@@ -28,6 +28,20 @@ import {
   type SourceProfile,
 } from "./profiles";
 import type { LakeAdapter, LakeColumn, LakeRow } from "./types";
+import {
+  PREVIEW_ROWS,
+  PROFILE_NAME,
+  UPLOAD_EXTENSIONS,
+  UPLOAD_MAX_BYTES,
+  type UploadErrorCode,
+} from "./upload-shared";
+
+export {
+  PREVIEW_ROWS,
+  UPLOAD_EXTENSIONS,
+  UPLOAD_MAX_BYTES,
+  type UploadErrorCode,
+};
 
 /**
  * Uploading a file to import: store it (content-addressed), look inside it,
@@ -37,30 +51,11 @@ import type { LakeAdapter, LakeColumn, LakeRow } from "./types";
  * (`scripts/ingest-upload.ts`), never inside a request handler.
  */
 
-export const UPLOAD_MAX_BYTES = 50 * 1024 * 1024;
-export const UPLOAD_EXTENSIONS = [".csv", ".xlsx", ".parquet", ".ndjson"];
-
-/** Rows shown in the preview. */
-export const PREVIEW_ROWS = 20;
-
 /** Rejects kept in the result of an import (all of them stay in ingest_run). */
 const RESULT_REJECTS = 20;
 
 /** Lake table the uploaded file is exposed as, whatever the profile calls it. */
 const UPLOAD_TABLE = "upload";
-
-export type UploadErrorCode =
-  | "no_file"
-  | "empty_file"
-  | "file_too_large"
-  | "unsupported_type"
-  | "unknown_upload"
-  | "unreadable_file"
-  /** The file lacks columns the profile needs, or their type drifted. */
-  | "invalid_profile"
-  /** The profile itself is malformed (name, keys...). */
-  | "invalid_profile_definition"
-  | "profile_exists";
 
 /** A failure the user can act on; `code` maps to a UI message. */
 export class UploadError extends Error {
@@ -249,9 +244,6 @@ export async function inspectUpload(
 }
 
 // --- Profiles --------------------------------------------------------------
-
-/** Custom profiles are stored as `<name>.json`: names must be safe file names. */
-const PROFILE_NAME = /^[a-z0-9][a-z0-9_-]{0,63}$/;
 
 /** Parse a profile definition coming from the UI. */
 function parseCustomProfile(input: unknown): SourceProfile {
