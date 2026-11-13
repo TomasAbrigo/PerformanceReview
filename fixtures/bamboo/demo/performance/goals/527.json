@@ -22,20 +22,22 @@
   "selectedFilter": "status-all",
   "goals": [
     {
-      "id": "7507",
-      "title": "Reducir el tiempo de primera respuesta un 20%",
-      "description": "Alineado con el plan del área para el año.",
-      "percentComplete": 100,
-      "alignsWithOptionId": 9001,
-      "sharedWithEmployeeIds": [],
-      "dueDate": "2024-05-21",
-      "completionDate": "2024-05-08",
-      "lastChangedDateTime": "2024-05-08T15:11:42Z",
-      "status": "completed",
+      "id": "7253",
+      "title": "Automatizar la conciliación mensual",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 20,
+      "alignsWithOptionId": 9004,
+      "sharedWithEmployeeIds": [
+        159
+      ],
+      "dueDate": "2026-06-30",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-05-04T08:19:59Z",
+      "status": "in_progress",
       "milestones": null,
       "actions": {
         "canEdit": true,
-        "canUpdateProgress": false,
+        "canUpdateProgress": true,
         "canClose": true,
         "canReopen": false,
         "canDelete": true,
@@ -43,38 +45,17 @@
       }
     },
     {
-      "id": "7509",
-      "title": "Cerrar el plan de capacitación anual",
-      "description": "Alineado con el plan del área para el año.",
-      "percentComplete": 100,
-      "alignsWithOptionId": null,
-      "sharedWithEmployeeIds": [],
-      "dueDate": "2024-05-19",
-      "completionDate": "2024-02-08",
-      "lastChangedDateTime": "2024-02-08T15:48:34Z",
-      "status": "completed",
-      "milestones": null,
-      "actions": {
-        "canEdit": true,
-        "canUpdateProgress": false,
-        "canClose": true,
-        "canReopen": false,
-        "canDelete": true,
-        "canComment": true
-      }
-    },
-    {
-      "id": "7511",
-      "title": "Reducir el tiempo de primera respuesta un 20%",
+      "id": "7254",
+      "title": "Documentar los procesos críticos",
       "description": "Pedido por el equipo directivo en la planificación.",
       "percentComplete": 100,
       "alignsWithOptionId": null,
       "sharedWithEmployeeIds": [
         159
       ],
-      "dueDate": "2026-09-09",
-      "completionDate": "2026-06-05",
-      "lastChangedDateTime": "2026-06-05T10:44:26Z",
+      "dueDate": "2026-04-10",
+      "completionDate": "2026-01-09",
+      "lastChangedDateTime": "2026-01-09T12:09:05Z",
       "status": "completed",
       "milestones": null,
       "actions": {
@@ -103,8 +84,8 @@
   ],
   "comments": [
     {
-      "goalId": "7509",
-      "commentCount": 1
+      "goalId": "7254",
+      "commentCount": 3
     }
   ]
 }

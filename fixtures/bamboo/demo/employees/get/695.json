@@ -3,15 +3,15 @@
   "firstName": "Rodrigo",
   "lastName": "Duarte",
   "workEmail": "rodrigo.duarte@meridian-andina.example",
-  "employeeNumber": "11697",
+  "employeeNumber": "11676",
   "supervisorEId": "341",
-  "supervisorId": "10847",
+  "supervisorId": "10833",
   "supervisor": "López, Silvana",
   "hireDate": "2025-02-28",
   "terminationDate": null,
   "department": "Ventas",
   "division": "Comercial",
-  "jobTitle": "Business Developer Ssr",
+  "jobTitle": "Business Developer Sr",
   "location": "Buenos Aires",
   "status": "Active"
 }

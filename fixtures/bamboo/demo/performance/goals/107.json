@@ -22,61 +22,72 @@
   "selectedFilter": "status-all",
   "goals": [
     {
-      "id": "5464",
-      "title": "Cerrar el plan de capacitación anual",
+      "id": "5444",
+      "title": "Reducir los incidentes recurrentes a la mitad",
+      "description": "Sirve de base para el próximo ciclo de evaluación.",
+      "percentComplete": 0,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2023-04-17",
+      "completionDate": null,
+      "lastChangedDateTime": "2022-12-10T16:49:32Z",
+      "status": "in_progress",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "5446",
+      "title": "Implementar el calendario editorial",
       "description": "Pedido por el equipo directivo en la planificación.",
       "percentComplete": 100,
       "alignsWithOptionId": null,
       "sharedWithEmployeeIds": [],
-      "dueDate": "2023-05-25",
-      "completionDate": "2023-05-04",
-      "lastChangedDateTime": "2023-05-04T16:11:09Z",
+      "dueDate": "2025-03-21",
+      "completionDate": "2024-11-22",
+      "lastChangedDateTime": "2024-11-22T09:18:57Z",
       "status": "completed",
-      "milestones": null,
-      "actions": {
-        "canEdit": true,
-        "canUpdateProgress": false,
-        "canClose": true,
-        "canReopen": false,
-        "canDelete": true,
-        "canComment": true
-      }
-    },
-    {
-      "id": "5466",
-      "title": "Completar la certificación del área",
-      "description": "Alineado con el plan del área para el año.",
-      "percentComplete": 45,
-      "alignsWithOptionId": null,
-      "sharedWithEmployeeIds": [],
-      "dueDate": "2024-04-08",
-      "completionDate": null,
-      "lastChangedDateTime": "2024-02-26T16:16:25Z",
-      "status": "closed",
-      "milestones": null,
-      "actions": {
-        "canEdit": false,
-        "canUpdateProgress": false,
-        "canClose": false,
-        "canReopen": true,
-        "canDelete": true,
-        "canComment": true
-      }
-    },
-    {
-      "id": "5467",
-      "title": "Implementar el calendario editorial",
-      "description": "Alineado con el plan del área para el año.",
-      "percentComplete": 100,
-      "alignsWithOptionId": 9003,
-      "sharedWithEmployeeIds": [
-        43
+      "milestones": [
+        {
+          "id": 885,
+          "employeeGoalId": 5446,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2024-10-27T09:09:20Z",
+          "lastUpdateDateTime": "2024-10-27T09:09:20Z",
+          "lastUpdateUserId": 107
+        },
+        {
+          "id": 886,
+          "employeeGoalId": 5446,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2024-10-27T15:50:32Z",
+          "lastUpdateDateTime": "2024-10-27T15:50:32Z",
+          "lastUpdateUserId": 107
+        },
+        {
+          "id": 887,
+          "employeeGoalId": 5446,
+          "title": "Hito 3",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2024-10-17T19:27:20Z",
+          "lastUpdateDateTime": "2024-10-17T19:27:20Z",
+          "lastUpdateUserId": 107
+        }
       ],
-      "dueDate": "2024-09-20",
-      "completionDate": "2024-09-20",
-      "lastChangedDateTime": "2024-09-20T10:03:33Z",
-      "status": "completed",
-      "milestones": null,
       "actions": {
         "canEdit": true,
         "canUpdateProgress": false,
@@ -87,17 +98,15 @@
       }
     },
     {
-      "id": "5468",
-      "title": "Completar la certificación del área",
+      "id": "5447",
+      "title": "Aumentar la cobertura de pruebas al 80%",
       "description": "Sirve de base para el próximo ciclo de evaluación.",
       "percentComplete": 100,
-      "alignsWithOptionId": 9002,
-      "sharedWithEmployeeIds": [
-        43
-      ],
-      "dueDate": "2025-04-29",
-      "completionDate": "2025-03-27",
-      "lastChangedDateTime": "2025-03-27T10:24:11Z",
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2025-03-05",
+      "completionDate": "2024-11-20",
+      "lastChangedDateTime": "2024-11-20T15:00:33Z",
       "status": "completed",
       "milestones": null,
       "actions": {
@@ -110,15 +119,15 @@
       }
     },
     {
-      "id": "5471",
-      "title": "Documentar los procesos críticos",
-      "description": "Alineado con el plan del área para el año.",
+      "id": "5448",
+      "title": "Reducir el tiempo de primera respuesta un 20%",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
       "percentComplete": 100,
-      "alignsWithOptionId": 9002,
+      "alignsWithOptionId": null,
       "sharedWithEmployeeIds": [],
-      "dueDate": "2025-11-09",
-      "completionDate": "2025-10-05",
-      "lastChangedDateTime": "2025-10-05T19:36:58Z",
+      "dueDate": "2026-07-30",
+      "completionDate": "2026-07-22",
+      "lastChangedDateTime": "2026-07-22T08:15:29Z",
       "status": "completed",
       "milestones": null,
       "actions": {
@@ -135,20 +144,18 @@
     {
       "employeeId": 107,
       "firstName": "Leandro",
-      "lastName": "Luna",
-      "preferredName": null
-    },
-    {
-      "employeeId": 43,
-      "firstName": "Eugenia",
-      "lastName": "Soria",
+      "lastName": "Medina",
       "preferredName": null
     }
   ],
   "comments": [
     {
-      "goalId": "5467",
-      "commentCount": 1
+      "goalId": "5446",
+      "commentCount": 2
+    },
+    {
+      "goalId": "5448",
+      "commentCount": 4
     }
   ]
 }

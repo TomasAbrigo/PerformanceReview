@@ -22,17 +22,38 @@
   "selectedFilter": "status-all",
   "goals": [
     {
-      "id": "5151",
-      "title": "Mejorar el NPS interno del equipo",
-      "description": "Pedido por el equipo directivo en la planificación.",
-      "percentComplete": 15,
-      "alignsWithOptionId": 9004,
+      "id": "5128",
+      "title": "Entregar el proyecto Norte sin desvíos",
+      "description": "Sirve de base para el próximo ciclo de evaluación.",
+      "percentComplete": 10,
+      "alignsWithOptionId": null,
       "sharedWithEmployeeIds": [
-        37
+        41
       ],
-      "dueDate": "2024-08-30",
+      "dueDate": "2024-06-28",
       "completionDate": null,
-      "lastChangedDateTime": "2024-02-29T18:19:15Z",
+      "lastChangedDateTime": "2023-11-27T14:15:53Z",
+      "status": "closed",
+      "milestones": null,
+      "actions": {
+        "canEdit": false,
+        "canUpdateProgress": false,
+        "canClose": false,
+        "canReopen": false,
+        "canDelete": false,
+        "canComment": false
+      }
+    },
+    {
+      "id": "5130",
+      "title": "Reducir los incidentes recurrentes a la mitad",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "percentComplete": 40,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2024-06-09",
+      "completionDate": null,
+      "lastChangedDateTime": "2024-01-21T15:35:44Z",
       "status": "closed",
       "milestones": null,
       "actions": {
@@ -53,11 +74,16 @@
       "preferredName": null
     },
     {
-      "employeeId": 37,
-      "firstName": "Hugo",
-      "lastName": "Ríos",
-      "preferredName": null
+      "employeeId": 41,
+      "firstName": "Milagros",
+      "lastName": "González",
+      "preferredName": "Mili"
     }
   ],
-  "comments": []
+  "comments": [
+    {
+      "goalId": "5128",
+      "commentCount": 3
+    }
+  ]
 }

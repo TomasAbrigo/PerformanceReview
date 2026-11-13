@@ -22,15 +22,15 @@
   "selectedFilter": "status-all",
   "goals": [
     {
-      "id": "8270",
-      "title": "Mejorar el NPS interno del equipo",
+      "id": "7940",
+      "title": "Entregar el proyecto Norte sin desvíos",
       "description": "Sirve de base para el próximo ciclo de evaluación.",
-      "percentComplete": 50,
+      "percentComplete": 70,
       "alignsWithOptionId": null,
       "sharedWithEmployeeIds": [],
-      "dueDate": "2027-03-09",
+      "dueDate": "2026-07-30",
       "completionDate": null,
-      "lastChangedDateTime": "2026-10-29T09:18:46Z",
+      "lastChangedDateTime": "2026-06-21T17:22:53Z",
       "status": "in_progress",
       "milestones": null,
       "actions": {
@@ -51,5 +51,10 @@
       "preferredName": "Maxi"
     }
   ],
-  "comments": []
+  "comments": [
+    {
+      "goalId": "7940",
+      "commentCount": 1
+    }
+  ]
 }

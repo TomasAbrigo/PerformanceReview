@@ -18,6 +18,7 @@ import type {
   FixtureJobRow,
   IdentityGroundTruth,
 } from "./types";
+import { requireAtLeast, requirePool } from "./pool";
 
 /** The fictional "today": everything in the fixtures happened before it. */
 export const AS_OF = "2026-11-01";
@@ -42,6 +43,8 @@ interface TerminationInfo {
 interface WorkRecord {
   /** Index in the records list; only used while simulating. */
   key: number;
+  /** The earlier record of a rehired person. */
+  rehireOf: WorkRecord | null;
   /** Same for every record of one human (a rehire has a new `key`). */
   personKey: number;
   level: Level;
@@ -121,6 +124,7 @@ export function buildWorkforce(
       | "employmentStatus"
       | "personKey"
       | "name"
+      | "rehireOf"
     > & {
       name?: PersonName;
       employmentStatus?: string;
@@ -139,6 +143,7 @@ export function buildWorkforce(
       termination: null,
       employmentStatus: fields.employmentStatus ?? "Full-Time",
       key: records.length,
+      rehireOf: rehireOf ?? null,
       personKey: rehireOf?.personKey ?? records.length,
       preferredName: rehireOf
         ? rehireOf.preferredName
@@ -291,12 +296,29 @@ export function buildWorkforce(
       (r) => r.level === 4 && (leadsPerDeptNow.get(r.department) ?? 0) > 1,
     ),
   );
+  requirePool(
+    replaceableLeads,
+    config.managerTerminations,
+    "team leads with a colleague in their department",
+  );
   for (const lead of replaceableLeads.slice(0, config.managerTerminations)) {
     terminate(lead, dateBetween("2024-02-01", "2025-09-30", rng.int));
   }
-  const leavingICs = rng
-    .shuffle(records.filter((r) => r.level === 5 && r.hireDate <= "2025-06-30"))
-    .slice(0, config.terminations - config.managerTerminations);
+  const leavingPool = records.filter(
+    (r) => r.level === 5 && r.hireDate <= "2025-06-30",
+  );
+  const leavingCount = config.terminations - config.managerTerminations;
+  requirePool(
+    leavingPool,
+    leavingCount,
+    "individual contributors to terminate",
+  );
+  requireAtLeast(
+    leavingCount,
+    config.rehires,
+    "terminated individual contributors to rehire",
+  );
+  const leavingICs = rng.shuffle(leavingPool).slice(0, leavingCount);
   leavingICs.forEach((ic) => {
     terminate(
       ic,
@@ -320,6 +342,7 @@ export function buildWorkforce(
         rng.int,
       ),
       terminationDate: null,
+      // Placeholders: the rehire event copies the job the person left with.
       department: previous.department,
       division: previous.division,
       jobTitle: previous.jobTitle,
@@ -333,6 +356,7 @@ export function buildWorkforce(
     r.hireDate <= date &&
     (r.terminationDate === null || date < r.terminationDate);
   for (const r of records) {
+    if (r.rehireOf !== null) continue; // starts at the rehire event
     let managerKey = r.parentKey;
     if (r.level === 5) {
       const leads = records.filter(
@@ -359,7 +383,7 @@ export function buildWorkforce(
   }
 
   // Timeline: reorgs, managers leaving, promotions and relocations.
-  type EventKind = "leave" | "change" | "promote" | "relocate";
+  type EventKind = "rehire" | "leave" | "change" | "promote" | "relocate";
   interface TimelineEvent {
     date: string;
     kind: EventKind;
@@ -380,6 +404,9 @@ export function buildWorkforce(
     });
   }
   for (const r of records) {
+    if (r.rehireOf !== null) {
+      events.push({ kind: "rehire", date: r.hireDate, record: r });
+    }
     if (r.level === 4 && r.terminationDate !== null) {
       events.push({ kind: "leave", date: r.terminationDate, record: r });
     }
@@ -401,10 +428,11 @@ export function buildWorkforce(
     }
   }
   const order: Record<EventKind, number> = {
-    leave: 0,
-    change: 1,
-    promote: 2,
-    relocate: 3,
+    rehire: 0,
+    leave: 1,
+    change: 2,
+    promote: 3,
+    relocate: 4,
   };
   events.sort((a, b) =>
     a.date !== b.date
@@ -425,7 +453,26 @@ export function buildWorkforce(
 
   for (const event of events) {
     const { date } = event;
-    if (event.kind === "leave") {
+    if (event.kind === "rehire") {
+      // Same department, title and location the person left with, under
+      // whoever leads that department now.
+      const record = event.record!;
+      const left = current(record.rehireOf!);
+      const leads = activeLeads(date).filter(
+        (m) => m.department === left.department,
+      );
+      const head = deptHeads.get(left.department);
+      requireAtLeast(
+        leads.length + (head ? 1 : 0),
+        1,
+        `managers for a rehire into ${left.department}`,
+      );
+      record.rows.push({
+        ...left,
+        date,
+        managerKey: leads.length > 0 ? rng.pick(leads).key : head!.key,
+      });
+    } else if (event.kind === "leave") {
       const lead = event.record!;
       const others = activeLeads(date).filter(
         (m) => m.department === lead.department,
@@ -519,6 +566,11 @@ export function buildWorkforce(
     namesakes = stableICs(hiredBy);
     if (namesakes.length >= 2) break;
   }
+  requirePool(
+    namesakes,
+    2,
+    "stable individual contributors for the namesake pair",
+  );
   const original = namesakes[0];
   const clone =
     namesakes.find((r) => r.department !== original.department) ?? namesakes[1];
@@ -529,6 +581,7 @@ export function buildWorkforce(
   const renameCandidates = stableICs("2024-12-31").filter(
     (r) => r !== original && r !== clone,
   );
+  requirePool(renameCandidates, config.renames, "people to rename");
   for (const r of renameCandidates.slice(0, config.renames)) {
     renames.push({
       record: r,

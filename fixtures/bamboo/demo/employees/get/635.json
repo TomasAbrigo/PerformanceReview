@@ -3,15 +3,15 @@
   "firstName": "Federico",
   "lastName": "Bravo",
   "workEmail": "federico.bravo@meridian-andina.example",
-  "employeeNumber": "11529",
+  "employeeNumber": "11538",
   "supervisorEId": "321",
-  "supervisorId": "10792",
+  "supervisorId": "10788",
   "supervisor": "Figueroa, Facundo",
   "hireDate": "2024-10-07",
   "terminationDate": null,
   "department": "Finanzas",
   "division": "Corporativo",
-  "jobTitle": "Analista Contable Ssr",
+  "jobTitle": "Analista Contable Sr",
   "location": "Córdoba",
   "status": "Active"
 }

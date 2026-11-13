@@ -1,7 +1,12 @@
 import { mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
-import { generateCompany, type CompanyFixture, type FixtureSize } from "./company";
+import {
+  generateCompany,
+  type CompanyFixture,
+  type FixtureSize,
+} from "./company";
 import { SIZE_CONFIG } from "./company/config";
+import { countManagerChanges, groupJobRows } from "./company/job-history";
 import { serializeBambooApi } from "./serialize/bamboo-api";
 import { serializeBambooReports } from "./serialize/bamboo-reports";
 import { jsonFile, type FixtureFile } from "./serialize/files";
@@ -14,24 +19,6 @@ export const FIXTURE_SEEDS: Record<FixtureSize, number> = {
 
 export const FIXTURE_SIZES: readonly FixtureSize[] = ["small", "demo"];
 
-function managerChangeCount(company: CompanyFixture): number {
-  const rowsByEmployee = new Map<string, CompanyFixture["jobHistory"]>();
-  for (const row of company.jobHistory) {
-    rowsByEmployee.set(row.employeeId, [
-      ...(rowsByEmployee.get(row.employeeId) ?? []),
-      row,
-    ]);
-  }
-  let changes = 0;
-  for (const rows of rowsByEmployee.values()) {
-    const ordered = [...rows].sort((a, b) => (a.date < b.date ? -1 : 1));
-    for (let i = 1; i < ordered.length; i++) {
-      if (ordered[i].managerId !== ordered[i - 1].managerId) changes++;
-    }
-  }
-  return changes;
-}
-
 function manifest(company: CompanyFixture, apiFileCount: number): FixtureFile {
   const participants = company.assessments.filter((a) => a.employeeId !== null);
   return jsonFile(`bamboo/${company.size}/manifest.json`, {
@@ -42,9 +29,11 @@ function manifest(company: CompanyFixture, apiFileCount: number): FixtureFile {
     pageLimit: SIZE_CONFIG[company.size].pageLimit,
     counts: {
       employees: company.employees.length,
-      terminations: company.employees.filter((e) => e.terminationDate !== null).length,
-      rehires: company.identity.persons.filter((p) => p.employeeIds.length > 1).length,
-      managerChanges: managerChangeCount(company),
+      terminations: company.employees.filter((e) => e.terminationDate !== null)
+        .length,
+      rehires: company.identity.persons.filter((p) => p.employeeIds.length > 1)
+        .length,
+      managerChanges: countManagerChanges(groupJobRows(company.jobHistory)),
       jobInfoRows: company.jobHistory.length,
       employmentStatusRows: company.employmentHistory.length,
       goals: company.goals.length,
@@ -85,7 +74,10 @@ export function writeFixtures(
   const written: Record<string, number> = {};
   for (const size of sizes) {
     rmSync(join(rootDir, "bamboo", size), { recursive: true, force: true });
-    rmSync(join(rootDir, "bamboo-reports", size), { recursive: true, force: true });
+    rmSync(join(rootDir, "bamboo-reports", size), {
+      recursive: true,
+      force: true,
+    });
     const files = fixtureFiles(size);
     for (const file of files) {
       const target = join(rootDir, file.path);

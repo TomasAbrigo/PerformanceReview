@@ -3,15 +3,15 @@
   "firstName": "Patricia",
   "lastName": "Ríos",
   "workEmail": "patricia.rios@meridian-andina.example",
-  "employeeNumber": "11325",
+  "employeeNumber": "11315",
   "supervisorEId": "363",
-  "supervisorId": "10907",
+  "supervisorId": "10890",
   "supervisor": "Navarro, Agustina",
   "hireDate": "2024-02-02",
   "terminationDate": null,
   "department": "Legales",
   "division": "Corporativo",
   "jobTitle": "Abogado Corporativo Jr",
-  "location": "Santiago de Chile",
+  "location": "Remoto",
   "status": "Active"
 }

@@ -22,43 +22,22 @@
   "selectedFilter": "status-all",
   "goals": [
     {
-      "id": "8271",
-      "title": "Cerrar el plan de capacitación anual",
+      "id": "7942",
+      "title": "Entregar el proyecto Norte sin desvíos",
       "description": "Pedido por el equipo directivo en la planificación.",
-      "percentComplete": 100,
-      "alignsWithOptionId": null,
-      "sharedWithEmployeeIds": [],
-      "dueDate": "2027-01-17",
-      "completionDate": "2026-10-31",
-      "lastChangedDateTime": "2026-10-31T11:23:13Z",
-      "status": "completed",
-      "milestones": [
-        {
-          "id": 2199,
-          "employeeGoalId": 8271,
-          "title": "Hito 1",
-          "startValue": 0,
-          "endValue": 1,
-          "currentValue": 1,
-          "completedDateTime": "2026-10-30T15:22:38Z",
-          "lastUpdateDateTime": "2026-10-30T15:22:38Z",
-          "lastUpdateUserId": 809
-        },
-        {
-          "id": 2200,
-          "employeeGoalId": 8271,
-          "title": "Hito 2",
-          "startValue": 0,
-          "endValue": 1,
-          "currentValue": 1,
-          "completedDateTime": "2026-10-26T10:58:07Z",
-          "lastUpdateDateTime": "2026-10-26T10:58:07Z",
-          "lastUpdateUserId": 809
-        }
+      "percentComplete": 45,
+      "alignsWithOptionId": 9003,
+      "sharedWithEmployeeIds": [
+        49
       ],
+      "dueDate": "2027-02-03",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-10-29T08:18:31Z",
+      "status": "in_progress",
+      "milestones": null,
       "actions": {
         "canEdit": true,
-        "canUpdateProgress": false,
+        "canUpdateProgress": true,
         "canClose": true,
         "canReopen": false,
         "canDelete": true,
@@ -66,15 +45,59 @@
       }
     },
     {
-      "id": "8274",
-      "title": "Cerrar el plan de capacitación anual",
+      "id": "7943",
+      "title": "Mentorear a dos personas nuevas",
       "description": "Sirve de base para el próximo ciclo de evaluación.",
-      "percentComplete": 15,
+      "percentComplete": 0,
       "alignsWithOptionId": null,
       "sharedWithEmployeeIds": [],
-      "dueDate": "2027-03-10",
+      "dueDate": "2026-12-19",
       "completionDate": null,
-      "lastChangedDateTime": "2026-10-26T17:24:33Z",
+      "lastChangedDateTime": "2026-10-06T17:15:21Z",
+      "status": "in_progress",
+      "milestones": [
+        {
+          "id": 2049,
+          "employeeGoalId": 7943,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2026-09-30T18:30:22Z",
+          "lastUpdateUserId": 809
+        },
+        {
+          "id": 2050,
+          "employeeGoalId": 7943,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2026-09-30T16:21:04Z",
+          "lastUpdateUserId": 809
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "7944",
+      "title": "Automatizar la conciliación mensual",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 0,
+      "alignsWithOptionId": 9004,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2027-01-04",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-10-08T10:32:19Z",
       "status": "in_progress",
       "milestones": null,
       "actions": {
@@ -93,7 +116,22 @@
       "firstName": "Candela",
       "lastName": "Álvarez",
       "preferredName": "Cande"
+    },
+    {
+      "employeeId": 49,
+      "firstName": "Milagros",
+      "lastName": "Monzón",
+      "preferredName": null
     }
   ],
-  "comments": []
+  "comments": [
+    {
+      "goalId": "7943",
+      "commentCount": 2
+    },
+    {
+      "goalId": "7944",
+      "commentCount": 4
+    }
+  ]
 }

@@ -22,129 +22,99 @@
   "selectedFilter": "status-all",
   "goals": [
     {
-      "id": "7678",
-      "title": "Documentar los procesos críticos",
-      "description": "Sirve de base para el próximo ciclo de evaluación.",
-      "percentComplete": 30,
-      "alignsWithOptionId": null,
-      "sharedWithEmployeeIds": [],
-      "dueDate": "2024-11-06",
-      "completionDate": null,
-      "lastChangedDateTime": "2025-07-10T08:56:02Z",
-      "status": "in_progress",
-      "milestones": null,
-      "actions": {
-        "canEdit": true,
-        "canUpdateProgress": true,
-        "canClose": true,
-        "canReopen": false,
-        "canDelete": true,
-        "canComment": true
-      }
-    },
-    {
-      "id": "7679",
+      "id": "7400",
       "title": "Mejorar el NPS interno del equipo",
-      "description": "Meta compartida con otra área; coordinar avances mensuales.",
-      "percentComplete": 55,
-      "alignsWithOptionId": null,
-      "sharedWithEmployeeIds": [],
-      "dueDate": "2024-12-26",
-      "completionDate": null,
-      "lastChangedDateTime": "2026-03-18T13:59:19Z",
-      "status": "in_progress",
-      "milestones": null,
-      "actions": {
-        "canEdit": true,
-        "canUpdateProgress": true,
-        "canClose": true,
-        "canReopen": false,
-        "canDelete": true,
-        "canComment": true
-      }
-    },
-    {
-      "id": "7681",
-      "title": "Implementar el calendario editorial",
-      "description": "Meta compartida con otra área; coordinar avances mensuales.",
-      "percentComplete": 75,
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 100,
       "alignsWithOptionId": null,
       "sharedWithEmployeeIds": [
         93
       ],
-      "dueDate": "2024-11-21",
+      "dueDate": "2024-10-05",
+      "completionDate": "2024-08-21",
+      "lastChangedDateTime": "2024-08-21T12:56:10Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "7401",
+      "title": "Reducir los incidentes recurrentes a la mitad",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [
+        93
+      ],
+      "dueDate": "2025-09-22",
+      "completionDate": "2025-07-03",
+      "lastChangedDateTime": "2025-07-03T17:08:34Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "7402",
+      "title": "Renovar las cuentas clave del trimestre",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 67,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [
+        93
+      ],
+      "dueDate": "2025-10-18",
       "completionDate": null,
-      "lastChangedDateTime": "2026-03-24T18:16:38Z",
+      "lastChangedDateTime": "2026-07-11T12:13:12Z",
       "status": "in_progress",
       "milestones": [
         {
-          "id": 1904,
-          "employeeGoalId": 7681,
+          "id": 1807,
+          "employeeGoalId": 7402,
           "title": "Hito 1",
           "startValue": 0,
           "endValue": 1,
           "currentValue": 1,
-          "completedDateTime": "2025-12-16T08:21:43Z",
-          "lastUpdateDateTime": "2025-12-16T08:21:43Z",
+          "completedDateTime": "2026-02-23T11:27:46Z",
+          "lastUpdateDateTime": "2026-02-23T11:27:46Z",
           "lastUpdateUserId": 575
         },
         {
-          "id": 1905,
-          "employeeGoalId": 7681,
+          "id": 1808,
+          "employeeGoalId": 7402,
           "title": "Hito 2",
           "startValue": 0,
           "endValue": 1,
           "currentValue": 1,
-          "completedDateTime": "2025-10-01T15:29:26Z",
-          "lastUpdateDateTime": "2025-10-01T15:29:26Z",
+          "completedDateTime": "2026-06-22T10:28:53Z",
+          "lastUpdateDateTime": "2026-06-22T10:28:53Z",
           "lastUpdateUserId": 575
         },
         {
-          "id": 1906,
-          "employeeGoalId": 7681,
+          "id": 1809,
+          "employeeGoalId": 7402,
           "title": "Hito 3",
-          "startValue": 0,
-          "endValue": 1,
-          "currentValue": 1,
-          "completedDateTime": "2024-12-21T18:48:56Z",
-          "lastUpdateDateTime": "2024-12-21T18:48:56Z",
-          "lastUpdateUserId": 575
-        },
-        {
-          "id": 1907,
-          "employeeGoalId": 7681,
-          "title": "Hito 4",
           "startValue": 0,
           "endValue": 1,
           "currentValue": 0,
           "completedDateTime": null,
-          "lastUpdateDateTime": "2024-07-19T18:04:55Z",
+          "lastUpdateDateTime": "2025-07-28T10:59:41Z",
           "lastUpdateUserId": 575
         }
       ],
-      "actions": {
-        "canEdit": true,
-        "canUpdateProgress": true,
-        "canClose": true,
-        "canReopen": false,
-        "canDelete": true,
-        "canComment": true
-      }
-    },
-    {
-      "id": "7682",
-      "title": "Aumentar la cobertura de pruebas al 80%",
-      "description": "Pedido por el equipo directivo en la planificación.",
-      "percentComplete": 80,
-      "alignsWithOptionId": 9002,
-      "sharedWithEmployeeIds": [
-        93
-      ],
-      "dueDate": "2027-01-14",
-      "completionDate": null,
-      "lastChangedDateTime": "2026-10-21T10:51:22Z",
-      "status": "in_progress",
-      "milestones": null,
       "actions": {
         "canEdit": true,
         "canUpdateProgress": true,
@@ -171,12 +141,16 @@
   ],
   "comments": [
     {
-      "goalId": "7678",
+      "goalId": "7400",
+      "commentCount": 3
+    },
+    {
+      "goalId": "7401",
       "commentCount": 4
     },
     {
-      "goalId": "7682",
-      "commentCount": 3
+      "goalId": "7402",
+      "commentCount": 4
     }
   ]
 }

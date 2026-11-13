@@ -22,20 +22,143 @@
   "selectedFilter": "status-all",
   "goals": [
     {
-      "id": "7994",
-      "title": "Aumentar la cobertura de pruebas al 80%",
+      "id": "7708",
+      "title": "Entregar el proyecto Norte sin desvíos",
       "description": "Sirve de base para el próximo ciclo de evaluación.",
       "percentComplete": 100,
-      "alignsWithOptionId": 9003,
+      "alignsWithOptionId": null,
       "sharedWithEmployeeIds": [],
-      "dueDate": "2026-04-05",
-      "completionDate": "2026-03-23",
-      "lastChangedDateTime": "2026-03-23T19:31:59Z",
+      "dueDate": "2025-04-25",
+      "completionDate": "2025-03-11",
+      "lastChangedDateTime": "2025-03-11T10:08:27Z",
       "status": "completed",
-      "milestones": null,
+      "milestones": [
+        {
+          "id": 1960,
+          "employeeGoalId": 7708,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-02-21T13:52:48Z",
+          "lastUpdateDateTime": "2025-02-21T13:52:48Z",
+          "lastUpdateUserId": 689
+        },
+        {
+          "id": 1961,
+          "employeeGoalId": 7708,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-03-04T08:06:17Z",
+          "lastUpdateDateTime": "2025-03-04T08:06:17Z",
+          "lastUpdateUserId": 689
+        },
+        {
+          "id": 1962,
+          "employeeGoalId": 7708,
+          "title": "Hito 3",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-03-05T10:59:41Z",
+          "lastUpdateDateTime": "2025-03-05T10:59:41Z",
+          "lastUpdateUserId": 689
+        },
+        {
+          "id": 1963,
+          "employeeGoalId": 7708,
+          "title": "Hito 4",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-03-06T16:56:07Z",
+          "lastUpdateDateTime": "2025-03-06T16:56:07Z",
+          "lastUpdateUserId": 689
+        }
+      ],
       "actions": {
         "canEdit": true,
         "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "7710",
+      "title": "Cerrar el plan de capacitación anual",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 25,
+      "alignsWithOptionId": 9003,
+      "sharedWithEmployeeIds": [
+        111
+      ],
+      "dueDate": "2026-10-14",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-05-29T10:33:46Z",
+      "status": "closed",
+      "milestones": null,
+      "actions": {
+        "canEdit": false,
+        "canUpdateProgress": false,
+        "canClose": false,
+        "canReopen": true,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "7711",
+      "title": "Automatizar la conciliación mensual",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 33,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2026-02-09",
+      "completionDate": null,
+      "lastChangedDateTime": "2025-09-02T09:27:30Z",
+      "status": "in_progress",
+      "milestones": [
+        {
+          "id": 1964,
+          "employeeGoalId": 7711,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-08-21T08:05:12Z",
+          "lastUpdateDateTime": "2025-08-21T08:05:12Z",
+          "lastUpdateUserId": 689
+        },
+        {
+          "id": 1965,
+          "employeeGoalId": 7711,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2025-08-16T12:51:05Z",
+          "lastUpdateUserId": 689
+        },
+        {
+          "id": 1966,
+          "employeeGoalId": 7711,
+          "title": "Hito 3",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2025-08-16T14:28:36Z",
+          "lastUpdateUserId": 689
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
         "canClose": true,
         "canReopen": false,
         "canDelete": true,
@@ -49,12 +172,13 @@
       "firstName": "Martín",
       "lastName": "Núñez",
       "preferredName": null
+    },
+    {
+      "employeeId": 111,
+      "firstName": "Martín",
+      "lastName": "Peralta",
+      "preferredName": null
     }
   ],
-  "comments": [
-    {
-      "goalId": "7994",
-      "commentCount": 2
-    }
-  ]
+  "comments": []
 }

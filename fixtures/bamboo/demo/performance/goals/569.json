@@ -22,48 +22,81 @@
   "selectedFilter": "status-all",
   "goals": [
     {
-      "id": "7659",
-      "title": "Entregar el proyecto Norte sin desvíos",
+      "id": "7386",
+      "title": "Implementar el calendario editorial",
       "description": "Alineado con el plan del área para el año.",
-      "percentComplete": 33,
-      "alignsWithOptionId": 9003,
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
       "sharedWithEmployeeIds": [],
-      "dueDate": "2024-10-10",
-      "completionDate": null,
-      "lastChangedDateTime": "2026-03-05T11:44:51Z",
-      "status": "in_progress",
+      "dueDate": "2024-06-23",
+      "completionDate": "2024-07-08",
+      "lastChangedDateTime": "2024-07-08T13:33:55Z",
+      "status": "completed",
       "milestones": [
         {
-          "id": 1891,
-          "employeeGoalId": 7659,
+          "id": 1801,
+          "employeeGoalId": 7386,
           "title": "Hito 1",
           "startValue": 0,
           "endValue": 1,
           "currentValue": 1,
-          "completedDateTime": "2025-10-10T18:12:01Z",
-          "lastUpdateDateTime": "2025-10-10T18:12:01Z",
+          "completedDateTime": "2024-05-01T09:42:31Z",
+          "lastUpdateDateTime": "2024-05-01T09:42:31Z",
           "lastUpdateUserId": 569
         },
         {
-          "id": 1892,
-          "employeeGoalId": 7659,
+          "id": 1802,
+          "employeeGoalId": 7386,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2024-05-27T16:49:55Z",
+          "lastUpdateDateTime": "2024-05-27T16:49:55Z",
+          "lastUpdateUserId": 569
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "7387",
+      "title": "Entregar el proyecto Norte sin desvíos",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 50,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2025-10-03",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-08-13T16:47:18Z",
+      "status": "in_progress",
+      "milestones": [
+        {
+          "id": 1803,
+          "employeeGoalId": 7387,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-12-28T14:05:28Z",
+          "lastUpdateDateTime": "2025-12-28T14:05:28Z",
+          "lastUpdateUserId": 569
+        },
+        {
+          "id": 1804,
+          "employeeGoalId": 7387,
           "title": "Hito 2",
           "startValue": 0,
           "endValue": 1,
           "currentValue": 0,
           "completedDateTime": null,
-          "lastUpdateDateTime": "2024-07-20T18:08:43Z",
-          "lastUpdateUserId": 569
-        },
-        {
-          "id": 1893,
-          "employeeGoalId": 7659,
-          "title": "Hito 3",
-          "startValue": 0,
-          "endValue": 1,
-          "currentValue": 0,
-          "completedDateTime": null,
-          "lastUpdateDateTime": "2024-07-20T12:40:29Z",
+          "lastUpdateDateTime": "2025-06-19T13:08:16Z",
           "lastUpdateUserId": 569
         }
       ],
@@ -77,41 +110,43 @@
       }
     },
     {
-      "id": "7662",
-      "title": "Renovar las cuentas clave del trimestre",
-      "description": "Pedido por el equipo directivo en la planificación.",
-      "percentComplete": 30,
-      "alignsWithOptionId": 9004,
-      "sharedWithEmployeeIds": [],
-      "dueDate": "2025-10-31",
-      "completionDate": null,
-      "lastChangedDateTime": "2025-11-06T11:00:43Z",
-      "status": "closed",
-      "milestones": null,
-      "actions": {
-        "canEdit": false,
-        "canUpdateProgress": false,
-        "canClose": false,
-        "canReopen": true,
-        "canDelete": true,
-        "canComment": true
-      }
-    },
-    {
-      "id": "7664",
-      "title": "Reducir el tiempo de primera respuesta un 20%",
+      "id": "7389",
+      "title": "Documentar los procesos críticos",
       "description": "Sirve de base para el próximo ciclo de evaluación.",
-      "percentComplete": 20,
+      "percentComplete": 90,
       "alignsWithOptionId": null,
       "sharedWithEmployeeIds": [],
-      "dueDate": "2025-03-21",
+      "dueDate": "2025-05-28",
       "completionDate": null,
-      "lastChangedDateTime": "2025-08-12T11:43:06Z",
+      "lastChangedDateTime": "2026-09-02T10:50:32Z",
       "status": "in_progress",
       "milestones": null,
       "actions": {
         "canEdit": true,
         "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "7392",
+      "title": "Entregar el proyecto Norte sin desvíos",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [
+        95
+      ],
+      "dueDate": "2026-06-16",
+      "completionDate": "2026-03-28",
+      "lastChangedDateTime": "2026-03-28T14:04:36Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
         "canClose": true,
         "canReopen": false,
         "canDelete": true,
@@ -125,12 +160,18 @@
       "firstName": "Emiliano",
       "lastName": "Figueroa",
       "preferredName": null
+    },
+    {
+      "employeeId": 95,
+      "firstName": "José",
+      "lastName": "Fernández",
+      "preferredName": null
     }
   ],
   "comments": [
     {
-      "goalId": "7659",
-      "commentCount": 1
+      "goalId": "7387",
+      "commentCount": 3
     }
   ]
 }

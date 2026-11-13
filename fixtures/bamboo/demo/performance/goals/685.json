@@ -22,15 +22,15 @@
   "selectedFilter": "status-all",
   "goals": [
     {
-      "id": "7979",
-      "title": "Lanzar el nuevo flujo de onboarding",
+      "id": "7703",
+      "title": "Mejorar el NPS interno del equipo",
       "description": "Pedido por el equipo directivo en la planificación.",
       "percentComplete": 100,
       "alignsWithOptionId": null,
       "sharedWithEmployeeIds": [],
-      "dueDate": "2026-02-22",
-      "completionDate": "2025-12-02",
-      "lastChangedDateTime": "2025-12-02T08:19:52Z",
+      "dueDate": "2025-08-10",
+      "completionDate": "2025-06-20",
+      "lastChangedDateTime": "2025-06-20T16:08:33Z",
       "status": "completed",
       "milestones": null,
       "actions": {
@@ -43,15 +43,15 @@
       }
     },
     {
-      "id": "7982",
-      "title": "Automatizar la conciliación mensual",
-      "description": "Pedido por el equipo directivo en la planificación.",
+      "id": "7704",
+      "title": "Migrar los reportes al nuevo tablero",
+      "description": "Alineado con el plan del área para el año.",
       "percentComplete": 100,
       "alignsWithOptionId": null,
       "sharedWithEmployeeIds": [],
       "dueDate": "2026-09-07",
-      "completionDate": "2026-07-25",
-      "lastChangedDateTime": "2026-07-25T10:01:06Z",
+      "completionDate": "2026-05-23",
+      "lastChangedDateTime": "2026-05-23T14:44:46Z",
       "status": "completed",
       "milestones": null,
       "actions": {
@@ -72,14 +72,5 @@
       "preferredName": null
     }
   ],
-  "comments": [
-    {
-      "goalId": "7979",
-      "commentCount": 2
-    },
-    {
-      "goalId": "7982",
-      "commentCount": 1
-    }
-  ]
+  "comments": []
 }

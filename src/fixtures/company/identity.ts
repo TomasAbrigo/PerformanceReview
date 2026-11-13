@@ -11,7 +11,7 @@ export function fullName(name: PersonName): string {
 }
 
 export function stripAccents(text: string): string {
-  return text.normalize("NFD").replace(/[̀-ͯ]/g, "");
+  return text.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 }
 
 /** "Ruiz, Ana": how Bamboo renders supervisor / reportsTo. */

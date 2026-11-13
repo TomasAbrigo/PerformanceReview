@@ -22,16 +22,16 @@
   "selectedFilter": "status-all",
   "goals": [
     {
-      "id": "5146",
-      "title": "Renovar las cuentas clave del trimestre",
-      "description": "Meta compartida con otra área; coordinar avances mensuales.",
-      "percentComplete": 100,
-      "alignsWithOptionId": null,
+      "id": "5119",
+      "title": "Aumentar la cobertura de pruebas al 80%",
+      "description": "Sirve de base para el próximo ciclo de evaluación.",
+      "percentComplete": 30,
+      "alignsWithOptionId": 9003,
       "sharedWithEmployeeIds": [],
-      "dueDate": "2023-10-07",
-      "completionDate": "2023-08-13",
-      "lastChangedDateTime": "2023-08-13T13:54:40Z",
-      "status": "completed",
+      "dueDate": "2023-03-17",
+      "completionDate": null,
+      "lastChangedDateTime": "2024-11-08T10:25:02Z",
+      "status": "in_progress",
       "milestones": null,
       "actions": {
         "canEdit": false,
@@ -43,17 +43,61 @@
       }
     },
     {
-      "id": "5148",
-      "title": "Cerrar el plan de capacitación anual",
-      "description": "Sirve de base para el próximo ciclo de evaluación.",
+      "id": "5120",
+      "title": "Mejorar el NPS interno del equipo",
+      "description": "Pedido por el equipo directivo en la planificación.",
       "percentComplete": 100,
       "alignsWithOptionId": null,
       "sharedWithEmployeeIds": [
         41
       ],
-      "dueDate": "2024-11-30",
-      "completionDate": "2024-10-31",
-      "lastChangedDateTime": "2024-10-31T12:27:26Z",
+      "dueDate": "2024-03-23",
+      "completionDate": "2023-12-21",
+      "lastChangedDateTime": "2023-12-21T13:24:47Z",
+      "status": "completed",
+      "milestones": [
+        {
+          "id": 756,
+          "employeeGoalId": 5120,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2023-11-12T16:03:51Z",
+          "lastUpdateDateTime": "2023-11-12T16:03:51Z",
+          "lastUpdateUserId": 43
+        },
+        {
+          "id": 757,
+          "employeeGoalId": 5120,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2023-09-13T09:57:48Z",
+          "lastUpdateDateTime": "2023-09-13T09:57:48Z",
+          "lastUpdateUserId": 43
+        }
+      ],
+      "actions": {
+        "canEdit": false,
+        "canUpdateProgress": false,
+        "canClose": false,
+        "canReopen": false,
+        "canDelete": false,
+        "canComment": false
+      }
+    },
+    {
+      "id": "5123",
+      "title": "Completar la certificación del área",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 100,
+      "alignsWithOptionId": 9004,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2024-05-21",
+      "completionDate": "2024-02-07",
+      "lastChangedDateTime": "2024-02-07T10:14:06Z",
       "status": "completed",
       "milestones": null,
       "actions": {
@@ -66,15 +110,15 @@
       }
     },
     {
-      "id": "5149",
-      "title": "Entregar el proyecto Norte sin desvíos",
-      "description": "Pedido por el equipo directivo en la planificación.",
+      "id": "5126",
+      "title": "Reducir los incidentes recurrentes a la mitad",
+      "description": "Alineado con el plan del área para el año.",
       "percentComplete": 100,
-      "alignsWithOptionId": 9003,
+      "alignsWithOptionId": 9004,
       "sharedWithEmployeeIds": [],
-      "dueDate": "2025-08-29",
-      "completionDate": "2025-04-27",
-      "lastChangedDateTime": "2025-04-27T09:13:45Z",
+      "dueDate": "2025-02-24",
+      "completionDate": "2025-01-04",
+      "lastChangedDateTime": "2025-01-04T12:45:44Z",
       "status": "completed",
       "milestones": null,
       "actions": {
@@ -101,5 +145,10 @@
       "preferredName": "Mili"
     }
   ],
-  "comments": []
+  "comments": [
+    {
+      "goalId": "5123",
+      "commentCount": 4
+    }
+  ]
 }

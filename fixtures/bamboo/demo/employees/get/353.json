@@ -3,15 +3,15 @@
   "firstName": "Gustavo",
   "lastName": "Barrios",
   "workEmail": "gustavo.barrios@meridian-andina.example",
-  "employeeNumber": "10873",
+  "employeeNumber": "10869",
   "supervisorEId": "59",
-  "supervisorId": "10110",
+  "supervisorId": "10104",
   "supervisor": "Soria, Gonzalo",
   "hireDate": "2022-07-27",
   "terminationDate": "2025-07-14",
   "department": "Finanzas",
   "division": "Corporativo",
-  "jobTitle": "Analista de Tesorería Ssr",
+  "jobTitle": "Analista de Tesorería Jr",
   "location": "Córdoba",
   "status": "Inactive"
 }

@@ -22,15 +22,15 @@
   "selectedFilter": "status-all",
   "goals": [
     {
-      "id": "6155",
-      "title": "Migrar los reportes al nuevo tablero",
-      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "id": "6042",
+      "title": "Documentar los procesos críticos",
+      "description": "Alineado con el plan del área para el año.",
       "percentComplete": 100,
       "alignsWithOptionId": null,
       "sharedWithEmployeeIds": [],
-      "dueDate": "2023-08-30",
-      "completionDate": "2023-06-09",
-      "lastChangedDateTime": "2023-06-09T10:11:03Z",
+      "dueDate": "2023-10-16",
+      "completionDate": "2023-09-09",
+      "lastChangedDateTime": "2023-09-09T10:32:06Z",
       "status": "completed",
       "milestones": null,
       "actions": {
@@ -43,15 +43,15 @@
       }
     },
     {
-      "id": "6156",
-      "title": "Automatizar la conciliación mensual",
+      "id": "6045",
+      "title": "Aumentar la cobertura de pruebas al 80%",
       "description": "Pedido por el equipo directivo en la planificación.",
       "percentComplete": 100,
       "alignsWithOptionId": null,
       "sharedWithEmployeeIds": [],
-      "dueDate": "2025-03-08",
-      "completionDate": "2024-12-10",
-      "lastChangedDateTime": "2024-12-10T12:59:02Z",
+      "dueDate": "2024-08-02",
+      "completionDate": "2024-06-18",
+      "lastChangedDateTime": "2024-06-18T14:26:55Z",
       "status": "completed",
       "milestones": null,
       "actions": {
@@ -64,36 +64,17 @@
       }
     },
     {
-      "id": "6159",
-      "title": "Reducir el tiempo de primera respuesta un 20%",
-      "description": "Meta compartida con otra área; coordinar avances mensuales.",
-      "percentComplete": 100,
-      "alignsWithOptionId": null,
-      "sharedWithEmployeeIds": [],
-      "dueDate": "2025-06-17",
-      "completionDate": "2025-04-20",
-      "lastChangedDateTime": "2025-04-20T08:06:08Z",
-      "status": "completed",
-      "milestones": null,
-      "actions": {
-        "canEdit": true,
-        "canUpdateProgress": false,
-        "canClose": true,
-        "canReopen": false,
-        "canDelete": true,
-        "canComment": true
-      }
-    },
-    {
-      "id": "6162",
+      "id": "6046",
       "title": "Aumentar la cobertura de pruebas al 80%",
       "description": "Meta compartida con otra área; coordinar avances mensuales.",
       "percentComplete": 100,
       "alignsWithOptionId": null,
-      "sharedWithEmployeeIds": [],
-      "dueDate": "2026-10-18",
-      "completionDate": "2026-09-30",
-      "lastChangedDateTime": "2026-09-30T11:35:46Z",
+      "sharedWithEmployeeIds": [
+        61
+      ],
+      "dueDate": "2025-04-13",
+      "completionDate": "2024-12-23",
+      "lastChangedDateTime": "2024-12-23T14:10:13Z",
       "status": "completed",
       "milestones": null,
       "actions": {
@@ -106,20 +87,66 @@
       }
     },
     {
-      "id": "6165",
-      "title": "Reducir los incidentes recurrentes a la mitad",
-      "description": "Meta compartida con otra área; coordinar avances mensuales.",
-      "percentComplete": 100,
-      "alignsWithOptionId": null,
+      "id": "6048",
+      "title": "Mejorar el NPS interno del equipo",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 50,
+      "alignsWithOptionId": 9002,
       "sharedWithEmployeeIds": [],
-      "dueDate": "2026-08-04",
-      "completionDate": "2026-02-15",
-      "lastChangedDateTime": "2026-02-15T19:45:07Z",
-      "status": "completed",
+      "dueDate": "2026-08-31",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-10-31T13:32:12Z",
+      "status": "in_progress",
+      "milestones": [
+        {
+          "id": 1175,
+          "employeeGoalId": 6048,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2026-10-24T08:32:17Z",
+          "lastUpdateDateTime": "2026-10-24T08:32:17Z",
+          "lastUpdateUserId": 235
+        },
+        {
+          "id": 1176,
+          "employeeGoalId": 6048,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2026-06-09T16:52:13Z",
+          "lastUpdateUserId": 235
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "6050",
+      "title": "Mentorear a dos personas nuevas",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "percentComplete": 85,
+      "alignsWithOptionId": 9004,
+      "sharedWithEmployeeIds": [
+        61
+      ],
+      "dueDate": "2026-07-25",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-07-20T13:26:28Z",
+      "status": "in_progress",
       "milestones": null,
       "actions": {
         "canEdit": true,
-        "canUpdateProgress": false,
+        "canUpdateProgress": true,
         "canClose": true,
         "canReopen": false,
         "canDelete": true,
@@ -133,12 +160,30 @@
       "firstName": "Gabriela",
       "lastName": "Cabrera",
       "preferredName": "Gabi"
+    },
+    {
+      "employeeId": 61,
+      "firstName": "Marcelo",
+      "lastName": "Peralta",
+      "preferredName": null
     }
   ],
   "comments": [
     {
-      "goalId": "6155",
-      "commentCount": 4
+      "goalId": "6042",
+      "commentCount": 1
+    },
+    {
+      "goalId": "6045",
+      "commentCount": 1
+    },
+    {
+      "goalId": "6048",
+      "commentCount": 3
+    },
+    {
+      "goalId": "6050",
+      "commentCount": 1
     }
   ]
 }

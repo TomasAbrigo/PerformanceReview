@@ -3,15 +3,15 @@
   "firstName": "Marcelo",
   "lastName": "Franco",
   "workEmail": "marcelo.franco@meridian-andina.example",
-  "employeeNumber": "11193",
+  "employeeNumber": "11184",
   "supervisorEId": "67",
-  "supervisorId": "10132",
+  "supervisorId": "10118",
   "supervisor": "Roldán, Noelia",
   "hireDate": "2023-08-08",
   "terminationDate": null,
   "department": "Datos",
   "division": "Tecnología",
-  "jobTitle": "Analytics Engineer Ssr",
+  "jobTitle": "Analytics Engineer Sr",
   "location": "Buenos Aires",
   "status": "Active"
 }

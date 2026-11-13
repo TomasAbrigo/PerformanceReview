@@ -22,81 +22,15 @@
   "selectedFilter": "status-all",
   "goals": [
     {
-      "id": "7627",
+      "id": "7350",
       "title": "Automatizar la conciliación mensual",
-      "description": "Sirve de base para el próximo ciclo de evaluación.",
-      "percentComplete": 25,
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 60,
       "alignsWithOptionId": null,
       "sharedWithEmployeeIds": [],
-      "dueDate": "2027-01-08",
+      "dueDate": "2024-11-26",
       "completionDate": null,
-      "lastChangedDateTime": "2026-08-21T09:50:52Z",
-      "status": "in_progress",
-      "milestones": [
-        {
-          "id": 1882,
-          "employeeGoalId": 7627,
-          "title": "Hito 1",
-          "startValue": 0,
-          "endValue": 1,
-          "currentValue": 1,
-          "completedDateTime": "2026-08-04T19:42:46Z",
-          "lastUpdateDateTime": "2026-08-04T19:42:46Z",
-          "lastUpdateUserId": 559
-        },
-        {
-          "id": 1883,
-          "employeeGoalId": 7627,
-          "title": "Hito 2",
-          "startValue": 0,
-          "endValue": 1,
-          "currentValue": 0,
-          "completedDateTime": null,
-          "lastUpdateDateTime": "2026-05-30T11:49:25Z",
-          "lastUpdateUserId": 559
-        },
-        {
-          "id": 1884,
-          "employeeGoalId": 7627,
-          "title": "Hito 3",
-          "startValue": 0,
-          "endValue": 1,
-          "currentValue": 0,
-          "completedDateTime": null,
-          "lastUpdateDateTime": "2026-05-30T18:51:50Z",
-          "lastUpdateUserId": 559
-        },
-        {
-          "id": 1885,
-          "employeeGoalId": 7627,
-          "title": "Hito 4",
-          "startValue": 0,
-          "endValue": 1,
-          "currentValue": 0,
-          "completedDateTime": null,
-          "lastUpdateDateTime": "2026-05-30T19:52:03Z",
-          "lastUpdateUserId": 559
-        }
-      ],
-      "actions": {
-        "canEdit": true,
-        "canUpdateProgress": true,
-        "canClose": true,
-        "canReopen": false,
-        "canDelete": true,
-        "canComment": true
-      }
-    },
-    {
-      "id": "7630",
-      "title": "Implementar el calendario editorial",
-      "description": "Pedido por el equipo directivo en la planificación.",
-      "percentComplete": 90,
-      "alignsWithOptionId": null,
-      "sharedWithEmployeeIds": [],
-      "dueDate": "2027-01-01",
-      "completionDate": null,
-      "lastChangedDateTime": "2026-09-02T13:50:23Z",
+      "lastChangedDateTime": "2025-03-10T11:40:59Z",
       "status": "in_progress",
       "milestones": null,
       "actions": {
@@ -119,8 +53,8 @@
   ],
   "comments": [
     {
-      "goalId": "7627",
-      "commentCount": 3
+      "goalId": "7350",
+      "commentCount": 1
     }
   ]
 }

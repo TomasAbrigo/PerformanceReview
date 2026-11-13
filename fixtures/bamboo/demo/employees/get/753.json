@@ -3,15 +3,15 @@
   "firstName": "Micaela",
   "lastName": "Silva",
   "workEmail": "micaela.silva@meridian-andina.example",
-  "employeeNumber": "11838",
+  "employeeNumber": "11839",
   "supervisorEId": "241",
-  "supervisorId": "10574",
+  "supervisorId": "10570",
   "supervisor": "Reyes, Daniela",
   "hireDate": "2025-07-11",
   "terminationDate": null,
   "department": "Marketing",
   "division": "Comercial",
   "jobTitle": "Content Specialist Ssr",
-  "location": "Rosario",
+  "location": "Córdoba",
   "status": "Active"
 }

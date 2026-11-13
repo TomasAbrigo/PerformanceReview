@@ -3,7 +3,7 @@
   "firstName": "Martín",
   "lastName": "Páez",
   "workEmail": "martin.paez@meridian-andina.example",
-  "employeeNumber": "11741",
+  "employeeNumber": "11725",
   "supervisorEId": "47",
   "supervisorId": "10080",
   "supervisor": "Olmos, Candela",
@@ -11,7 +11,7 @@
   "terminationDate": null,
   "department": "Soporte",
   "division": "Operaciones",
-  "jobTitle": "Especialista de Soporte Ssr",
+  "jobTitle": "Especialista de Soporte Sr",
   "location": "Buenos Aires",
   "status": "Active"
 }

@@ -3,7 +3,7 @@
   "firstName": "Maximiliano",
   "lastName": "Romero",
   "workEmail": "maximiliano.romero@meridian-andina.example",
-  "employeeNumber": "11369",
+  "employeeNumber": "11356",
   "supervisorEId": "33",
   "supervisorId": "10050",
   "supervisor": "Romero, Brenda",
@@ -11,7 +11,7 @@
   "terminationDate": null,
   "department": "Ingeniería",
   "division": "Tecnología",
-  "jobTitle": "Mobile Developer Ssr",
+  "jobTitle": "Mobile Developer Sr",
   "location": "Montevideo",
   "status": "Active"
 }

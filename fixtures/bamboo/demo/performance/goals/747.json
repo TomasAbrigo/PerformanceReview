@@ -22,71 +22,37 @@
   "selectedFilter": "status-all",
   "goals": [
     {
-      "id": "8145",
-      "title": "Reducir los incidentes recurrentes a la mitad",
-      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "id": "7833",
+      "title": "Implementar el calendario editorial",
+      "description": "Alineado con el plan del área para el año.",
       "percentComplete": 100,
-      "alignsWithOptionId": 9001,
-      "sharedWithEmployeeIds": [],
-      "dueDate": "2025-12-18",
-      "completionDate": "2025-08-22",
-      "lastChangedDateTime": "2025-08-22T19:10:59Z",
-      "status": "completed",
-      "milestones": null,
-      "actions": {
-        "canEdit": false,
-        "canUpdateProgress": false,
-        "canClose": false,
-        "canReopen": false,
-        "canDelete": false,
-        "canComment": false
-      }
-    },
-    {
-      "id": "8147",
-      "title": "Mejorar el NPS interno del equipo",
-      "description": "Meta compartida con otra área; coordinar avances mensuales.",
-      "percentComplete": 0,
       "alignsWithOptionId": null,
-      "sharedWithEmployeeIds": [
-        125
-      ],
-      "dueDate": "2027-01-29",
-      "completionDate": null,
-      "lastChangedDateTime": "2026-06-08T10:15:24Z",
-      "status": "closed",
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2025-10-17",
+      "completionDate": "2025-07-21",
+      "lastChangedDateTime": "2025-07-21T14:22:29Z",
+      "status": "completed",
       "milestones": [
         {
-          "id": 2131,
-          "employeeGoalId": 8147,
+          "id": 2011,
+          "employeeGoalId": 7833,
           "title": "Hito 1",
           "startValue": 0,
           "endValue": 1,
-          "currentValue": 0,
-          "completedDateTime": null,
-          "lastUpdateDateTime": "2026-06-08T18:44:23Z",
+          "currentValue": 1,
+          "completedDateTime": "2025-07-13T11:28:36Z",
+          "lastUpdateDateTime": "2025-07-13T11:28:36Z",
           "lastUpdateUserId": 747
         },
         {
-          "id": 2132,
-          "employeeGoalId": 8147,
+          "id": 2012,
+          "employeeGoalId": 7833,
           "title": "Hito 2",
           "startValue": 0,
           "endValue": 1,
-          "currentValue": 0,
-          "completedDateTime": null,
-          "lastUpdateDateTime": "2026-06-08T17:44:51Z",
-          "lastUpdateUserId": 747
-        },
-        {
-          "id": 2133,
-          "employeeGoalId": 8147,
-          "title": "Hito 3",
-          "startValue": 0,
-          "endValue": 1,
-          "currentValue": 0,
-          "completedDateTime": null,
-          "lastUpdateDateTime": "2026-06-08T19:22:21Z",
+          "currentValue": 1,
+          "completedDateTime": "2025-07-14T14:10:50Z",
+          "lastUpdateDateTime": "2025-07-14T14:10:50Z",
           "lastUpdateUserId": 747
         }
       ],
@@ -100,16 +66,16 @@
       }
     },
     {
-      "id": "8148",
-      "title": "Mejorar el NPS interno del equipo",
-      "description": "Pedido por el equipo directivo en la planificación.",
-      "percentComplete": 100,
-      "alignsWithOptionId": null,
+      "id": "7834",
+      "title": "Lanzar el nuevo flujo de onboarding",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "percentComplete": 5,
+      "alignsWithOptionId": 9003,
       "sharedWithEmployeeIds": [],
-      "dueDate": "2026-03-19",
-      "completionDate": "2026-01-20",
-      "lastChangedDateTime": "2026-01-20T13:41:53Z",
-      "status": "completed",
+      "dueDate": "2025-09-27",
+      "completionDate": null,
+      "lastChangedDateTime": "2025-08-13T14:33:44Z",
+      "status": "in_progress",
       "milestones": null,
       "actions": {
         "canEdit": false,
@@ -121,18 +87,37 @@
       }
     },
     {
-      "id": "8150",
-      "title": "Mejorar el NPS interno del equipo",
-      "description": "Meta compartida con otra área; coordinar avances mensuales.",
-      "percentComplete": 100,
+      "id": "7835",
+      "title": "Automatizar la conciliación mensual",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 50,
+      "alignsWithOptionId": 9002,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2026-03-31",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-02-15T11:41:33Z",
+      "status": "in_progress",
+      "milestones": null,
+      "actions": {
+        "canEdit": false,
+        "canUpdateProgress": false,
+        "canClose": false,
+        "canReopen": false,
+        "canDelete": false,
+        "canComment": false
+      }
+    },
+    {
+      "id": "7836",
+      "title": "Reducir el tiempo de primera respuesta un 20%",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 90,
       "alignsWithOptionId": null,
-      "sharedWithEmployeeIds": [
-        125
-      ],
-      "dueDate": "2026-06-12",
-      "completionDate": "2026-05-25",
-      "lastChangedDateTime": "2026-05-25T11:33:19Z",
-      "status": "completed",
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2026-02-12",
+      "completionDate": null,
+      "lastChangedDateTime": "2025-12-26T11:50:55Z",
+      "status": "in_progress",
       "milestones": null,
       "actions": {
         "canEdit": false,
@@ -150,13 +135,12 @@
       "firstName": "Candela",
       "lastName": "Flores",
       "preferredName": null
-    },
-    {
-      "employeeId": 125,
-      "firstName": "Tomás",
-      "lastName": "Navarro",
-      "preferredName": null
     }
   ],
-  "comments": []
+  "comments": [
+    {
+      "goalId": "7835",
+      "commentCount": 1
+    }
+  ]
 }

@@ -22,54 +22,64 @@
   "selectedFilter": "status-all",
   "goals": [
     {
-      "id": "8172",
-      "title": "Automatizar la conciliación mensual",
-      "description": "Sirve de base para el próximo ciclo de evaluación.",
-      "percentComplete": 67,
-      "alignsWithOptionId": 9003,
+      "id": "7856",
+      "title": "Lanzar el nuevo flujo de onboarding",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 15,
+      "alignsWithOptionId": null,
       "sharedWithEmployeeIds": [],
-      "dueDate": "2026-11-08",
+      "dueDate": "2025-11-11",
       "completionDate": null,
-      "lastChangedDateTime": "2026-09-02T14:05:00Z",
-      "status": "in_progress",
-      "milestones": [
-        {
-          "id": 2150,
-          "employeeGoalId": 8172,
-          "title": "Hito 1",
-          "startValue": 0,
-          "endValue": 1,
-          "currentValue": 1,
-          "completedDateTime": "2026-08-17T13:22:00Z",
-          "lastUpdateDateTime": "2026-08-17T13:22:00Z",
-          "lastUpdateUserId": 757
-        },
-        {
-          "id": 2151,
-          "employeeGoalId": 8172,
-          "title": "Hito 2",
-          "startValue": 0,
-          "endValue": 1,
-          "currentValue": 1,
-          "completedDateTime": "2026-07-28T16:19:32Z",
-          "lastUpdateDateTime": "2026-07-28T16:19:32Z",
-          "lastUpdateUserId": 757
-        },
-        {
-          "id": 2152,
-          "employeeGoalId": 8172,
-          "title": "Hito 3",
-          "startValue": 0,
-          "endValue": 1,
-          "currentValue": 0,
-          "completedDateTime": null,
-          "lastUpdateDateTime": "2026-07-27T10:02:47Z",
-          "lastUpdateUserId": 757
-        }
+      "lastChangedDateTime": "2025-09-09T17:50:28Z",
+      "status": "closed",
+      "milestones": null,
+      "actions": {
+        "canEdit": false,
+        "canUpdateProgress": false,
+        "canClose": false,
+        "canReopen": true,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "7857",
+      "title": "Mentorear a dos personas nuevas",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 10,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [
+        49
       ],
+      "dueDate": "2025-12-04",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-04-03T09:37:25Z",
+      "status": "closed",
+      "milestones": null,
+      "actions": {
+        "canEdit": false,
+        "canUpdateProgress": false,
+        "canClose": false,
+        "canReopen": true,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "7858",
+      "title": "Entregar el proyecto Norte sin desvíos",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2026-05-28",
+      "completionDate": "2026-03-08",
+      "lastChangedDateTime": "2026-03-08T12:44:24Z",
+      "status": "completed",
+      "milestones": null,
       "actions": {
         "canEdit": true,
-        "canUpdateProgress": true,
+        "canUpdateProgress": false,
         "canClose": true,
         "canReopen": false,
         "canDelete": true,
@@ -82,6 +92,12 @@
       "employeeId": 757,
       "firstName": "Mariana",
       "lastName": "Soria",
+      "preferredName": null
+    },
+    {
+      "employeeId": 49,
+      "firstName": "Milagros",
+      "lastName": "Monzón",
       "preferredName": null
     }
   ],

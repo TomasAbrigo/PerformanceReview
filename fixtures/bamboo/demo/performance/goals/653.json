@@ -22,17 +22,17 @@
   "selectedFilter": "status-all",
   "goals": [
     {
-      "id": "7894",
-      "title": "Entregar el proyecto Norte sin desvíos",
+      "id": "7654",
+      "title": "Aumentar la cobertura de pruebas al 80%",
       "description": "Pedido por el equipo directivo en la planificación.",
       "percentComplete": 100,
-      "alignsWithOptionId": 9004,
+      "alignsWithOptionId": 9002,
       "sharedWithEmployeeIds": [
         321
       ],
-      "dueDate": "2025-08-02",
-      "completionDate": "2025-04-18",
-      "lastChangedDateTime": "2025-04-18T18:41:35Z",
+      "dueDate": "2025-11-01",
+      "completionDate": "2025-06-19",
+      "lastChangedDateTime": "2025-06-19T10:51:22Z",
       "status": "completed",
       "milestones": null,
       "actions": {
@@ -45,66 +45,67 @@
       }
     },
     {
-      "id": "7896",
-      "title": "Mentorear a dos personas nuevas",
-      "description": "Meta compartida con otra área; coordinar avances mensuales.",
-      "percentComplete": 50,
-      "alignsWithOptionId": 9001,
+      "id": "7655",
+      "title": "Lanzar el nuevo flujo de onboarding",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 25,
+      "alignsWithOptionId": null,
       "sharedWithEmployeeIds": [],
-      "dueDate": "2026-02-14",
+      "dueDate": "2026-10-01",
       "completionDate": null,
-      "lastChangedDateTime": "2026-08-11T19:34:05Z",
-      "status": "closed",
+      "lastChangedDateTime": "2026-06-16T11:25:46Z",
+      "status": "in_progress",
       "milestones": [
         {
-          "id": 2010,
-          "employeeGoalId": 7896,
+          "id": 1918,
+          "employeeGoalId": 7655,
           "title": "Hito 1",
           "startValue": 0,
           "endValue": 1,
           "currentValue": 1,
-          "completedDateTime": "2026-06-01T09:58:04Z",
-          "lastUpdateDateTime": "2026-06-01T09:58:04Z",
+          "completedDateTime": "2026-03-28T16:44:37Z",
+          "lastUpdateDateTime": "2026-03-28T16:44:37Z",
           "lastUpdateUserId": 653
         },
         {
-          "id": 2011,
-          "employeeGoalId": 7896,
+          "id": 1919,
+          "employeeGoalId": 7655,
           "title": "Hito 2",
           "startValue": 0,
           "endValue": 1,
           "currentValue": 0,
           "completedDateTime": null,
-          "lastUpdateDateTime": "2025-10-11T15:59:40Z",
+          "lastUpdateDateTime": "2026-02-17T13:59:06Z",
+          "lastUpdateUserId": 653
+        },
+        {
+          "id": 1920,
+          "employeeGoalId": 7655,
+          "title": "Hito 3",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2026-02-17T19:15:54Z",
+          "lastUpdateUserId": 653
+        },
+        {
+          "id": 1921,
+          "employeeGoalId": 7655,
+          "title": "Hito 4",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2026-02-17T18:15:52Z",
           "lastUpdateUserId": 653
         }
       ],
       "actions": {
-        "canEdit": false,
-        "canUpdateProgress": false,
-        "canClose": false,
-        "canReopen": true,
-        "canDelete": true,
-        "canComment": true
-      }
-    },
-    {
-      "id": "7898",
-      "title": "Implementar el calendario editorial",
-      "description": "Meta compartida con otra área; coordinar avances mensuales.",
-      "percentComplete": 35,
-      "alignsWithOptionId": null,
-      "sharedWithEmployeeIds": [],
-      "dueDate": "2026-05-06",
-      "completionDate": null,
-      "lastChangedDateTime": "2026-04-18T15:26:23Z",
-      "status": "closed",
-      "milestones": null,
-      "actions": {
-        "canEdit": false,
-        "canUpdateProgress": false,
-        "canClose": false,
-        "canReopen": true,
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
         "canDelete": true,
         "canComment": true
       }
@@ -126,8 +127,8 @@
   ],
   "comments": [
     {
-      "goalId": "7898",
-      "commentCount": 1
+      "goalId": "7654",
+      "commentCount": 3
     }
   ]
 }

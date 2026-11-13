@@ -3,15 +3,15 @@
   "firstName": "Damián",
   "lastName": "Soria",
   "workEmail": "damian.soria@meridian-andina.example",
-  "employeeNumber": "11388",
+  "employeeNumber": "11374",
   "supervisorEId": "61",
-  "supervisorId": "10116",
+  "supervisorId": "10107",
   "supervisor": "Peralta, Marcelo",
   "hireDate": "2024-04-10",
   "terminationDate": null,
   "department": "Ventas",
   "division": "Comercial",
-  "jobTitle": "Sales Analyst Sr",
+  "jobTitle": "Sales Analyst Ssr",
   "location": "Buenos Aires",
   "status": "Active"
 }

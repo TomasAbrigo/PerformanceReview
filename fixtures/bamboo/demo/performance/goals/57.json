@@ -22,7 +22,7 @@
   "selectedFilter": "status-all",
   "goals": [
     {
-      "id": "5236",
+      "id": "5233",
       "title": "Reducir el tiempo de primera respuesta un 20%",
       "description": "Sirve de base para el próximo ciclo de evaluación.",
       "percentComplete": 100,
@@ -34,8 +34,8 @@
       "status": "completed",
       "milestones": [
         {
-          "id": 811,
-          "employeeGoalId": 5236,
+          "id": 803,
+          "employeeGoalId": 5233,
           "title": "Hito 1",
           "startValue": 0,
           "endValue": 1,
@@ -45,8 +45,8 @@
           "lastUpdateUserId": 57
         },
         {
-          "id": 812,
-          "employeeGoalId": 5236,
+          "id": 804,
+          "employeeGoalId": 5233,
           "title": "Hito 2",
           "startValue": 0,
           "endValue": 1,
@@ -56,8 +56,8 @@
           "lastUpdateUserId": 57
         },
         {
-          "id": 813,
-          "employeeGoalId": 5236,
+          "id": 805,
+          "employeeGoalId": 5233,
           "title": "Hito 3",
           "startValue": 0,
           "endValue": 1,
@@ -77,7 +77,7 @@
       }
     },
     {
-      "id": "5237",
+      "id": "5234",
       "title": "Reducir los incidentes recurrentes a la mitad",
       "description": "Sirve de base para el próximo ciclo de evaluación.",
       "percentComplete": 100,
@@ -100,7 +100,7 @@
       }
     },
     {
-      "id": "5239",
+      "id": "5236",
       "title": "Reducir el tiempo de primera respuesta un 20%",
       "description": "Meta compartida con otra área; coordinar avances mensuales.",
       "percentComplete": 100,
@@ -123,7 +123,7 @@
       }
     },
     {
-      "id": "5241",
+      "id": "5238",
       "title": "Documentar los procesos críticos",
       "description": "Sirve de base para el próximo ciclo de evaluación.",
       "percentComplete": 100,
@@ -144,7 +144,7 @@
       }
     },
     {
-      "id": "5242",
+      "id": "5239",
       "title": "Implementar el calendario editorial",
       "description": "Sirve de base para el próximo ciclo de evaluación.",
       "percentComplete": 75,
@@ -156,8 +156,8 @@
       "status": "in_progress",
       "milestones": [
         {
-          "id": 814,
-          "employeeGoalId": 5242,
+          "id": 806,
+          "employeeGoalId": 5239,
           "title": "Hito 1",
           "startValue": 0,
           "endValue": 1,
@@ -167,8 +167,8 @@
           "lastUpdateUserId": 57
         },
         {
-          "id": 815,
-          "employeeGoalId": 5242,
+          "id": 807,
+          "employeeGoalId": 5239,
           "title": "Hito 2",
           "startValue": 0,
           "endValue": 1,
@@ -178,8 +178,8 @@
           "lastUpdateUserId": 57
         },
         {
-          "id": 816,
-          "employeeGoalId": 5242,
+          "id": 808,
+          "employeeGoalId": 5239,
           "title": "Hito 3",
           "startValue": 0,
           "endValue": 1,
@@ -189,8 +189,8 @@
           "lastUpdateUserId": 57
         },
         {
-          "id": 817,
-          "employeeGoalId": 5242,
+          "id": 809,
+          "employeeGoalId": 5239,
           "title": "Hito 4",
           "startValue": 0,
           "endValue": 1,
@@ -210,7 +210,7 @@
       }
     },
     {
-      "id": "5245",
+      "id": "5242",
       "title": "Reducir el tiempo de primera respuesta un 20%",
       "description": "Meta compartida con otra área; coordinar avances mensuales.",
       "percentComplete": 100,
@@ -231,7 +231,7 @@
       }
     },
     {
-      "id": "5246",
+      "id": "5243",
       "title": "Entregar el proyecto Norte sin desvíos",
       "description": "Sirve de base para el próximo ciclo de evaluación.",
       "percentComplete": 70,
@@ -270,11 +270,11 @@
   ],
   "comments": [
     {
-      "goalId": "5237",
+      "goalId": "5234",
       "commentCount": 1
     },
     {
-      "goalId": "5245",
+      "goalId": "5242",
       "commentCount": 1
     }
   ]

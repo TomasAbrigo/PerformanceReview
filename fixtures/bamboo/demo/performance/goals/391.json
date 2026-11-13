@@ -22,56 +22,164 @@
   "selectedFilter": "status-all",
   "goals": [
     {
-      "id": "6879",
-      "title": "Implementar el calendario editorial",
+      "id": "6682",
+      "title": "Automatizar la conciliación mensual",
       "description": "Alineado con el plan del área para el año.",
-      "percentComplete": 100,
-      "alignsWithOptionId": null,
+      "percentComplete": 0,
+      "alignsWithOptionId": 9002,
       "sharedWithEmployeeIds": [
         41
       ],
-      "dueDate": "2024-07-19",
-      "completionDate": "2024-05-22",
-      "lastChangedDateTime": "2024-05-22T18:10:12Z",
-      "status": "completed",
+      "dueDate": "2023-03-26",
+      "completionDate": null,
+      "lastChangedDateTime": "2025-12-20T19:16:51Z",
+      "status": "closed",
       "milestones": [
         {
-          "id": 1525,
-          "employeeGoalId": 6879,
+          "id": 1440,
+          "employeeGoalId": 6682,
           "title": "Hito 1",
           "startValue": 0,
           "endValue": 1,
-          "currentValue": 1,
-          "completedDateTime": "2024-03-10T18:01:42Z",
-          "lastUpdateDateTime": "2024-03-10T18:01:42Z",
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2022-11-09T18:19:40Z",
           "lastUpdateUserId": 391
         },
         {
-          "id": 1526,
-          "employeeGoalId": 6879,
+          "id": 1441,
+          "employeeGoalId": 6682,
           "title": "Hito 2",
           "startValue": 0,
           "endValue": 1,
-          "currentValue": 1,
-          "completedDateTime": "2024-05-10T10:40:44Z",
-          "lastUpdateDateTime": "2024-05-10T10:40:44Z",
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2022-11-09T11:11:22Z",
           "lastUpdateUserId": 391
         },
         {
-          "id": 1527,
-          "employeeGoalId": 6879,
+          "id": 1442,
+          "employeeGoalId": 6682,
           "title": "Hito 3",
           "startValue": 0,
           "endValue": 1,
-          "currentValue": 1,
-          "completedDateTime": "2024-03-30T12:18:25Z",
-          "lastUpdateDateTime": "2024-03-30T12:18:25Z",
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2022-11-09T14:55:17Z",
+          "lastUpdateUserId": 391
+        },
+        {
+          "id": 1443,
+          "employeeGoalId": 6682,
+          "title": "Hito 4",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2022-11-09T11:39:00Z",
+          "lastUpdateUserId": 391
+        }
+      ],
+      "actions": {
+        "canEdit": false,
+        "canUpdateProgress": false,
+        "canClose": false,
+        "canReopen": true,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "6684",
+      "title": "Mejorar el NPS interno del equipo",
+      "description": "Sirve de base para el próximo ciclo de evaluación.",
+      "percentComplete": 65,
+      "alignsWithOptionId": 9002,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2023-08-25",
+      "completionDate": null,
+      "lastChangedDateTime": "2025-01-06T12:11:47Z",
+      "status": "in_progress",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "6686",
+      "title": "Mejorar el NPS interno del equipo",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 85,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2024-11-09",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-04-25T17:59:14Z",
+      "status": "in_progress",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "6687",
+      "title": "Implementar el calendario editorial",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 0,
+      "alignsWithOptionId": 9004,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2025-02-12",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-01-11T18:16:06Z",
+      "status": "in_progress",
+      "milestones": [
+        {
+          "id": 1444,
+          "employeeGoalId": 6687,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2024-09-22T12:35:03Z",
+          "lastUpdateUserId": 391
+        },
+        {
+          "id": 1445,
+          "employeeGoalId": 6687,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2024-09-22T08:23:27Z",
+          "lastUpdateUserId": 391
+        },
+        {
+          "id": 1446,
+          "employeeGoalId": 6687,
+          "title": "Hito 3",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2024-09-22T19:48:28Z",
           "lastUpdateUserId": 391
         }
       ],
       "actions": {
         "canEdit": true,
-        "canUpdateProgress": false,
+        "canUpdateProgress": true,
         "canClose": true,
         "canReopen": false,
         "canDelete": true,
@@ -95,8 +203,16 @@
   ],
   "comments": [
     {
-      "goalId": "6879",
+      "goalId": "6682",
       "commentCount": 4
+    },
+    {
+      "goalId": "6686",
+      "commentCount": 3
+    },
+    {
+      "goalId": "6687",
+      "commentCount": 3
     }
   ]
 }

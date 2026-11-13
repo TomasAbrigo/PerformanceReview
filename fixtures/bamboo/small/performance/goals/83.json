@@ -22,15 +22,15 @@
   "selectedFilter": "status-all",
   "goals": [
     {
-      "id": "5292",
-      "title": "Aumentar la cobertura de pruebas al 80%",
-      "description": "Pedido por el equipo directivo en la planificación.",
+      "id": "5251",
+      "title": "Documentar los procesos críticos",
+      "description": "Sirve de base para el próximo ciclo de evaluación.",
       "percentComplete": 100,
-      "alignsWithOptionId": null,
+      "alignsWithOptionId": 9002,
       "sharedWithEmployeeIds": [],
-      "dueDate": "2025-10-17",
-      "completionDate": "2025-09-07",
-      "lastChangedDateTime": "2025-09-07T12:55:57Z",
+      "dueDate": "2025-11-19",
+      "completionDate": "2025-09-12",
+      "lastChangedDateTime": "2025-09-12T18:29:11Z",
       "status": "completed",
       "milestones": null,
       "actions": {
@@ -43,166 +43,22 @@
       }
     },
     {
-      "id": "5294",
-      "title": "Implementar el calendario editorial",
+      "id": "5252",
+      "title": "Mentorear a dos personas nuevas",
       "description": "Sirve de base para el próximo ciclo de evaluación.",
-      "percentComplete": 5,
-      "alignsWithOptionId": null,
-      "sharedWithEmployeeIds": [],
-      "dueDate": "2025-11-14",
-      "completionDate": null,
-      "lastChangedDateTime": "2025-09-18T11:38:43Z",
-      "status": "in_progress",
-      "milestones": null,
-      "actions": {
-        "canEdit": true,
-        "canUpdateProgress": true,
-        "canClose": true,
-        "canReopen": false,
-        "canDelete": true,
-        "canComment": true
-      }
-    },
-    {
-      "id": "5296",
-      "title": "Reducir los incidentes recurrentes a la mitad",
-      "description": "Sirve de base para el próximo ciclo de evaluación.",
-      "percentComplete": 100,
-      "alignsWithOptionId": 9004,
-      "sharedWithEmployeeIds": [],
-      "dueDate": "2026-04-17",
-      "completionDate": "2025-12-31",
-      "lastChangedDateTime": "2025-12-31T10:27:04Z",
-      "status": "completed",
-      "milestones": null,
-      "actions": {
-        "canEdit": true,
-        "canUpdateProgress": false,
-        "canClose": true,
-        "canReopen": false,
-        "canDelete": true,
-        "canComment": true
-      }
-    },
-    {
-      "id": "5297",
-      "title": "Cerrar el plan de capacitación anual",
-      "description": "Meta compartida con otra área; coordinar avances mensuales.",
-      "percentComplete": 67,
-      "alignsWithOptionId": null,
-      "sharedWithEmployeeIds": [
-        29
-      ],
-      "dueDate": "2026-11-26",
-      "completionDate": null,
-      "lastChangedDateTime": "2026-09-09T16:13:04Z",
-      "status": "in_progress",
-      "milestones": [
-        {
-          "id": 822,
-          "employeeGoalId": 5297,
-          "title": "Hito 1",
-          "startValue": 0,
-          "endValue": 1,
-          "currentValue": 1,
-          "completedDateTime": "2026-09-07T08:26:06Z",
-          "lastUpdateDateTime": "2026-09-07T08:26:06Z",
-          "lastUpdateUserId": 83
-        },
-        {
-          "id": 823,
-          "employeeGoalId": 5297,
-          "title": "Hito 2",
-          "startValue": 0,
-          "endValue": 1,
-          "currentValue": 1,
-          "completedDateTime": "2026-09-04T12:22:25Z",
-          "lastUpdateDateTime": "2026-09-04T12:22:25Z",
-          "lastUpdateUserId": 83
-        },
-        {
-          "id": 824,
-          "employeeGoalId": 5297,
-          "title": "Hito 3",
-          "startValue": 0,
-          "endValue": 1,
-          "currentValue": 0,
-          "completedDateTime": null,
-          "lastUpdateDateTime": "2026-08-24T15:53:36Z",
-          "lastUpdateUserId": 83
-        }
-      ],
-      "actions": {
-        "canEdit": true,
-        "canUpdateProgress": true,
-        "canClose": true,
-        "canReopen": false,
-        "canDelete": true,
-        "canComment": true
-      }
-    },
-    {
-      "id": "5298",
-      "title": "Migrar los reportes al nuevo tablero",
-      "description": "Pedido por el equipo directivo en la planificación.",
-      "percentComplete": 25,
+      "percentComplete": 80,
       "alignsWithOptionId": 9003,
       "sharedWithEmployeeIds": [],
-      "dueDate": "2026-05-23",
+      "dueDate": "2026-11-20",
       "completionDate": null,
-      "lastChangedDateTime": "2026-05-29T08:21:17Z",
-      "status": "closed",
-      "milestones": [
-        {
-          "id": 825,
-          "employeeGoalId": 5298,
-          "title": "Hito 1",
-          "startValue": 0,
-          "endValue": 1,
-          "currentValue": 1,
-          "completedDateTime": "2026-05-04T09:00:44Z",
-          "lastUpdateDateTime": "2026-05-04T09:00:44Z",
-          "lastUpdateUserId": 83
-        },
-        {
-          "id": 826,
-          "employeeGoalId": 5298,
-          "title": "Hito 2",
-          "startValue": 0,
-          "endValue": 1,
-          "currentValue": 0,
-          "completedDateTime": null,
-          "lastUpdateDateTime": "2026-01-25T10:42:21Z",
-          "lastUpdateUserId": 83
-        },
-        {
-          "id": 827,
-          "employeeGoalId": 5298,
-          "title": "Hito 3",
-          "startValue": 0,
-          "endValue": 1,
-          "currentValue": 0,
-          "completedDateTime": null,
-          "lastUpdateDateTime": "2026-01-25T12:35:54Z",
-          "lastUpdateUserId": 83
-        },
-        {
-          "id": 828,
-          "employeeGoalId": 5298,
-          "title": "Hito 4",
-          "startValue": 0,
-          "endValue": 1,
-          "currentValue": 0,
-          "completedDateTime": null,
-          "lastUpdateDateTime": "2026-01-25T17:50:29Z",
-          "lastUpdateUserId": 83
-        }
-      ],
+      "lastChangedDateTime": "2026-10-14T19:36:27Z",
+      "status": "in_progress",
+      "milestones": null,
       "actions": {
-        "canEdit": false,
-        "canUpdateProgress": false,
-        "canClose": false,
-        "canReopen": true,
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
         "canDelete": true,
         "canComment": true
       }
@@ -214,22 +70,7 @@
       "firstName": "Natalia",
       "lastName": "Lezcano",
       "preferredName": null
-    },
-    {
-      "employeeId": 29,
-      "firstName": "Rocío",
-      "lastName": "Ibáñez",
-      "preferredName": null
     }
   ],
-  "comments": [
-    {
-      "goalId": "5294",
-      "commentCount": 1
-    },
-    {
-      "goalId": "5298",
-      "commentCount": 1
-    }
-  ]
+  "comments": []
 }

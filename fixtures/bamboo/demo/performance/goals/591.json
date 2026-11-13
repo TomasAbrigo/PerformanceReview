@@ -22,16 +22,16 @@
   "selectedFilter": "status-all",
   "goals": [
     {
-      "id": "7724",
-      "title": "Implementar el calendario editorial",
-      "description": "Sirve de base para el próximo ciclo de evaluación.",
-      "percentComplete": 30,
+      "id": "7437",
+      "title": "Completar la certificación del área",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 65,
       "alignsWithOptionId": null,
       "sharedWithEmployeeIds": [],
-      "dueDate": "2024-11-13",
+      "dueDate": "2024-10-03",
       "completionDate": null,
-      "lastChangedDateTime": "2025-05-07T18:56:52Z",
-      "status": "closed",
+      "lastChangedDateTime": "2025-06-04T19:02:58Z",
+      "status": "in_progress",
       "milestones": null,
       "actions": {
         "canEdit": false,
@@ -43,17 +43,107 @@
       }
     },
     {
-      "id": "7726",
-      "title": "Reducir el tiempo de primera respuesta un 20%",
-      "description": "Sirve de base para el próximo ciclo de evaluación.",
-      "percentComplete": 5,
+      "id": "7440",
+      "title": "Completar la certificación del área",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2024-09-16",
+      "completionDate": "2024-08-08",
+      "lastChangedDateTime": "2024-08-08T14:32:19Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": false,
+        "canUpdateProgress": false,
+        "canClose": false,
+        "canReopen": false,
+        "canDelete": false,
+        "canComment": false
+      }
+    },
+    {
+      "id": "7442",
+      "title": "Lanzar el nuevo flujo de onboarding",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "percentComplete": 50,
+      "alignsWithOptionId": 9003,
+      "sharedWithEmployeeIds": [
+        59
+      ],
+      "dueDate": "2025-06-10",
+      "completionDate": null,
+      "lastChangedDateTime": "2025-03-05T13:22:57Z",
+      "status": "in_progress",
+      "milestones": [
+        {
+          "id": 1821,
+          "employeeGoalId": 7442,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2024-12-08T13:21:02Z",
+          "lastUpdateDateTime": "2024-12-08T13:21:02Z",
+          "lastUpdateUserId": 591
+        },
+        {
+          "id": 1822,
+          "employeeGoalId": 7442,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2024-11-29T16:18:29Z",
+          "lastUpdateUserId": 591
+        }
+      ],
+      "actions": {
+        "canEdit": false,
+        "canUpdateProgress": false,
+        "canClose": false,
+        "canReopen": false,
+        "canDelete": false,
+        "canComment": false
+      }
+    },
+    {
+      "id": "7445",
+      "title": "Entregar el proyecto Norte sin desvíos",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 100,
       "alignsWithOptionId": null,
       "sharedWithEmployeeIds": [
         59
       ],
-      "dueDate": "2025-06-18",
+      "dueDate": "2025-05-26",
+      "completionDate": "2025-06-14",
+      "lastChangedDateTime": "2025-06-14T08:25:04Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": false,
+        "canUpdateProgress": false,
+        "canClose": false,
+        "canReopen": false,
+        "canDelete": false,
+        "canComment": false
+      }
+    },
+    {
+      "id": "7446",
+      "title": "Migrar los reportes al nuevo tablero",
+      "description": "Sirve de base para el próximo ciclo de evaluación.",
+      "percentComplete": 35,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [
+        59
+      ],
+      "dueDate": "2025-06-28",
       "completionDate": null,
-      "lastChangedDateTime": "2025-09-16T13:02:22Z",
+      "lastChangedDateTime": "2025-07-22T10:39:59Z",
       "status": "in_progress",
       "milestones": null,
       "actions": {
@@ -82,8 +172,12 @@
   ],
   "comments": [
     {
-      "goalId": "7726",
-      "commentCount": 2
+      "goalId": "7437",
+      "commentCount": 4
+    },
+    {
+      "goalId": "7442",
+      "commentCount": 1
     }
   ]
 }

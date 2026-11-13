@@ -22,60 +22,61 @@
   "selectedFilter": "status-all",
   "goals": [
     {
-      "id": "6931",
-      "title": "Completar la certificación del área",
-      "description": "Alineado con el plan del área para el año.",
+      "id": "6753",
+      "title": "Migrar los reportes al nuevo tablero",
+      "description": "Pedido por el equipo directivo en la planificación.",
       "percentComplete": 100,
-      "alignsWithOptionId": null,
+      "alignsWithOptionId": 9003,
       "sharedWithEmployeeIds": [
         111
       ],
-      "dueDate": "2023-12-08",
-      "completionDate": "2023-08-10",
-      "lastChangedDateTime": "2023-08-10T17:06:15Z",
-      "status": "completed",
-      "milestones": null,
-      "actions": {
-        "canEdit": true,
-        "canUpdateProgress": false,
-        "canClose": true,
-        "canReopen": false,
-        "canDelete": true,
-        "canComment": true
-      }
-    },
-    {
-      "id": "6933",
-      "title": "Migrar los reportes al nuevo tablero",
-      "description": "Meta compartida con otra área; coordinar avances mensuales.",
-      "percentComplete": 100,
-      "alignsWithOptionId": 9002,
-      "sharedWithEmployeeIds": [],
-      "dueDate": "2023-08-23",
-      "completionDate": "2023-04-30",
-      "lastChangedDateTime": "2023-04-30T17:04:25Z",
+      "dueDate": "2024-09-06",
+      "completionDate": "2024-04-04",
+      "lastChangedDateTime": "2024-04-04T09:02:51Z",
       "status": "completed",
       "milestones": [
         {
-          "id": 1547,
-          "employeeGoalId": 6933,
+          "id": 1474,
+          "employeeGoalId": 6753,
           "title": "Hito 1",
           "startValue": 0,
           "endValue": 1,
           "currentValue": 1,
-          "completedDateTime": "2023-04-18T19:29:39Z",
-          "lastUpdateDateTime": "2023-04-18T19:29:39Z",
+          "completedDateTime": "2024-03-03T16:35:01Z",
+          "lastUpdateDateTime": "2024-03-03T16:35:01Z",
           "lastUpdateUserId": 405
         },
         {
-          "id": 1548,
-          "employeeGoalId": 6933,
+          "id": 1475,
+          "employeeGoalId": 6753,
           "title": "Hito 2",
           "startValue": 0,
           "endValue": 1,
           "currentValue": 1,
-          "completedDateTime": "2023-04-16T11:38:33Z",
-          "lastUpdateDateTime": "2023-04-16T11:38:33Z",
+          "completedDateTime": "2024-03-31T16:11:11Z",
+          "lastUpdateDateTime": "2024-03-31T16:11:11Z",
+          "lastUpdateUserId": 405
+        },
+        {
+          "id": 1476,
+          "employeeGoalId": 6753,
+          "title": "Hito 3",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2024-03-28T14:45:46Z",
+          "lastUpdateDateTime": "2024-03-28T14:45:46Z",
+          "lastUpdateUserId": 405
+        },
+        {
+          "id": 1477,
+          "employeeGoalId": 6753,
+          "title": "Hito 4",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2024-03-30T11:47:29Z",
+          "lastUpdateDateTime": "2024-03-30T11:47:29Z",
           "lastUpdateUserId": 405
         }
       ],
@@ -89,37 +90,69 @@
       }
     },
     {
-      "id": "6936",
-      "title": "Renovar las cuentas clave del trimestre",
+      "id": "6754",
+      "title": "Cerrar el plan de capacitación anual",
       "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 80,
+      "alignsWithOptionId": 9001,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2024-11-28",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-03-14T14:51:46Z",
+      "status": "in_progress",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "6757",
+      "title": "Lanzar el nuevo flujo de onboarding",
+      "description": "Pedido por el equipo directivo en la planificación.",
       "percentComplete": 100,
       "alignsWithOptionId": null,
       "sharedWithEmployeeIds": [],
-      "dueDate": "2024-08-06",
-      "completionDate": "2024-06-20",
-      "lastChangedDateTime": "2024-06-20T19:59:15Z",
+      "dueDate": "2025-03-02",
+      "completionDate": "2025-03-16",
+      "lastChangedDateTime": "2025-03-16T11:45:35Z",
       "status": "completed",
       "milestones": [
         {
-          "id": 1549,
-          "employeeGoalId": 6936,
+          "id": 1478,
+          "employeeGoalId": 6757,
           "title": "Hito 1",
           "startValue": 0,
           "endValue": 1,
           "currentValue": 1,
-          "completedDateTime": "2024-06-03T19:06:31Z",
-          "lastUpdateDateTime": "2024-06-03T19:06:31Z",
+          "completedDateTime": "2025-02-08T08:03:41Z",
+          "lastUpdateDateTime": "2025-02-08T08:03:41Z",
           "lastUpdateUserId": 405
         },
         {
-          "id": 1550,
-          "employeeGoalId": 6936,
+          "id": 1479,
+          "employeeGoalId": 6757,
           "title": "Hito 2",
           "startValue": 0,
           "endValue": 1,
           "currentValue": 1,
-          "completedDateTime": "2024-05-10T18:45:11Z",
-          "lastUpdateDateTime": "2024-05-10T18:45:11Z",
+          "completedDateTime": "2025-02-05T15:28:40Z",
+          "lastUpdateDateTime": "2025-02-05T15:28:40Z",
+          "lastUpdateUserId": 405
+        },
+        {
+          "id": 1480,
+          "employeeGoalId": 6757,
+          "title": "Hito 3",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-01-02T08:41:46Z",
+          "lastUpdateDateTime": "2025-01-02T08:41:46Z",
           "lastUpdateUserId": 405
         }
       ],
@@ -133,17 +166,40 @@
       }
     },
     {
-      "id": "6937",
-      "title": "Completar la certificación del área",
-      "description": "Meta compartida con otra área; coordinar avances mensuales.",
-      "percentComplete": 55,
-      "alignsWithOptionId": 9004,
+      "id": "6760",
+      "title": "Cerrar el plan de capacitación anual",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 0,
+      "alignsWithOptionId": null,
       "sharedWithEmployeeIds": [],
-      "dueDate": "2026-08-06",
+      "dueDate": "2025-04-25",
       "completionDate": null,
-      "lastChangedDateTime": "2026-04-11T14:23:36Z",
+      "lastChangedDateTime": "2026-06-10T09:56:08Z",
       "status": "in_progress",
-      "milestones": null,
+      "milestones": [
+        {
+          "id": 1481,
+          "employeeGoalId": 6760,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2025-01-30T13:36:34Z",
+          "lastUpdateUserId": 405
+        },
+        {
+          "id": 1482,
+          "employeeGoalId": 6760,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2025-01-30T12:26:40Z",
+          "lastUpdateUserId": 405
+        }
+      ],
       "actions": {
         "canEdit": true,
         "canUpdateProgress": true,
@@ -170,11 +226,15 @@
   ],
   "comments": [
     {
-      "goalId": "6931",
-      "commentCount": 4
+      "goalId": "6753",
+      "commentCount": 2
     },
     {
-      "goalId": "6936",
+      "goalId": "6757",
+      "commentCount": 2
+    },
+    {
+      "goalId": "6760",
       "commentCount": 4
     }
   ]

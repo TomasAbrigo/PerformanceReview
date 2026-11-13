@@ -22,107 +22,19 @@
   "selectedFilter": "status-all",
   "goals": [
     {
-      "id": "5299",
-      "title": "Lanzar el nuevo flujo de onboarding",
-      "description": "Alineado con el plan del área para el año.",
-      "percentComplete": 100,
-      "alignsWithOptionId": 9004,
-      "sharedWithEmployeeIds": [],
-      "dueDate": "2023-10-20",
-      "completionDate": "2023-05-04",
-      "lastChangedDateTime": "2023-05-04T16:01:40Z",
-      "status": "completed",
-      "milestones": null,
-      "actions": {
-        "canEdit": true,
-        "canUpdateProgress": false,
-        "canClose": true,
-        "canReopen": false,
-        "canDelete": true,
-        "canComment": true
-      }
-    },
-    {
-      "id": "5302",
-      "title": "Mejorar el NPS interno del equipo",
-      "description": "Sirve de base para el próximo ciclo de evaluación.",
-      "percentComplete": 100,
-      "alignsWithOptionId": null,
-      "sharedWithEmployeeIds": [
-        49
-      ],
-      "dueDate": "2024-02-29",
-      "completionDate": "2024-03-01",
-      "lastChangedDateTime": "2024-03-01T14:07:15Z",
-      "status": "completed",
-      "milestones": null,
-      "actions": {
-        "canEdit": true,
-        "canUpdateProgress": false,
-        "canClose": true,
-        "canReopen": false,
-        "canDelete": true,
-        "canComment": true
-      }
-    },
-    {
-      "id": "5305",
-      "title": "Renovar las cuentas clave del trimestre",
+      "id": "5285",
+      "title": "Cerrar el plan de capacitación anual",
       "description": "Pedido por el equipo directivo en la planificación.",
-      "percentComplete": 100,
-      "alignsWithOptionId": null,
-      "sharedWithEmployeeIds": [],
-      "dueDate": "2024-05-30",
-      "completionDate": "2023-12-21",
-      "lastChangedDateTime": "2023-12-21T09:27:54Z",
-      "status": "completed",
-      "milestones": null,
-      "actions": {
-        "canEdit": true,
-        "canUpdateProgress": false,
-        "canClose": true,
-        "canReopen": false,
-        "canDelete": true,
-        "canComment": true
-      }
-    },
-    {
-      "id": "5306",
-      "title": "Entregar el proyecto Norte sin desvíos",
-      "description": "Alineado con el plan del área para el año.",
-      "percentComplete": 0,
+      "percentComplete": 85,
       "alignsWithOptionId": null,
       "sharedWithEmployeeIds": [
         49
       ],
-      "dueDate": "2025-03-13",
+      "dueDate": "2024-08-05",
       "completionDate": null,
-      "lastChangedDateTime": "2025-06-18T11:02:17Z",
+      "lastChangedDateTime": "2025-07-31T11:10:16Z",
       "status": "in_progress",
-      "milestones": [
-        {
-          "id": 841,
-          "employeeGoalId": 5306,
-          "title": "Hito 1",
-          "startValue": 0,
-          "endValue": 1,
-          "currentValue": 0,
-          "completedDateTime": null,
-          "lastUpdateDateTime": "2024-11-21T10:33:36Z",
-          "lastUpdateUserId": 69
-        },
-        {
-          "id": 842,
-          "employeeGoalId": 5306,
-          "title": "Hito 2",
-          "startValue": 0,
-          "endValue": 1,
-          "currentValue": 0,
-          "completedDateTime": null,
-          "lastUpdateDateTime": "2024-11-21T14:01:07Z",
-          "lastUpdateUserId": 69
-        }
-      ],
+      "milestones": null,
       "actions": {
         "canEdit": true,
         "canUpdateProgress": true,
@@ -133,15 +45,74 @@
       }
     },
     {
-      "id": "5309",
-      "title": "Mejorar el NPS interno del equipo",
-      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "id": "5288",
+      "title": "Lanzar el nuevo flujo de onboarding",
+      "description": "Alineado con el plan del área para el año.",
       "percentComplete": 100,
-      "alignsWithOptionId": 9003,
-      "sharedWithEmployeeIds": [],
-      "dueDate": "2025-10-15",
-      "completionDate": "2025-07-26",
-      "lastChangedDateTime": "2025-07-26T11:09:16Z",
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [
+        49
+      ],
+      "dueDate": "2025-03-07",
+      "completionDate": "2024-12-10",
+      "lastChangedDateTime": "2024-12-10T10:08:42Z",
+      "status": "completed",
+      "milestones": [
+        {
+          "id": 830,
+          "employeeGoalId": 5288,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2024-08-16T09:31:54Z",
+          "lastUpdateDateTime": "2024-08-16T09:31:54Z",
+          "lastUpdateUserId": 69
+        },
+        {
+          "id": 831,
+          "employeeGoalId": 5288,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2024-09-09T15:00:51Z",
+          "lastUpdateDateTime": "2024-09-09T15:00:51Z",
+          "lastUpdateUserId": 69
+        },
+        {
+          "id": 832,
+          "employeeGoalId": 5288,
+          "title": "Hito 3",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2024-11-20T17:38:28Z",
+          "lastUpdateDateTime": "2024-11-20T17:38:28Z",
+          "lastUpdateUserId": 69
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "5291",
+      "title": "Entregar el proyecto Norte sin desvíos",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [
+        49
+      ],
+      "dueDate": "2025-05-18",
+      "completionDate": "2025-02-23",
+      "lastChangedDateTime": "2025-02-23T15:12:52Z",
       "status": "completed",
       "milestones": null,
       "actions": {
@@ -154,17 +125,15 @@
       }
     },
     {
-      "id": "5311",
-      "title": "Renovar las cuentas clave del trimestre",
-      "description": "Meta compartida con otra área; coordinar avances mensuales.",
-      "percentComplete": 85,
-      "alignsWithOptionId": 9004,
-      "sharedWithEmployeeIds": [
-        49
-      ],
-      "dueDate": "2026-11-14",
+      "id": "5294",
+      "title": "Migrar los reportes al nuevo tablero",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 45,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2026-12-05",
       "completionDate": null,
-      "lastChangedDateTime": "2026-10-18T19:13:48Z",
+      "lastChangedDateTime": "2026-05-19T19:39:18Z",
       "status": "in_progress",
       "milestones": null,
       "actions": {
@@ -193,20 +162,12 @@
   ],
   "comments": [
     {
-      "goalId": "5299",
-      "commentCount": 4
-    },
-    {
-      "goalId": "5302",
-      "commentCount": 3
-    },
-    {
-      "goalId": "5306",
-      "commentCount": 3
-    },
-    {
-      "goalId": "5309",
+      "goalId": "5291",
       "commentCount": 2
+    },
+    {
+      "goalId": "5294",
+      "commentCount": 3
     }
   ]
 }

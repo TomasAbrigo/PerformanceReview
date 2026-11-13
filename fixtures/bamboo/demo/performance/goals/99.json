@@ -22,24 +22,111 @@
   "selectedFilter": "status-all",
   "goals": [
     {
-      "id": "5444",
-      "title": "Entregar el proyecto Norte sin desvíos",
-      "description": "Pedido por el equipo directivo en la planificación.",
-      "percentComplete": 0,
-      "alignsWithOptionId": 9002,
+      "id": "5421",
+      "title": "Reducir los incidentes recurrentes a la mitad",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 75,
+      "alignsWithOptionId": 9003,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2024-12-25",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-05-26T14:31:58Z",
+      "status": "in_progress",
+      "milestones": [
+        {
+          "id": 879,
+          "employeeGoalId": 5421,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-11-15T12:20:27Z",
+          "lastUpdateDateTime": "2025-11-15T12:20:27Z",
+          "lastUpdateUserId": 99
+        },
+        {
+          "id": 880,
+          "employeeGoalId": 5421,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2026-03-02T16:40:32Z",
+          "lastUpdateDateTime": "2026-03-02T16:40:32Z",
+          "lastUpdateUserId": 99
+        },
+        {
+          "id": 881,
+          "employeeGoalId": 5421,
+          "title": "Hito 3",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2024-10-24T16:36:57Z",
+          "lastUpdateDateTime": "2024-10-24T16:36:57Z",
+          "lastUpdateUserId": 99
+        },
+        {
+          "id": 882,
+          "employeeGoalId": 5421,
+          "title": "Hito 4",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2024-05-31T16:39:09Z",
+          "lastUpdateUserId": 99
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "5422",
+      "title": "Reducir el tiempo de primera respuesta un 20%",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 50,
+      "alignsWithOptionId": null,
       "sharedWithEmployeeIds": [
         67
       ],
-      "dueDate": "2025-11-20",
+      "dueDate": "2024-04-30",
       "completionDate": null,
-      "lastChangedDateTime": "2026-04-14T17:17:18Z",
-      "status": "closed",
+      "lastChangedDateTime": "2026-07-31T12:49:27Z",
+      "status": "in_progress",
       "milestones": null,
       "actions": {
-        "canEdit": false,
-        "canUpdateProgress": false,
-        "canClose": false,
-        "canReopen": true,
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "5425",
+      "title": "Implementar el calendario editorial",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 40,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2026-04-14",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-05-23T19:28:32Z",
+      "status": "in_progress",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
         "canDelete": true,
         "canComment": true
       }
@@ -59,5 +146,10 @@
       "preferredName": null
     }
   ],
-  "comments": []
+  "comments": [
+    {
+      "goalId": "5425",
+      "commentCount": 1
+    }
+  ]
 }

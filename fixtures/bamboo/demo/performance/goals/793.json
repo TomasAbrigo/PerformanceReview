@@ -20,50 +20,7 @@
     }
   ],
   "selectedFilter": "status-all",
-  "goals": [
-    {
-      "id": "8248",
-      "title": "Completar la certificación del área",
-      "description": "Alineado con el plan del área para el año.",
-      "percentComplete": 100,
-      "alignsWithOptionId": null,
-      "sharedWithEmployeeIds": [],
-      "dueDate": "2025-12-26",
-      "completionDate": "2025-09-09",
-      "lastChangedDateTime": "2025-09-09T09:26:28Z",
-      "status": "completed",
-      "milestones": null,
-      "actions": {
-        "canEdit": true,
-        "canUpdateProgress": false,
-        "canClose": true,
-        "canReopen": false,
-        "canDelete": true,
-        "canComment": true
-      }
-    },
-    {
-      "id": "8249",
-      "title": "Cerrar el plan de capacitación anual",
-      "description": "Pedido por el equipo directivo en la planificación.",
-      "percentComplete": 100,
-      "alignsWithOptionId": 9004,
-      "sharedWithEmployeeIds": [],
-      "dueDate": "2025-10-28",
-      "completionDate": "2025-09-07",
-      "lastChangedDateTime": "2025-09-07T12:35:14Z",
-      "status": "completed",
-      "milestones": null,
-      "actions": {
-        "canEdit": true,
-        "canUpdateProgress": false,
-        "canClose": true,
-        "canReopen": false,
-        "canDelete": true,
-        "canComment": true
-      }
-    }
-  ],
+  "goals": [],
   "persons": [
     {
       "employeeId": 793,
@@ -72,10 +29,5 @@
       "preferredName": null
     }
   ],
-  "comments": [
-    {
-      "goalId": "8248",
-      "commentCount": 1
-    }
-  ]
+  "comments": []
 }

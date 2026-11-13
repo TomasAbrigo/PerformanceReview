@@ -3,15 +3,15 @@
   "firstName": "Laura",
   "lastName": "Fernández",
   "workEmail": "laura.fernandez@meridian-andina.example",
-  "employeeNumber": "11229",
+  "employeeNumber": "11224",
   "supervisorEId": "111",
-  "supervisorId": "10253",
+  "supervisorId": "10250",
   "supervisor": "Peralta, Martín",
   "hireDate": "2023-09-20",
   "terminationDate": null,
   "department": "Datos",
   "division": "Tecnología",
-  "jobTitle": "Data Analyst Jr",
+  "jobTitle": "Data Analyst Ssr",
   "location": "Rosario",
   "status": "Active"
 }

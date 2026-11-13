@@ -8,13 +8,11 @@ import type {
   ListEmployee,
   ListEmployeesPage,
 } from "../bamboo-schemas";
-import type {
-  CompanyFixture,
-  FixtureEmployee,
-  FixtureGoal,
-} from "../company";
+import type { CompanyFixture, FixtureEmployee, FixtureGoal } from "../company";
 import { SIZE_CONFIG } from "../company/config";
+import { groupGoalsByEmployee } from "../company/goals";
 import { lastFirst } from "../company/identity";
+import { groupJobRows } from "../company/job-history";
 import { jsonFile, type FixtureFile } from "./files";
 
 const byNumericId = (a: FixtureEmployee, b: FixtureEmployee): number =>
@@ -31,7 +29,9 @@ function listUrl(
 ): string {
   const query = [`sort=employeeId`, `page[limit]=${limit}`];
   if (position) {
-    query.push(`page[${position.param}]=${encodeURIComponent(position.cursor)}`);
+    query.push(
+      `page[${position.param}]=${encodeURIComponent(position.cursor)}`,
+    );
   }
   return `/api/v1/employees?${query.join("&")}`;
 }
@@ -126,23 +126,21 @@ function aggregateFor(
     canCreateGoals: employee.status === "Active",
     filters: GOAL_FILTERS,
     selectedFilter: "status-all",
-    goals: goals.map(
-      (g): BambooGoal => ({
-        id: g.id,
-        title: g.title,
-        description: g.description,
-        percentComplete: g.percentComplete,
-        alignsWithOptionId: g.alignsWithOptionId,
-        // The one place Bamboo uses integers for employee ids.
-        sharedWithEmployeeIds: g.sharedWithEmployeeIds.map(Number),
-        dueDate: g.dueDate,
-        completionDate: g.completionDate,
-        lastChangedDateTime: g.lastChangedDateTime,
-        status: g.status,
-        milestones: g.milestones,
-        actions: goalActions(g, employee.status === "Active"),
-      }),
-    ),
+    goals: goals.map((g): BambooGoal => ({
+      id: g.id,
+      title: g.title,
+      description: g.description,
+      percentComplete: g.percentComplete,
+      alignsWithOptionId: g.alignsWithOptionId,
+      // The one place Bamboo uses integers for employee ids.
+      sharedWithEmployeeIds: g.sharedWithEmployeeIds.map(Number),
+      dueDate: g.dueDate,
+      completionDate: g.completionDate,
+      lastChangedDateTime: g.lastChangedDateTime,
+      status: g.status,
+      milestones: g.milestones,
+      actions: goalActions(g, employee.status === "Active"),
+    })),
     persons: [...people.values()].map((p) => ({
       employeeId: Number(p.id),
       firstName: p.firstName,
@@ -177,19 +175,34 @@ export function serializeBambooApi(company: CompanyFixture): FixtureFile[] {
     const prevCursor = i > 0 ? cursor("before", first) : null;
     const page: ListEmployeesPage = {
       data: chunk.map(listEmployee),
-      meta: { total: employees.length, page: { limit, nextCursor, prevCursor } },
+      meta: {
+        total: employees.length,
+        page: { limit, nextCursor, prevCursor },
+      },
       _links: {
         self: listUrl(
           limit,
           i > 0
-            ? { param: "after", cursor: cursor("after", chunks[i - 1].at(-1)!.id) }
+            ? {
+                param: "after",
+                cursor: cursor("after", chunks[i - 1].at(-1)!.id),
+              }
             : undefined,
         ),
-        next: nextCursor ? listUrl(limit, { param: "after", cursor: nextCursor }) : null,
-        prev: prevCursor ? listUrl(limit, { param: "before", cursor: prevCursor }) : null,
+        next: nextCursor
+          ? listUrl(limit, { param: "after", cursor: nextCursor })
+          : null,
+        prev: prevCursor
+          ? listUrl(limit, { param: "before", cursor: prevCursor })
+          : null,
       },
     };
-    files.push(jsonFile(`employees/list/page-${String(i + 1).padStart(3, "0")}.json`, page));
+    files.push(
+      jsonFile(
+        `employees/list/page-${String(i + 1).padStart(3, "0")}.json`,
+        page,
+      ),
+    );
   });
 
   // GET /api/v1/employees/{id}
@@ -197,14 +210,18 @@ export function serializeBambooApi(company: CompanyFixture): FixtureFile[] {
     files.push(
       jsonFile(
         `employees/get/${e.id}.json`,
-        getEmployee(e, e.managerId === null ? undefined : byId.get(e.managerId)),
+        getEmployee(
+          e,
+          e.managerId === null ? undefined : byId.get(e.managerId),
+        ),
       ),
     );
   }
 
   // GET /api/v1/employees/all/tables/jobInfo (reportsTo is a NAME, not an id)
   const jobRows: JobInfoRow[] = company.jobHistory.map((row) => {
-    const manager = row.managerId === null ? undefined : byId.get(row.managerId);
+    const manager =
+      row.managerId === null ? undefined : byId.get(row.managerId);
     return {
       id: row.id,
       employeeId: row.employeeId,
@@ -214,7 +231,10 @@ export function serializeBambooApi(company: CompanyFixture): FixtureFile[] {
       division: row.division,
       jobTitle: row.jobTitle,
       reportsTo: manager
-        ? lastFirst({ firstName: manager.firstName, lastName: manager.lastName })
+        ? lastFirst({
+            firstName: manager.firstName,
+            lastName: manager.lastName,
+          })
         : null,
     };
   });
@@ -232,13 +252,14 @@ export function serializeBambooApi(company: CompanyFixture): FixtureFile[] {
   const renamedOn = new Map(
     company.identity.renames.map((r) => [r.employeeId, r.renamedOn]),
   );
+  const jobRowsByEmployee = groupJobRows(company.jobHistory);
   const changed: EmployeesChanged["employees"] = {};
   for (const e of employees) {
     const dates = [
       e.hireDate,
       e.terminationDate,
       renamedOn.get(e.id) ?? null,
-      ...company.jobHistory.filter((r) => r.employeeId === e.id).map((r) => r.date),
+      ...(jobRowsByEmployee.get(e.id) ?? []).map((r) => r.date),
     ].filter((d): d is string => d !== null);
     const lastDate = dates.reduce((a, b) => (a > b ? a : b));
     changed[e.id] = {
@@ -250,12 +271,17 @@ export function serializeBambooApi(company: CompanyFixture): FixtureFile[] {
   const latest = Object.values(changed)
     .map((entry) => entry.lastChanged)
     .reduce((a, b) => (a > b ? a : b));
-  files.push(jsonFile("employees/changed.json", { latest, employees: changed }));
+  files.push(
+    jsonFile("employees/changed.json", { latest, employees: changed }),
+  );
 
   // GET /api/v1_2/performance/employees/{id}/goals/aggregate?filter=status-all
+  const goalsByEmployee = groupGoalsByEmployee(company.goals);
   for (const e of employees) {
-    const goals = company.goals.filter((g) => g.employeeId === e.id);
-    files.push(jsonFile(`performance/goals/${e.id}.json`, aggregateFor(e, goals, byId)));
+    const goals = goalsByEmployee.get(e.id) ?? [];
+    files.push(
+      jsonFile(`performance/goals/${e.id}.json`, aggregateFor(e, goals, byId)),
+    );
   }
 
   return files;

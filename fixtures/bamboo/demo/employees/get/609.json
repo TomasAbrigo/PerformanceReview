@@ -3,15 +3,15 @@
   "firstName": "Joaquín",
   "lastName": "Duarte",
   "workEmail": "joaquin.duarte@meridian-andina.example",
-  "employeeNumber": "11492",
+  "employeeNumber": "11482",
   "supervisorEId": "159",
-  "supervisorId": "10370",
+  "supervisorId": "10368",
   "supervisor": "Ríos, Marcela",
   "hireDate": "2024-07-13",
   "terminationDate": null,
   "department": "Datos",
   "division": "Tecnología",
-  "jobTitle": "Analytics Engineer Jr",
+  "jobTitle": "Analytics Engineer Ssr",
   "location": "Buenos Aires",
   "status": "Active"
 }

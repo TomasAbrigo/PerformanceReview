@@ -3,15 +3,15 @@
   "firstName": "Silvana",
   "lastName": "Ortiz",
   "workEmail": "silvana.ortiz@meridian-andina.example",
-  "employeeNumber": "11493",
+  "employeeNumber": "11486",
   "supervisorEId": "167",
-  "supervisorId": "10390",
+  "supervisorId": "10382",
   "supervisor": "Escobar, Marcela",
   "hireDate": "2024-07-13",
   "terminationDate": null,
   "department": "Infraestructura",
   "division": "Tecnología",
-  "jobTitle": "SysAdmin Ssr",
+  "jobTitle": "SysAdmin Jr",
   "location": "Buenos Aires",
   "status": "Active"
 }

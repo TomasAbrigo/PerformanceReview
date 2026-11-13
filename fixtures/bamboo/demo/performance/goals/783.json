@@ -20,29 +20,7 @@
     }
   ],
   "selectedFilter": "status-all",
-  "goals": [
-    {
-      "id": "8225",
-      "title": "Automatizar la conciliación mensual",
-      "description": "Pedido por el equipo directivo en la planificación.",
-      "percentComplete": 50,
-      "alignsWithOptionId": 9001,
-      "sharedWithEmployeeIds": [],
-      "dueDate": "2025-11-26",
-      "completionDate": null,
-      "lastChangedDateTime": "2025-11-17T18:53:44Z",
-      "status": "closed",
-      "milestones": null,
-      "actions": {
-        "canEdit": false,
-        "canUpdateProgress": false,
-        "canClose": false,
-        "canReopen": true,
-        "canDelete": true,
-        "canComment": true
-      }
-    }
-  ],
+  "goals": [],
   "persons": [
     {
       "employeeId": 783,

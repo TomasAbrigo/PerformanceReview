@@ -1,5 +1,5 @@
 import { addDays, dateBetween, maxDate, minDate } from "./dates";
-import { groupJobRows, rowOnDate } from "./reviews";
+import { groupJobRows, rowOnDate } from "./job-history";
 import type { Rng } from "./rng";
 import type {
   FixtureEmployee,
@@ -48,6 +48,11 @@ interface Counters {
   milestone: number;
 }
 
+/** Latest of several UTC timestamps (same fixed-width format, so string order works). */
+function latest(stamps: ReadonlyArray<string | null>): string {
+  return stamps.reduce<string>((a, b) => (b !== null && b > a ? b : a), "");
+}
+
 function dateTime(date: string, rng: Rng): string {
   const pad = (n: number) => String(n).padStart(2, "0");
   return `${date}T${pad(rng.int(8, 19))}:${pad(rng.int(0, 59))}:${pad(rng.int(0, 59))}Z`;
@@ -65,7 +70,17 @@ export function buildGoals(
   const counters: Counters = { goal: 5000, milestone: 700 };
   const goals: FixtureGoal[] = [];
 
+  // A few active people never set goals ("No Goals Set" in Bamboo's report).
+  const active = input.employees.filter((e) => e.status === "Active");
+  const noGoals = new Set(
+    rng
+      .shuffle(active)
+      .slice(0, Math.max(2, Math.round(active.length * 0.08)))
+      .map((e) => e.id),
+  );
+
   for (const employee of input.employees) {
+    if (noGoals.has(employee.id)) continue;
     const lastDay = minDate(employee.terminationDate ?? input.asOf, input.asOf);
     for (const year of GOAL_YEARS) {
       if (employee.hireDate > `${year}-09-30`) continue;
@@ -156,7 +171,13 @@ export function buildGoals(
             manager !== null && rng.chance(0.2) ? [manager] : [],
           dueDate,
           completionDate,
-          lastChangedDateTime: dateTime(changedOn, rng),
+          lastChangedDateTime: latest([
+            dateTime(changedOn, rng),
+            ...(milestones ?? []).flatMap((m) => [
+              m.completedDateTime,
+              m.lastUpdateDateTime,
+            ]),
+          ]),
           status,
           milestones,
           commentCount: comments,
@@ -200,4 +221,17 @@ function buildMilestones(
       lastUpdateUserId: Number(goal.ownerId),
     };
   });
+}
+
+/** Goals grouped by owner, in generation order. */
+export function groupGoalsByEmployee(
+  goals: readonly FixtureGoal[],
+): Map<string, FixtureGoal[]> {
+  const byEmployee = new Map<string, FixtureGoal[]>();
+  for (const goal of goals) {
+    const owned = byEmployee.get(goal.employeeId);
+    if (owned) owned.push(goal);
+    else byEmployee.set(goal.employeeId, [goal]);
+  }
+  return byEmployee;
 }

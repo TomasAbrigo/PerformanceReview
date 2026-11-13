@@ -22,16 +22,16 @@
   "selectedFilter": "status-all",
   "goals": [
     {
-      "id": "5263",
-      "title": "Mejorar el NPS interno del equipo",
-      "description": "Sirve de base para el próximo ciclo de evaluación.",
-      "percentComplete": 90,
-      "alignsWithOptionId": 9004,
+      "id": "5231",
+      "title": "Implementar el calendario editorial",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 25,
+      "alignsWithOptionId": null,
       "sharedWithEmployeeIds": [],
-      "dueDate": "2025-06-19",
+      "dueDate": "2025-10-28",
       "completionDate": null,
-      "lastChangedDateTime": "2025-08-21T08:45:43Z",
-      "status": "in_progress",
+      "lastChangedDateTime": "2025-06-23T17:17:35Z",
+      "status": "closed",
       "milestones": null,
       "actions": {
         "canEdit": false,
@@ -43,17 +43,15 @@
       }
     },
     {
-      "id": "5266",
-      "title": "Cerrar el plan de capacitación anual",
-      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "id": "5234",
+      "title": "Migrar los reportes al nuevo tablero",
+      "description": "Alineado con el plan del área para el año.",
       "percentComplete": 100,
       "alignsWithOptionId": null,
-      "sharedWithEmployeeIds": [
-        29
-      ],
-      "dueDate": "2025-07-29",
-      "completionDate": "2025-01-24",
-      "lastChangedDateTime": "2025-01-24T18:27:41Z",
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2025-05-16",
+      "completionDate": "2025-04-27",
+      "lastChangedDateTime": "2025-04-27T13:41:40Z",
       "status": "completed",
       "milestones": null,
       "actions": {
@@ -72,17 +70,15 @@
       "firstName": "Victoria",
       "lastName": "Yáñez",
       "preferredName": "Vico"
-    },
-    {
-      "employeeId": 29,
-      "firstName": "Rocío",
-      "lastName": "Ibáñez",
-      "preferredName": null
     }
   ],
   "comments": [
     {
-      "goalId": "5263",
+      "goalId": "5231",
+      "commentCount": 4
+    },
+    {
+      "goalId": "5234",
       "commentCount": 3
     }
   ]

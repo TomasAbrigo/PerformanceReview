@@ -2,6 +2,8 @@ import { OUTSIDER_NAMES } from "./catalog";
 import type { SizeConfig } from "./config";
 import { addDays, dateBetween } from "./dates";
 import { fullName, misspell } from "./identity";
+import { groupJobRows, rowOnDate } from "./job-history";
+import { requirePool } from "./pool";
 import {
   FOLLOW_UP_NOTES,
   MANAGER_IMPROVEMENTS,
@@ -48,33 +50,6 @@ export interface Reviews {
   reportNoise: Pick<IdentityGroundTruth, "misspellings" | "outsiders">;
 }
 
-/** jobInfo row in force for `employeeId` on `date` (last one on or before it). */
-export function rowOnDate(
-  rowsByEmployee: Map<string, FixtureJobRow[]>,
-  employeeId: string,
-  date: string,
-): FixtureJobRow | null {
-  const rows = rowsByEmployee.get(employeeId) ?? [];
-  let found: FixtureJobRow | null = null;
-  for (const row of rows) {
-    if (row.date <= date) found = row;
-  }
-  return found;
-}
-
-export function groupJobRows(
-  jobHistory: FixtureJobRow[],
-): Map<string, FixtureJobRow[]> {
-  const byEmployee = new Map<string, FixtureJobRow[]>();
-  for (const row of jobHistory) {
-    byEmployee.set(row.employeeId, [...(byEmployee.get(row.employeeId) ?? []), row]);
-  }
-  for (const rows of byEmployee.values()) {
-    rows.sort((a, b) => (a.date < b.date ? -1 : 1));
-  }
-  return byEmployee;
-}
-
 const clamp = (value: number, min: number, max: number): number =>
   Math.min(max, Math.max(min, value));
 
@@ -91,6 +66,11 @@ export function buildReviews(
   config: SizeConfig,
 ): Reviews {
   const cycles = buildCycles();
+  requirePool(
+    OUTSIDER_NAMES,
+    2 * cycles.length * config.outsidersPerCycle,
+    "outsider names in the catalog",
+  );
   const rowsByEmployee = groupJobRows(input.jobHistory);
   const personOf = new Map<string, number>();
   input.identity.persons.forEach((person, index) =>
@@ -106,12 +86,22 @@ export function buildReviews(
     kind: "self" | "manager",
   ): AssessmentAnswers => {
     const noise = () => (rng.next() - 0.5) * 1.2;
-    const rate = (shift: number) => clamp(Math.round(score + shift + noise()), 1, 5);
+    const rate = (shift: number) =>
+      clamp(Math.round(score + shift + noise()), 1, 5);
     return {
-      q1: letterFor(clamp(score + noise(), 1, 5), kind === "self" ? "ABCD" : "ABCDE"),
+      q1: letterFor(
+        clamp(score + noise(), 1, 5),
+        kind === "self" ? "ABCD" : "ABCDE",
+      ),
       q2:
         kind === "self"
-          ? rng.weighted([["A", 25], ["B", 15], ["C", 25], ["D", 25], ["E", 10]] as const)
+          ? rng.weighted([
+              ["A", 25],
+              ["B", 15],
+              ["C", 25],
+              ["D", 25],
+              ["E", 10],
+            ] as const)
           : letterFor(clamp(score + noise(), 1, 5), "ABCDE"),
       q3: rng.pick(kind === "self" ? SELF_STRENGTHS : MANAGER_STRENGTHS),
       q4: rng.pick(kind === "self" ? SELF_IMPROVEMENTS : MANAGER_IMPROVEMENTS),
@@ -161,7 +151,11 @@ export function buildReviews(
         assessments.push({ ...base, ...idle });
         continue;
       }
-      const selfOn = dateBetween(cycle.assessmentOpen, addDays(cycle.assessmentDue, -3), rng.int);
+      const selfOn = dateBetween(
+        cycle.assessmentOpen,
+        addDays(cycle.assessmentDue, -3),
+        rng.int,
+      );
       const selfAnswers = answers(score, "self");
       if (roll >= 0.78) {
         const managerWorking = rng.chance(0.6);
@@ -205,9 +199,10 @@ export function buildReviews(
       const sameDepartment = colleagues.filter(
         (e) => e.id !== a.employeeId && departmentOf.get(e.id) === own,
       );
-      const pool = sameDepartment.length >= 2
-        ? sameDepartment
-        : colleagues.filter((e) => e.id !== a.employeeId);
+      const pool =
+        sameDepartment.length >= 2
+          ? sameDepartment
+          : colleagues.filter((e) => e.id !== a.employeeId);
       for (const reviewer of rng.shuffle(pool).slice(0, rng.int(2, 4))) {
         feedback.push({
           cycle: cycleIndex,
@@ -226,9 +221,11 @@ export function buildReviews(
     const peopleInCycle = assessments.filter(
       (a) => a.cycle === cycleIndex && a.managerIdAtReview !== null,
     );
+    requirePool(peopleInCycle, 1, `assessed people in ${cycle.name}`);
     for (let i = 0; i < config.outsidersPerCycle; i++) {
+      // One distinct nobody per slot: assessed names first, reviewer names after.
       const slot = cycleIndex * config.outsidersPerCycle + i;
-      const name = OUTSIDER_NAMES[slot % OUTSIDER_NAMES.length];
+      const name = OUTSIDER_NAMES[slot];
       const score = 2 + rng.next() * 2.5;
       const selfOn = dateBetween(
         cycle.assessmentOpen,
@@ -255,9 +252,7 @@ export function buildReviews(
       });
 
       const reviewer =
-        OUTSIDER_NAMES[
-          (slot + OUTSIDER_NAMES.length / 2) % OUTSIDER_NAMES.length
-        ];
+        OUTSIDER_NAMES[cycles.length * config.outsidersPerCycle + slot];
       feedback.push({
         cycle: cycleIndex,
         employeeId: rng.pick(peopleInCycle).employeeId!,
@@ -283,7 +278,14 @@ export function buildReviews(
     ...input.identity.renames.map((r) => r.employeeId),
     ...input.identity.duplicateNames.flatMap((d) => d.employeeIds),
   ]);
-  const known = new Set(input.employees.map(fullName));
+  // Names a typo must not collide with: everyone printed anywhere.
+  const known = new Set<string>([
+    ...input.employees.map(fullName),
+    ...input.identity.renames.map(
+      (r) => `${r.previousFirstName} ${r.previousLastName}`,
+    ),
+    ...OUTSIDER_NAMES,
+  ]);
   const byEmployee = new Map(input.employees.map((e) => [e.id, e]));
   const misspellings: IdentityGroundTruth["misspellings"] = [];
   for (
@@ -303,12 +305,11 @@ export function buildReviews(
     );
     if (candidates.length === 0) continue;
     const target = byEmployee.get(rng.pick(candidates).employeeId!)!;
-    misspellings.push({
-      employeeId: target.id,
-      cycle,
-      csvName: misspell(target, rng, known),
-    });
+    const csvName = misspell(target, rng, known);
+    known.add(csvName);
+    misspellings.push({ employeeId: target.id, cycle, csvName });
   }
+  requirePool(misspellings, config.misspellings, "names to misspell");
 
   return {
     cycles,

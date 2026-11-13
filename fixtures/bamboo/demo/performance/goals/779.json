@@ -22,15 +22,15 @@
   "selectedFilter": "status-all",
   "goals": [
     {
-      "id": "8215",
-      "title": "Automatizar la conciliación mensual",
-      "description": "Meta compartida con otra área; coordinar avances mensuales.",
-      "percentComplete": 65,
+      "id": "7894",
+      "title": "Completar la certificación del área",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 60,
       "alignsWithOptionId": null,
       "sharedWithEmployeeIds": [],
-      "dueDate": "2025-12-11",
+      "dueDate": "2025-10-21",
       "completionDate": null,
-      "lastChangedDateTime": "2026-03-21T17:48:28Z",
+      "lastChangedDateTime": "2026-03-26T13:08:33Z",
       "status": "in_progress",
       "milestones": null,
       "actions": {
@@ -43,54 +43,20 @@
       }
     },
     {
-      "id": "8217",
+      "id": "7895",
       "title": "Automatizar la conciliación mensual",
-      "description": "Meta compartida con otra área; coordinar avances mensuales.",
-      "percentComplete": 100,
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 50,
       "alignsWithOptionId": null,
       "sharedWithEmployeeIds": [],
-      "dueDate": "2026-04-14",
-      "completionDate": "2026-04-03",
-      "lastChangedDateTime": "2026-04-03T16:21:35Z",
-      "status": "completed",
-      "milestones": [
-        {
-          "id": 2169,
-          "employeeGoalId": 8217,
-          "title": "Hito 1",
-          "startValue": 0,
-          "endValue": 1,
-          "currentValue": 1,
-          "completedDateTime": "2026-03-31T12:37:54Z",
-          "lastUpdateDateTime": "2026-03-31T12:37:54Z",
-          "lastUpdateUserId": 779
-        },
-        {
-          "id": 2170,
-          "employeeGoalId": 8217,
-          "title": "Hito 2",
-          "startValue": 0,
-          "endValue": 1,
-          "currentValue": 1,
-          "completedDateTime": "2026-03-24T19:00:10Z",
-          "lastUpdateDateTime": "2026-03-24T19:00:10Z",
-          "lastUpdateUserId": 779
-        },
-        {
-          "id": 2171,
-          "employeeGoalId": 8217,
-          "title": "Hito 3",
-          "startValue": 0,
-          "endValue": 1,
-          "currentValue": 1,
-          "completedDateTime": "2026-03-01T08:53:05Z",
-          "lastUpdateDateTime": "2026-03-01T08:53:05Z",
-          "lastUpdateUserId": 779
-        }
-      ],
+      "dueDate": "2025-11-19",
+      "completionDate": null,
+      "lastChangedDateTime": "2025-11-04T18:11:24Z",
+      "status": "in_progress",
+      "milestones": null,
       "actions": {
         "canEdit": true,
-        "canUpdateProgress": false,
+        "canUpdateProgress": true,
         "canClose": true,
         "canReopen": false,
         "canDelete": true,
@@ -98,41 +64,20 @@
       }
     },
     {
-      "id": "8219",
-      "title": "Mentorear a dos personas nuevas",
+      "id": "7897",
+      "title": "Renovar las cuentas clave del trimestre",
       "description": "Alineado con el plan del área para el año.",
-      "percentComplete": 65,
-      "alignsWithOptionId": null,
+      "percentComplete": 20,
+      "alignsWithOptionId": 9004,
       "sharedWithEmployeeIds": [],
-      "dueDate": "2027-01-20",
+      "dueDate": "2026-07-16",
       "completionDate": null,
-      "lastChangedDateTime": "2026-10-25T14:57:40Z",
+      "lastChangedDateTime": "2026-04-07T10:46:11Z",
       "status": "in_progress",
       "milestones": null,
       "actions": {
         "canEdit": true,
         "canUpdateProgress": true,
-        "canClose": true,
-        "canReopen": false,
-        "canDelete": true,
-        "canComment": true
-      }
-    },
-    {
-      "id": "8222",
-      "title": "Automatizar la conciliación mensual",
-      "description": "Sirve de base para el próximo ciclo de evaluación.",
-      "percentComplete": 100,
-      "alignsWithOptionId": 9003,
-      "sharedWithEmployeeIds": [],
-      "dueDate": "2026-06-28",
-      "completionDate": "2026-04-23",
-      "lastChangedDateTime": "2026-04-23T14:23:19Z",
-      "status": "completed",
-      "milestones": null,
-      "actions": {
-        "canEdit": true,
-        "canUpdateProgress": false,
         "canClose": true,
         "canReopen": false,
         "canDelete": true,
@@ -148,18 +93,5 @@
       "preferredName": null
     }
   ],
-  "comments": [
-    {
-      "goalId": "8217",
-      "commentCount": 4
-    },
-    {
-      "goalId": "8219",
-      "commentCount": 1
-    },
-    {
-      "goalId": "8222",
-      "commentCount": 1
-    }
-  ]
+  "comments": []
 }

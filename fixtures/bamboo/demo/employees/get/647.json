@@ -3,15 +3,15 @@
   "firstName": "Alejandro",
   "lastName": "Heredia",
   "workEmail": "alejandro.heredia@meridian-andina.example",
-  "employeeNumber": "11553",
+  "employeeNumber": "11556",
   "supervisorEId": "65",
-  "supervisorId": "10126",
+  "supervisorId": "10117",
   "supervisor": "Díaz, Valentina",
   "hireDate": "2024-11-20",
   "terminationDate": null,
   "department": "Marketing",
   "division": "Comercial",
-  "jobTitle": "Diseñador de Marca Ssr",
+  "jobTitle": "Diseñador de Marca Jr",
   "location": "Córdoba",
   "status": "Active"
 }

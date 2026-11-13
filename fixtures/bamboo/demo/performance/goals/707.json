@@ -22,15 +22,61 @@
   "selectedFilter": "status-all",
   "goals": [
     {
-      "id": "8027",
+      "id": "7733",
       "title": "Automatizar la conciliación mensual",
       "description": "Meta compartida con otra área; coordinar avances mensuales.",
-      "percentComplete": 5,
-      "alignsWithOptionId": null,
+      "percentComplete": 100,
+      "alignsWithOptionId": 9002,
       "sharedWithEmployeeIds": [],
-      "dueDate": "2025-09-24",
+      "dueDate": "2025-09-06",
+      "completionDate": "2025-08-19",
+      "lastChangedDateTime": "2025-08-19T17:12:26Z",
+      "status": "completed",
+      "milestones": [
+        {
+          "id": 1975,
+          "employeeGoalId": 7733,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-08-01T15:09:17Z",
+          "lastUpdateDateTime": "2025-08-01T15:09:17Z",
+          "lastUpdateUserId": 707
+        },
+        {
+          "id": 1976,
+          "employeeGoalId": 7733,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-07-16T19:21:03Z",
+          "lastUpdateDateTime": "2025-07-16T19:21:03Z",
+          "lastUpdateUserId": 707
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "7736",
+      "title": "Migrar los reportes al nuevo tablero",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 60,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [
+        237
+      ],
+      "dueDate": "2025-06-30",
       "completionDate": null,
-      "lastChangedDateTime": "2026-01-03T10:26:33Z",
+      "lastChangedDateTime": "2026-10-12T16:57:52Z",
       "status": "closed",
       "milestones": null,
       "actions": {
@@ -49,6 +95,12 @@
       "firstName": "Milagros",
       "lastName": "Sánchez",
       "preferredName": "Mili"
+    },
+    {
+      "employeeId": 237,
+      "firstName": "Florencia",
+      "lastName": "Benítez",
+      "preferredName": "Flor"
     }
   ],
   "comments": []

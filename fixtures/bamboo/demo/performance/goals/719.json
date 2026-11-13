@@ -22,15 +22,15 @@
   "selectedFilter": "status-all",
   "goals": [
     {
-      "id": "8063",
-      "title": "Entregar el proyecto Norte sin desvíos",
-      "description": "Sirve de base para el próximo ciclo de evaluación.",
+      "id": "7763",
+      "title": "Lanzar el nuevo flujo de onboarding",
+      "description": "Alineado con el plan del área para el año.",
       "percentComplete": 100,
-      "alignsWithOptionId": null,
+      "alignsWithOptionId": 9003,
       "sharedWithEmployeeIds": [],
-      "dueDate": "2025-11-27",
-      "completionDate": "2025-08-26",
-      "lastChangedDateTime": "2025-08-26T14:15:53Z",
+      "dueDate": "2025-07-10",
+      "completionDate": "2025-05-06",
+      "lastChangedDateTime": "2025-05-06T17:23:10Z",
       "status": "completed",
       "milestones": null,
       "actions": {
@@ -43,59 +43,40 @@
       }
     },
     {
-      "id": "8064",
+      "id": "7766",
       "title": "Migrar los reportes al nuevo tablero",
-      "description": "Pedido por el equipo directivo en la planificación.",
-      "percentComplete": 90,
-      "alignsWithOptionId": 9001,
-      "sharedWithEmployeeIds": [],
-      "dueDate": "2025-07-18",
-      "completionDate": null,
-      "lastChangedDateTime": "2026-02-17T10:58:48Z",
-      "status": "in_progress",
-      "milestones": null,
-      "actions": {
-        "canEdit": false,
-        "canUpdateProgress": false,
-        "canClose": false,
-        "canReopen": false,
-        "canDelete": false,
-        "canComment": false
-      }
-    },
-    {
-      "id": "8066",
-      "title": "Mejorar el NPS interno del equipo",
-      "description": "Pedido por el equipo directivo en la planificación.",
-      "percentComplete": 10,
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 100,
       "alignsWithOptionId": null,
       "sharedWithEmployeeIds": [],
-      "dueDate": "2026-04-17",
-      "completionDate": null,
-      "lastChangedDateTime": "2025-11-14T12:06:52Z",
-      "status": "in_progress",
-      "milestones": null,
-      "actions": {
-        "canEdit": false,
-        "canUpdateProgress": false,
-        "canClose": false,
-        "canReopen": false,
-        "canDelete": false,
-        "canComment": false
-      }
-    },
-    {
-      "id": "8067",
-      "title": "Aumentar la cobertura de pruebas al 80%",
-      "description": "Meta compartida con otra área; coordinar avances mensuales.",
-      "percentComplete": 45,
-      "alignsWithOptionId": 9001,
-      "sharedWithEmployeeIds": [],
-      "dueDate": "2026-06-21",
-      "completionDate": null,
-      "lastChangedDateTime": "2026-04-14T08:02:21Z",
-      "status": "closed",
-      "milestones": null,
+      "dueDate": "2025-09-27",
+      "completionDate": "2025-08-10",
+      "lastChangedDateTime": "2025-08-10T15:05:48Z",
+      "status": "completed",
+      "milestones": [
+        {
+          "id": 1989,
+          "employeeGoalId": 7766,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-06-13T18:54:54Z",
+          "lastUpdateDateTime": "2025-06-13T18:54:54Z",
+          "lastUpdateUserId": 719
+        },
+        {
+          "id": 1990,
+          "employeeGoalId": 7766,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-05-08T10:29:24Z",
+          "lastUpdateDateTime": "2025-05-08T10:29:24Z",
+          "lastUpdateUserId": 719
+        }
+      ],
       "actions": {
         "canEdit": false,
         "canUpdateProgress": false,
@@ -114,5 +95,14 @@
       "preferredName": null
     }
   ],
-  "comments": []
+  "comments": [
+    {
+      "goalId": "7763",
+      "commentCount": 3
+    },
+    {
+      "goalId": "7766",
+      "commentCount": 1
+    }
+  ]
 }

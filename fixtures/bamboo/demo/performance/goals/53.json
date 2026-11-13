@@ -22,7 +22,7 @@
   "selectedFilter": "status-all",
   "goals": [
     {
-      "id": "5215",
+      "id": "5212",
       "title": "Lanzar el nuevo flujo de onboarding",
       "description": "Pedido por el equipo directivo en la planificación.",
       "percentComplete": 35,
@@ -45,7 +45,7 @@
       }
     },
     {
-      "id": "5218",
+      "id": "5215",
       "title": "Cerrar el plan de capacitación anual",
       "description": "Pedido por el equipo directivo en la planificación.",
       "percentComplete": 100,
@@ -66,7 +66,7 @@
       }
     },
     {
-      "id": "5221",
+      "id": "5218",
       "title": "Mejorar el NPS interno del equipo",
       "description": "Alineado con el plan del área para el año.",
       "percentComplete": 100,
@@ -87,7 +87,7 @@
       }
     },
     {
-      "id": "5223",
+      "id": "5220",
       "title": "Entregar el proyecto Norte sin desvíos",
       "description": "Meta compartida con otra área; coordinar avances mensuales.",
       "percentComplete": 25,
@@ -99,8 +99,8 @@
       "status": "in_progress",
       "milestones": [
         {
-          "id": 798,
-          "employeeGoalId": 5223,
+          "id": 790,
+          "employeeGoalId": 5220,
           "title": "Hito 1",
           "startValue": 0,
           "endValue": 1,
@@ -110,8 +110,8 @@
           "lastUpdateUserId": 53
         },
         {
-          "id": 799,
-          "employeeGoalId": 5223,
+          "id": 791,
+          "employeeGoalId": 5220,
           "title": "Hito 2",
           "startValue": 0,
           "endValue": 1,
@@ -121,8 +121,8 @@
           "lastUpdateUserId": 53
         },
         {
-          "id": 800,
-          "employeeGoalId": 5223,
+          "id": 792,
+          "employeeGoalId": 5220,
           "title": "Hito 3",
           "startValue": 0,
           "endValue": 1,
@@ -132,8 +132,8 @@
           "lastUpdateUserId": 53
         },
         {
-          "id": 801,
-          "employeeGoalId": 5223,
+          "id": 793,
+          "employeeGoalId": 5220,
           "title": "Hito 4",
           "startValue": 0,
           "endValue": 1,
@@ -153,7 +153,7 @@
       }
     },
     {
-      "id": "5224",
+      "id": "5221",
       "title": "Lanzar el nuevo flujo de onboarding",
       "description": "Pedido por el equipo directivo en la planificación.",
       "percentComplete": 75,
@@ -174,7 +174,7 @@
       }
     },
     {
-      "id": "5226",
+      "id": "5223",
       "title": "Reducir los incidentes recurrentes a la mitad",
       "description": "Pedido por el equipo directivo en la planificación.",
       "percentComplete": 100,
@@ -186,8 +186,8 @@
       "status": "completed",
       "milestones": [
         {
-          "id": 802,
-          "employeeGoalId": 5226,
+          "id": 794,
+          "employeeGoalId": 5223,
           "title": "Hito 1",
           "startValue": 0,
           "endValue": 1,
@@ -197,8 +197,8 @@
           "lastUpdateUserId": 53
         },
         {
-          "id": 803,
-          "employeeGoalId": 5226,
+          "id": 795,
+          "employeeGoalId": 5223,
           "title": "Hito 2",
           "startValue": 0,
           "endValue": 1,
@@ -208,8 +208,8 @@
           "lastUpdateUserId": 53
         },
         {
-          "id": 804,
-          "employeeGoalId": 5226,
+          "id": 796,
+          "employeeGoalId": 5223,
           "title": "Hito 3",
           "startValue": 0,
           "endValue": 1,
@@ -229,7 +229,7 @@
       }
     },
     {
-      "id": "5227",
+      "id": "5224",
       "title": "Migrar los reportes al nuevo tablero",
       "description": "Pedido por el equipo directivo en la planificación.",
       "percentComplete": 100,
@@ -266,15 +266,15 @@
   ],
   "comments": [
     {
-      "goalId": "5215",
+      "goalId": "5212",
       "commentCount": 2
     },
     {
-      "goalId": "5218",
+      "goalId": "5215",
       "commentCount": 3
     },
     {
-      "goalId": "5224",
+      "goalId": "5221",
       "commentCount": 1
     }
   ]

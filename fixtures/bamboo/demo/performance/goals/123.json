@@ -22,37 +22,48 @@
   "selectedFilter": "status-all",
   "goals": [
     {
-      "id": "5531",
-      "title": "Renovar las cuentas clave del trimestre",
-      "description": "Alineado con el plan del área para el año.",
+      "id": "5501",
+      "title": "Reducir el tiempo de primera respuesta un 20%",
+      "description": "Sirve de base para el próximo ciclo de evaluación.",
       "percentComplete": 100,
       "alignsWithOptionId": null,
       "sharedWithEmployeeIds": [],
-      "dueDate": "2023-05-11",
-      "completionDate": "2023-03-09",
-      "lastChangedDateTime": "2023-03-09T10:07:35Z",
+      "dueDate": "2025-09-11",
+      "completionDate": "2025-08-07",
+      "lastChangedDateTime": "2025-08-07T12:21:20Z",
       "status": "completed",
       "milestones": [
         {
-          "id": 952,
-          "employeeGoalId": 5531,
+          "id": 917,
+          "employeeGoalId": 5501,
           "title": "Hito 1",
           "startValue": 0,
           "endValue": 1,
           "currentValue": 1,
-          "completedDateTime": "2023-03-04T16:52:26Z",
-          "lastUpdateDateTime": "2023-03-04T16:52:26Z",
+          "completedDateTime": "2025-07-27T12:21:20Z",
+          "lastUpdateDateTime": "2025-07-27T12:21:20Z",
           "lastUpdateUserId": 123
         },
         {
-          "id": 953,
-          "employeeGoalId": 5531,
+          "id": 918,
+          "employeeGoalId": 5501,
           "title": "Hito 2",
           "startValue": 0,
           "endValue": 1,
           "currentValue": 1,
-          "completedDateTime": "2023-02-27T19:52:27Z",
-          "lastUpdateDateTime": "2023-02-27T19:52:27Z",
+          "completedDateTime": "2025-06-12T17:17:03Z",
+          "lastUpdateDateTime": "2025-06-12T17:17:03Z",
+          "lastUpdateUserId": 123
+        },
+        {
+          "id": 919,
+          "employeeGoalId": 5501,
+          "title": "Hito 3",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-06-25T09:51:11Z",
+          "lastUpdateDateTime": "2025-06-25T09:51:11Z",
           "lastUpdateUserId": 123
         }
       ],
@@ -66,15 +77,36 @@
       }
     },
     {
-      "id": "5534",
-      "title": "Reducir el tiempo de primera respuesta un 20%",
-      "description": "Pedido por el equipo directivo en la planificación.",
+      "id": "5502",
+      "title": "Renovar las cuentas clave del trimestre",
+      "description": "Sirve de base para el próximo ciclo de evaluación.",
+      "percentComplete": 50,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2025-10-18",
+      "completionDate": null,
+      "lastChangedDateTime": "2025-08-12T14:36:33Z",
+      "status": "closed",
+      "milestones": null,
+      "actions": {
+        "canEdit": false,
+        "canUpdateProgress": false,
+        "canClose": false,
+        "canReopen": true,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "5505",
+      "title": "Lanzar el nuevo flujo de onboarding",
+      "description": "Alineado con el plan del área para el año.",
       "percentComplete": 100,
       "alignsWithOptionId": null,
       "sharedWithEmployeeIds": [],
-      "dueDate": "2023-04-02",
-      "completionDate": "2023-03-16",
-      "lastChangedDateTime": "2023-03-16T08:23:42Z",
+      "dueDate": "2026-05-03",
+      "completionDate": "2026-04-14",
+      "lastChangedDateTime": "2026-04-14T13:53:06Z",
       "status": "completed",
       "milestones": null,
       "actions": {
@@ -95,10 +127,5 @@
       "preferredName": null
     }
   ],
-  "comments": [
-    {
-      "goalId": "5534",
-      "commentCount": 4
-    }
-  ]
+  "comments": []
 }

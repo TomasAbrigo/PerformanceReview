@@ -26,13 +26,18 @@ const listEmployee = {
 
 const page = (data: unknown[]) => ({
   data,
-  meta: { total: data.length, page: { limit: 15, nextCursor: null, prevCursor: null } },
+  meta: {
+    total: data.length,
+    page: { limit: 15, nextCursor: null, prevCursor: null },
+  },
   _links: { self: "/api/v1/employees?page[limit]=15", next: null, prev: null },
 });
 
 describe("list-employees page schema", () => {
   it("accepts the documented shape", () => {
-    expect(listEmployeesPageSchema.safeParse(page([listEmployee])).success).toBe(true);
+    expect(
+      listEmployeesPageSchema.safeParse(page([listEmployee])).success,
+    ).toBe(true);
   });
 
   it("tolerates pagination links given as { href } objects", () => {
@@ -45,16 +50,24 @@ describe("list-employees page schema", () => {
 
   it("rejects numeric ids and statuses outside the enum", () => {
     expect(
-      listEmployeesPageSchema.safeParse(page([{ ...listEmployee, employeeId: 101 }])).success,
+      listEmployeesPageSchema.safeParse(
+        page([{ ...listEmployee, employeeId: 101 }]),
+      ).success,
     ).toBe(false);
     expect(
-      listEmployeesPageSchema.safeParse(page([{ ...listEmployee, reportsToId: 7 }])).success,
+      listEmployeesPageSchema.safeParse(
+        page([{ ...listEmployee, reportsToId: 7 }]),
+      ).success,
     ).toBe(false);
     expect(
-      listEmployeesPageSchema.safeParse(page([{ ...listEmployee, status: "active" }])).success,
+      listEmployeesPageSchema.safeParse(
+        page([{ ...listEmployee, status: "active" }]),
+      ).success,
     ).toBe(false);
     expect(
-      listEmployeesPageSchema.safeParse(page([{ ...listEmployee, hireDate: "01/02/2013" }])).success,
+      listEmployeesPageSchema.safeParse(
+        page([{ ...listEmployee, hireDate: "01/02/2013" }]),
+      ).success,
     ).toBe(false);
   });
 });
@@ -87,8 +100,12 @@ describe("get-employee schema", () => {
         supervisor: null,
       }).success,
     ).toBe(true);
-    expect(employeeSchema.safeParse({ ...employee, supervisorEId: 55 }).success).toBe(false);
-    expect(employeeSchema.safeParse({ ...employee, id: 101 }).success).toBe(false);
+    expect(
+      employeeSchema.safeParse({ ...employee, supervisorEId: 55 }).success,
+    ).toBe(false);
+    expect(employeeSchema.safeParse({ ...employee, id: 101 }).success).toBe(
+      false,
+    );
   });
 });
 
@@ -125,7 +142,11 @@ describe("tables and changes schemas", () => {
       employeesChangedSchema.safeParse({
         latest: "2026-10-30T09:00:00+00:00",
         employees: {
-          "101": { id: "101", action: "Updated", lastChanged: "2026-10-30T09:00:00+00:00" },
+          "101": {
+            id: "101",
+            action: "Updated",
+            lastChanged: "2026-10-30T09:00:00+00:00",
+          },
         },
       }).success,
     ).toBe(true);
@@ -175,7 +196,9 @@ describe("goals aggregate schema", () => {
       lastUpdateDateTime: "2025-05-02T14:03:22Z",
       lastUpdateUserId: 101,
     };
-    expect(goalsAggregateSchema.safeParse(aggregate([goal])).success).toBe(true);
+    expect(goalsAggregateSchema.safeParse(aggregate([goal])).success).toBe(
+      true,
+    );
     expect(
       goalsAggregateSchema.safeParse(
         aggregate([{ ...goal, status: "completed", milestones: [milestone] }]),
@@ -184,12 +207,18 @@ describe("goals aggregate schema", () => {
   });
 
   it("rejects numeric goal ids and unknown statuses", () => {
-    expect(goalsAggregateSchema.safeParse(aggregate([{ ...goal, id: 5001 }])).success).toBe(false);
     expect(
-      goalsAggregateSchema.safeParse(aggregate([{ ...goal, status: "done" }])).success,
+      goalsAggregateSchema.safeParse(aggregate([{ ...goal, id: 5001 }]))
+        .success,
     ).toBe(false);
     expect(
-      goalsAggregateSchema.safeParse(aggregate([{ ...goal, sharedWithEmployeeIds: ["55"] }])).success,
+      goalsAggregateSchema.safeParse(aggregate([{ ...goal, status: "done" }]))
+        .success,
+    ).toBe(false);
+    expect(
+      goalsAggregateSchema.safeParse(
+        aggregate([{ ...goal, sharedWithEmployeeIds: ["55"] }]),
+      ).success,
     ).toBe(false);
   });
 });

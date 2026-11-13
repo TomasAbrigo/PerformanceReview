@@ -3,7 +3,7 @@
   "firstName": "Federico",
   "lastName": "Giménez",
   "workEmail": "federico.gimenez@meridian-andina.example",
-  "employeeNumber": "10587",
+  "employeeNumber": "10579",
   "supervisorEId": "33",
   "supervisorId": "10050",
   "supervisor": "Romero, Brenda",
@@ -11,7 +11,7 @@
   "terminationDate": "2024-02-28",
   "department": "Ingeniería",
   "division": "Tecnología",
-  "jobTitle": "Mobile Developer Jr",
+  "jobTitle": "Mobile Developer Ssr",
   "location": "Rosario",
   "status": "Inactive"
 }

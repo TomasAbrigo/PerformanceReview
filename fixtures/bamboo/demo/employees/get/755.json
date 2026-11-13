@@ -3,15 +3,15 @@
   "firstName": "Sebastián",
   "lastName": "Maldonado",
   "workEmail": "sebastian.maldonado@meridian-andina.example",
-  "employeeNumber": "11846",
+  "employeeNumber": "11845",
   "supervisorEId": "241",
-  "supervisorId": "10574",
+  "supervisorId": "10570",
   "supervisor": "Reyes, Daniela",
   "hireDate": "2025-07-13",
   "terminationDate": null,
   "department": "Marketing",
   "division": "Comercial",
   "jobTitle": "Diseñador de Marca Jr",
-  "location": "Córdoba",
+  "location": "Buenos Aires",
   "status": "Active"
 }

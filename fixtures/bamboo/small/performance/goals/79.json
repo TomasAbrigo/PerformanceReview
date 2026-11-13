@@ -22,22 +22,54 @@
   "selectedFilter": "status-all",
   "goals": [
     {
-      "id": "5275",
-      "title": "Cerrar el plan de capacitación anual",
-      "description": "Meta compartida con otra área; coordinar avances mensuales.",
-      "percentComplete": 100,
+      "id": "5239",
+      "title": "Entregar el proyecto Norte sin desvíos",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 0,
       "alignsWithOptionId": null,
-      "sharedWithEmployeeIds": [
-        37
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2025-09-02",
+      "completionDate": null,
+      "lastChangedDateTime": "2025-05-11T18:51:08Z",
+      "status": "in_progress",
+      "milestones": [
+        {
+          "id": 829,
+          "employeeGoalId": 5239,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2025-04-01T17:59:02Z",
+          "lastUpdateUserId": 79
+        },
+        {
+          "id": 830,
+          "employeeGoalId": 5239,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2025-04-01T17:43:34Z",
+          "lastUpdateUserId": 79
+        },
+        {
+          "id": 831,
+          "employeeGoalId": 5239,
+          "title": "Hito 3",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2025-04-01T14:46:23Z",
+          "lastUpdateUserId": 79
+        }
       ],
-      "dueDate": "2025-06-20",
-      "completionDate": "2025-05-20",
-      "lastChangedDateTime": "2025-05-20T08:23:21Z",
-      "status": "completed",
-      "milestones": null,
       "actions": {
         "canEdit": true,
-        "canUpdateProgress": false,
+        "canUpdateProgress": true,
         "canClose": true,
         "canReopen": false,
         "canDelete": true,
@@ -45,20 +77,64 @@
       }
     },
     {
-      "id": "5278",
-      "title": "Migrar los reportes al nuevo tablero",
-      "description": "Meta compartida con otra área; coordinar avances mensuales.",
-      "percentComplete": 100,
+      "id": "5240",
+      "title": "Entregar el proyecto Norte sin desvíos",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 45,
       "alignsWithOptionId": null,
       "sharedWithEmployeeIds": [],
-      "dueDate": "2026-07-01",
-      "completionDate": "2026-02-05",
-      "lastChangedDateTime": "2026-02-05T14:04:41Z",
-      "status": "completed",
+      "dueDate": "2025-07-05",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-08-08T10:29:21Z",
+      "status": "closed",
+      "milestones": null,
+      "actions": {
+        "canEdit": false,
+        "canUpdateProgress": false,
+        "canClose": false,
+        "canReopen": true,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "5241",
+      "title": "Automatizar la conciliación mensual",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "percentComplete": 15,
+      "alignsWithOptionId": 9004,
+      "sharedWithEmployeeIds": [
+        37
+      ],
+      "dueDate": "2026-08-09",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-06-24T09:05:48Z",
+      "status": "in_progress",
       "milestones": null,
       "actions": {
         "canEdit": true,
-        "canUpdateProgress": false,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "5243",
+      "title": "Documentar los procesos críticos",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 70,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2026-11-15",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-04-05T12:29:13Z",
+      "status": "in_progress",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
         "canClose": true,
         "canReopen": false,
         "canDelete": true,
@@ -80,5 +156,10 @@
       "preferredName": null
     }
   ],
-  "comments": []
+  "comments": [
+    {
+      "goalId": "5239",
+      "commentCount": 1
+    }
+  ]
 }

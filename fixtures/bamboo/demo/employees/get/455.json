@@ -3,15 +3,15 @@
   "firstName": "Brenda",
   "lastName": "Soria",
   "workEmail": "brenda.soria@meridian-andina.example",
-  "employeeNumber": "11131",
+  "employeeNumber": "11123",
   "supervisorEId": "159",
-  "supervisorId": "10370",
+  "supervisorId": "10368",
   "supervisor": "Ríos, Marcela",
   "hireDate": "2023-05-26",
   "terminationDate": null,
   "department": "Datos",
   "division": "Tecnología",
-  "jobTitle": "Data Analyst Ssr",
+  "jobTitle": "Data Analyst Jr",
   "location": "Montevideo",
   "status": "Active"
 }

@@ -22,38 +22,17 @@
   "selectedFilter": "status-all",
   "goals": [
     {
-      "id": "5345",
-      "title": "Implementar el calendario editorial",
-      "description": "Alineado con el plan del área para el año.",
-      "percentComplete": 100,
-      "alignsWithOptionId": null,
-      "sharedWithEmployeeIds": [],
-      "dueDate": "2024-10-27",
-      "completionDate": "2024-05-23",
-      "lastChangedDateTime": "2024-05-23T12:10:37Z",
-      "status": "completed",
-      "milestones": null,
-      "actions": {
-        "canEdit": true,
-        "canUpdateProgress": false,
-        "canClose": true,
-        "canReopen": false,
-        "canDelete": true,
-        "canComment": true
-      }
-    },
-    {
-      "id": "5348",
-      "title": "Lanzar el nuevo flujo de onboarding",
-      "description": "Sirve de base para el próximo ciclo de evaluación.",
+      "id": "5328",
+      "title": "Migrar los reportes al nuevo tablero",
+      "description": "Pedido por el equipo directivo en la planificación.",
       "percentComplete": 100,
       "alignsWithOptionId": null,
       "sharedWithEmployeeIds": [
         65
       ],
-      "dueDate": "2025-05-14",
-      "completionDate": "2024-12-03",
-      "lastChangedDateTime": "2024-12-03T11:13:01Z",
+      "dueDate": "2023-03-12",
+      "completionDate": "2023-03-31",
+      "lastChangedDateTime": "2023-03-31T19:18:04Z",
       "status": "completed",
       "milestones": null,
       "actions": {
@@ -66,20 +45,152 @@
       }
     },
     {
-      "id": "5349",
-      "title": "Documentar los procesos críticos",
-      "description": "Sirve de base para el próximo ciclo de evaluación.",
-      "percentComplete": 65,
-      "alignsWithOptionId": 9002,
+      "id": "5330",
+      "title": "Mejorar el NPS interno del equipo",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
       "sharedWithEmployeeIds": [],
-      "dueDate": "2025-06-06",
-      "completionDate": null,
-      "lastChangedDateTime": "2025-08-06T17:03:26Z",
-      "status": "in_progress",
+      "dueDate": "2025-09-19",
+      "completionDate": "2025-09-08",
+      "lastChangedDateTime": "2025-09-08T15:22:12Z",
+      "status": "completed",
       "milestones": null,
       "actions": {
         "canEdit": true,
-        "canUpdateProgress": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "5332",
+      "title": "Entregar el proyecto Norte sin desvíos",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2026-06-17",
+      "completionDate": "2026-04-29",
+      "lastChangedDateTime": "2026-04-29T09:47:19Z",
+      "status": "completed",
+      "milestones": [
+        {
+          "id": 847,
+          "employeeGoalId": 5332,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2026-03-20T12:05:47Z",
+          "lastUpdateDateTime": "2026-03-20T12:05:47Z",
+          "lastUpdateUserId": 79
+        },
+        {
+          "id": 848,
+          "employeeGoalId": 5332,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2026-04-21T11:34:14Z",
+          "lastUpdateDateTime": "2026-04-21T11:34:14Z",
+          "lastUpdateUserId": 79
+        },
+        {
+          "id": 849,
+          "employeeGoalId": 5332,
+          "title": "Hito 3",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2026-04-20T12:40:25Z",
+          "lastUpdateDateTime": "2026-04-20T12:40:25Z",
+          "lastUpdateUserId": 79
+        },
+        {
+          "id": 850,
+          "employeeGoalId": 5332,
+          "title": "Hito 4",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2026-03-08T09:29:56Z",
+          "lastUpdateDateTime": "2026-03-08T09:29:56Z",
+          "lastUpdateUserId": 79
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "5335",
+      "title": "Renovar las cuentas clave del trimestre",
+      "description": "Sirve de base para el próximo ciclo de evaluación.",
+      "percentComplete": 100,
+      "alignsWithOptionId": 9003,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2026-08-23",
+      "completionDate": "2026-05-18",
+      "lastChangedDateTime": "2026-05-18T13:41:10Z",
+      "status": "completed",
+      "milestones": [
+        {
+          "id": 851,
+          "employeeGoalId": 5335,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2026-03-20T14:40:35Z",
+          "lastUpdateDateTime": "2026-03-20T14:40:35Z",
+          "lastUpdateUserId": 79
+        },
+        {
+          "id": 852,
+          "employeeGoalId": 5335,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2026-04-04T12:14:10Z",
+          "lastUpdateDateTime": "2026-04-04T12:14:10Z",
+          "lastUpdateUserId": 79
+        },
+        {
+          "id": 853,
+          "employeeGoalId": 5335,
+          "title": "Hito 3",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2026-03-13T09:06:53Z",
+          "lastUpdateDateTime": "2026-03-13T09:06:53Z",
+          "lastUpdateUserId": 79
+        },
+        {
+          "id": 854,
+          "employeeGoalId": 5335,
+          "title": "Hito 4",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2026-04-29T16:04:49Z",
+          "lastUpdateDateTime": "2026-04-29T16:04:49Z",
+          "lastUpdateUserId": 79
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
         "canClose": true,
         "canReopen": false,
         "canDelete": true,
@@ -91,7 +202,7 @@
     {
       "employeeId": 79,
       "firstName": "Silvana",
-      "lastName": "Torres",
+      "lastName": "Sánchez",
       "preferredName": null
     },
     {
@@ -103,11 +214,7 @@
   ],
   "comments": [
     {
-      "goalId": "5345",
-      "commentCount": 3
-    },
-    {
-      "goalId": "5349",
+      "goalId": "5335",
       "commentCount": 3
     }
   ]

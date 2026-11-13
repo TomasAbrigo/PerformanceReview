@@ -22,62 +22,19 @@
   "selectedFilter": "status-all",
   "goals": [
     {
-      "id": "8010",
-      "title": "Documentar los procesos críticos",
+      "id": "7728",
+      "title": "Renovar las cuentas clave del trimestre",
       "description": "Sirve de base para el próximo ciclo de evaluación.",
       "percentComplete": 100,
       "alignsWithOptionId": null,
-      "sharedWithEmployeeIds": [],
-      "dueDate": "2025-08-19",
-      "completionDate": "2025-05-06",
-      "lastChangedDateTime": "2025-05-06T19:54:25Z",
-      "status": "completed",
-      "milestones": [
-        {
-          "id": 2063,
-          "employeeGoalId": 8010,
-          "title": "Hito 1",
-          "startValue": 0,
-          "endValue": 1,
-          "currentValue": 1,
-          "completedDateTime": "2025-04-21T16:57:34Z",
-          "lastUpdateDateTime": "2025-04-21T16:57:34Z",
-          "lastUpdateUserId": 699
-        },
-        {
-          "id": 2064,
-          "employeeGoalId": 8010,
-          "title": "Hito 2",
-          "startValue": 0,
-          "endValue": 1,
-          "currentValue": 1,
-          "completedDateTime": "2025-05-05T19:32:09Z",
-          "lastUpdateDateTime": "2025-05-05T19:32:09Z",
-          "lastUpdateUserId": 699
-        },
-        {
-          "id": 2065,
-          "employeeGoalId": 8010,
-          "title": "Hito 3",
-          "startValue": 0,
-          "endValue": 1,
-          "currentValue": 1,
-          "completedDateTime": "2025-04-24T17:00:51Z",
-          "lastUpdateDateTime": "2025-04-24T17:00:51Z",
-          "lastUpdateUserId": 699
-        },
-        {
-          "id": 2066,
-          "employeeGoalId": 8010,
-          "title": "Hito 4",
-          "startValue": 0,
-          "endValue": 1,
-          "currentValue": 1,
-          "completedDateTime": "2025-04-30T09:31:01Z",
-          "lastUpdateDateTime": "2025-04-30T09:31:01Z",
-          "lastUpdateUserId": 699
-        }
+      "sharedWithEmployeeIds": [
+        241
       ],
+      "dueDate": "2026-02-09",
+      "completionDate": "2025-07-20",
+      "lastChangedDateTime": "2025-07-20T08:07:03Z",
+      "status": "completed",
+      "milestones": null,
       "actions": {
         "canEdit": true,
         "canUpdateProgress": false,
@@ -94,12 +51,13 @@
       "firstName": "Bruno",
       "lastName": "Pereyra",
       "preferredName": null
+    },
+    {
+      "employeeId": 241,
+      "firstName": "Daniela",
+      "lastName": "Reyes",
+      "preferredName": null
     }
   ],
-  "comments": [
-    {
-      "goalId": "8010",
-      "commentCount": 1
-    }
-  ]
+  "comments": []
 }

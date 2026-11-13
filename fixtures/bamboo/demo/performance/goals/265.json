@@ -22,15 +22,15 @@
   "selectedFilter": "status-all",
   "goals": [
     {
-      "id": "6298",
-      "title": "Migrar los reportes al nuevo tablero",
-      "description": "Sirve de base para el próximo ciclo de evaluación.",
+      "id": "6161",
+      "title": "Automatizar la conciliación mensual",
+      "description": "Pedido por el equipo directivo en la planificación.",
       "percentComplete": 50,
-      "alignsWithOptionId": null,
+      "alignsWithOptionId": 9004,
       "sharedWithEmployeeIds": [],
-      "dueDate": "2023-11-17",
+      "dueDate": "2024-11-26",
       "completionDate": null,
-      "lastChangedDateTime": "2025-03-14T11:02:53Z",
+      "lastChangedDateTime": "2025-12-09T13:13:53Z",
       "status": "in_progress",
       "milestones": null,
       "actions": {
@@ -43,15 +43,15 @@
       }
     },
     {
-      "id": "6299",
-      "title": "Lanzar el nuevo flujo de onboarding",
-      "description": "Alineado con el plan del área para el año.",
+      "id": "6163",
+      "title": "Completar la certificación del área",
+      "description": "Pedido por el equipo directivo en la planificación.",
       "percentComplete": 100,
       "alignsWithOptionId": null,
       "sharedWithEmployeeIds": [],
-      "dueDate": "2024-10-29",
-      "completionDate": "2024-04-07",
-      "lastChangedDateTime": "2024-04-07T19:09:30Z",
+      "dueDate": "2025-05-09",
+      "completionDate": "2025-04-04",
+      "lastChangedDateTime": "2025-04-04T11:00:17Z",
       "status": "completed",
       "milestones": null,
       "actions": {
@@ -64,17 +64,80 @@
       }
     },
     {
-      "id": "6301",
-      "title": "Migrar los reportes al nuevo tablero",
-      "description": "Pedido por el equipo directivo en la planificación.",
-      "percentComplete": 65,
+      "id": "6164",
+      "title": "Cerrar el plan de capacitación anual",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "percentComplete": 100,
       "alignsWithOptionId": null,
       "sharedWithEmployeeIds": [
         21
       ],
-      "dueDate": "2026-11-17",
+      "dueDate": "2025-11-14",
+      "completionDate": "2025-10-13",
+      "lastChangedDateTime": "2025-10-13T10:18:01Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "6166",
+      "title": "Documentar los procesos críticos",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 20,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2027-02-19",
       "completionDate": null,
-      "lastChangedDateTime": "2026-10-28T18:30:01Z",
+      "lastChangedDateTime": "2026-08-30T14:32:29Z",
+      "status": "in_progress",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "6168",
+      "title": "Mentorear a dos personas nuevas",
+      "description": "Sirve de base para el próximo ciclo de evaluación.",
+      "percentComplete": 10,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2026-07-05",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-09-10T17:05:24Z",
+      "status": "in_progress",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "6171",
+      "title": "Implementar el calendario editorial",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 55,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2026-03-18",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-03-01T19:52:37Z",
       "status": "in_progress",
       "milestones": null,
       "actions": {
@@ -103,7 +166,15 @@
   ],
   "comments": [
     {
-      "goalId": "6301",
+      "goalId": "6161",
+      "commentCount": 3
+    },
+    {
+      "goalId": "6168",
+      "commentCount": 2
+    },
+    {
+      "goalId": "6171",
       "commentCount": 2
     }
   ]

@@ -22,40 +22,17 @@
   "selectedFilter": "status-all",
   "goals": [
     {
-      "id": "5571",
-      "title": "Aumentar la cobertura de pruebas al 80%",
-      "description": "Pedido por el equipo directivo en la planificación.",
-      "percentComplete": 0,
+      "id": "5525",
+      "title": "Cerrar el plan de capacitación anual",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "percentComplete": 60,
       "alignsWithOptionId": null,
       "sharedWithEmployeeIds": [],
-      "dueDate": "2025-10-13",
+      "dueDate": "2026-02-12",
       "completionDate": null,
-      "lastChangedDateTime": "2026-03-10T09:08:50Z",
+      "lastChangedDateTime": "2026-01-24T11:37:52Z",
       "status": "in_progress",
-      "milestones": [
-        {
-          "id": 964,
-          "employeeGoalId": 5571,
-          "title": "Hito 1",
-          "startValue": 0,
-          "endValue": 1,
-          "currentValue": 0,
-          "completedDateTime": null,
-          "lastUpdateDateTime": "2025-08-12T16:19:26Z",
-          "lastUpdateUserId": 129
-        },
-        {
-          "id": 965,
-          "employeeGoalId": 5571,
-          "title": "Hito 2",
-          "startValue": 0,
-          "endValue": 1,
-          "currentValue": 0,
-          "completedDateTime": null,
-          "lastUpdateDateTime": "2025-08-12T14:37:08Z",
-          "lastUpdateUserId": 129
-        }
-      ],
+      "milestones": null,
       "actions": {
         "canEdit": true,
         "canUpdateProgress": true,
@@ -66,38 +43,62 @@
       }
     },
     {
-      "id": "5574",
-      "title": "Migrar los reportes al nuevo tablero",
+      "id": "5528",
+      "title": "Cerrar el plan de capacitación anual",
       "description": "Alineado con el plan del área para el año.",
       "percentComplete": 100,
-      "alignsWithOptionId": 9004,
+      "alignsWithOptionId": 9003,
       "sharedWithEmployeeIds": [],
-      "dueDate": "2026-06-20",
-      "completionDate": "2025-12-13",
-      "lastChangedDateTime": "2025-12-13T09:22:18Z",
+      "dueDate": "2026-09-29",
+      "completionDate": "2026-09-06",
+      "lastChangedDateTime": "2026-09-06T12:08:50Z",
       "status": "completed",
-      "milestones": null,
-      "actions": {
-        "canEdit": true,
-        "canUpdateProgress": false,
-        "canClose": true,
-        "canReopen": false,
-        "canDelete": true,
-        "canComment": true
-      }
-    },
-    {
-      "id": "5577",
-      "title": "Reducir los incidentes recurrentes a la mitad",
-      "description": "Pedido por el equipo directivo en la planificación.",
-      "percentComplete": 100,
-      "alignsWithOptionId": null,
-      "sharedWithEmployeeIds": [],
-      "dueDate": "2026-09-22",
-      "completionDate": "2026-05-13",
-      "lastChangedDateTime": "2026-05-13T11:49:27Z",
-      "status": "completed",
-      "milestones": null,
+      "milestones": [
+        {
+          "id": 933,
+          "employeeGoalId": 5528,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2026-06-03T11:27:02Z",
+          "lastUpdateDateTime": "2026-06-03T11:27:02Z",
+          "lastUpdateUserId": 129
+        },
+        {
+          "id": 934,
+          "employeeGoalId": 5528,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2026-04-13T14:23:10Z",
+          "lastUpdateDateTime": "2026-04-13T14:23:10Z",
+          "lastUpdateUserId": 129
+        },
+        {
+          "id": 935,
+          "employeeGoalId": 5528,
+          "title": "Hito 3",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2026-06-17T10:58:18Z",
+          "lastUpdateDateTime": "2026-06-17T10:58:18Z",
+          "lastUpdateUserId": 129
+        },
+        {
+          "id": 936,
+          "employeeGoalId": 5528,
+          "title": "Hito 4",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2026-07-21T18:19:40Z",
+          "lastUpdateDateTime": "2026-07-21T18:19:40Z",
+          "lastUpdateUserId": 129
+        }
+      ],
       "actions": {
         "canEdit": true,
         "canUpdateProgress": false,
@@ -112,9 +113,14 @@
     {
       "employeeId": 129,
       "firstName": "Ivana",
-      "lastName": "Martínez",
+      "lastName": "Maldonado",
       "preferredName": null
     }
   ],
-  "comments": []
+  "comments": [
+    {
+      "goalId": "5525",
+      "commentCount": 3
+    }
+  ]
 }

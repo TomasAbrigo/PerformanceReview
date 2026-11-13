@@ -3,15 +3,15 @@
   "firstName": "Bruno",
   "lastName": "Sosa",
   "workEmail": "bruno.sosa@meridian-andina.example",
-  "employeeNumber": "11621",
+  "employeeNumber": "11605",
   "supervisorEId": "67",
-  "supervisorId": "10132",
+  "supervisorId": "10118",
   "supervisor": "Roldán, Noelia",
   "hireDate": "2025-01-10",
   "terminationDate": null,
   "department": "Datos",
   "division": "Tecnología",
-  "jobTitle": "Analytics Engineer Sr",
+  "jobTitle": "Analytics Engineer Ssr",
   "location": "Córdoba",
   "status": "Active"
 }

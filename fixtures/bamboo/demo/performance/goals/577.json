@@ -22,127 +22,20 @@
   "selectedFilter": "status-all",
   "goals": [
     {
-      "id": "7684",
-      "title": "Migrar los reportes al nuevo tablero",
+      "id": "7404",
+      "title": "Completar la certificación del área",
       "description": "Meta compartida con otra área; coordinar avances mensuales.",
-      "percentComplete": 100,
+      "percentComplete": 85,
       "alignsWithOptionId": null,
       "sharedWithEmployeeIds": [],
-      "dueDate": "2024-12-20",
-      "completionDate": "2024-12-16",
-      "lastChangedDateTime": "2024-12-16T18:39:08Z",
-      "status": "completed",
-      "milestones": [
-        {
-          "id": 1908,
-          "employeeGoalId": 7684,
-          "title": "Hito 1",
-          "startValue": 0,
-          "endValue": 1,
-          "currentValue": 1,
-          "completedDateTime": "2024-11-27T11:19:44Z",
-          "lastUpdateDateTime": "2024-11-27T11:19:44Z",
-          "lastUpdateUserId": 577
-        },
-        {
-          "id": 1909,
-          "employeeGoalId": 7684,
-          "title": "Hito 2",
-          "startValue": 0,
-          "endValue": 1,
-          "currentValue": 1,
-          "completedDateTime": "2024-11-26T15:25:59Z",
-          "lastUpdateDateTime": "2024-11-26T15:25:59Z",
-          "lastUpdateUserId": 577
-        }
-      ],
-      "actions": {
-        "canEdit": true,
-        "canUpdateProgress": false,
-        "canClose": true,
-        "canReopen": false,
-        "canDelete": true,
-        "canComment": true
-      }
-    },
-    {
-      "id": "7686",
-      "title": "Reducir los incidentes recurrentes a la mitad",
-      "description": "Pedido por el equipo directivo en la planificación.",
-      "percentComplete": 100,
-      "alignsWithOptionId": null,
-      "sharedWithEmployeeIds": [],
-      "dueDate": "2024-11-10",
-      "completionDate": "2024-10-15",
-      "lastChangedDateTime": "2024-10-15T15:25:43Z",
-      "status": "completed",
+      "dueDate": "2025-11-14",
+      "completionDate": null,
+      "lastChangedDateTime": "2025-10-05T14:25:49Z",
+      "status": "in_progress",
       "milestones": null,
       "actions": {
         "canEdit": true,
-        "canUpdateProgress": false,
-        "canClose": true,
-        "canReopen": false,
-        "canDelete": true,
-        "canComment": true
-      }
-    },
-    {
-      "id": "7687",
-      "title": "Renovar las cuentas clave del trimestre",
-      "description": "Sirve de base para el próximo ciclo de evaluación.",
-      "percentComplete": 100,
-      "alignsWithOptionId": 9001,
-      "sharedWithEmployeeIds": [],
-      "dueDate": "2026-07-29",
-      "completionDate": "2026-05-24",
-      "lastChangedDateTime": "2026-05-24T12:19:18Z",
-      "status": "completed",
-      "milestones": null,
-      "actions": {
-        "canEdit": true,
-        "canUpdateProgress": false,
-        "canClose": true,
-        "canReopen": false,
-        "canDelete": true,
-        "canComment": true
-      }
-    },
-    {
-      "id": "7689",
-      "title": "Entregar el proyecto Norte sin desvíos",
-      "description": "Alineado con el plan del área para el año.",
-      "percentComplete": 100,
-      "alignsWithOptionId": null,
-      "sharedWithEmployeeIds": [],
-      "dueDate": "2026-05-27",
-      "completionDate": "2026-06-13",
-      "lastChangedDateTime": "2026-06-13T09:44:25Z",
-      "status": "completed",
-      "milestones": null,
-      "actions": {
-        "canEdit": true,
-        "canUpdateProgress": false,
-        "canClose": true,
-        "canReopen": false,
-        "canDelete": true,
-        "canComment": true
-      }
-    },
-    {
-      "id": "7690",
-      "title": "Documentar los procesos críticos",
-      "description": "Alineado con el plan del área para el año.",
-      "percentComplete": 100,
-      "alignsWithOptionId": null,
-      "sharedWithEmployeeIds": [],
-      "dueDate": "2026-06-05",
-      "completionDate": "2026-04-13",
-      "lastChangedDateTime": "2026-04-13T08:10:12Z",
-      "status": "completed",
-      "milestones": null,
-      "actions": {
-        "canEdit": true,
-        "canUpdateProgress": false,
+        "canUpdateProgress": true,
         "canClose": true,
         "canReopen": false,
         "canDelete": true,
@@ -158,14 +51,5 @@
       "preferredName": null
     }
   ],
-  "comments": [
-    {
-      "goalId": "7684",
-      "commentCount": 4
-    },
-    {
-      "goalId": "7687",
-      "commentCount": 4
-    }
-  ]
+  "comments": []
 }

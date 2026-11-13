@@ -22,18 +22,16 @@
   "selectedFilter": "status-all",
   "goals": [
     {
-      "id": "5169",
-      "title": "Reducir los incidentes recurrentes a la mitad",
-      "description": "Alineado con el plan del área para el año.",
-      "percentComplete": 100,
+      "id": "5153",
+      "title": "Cerrar el plan de capacitación anual",
+      "description": "Sirve de base para el próximo ciclo de evaluación.",
+      "percentComplete": 80,
       "alignsWithOptionId": null,
-      "sharedWithEmployeeIds": [
-        31
-      ],
-      "dueDate": "2023-08-11",
-      "completionDate": "2023-06-07",
-      "lastChangedDateTime": "2023-06-07T09:55:48Z",
-      "status": "completed",
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2023-11-14",
+      "completionDate": null,
+      "lastChangedDateTime": "2023-10-17T14:42:34Z",
+      "status": "in_progress",
       "milestones": null,
       "actions": {
         "canEdit": false,
@@ -51,18 +49,12 @@
       "firstName": "Romina",
       "lastName": "Páez",
       "preferredName": null
-    },
-    {
-      "employeeId": 31,
-      "firstName": "Federico",
-      "lastName": "Rivas",
-      "preferredName": "Fede"
     }
   ],
   "comments": [
     {
-      "goalId": "5169",
-      "commentCount": 3
+      "goalId": "5153",
+      "commentCount": 1
     }
   ]
 }

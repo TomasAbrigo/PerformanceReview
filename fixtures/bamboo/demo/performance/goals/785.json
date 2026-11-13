@@ -20,96 +20,7 @@
     }
   ],
   "selectedFilter": "status-all",
-  "goals": [
-    {
-      "id": "8226",
-      "title": "Aumentar la cobertura de pruebas al 80%",
-      "description": "Alineado con el plan del área para el año.",
-      "percentComplete": 0,
-      "alignsWithOptionId": null,
-      "sharedWithEmployeeIds": [],
-      "dueDate": "2025-11-14",
-      "completionDate": null,
-      "lastChangedDateTime": "2025-10-24T17:31:33Z",
-      "status": "in_progress",
-      "milestones": [
-        {
-          "id": 2172,
-          "employeeGoalId": 8226,
-          "title": "Hito 1",
-          "startValue": 0,
-          "endValue": 1,
-          "currentValue": 0,
-          "completedDateTime": null,
-          "lastUpdateDateTime": "2025-08-20T18:09:14Z",
-          "lastUpdateUserId": 785
-        },
-        {
-          "id": 2173,
-          "employeeGoalId": 8226,
-          "title": "Hito 2",
-          "startValue": 0,
-          "endValue": 1,
-          "currentValue": 0,
-          "completedDateTime": null,
-          "lastUpdateDateTime": "2025-08-20T14:39:14Z",
-          "lastUpdateUserId": 785
-        }
-      ],
-      "actions": {
-        "canEdit": true,
-        "canUpdateProgress": true,
-        "canClose": true,
-        "canReopen": false,
-        "canDelete": true,
-        "canComment": true
-      }
-    },
-    {
-      "id": "8229",
-      "title": "Cerrar el plan de capacitación anual",
-      "description": "Sirve de base para el próximo ciclo de evaluación.",
-      "percentComplete": 50,
-      "alignsWithOptionId": null,
-      "sharedWithEmployeeIds": [],
-      "dueDate": "2026-06-15",
-      "completionDate": null,
-      "lastChangedDateTime": "2026-06-06T08:37:07Z",
-      "status": "in_progress",
-      "milestones": [
-        {
-          "id": 2174,
-          "employeeGoalId": 8229,
-          "title": "Hito 1",
-          "startValue": 0,
-          "endValue": 1,
-          "currentValue": 1,
-          "completedDateTime": "2026-02-23T08:17:25Z",
-          "lastUpdateDateTime": "2026-02-23T08:17:25Z",
-          "lastUpdateUserId": 785
-        },
-        {
-          "id": 2175,
-          "employeeGoalId": 8229,
-          "title": "Hito 2",
-          "startValue": 0,
-          "endValue": 1,
-          "currentValue": 0,
-          "completedDateTime": null,
-          "lastUpdateDateTime": "2025-12-14T19:41:37Z",
-          "lastUpdateUserId": 785
-        }
-      ],
-      "actions": {
-        "canEdit": true,
-        "canUpdateProgress": true,
-        "canClose": true,
-        "canReopen": false,
-        "canDelete": true,
-        "canComment": true
-      }
-    }
-  ],
+  "goals": [],
   "persons": [
     {
       "employeeId": 785,
@@ -118,10 +29,5 @@
       "preferredName": "Nico"
     }
   ],
-  "comments": [
-    {
-      "goalId": "8226",
-      "commentCount": 2
-    }
-  ]
+  "comments": []
 }

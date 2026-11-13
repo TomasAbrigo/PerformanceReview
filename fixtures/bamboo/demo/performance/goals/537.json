@@ -22,17 +22,15 @@
   "selectedFilter": "status-all",
   "goals": [
     {
-      "id": "7537",
-      "title": "Implementar el calendario editorial",
-      "description": "Sirve de base para el próximo ciclo de evaluación.",
+      "id": "7281",
+      "title": "Migrar los reportes al nuevo tablero",
+      "description": "Alineado con el plan del área para el año.",
       "percentComplete": 100,
       "alignsWithOptionId": null,
-      "sharedWithEmployeeIds": [
-        59
-      ],
-      "dueDate": "2026-02-27",
-      "completionDate": "2025-08-23",
-      "lastChangedDateTime": "2025-08-23T14:09:03Z",
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2024-10-18",
+      "completionDate": "2024-07-14",
+      "lastChangedDateTime": "2024-07-14T14:26:34Z",
       "status": "completed",
       "milestones": null,
       "actions": {
@@ -45,15 +43,102 @@
       }
     },
     {
-      "id": "7539",
-      "title": "Lanzar el nuevo flujo de onboarding",
-      "description": "Pedido por el equipo directivo en la planificación.",
+      "id": "7282",
+      "title": "Migrar los reportes al nuevo tablero",
+      "description": "Alineado con el plan del área para el año.",
       "percentComplete": 100,
       "alignsWithOptionId": null,
       "sharedWithEmployeeIds": [],
-      "dueDate": "2026-07-23",
-      "completionDate": "2026-06-25",
-      "lastChangedDateTime": "2026-06-25T14:22:56Z",
+      "dueDate": "2024-10-04",
+      "completionDate": "2024-09-02",
+      "lastChangedDateTime": "2024-09-02T19:21:56Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "7285",
+      "title": "Renovar las cuentas clave del trimestre",
+      "description": "Sirve de base para el próximo ciclo de evaluación.",
+      "percentComplete": 25,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2025-12-21",
+      "completionDate": null,
+      "lastChangedDateTime": "2025-11-12T11:09:40Z",
+      "status": "in_progress",
+      "milestones": [
+        {
+          "id": 1755,
+          "employeeGoalId": 7285,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-11-04T08:25:51Z",
+          "lastUpdateDateTime": "2025-11-04T08:25:51Z",
+          "lastUpdateUserId": 537
+        },
+        {
+          "id": 1756,
+          "employeeGoalId": 7285,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2025-08-02T11:24:16Z",
+          "lastUpdateUserId": 537
+        },
+        {
+          "id": 1757,
+          "employeeGoalId": 7285,
+          "title": "Hito 3",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2025-08-02T15:48:57Z",
+          "lastUpdateUserId": 537
+        },
+        {
+          "id": 1758,
+          "employeeGoalId": 7285,
+          "title": "Hito 4",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2025-08-02T08:45:21Z",
+          "lastUpdateUserId": 537
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "7286",
+      "title": "Automatizar la conciliación mensual",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2026-10-17",
+      "completionDate": "2026-07-11",
+      "lastChangedDateTime": "2026-07-11T13:22:48Z",
       "status": "completed",
       "milestones": null,
       "actions": {
@@ -70,15 +155,18 @@
     {
       "employeeId": 537,
       "firstName": "Paula",
-      "lastName": "Peralta",
-      "preferredName": null
-    },
-    {
-      "employeeId": 59,
-      "firstName": "Gonzalo",
-      "lastName": "Soria",
+      "lastName": "Díaz",
       "preferredName": null
     }
   ],
-  "comments": []
+  "comments": [
+    {
+      "goalId": "7281",
+      "commentCount": 2
+    },
+    {
+      "goalId": "7285",
+      "commentCount": 3
+    }
+  ]
 }

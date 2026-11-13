@@ -22,22 +22,43 @@
   "selectedFilter": "status-all",
   "goals": [
     {
-      "id": "7460",
-      "title": "Aumentar la cobertura de pruebas al 80%",
-      "description": "Sirve de base para el próximo ciclo de evaluación.",
-      "percentComplete": 5,
-      "alignsWithOptionId": null,
-      "sharedWithEmployeeIds": [
-        43
+      "id": "7203",
+      "title": "Reducir el tiempo de primera respuesta un 20%",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 100,
+      "alignsWithOptionId": 9002,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2024-03-25",
+      "completionDate": "2024-04-11",
+      "lastChangedDateTime": "2024-04-11T12:48:40Z",
+      "status": "completed",
+      "milestones": [
+        {
+          "id": 1714,
+          "employeeGoalId": 7203,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2024-03-16T12:43:47Z",
+          "lastUpdateDateTime": "2024-03-16T12:43:47Z",
+          "lastUpdateUserId": 515
+        },
+        {
+          "id": 1715,
+          "employeeGoalId": 7203,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2024-03-02T13:52:36Z",
+          "lastUpdateDateTime": "2024-03-02T13:52:36Z",
+          "lastUpdateUserId": 515
+        }
       ],
-      "dueDate": "2024-10-07",
-      "completionDate": null,
-      "lastChangedDateTime": "2025-12-29T17:31:46Z",
-      "status": "in_progress",
-      "milestones": null,
       "actions": {
         "canEdit": true,
-        "canUpdateProgress": true,
+        "canUpdateProgress": false,
         "canClose": true,
         "canReopen": false,
         "canDelete": true,
@@ -45,20 +66,20 @@
       }
     },
     {
-      "id": "7461",
-      "title": "Cerrar el plan de capacitación anual",
+      "id": "7204",
+      "title": "Mentorear a dos personas nuevas",
       "description": "Sirve de base para el próximo ciclo de evaluación.",
-      "percentComplete": 100,
+      "percentComplete": 75,
       "alignsWithOptionId": null,
       "sharedWithEmployeeIds": [],
-      "dueDate": "2026-05-01",
-      "completionDate": "2026-05-03",
-      "lastChangedDateTime": "2026-05-03T14:03:18Z",
-      "status": "completed",
+      "dueDate": "2025-07-04",
+      "completionDate": null,
+      "lastChangedDateTime": "2025-07-26T16:58:40Z",
+      "status": "in_progress",
       "milestones": null,
       "actions": {
         "canEdit": true,
-        "canUpdateProgress": false,
+        "canUpdateProgress": true,
         "canClose": true,
         "canReopen": false,
         "canDelete": true,
@@ -71,12 +92,6 @@
       "employeeId": 515,
       "firstName": "Silvana",
       "lastName": "Medina",
-      "preferredName": null
-    },
-    {
-      "employeeId": 43,
-      "firstName": "Eugenia",
-      "lastName": "Soria",
       "preferredName": null
     }
   ],

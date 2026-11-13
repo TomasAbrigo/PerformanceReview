@@ -168,7 +168,7 @@ export const LAST_NAMES = [
   "Reyes",
 ] as const;
 
-/** Surnames reserved for the "unmatchable" CSV rows (never used by employees). */
+/** Full names for the "unmatchable" CSV rows: surnames no employee has. Two names per row slot (2 reports x cycles x per cycle). */
 export const OUTSIDER_NAMES = [
   "Bruno Salvatierra",
   "Eliana Corvalán",
@@ -182,6 +182,18 @@ export const OUTSIDER_NAMES = [
   "Dolores Echagüe",
   "Renzo Albornoz",
   "Marta Zabala",
+  "Tadeo Orellana",
+  "Nerea Bidegain",
+  "Lisandro Piccirillo",
+  "Aldana Cuello",
+  "Emanuel Sarmiento",
+  "Josefina Montenegro",
+  "Hilario Bustamante",
+  "Zulema Arrieta",
+  "Genaro Villegas",
+  "Ludmila Scaglia",
+  "Anselmo Barrionuevo",
+  "Ivanna Cardozo",
 ] as const;
 
 /** Short forms some people go by (Bamboo `preferredName`). */

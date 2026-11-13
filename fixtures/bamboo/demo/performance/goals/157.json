@@ -22,87 +22,54 @@
   "selectedFilter": "status-all",
   "goals": [
     {
-      "id": "5717",
+      "id": "5669",
       "title": "Mejorar el NPS interno del equipo",
       "description": "Meta compartida con otra área; coordinar avances mensuales.",
-      "percentComplete": 80,
-      "alignsWithOptionId": null,
+      "percentComplete": 100,
+      "alignsWithOptionId": 9001,
       "sharedWithEmployeeIds": [],
-      "dueDate": "2024-04-11",
-      "completionDate": null,
-      "lastChangedDateTime": "2025-07-10T14:50:07Z",
-      "status": "in_progress",
-      "milestones": null,
+      "dueDate": "2025-02-02",
+      "completionDate": "2024-08-10",
+      "lastChangedDateTime": "2024-08-10T14:09:57Z",
+      "status": "completed",
+      "milestones": [
+        {
+          "id": 987,
+          "employeeGoalId": 5669,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2024-08-02T16:59:01Z",
+          "lastUpdateDateTime": "2024-08-02T16:59:01Z",
+          "lastUpdateUserId": 157
+        },
+        {
+          "id": 988,
+          "employeeGoalId": 5669,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2024-07-25T18:24:32Z",
+          "lastUpdateDateTime": "2024-07-25T18:24:32Z",
+          "lastUpdateUserId": 157
+        },
+        {
+          "id": 989,
+          "employeeGoalId": 5669,
+          "title": "Hito 3",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2024-07-14T19:25:54Z",
+          "lastUpdateDateTime": "2024-07-14T19:25:54Z",
+          "lastUpdateUserId": 157
+        }
+      ],
       "actions": {
         "canEdit": true,
-        "canUpdateProgress": true,
-        "canClose": true,
-        "canReopen": false,
-        "canDelete": true,
-        "canComment": true
-      }
-    },
-    {
-      "id": "5719",
-      "title": "Reducir los incidentes recurrentes a la mitad",
-      "description": "Meta compartida con otra área; coordinar avances mensuales.",
-      "percentComplete": 0,
-      "alignsWithOptionId": null,
-      "sharedWithEmployeeIds": [],
-      "dueDate": "2025-12-02",
-      "completionDate": null,
-      "lastChangedDateTime": "2026-06-23T08:54:07Z",
-      "status": "closed",
-      "milestones": null,
-      "actions": {
-        "canEdit": false,
         "canUpdateProgress": false,
-        "canClose": false,
-        "canReopen": true,
-        "canDelete": true,
-        "canComment": true
-      }
-    },
-    {
-      "id": "5722",
-      "title": "Renovar las cuentas clave del trimestre",
-      "description": "Pedido por el equipo directivo en la planificación.",
-      "percentComplete": 70,
-      "alignsWithOptionId": null,
-      "sharedWithEmployeeIds": [
-        65
-      ],
-      "dueDate": "2025-05-27",
-      "completionDate": null,
-      "lastChangedDateTime": "2026-08-13T18:22:58Z",
-      "status": "in_progress",
-      "milestones": null,
-      "actions": {
-        "canEdit": true,
-        "canUpdateProgress": true,
-        "canClose": true,
-        "canReopen": false,
-        "canDelete": true,
-        "canComment": true
-      }
-    },
-    {
-      "id": "5725",
-      "title": "Reducir los incidentes recurrentes a la mitad",
-      "description": "Pedido por el equipo directivo en la planificación.",
-      "percentComplete": 75,
-      "alignsWithOptionId": null,
-      "sharedWithEmployeeIds": [
-        65
-      ],
-      "dueDate": "2027-03-20",
-      "completionDate": null,
-      "lastChangedDateTime": "2026-10-25T16:32:14Z",
-      "status": "in_progress",
-      "milestones": null,
-      "actions": {
-        "canEdit": true,
-        "canUpdateProgress": true,
         "canClose": true,
         "canReopen": false,
         "canDelete": true,
@@ -116,26 +83,7 @@
       "firstName": "Sebastián",
       "lastName": "Garrido",
       "preferredName": "Seba"
-    },
-    {
-      "employeeId": 65,
-      "firstName": "Valentina",
-      "lastName": "Díaz",
-      "preferredName": "Vale"
     }
   ],
-  "comments": [
-    {
-      "goalId": "5717",
-      "commentCount": 2
-    },
-    {
-      "goalId": "5719",
-      "commentCount": 4
-    },
-    {
-      "goalId": "5722",
-      "commentCount": 4
-    }
-  ]
+  "comments": []
 }

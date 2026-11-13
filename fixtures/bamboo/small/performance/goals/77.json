@@ -22,17 +22,62 @@
   "selectedFilter": "status-all",
   "goals": [
     {
-      "id": "5268",
-      "title": "Renovar las cuentas clave del trimestre",
-      "description": "Alineado con el plan del área para el año.",
-      "percentComplete": 15,
+      "id": "5235",
+      "title": "Aumentar la cobertura de pruebas al 80%",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "percentComplete": 75,
       "alignsWithOptionId": null,
       "sharedWithEmployeeIds": [],
-      "dueDate": "2025-11-19",
+      "dueDate": "2027-02-09",
       "completionDate": null,
-      "lastChangedDateTime": "2026-05-14T18:26:01Z",
+      "lastChangedDateTime": "2026-10-16T19:48:08Z",
       "status": "in_progress",
-      "milestones": null,
+      "milestones": [
+        {
+          "id": 825,
+          "employeeGoalId": 5235,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2026-10-16T17:39:30Z",
+          "lastUpdateDateTime": "2026-10-16T17:39:30Z",
+          "lastUpdateUserId": 77
+        },
+        {
+          "id": 826,
+          "employeeGoalId": 5235,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2026-10-16T19:48:08Z",
+          "lastUpdateDateTime": "2026-10-16T19:48:08Z",
+          "lastUpdateUserId": 77
+        },
+        {
+          "id": 827,
+          "employeeGoalId": 5235,
+          "title": "Hito 3",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2026-10-14T19:17:11Z",
+          "lastUpdateDateTime": "2026-10-14T19:17:11Z",
+          "lastUpdateUserId": 77
+        },
+        {
+          "id": 828,
+          "employeeGoalId": 5235,
+          "title": "Hito 4",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2026-10-14T08:24:32Z",
+          "lastUpdateUserId": 77
+        }
+      ],
       "actions": {
         "canEdit": true,
         "canUpdateProgress": true,
@@ -43,43 +88,20 @@
       }
     },
     {
-      "id": "5271",
-      "title": "Migrar los reportes al nuevo tablero",
+      "id": "5237",
+      "title": "Mentorear a dos personas nuevas",
       "description": "Meta compartida con otra área; coordinar avances mensuales.",
       "percentComplete": 100,
-      "alignsWithOptionId": 9001,
-      "sharedWithEmployeeIds": [
-        37
-      ],
-      "dueDate": "2025-12-27",
-      "completionDate": "2025-10-29",
-      "lastChangedDateTime": "2025-10-29T17:40:57Z",
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2026-02-03",
+      "completionDate": "2026-01-17",
+      "lastChangedDateTime": "2026-01-17T12:33:51Z",
       "status": "completed",
       "milestones": null,
       "actions": {
         "canEdit": true,
         "canUpdateProgress": false,
-        "canClose": true,
-        "canReopen": false,
-        "canDelete": true,
-        "canComment": true
-      }
-    },
-    {
-      "id": "5274",
-      "title": "Aumentar la cobertura de pruebas al 80%",
-      "description": "Pedido por el equipo directivo en la planificación.",
-      "percentComplete": 0,
-      "alignsWithOptionId": null,
-      "sharedWithEmployeeIds": [],
-      "dueDate": "2026-02-20",
-      "completionDate": null,
-      "lastChangedDateTime": "2026-07-21T13:19:57Z",
-      "status": "in_progress",
-      "milestones": null,
-      "actions": {
-        "canEdit": true,
-        "canUpdateProgress": true,
         "canClose": true,
         "canReopen": false,
         "canDelete": true,
@@ -92,12 +114,6 @@
       "employeeId": 77,
       "firstName": "Patricia",
       "lastName": "Romero",
-      "preferredName": null
-    },
-    {
-      "employeeId": 37,
-      "firstName": "Hugo",
-      "lastName": "Ríos",
       "preferredName": null
     }
   ],

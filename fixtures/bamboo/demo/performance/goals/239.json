@@ -22,51 +22,17 @@
   "selectedFilter": "status-all",
   "goals": [
     {
-      "id": "6175",
-      "title": "Aumentar la cobertura de pruebas al 80%",
+      "id": "6061",
+      "title": "Reducir el tiempo de primera respuesta un 20%",
       "description": "Alineado con el plan del área para el año.",
       "percentComplete": 100,
       "alignsWithOptionId": null,
       "sharedWithEmployeeIds": [],
-      "dueDate": "2024-10-21",
-      "completionDate": "2024-06-24",
-      "lastChangedDateTime": "2024-06-24T08:10:23Z",
+      "dueDate": "2023-09-08",
+      "completionDate": "2023-07-18",
+      "lastChangedDateTime": "2023-07-18T08:28:14Z",
       "status": "completed",
-      "milestones": [
-        {
-          "id": 1216,
-          "employeeGoalId": 6175,
-          "title": "Hito 1",
-          "startValue": 0,
-          "endValue": 1,
-          "currentValue": 1,
-          "completedDateTime": "2024-06-18T10:10:58Z",
-          "lastUpdateDateTime": "2024-06-18T10:10:58Z",
-          "lastUpdateUserId": 239
-        },
-        {
-          "id": 1217,
-          "employeeGoalId": 6175,
-          "title": "Hito 2",
-          "startValue": 0,
-          "endValue": 1,
-          "currentValue": 1,
-          "completedDateTime": "2024-06-20T19:00:03Z",
-          "lastUpdateDateTime": "2024-06-20T19:00:03Z",
-          "lastUpdateUserId": 239
-        },
-        {
-          "id": 1218,
-          "employeeGoalId": 6175,
-          "title": "Hito 3",
-          "startValue": 0,
-          "endValue": 1,
-          "currentValue": 1,
-          "completedDateTime": "2024-06-15T10:09:54Z",
-          "lastUpdateDateTime": "2024-06-15T10:09:54Z",
-          "lastUpdateUserId": 239
-        }
-      ],
+      "milestones": null,
       "actions": {
         "canEdit": true,
         "canUpdateProgress": false,
@@ -77,43 +43,64 @@
       }
     },
     {
-      "id": "6178",
+      "id": "6063",
       "title": "Entregar el proyecto Norte sin desvíos",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "percentComplete": 85,
+      "alignsWithOptionId": 9003,
+      "sharedWithEmployeeIds": [
+        65
+      ],
+      "dueDate": "2023-05-30",
+      "completionDate": null,
+      "lastChangedDateTime": "2025-10-01T13:22:37Z",
+      "status": "in_progress",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "6065",
+      "title": "Implementar el calendario editorial",
       "description": "Alineado con el plan del área para el año.",
       "percentComplete": 100,
       "alignsWithOptionId": null,
       "sharedWithEmployeeIds": [],
-      "dueDate": "2025-06-25",
-      "completionDate": "2025-02-24",
-      "lastChangedDateTime": "2025-02-24T12:19:16Z",
+      "dueDate": "2024-07-25",
+      "completionDate": "2024-08-01",
+      "lastChangedDateTime": "2024-08-01T17:51:15Z",
       "status": "completed",
-      "milestones": [
-        {
-          "id": 1219,
-          "employeeGoalId": 6178,
-          "title": "Hito 1",
-          "startValue": 0,
-          "endValue": 1,
-          "currentValue": 1,
-          "completedDateTime": "2024-12-12T13:34:44Z",
-          "lastUpdateDateTime": "2024-12-12T13:34:44Z",
-          "lastUpdateUserId": 239
-        },
-        {
-          "id": 1220,
-          "employeeGoalId": 6178,
-          "title": "Hito 2",
-          "startValue": 0,
-          "endValue": 1,
-          "currentValue": 1,
-          "completedDateTime": "2024-12-21T11:51:51Z",
-          "lastUpdateDateTime": "2024-12-21T11:51:51Z",
-          "lastUpdateUserId": 239
-        }
-      ],
+      "milestones": null,
       "actions": {
         "canEdit": true,
         "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "6067",
+      "title": "Renovar las cuentas clave del trimestre",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "percentComplete": 25,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2024-10-03",
+      "completionDate": null,
+      "lastChangedDateTime": "2025-01-09T10:55:25Z",
+      "status": "in_progress",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
         "canClose": true,
         "canReopen": false,
         "canDelete": true,
@@ -127,15 +114,21 @@
       "firstName": "Romina",
       "lastName": "Navarro",
       "preferredName": null
+    },
+    {
+      "employeeId": 65,
+      "firstName": "Valentina",
+      "lastName": "Díaz",
+      "preferredName": "Vale"
     }
   ],
   "comments": [
     {
-      "goalId": "6175",
-      "commentCount": 1
+      "goalId": "6061",
+      "commentCount": 2
     },
     {
-      "goalId": "6178",
+      "goalId": "6065",
       "commentCount": 3
     }
   ]

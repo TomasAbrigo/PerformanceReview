@@ -22,105 +22,59 @@
   "selectedFilter": "status-all",
   "goals": [
     {
-      "id": "7533",
-      "title": "Documentar los procesos críticos",
-      "description": "Meta compartida con otra área; coordinar avances mensuales.",
-      "percentComplete": 0,
-      "alignsWithOptionId": null,
-      "sharedWithEmployeeIds": [],
-      "dueDate": "2025-08-11",
-      "completionDate": null,
-      "lastChangedDateTime": "2025-12-19T18:32:28Z",
-      "status": "in_progress",
-      "milestones": [
-        {
-          "id": 1844,
-          "employeeGoalId": 7533,
-          "title": "Hito 1",
-          "startValue": 0,
-          "endValue": 1,
-          "currentValue": 0,
-          "completedDateTime": null,
-          "lastUpdateDateTime": "2024-12-23T11:56:52Z",
-          "lastUpdateUserId": 535
-        },
-        {
-          "id": 1845,
-          "employeeGoalId": 7533,
-          "title": "Hito 2",
-          "startValue": 0,
-          "endValue": 1,
-          "currentValue": 0,
-          "completedDateTime": null,
-          "lastUpdateDateTime": "2024-12-23T19:13:41Z",
-          "lastUpdateUserId": 535
-        },
-        {
-          "id": 1846,
-          "employeeGoalId": 7533,
-          "title": "Hito 3",
-          "startValue": 0,
-          "endValue": 1,
-          "currentValue": 0,
-          "completedDateTime": null,
-          "lastUpdateDateTime": "2024-12-23T10:45:23Z",
-          "lastUpdateUserId": 535
-        }
-      ],
-      "actions": {
-        "canEdit": false,
-        "canUpdateProgress": false,
-        "canClose": false,
-        "canReopen": false,
-        "canDelete": false,
-        "canComment": false
-      }
-    },
-    {
-      "id": "7536",
-      "title": "Implementar el calendario editorial",
+      "id": "7280",
+      "title": "Renovar las cuentas clave del trimestre",
       "description": "Pedido por el equipo directivo en la planificación.",
       "percentComplete": 100,
       "alignsWithOptionId": null,
-      "sharedWithEmployeeIds": [
-        243
-      ],
-      "dueDate": "2025-08-13",
-      "completionDate": "2025-06-13",
-      "lastChangedDateTime": "2025-06-13T18:02:39Z",
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2025-05-15",
+      "completionDate": "2025-05-27",
+      "lastChangedDateTime": "2025-05-27T13:55:01Z",
       "status": "completed",
       "milestones": [
         {
-          "id": 1847,
-          "employeeGoalId": 7536,
+          "id": 1751,
+          "employeeGoalId": 7280,
           "title": "Hito 1",
           "startValue": 0,
           "endValue": 1,
           "currentValue": 1,
-          "completedDateTime": "2024-12-24T14:11:20Z",
-          "lastUpdateDateTime": "2024-12-24T14:11:20Z",
+          "completedDateTime": "2025-05-01T13:06:07Z",
+          "lastUpdateDateTime": "2025-05-01T13:06:07Z",
           "lastUpdateUserId": 535
         },
         {
-          "id": 1848,
-          "employeeGoalId": 7536,
+          "id": 1752,
+          "employeeGoalId": 7280,
           "title": "Hito 2",
           "startValue": 0,
           "endValue": 1,
           "currentValue": 1,
-          "completedDateTime": "2025-01-25T19:30:08Z",
-          "lastUpdateDateTime": "2025-01-25T19:30:08Z",
+          "completedDateTime": "2025-01-30T12:41:34Z",
+          "lastUpdateDateTime": "2025-01-30T12:41:34Z",
           "lastUpdateUserId": 535
         },
         {
-          "id": 1849,
-          "employeeGoalId": 7536,
+          "id": 1753,
+          "employeeGoalId": 7280,
           "title": "Hito 3",
           "startValue": 0,
           "endValue": 1,
           "currentValue": 1,
-          "completedDateTime": "2025-03-10T14:36:31Z",
-          "lastUpdateDateTime": "2025-03-10T14:36:31Z",
+          "completedDateTime": "2025-04-09T13:32:59Z",
+          "lastUpdateDateTime": "2025-04-09T13:32:59Z",
+          "lastUpdateUserId": 535
+        },
+        {
+          "id": 1754,
+          "employeeGoalId": 7280,
+          "title": "Hito 4",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-02-18T11:32:04Z",
+          "lastUpdateDateTime": "2025-02-18T11:32:04Z",
           "lastUpdateUserId": 535
         }
       ],
@@ -140,18 +94,7 @@
       "firstName": "Belén",
       "lastName": "Heredia",
       "preferredName": null
-    },
-    {
-      "employeeId": 243,
-      "firstName": "Jimena",
-      "lastName": "Bustos",
-      "preferredName": null
     }
   ],
-  "comments": [
-    {
-      "goalId": "7533",
-      "commentCount": 1
-    }
-  ]
+  "comments": []
 }

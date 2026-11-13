@@ -51,8 +51,8 @@ El generador (`src/fixtures/company/`) es puro y usa una semilla fija (`1001` pa
 
 | Tamaño | Registros Bamboo | Bajas | Reingresos | Cambios de manager | Goals | Assessments | Pedidos de feedback |
 | ------ | ---------------- | ----- | ---------- | ------------------ | ----- | ----------- | ------------------- |
-| small  | 40               | 10    | 4          | 26                 | 157   | 80          | 215                 |
-| demo   | 400              | 30    | 8          | 70                 | 1649  | 915         | 2764                |
+| small  | 40               | 10    | 4          | 24                 | 143   | 80          | 220                 |
+| demo   | 400              | 30    | 8          | 71                 | 1484  | 915         | 2801                |
 
 Ambos tienen 5 niveles (CEO, VP de división, gerente de área, líder de equipo, individual), varias divisiones, áreas y ubicaciones, una sola persona sin manager (el CEO) y 3 ciclos históricos anuales (2023, 2024 y 2025).
 

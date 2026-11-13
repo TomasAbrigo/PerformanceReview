@@ -22,7 +22,7 @@
   "selectedFilter": "status-all",
   "goals": [
     {
-      "id": "5263",
+      "id": "5260",
       "title": "Mejorar el NPS interno del equipo",
       "description": "Meta compartida con otra área; coordinar avances mensuales.",
       "percentComplete": 100,
@@ -34,8 +34,8 @@
       "status": "completed",
       "milestones": [
         {
-          "id": 827,
-          "employeeGoalId": 5263,
+          "id": 819,
+          "employeeGoalId": 5260,
           "title": "Hito 1",
           "startValue": 0,
           "endValue": 1,
@@ -45,8 +45,8 @@
           "lastUpdateUserId": 63
         },
         {
-          "id": 828,
-          "employeeGoalId": 5263,
+          "id": 820,
+          "employeeGoalId": 5260,
           "title": "Hito 2",
           "startValue": 0,
           "endValue": 1,
@@ -66,7 +66,7 @@
       }
     },
     {
-      "id": "5264",
+      "id": "5261",
       "title": "Renovar las cuentas clave del trimestre",
       "description": "Sirve de base para el próximo ciclo de evaluación.",
       "percentComplete": 75,
@@ -89,7 +89,7 @@
       }
     },
     {
-      "id": "5267",
+      "id": "5264",
       "title": "Mentorear a dos personas nuevas",
       "description": "Alineado con el plan del área para el año.",
       "percentComplete": 0,
@@ -112,7 +112,7 @@
       }
     },
     {
-      "id": "5270",
+      "id": "5267",
       "title": "Documentar los procesos críticos",
       "description": "Sirve de base para el próximo ciclo de evaluación.",
       "percentComplete": 50,
@@ -124,8 +124,8 @@
       "status": "in_progress",
       "milestones": [
         {
-          "id": 829,
-          "employeeGoalId": 5270,
+          "id": 821,
+          "employeeGoalId": 5267,
           "title": "Hito 1",
           "startValue": 0,
           "endValue": 1,
@@ -135,8 +135,8 @@
           "lastUpdateUserId": 63
         },
         {
-          "id": 830,
-          "employeeGoalId": 5270,
+          "id": 822,
+          "employeeGoalId": 5267,
           "title": "Hito 2",
           "startValue": 0,
           "endValue": 1,
@@ -156,7 +156,7 @@
       }
     },
     {
-      "id": "5271",
+      "id": "5268",
       "title": "Entregar el proyecto Norte sin desvíos",
       "description": "Sirve de base para el próximo ciclo de evaluación.",
       "percentComplete": 100,
@@ -168,8 +168,8 @@
       "status": "completed",
       "milestones": [
         {
-          "id": 831,
-          "employeeGoalId": 5271,
+          "id": 823,
+          "employeeGoalId": 5268,
           "title": "Hito 1",
           "startValue": 0,
           "endValue": 1,
@@ -179,8 +179,8 @@
           "lastUpdateUserId": 63
         },
         {
-          "id": 832,
-          "employeeGoalId": 5271,
+          "id": 824,
+          "employeeGoalId": 5268,
           "title": "Hito 2",
           "startValue": 0,
           "endValue": 1,
@@ -200,7 +200,7 @@
       }
     },
     {
-      "id": "5273",
+      "id": "5270",
       "title": "Aumentar la cobertura de pruebas al 80%",
       "description": "Pedido por el equipo directivo en la planificación.",
       "percentComplete": 100,
@@ -212,8 +212,8 @@
       "status": "completed",
       "milestones": [
         {
-          "id": 833,
-          "employeeGoalId": 5273,
+          "id": 825,
+          "employeeGoalId": 5270,
           "title": "Hito 1",
           "startValue": 0,
           "endValue": 1,
@@ -223,8 +223,8 @@
           "lastUpdateUserId": 63
         },
         {
-          "id": 834,
-          "employeeGoalId": 5273,
+          "id": 826,
+          "employeeGoalId": 5270,
           "title": "Hito 2",
           "startValue": 0,
           "endValue": 1,
@@ -244,7 +244,7 @@
       }
     },
     {
-      "id": "5274",
+      "id": "5271",
       "title": "Mentorear a dos personas nuevas",
       "description": "Alineado con el plan del área para el año.",
       "percentComplete": 100,
@@ -281,11 +281,11 @@
   ],
   "comments": [
     {
-      "goalId": "5271",
+      "goalId": "5268",
       "commentCount": 2
     },
     {
-      "goalId": "5273",
+      "goalId": "5270",
       "commentCount": 1
     }
   ]

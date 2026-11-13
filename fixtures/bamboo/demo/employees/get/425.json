@@ -3,15 +3,15 @@
   "firstName": "Lorena",
   "lastName": "Fuentes",
   "workEmail": "lorena.fuentes@meridian-andina.example",
-  "employeeNumber": "11059",
+  "employeeNumber": "11058",
   "supervisorEId": "363",
-  "supervisorId": "10907",
+  "supervisorId": "10890",
   "supervisor": "Navarro, Agustina",
   "hireDate": "2023-02-16",
   "terminationDate": null,
   "department": "Legales",
   "division": "Corporativo",
-  "jobTitle": "Abogado Corporativo Sr",
+  "jobTitle": "Abogado Corporativo Ssr",
   "location": "Buenos Aires",
   "status": "Active"
 }

@@ -3,7 +3,7 @@
   "firstName": "Facundo",
   "lastName": "Aguirre",
   "workEmail": "facundo.aguirre@meridian-andina.example",
-  "employeeNumber": "10283",
+  "employeeNumber": "10280",
   "supervisorEId": "47",
   "supervisorId": "10080",
   "supervisor": "Olmos, Candela",
@@ -11,7 +11,7 @@
   "terminationDate": null,
   "department": "Soporte",
   "division": "Operaciones",
-  "jobTitle": "Agente de Soporte Ssr",
+  "jobTitle": "Agente de Soporte Sr",
   "location": "Córdoba",
   "status": "Active"
 }

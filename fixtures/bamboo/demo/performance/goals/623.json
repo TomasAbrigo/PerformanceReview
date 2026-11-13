@@ -22,17 +22,15 @@
   "selectedFilter": "status-all",
   "goals": [
     {
-      "id": "7826",
-      "title": "Automatizar la conciliación mensual",
-      "description": "Alineado con el plan del área para el año.",
+      "id": "7553",
+      "title": "Renovar las cuentas clave del trimestre",
+      "description": "Pedido por el equipo directivo en la planificación.",
       "percentComplete": 100,
       "alignsWithOptionId": null,
-      "sharedWithEmployeeIds": [
-        243
-      ],
-      "dueDate": "2025-07-27",
-      "completionDate": "2025-08-02",
-      "lastChangedDateTime": "2025-08-02T10:34:45Z",
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2024-11-25",
+      "completionDate": "2024-11-11",
+      "lastChangedDateTime": "2024-11-11T15:46:21Z",
       "status": "completed",
       "milestones": null,
       "actions": {
@@ -45,17 +43,36 @@
       }
     },
     {
-      "id": "7827",
+      "id": "7556",
       "title": "Lanzar el nuevo flujo de onboarding",
-      "description": "Pedido por el equipo directivo en la planificación.",
+      "description": "Alineado con el plan del área para el año.",
       "percentComplete": 100,
       "alignsWithOptionId": null,
-      "sharedWithEmployeeIds": [
-        243
-      ],
-      "dueDate": "2025-07-08",
-      "completionDate": "2025-02-10",
-      "lastChangedDateTime": "2025-02-10T14:59:20Z",
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2025-04-04",
+      "completionDate": "2025-03-26",
+      "lastChangedDateTime": "2025-03-26T12:00:15Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "7558",
+      "title": "Automatizar la conciliación mensual",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 100,
+      "alignsWithOptionId": 9002,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2026-05-01",
+      "completionDate": "2026-05-03",
+      "lastChangedDateTime": "2026-05-03T09:54:46Z",
       "status": "completed",
       "milestones": null,
       "actions": {
@@ -74,13 +91,20 @@
       "firstName": "Tomás",
       "lastName": "Ojeda",
       "preferredName": null
-    },
-    {
-      "employeeId": 243,
-      "firstName": "Jimena",
-      "lastName": "Bustos",
-      "preferredName": null
     }
   ],
-  "comments": []
+  "comments": [
+    {
+      "goalId": "7553",
+      "commentCount": 4
+    },
+    {
+      "goalId": "7556",
+      "commentCount": 4
+    },
+    {
+      "goalId": "7558",
+      "commentCount": 4
+    }
+  ]
 }

@@ -22,170 +22,19 @@
   "selectedFilter": "status-all",
   "goals": [
     {
-      "id": "6389",
-      "title": "Mentorear a dos personas nuevas",
-      "description": "Sirve de base para el próximo ciclo de evaluación.",
-      "percentComplete": 75,
+      "id": "6268",
+      "title": "Reducir los incidentes recurrentes a la mitad",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 5,
       "alignsWithOptionId": null,
-      "sharedWithEmployeeIds": [],
-      "dueDate": "2023-03-21",
+      "sharedWithEmployeeIds": [
+        43
+      ],
+      "dueDate": "2025-07-21",
       "completionDate": null,
-      "lastChangedDateTime": "2025-02-11T10:01:19Z",
-      "status": "in_progress",
-      "milestones": [
-        {
-          "id": 1307,
-          "employeeGoalId": 6389,
-          "title": "Hito 1",
-          "startValue": 0,
-          "endValue": 1,
-          "currentValue": 1,
-          "completedDateTime": "2024-02-22T08:33:20Z",
-          "lastUpdateDateTime": "2024-02-22T08:33:20Z",
-          "lastUpdateUserId": 287
-        },
-        {
-          "id": 1308,
-          "employeeGoalId": 6389,
-          "title": "Hito 2",
-          "startValue": 0,
-          "endValue": 1,
-          "currentValue": 1,
-          "completedDateTime": "2022-10-29T17:02:09Z",
-          "lastUpdateDateTime": "2022-10-29T17:02:09Z",
-          "lastUpdateUserId": 287
-        },
-        {
-          "id": 1309,
-          "employeeGoalId": 6389,
-          "title": "Hito 3",
-          "startValue": 0,
-          "endValue": 1,
-          "currentValue": 1,
-          "completedDateTime": "2023-09-17T14:09:59Z",
-          "lastUpdateDateTime": "2023-09-17T14:09:59Z",
-          "lastUpdateUserId": 287
-        },
-        {
-          "id": 1310,
-          "employeeGoalId": 6389,
-          "title": "Hito 4",
-          "startValue": 0,
-          "endValue": 1,
-          "currentValue": 0,
-          "completedDateTime": null,
-          "lastUpdateDateTime": "2022-09-18T11:17:05Z",
-          "lastUpdateUserId": 287
-        }
-      ],
-      "actions": {
-        "canEdit": false,
-        "canUpdateProgress": false,
-        "canClose": false,
-        "canReopen": false,
-        "canDelete": false,
-        "canComment": false
-      }
-    },
-    {
-      "id": "6390",
-      "title": "Cerrar el plan de capacitación anual",
-      "description": "Meta compartida con otra área; coordinar avances mensuales.",
-      "percentComplete": 100,
-      "alignsWithOptionId": 9002,
-      "sharedWithEmployeeIds": [],
-      "dueDate": "2023-09-09",
-      "completionDate": "2023-08-28",
-      "lastChangedDateTime": "2023-08-28T15:32:12Z",
-      "status": "completed",
+      "lastChangedDateTime": "2025-04-03T19:53:10Z",
+      "status": "closed",
       "milestones": null,
-      "actions": {
-        "canEdit": false,
-        "canUpdateProgress": false,
-        "canClose": false,
-        "canReopen": false,
-        "canDelete": false,
-        "canComment": false
-      }
-    },
-    {
-      "id": "6393",
-      "title": "Entregar el proyecto Norte sin desvíos",
-      "description": "Alineado con el plan del área para el año.",
-      "percentComplete": 100,
-      "alignsWithOptionId": null,
-      "sharedWithEmployeeIds": [],
-      "dueDate": "2023-03-18",
-      "completionDate": "2023-03-18",
-      "lastChangedDateTime": "2023-03-18T15:36:12Z",
-      "status": "completed",
-      "milestones": null,
-      "actions": {
-        "canEdit": false,
-        "canUpdateProgress": false,
-        "canClose": false,
-        "canReopen": false,
-        "canDelete": false,
-        "canComment": false
-      }
-    },
-    {
-      "id": "6394",
-      "title": "Cerrar el plan de capacitación anual",
-      "description": "Alineado con el plan del área para el año.",
-      "percentComplete": 100,
-      "alignsWithOptionId": null,
-      "sharedWithEmployeeIds": [],
-      "dueDate": "2024-02-10",
-      "completionDate": "2024-02-01",
-      "lastChangedDateTime": "2024-02-01T19:18:47Z",
-      "status": "completed",
-      "milestones": [
-        {
-          "id": 1311,
-          "employeeGoalId": 6394,
-          "title": "Hito 1",
-          "startValue": 0,
-          "endValue": 1,
-          "currentValue": 1,
-          "completedDateTime": "2023-08-30T16:05:46Z",
-          "lastUpdateDateTime": "2023-08-30T16:05:46Z",
-          "lastUpdateUserId": 287
-        },
-        {
-          "id": 1312,
-          "employeeGoalId": 6394,
-          "title": "Hito 2",
-          "startValue": 0,
-          "endValue": 1,
-          "currentValue": 1,
-          "completedDateTime": "2023-10-19T18:50:25Z",
-          "lastUpdateDateTime": "2023-10-19T18:50:25Z",
-          "lastUpdateUserId": 287
-        },
-        {
-          "id": 1313,
-          "employeeGoalId": 6394,
-          "title": "Hito 3",
-          "startValue": 0,
-          "endValue": 1,
-          "currentValue": 1,
-          "completedDateTime": "2023-06-22T17:14:33Z",
-          "lastUpdateDateTime": "2023-06-22T17:14:33Z",
-          "lastUpdateUserId": 287
-        },
-        {
-          "id": 1314,
-          "employeeGoalId": 6394,
-          "title": "Hito 4",
-          "startValue": 0,
-          "endValue": 1,
-          "currentValue": 1,
-          "completedDateTime": "2023-09-28T15:21:38Z",
-          "lastUpdateDateTime": "2023-09-28T15:21:38Z",
-          "lastUpdateUserId": 287
-        }
-      ],
       "actions": {
         "canEdit": false,
         "canUpdateProgress": false,
@@ -202,12 +51,13 @@
       "firstName": "Fernando",
       "lastName": "Olmos",
       "preferredName": "Fer"
+    },
+    {
+      "employeeId": 43,
+      "firstName": "Eugenia",
+      "lastName": "Soria",
+      "preferredName": null
     }
   ],
-  "comments": [
-    {
-      "goalId": "6393",
-      "commentCount": 3
-    }
-  ]
+  "comments": []
 }

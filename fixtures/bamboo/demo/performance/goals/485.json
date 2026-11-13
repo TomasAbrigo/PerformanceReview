@@ -22,63 +22,53 @@
   "selectedFilter": "status-all",
   "goals": [
     {
-      "id": "7321",
+      "id": "7093",
       "title": "Aumentar la cobertura de pruebas al 80%",
-      "description": "Alineado con el plan del área para el año.",
-      "percentComplete": 65,
-      "alignsWithOptionId": null,
-      "sharedWithEmployeeIds": [],
-      "dueDate": "2023-10-31",
-      "completionDate": null,
-      "lastChangedDateTime": "2025-08-08T12:29:19Z",
-      "status": "closed",
-      "milestones": null,
-      "actions": {
-        "canEdit": false,
-        "canUpdateProgress": false,
-        "canClose": false,
-        "canReopen": true,
-        "canDelete": true,
-        "canComment": true
-      }
-    },
-    {
-      "id": "7323",
-      "title": "Mentorear a dos personas nuevas",
-      "description": "Sirve de base para el próximo ciclo de evaluación.",
-      "percentComplete": 70,
-      "alignsWithOptionId": 9001,
-      "sharedWithEmployeeIds": [
-        111
-      ],
-      "dueDate": "2024-03-26",
-      "completionDate": null,
-      "lastChangedDateTime": "2026-06-17T10:22:27Z",
-      "status": "in_progress",
-      "milestones": null,
-      "actions": {
-        "canEdit": true,
-        "canUpdateProgress": true,
-        "canClose": true,
-        "canReopen": false,
-        "canDelete": true,
-        "canComment": true
-      }
-    },
-    {
-      "id": "7325",
-      "title": "Entregar el proyecto Norte sin desvíos",
-      "description": "Alineado con el plan del área para el año.",
-      "percentComplete": 45,
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 67,
       "alignsWithOptionId": null,
       "sharedWithEmployeeIds": [
-        111
+        67
       ],
-      "dueDate": "2025-02-04",
+      "dueDate": "2026-07-19",
       "completionDate": null,
-      "lastChangedDateTime": "2026-10-22T18:29:34Z",
+      "lastChangedDateTime": "2026-06-23T11:31:13Z",
       "status": "in_progress",
-      "milestones": null,
+      "milestones": [
+        {
+          "id": 1646,
+          "employeeGoalId": 7093,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2026-04-29T08:44:08Z",
+          "lastUpdateDateTime": "2026-04-29T08:44:08Z",
+          "lastUpdateUserId": 485
+        },
+        {
+          "id": 1647,
+          "employeeGoalId": 7093,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2026-06-19T12:36:23Z",
+          "lastUpdateDateTime": "2026-06-19T12:36:23Z",
+          "lastUpdateUserId": 485
+        },
+        {
+          "id": 1648,
+          "employeeGoalId": 7093,
+          "title": "Hito 3",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2026-04-10T18:23:49Z",
+          "lastUpdateUserId": 485
+        }
+      ],
       "actions": {
         "canEdit": true,
         "canUpdateProgress": true,
@@ -97,16 +87,11 @@
       "preferredName": null
     },
     {
-      "employeeId": 111,
-      "firstName": "Martín",
-      "lastName": "Peralta",
+      "employeeId": 67,
+      "firstName": "Noelia",
+      "lastName": "Roldán",
       "preferredName": null
     }
   ],
-  "comments": [
-    {
-      "goalId": "7325",
-      "commentCount": 4
-    }
-  ]
+  "comments": []
 }

@@ -22,36 +22,15 @@
   "selectedFilter": "status-all",
   "goals": [
     {
-      "id": "7437",
-      "title": "Implementar el calendario editorial",
-      "description": "Pedido por el equipo directivo en la planificación.",
-      "percentComplete": 100,
-      "alignsWithOptionId": null,
-      "sharedWithEmployeeIds": [],
-      "dueDate": "2024-09-30",
-      "completionDate": "2024-06-29",
-      "lastChangedDateTime": "2024-06-29T17:15:32Z",
-      "status": "completed",
-      "milestones": null,
-      "actions": {
-        "canEdit": true,
-        "canUpdateProgress": false,
-        "canClose": true,
-        "canReopen": false,
-        "canDelete": true,
-        "canComment": true
-      }
-    },
-    {
-      "id": "7438",
-      "title": "Mentorear a dos personas nuevas",
+      "id": "7192",
+      "title": "Migrar los reportes al nuevo tablero",
       "description": "Alineado con el plan del área para el año.",
-      "percentComplete": 5,
+      "percentComplete": 55,
       "alignsWithOptionId": null,
       "sharedWithEmployeeIds": [],
-      "dueDate": "2024-12-29",
+      "dueDate": "2024-09-15",
       "completionDate": null,
-      "lastChangedDateTime": "2026-06-23T14:31:09Z",
+      "lastChangedDateTime": "2024-05-17T19:55:08Z",
       "status": "in_progress",
       "milestones": null,
       "actions": {
@@ -64,104 +43,17 @@
       }
     },
     {
-      "id": "7440",
-      "title": "Reducir los incidentes recurrentes a la mitad",
-      "description": "Sirve de base para el próximo ciclo de evaluación.",
-      "percentComplete": 25,
+      "id": "7193",
+      "title": "Renovar las cuentas clave del trimestre",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "percentComplete": 0,
       "alignsWithOptionId": null,
       "sharedWithEmployeeIds": [],
-      "dueDate": "2025-05-10",
+      "dueDate": "2027-02-22",
       "completionDate": null,
-      "lastChangedDateTime": "2026-02-25T09:41:48Z",
-      "status": "closed",
-      "milestones": null,
-      "actions": {
-        "canEdit": false,
-        "canUpdateProgress": false,
-        "canClose": false,
-        "canReopen": true,
-        "canDelete": true,
-        "canComment": true
-      }
-    },
-    {
-      "id": "7442",
-      "title": "Mentorear a dos personas nuevas",
-      "description": "Pedido por el equipo directivo en la planificación.",
-      "percentComplete": 100,
-      "alignsWithOptionId": 9002,
-      "sharedWithEmployeeIds": [],
-      "dueDate": "2026-03-22",
-      "completionDate": "2025-09-15",
-      "lastChangedDateTime": "2025-09-15T17:07:35Z",
-      "status": "completed",
-      "milestones": null,
-      "actions": {
-        "canEdit": true,
-        "canUpdateProgress": false,
-        "canClose": true,
-        "canReopen": false,
-        "canDelete": true,
-        "canComment": true
-      }
-    },
-    {
-      "id": "7444",
-      "title": "Implementar el calendario editorial",
-      "description": "Alineado con el plan del área para el año.",
-      "percentComplete": 25,
-      "alignsWithOptionId": null,
-      "sharedWithEmployeeIds": [],
-      "dueDate": "2026-11-08",
-      "completionDate": null,
-      "lastChangedDateTime": "2026-04-29T17:50:42Z",
+      "lastChangedDateTime": "2026-10-24T16:08:19Z",
       "status": "in_progress",
-      "milestones": [
-        {
-          "id": 1809,
-          "employeeGoalId": 7444,
-          "title": "Hito 1",
-          "startValue": 0,
-          "endValue": 1,
-          "currentValue": 1,
-          "completedDateTime": "2026-04-03T09:48:53Z",
-          "lastUpdateDateTime": "2026-04-03T09:48:53Z",
-          "lastUpdateUserId": 509
-        },
-        {
-          "id": 1810,
-          "employeeGoalId": 7444,
-          "title": "Hito 2",
-          "startValue": 0,
-          "endValue": 1,
-          "currentValue": 0,
-          "completedDateTime": null,
-          "lastUpdateDateTime": "2026-03-24T08:48:25Z",
-          "lastUpdateUserId": 509
-        },
-        {
-          "id": 1811,
-          "employeeGoalId": 7444,
-          "title": "Hito 3",
-          "startValue": 0,
-          "endValue": 1,
-          "currentValue": 0,
-          "completedDateTime": null,
-          "lastUpdateDateTime": "2026-03-24T17:45:35Z",
-          "lastUpdateUserId": 509
-        },
-        {
-          "id": 1812,
-          "employeeGoalId": 7444,
-          "title": "Hito 4",
-          "startValue": 0,
-          "endValue": 1,
-          "currentValue": 0,
-          "completedDateTime": null,
-          "lastUpdateDateTime": "2026-03-24T19:17:35Z",
-          "lastUpdateUserId": 509
-        }
-      ],
+      "milestones": null,
       "actions": {
         "canEdit": true,
         "canUpdateProgress": true,
@@ -182,8 +74,12 @@
   ],
   "comments": [
     {
-      "goalId": "7440",
+      "goalId": "7192",
       "commentCount": 4
+    },
+    {
+      "goalId": "7193",
+      "commentCount": 1
     }
   ]
 }

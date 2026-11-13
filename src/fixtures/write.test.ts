@@ -1,4 +1,12 @@
-import { mkdtempSync, readFileSync, readdirSync, rmSync, statSync, writeFileSync, mkdirSync } from "node:fs";
+import {
+  mkdtempSync,
+  readFileSync,
+  readdirSync,
+  rmSync,
+  statSync,
+  writeFileSync,
+  mkdirSync,
+} from "node:fs";
 import { tmpdir } from "node:os";
 import { join, relative } from "node:path";
 import { afterAll, describe, expect, it } from "vitest";
@@ -36,7 +44,9 @@ describe("fixture layout", () => {
     for (const size of ["small", "demo"] as const) {
       const paths = fixtureFiles(size).map((f) => f.path);
       expect(paths).toContain(`bamboo/${size}/employees/changed.json`);
-      expect(paths).toContain(`bamboo/${size}/employees/tables/jobInfo/all.json`);
+      expect(paths).toContain(
+        `bamboo/${size}/employees/tables/jobInfo/all.json`,
+      );
       expect(paths).toContain(`bamboo/${size}/manifest.json`);
       for (const report of [
         "employee-performance",
@@ -51,7 +61,9 @@ describe("fixture layout", () => {
   });
 
   it("describes the dataset in a manifest with the seed and headline counts", () => {
-    const file = fixtureFiles("small").find((f) => f.path === "bamboo/small/manifest.json")!;
+    const file = fixtureFiles("small").find(
+      (f) => f.path === "bamboo/small/manifest.json",
+    )!;
     const manifest = JSON.parse(file.content);
     expect(manifest).toMatchObject({
       size: "small",
@@ -82,10 +94,14 @@ describe("committed fixtures", () => {
   it.each(["small", "demo"] as const)(
     "%s fixtures in the repo are up to date (run `pnpm fixtures:build`)",
     (size) => {
-      const expected = Object.fromEntries(fixtureFiles(size).map((f) => [f.path, f.content]));
+      const expected = Object.fromEntries(
+        fixtureFiles(size).map((f) => [f.path, f.content]),
+      );
       const onDisk = Object.fromEntries(
         Object.entries(tree(repoFixtures)).filter(
-          ([path]) => path.startsWith(`bamboo/${size}/`) || path.startsWith(`bamboo-reports/${size}/`),
+          ([path]) =>
+            path.startsWith(`bamboo/${size}/`) ||
+            path.startsWith(`bamboo-reports/${size}/`),
         ),
       );
       expect(Object.keys(onDisk).sort()).toEqual(Object.keys(expected).sort());

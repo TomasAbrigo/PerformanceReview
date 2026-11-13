@@ -22,20 +22,20 @@
   "selectedFilter": "status-all",
   "goals": [
     {
-      "id": "6965",
-      "title": "Mejorar el NPS interno del equipo",
-      "description": "Pedido por el equipo directivo en la planificación.",
-      "percentComplete": 100,
+      "id": "6800",
+      "title": "Implementar el calendario editorial",
+      "description": "Sirve de base para el próximo ciclo de evaluación.",
+      "percentComplete": 0,
       "alignsWithOptionId": null,
       "sharedWithEmployeeIds": [],
-      "dueDate": "2025-02-05",
-      "completionDate": "2024-12-28",
-      "lastChangedDateTime": "2024-12-28T18:09:33Z",
-      "status": "completed",
+      "dueDate": "2023-06-21",
+      "completionDate": null,
+      "lastChangedDateTime": "2024-05-05T13:44:27Z",
+      "status": "in_progress",
       "milestones": null,
       "actions": {
         "canEdit": true,
-        "canUpdateProgress": false,
+        "canUpdateProgress": true,
         "canClose": true,
         "canReopen": false,
         "canDelete": true,
@@ -43,20 +43,20 @@
       }
     },
     {
-      "id": "6968",
+      "id": "6801",
       "title": "Lanzar el nuevo flujo de onboarding",
       "description": "Meta compartida con otra área; coordinar avances mensuales.",
-      "percentComplete": 30,
+      "percentComplete": 100,
       "alignsWithOptionId": null,
       "sharedWithEmployeeIds": [],
-      "dueDate": "2027-03-19",
-      "completionDate": null,
-      "lastChangedDateTime": "2026-09-29T11:18:07Z",
-      "status": "in_progress",
+      "dueDate": "2024-11-30",
+      "completionDate": "2024-09-05",
+      "lastChangedDateTime": "2024-09-05T15:24:10Z",
+      "status": "completed",
       "milestones": null,
       "actions": {
         "canEdit": true,
-        "canUpdateProgress": true,
+        "canUpdateProgress": false,
         "canClose": true,
         "canReopen": false,
         "canDelete": true,
@@ -72,14 +72,5 @@
       "preferredName": "Vico"
     }
   ],
-  "comments": [
-    {
-      "goalId": "6965",
-      "commentCount": 1
-    },
-    {
-      "goalId": "6968",
-      "commentCount": 2
-    }
-  ]
+  "comments": []
 }

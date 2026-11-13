@@ -22,36 +22,59 @@
   "selectedFilter": "status-all",
   "goals": [
     {
-      "id": "7872",
-      "title": "Renovar las cuentas clave del trimestre",
+      "id": "7624",
+      "title": "Reducir los incidentes recurrentes a la mitad",
       "description": "Pedido por el equipo directivo en la planificación.",
-      "percentComplete": 65,
-      "alignsWithOptionId": 9004,
+      "percentComplete": 100,
+      "alignsWithOptionId": 9003,
       "sharedWithEmployeeIds": [],
-      "dueDate": "2025-05-14",
-      "completionDate": null,
-      "lastChangedDateTime": "2026-01-20T08:03:14Z",
-      "status": "closed",
+      "dueDate": "2025-06-26",
+      "completionDate": "2025-03-20",
+      "lastChangedDateTime": "2025-03-20T17:53:12Z",
+      "status": "completed",
       "milestones": null,
       "actions": {
-        "canEdit": false,
+        "canEdit": true,
         "canUpdateProgress": false,
-        "canClose": false,
-        "canReopen": true,
+        "canClose": true,
+        "canReopen": false,
         "canDelete": true,
         "canComment": true
       }
     },
     {
-      "id": "7874",
-      "title": "Automatizar la conciliación mensual",
-      "description": "Sirve de base para el próximo ciclo de evaluación.",
-      "percentComplete": 45,
-      "alignsWithOptionId": 9003,
+      "id": "7627",
+      "title": "Reducir el tiempo de primera respuesta un 20%",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 20,
+      "alignsWithOptionId": null,
       "sharedWithEmployeeIds": [],
-      "dueDate": "2026-05-29",
+      "dueDate": "2025-11-08",
       "completionDate": null,
-      "lastChangedDateTime": "2026-06-15T14:03:58Z",
+      "lastChangedDateTime": "2026-02-05T11:44:51Z",
+      "status": "in_progress",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "7629",
+      "title": "Mentorear a dos personas nuevas",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "percentComplete": 50,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [
+        59
+      ],
+      "dueDate": "2025-10-29",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-04-07T19:43:16Z",
       "status": "in_progress",
       "milestones": null,
       "actions": {
@@ -70,12 +93,22 @@
       "firstName": "José",
       "lastName": "Sosa",
       "preferredName": "Pepe"
+    },
+    {
+      "employeeId": 59,
+      "firstName": "Gonzalo",
+      "lastName": "Soria",
+      "preferredName": null
     }
   ],
   "comments": [
     {
-      "goalId": "7872",
-      "commentCount": 1
+      "goalId": "7624",
+      "commentCount": 4
+    },
+    {
+      "goalId": "7627",
+      "commentCount": 4
     }
   ]
 }

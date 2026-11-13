@@ -3,15 +3,15 @@
   "firstName": "Romina",
   "lastName": "Rodríguez",
   "workEmail": "romina.rodriguez@meridian-andina.example",
-  "employeeNumber": "11412",
+  "employeeNumber": "11397",
   "supervisorEId": "65",
-  "supervisorId": "10126",
+  "supervisorId": "10117",
   "supervisor": "Díaz, Valentina",
   "hireDate": "2024-04-25",
   "terminationDate": null,
   "department": "Marketing",
   "division": "Comercial",
-  "jobTitle": "Content Specialist Jr",
+  "jobTitle": "Content Specialist Ssr",
   "location": "Buenos Aires",
   "status": "Active"
 }

@@ -841,16 +841,6 @@
   },
   {
     "id": "1085",
-    "employeeId": "73",
-    "date": "2021-01-28",
-    "location": "Córdoba",
-    "department": "Marketing",
-    "division": "Comercial",
-    "jobTitle": "Content Specialist Ssr",
-    "reportsTo": "Díaz, Valentina"
-  },
-  {
-    "id": "1086",
     "employeeId": "179",
     "date": "2021-02-15",
     "location": "Remoto",
@@ -860,7 +850,7 @@
     "reportsTo": "Soria, Gonzalo"
   },
   {
-    "id": "1087",
+    "id": "1086",
     "employeeId": "181",
     "date": "2021-02-22",
     "location": "Rosario",
@@ -870,7 +860,7 @@
     "reportsTo": "Monzón, Milagros"
   },
   {
-    "id": "1088",
+    "id": "1087",
     "employeeId": "183",
     "date": "2021-02-23",
     "location": "Buenos Aires",
@@ -880,7 +870,7 @@
     "reportsTo": "Díaz, Valentina"
   },
   {
-    "id": "1089",
+    "id": "1088",
     "employeeId": "185",
     "date": "2021-02-25",
     "location": "Buenos Aires",
@@ -890,7 +880,7 @@
     "reportsTo": "Trejo, Adrián"
   },
   {
-    "id": "1090",
+    "id": "1089",
     "employeeId": "187",
     "date": "2021-03-03",
     "location": "Buenos Aires",
@@ -900,7 +890,7 @@
     "reportsTo": "Escobar, Marcela"
   },
   {
-    "id": "1091",
+    "id": "1090",
     "employeeId": "189",
     "date": "2021-03-19",
     "location": "Buenos Aires",
@@ -910,7 +900,7 @@
     "reportsTo": "Medina, María"
   },
   {
-    "id": "1092",
+    "id": "1091",
     "employeeId": "191",
     "date": "2021-03-23",
     "location": "Buenos Aires",
@@ -920,7 +910,7 @@
     "reportsTo": "Ríos, Marcela"
   },
   {
-    "id": "1093",
+    "id": "1092",
     "employeeId": "193",
     "date": "2021-03-30",
     "location": "Rosario",
@@ -930,7 +920,7 @@
     "reportsTo": "Lezcano, Marcela"
   },
   {
-    "id": "1094",
+    "id": "1093",
     "employeeId": "195",
     "date": "2021-03-31",
     "location": "Buenos Aires",
@@ -940,7 +930,7 @@
     "reportsTo": "Monzón, Milagros"
   },
   {
-    "id": "1095",
+    "id": "1094",
     "employeeId": "197",
     "date": "2021-04-02",
     "location": "Santiago de Chile",
@@ -950,7 +940,7 @@
     "reportsTo": "Soria, Gonzalo"
   },
   {
-    "id": "1096",
+    "id": "1095",
     "employeeId": "199",
     "date": "2021-04-03",
     "location": "Santiago de Chile",
@@ -960,7 +950,7 @@
     "reportsTo": "Soria, Gonzalo"
   },
   {
-    "id": "1097",
+    "id": "1096",
     "employeeId": "201",
     "date": "2021-04-06",
     "location": "Buenos Aires",
@@ -970,7 +960,7 @@
     "reportsTo": "Peralta, Martín"
   },
   {
-    "id": "1098",
+    "id": "1097",
     "employeeId": "203",
     "date": "2021-04-08",
     "location": "Buenos Aires",
@@ -980,7 +970,7 @@
     "reportsTo": "Morales, Florencia"
   },
   {
-    "id": "1099",
+    "id": "1098",
     "employeeId": "205",
     "date": "2021-05-01",
     "location": "Buenos Aires",
@@ -990,7 +980,7 @@
     "reportsTo": "Fernández, José"
   },
   {
-    "id": "1100",
+    "id": "1099",
     "employeeId": "207",
     "date": "2021-05-07",
     "location": "Buenos Aires",
@@ -1000,7 +990,7 @@
     "reportsTo": "Fernández, José"
   },
   {
-    "id": "1101",
+    "id": "1100",
     "employeeId": "209",
     "date": "2021-05-09",
     "location": "Remoto",
@@ -1010,7 +1000,7 @@
     "reportsTo": "Páez, Paula"
   },
   {
-    "id": "1102",
+    "id": "1101",
     "employeeId": "211",
     "date": "2021-05-10",
     "location": "Montevideo",
@@ -1020,7 +1010,7 @@
     "reportsTo": "Trejo, Adrián"
   },
   {
-    "id": "1103",
+    "id": "1102",
     "employeeId": "213",
     "date": "2021-05-14",
     "location": "Buenos Aires",
@@ -1030,7 +1020,7 @@
     "reportsTo": "Morales, Florencia"
   },
   {
-    "id": "1104",
+    "id": "1103",
     "employeeId": "215",
     "date": "2021-05-27",
     "location": "Rosario",
@@ -1040,7 +1030,7 @@
     "reportsTo": "Toledo, Gonzalo"
   },
   {
-    "id": "1105",
+    "id": "1104",
     "employeeId": "217",
     "date": "2021-06-01",
     "location": "Montevideo",
@@ -1050,7 +1040,7 @@
     "reportsTo": "Soria, Gonzalo"
   },
   {
-    "id": "1106",
+    "id": "1105",
     "employeeId": "219",
     "date": "2021-06-30",
     "location": "Buenos Aires",
@@ -1060,7 +1050,7 @@
     "reportsTo": "Monzón, Milagros"
   },
   {
-    "id": "1107",
+    "id": "1106",
     "employeeId": "221",
     "date": "2021-07-05",
     "location": "Buenos Aires",
@@ -1070,7 +1060,7 @@
     "reportsTo": "Trejo, Marcela"
   },
   {
-    "id": "1108",
+    "id": "1107",
     "employeeId": "223",
     "date": "2021-07-11",
     "location": "Córdoba",
@@ -1080,7 +1070,7 @@
     "reportsTo": "Soria, Gonzalo"
   },
   {
-    "id": "1109",
+    "id": "1108",
     "employeeId": "225",
     "date": "2021-07-17",
     "location": "Córdoba",
@@ -1090,7 +1080,7 @@
     "reportsTo": "Soria, Gonzalo"
   },
   {
-    "id": "1110",
+    "id": "1109",
     "employeeId": "227",
     "date": "2021-07-30",
     "location": "Rosario",
@@ -1100,7 +1090,7 @@
     "reportsTo": "Franco, Daniela"
   },
   {
-    "id": "1111",
+    "id": "1110",
     "employeeId": "229",
     "date": "2021-08-16",
     "location": "Santiago de Chile",
@@ -1110,7 +1100,7 @@
     "reportsTo": "Ríos, Antonella"
   },
   {
-    "id": "1112",
+    "id": "1111",
     "employeeId": "231",
     "date": "2021-08-19",
     "location": "Buenos Aires",
@@ -1120,7 +1110,7 @@
     "reportsTo": "Reyes, Santiago"
   },
   {
-    "id": "1113",
+    "id": "1112",
     "employeeId": "233",
     "date": "2021-08-20",
     "location": "Montevideo",
@@ -1130,7 +1120,7 @@
     "reportsTo": "Díaz, Valentina"
   },
   {
-    "id": "1114",
+    "id": "1113",
     "employeeId": "235",
     "date": "2021-08-20",
     "location": "Rosario",
@@ -1140,7 +1130,7 @@
     "reportsTo": "Peralta, Marcelo"
   },
   {
-    "id": "1115",
+    "id": "1114",
     "employeeId": "237",
     "date": "2021-09-03",
     "location": "Buenos Aires",
@@ -1150,7 +1140,7 @@
     "reportsTo": "Navarro, Lucas"
   },
   {
-    "id": "1116",
+    "id": "1115",
     "employeeId": "239",
     "date": "2021-09-05",
     "location": "Córdoba",
@@ -1160,7 +1150,7 @@
     "reportsTo": "Díaz, Valentina"
   },
   {
-    "id": "1117",
+    "id": "1116",
     "employeeId": "241",
     "date": "2021-09-10",
     "location": "Rosario",
@@ -1170,7 +1160,7 @@
     "reportsTo": "Medina, Tomás"
   },
   {
-    "id": "1118",
+    "id": "1117",
     "employeeId": "243",
     "date": "2021-09-15",
     "location": "Remoto",
@@ -1180,7 +1170,7 @@
     "reportsTo": "Reyes, Cristian"
   },
   {
-    "id": "1119",
+    "id": "1118",
     "employeeId": "245",
     "date": "2021-09-15",
     "location": "Rosario",
@@ -1190,7 +1180,7 @@
     "reportsTo": "Romero, Brenda"
   },
   {
-    "id": "1120",
+    "id": "1119",
     "employeeId": "247",
     "date": "2021-09-25",
     "location": "Córdoba",
@@ -1200,7 +1190,7 @@
     "reportsTo": "Núñez, Mariana"
   },
   {
-    "id": "1121",
+    "id": "1120",
     "employeeId": "249",
     "date": "2021-09-30",
     "location": "Buenos Aires",
@@ -1210,7 +1200,7 @@
     "reportsTo": "Reyes, Daniela"
   },
   {
-    "id": "1122",
+    "id": "1121",
     "employeeId": "251",
     "date": "2021-10-06",
     "location": "Montevideo",
@@ -1220,7 +1210,7 @@
     "reportsTo": "Peralta, Marcelo"
   },
   {
-    "id": "1123",
+    "id": "1122",
     "employeeId": "253",
     "date": "2021-10-16",
     "location": "Rosario",
@@ -1230,7 +1220,7 @@
     "reportsTo": "Monzón, Milagros"
   },
   {
-    "id": "1124",
+    "id": "1123",
     "employeeId": "255",
     "date": "2021-10-29",
     "location": "Buenos Aires",
@@ -1240,7 +1230,7 @@
     "reportsTo": "Ibáñez, Lucía"
   },
   {
-    "id": "1125",
+    "id": "1124",
     "employeeId": "257",
     "date": "2021-11-01",
     "location": "Buenos Aires",
@@ -1250,7 +1240,7 @@
     "reportsTo": "Páez, Paula"
   },
   {
-    "id": "1126",
+    "id": "1125",
     "employeeId": "259",
     "date": "2021-11-17",
     "location": "Córdoba",
@@ -1260,7 +1250,7 @@
     "reportsTo": "Monzón, Milagros"
   },
   {
-    "id": "1127",
+    "id": "1126",
     "employeeId": "261",
     "date": "2021-11-17",
     "location": "Montevideo",
@@ -1270,7 +1260,7 @@
     "reportsTo": "Soria, Gonzalo"
   },
   {
-    "id": "1128",
+    "id": "1127",
     "employeeId": "263",
     "date": "2021-11-24",
     "location": "Remoto",
@@ -1280,7 +1270,7 @@
     "reportsTo": "Soria, Gonzalo"
   },
   {
-    "id": "1129",
+    "id": "1128",
     "employeeId": "265",
     "date": "2021-11-29",
     "location": "Buenos Aires",
@@ -1290,7 +1280,7 @@
     "reportsTo": "Navarro, Lucas"
   },
   {
-    "id": "1130",
+    "id": "1129",
     "employeeId": "267",
     "date": "2021-12-07",
     "location": "Buenos Aires",
@@ -1300,7 +1290,7 @@
     "reportsTo": "Romero, Brenda"
   },
   {
-    "id": "1131",
+    "id": "1130",
     "employeeId": "269",
     "date": "2021-12-14",
     "location": "Buenos Aires",
@@ -1310,7 +1300,7 @@
     "reportsTo": "Díaz, Valentina"
   },
   {
-    "id": "1132",
+    "id": "1131",
     "employeeId": "271",
     "date": "2021-12-24",
     "location": "Córdoba",
@@ -1320,7 +1310,7 @@
     "reportsTo": "Trejo, Marcela"
   },
   {
-    "id": "1133",
+    "id": "1132",
     "employeeId": "273",
     "date": "2021-12-26",
     "location": "Buenos Aires",
@@ -1330,7 +1320,7 @@
     "reportsTo": "Reyes, Santiago"
   },
   {
-    "id": "1134",
+    "id": "1133",
     "employeeId": "275",
     "date": "2022-01-03",
     "location": "Rosario",
@@ -1340,7 +1330,7 @@
     "reportsTo": "Franco, Daniela"
   },
   {
-    "id": "1135",
+    "id": "1134",
     "employeeId": "277",
     "date": "2022-01-08",
     "location": "Córdoba",
@@ -1350,7 +1340,7 @@
     "reportsTo": "Trejo, Marcela"
   },
   {
-    "id": "1136",
+    "id": "1135",
     "employeeId": "279",
     "date": "2022-01-11",
     "location": "Montevideo",
@@ -1360,7 +1350,7 @@
     "reportsTo": "Franco, Daniela"
   },
   {
-    "id": "1137",
+    "id": "1136",
     "employeeId": "281",
     "date": "2022-01-15",
     "location": "Córdoba",
@@ -1370,7 +1360,7 @@
     "reportsTo": "Soria, Gonzalo"
   },
   {
-    "id": "1138",
+    "id": "1137",
     "employeeId": "283",
     "date": "2022-01-17",
     "location": "Santiago de Chile",
@@ -1380,7 +1370,7 @@
     "reportsTo": "Bustos, Jimena"
   },
   {
-    "id": "1139",
+    "id": "1138",
     "employeeId": "285",
     "date": "2022-01-18",
     "location": "Buenos Aires",
@@ -1390,7 +1380,7 @@
     "reportsTo": "Bustos, Jimena"
   },
   {
-    "id": "1140",
+    "id": "1139",
     "employeeId": "287",
     "date": "2022-01-22",
     "location": "Buenos Aires",
@@ -1400,7 +1390,7 @@
     "reportsTo": "Soria, Eugenia"
   },
   {
-    "id": "1141",
+    "id": "1140",
     "employeeId": "289",
     "date": "2022-01-26",
     "location": "Buenos Aires",
@@ -1410,7 +1400,7 @@
     "reportsTo": "Peralta, Martín"
   },
   {
-    "id": "1142",
+    "id": "1141",
     "employeeId": "291",
     "date": "2022-01-26",
     "location": "Remoto",
@@ -1420,7 +1410,7 @@
     "reportsTo": "Rivas, Alejandro"
   },
   {
-    "id": "1143",
+    "id": "1142",
     "employeeId": "293",
     "date": "2022-01-27",
     "location": "Buenos Aires",
@@ -1430,7 +1420,7 @@
     "reportsTo": "Peralta, Marcelo"
   },
   {
-    "id": "1144",
+    "id": "1143",
     "employeeId": "295",
     "date": "2022-01-28",
     "location": "Montevideo",
@@ -1440,7 +1430,7 @@
     "reportsTo": "Díaz, Valentina"
   },
   {
-    "id": "1145",
+    "id": "1144",
     "employeeId": "297",
     "date": "2022-01-29",
     "location": "Buenos Aires",
@@ -1450,17 +1440,7 @@
     "reportsTo": "Lezcano, Marcela"
   },
   {
-    "id": "1146",
-    "employeeId": "87",
-    "date": "2022-02-01",
-    "location": "Buenos Aires",
-    "department": "Ventas",
-    "division": "Comercial",
-    "jobTitle": "Business Developer Sr",
-    "reportsTo": "Peralta, Marcelo"
-  },
-  {
-    "id": "1147",
+    "id": "1145",
     "employeeId": "299",
     "date": "2022-02-02",
     "location": "Remoto",
@@ -1470,7 +1450,7 @@
     "reportsTo": "Olmos, Candela"
   },
   {
-    "id": "1148",
+    "id": "1146",
     "employeeId": "301",
     "date": "2022-02-13",
     "location": "Buenos Aires",
@@ -1480,7 +1460,7 @@
     "reportsTo": "Trejo, Adrián"
   },
   {
-    "id": "1149",
+    "id": "1147",
     "employeeId": "303",
     "date": "2022-02-21",
     "location": "Buenos Aires",
@@ -1490,7 +1470,7 @@
     "reportsTo": "Martínez, Bruno"
   },
   {
-    "id": "1150",
+    "id": "1148",
     "employeeId": "305",
     "date": "2022-02-24",
     "location": "Remoto",
@@ -1500,7 +1480,7 @@
     "reportsTo": "Franco, Daniela"
   },
   {
-    "id": "1151",
+    "id": "1149",
     "employeeId": "307",
     "date": "2022-03-02",
     "location": "Buenos Aires",
@@ -1510,7 +1490,7 @@
     "reportsTo": "Roldán, Noelia"
   },
   {
-    "id": "1152",
+    "id": "1150",
     "employeeId": "309",
     "date": "2022-03-03",
     "location": "Buenos Aires",
@@ -1520,7 +1500,7 @@
     "reportsTo": "Díaz, Valentina"
   },
   {
-    "id": "1153",
+    "id": "1151",
     "employeeId": "311",
     "date": "2022-03-19",
     "location": "Remoto",
@@ -1530,7 +1510,7 @@
     "reportsTo": "Díaz, Valentina"
   },
   {
-    "id": "1154",
+    "id": "1152",
     "employeeId": "313",
     "date": "2022-03-19",
     "location": "Montevideo",
@@ -1540,7 +1520,7 @@
     "reportsTo": "Trejo, Marcela"
   },
   {
-    "id": "1155",
+    "id": "1153",
     "employeeId": "315",
     "date": "2022-03-23",
     "location": "Buenos Aires",
@@ -1550,7 +1530,7 @@
     "reportsTo": "Bustos, Jimena"
   },
   {
-    "id": "1156",
+    "id": "1154",
     "employeeId": "317",
     "date": "2022-03-30",
     "location": "Montevideo",
@@ -1560,7 +1540,7 @@
     "reportsTo": "Ríos, Antonella"
   },
   {
-    "id": "1157",
+    "id": "1155",
     "employeeId": "319",
     "date": "2022-04-03",
     "location": "Remoto",
@@ -1570,7 +1550,17 @@
     "reportsTo": "Soria, Gonzalo"
   },
   {
-    "id": "1158",
+    "id": "1156",
+    "employeeId": "121",
+    "date": "2022-04-17",
+    "location": "Córdoba",
+    "department": "Soporte",
+    "division": "Operaciones",
+    "jobTitle": "Agente de Soporte Sr",
+    "reportsTo": "Olmos, Candela"
+  },
+  {
+    "id": "1157",
     "employeeId": "321",
     "date": "2022-04-23",
     "location": "Remoto",
@@ -1580,7 +1570,7 @@
     "reportsTo": "Ortiz, Brenda"
   },
   {
-    "id": "1159",
+    "id": "1158",
     "employeeId": "323",
     "date": "2022-04-27",
     "location": "Córdoba",
@@ -1590,7 +1580,7 @@
     "reportsTo": "Olmos, Ivana"
   },
   {
-    "id": "1160",
+    "id": "1159",
     "employeeId": "325",
     "date": "2022-04-30",
     "location": "Montevideo",
@@ -1600,7 +1590,7 @@
     "reportsTo": "Escobar, Marcela"
   },
   {
-    "id": "1161",
+    "id": "1160",
     "employeeId": "327",
     "date": "2022-05-01",
     "location": "Córdoba",
@@ -1610,7 +1600,7 @@
     "reportsTo": "Figueroa, Facundo"
   },
   {
-    "id": "1162",
+    "id": "1161",
     "employeeId": "329",
     "date": "2022-05-02",
     "location": "Buenos Aires",
@@ -1620,7 +1610,7 @@
     "reportsTo": "Díaz, Valentina"
   },
   {
-    "id": "1163",
+    "id": "1162",
     "employeeId": "331",
     "date": "2022-05-10",
     "location": "Buenos Aires",
@@ -1630,7 +1620,7 @@
     "reportsTo": "Morales, Florencia"
   },
   {
-    "id": "1164",
+    "id": "1163",
     "employeeId": "333",
     "date": "2022-05-13",
     "location": "Buenos Aires",
@@ -1640,7 +1630,7 @@
     "reportsTo": "Monzón, Milagros"
   },
   {
-    "id": "1165",
+    "id": "1164",
     "employeeId": "335",
     "date": "2022-05-18",
     "location": "Buenos Aires",
@@ -1650,7 +1640,7 @@
     "reportsTo": "Reyes, Daniela"
   },
   {
-    "id": "1166",
+    "id": "1165",
     "employeeId": "337",
     "date": "2022-05-21",
     "location": "Santiago de Chile",
@@ -1660,17 +1650,7 @@
     "reportsTo": "Peralta, Martín"
   },
   {
-    "id": "1167",
-    "employeeId": "133",
-    "date": "2022-05-23",
-    "location": "Buenos Aires",
-    "department": "Infraestructura",
-    "division": "Tecnología",
-    "jobTitle": "DevOps Engineer Sr",
-    "reportsTo": "Núñez, Mariana"
-  },
-  {
-    "id": "1168",
+    "id": "1166",
     "employeeId": "339",
     "date": "2022-06-02",
     "location": "Buenos Aires",
@@ -1680,7 +1660,7 @@
     "reportsTo": "Medina, María"
   },
   {
-    "id": "1169",
+    "id": "1167",
     "employeeId": "341",
     "date": "2022-06-04",
     "location": "Montevideo",
@@ -1690,7 +1670,7 @@
     "reportsTo": "Morales, Andrés"
   },
   {
-    "id": "1170",
+    "id": "1168",
     "employeeId": "343",
     "date": "2022-06-07",
     "location": "Buenos Aires",
@@ -1700,7 +1680,7 @@
     "reportsTo": "Peralta, Marcelo"
   },
   {
-    "id": "1171",
+    "id": "1169",
     "employeeId": "345",
     "date": "2022-06-27",
     "location": "Buenos Aires",
@@ -1710,7 +1690,7 @@
     "reportsTo": "Reyes, Daniela"
   },
   {
-    "id": "1172",
+    "id": "1170",
     "employeeId": "347",
     "date": "2022-06-30",
     "location": "Buenos Aires",
@@ -1720,7 +1700,7 @@
     "reportsTo": "Roldán, Noelia"
   },
   {
-    "id": "1173",
+    "id": "1171",
     "employeeId": "349",
     "date": "2022-07-10",
     "location": "Buenos Aires",
@@ -1730,7 +1710,7 @@
     "reportsTo": "Páez, Paula"
   },
   {
-    "id": "1174",
+    "id": "1172",
     "employeeId": "351",
     "date": "2022-07-15",
     "location": "Córdoba",
@@ -1740,7 +1720,7 @@
     "reportsTo": "Olmos, Ivana"
   },
   {
-    "id": "1175",
+    "id": "1173",
     "employeeId": "353",
     "date": "2022-07-27",
     "location": "Córdoba",
@@ -1750,7 +1730,7 @@
     "reportsTo": "Soria, Gonzalo"
   },
   {
-    "id": "1176",
+    "id": "1174",
     "employeeId": "355",
     "date": "2022-07-31",
     "location": "Rosario",
@@ -1760,7 +1740,7 @@
     "reportsTo": "Díaz, Valentina"
   },
   {
-    "id": "1177",
+    "id": "1175",
     "employeeId": "357",
     "date": "2022-08-01",
     "location": "Buenos Aires",
@@ -1770,7 +1750,7 @@
     "reportsTo": "Bustos, Jimena"
   },
   {
-    "id": "1178",
+    "id": "1176",
     "employeeId": "359",
     "date": "2022-08-02",
     "location": "Córdoba",
@@ -1780,7 +1760,7 @@
     "reportsTo": "Medina, María"
   },
   {
-    "id": "1179",
+    "id": "1177",
     "employeeId": "361",
     "date": "2022-08-03",
     "location": "Buenos Aires",
@@ -1790,7 +1770,7 @@
     "reportsTo": "Medina, María"
   },
   {
-    "id": "1180",
+    "id": "1178",
     "employeeId": "363",
     "date": "2022-08-10",
     "location": "Buenos Aires",
@@ -1800,7 +1780,7 @@
     "reportsTo": "Acosta, Cristian"
   },
   {
-    "id": "1181",
+    "id": "1179",
     "employeeId": "365",
     "date": "2022-08-11",
     "location": "Córdoba",
@@ -1810,7 +1790,7 @@
     "reportsTo": "Soria, Eugenia"
   },
   {
-    "id": "1182",
+    "id": "1180",
     "employeeId": "367",
     "date": "2022-08-22",
     "location": "Santiago de Chile",
@@ -1820,7 +1800,7 @@
     "reportsTo": "Fernández, Sergio"
   },
   {
-    "id": "1183",
+    "id": "1181",
     "employeeId": "369",
     "date": "2022-08-22",
     "location": "Buenos Aires",
@@ -1830,7 +1810,17 @@
     "reportsTo": "Reyes, Daniela"
   },
   {
-    "id": "1184",
+    "id": "1182",
+    "employeeId": "183",
+    "date": "2022-09-01",
+    "location": "Buenos Aires",
+    "department": "Marketing",
+    "division": "Comercial",
+    "jobTitle": "Growth Analyst Sr",
+    "reportsTo": "Díaz, Valentina"
+  },
+  {
+    "id": "1183",
     "employeeId": "371",
     "date": "2022-09-28",
     "location": "Rosario",
@@ -1840,7 +1830,7 @@
     "reportsTo": "Díaz, Valentina"
   },
   {
-    "id": "1185",
+    "id": "1184",
     "employeeId": "373",
     "date": "2022-09-28",
     "location": "Buenos Aires",
@@ -1850,7 +1840,7 @@
     "reportsTo": "Soria, Gonzalo"
   },
   {
-    "id": "1186",
+    "id": "1185",
     "employeeId": "375",
     "date": "2022-09-30",
     "location": "Buenos Aires",
@@ -1860,7 +1850,7 @@
     "reportsTo": "Soria, Gonzalo"
   },
   {
-    "id": "1187",
+    "id": "1186",
     "employeeId": "377",
     "date": "2022-10-03",
     "location": "Buenos Aires",
@@ -1870,7 +1860,7 @@
     "reportsTo": "Fernández, Sergio"
   },
   {
-    "id": "1188",
+    "id": "1187",
     "employeeId": "379",
     "date": "2022-10-06",
     "location": "Buenos Aires",
@@ -1880,7 +1870,7 @@
     "reportsTo": "Peralta, Martín"
   },
   {
-    "id": "1189",
+    "id": "1188",
     "employeeId": "381",
     "date": "2022-10-16",
     "location": "Remoto",
@@ -1890,7 +1880,7 @@
     "reportsTo": "Martínez, Bruno"
   },
   {
-    "id": "1190",
+    "id": "1189",
     "employeeId": "383",
     "date": "2022-10-21",
     "location": "Santiago de Chile",
@@ -1900,7 +1890,7 @@
     "reportsTo": "Escobar, Marcela"
   },
   {
-    "id": "1191",
+    "id": "1190",
     "employeeId": "385",
     "date": "2022-10-25",
     "location": "Rosario",
@@ -1910,7 +1900,7 @@
     "reportsTo": "Roldán, Noelia"
   },
   {
-    "id": "1192",
+    "id": "1191",
     "employeeId": "387",
     "date": "2022-10-27",
     "location": "Remoto",
@@ -1920,7 +1910,7 @@
     "reportsTo": "Soria, Eugenia"
   },
   {
-    "id": "1193",
+    "id": "1192",
     "employeeId": "389",
     "date": "2022-11-07",
     "location": "Rosario",
@@ -1930,7 +1920,7 @@
     "reportsTo": "Trejo, Marcela"
   },
   {
-    "id": "1194",
+    "id": "1193",
     "employeeId": "391",
     "date": "2022-11-09",
     "location": "Remoto",
@@ -1940,7 +1930,7 @@
     "reportsTo": "Morales, Florencia"
   },
   {
-    "id": "1195",
+    "id": "1194",
     "employeeId": "393",
     "date": "2022-11-10",
     "location": "Buenos Aires",
@@ -1950,7 +1940,7 @@
     "reportsTo": "Benítez, Florencia"
   },
   {
-    "id": "1196",
+    "id": "1195",
     "employeeId": "395",
     "date": "2022-11-20",
     "location": "Buenos Aires",
@@ -1960,7 +1950,7 @@
     "reportsTo": "Páez, Paula"
   },
   {
-    "id": "1197",
+    "id": "1196",
     "employeeId": "397",
     "date": "2022-11-24",
     "location": "Remoto",
@@ -1970,7 +1960,7 @@
     "reportsTo": "Reyes, Daniela"
   },
   {
-    "id": "1198",
+    "id": "1197",
     "employeeId": "399",
     "date": "2022-12-01",
     "location": "Buenos Aires",
@@ -1980,7 +1970,7 @@
     "reportsTo": "Roldán, Noelia"
   },
   {
-    "id": "1199",
+    "id": "1198",
     "employeeId": "401",
     "date": "2022-12-02",
     "location": "Buenos Aires",
@@ -1990,7 +1980,7 @@
     "reportsTo": "Ríos, Antonella"
   },
   {
-    "id": "1200",
+    "id": "1199",
     "employeeId": "403",
     "date": "2022-12-11",
     "location": "Buenos Aires",
@@ -2000,7 +1990,7 @@
     "reportsTo": "Díaz, Valentina"
   },
   {
-    "id": "1201",
+    "id": "1200",
     "employeeId": "405",
     "date": "2022-12-13",
     "location": "Montevideo",
@@ -2008,6 +1998,16 @@
     "division": "Tecnología",
     "jobTitle": "Data Analyst Ssr",
     "reportsTo": "Peralta, Martín"
+  },
+  {
+    "id": "1201",
+    "employeeId": "295",
+    "date": "2022-12-18",
+    "location": "Remoto",
+    "department": "Marketing",
+    "division": "Comercial",
+    "jobTitle": "Growth Analyst Ssr",
+    "reportsTo": "Díaz, Valentina"
   },
   {
     "id": "1202",
@@ -2061,36 +2061,6 @@
   },
   {
     "id": "1207",
-    "employeeId": "207",
-    "date": "2023-01-14",
-    "location": "Buenos Aires",
-    "department": "Operaciones",
-    "division": "Operaciones",
-    "jobTitle": "Coordinador de Procesos Ssr",
-    "reportsTo": "Fernández, José"
-  },
-  {
-    "id": "1208",
-    "employeeId": "365",
-    "date": "2023-01-15",
-    "location": "Córdoba",
-    "department": "Finanzas",
-    "division": "Corporativo",
-    "jobTitle": "Analista de Tesorería Sr",
-    "reportsTo": "Figueroa, Facundo"
-  },
-  {
-    "id": "1209",
-    "employeeId": "251",
-    "date": "2023-01-17",
-    "location": "Montevideo",
-    "department": "Ventas",
-    "division": "Comercial",
-    "jobTitle": "Sales Analyst Jr",
-    "reportsTo": "López, Silvana"
-  },
-  {
-    "id": "1210",
     "employeeId": "417",
     "date": "2023-01-17",
     "location": "Montevideo",
@@ -2100,7 +2070,7 @@
     "reportsTo": "Herrera, Rocío"
   },
   {
-    "id": "1211",
+    "id": "1208",
     "employeeId": "419",
     "date": "2023-02-02",
     "location": "Córdoba",
@@ -2110,17 +2080,7 @@
     "reportsTo": "Fernández, Sergio"
   },
   {
-    "id": "1212",
-    "employeeId": "383",
-    "date": "2023-02-06",
-    "location": "Santiago de Chile",
-    "department": "Infraestructura",
-    "division": "Tecnología",
-    "jobTitle": "DevOps Engineer Ssr",
-    "reportsTo": "Benítez, Florencia"
-  },
-  {
-    "id": "1213",
+    "id": "1209",
     "employeeId": "421",
     "date": "2023-02-09",
     "location": "Córdoba",
@@ -2130,7 +2090,7 @@
     "reportsTo": "López, Silvana"
   },
   {
-    "id": "1214",
+    "id": "1210",
     "employeeId": "423",
     "date": "2023-02-15",
     "location": "Buenos Aires",
@@ -2140,7 +2100,7 @@
     "reportsTo": "Maldonado, Marcela"
   },
   {
-    "id": "1215",
+    "id": "1211",
     "employeeId": "425",
     "date": "2023-02-16",
     "location": "Buenos Aires",
@@ -2150,7 +2110,7 @@
     "reportsTo": "Navarro, Agustina"
   },
   {
-    "id": "1216",
+    "id": "1212",
     "employeeId": "427",
     "date": "2023-02-16",
     "location": "Buenos Aires",
@@ -2160,7 +2120,7 @@
     "reportsTo": "Peralta, Martín"
   },
   {
-    "id": "1217",
+    "id": "1213",
     "employeeId": "429",
     "date": "2023-02-20",
     "location": "Buenos Aires",
@@ -2170,17 +2130,7 @@
     "reportsTo": "Díaz, Valentina"
   },
   {
-    "id": "1218",
-    "employeeId": "325",
-    "date": "2023-02-25",
-    "location": "Montevideo",
-    "department": "Datos",
-    "division": "Tecnología",
-    "jobTitle": "Data Analyst Jr",
-    "reportsTo": "Roldán, Noelia"
-  },
-  {
-    "id": "1219",
+    "id": "1214",
     "employeeId": "431",
     "date": "2023-02-27",
     "location": "Montevideo",
@@ -2190,7 +2140,7 @@
     "reportsTo": "López, Silvana"
   },
   {
-    "id": "1220",
+    "id": "1215",
     "employeeId": "433",
     "date": "2023-03-12",
     "location": "Rosario",
@@ -2200,7 +2150,7 @@
     "reportsTo": "Ríos, Marcela"
   },
   {
-    "id": "1221",
+    "id": "1216",
     "employeeId": "435",
     "date": "2023-03-14",
     "location": "Córdoba",
@@ -2210,7 +2160,27 @@
     "reportsTo": "Herrera, Rocío"
   },
   {
-    "id": "1222",
+    "id": "1217",
+    "employeeId": "245",
+    "date": "2023-03-17",
+    "location": "Rosario",
+    "department": "Ingeniería",
+    "division": "Tecnología",
+    "jobTitle": "Mobile Developer Ssr",
+    "reportsTo": "Romero, Brenda"
+  },
+  {
+    "id": "1218",
+    "employeeId": "373",
+    "date": "2023-03-17",
+    "location": "Buenos Aires",
+    "department": "Finanzas",
+    "division": "Corporativo",
+    "jobTitle": "Analista de Tesorería Ssr",
+    "reportsTo": "Figueroa, Facundo"
+  },
+  {
+    "id": "1219",
     "employeeId": "437",
     "date": "2023-03-18",
     "location": "Buenos Aires",
@@ -2220,7 +2190,7 @@
     "reportsTo": "Monzón, Milagros"
   },
   {
-    "id": "1223",
+    "id": "1220",
     "employeeId": "439",
     "date": "2023-03-21",
     "location": "Buenos Aires",
@@ -2230,7 +2200,7 @@
     "reportsTo": "Rivas, Alejandro"
   },
   {
-    "id": "1224",
+    "id": "1221",
     "employeeId": "441",
     "date": "2023-03-25",
     "location": "Santiago de Chile",
@@ -2240,7 +2210,17 @@
     "reportsTo": "Franco, Daniela"
   },
   {
-    "id": "1225",
+    "id": "1222",
+    "employeeId": "347",
+    "date": "2023-03-27",
+    "location": "Buenos Aires",
+    "department": "Marketing",
+    "division": "Comercial",
+    "jobTitle": "Growth Analyst Jr",
+    "reportsTo": "Reyes, Daniela"
+  },
+  {
+    "id": "1223",
     "employeeId": "443",
     "date": "2023-03-28",
     "location": "Buenos Aires",
@@ -2250,17 +2230,7 @@
     "reportsTo": "Figueroa, Facundo"
   },
   {
-    "id": "1226",
-    "employeeId": "239",
-    "date": "2023-03-29",
-    "location": "Córdoba",
-    "department": "Marketing",
-    "division": "Comercial",
-    "jobTitle": "Growth Analyst Jr",
-    "reportsTo": "Reyes, Daniela"
-  },
-  {
-    "id": "1227",
+    "id": "1224",
     "employeeId": "445",
     "date": "2023-03-31",
     "location": "Buenos Aires",
@@ -2270,7 +2240,17 @@
     "reportsTo": "Olmos, Candela"
   },
   {
-    "id": "1228",
+    "id": "1225",
+    "employeeId": "289",
+    "date": "2023-04-03",
+    "location": "Buenos Aires",
+    "department": "Datos",
+    "division": "Tecnología",
+    "jobTitle": "Analytics Engineer Ssr",
+    "reportsTo": "Ríos, Marcela"
+  },
+  {
+    "id": "1226",
     "employeeId": "447",
     "date": "2023-04-22",
     "location": "Buenos Aires",
@@ -2280,7 +2260,7 @@
     "reportsTo": "Peralta, Martín"
   },
   {
-    "id": "1229",
+    "id": "1227",
     "employeeId": "449",
     "date": "2023-04-23",
     "location": "Remoto",
@@ -2290,7 +2270,7 @@
     "reportsTo": "Ríos, Marcela"
   },
   {
-    "id": "1230",
+    "id": "1228",
     "employeeId": "451",
     "date": "2023-04-25",
     "location": "Córdoba",
@@ -2300,17 +2280,7 @@
     "reportsTo": "Benítez, Florencia"
   },
   {
-    "id": "1231",
-    "employeeId": "151",
-    "date": "2023-05-02",
-    "location": "Montevideo",
-    "department": "Customer Success",
-    "division": "Comercial",
-    "jobTitle": "Customer Success Manager Jr",
-    "reportsTo": "Quiroga, Lucía"
-  },
-  {
-    "id": "1232",
+    "id": "1229",
     "employeeId": "453",
     "date": "2023-05-06",
     "location": "Buenos Aires",
@@ -2320,7 +2290,47 @@
     "reportsTo": "Toledo, Gonzalo"
   },
   {
+    "id": "1230",
+    "employeeId": "171",
+    "date": "2023-05-07",
+    "location": "Buenos Aires",
+    "department": "Operaciones",
+    "division": "Operaciones",
+    "jobTitle": "Coordinador de Procesos Sr",
+    "reportsTo": "Fernández, José"
+  },
+  {
+    "id": "1231",
+    "employeeId": "217",
+    "date": "2023-05-11",
+    "location": "Montevideo",
+    "department": "Finanzas",
+    "division": "Corporativo",
+    "jobTitle": "Analista de Tesorería Jr",
+    "reportsTo": "Figueroa, Facundo"
+  },
+  {
+    "id": "1232",
+    "employeeId": "375",
+    "date": "2023-05-22",
+    "location": "Buenos Aires",
+    "department": "Calidad",
+    "division": "Operaciones",
+    "jobTitle": "Analista de Calidad Jr",
+    "reportsTo": "Monzón, Milagros"
+  },
+  {
     "id": "1233",
+    "employeeId": "133",
+    "date": "2023-05-26",
+    "location": "Santiago de Chile",
+    "department": "Infraestructura",
+    "division": "Tecnología",
+    "jobTitle": "DevOps Engineer Ssr",
+    "reportsTo": "Núñez, Mariana"
+  },
+  {
+    "id": "1234",
     "employeeId": "455",
     "date": "2023-05-26",
     "location": "Montevideo",
@@ -2330,7 +2340,7 @@
     "reportsTo": "Ríos, Marcela"
   },
   {
-    "id": "1234",
+    "id": "1235",
     "employeeId": "457",
     "date": "2023-05-29",
     "location": "Remoto",
@@ -2340,7 +2350,7 @@
     "reportsTo": "Bustos, Jimena"
   },
   {
-    "id": "1235",
+    "id": "1236",
     "employeeId": "459",
     "date": "2023-05-29",
     "location": "Remoto",
@@ -2350,7 +2360,7 @@
     "reportsTo": "Trejo, Marcela"
   },
   {
-    "id": "1236",
+    "id": "1237",
     "employeeId": "461",
     "date": "2023-06-03",
     "location": "Rosario",
@@ -2360,7 +2370,7 @@
     "reportsTo": "Páez, Paula"
   },
   {
-    "id": "1237",
+    "id": "1238",
     "employeeId": "463",
     "date": "2023-06-04",
     "location": "Rosario",
@@ -2368,16 +2378,6 @@
     "division": "Operaciones",
     "jobTitle": "Coordinador de Procesos Jr",
     "reportsTo": "Reyes, Santiago"
-  },
-  {
-    "id": "1238",
-    "employeeId": "233",
-    "date": "2023-06-08",
-    "location": "Montevideo",
-    "department": "Marketing",
-    "division": "Comercial",
-    "jobTitle": "Diseñador de Marca Jr",
-    "reportsTo": "Reyes, Daniela"
   },
   {
     "id": "1239",
@@ -2391,16 +2391,6 @@
   },
   {
     "id": "1240",
-    "employeeId": "251",
-    "date": "2023-06-16",
-    "location": "Montevideo",
-    "department": "Ventas",
-    "division": "Comercial",
-    "jobTitle": "Sales Analyst Ssr",
-    "reportsTo": "López, Silvana"
-  },
-  {
-    "id": "1241",
     "employeeId": "467",
     "date": "2023-06-21",
     "location": "Buenos Aires",
@@ -2410,7 +2400,7 @@
     "reportsTo": "Peralta, Martín"
   },
   {
-    "id": "1242",
+    "id": "1241",
     "employeeId": "469",
     "date": "2023-06-25",
     "location": "Buenos Aires",
@@ -2420,17 +2410,17 @@
     "reportsTo": "Soria, Gonzalo"
   },
   {
-    "id": "1243",
-    "employeeId": "389",
-    "date": "2023-07-01",
+    "id": "1242",
+    "employeeId": "169",
+    "date": "2023-07-02",
     "location": "Rosario",
-    "department": "Calidad",
-    "division": "Operaciones",
-    "jobTitle": "Auditor de Procesos Ssr",
-    "reportsTo": "Monzón, Milagros"
+    "department": "Marketing",
+    "division": "Comercial",
+    "jobTitle": "Content Specialist Ssr",
+    "reportsTo": "Reyes, Daniela"
   },
   {
-    "id": "1244",
+    "id": "1243",
     "employeeId": "471",
     "date": "2023-07-03",
     "location": "Buenos Aires",
@@ -2440,7 +2430,7 @@
     "reportsTo": "López, Silvana"
   },
   {
-    "id": "1245",
+    "id": "1244",
     "employeeId": "473",
     "date": "2023-07-03",
     "location": "Buenos Aires",
@@ -2450,7 +2440,7 @@
     "reportsTo": "Franco, Daniela"
   },
   {
-    "id": "1246",
+    "id": "1245",
     "employeeId": "475",
     "date": "2023-07-16",
     "location": "Buenos Aires",
@@ -2460,7 +2450,7 @@
     "reportsTo": "Toledo, Gonzalo"
   },
   {
-    "id": "1247",
+    "id": "1246",
     "employeeId": "477",
     "date": "2023-07-20",
     "location": "Buenos Aires",
@@ -2470,17 +2460,7 @@
     "reportsTo": "Roldán, Noelia"
   },
   {
-    "id": "1248",
-    "employeeId": "347",
-    "date": "2023-07-25",
-    "location": "Buenos Aires",
-    "department": "Infraestructura",
-    "division": "Tecnología",
-    "jobTitle": "DevOps Engineer Jr",
-    "reportsTo": "Herrera, Rocío"
-  },
-  {
-    "id": "1249",
+    "id": "1247",
     "employeeId": "479",
     "date": "2023-07-28",
     "location": "Córdoba",
@@ -2490,7 +2470,7 @@
     "reportsTo": "Soria, Gonzalo"
   },
   {
-    "id": "1250",
+    "id": "1248",
     "employeeId": "481",
     "date": "2023-08-01",
     "location": "Montevideo",
@@ -2500,17 +2480,7 @@
     "reportsTo": "Monzón, Milagros"
   },
   {
-    "id": "1251",
-    "employeeId": "369",
-    "date": "2023-08-03",
-    "location": "Buenos Aires",
-    "department": "Marketing",
-    "division": "Comercial",
-    "jobTitle": "Content Specialist Jr",
-    "reportsTo": "Díaz, Valentina"
-  },
-  {
-    "id": "1252",
+    "id": "1249",
     "employeeId": "483",
     "date": "2023-08-08",
     "location": "Buenos Aires",
@@ -2520,7 +2490,7 @@
     "reportsTo": "Roldán, Noelia"
   },
   {
-    "id": "1253",
+    "id": "1250",
     "employeeId": "485",
     "date": "2023-08-10",
     "location": "Remoto",
@@ -2530,37 +2500,17 @@
     "reportsTo": "Peralta, Martín"
   },
   {
-    "id": "1254",
-    "employeeId": "285",
-    "date": "2023-08-27",
+    "id": "1251",
+    "employeeId": "249",
+    "date": "2023-08-17",
     "location": "Buenos Aires",
-    "department": "Calidad",
-    "division": "Operaciones",
-    "jobTitle": "Analista de Calidad Ssr",
-    "reportsTo": "Bustos, Jimena"
+    "department": "Marketing",
+    "division": "Comercial",
+    "jobTitle": "Content Specialist Ssr",
+    "reportsTo": "Díaz, Valentina"
   },
   {
-    "id": "1255",
-    "employeeId": "401",
-    "date": "2023-08-28",
-    "location": "Buenos Aires",
-    "department": "Datos",
-    "division": "Tecnología",
-    "jobTitle": "Data Analyst Ssr",
-    "reportsTo": "Peralta, Martín"
-  },
-  {
-    "id": "1256",
-    "employeeId": "449",
-    "date": "2023-08-29",
-    "location": "Remoto",
-    "department": "Datos",
-    "division": "Tecnología",
-    "jobTitle": "Data Analyst Jr",
-    "reportsTo": "Roldán, Noelia"
-  },
-  {
-    "id": "1257",
+    "id": "1252",
     "employeeId": "487",
     "date": "2023-08-30",
     "location": "Buenos Aires",
@@ -2570,7 +2520,7 @@
     "reportsTo": "Olmos, Ivana"
   },
   {
-    "id": "1258",
+    "id": "1253",
     "employeeId": "489",
     "date": "2023-09-05",
     "location": "Remoto",
@@ -2580,7 +2530,7 @@
     "reportsTo": "Navarro, Tomás"
   },
   {
-    "id": "1259",
+    "id": "1254",
     "employeeId": "491",
     "date": "2023-09-09",
     "location": "Córdoba",
@@ -2590,7 +2540,7 @@
     "reportsTo": "Reyes, Daniela"
   },
   {
-    "id": "1260",
+    "id": "1255",
     "employeeId": "493",
     "date": "2023-09-14",
     "location": "Córdoba",
@@ -2600,7 +2550,7 @@
     "reportsTo": "Monzón, Milagros"
   },
   {
-    "id": "1261",
+    "id": "1256",
     "employeeId": "495",
     "date": "2023-09-15",
     "location": "Córdoba",
@@ -2610,7 +2560,7 @@
     "reportsTo": "Núñez, Mariana"
   },
   {
-    "id": "1262",
+    "id": "1257",
     "employeeId": "497",
     "date": "2023-09-20",
     "location": "Rosario",
@@ -2620,7 +2570,7 @@
     "reportsTo": "Peralta, Martín"
   },
   {
-    "id": "1263",
+    "id": "1258",
     "employeeId": "499",
     "date": "2023-09-22",
     "location": "Montevideo",
@@ -2630,7 +2580,7 @@
     "reportsTo": "Martínez, Bruno"
   },
   {
-    "id": "1264",
+    "id": "1259",
     "employeeId": "501",
     "date": "2023-09-27",
     "location": "Buenos Aires",
@@ -2640,7 +2590,17 @@
     "reportsTo": "Fernández, José"
   },
   {
-    "id": "1265",
+    "id": "1260",
+    "employeeId": "383",
+    "date": "2023-10-01",
+    "location": "Santiago de Chile",
+    "department": "Infraestructura",
+    "division": "Tecnología",
+    "jobTitle": "DevOps Engineer Ssr",
+    "reportsTo": "Olmos, Ivana"
+  },
+  {
+    "id": "1261",
     "employeeId": "503",
     "date": "2023-10-03",
     "location": "Córdoba",
@@ -2650,17 +2610,7 @@
     "reportsTo": "Soria, Gonzalo"
   },
   {
-    "id": "1266",
-    "employeeId": "409",
-    "date": "2023-10-04",
-    "location": "Buenos Aires",
-    "department": "Finanzas",
-    "division": "Corporativo",
-    "jobTitle": "Analista de Tesorería Ssr",
-    "reportsTo": "Figueroa, Facundo"
-  },
-  {
-    "id": "1267",
+    "id": "1262",
     "employeeId": "505",
     "date": "2023-10-09",
     "location": "Buenos Aires",
@@ -2670,7 +2620,7 @@
     "reportsTo": "Navarro, Agustina"
   },
   {
-    "id": "1268",
+    "id": "1263",
     "employeeId": "507",
     "date": "2023-10-11",
     "location": "Montevideo",
@@ -2680,7 +2630,17 @@
     "reportsTo": "Ríos, Marcela"
   },
   {
-    "id": "1269",
+    "id": "1264",
+    "employeeId": "461",
+    "date": "2023-10-12",
+    "location": "Rosario",
+    "department": "Legales",
+    "division": "Corporativo",
+    "jobTitle": "Analista de Compliance Jr",
+    "reportsTo": "Soria, Eugenia"
+  },
+  {
+    "id": "1265",
     "employeeId": "509",
     "date": "2023-10-16",
     "location": "Buenos Aires",
@@ -2690,7 +2650,37 @@
     "reportsTo": "Ibáñez, Lucía"
   },
   {
-    "id": "1270",
+    "id": "1266",
+    "employeeId": "97",
+    "date": "2023-10-24",
+    "location": "Rosario",
+    "department": "Customer Success",
+    "division": "Comercial",
+    "jobTitle": "Customer Success Manager Jr",
+    "reportsTo": "Fernández, Sergio"
+  },
+  {
+    "id": "1267",
+    "employeeId": "239",
+    "date": "2023-10-24",
+    "location": "Córdoba",
+    "department": "Marketing",
+    "division": "Comercial",
+    "jobTitle": "Growth Analyst Jr",
+    "reportsTo": "Reyes, Daniela"
+  },
+  {
+    "id": "1268",
+    "employeeId": "151",
+    "date": "2023-10-25",
+    "location": "Montevideo",
+    "department": "Ventas",
+    "division": "Comercial",
+    "jobTitle": "Ejecutivo de Cuentas Jr",
+    "reportsTo": "López, Silvana"
+  },
+  {
+    "id": "1269",
     "employeeId": "511",
     "date": "2023-10-25",
     "location": "Remoto",
@@ -2700,23 +2690,33 @@
     "reportsTo": "Ríos, Antonella"
   },
   {
-    "id": "1271",
-    "employeeId": "289",
-    "date": "2023-10-28",
+    "id": "1270",
+    "employeeId": "471",
+    "date": "2023-10-30",
     "location": "Buenos Aires",
-    "department": "Datos",
-    "division": "Tecnología",
-    "jobTitle": "Analytics Engineer Sr",
-    "reportsTo": "Peralta, Martín"
+    "department": "Ventas",
+    "division": "Comercial",
+    "jobTitle": "Ejecutivo de Cuentas Jr",
+    "reportsTo": "Peralta, Marcelo"
   },
   {
-    "id": "1272",
+    "id": "1271",
     "employeeId": "513",
     "date": "2023-10-30",
     "location": "Buenos Aires",
     "department": "Marketing",
     "division": "Comercial",
     "jobTitle": "Growth Analyst Ssr",
+    "reportsTo": "Reyes, Daniela"
+  },
+  {
+    "id": "1272",
+    "employeeId": "213",
+    "date": "2023-10-31",
+    "location": "Buenos Aires",
+    "department": "Marketing",
+    "division": "Comercial",
+    "jobTitle": "Content Specialist Jr",
     "reportsTo": "Reyes, Daniela"
   },
   {
@@ -2741,16 +2741,26 @@
   },
   {
     "id": "1275",
-    "employeeId": "171",
-    "date": "2023-11-15",
+    "employeeId": "297",
+    "date": "2023-11-09",
     "location": "Buenos Aires",
-    "department": "Calidad",
-    "division": "Operaciones",
-    "jobTitle": "Analista de Calidad Ssr",
-    "reportsTo": "Bustos, Jimena"
+    "department": "Customer Success",
+    "division": "Comercial",
+    "jobTitle": "Onboarding Specialist Ssr",
+    "reportsTo": "Franco, Daniela"
   },
   {
     "id": "1276",
+    "employeeId": "255",
+    "date": "2023-11-14",
+    "location": "Buenos Aires",
+    "department": "Ingeniería",
+    "division": "Tecnología",
+    "jobTitle": "Frontend Developer Sr",
+    "reportsTo": "Ibáñez, Lucía"
+  },
+  {
+    "id": "1277",
     "employeeId": "519",
     "date": "2023-11-18",
     "location": "Montevideo",
@@ -2760,7 +2770,27 @@
     "reportsTo": "Quiroga, Lucía"
   },
   {
-    "id": "1277",
+    "id": "1278",
+    "employeeId": "393",
+    "date": "2023-11-20",
+    "location": "Montevideo",
+    "department": "Infraestructura",
+    "division": "Tecnología",
+    "jobTitle": "Site Reliability Engineer Jr",
+    "reportsTo": "Benítez, Florencia"
+  },
+  {
+    "id": "1279",
+    "employeeId": "79",
+    "date": "2023-11-28",
+    "location": "Buenos Aires",
+    "department": "Marketing",
+    "division": "Comercial",
+    "jobTitle": "Growth Analyst Ssr",
+    "reportsTo": "Díaz, Valentina"
+  },
+  {
+    "id": "1280",
     "employeeId": "521",
     "date": "2023-12-02",
     "location": "Buenos Aires",
@@ -2770,27 +2800,27 @@
     "reportsTo": "Fernández, Sergio"
   },
   {
-    "id": "1278",
-    "employeeId": "175",
-    "date": "2023-12-14",
-    "location": "Santiago de Chile",
+    "id": "1281",
+    "employeeId": "271",
+    "date": "2023-12-07",
+    "location": "Remoto",
     "department": "Calidad",
     "division": "Operaciones",
     "jobTitle": "Analista de Calidad Ssr",
     "reportsTo": "Trejo, Marcela"
   },
   {
-    "id": "1279",
-    "employeeId": "415",
-    "date": "2023-12-15",
-    "location": "Córdoba",
-    "department": "Finanzas",
-    "division": "Corporativo",
-    "jobTitle": "Analista de Tesorería Ssr",
-    "reportsTo": "Figueroa, Facundo"
+    "id": "1282",
+    "employeeId": "355",
+    "date": "2023-12-10",
+    "location": "Rosario",
+    "department": "Marketing",
+    "division": "Comercial",
+    "jobTitle": "Content Specialist Jr",
+    "reportsTo": "Reyes, Daniela"
   },
   {
-    "id": "1280",
+    "id": "1283",
     "employeeId": "523",
     "date": "2023-12-27",
     "location": "Buenos Aires",
@@ -2800,7 +2830,7 @@
     "reportsTo": "Escobar, Marcela"
   },
   {
-    "id": "1281",
+    "id": "1284",
     "employeeId": "525",
     "date": "2023-12-27",
     "location": "Buenos Aires",
@@ -2810,7 +2840,7 @@
     "reportsTo": "Soria, Eugenia"
   },
   {
-    "id": "1282",
+    "id": "1285",
     "employeeId": "527",
     "date": "2024-01-02",
     "location": "Córdoba",
@@ -2820,7 +2850,7 @@
     "reportsTo": "Ríos, Marcela"
   },
   {
-    "id": "1283",
+    "id": "1286",
     "employeeId": "529",
     "date": "2024-01-03",
     "location": "Rosario",
@@ -2830,7 +2860,7 @@
     "reportsTo": "Suárez, Adrián"
   },
   {
-    "id": "1284",
+    "id": "1287",
     "employeeId": "531",
     "date": "2024-01-05",
     "location": "Córdoba",
@@ -2840,7 +2870,7 @@
     "reportsTo": "Bustos, Jimena"
   },
   {
-    "id": "1285",
+    "id": "1288",
     "employeeId": "533",
     "date": "2024-01-12",
     "location": "Córdoba",
@@ -2850,7 +2880,7 @@
     "reportsTo": "Roldán, Noelia"
   },
   {
-    "id": "1286",
+    "id": "1289",
     "employeeId": "535",
     "date": "2024-01-19",
     "location": "Buenos Aires",
@@ -2860,17 +2890,7 @@
     "reportsTo": "Bustos, Jimena"
   },
   {
-    "id": "1287",
-    "employeeId": "91",
-    "date": "2024-01-20",
-    "location": "Buenos Aires",
-    "department": "Marketing",
-    "division": "Comercial",
-    "jobTitle": "Diseñador de Marca Ssr",
-    "reportsTo": "Díaz, Valentina"
-  },
-  {
-    "id": "1288",
+    "id": "1290",
     "employeeId": "537",
     "date": "2024-01-20",
     "location": "Buenos Aires",
@@ -2880,7 +2900,7 @@
     "reportsTo": "Soria, Gonzalo"
   },
   {
-    "id": "1289",
+    "id": "1291",
     "employeeId": "539",
     "date": "2024-01-23",
     "location": "Buenos Aires",
@@ -2890,7 +2910,27 @@
     "reportsTo": "Navarro, Tomás"
   },
   {
-    "id": "1290",
+    "id": "1292",
+    "employeeId": "329",
+    "date": "2024-01-24",
+    "location": "Buenos Aires",
+    "department": "Marketing",
+    "division": "Comercial",
+    "jobTitle": "Content Specialist Sr",
+    "reportsTo": "Díaz, Valentina"
+  },
+  {
+    "id": "1293",
+    "employeeId": "143",
+    "date": "2024-01-25",
+    "location": "Córdoba",
+    "department": "Customer Success",
+    "division": "Comercial",
+    "jobTitle": "Customer Success Manager Ssr",
+    "reportsTo": "Lezcano, Marcela"
+  },
+  {
+    "id": "1294",
     "employeeId": "541",
     "date": "2024-01-31",
     "location": "Buenos Aires",
@@ -2900,7 +2940,7 @@
     "reportsTo": "Soria, Gonzalo"
   },
   {
-    "id": "1291",
+    "id": "1295",
     "employeeId": "543",
     "date": "2024-02-02",
     "location": "Remoto",
@@ -2910,17 +2950,17 @@
     "reportsTo": "Navarro, Agustina"
   },
   {
-    "id": "1292",
-    "employeeId": "297",
-    "date": "2024-02-27",
+    "id": "1296",
+    "employeeId": "249",
+    "date": "2024-02-13",
     "location": "Buenos Aires",
     "department": "Marketing",
     "division": "Comercial",
-    "jobTitle": "Growth Analyst Ssr",
+    "jobTitle": "Content Specialist Ssr",
     "reportsTo": "Reyes, Daniela"
   },
   {
-    "id": "1293",
+    "id": "1297",
     "employeeId": "545",
     "date": "2024-03-01",
     "location": "Buenos Aires",
@@ -2930,17 +2970,7 @@
     "reportsTo": "Ibáñez, Lucía"
   },
   {
-    "id": "1294",
-    "employeeId": "463",
-    "date": "2024-03-02",
-    "location": "Buenos Aires",
-    "department": "Operaciones",
-    "division": "Operaciones",
-    "jobTitle": "Coordinador de Procesos Jr",
-    "reportsTo": "Reyes, Santiago"
-  },
-  {
-    "id": "1295",
+    "id": "1298",
     "employeeId": "547",
     "date": "2024-03-04",
     "location": "Buenos Aires",
@@ -2950,7 +2980,7 @@
     "reportsTo": "Soria, Eugenia"
   },
   {
-    "id": "1296",
+    "id": "1299",
     "employeeId": "549",
     "date": "2024-03-06",
     "location": "Córdoba",
@@ -2960,7 +2990,7 @@
     "reportsTo": "Soria, Gonzalo"
   },
   {
-    "id": "1297",
+    "id": "1300",
     "employeeId": "551",
     "date": "2024-03-11",
     "location": "Buenos Aires",
@@ -2970,7 +3000,7 @@
     "reportsTo": "Peralta, Martín"
   },
   {
-    "id": "1298",
+    "id": "1301",
     "employeeId": "553",
     "date": "2024-03-12",
     "location": "Remoto",
@@ -2980,7 +3010,7 @@
     "reportsTo": "Bustos, Jimena"
   },
   {
-    "id": "1299",
+    "id": "1302",
     "employeeId": "555",
     "date": "2024-03-13",
     "location": "Buenos Aires",
@@ -2990,17 +3020,27 @@
     "reportsTo": "Trejo, Marcela"
   },
   {
-    "id": "1300",
-    "employeeId": "375",
-    "date": "2024-03-26",
-    "location": "Buenos Aires",
-    "department": "Finanzas",
-    "division": "Corporativo",
-    "jobTitle": "Analista de Tesorería Jr",
-    "reportsTo": "Figueroa, Facundo"
+    "id": "1303",
+    "employeeId": "259",
+    "date": "2024-03-19",
+    "location": "Córdoba",
+    "department": "Calidad",
+    "division": "Operaciones",
+    "jobTitle": "Auditor de Procesos Ssr",
+    "reportsTo": "Trejo, Marcela"
   },
   {
-    "id": "1301",
+    "id": "1304",
+    "employeeId": "139",
+    "date": "2024-03-30",
+    "location": "Córdoba",
+    "department": "Legales",
+    "division": "Corporativo",
+    "jobTitle": "Analista de Compliance Sr",
+    "reportsTo": "Soria, Eugenia"
+  },
+  {
+    "id": "1305",
     "employeeId": "557",
     "date": "2024-03-30",
     "location": "Montevideo",
@@ -3010,7 +3050,7 @@
     "reportsTo": "Romero, Brenda"
   },
   {
-    "id": "1302",
+    "id": "1306",
     "employeeId": "559",
     "date": "2024-04-01",
     "location": "Buenos Aires",
@@ -3020,17 +3060,17 @@
     "reportsTo": "Olmos, Candela"
   },
   {
-    "id": "1303",
-    "employeeId": "285",
-    "date": "2024-04-02",
-    "location": "Buenos Aires",
-    "department": "Soporte",
-    "division": "Operaciones",
-    "jobTitle": "Especialista de Soporte Ssr",
-    "reportsTo": "Páez, Lorena"
+    "id": "1307",
+    "employeeId": "317",
+    "date": "2024-04-03",
+    "location": "Montevideo",
+    "department": "Datos",
+    "division": "Tecnología",
+    "jobTitle": "Analytics Engineer Ssr",
+    "reportsTo": "Roldán, Noelia"
   },
   {
-    "id": "1304",
+    "id": "1308",
     "employeeId": "561",
     "date": "2024-04-05",
     "location": "Buenos Aires",
@@ -3040,7 +3080,7 @@
     "reportsTo": "Soria, Eugenia"
   },
   {
-    "id": "1305",
+    "id": "1309",
     "employeeId": "563",
     "date": "2024-04-07",
     "location": "Rosario",
@@ -3050,7 +3090,7 @@
     "reportsTo": "Díaz, Valentina"
   },
   {
-    "id": "1306",
+    "id": "1310",
     "employeeId": "565",
     "date": "2024-04-10",
     "location": "Buenos Aires",
@@ -3060,7 +3100,17 @@
     "reportsTo": "Peralta, Marcelo"
   },
   {
-    "id": "1307",
+    "id": "1311",
+    "employeeId": "501",
+    "date": "2024-04-13",
+    "location": "Buenos Aires",
+    "department": "Operaciones",
+    "division": "Operaciones",
+    "jobTitle": "Analista de Operaciones Sr",
+    "reportsTo": "Rivas, Alejandro"
+  },
+  {
+    "id": "1312",
     "employeeId": "567",
     "date": "2024-04-16",
     "location": "Buenos Aires",
@@ -3070,7 +3120,7 @@
     "reportsTo": "Carrizo, Silvana"
   },
   {
-    "id": "1308",
+    "id": "1313",
     "employeeId": "569",
     "date": "2024-04-20",
     "location": "Buenos Aires",
@@ -3080,7 +3130,7 @@
     "reportsTo": "Rivas, Alejandro"
   },
   {
-    "id": "1309",
+    "id": "1314",
     "employeeId": "571",
     "date": "2024-04-23",
     "location": "Remoto",
@@ -3090,7 +3140,7 @@
     "reportsTo": "Figueroa, Facundo"
   },
   {
-    "id": "1310",
+    "id": "1315",
     "employeeId": "573",
     "date": "2024-04-25",
     "location": "Buenos Aires",
@@ -3100,7 +3150,7 @@
     "reportsTo": "Díaz, Valentina"
   },
   {
-    "id": "1311",
+    "id": "1316",
     "employeeId": "575",
     "date": "2024-04-26",
     "location": "Montevideo",
@@ -3110,7 +3160,7 @@
     "reportsTo": "Herrera, Rocío"
   },
   {
-    "id": "1312",
+    "id": "1317",
     "employeeId": "577",
     "date": "2024-04-28",
     "location": "Córdoba",
@@ -3120,7 +3170,7 @@
     "reportsTo": "López, Silvana"
   },
   {
-    "id": "1313",
+    "id": "1318",
     "employeeId": "579",
     "date": "2024-04-29",
     "location": "Santiago de Chile",
@@ -3130,27 +3180,37 @@
     "reportsTo": "Monzón, Milagros"
   },
   {
-    "id": "1314",
-    "employeeId": "233",
-    "date": "2024-05-10",
-    "location": "Montevideo",
-    "department": "Marketing",
+    "id": "1319",
+    "employeeId": "395",
+    "date": "2024-05-07",
+    "location": "Buenos Aires",
+    "department": "Infraestructura",
+    "division": "Tecnología",
+    "jobTitle": "SysAdmin Jr",
+    "reportsTo": "Escobar, Marcela"
+  },
+  {
+    "id": "1320",
+    "employeeId": "227",
+    "date": "2024-05-11",
+    "location": "Rosario",
+    "department": "Customer Success",
     "division": "Comercial",
-    "jobTitle": "Diseñador de Marca Ssr",
-    "reportsTo": "Reyes, Daniela"
+    "jobTitle": "Customer Success Manager Sr",
+    "reportsTo": "Franco, Daniela"
   },
   {
-    "id": "1315",
-    "employeeId": "493",
-    "date": "2024-05-10",
-    "location": "Córdoba",
-    "department": "Soporte",
+    "id": "1321",
+    "employeeId": "315",
+    "date": "2024-05-11",
+    "location": "Buenos Aires",
+    "department": "Operaciones",
     "division": "Operaciones",
-    "jobTitle": "Agente de Soporte Ssr",
-    "reportsTo": "Páez, Lorena"
+    "jobTitle": "Analista de Operaciones Ssr",
+    "reportsTo": "Rivas, Alejandro"
   },
   {
-    "id": "1316",
+    "id": "1322",
     "employeeId": "581",
     "date": "2024-05-11",
     "location": "Córdoba",
@@ -3160,7 +3220,7 @@
     "reportsTo": "Díaz, Valentina"
   },
   {
-    "id": "1317",
+    "id": "1323",
     "employeeId": "583",
     "date": "2024-05-15",
     "location": "Buenos Aires",
@@ -3170,7 +3230,7 @@
     "reportsTo": "Díaz, Valentina"
   },
   {
-    "id": "1318",
+    "id": "1324",
     "employeeId": "585",
     "date": "2024-05-16",
     "location": "Buenos Aires",
@@ -3180,7 +3240,7 @@
     "reportsTo": "Díaz, Valentina"
   },
   {
-    "id": "1319",
+    "id": "1325",
     "employeeId": "587",
     "date": "2024-05-20",
     "location": "Córdoba",
@@ -3190,17 +3250,27 @@
     "reportsTo": "Díaz, Valentina"
   },
   {
-    "id": "1320",
-    "employeeId": "97",
-    "date": "2024-05-22",
-    "location": "Rosario",
-    "department": "Marketing",
-    "division": "Comercial",
-    "jobTitle": "Diseñador de Marca Jr",
-    "reportsTo": "Reyes, Daniela"
+    "id": "1326",
+    "employeeId": "415",
+    "date": "2024-05-26",
+    "location": "Córdoba",
+    "department": "Legales",
+    "division": "Corporativo",
+    "jobTitle": "Analista de Compliance Ssr",
+    "reportsTo": "Páez, Paula"
   },
   {
-    "id": "1321",
+    "id": "1327",
+    "employeeId": "529",
+    "date": "2024-05-26",
+    "location": "Rosario",
+    "department": "Ventas",
+    "division": "Comercial",
+    "jobTitle": "Sales Analyst Sr",
+    "reportsTo": "López, Silvana"
+  },
+  {
+    "id": "1328",
     "employeeId": "589",
     "date": "2024-05-28",
     "location": "Córdoba",
@@ -3210,7 +3280,17 @@
     "reportsTo": "Peralta, Martín"
   },
   {
-    "id": "1322",
+    "id": "1329",
+    "employeeId": "291",
+    "date": "2024-06-03",
+    "location": "Remoto",
+    "department": "Operaciones",
+    "division": "Operaciones",
+    "jobTitle": "Analista de Operaciones Ssr",
+    "reportsTo": "Martínez, Bruno"
+  },
+  {
+    "id": "1330",
     "employeeId": "591",
     "date": "2024-06-03",
     "location": "Buenos Aires",
@@ -3220,7 +3300,7 @@
     "reportsTo": "Soria, Gonzalo"
   },
   {
-    "id": "1323",
+    "id": "1331",
     "employeeId": "593",
     "date": "2024-06-08",
     "location": "Córdoba",
@@ -3230,17 +3310,7 @@
     "reportsTo": "Peralta, Marcelo"
   },
   {
-    "id": "1324",
-    "employeeId": "305",
-    "date": "2024-06-11",
-    "location": "Remoto",
-    "department": "Customer Success",
-    "division": "Comercial",
-    "jobTitle": "Customer Success Manager Ssr",
-    "reportsTo": "Franco, Daniela"
-  },
-  {
-    "id": "1325",
+    "id": "1332",
     "employeeId": "595",
     "date": "2024-06-11",
     "location": "Córdoba",
@@ -3250,17 +3320,7 @@
     "reportsTo": "Núñez, Mariana"
   },
   {
-    "id": "1326",
-    "employeeId": "187",
-    "date": "2024-06-13",
-    "location": "Buenos Aires",
-    "department": "Infraestructura",
-    "division": "Tecnología",
-    "jobTitle": "SysAdmin Ssr",
-    "reportsTo": "Escobar, Marcela"
-  },
-  {
-    "id": "1327",
+    "id": "1333",
     "employeeId": "597",
     "date": "2024-06-15",
     "location": "Rosario",
@@ -3270,7 +3330,7 @@
     "reportsTo": "Monzón, Milagros"
   },
   {
-    "id": "1328",
+    "id": "1334",
     "employeeId": "599",
     "date": "2024-06-16",
     "location": "Córdoba",
@@ -3280,7 +3340,7 @@
     "reportsTo": "Escobar, Marcela"
   },
   {
-    "id": "1329",
+    "id": "1335",
     "employeeId": "601",
     "date": "2024-06-21",
     "location": "Buenos Aires",
@@ -3290,7 +3350,7 @@
     "reportsTo": "Herrera, Rocío"
   },
   {
-    "id": "1330",
+    "id": "1336",
     "employeeId": "603",
     "date": "2024-06-26",
     "location": "Buenos Aires",
@@ -3300,27 +3360,17 @@
     "reportsTo": "Maldonado, Marcela"
   },
   {
-    "id": "1331",
-    "employeeId": "253",
+    "id": "1337",
+    "employeeId": "89",
     "date": "2024-07-01",
-    "location": "Rosario",
-    "department": "Calidad",
-    "division": "Operaciones",
-    "jobTitle": "Auditor de Procesos Ssr",
-    "reportsTo": "Monzón, Milagros"
-  },
-  {
-    "id": "1332",
-    "employeeId": "495",
-    "date": "2024-07-01",
-    "location": "Córdoba",
+    "location": "Buenos Aires",
     "department": "Ingeniería",
     "division": "Tecnología",
-    "jobTitle": "Mobile Developer Sr",
-    "reportsTo": "Romero, Brenda"
+    "jobTitle": "Mobile Developer Jr",
+    "reportsTo": "Ibáñez, Lucía"
   },
   {
-    "id": "1333",
+    "id": "1338",
     "employeeId": "605",
     "date": "2024-07-01",
     "location": "Remoto",
@@ -3330,7 +3380,17 @@
     "reportsTo": "Reyes, Daniela"
   },
   {
-    "id": "1334",
+    "id": "1339",
+    "employeeId": "191",
+    "date": "2024-07-02",
+    "location": "Buenos Aires",
+    "department": "Infraestructura",
+    "division": "Tecnología",
+    "jobTitle": "DevOps Engineer Ssr",
+    "reportsTo": "Ríos, Antonella"
+  },
+  {
+    "id": "1340",
     "employeeId": "607",
     "date": "2024-07-05",
     "location": "Córdoba",
@@ -3340,47 +3400,67 @@
     "reportsTo": "Monzón, Milagros"
   },
   {
-    "id": "1335",
+    "id": "1341",
+    "employeeId": "347",
+    "date": "2024-07-07",
+    "location": "Buenos Aires",
+    "department": "Marketing",
+    "division": "Comercial",
+    "jobTitle": "Growth Analyst Ssr",
+    "reportsTo": "Reyes, Daniela"
+  },
+  {
+    "id": "1342",
+    "employeeId": "97",
+    "date": "2024-07-08",
+    "location": "Rosario",
+    "department": "Customer Success",
+    "division": "Comercial",
+    "jobTitle": "Customer Success Manager Jr",
+    "reportsTo": "Lezcano, Marcela"
+  },
+  {
+    "id": "1343",
     "employeeId": "367",
     "date": "2024-07-08",
     "location": "Santiago de Chile",
     "department": "Customer Success",
     "division": "Comercial",
     "jobTitle": "Onboarding Specialist Ssr",
-    "reportsTo": "Morales, Florencia"
+    "reportsTo": "Maldonado, Marcela"
   },
   {
-    "id": "1336",
+    "id": "1344",
     "employeeId": "377",
     "date": "2024-07-08",
     "location": "Buenos Aires",
     "department": "Customer Success",
     "division": "Comercial",
     "jobTitle": "Customer Success Manager Sr",
-    "reportsTo": "Morales, Florencia"
+    "reportsTo": "Quiroga, Lucía"
   },
   {
-    "id": "1337",
+    "id": "1345",
     "employeeId": "419",
     "date": "2024-07-08",
     "location": "Córdoba",
     "department": "Customer Success",
     "division": "Comercial",
     "jobTitle": "Onboarding Specialist Sr",
-    "reportsTo": "Quiroga, Lucía"
+    "reportsTo": "Lezcano, Marcela"
   },
   {
-    "id": "1338",
+    "id": "1346",
     "employeeId": "521",
     "date": "2024-07-08",
     "location": "Buenos Aires",
     "department": "Customer Success",
     "division": "Comercial",
     "jobTitle": "Customer Success Manager Ssr",
-    "reportsTo": "Maldonado, Marcela"
+    "reportsTo": "Suárez, Adrián"
   },
   {
-    "id": "1339",
+    "id": "1347",
     "employeeId": "609",
     "date": "2024-07-13",
     "location": "Buenos Aires",
@@ -3390,7 +3470,7 @@
     "reportsTo": "Ríos, Marcela"
   },
   {
-    "id": "1340",
+    "id": "1348",
     "employeeId": "611",
     "date": "2024-07-13",
     "location": "Buenos Aires",
@@ -3400,7 +3480,7 @@
     "reportsTo": "Escobar, Marcela"
   },
   {
-    "id": "1341",
+    "id": "1349",
     "employeeId": "613",
     "date": "2024-07-13",
     "location": "Rosario",
@@ -3410,17 +3490,7 @@
     "reportsTo": "Díaz, Valentina"
   },
   {
-    "id": "1342",
-    "employeeId": "313",
-    "date": "2024-07-14",
-    "location": "Montevideo",
-    "department": "Calidad",
-    "division": "Operaciones",
-    "jobTitle": "Auditor de Procesos Sr",
-    "reportsTo": "Trejo, Marcela"
-  },
-  {
-    "id": "1343",
+    "id": "1350",
     "employeeId": "615",
     "date": "2024-07-14",
     "location": "Buenos Aires",
@@ -3430,17 +3500,7 @@
     "reportsTo": "Reyes, Daniela"
   },
   {
-    "id": "1344",
-    "employeeId": "307",
-    "date": "2024-07-19",
-    "location": "Remoto",
-    "department": "Datos",
-    "division": "Tecnología",
-    "jobTitle": "Data Analyst Ssr",
-    "reportsTo": "Roldán, Noelia"
-  },
-  {
-    "id": "1345",
+    "id": "1351",
     "employeeId": "617",
     "date": "2024-07-26",
     "location": "Remoto",
@@ -3450,7 +3510,7 @@
     "reportsTo": "Olmos, Ivana"
   },
   {
-    "id": "1346",
+    "id": "1352",
     "employeeId": "619",
     "date": "2024-07-28",
     "location": "Buenos Aires",
@@ -3460,7 +3520,7 @@
     "reportsTo": "Martínez, Bruno"
   },
   {
-    "id": "1347",
+    "id": "1353",
     "employeeId": "621",
     "date": "2024-07-31",
     "location": "Montevideo",
@@ -3470,17 +3530,17 @@
     "reportsTo": "Figueroa, Facundo"
   },
   {
-    "id": "1348",
-    "employeeId": "391",
+    "id": "1354",
+    "employeeId": "297",
     "date": "2024-08-05",
-    "location": "Remoto",
+    "location": "Buenos Aires",
     "department": "Customer Success",
     "division": "Comercial",
-    "jobTitle": "Customer Success Manager Ssr",
+    "jobTitle": "Onboarding Specialist Ssr",
     "reportsTo": "Morales, Florencia"
   },
   {
-    "id": "1349",
+    "id": "1355",
     "employeeId": "623",
     "date": "2024-08-16",
     "location": "Buenos Aires",
@@ -3490,17 +3550,7 @@
     "reportsTo": "Bustos, Jimena"
   },
   {
-    "id": "1350",
-    "employeeId": "347",
-    "date": "2024-08-17",
-    "location": "Buenos Aires",
-    "department": "Infraestructura",
-    "division": "Tecnología",
-    "jobTitle": "DevOps Engineer Jr",
-    "reportsTo": "Escobar, Marcela"
-  },
-  {
-    "id": "1351",
+    "id": "1356",
     "employeeId": "625",
     "date": "2024-08-20",
     "location": "Buenos Aires",
@@ -3510,7 +3560,37 @@
     "reportsTo": "Navarro, Tomás"
   },
   {
-    "id": "1352",
+    "id": "1357",
+    "employeeId": "285",
+    "date": "2024-08-24",
+    "location": "Buenos Aires",
+    "department": "Calidad",
+    "division": "Operaciones",
+    "jobTitle": "Analista de Calidad Jr",
+    "reportsTo": "Trejo, Marcela"
+  },
+  {
+    "id": "1358",
+    "employeeId": "389",
+    "date": "2024-09-02",
+    "location": "Rosario",
+    "department": "Operaciones",
+    "division": "Operaciones",
+    "jobTitle": "Coordinador de Procesos Ssr",
+    "reportsTo": "Rivas, Alejandro"
+  },
+  {
+    "id": "1359",
+    "employeeId": "277",
+    "date": "2024-09-03",
+    "location": "Córdoba",
+    "department": "Calidad",
+    "division": "Operaciones",
+    "jobTitle": "Auditor de Procesos Sr",
+    "reportsTo": "Trejo, Marcela"
+  },
+  {
+    "id": "1360",
     "employeeId": "627",
     "date": "2024-09-11",
     "location": "Buenos Aires",
@@ -3520,7 +3600,7 @@
     "reportsTo": "Páez, Paula"
   },
   {
-    "id": "1353",
+    "id": "1361",
     "employeeId": "629",
     "date": "2024-09-12",
     "location": "Remoto",
@@ -3530,7 +3610,7 @@
     "reportsTo": "Roldán, Noelia"
   },
   {
-    "id": "1354",
+    "id": "1362",
     "employeeId": "631",
     "date": "2024-09-18",
     "location": "Remoto",
@@ -3540,7 +3620,7 @@
     "reportsTo": "Carrizo, Silvana"
   },
   {
-    "id": "1355",
+    "id": "1363",
     "employeeId": "633",
     "date": "2024-09-23",
     "location": "Buenos Aires",
@@ -3550,17 +3630,17 @@
     "reportsTo": "Lezcano, Marcela"
   },
   {
-    "id": "1356",
-    "employeeId": "75",
-    "date": "2024-10-01",
-    "location": "Montevideo",
-    "department": "Ventas",
-    "division": "Comercial",
-    "jobTitle": "Business Developer Jr",
-    "reportsTo": "López, Silvana"
+    "id": "1364",
+    "employeeId": "443",
+    "date": "2024-10-02",
+    "location": "Buenos Aires",
+    "department": "Legales",
+    "division": "Corporativo",
+    "jobTitle": "Analista de Compliance Ssr",
+    "reportsTo": "Soria, Eugenia"
   },
   {
-    "id": "1357",
+    "id": "1365",
     "employeeId": "635",
     "date": "2024-10-07",
     "location": "Córdoba",
@@ -3570,27 +3650,7 @@
     "reportsTo": "Figueroa, Facundo"
   },
   {
-    "id": "1358",
-    "employeeId": "309",
-    "date": "2024-10-10",
-    "location": "Buenos Aires",
-    "department": "Datos",
-    "division": "Tecnología",
-    "jobTitle": "Data Engineer Ssr",
-    "reportsTo": "Roldán, Noelia"
-  },
-  {
-    "id": "1359",
-    "employeeId": "281",
-    "date": "2024-10-11",
-    "location": "Córdoba",
-    "department": "Finanzas",
-    "division": "Corporativo",
-    "jobTitle": "Analista Contable Jr",
-    "reportsTo": "Figueroa, Facundo"
-  },
-  {
-    "id": "1360",
+    "id": "1366",
     "employeeId": "637",
     "date": "2024-10-20",
     "location": "Córdoba",
@@ -3600,7 +3660,7 @@
     "reportsTo": "Ríos, Antonella"
   },
   {
-    "id": "1361",
+    "id": "1367",
     "employeeId": "639",
     "date": "2024-10-20",
     "location": "Buenos Aires",
@@ -3610,7 +3670,7 @@
     "reportsTo": "Olmos, Ivana"
   },
   {
-    "id": "1362",
+    "id": "1368",
     "employeeId": "641",
     "date": "2024-10-20",
     "location": "Buenos Aires",
@@ -3620,27 +3680,7 @@
     "reportsTo": "Escobar, Marcela"
   },
   {
-    "id": "1363",
-    "employeeId": "203",
-    "date": "2024-10-24",
-    "location": "Buenos Aires",
-    "department": "Customer Success",
-    "division": "Comercial",
-    "jobTitle": "Customer Success Manager Jr",
-    "reportsTo": "Suárez, Adrián"
-  },
-  {
-    "id": "1364",
-    "employeeId": "587",
-    "date": "2024-10-24",
-    "location": "Córdoba",
-    "department": "Marketing",
-    "division": "Comercial",
-    "jobTitle": "Content Specialist Ssr",
-    "reportsTo": "Reyes, Daniela"
-  },
-  {
-    "id": "1365",
+    "id": "1369",
     "employeeId": "643",
     "date": "2024-10-25",
     "location": "Buenos Aires",
@@ -3650,37 +3690,7 @@
     "reportsTo": "Soria, Gonzalo"
   },
   {
-    "id": "1366",
-    "employeeId": "605",
-    "date": "2024-10-30",
-    "location": "Remoto",
-    "department": "Marketing",
-    "division": "Comercial",
-    "jobTitle": "Content Specialist Sr",
-    "reportsTo": "Díaz, Valentina"
-  },
-  {
-    "id": "1367",
-    "employeeId": "199",
-    "date": "2024-10-31",
-    "location": "Santiago de Chile",
-    "department": "Finanzas",
-    "division": "Corporativo",
-    "jobTitle": "Analista Contable Jr",
-    "reportsTo": "Figueroa, Facundo"
-  },
-  {
-    "id": "1368",
-    "employeeId": "101",
-    "date": "2024-11-02",
-    "location": "Buenos Aires",
-    "department": "Datos",
-    "division": "Tecnología",
-    "jobTitle": "Data Engineer Ssr",
-    "reportsTo": "Roldán, Noelia"
-  },
-  {
-    "id": "1369",
+    "id": "1370",
     "employeeId": "645",
     "date": "2024-11-07",
     "location": "Buenos Aires",
@@ -3690,34 +3700,24 @@
     "reportsTo": "Figueroa, Facundo"
   },
   {
-    "id": "1370",
-    "employeeId": "499",
-    "date": "2024-11-09",
-    "location": "Montevideo",
-    "department": "Ingeniería",
-    "division": "Tecnología",
-    "jobTitle": "Backend Developer Jr",
-    "reportsTo": "Romero, Brenda"
-  },
-  {
     "id": "1371",
-    "employeeId": "577",
-    "date": "2024-11-12",
+    "employeeId": "323",
+    "date": "2024-11-08",
     "location": "Córdoba",
-    "department": "Ventas",
-    "division": "Comercial",
-    "jobTitle": "Sales Analyst Ssr",
-    "reportsTo": "Peralta, Marcelo"
+    "department": "Infraestructura",
+    "division": "Tecnología",
+    "jobTitle": "DevOps Engineer Sr",
+    "reportsTo": "Olmos, Ivana"
   },
   {
     "id": "1372",
-    "employeeId": "231",
-    "date": "2024-11-19",
+    "employeeId": "559",
+    "date": "2024-11-13",
     "location": "Buenos Aires",
-    "department": "Operaciones",
+    "department": "Soporte",
     "division": "Operaciones",
-    "jobTitle": "Coordinador de Procesos Sr",
-    "reportsTo": "Reyes, Santiago"
+    "jobTitle": "Agente de Soporte Jr",
+    "reportsTo": "Páez, Lorena"
   },
   {
     "id": "1373",
@@ -3731,17 +3731,17 @@
   },
   {
     "id": "1374",
-    "employeeId": "423",
+    "employeeId": "367",
     "date": "2024-11-21",
-    "location": "Buenos Aires",
+    "location": "Santiago de Chile",
     "department": "Customer Success",
     "division": "Comercial",
-    "jobTitle": "Customer Success Manager Ssr",
-    "reportsTo": "Lezcano, Marcela"
+    "jobTitle": "Onboarding Specialist Ssr",
+    "reportsTo": "Quiroga, Lucía"
   },
   {
     "id": "1375",
-    "employeeId": "521",
+    "employeeId": "423",
     "date": "2024-11-21",
     "location": "Buenos Aires",
     "department": "Customer Success",
@@ -3757,7 +3757,7 @@
     "department": "Customer Success",
     "division": "Comercial",
     "jobTitle": "Onboarding Specialist Jr",
-    "reportsTo": "Morales, Florencia"
+    "reportsTo": "Suárez, Adrián"
   },
   {
     "id": "1377",
@@ -3801,22 +3801,22 @@
   },
   {
     "id": "1381",
+    "employeeId": "79",
+    "date": "2024-12-05",
+    "location": "Santiago de Chile",
+    "department": "Marketing",
+    "division": "Comercial",
+    "jobTitle": "Growth Analyst Ssr",
+    "reportsTo": "Díaz, Valentina"
+  },
+  {
+    "id": "1382",
     "employeeId": "657",
     "date": "2024-12-05",
     "location": "Córdoba",
     "department": "Finanzas",
     "division": "Corporativo",
     "jobTitle": "Controller Jr",
-    "reportsTo": "Soria, Gonzalo"
-  },
-  {
-    "id": "1382",
-    "employeeId": "353",
-    "date": "2024-12-07",
-    "location": "Córdoba",
-    "department": "Finanzas",
-    "division": "Corporativo",
-    "jobTitle": "Analista de Tesorería Ssr",
     "reportsTo": "Soria, Gonzalo"
   },
   {
@@ -3831,16 +3831,6 @@
   },
   {
     "id": "1384",
-    "employeeId": "543",
-    "date": "2024-12-08",
-    "location": "Santiago de Chile",
-    "department": "Legales",
-    "division": "Corporativo",
-    "jobTitle": "Abogado Corporativo Jr",
-    "reportsTo": "Navarro, Agustina"
-  },
-  {
-    "id": "1385",
     "employeeId": "661",
     "date": "2024-12-09",
     "location": "Buenos Aires",
@@ -3850,7 +3840,7 @@
     "reportsTo": "Roldán, Noelia"
   },
   {
-    "id": "1386",
+    "id": "1385",
     "employeeId": "663",
     "date": "2024-12-10",
     "location": "Montevideo",
@@ -3860,14 +3850,24 @@
     "reportsTo": "Rivas, Alejandro"
   },
   {
+    "id": "1386",
+    "employeeId": "355",
+    "date": "2024-12-12",
+    "location": "Rosario",
+    "department": "Marketing",
+    "division": "Comercial",
+    "jobTitle": "Content Specialist Ssr",
+    "reportsTo": "Reyes, Daniela"
+  },
+  {
     "id": "1387",
-    "employeeId": "575",
-    "date": "2024-12-14",
-    "location": "Córdoba",
-    "department": "Infraestructura",
-    "division": "Tecnología",
-    "jobTitle": "Site Reliability Engineer Jr",
-    "reportsTo": "Herrera, Rocío"
+    "employeeId": "293",
+    "date": "2024-12-15",
+    "location": "Buenos Aires",
+    "department": "Ventas",
+    "division": "Comercial",
+    "jobTitle": "Ejecutivo de Cuentas Ssr",
+    "reportsTo": "Peralta, Marcelo"
   },
   {
     "id": "1388",
@@ -3881,6 +3881,16 @@
   },
   {
     "id": "1389",
+    "employeeId": "323",
+    "date": "2025-01-06",
+    "location": "Montevideo",
+    "department": "Infraestructura",
+    "division": "Tecnología",
+    "jobTitle": "DevOps Engineer Sr",
+    "reportsTo": "Olmos, Ivana"
+  },
+  {
+    "id": "1390",
     "employeeId": "667",
     "date": "2025-01-08",
     "location": "Buenos Aires",
@@ -3890,7 +3900,7 @@
     "reportsTo": "Figueroa, Facundo"
   },
   {
-    "id": "1390",
+    "id": "1391",
     "employeeId": "669",
     "date": "2025-01-10",
     "location": "Córdoba",
@@ -3900,17 +3910,27 @@
     "reportsTo": "Roldán, Noelia"
   },
   {
-    "id": "1391",
-    "employeeId": "463",
-    "date": "2025-01-16",
+    "id": "1392",
+    "employeeId": "249",
+    "date": "2025-01-15",
     "location": "Buenos Aires",
-    "department": "Operaciones",
-    "division": "Operaciones",
-    "jobTitle": "Coordinador de Procesos Ssr",
-    "reportsTo": "Reyes, Santiago"
+    "department": "Customer Success",
+    "division": "Comercial",
+    "jobTitle": "Customer Success Manager Ssr",
+    "reportsTo": "Suárez, Adrián"
   },
   {
-    "id": "1392",
+    "id": "1393",
+    "employeeId": "247",
+    "date": "2025-01-17",
+    "location": "Córdoba",
+    "department": "Ingeniería",
+    "division": "Tecnología",
+    "jobTitle": "Backend Developer Ssr",
+    "reportsTo": "Ibáñez, Lucía"
+  },
+  {
+    "id": "1394",
     "employeeId": "671",
     "date": "2025-01-18",
     "location": "Buenos Aires",
@@ -3920,17 +3940,17 @@
     "reportsTo": "Olmos, Ivana"
   },
   {
-    "id": "1393",
-    "employeeId": "465",
+    "id": "1395",
+    "employeeId": "375",
     "date": "2025-01-20",
-    "location": "Córdoba",
-    "department": "Finanzas",
-    "division": "Corporativo",
-    "jobTitle": "Controller Ssr",
-    "reportsTo": "Figueroa, Facundo"
+    "location": "Buenos Aires",
+    "department": "Calidad",
+    "division": "Operaciones",
+    "jobTitle": "Analista de Calidad Ssr",
+    "reportsTo": "Monzón, Milagros"
   },
   {
-    "id": "1394",
+    "id": "1396",
     "employeeId": "673",
     "date": "2025-01-24",
     "location": "Córdoba",
@@ -3940,7 +3960,7 @@
     "reportsTo": "Reyes, Daniela"
   },
   {
-    "id": "1395",
+    "id": "1397",
     "employeeId": "675",
     "date": "2025-01-24",
     "location": "Buenos Aires",
@@ -3950,7 +3970,7 @@
     "reportsTo": "Toledo, Gonzalo"
   },
   {
-    "id": "1396",
+    "id": "1398",
     "employeeId": "677",
     "date": "2025-01-24",
     "location": "Buenos Aires",
@@ -3960,17 +3980,7 @@
     "reportsTo": "Olmos, Candela"
   },
   {
-    "id": "1397",
-    "employeeId": "309",
-    "date": "2025-01-26",
-    "location": "Buenos Aires",
-    "department": "Datos",
-    "division": "Tecnología",
-    "jobTitle": "Data Engineer Sr",
-    "reportsTo": "Roldán, Noelia"
-  },
-  {
-    "id": "1398",
+    "id": "1399",
     "employeeId": "679",
     "date": "2025-01-29",
     "location": "Córdoba",
@@ -3980,7 +3990,17 @@
     "reportsTo": "Escobar, Marcela"
   },
   {
-    "id": "1399",
+    "id": "1400",
+    "employeeId": "269",
+    "date": "2025-01-31",
+    "location": "Montevideo",
+    "department": "Marketing",
+    "division": "Comercial",
+    "jobTitle": "Content Specialist Sr",
+    "reportsTo": "Díaz, Valentina"
+  },
+  {
+    "id": "1401",
     "employeeId": "681",
     "date": "2025-01-31",
     "location": "Buenos Aires",
@@ -3990,7 +4010,7 @@
     "reportsTo": "Peralta, Martín"
   },
   {
-    "id": "1400",
+    "id": "1402",
     "employeeId": "683",
     "date": "2025-02-03",
     "location": "Remoto",
@@ -4000,27 +4020,17 @@
     "reportsTo": "Herrera, Rocío"
   },
   {
-    "id": "1401",
-    "employeeId": "441",
-    "date": "2025-02-10",
-    "location": "Santiago de Chile",
-    "department": "Customer Success",
-    "division": "Comercial",
-    "jobTitle": "Customer Success Manager Sr",
-    "reportsTo": "Franco, Daniela"
-  },
-  {
-    "id": "1402",
-    "employeeId": "129",
-    "date": "2025-02-13",
-    "location": "Remoto",
-    "department": "Calidad",
-    "division": "Operaciones",
-    "jobTitle": "Auditor de Procesos Jr",
-    "reportsTo": "Bustos, Jimena"
-  },
-  {
     "id": "1403",
+    "employeeId": "637",
+    "date": "2025-02-06",
+    "location": "Córdoba",
+    "department": "Infraestructura",
+    "division": "Tecnología",
+    "jobTitle": "SysAdmin Ssr",
+    "reportsTo": "Olmos, Ivana"
+  },
+  {
+    "id": "1404",
     "employeeId": "685",
     "date": "2025-02-15",
     "location": "Remoto",
@@ -4030,7 +4040,7 @@
     "reportsTo": "Soria, Eugenia"
   },
   {
-    "id": "1404",
+    "id": "1405",
     "employeeId": "687",
     "date": "2025-02-18",
     "location": "Buenos Aires",
@@ -4040,7 +4050,7 @@
     "reportsTo": "Núñez, Mariana"
   },
   {
-    "id": "1405",
+    "id": "1406",
     "employeeId": "689",
     "date": "2025-02-18",
     "location": "Buenos Aires",
@@ -4050,24 +4060,14 @@
     "reportsTo": "Peralta, Martín"
   },
   {
-    "id": "1406",
-    "employeeId": "169",
-    "date": "2025-02-19",
-    "location": "Rosario",
-    "department": "Marketing",
-    "division": "Comercial",
-    "jobTitle": "Content Specialist Sr",
-    "reportsTo": "Díaz, Valentina"
-  },
-  {
     "id": "1407",
-    "employeeId": "139",
-    "date": "2025-02-22",
-    "location": "Córdoba",
-    "department": "Legales",
-    "division": "Corporativo",
-    "jobTitle": "Analista de Compliance Sr",
-    "reportsTo": "Soria, Eugenia"
+    "employeeId": "317",
+    "date": "2025-02-24",
+    "location": "Montevideo",
+    "department": "Datos",
+    "division": "Tecnología",
+    "jobTitle": "Analytics Engineer Sr",
+    "reportsTo": "Roldán, Noelia"
   },
   {
     "id": "1408",
@@ -4081,6 +4081,16 @@
   },
   {
     "id": "1409",
+    "employeeId": "435",
+    "date": "2025-02-25",
+    "location": "Córdoba",
+    "department": "Ingeniería",
+    "division": "Tecnología",
+    "jobTitle": "Mobile Developer Ssr",
+    "reportsTo": "Ibáñez, Lucía"
+  },
+  {
+    "id": "1410",
     "employeeId": "693",
     "date": "2025-02-25",
     "location": "Buenos Aires",
@@ -4090,7 +4100,7 @@
     "reportsTo": "Soria, Gonzalo"
   },
   {
-    "id": "1410",
+    "id": "1411",
     "employeeId": "695",
     "date": "2025-02-28",
     "location": "Buenos Aires",
@@ -4100,7 +4110,7 @@
     "reportsTo": "López, Silvana"
   },
   {
-    "id": "1411",
+    "id": "1412",
     "employeeId": "697",
     "date": "2025-03-04",
     "location": "Buenos Aires",
@@ -4110,7 +4120,7 @@
     "reportsTo": "Díaz, Valentina"
   },
   {
-    "id": "1412",
+    "id": "1413",
     "employeeId": "699",
     "date": "2025-03-05",
     "location": "Rosario",
@@ -4118,16 +4128,6 @@
     "division": "Comercial",
     "jobTitle": "Content Specialist Sr",
     "reportsTo": "Reyes, Daniela"
-  },
-  {
-    "id": "1413",
-    "employeeId": "429",
-    "date": "2025-03-06",
-    "location": "Buenos Aires",
-    "department": "Marketing",
-    "division": "Comercial",
-    "jobTitle": "Diseñador de Marca Sr",
-    "reportsTo": "Díaz, Valentina"
   },
   {
     "id": "1414",
@@ -4141,16 +4141,6 @@
   },
   {
     "id": "1415",
-    "employeeId": "551",
-    "date": "2025-03-13",
-    "location": "Córdoba",
-    "department": "Datos",
-    "division": "Tecnología",
-    "jobTitle": "Data Analyst Ssr",
-    "reportsTo": "Peralta, Martín"
-  },
-  {
-    "id": "1416",
     "employeeId": "703",
     "date": "2025-03-13",
     "location": "Buenos Aires",
@@ -4160,7 +4150,7 @@
     "reportsTo": "Monzón, Milagros"
   },
   {
-    "id": "1417",
+    "id": "1416",
     "employeeId": "705",
     "date": "2025-03-14",
     "location": "Remoto",
@@ -4168,6 +4158,16 @@
     "division": "Comercial",
     "jobTitle": "Diseñador de Marca Ssr",
     "reportsTo": "Reyes, Daniela"
+  },
+  {
+    "id": "1417",
+    "employeeId": "461",
+    "date": "2025-03-15",
+    "location": "Rosario",
+    "department": "Legales",
+    "division": "Corporativo",
+    "jobTitle": "Analista de Compliance Ssr",
+    "reportsTo": "Soria, Eugenia"
   },
   {
     "id": "1418",
@@ -4181,36 +4181,6 @@
   },
   {
     "id": "1419",
-    "employeeId": "319",
-    "date": "2025-03-19",
-    "location": "Córdoba",
-    "department": "Finanzas",
-    "division": "Corporativo",
-    "jobTitle": "Controller Ssr",
-    "reportsTo": "Soria, Gonzalo"
-  },
-  {
-    "id": "1420",
-    "employeeId": "465",
-    "date": "2025-03-20",
-    "location": "Córdoba",
-    "department": "Finanzas",
-    "division": "Corporativo",
-    "jobTitle": "Controller Sr",
-    "reportsTo": "Figueroa, Facundo"
-  },
-  {
-    "id": "1421",
-    "employeeId": "603",
-    "date": "2025-03-20",
-    "location": "Buenos Aires",
-    "department": "Marketing",
-    "division": "Comercial",
-    "jobTitle": "Diseñador de Marca Jr",
-    "reportsTo": "Díaz, Valentina"
-  },
-  {
-    "id": "1422",
     "employeeId": "709",
     "date": "2025-03-20",
     "location": "Buenos Aires",
@@ -4220,7 +4190,7 @@
     "reportsTo": "Toledo, Gonzalo"
   },
   {
-    "id": "1423",
+    "id": "1420",
     "employeeId": "711",
     "date": "2025-03-26",
     "location": "Buenos Aires",
@@ -4230,7 +4200,7 @@
     "reportsTo": "Páez, Lorena"
   },
   {
-    "id": "1424",
+    "id": "1421",
     "employeeId": "713",
     "date": "2025-03-28",
     "location": "Buenos Aires",
@@ -4240,7 +4210,7 @@
     "reportsTo": "Núñez, Mariana"
   },
   {
-    "id": "1425",
+    "id": "1422",
     "employeeId": "715",
     "date": "2025-03-30",
     "location": "Buenos Aires",
@@ -4250,17 +4220,7 @@
     "reportsTo": "Morales, Florencia"
   },
   {
-    "id": "1426",
-    "employeeId": "163",
-    "date": "2025-04-03",
-    "location": "Remoto",
-    "department": "Operaciones",
-    "division": "Operaciones",
-    "jobTitle": "Coordinador de Procesos Ssr",
-    "reportsTo": "Reyes, Santiago"
-  },
-  {
-    "id": "1427",
+    "id": "1423",
     "employeeId": "717",
     "date": "2025-04-03",
     "location": "Montevideo",
@@ -4270,7 +4230,7 @@
     "reportsTo": "Morales, Florencia"
   },
   {
-    "id": "1428",
+    "id": "1424",
     "employeeId": "719",
     "date": "2025-04-06",
     "location": "Buenos Aires",
@@ -4280,37 +4240,17 @@
     "reportsTo": "Franco, Daniela"
   },
   {
-    "id": "1429",
-    "employeeId": "443",
-    "date": "2025-04-13",
+    "id": "1425",
+    "employeeId": "645",
+    "date": "2025-04-17",
     "location": "Buenos Aires",
     "department": "Finanzas",
     "division": "Corporativo",
-    "jobTitle": "Analista de Tesorería Ssr",
+    "jobTitle": "Controller Jr",
     "reportsTo": "Soria, Gonzalo"
   },
   {
-    "id": "1430",
-    "employeeId": "273",
-    "date": "2025-04-20",
-    "location": "Buenos Aires",
-    "department": "Calidad",
-    "division": "Operaciones",
-    "jobTitle": "Analista de Calidad Sr",
-    "reportsTo": "Trejo, Marcela"
-  },
-  {
-    "id": "1431",
-    "employeeId": "149",
-    "date": "2025-04-21",
-    "location": "Montevideo",
-    "department": "Legales",
-    "division": "Corporativo",
-    "jobTitle": "Analista de Compliance Sr",
-    "reportsTo": "Soria, Eugenia"
-  },
-  {
-    "id": "1432",
+    "id": "1426",
     "employeeId": "721",
     "date": "2025-04-22",
     "location": "Buenos Aires",
@@ -4320,7 +4260,7 @@
     "reportsTo": "Díaz, Valentina"
   },
   {
-    "id": "1433",
+    "id": "1427",
     "employeeId": "723",
     "date": "2025-04-29",
     "location": "Córdoba",
@@ -4330,17 +4270,17 @@
     "reportsTo": "Díaz, Valentina"
   },
   {
-    "id": "1434",
-    "employeeId": "377",
+    "id": "1428",
+    "employeeId": "153",
     "date": "2025-05-02",
-    "location": "Buenos Aires",
-    "department": "Customer Success",
+    "location": "Rosario",
+    "department": "Ventas",
     "division": "Comercial",
-    "jobTitle": "Customer Success Manager Sr",
-    "reportsTo": "Suárez, Adrián"
+    "jobTitle": "Business Developer Ssr",
+    "reportsTo": "López, Silvana"
   },
   {
-    "id": "1435",
+    "id": "1429",
     "employeeId": "725",
     "date": "2025-05-11",
     "location": "Buenos Aires",
@@ -4350,7 +4290,7 @@
     "reportsTo": "Soria, Gonzalo"
   },
   {
-    "id": "1436",
+    "id": "1430",
     "employeeId": "727",
     "date": "2025-05-16",
     "location": "Buenos Aires",
@@ -4360,7 +4300,7 @@
     "reportsTo": "Trejo, Marcela"
   },
   {
-    "id": "1437",
+    "id": "1431",
     "employeeId": "729",
     "date": "2025-05-19",
     "location": "Montevideo",
@@ -4370,27 +4310,17 @@
     "reportsTo": "Figueroa, Facundo"
   },
   {
-    "id": "1438",
-    "employeeId": "329",
+    "id": "1432",
+    "employeeId": "73",
     "date": "2025-05-23",
-    "location": "Buenos Aires",
+    "location": "Córdoba",
     "department": "Marketing",
     "division": "Comercial",
-    "jobTitle": "Content Specialist Sr",
+    "jobTitle": "Content Specialist Ssr",
     "reportsTo": "Díaz, Valentina"
   },
   {
-    "id": "1439",
-    "employeeId": "507",
-    "date": "2025-05-24",
-    "location": "Montevideo",
-    "department": "Datos",
-    "division": "Tecnología",
-    "jobTitle": "Analytics Engineer Ssr",
-    "reportsTo": "Ríos, Marcela"
-  },
-  {
-    "id": "1440",
+    "id": "1433",
     "employeeId": "731",
     "date": "2025-05-25",
     "location": "Buenos Aires",
@@ -4400,27 +4330,27 @@
     "reportsTo": "Páez, Lorena"
   },
   {
-    "id": "1441",
-    "employeeId": "291",
-    "date": "2025-05-26",
-    "location": "Remoto",
-    "department": "Calidad",
-    "division": "Operaciones",
-    "jobTitle": "Analista de Calidad Ssr",
-    "reportsTo": "Bustos, Jimena"
-  },
-  {
-    "id": "1442",
-    "employeeId": "461",
+    "id": "1434",
+    "employeeId": "179",
     "date": "2025-06-04",
-    "location": "Rosario",
-    "department": "Legales",
+    "location": "Remoto",
+    "department": "Finanzas",
     "division": "Corporativo",
-    "jobTitle": "Analista de Compliance Jr",
-    "reportsTo": "Soria, Eugenia"
+    "jobTitle": "Controller Sr",
+    "reportsTo": "Soria, Gonzalo"
   },
   {
-    "id": "1443",
+    "id": "1435",
+    "employeeId": "587",
+    "date": "2025-06-06",
+    "location": "Córdoba",
+    "department": "Marketing",
+    "division": "Comercial",
+    "jobTitle": "Content Specialist Ssr",
+    "reportsTo": "Reyes, Daniela"
+  },
+  {
+    "id": "1436",
     "employeeId": "733",
     "date": "2025-06-06",
     "location": "Montevideo",
@@ -4430,7 +4360,7 @@
     "reportsTo": "Reyes, Daniela"
   },
   {
-    "id": "1444",
+    "id": "1437",
     "employeeId": "735",
     "date": "2025-06-07",
     "location": "Buenos Aires",
@@ -4440,7 +4370,7 @@
     "reportsTo": "Navarro, Tomás"
   },
   {
-    "id": "1445",
+    "id": "1438",
     "employeeId": "737",
     "date": "2025-06-08",
     "location": "Córdoba",
@@ -4450,17 +4380,27 @@
     "reportsTo": "Soria, Eugenia"
   },
   {
-    "id": "1446",
-    "employeeId": "455",
-    "date": "2025-06-18",
-    "location": "Montevideo",
-    "department": "Datos",
-    "division": "Tecnología",
-    "jobTitle": "Data Analyst Ssr",
-    "reportsTo": "Ríos, Marcela"
+    "id": "1439",
+    "employeeId": "331",
+    "date": "2025-06-09",
+    "location": "Buenos Aires",
+    "department": "Customer Success",
+    "division": "Comercial",
+    "jobTitle": "Onboarding Specialist Sr",
+    "reportsTo": "Morales, Florencia"
   },
   {
-    "id": "1447",
+    "id": "1440",
+    "employeeId": "403",
+    "date": "2025-06-13",
+    "location": "Buenos Aires",
+    "department": "Marketing",
+    "division": "Comercial",
+    "jobTitle": "Content Specialist Sr",
+    "reportsTo": "Díaz, Valentina"
+  },
+  {
+    "id": "1441",
     "employeeId": "739",
     "date": "2025-06-19",
     "location": "Buenos Aires",
@@ -4470,37 +4410,27 @@
     "reportsTo": "Peralta, Martín"
   },
   {
-    "id": "1448",
-    "employeeId": "315",
-    "date": "2025-06-20",
-    "location": "Buenos Aires",
-    "department": "Calidad",
-    "division": "Operaciones",
-    "jobTitle": "Analista de Calidad Sr",
-    "reportsTo": "Bustos, Jimena"
-  },
-  {
-    "id": "1449",
-    "employeeId": "267",
-    "date": "2025-06-24",
-    "location": "Buenos Aires",
-    "department": "Ingeniería",
-    "division": "Tecnología",
-    "jobTitle": "Frontend Developer Sr",
-    "reportsTo": "Romero, Brenda"
-  },
-  {
-    "id": "1450",
+    "id": "1442",
     "employeeId": "741",
     "date": "2025-06-25",
     "location": "Córdoba",
     "department": "Soporte",
     "division": "Operaciones",
-    "jobTitle": "Agente de Soporte Ssr",
-    "reportsTo": "Olmos, Candela"
+    "jobTitle": "Agente de Soporte Sr",
+    "reportsTo": "Páez, Lorena"
   },
   {
-    "id": "1451",
+    "id": "1443",
+    "employeeId": "471",
+    "date": "2025-06-26",
+    "location": "Buenos Aires",
+    "department": "Ventas",
+    "division": "Comercial",
+    "jobTitle": "Ejecutivo de Cuentas Ssr",
+    "reportsTo": "Peralta, Marcelo"
+  },
+  {
+    "id": "1444",
     "employeeId": "743",
     "date": "2025-06-28",
     "location": "Buenos Aires",
@@ -4510,7 +4440,7 @@
     "reportsTo": "Navarro, Agustina"
   },
   {
-    "id": "1452",
+    "id": "1445",
     "employeeId": "745",
     "date": "2025-06-29",
     "location": "Buenos Aires",
@@ -4520,7 +4450,7 @@
     "reportsTo": "Roldán, Noelia"
   },
   {
-    "id": "1453",
+    "id": "1446",
     "employeeId": "747",
     "date": "2025-06-29",
     "location": "Córdoba",
@@ -4530,27 +4460,27 @@
     "reportsTo": "Navarro, Tomás"
   },
   {
-    "id": "1454",
-    "employeeId": "445",
-    "date": "2025-07-02",
-    "location": "Buenos Aires",
-    "department": "Operaciones",
+    "id": "1447",
+    "employeeId": "129",
+    "date": "2025-07-01",
+    "location": "Remoto",
+    "department": "Calidad",
     "division": "Operaciones",
-    "jobTitle": "Coordinador de Procesos Jr",
-    "reportsTo": "Reyes, Santiago"
+    "jobTitle": "Auditor de Procesos Jr",
+    "reportsTo": "Trejo, Marcela"
   },
   {
-    "id": "1455",
-    "employeeId": "547",
+    "id": "1448",
+    "employeeId": "477",
     "date": "2025-07-02",
     "location": "Buenos Aires",
-    "department": "Legales",
-    "division": "Corporativo",
-    "jobTitle": "Abogado Corporativo Ssr",
-    "reportsTo": "Páez, Paula"
+    "department": "Datos",
+    "division": "Tecnología",
+    "jobTitle": "Data Engineer Ssr",
+    "reportsTo": "Roldán, Noelia"
   },
   {
-    "id": "1456",
+    "id": "1449",
     "employeeId": "749",
     "date": "2025-07-04",
     "location": "Buenos Aires",
@@ -4560,7 +4490,27 @@
     "reportsTo": "Quiroga, Lucía"
   },
   {
-    "id": "1457",
+    "id": "1450",
+    "employeeId": "567",
+    "date": "2025-07-05",
+    "location": "Córdoba",
+    "department": "Operaciones",
+    "division": "Operaciones",
+    "jobTitle": "Analista de Operaciones Sr",
+    "reportsTo": "Carrizo, Silvana"
+  },
+  {
+    "id": "1451",
+    "employeeId": "443",
+    "date": "2025-07-06",
+    "location": "Buenos Aires",
+    "department": "Legales",
+    "division": "Corporativo",
+    "jobTitle": "Analista de Compliance Sr",
+    "reportsTo": "Soria, Eugenia"
+  },
+  {
+    "id": "1452",
     "employeeId": "751",
     "date": "2025-07-06",
     "location": "Buenos Aires",
@@ -4570,17 +4520,7 @@
     "reportsTo": "Ibáñez, Lucía"
   },
   {
-    "id": "1458",
-    "employeeId": "435",
-    "date": "2025-07-10",
-    "location": "Córdoba",
-    "department": "Infraestructura",
-    "division": "Tecnología",
-    "jobTitle": "Site Reliability Engineer Sr",
-    "reportsTo": "Herrera, Rocío"
-  },
-  {
-    "id": "1459",
+    "id": "1453",
     "employeeId": "753",
     "date": "2025-07-11",
     "location": "Córdoba",
@@ -4590,7 +4530,27 @@
     "reportsTo": "Reyes, Daniela"
   },
   {
-    "id": "1460",
+    "id": "1454",
+    "employeeId": "395",
+    "date": "2025-07-12",
+    "location": "Buenos Aires",
+    "department": "Infraestructura",
+    "division": "Tecnología",
+    "jobTitle": "SysAdmin Ssr",
+    "reportsTo": "Escobar, Marcela"
+  },
+  {
+    "id": "1455",
+    "employeeId": "481",
+    "date": "2025-07-13",
+    "location": "Montevideo",
+    "department": "Calidad",
+    "division": "Operaciones",
+    "jobTitle": "Analista de Calidad Ssr",
+    "reportsTo": "Monzón, Milagros"
+  },
+  {
+    "id": "1456",
     "employeeId": "755",
     "date": "2025-07-13",
     "location": "Buenos Aires",
@@ -4600,7 +4560,37 @@
     "reportsTo": "Reyes, Daniela"
   },
   {
-    "id": "1461",
+    "id": "1457",
+    "employeeId": "343",
+    "date": "2025-07-14",
+    "location": "Santiago de Chile",
+    "department": "Ventas",
+    "division": "Comercial",
+    "jobTitle": "Business Developer Jr",
+    "reportsTo": "Peralta, Marcelo"
+  },
+  {
+    "id": "1458",
+    "employeeId": "523",
+    "date": "2025-07-15",
+    "location": "Buenos Aires",
+    "department": "Infraestructura",
+    "division": "Tecnología",
+    "jobTitle": "Site Reliability Engineer Sr",
+    "reportsTo": "Escobar, Marcela"
+  },
+  {
+    "id": "1459",
+    "employeeId": "625",
+    "date": "2025-07-16",
+    "location": "Montevideo",
+    "department": "Ingeniería",
+    "division": "Tecnología",
+    "jobTitle": "Frontend Developer Ssr",
+    "reportsTo": "Navarro, Tomás"
+  },
+  {
+    "id": "1460",
     "employeeId": "757",
     "date": "2025-07-16",
     "location": "Buenos Aires",
@@ -4610,7 +4600,7 @@
     "reportsTo": "Monzón, Milagros"
   },
   {
-    "id": "1462",
+    "id": "1461",
     "employeeId": "759",
     "date": "2025-07-21",
     "location": "Córdoba",
@@ -4620,7 +4610,7 @@
     "reportsTo": "Lezcano, Marcela"
   },
   {
-    "id": "1463",
+    "id": "1462",
     "employeeId": "761",
     "date": "2025-07-22",
     "location": "Córdoba",
@@ -4630,7 +4620,7 @@
     "reportsTo": "Navarro, Agustina"
   },
   {
-    "id": "1464",
+    "id": "1463",
     "employeeId": "763",
     "date": "2025-07-22",
     "location": "Buenos Aires",
@@ -4640,7 +4630,27 @@
     "reportsTo": "Peralta, Marcelo"
   },
   {
+    "id": "1464",
+    "employeeId": "173",
+    "date": "2025-07-25",
+    "location": "Córdoba",
+    "department": "Legales",
+    "division": "Corporativo",
+    "jobTitle": "Analista de Compliance Ssr",
+    "reportsTo": "Soria, Eugenia"
+  },
+  {
     "id": "1465",
+    "employeeId": "485",
+    "date": "2025-07-25",
+    "location": "Remoto",
+    "department": "Datos",
+    "division": "Tecnología",
+    "jobTitle": "Data Engineer Jr",
+    "reportsTo": "Roldán, Noelia"
+  },
+  {
+    "id": "1466",
     "employeeId": "765",
     "date": "2025-07-25",
     "location": "Córdoba",
@@ -4650,7 +4660,7 @@
     "reportsTo": "Soria, Gonzalo"
   },
   {
-    "id": "1466",
+    "id": "1467",
     "employeeId": "767",
     "date": "2025-07-25",
     "location": "Córdoba",
@@ -4660,7 +4670,7 @@
     "reportsTo": "Ríos, Marcela"
   },
   {
-    "id": "1467",
+    "id": "1468",
     "employeeId": "769",
     "date": "2025-07-27",
     "location": "Montevideo",
@@ -4670,7 +4680,7 @@
     "reportsTo": "Carrizo, Silvana"
   },
   {
-    "id": "1468",
+    "id": "1469",
     "employeeId": "771",
     "date": "2025-07-27",
     "location": "Córdoba",
@@ -4680,17 +4690,27 @@
     "reportsTo": "Reyes, Daniela"
   },
   {
-    "id": "1469",
-    "employeeId": "509",
-    "date": "2025-08-05",
+    "id": "1470",
+    "employeeId": "661",
+    "date": "2025-08-03",
     "location": "Buenos Aires",
-    "department": "Infraestructura",
+    "department": "Datos",
     "division": "Tecnología",
-    "jobTitle": "Site Reliability Engineer Ssr",
-    "reportsTo": "Escobar, Marcela"
+    "jobTitle": "Data Engineer Sr",
+    "reportsTo": "Ríos, Marcela"
   },
   {
-    "id": "1470",
+    "id": "1471",
+    "employeeId": "485",
+    "date": "2025-08-09",
+    "location": "Remoto",
+    "department": "Datos",
+    "division": "Tecnología",
+    "jobTitle": "Data Engineer Ssr",
+    "reportsTo": "Roldán, Noelia"
+  },
+  {
+    "id": "1472",
     "employeeId": "773",
     "date": "2025-08-09",
     "location": "Buenos Aires",
@@ -4700,7 +4720,7 @@
     "reportsTo": "Soria, Gonzalo"
   },
   {
-    "id": "1471",
+    "id": "1473",
     "employeeId": "775",
     "date": "2025-08-11",
     "location": "Rosario",
@@ -4710,7 +4730,7 @@
     "reportsTo": "Soria, Gonzalo"
   },
   {
-    "id": "1472",
+    "id": "1474",
     "employeeId": "777",
     "date": "2025-08-15",
     "location": "Santiago de Chile",
@@ -4720,7 +4740,7 @@
     "reportsTo": "Ríos, Marcela"
   },
   {
-    "id": "1473",
+    "id": "1475",
     "employeeId": "779",
     "date": "2025-08-16",
     "location": "Montevideo",
@@ -4730,17 +4750,7 @@
     "reportsTo": "Díaz, Valentina"
   },
   {
-    "id": "1474",
-    "employeeId": "555",
-    "date": "2025-08-18",
-    "location": "Rosario",
-    "department": "Calidad",
-    "division": "Operaciones",
-    "jobTitle": "Auditor de Procesos Ssr",
-    "reportsTo": "Trejo, Marcela"
-  },
-  {
-    "id": "1475",
+    "id": "1476",
     "employeeId": "781",
     "date": "2025-08-18",
     "location": "Buenos Aires",
@@ -4750,7 +4760,7 @@
     "reportsTo": "Reyes, Daniela"
   },
   {
-    "id": "1476",
+    "id": "1477",
     "employeeId": "783",
     "date": "2025-08-19",
     "location": "Montevideo",
@@ -4760,7 +4770,7 @@
     "reportsTo": "Navarro, Tomás"
   },
   {
-    "id": "1477",
+    "id": "1478",
     "employeeId": "785",
     "date": "2025-08-20",
     "location": "Montevideo",
@@ -4770,7 +4780,7 @@
     "reportsTo": "Roldán, Noelia"
   },
   {
-    "id": "1478",
+    "id": "1479",
     "employeeId": "787",
     "date": "2025-08-20",
     "location": "Buenos Aires",
@@ -4778,16 +4788,6 @@
     "division": "Tecnología",
     "jobTitle": "SysAdmin Jr",
     "reportsTo": "Olmos, Ivana"
-  },
-  {
-    "id": "1479",
-    "employeeId": "405",
-    "date": "2025-08-24",
-    "location": "Montevideo",
-    "department": "Datos",
-    "division": "Tecnología",
-    "jobTitle": "Data Analyst Ssr",
-    "reportsTo": "Roldán, Noelia"
   },
   {
     "id": "1480",
@@ -4811,6 +4811,16 @@
   },
   {
     "id": "1482",
+    "employeeId": "325",
+    "date": "2025-08-28",
+    "location": "Montevideo",
+    "department": "Datos",
+    "division": "Tecnología",
+    "jobTitle": "Data Analyst Jr",
+    "reportsTo": "Ríos, Marcela"
+  },
+  {
+    "id": "1483",
     "employeeId": "793",
     "date": "2025-08-28",
     "location": "Buenos Aires",
@@ -4820,7 +4830,17 @@
     "reportsTo": "Reyes, Daniela"
   },
   {
-    "id": "1483",
+    "id": "1484",
+    "employeeId": "667",
+    "date": "2025-08-29",
+    "location": "Buenos Aires",
+    "department": "Finanzas",
+    "division": "Corporativo",
+    "jobTitle": "Controller Jr",
+    "reportsTo": "Soria, Gonzalo"
+  },
+  {
+    "id": "1485",
     "employeeId": "795",
     "date": "2025-08-29",
     "location": "Córdoba",
@@ -4830,17 +4850,27 @@
     "reportsTo": "Quiroga, Lucía"
   },
   {
-    "id": "1484",
-    "employeeId": "191",
+    "id": "1486",
+    "employeeId": "549",
     "date": "2025-09-02",
-    "location": "Buenos Aires",
-    "department": "Datos",
-    "division": "Tecnología",
-    "jobTitle": "Data Engineer Ssr",
-    "reportsTo": "Peralta, Martín"
+    "location": "Córdoba",
+    "department": "Finanzas",
+    "division": "Corporativo",
+    "jobTitle": "Analista de Tesorería Ssr",
+    "reportsTo": "Soria, Gonzalo"
   },
   {
-    "id": "1485",
+    "id": "1487",
+    "employeeId": "535",
+    "date": "2025-09-06",
+    "location": "Buenos Aires",
+    "department": "Calidad",
+    "division": "Operaciones",
+    "jobTitle": "Analista de Calidad Sr",
+    "reportsTo": "Bustos, Jimena"
+  },
+  {
+    "id": "1488",
     "employeeId": "85",
     "date": "2025-09-10",
     "location": "Buenos Aires",
@@ -4850,7 +4880,7 @@
     "reportsTo": "Olmos, Candela"
   },
   {
-    "id": "1486",
+    "id": "1489",
     "employeeId": "119",
     "date": "2025-09-10",
     "location": "Córdoba",
@@ -4860,7 +4890,7 @@
     "reportsTo": "Olmos, Candela"
   },
   {
-    "id": "1487",
+    "id": "1490",
     "employeeId": "165",
     "date": "2025-09-10",
     "location": "Córdoba",
@@ -4870,27 +4900,17 @@
     "reportsTo": "Olmos, Candela"
   },
   {
-    "id": "1488",
-    "employeeId": "285",
+    "id": "1491",
+    "employeeId": "559",
     "date": "2025-09-10",
     "location": "Buenos Aires",
     "department": "Soporte",
     "division": "Operaciones",
-    "jobTitle": "Especialista de Soporte Ssr",
+    "jobTitle": "Agente de Soporte Jr",
     "reportsTo": "Olmos, Candela"
   },
   {
-    "id": "1489",
-    "employeeId": "493",
-    "date": "2025-09-10",
-    "location": "Córdoba",
-    "department": "Soporte",
-    "division": "Operaciones",
-    "jobTitle": "Agente de Soporte Ssr",
-    "reportsTo": "Olmos, Candela"
-  },
-  {
-    "id": "1490",
+    "id": "1492",
     "employeeId": "659",
     "date": "2025-09-10",
     "location": "Buenos Aires",
@@ -4900,7 +4920,7 @@
     "reportsTo": "Olmos, Candela"
   },
   {
-    "id": "1491",
+    "id": "1493",
     "employeeId": "711",
     "date": "2025-09-10",
     "location": "Buenos Aires",
@@ -4910,7 +4930,7 @@
     "reportsTo": "Olmos, Candela"
   },
   {
-    "id": "1492",
+    "id": "1494",
     "employeeId": "731",
     "date": "2025-09-10",
     "location": "Buenos Aires",
@@ -4920,127 +4940,177 @@
     "reportsTo": "Olmos, Candela"
   },
   {
-    "id": "1493",
-    "employeeId": "601",
-    "date": "2025-09-15",
-    "location": "Rosario",
-    "department": "Infraestructura",
-    "division": "Tecnología",
-    "jobTitle": "Site Reliability Engineer Jr",
-    "reportsTo": "Herrera, Rocío"
-  },
-  {
-    "id": "1494",
-    "employeeId": "617",
-    "date": "2025-09-23",
-    "location": "Córdoba",
-    "department": "Infraestructura",
-    "division": "Tecnología",
-    "jobTitle": "SysAdmin Jr",
-    "reportsTo": "Olmos, Ivana"
-  },
-  {
     "id": "1495",
-    "employeeId": "535",
-    "date": "2025-09-30",
-    "location": "Buenos Aires",
-    "department": "Calidad",
+    "employeeId": "741",
+    "date": "2025-09-10",
+    "location": "Córdoba",
+    "department": "Soporte",
     "division": "Operaciones",
-    "jobTitle": "Analista de Calidad Sr",
-    "reportsTo": "Bustos, Jimena"
+    "jobTitle": "Agente de Soporte Sr",
+    "reportsTo": "Olmos, Candela"
   },
   {
     "id": "1496",
-    "employeeId": "489",
-    "date": "2025-10-02",
+    "employeeId": "471",
+    "date": "2025-09-21",
     "location": "Remoto",
-    "department": "Infraestructura",
-    "division": "Tecnología",
-    "jobTitle": "DevOps Engineer Ssr",
-    "reportsTo": "Herrera, Rocío"
+    "department": "Ventas",
+    "division": "Comercial",
+    "jobTitle": "Ejecutivo de Cuentas Ssr",
+    "reportsTo": "Peralta, Marcelo"
   },
   {
     "id": "1497",
-    "employeeId": "329",
-    "date": "2025-10-03",
-    "location": "Montevideo",
-    "department": "Marketing",
-    "division": "Comercial",
-    "jobTitle": "Content Specialist Sr",
-    "reportsTo": "Díaz, Valentina"
+    "employeeId": "497",
+    "date": "2025-09-27",
+    "location": "Rosario",
+    "department": "Datos",
+    "division": "Tecnología",
+    "jobTitle": "Data Analyst Ssr",
+    "reportsTo": "Peralta, Martín"
   },
   {
     "id": "1498",
-    "employeeId": "413",
-    "date": "2025-10-22",
-    "location": "Buenos Aires",
+    "employeeId": "563",
+    "date": "2025-09-30",
+    "location": "Rosario",
     "department": "Marketing",
     "division": "Comercial",
-    "jobTitle": "Content Specialist Ssr",
-    "reportsTo": "Reyes, Daniela"
-  },
-  {
-    "id": "1499",
-    "employeeId": "279",
-    "date": "2025-10-24",
-    "location": "Montevideo",
-    "department": "Customer Success",
-    "division": "Comercial",
-    "jobTitle": "Onboarding Specialist Sr",
-    "reportsTo": "Franco, Daniela"
-  },
-  {
-    "id": "1500",
-    "employeeId": "605",
-    "date": "2025-11-07",
-    "location": "Buenos Aires",
-    "department": "Marketing",
-    "division": "Comercial",
-    "jobTitle": "Content Specialist Sr",
+    "jobTitle": "Diseñador de Marca Ssr",
     "reportsTo": "Díaz, Valentina"
   },
   {
-    "id": "1501",
-    "employeeId": "595",
-    "date": "2025-11-13",
+    "id": "1499",
+    "employeeId": "493",
+    "date": "2025-10-03",
     "location": "Córdoba",
-    "department": "Infraestructura",
+    "department": "Calidad",
+    "division": "Operaciones",
+    "jobTitle": "Analista de Calidad Sr",
+    "reportsTo": "Monzón, Milagros"
+  },
+  {
+    "id": "1500",
+    "employeeId": "285",
+    "date": "2025-10-04",
+    "location": "Buenos Aires",
+    "department": "Operaciones",
+    "division": "Operaciones",
+    "jobTitle": "Analista de Operaciones Jr",
+    "reportsTo": "Rivas, Alejandro"
+  },
+  {
+    "id": "1501",
+    "employeeId": "507",
+    "date": "2025-10-06",
+    "location": "Montevideo",
+    "department": "Datos",
     "division": "Tecnología",
-    "jobTitle": "Site Reliability Engineer Jr",
-    "reportsTo": "Herrera, Rocío"
+    "jobTitle": "Analytics Engineer Ssr",
+    "reportsTo": "Ríos, Marcela"
   },
   {
     "id": "1502",
-    "employeeId": "173",
-    "date": "2025-11-14",
+    "employeeId": "557",
+    "date": "2025-10-09",
+    "location": "Montevideo",
+    "department": "Ingeniería",
+    "division": "Tecnología",
+    "jobTitle": "Mobile Developer Sr",
+    "reportsTo": "Romero, Brenda"
+  },
+  {
+    "id": "1503",
+    "employeeId": "591",
+    "date": "2025-10-17",
+    "location": "Rosario",
+    "department": "Finanzas",
+    "division": "Corporativo",
+    "jobTitle": "Analista de Tesorería Jr",
+    "reportsTo": "Soria, Gonzalo"
+  },
+  {
+    "id": "1504",
+    "employeeId": "631",
+    "date": "2025-10-27",
+    "location": "Córdoba",
+    "department": "Operaciones",
+    "division": "Operaciones",
+    "jobTitle": "Analista de Operaciones Jr",
+    "reportsTo": "Carrizo, Silvana"
+  },
+  {
+    "id": "1505",
+    "employeeId": "559",
+    "date": "2025-10-28",
+    "location": "Buenos Aires",
+    "department": "Soporte",
+    "division": "Operaciones",
+    "jobTitle": "Agente de Soporte Ssr",
+    "reportsTo": "Olmos, Candela"
+  },
+  {
+    "id": "1506",
+    "employeeId": "627",
+    "date": "2025-11-04",
     "location": "Córdoba",
     "department": "Legales",
     "division": "Corporativo",
     "jobTitle": "Analista de Compliance Ssr",
-    "reportsTo": "Soria, Eugenia"
+    "reportsTo": "Páez, Paula"
   },
   {
-    "id": "1503",
-    "employeeId": "427",
-    "date": "2025-11-27",
+    "id": "1507",
+    "employeeId": "579",
+    "date": "2025-11-15",
+    "location": "Santiago de Chile",
+    "department": "Soporte",
+    "division": "Operaciones",
+    "jobTitle": "Especialista de Soporte Ssr",
+    "reportsTo": "Olmos, Candela"
+  },
+  {
+    "id": "1508",
+    "employeeId": "589",
+    "date": "2025-11-30",
     "location": "Córdoba",
     "department": "Datos",
     "division": "Tecnología",
-    "jobTitle": "Analytics Engineer Sr",
+    "jobTitle": "Data Engineer Sr",
     "reportsTo": "Peralta, Martín"
   },
   {
-    "id": "1504",
-    "employeeId": "591",
-    "date": "2025-12-08",
+    "id": "1509",
+    "employeeId": "483",
+    "date": "2025-12-03",
     "location": "Buenos Aires",
-    "department": "Finanzas",
-    "division": "Corporativo",
-    "jobTitle": "Analista de Tesorería Ssr",
-    "reportsTo": "Soria, Gonzalo"
+    "department": "Datos",
+    "division": "Tecnología",
+    "jobTitle": "Analytics Engineer Sr",
+    "reportsTo": "Roldán, Noelia"
   },
   {
-    "id": "1505",
+    "id": "1510",
+    "employeeId": "595",
+    "date": "2025-12-14",
+    "location": "Córdoba",
+    "department": "Infraestructura",
+    "division": "Tecnología",
+    "jobTitle": "Site Reliability Engineer Ssr",
+    "reportsTo": "Herrera, Rocío"
+  },
+  {
+    "id": "1511",
+    "employeeId": "569",
+    "date": "2025-12-15",
+    "location": "Buenos Aires",
+    "department": "Operaciones",
+    "division": "Operaciones",
+    "jobTitle": "Analista de Operaciones Ssr",
+    "reportsTo": "Fernández, José"
+  },
+  {
+    "id": "1512",
     "employeeId": "797",
     "date": "2025-12-16",
     "location": "Buenos Aires",
@@ -5050,107 +5120,27 @@
     "reportsTo": "Franco, Daniela"
   },
   {
-    "id": "1506",
-    "employeeId": "491",
-    "date": "2025-12-17",
-    "location": "Córdoba",
-    "department": "Marketing",
-    "division": "Comercial",
-    "jobTitle": "Growth Analyst Ssr",
-    "reportsTo": "Reyes, Daniela"
-  },
-  {
-    "id": "1507",
-    "employeeId": "565",
-    "date": "2026-01-05",
-    "location": "Buenos Aires",
-    "department": "Ventas",
-    "division": "Comercial",
-    "jobTitle": "Sales Analyst Sr",
-    "reportsTo": "Peralta, Marcelo"
-  },
-  {
-    "id": "1508",
-    "employeeId": "347",
-    "date": "2026-01-09",
-    "location": "Buenos Aires",
-    "department": "Infraestructura",
-    "division": "Tecnología",
-    "jobTitle": "DevOps Engineer Ssr",
-    "reportsTo": "Escobar, Marcela"
-  },
-  {
-    "id": "1509",
-    "employeeId": "679",
-    "date": "2026-01-12",
-    "location": "Montevideo",
-    "department": "Infraestructura",
-    "division": "Tecnología",
-    "jobTitle": "Site Reliability Engineer Ssr",
-    "reportsTo": "Escobar, Marcela"
-  },
-  {
-    "id": "1510",
-    "employeeId": "613",
-    "date": "2026-01-15",
-    "location": "Rosario",
-    "department": "Marketing",
-    "division": "Comercial",
-    "jobTitle": "Growth Analyst Jr",
-    "reportsTo": "Reyes, Daniela"
-  },
-  {
-    "id": "1511",
-    "employeeId": "343",
-    "date": "2026-01-16",
-    "location": "Buenos Aires",
-    "department": "Ventas",
-    "division": "Comercial",
-    "jobTitle": "Business Developer Ssr",
-    "reportsTo": "Peralta, Marcelo"
-  },
-  {
-    "id": "1512",
-    "employeeId": "413",
-    "date": "2026-01-18",
-    "location": "Montevideo",
-    "department": "Marketing",
-    "division": "Comercial",
-    "jobTitle": "Content Specialist Ssr",
-    "reportsTo": "Reyes, Daniela"
-  },
-  {
     "id": "1513",
-    "employeeId": "571",
-    "date": "2026-01-20",
-    "location": "Remoto",
-    "department": "Finanzas",
-    "division": "Corporativo",
-    "jobTitle": "Controller Sr",
-    "reportsTo": "Figueroa, Facundo"
+    "employeeId": "555",
+    "date": "2025-12-27",
+    "location": "Buenos Aires",
+    "department": "Calidad",
+    "division": "Operaciones",
+    "jobTitle": "Auditor de Procesos Sr",
+    "reportsTo": "Trejo, Marcela"
   },
   {
     "id": "1514",
-    "employeeId": "661",
-    "date": "2026-01-28",
-    "location": "Buenos Aires",
-    "department": "Datos",
+    "employeeId": "435",
+    "date": "2026-01-18",
+    "location": "Córdoba",
+    "department": "Infraestructura",
     "division": "Tecnología",
-    "jobTitle": "Data Engineer Sr",
-    "reportsTo": "Ríos, Marcela"
+    "jobTitle": "SysAdmin Ssr",
+    "reportsTo": "Olmos, Ivana"
   },
   {
     "id": "1515",
-    "employeeId": "209",
-    "date": "2026-01-30",
-    "location": "Remoto",
-    "department": "Legales",
-    "division": "Corporativo",
-    "jobTitle": "Analista de Compliance Jr",
-    "reportsTo": "Navarro, Agustina"
-  },
-  {
-    "id": "1516",
     "employeeId": "799",
     "date": "2026-01-30",
     "location": "Montevideo",
@@ -5160,114 +5150,124 @@
     "reportsTo": "Díaz, Valentina"
   },
   {
-    "id": "1517",
-    "employeeId": "537",
-    "date": "2026-02-06",
-    "location": "Buenos Aires",
+    "id": "1516",
+    "employeeId": "199",
+    "date": "2026-02-03",
+    "location": "Santiago de Chile",
     "department": "Finanzas",
     "division": "Corporativo",
-    "jobTitle": "Controller Ssr",
+    "jobTitle": "Analista Contable Ssr",
     "reportsTo": "Soria, Gonzalo"
+  },
+  {
+    "id": "1517",
+    "employeeId": "575",
+    "date": "2026-02-07",
+    "location": "Montevideo",
+    "department": "Infraestructura",
+    "division": "Tecnología",
+    "jobTitle": "Site Reliability Engineer Ssr",
+    "reportsTo": "Herrera, Rocío"
   },
   {
     "id": "1518",
-    "employeeId": "613",
-    "date": "2026-02-17",
-    "location": "Rosario",
-    "department": "Marketing",
-    "division": "Comercial",
-    "jobTitle": "Growth Analyst Ssr",
-    "reportsTo": "Reyes, Daniela"
+    "employeeId": "617",
+    "date": "2026-02-09",
+    "location": "Remoto",
+    "department": "Infraestructura",
+    "division": "Tecnología",
+    "jobTitle": "SysAdmin Ssr",
+    "reportsTo": "Olmos, Ivana"
   },
   {
     "id": "1519",
-    "employeeId": "397",
-    "date": "2026-02-23",
-    "location": "Remoto",
-    "department": "Marketing",
-    "division": "Comercial",
-    "jobTitle": "Growth Analyst Sr",
-    "reportsTo": "Reyes, Daniela"
-  },
-  {
-    "id": "1520",
-    "employeeId": "205",
-    "date": "2026-02-28",
-    "location": "Buenos Aires",
-    "department": "Operaciones",
-    "division": "Operaciones",
-    "jobTitle": "Analista de Operaciones Ssr",
-    "reportsTo": "Fernández, José"
-  },
-  {
-    "id": "1521",
-    "employeeId": "255",
-    "date": "2026-03-01",
-    "location": "Buenos Aires",
-    "department": "Ingeniería",
-    "division": "Tecnología",
-    "jobTitle": "Frontend Developer Sr",
-    "reportsTo": "Ibáñez, Lucía"
-  },
-  {
-    "id": "1522",
-    "employeeId": "779",
-    "date": "2026-03-27",
-    "location": "Buenos Aires",
-    "department": "Marketing",
-    "division": "Comercial",
-    "jobTitle": "Growth Analyst Jr",
-    "reportsTo": "Díaz, Valentina"
-  },
-  {
-    "id": "1523",
-    "employeeId": "549",
-    "date": "2026-04-04",
-    "location": "Córdoba",
-    "department": "Finanzas",
-    "division": "Corporativo",
-    "jobTitle": "Analista de Tesorería Ssr",
-    "reportsTo": "Soria, Gonzalo"
-  },
-  {
-    "id": "1524",
-    "employeeId": "753",
-    "date": "2026-04-07",
+    "employeeId": "371",
+    "date": "2026-02-13",
     "location": "Rosario",
     "department": "Marketing",
     "division": "Comercial",
     "jobTitle": "Content Specialist Ssr",
-    "reportsTo": "Reyes, Daniela"
+    "reportsTo": "Díaz, Valentina"
   },
   {
-    "id": "1525",
-    "employeeId": "587",
-    "date": "2026-04-09",
-    "location": "Córdoba",
+    "id": "1520",
+    "employeeId": "145",
+    "date": "2026-02-15",
+    "location": "Buenos Aires",
+    "department": "Customer Success",
+    "division": "Comercial",
+    "jobTitle": "Onboarding Specialist Sr",
+    "reportsTo": "Quiroga, Lucía"
+  },
+  {
+    "id": "1521",
+    "employeeId": "615",
+    "date": "2026-02-16",
+    "location": "Buenos Aires",
     "department": "Marketing",
     "division": "Comercial",
     "jobTitle": "Content Specialist Sr",
     "reportsTo": "Reyes, Daniela"
   },
   {
-    "id": "1526",
-    "employeeId": "713",
-    "date": "2026-04-10",
-    "location": "Buenos Aires",
-    "department": "Infraestructura",
-    "division": "Tecnología",
-    "jobTitle": "DevOps Engineer Ssr",
-    "reportsTo": "Ríos, Antonella"
+    "id": "1522",
+    "employeeId": "283",
+    "date": "2026-03-09",
+    "location": "Santiago de Chile",
+    "department": "Soporte",
+    "division": "Operaciones",
+    "jobTitle": "Especialista de Soporte Ssr",
+    "reportsTo": "Olmos, Candela"
   },
   {
-    "id": "1527",
-    "employeeId": "625",
-    "date": "2026-04-20",
+    "id": "1523",
+    "employeeId": "545",
+    "date": "2026-03-14",
     "location": "Buenos Aires",
     "department": "Ingeniería",
     "division": "Tecnología",
-    "jobTitle": "Frontend Developer Sr",
-    "reportsTo": "Navarro, Tomás"
+    "jobTitle": "Mobile Developer Ssr",
+    "reportsTo": "Ibáñez, Lucía"
+  },
+  {
+    "id": "1524",
+    "employeeId": "499",
+    "date": "2026-03-25",
+    "location": "Montevideo",
+    "department": "Operaciones",
+    "division": "Operaciones",
+    "jobTitle": "Analista de Operaciones Ssr",
+    "reportsTo": "Martínez, Bruno"
+  },
+  {
+    "id": "1525",
+    "employeeId": "579",
+    "date": "2026-03-31",
+    "location": "Santiago de Chile",
+    "department": "Soporte",
+    "division": "Operaciones",
+    "jobTitle": "Especialista de Soporte Sr",
+    "reportsTo": "Olmos, Candela"
+  },
+  {
+    "id": "1526",
+    "employeeId": "307",
+    "date": "2026-04-03",
+    "location": "Buenos Aires",
+    "department": "Datos",
+    "division": "Tecnología",
+    "jobTitle": "Data Analyst Ssr",
+    "reportsTo": "Peralta, Martín"
+  },
+  {
+    "id": "1527",
+    "employeeId": "639",
+    "date": "2026-04-18",
+    "location": "Buenos Aires",
+    "department": "Infraestructura",
+    "division": "Tecnología",
+    "jobTitle": "Site Reliability Engineer Ssr",
+    "reportsTo": "Olmos, Ivana"
   },
   {
     "id": "1528",
@@ -5277,57 +5277,57 @@
     "department": "Finanzas",
     "division": "Corporativo",
     "jobTitle": "Controller Jr",
-    "reportsTo": "Soria, Gonzalo"
+    "reportsTo": "Figueroa, Facundo"
   },
   {
     "id": "1529",
-    "employeeId": "713",
-    "date": "2026-04-27",
-    "location": "Remoto",
-    "department": "Infraestructura",
-    "division": "Tecnología",
-    "jobTitle": "DevOps Engineer Ssr",
-    "reportsTo": "Ríos, Antonella"
-  },
-  {
-    "id": "1530",
-    "employeeId": "75",
-    "date": "2026-05-04",
-    "location": "Buenos Aires",
-    "department": "Ventas",
-    "division": "Comercial",
-    "jobTitle": "Business Developer Jr",
-    "reportsTo": "López, Silvana"
-  },
-  {
-    "id": "1531",
-    "employeeId": "563",
-    "date": "2026-05-14",
-    "location": "Rosario",
-    "department": "Marketing",
-    "division": "Comercial",
-    "jobTitle": "Diseñador de Marca Ssr",
-    "reportsTo": "Díaz, Valentina"
-  },
-  {
-    "id": "1532",
-    "employeeId": "589",
-    "date": "2026-05-15",
+    "employeeId": "661",
+    "date": "2026-04-30",
     "location": "Buenos Aires",
     "department": "Datos",
     "division": "Tecnología",
-    "jobTitle": "Data Engineer Ssr",
+    "jobTitle": "Data Engineer Sr",
     "reportsTo": "Peralta, Martín"
   },
   {
-    "id": "1533",
+    "id": "1530",
+    "employeeId": "687",
+    "date": "2026-05-03",
+    "location": "Córdoba",
+    "department": "Infraestructura",
+    "division": "Tecnología",
+    "jobTitle": "Site Reliability Engineer Jr",
+    "reportsTo": "Núñez, Mariana"
+  },
+  {
+    "id": "1531",
+    "employeeId": "547",
+    "date": "2026-05-09",
+    "location": "Buenos Aires",
+    "department": "Legales",
+    "division": "Corporativo",
+    "jobTitle": "Abogado Corporativo Sr",
+    "reportsTo": "Soria, Eugenia"
+  },
+  {
+    "id": "1532",
     "employeeId": "803",
     "date": "2026-05-15",
     "location": "Córdoba",
     "department": "Infraestructura",
     "division": "Tecnología",
     "jobTitle": "Site Reliability Engineer Jr",
-    "reportsTo": "Olmos, Ivana"
+    "reportsTo": "Benítez, Florencia"
+  },
+  {
+    "id": "1533",
+    "employeeId": "573",
+    "date": "2026-05-18",
+    "location": "Buenos Aires",
+    "department": "Marketing",
+    "division": "Comercial",
+    "jobTitle": "Content Specialist Ssr",
+    "reportsTo": "Díaz, Valentina"
   },
   {
     "id": "1534",
@@ -5337,22 +5337,42 @@
     "department": "Customer Success",
     "division": "Comercial",
     "jobTitle": "Customer Success Manager Ssr",
-    "reportsTo": "Suárez, Adrián"
+    "reportsTo": "Lezcano, Marcela"
   },
   {
     "id": "1535",
+    "employeeId": "609",
+    "date": "2026-05-20",
+    "location": "Buenos Aires",
+    "department": "Datos",
+    "division": "Tecnología",
+    "jobTitle": "Analytics Engineer Ssr",
+    "reportsTo": "Ríos, Marcela"
+  },
+  {
+    "id": "1536",
     "employeeId": "807",
     "date": "2026-05-21",
-    "location": "Buenos Aires",
+    "location": "Rosario",
     "department": "Finanzas",
     "division": "Corporativo",
     "jobTitle": "Analista de Tesorería Jr",
     "reportsTo": "Soria, Gonzalo"
   },
   {
-    "id": "1536",
+    "id": "1537",
+    "employeeId": "385",
+    "date": "2026-05-23",
+    "location": "Rosario",
+    "department": "Datos",
+    "division": "Tecnología",
+    "jobTitle": "Analytics Engineer Ssr",
+    "reportsTo": "Roldán, Noelia"
+  },
+  {
+    "id": "1538",
     "employeeId": "619",
-    "date": "2026-06-03",
+    "date": "2026-05-25",
     "location": "Buenos Aires",
     "department": "Operaciones",
     "division": "Operaciones",
@@ -5360,239 +5380,19 @@
     "reportsTo": "Martínez, Bruno"
   },
   {
-    "id": "1537",
-    "employeeId": "773",
-    "date": "2026-06-06",
-    "location": "Córdoba",
-    "department": "Finanzas",
-    "division": "Corporativo",
-    "jobTitle": "Analista de Tesorería Ssr",
-    "reportsTo": "Soria, Gonzalo"
-  },
-  {
-    "id": "1538",
-    "employeeId": "631",
-    "date": "2026-06-15",
-    "location": "Remoto",
-    "department": "Operaciones",
-    "division": "Operaciones",
-    "jobTitle": "Analista de Operaciones Ssr",
-    "reportsTo": "Carrizo, Silvana"
-  },
-  {
     "id": "1539",
-    "employeeId": "493",
-    "date": "2026-06-26",
+    "employeeId": "415",
+    "date": "2026-05-28",
     "location": "Córdoba",
-    "department": "Soporte",
-    "division": "Operaciones",
-    "jobTitle": "Agente de Soporte Sr",
-    "reportsTo": "Olmos, Candela"
+    "department": "Legales",
+    "division": "Corporativo",
+    "jobTitle": "Analista de Compliance Sr",
+    "reportsTo": "Páez, Paula"
   },
   {
     "id": "1540",
-    "employeeId": "651",
-    "date": "2026-06-30",
-    "location": "Buenos Aires",
-    "department": "Infraestructura",
-    "division": "Tecnología",
-    "jobTitle": "Site Reliability Engineer Ssr",
-    "reportsTo": "Olmos, Ivana"
-  },
-  {
-    "id": "1541",
-    "employeeId": "763",
-    "date": "2026-07-01",
-    "location": "Córdoba",
-    "department": "Ventas",
-    "division": "Comercial",
-    "jobTitle": "Business Developer Sr",
-    "reportsTo": "Peralta, Marcelo"
-  },
-  {
-    "id": "1542",
-    "employeeId": "669",
-    "date": "2026-07-05",
-    "location": "Córdoba",
-    "department": "Datos",
-    "division": "Tecnología",
-    "jobTitle": "Analytics Engineer Sr",
-    "reportsTo": "Roldán, Noelia"
-  },
-  {
-    "id": "1543",
-    "employeeId": "425",
-    "date": "2026-07-06",
-    "location": "Buenos Aires",
-    "department": "Legales",
-    "division": "Corporativo",
-    "jobTitle": "Abogado Corporativo Sr",
-    "reportsTo": "Navarro, Agustina"
-  },
-  {
-    "id": "1544",
-    "employeeId": "467",
-    "date": "2026-07-15",
-    "location": "Buenos Aires",
-    "department": "Datos",
-    "division": "Tecnología",
-    "jobTitle": "Data Analyst Sr",
-    "reportsTo": "Peralta, Martín"
-  },
-  {
-    "id": "1545",
-    "employeeId": "611",
-    "date": "2026-07-16",
-    "location": "Buenos Aires",
-    "department": "Infraestructura",
-    "division": "Tecnología",
-    "jobTitle": "SysAdmin Ssr",
-    "reportsTo": "Escobar, Marcela"
-  },
-  {
-    "id": "1546",
-    "employeeId": "79",
-    "date": "2026-07-17",
-    "location": "Buenos Aires",
-    "department": "Marketing",
-    "division": "Comercial",
-    "jobTitle": "Growth Analyst Ssr",
-    "reportsTo": "Díaz, Valentina"
-  },
-  {
-    "id": "1547",
-    "employeeId": "755",
-    "date": "2026-07-29",
-    "location": "Córdoba",
-    "department": "Marketing",
-    "division": "Comercial",
-    "jobTitle": "Diseñador de Marca Jr",
-    "reportsTo": "Reyes, Daniela"
-  },
-  {
-    "id": "1548",
-    "employeeId": "545",
-    "date": "2026-08-03",
-    "location": "Buenos Aires",
-    "department": "Ingeniería",
-    "division": "Tecnología",
-    "jobTitle": "Mobile Developer Ssr",
-    "reportsTo": "Ibáñez, Lucía"
-  },
-  {
-    "id": "1549",
-    "employeeId": "577",
-    "date": "2026-08-06",
-    "location": "Córdoba",
-    "department": "Ventas",
-    "division": "Comercial",
-    "jobTitle": "Sales Analyst Sr",
-    "reportsTo": "Peralta, Marcelo"
-  },
-  {
-    "id": "1550",
-    "employeeId": "275",
-    "date": "2026-08-14",
-    "location": "Rosario",
-    "department": "Customer Success",
-    "division": "Comercial",
-    "jobTitle": "Onboarding Specialist Ssr",
-    "reportsTo": "Franco, Daniela"
-  },
-  {
-    "id": "1551",
-    "employeeId": "479",
-    "date": "2026-08-18",
-    "location": "Córdoba",
-    "department": "Finanzas",
-    "division": "Corporativo",
-    "jobTitle": "Controller Sr",
-    "reportsTo": "Soria, Gonzalo"
-  },
-  {
-    "id": "1552",
-    "employeeId": "787",
-    "date": "2026-08-21",
-    "location": "Santiago de Chile",
-    "department": "Infraestructura",
-    "division": "Tecnología",
-    "jobTitle": "SysAdmin Jr",
-    "reportsTo": "Olmos, Ivana"
-  },
-  {
-    "id": "1553",
-    "employeeId": "679",
-    "date": "2026-09-01",
-    "location": "Montevideo",
-    "department": "Infraestructura",
-    "division": "Tecnología",
-    "jobTitle": "Site Reliability Engineer Sr",
-    "reportsTo": "Escobar, Marcela"
-  },
-  {
-    "id": "1554",
-    "employeeId": "629",
-    "date": "2026-09-03",
-    "location": "Remoto",
-    "department": "Datos",
-    "division": "Tecnología",
-    "jobTitle": "Data Analyst Sr",
-    "reportsTo": "Roldán, Noelia"
-  },
-  {
-    "id": "1555",
-    "employeeId": "157",
-    "date": "2026-09-06",
-    "location": "Montevideo",
-    "department": "Marketing",
-    "division": "Comercial",
-    "jobTitle": "Diseñador de Marca Sr",
-    "reportsTo": "Reyes, Daniela"
-  },
-  {
-    "id": "1556",
-    "employeeId": "377",
-    "date": "2026-09-06",
-    "location": "Buenos Aires",
-    "department": "Customer Success",
-    "division": "Comercial",
-    "jobTitle": "Customer Success Manager Sr",
-    "reportsTo": "Morales, Florencia"
-  },
-  {
-    "id": "1557",
-    "employeeId": "647",
-    "date": "2026-09-06",
-    "location": "Córdoba",
-    "department": "Marketing",
-    "division": "Comercial",
-    "jobTitle": "Diseñador de Marca Ssr",
-    "reportsTo": "Díaz, Valentina"
-  },
-  {
-    "id": "1558",
-    "employeeId": "197",
-    "date": "2026-09-10",
-    "location": "Santiago de Chile",
-    "department": "Finanzas",
-    "division": "Corporativo",
-    "jobTitle": "Controller Jr",
-    "reportsTo": "Figueroa, Facundo"
-  },
-  {
-    "id": "1559",
-    "employeeId": "623",
-    "date": "2026-09-12",
-    "location": "Buenos Aires",
-    "department": "Calidad",
-    "division": "Operaciones",
-    "jobTitle": "Analista de Calidad Sr",
-    "reportsTo": "Bustos, Jimena"
-  },
-  {
-    "id": "1560",
     "employeeId": "641",
-    "date": "2026-09-16",
+    "date": "2026-05-31",
     "location": "Buenos Aires",
     "department": "Infraestructura",
     "division": "Tecnología",
@@ -5600,9 +5400,219 @@
     "reportsTo": "Escobar, Marcela"
   },
   {
+    "id": "1541",
+    "employeeId": "603",
+    "date": "2026-06-03",
+    "location": "Buenos Aires",
+    "department": "Customer Success",
+    "division": "Comercial",
+    "jobTitle": "Onboarding Specialist Ssr",
+    "reportsTo": "Suárez, Adrián"
+  },
+  {
+    "id": "1542",
+    "employeeId": "657",
+    "date": "2026-06-05",
+    "location": "Córdoba",
+    "department": "Finanzas",
+    "division": "Corporativo",
+    "jobTitle": "Controller Ssr",
+    "reportsTo": "Soria, Gonzalo"
+  },
+  {
+    "id": "1543",
+    "employeeId": "149",
+    "date": "2026-06-06",
+    "location": "Montevideo",
+    "department": "Legales",
+    "division": "Corporativo",
+    "jobTitle": "Analista de Compliance Sr",
+    "reportsTo": "Soria, Eugenia"
+  },
+  {
+    "id": "1544",
+    "employeeId": "169",
+    "date": "2026-06-06",
+    "location": "Rosario",
+    "department": "Marketing",
+    "division": "Comercial",
+    "jobTitle": "Content Specialist Sr",
+    "reportsTo": "Reyes, Daniela"
+  },
+  {
+    "id": "1545",
+    "employeeId": "629",
+    "date": "2026-06-07",
+    "location": "Córdoba",
+    "department": "Datos",
+    "division": "Tecnología",
+    "jobTitle": "Data Analyst Ssr",
+    "reportsTo": "Roldán, Noelia"
+  },
+  {
+    "id": "1546",
+    "employeeId": "273",
+    "date": "2026-07-05",
+    "location": "Santiago de Chile",
+    "department": "Operaciones",
+    "division": "Operaciones",
+    "jobTitle": "Analista de Operaciones Sr",
+    "reportsTo": "Reyes, Santiago"
+  },
+  {
+    "id": "1547",
+    "employeeId": "765",
+    "date": "2026-07-29",
+    "location": "Córdoba",
+    "department": "Finanzas",
+    "division": "Corporativo",
+    "jobTitle": "Controller Sr",
+    "reportsTo": "Figueroa, Facundo"
+  },
+  {
+    "id": "1548",
+    "employeeId": "397",
+    "date": "2026-08-15",
+    "location": "Buenos Aires",
+    "department": "Marketing",
+    "division": "Comercial",
+    "jobTitle": "Growth Analyst Ssr",
+    "reportsTo": "Reyes, Daniela"
+  },
+  {
+    "id": "1549",
+    "employeeId": "645",
+    "date": "2026-08-19",
+    "location": "Buenos Aires",
+    "department": "Finanzas",
+    "division": "Corporativo",
+    "jobTitle": "Controller Ssr",
+    "reportsTo": "Soria, Gonzalo"
+  },
+  {
+    "id": "1550",
+    "employeeId": "671",
+    "date": "2026-08-20",
+    "location": "Buenos Aires",
+    "department": "Infraestructura",
+    "division": "Tecnología",
+    "jobTitle": "Site Reliability Engineer Sr",
+    "reportsTo": "Olmos, Ivana"
+  },
+  {
+    "id": "1551",
+    "employeeId": "389",
+    "date": "2026-08-22",
+    "location": "Rosario",
+    "department": "Operaciones",
+    "division": "Operaciones",
+    "jobTitle": "Coordinador de Procesos Ssr",
+    "reportsTo": "Reyes, Santiago"
+  },
+  {
+    "id": "1552",
+    "employeeId": "571",
+    "date": "2026-08-24",
+    "location": "Remoto",
+    "department": "Finanzas",
+    "division": "Corporativo",
+    "jobTitle": "Controller Sr",
+    "reportsTo": "Figueroa, Facundo"
+  },
+  {
+    "id": "1553",
+    "employeeId": "659",
+    "date": "2026-08-25",
+    "location": "Buenos Aires",
+    "department": "Soporte",
+    "division": "Operaciones",
+    "jobTitle": "Agente de Soporte Ssr",
+    "reportsTo": "Olmos, Candela"
+  },
+  {
+    "id": "1554",
+    "employeeId": "663",
+    "date": "2026-08-27",
+    "location": "Montevideo",
+    "department": "Operaciones",
+    "division": "Operaciones",
+    "jobTitle": "Coordinador de Procesos Sr",
+    "reportsTo": "Rivas, Alejandro"
+  },
+  {
+    "id": "1555",
+    "employeeId": "553",
+    "date": "2026-08-30",
+    "location": "Remoto",
+    "department": "Calidad",
+    "division": "Operaciones",
+    "jobTitle": "Auditor de Procesos Sr",
+    "reportsTo": "Bustos, Jimena"
+  },
+  {
+    "id": "1556",
+    "employeeId": "635",
+    "date": "2026-09-01",
+    "location": "Córdoba",
+    "department": "Finanzas",
+    "division": "Corporativo",
+    "jobTitle": "Analista Contable Sr",
+    "reportsTo": "Figueroa, Facundo"
+  },
+  {
+    "id": "1557",
+    "employeeId": "109",
+    "date": "2026-09-06",
+    "location": "Córdoba",
+    "department": "Customer Success",
+    "division": "Comercial",
+    "jobTitle": "Customer Success Manager Ssr",
+    "reportsTo": "Franco, Daniela"
+  },
+  {
+    "id": "1558",
+    "employeeId": "701",
+    "date": "2026-09-12",
+    "location": "Buenos Aires",
+    "department": "Infraestructura",
+    "division": "Tecnología",
+    "jobTitle": "DevOps Engineer Sr",
+    "reportsTo": "Herrera, Rocío"
+  },
+  {
+    "id": "1559",
+    "employeeId": "711",
+    "date": "2026-09-17",
+    "location": "Buenos Aires",
+    "department": "Soporte",
+    "division": "Operaciones",
+    "jobTitle": "Especialista de Soporte Sr",
+    "reportsTo": "Olmos, Candela"
+  },
+  {
+    "id": "1560",
+    "employeeId": "713",
+    "date": "2026-09-21",
+    "location": "Buenos Aires",
+    "department": "Infraestructura",
+    "division": "Tecnología",
+    "jobTitle": "DevOps Engineer Sr",
+    "reportsTo": "Núñez, Mariana"
+  },
+  {
     "id": "1561",
+    "employeeId": "695",
+    "date": "2026-09-27",
+    "location": "Buenos Aires",
+    "department": "Ventas",
+    "division": "Comercial",
+    "jobTitle": "Business Developer Sr",
+    "reportsTo": "López, Silvana"
+  },
+  {
+    "id": "1562",
     "employeeId": "707",
-    "date": "2026-09-16",
+    "date": "2026-09-29",
     "location": "Buenos Aires",
     "department": "Infraestructura",
     "division": "Tecnología",
@@ -5610,63 +5620,23 @@
     "reportsTo": "Benítez, Florencia"
   },
   {
-    "id": "1562",
-    "employeeId": "615",
-    "date": "2026-09-22",
-    "location": "Buenos Aires",
-    "department": "Marketing",
-    "division": "Comercial",
-    "jobTitle": "Content Specialist Sr",
-    "reportsTo": "Reyes, Daniela"
-  },
-  {
     "id": "1563",
-    "employeeId": "713",
-    "date": "2026-09-24",
-    "location": "Remoto",
-    "department": "Infraestructura",
-    "division": "Tecnología",
-    "jobTitle": "DevOps Engineer Sr",
-    "reportsTo": "Ríos, Antonella"
-  },
-  {
-    "id": "1564",
-    "employeeId": "687",
-    "date": "2026-09-27",
-    "location": "Buenos Aires",
-    "department": "Infraestructura",
-    "division": "Tecnología",
-    "jobTitle": "Site Reliability Engineer Ssr",
-    "reportsTo": "Núñez, Mariana"
-  },
-  {
-    "id": "1565",
-    "employeeId": "705",
-    "date": "2026-09-28",
-    "location": "Remoto",
-    "department": "Marketing",
-    "division": "Comercial",
-    "jobTitle": "Diseñador de Marca Sr",
-    "reportsTo": "Reyes, Daniela"
-  },
-  {
-    "id": "1566",
-    "employeeId": "717",
-    "date": "2026-09-29",
-    "location": "Montevideo",
-    "department": "Customer Success",
-    "division": "Comercial",
-    "jobTitle": "Customer Success Manager Sr",
-    "reportsTo": "Morales, Florencia"
-  },
-  {
-    "id": "1567",
     "employeeId": "809",
     "date": "2026-09-30",
     "location": "Buenos Aires",
     "department": "Calidad",
     "division": "Operaciones",
     "jobTitle": "Auditor de Procesos Sr",
-    "reportsTo": "Trejo, Marcela"
+    "reportsTo": "Monzón, Milagros"
+  },
+  {
+    "id": "1564",
+    "employeeId": "683",
+    "date": "2026-10-01",
+    "location": "Remoto",
+    "department": "Infraestructura",
+    "division": "Tecnología",
+    "jobTitle": "DevOps Engineer Ssr",
+    "reportsTo": "Herrera, Rocío"
   }
 ]

@@ -22,79 +22,56 @@
   "selectedFilter": "status-all",
   "goals": [
     {
-      "id": "8021",
-      "title": "Reducir los incidentes recurrentes a la mitad",
-      "description": "Meta compartida con otra área; coordinar avances mensuales.",
-      "percentComplete": 100,
+      "id": "7730",
+      "title": "Automatizar la conciliación mensual",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 0,
       "alignsWithOptionId": null,
-      "sharedWithEmployeeIds": [
-        49
-      ],
-      "dueDate": "2025-07-03",
-      "completionDate": "2025-05-22",
-      "lastChangedDateTime": "2025-05-22T16:35:35Z",
-      "status": "completed",
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2025-08-25",
+      "completionDate": null,
+      "lastChangedDateTime": "2025-08-21T08:13:19Z",
+      "status": "closed",
       "milestones": [
         {
-          "id": 2069,
-          "employeeGoalId": 8021,
+          "id": 1972,
+          "employeeGoalId": 7730,
           "title": "Hito 1",
           "startValue": 0,
           "endValue": 1,
-          "currentValue": 1,
-          "completedDateTime": "2025-05-11T12:49:34Z",
-          "lastUpdateDateTime": "2025-05-11T12:49:34Z",
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2025-05-17T09:45:03Z",
           "lastUpdateUserId": 703
         },
         {
-          "id": 2070,
-          "employeeGoalId": 8021,
+          "id": 1973,
+          "employeeGoalId": 7730,
           "title": "Hito 2",
           "startValue": 0,
           "endValue": 1,
-          "currentValue": 1,
-          "completedDateTime": "2025-04-25T08:53:13Z",
-          "lastUpdateDateTime": "2025-04-25T08:53:13Z",
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2025-05-17T18:47:36Z",
           "lastUpdateUserId": 703
         },
         {
-          "id": 2071,
-          "employeeGoalId": 8021,
+          "id": 1974,
+          "employeeGoalId": 7730,
           "title": "Hito 3",
           "startValue": 0,
           "endValue": 1,
-          "currentValue": 1,
-          "completedDateTime": "2025-04-20T08:12:15Z",
-          "lastUpdateDateTime": "2025-04-20T08:12:15Z",
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2025-05-17T11:56:15Z",
           "lastUpdateUserId": 703
         }
       ],
       "actions": {
-        "canEdit": true,
+        "canEdit": false,
         "canUpdateProgress": false,
-        "canClose": true,
-        "canReopen": false,
-        "canDelete": true,
-        "canComment": true
-      }
-    },
-    {
-      "id": "8024",
-      "title": "Implementar el calendario editorial",
-      "description": "Meta compartida con otra área; coordinar avances mensuales.",
-      "percentComplete": 65,
-      "alignsWithOptionId": 9003,
-      "sharedWithEmployeeIds": [],
-      "dueDate": "2025-12-08",
-      "completionDate": null,
-      "lastChangedDateTime": "2026-06-08T10:42:09Z",
-      "status": "in_progress",
-      "milestones": null,
-      "actions": {
-        "canEdit": true,
-        "canUpdateProgress": true,
-        "canClose": true,
-        "canReopen": false,
+        "canClose": false,
+        "canReopen": true,
         "canDelete": true,
         "canComment": true
       }
@@ -106,22 +83,12 @@
       "firstName": "Hugo",
       "lastName": "Bustos",
       "preferredName": null
-    },
-    {
-      "employeeId": 49,
-      "firstName": "Milagros",
-      "lastName": "Monzón",
-      "preferredName": null
     }
   ],
   "comments": [
     {
-      "goalId": "8021",
-      "commentCount": 4
-    },
-    {
-      "goalId": "8024",
-      "commentCount": 2
+      "goalId": "7730",
+      "commentCount": 1
     }
   ]
 }

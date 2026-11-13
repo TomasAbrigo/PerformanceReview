@@ -22,48 +22,103 @@
   "selectedFilter": "status-all",
   "goals": [
     {
-      "id": "5259",
-      "title": "Mejorar el NPS interno del equipo",
-      "description": "Alineado con el plan del área para el año.",
+      "id": "5221",
+      "title": "Aumentar la cobertura de pruebas al 80%",
+      "description": "Pedido por el equipo directivo en la planificación.",
       "percentComplete": 100,
       "alignsWithOptionId": null,
       "sharedWithEmployeeIds": [],
-      "dueDate": "2025-04-10",
-      "completionDate": "2025-04-02",
-      "lastChangedDateTime": "2025-04-02T18:46:39Z",
+      "dueDate": "2024-11-30",
+      "completionDate": "2024-12-10",
+      "lastChangedDateTime": "2024-12-10T10:00:50Z",
       "status": "completed",
       "milestones": [
         {
-          "id": 815,
-          "employeeGoalId": 5259,
+          "id": 811,
+          "employeeGoalId": 5221,
           "title": "Hito 1",
           "startValue": 0,
           "endValue": 1,
           "currentValue": 1,
-          "completedDateTime": "2025-02-01T08:34:35Z",
-          "lastUpdateDateTime": "2025-02-01T08:34:35Z",
+          "completedDateTime": "2024-09-04T08:05:48Z",
+          "lastUpdateDateTime": "2024-09-04T08:05:48Z",
           "lastUpdateUserId": 71
         },
         {
-          "id": 816,
-          "employeeGoalId": 5259,
+          "id": 812,
+          "employeeGoalId": 5221,
           "title": "Hito 2",
           "startValue": 0,
           "endValue": 1,
           "currentValue": 1,
-          "completedDateTime": "2025-02-18T16:40:18Z",
-          "lastUpdateDateTime": "2025-02-18T16:40:18Z",
+          "completedDateTime": "2024-11-16T17:35:01Z",
+          "lastUpdateDateTime": "2024-11-16T17:35:01Z",
           "lastUpdateUserId": 71
-        },
+        }
+      ],
+      "actions": {
+        "canEdit": false,
+        "canUpdateProgress": false,
+        "canClose": false,
+        "canReopen": false,
+        "canDelete": false,
+        "canComment": false
+      }
+    },
+    {
+      "id": "5224",
+      "title": "Documentar los procesos críticos",
+      "description": "Sirve de base para el próximo ciclo de evaluación.",
+      "percentComplete": 25,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2024-11-22",
+      "completionDate": null,
+      "lastChangedDateTime": "2025-04-14T19:57:24Z",
+      "status": "in_progress",
+      "milestones": [
         {
-          "id": 817,
-          "employeeGoalId": 5259,
-          "title": "Hito 3",
+          "id": 813,
+          "employeeGoalId": 5224,
+          "title": "Hito 1",
           "startValue": 0,
           "endValue": 1,
           "currentValue": 1,
-          "completedDateTime": "2025-01-31T19:52:19Z",
-          "lastUpdateDateTime": "2025-01-31T19:52:19Z",
+          "completedDateTime": "2024-09-09T10:38:45Z",
+          "lastUpdateDateTime": "2024-09-09T10:38:45Z",
+          "lastUpdateUserId": 71
+        },
+        {
+          "id": 814,
+          "employeeGoalId": 5224,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2024-08-27T14:39:06Z",
+          "lastUpdateUserId": 71
+        },
+        {
+          "id": 815,
+          "employeeGoalId": 5224,
+          "title": "Hito 3",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2024-08-27T08:52:16Z",
+          "lastUpdateUserId": 71
+        },
+        {
+          "id": 816,
+          "employeeGoalId": 5224,
+          "title": "Hito 4",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2024-08-27T15:02:34Z",
           "lastUpdateUserId": 71
         }
       ],
@@ -87,7 +142,7 @@
   ],
   "comments": [
     {
-      "goalId": "5259",
+      "goalId": "5224",
       "commentCount": 1
     }
   ]

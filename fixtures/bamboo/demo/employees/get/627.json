@@ -3,7 +3,7 @@
   "firstName": "Ricardo",
   "lastName": "Godoy",
   "workEmail": "ricardo.godoy@meridian-andina.example",
-  "employeeNumber": "11517",
+  "employeeNumber": "11529",
   "supervisorEId": "147",
   "supervisorId": "10339",
   "supervisor": "Páez, Paula",
@@ -12,6 +12,6 @@
   "department": "Legales",
   "division": "Corporativo",
   "jobTitle": "Analista de Compliance Ssr",
-  "location": "Buenos Aires",
+  "location": "Córdoba",
   "status": "Active"
 }

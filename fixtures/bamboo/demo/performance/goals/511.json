@@ -22,15 +22,15 @@
   "selectedFilter": "status-all",
   "goals": [
     {
-      "id": "7446",
-      "title": "Aumentar la cobertura de pruebas al 80%",
-      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "id": "7196",
+      "title": "Entregar el proyecto Norte sin desvíos",
+      "description": "Sirve de base para el próximo ciclo de evaluación.",
       "percentComplete": 100,
       "alignsWithOptionId": null,
       "sharedWithEmployeeIds": [],
-      "dueDate": "2025-04-11",
-      "completionDate": "2025-02-16",
-      "lastChangedDateTime": "2025-02-16T12:06:56Z",
+      "dueDate": "2024-04-23",
+      "completionDate": "2024-02-23",
+      "lastChangedDateTime": "2024-02-23T15:14:12Z",
       "status": "completed",
       "milestones": null,
       "actions": {
@@ -43,17 +43,40 @@
       }
     },
     {
-      "id": "7447",
-      "title": "Entregar el proyecto Norte sin desvíos",
+      "id": "7198",
+      "title": "Implementar el calendario editorial",
       "description": "Pedido por el equipo directivo en la planificación.",
-      "percentComplete": 10,
+      "percentComplete": 50,
       "alignsWithOptionId": null,
       "sharedWithEmployeeIds": [],
-      "dueDate": "2025-12-06",
+      "dueDate": "2026-10-09",
       "completionDate": null,
-      "lastChangedDateTime": "2026-05-25T09:12:19Z",
+      "lastChangedDateTime": "2026-05-26T14:14:49Z",
       "status": "in_progress",
-      "milestones": null,
+      "milestones": [
+        {
+          "id": 1708,
+          "employeeGoalId": 7198,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2026-04-18T14:16:27Z",
+          "lastUpdateDateTime": "2026-04-18T14:16:27Z",
+          "lastUpdateUserId": 511
+        },
+        {
+          "id": 1709,
+          "employeeGoalId": 7198,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2026-02-26T15:02:01Z",
+          "lastUpdateUserId": 511
+        }
+      ],
       "actions": {
         "canEdit": true,
         "canUpdateProgress": true,
@@ -64,22 +87,43 @@
       }
     },
     {
-      "id": "7449",
-      "title": "Aumentar la cobertura de pruebas al 80%",
+      "id": "7200",
+      "title": "Completar la certificación del área",
       "description": "Sirve de base para el próximo ciclo de evaluación.",
-      "percentComplete": 35,
-      "alignsWithOptionId": null,
-      "sharedWithEmployeeIds": [
-        31
+      "percentComplete": 100,
+      "alignsWithOptionId": 9001,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2026-02-08",
+      "completionDate": "2025-11-14",
+      "lastChangedDateTime": "2025-11-14T18:29:38Z",
+      "status": "completed",
+      "milestones": [
+        {
+          "id": 1710,
+          "employeeGoalId": 7200,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-11-09T19:21:40Z",
+          "lastUpdateDateTime": "2025-11-09T19:21:40Z",
+          "lastUpdateUserId": 511
+        },
+        {
+          "id": 1711,
+          "employeeGoalId": 7200,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-11-14T11:41:14Z",
+          "lastUpdateDateTime": "2025-11-14T11:41:14Z",
+          "lastUpdateUserId": 511
+        }
       ],
-      "dueDate": "2026-07-09",
-      "completionDate": null,
-      "lastChangedDateTime": "2026-07-26T08:38:32Z",
-      "status": "in_progress",
-      "milestones": null,
       "actions": {
         "canEdit": true,
-        "canUpdateProgress": true,
+        "canUpdateProgress": false,
         "canClose": true,
         "canReopen": false,
         "canDelete": true,
@@ -93,18 +137,16 @@
       "firstName": "Ivana",
       "lastName": "Escobar",
       "preferredName": null
-    },
-    {
-      "employeeId": 31,
-      "firstName": "Antonella",
-      "lastName": "Ríos",
-      "preferredName": null
     }
   ],
   "comments": [
     {
-      "goalId": "7447",
-      "commentCount": 4
+      "goalId": "7198",
+      "commentCount": 3
+    },
+    {
+      "goalId": "7200",
+      "commentCount": 3
     }
   ]
 }

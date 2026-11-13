@@ -14,12 +14,18 @@ const fullName = (e: Pick<FixtureEmployee, "firstName" | "lastName">): string =>
  */
 export function createReportNamer(company: CompanyFixture) {
   const byId = new Map(company.employees.map((e) => [e.id, e]));
-  const renames = new Map(company.identity.renames.map((r) => [r.employeeId, r]));
+  const renames = new Map(
+    company.identity.renames.map((r) => [r.employeeId, r]),
+  );
   const typos = new Map(
-    company.identity.misspellings.map((m) => [`${m.employeeId}:${m.cycle}`, m.csvName]),
+    company.identity.misspellings.map((m) => [
+      `${m.employeeId}:${m.cycle}`,
+      m.csvName,
+    ]),
   );
 
-  const current = (employeeId: string): string => fullName(byId.get(employeeId)!);
+  const current = (employeeId: string): string =>
+    fullName(byId.get(employeeId)!);
 
   return {
     current,
@@ -27,7 +33,10 @@ export function createReportNamer(company: CompanyFixture) {
       const typo = typos.get(`${employeeId}:${cycleIndex}`);
       if (typo !== undefined) return typo;
       const rename = renames.get(employeeId);
-      if (rename && company.cycles[cycleIndex].assessmentDue < rename.renamedOn) {
+      if (
+        rename &&
+        company.cycles[cycleIndex].assessmentDue < rename.renamedOn
+      ) {
         return `${rename.previousFirstName} ${rename.previousLastName}`;
       }
       return current(employeeId);

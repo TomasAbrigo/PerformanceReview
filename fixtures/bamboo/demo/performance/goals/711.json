@@ -22,120 +22,17 @@
   "selectedFilter": "status-all",
   "goals": [
     {
-      "id": "8038",
-      "title": "Completar la certificación del área",
-      "description": "Alineado con el plan del área para el año.",
-      "percentComplete": 100,
-      "alignsWithOptionId": 9002,
+      "id": "7745",
+      "title": "Cerrar el plan de capacitación anual",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 15,
+      "alignsWithOptionId": 9001,
       "sharedWithEmployeeIds": [],
-      "dueDate": "2025-10-07",
-      "completionDate": "2025-07-02",
-      "lastChangedDateTime": "2025-07-02T12:08:45Z",
-      "status": "completed",
-      "milestones": null,
-      "actions": {
-        "canEdit": true,
-        "canUpdateProgress": false,
-        "canClose": true,
-        "canReopen": false,
-        "canDelete": true,
-        "canComment": true
-      }
-    },
-    {
-      "id": "8041",
-      "title": "Mentorear a dos personas nuevas",
-      "description": "Meta compartida con otra área; coordinar avances mensuales.",
-      "percentComplete": 100,
-      "alignsWithOptionId": null,
-      "sharedWithEmployeeIds": [
-        81
-      ],
-      "dueDate": "2025-12-16",
-      "completionDate": "2025-09-23",
-      "lastChangedDateTime": "2025-09-23T19:26:40Z",
-      "status": "completed",
-      "milestones": [
-        {
-          "id": 2079,
-          "employeeGoalId": 8041,
-          "title": "Hito 1",
-          "startValue": 0,
-          "endValue": 1,
-          "currentValue": 1,
-          "completedDateTime": "2025-07-03T09:23:07Z",
-          "lastUpdateDateTime": "2025-07-03T09:23:07Z",
-          "lastUpdateUserId": 711
-        },
-        {
-          "id": 2080,
-          "employeeGoalId": 8041,
-          "title": "Hito 2",
-          "startValue": 0,
-          "endValue": 1,
-          "currentValue": 1,
-          "completedDateTime": "2025-07-13T09:48:25Z",
-          "lastUpdateDateTime": "2025-07-13T09:48:25Z",
-          "lastUpdateUserId": 711
-        }
-      ],
-      "actions": {
-        "canEdit": true,
-        "canUpdateProgress": false,
-        "canClose": true,
-        "canReopen": false,
-        "canDelete": true,
-        "canComment": true
-      }
-    },
-    {
-      "id": "8043",
-      "title": "Completar la certificación del área",
-      "description": "Alineado con el plan del área para el año.",
-      "percentComplete": 33,
-      "alignsWithOptionId": null,
-      "sharedWithEmployeeIds": [
-        47
-      ],
-      "dueDate": "2026-12-05",
+      "dueDate": "2026-07-31",
       "completionDate": null,
-      "lastChangedDateTime": "2026-10-05T09:45:55Z",
+      "lastChangedDateTime": "2026-10-11T17:18:45Z",
       "status": "in_progress",
-      "milestones": [
-        {
-          "id": 2081,
-          "employeeGoalId": 8043,
-          "title": "Hito 1",
-          "startValue": 0,
-          "endValue": 1,
-          "currentValue": 1,
-          "completedDateTime": "2026-09-27T17:58:07Z",
-          "lastUpdateDateTime": "2026-09-27T17:58:07Z",
-          "lastUpdateUserId": 711
-        },
-        {
-          "id": 2082,
-          "employeeGoalId": 8043,
-          "title": "Hito 2",
-          "startValue": 0,
-          "endValue": 1,
-          "currentValue": 0,
-          "completedDateTime": null,
-          "lastUpdateDateTime": "2026-09-27T19:57:53Z",
-          "lastUpdateUserId": 711
-        },
-        {
-          "id": 2083,
-          "employeeGoalId": 8043,
-          "title": "Hito 3",
-          "startValue": 0,
-          "endValue": 1,
-          "currentValue": 0,
-          "completedDateTime": null,
-          "lastUpdateDateTime": "2026-09-27T16:22:53Z",
-          "lastUpdateUserId": 711
-        }
-      ],
+      "milestones": null,
       "actions": {
         "canEdit": true,
         "canUpdateProgress": true,
@@ -152,24 +49,7 @@
       "firstName": "Martín",
       "lastName": "Páez",
       "preferredName": null
-    },
-    {
-      "employeeId": 81,
-      "firstName": "Lorena",
-      "lastName": "Páez",
-      "preferredName": null
-    },
-    {
-      "employeeId": 47,
-      "firstName": "Candela",
-      "lastName": "Olmos",
-      "preferredName": "Cande"
     }
   ],
-  "comments": [
-    {
-      "goalId": "8043",
-      "commentCount": 3
-    }
-  ]
+  "comments": []
 }

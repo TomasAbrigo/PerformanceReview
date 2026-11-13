@@ -22,17 +22,106 @@
   "selectedFilter": "status-all",
   "goals": [
     {
-      "id": "7591",
-      "title": "Implementar el calendario editorial",
+      "id": "7308",
+      "title": "Automatizar la conciliación mensual",
       "description": "Sirve de base para el próximo ciclo de evaluación.",
+      "percentComplete": 10,
+      "alignsWithOptionId": 9001,
+      "sharedWithEmployeeIds": [
+        59
+      ],
+      "dueDate": "2024-09-25",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-07-02T19:36:44Z",
+      "status": "in_progress",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "7311",
+      "title": "Reducir los incidentes recurrentes a la mitad",
+      "description": "Sirve de base para el próximo ciclo de evaluación.",
+      "percentComplete": 20,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2025-08-18",
+      "completionDate": null,
+      "lastChangedDateTime": "2025-07-13T09:03:52Z",
+      "status": "closed",
+      "milestones": null,
+      "actions": {
+        "canEdit": false,
+        "canUpdateProgress": false,
+        "canClose": false,
+        "canReopen": true,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "7312",
+      "title": "Aumentar la cobertura de pruebas al 80%",
+      "description": "Alineado con el plan del área para el año.",
       "percentComplete": 100,
       "alignsWithOptionId": null,
       "sharedWithEmployeeIds": [],
-      "dueDate": "2025-03-27",
-      "completionDate": "2025-03-12",
-      "lastChangedDateTime": "2025-03-12T08:30:55Z",
+      "dueDate": "2026-10-15",
+      "completionDate": "2026-09-19",
+      "lastChangedDateTime": "2026-09-19T19:40:52Z",
       "status": "completed",
-      "milestones": null,
+      "milestones": [
+        {
+          "id": 1771,
+          "employeeGoalId": 7312,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2026-08-17T08:20:59Z",
+          "lastUpdateDateTime": "2026-08-17T08:20:59Z",
+          "lastUpdateUserId": 549
+        },
+        {
+          "id": 1772,
+          "employeeGoalId": 7312,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2026-08-15T15:17:53Z",
+          "lastUpdateDateTime": "2026-08-15T15:17:53Z",
+          "lastUpdateUserId": 549
+        },
+        {
+          "id": 1773,
+          "employeeGoalId": 7312,
+          "title": "Hito 3",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2026-09-02T13:30:20Z",
+          "lastUpdateDateTime": "2026-09-02T13:30:20Z",
+          "lastUpdateUserId": 549
+        },
+        {
+          "id": 1774,
+          "employeeGoalId": 7312,
+          "title": "Hito 4",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2026-08-26T15:22:59Z",
+          "lastUpdateDateTime": "2026-08-26T15:22:59Z",
+          "lastUpdateUserId": 549
+        }
+      ],
       "actions": {
         "canEdit": true,
         "canUpdateProgress": false,
@@ -43,15 +132,15 @@
       }
     },
     {
-      "id": "7593",
-      "title": "Reducir los incidentes recurrentes a la mitad",
-      "description": "Alineado con el plan del área para el año.",
+      "id": "7313",
+      "title": "Automatizar la conciliación mensual",
+      "description": "Sirve de base para el próximo ciclo de evaluación.",
       "percentComplete": 100,
-      "alignsWithOptionId": 9004,
+      "alignsWithOptionId": null,
       "sharedWithEmployeeIds": [],
-      "dueDate": "2026-03-15",
-      "completionDate": "2026-03-25",
-      "lastChangedDateTime": "2026-03-25T11:44:24Z",
+      "dueDate": "2026-09-27",
+      "completionDate": "2026-04-18",
+      "lastChangedDateTime": "2026-04-18T15:29:19Z",
       "status": "completed",
       "milestones": null,
       "actions": {
@@ -70,15 +159,25 @@
       "firstName": "Eugenia",
       "lastName": "Trejo",
       "preferredName": null
+    },
+    {
+      "employeeId": 59,
+      "firstName": "Gonzalo",
+      "lastName": "Soria",
+      "preferredName": null
     }
   ],
   "comments": [
     {
-      "goalId": "7591",
-      "commentCount": 2
+      "goalId": "7308",
+      "commentCount": 4
     },
     {
-      "goalId": "7593",
+      "goalId": "7311",
+      "commentCount": 3
+    },
+    {
+      "goalId": "7313",
       "commentCount": 1
     }
   ]

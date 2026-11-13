@@ -22,104 +22,82 @@
   "selectedFilter": "status-all",
   "goals": [
     {
-      "id": "7665",
-      "title": "Implementar el calendario editorial",
+      "id": "7394",
+      "title": "Completar la certificación del área",
+      "description": "Sirve de base para el próximo ciclo de evaluación.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2024-09-13",
+      "completionDate": "2024-07-20",
+      "lastChangedDateTime": "2024-07-20T14:47:54Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "7395",
+      "title": "Lanzar el nuevo flujo de onboarding",
       "description": "Alineado con el plan del área para el año.",
       "percentComplete": 100,
-      "alignsWithOptionId": 9004,
+      "alignsWithOptionId": null,
       "sharedWithEmployeeIds": [],
-      "dueDate": "2024-10-21",
-      "completionDate": "2024-06-08",
-      "lastChangedDateTime": "2024-06-08T16:36:12Z",
+      "dueDate": "2025-03-24",
+      "completionDate": "2024-11-26",
+      "lastChangedDateTime": "2024-11-26T18:51:44Z",
       "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "7398",
+      "title": "Renovar las cuentas clave del trimestre",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "percentComplete": 50,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2026-09-25",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-05-12T12:32:32Z",
+      "status": "in_progress",
       "milestones": [
         {
-          "id": 1894,
-          "employeeGoalId": 7665,
+          "id": 1805,
+          "employeeGoalId": 7398,
           "title": "Hito 1",
           "startValue": 0,
           "endValue": 1,
           "currentValue": 1,
-          "completedDateTime": "2024-05-01T18:30:21Z",
-          "lastUpdateDateTime": "2024-05-01T18:30:21Z",
+          "completedDateTime": "2026-05-04T17:30:37Z",
+          "lastUpdateDateTime": "2026-05-04T17:30:37Z",
           "lastUpdateUserId": 571
         },
         {
-          "id": 1895,
-          "employeeGoalId": 7665,
+          "id": 1806,
+          "employeeGoalId": 7398,
           "title": "Hito 2",
           "startValue": 0,
           "endValue": 1,
-          "currentValue": 1,
-          "completedDateTime": "2024-05-31T08:42:57Z",
-          "lastUpdateDateTime": "2024-05-31T08:42:57Z",
-          "lastUpdateUserId": 571
-        },
-        {
-          "id": 1896,
-          "employeeGoalId": 7665,
-          "title": "Hito 3",
-          "startValue": 0,
-          "endValue": 1,
-          "currentValue": 1,
-          "completedDateTime": "2024-04-30T09:57:26Z",
-          "lastUpdateDateTime": "2024-04-30T09:57:26Z",
-          "lastUpdateUserId": 571
-        },
-        {
-          "id": 1897,
-          "employeeGoalId": 7665,
-          "title": "Hito 4",
-          "startValue": 0,
-          "endValue": 1,
-          "currentValue": 1,
-          "completedDateTime": "2024-05-31T12:02:07Z",
-          "lastUpdateDateTime": "2024-05-31T12:02:07Z",
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2026-04-11T17:34:15Z",
           "lastUpdateUserId": 571
         }
       ],
-      "actions": {
-        "canEdit": true,
-        "canUpdateProgress": false,
-        "canClose": true,
-        "canReopen": false,
-        "canDelete": true,
-        "canComment": true
-      }
-    },
-    {
-      "id": "7666",
-      "title": "Entregar el proyecto Norte sin desvíos",
-      "description": "Meta compartida con otra área; coordinar avances mensuales.",
-      "percentComplete": 100,
-      "alignsWithOptionId": 9003,
-      "sharedWithEmployeeIds": [],
-      "dueDate": "2025-08-21",
-      "completionDate": "2025-04-15",
-      "lastChangedDateTime": "2025-04-15T18:07:24Z",
-      "status": "completed",
-      "milestones": null,
-      "actions": {
-        "canEdit": true,
-        "canUpdateProgress": false,
-        "canClose": true,
-        "canReopen": false,
-        "canDelete": true,
-        "canComment": true
-      }
-    },
-    {
-      "id": "7668",
-      "title": "Mejorar el NPS interno del equipo",
-      "description": "Alineado con el plan del área para el año.",
-      "percentComplete": 40,
-      "alignsWithOptionId": null,
-      "sharedWithEmployeeIds": [],
-      "dueDate": "2026-06-09",
-      "completionDate": null,
-      "lastChangedDateTime": "2026-08-27T09:34:37Z",
-      "status": "in_progress",
-      "milestones": null,
       "actions": {
         "canEdit": true,
         "canUpdateProgress": true,
@@ -138,14 +116,5 @@
       "preferredName": null
     }
   ],
-  "comments": [
-    {
-      "goalId": "7665",
-      "commentCount": 1
-    },
-    {
-      "goalId": "7668",
-      "commentCount": 3
-    }
-  ]
+  "comments": []
 }

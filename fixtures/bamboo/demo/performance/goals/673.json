@@ -20,29 +20,7 @@
     }
   ],
   "selectedFilter": "status-all",
-  "goals": [
-    {
-      "id": "7956",
-      "title": "Renovar las cuentas clave del trimestre",
-      "description": "Pedido por el equipo directivo en la planificación.",
-      "percentComplete": 100,
-      "alignsWithOptionId": null,
-      "sharedWithEmployeeIds": [],
-      "dueDate": "2025-06-05",
-      "completionDate": "2025-04-25",
-      "lastChangedDateTime": "2025-04-25T14:17:44Z",
-      "status": "completed",
-      "milestones": null,
-      "actions": {
-        "canEdit": true,
-        "canUpdateProgress": false,
-        "canClose": true,
-        "canReopen": false,
-        "canDelete": true,
-        "canComment": true
-      }
-    }
-  ],
+  "goals": [],
   "persons": [
     {
       "employeeId": 673,

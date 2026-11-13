@@ -1,17 +1,17 @@
 {
   "id": "537",
   "firstName": "Paula",
-  "lastName": "Peralta",
-  "workEmail": "paula.peralta@meridian-andina.example",
-  "employeeNumber": "11312",
+  "lastName": "Díaz",
+  "workEmail": "paula.diaz@meridian-andina.example",
+  "employeeNumber": "11306",
   "supervisorEId": "59",
-  "supervisorId": "10110",
+  "supervisorId": "10104",
   "supervisor": "Soria, Gonzalo",
   "hireDate": "2024-01-20",
   "terminationDate": null,
   "department": "Finanzas",
   "division": "Corporativo",
-  "jobTitle": "Controller Ssr",
+  "jobTitle": "Controller Jr",
   "location": "Buenos Aires",
   "status": "Active"
 }

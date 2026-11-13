@@ -22,59 +22,62 @@
   "selectedFilter": "status-all",
   "goals": [
     {
-      "id": "8181",
-      "title": "Migrar los reportes al nuevo tablero",
-      "description": "Pedido por el equipo directivo en la planificación.",
-      "percentComplete": 100,
-      "alignsWithOptionId": 9003,
-      "sharedWithEmployeeIds": [],
-      "dueDate": "2025-12-12",
-      "completionDate": "2025-08-31",
-      "lastChangedDateTime": "2025-08-31T14:02:29Z",
-      "status": "completed",
-      "milestones": null,
-      "actions": {
-        "canEdit": true,
-        "canUpdateProgress": false,
-        "canClose": true,
-        "canReopen": false,
-        "canDelete": true,
-        "canComment": true
-      }
-    },
-    {
-      "id": "8184",
-      "title": "Mejorar el NPS interno del equipo",
-      "description": "Alineado con el plan del área para el año.",
-      "percentComplete": 100,
-      "alignsWithOptionId": null,
-      "sharedWithEmployeeIds": [],
-      "dueDate": "2025-11-16",
-      "completionDate": "2025-10-15",
-      "lastChangedDateTime": "2025-10-15T16:51:14Z",
-      "status": "completed",
-      "milestones": null,
-      "actions": {
-        "canEdit": true,
-        "canUpdateProgress": false,
-        "canClose": true,
-        "canReopen": false,
-        "canDelete": true,
-        "canComment": true
-      }
-    },
-    {
-      "id": "8186",
-      "title": "Completar la certificación del área",
+      "id": "7865",
+      "title": "Implementar el calendario editorial",
       "description": "Pedido por el equipo directivo en la planificación.",
       "percentComplete": 100,
       "alignsWithOptionId": null,
       "sharedWithEmployeeIds": [],
-      "dueDate": "2026-07-27",
-      "completionDate": "2026-02-10",
-      "lastChangedDateTime": "2026-02-10T19:51:18Z",
+      "dueDate": "2025-12-03",
+      "completionDate": "2025-10-04",
+      "lastChangedDateTime": "2025-10-04T19:25:37Z",
       "status": "completed",
-      "milestones": null,
+      "milestones": [
+        {
+          "id": 2020,
+          "employeeGoalId": 7865,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-09-30T12:16:45Z",
+          "lastUpdateDateTime": "2025-09-30T12:16:45Z",
+          "lastUpdateUserId": 765
+        },
+        {
+          "id": 2021,
+          "employeeGoalId": 7865,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-09-29T16:02:53Z",
+          "lastUpdateDateTime": "2025-09-29T16:02:53Z",
+          "lastUpdateUserId": 765
+        },
+        {
+          "id": 2022,
+          "employeeGoalId": 7865,
+          "title": "Hito 3",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-08-17T19:34:19Z",
+          "lastUpdateDateTime": "2025-08-17T19:34:19Z",
+          "lastUpdateUserId": 765
+        },
+        {
+          "id": 2023,
+          "employeeGoalId": 7865,
+          "title": "Hito 4",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-08-29T09:34:16Z",
+          "lastUpdateDateTime": "2025-08-29T09:34:16Z",
+          "lastUpdateUserId": 765
+        }
+      ],
       "actions": {
         "canEdit": true,
         "canUpdateProgress": false,
@@ -85,20 +88,41 @@
       }
     },
     {
-      "id": "8188",
-      "title": "Entregar el proyecto Norte sin desvíos",
-      "description": "Alineado con el plan del área para el año.",
-      "percentComplete": 100,
+      "id": "7868",
+      "title": "Reducir el tiempo de primera respuesta un 20%",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 55,
       "alignsWithOptionId": null,
       "sharedWithEmployeeIds": [],
-      "dueDate": "2026-04-27",
-      "completionDate": "2026-04-04",
-      "lastChangedDateTime": "2026-04-04T17:53:04Z",
-      "status": "completed",
+      "dueDate": "2026-08-23",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-05-15T12:10:13Z",
+      "status": "in_progress",
       "milestones": null,
       "actions": {
         "canEdit": true,
-        "canUpdateProgress": false,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "7869",
+      "title": "Implementar el calendario editorial",
+      "description": "Sirve de base para el próximo ciclo de evaluación.",
+      "percentComplete": 90,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2026-12-05",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-10-29T08:35:59Z",
+      "status": "in_progress",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
         "canClose": true,
         "canReopen": false,
         "canDelete": true,
@@ -114,14 +138,5 @@
       "preferredName": "Fer"
     }
   ],
-  "comments": [
-    {
-      "goalId": "8184",
-      "commentCount": 1
-    },
-    {
-      "goalId": "8188",
-      "commentCount": 4
-    }
-  ]
+  "comments": []
 }

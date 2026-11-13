@@ -3,7 +3,7 @@
   "firstName": "Verónica",
   "lastName": "Gutiérrez",
   "workEmail": "veronica.gutierrez@meridian-andina.example",
-  "employeeNumber": "11189",
+  "employeeNumber": "11182",
   "supervisorEId": "49",
   "supervisorId": "10081",
   "supervisor": "Monzón, Milagros",
@@ -11,7 +11,7 @@
   "terminationDate": null,
   "department": "Calidad",
   "division": "Operaciones",
-  "jobTitle": "Analista de Calidad Jr",
+  "jobTitle": "Analista de Calidad Ssr",
   "location": "Montevideo",
   "status": "Active"
 }

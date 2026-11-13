@@ -22,15 +22,36 @@
   "selectedFilter": "status-all",
   "goals": [
     {
-      "id": "5300",
-      "title": "Automatizar la conciliación mensual",
-      "description": "Sirve de base para el próximo ciclo de evaluación.",
-      "percentComplete": 90,
-      "alignsWithOptionId": 9004,
+      "id": "5259",
+      "title": "Aumentar la cobertura de pruebas al 80%",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
       "sharedWithEmployeeIds": [],
-      "dueDate": "2026-11-07",
+      "dueDate": "2026-05-17",
+      "completionDate": "2026-04-04",
+      "lastChangedDateTime": "2026-04-04T12:55:57Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "5261",
+      "title": "Implementar el calendario editorial",
+      "description": "Sirve de base para el próximo ciclo de evaluación.",
+      "percentComplete": 5,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2026-09-14",
       "completionDate": null,
-      "lastChangedDateTime": "2026-07-21T09:15:43Z",
+      "lastChangedDateTime": "2026-06-14T11:38:43Z",
       "status": "in_progress",
       "milestones": null,
       "actions": {
@@ -51,5 +72,10 @@
       "preferredName": null
     }
   ],
-  "comments": []
+  "comments": [
+    {
+      "goalId": "5261",
+      "commentCount": 1
+    }
+  ]
 }

@@ -22,51 +22,19 @@
   "selectedFilter": "status-all",
   "goals": [
     {
-      "id": "7655",
-      "title": "Documentar los procesos críticos",
-      "description": "Pedido por el equipo directivo en la planificación.",
+      "id": "7382",
+      "title": "Entregar el proyecto Norte sin desvíos",
+      "description": "Alineado con el plan del área para el año.",
       "percentComplete": 100,
-      "alignsWithOptionId": 9001,
-      "sharedWithEmployeeIds": [],
-      "dueDate": "2024-12-25",
-      "completionDate": "2024-11-06",
-      "lastChangedDateTime": "2024-11-06T09:42:17Z",
-      "status": "completed",
-      "milestones": [
-        {
-          "id": 1886,
-          "employeeGoalId": 7655,
-          "title": "Hito 1",
-          "startValue": 0,
-          "endValue": 1,
-          "currentValue": 1,
-          "completedDateTime": "2024-10-30T14:17:56Z",
-          "lastUpdateDateTime": "2024-10-30T14:17:56Z",
-          "lastUpdateUserId": 567
-        },
-        {
-          "id": 1887,
-          "employeeGoalId": 7655,
-          "title": "Hito 2",
-          "startValue": 0,
-          "endValue": 1,
-          "currentValue": 1,
-          "completedDateTime": "2024-10-16T17:21:56Z",
-          "lastUpdateDateTime": "2024-10-16T17:21:56Z",
-          "lastUpdateUserId": 567
-        },
-        {
-          "id": 1888,
-          "employeeGoalId": 7655,
-          "title": "Hito 3",
-          "startValue": 0,
-          "endValue": 1,
-          "currentValue": 1,
-          "completedDateTime": "2024-10-20T17:29:53Z",
-          "lastUpdateDateTime": "2024-10-20T17:29:53Z",
-          "lastUpdateUserId": 567
-        }
+      "alignsWithOptionId": 9004,
+      "sharedWithEmployeeIds": [
+        301
       ],
+      "dueDate": "2024-08-20",
+      "completionDate": "2024-08-17",
+      "lastChangedDateTime": "2024-08-17T09:23:19Z",
+      "status": "completed",
+      "milestones": null,
       "actions": {
         "canEdit": true,
         "canUpdateProgress": false,
@@ -77,40 +45,17 @@
       }
     },
     {
-      "id": "7658",
-      "title": "Migrar los reportes al nuevo tablero",
-      "description": "Pedido por el equipo directivo en la planificación.",
+      "id": "7384",
+      "title": "Documentar los procesos críticos",
+      "description": "Alineado con el plan del área para el año.",
       "percentComplete": 100,
       "alignsWithOptionId": null,
       "sharedWithEmployeeIds": [],
-      "dueDate": "2026-05-25",
-      "completionDate": "2026-05-17",
-      "lastChangedDateTime": "2026-05-17T12:17:17Z",
+      "dueDate": "2026-06-19",
+      "completionDate": "2026-04-28",
+      "lastChangedDateTime": "2026-04-28T10:22:00Z",
       "status": "completed",
-      "milestones": [
-        {
-          "id": 1889,
-          "employeeGoalId": 7658,
-          "title": "Hito 1",
-          "startValue": 0,
-          "endValue": 1,
-          "currentValue": 1,
-          "completedDateTime": "2026-04-11T14:18:47Z",
-          "lastUpdateDateTime": "2026-04-11T14:18:47Z",
-          "lastUpdateUserId": 567
-        },
-        {
-          "id": 1890,
-          "employeeGoalId": 7658,
-          "title": "Hito 2",
-          "startValue": 0,
-          "endValue": 1,
-          "currentValue": 1,
-          "completedDateTime": "2026-04-14T08:58:32Z",
-          "lastUpdateDateTime": "2026-04-14T08:58:32Z",
-          "lastUpdateUserId": 567
-        }
-      ],
+      "milestones": null,
       "actions": {
         "canEdit": true,
         "canUpdateProgress": false,
@@ -127,12 +72,22 @@
       "firstName": "Gustavo",
       "lastName": "Núñez",
       "preferredName": null
+    },
+    {
+      "employeeId": 301,
+      "firstName": "Silvana",
+      "lastName": "Carrizo",
+      "preferredName": null
     }
   ],
   "comments": [
     {
-      "goalId": "7658",
-      "commentCount": 1
+      "goalId": "7382",
+      "commentCount": 4
+    },
+    {
+      "goalId": "7384",
+      "commentCount": 4
     }
   ]
 }

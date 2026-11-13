@@ -22,86 +22,22 @@
   "selectedFilter": "status-all",
   "goals": [
     {
-      "id": "7719",
-      "title": "Implementar el calendario editorial",
-      "description": "Meta compartida con otra área; coordinar avances mensuales.",
-      "percentComplete": 100,
-      "alignsWithOptionId": 9003,
-      "sharedWithEmployeeIds": [],
-      "dueDate": "2024-08-06",
-      "completionDate": "2024-07-18",
-      "lastChangedDateTime": "2024-07-18T13:40:03Z",
-      "status": "completed",
-      "milestones": [
-        {
-          "id": 1918,
-          "employeeGoalId": 7719,
-          "title": "Hito 1",
-          "startValue": 0,
-          "endValue": 1,
-          "currentValue": 1,
-          "completedDateTime": "2024-07-03T08:01:44Z",
-          "lastUpdateDateTime": "2024-07-03T08:01:44Z",
-          "lastUpdateUserId": 589
-        },
-        {
-          "id": 1919,
-          "employeeGoalId": 7719,
-          "title": "Hito 2",
-          "startValue": 0,
-          "endValue": 1,
-          "currentValue": 1,
-          "completedDateTime": "2024-06-05T12:06:56Z",
-          "lastUpdateDateTime": "2024-06-05T12:06:56Z",
-          "lastUpdateUserId": 589
-        },
-        {
-          "id": 1920,
-          "employeeGoalId": 7719,
-          "title": "Hito 3",
-          "startValue": 0,
-          "endValue": 1,
-          "currentValue": 1,
-          "completedDateTime": "2024-06-03T12:01:11Z",
-          "lastUpdateDateTime": "2024-06-03T12:01:11Z",
-          "lastUpdateUserId": 589
-        },
-        {
-          "id": 1921,
-          "employeeGoalId": 7719,
-          "title": "Hito 4",
-          "startValue": 0,
-          "endValue": 1,
-          "currentValue": 1,
-          "completedDateTime": "2024-07-08T16:43:06Z",
-          "lastUpdateDateTime": "2024-07-08T16:43:06Z",
-          "lastUpdateUserId": 589
-        }
-      ],
-      "actions": {
-        "canEdit": true,
-        "canUpdateProgress": false,
-        "canClose": true,
-        "canReopen": false,
-        "canDelete": true,
-        "canComment": true
-      }
-    },
-    {
-      "id": "7721",
-      "title": "Documentar los procesos críticos",
-      "description": "Alineado con el plan del área para el año.",
-      "percentComplete": 100,
+      "id": "7434",
+      "title": "Aumentar la cobertura de pruebas al 80%",
+      "description": "Sirve de base para el próximo ciclo de evaluación.",
+      "percentComplete": 5,
       "alignsWithOptionId": null,
-      "sharedWithEmployeeIds": [],
-      "dueDate": "2024-09-23",
-      "completionDate": "2024-06-09",
-      "lastChangedDateTime": "2024-06-09T17:35:06Z",
-      "status": "completed",
+      "sharedWithEmployeeIds": [
+        111
+      ],
+      "dueDate": "2024-11-21",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-01-14T17:31:46Z",
+      "status": "in_progress",
       "milestones": null,
       "actions": {
         "canEdit": true,
-        "canUpdateProgress": false,
+        "canUpdateProgress": true,
         "canClose": true,
         "canReopen": false,
         "canDelete": true,
@@ -109,15 +45,15 @@
       }
     },
     {
-      "id": "7722",
-      "title": "Automatizar la conciliación mensual",
+      "id": "7435",
+      "title": "Cerrar el plan de capacitación anual",
       "description": "Sirve de base para el próximo ciclo de evaluación.",
       "percentComplete": 100,
       "alignsWithOptionId": null,
       "sharedWithEmployeeIds": [],
-      "dueDate": "2026-10-08",
-      "completionDate": "2026-03-30",
-      "lastChangedDateTime": "2026-03-30T09:25:18Z",
+      "dueDate": "2026-05-01",
+      "completionDate": "2026-05-03",
+      "lastChangedDateTime": "2026-05-03T14:03:18Z",
       "status": "completed",
       "milestones": null,
       "actions": {
@@ -136,12 +72,13 @@
       "firstName": "Santiago",
       "lastName": "Castro",
       "preferredName": null
+    },
+    {
+      "employeeId": 111,
+      "firstName": "Martín",
+      "lastName": "Peralta",
+      "preferredName": null
     }
   ],
-  "comments": [
-    {
-      "goalId": "7722",
-      "commentCount": 4
-    }
-  ]
+  "comments": []
 }

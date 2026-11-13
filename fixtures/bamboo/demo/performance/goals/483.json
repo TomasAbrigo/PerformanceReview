@@ -22,153 +22,20 @@
   "selectedFilter": "status-all",
   "goals": [
     {
-      "id": "7312",
-      "title": "Renovar las cuentas clave del trimestre",
+      "id": "7092",
+      "title": "Cerrar el plan de capacitación anual",
       "description": "Pedido por el equipo directivo en la planificación.",
-      "percentComplete": 25,
-      "alignsWithOptionId": null,
-      "sharedWithEmployeeIds": [],
-      "dueDate": "2023-10-13",
-      "completionDate": null,
-      "lastChangedDateTime": "2025-06-11T13:39:17Z",
-      "status": "in_progress",
-      "milestones": null,
-      "actions": {
-        "canEdit": true,
-        "canUpdateProgress": true,
-        "canClose": true,
-        "canReopen": false,
-        "canDelete": true,
-        "canComment": true
-      }
-    },
-    {
-      "id": "7315",
-      "title": "Reducir el tiempo de primera respuesta un 20%",
-      "description": "Pedido por el equipo directivo en la planificación.",
-      "percentComplete": 35,
-      "alignsWithOptionId": null,
-      "sharedWithEmployeeIds": [
-        67
-      ],
-      "dueDate": "2024-07-15",
-      "completionDate": null,
-      "lastChangedDateTime": "2025-02-22T14:52:19Z",
-      "status": "in_progress",
-      "milestones": null,
-      "actions": {
-        "canEdit": true,
-        "canUpdateProgress": true,
-        "canClose": true,
-        "canReopen": false,
-        "canDelete": true,
-        "canComment": true
-      }
-    },
-    {
-      "id": "7316",
-      "title": "Mentorear a dos personas nuevas",
-      "description": "Meta compartida con otra área; coordinar avances mensuales.",
       "percentComplete": 100,
       "alignsWithOptionId": null,
-      "sharedWithEmployeeIds": [
-        67
-      ],
-      "dueDate": "2024-03-15",
-      "completionDate": "2023-10-10",
-      "lastChangedDateTime": "2023-10-10T09:58:31Z",
-      "status": "completed",
-      "milestones": [
-        {
-          "id": 1746,
-          "employeeGoalId": 7316,
-          "title": "Hito 1",
-          "startValue": 0,
-          "endValue": 1,
-          "currentValue": 1,
-          "completedDateTime": "2023-09-30T12:09:08Z",
-          "lastUpdateDateTime": "2023-09-30T12:09:08Z",
-          "lastUpdateUserId": 483
-        },
-        {
-          "id": 1747,
-          "employeeGoalId": 7316,
-          "title": "Hito 2",
-          "startValue": 0,
-          "endValue": 1,
-          "currentValue": 1,
-          "completedDateTime": "2023-09-24T15:04:36Z",
-          "lastUpdateDateTime": "2023-09-24T15:04:36Z",
-          "lastUpdateUserId": 483
-        },
-        {
-          "id": 1748,
-          "employeeGoalId": 7316,
-          "title": "Hito 3",
-          "startValue": 0,
-          "endValue": 1,
-          "currentValue": 1,
-          "completedDateTime": "2023-09-24T17:09:03Z",
-          "lastUpdateDateTime": "2023-09-24T17:09:03Z",
-          "lastUpdateUserId": 483
-        },
-        {
-          "id": 1749,
-          "employeeGoalId": 7316,
-          "title": "Hito 4",
-          "startValue": 0,
-          "endValue": 1,
-          "currentValue": 1,
-          "completedDateTime": "2023-10-10T14:27:35Z",
-          "lastUpdateDateTime": "2023-10-10T14:27:35Z",
-          "lastUpdateUserId": 483
-        }
-      ],
-      "actions": {
-        "canEdit": true,
-        "canUpdateProgress": false,
-        "canClose": true,
-        "canReopen": false,
-        "canDelete": true,
-        "canComment": true
-      }
-    },
-    {
-      "id": "7319",
-      "title": "Lanzar el nuevo flujo de onboarding",
-      "description": "Alineado con el plan del área para el año.",
-      "percentComplete": 100,
-      "alignsWithOptionId": 9001,
       "sharedWithEmployeeIds": [],
-      "dueDate": "2025-09-07",
-      "completionDate": "2025-03-28",
-      "lastChangedDateTime": "2025-03-28T11:29:36Z",
+      "dueDate": "2023-12-13",
+      "completionDate": "2023-10-01",
+      "lastChangedDateTime": "2023-10-01T15:35:32Z",
       "status": "completed",
       "milestones": null,
       "actions": {
         "canEdit": true,
         "canUpdateProgress": false,
-        "canClose": true,
-        "canReopen": false,
-        "canDelete": true,
-        "canComment": true
-      }
-    },
-    {
-      "id": "7320",
-      "title": "Documentar los procesos críticos",
-      "description": "Sirve de base para el próximo ciclo de evaluación.",
-      "percentComplete": 45,
-      "alignsWithOptionId": 9004,
-      "sharedWithEmployeeIds": [],
-      "dueDate": "2026-08-07",
-      "completionDate": null,
-      "lastChangedDateTime": "2026-07-27T19:21:22Z",
-      "status": "in_progress",
-      "milestones": null,
-      "actions": {
-        "canEdit": true,
-        "canUpdateProgress": true,
         "canClose": true,
         "canReopen": false,
         "canDelete": true,
@@ -182,21 +49,11 @@
       "firstName": "Marcelo",
       "lastName": "Franco",
       "preferredName": null
-    },
-    {
-      "employeeId": 67,
-      "firstName": "Noelia",
-      "lastName": "Roldán",
-      "preferredName": null
     }
   ],
   "comments": [
     {
-      "goalId": "7312",
-      "commentCount": 3
-    },
-    {
-      "goalId": "7316",
+      "goalId": "7092",
       "commentCount": 4
     }
   ]

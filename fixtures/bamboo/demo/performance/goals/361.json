@@ -22,15 +22,36 @@
   "selectedFilter": "status-all",
   "goals": [
     {
-      "id": "6748",
-      "title": "Reducir el tiempo de primera respuesta un 20%",
+      "id": "6562",
+      "title": "Aumentar la cobertura de pruebas al 80%",
       "description": "Pedido por el equipo directivo en la planificación.",
-      "percentComplete": 100,
-      "alignsWithOptionId": 9004,
+      "percentComplete": 0,
+      "alignsWithOptionId": 9002,
       "sharedWithEmployeeIds": [],
-      "dueDate": "2024-12-11",
-      "completionDate": "2024-06-28",
-      "lastChangedDateTime": "2024-06-28T13:24:56Z",
+      "dueDate": "2024-09-17",
+      "completionDate": null,
+      "lastChangedDateTime": "2025-07-13T11:56:05Z",
+      "status": "closed",
+      "milestones": null,
+      "actions": {
+        "canEdit": false,
+        "canUpdateProgress": false,
+        "canClose": false,
+        "canReopen": true,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "6563",
+      "title": "Migrar los reportes al nuevo tablero",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2024-02-12",
+      "completionDate": "2024-02-05",
+      "lastChangedDateTime": "2024-02-05T12:54:47Z",
       "status": "completed",
       "milestones": null,
       "actions": {
@@ -43,37 +64,37 @@
       }
     },
     {
-      "id": "6749",
-      "title": "Cerrar el plan de capacitación anual",
-      "description": "Alineado con el plan del área para el año.",
+      "id": "6565",
+      "title": "Automatizar la conciliación mensual",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
       "percentComplete": 50,
-      "alignsWithOptionId": 9003,
+      "alignsWithOptionId": null,
       "sharedWithEmployeeIds": [],
-      "dueDate": "2025-02-01",
+      "dueDate": "2025-03-16",
       "completionDate": null,
-      "lastChangedDateTime": "2026-10-09T16:03:29Z",
+      "lastChangedDateTime": "2026-04-18T17:25:36Z",
       "status": "in_progress",
       "milestones": [
         {
-          "id": 1472,
-          "employeeGoalId": 6749,
+          "id": 1383,
+          "employeeGoalId": 6565,
           "title": "Hito 1",
           "startValue": 0,
           "endValue": 1,
           "currentValue": 1,
-          "completedDateTime": "2025-12-14T12:53:16Z",
-          "lastUpdateDateTime": "2025-12-14T12:53:16Z",
+          "completedDateTime": "2025-10-22T17:46:17Z",
+          "lastUpdateDateTime": "2025-10-22T17:46:17Z",
           "lastUpdateUserId": 361
         },
         {
-          "id": 1473,
-          "employeeGoalId": 6749,
+          "id": 1384,
+          "employeeGoalId": 6565,
           "title": "Hito 2",
           "startValue": 0,
           "endValue": 1,
           "currentValue": 0,
           "completedDateTime": null,
-          "lastUpdateDateTime": "2024-07-26T11:20:18Z",
+          "lastUpdateDateTime": "2025-01-13T10:35:17Z",
           "lastUpdateUserId": 361
         }
       ],
@@ -82,6 +103,48 @@
         "canUpdateProgress": true,
         "canClose": true,
         "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "6568",
+      "title": "Completar la certificación del área",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 85,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2025-04-13",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-05-14T19:24:42Z",
+      "status": "in_progress",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "6570",
+      "title": "Renovar las cuentas clave del trimestre",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 30,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2027-02-19",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-10-28T15:36:30Z",
+      "status": "closed",
+      "milestones": null,
+      "actions": {
+        "canEdit": false,
+        "canUpdateProgress": false,
+        "canClose": false,
+        "canReopen": true,
         "canDelete": true,
         "canComment": true
       }
@@ -97,8 +160,20 @@
   ],
   "comments": [
     {
-      "goalId": "6749",
-      "commentCount": 3
+      "goalId": "6562",
+      "commentCount": 2
+    },
+    {
+      "goalId": "6565",
+      "commentCount": 2
+    },
+    {
+      "goalId": "6568",
+      "commentCount": 4
+    },
+    {
+      "goalId": "6570",
+      "commentCount": 2
     }
   ]
 }

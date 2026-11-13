@@ -23,186 +23,42 @@
   "goals": [
     {
       "id": "5038",
-      "title": "Aumentar la cobertura de pruebas al 80%",
+      "title": "Documentar los procesos críticos",
       "description": "Sirve de base para el próximo ciclo de evaluación.",
-      "percentComplete": 100,
-      "alignsWithOptionId": 9001,
-      "sharedWithEmployeeIds": [],
-      "dueDate": "2025-06-13",
-      "completionDate": "2025-05-28",
-      "lastChangedDateTime": "2025-05-28T17:02:23Z",
-      "status": "completed",
-      "milestones": [
-        {
-          "id": 719,
-          "employeeGoalId": 5038,
-          "title": "Hito 1",
-          "startValue": 0,
-          "endValue": 1,
-          "currentValue": 1,
-          "completedDateTime": "2025-05-24T11:15:41Z",
-          "lastUpdateDateTime": "2025-05-24T11:15:41Z",
-          "lastUpdateUserId": 19
-        },
-        {
-          "id": 720,
-          "employeeGoalId": 5038,
-          "title": "Hito 2",
-          "startValue": 0,
-          "endValue": 1,
-          "currentValue": 1,
-          "completedDateTime": "2025-04-21T18:55:13Z",
-          "lastUpdateDateTime": "2025-04-21T18:55:13Z",
-          "lastUpdateUserId": 19
-        }
-      ],
-      "actions": {
-        "canEdit": true,
-        "canUpdateProgress": false,
-        "canClose": true,
-        "canReopen": false,
-        "canDelete": true,
-        "canComment": true
-      }
-    },
-    {
-      "id": "5039",
-      "title": "Renovar las cuentas clave del trimestre",
-      "description": "Alineado con el plan del área para el año.",
-      "percentComplete": 50,
+      "percentComplete": 70,
       "alignsWithOptionId": null,
       "sharedWithEmployeeIds": [],
-      "dueDate": "2026-06-20",
+      "dueDate": "2023-09-18",
       "completionDate": null,
-      "lastChangedDateTime": "2026-08-03T11:15:09Z",
-      "status": "in_progress",
-      "milestones": [
-        {
-          "id": 721,
-          "employeeGoalId": 5039,
-          "title": "Hito 1",
-          "startValue": 0,
-          "endValue": 1,
-          "currentValue": 1,
-          "completedDateTime": "2026-03-17T09:18:37Z",
-          "lastUpdateDateTime": "2026-03-17T09:18:37Z",
-          "lastUpdateUserId": 19
-        },
-        {
-          "id": 722,
-          "employeeGoalId": 5039,
-          "title": "Hito 2",
-          "startValue": 0,
-          "endValue": 1,
-          "currentValue": 1,
-          "completedDateTime": "2026-04-24T12:33:56Z",
-          "lastUpdateDateTime": "2026-04-24T12:33:56Z",
-          "lastUpdateUserId": 19
-        },
-        {
-          "id": 723,
-          "employeeGoalId": 5039,
-          "title": "Hito 3",
-          "startValue": 0,
-          "endValue": 1,
-          "currentValue": 0,
-          "completedDateTime": null,
-          "lastUpdateDateTime": "2026-03-09T09:21:48Z",
-          "lastUpdateUserId": 19
-        },
-        {
-          "id": 724,
-          "employeeGoalId": 5039,
-          "title": "Hito 4",
-          "startValue": 0,
-          "endValue": 1,
-          "currentValue": 0,
-          "completedDateTime": null,
-          "lastUpdateDateTime": "2026-03-09T17:52:53Z",
-          "lastUpdateUserId": 19
-        }
-      ],
+      "lastChangedDateTime": "2025-08-26T09:06:24Z",
+      "status": "closed",
+      "milestones": null,
       "actions": {
-        "canEdit": true,
-        "canUpdateProgress": true,
-        "canClose": true,
-        "canReopen": false,
+        "canEdit": false,
+        "canUpdateProgress": false,
+        "canClose": false,
+        "canReopen": true,
         "canDelete": true,
         "canComment": true
       }
     },
     {
-      "id": "5040",
-      "title": "Migrar los reportes al nuevo tablero",
+      "id": "5041",
+      "title": "Automatizar la conciliación mensual",
       "description": "Alineado con el plan del área para el año.",
-      "percentComplete": 33,
-      "alignsWithOptionId": 9004,
-      "sharedWithEmployeeIds": [],
-      "dueDate": "2027-02-11",
-      "completionDate": null,
-      "lastChangedDateTime": "2026-10-04T10:36:27Z",
-      "status": "in_progress",
-      "milestones": [
-        {
-          "id": 725,
-          "employeeGoalId": 5040,
-          "title": "Hito 1",
-          "startValue": 0,
-          "endValue": 1,
-          "currentValue": 1,
-          "completedDateTime": "2026-09-29T09:38:08Z",
-          "lastUpdateDateTime": "2026-09-29T09:38:08Z",
-          "lastUpdateUserId": 19
-        },
-        {
-          "id": 726,
-          "employeeGoalId": 5040,
-          "title": "Hito 2",
-          "startValue": 0,
-          "endValue": 1,
-          "currentValue": 0,
-          "completedDateTime": null,
-          "lastUpdateDateTime": "2026-09-29T10:35:37Z",
-          "lastUpdateUserId": 19
-        },
-        {
-          "id": 727,
-          "employeeGoalId": 5040,
-          "title": "Hito 3",
-          "startValue": 0,
-          "endValue": 1,
-          "currentValue": 0,
-          "completedDateTime": null,
-          "lastUpdateDateTime": "2026-09-29T12:16:53Z",
-          "lastUpdateUserId": 19
-        }
-      ],
-      "actions": {
-        "canEdit": true,
-        "canUpdateProgress": true,
-        "canClose": true,
-        "canReopen": false,
-        "canDelete": true,
-        "canComment": true
-      }
-    },
-    {
-      "id": "5042",
-      "title": "Implementar el calendario editorial",
-      "description": "Pedido por el equipo directivo en la planificación.",
-      "percentComplete": 100,
-      "alignsWithOptionId": 9004,
+      "percentComplete": 75,
+      "alignsWithOptionId": null,
       "sharedWithEmployeeIds": [
         11
       ],
-      "dueDate": "2026-08-20",
-      "completionDate": "2026-04-01",
-      "lastChangedDateTime": "2026-04-01T18:11:12Z",
-      "status": "completed",
+      "dueDate": "2023-07-17",
+      "completionDate": null,
+      "lastChangedDateTime": "2024-09-13T11:57:14Z",
+      "status": "in_progress",
       "milestones": null,
       "actions": {
         "canEdit": true,
-        "canUpdateProgress": false,
+        "canUpdateProgress": true,
         "canClose": true,
         "canReopen": false,
         "canDelete": true,
@@ -226,12 +82,8 @@
   ],
   "comments": [
     {
-      "goalId": "5040",
-      "commentCount": 3
-    },
-    {
-      "goalId": "5042",
-      "commentCount": 3
+      "goalId": "5041",
+      "commentCount": 4
     }
   ]
 }

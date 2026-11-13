@@ -22,20 +22,41 @@
   "selectedFilter": "status-all",
   "goals": [
     {
-      "id": "8072",
-      "title": "Implementar el calendario editorial",
-      "description": "Pedido por el equipo directivo en la planificación.",
+      "id": "7771",
+      "title": "Aumentar la cobertura de pruebas al 80%",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
       "percentComplete": 100,
       "alignsWithOptionId": null,
       "sharedWithEmployeeIds": [],
-      "dueDate": "2026-02-19",
-      "completionDate": "2026-01-17",
-      "lastChangedDateTime": "2026-01-17T14:52:34Z",
+      "dueDate": "2025-09-20",
+      "completionDate": "2025-09-11",
+      "lastChangedDateTime": "2025-09-11T14:40:50Z",
       "status": "completed",
       "milestones": null,
       "actions": {
         "canEdit": true,
         "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "7772",
+      "title": "Entregar el proyecto Norte sin desvíos",
+      "description": "Sirve de base para el próximo ciclo de evaluación.",
+      "percentComplete": 20,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2025-11-06",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-05-20T11:46:29Z",
+      "status": "in_progress",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
         "canClose": true,
         "canReopen": false,
         "canDelete": true,
@@ -53,8 +74,8 @@
   ],
   "comments": [
     {
-      "goalId": "8072",
-      "commentCount": 4
+      "goalId": "7772",
+      "commentCount": 3
     }
   ]
 }

@@ -3,15 +3,15 @@
   "firstName": "Soledad",
   "lastName": "Heredia",
   "workEmail": "soledad.heredia@meridian-andina.example",
-  "employeeNumber": "10250",
+  "employeeNumber": "10241",
   "supervisorEId": "83",
-  "supervisorId": "10177",
+  "supervisorId": "10163",
   "supervisor": "Franco, Daniela",
   "hireDate": "2019-09-22",
   "terminationDate": null,
   "department": "Customer Success",
   "division": "Comercial",
-  "jobTitle": "Customer Success Manager Jr",
+  "jobTitle": "Customer Success Manager Ssr",
   "location": "Córdoba",
   "status": "Active"
 }

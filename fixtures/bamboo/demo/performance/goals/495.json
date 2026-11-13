@@ -22,15 +22,36 @@
   "selectedFilter": "status-all",
   "goals": [
     {
-      "id": "7377",
-      "title": "Automatizar la conciliación mensual",
+      "id": "7133",
+      "title": "Reducir los incidentes recurrentes a la mitad",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "percentComplete": 30,
+      "alignsWithOptionId": 9002,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2023-11-17",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-03-21T19:45:34Z",
+      "status": "in_progress",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "7136",
+      "title": "Migrar los reportes al nuevo tablero",
       "description": "Alineado con el plan del área para el año.",
-      "percentComplete": 60,
+      "percentComplete": 10,
       "alignsWithOptionId": null,
       "sharedWithEmployeeIds": [],
-      "dueDate": "2023-12-24",
+      "dueDate": "2024-06-17",
       "completionDate": null,
-      "lastChangedDateTime": "2024-07-28T11:40:59Z",
+      "lastChangedDateTime": "2024-11-08T10:19:04Z",
       "status": "in_progress",
       "milestones": null,
       "actions": {
@@ -43,36 +64,15 @@
       }
     },
     {
-      "id": "7380",
-      "title": "Completar la certificación del área",
-      "description": "Pedido por el equipo directivo en la planificación.",
-      "percentComplete": 5,
-      "alignsWithOptionId": null,
-      "sharedWithEmployeeIds": [],
-      "dueDate": "2026-07-28",
-      "completionDate": null,
-      "lastChangedDateTime": "2026-08-21T13:53:28Z",
-      "status": "in_progress",
-      "milestones": null,
-      "actions": {
-        "canEdit": true,
-        "canUpdateProgress": true,
-        "canClose": true,
-        "canReopen": false,
-        "canDelete": true,
-        "canComment": true
-      }
-    },
-    {
-      "id": "7382",
+      "id": "7137",
       "title": "Migrar los reportes al nuevo tablero",
       "description": "Meta compartida con otra área; coordinar avances mensuales.",
       "percentComplete": 100,
       "alignsWithOptionId": null,
       "sharedWithEmployeeIds": [],
-      "dueDate": "2026-02-01",
-      "completionDate": "2025-11-17",
-      "lastChangedDateTime": "2025-11-17T14:41:27Z",
+      "dueDate": "2025-11-25",
+      "completionDate": "2025-11-30",
+      "lastChangedDateTime": "2025-11-30T16:07:34Z",
       "status": "completed",
       "milestones": null,
       "actions": {
@@ -85,15 +85,17 @@
       }
     },
     {
-      "id": "7385",
-      "title": "Implementar el calendario editorial",
-      "description": "Alineado con el plan del área para el año.",
+      "id": "7138",
+      "title": "Completar la certificación del área",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
       "percentComplete": 100,
       "alignsWithOptionId": null,
-      "sharedWithEmployeeIds": [],
-      "dueDate": "2026-03-07",
-      "completionDate": "2026-02-12",
-      "lastChangedDateTime": "2026-02-12T16:39:41Z",
+      "sharedWithEmployeeIds": [
+        117
+      ],
+      "dueDate": "2026-10-04",
+      "completionDate": "2026-08-30",
+      "lastChangedDateTime": "2026-08-30T15:17:02Z",
       "status": "completed",
       "milestones": null,
       "actions": {
@@ -112,16 +114,18 @@
       "firstName": "Noelia",
       "lastName": "Benítez",
       "preferredName": null
+    },
+    {
+      "employeeId": 117,
+      "firstName": "Mariana",
+      "lastName": "Núñez",
+      "preferredName": null
     }
   ],
   "comments": [
     {
-      "goalId": "7377",
-      "commentCount": 1
-    },
-    {
-      "goalId": "7382",
-      "commentCount": 2
+      "goalId": "7133",
+      "commentCount": 4
     }
   ]
 }

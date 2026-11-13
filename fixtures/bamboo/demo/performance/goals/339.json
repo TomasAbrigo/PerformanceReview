@@ -22,40 +22,17 @@
   "selectedFilter": "status-all",
   "goals": [
     {
-      "id": "6641",
-      "title": "Documentar los procesos críticos",
-      "description": "Alineado con el plan del área para el año.",
+      "id": "6477",
+      "title": "Entregar el proyecto Norte sin desvíos",
+      "description": "Pedido por el equipo directivo en la planificación.",
       "percentComplete": 100,
       "alignsWithOptionId": null,
       "sharedWithEmployeeIds": [],
-      "dueDate": "2023-03-09",
-      "completionDate": "2022-11-16",
-      "lastChangedDateTime": "2022-11-16T08:10:42Z",
+      "dueDate": "2023-06-29",
+      "completionDate": "2023-07-13",
+      "lastChangedDateTime": "2023-07-13T09:53:57Z",
       "status": "completed",
-      "milestones": [
-        {
-          "id": 1441,
-          "employeeGoalId": 6641,
-          "title": "Hito 1",
-          "startValue": 0,
-          "endValue": 1,
-          "currentValue": 1,
-          "completedDateTime": "2022-10-09T18:36:10Z",
-          "lastUpdateDateTime": "2022-10-09T18:36:10Z",
-          "lastUpdateUserId": 339
-        },
-        {
-          "id": 1442,
-          "employeeGoalId": 6641,
-          "title": "Hito 2",
-          "startValue": 0,
-          "endValue": 1,
-          "currentValue": 1,
-          "completedDateTime": "2022-11-03T10:10:43Z",
-          "lastUpdateDateTime": "2022-11-03T10:10:43Z",
-          "lastUpdateUserId": 339
-        }
-      ],
+      "milestones": null,
       "actions": {
         "canEdit": false,
         "canUpdateProgress": false,
@@ -66,17 +43,15 @@
       }
     },
     {
-      "id": "6644",
-      "title": "Aumentar la cobertura de pruebas al 80%",
-      "description": "Alineado con el plan del área para el año.",
-      "percentComplete": 20,
+      "id": "6479",
+      "title": "Completar la certificación del área",
+      "description": "Sirve de base para el próximo ciclo de evaluación.",
+      "percentComplete": 30,
       "alignsWithOptionId": null,
-      "sharedWithEmployeeIds": [
-        23
-      ],
-      "dueDate": "2023-05-19",
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2023-04-22",
       "completionDate": null,
-      "lastChangedDateTime": "2024-08-13T08:16:10Z",
+      "lastChangedDateTime": "2024-09-16T16:52:28Z",
       "status": "in_progress",
       "milestones": null,
       "actions": {
@@ -89,37 +64,16 @@
       }
     },
     {
-      "id": "6645",
-      "title": "Cerrar el plan de capacitación anual",
-      "description": "Meta compartida con otra área; coordinar avances mensuales.",
-      "percentComplete": 100,
+      "id": "6481",
+      "title": "Documentar los procesos críticos",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 35,
       "alignsWithOptionId": null,
       "sharedWithEmployeeIds": [],
-      "dueDate": "2023-11-19",
-      "completionDate": "2023-08-15",
-      "lastChangedDateTime": "2023-08-15T16:05:11Z",
-      "status": "completed",
-      "milestones": null,
-      "actions": {
-        "canEdit": false,
-        "canUpdateProgress": false,
-        "canClose": false,
-        "canReopen": false,
-        "canDelete": false,
-        "canComment": false
-      }
-    },
-    {
-      "id": "6648",
-      "title": "Entregar el proyecto Norte sin desvíos",
-      "description": "Meta compartida con otra área; coordinar avances mensuales.",
-      "percentComplete": 100,
-      "alignsWithOptionId": null,
-      "sharedWithEmployeeIds": [],
-      "dueDate": "2024-05-17",
-      "completionDate": "2024-01-08",
-      "lastChangedDateTime": "2024-01-08T16:23:52Z",
-      "status": "completed",
+      "dueDate": "2024-07-10",
+      "completionDate": null,
+      "lastChangedDateTime": "2024-06-26T13:12:31Z",
+      "status": "closed",
       "milestones": null,
       "actions": {
         "canEdit": false,
@@ -137,13 +91,16 @@
       "firstName": "Marcela",
       "lastName": "Maldonado",
       "preferredName": null
-    },
-    {
-      "employeeId": 23,
-      "firstName": "María",
-      "lastName": "Medina",
-      "preferredName": null
     }
   ],
-  "comments": []
+  "comments": [
+    {
+      "goalId": "6477",
+      "commentCount": 1
+    },
+    {
+      "goalId": "6481",
+      "commentCount": 1
+    }
+  ]
 }

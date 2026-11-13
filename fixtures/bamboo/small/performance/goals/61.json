@@ -22,38 +22,59 @@
   "selectedFilter": "status-all",
   "goals": [
     {
-      "id": "5209",
-      "title": "Cerrar el plan de capacitación anual",
-      "description": "Meta compartida con otra área; coordinar avances mensuales.",
-      "percentComplete": 60,
+      "id": "5189",
+      "title": "Aumentar la cobertura de pruebas al 80%",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 100,
       "alignsWithOptionId": null,
-      "sharedWithEmployeeIds": [
-        29
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2024-12-25",
+      "completionDate": "2024-08-26",
+      "lastChangedDateTime": "2024-08-26T19:00:56Z",
+      "status": "completed",
+      "milestones": [
+        {
+          "id": 782,
+          "employeeGoalId": 5189,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2024-08-16T15:43:30Z",
+          "lastUpdateDateTime": "2024-08-16T15:43:30Z",
+          "lastUpdateUserId": 61
+        },
+        {
+          "id": 783,
+          "employeeGoalId": 5189,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2024-08-25T18:53:48Z",
+          "lastUpdateDateTime": "2024-08-25T18:53:48Z",
+          "lastUpdateUserId": 61
+        }
       ],
-      "dueDate": "2025-06-25",
-      "completionDate": null,
-      "lastChangedDateTime": "2026-10-07T10:52:53Z",
-      "status": "closed",
-      "milestones": null,
       "actions": {
-        "canEdit": false,
+        "canEdit": true,
         "canUpdateProgress": false,
-        "canClose": false,
-        "canReopen": true,
+        "canClose": true,
+        "canReopen": false,
         "canDelete": true,
         "canComment": true
       }
     },
     {
-      "id": "5210",
+      "id": "5190",
       "title": "Implementar el calendario editorial",
-      "description": "Pedido por el equipo directivo en la planificación.",
+      "description": "Alineado con el plan del área para el año.",
       "percentComplete": 100,
       "alignsWithOptionId": null,
       "sharedWithEmployeeIds": [],
-      "dueDate": "2025-03-23",
-      "completionDate": "2024-12-20",
-      "lastChangedDateTime": "2024-12-20T14:23:49Z",
+      "dueDate": "2024-10-10",
+      "completionDate": "2024-07-31",
+      "lastChangedDateTime": "2024-07-31T14:21:23Z",
       "status": "completed",
       "milestones": null,
       "actions": {
@@ -61,6 +82,105 @@
         "canUpdateProgress": false,
         "canClose": true,
         "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "5191",
+      "title": "Mejorar el NPS interno del equipo",
+      "description": "Sirve de base para el próximo ciclo de evaluación.",
+      "percentComplete": 80,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2026-03-31",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-04-28T15:07:42Z",
+      "status": "in_progress",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "5192",
+      "title": "Implementar el calendario editorial",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 35,
+      "alignsWithOptionId": 9004,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2026-03-17",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-03-19T13:19:51Z",
+      "status": "in_progress",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "5194",
+      "title": "Documentar los procesos críticos",
+      "description": "Sirve de base para el próximo ciclo de evaluación.",
+      "percentComplete": 33,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [
+        29
+      ],
+      "dueDate": "2026-02-12",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-04-10T08:54:05Z",
+      "status": "closed",
+      "milestones": [
+        {
+          "id": 784,
+          "employeeGoalId": 5194,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-11-21T17:14:27Z",
+          "lastUpdateDateTime": "2025-11-21T17:14:27Z",
+          "lastUpdateUserId": 61
+        },
+        {
+          "id": 785,
+          "employeeGoalId": 5194,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2025-11-06T16:36:59Z",
+          "lastUpdateUserId": 61
+        },
+        {
+          "id": 786,
+          "employeeGoalId": 5194,
+          "title": "Hito 3",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2025-11-06T11:50:15Z",
+          "lastUpdateUserId": 61
+        }
+      ],
+      "actions": {
+        "canEdit": false,
+        "canUpdateProgress": false,
+        "canClose": false,
+        "canReopen": true,
         "canDelete": true,
         "canComment": true
       }
@@ -82,12 +202,8 @@
   ],
   "comments": [
     {
-      "goalId": "5209",
-      "commentCount": 1
-    },
-    {
-      "goalId": "5210",
-      "commentCount": 4
+      "goalId": "5194",
+      "commentCount": 2
     }
   ]
 }

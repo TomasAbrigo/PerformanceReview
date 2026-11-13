@@ -3,15 +3,15 @@
   "firstName": "Federico",
   "lastName": "Coronel",
   "workEmail": "federico.coronel@meridian-andina.example",
-  "employeeNumber": "11352",
+  "employeeNumber": "11341",
   "supervisorEId": "243",
-  "supervisorId": "10583",
+  "supervisorId": "10574",
   "supervisor": "Bustos, Jimena",
   "hireDate": "2024-03-12",
   "terminationDate": null,
   "department": "Calidad",
   "division": "Operaciones",
-  "jobTitle": "Auditor de Procesos Ssr",
+  "jobTitle": "Auditor de Procesos Sr",
   "location": "Remoto",
   "status": "Active"
 }

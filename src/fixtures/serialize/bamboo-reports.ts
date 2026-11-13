@@ -1,4 +1,5 @@
 import type { CompanyFixture } from "../company";
+import { groupGoalsByEmployee } from "../company/goals";
 import {
   CUSTOM_QUESTIONS,
   MANAGER_QUESTIONS,
@@ -94,13 +95,17 @@ export function serializeBambooReports(company: CompanyFixture): FixtureFile[] {
 
   // Employee Performance: completed self + manager assessments only.
   const performanceRows = company.assessments
-    .filter((a) => a.selfStatus === "Submitted" && a.managerStatus === "Submitted")
+    .filter(
+      (a) => a.selfStatus === "Submitted" && a.managerStatus === "Submitted",
+    )
     .map((a) => {
       const employee = a.employeeId === null ? null : byId.get(a.employeeId)!;
       const self = a.selfAnswers!;
       const manager = a.managerAnswers!;
       return [
-        employee === null ? a.outsiderName! : names.inCycle(employee.id, a.cycle),
+        employee === null
+          ? a.outsiderName!
+          : names.inCycle(employee.id, a.cycle),
         employee === null
           ? managerName(a.managerIdAtReview)
           : managerName(employee.managerId),
@@ -125,17 +130,20 @@ export function serializeBambooReports(company: CompanyFixture): FixtureFile[] {
   // Feedback Status: who gives feedback to whom.
   const feedbackRows = company.feedback.map((f) => [
     names.inCycle(f.employeeId, f.cycle),
-    f.reviewerId === null ? f.reviewerName! : names.inCycle(f.reviewerId, f.cycle),
+    f.reviewerId === null
+      ? f.reviewerName!
+      : names.inCycle(f.reviewerId, f.cycle),
     f.completedOn ?? "",
     f.dueDate,
     cycleName(f.cycle),
   ]);
 
   // Goal Status: a snapshot of today, active people only.
+  const goalsByEmployee = groupGoalsByEmployee(company.goals);
   const goalRows: string[][] = [];
   for (const employee of company.employees) {
     if (employee.status !== "Active") continue;
-    const goals = company.goals.filter((g) => g.employeeId === employee.id);
+    const goals = goalsByEmployee.get(employee.id) ?? [];
     const who = [
       names.current(employee.id),
       managerName(employee.managerId),
@@ -162,7 +170,8 @@ export function serializeBambooReports(company: CompanyFixture): FixtureFile[] {
     .filter((a) => a.employeeId !== null)
     .map((a) => {
       const employee = byId.get(a.employeeId!)!;
-      const bothDone = a.selfStatus === "Submitted" && a.managerStatus === "Submitted";
+      const bothDone =
+        a.selfStatus === "Submitted" && a.managerStatus === "Submitted";
       const noneStarted =
         a.selfStatus === "Not Started" && a.managerStatus === "Not Started";
       return [
@@ -180,7 +189,10 @@ export function serializeBambooReports(company: CompanyFixture): FixtureFile[] {
   return [
     {
       path: "employee-performance.csv",
-      content: toCsv(EMPLOYEE_PERFORMANCE_HEADER, sortRows(performanceRows, 3, 0)),
+      content: toCsv(
+        EMPLOYEE_PERFORMANCE_HEADER,
+        sortRows(performanceRows, 3, 0),
+      ),
     },
     {
       path: "feedback-status.csv",

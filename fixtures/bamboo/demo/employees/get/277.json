@@ -3,15 +3,15 @@
   "firstName": "Adrián",
   "lastName": "López",
   "workEmail": "adrian.lopez@meridian-andina.example",
-  "employeeNumber": "10674",
+  "employeeNumber": "10664",
   "supervisorEId": "135",
-  "supervisorId": "10316",
+  "supervisorId": "10312",
   "supervisor": "Trejo, Marcela",
   "hireDate": "2022-01-08",
   "terminationDate": null,
   "department": "Calidad",
   "division": "Operaciones",
-  "jobTitle": "Auditor de Procesos Ssr",
+  "jobTitle": "Auditor de Procesos Sr",
   "location": "Córdoba",
   "status": "Active"
 }

@@ -22,72 +22,19 @@
   "selectedFilter": "status-all",
   "goals": [
     {
-      "id": "6371",
-      "title": "Completar la certificación del área",
+      "id": "6256",
+      "title": "Mejorar el NPS interno del equipo",
       "description": "Alineado con el plan del área para el año.",
-      "percentComplete": 100,
+      "percentComplete": 55,
       "alignsWithOptionId": null,
-      "sharedWithEmployeeIds": [],
-      "dueDate": "2024-04-01",
-      "completionDate": "2023-11-10",
-      "lastChangedDateTime": "2023-11-10T16:46:15Z",
-      "status": "completed",
-      "milestones": null,
-      "actions": {
-        "canEdit": true,
-        "canUpdateProgress": false,
-        "canClose": true,
-        "canReopen": false,
-        "canDelete": true,
-        "canComment": true
-      }
-    },
-    {
-      "id": "6373",
-      "title": "Reducir el tiempo de primera respuesta un 20%",
-      "description": "Pedido por el equipo directivo en la planificación.",
-      "percentComplete": 33,
-      "alignsWithOptionId": 9002,
-      "sharedWithEmployeeIds": [],
-      "dueDate": "2025-07-01",
-      "completionDate": null,
-      "lastChangedDateTime": "2025-08-20T15:48:08Z",
-      "status": "in_progress",
-      "milestones": [
-        {
-          "id": 1293,
-          "employeeGoalId": 6373,
-          "title": "Hito 1",
-          "startValue": 0,
-          "endValue": 1,
-          "currentValue": 1,
-          "completedDateTime": "2025-04-22T16:00:56Z",
-          "lastUpdateDateTime": "2025-04-22T16:00:56Z",
-          "lastUpdateUserId": 283
-        },
-        {
-          "id": 1294,
-          "employeeGoalId": 6373,
-          "title": "Hito 2",
-          "startValue": 0,
-          "endValue": 1,
-          "currentValue": 0,
-          "completedDateTime": null,
-          "lastUpdateDateTime": "2025-02-01T14:22:12Z",
-          "lastUpdateUserId": 283
-        },
-        {
-          "id": 1295,
-          "employeeGoalId": 6373,
-          "title": "Hito 3",
-          "startValue": 0,
-          "endValue": 1,
-          "currentValue": 0,
-          "completedDateTime": null,
-          "lastUpdateDateTime": "2025-02-01T10:21:24Z",
-          "lastUpdateUserId": 283
-        }
+      "sharedWithEmployeeIds": [
+        243
       ],
+      "dueDate": "2023-11-03",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-02-26T14:08:14Z",
+      "status": "in_progress",
+      "milestones": null,
       "actions": {
         "canEdit": true,
         "canUpdateProgress": true,
@@ -98,17 +45,123 @@
       }
     },
     {
-      "id": "6375",
-      "title": "Automatizar la conciliación mensual",
+      "id": "6258",
+      "title": "Implementar el calendario editorial",
       "description": "Pedido por el equipo directivo en la planificación.",
-      "percentComplete": 45,
+      "percentComplete": 50,
       "alignsWithOptionId": null,
-      "sharedWithEmployeeIds": [
-        243
-      ],
-      "dueDate": "2025-06-09",
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2024-04-03",
       "completionDate": null,
-      "lastChangedDateTime": "2025-10-30T08:40:09Z",
+      "lastChangedDateTime": "2025-12-03T18:17:19Z",
+      "status": "in_progress",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "6261",
+      "title": "Cerrar el plan de capacitación anual",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 50,
+      "alignsWithOptionId": 9004,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2024-09-11",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-04-20T12:30:03Z",
+      "status": "closed",
+      "milestones": [
+        {
+          "id": 1263,
+          "employeeGoalId": 6261,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-03-08T08:23:02Z",
+          "lastUpdateDateTime": "2025-03-08T08:23:02Z",
+          "lastUpdateUserId": 283
+        },
+        {
+          "id": 1264,
+          "employeeGoalId": 6261,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2024-12-25T10:18:24Z",
+          "lastUpdateDateTime": "2024-12-25T10:18:24Z",
+          "lastUpdateUserId": 283
+        },
+        {
+          "id": 1265,
+          "employeeGoalId": 6261,
+          "title": "Hito 3",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2024-07-06T09:26:30Z",
+          "lastUpdateUserId": 283
+        },
+        {
+          "id": 1266,
+          "employeeGoalId": 6261,
+          "title": "Hito 4",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2024-07-06T09:54:03Z",
+          "lastUpdateUserId": 283
+        }
+      ],
+      "actions": {
+        "canEdit": false,
+        "canUpdateProgress": false,
+        "canClose": false,
+        "canReopen": true,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "6262",
+      "title": "Migrar los reportes al nuevo tablero",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 30,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2025-10-15",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-10-07T11:25:02Z",
+      "status": "in_progress",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "6265",
+      "title": "Entregar el proyecto Norte sin desvíos",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 70,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2026-10-22",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-10-08T11:35:41Z",
       "status": "in_progress",
       "milestones": null,
       "actions": {
@@ -137,12 +190,12 @@
   ],
   "comments": [
     {
-      "goalId": "6373",
-      "commentCount": 1
+      "goalId": "6256",
+      "commentCount": 3
     },
     {
-      "goalId": "6375",
-      "commentCount": 3
+      "goalId": "6265",
+      "commentCount": 1
     }
   ]
 }

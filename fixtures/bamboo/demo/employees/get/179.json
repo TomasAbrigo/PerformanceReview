@@ -3,15 +3,15 @@
   "firstName": "Antonella",
   "lastName": "Quiroga",
   "workEmail": "antonella.quiroga@meridian-andina.example",
-  "employeeNumber": "10425",
+  "employeeNumber": "10416",
   "supervisorEId": "59",
-  "supervisorId": "10110",
+  "supervisorId": "10104",
   "supervisor": "Soria, Gonzalo",
   "hireDate": "2021-02-15",
   "terminationDate": null,
   "department": "Finanzas",
   "division": "Corporativo",
-  "jobTitle": "Controller Ssr",
+  "jobTitle": "Controller Sr",
   "location": "Remoto",
   "status": "Active"
 }

@@ -22,137 +22,70 @@
   "selectedFilter": "status-all",
   "goals": [
     {
-      "id": "6785",
-      "title": "Entregar el proyecto Norte sin desvíos",
-      "description": "Pedido por el equipo directivo en la planificación.",
-      "percentComplete": 100,
-      "alignsWithOptionId": 9003,
-      "sharedWithEmployeeIds": [
-        65
-      ],
-      "dueDate": "2023-02-19",
-      "completionDate": "2023-01-09",
-      "lastChangedDateTime": "2023-01-09T11:28:43Z",
-      "status": "completed",
-      "milestones": null,
-      "actions": {
-        "canEdit": true,
-        "canUpdateProgress": false,
-        "canClose": true,
-        "canReopen": false,
-        "canDelete": true,
-        "canComment": true
-      }
-    },
-    {
-      "id": "6787",
-      "title": "Mentorear a dos personas nuevas",
-      "description": "Pedido por el equipo directivo en la planificación.",
-      "percentComplete": 100,
+      "id": "6607",
+      "title": "Completar la certificación del área",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "percentComplete": 33,
       "alignsWithOptionId": null,
       "sharedWithEmployeeIds": [],
-      "dueDate": "2024-02-23",
-      "completionDate": "2023-09-04",
-      "lastChangedDateTime": "2023-09-04T15:53:19Z",
-      "status": "completed",
-      "milestones": null,
-      "actions": {
-        "canEdit": true,
-        "canUpdateProgress": false,
-        "canClose": true,
-        "canReopen": false,
-        "canDelete": true,
-        "canComment": true
-      }
-    },
-    {
-      "id": "6789",
-      "title": "Mentorear a dos personas nuevas",
-      "description": "Pedido por el equipo directivo en la planificación.",
-      "percentComplete": 100,
-      "alignsWithOptionId": null,
-      "sharedWithEmployeeIds": [],
-      "dueDate": "2025-11-19",
-      "completionDate": "2025-07-13",
-      "lastChangedDateTime": "2025-07-13T18:11:37Z",
-      "status": "completed",
-      "milestones": null,
-      "actions": {
-        "canEdit": true,
-        "canUpdateProgress": false,
-        "canClose": true,
-        "canReopen": false,
-        "canDelete": true,
-        "canComment": true
-      }
-    },
-    {
-      "id": "6791",
-      "title": "Automatizar la conciliación mensual",
-      "description": "Alineado con el plan del área para el año.",
-      "percentComplete": 100,
-      "alignsWithOptionId": null,
-      "sharedWithEmployeeIds": [
-        65
-      ],
-      "dueDate": "2025-08-03",
-      "completionDate": "2025-06-14",
-      "lastChangedDateTime": "2025-06-14T10:22:03Z",
-      "status": "completed",
+      "dueDate": "2023-03-18",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-05-06T08:02:36Z",
+      "status": "closed",
       "milestones": [
         {
-          "id": 1492,
-          "employeeGoalId": 6791,
+          "id": 1407,
+          "employeeGoalId": 6607,
           "title": "Hito 1",
           "startValue": 0,
           "endValue": 1,
           "currentValue": 1,
-          "completedDateTime": "2025-06-05T14:53:54Z",
-          "lastUpdateDateTime": "2025-06-05T14:53:54Z",
+          "completedDateTime": "2024-01-09T15:03:15Z",
+          "lastUpdateDateTime": "2024-01-09T15:03:15Z",
           "lastUpdateUserId": 371
         },
         {
-          "id": 1493,
-          "employeeGoalId": 6791,
+          "id": 1408,
+          "employeeGoalId": 6607,
           "title": "Hito 2",
           "startValue": 0,
           "endValue": 1,
-          "currentValue": 1,
-          "completedDateTime": "2025-06-01T13:26:20Z",
-          "lastUpdateDateTime": "2025-06-01T13:26:20Z",
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2022-09-28T17:33:46Z",
           "lastUpdateUserId": 371
         },
         {
-          "id": 1494,
-          "employeeGoalId": 6791,
+          "id": 1409,
+          "employeeGoalId": 6607,
           "title": "Hito 3",
           "startValue": 0,
           "endValue": 1,
-          "currentValue": 1,
-          "completedDateTime": "2025-06-10T15:58:03Z",
-          "lastUpdateDateTime": "2025-06-10T15:58:03Z",
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2022-09-28T19:05:06Z",
           "lastUpdateUserId": 371
         }
       ],
       "actions": {
-        "canEdit": true,
+        "canEdit": false,
         "canUpdateProgress": false,
-        "canClose": true,
-        "canReopen": false,
+        "canClose": false,
+        "canReopen": true,
         "canDelete": true,
         "canComment": true
       }
     },
     {
-      "id": "6793",
-      "title": "Aumentar la cobertura de pruebas al 80%",
-      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "id": "6608",
+      "title": "Mejorar el NPS interno del equipo",
+      "description": "Pedido por el equipo directivo en la planificación.",
       "percentComplete": 100,
       "alignsWithOptionId": null,
       "sharedWithEmployeeIds": [],
-      "dueDate": "2026-06-14",
-      "completionDate": "2026-05-18",
-      "lastChangedDateTime": "2026-05-18T19:06:24Z",
+      "dueDate": "2024-12-16",
+      "completionDate": "2024-10-15",
+      "lastChangedDateTime": "2024-10-15T16:51:24Z",
       "status": "completed",
       "milestones": null,
       "actions": {
@@ -165,20 +98,182 @@
       }
     },
     {
-      "id": "6794",
-      "title": "Aumentar la cobertura de pruebas al 80%",
-      "description": "Pedido por el equipo directivo en la planificación.",
-      "percentComplete": 10,
+      "id": "6609",
+      "title": "Documentar los procesos críticos",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 100,
+      "alignsWithOptionId": 9002,
+      "sharedWithEmployeeIds": [
+        65
+      ],
+      "dueDate": "2024-08-07",
+      "completionDate": "2024-08-20",
+      "lastChangedDateTime": "2024-08-20T13:48:13Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "6611",
+      "title": "Migrar los reportes al nuevo tablero",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 33,
       "alignsWithOptionId": null,
       "sharedWithEmployeeIds": [],
-      "dueDate": "2026-05-28",
+      "dueDate": "2025-12-02",
       "completionDate": null,
-      "lastChangedDateTime": "2026-03-22T16:52:41Z",
+      "lastChangedDateTime": "2026-03-29T17:12:31Z",
+      "status": "closed",
+      "milestones": [
+        {
+          "id": 1410,
+          "employeeGoalId": 6611,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-12-23T10:59:25Z",
+          "lastUpdateDateTime": "2025-12-23T10:59:25Z",
+          "lastUpdateUserId": 371
+        },
+        {
+          "id": 1411,
+          "employeeGoalId": 6611,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2025-05-23T14:22:49Z",
+          "lastUpdateUserId": 371
+        },
+        {
+          "id": 1412,
+          "employeeGoalId": 6611,
+          "title": "Hito 3",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2025-05-23T14:08:38Z",
+          "lastUpdateUserId": 371
+        }
+      ],
+      "actions": {
+        "canEdit": false,
+        "canUpdateProgress": false,
+        "canClose": false,
+        "canReopen": true,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "6613",
+      "title": "Migrar los reportes al nuevo tablero",
+      "description": "Sirve de base para el próximo ciclo de evaluación.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2025-09-25",
+      "completionDate": "2025-09-21",
+      "lastChangedDateTime": "2025-09-21T18:37:16Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "6614",
+      "title": "Automatizar la conciliación mensual",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "percentComplete": 0,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2025-11-06",
+      "completionDate": null,
+      "lastChangedDateTime": "2025-12-23T16:28:28Z",
       "status": "in_progress",
       "milestones": null,
       "actions": {
         "canEdit": true,
         "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "6616",
+      "title": "Implementar el calendario editorial",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "percentComplete": 75,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2026-08-15",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-08-17T14:50:57Z",
+      "status": "in_progress",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "6618",
+      "title": "Reducir los incidentes recurrentes a la mitad",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 70,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2026-04-18",
+      "completionDate": null,
+      "lastChangedDateTime": "2025-11-25T14:25:51Z",
+      "status": "in_progress",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "6620",
+      "title": "Renovar las cuentas clave del trimestre",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "percentComplete": 100,
+      "alignsWithOptionId": 9002,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2026-10-31",
+      "completionDate": "2026-10-16",
+      "lastChangedDateTime": "2026-10-16T18:27:15Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
         "canClose": true,
         "canReopen": false,
         "canDelete": true,
@@ -202,16 +297,28 @@
   ],
   "comments": [
     {
-      "goalId": "6787",
-      "commentCount": 2
-    },
-    {
-      "goalId": "6789",
+      "goalId": "6608",
       "commentCount": 1
     },
     {
-      "goalId": "6791",
+      "goalId": "6609",
       "commentCount": 4
+    },
+    {
+      "goalId": "6613",
+      "commentCount": 1
+    },
+    {
+      "goalId": "6614",
+      "commentCount": 3
+    },
+    {
+      "goalId": "6616",
+      "commentCount": 3
+    },
+    {
+      "goalId": "6618",
+      "commentCount": 2
     }
   ]
 }

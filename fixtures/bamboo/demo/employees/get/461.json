@@ -3,15 +3,15 @@
   "firstName": "Brenda",
   "lastName": "Morales",
   "workEmail": "brenda.morales@meridian-andina.example",
-  "employeeNumber": "11141",
+  "employeeNumber": "11140",
   "supervisorEId": "43",
-  "supervisorId": "10070",
+  "supervisorId": "10072",
   "supervisor": "Soria, Eugenia",
   "hireDate": "2023-06-03",
   "terminationDate": null,
   "department": "Legales",
   "division": "Corporativo",
-  "jobTitle": "Analista de Compliance Jr",
+  "jobTitle": "Analista de Compliance Ssr",
   "location": "Rosario",
   "status": "Active"
 }

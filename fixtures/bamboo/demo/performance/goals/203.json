@@ -22,40 +22,78 @@
   "selectedFilter": "status-all",
   "goals": [
     {
-      "id": "5979",
-      "title": "Mejorar el NPS interno del equipo",
+      "id": "5895",
+      "title": "Completar la certificación del área",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 25,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2023-11-21",
+      "completionDate": null,
+      "lastChangedDateTime": "2024-05-05T09:27:03Z",
+      "status": "in_progress",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "5897",
+      "title": "Renovar las cuentas clave del trimestre",
+      "description": "Sirve de base para el próximo ciclo de evaluación.",
+      "percentComplete": 60,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2024-05-27",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-06-04T17:25:54Z",
+      "status": "in_progress",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "5899",
+      "title": "Completar la certificación del área",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "percentComplete": 65,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2025-08-07",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-04-24T18:19:36Z",
+      "status": "in_progress",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "5900",
+      "title": "Automatizar la conciliación mensual",
       "description": "Meta compartida con otra área; coordinar avances mensuales.",
       "percentComplete": 100,
-      "alignsWithOptionId": 9001,
-      "sharedWithEmployeeIds": [
-        41
-      ],
-      "dueDate": "2023-06-29",
-      "completionDate": "2023-05-21",
-      "lastChangedDateTime": "2023-05-21T15:09:45Z",
-      "status": "completed",
-      "milestones": null,
-      "actions": {
-        "canEdit": true,
-        "canUpdateProgress": false,
-        "canClose": true,
-        "canReopen": false,
-        "canDelete": true,
-        "canComment": true
-      }
-    },
-    {
-      "id": "5980",
-      "title": "Aumentar la cobertura de pruebas al 80%",
-      "description": "Pedido por el equipo directivo en la planificación.",
-      "percentComplete": 100,
       "alignsWithOptionId": null,
-      "sharedWithEmployeeIds": [
-        41
-      ],
-      "dueDate": "2024-09-23",
-      "completionDate": "2024-07-30",
-      "lastChangedDateTime": "2024-07-30T13:23:57Z",
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2025-07-14",
+      "completionDate": "2025-05-01",
+      "lastChangedDateTime": "2025-05-01T14:09:54Z",
       "status": "completed",
       "milestones": null,
       "actions": {
@@ -68,57 +106,17 @@
       }
     },
     {
-      "id": "5981",
+      "id": "5902",
       "title": "Documentar los procesos críticos",
-      "description": "Sirve de base para el próximo ciclo de evaluación.",
-      "percentComplete": 100,
-      "alignsWithOptionId": null,
-      "sharedWithEmployeeIds": [],
-      "dueDate": "2025-04-07",
-      "completionDate": "2025-02-11",
-      "lastChangedDateTime": "2025-02-11T09:45:57Z",
-      "status": "completed",
-      "milestones": null,
-      "actions": {
-        "canEdit": true,
-        "canUpdateProgress": false,
-        "canClose": true,
-        "canReopen": false,
-        "canDelete": true,
-        "canComment": true
-      }
-    },
-    {
-      "id": "5983",
-      "title": "Mejorar el NPS interno del equipo",
       "description": "Alineado con el plan del área para el año.",
       "percentComplete": 100,
       "alignsWithOptionId": null,
-      "sharedWithEmployeeIds": [],
-      "dueDate": "2025-04-13",
-      "completionDate": "2025-02-10",
-      "lastChangedDateTime": "2025-02-10T09:28:32Z",
-      "status": "completed",
-      "milestones": null,
-      "actions": {
-        "canEdit": true,
-        "canUpdateProgress": false,
-        "canClose": true,
-        "canReopen": false,
-        "canDelete": true,
-        "canComment": true
-      }
-    },
-    {
-      "id": "5986",
-      "title": "Reducir el tiempo de primera respuesta un 20%",
-      "description": "Alineado con el plan del área para el año.",
-      "percentComplete": 100,
-      "alignsWithOptionId": null,
-      "sharedWithEmployeeIds": [],
-      "dueDate": "2025-11-04",
-      "completionDate": "2025-10-25",
-      "lastChangedDateTime": "2025-10-25T08:30:57Z",
+      "sharedWithEmployeeIds": [
+        41
+      ],
+      "dueDate": "2025-10-07",
+      "completionDate": "2025-08-10",
+      "lastChangedDateTime": "2025-08-10T18:19:23Z",
       "status": "completed",
       "milestones": null,
       "actions": {
@@ -147,12 +145,12 @@
   ],
   "comments": [
     {
-      "goalId": "5979",
+      "goalId": "5897",
       "commentCount": 2
     },
     {
-      "goalId": "5986",
-      "commentCount": 2
+      "goalId": "5899",
+      "commentCount": 1
     }
   ]
 }

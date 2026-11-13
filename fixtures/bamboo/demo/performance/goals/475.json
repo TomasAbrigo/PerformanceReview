@@ -22,36 +22,15 @@
   "selectedFilter": "status-all",
   "goals": [
     {
-      "id": "7282",
-      "title": "Renovar las cuentas clave del trimestre",
+      "id": "7071",
+      "title": "Migrar los reportes al nuevo tablero",
       "description": "Pedido por el equipo directivo en la planificación.",
-      "percentComplete": 100,
+      "percentComplete": 55,
       "alignsWithOptionId": null,
       "sharedWithEmployeeIds": [],
-      "dueDate": "2024-03-22",
-      "completionDate": "2023-09-20",
-      "lastChangedDateTime": "2023-09-20T11:29:33Z",
-      "status": "completed",
-      "milestones": null,
-      "actions": {
-        "canEdit": true,
-        "canUpdateProgress": false,
-        "canClose": true,
-        "canReopen": false,
-        "canDelete": true,
-        "canComment": true
-      }
-    },
-    {
-      "id": "7283",
-      "title": "Reducir el tiempo de primera respuesta un 20%",
-      "description": "Sirve de base para el próximo ciclo de evaluación.",
-      "percentComplete": 90,
-      "alignsWithOptionId": 9002,
-      "sharedWithEmployeeIds": [],
-      "dueDate": "2024-06-21",
+      "dueDate": "2025-09-18",
       "completionDate": null,
-      "lastChangedDateTime": "2024-10-09T08:30:22Z",
+      "lastChangedDateTime": "2026-05-11T09:31:21Z",
       "status": "in_progress",
       "milestones": null,
       "actions": {
@@ -59,115 +38,6 @@
         "canUpdateProgress": true,
         "canClose": true,
         "canReopen": false,
-        "canDelete": true,
-        "canComment": true
-      }
-    },
-    {
-      "id": "7285",
-      "title": "Migrar los reportes al nuevo tablero",
-      "description": "Alineado con el plan del área para el año.",
-      "percentComplete": 100,
-      "alignsWithOptionId": null,
-      "sharedWithEmployeeIds": [],
-      "dueDate": "2025-02-10",
-      "completionDate": "2025-02-03",
-      "lastChangedDateTime": "2025-02-03T11:57:25Z",
-      "status": "completed",
-      "milestones": null,
-      "actions": {
-        "canEdit": true,
-        "canUpdateProgress": false,
-        "canClose": true,
-        "canReopen": false,
-        "canDelete": true,
-        "canComment": true
-      }
-    },
-    {
-      "id": "7288",
-      "title": "Migrar los reportes al nuevo tablero",
-      "description": "Meta compartida con otra área; coordinar avances mensuales.",
-      "percentComplete": 50,
-      "alignsWithOptionId": null,
-      "sharedWithEmployeeIds": [
-        51
-      ],
-      "dueDate": "2025-05-11",
-      "completionDate": null,
-      "lastChangedDateTime": "2025-06-11T09:04:00Z",
-      "status": "in_progress",
-      "milestones": [
-        {
-          "id": 1730,
-          "employeeGoalId": 7288,
-          "title": "Hito 1",
-          "startValue": 0,
-          "endValue": 1,
-          "currentValue": 1,
-          "completedDateTime": "2024-12-18T15:28:51Z",
-          "lastUpdateDateTime": "2024-12-18T15:28:51Z",
-          "lastUpdateUserId": 475
-        },
-        {
-          "id": 1731,
-          "employeeGoalId": 7288,
-          "title": "Hito 2",
-          "startValue": 0,
-          "endValue": 1,
-          "currentValue": 0,
-          "completedDateTime": null,
-          "lastUpdateDateTime": "2024-12-01T15:47:45Z",
-          "lastUpdateUserId": 475
-        }
-      ],
-      "actions": {
-        "canEdit": true,
-        "canUpdateProgress": true,
-        "canClose": true,
-        "canReopen": false,
-        "canDelete": true,
-        "canComment": true
-      }
-    },
-    {
-      "id": "7289",
-      "title": "Reducir el tiempo de primera respuesta un 20%",
-      "description": "Sirve de base para el próximo ciclo de evaluación.",
-      "percentComplete": 50,
-      "alignsWithOptionId": 9004,
-      "sharedWithEmployeeIds": [],
-      "dueDate": "2025-02-03",
-      "completionDate": null,
-      "lastChangedDateTime": "2025-02-26T12:05:14Z",
-      "status": "in_progress",
-      "milestones": null,
-      "actions": {
-        "canEdit": true,
-        "canUpdateProgress": true,
-        "canClose": true,
-        "canReopen": false,
-        "canDelete": true,
-        "canComment": true
-      }
-    },
-    {
-      "id": "7292",
-      "title": "Migrar los reportes al nuevo tablero",
-      "description": "Alineado con el plan del área para el año.",
-      "percentComplete": 15,
-      "alignsWithOptionId": 9004,
-      "sharedWithEmployeeIds": [],
-      "dueDate": "2026-02-16",
-      "completionDate": null,
-      "lastChangedDateTime": "2026-04-08T16:21:03Z",
-      "status": "closed",
-      "milestones": null,
-      "actions": {
-        "canEdit": false,
-        "canUpdateProgress": false,
-        "canClose": false,
-        "canReopen": true,
         "canDelete": true,
         "canComment": true
       }
@@ -179,22 +49,7 @@
       "firstName": "Emiliano",
       "lastName": "Esquivel",
       "preferredName": null
-    },
-    {
-      "employeeId": 51,
-      "firstName": "Gonzalo",
-      "lastName": "Toledo",
-      "preferredName": "Gonza"
     }
   ],
-  "comments": [
-    {
-      "goalId": "7283",
-      "commentCount": 2
-    },
-    {
-      "goalId": "7289",
-      "commentCount": 2
-    }
-  ]
+  "comments": []
 }

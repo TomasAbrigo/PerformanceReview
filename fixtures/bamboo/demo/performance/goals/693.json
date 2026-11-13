@@ -22,106 +22,17 @@
   "selectedFilter": "status-all",
   "goals": [
     {
-      "id": "7999",
-      "title": "Aumentar la cobertura de pruebas al 80%",
-      "description": "Alineado con el plan del área para el año.",
-      "percentComplete": 100,
+      "id": "7719",
+      "title": "Documentar los procesos críticos",
+      "description": "Sirve de base para el próximo ciclo de evaluación.",
+      "percentComplete": 5,
       "alignsWithOptionId": null,
       "sharedWithEmployeeIds": [],
-      "dueDate": "2025-07-29",
-      "completionDate": "2025-04-13",
-      "lastChangedDateTime": "2025-04-13T15:19:56Z",
-      "status": "completed",
-      "milestones": null,
-      "actions": {
-        "canEdit": false,
-        "canUpdateProgress": false,
-        "canClose": false,
-        "canReopen": false,
-        "canDelete": false,
-        "canComment": false
-      }
-    },
-    {
-      "id": "8000",
-      "title": "Entregar el proyecto Norte sin desvíos",
-      "description": "Alineado con el plan del área para el año.",
-      "percentComplete": 100,
-      "alignsWithOptionId": 9004,
-      "sharedWithEmployeeIds": [],
-      "dueDate": "2025-05-30",
-      "completionDate": "2025-03-05",
-      "lastChangedDateTime": "2025-03-05T09:18:27Z",
-      "status": "completed",
-      "milestones": null,
-      "actions": {
-        "canEdit": false,
-        "canUpdateProgress": false,
-        "canClose": false,
-        "canReopen": false,
-        "canDelete": false,
-        "canComment": false
-      }
-    },
-    {
-      "id": "8003",
-      "title": "Cerrar el plan de capacitación anual",
-      "description": "Pedido por el equipo directivo en la planificación.",
-      "percentComplete": 0,
-      "alignsWithOptionId": null,
-      "sharedWithEmployeeIds": [
-        59
-      ],
-      "dueDate": "2025-08-23",
+      "dueDate": "2025-11-07",
       "completionDate": null,
-      "lastChangedDateTime": "2025-09-26T15:14:04Z",
-      "status": "in_progress",
-      "milestones": [
-        {
-          "id": 2056,
-          "employeeGoalId": 8003,
-          "title": "Hito 1",
-          "startValue": 0,
-          "endValue": 1,
-          "currentValue": 0,
-          "completedDateTime": null,
-          "lastUpdateDateTime": "2025-06-13T17:38:05Z",
-          "lastUpdateUserId": 693
-        },
-        {
-          "id": 2057,
-          "employeeGoalId": 8003,
-          "title": "Hito 2",
-          "startValue": 0,
-          "endValue": 1,
-          "currentValue": 0,
-          "completedDateTime": null,
-          "lastUpdateDateTime": "2025-06-13T16:14:27Z",
-          "lastUpdateUserId": 693
-        },
-        {
-          "id": 2058,
-          "employeeGoalId": 8003,
-          "title": "Hito 3",
-          "startValue": 0,
-          "endValue": 1,
-          "currentValue": 0,
-          "completedDateTime": null,
-          "lastUpdateDateTime": "2025-06-13T18:18:13Z",
-          "lastUpdateUserId": 693
-        },
-        {
-          "id": 2059,
-          "employeeGoalId": 8003,
-          "title": "Hito 4",
-          "startValue": 0,
-          "endValue": 1,
-          "currentValue": 0,
-          "completedDateTime": null,
-          "lastUpdateDateTime": "2025-06-13T14:41:47Z",
-          "lastUpdateUserId": 693
-        }
-      ],
+      "lastChangedDateTime": "2025-07-01T14:29:32Z",
+      "status": "closed",
+      "milestones": null,
       "actions": {
         "canEdit": false,
         "canUpdateProgress": false,
@@ -138,13 +49,12 @@
       "firstName": "Mariana",
       "lastName": "Yáñez",
       "preferredName": null
-    },
-    {
-      "employeeId": 59,
-      "firstName": "Gonzalo",
-      "lastName": "Soria",
-      "preferredName": null
     }
   ],
-  "comments": []
+  "comments": [
+    {
+      "goalId": "7719",
+      "commentCount": 1
+    }
+  ]
 }

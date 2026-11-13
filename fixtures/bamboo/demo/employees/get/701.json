@@ -3,15 +3,15 @@
   "firstName": "Silvana",
   "lastName": "Nieto",
   "workEmail": "silvana.nieto@meridian-andina.example",
-  "employeeNumber": "11719",
+  "employeeNumber": "11691",
   "supervisorEId": "93",
-  "supervisorId": "10213",
+  "supervisorId": "10190",
   "supervisor": "Herrera, Rocío",
   "hireDate": "2025-03-08",
   "terminationDate": null,
   "department": "Infraestructura",
   "division": "Tecnología",
-  "jobTitle": "DevOps Engineer Ssr",
+  "jobTitle": "DevOps Engineer Sr",
   "location": "Buenos Aires",
   "status": "Active"
 }

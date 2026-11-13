@@ -22,20 +22,20 @@
   "selectedFilter": "status-all",
   "goals": [
     {
-      "id": "7977",
+      "id": "7701",
       "title": "Automatizar la conciliación mensual",
       "description": "Alineado con el plan del área para el año.",
-      "percentComplete": 45,
+      "percentComplete": 100,
       "alignsWithOptionId": null,
       "sharedWithEmployeeIds": [],
-      "dueDate": "2026-12-30",
-      "completionDate": null,
-      "lastChangedDateTime": "2026-09-25T17:26:33Z",
-      "status": "in_progress",
+      "dueDate": "2025-09-22",
+      "completionDate": "2025-07-03",
+      "lastChangedDateTime": "2025-07-03T12:49:01Z",
+      "status": "completed",
       "milestones": null,
       "actions": {
         "canEdit": true,
-        "canUpdateProgress": true,
+        "canUpdateProgress": false,
         "canClose": true,
         "canReopen": false,
         "canDelete": true,
@@ -53,8 +53,8 @@
   ],
   "comments": [
     {
-      "goalId": "7977",
-      "commentCount": 2
+      "goalId": "7701",
+      "commentCount": 1
     }
   ]
 }

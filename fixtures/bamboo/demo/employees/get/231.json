@@ -3,15 +3,15 @@
   "firstName": "Diego",
   "lastName": "Quiroga",
   "workEmail": "diego.quiroga@meridian-andina.example",
-  "employeeNumber": "10551",
+  "employeeNumber": "10546",
   "supervisorEId": "211",
-  "supervisorId": "10504",
+  "supervisorId": "10496",
   "supervisor": "Reyes, Santiago",
   "hireDate": "2021-08-19",
   "terminationDate": null,
   "department": "Operaciones",
   "division": "Operaciones",
-  "jobTitle": "Coordinador de Procesos Sr",
+  "jobTitle": "Coordinador de Procesos Ssr",
   "location": "Buenos Aires",
   "status": "Active"
 }

@@ -22,38 +22,42 @@
   "selectedFilter": "status-all",
   "goals": [
     {
-      "id": "7041",
-      "title": "Reducir los incidentes recurrentes a la mitad",
-      "description": "Sirve de base para el próximo ciclo de evaluación.",
+      "id": "6865",
+      "title": "Renovar las cuentas clave del trimestre",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
       "percentComplete": 100,
       "alignsWithOptionId": null,
-      "sharedWithEmployeeIds": [],
-      "dueDate": "2024-04-01",
-      "completionDate": "2023-11-19",
-      "lastChangedDateTime": "2023-11-19T15:08:47Z",
+      "sharedWithEmployeeIds": [
+        65
+      ],
+      "dueDate": "2026-03-01",
+      "completionDate": "2026-03-18",
+      "lastChangedDateTime": "2026-03-18T17:54:58Z",
       "status": "completed",
-      "milestones": null,
-      "actions": {
-        "canEdit": true,
-        "canUpdateProgress": false,
-        "canClose": true,
-        "canReopen": false,
-        "canDelete": true,
-        "canComment": true
-      }
-    },
-    {
-      "id": "7044",
-      "title": "Automatizar la conciliación mensual",
-      "description": "Pedido por el equipo directivo en la planificación.",
-      "percentComplete": 100,
-      "alignsWithOptionId": null,
-      "sharedWithEmployeeIds": [],
-      "dueDate": "2025-07-07",
-      "completionDate": "2025-03-17",
-      "lastChangedDateTime": "2025-03-17T19:48:34Z",
-      "status": "completed",
-      "milestones": null,
+      "milestones": [
+        {
+          "id": 1526,
+          "employeeGoalId": 6865,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2026-02-07T17:17:30Z",
+          "lastUpdateDateTime": "2026-02-07T17:17:30Z",
+          "lastUpdateUserId": 429
+        },
+        {
+          "id": 1527,
+          "employeeGoalId": 6865,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2026-01-06T11:18:58Z",
+          "lastUpdateDateTime": "2026-01-06T11:18:58Z",
+          "lastUpdateUserId": 429
+        }
+      ],
       "actions": {
         "canEdit": true,
         "canUpdateProgress": false,
@@ -70,12 +74,13 @@
       "firstName": "Leandro",
       "lastName": "Soria",
       "preferredName": null
+    },
+    {
+      "employeeId": 65,
+      "firstName": "Valentina",
+      "lastName": "Díaz",
+      "preferredName": "Vale"
     }
   ],
-  "comments": [
-    {
-      "goalId": "7044",
-      "commentCount": 4
-    }
-  ]
+  "comments": []
 }
