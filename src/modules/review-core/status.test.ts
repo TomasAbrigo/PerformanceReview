@@ -32,6 +32,15 @@ describe("cycle status machine", () => {
     ]);
   });
 
+  it("skips manager review when the manager component is off", () => {
+    expect(phasesFor({ ...all, manager: false })).not.toContain(
+      "manager_review",
+    );
+    expect(
+      allowedTransitions({ ...all, manager: false }, "collecting"),
+    ).toEqual(["calibration", "nominations"]);
+  });
+
   it("allows one step forward and one step back, never back to draft", () => {
     expect(allowedTransitions(all, "collecting")).toEqual([
       "manager_review",

@@ -360,7 +360,8 @@
         "acknowledge": "Acuse de recibo"
       },
       "summary": "Resumen",
-      "participantsToLaunch": "{count, plural, one {Se lanzará con # participante} other {Se lanzará con # participantes}}"
+      "participantsToLaunch": "{count, plural, one {Se lanzará con # participante} other {Se lanzará con # participantes}}",
+      "snapshotHint": "Los participantes se resuelven a la fecha de snapshot organizacional."
     },
     "detail": {
       "snapshotDate": "Snapshot al {date}",

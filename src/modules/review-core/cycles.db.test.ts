@@ -128,6 +128,23 @@ describe("launchCycle", () => {
     expect(byId.get(carla)?.snapManagerPersonId).toBe(ana);
   });
 
+  it("keeps the snapshot when the referenced job row is deleted", async () => {
+    const cycle = await createCycle(db, input());
+    await launchCycle(db, cycle.id, null);
+    // Job-history re-ingest hard-deletes and rebuilds rows.
+    await db
+      .delete(employeeJobHistory)
+      .where(eq(employeeJobHistory.personId, bruno));
+    const detail = await getCycle(db, cycle.id);
+    expect(
+      detail!.participants.find((p) => p.revieweePersonId === bruno),
+    ).toMatchObject({
+      snapJobHistoryId: null,
+      snapManagerPersonId: carla,
+      snapJobTitle: "Developer",
+    });
+  });
+
   it("flags participants without a manager in the snapshot", async () => {
     const cycle = await createCycle(db, input());
     await launchCycle(db, cycle.id, null);
@@ -137,21 +154,41 @@ describe("launchCycle", () => {
     expect(detail!.stats).toEqual({ active: 3, removed: 0, withoutManager: 1 });
   });
 
-  it("launches the same people the preview counted", async () => {
+  it("launches the same people the preview counted as of the snapshot date", async () => {
     const filter = { kind: "all" } as const;
-    const preview = await previewParticipants(db, filter);
-    // Carla is terminated: "all" means current employees.
-    expect(preview.count).toBe(2);
+    // Carla left in 2024: in the org on 2022-06-01, gone by 2025.
+    expect(
+      (await previewParticipants(db, filter, 10, "2025-01-01")).count,
+    ).toBe(2);
+    const preview = await previewParticipants(db, filter, 10, "2022-06-01");
+    expect(preview.count).toBe(3);
     const cycle = await createCycle(db, input({ participantFilter: filter }));
     await launchCycle(db, cycle.id, null);
     const detail = await getCycle(db, cycle.id);
     expect(detail!.participants.map((p) => p.revieweePersonId).sort()).toEqual(
       preview.sample.map((p) => p.personId).sort(),
     );
-    expect((await listCycles(db))[0].participantCount).toBe(2);
+    expect((await listCycles(db))[0].participantCount).toBe(3);
   });
 
-  it("filters by current job attributes and employment status", async () => {
+  it("matches job attributes as of the snapshot date", async () => {
+    // Bruno was "Developer" in 2022 and "Senior Developer" since 2023.
+    const filter = { kind: "filter" as const, jobTitles: ["Developer"] };
+    expect(
+      (await previewParticipants(db, filter, 10, "2022-06-01")).count,
+    ).toBe(1);
+    expect(
+      (await previewParticipants(db, filter, 10, "2025-01-01")).count,
+    ).toBe(0);
+    const cycle = await createCycle(db, input({ participantFilter: filter }));
+    await launchCycle(db, cycle.id, null);
+    const detail = await getCycle(db, cycle.id);
+    expect(detail!.participants.map((p) => p.displayName)).toEqual([
+      "Bruno Pérez",
+    ]);
+  });
+
+  it("filters by job attributes and employment status", async () => {
     const byLocation = await previewParticipants(db, {
       kind: "filter",
       locations: ["Rosario"],
@@ -159,10 +196,12 @@ describe("launchCycle", () => {
     expect(byLocation.sample.map((p) => p.displayName)).toEqual([
       "Bruno Pérez",
     ]);
-    const inactive = await previewParticipants(db, {
-      kind: "filter",
-      statuses: ["Inactive"],
-    });
+    const inactive = await previewParticipants(
+      db,
+      { kind: "filter", statuses: ["Inactive"] },
+      10,
+      "2022-06-01",
+    );
     expect(inactive.sample.map((p) => p.displayName)).toEqual(["Carla Romero"]);
   });
 

@@ -1,7 +1,7 @@
 /**
  * Cycle status machine (docs/research/06): the phases of a cycle depend on
  * its components (no nominations without peers, no calibration phase when
- * calibration is off). From any active phase a cycle may move one step
+ * calibration is off, no manager review without managers). From any active phase a cycle may move one step
  * forward or one step back; `draft` is left only by launching, and `closed`
  * is terminal.
  */
@@ -53,6 +53,7 @@ export function phasesFor(components: CycleComponents): CycleStatus[] {
   return cycleStatuses.filter(
     (s) =>
       (s !== "nominations" || components.peer) &&
+      (s !== "manager_review" || components.manager) &&
       (s !== "calibration" || components.calibration),
   );
 }

@@ -100,8 +100,10 @@ export const cycleParticipant = pgTable(
     snapDivision: text("snap_division"),
     snapJobTitle: text("snap_job_title"),
     snapLocation: text("snap_location"),
+    /** Set null when job-history re-ingest rebuilds rows (snap_* stay). */
     snapJobHistoryId: uuid("snap_job_history_id").references(
       () => employeeJobHistory.id,
+      { onDelete: "set null" },
     ),
     addedAt: timestamp("added_at", { withTimezone: true })
       .notNull()

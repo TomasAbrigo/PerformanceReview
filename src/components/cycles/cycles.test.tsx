@@ -118,35 +118,123 @@ async function fillDates(user: ReturnType<typeof userEvent.setup>) {
   await user.type(screen.getByLabelText("Cycle name"), "H1 2026");
   await user.type(screen.getByLabelText("Period start"), "2026-01-01");
   await user.type(screen.getByLabelText("Period end"), "2026-06-30");
-  await user.type(screen.getByLabelText("Org snapshot date"), "2026-06-01");
 }
 
 describe("CycleWizard", () => {
   it("shows the participant count of the filter on the people step (es)", async () => {
     const user = userEvent.setup();
-    renderIn("es", <CycleWizard options={options} actions={actions} />);
+    renderIn(
+      "es",
+      <CycleWizard
+        options={options}
+        actions={actions}
+        defaultSnapshotDate="2026-06-01"
+      />,
+    );
     expect(screen.getByText("Paso 1 de 4")).toBeVisible();
     expect(await screen.findByText("2 personas coinciden")).toBeVisible();
 
     await user.click(screen.getByLabelText("Por filtro"));
     await user.click(screen.getByRole("checkbox", { name: "Rosario" }));
     await waitFor(() =>
-      expect(actions.preview).toHaveBeenLastCalledWith({
-        kind: "filter",
-        departments: [],
-        divisions: [],
-        locations: ["Rosario"],
-        jobTitles: [],
-        statuses: [],
-      }),
+      expect(actions.preview).toHaveBeenLastCalledWith(
+        {
+          kind: "filter",
+          departments: [],
+          divisions: [],
+          locations: ["Rosario"],
+          jobTitles: [],
+          statuses: [],
+        },
+        "2026-06-01",
+      ),
     );
     expect(await screen.findByText("1 persona coincide")).toBeVisible();
     expect(screen.getByText("Bruno Pérez")).toBeVisible();
   });
 
+  it("resolves participants as of the snapshot date chosen on the people step", async () => {
+    const user = userEvent.setup();
+    renderIn(
+      "en",
+      <CycleWizard
+        options={options}
+        actions={actions}
+        defaultSnapshotDate="2026-06-01"
+      />,
+    );
+    expect(
+      screen.getByText(
+        "Participants are resolved as of the org snapshot date.",
+      ),
+    ).toBeVisible();
+    const date = screen.getByLabelText("Org snapshot date");
+    await user.clear(date);
+    await user.type(date, "2022-06-01");
+    await waitFor(() =>
+      expect(actions.preview).toHaveBeenLastCalledWith(
+        { kind: "all" },
+        "2022-06-01",
+      ),
+    );
+  });
+
+  it("stays on the wizard and shows the error when launching fails", async () => {
+    const user = userEvent.setup();
+    actions.launch = vi
+      .fn()
+      .mockResolvedValue({ ok: false, code: "no_participants", issues: [] });
+    renderIn(
+      "en",
+      <CycleWizard
+        options={options}
+        actions={actions}
+        defaultSnapshotDate="2026-06-01"
+      />,
+    );
+    await user.click(screen.getByRole("button", { name: "Next" }));
+    await user.click(screen.getByRole("button", { name: "Next" }));
+    await fillDates(user);
+    await user.click(screen.getByRole("button", { name: "Next" }));
+    await screen.findByText("Will launch with 2 participants");
+    await user.click(screen.getByRole("button", { name: "Create and launch" }));
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "The filter matches no one.",
+    );
+    expect(push).not.toHaveBeenCalled();
+  });
+
+  it("cannot launch without a template", async () => {
+    const user = userEvent.setup();
+    renderIn(
+      "en",
+      <CycleWizard
+        options={{ ...options, templates: [] }}
+        actions={actions}
+        defaultSnapshotDate="2026-06-01"
+      />,
+    );
+    await user.click(screen.getByRole("button", { name: "Next" }));
+    await user.click(screen.getByRole("button", { name: "Next" }));
+    await fillDates(user);
+    await user.click(screen.getByRole("button", { name: "Next" }));
+    await screen.findByText("Will launch with 2 participants");
+    expect(
+      screen.getByRole("button", { name: "Create and launch" }),
+    ).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Save draft" })).toBeEnabled();
+  });
+
   it("offers anonymity modes only for enabled components", async () => {
     const user = userEvent.setup();
-    renderIn("en", <CycleWizard options={options} actions={actions} />);
+    renderIn(
+      "en",
+      <CycleWizard
+        options={options}
+        actions={actions}
+        defaultSnapshotDate="2026-06-01"
+      />,
+    );
     await user.click(screen.getByRole("button", { name: "Next" }));
     expect(screen.getByText("Step 2 of 4")).toBeVisible();
     expect(screen.getByLabelText("Peer anonymity")).toBeVisible();
@@ -156,7 +244,14 @@ describe("CycleWizard", () => {
 
   it("validates that phase dates are in order", async () => {
     const user = userEvent.setup();
-    renderIn("en", <CycleWizard options={options} actions={actions} />);
+    renderIn(
+      "en",
+      <CycleWizard
+        options={options}
+        actions={actions}
+        defaultSnapshotDate="2026-06-01"
+      />,
+    );
     await user.click(screen.getByRole("button", { name: "Next" }));
     await user.click(screen.getByRole("button", { name: "Next" }));
     await fillDates(user);
@@ -169,7 +264,14 @@ describe("CycleWizard", () => {
 
   it("creates and launches the cycle from the review step (en)", async () => {
     const user = userEvent.setup();
-    renderIn("en", <CycleWizard options={options} actions={actions} />);
+    renderIn(
+      "en",
+      <CycleWizard
+        options={options}
+        actions={actions}
+        defaultSnapshotDate="2026-06-01"
+      />,
+    );
     await user.click(screen.getByRole("button", { name: "Next" }));
     await user.click(screen.getByRole("button", { name: "Next" }));
     await fillDates(user);

@@ -360,7 +360,8 @@
         "acknowledge": "Acknowledgement"
       },
       "summary": "Summary",
-      "participantsToLaunch": "{count, plural, one {Will launch with # participant} other {Will launch with # participants}}"
+      "participantsToLaunch": "{count, plural, one {Will launch with # participant} other {Will launch with # participants}}",
+      "snapshotHint": "Participants are resolved as of the org snapshot date."
     },
     "detail": {
       "snapshotDate": "Snapshot as of {date}",
