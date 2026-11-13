@@ -382,5 +382,139 @@
       "older": "Casos anteriores",
       "newest": "Volver a los más recientes"
     }
+  },
+  "Cycles": {
+    "nav": "Ciclos de evaluación",
+    "title": "Ciclos de evaluación",
+    "new": "Nuevo ciclo",
+    "back": "Volver a ciclos",
+    "empty": "Todavía no hay ciclos.",
+    "columns": {
+      "name": "Nombre",
+      "status": "Estado",
+      "period": "Período",
+      "participants": "Participantes"
+    },
+    "period": "{start} → {end}",
+    "status": {
+      "draft": "Borrador",
+      "nominations": "Nominaciones",
+      "collecting": "Recolección",
+      "manager_review": "Revisión del manager",
+      "calibration": "Calibración",
+      "sharing": "Compartir resultados",
+      "closed": "Cerrado"
+    },
+    "wizard": {
+      "title": "Nuevo ciclo",
+      "stepsLabel": "Pasos",
+      "stepOf": "Paso {current} de {total}",
+      "steps": {
+        "people": "Personas",
+        "components": "Componentes y anonimato",
+        "dates": "Fechas por fase",
+        "review": "Revisar y lanzar"
+      },
+      "next": "Siguiente",
+      "previous": "Anterior",
+      "saveDraft": "Guardar borrador",
+      "launch": "Crear y lanzar",
+      "mode": "¿Quiénes participan?",
+      "modeAll": "Todas las personas activas",
+      "modeFilter": "Por filtro",
+      "modePeople": "Personas individuales",
+      "filters": {
+        "departments": "Área",
+        "divisions": "División",
+        "locations": "Ubicación",
+        "jobTitles": "Puesto",
+        "statuses": "Estado"
+      },
+      "count": "{count, plural, =0 {Ninguna persona coincide} one {# persona coincide} other {# personas coinciden}}",
+      "counting": "Contando…",
+      "sample": "Muestra",
+      "components": "Componentes",
+      "componentNames": {
+        "self": "Autoevaluación",
+        "manager": "Evaluación del manager",
+        "peer": "Evaluación de pares",
+        "upward": "Evaluación ascendente",
+        "calibration": "Calibración"
+      },
+      "anonymity": "Anonimato",
+      "anonymityPeer": "Anonimato de pares",
+      "anonymityUpward": "Anonimato ascendente",
+      "anonymityModes": {
+        "transparent": "Transparente",
+        "anonymous_to_employee": "Anónimo para la persona evaluada",
+        "fully_anonymous": "Totalmente anónimo"
+      },
+      "template": "Plantilla",
+      "finalScale": "Escala final",
+      "none": "Sin seleccionar",
+      "name": "Nombre del ciclo",
+      "description": "Descripción",
+      "periodStart": "Inicio del período",
+      "periodEnd": "Fin del período",
+      "snapshotDate": "Fecha de snapshot organizacional",
+      "dueDates": "Fechas límite por fase",
+      "phases": {
+        "nominations": "Nominaciones",
+        "self": "Autoevaluación",
+        "peer": "Pares",
+        "manager": "Manager",
+        "calibration": "Calibración",
+        "sharing": "Compartir",
+        "acknowledge": "Acuse de recibo"
+      },
+      "summary": "Resumen",
+      "participantsToLaunch": "{count, plural, one {Se lanzará con # participante} other {Se lanzará con # participantes}}",
+      "snapshotHint": "Los participantes se resuelven a la fecha de snapshot organizacional."
+    },
+    "detail": {
+      "snapshotDate": "Snapshot al {date}",
+      "participants": "Participantes",
+      "transitions": "Historial de estados",
+      "stats": "{active} activos · {removed} quitados · {withoutManager} sin manager",
+      "questions": "{count, plural, one {# pregunta congelada} other {# preguntas congeladas}}",
+      "actions": "Acciones de fase",
+      "moveTo": "Pasar a {status}",
+      "launch": "Lanzar ciclo",
+      "confirmTitle": "¿Confirmás el cambio de fase?",
+      "confirmBody": "El ciclo pasará de {from} a {to}.",
+      "confirm": "Confirmar",
+      "cancel": "Cancelar",
+      "noActions": "No hay acciones disponibles.",
+      "noParticipants": "Este ciclo todavía no tiene participantes.",
+      "noTransitions": "Sin cambios de estado todavía.",
+      "noManager": "Sin manager",
+      "removed": "Quitado",
+      "columns": {
+        "name": "Persona",
+        "manager": "Manager (snapshot)",
+        "department": "Área",
+        "jobTitle": "Puesto",
+        "from": "De",
+        "to": "A",
+        "actor": "Quién",
+        "when": "Cuándo",
+        "note": "Nota"
+      },
+      "system": "Sistema"
+    },
+    "errors": {
+      "validation": "Revisá los campos marcados.",
+      "not_found": "El ciclo ya no existe.",
+      "not_draft": "El ciclo ya fue lanzado.",
+      "not_active": "El ciclo no está activo.",
+      "invalid_transition": "Ese cambio de fase no está permitido.",
+      "no_participants": "El filtro no incluye a ninguna persona.",
+      "no_template": "Elegí una plantilla.",
+      "already_participant": "La persona ya participa del ciclo.",
+      "date_order": "Las fechas deben estar en orden.",
+      "required": "Este campo es obligatorio.",
+      "invalid": "Valor inválido.",
+      "unknown": "Ocurrió un error inesperado."
+    }
   }
 }

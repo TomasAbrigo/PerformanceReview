@@ -1,0 +1,58 @@
+import { hasLocale } from "next-intl";
+import { setRequestLocale } from "next-intl/server";
+import { notFound } from "next/navigation";
+import { connection } from "next/server";
+import { Suspense } from "react";
+import { CycleDetailView } from "@/components/cycles/cycle-detail";
+import { db } from "@/db/client";
+import { routing } from "@/i18n/routing";
+import { getCycle } from "@/modules/review-core";
+import { launchCycleAction, transitionCycleAction } from "../actions";
+
+async function Detail({ params }: PageProps<"/[locale]/cycles/[id]">) {
+  const { locale, id } = await params;
+  if (!hasLocale(routing.locales, locale)) notFound();
+  setRequestLocale(locale);
+  await connection();
+  const cycle = await getCycle(db, id);
+  if (!cycle) notFound();
+  return (
+    <CycleDetailView
+      cycle={{
+        id: cycle.id,
+        name: cycle.name,
+        status: cycle.status,
+        periodStart: cycle.periodStart,
+        periodEnd: cycle.periodEnd,
+        snapshotDate: cycle.snapshotDate,
+        questionCount: cycle.questionCount,
+        stats: cycle.stats,
+        allowedTransitions: cycle.allowedTransitions,
+        participants: cycle.participants.map((p) => ({
+          id: p.id,
+          displayName: p.displayName,
+          snapManagerName: p.snapManagerName,
+          snapDepartment: p.snapDepartment,
+          snapJobTitle: p.snapJobTitle,
+          withoutManager: p.withoutManager,
+          removedAt: p.removedAt,
+        })),
+        transitions: cycle.transitions,
+      }}
+      actions={{
+        transition: transitionCycleAction,
+        launch: launchCycleAction,
+      }}
+    />
+  );
+}
+
+export default function CyclePage(props: PageProps<"/[locale]/cycles/[id]">) {
+  return (
+    <main className="mx-auto w-full max-w-5xl p-8">
+      <Suspense fallback={<div aria-busy="true" className="h-40" />}>
+        <Detail {...props} />
+      </Suspense>
+    </main>
+  );
+}
