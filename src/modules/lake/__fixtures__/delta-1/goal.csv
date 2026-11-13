@@ -1,0 +1,4 @@
+id,title,percent_complete,status,due_date,completed_at,_fivetran_synced,_fivetran_deleted
+301,Ship onboarding revamp,60,in_progress,2026-06-30,,2026-01-10T10:00:00Z,false
+302,Improve NPS,100,completed,2025-12-15,2025-12-10T15:30:00Z,2026-01-10T10:00:00Z,false
+303,Reduce churn,40,in_progress,2026-09-30,,2026-02-10T10:00:00Z,false
