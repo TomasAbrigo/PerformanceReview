@@ -1,0 +1,17 @@
+{
+  "id": "61",
+  "firstName": "Martín",
+  "lastName": "Fuentes",
+  "workEmail": "martin.fuentes@meridian-andina.example",
+  "employeeNumber": "10124",
+  "supervisorEId": "29",
+  "supervisorId": "10049",
+  "supervisor": "Ibáñez, Rocío",
+  "hireDate": "2023-12-26",
+  "terminationDate": null,
+  "department": "People",
+  "division": "Corporativo",
+  "jobTitle": "HR Business Partner Sr",
+  "location": "Remoto",
+  "status": "Active"
+}

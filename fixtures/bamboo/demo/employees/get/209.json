@@ -1,0 +1,17 @@
+{
+  "id": "209",
+  "firstName": "Joaquín",
+  "lastName": "Lagos",
+  "workEmail": "joaquin.lagos@meridian-andina.example",
+  "employeeNumber": "10491",
+  "supervisorEId": "147",
+  "supervisorId": "10339",
+  "supervisor": "Páez, Paula",
+  "hireDate": "2021-05-09",
+  "terminationDate": null,
+  "department": "Legales",
+  "division": "Corporativo",
+  "jobTitle": "Analista de Compliance Jr",
+  "location": "Remoto",
+  "status": "Active"
+}

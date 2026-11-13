@@ -1,0 +1,17 @@
+{
+  "id": "137",
+  "firstName": "Marcela",
+  "lastName": "Lezcano",
+  "workEmail": "marcela.lezcano@meridian-andina.example",
+  "employeeNumber": "10314",
+  "supervisorEId": "23",
+  "supervisorId": "10028",
+  "supervisor": "Medina, María",
+  "hireDate": "2020-02-18",
+  "terminationDate": null,
+  "department": "Customer Success",
+  "division": "Comercial",
+  "jobTitle": "Líder de Customer Success",
+  "location": "Buenos Aires",
+  "status": "Active"
+}

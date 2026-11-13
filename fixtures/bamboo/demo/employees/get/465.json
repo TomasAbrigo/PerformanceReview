@@ -1,0 +1,17 @@
+{
+  "id": "465",
+  "firstName": "Diego",
+  "lastName": "López",
+  "workEmail": "diego.lopez@meridian-andina.example",
+  "employeeNumber": "11143",
+  "supervisorEId": "59",
+  "supervisorId": "10104",
+  "supervisor": "Soria, Gonzalo",
+  "hireDate": "2023-06-14",
+  "terminationDate": null,
+  "department": "Finanzas",
+  "division": "Corporativo",
+  "jobTitle": "Controller Ssr",
+  "location": "Córdoba",
+  "status": "Active"
+}

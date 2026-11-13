@@ -1,0 +1,17 @@
+{
+  "id": "503",
+  "firstName": "Cristian",
+  "lastName": "Díaz",
+  "workEmail": "cristian.diaz@meridian-andina.example",
+  "employeeNumber": "11238",
+  "supervisorEId": "59",
+  "supervisorId": "10104",
+  "supervisor": "Soria, Gonzalo",
+  "hireDate": "2023-10-03",
+  "terminationDate": null,
+  "department": "Finanzas",
+  "division": "Corporativo",
+  "jobTitle": "Analista Contable Ssr",
+  "location": "Córdoba",
+  "status": "Active"
+}

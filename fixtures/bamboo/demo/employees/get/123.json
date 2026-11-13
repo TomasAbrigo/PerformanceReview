@@ -1,0 +1,17 @@
+{
+  "id": "123",
+  "firstName": "Paula",
+  "lastName": "Medina",
+  "workEmail": "paula.medina@meridian-andina.example",
+  "employeeNumber": "10281",
+  "supervisorEId": "49",
+  "supervisorId": "10081",
+  "supervisor": "Monzón, Milagros",
+  "hireDate": "2020-01-01",
+  "terminationDate": null,
+  "department": "Calidad",
+  "division": "Operaciones",
+  "jobTitle": "Analista de Calidad Sr",
+  "location": "Remoto",
+  "status": "Active"
+}

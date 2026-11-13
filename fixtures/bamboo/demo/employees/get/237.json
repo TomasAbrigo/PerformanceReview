@@ -1,0 +1,17 @@
+{
+  "id": "237",
+  "firstName": "Florencia",
+  "lastName": "Benítez",
+  "workEmail": "florencia.benitez@meridian-andina.example",
+  "employeeNumber": "10564",
+  "supervisorEId": "21",
+  "supervisorId": "10026",
+  "supervisor": "Navarro, Lucas",
+  "hireDate": "2021-09-03",
+  "terminationDate": null,
+  "department": "Infraestructura",
+  "division": "Tecnología",
+  "jobTitle": "Líder de Infraestructura",
+  "location": "Buenos Aires",
+  "status": "Active"
+}

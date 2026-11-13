@@ -1,0 +1,17 @@
+{
+  "id": "243",
+  "firstName": "Jimena",
+  "lastName": "Bustos",
+  "workEmail": "jimena.bustos@meridian-andina.example",
+  "employeeNumber": "10574",
+  "supervisorEId": "37",
+  "supervisorId": "10060",
+  "supervisor": "Reyes, Cristian",
+  "hireDate": "2021-09-15",
+  "terminationDate": null,
+  "department": "Calidad",
+  "division": "Operaciones",
+  "jobTitle": "Líder de Calidad",
+  "location": "Remoto",
+  "status": "Active"
+}

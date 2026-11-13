@@ -1,0 +1,17 @@
+{
+  "id": "305",
+  "firstName": "Ricardo",
+  "lastName": "Domínguez",
+  "workEmail": "ricardo.dominguez@meridian-andina.example",
+  "employeeNumber": "10737",
+  "supervisorEId": "83",
+  "supervisorId": "10163",
+  "supervisor": "Franco, Daniela",
+  "hireDate": "2022-02-24",
+  "terminationDate": null,
+  "department": "Customer Success",
+  "division": "Comercial",
+  "jobTitle": "Customer Success Manager Jr",
+  "location": "Remoto",
+  "status": "Active"
+}

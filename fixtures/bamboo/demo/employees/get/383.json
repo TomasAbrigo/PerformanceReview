@@ -1,0 +1,17 @@
+{
+  "id": "383",
+  "firstName": "Jimena",
+  "lastName": "Peralta",
+  "workEmail": "jimena.peralta@meridian-andina.example",
+  "employeeNumber": "10945",
+  "supervisorEId": "265",
+  "supervisorId": "10627",
+  "supervisor": "Olmos, Ivana",
+  "hireDate": "2022-10-21",
+  "terminationDate": null,
+  "department": "Infraestructura",
+  "division": "Tecnología",
+  "jobTitle": "DevOps Engineer Ssr",
+  "location": "Santiago de Chile",
+  "status": "Active"
+}

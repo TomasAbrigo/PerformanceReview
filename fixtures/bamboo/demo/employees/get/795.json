@@ -1,0 +1,17 @@
+{
+  "id": "795",
+  "firstName": "Elena",
+  "lastName": "Vega",
+  "workEmail": "elena.vega@meridian-andina.example",
+  "employeeNumber": "11939",
+  "supervisorEId": "189",
+  "supervisorId": "10436",
+  "supervisor": "Quiroga, Lucía",
+  "hireDate": "2025-08-29",
+  "terminationDate": null,
+  "department": "Customer Success",
+  "division": "Comercial",
+  "jobTitle": "Onboarding Specialist Ssr",
+  "location": "Córdoba",
+  "status": "Active"
+}

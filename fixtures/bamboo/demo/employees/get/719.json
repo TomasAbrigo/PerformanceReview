@@ -1,0 +1,17 @@
+{
+  "id": "719",
+  "firstName": "Lorena",
+  "lastName": "González",
+  "workEmail": "lorena.gonzalez@meridian-andina.example",
+  "employeeNumber": "11756",
+  "supervisorEId": "83",
+  "supervisorId": "10163",
+  "supervisor": "Franco, Daniela",
+  "hireDate": "2025-04-06",
+  "terminationDate": "2026-04-23",
+  "department": "Customer Success",
+  "division": "Comercial",
+  "jobTitle": "Customer Success Manager Ssr",
+  "location": "Buenos Aires",
+  "status": "Inactive"
+}

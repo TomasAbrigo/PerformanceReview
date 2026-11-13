@@ -1,0 +1,17 @@
+{
+  "id": "51",
+  "firstName": "Romina",
+  "lastName": "Páez",
+  "workEmail": "romina.paez@meridian-andina.example",
+  "employeeNumber": "10100",
+  "supervisorEId": "29",
+  "supervisorId": "10049",
+  "supervisor": "Ibáñez, Rocío",
+  "hireDate": "2021-04-25",
+  "terminationDate": "2024-02-21",
+  "department": "People",
+  "division": "Corporativo",
+  "jobTitle": "Analista de People Sr",
+  "location": "Buenos Aires",
+  "status": "Inactive"
+}

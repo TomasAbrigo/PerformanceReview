@@ -1,0 +1,17 @@
+{
+  "id": "315",
+  "firstName": "Adrián",
+  "lastName": "Bravo",
+  "workEmail": "adrian.bravo@meridian-andina.example",
+  "employeeNumber": "10770",
+  "supervisorEId": "63",
+  "supervisorId": "10109",
+  "supervisor": "Rivas, Alejandro",
+  "hireDate": "2022-03-23",
+  "terminationDate": null,
+  "department": "Operaciones",
+  "division": "Operaciones",
+  "jobTitle": "Analista de Operaciones Ssr",
+  "location": "Buenos Aires",
+  "status": "Active"
+}

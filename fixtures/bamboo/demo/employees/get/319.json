@@ -1,0 +1,17 @@
+{
+  "id": "319",
+  "firstName": "Noelia",
+  "lastName": "Delgado",
+  "workEmail": "noelia.delgado@meridian-andina.example",
+  "employeeNumber": "10786",
+  "supervisorEId": "59",
+  "supervisorId": "10104",
+  "supervisor": "Soria, Gonzalo",
+  "hireDate": "2022-04-03",
+  "terminationDate": null,
+  "department": "Finanzas",
+  "division": "Corporativo",
+  "jobTitle": "Controller Ssr",
+  "location": "Remoto",
+  "status": "Active"
+}

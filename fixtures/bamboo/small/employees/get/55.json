@@ -1,0 +1,17 @@
+{
+  "id": "55",
+  "firstName": "Patricia",
+  "lastName": "Romero",
+  "workEmail": "patricia.romero@meridian-andina.example",
+  "employeeNumber": "10109",
+  "supervisorEId": "41",
+  "supervisorId": "10080",
+  "supervisor": "González, Milagros",
+  "hireDate": "2022-05-17",
+  "terminationDate": "2024-02-26",
+  "department": "Datos",
+  "division": "Tecnología",
+  "jobTitle": "Analytics Engineer Jr",
+  "location": "Buenos Aires",
+  "status": "Inactive"
+}

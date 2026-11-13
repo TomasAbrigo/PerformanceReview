@@ -1,0 +1,233 @@
+{
+  "canAlign": true,
+  "canCreateGoals": false,
+  "filters": [
+    {
+      "id": "status-all",
+      "name": "All"
+    },
+    {
+      "id": "inProgress",
+      "name": "In progress"
+    },
+    {
+      "id": "completed",
+      "name": "Completed"
+    },
+    {
+      "id": "closed",
+      "name": "Closed"
+    }
+  ],
+  "selectedFilter": "status-all",
+  "goals": [
+    {
+      "id": "7058",
+      "title": "Reducir los incidentes recurrentes a la mitad",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 85,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2023-12-28",
+      "completionDate": null,
+      "lastChangedDateTime": "2024-08-25T10:01:45Z",
+      "status": "in_progress",
+      "milestones": null,
+      "actions": {
+        "canEdit": false,
+        "canUpdateProgress": false,
+        "canClose": false,
+        "canReopen": false,
+        "canDelete": false,
+        "canComment": false
+      }
+    },
+    {
+      "id": "7061",
+      "title": "Mejorar el NPS interno del equipo",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 40,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2023-09-07",
+      "completionDate": null,
+      "lastChangedDateTime": "2023-12-26T10:26:24Z",
+      "status": "in_progress",
+      "milestones": null,
+      "actions": {
+        "canEdit": false,
+        "canUpdateProgress": false,
+        "canClose": false,
+        "canReopen": false,
+        "canDelete": false,
+        "canComment": false
+      }
+    },
+    {
+      "id": "7062",
+      "title": "Implementar el calendario editorial",
+      "description": "Sirve de base para el próximo ciclo de evaluación.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2024-04-11",
+      "completionDate": "2024-03-03",
+      "lastChangedDateTime": "2024-03-03T10:12:55Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": false,
+        "canUpdateProgress": false,
+        "canClose": false,
+        "canReopen": false,
+        "canDelete": false,
+        "canComment": false
+      }
+    },
+    {
+      "id": "7065",
+      "title": "Aumentar la cobertura de pruebas al 80%",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2024-08-12",
+      "completionDate": "2024-02-12",
+      "lastChangedDateTime": "2024-02-12T12:21:11Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": false,
+        "canUpdateProgress": false,
+        "canClose": false,
+        "canReopen": false,
+        "canDelete": false,
+        "canComment": false
+      }
+    },
+    {
+      "id": "7066",
+      "title": "Entregar el proyecto Norte sin desvíos",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "percentComplete": 75,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2024-10-06",
+      "completionDate": null,
+      "lastChangedDateTime": "2024-09-13T18:31:11Z",
+      "status": "closed",
+      "milestones": [
+        {
+          "id": 1634,
+          "employeeGoalId": 7066,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2024-09-03T12:39:44Z",
+          "lastUpdateDateTime": "2024-09-03T12:39:44Z",
+          "lastUpdateUserId": 473
+        },
+        {
+          "id": 1635,
+          "employeeGoalId": 7066,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2024-09-05T14:05:57Z",
+          "lastUpdateDateTime": "2024-09-05T14:05:57Z",
+          "lastUpdateUserId": 473
+        },
+        {
+          "id": 1636,
+          "employeeGoalId": 7066,
+          "title": "Hito 3",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2024-09-10T17:51:25Z",
+          "lastUpdateDateTime": "2024-09-10T17:51:25Z",
+          "lastUpdateUserId": 473
+        },
+        {
+          "id": 1637,
+          "employeeGoalId": 7066,
+          "title": "Hito 4",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2024-05-24T13:10:55Z",
+          "lastUpdateUserId": 473
+        }
+      ],
+      "actions": {
+        "canEdit": false,
+        "canUpdateProgress": false,
+        "canClose": false,
+        "canReopen": false,
+        "canDelete": false,
+        "canComment": false
+      }
+    },
+    {
+      "id": "7069",
+      "title": "Aumentar la cobertura de pruebas al 80%",
+      "description": "Sirve de base para el próximo ciclo de evaluación.",
+      "percentComplete": 0,
+      "alignsWithOptionId": 9001,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2025-06-27",
+      "completionDate": null,
+      "lastChangedDateTime": "2025-05-07T15:57:43Z",
+      "status": "closed",
+      "milestones": [
+        {
+          "id": 1638,
+          "employeeGoalId": 7069,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2025-04-28T11:52:25Z",
+          "lastUpdateUserId": 473
+        },
+        {
+          "id": 1639,
+          "employeeGoalId": 7069,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2025-04-28T10:08:28Z",
+          "lastUpdateUserId": 473
+        }
+      ],
+      "actions": {
+        "canEdit": false,
+        "canUpdateProgress": false,
+        "canClose": false,
+        "canReopen": false,
+        "canDelete": false,
+        "canComment": false
+      }
+    }
+  ],
+  "persons": [
+    {
+      "employeeId": 473,
+      "firstName": "Gabriela",
+      "lastName": "Figueroa",
+      "preferredName": "Gabi"
+    }
+  ],
+  "comments": [
+    {
+      "goalId": "7069",
+      "commentCount": 3
+    }
+  ]
+}

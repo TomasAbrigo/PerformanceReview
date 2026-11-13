@@ -1,0 +1,17 @@
+{
+  "id": "359",
+  "firstName": "Sergio",
+  "lastName": "Fernández",
+  "workEmail": "sergio.fernandez@meridian-andina.example",
+  "employeeNumber": "10884",
+  "supervisorEId": "23",
+  "supervisorId": "10028",
+  "supervisor": "Medina, María",
+  "hireDate": "2022-08-02",
+  "terminationDate": "2024-07-08",
+  "department": "Customer Success",
+  "division": "Comercial",
+  "jobTitle": "Líder de Customer Success",
+  "location": "Córdoba",
+  "status": "Inactive"
+}

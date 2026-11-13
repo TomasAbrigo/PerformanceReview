@@ -1,0 +1,123 @@
+{
+  "canAlign": true,
+  "canCreateGoals": true,
+  "filters": [
+    {
+      "id": "status-all",
+      "name": "All"
+    },
+    {
+      "id": "inProgress",
+      "name": "In progress"
+    },
+    {
+      "id": "completed",
+      "name": "Completed"
+    },
+    {
+      "id": "closed",
+      "name": "Closed"
+    }
+  ],
+  "selectedFilter": "status-all",
+  "goals": [
+    {
+      "id": "7621",
+      "title": "Documentar los procesos críticos",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2025-04-11",
+      "completionDate": "2025-03-18",
+      "lastChangedDateTime": "2025-03-18T13:53:24Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "7622",
+      "title": "Reducir el tiempo de primera respuesta un 20%",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [
+        167
+      ],
+      "dueDate": "2026-06-02",
+      "completionDate": "2026-05-23",
+      "lastChangedDateTime": "2026-05-23T09:16:27Z",
+      "status": "completed",
+      "milestones": [
+        {
+          "id": 1905,
+          "employeeGoalId": 7622,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2026-03-24T08:02:20Z",
+          "lastUpdateDateTime": "2026-03-24T08:02:20Z",
+          "lastUpdateUserId": 641
+        },
+        {
+          "id": 1906,
+          "employeeGoalId": 7622,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2026-04-24T19:08:09Z",
+          "lastUpdateDateTime": "2026-04-24T19:08:09Z",
+          "lastUpdateUserId": 641
+        },
+        {
+          "id": 1907,
+          "employeeGoalId": 7622,
+          "title": "Hito 3",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2026-04-02T14:18:47Z",
+          "lastUpdateDateTime": "2026-04-02T14:18:47Z",
+          "lastUpdateUserId": 641
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    }
+  ],
+  "persons": [
+    {
+      "employeeId": 641,
+      "firstName": "Julieta",
+      "lastName": "Heredia",
+      "preferredName": null
+    },
+    {
+      "employeeId": 167,
+      "firstName": "Marcela",
+      "lastName": "Escobar",
+      "preferredName": null
+    }
+  ],
+  "comments": [
+    {
+      "goalId": "7621",
+      "commentCount": 4
+    }
+  ]
+}

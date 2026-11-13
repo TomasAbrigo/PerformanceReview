@@ -1,0 +1,17 @@
+{
+  "id": "269",
+  "firstName": "Cristian",
+  "lastName": "Carrizo",
+  "workEmail": "cristian.carrizo@meridian-andina.example",
+  "employeeNumber": "10643",
+  "supervisorEId": "65",
+  "supervisorId": "10117",
+  "supervisor": "Díaz, Valentina",
+  "hireDate": "2021-12-14",
+  "terminationDate": null,
+  "department": "Marketing",
+  "division": "Comercial",
+  "jobTitle": "Content Specialist Sr",
+  "location": "Montevideo",
+  "status": "Active"
+}

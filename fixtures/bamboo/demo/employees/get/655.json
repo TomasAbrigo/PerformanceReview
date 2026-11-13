@@ -1,0 +1,17 @@
+{
+  "id": "655",
+  "firstName": "Soledad",
+  "lastName": "Quiroga",
+  "workEmail": "soledad.quiroga@meridian-andina.example",
+  "employeeNumber": "11571",
+  "supervisorEId": "67",
+  "supervisorId": "10118",
+  "supervisor": "Roldán, Noelia",
+  "hireDate": "2024-12-04",
+  "terminationDate": null,
+  "department": "Datos",
+  "division": "Tecnología",
+  "jobTitle": "Data Analyst Ssr",
+  "location": "Buenos Aires",
+  "status": "Active"
+}

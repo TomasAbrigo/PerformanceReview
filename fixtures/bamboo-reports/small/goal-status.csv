@@ -1,0 +1,120 @@
+Employee Name,Manager,Department,Goal,Due Date,Progress,Status,Last Comment
+Adrián Bustos,Silvana Molina,Ingeniería,Migrar los reportes al nuevo tablero,2023-08-25,33%,Past Due,Hay un bloqueo con otra área; lo escalo.
+Adrián Bustos,Silvana Molina,Ingeniería,Lanzar el nuevo flujo de onboarding,2025-07-03,70%,Closed,Quedamos en revisar el alcance la semana próxima.
+Adrián Bustos,Silvana Molina,Ingeniería,Renovar las cuentas clave del trimestre,2026-10-26,67%,Past Due,
+Adrián Cabrera,Federico Rivas,Finanzas,Documentar los procesos críticos,2025-10-31,100%,Completed,
+Adrián Cabrera,Federico Rivas,Finanzas,Renovar las cuentas clave del trimestre,2026-11-09,40%,In Progress,
+Adrián Cabrera,Federico Rivas,Finanzas,Mentorear a dos personas nuevas,2027-01-31,35%,In Progress,"Cerrado con el equipo, gracias por el apoyo."
+Bruno Campos,Carolina Núñez,Ingeniería,Reducir los incidentes recurrentes a la mitad,2026-11-27,75%,In Progress,
+Bruno Campos,Carolina Núñez,Ingeniería,Completar la certificación del área,2027-01-21,80%,In Progress,"Cerrado con el equipo, gracias por el apoyo."
+Candela Campos,Rocío Ibáñez,People,Completar la certificación del área,2024-08-15,20%,Past Due,
+Candela Campos,Rocío Ibáñez,People,Renovar las cuentas clave del trimestre,2025-04-01,100%,Completed,Buen avance este mes.
+Candela Campos,Rocío Ibáñez,People,Documentar los procesos críticos,2025-11-17,85%,Past Due,
+Candela Campos,Rocío Ibáñez,People,Automatizar la conciliación mensual,2026-04-29,100%,Completed,Quedamos en revisar el alcance la semana próxima.
+Candela Campos,Rocío Ibáñez,People,Cerrar el plan de capacitación anual,2026-05-30,100%,Completed,Quedamos en revisar el alcance la semana próxima.
+Carolina Núñez,Adrián Bustos,Ingeniería,,,,No Goals Set,
+Cecilia Pereyra,Federico Rivas,Finanzas,Aumentar la cobertura de pruebas al 80%,2023-09-03,20%,Past Due,
+Cecilia Pereyra,Federico Rivas,Finanzas,Lanzar el nuevo flujo de onboarding,2024-04-12,25%,Closed,
+Cecilia Pereyra,Federico Rivas,Finanzas,Cerrar el plan de capacitación anual,2024-05-21,100%,Completed,"Cerrado con el equipo, gracias por el apoyo."
+Cecilia Pereyra,Federico Rivas,Finanzas,Reducir los incidentes recurrentes a la mitad,2024-05-25,5%,Past Due,Hay un bloqueo con otra área; lo escalo.
+Cecilia Pereyra,Federico Rivas,Finanzas,Renovar las cuentas clave del trimestre,2025-08-31,45%,Past Due,"Cerrado con el equipo, gracias por el apoyo."
+Cecilia Pereyra,Federico Rivas,Finanzas,Mejorar el NPS interno del equipo,2025-12-14,100%,Completed,
+Cecilia Pereyra,Federico Rivas,Finanzas,Mentorear a dos personas nuevas,2027-03-25,100%,Completed,
+Cristian Esquivel,Hugo Ríos,Datos,Aumentar la cobertura de pruebas al 80%,2026-05-17,100%,Completed,
+Cristian Esquivel,Hugo Ríos,Datos,Implementar el calendario editorial,2026-09-14,5%,Past Due,Buen avance este mes.
+Facundo Sosa,Rocío Ibáñez,People,Reducir los incidentes recurrentes a la mitad,2024-07-11,100%,Completed,
+Federico Rivas,Mateo Ibáñez,Finanzas,Mejorar el NPS interno del equipo,2023-08-11,100%,Completed,
+Federico Rivas,Mateo Ibáñez,Finanzas,Entregar el proyecto Norte sin desvíos,2024-07-11,100%,Completed,
+Federico Rivas,Mateo Ibáñez,Finanzas,Reducir los incidentes recurrentes a la mitad,2025-03-12,100%,Completed,Lo muevo de fecha por cambio de prioridades.
+Federico Rivas,Mateo Ibáñez,Finanzas,Cerrar el plan de capacitación anual,2025-10-07,55%,Past Due,
+Federico Rivas,Mateo Ibáñez,Finanzas,Mejorar el NPS interno del equipo,2025-12-09,100%,Completed,
+Federico Rivas,Mateo Ibáñez,Finanzas,Documentar los procesos críticos,2026-07-01,40%,Past Due,
+Hugo Ríos,Silvana Quiroga,Datos,Automatizar la conciliación mensual,2023-10-01,75%,Past Due,
+Hugo Ríos,Silvana Quiroga,Datos,Implementar el calendario editorial,2024-02-20,100%,Completed,Lo muevo de fecha por cambio de prioridades.
+Hugo Ríos,Silvana Quiroga,Datos,Mejorar el NPS interno del equipo,2024-06-18,70%,Past Due,"Cerrado con el equipo, gracias por el apoyo."
+Hugo Ríos,Silvana Quiroga,Datos,Lanzar el nuevo flujo de onboarding,2024-08-20,100%,Completed,
+Hugo Ríos,Silvana Quiroga,Datos,Completar la certificación del área,2025-05-30,10%,Past Due,
+Hugo Ríos,Silvana Quiroga,Datos,Mejorar el NPS interno del equipo,2025-07-15,55%,Closed,
+Jimena Coronel,Marcelo Ibáñez,Ventas,Renovar las cuentas clave del trimestre,2023-03-05,100%,Completed,"Cerrado con el equipo, gracias por el apoyo."
+Jimena Coronel,Marcelo Ibáñez,Ventas,Mejorar el NPS interno del equipo,2023-04-20,45%,Closed,"Cerrado con el equipo, gracias por el apoyo."
+Jimena Coronel,Marcelo Ibáñez,Ventas,Renovar las cuentas clave del trimestre,2024-07-07,100%,Completed,"Cerrado con el equipo, gracias por el apoyo."
+Jimena Coronel,Marcelo Ibáñez,Ventas,Cerrar el plan de capacitación anual,2025-10-12,100%,Completed,Lo muevo de fecha por cambio de prioridades.
+Jimena Coronel,Marcelo Ibáñez,Ventas,Mentorear a dos personas nuevas,2026-12-21,100%,Completed,
+Marcela Delgado,,Dirección General,Implementar el calendario editorial,2023-11-26,15%,Past Due,
+Marcela Delgado,,Dirección General,Reducir los incidentes recurrentes a la mitad,2024-03-11,100%,Completed,Hay un bloqueo con otra área; lo escalo.
+Marcela Delgado,,Dirección General,Aumentar la cobertura de pruebas al 80%,2025-08-09,40%,Closed,
+Marcela Delgado,,Dirección General,Reducir el tiempo de primera respuesta un 20%,2025-08-11,100%,Completed,
+Marcela Delgado,,Dirección General,Reducir los incidentes recurrentes a la mitad,2026-08-10,100%,Completed,Quedamos en revisar el alcance la semana próxima.
+Marcela Delgado,,Dirección General,Aumentar la cobertura de pruebas al 80%,2027-03-26,5%,In Progress,
+Marcelo Ibáñez,Santiago Garrido,Ventas,Mejorar el NPS interno del equipo,2023-03-01,85%,Past Due,
+Marcelo Ibáñez,Santiago Garrido,Ventas,Entregar el proyecto Norte sin desvíos,2023-04-20,0%,Past Due,"Cerrado con el equipo, gracias por el apoyo."
+Marcelo Ibáñez,Santiago Garrido,Ventas,Renovar las cuentas clave del trimestre,2026-02-17,100%,Completed,
+Marcelo Ibáñez,Santiago Garrido,Ventas,Aumentar la cobertura de pruebas al 80%,2027-02-05,20%,In Progress,
+Marcelo Lagos,Silvana Arias,People,Cerrar el plan de capacitación anual,2025-03-24,100%,Completed,Quedamos en revisar el alcance la semana próxima.
+Marcelo Lagos,Silvana Arias,People,Reducir el tiempo de primera respuesta un 20%,2025-07-22,0%,Closed,Buen avance este mes.
+Marcelo Lagos,Silvana Arias,People,Cerrar el plan de capacitación anual,2025-09-16,100%,Completed,
+Marcelo Lagos,Silvana Arias,People,Implementar el calendario editorial,2026-07-11,25%,Past Due,Hay un bloqueo con otra área; lo escalo.
+Marcelo Lagos,Silvana Arias,People,Mentorear a dos personas nuevas,2026-12-23,65%,In Progress,
+Martín Fuentes,Rocío Ibáñez,People,Implementar el calendario editorial,2024-10-10,100%,Completed,
+Martín Fuentes,Rocío Ibáñez,People,Aumentar la cobertura de pruebas al 80%,2024-12-25,100%,Completed,
+Martín Fuentes,Rocío Ibáñez,People,Documentar los procesos críticos,2026-02-12,33%,Closed,Buen avance este mes.
+Martín Fuentes,Rocío Ibáñez,People,Implementar el calendario editorial,2026-03-17,35%,Past Due,
+Martín Fuentes,Rocío Ibáñez,People,Mejorar el NPS interno del equipo,2026-03-31,80%,Past Due,
+Mateo Ibáñez,Silvana Arias,Finanzas,,,,No Goals Set,
+Natalia Lezcano,Rocío Ibáñez,People,Documentar los procesos críticos,2025-11-19,100%,Completed,
+Natalia Lezcano,Rocío Ibáñez,People,Mentorear a dos personas nuevas,2026-11-20,80%,In Progress,
+Pablo Monzón,Jimena Coronel,Ventas,Implementar el calendario editorial,2023-07-31,0%,Past Due,
+Pablo Monzón,Jimena Coronel,Ventas,Entregar el proyecto Norte sin desvíos,2024-10-20,35%,Closed,
+Pablo Monzón,Jimena Coronel,Ventas,Cerrar el plan de capacitación anual,2024-11-11,100%,Completed,
+Pablo Monzón,Jimena Coronel,Ventas,Implementar el calendario editorial,2025-02-16,50%,Past Due,
+Pablo Monzón,Jimena Coronel,Ventas,Aumentar la cobertura de pruebas al 80%,2025-06-24,100%,Completed,Hay un bloqueo con otra área; lo escalo.
+Pablo Monzón,Jimena Coronel,Ventas,Reducir el tiempo de primera respuesta un 20%,2026-05-10,0%,Past Due,
+Pablo Monzón,Jimena Coronel,Ventas,Lanzar el nuevo flujo de onboarding,2026-07-05,100%,Completed,"Cerrado con el equipo, gracias por el apoyo."
+Patricia Romero,Carolina Núñez,Ingeniería,Mentorear a dos personas nuevas,2026-02-03,100%,Completed,
+Patricia Romero,Carolina Núñez,Ingeniería,Aumentar la cobertura de pruebas al 80%,2027-02-09,75%,In Progress,
+Ramiro Valdez,Rocío Ibáñez,People,Completar la certificación del área,2025-05-02,100%,Completed,
+Ramiro Valdez,Rocío Ibáñez,People,Lanzar el nuevo flujo de onboarding,2025-12-27,100%,Completed,
+Ramiro Valdez,Rocío Ibáñez,People,Mejorar el NPS interno del equipo,2026-05-29,30%,Past Due,Hay un bloqueo con otra área; lo escalo.
+Rocío Fuentes,Hugo Ríos,Datos,Entregar el proyecto Norte sin desvíos,2025-07-05,45%,Closed,
+Rocío Fuentes,Hugo Ríos,Datos,Entregar el proyecto Norte sin desvíos,2025-09-02,0%,Past Due,Lo muevo de fecha por cambio de prioridades.
+Rocío Fuentes,Hugo Ríos,Datos,Automatizar la conciliación mensual,2026-08-09,15%,Past Due,
+Rocío Fuentes,Hugo Ríos,Datos,Documentar los procesos críticos,2026-11-15,70%,In Progress,
+Rocío Ibáñez,Marcelo Lagos,People,Documentar los procesos críticos,2023-02-02,100%,Completed,
+Rocío Ibáñez,Marcelo Lagos,People,Mentorear a dos personas nuevas,2023-12-17,80%,Past Due,
+Rocío Ibáñez,Marcelo Lagos,People,Mejorar el NPS interno del equipo,2025-05-11,85%,Past Due,Buen avance este mes.
+Rocío Ibáñez,Marcelo Lagos,People,Mejorar el NPS interno del equipo,2025-05-31,100%,Completed,Quedamos en revisar el alcance la semana próxima.
+Rocío Ibáñez,Marcelo Lagos,People,Reducir el tiempo de primera respuesta un 20%,2026-11-24,0%,In Progress,Hay un bloqueo con otra área; lo escalo.
+Santiago Fernández,Hugo Ríos,Datos,Lanzar el nuevo flujo de onboarding,2023-05-15,100%,Completed,
+Santiago Fernández,Hugo Ríos,Datos,Lanzar el nuevo flujo de onboarding,2023-09-18,0%,Past Due,Buen avance este mes.
+Santiago Fernández,Carolina Núñez,Ingeniería,Cerrar el plan de capacitación anual,2024-03-02,100%,Completed,Hay un bloqueo con otra área; lo escalo.
+Santiago Fernández,Carolina Núñez,Ingeniería,Completar la certificación del área,2024-11-10,100%,Completed,Buen avance este mes.
+Santiago Fernández,Hugo Ríos,Datos,Reducir el tiempo de primera respuesta un 20%,2024-12-08,100%,Completed,
+Santiago Fernández,Carolina Núñez,Ingeniería,Lanzar el nuevo flujo de onboarding,2025-10-13,75%,Past Due,
+Santiago Fernández,Hugo Ríos,Datos,Automatizar la conciliación mensual,2025-12-16,100%,Completed,"Cerrado con el equipo, gracias por el apoyo."
+Santiago Fernández,Hugo Ríos,Datos,Cerrar el plan de capacitación anual,2027-01-20,33%,In Progress,
+Santiago Fernández,Hugo Ríos,Datos,Reducir el tiempo de primera respuesta un 20%,2027-03-01,25%,In Progress,Lo muevo de fecha por cambio de prioridades.
+Santiago Garrido,Marcela Delgado,Dirección de Comercial,Reducir los incidentes recurrentes a la mitad,2023-06-08,10%,Closed,
+Santiago Garrido,Marcela Delgado,Dirección de Comercial,Migrar los reportes al nuevo tablero,2023-11-11,30%,Past Due,"Cerrado con el equipo, gracias por el apoyo."
+Santiago Garrido,Marcela Delgado,Dirección de Comercial,Automatizar la conciliación mensual,2025-04-24,100%,Completed,Buen avance este mes.
+Santiago Garrido,Marcela Delgado,Dirección de Comercial,Reducir los incidentes recurrentes a la mitad,2025-12-21,100%,Completed,
+Santiago Garrido,Marcela Delgado,Dirección de Comercial,Implementar el calendario editorial,2026-03-08,100%,Completed,"Cerrado con el equipo, gracias por el apoyo."
+Silvana Arias,Marcela Delgado,Dirección de Corporativo,Aumentar la cobertura de pruebas al 80%,2023-05-12,100%,Completed,
+Silvana Arias,Marcela Delgado,Dirección de Corporativo,Renovar las cuentas clave del trimestre,2023-05-17,100%,Completed,
+Silvana Arias,Marcela Delgado,Dirección de Corporativo,Migrar los reportes al nuevo tablero,2025-08-05,60%,Closed,Buen avance este mes.
+Silvana Arias,Marcela Delgado,Dirección de Corporativo,Mentorear a dos personas nuevas,2025-08-08,100%,Completed,Quedamos en revisar el alcance la semana próxima.
+Silvana Arias,Marcela Delgado,Dirección de Corporativo,Automatizar la conciliación mensual,2025-11-04,70%,Past Due,
+Silvana Arias,Marcela Delgado,Dirección de Corporativo,Aumentar la cobertura de pruebas al 80%,2026-11-13,25%,In Progress,
+Silvana Molina,Marcela Delgado,Dirección de Tecnología,Automatizar la conciliación mensual,2023-07-17,75%,Past Due,Buen avance este mes.
+Silvana Molina,Marcela Delgado,Dirección de Tecnología,Documentar los procesos críticos,2023-09-18,70%,Closed,
+Silvana Quiroga,Silvana Molina,Datos,Entregar el proyecto Norte sin desvíos,2024-07-26,100%,Completed,Lo muevo de fecha por cambio de prioridades.
+Silvana Quiroga,Silvana Molina,Datos,Lanzar el nuevo flujo de onboarding,2025-03-16,80%,Past Due,Buen avance este mes.
+Silvana Quiroga,Silvana Molina,Datos,Entregar el proyecto Norte sin desvíos,2026-08-23,100%,Completed,
+Silvana Quiroga,Silvana Molina,Datos,Cerrar el plan de capacitación anual,2027-03-05,33%,In Progress,
+Sofía Valdez,Carolina Núñez,Ingeniería,Reducir los incidentes recurrentes a la mitad,2026-10-06,100%,Completed,
+Sofía Valdez,Carolina Núñez,Ingeniería,Reducir los incidentes recurrentes a la mitad,2027-01-22,90%,In Progress,
+Verónica Márquez,Federico Rivas,Finanzas,Reducir el tiempo de primera respuesta un 20%,2023-06-02,100%,Completed,
+Verónica Márquez,Federico Rivas,Finanzas,Completar la certificación del área,2023-12-10,50%,Past Due,
+Verónica Márquez,Federico Rivas,Finanzas,Aumentar la cobertura de pruebas al 80%,2024-09-26,100%,Completed,
+Verónica Márquez,Federico Rivas,Finanzas,Migrar los reportes al nuevo tablero,2024-12-02,100%,Completed,
+Verónica Márquez,Federico Rivas,Finanzas,Automatizar la conciliación mensual,2025-07-09,100%,Completed,Hay un bloqueo con otra área; lo escalo.
+Verónica Márquez,Federico Rivas,Finanzas,Reducir el tiempo de primera respuesta un 20%,2026-02-15,100%,Completed,

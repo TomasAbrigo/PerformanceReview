@@ -1,0 +1,110 @@
+{
+  "canAlign": true,
+  "canCreateGoals": true,
+  "filters": [
+    {
+      "id": "status-all",
+      "name": "All"
+    },
+    {
+      "id": "inProgress",
+      "name": "In progress"
+    },
+    {
+      "id": "completed",
+      "name": "Completed"
+    },
+    {
+      "id": "closed",
+      "name": "Closed"
+    }
+  ],
+  "selectedFilter": "status-all",
+  "goals": [
+    {
+      "id": "7879",
+      "title": "Renovar las cuentas clave del trimestre",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2025-10-03",
+      "completionDate": "2025-08-12",
+      "lastChangedDateTime": "2025-08-12T13:47:18Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "7882",
+      "title": "Implementar el calendario editorial",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2026-09-21",
+      "completionDate": "2026-09-30",
+      "lastChangedDateTime": "2026-09-30T08:46:14Z",
+      "status": "completed",
+      "milestones": [
+        {
+          "id": 2026,
+          "employeeGoalId": 7882,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2026-05-25T08:05:48Z",
+          "lastUpdateDateTime": "2026-05-25T08:05:48Z",
+          "lastUpdateUserId": 771
+        },
+        {
+          "id": 2027,
+          "employeeGoalId": 7882,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2026-08-12T19:45:54Z",
+          "lastUpdateDateTime": "2026-08-12T19:45:54Z",
+          "lastUpdateUserId": 771
+        },
+        {
+          "id": 2028,
+          "employeeGoalId": 7882,
+          "title": "Hito 3",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2026-05-10T10:29:16Z",
+          "lastUpdateDateTime": "2026-05-10T10:29:16Z",
+          "lastUpdateUserId": 771
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    }
+  ],
+  "persons": [
+    {
+      "employeeId": 771,
+      "firstName": "José",
+      "lastName": "Ledesma",
+      "preferredName": null
+    }
+  ],
+  "comments": []
+}

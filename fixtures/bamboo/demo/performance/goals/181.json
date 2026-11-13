@@ -1,0 +1,239 @@
+{
+  "canAlign": true,
+  "canCreateGoals": true,
+  "filters": [
+    {
+      "id": "status-all",
+      "name": "All"
+    },
+    {
+      "id": "inProgress",
+      "name": "In progress"
+    },
+    {
+      "id": "completed",
+      "name": "Completed"
+    },
+    {
+      "id": "closed",
+      "name": "Closed"
+    }
+  ],
+  "selectedFilter": "status-all",
+  "goals": [
+    {
+      "id": "5765",
+      "title": "Reducir los incidentes recurrentes a la mitad",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2023-12-27",
+      "completionDate": "2023-10-14",
+      "lastChangedDateTime": "2023-10-14T13:38:40Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "5768",
+      "title": "Renovar las cuentas clave del trimestre",
+      "description": "Sirve de base para el próximo ciclo de evaluación.",
+      "percentComplete": 45,
+      "alignsWithOptionId": 9003,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2024-09-30",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-05-25T13:15:24Z",
+      "status": "in_progress",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "5769",
+      "title": "Renovar las cuentas clave del trimestre",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 35,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [
+        49
+      ],
+      "dueDate": "2025-05-24",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-01-22T17:18:33Z",
+      "status": "in_progress",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "5772",
+      "title": "Renovar las cuentas clave del trimestre",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 75,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2025-02-11",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-06-07T15:24:57Z",
+      "status": "in_progress",
+      "milestones": [
+        {
+          "id": 1030,
+          "employeeGoalId": 5772,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2026-05-13T10:48:04Z",
+          "lastUpdateDateTime": "2026-05-13T10:48:04Z",
+          "lastUpdateUserId": 181
+        },
+        {
+          "id": 1031,
+          "employeeGoalId": 5772,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-01-08T18:55:37Z",
+          "lastUpdateDateTime": "2025-01-08T18:55:37Z",
+          "lastUpdateUserId": 181
+        },
+        {
+          "id": 1032,
+          "employeeGoalId": 5772,
+          "title": "Hito 3",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-04-19T08:33:06Z",
+          "lastUpdateDateTime": "2025-04-19T08:33:06Z",
+          "lastUpdateUserId": 181
+        },
+        {
+          "id": 1033,
+          "employeeGoalId": 5772,
+          "title": "Hito 4",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2024-11-14T16:24:50Z",
+          "lastUpdateUserId": 181
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "5774",
+      "title": "Mentorear a dos personas nuevas",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 33,
+      "alignsWithOptionId": 9003,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2026-11-28",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-10-30T17:12:44Z",
+      "status": "in_progress",
+      "milestones": [
+        {
+          "id": 1034,
+          "employeeGoalId": 5774,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2026-06-02T17:03:14Z",
+          "lastUpdateDateTime": "2026-06-02T17:03:14Z",
+          "lastUpdateUserId": 181
+        },
+        {
+          "id": 1035,
+          "employeeGoalId": 5774,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2026-04-29T13:31:25Z",
+          "lastUpdateUserId": 181
+        },
+        {
+          "id": 1036,
+          "employeeGoalId": 5774,
+          "title": "Hito 3",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2026-04-29T15:38:51Z",
+          "lastUpdateUserId": 181
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    }
+  ],
+  "persons": [
+    {
+      "employeeId": 181,
+      "firstName": "Laura",
+      "lastName": "Olmos",
+      "preferredName": null
+    },
+    {
+      "employeeId": 49,
+      "firstName": "Milagros",
+      "lastName": "Monzón",
+      "preferredName": null
+    }
+  ],
+  "comments": [
+    {
+      "goalId": "5765",
+      "commentCount": 4
+    },
+    {
+      "goalId": "5768",
+      "commentCount": 3
+    },
+    {
+      "goalId": "5769",
+      "commentCount": 1
+    }
+  ]
+}

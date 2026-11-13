@@ -1,0 +1,17 @@
+{
+  "id": "459",
+  "firstName": "Nicolás",
+  "lastName": "Esquivel",
+  "workEmail": "nicolas.esquivel@meridian-andina.example",
+  "employeeNumber": "11133",
+  "supervisorEId": "135",
+  "supervisorId": "10312",
+  "supervisor": "Trejo, Marcela",
+  "hireDate": "2023-05-29",
+  "terminationDate": "2024-11-09",
+  "department": "Calidad",
+  "division": "Operaciones",
+  "jobTitle": "Analista de Calidad Ssr",
+  "location": "Remoto",
+  "status": "Inactive"
+}

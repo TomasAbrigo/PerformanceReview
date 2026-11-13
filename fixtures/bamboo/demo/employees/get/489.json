@@ -1,0 +1,17 @@
+{
+  "id": "489",
+  "firstName": "José",
+  "lastName": "Roldán",
+  "workEmail": "jose.roldan@meridian-andina.example",
+  "employeeNumber": "11202",
+  "supervisorEId": "125",
+  "supervisorId": "10282",
+  "supervisor": "Navarro, Tomás",
+  "hireDate": "2023-09-05",
+  "terminationDate": null,
+  "department": "Ingeniería",
+  "division": "Tecnología",
+  "jobTitle": "Mobile Developer Ssr",
+  "location": "Remoto",
+  "status": "Active"
+}

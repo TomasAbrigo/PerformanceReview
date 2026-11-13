@@ -1,0 +1,17 @@
+{
+  "id": "803",
+  "firstName": "Sofía",
+  "lastName": "Ibáñez",
+  "workEmail": "sofia.ibanez@meridian-andina.example",
+  "employeeNumber": "11116",
+  "supervisorEId": "237",
+  "supervisorId": "10564",
+  "supervisor": "Benítez, Florencia",
+  "hireDate": "2026-05-15",
+  "terminationDate": null,
+  "department": "Infraestructura",
+  "division": "Tecnología",
+  "jobTitle": "Site Reliability Engineer Jr",
+  "location": "Córdoba",
+  "status": "Active"
+}

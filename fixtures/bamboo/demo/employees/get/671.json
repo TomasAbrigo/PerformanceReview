@@ -1,0 +1,17 @@
+{
+  "id": "671",
+  "firstName": "Rocío",
+  "lastName": "Ibáñez",
+  "workEmail": "rocio.ibanez@meridian-andina.example",
+  "employeeNumber": "11609",
+  "supervisorEId": "265",
+  "supervisorId": "10627",
+  "supervisor": "Olmos, Ivana",
+  "hireDate": "2025-01-18",
+  "terminationDate": null,
+  "department": "Infraestructura",
+  "division": "Tecnología",
+  "jobTitle": "Site Reliability Engineer Sr",
+  "location": "Buenos Aires",
+  "status": "Active"
+}

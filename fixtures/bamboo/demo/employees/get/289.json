@@ -1,0 +1,17 @@
+{
+  "id": "289",
+  "firstName": "Belén",
+  "lastName": "Soria",
+  "workEmail": "belen.soria@meridian-andina.example",
+  "employeeNumber": "10693",
+  "supervisorEId": "159",
+  "supervisorId": "10368",
+  "supervisor": "Ríos, Marcela",
+  "hireDate": "2022-01-26",
+  "terminationDate": null,
+  "department": "Datos",
+  "division": "Tecnología",
+  "jobTitle": "Analytics Engineer Ssr",
+  "location": "Buenos Aires",
+  "status": "Active"
+}

@@ -1,0 +1,17 @@
+{
+  "id": "519",
+  "firstName": "Cristian",
+  "lastName": "Vázquez",
+  "workEmail": "cristian.vazquez@meridian-andina.example",
+  "employeeNumber": "11272",
+  "supervisorEId": "189",
+  "supervisorId": "10436",
+  "supervisor": "Quiroga, Lucía",
+  "hireDate": "2023-11-18",
+  "terminationDate": null,
+  "department": "Customer Success",
+  "division": "Comercial",
+  "jobTitle": "Customer Success Manager Ssr",
+  "location": "Montevideo",
+  "status": "Active"
+}

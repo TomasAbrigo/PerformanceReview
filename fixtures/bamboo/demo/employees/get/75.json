@@ -1,0 +1,17 @@
+{
+  "id": "75",
+  "firstName": "Nicolás",
+  "lastName": "Álvarez",
+  "workEmail": "nicolas.alvarez@meridian-andina.example",
+  "employeeNumber": "10138",
+  "supervisorEId": "61",
+  "supervisorId": "10107",
+  "supervisor": "Peralta, Marcelo",
+  "hireDate": "2019-01-12",
+  "terminationDate": null,
+  "department": "Ventas",
+  "division": "Comercial",
+  "jobTitle": "Business Developer Jr",
+  "location": "Montevideo",
+  "status": "Active"
+}

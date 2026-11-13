@@ -1,0 +1,17 @@
+{
+  "id": "171",
+  "firstName": "Martín",
+  "lastName": "Godoy",
+  "workEmail": "martin.godoy@meridian-andina.example",
+  "employeeNumber": "10398",
+  "supervisorEId": "95",
+  "supervisorId": "10199",
+  "supervisor": "Fernández, José",
+  "hireDate": "2020-12-05",
+  "terminationDate": "2025-06-27",
+  "department": "Operaciones",
+  "division": "Operaciones",
+  "jobTitle": "Coordinador de Procesos Sr",
+  "location": "Buenos Aires",
+  "status": "Inactive"
+}

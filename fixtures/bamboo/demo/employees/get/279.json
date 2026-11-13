@@ -1,0 +1,17 @@
+{
+  "id": "279",
+  "firstName": "Sofía",
+  "lastName": "Coronel",
+  "workEmail": "sofia.coronel@meridian-andina.example",
+  "employeeNumber": "10668",
+  "supervisorEId": "83",
+  "supervisorId": "10163",
+  "supervisor": "Franco, Daniela",
+  "hireDate": "2022-01-11",
+  "terminationDate": null,
+  "department": "Customer Success",
+  "division": "Comercial",
+  "jobTitle": "Onboarding Specialist Ssr",
+  "location": "Montevideo",
+  "status": "Active"
+}

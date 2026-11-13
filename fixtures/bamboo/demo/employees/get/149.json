@@ -1,0 +1,17 @@
+{
+  "id": "149",
+  "firstName": "Daniela",
+  "lastName": "Pérez",
+  "workEmail": "daniela.perez@meridian-andina.example",
+  "employeeNumber": "10342",
+  "supervisorEId": "43",
+  "supervisorId": "10072",
+  "supervisor": "Soria, Eugenia",
+  "hireDate": "2020-07-18",
+  "terminationDate": null,
+  "department": "Legales",
+  "division": "Corporativo",
+  "jobTitle": "Analista de Compliance Sr",
+  "location": "Montevideo",
+  "status": "Active"
+}

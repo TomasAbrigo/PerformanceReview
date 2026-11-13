@@ -1,0 +1,17 @@
+{
+  "id": "303",
+  "firstName": "Tomás",
+  "lastName": "Gómez",
+  "workEmail": "tomas.gomez@meridian-andina.example",
+  "employeeNumber": "10733",
+  "supervisorEId": "185",
+  "supervisorId": "10427",
+  "supervisor": "Martínez, Bruno",
+  "hireDate": "2022-02-21",
+  "terminationDate": null,
+  "department": "Operaciones",
+  "division": "Operaciones",
+  "jobTitle": "Analista de Operaciones Jr",
+  "location": "Buenos Aires",
+  "status": "Active"
+}

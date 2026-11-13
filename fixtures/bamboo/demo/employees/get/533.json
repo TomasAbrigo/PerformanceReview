@@ -1,0 +1,17 @@
+{
+  "id": "533",
+  "firstName": "Nicolás",
+  "lastName": "Soria",
+  "workEmail": "nicolas.soria@meridian-andina.example",
+  "employeeNumber": "11294",
+  "supervisorEId": "67",
+  "supervisorId": "10118",
+  "supervisor": "Roldán, Noelia",
+  "hireDate": "2024-01-12",
+  "terminationDate": null,
+  "department": "Datos",
+  "division": "Tecnología",
+  "jobTitle": "Data Engineer Ssr",
+  "location": "Córdoba",
+  "status": "Active"
+}

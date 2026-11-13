@@ -1,0 +1,17 @@
+{
+  "id": "677",
+  "firstName": "Soledad",
+  "lastName": "Carrizo",
+  "workEmail": "soledad.carrizo@meridian-andina.example",
+  "employeeNumber": "11630",
+  "supervisorEId": "47",
+  "supervisorId": "10080",
+  "supervisor": "Olmos, Candela",
+  "hireDate": "2025-01-24",
+  "terminationDate": null,
+  "department": "Soporte",
+  "division": "Operaciones",
+  "jobTitle": "Agente de Soporte Ssr",
+  "location": "Buenos Aires",
+  "status": "Active"
+}

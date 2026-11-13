@@ -1,0 +1,17 @@
+{
+  "id": "493",
+  "firstName": "Carolina",
+  "lastName": "Urquiza",
+  "workEmail": "carolina.urquiza@meridian-andina.example",
+  "employeeNumber": "11211",
+  "supervisorEId": "49",
+  "supervisorId": "10081",
+  "supervisor": "Monzón, Milagros",
+  "hireDate": "2023-09-14",
+  "terminationDate": null,
+  "department": "Calidad",
+  "division": "Operaciones",
+  "jobTitle": "Analista de Calidad Sr",
+  "location": "Córdoba",
+  "status": "Active"
+}

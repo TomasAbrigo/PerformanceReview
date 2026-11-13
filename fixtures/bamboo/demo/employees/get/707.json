@@ -1,0 +1,17 @@
+{
+  "id": "707",
+  "firstName": "Milagros",
+  "lastName": "Sánchez",
+  "workEmail": "milagros.sanchez@meridian-andina.example",
+  "employeeNumber": "11717",
+  "supervisorEId": "237",
+  "supervisorId": "10564",
+  "supervisor": "Benítez, Florencia",
+  "hireDate": "2025-03-17",
+  "terminationDate": null,
+  "department": "Infraestructura",
+  "division": "Tecnología",
+  "jobTitle": "SysAdmin Ssr",
+  "location": "Buenos Aires",
+  "status": "Active"
+}

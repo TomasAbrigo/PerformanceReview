@@ -1,0 +1,17 @@
+{
+  "id": "477",
+  "firstName": "Eugenia",
+  "lastName": "Ledesma",
+  "workEmail": "eugenia.ledesma@meridian-andina.example",
+  "employeeNumber": "11173",
+  "supervisorEId": "67",
+  "supervisorId": "10118",
+  "supervisor": "Roldán, Noelia",
+  "hireDate": "2023-07-20",
+  "terminationDate": null,
+  "department": "Datos",
+  "division": "Tecnología",
+  "jobTitle": "Data Engineer Ssr",
+  "location": "Buenos Aires",
+  "status": "Active"
+}

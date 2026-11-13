@@ -1,0 +1,17 @@
+{
+  "id": "159",
+  "firstName": "Marcela",
+  "lastName": "Ríos",
+  "workEmail": "marcela.rios@meridian-andina.example",
+  "employeeNumber": "10368",
+  "supervisorEId": "35",
+  "supervisorId": "10053",
+  "supervisor": "Ojeda, Matías",
+  "hireDate": "2020-09-14",
+  "terminationDate": null,
+  "department": "Datos",
+  "division": "Tecnología",
+  "jobTitle": "Líder de Datos",
+  "location": "Córdoba",
+  "status": "Active"
+}

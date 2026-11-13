@@ -1,0 +1,17 @@
+{
+  "id": "287",
+  "firstName": "Fernando",
+  "lastName": "Olmos",
+  "workEmail": "fernando.olmos@meridian-andina.example",
+  "employeeNumber": "10688",
+  "supervisorEId": "43",
+  "supervisorId": "10072",
+  "supervisor": "Soria, Eugenia",
+  "hireDate": "2022-01-22",
+  "terminationDate": "2025-04-07",
+  "department": "Legales",
+  "division": "Corporativo",
+  "jobTitle": "Abogado Corporativo Ssr",
+  "location": "Buenos Aires",
+  "status": "Inactive"
+}

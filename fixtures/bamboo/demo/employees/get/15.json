@@ -1,0 +1,17 @@
+{
+  "id": "15",
+  "firstName": "Ivana",
+  "lastName": "Toledo",
+  "workEmail": "ivana.toledo@meridian-andina.example",
+  "employeeNumber": "10012",
+  "supervisorEId": "11",
+  "supervisorId": "10004",
+  "supervisor": "Lezcano, Damián",
+  "hireDate": "2014-06-16",
+  "terminationDate": null,
+  "department": "Dirección de Comercial",
+  "division": "Comercial",
+  "jobTitle": "VP de Comercial",
+  "location": "Buenos Aires",
+  "status": "Active"
+}
