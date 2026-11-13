@@ -1,26 +1,4 @@
-import { execFileSync } from "node:child_process";
 import { expect, test } from "@playwright/test";
-
-test.describe.configure({ mode: "serial" });
-
-/** Runs a pnpm script; retried because other specs seed the same DB at once. */
-function pnpm(...args: string[]) {
-  for (let attempt = 1; ; attempt++) {
-    try {
-      execFileSync("pnpm", args, { stdio: "inherit" });
-      return;
-    } catch (err) {
-      if (attempt >= 3) throw err;
-    }
-  }
-}
-
-// Seeds from the hand-made Bamboo fixtures: 3 employees (Carla is terminated,
-// so her goals are not read) and the goals of Ana and Bruno. Idempotent.
-test.beforeAll(() => {
-  pnpm("ingest:employees", "--source", "fixture");
-  pnpm("ingest:goals", "--source", "fixture");
-});
 
 test("person detail lists goals by due date with progress and milestones", async ({
   page,
