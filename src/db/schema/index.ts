@@ -5,3 +5,4 @@ export * from "./rating-scales";
 export * from "./templates";
 export * from "./org-history";
 export * from "./review-cycles";
+export * from "./review-requests";

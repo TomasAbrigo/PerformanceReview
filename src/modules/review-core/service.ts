@@ -30,6 +30,7 @@ import {
 } from "@/db/schema";
 import { jobAsOf, type IsoDate } from "@/modules/org-history/queries";
 import { CyclesError } from "./errors";
+import { ensureSelfRequests } from "./requests";
 import { allowedTransitions, type CycleStatus, launchStatus } from "./status";
 import {
   cycleInput,
@@ -341,6 +342,7 @@ export async function launchCycle(
       toStatus: to,
       actorPersonId,
     });
+    await ensureSelfRequests(tx, id);
     return updated;
   });
 }
@@ -372,6 +374,7 @@ export async function transition(
       actorPersonId,
       note: note || null,
     });
+    await ensureSelfRequests(tx, id);
     return updated;
   });
 }
@@ -413,9 +416,11 @@ export async function addParticipant(
       .set({ ...values, addedAt: new Date(), removedAt: null })
       .where(eq(cycleParticipant.id, existing.id))
       .returning();
+    await ensureSelfRequests(db, cycleId, row.id);
     return row;
   }
   const [row] = await db.insert(cycleParticipant).values(values).returning();
+  await ensureSelfRequests(db, cycleId, row.id);
   return row;
 }
 
