@@ -1,0 +1,17 @@
+{
+  "id": "465",
+  "firstName": "Diego",
+  "lastName": "Ríos",
+  "workEmail": "diego.rios@meridian-andina.example",
+  "employeeNumber": "11147",
+  "supervisorEId": "321",
+  "supervisorId": "10792",
+  "supervisor": "Figueroa, Facundo",
+  "hireDate": "2023-06-14",
+  "terminationDate": null,
+  "department": "Finanzas",
+  "division": "Corporativo",
+  "jobTitle": "Controller Sr",
+  "location": "Córdoba",
+  "status": "Active"
+}

@@ -1,0 +1,17 @@
+{
+  "id": "601",
+  "firstName": "Brenda",
+  "lastName": "Valdez",
+  "workEmail": "brenda.valdez@meridian-andina.example",
+  "employeeNumber": "11467",
+  "supervisorEId": "93",
+  "supervisorId": "10213",
+  "supervisor": "Herrera, Rocío",
+  "hireDate": "2024-06-21",
+  "terminationDate": null,
+  "department": "Infraestructura",
+  "division": "Tecnología",
+  "jobTitle": "Site Reliability Engineer Jr",
+  "location": "Rosario",
+  "status": "Active"
+}

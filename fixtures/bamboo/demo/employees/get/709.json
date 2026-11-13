@@ -1,0 +1,17 @@
+{
+  "id": "709",
+  "firstName": "Gonzalo",
+  "lastName": "Bustos",
+  "workEmail": "gonzalo.bustos@meridian-andina.example",
+  "employeeNumber": "11738",
+  "supervisorEId": "51",
+  "supervisorId": "10084",
+  "supervisor": "Toledo, Gonzalo",
+  "hireDate": "2025-03-20",
+  "terminationDate": null,
+  "department": "People",
+  "division": "Corporativo",
+  "jobTitle": "Analista de People Ssr",
+  "location": "Buenos Aires",
+  "status": "Active"
+}

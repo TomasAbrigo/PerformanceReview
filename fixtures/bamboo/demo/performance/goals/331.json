@@ -1,0 +1,232 @@
+{
+  "canAlign": true,
+  "canCreateGoals": true,
+  "filters": [
+    {
+      "id": "status-all",
+      "name": "All"
+    },
+    {
+      "id": "inProgress",
+      "name": "In progress"
+    },
+    {
+      "id": "completed",
+      "name": "Completed"
+    },
+    {
+      "id": "closed",
+      "name": "Closed"
+    }
+  ],
+  "selectedFilter": "status-all",
+  "goals": [
+    {
+      "id": "6604",
+      "title": "Documentar los procesos críticos",
+      "description": "Sirve de base para el próximo ciclo de evaluación.",
+      "percentComplete": 45,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [
+        41
+      ],
+      "dueDate": "2024-08-20",
+      "completionDate": null,
+      "lastChangedDateTime": "2024-09-18T17:19:52Z",
+      "status": "in_progress",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "6607",
+      "title": "Lanzar el nuevo flujo de onboarding",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "percentComplete": 20,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [
+        41
+      ],
+      "dueDate": "2025-09-25",
+      "completionDate": null,
+      "lastChangedDateTime": "2025-05-03T14:58:56Z",
+      "status": "in_progress",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "6608",
+      "title": "Automatizar la conciliación mensual",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 100,
+      "alignsWithOptionId": 9002,
+      "sharedWithEmployeeIds": [
+        41
+      ],
+      "dueDate": "2025-09-20",
+      "completionDate": "2025-08-13",
+      "lastChangedDateTime": "2025-08-13T13:53:23Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "6610",
+      "title": "Entregar el proyecto Norte sin desvíos",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 0,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2025-09-06",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-10-30T08:52:40Z",
+      "status": "closed",
+      "milestones": [
+        {
+          "id": 1407,
+          "employeeGoalId": 6610,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2025-04-04T16:26:44Z",
+          "lastUpdateUserId": 331
+        },
+        {
+          "id": 1408,
+          "employeeGoalId": 6610,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2025-04-04T19:11:11Z",
+          "lastUpdateUserId": 331
+        }
+      ],
+      "actions": {
+        "canEdit": false,
+        "canUpdateProgress": false,
+        "canClose": false,
+        "canReopen": true,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "6613",
+      "title": "Automatizar la conciliación mensual",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 0,
+      "alignsWithOptionId": 9001,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2027-02-03",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-10-16T19:42:18Z",
+      "status": "in_progress",
+      "milestones": [
+        {
+          "id": 1409,
+          "employeeGoalId": 6613,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2026-08-11T17:40:14Z",
+          "lastUpdateUserId": 331
+        },
+        {
+          "id": 1410,
+          "employeeGoalId": 6613,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2026-08-11T10:33:17Z",
+          "lastUpdateUserId": 331
+        },
+        {
+          "id": 1411,
+          "employeeGoalId": 6613,
+          "title": "Hito 3",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2026-08-11T11:28:50Z",
+          "lastUpdateUserId": 331
+        },
+        {
+          "id": 1412,
+          "employeeGoalId": 6613,
+          "title": "Hito 4",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2026-08-11T10:48:13Z",
+          "lastUpdateUserId": 331
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    }
+  ],
+  "persons": [
+    {
+      "employeeId": 331,
+      "firstName": "Lorena",
+      "lastName": "Gómez",
+      "preferredName": null
+    },
+    {
+      "employeeId": 41,
+      "firstName": "Florencia",
+      "lastName": "Morales",
+      "preferredName": "Flor"
+    }
+  ],
+  "comments": [
+    {
+      "goalId": "6604",
+      "commentCount": 3
+    },
+    {
+      "goalId": "6607",
+      "commentCount": 1
+    },
+    {
+      "goalId": "6608",
+      "commentCount": 3
+    }
+  ]
+}

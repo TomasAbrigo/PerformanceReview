@@ -1,0 +1,292 @@
+{
+  "canAlign": true,
+  "canCreateGoals": true,
+  "filters": [
+    {
+      "id": "status-all",
+      "name": "All"
+    },
+    {
+      "id": "inProgress",
+      "name": "In progress"
+    },
+    {
+      "id": "completed",
+      "name": "Completed"
+    },
+    {
+      "id": "closed",
+      "name": "Closed"
+    }
+  ],
+  "selectedFilter": "status-all",
+  "goals": [
+    {
+      "id": "6587",
+      "title": "Mejorar el NPS interno del equipo",
+      "description": "Sirve de base para el próximo ciclo de evaluación.",
+      "percentComplete": 67,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2024-04-07",
+      "completionDate": null,
+      "lastChangedDateTime": "2024-06-20T14:06:48Z",
+      "status": "closed",
+      "milestones": [
+        {
+          "id": 1393,
+          "employeeGoalId": 6587,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2024-03-06T13:59:27Z",
+          "lastUpdateDateTime": "2024-03-06T13:59:27Z",
+          "lastUpdateUserId": 327
+        },
+        {
+          "id": 1394,
+          "employeeGoalId": 6587,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2024-06-02T14:35:52Z",
+          "lastUpdateDateTime": "2024-06-02T14:35:52Z",
+          "lastUpdateUserId": 327
+        },
+        {
+          "id": 1395,
+          "employeeGoalId": 6587,
+          "title": "Hito 3",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2023-12-16T11:51:14Z",
+          "lastUpdateUserId": 327
+        }
+      ],
+      "actions": {
+        "canEdit": false,
+        "canUpdateProgress": false,
+        "canClose": false,
+        "canReopen": true,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "6588",
+      "title": "Mentorear a dos personas nuevas",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "percentComplete": 0,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2025-03-09",
+      "completionDate": null,
+      "lastChangedDateTime": "2025-08-13T14:05:43Z",
+      "status": "in_progress",
+      "milestones": [
+        {
+          "id": 1396,
+          "employeeGoalId": 6588,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2024-09-08T12:17:39Z",
+          "lastUpdateUserId": 327
+        },
+        {
+          "id": 1397,
+          "employeeGoalId": 6588,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2024-09-08T09:52:07Z",
+          "lastUpdateUserId": 327
+        },
+        {
+          "id": 1398,
+          "employeeGoalId": 6588,
+          "title": "Hito 3",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2024-09-08T18:03:06Z",
+          "lastUpdateUserId": 327
+        },
+        {
+          "id": 1399,
+          "employeeGoalId": 6588,
+          "title": "Hito 4",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2024-09-08T08:18:54Z",
+          "lastUpdateUserId": 327
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "6590",
+      "title": "Automatizar la conciliación mensual",
+      "description": "Sirve de base para el próximo ciclo de evaluación.",
+      "percentComplete": 0,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2025-08-19",
+      "completionDate": null,
+      "lastChangedDateTime": "2025-07-28T18:07:33Z",
+      "status": "in_progress",
+      "milestones": [
+        {
+          "id": 1400,
+          "employeeGoalId": 6590,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2025-04-29T11:47:12Z",
+          "lastUpdateUserId": 327
+        },
+        {
+          "id": 1401,
+          "employeeGoalId": 6590,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2025-04-29T10:55:51Z",
+          "lastUpdateUserId": 327
+        },
+        {
+          "id": 1402,
+          "employeeGoalId": 6590,
+          "title": "Hito 3",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2025-04-29T13:31:51Z",
+          "lastUpdateUserId": 327
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "6591",
+      "title": "Reducir el tiempo de primera respuesta un 20%",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 40,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [
+        321
+      ],
+      "dueDate": "2027-03-03",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-09-29T16:54:13Z",
+      "status": "in_progress",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "6592",
+      "title": "Reducir los incidentes recurrentes a la mitad",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [
+        321
+      ],
+      "dueDate": "2026-06-18",
+      "completionDate": "2026-04-04",
+      "lastChangedDateTime": "2026-04-04T12:06:48Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "6594",
+      "title": "Lanzar el nuevo flujo de onboarding",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "percentComplete": 45,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2026-10-24",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-08-02T10:05:44Z",
+      "status": "in_progress",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    }
+  ],
+  "persons": [
+    {
+      "employeeId": 327,
+      "firstName": "Tomás",
+      "lastName": "Maldonado",
+      "preferredName": null
+    },
+    {
+      "employeeId": 321,
+      "firstName": "Facundo",
+      "lastName": "Figueroa",
+      "preferredName": null
+    }
+  ],
+  "comments": [
+    {
+      "goalId": "6588",
+      "commentCount": 4
+    },
+    {
+      "goalId": "6591",
+      "commentCount": 1
+    }
+  ]
+}

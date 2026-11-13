@@ -1,0 +1,17 @@
+{
+  "id": "787",
+  "firstName": "Victoria",
+  "lastName": "Martínez",
+  "workEmail": "victoria.martinez@meridian-andina.example",
+  "employeeNumber": "11929",
+  "supervisorEId": "265",
+  "supervisorId": "10640",
+  "supervisor": "Olmos, Ivana",
+  "hireDate": "2025-08-20",
+  "terminationDate": null,
+  "department": "Infraestructura",
+  "division": "Tecnología",
+  "jobTitle": "SysAdmin Jr",
+  "location": "Santiago de Chile",
+  "status": "Active"
+}

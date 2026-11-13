@@ -1,0 +1,17 @@
+{
+  "id": "129",
+  "firstName": "Ivana",
+  "lastName": "Martínez",
+  "workEmail": "ivana.martinez@meridian-andina.example",
+  "employeeNumber": "10302",
+  "supervisorEId": "243",
+  "supervisorId": "10583",
+  "supervisor": "Bustos, Jimena",
+  "hireDate": "2020-01-12",
+  "terminationDate": null,
+  "department": "Calidad",
+  "division": "Operaciones",
+  "jobTitle": "Auditor de Procesos Jr",
+  "location": "Remoto",
+  "status": "Active"
+}

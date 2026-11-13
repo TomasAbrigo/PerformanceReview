@@ -1,0 +1,17 @@
+{
+  "id": "511",
+  "firstName": "Ivana",
+  "lastName": "Escobar",
+  "workEmail": "ivana.escobar@meridian-andina.example",
+  "employeeNumber": "11250",
+  "supervisorEId": "31",
+  "supervisorId": "10044",
+  "supervisor": "Ríos, Antonella",
+  "hireDate": "2023-10-25",
+  "terminationDate": null,
+  "department": "Infraestructura",
+  "division": "Tecnología",
+  "jobTitle": "Site Reliability Engineer Jr",
+  "location": "Remoto",
+  "status": "Active"
+}

@@ -1,0 +1,181 @@
+{
+  "canAlign": true,
+  "canCreateGoals": false,
+  "filters": [
+    {
+      "id": "status-all",
+      "name": "All"
+    },
+    {
+      "id": "inProgress",
+      "name": "In progress"
+    },
+    {
+      "id": "completed",
+      "name": "Completed"
+    },
+    {
+      "id": "closed",
+      "name": "Closed"
+    }
+  ],
+  "selectedFilter": "status-all",
+  "goals": [
+    {
+      "id": "5246",
+      "title": "Renovar las cuentas clave del trimestre",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2024-11-20",
+      "completionDate": "2024-06-29",
+      "lastChangedDateTime": "2024-06-29T17:52:28Z",
+      "status": "completed",
+      "milestones": [
+        {
+          "id": 812,
+          "employeeGoalId": 5246,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2024-06-23T17:10:39Z",
+          "lastUpdateDateTime": "2024-06-23T17:10:39Z",
+          "lastUpdateUserId": 69
+        },
+        {
+          "id": 813,
+          "employeeGoalId": 5246,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2024-06-20T13:32:34Z",
+          "lastUpdateDateTime": "2024-06-20T13:32:34Z",
+          "lastUpdateUserId": 69
+        },
+        {
+          "id": 814,
+          "employeeGoalId": 5246,
+          "title": "Hito 3",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2024-06-24T18:40:54Z",
+          "lastUpdateDateTime": "2024-06-24T18:40:54Z",
+          "lastUpdateUserId": 69
+        }
+      ],
+      "actions": {
+        "canEdit": false,
+        "canUpdateProgress": false,
+        "canClose": false,
+        "canReopen": false,
+        "canDelete": false,
+        "canComment": false
+      }
+    },
+    {
+      "id": "5247",
+      "title": "Reducir los incidentes recurrentes a la mitad",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2024-12-19",
+      "completionDate": "2024-12-11",
+      "lastChangedDateTime": "2024-12-11T10:02:51Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": false,
+        "canUpdateProgress": false,
+        "canClose": false,
+        "canReopen": false,
+        "canDelete": false,
+        "canComment": false
+      }
+    },
+    {
+      "id": "5250",
+      "title": "Documentar los procesos críticos",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [
+        37
+      ],
+      "dueDate": "2024-10-13",
+      "completionDate": "2024-10-09",
+      "lastChangedDateTime": "2024-10-09T14:28:47Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": false,
+        "canUpdateProgress": false,
+        "canClose": false,
+        "canReopen": false,
+        "canDelete": false,
+        "canComment": false
+      }
+    },
+    {
+      "id": "5253",
+      "title": "Migrar los reportes al nuevo tablero",
+      "description": "Sirve de base para el próximo ciclo de evaluación.",
+      "percentComplete": 100,
+      "alignsWithOptionId": 9001,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2025-06-27",
+      "completionDate": "2025-05-23",
+      "lastChangedDateTime": "2025-05-23T15:37:48Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": false,
+        "canUpdateProgress": false,
+        "canClose": false,
+        "canReopen": false,
+        "canDelete": false,
+        "canComment": false
+      }
+    },
+    {
+      "id": "5256",
+      "title": "Implementar el calendario editorial",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 0,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2025-07-24",
+      "completionDate": null,
+      "lastChangedDateTime": "2025-04-20T17:17:35Z",
+      "status": "closed",
+      "milestones": null,
+      "actions": {
+        "canEdit": false,
+        "canUpdateProgress": false,
+        "canClose": false,
+        "canReopen": false,
+        "canDelete": false,
+        "canComment": false
+      }
+    }
+  ],
+  "persons": [
+    {
+      "employeeId": 69,
+      "firstName": "Sofía",
+      "lastName": "Valdez",
+      "preferredName": null
+    },
+    {
+      "employeeId": 37,
+      "firstName": "Hugo",
+      "lastName": "Ríos",
+      "preferredName": null
+    }
+  ],
+  "comments": []
+}

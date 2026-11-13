@@ -1,0 +1,17 @@
+{
+  "id": "507",
+  "firstName": "Fernando",
+  "lastName": "Ledesma",
+  "workEmail": "fernando.ledesma@meridian-andina.example",
+  "employeeNumber": "11247",
+  "supervisorEId": "159",
+  "supervisorId": "10370",
+  "supervisor": "Ríos, Marcela",
+  "hireDate": "2023-10-11",
+  "terminationDate": null,
+  "department": "Datos",
+  "division": "Tecnología",
+  "jobTitle": "Analytics Engineer Ssr",
+  "location": "Montevideo",
+  "status": "Active"
+}

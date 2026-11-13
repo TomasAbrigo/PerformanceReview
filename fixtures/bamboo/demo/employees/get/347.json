@@ -1,0 +1,17 @@
+{
+  "id": "347",
+  "firstName": "Ignacio",
+  "lastName": "Martínez",
+  "workEmail": "ignacio.martinez@meridian-andina.example",
+  "employeeNumber": "10858",
+  "supervisorEId": "167",
+  "supervisorId": "10390",
+  "supervisor": "Escobar, Marcela",
+  "hireDate": "2022-06-30",
+  "terminationDate": "2026-05-02",
+  "department": "Infraestructura",
+  "division": "Tecnología",
+  "jobTitle": "DevOps Engineer Ssr",
+  "location": "Buenos Aires",
+  "status": "Inactive"
+}

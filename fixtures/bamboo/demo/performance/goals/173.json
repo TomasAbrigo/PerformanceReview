@@ -1,0 +1,285 @@
+{
+  "canAlign": true,
+  "canCreateGoals": true,
+  "filters": [
+    {
+      "id": "status-all",
+      "name": "All"
+    },
+    {
+      "id": "inProgress",
+      "name": "In progress"
+    },
+    {
+      "id": "completed",
+      "name": "Completed"
+    },
+    {
+      "id": "closed",
+      "name": "Closed"
+    }
+  ],
+  "selectedFilter": "status-all",
+  "goals": [
+    {
+      "id": "5820",
+      "title": "Automatizar la conciliación mensual",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [
+        43
+      ],
+      "dueDate": "2023-08-31",
+      "completionDate": "2023-04-14",
+      "lastChangedDateTime": "2023-04-14T10:44:47Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "5823",
+      "title": "Entregar el proyecto Norte sin desvíos",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "percentComplete": 67,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2024-11-20",
+      "completionDate": null,
+      "lastChangedDateTime": "2025-03-30T11:28:37Z",
+      "status": "closed",
+      "milestones": [
+        {
+          "id": 1070,
+          "employeeGoalId": 5823,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2024-05-01T12:23:36Z",
+          "lastUpdateDateTime": "2024-05-01T12:23:36Z",
+          "lastUpdateUserId": 173
+        },
+        {
+          "id": 1071,
+          "employeeGoalId": 5823,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2024-12-04T08:35:15Z",
+          "lastUpdateDateTime": "2024-12-04T08:35:15Z",
+          "lastUpdateUserId": 173
+        },
+        {
+          "id": 1072,
+          "employeeGoalId": 5823,
+          "title": "Hito 3",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2024-05-01T08:56:33Z",
+          "lastUpdateUserId": 173
+        }
+      ],
+      "actions": {
+        "canEdit": false,
+        "canUpdateProgress": false,
+        "canClose": false,
+        "canReopen": true,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "5826",
+      "title": "Entregar el proyecto Norte sin desvíos",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2025-04-09",
+      "completionDate": "2025-01-22",
+      "lastChangedDateTime": "2025-01-22T11:43:22Z",
+      "status": "completed",
+      "milestones": [
+        {
+          "id": 1073,
+          "employeeGoalId": 5826,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-01-21T19:21:17Z",
+          "lastUpdateDateTime": "2025-01-21T19:21:17Z",
+          "lastUpdateUserId": 173
+        },
+        {
+          "id": 1074,
+          "employeeGoalId": 5826,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-01-15T10:24:12Z",
+          "lastUpdateDateTime": "2025-01-15T10:24:12Z",
+          "lastUpdateUserId": 173
+        },
+        {
+          "id": 1075,
+          "employeeGoalId": 5826,
+          "title": "Hito 3",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2024-12-29T19:18:51Z",
+          "lastUpdateDateTime": "2024-12-29T19:18:51Z",
+          "lastUpdateUserId": 173
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "5829",
+      "title": "Completar la certificación del área",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2025-11-27",
+      "completionDate": "2025-07-23",
+      "lastChangedDateTime": "2025-07-23T18:32:56Z",
+      "status": "completed",
+      "milestones": [
+        {
+          "id": 1076,
+          "employeeGoalId": 5829,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-07-11T19:36:48Z",
+          "lastUpdateDateTime": "2025-07-11T19:36:48Z",
+          "lastUpdateUserId": 173
+        },
+        {
+          "id": 1077,
+          "employeeGoalId": 5829,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-07-16T11:11:05Z",
+          "lastUpdateDateTime": "2025-07-16T11:11:05Z",
+          "lastUpdateUserId": 173
+        },
+        {
+          "id": 1078,
+          "employeeGoalId": 5829,
+          "title": "Hito 3",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-07-07T16:23:24Z",
+          "lastUpdateDateTime": "2025-07-07T16:23:24Z",
+          "lastUpdateUserId": 173
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "5830",
+      "title": "Documentar los procesos críticos",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 15,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2026-02-23",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-08-15T11:05:29Z",
+      "status": "in_progress",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "5832",
+      "title": "Aumentar la cobertura de pruebas al 80%",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 60,
+      "alignsWithOptionId": 9002,
+      "sharedWithEmployeeIds": [
+        43
+      ],
+      "dueDate": "2026-09-12",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-10-05T11:12:46Z",
+      "status": "in_progress",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    }
+  ],
+  "persons": [
+    {
+      "employeeId": 173,
+      "firstName": "Ivana",
+      "lastName": "Cáceres",
+      "preferredName": null
+    },
+    {
+      "employeeId": 43,
+      "firstName": "Eugenia",
+      "lastName": "Soria",
+      "preferredName": null
+    }
+  ],
+  "comments": [
+    {
+      "goalId": "5829",
+      "commentCount": 4
+    },
+    {
+      "goalId": "5830",
+      "commentCount": 2
+    },
+    {
+      "goalId": "5832",
+      "commentCount": 2
+    }
+  ]
+}

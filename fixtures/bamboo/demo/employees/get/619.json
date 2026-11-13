@@ -1,0 +1,17 @@
+{
+  "id": "619",
+  "firstName": "Sebastián",
+  "lastName": "Olmos",
+  "workEmail": "sebastian.olmos@meridian-andina.example",
+  "employeeNumber": "11504",
+  "supervisorEId": "185",
+  "supervisorId": "10436",
+  "supervisor": "Martínez, Bruno",
+  "hireDate": "2024-07-28",
+  "terminationDate": null,
+  "department": "Operaciones",
+  "division": "Operaciones",
+  "jobTitle": "Coordinador de Procesos Sr",
+  "location": "Buenos Aires",
+  "status": "Active"
+}

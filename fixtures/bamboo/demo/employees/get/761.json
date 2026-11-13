@@ -1,0 +1,17 @@
+{
+  "id": "761",
+  "firstName": "Leandro",
+  "lastName": "Sosa",
+  "workEmail": "leandro.sosa@meridian-andina.example",
+  "employeeNumber": "11855",
+  "supervisorEId": "363",
+  "supervisorId": "10907",
+  "supervisor": "Navarro, Agustina",
+  "hireDate": "2025-07-22",
+  "terminationDate": null,
+  "department": "Legales",
+  "division": "Corporativo",
+  "jobTitle": "Abogado Corporativo Ssr",
+  "location": "Córdoba",
+  "status": "Active"
+}

@@ -1,0 +1,17 @@
+{
+  "id": "437",
+  "firstName": "Pablo",
+  "lastName": "Álvarez",
+  "workEmail": "pablo.alvarez@meridian-andina.example",
+  "employeeNumber": "11086",
+  "supervisorEId": "49",
+  "supervisorId": "10081",
+  "supervisor": "Monzón, Milagros",
+  "hireDate": "2023-03-18",
+  "terminationDate": null,
+  "department": "Calidad",
+  "division": "Operaciones",
+  "jobTitle": "Analista de Calidad Jr",
+  "location": "Buenos Aires",
+  "status": "Active"
+}

@@ -1,0 +1,121 @@
+{
+  "canAlign": true,
+  "canCreateGoals": true,
+  "filters": [
+    {
+      "id": "status-all",
+      "name": "All"
+    },
+    {
+      "id": "inProgress",
+      "name": "In progress"
+    },
+    {
+      "id": "completed",
+      "name": "Completed"
+    },
+    {
+      "id": "closed",
+      "name": "Closed"
+    }
+  ],
+  "selectedFilter": "status-all",
+  "goals": [
+    {
+      "id": "5665",
+      "title": "Mejorar el NPS interno del equipo",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2025-06-17",
+      "completionDate": "2025-01-15",
+      "lastChangedDateTime": "2025-01-15T19:47:17Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "5668",
+      "title": "Documentar los procesos críticos",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2025-02-02",
+      "completionDate": "2024-11-19",
+      "lastChangedDateTime": "2024-11-19T09:25:50Z",
+      "status": "completed",
+      "milestones": [
+        {
+          "id": 998,
+          "employeeGoalId": 5668,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2024-10-18T14:03:03Z",
+          "lastUpdateDateTime": "2024-10-18T14:03:03Z",
+          "lastUpdateUserId": 147
+        },
+        {
+          "id": 999,
+          "employeeGoalId": 5668,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2024-10-24T15:46:58Z",
+          "lastUpdateDateTime": "2024-10-24T15:46:58Z",
+          "lastUpdateUserId": 147
+        },
+        {
+          "id": 1000,
+          "employeeGoalId": 5668,
+          "title": "Hito 3",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2024-10-29T09:59:21Z",
+          "lastUpdateDateTime": "2024-10-29T09:59:21Z",
+          "lastUpdateUserId": 147
+        },
+        {
+          "id": 1001,
+          "employeeGoalId": 5668,
+          "title": "Hito 4",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2024-10-23T13:16:44Z",
+          "lastUpdateDateTime": "2024-10-23T13:16:44Z",
+          "lastUpdateUserId": 147
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    }
+  ],
+  "persons": [
+    {
+      "employeeId": 147,
+      "firstName": "Paula",
+      "lastName": "Páez",
+      "preferredName": null
+    }
+  ],
+  "comments": []
+}

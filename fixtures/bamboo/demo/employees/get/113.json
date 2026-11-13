@@ -1,0 +1,17 @@
+{
+  "id": "113",
+  "firstName": "Sebastián",
+  "lastName": "Ledesma",
+  "workEmail": "sebastian.ledesma@meridian-andina.example",
+  "employeeNumber": "10259",
+  "supervisorEId": "65",
+  "supervisorId": "10126",
+  "supervisor": "Díaz, Valentina",
+  "hireDate": "2019-10-10",
+  "terminationDate": null,
+  "department": "Marketing",
+  "division": "Comercial",
+  "jobTitle": "Diseñador de Marca Sr",
+  "location": "Buenos Aires",
+  "status": "Active"
+}

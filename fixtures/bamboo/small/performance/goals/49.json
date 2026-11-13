@@ -1,0 +1,268 @@
+{
+  "canAlign": true,
+  "canCreateGoals": true,
+  "filters": [
+    {
+      "id": "status-all",
+      "name": "All"
+    },
+    {
+      "id": "inProgress",
+      "name": "In progress"
+    },
+    {
+      "id": "completed",
+      "name": "Completed"
+    },
+    {
+      "id": "closed",
+      "name": "Closed"
+    }
+  ],
+  "selectedFilter": "status-all",
+  "goals": [
+    {
+      "id": "5159",
+      "title": "Entregar el proyecto Norte sin desvíos",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "percentComplete": 0,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2023-10-24",
+      "completionDate": null,
+      "lastChangedDateTime": "2024-09-20T10:59:57Z",
+      "status": "in_progress",
+      "milestones": [
+        {
+          "id": 780,
+          "employeeGoalId": 5159,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2023-07-14T18:04:31Z",
+          "lastUpdateUserId": 49
+        },
+        {
+          "id": 781,
+          "employeeGoalId": 5159,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2023-07-14T17:44:00Z",
+          "lastUpdateUserId": 49
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "5161",
+      "title": "Reducir el tiempo de primera respuesta un 20%",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 35,
+      "alignsWithOptionId": 9001,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2024-07-19",
+      "completionDate": null,
+      "lastChangedDateTime": "2024-08-11T15:11:31Z",
+      "status": "closed",
+      "milestones": null,
+      "actions": {
+        "canEdit": false,
+        "canUpdateProgress": false,
+        "canClose": false,
+        "canReopen": true,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "5162",
+      "title": "Migrar los reportes al nuevo tablero",
+      "description": "Sirve de base para el próximo ciclo de evaluación.",
+      "percentComplete": 67,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [
+        37
+      ],
+      "dueDate": "2024-08-17",
+      "completionDate": null,
+      "lastChangedDateTime": "2025-05-01T14:32:21Z",
+      "status": "in_progress",
+      "milestones": [
+        {
+          "id": 782,
+          "employeeGoalId": 5162,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2024-03-14T10:32:09Z",
+          "lastUpdateDateTime": "2024-03-14T10:32:09Z",
+          "lastUpdateUserId": 49
+        },
+        {
+          "id": 783,
+          "employeeGoalId": 5162,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2024-12-26T14:21:06Z",
+          "lastUpdateDateTime": "2024-12-26T14:21:06Z",
+          "lastUpdateUserId": 49
+        },
+        {
+          "id": 784,
+          "employeeGoalId": 5162,
+          "title": "Hito 3",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2024-02-11T11:46:28Z",
+          "lastUpdateUserId": 49
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "5163",
+      "title": "Reducir los incidentes recurrentes a la mitad",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 100,
+      "alignsWithOptionId": 9004,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2025-04-18",
+      "completionDate": "2025-01-27",
+      "lastChangedDateTime": "2025-01-27T18:17:14Z",
+      "status": "completed",
+      "milestones": [
+        {
+          "id": 785,
+          "employeeGoalId": 5163,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-01-13T10:24:48Z",
+          "lastUpdateDateTime": "2025-01-13T10:24:48Z",
+          "lastUpdateUserId": 49
+        },
+        {
+          "id": 786,
+          "employeeGoalId": 5163,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-01-21T08:56:16Z",
+          "lastUpdateDateTime": "2025-01-21T08:56:16Z",
+          "lastUpdateUserId": 49
+        },
+        {
+          "id": 787,
+          "employeeGoalId": 5163,
+          "title": "Hito 3",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-01-16T17:57:01Z",
+          "lastUpdateDateTime": "2025-01-16T17:57:01Z",
+          "lastUpdateUserId": 49
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "5165",
+      "title": "Completar la certificación del área",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 50,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2025-05-26",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-10-29T16:37:11Z",
+      "status": "in_progress",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "5168",
+      "title": "Cerrar el plan de capacitación anual",
+      "description": "Sirve de base para el próximo ciclo de evaluación.",
+      "percentComplete": 45,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2026-08-02",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-09-22T17:10:56Z",
+      "status": "in_progress",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    }
+  ],
+  "persons": [
+    {
+      "employeeId": 49,
+      "firstName": "Santiago",
+      "lastName": "Benítez",
+      "preferredName": "Santi"
+    },
+    {
+      "employeeId": 37,
+      "firstName": "Hugo",
+      "lastName": "Ríos",
+      "preferredName": null
+    }
+  ],
+  "comments": [
+    {
+      "goalId": "5159",
+      "commentCount": 4
+    },
+    {
+      "goalId": "5163",
+      "commentCount": 1
+    }
+  ]
+}

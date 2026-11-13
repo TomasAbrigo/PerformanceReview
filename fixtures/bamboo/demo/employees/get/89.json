@@ -1,0 +1,17 @@
+{
+  "id": "89",
+  "firstName": "Fernando",
+  "lastName": "Barrios",
+  "workEmail": "fernando.barrios@meridian-andina.example",
+  "employeeNumber": "10197",
+  "supervisorEId": "51",
+  "supervisorId": "10084",
+  "supervisor": "Toledo, Gonzalo",
+  "hireDate": "2019-03-22",
+  "terminationDate": null,
+  "department": "People",
+  "division": "Corporativo",
+  "jobTitle": "Analista de People Jr",
+  "location": "Buenos Aires",
+  "status": "Active"
+}

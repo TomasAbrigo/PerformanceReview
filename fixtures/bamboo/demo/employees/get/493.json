@@ -1,0 +1,17 @@
+{
+  "id": "493",
+  "firstName": "Carolina",
+  "lastName": "Urquiza",
+  "workEmail": "carolina.urquiza@meridian-andina.example",
+  "employeeNumber": "11213",
+  "supervisorEId": "47",
+  "supervisorId": "10080",
+  "supervisor": "Olmos, Candela",
+  "hireDate": "2023-09-14",
+  "terminationDate": null,
+  "department": "Soporte",
+  "division": "Operaciones",
+  "jobTitle": "Agente de Soporte Sr",
+  "location": "Córdoba",
+  "status": "Active"
+}

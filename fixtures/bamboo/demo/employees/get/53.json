@@ -1,0 +1,17 @@
+{
+  "id": "53",
+  "firstName": "Brenda",
+  "lastName": "Ortiz",
+  "workEmail": "brenda.ortiz@meridian-andina.example",
+  "employeeNumber": "10087",
+  "supervisorEId": "17",
+  "supervisorId": "10016",
+  "supervisor": "Martínez, Camila",
+  "hireDate": "2018-04-25",
+  "terminationDate": null,
+  "department": "Finanzas",
+  "division": "Corporativo",
+  "jobTitle": "Gerente de Finanzas",
+  "location": "Buenos Aires",
+  "status": "Active"
+}

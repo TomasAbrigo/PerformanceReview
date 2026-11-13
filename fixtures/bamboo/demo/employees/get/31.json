@@ -1,0 +1,17 @@
+{
+  "id": "31",
+  "firstName": "Antonella",
+  "lastName": "Ríos",
+  "workEmail": "antonella.rios@meridian-andina.example",
+  "employeeNumber": "10044",
+  "supervisorEId": "21",
+  "supervisorId": "10026",
+  "supervisor": "Navarro, Lucas",
+  "hireDate": "2017-03-07",
+  "terminationDate": null,
+  "department": "Infraestructura",
+  "division": "Tecnología",
+  "jobTitle": "Líder de Infraestructura",
+  "location": "Buenos Aires",
+  "status": "Active"
+}

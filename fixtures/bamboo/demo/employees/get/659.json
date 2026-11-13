@@ -1,0 +1,17 @@
+{
+  "id": "659",
+  "firstName": "Ivana",
+  "lastName": "Monzón",
+  "workEmail": "ivana.monzon@meridian-andina.example",
+  "employeeNumber": "11593",
+  "supervisorEId": "47",
+  "supervisorId": "10080",
+  "supervisor": "Olmos, Candela",
+  "hireDate": "2024-12-07",
+  "terminationDate": null,
+  "department": "Soporte",
+  "division": "Operaciones",
+  "jobTitle": "Agente de Soporte Jr",
+  "location": "Buenos Aires",
+  "status": "Active"
+}

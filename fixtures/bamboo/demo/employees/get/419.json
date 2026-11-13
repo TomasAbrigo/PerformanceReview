@@ -1,0 +1,17 @@
+{
+  "id": "419",
+  "firstName": "Ramiro",
+  "lastName": "Rivas",
+  "workEmail": "ramiro.rivas@meridian-andina.example",
+  "employeeNumber": "11042",
+  "supervisorEId": "189",
+  "supervisorId": "10450",
+  "supervisor": "Quiroga, Lucía",
+  "hireDate": "2023-02-02",
+  "terminationDate": null,
+  "department": "Customer Success",
+  "division": "Comercial",
+  "jobTitle": "Onboarding Specialist Sr",
+  "location": "Córdoba",
+  "status": "Active"
+}

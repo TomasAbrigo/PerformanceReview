@@ -1,0 +1,126 @@
+{
+  "canAlign": true,
+  "canCreateGoals": true,
+  "filters": [
+    {
+      "id": "status-all",
+      "name": "All"
+    },
+    {
+      "id": "inProgress",
+      "name": "In progress"
+    },
+    {
+      "id": "completed",
+      "name": "Completed"
+    },
+    {
+      "id": "closed",
+      "name": "Closed"
+    }
+  ],
+  "selectedFilter": "status-all",
+  "goals": [
+    {
+      "id": "7425",
+      "title": "Automatizar la conciliación mensual",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2024-11-16",
+      "completionDate": "2024-09-13",
+      "lastChangedDateTime": "2024-09-13T09:29:37Z",
+      "status": "completed",
+      "milestones": [
+        {
+          "id": 1799,
+          "employeeGoalId": 7425,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2024-05-08T09:32:43Z",
+          "lastUpdateDateTime": "2024-05-08T09:32:43Z",
+          "lastUpdateUserId": 505
+        },
+        {
+          "id": 1800,
+          "employeeGoalId": 7425,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2024-08-16T14:37:48Z",
+          "lastUpdateDateTime": "2024-08-16T14:37:48Z",
+          "lastUpdateUserId": 505
+        },
+        {
+          "id": 1801,
+          "employeeGoalId": 7425,
+          "title": "Hito 3",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2024-07-20T11:39:54Z",
+          "lastUpdateDateTime": "2024-07-20T11:39:54Z",
+          "lastUpdateUserId": 505
+        },
+        {
+          "id": 1802,
+          "employeeGoalId": 7425,
+          "title": "Hito 4",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2024-09-13T14:38:20Z",
+          "lastUpdateDateTime": "2024-09-13T14:38:20Z",
+          "lastUpdateUserId": 505
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "7427",
+      "title": "Implementar el calendario editorial",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2024-09-07",
+      "completionDate": "2024-04-15",
+      "lastChangedDateTime": "2024-04-15T16:17:19Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    }
+  ],
+  "persons": [
+    {
+      "employeeId": 505,
+      "firstName": "Cristian",
+      "lastName": "Ledesma",
+      "preferredName": null
+    }
+  ],
+  "comments": [
+    {
+      "goalId": "7427",
+      "commentCount": 2
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "id": "737",
+  "firstName": "Sebastián",
+  "lastName": "Aguirre",
+  "workEmail": "sebastian.aguirre@meridian-andina.example",
+  "employeeNumber": "11810",
+  "supervisorEId": "43",
+  "supervisorId": "10070",
+  "supervisor": "Soria, Eugenia",
+  "hireDate": "2025-06-08",
+  "terminationDate": null,
+  "department": "Legales",
+  "division": "Corporativo",
+  "jobTitle": "Analista de Compliance Ssr",
+  "location": "Córdoba",
+  "status": "Active"
+}

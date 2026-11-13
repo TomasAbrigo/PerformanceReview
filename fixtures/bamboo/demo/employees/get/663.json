@@ -1,0 +1,17 @@
+{
+  "id": "663",
+  "firstName": "Maximiliano",
+  "lastName": "Trejo",
+  "workEmail": "maximiliano.trejo@meridian-andina.example",
+  "employeeNumber": "11603",
+  "supervisorEId": "63",
+  "supervisorId": "10119",
+  "supervisor": "Rivas, Alejandro",
+  "hireDate": "2024-12-10",
+  "terminationDate": null,
+  "department": "Operaciones",
+  "division": "Operaciones",
+  "jobTitle": "Coordinador de Procesos Ssr",
+  "location": "Montevideo",
+  "status": "Active"
+}

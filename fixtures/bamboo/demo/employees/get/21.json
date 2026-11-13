@@ -1,0 +1,17 @@
+{
+  "id": "21",
+  "firstName": "Lucas",
+  "lastName": "Navarro",
+  "workEmail": "lucas.navarro@meridian-andina.example",
+  "employeeNumber": "10026",
+  "supervisorEId": "13",
+  "supervisorId": "10012",
+  "supervisor": "Zárate, Daniela",
+  "hireDate": "2016-01-21",
+  "terminationDate": null,
+  "department": "Infraestructura",
+  "division": "Tecnología",
+  "jobTitle": "Gerente de Infraestructura",
+  "location": "Montevideo",
+  "status": "Active"
+}

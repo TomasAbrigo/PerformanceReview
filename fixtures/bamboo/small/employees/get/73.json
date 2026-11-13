@@ -1,0 +1,17 @@
+{
+  "id": "73",
+  "firstName": "Cristian",
+  "lastName": "Esquivel",
+  "workEmail": "cristian.esquivel@meridian-andina.example",
+  "employeeNumber": "10169",
+  "supervisorEId": "35",
+  "supervisorId": "10073",
+  "supervisor": "Núñez, Carolina",
+  "hireDate": "2024-10-03",
+  "terminationDate": "2025-08-15",
+  "department": "Ingeniería",
+  "division": "Tecnología",
+  "jobTitle": "Backend Developer Jr",
+  "location": "Montevideo",
+  "status": "Inactive"
+}

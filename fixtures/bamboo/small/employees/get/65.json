@@ -1,0 +1,17 @@
+{
+  "id": "65",
+  "firstName": "Candela",
+  "lastName": "Godoy",
+  "workEmail": "candela.godoy@meridian-andina.example",
+  "employeeNumber": "10143",
+  "supervisorEId": "35",
+  "supervisorId": "10073",
+  "supervisor": "Núñez, Carolina",
+  "hireDate": "2024-02-06",
+  "terminationDate": null,
+  "department": "Ingeniería",
+  "division": "Tecnología",
+  "jobTitle": "Mobile Developer Sr",
+  "location": "Buenos Aires",
+  "status": "Active"
+}

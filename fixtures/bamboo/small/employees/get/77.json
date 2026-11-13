@@ -1,0 +1,17 @@
+{
+  "id": "77",
+  "firstName": "Patricia",
+  "lastName": "Romero",
+  "workEmail": "patricia.romero@meridian-andina.example",
+  "employeeNumber": "10114",
+  "supervisorEId": "37",
+  "supervisorId": "10075",
+  "supervisor": "Ríos, Hugo",
+  "hireDate": "2024-10-23",
+  "terminationDate": null,
+  "department": "Datos",
+  "division": "Tecnología",
+  "jobTitle": "Analytics Engineer Ssr",
+  "location": "Buenos Aires",
+  "status": "Active"
+}

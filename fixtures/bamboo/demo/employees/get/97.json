@@ -1,0 +1,17 @@
+{
+  "id": "97",
+  "firstName": "Micaela",
+  "lastName": "Molina",
+  "workEmail": "micaela.molina@meridian-andina.example",
+  "employeeNumber": "10228",
+  "supervisorEId": "241",
+  "supervisorId": "10574",
+  "supervisor": "Reyes, Daniela",
+  "hireDate": "2019-07-01",
+  "terminationDate": null,
+  "department": "Marketing",
+  "division": "Comercial",
+  "jobTitle": "Diseñador de Marca Jr",
+  "location": "Rosario",
+  "status": "Active"
+}

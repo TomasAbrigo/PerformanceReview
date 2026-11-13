@@ -1,0 +1,259 @@
+{
+  "canAlign": true,
+  "canCreateGoals": true,
+  "filters": [
+    {
+      "id": "status-all",
+      "name": "All"
+    },
+    {
+      "id": "inProgress",
+      "name": "In progress"
+    },
+    {
+      "id": "completed",
+      "name": "Completed"
+    },
+    {
+      "id": "closed",
+      "name": "Closed"
+    }
+  ],
+  "selectedFilter": "status-all",
+  "goals": [
+    {
+      "id": "7343",
+      "title": "Documentar los procesos críticos",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 80,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2023-11-04",
+      "completionDate": null,
+      "lastChangedDateTime": "2024-02-23T12:31:32Z",
+      "status": "in_progress",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "7345",
+      "title": "Documentar los procesos críticos",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 100,
+      "alignsWithOptionId": 9003,
+      "sharedWithEmployeeIds": [
+        125
+      ],
+      "dueDate": "2024-08-16",
+      "completionDate": "2024-04-15",
+      "lastChangedDateTime": "2024-04-15T14:03:32Z",
+      "status": "completed",
+      "milestones": [
+        {
+          "id": 1767,
+          "employeeGoalId": 7345,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2024-03-25T11:09:00Z",
+          "lastUpdateDateTime": "2024-03-25T11:09:00Z",
+          "lastUpdateUserId": 489
+        },
+        {
+          "id": 1768,
+          "employeeGoalId": 7345,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2024-04-02T19:18:42Z",
+          "lastUpdateDateTime": "2024-04-02T19:18:42Z",
+          "lastUpdateUserId": 489
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "7348",
+      "title": "Renovar las cuentas clave del trimestre",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2025-02-13",
+      "completionDate": "2024-11-27",
+      "lastChangedDateTime": "2024-11-27T11:57:47Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "7349",
+      "title": "Lanzar el nuevo flujo de onboarding",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2025-09-17",
+      "completionDate": "2025-05-20",
+      "lastChangedDateTime": "2025-05-20T15:56:46Z",
+      "status": "completed",
+      "milestones": [
+        {
+          "id": 1769,
+          "employeeGoalId": 7349,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-05-04T18:02:56Z",
+          "lastUpdateDateTime": "2025-05-04T18:02:56Z",
+          "lastUpdateUserId": 489
+        },
+        {
+          "id": 1770,
+          "employeeGoalId": 7349,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-05-01T18:05:52Z",
+          "lastUpdateDateTime": "2025-05-01T18:05:52Z",
+          "lastUpdateUserId": 489
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "7351",
+      "title": "Lanzar el nuevo flujo de onboarding",
+      "description": "Sirve de base para el próximo ciclo de evaluación.",
+      "percentComplete": 25,
+      "alignsWithOptionId": 9004,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2027-01-12",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-09-28T12:32:52Z",
+      "status": "in_progress",
+      "milestones": [
+        {
+          "id": 1771,
+          "employeeGoalId": 7351,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2026-09-09T11:49:04Z",
+          "lastUpdateDateTime": "2026-09-09T11:49:04Z",
+          "lastUpdateUserId": 489
+        },
+        {
+          "id": 1772,
+          "employeeGoalId": 7351,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2026-08-20T09:05:01Z",
+          "lastUpdateUserId": 489
+        },
+        {
+          "id": 1773,
+          "employeeGoalId": 7351,
+          "title": "Hito 3",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2026-08-20T10:16:43Z",
+          "lastUpdateUserId": 489
+        },
+        {
+          "id": 1774,
+          "employeeGoalId": 7351,
+          "title": "Hito 4",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2026-08-20T14:01:05Z",
+          "lastUpdateUserId": 489
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "7352",
+      "title": "Documentar los procesos críticos",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2026-03-15",
+      "completionDate": "2026-02-08",
+      "lastChangedDateTime": "2026-02-08T11:26:29Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    }
+  ],
+  "persons": [
+    {
+      "employeeId": 489,
+      "firstName": "José",
+      "lastName": "Roldán",
+      "preferredName": null
+    },
+    {
+      "employeeId": 125,
+      "firstName": "Tomás",
+      "lastName": "Navarro",
+      "preferredName": null
+    }
+  ],
+  "comments": []
+}

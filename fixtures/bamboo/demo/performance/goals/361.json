@@ -1,0 +1,104 @@
+{
+  "canAlign": true,
+  "canCreateGoals": true,
+  "filters": [
+    {
+      "id": "status-all",
+      "name": "All"
+    },
+    {
+      "id": "inProgress",
+      "name": "In progress"
+    },
+    {
+      "id": "completed",
+      "name": "Completed"
+    },
+    {
+      "id": "closed",
+      "name": "Closed"
+    }
+  ],
+  "selectedFilter": "status-all",
+  "goals": [
+    {
+      "id": "6748",
+      "title": "Reducir el tiempo de primera respuesta un 20%",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 100,
+      "alignsWithOptionId": 9004,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2024-12-11",
+      "completionDate": "2024-06-28",
+      "lastChangedDateTime": "2024-06-28T13:24:56Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "6749",
+      "title": "Cerrar el plan de capacitación anual",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 50,
+      "alignsWithOptionId": 9003,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2025-02-01",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-10-09T16:03:29Z",
+      "status": "in_progress",
+      "milestones": [
+        {
+          "id": 1472,
+          "employeeGoalId": 6749,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-12-14T12:53:16Z",
+          "lastUpdateDateTime": "2025-12-14T12:53:16Z",
+          "lastUpdateUserId": 361
+        },
+        {
+          "id": 1473,
+          "employeeGoalId": 6749,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2024-07-26T11:20:18Z",
+          "lastUpdateUserId": 361
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    }
+  ],
+  "persons": [
+    {
+      "employeeId": 361,
+      "firstName": "Adrián",
+      "lastName": "Suárez",
+      "preferredName": null
+    }
+  ],
+  "comments": [
+    {
+      "goalId": "6749",
+      "commentCount": 3
+    }
+  ]
+}

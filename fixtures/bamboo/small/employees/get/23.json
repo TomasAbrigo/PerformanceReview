@@ -1,0 +1,17 @@
+{
+  "id": "23",
+  "firstName": "Adrián",
+  "lastName": "Bustos",
+  "workEmail": "adrian.bustos@meridian-andina.example",
+  "employeeNumber": "10039",
+  "supervisorEId": "19",
+  "supervisorId": "10028",
+  "supervisor": "Molina, Silvana",
+  "hireDate": "2017-07-14",
+  "terminationDate": null,
+  "department": "Ingeniería",
+  "division": "Tecnología",
+  "jobTitle": "Gerente de Ingeniería",
+  "location": "Montevideo",
+  "status": "Active"
+}

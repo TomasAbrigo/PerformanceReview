@@ -1,0 +1,211 @@
+{
+  "canAlign": true,
+  "canCreateGoals": true,
+  "filters": [
+    {
+      "id": "status-all",
+      "name": "All"
+    },
+    {
+      "id": "inProgress",
+      "name": "In progress"
+    },
+    {
+      "id": "completed",
+      "name": "Completed"
+    },
+    {
+      "id": "closed",
+      "name": "Closed"
+    }
+  ],
+  "selectedFilter": "status-all",
+  "goals": [
+    {
+      "id": "7814",
+      "title": "Lanzar el nuevo flujo de onboarding",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "percentComplete": 50,
+      "alignsWithOptionId": 9003,
+      "sharedWithEmployeeIds": [
+        321
+      ],
+      "dueDate": "2024-11-27",
+      "completionDate": null,
+      "lastChangedDateTime": "2025-01-23T10:43:54Z",
+      "status": "in_progress",
+      "milestones": [
+        {
+          "id": 1971,
+          "employeeGoalId": 7814,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2024-12-18T16:21:12Z",
+          "lastUpdateDateTime": "2024-12-18T16:21:12Z",
+          "lastUpdateUserId": 621
+        },
+        {
+          "id": 1972,
+          "employeeGoalId": 7814,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2024-07-31T11:46:29Z",
+          "lastUpdateUserId": 621
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "7816",
+      "title": "Automatizar la conciliación mensual",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 100,
+      "alignsWithOptionId": 9003,
+      "sharedWithEmployeeIds": [
+        321
+      ],
+      "dueDate": "2024-11-29",
+      "completionDate": "2024-08-22",
+      "lastChangedDateTime": "2024-08-22T10:03:24Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "7817",
+      "title": "Reducir los incidentes recurrentes a la mitad",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2025-06-20",
+      "completionDate": "2025-03-17",
+      "lastChangedDateTime": "2025-03-17T13:53:43Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "7820",
+      "title": "Cerrar el plan de capacitación anual",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 67,
+      "alignsWithOptionId": 9003,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2025-10-22",
+      "completionDate": null,
+      "lastChangedDateTime": "2025-03-23T13:45:33Z",
+      "status": "in_progress",
+      "milestones": [
+        {
+          "id": 1973,
+          "employeeGoalId": 7820,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-03-21T12:21:57Z",
+          "lastUpdateDateTime": "2025-03-21T12:21:57Z",
+          "lastUpdateUserId": 621
+        },
+        {
+          "id": 1974,
+          "employeeGoalId": 7820,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-03-22T13:51:32Z",
+          "lastUpdateDateTime": "2025-03-22T13:51:32Z",
+          "lastUpdateUserId": 621
+        },
+        {
+          "id": 1975,
+          "employeeGoalId": 7820,
+          "title": "Hito 3",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2025-03-21T11:12:29Z",
+          "lastUpdateUserId": 621
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "7823",
+      "title": "Entregar el proyecto Norte sin desvíos",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2026-08-15",
+      "completionDate": "2026-05-04",
+      "lastChangedDateTime": "2026-05-04T16:36:29Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    }
+  ],
+  "persons": [
+    {
+      "employeeId": 621,
+      "firstName": "Marcela",
+      "lastName": "Toledo",
+      "preferredName": null
+    },
+    {
+      "employeeId": 321,
+      "firstName": "Facundo",
+      "lastName": "Figueroa",
+      "preferredName": null
+    }
+  ],
+  "comments": [
+    {
+      "goalId": "7823",
+      "commentCount": 1
+    }
+  ]
+}

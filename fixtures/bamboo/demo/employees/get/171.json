@@ -1,0 +1,17 @@
+{
+  "id": "171",
+  "firstName": "Martín",
+  "lastName": "Godoy",
+  "workEmail": "martin.godoy@meridian-andina.example",
+  "employeeNumber": "10399",
+  "supervisorEId": "243",
+  "supervisorId": "10583",
+  "supervisor": "Bustos, Jimena",
+  "hireDate": "2020-12-05",
+  "terminationDate": "2025-06-27",
+  "department": "Calidad",
+  "division": "Operaciones",
+  "jobTitle": "Analista de Calidad Ssr",
+  "location": "Buenos Aires",
+  "status": "Inactive"
+}

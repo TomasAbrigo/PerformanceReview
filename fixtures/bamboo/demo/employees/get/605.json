@@ -1,0 +1,17 @@
+{
+  "id": "605",
+  "firstName": "Bruno",
+  "lastName": "Urquiza",
+  "workEmail": "bruno.urquiza@meridian-andina.example",
+  "employeeNumber": "11478",
+  "supervisorEId": "65",
+  "supervisorId": "10126",
+  "supervisor": "Díaz, Valentina",
+  "hireDate": "2024-07-01",
+  "terminationDate": null,
+  "department": "Marketing",
+  "division": "Comercial",
+  "jobTitle": "Content Specialist Sr",
+  "location": "Buenos Aires",
+  "status": "Active"
+}

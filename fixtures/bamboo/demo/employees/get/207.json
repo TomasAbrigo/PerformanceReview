@@ -1,0 +1,17 @@
+{
+  "id": "207",
+  "firstName": "María",
+  "lastName": "Ledesma",
+  "workEmail": "maria.ledesma@meridian-andina.example",
+  "employeeNumber": "10493",
+  "supervisorEId": "95",
+  "supervisorId": "10220",
+  "supervisor": "Fernández, José",
+  "hireDate": "2021-05-07",
+  "terminationDate": null,
+  "department": "Operaciones",
+  "division": "Operaciones",
+  "jobTitle": "Coordinador de Procesos Ssr",
+  "location": "Buenos Aires",
+  "status": "Active"
+}

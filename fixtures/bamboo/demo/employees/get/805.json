@@ -1,0 +1,17 @@
+{
+  "id": "805",
+  "firstName": "Carla",
+  "lastName": "Suárez",
+  "workEmail": "carla.suarez2@meridian-andina.example",
+  "employeeNumber": "11056",
+  "supervisorEId": "361",
+  "supervisorId": "10899",
+  "supervisor": "Suárez, Adrián",
+  "hireDate": "2026-05-19",
+  "terminationDate": null,
+  "department": "Customer Success",
+  "division": "Comercial",
+  "jobTitle": "Customer Success Manager Ssr",
+  "location": "Buenos Aires",
+  "status": "Active"
+}

@@ -1,0 +1,17 @@
+{
+  "id": "365",
+  "firstName": "María",
+  "lastName": "Peralta",
+  "workEmail": "maria.peralta@meridian-andina.example",
+  "employeeNumber": "10908",
+  "supervisorEId": "321",
+  "supervisorId": "10792",
+  "supervisor": "Figueroa, Facundo",
+  "hireDate": "2022-08-11",
+  "terminationDate": null,
+  "department": "Finanzas",
+  "division": "Corporativo",
+  "jobTitle": "Analista de Tesorería Sr",
+  "location": "Córdoba",
+  "status": "Active"
+}

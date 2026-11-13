@@ -1,0 +1,123 @@
+{
+  "canAlign": true,
+  "canCreateGoals": true,
+  "filters": [
+    {
+      "id": "status-all",
+      "name": "All"
+    },
+    {
+      "id": "inProgress",
+      "name": "In progress"
+    },
+    {
+      "id": "completed",
+      "name": "Completed"
+    },
+    {
+      "id": "closed",
+      "name": "Closed"
+    }
+  ],
+  "selectedFilter": "status-all",
+  "goals": [
+    {
+      "id": "8170",
+      "title": "Reducir el tiempo de primera respuesta un 20%",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 100,
+      "alignsWithOptionId": 9004,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2025-10-31",
+      "completionDate": "2025-07-20",
+      "lastChangedDateTime": "2025-07-20T09:43:37Z",
+      "status": "completed",
+      "milestones": [
+        {
+          "id": 2147,
+          "employeeGoalId": 8170,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-07-19T08:09:50Z",
+          "lastUpdateDateTime": "2025-07-19T08:09:50Z",
+          "lastUpdateUserId": 755
+        },
+        {
+          "id": 2148,
+          "employeeGoalId": 8170,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-07-14T18:40:52Z",
+          "lastUpdateDateTime": "2025-07-14T18:40:52Z",
+          "lastUpdateUserId": 755
+        },
+        {
+          "id": 2149,
+          "employeeGoalId": 8170,
+          "title": "Hito 3",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-07-16T09:19:39Z",
+          "lastUpdateDateTime": "2025-07-16T09:19:39Z",
+          "lastUpdateUserId": 755
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "8171",
+      "title": "Automatizar la conciliación mensual",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 30,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [
+        241
+      ],
+      "dueDate": "2025-11-30",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-09-26T08:40:22Z",
+      "status": "in_progress",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    }
+  ],
+  "persons": [
+    {
+      "employeeId": 755,
+      "firstName": "Sebastián",
+      "lastName": "Maldonado",
+      "preferredName": "Seba"
+    },
+    {
+      "employeeId": 241,
+      "firstName": "Daniela",
+      "lastName": "Reyes",
+      "preferredName": null
+    }
+  ],
+  "comments": [
+    {
+      "goalId": "8170",
+      "commentCount": 2
+    }
+  ]
+}

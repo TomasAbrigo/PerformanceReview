@@ -1,0 +1,116 @@
+{
+  "canAlign": true,
+  "canCreateGoals": true,
+  "filters": [
+    {
+      "id": "status-all",
+      "name": "All"
+    },
+    {
+      "id": "inProgress",
+      "name": "In progress"
+    },
+    {
+      "id": "completed",
+      "name": "Completed"
+    },
+    {
+      "id": "closed",
+      "name": "Closed"
+    }
+  ],
+  "selectedFilter": "status-all",
+  "goals": [
+    {
+      "id": "8176",
+      "title": "Reducir el tiempo de primera respuesta un 20%",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [
+        363
+      ],
+      "dueDate": "2025-12-09",
+      "completionDate": "2025-10-27",
+      "lastChangedDateTime": "2025-10-27T16:38:25Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "8178",
+      "title": "Automatizar la conciliación mensual",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 100,
+      "alignsWithOptionId": 9001,
+      "sharedWithEmployeeIds": [
+        363
+      ],
+      "dueDate": "2026-05-01",
+      "completionDate": "2026-03-25",
+      "lastChangedDateTime": "2026-03-25T11:24:50Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "8179",
+      "title": "Mejorar el NPS interno del equipo",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2026-05-26",
+      "completionDate": "2026-03-14",
+      "lastChangedDateTime": "2026-03-14T15:01:26Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    }
+  ],
+  "persons": [
+    {
+      "employeeId": 761,
+      "firstName": "Leandro",
+      "lastName": "Sosa",
+      "preferredName": null
+    },
+    {
+      "employeeId": 363,
+      "firstName": "Agustina",
+      "lastName": "Navarro",
+      "preferredName": null
+    }
+  ],
+  "comments": [
+    {
+      "goalId": "8176",
+      "commentCount": 2
+    },
+    {
+      "goalId": "8178",
+      "commentCount": 3
+    }
+  ]
+}

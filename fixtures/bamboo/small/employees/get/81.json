@@ -1,0 +1,17 @@
+{
+  "id": "81",
+  "firstName": "Adrián",
+  "lastName": "Cabrera",
+  "workEmail": "adrian.cabrera@meridian-andina.example",
+  "employeeNumber": "10184",
+  "supervisorEId": "31",
+  "supervisorId": "10060",
+  "supervisor": "Rivas, Federico",
+  "hireDate": "2025-08-03",
+  "terminationDate": null,
+  "department": "Finanzas",
+  "division": "Corporativo",
+  "jobTitle": "Analista Contable Ssr",
+  "location": "Remoto",
+  "status": "Active"
+}

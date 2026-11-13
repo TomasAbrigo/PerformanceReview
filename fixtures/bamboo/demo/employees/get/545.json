@@ -1,0 +1,17 @@
+{
+  "id": "545",
+  "firstName": "Soledad",
+  "lastName": "Ruiz",
+  "workEmail": "soledad.ruiz@meridian-andina.example",
+  "employeeNumber": "11330",
+  "supervisorEId": "105",
+  "supervisorId": "10244",
+  "supervisor": "Ibáñez, Lucía",
+  "hireDate": "2024-03-01",
+  "terminationDate": null,
+  "department": "Ingeniería",
+  "division": "Tecnología",
+  "jobTitle": "Mobile Developer Ssr",
+  "location": "Buenos Aires",
+  "status": "Active"
+}

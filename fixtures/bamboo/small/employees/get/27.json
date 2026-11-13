@@ -1,0 +1,17 @@
+{
+  "id": "27",
+  "firstName": "Marcelo",
+  "lastName": "Lagos",
+  "workEmail": "marcelo.lagos@meridian-andina.example",
+  "employeeNumber": "10051",
+  "supervisorEId": "17",
+  "supervisorId": "10026",
+  "supervisor": "Arias, Silvana",
+  "hireDate": "2017-10-05",
+  "terminationDate": null,
+  "department": "People",
+  "division": "Corporativo",
+  "jobTitle": "Gerente de People",
+  "location": "Córdoba",
+  "status": "Active"
+}

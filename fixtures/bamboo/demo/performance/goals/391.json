@@ -1,0 +1,102 @@
+{
+  "canAlign": true,
+  "canCreateGoals": true,
+  "filters": [
+    {
+      "id": "status-all",
+      "name": "All"
+    },
+    {
+      "id": "inProgress",
+      "name": "In progress"
+    },
+    {
+      "id": "completed",
+      "name": "Completed"
+    },
+    {
+      "id": "closed",
+      "name": "Closed"
+    }
+  ],
+  "selectedFilter": "status-all",
+  "goals": [
+    {
+      "id": "6879",
+      "title": "Implementar el calendario editorial",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [
+        41
+      ],
+      "dueDate": "2024-07-19",
+      "completionDate": "2024-05-22",
+      "lastChangedDateTime": "2024-05-22T18:10:12Z",
+      "status": "completed",
+      "milestones": [
+        {
+          "id": 1525,
+          "employeeGoalId": 6879,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2024-03-10T18:01:42Z",
+          "lastUpdateDateTime": "2024-03-10T18:01:42Z",
+          "lastUpdateUserId": 391
+        },
+        {
+          "id": 1526,
+          "employeeGoalId": 6879,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2024-05-10T10:40:44Z",
+          "lastUpdateDateTime": "2024-05-10T10:40:44Z",
+          "lastUpdateUserId": 391
+        },
+        {
+          "id": 1527,
+          "employeeGoalId": 6879,
+          "title": "Hito 3",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2024-03-30T12:18:25Z",
+          "lastUpdateDateTime": "2024-03-30T12:18:25Z",
+          "lastUpdateUserId": 391
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    }
+  ],
+  "persons": [
+    {
+      "employeeId": 391,
+      "firstName": "Julieta",
+      "lastName": "Esquivel",
+      "preferredName": null
+    },
+    {
+      "employeeId": 41,
+      "firstName": "Florencia",
+      "lastName": "Morales",
+      "preferredName": "Flor"
+    }
+  ],
+  "comments": [
+    {
+      "goalId": "6879",
+      "commentCount": 4
+    }
+  ]
+}

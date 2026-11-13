@@ -1,0 +1,17 @@
+{
+  "id": "253",
+  "firstName": "Marcela",
+  "lastName": "Barrios",
+  "workEmail": "marcela.barrios@meridian-andina.example",
+  "employeeNumber": "10611",
+  "supervisorEId": "49",
+  "supervisorId": "10081",
+  "supervisor": "Monzón, Milagros",
+  "hireDate": "2021-10-16",
+  "terminationDate": null,
+  "department": "Calidad",
+  "division": "Operaciones",
+  "jobTitle": "Auditor de Procesos Ssr",
+  "location": "Rosario",
+  "status": "Active"
+}

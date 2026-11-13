@@ -1,0 +1,17 @@
+{
+  "id": "587",
+  "firstName": "Gustavo",
+  "lastName": "Molina",
+  "workEmail": "gustavo.molina@meridian-andina.example",
+  "employeeNumber": "11443",
+  "supervisorEId": "241",
+  "supervisorId": "10574",
+  "supervisor": "Reyes, Daniela",
+  "hireDate": "2024-05-20",
+  "terminationDate": null,
+  "department": "Marketing",
+  "division": "Comercial",
+  "jobTitle": "Content Specialist Sr",
+  "location": "Córdoba",
+  "status": "Active"
+}

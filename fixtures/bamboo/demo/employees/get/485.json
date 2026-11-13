@@ -1,0 +1,17 @@
+{
+  "id": "485",
+  "firstName": "Elena",
+  "lastName": "Delgado",
+  "workEmail": "elena.delgado@meridian-andina.example",
+  "employeeNumber": "11201",
+  "supervisorEId": "111",
+  "supervisorId": "10253",
+  "supervisor": "Peralta, Martín",
+  "hireDate": "2023-08-10",
+  "terminationDate": null,
+  "department": "Datos",
+  "division": "Tecnología",
+  "jobTitle": "Data Engineer Jr",
+  "location": "Remoto",
+  "status": "Active"
+}

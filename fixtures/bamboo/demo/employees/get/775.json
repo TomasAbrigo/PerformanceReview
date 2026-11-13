@@ -1,0 +1,17 @@
+{
+  "id": "775",
+  "firstName": "Gonzalo",
+  "lastName": "Ríos",
+  "workEmail": "gonzalo.rios@meridian-andina.example",
+  "employeeNumber": "11896",
+  "supervisorEId": "59",
+  "supervisorId": "10110",
+  "supervisor": "Soria, Gonzalo",
+  "hireDate": "2025-08-11",
+  "terminationDate": null,
+  "department": "Finanzas",
+  "division": "Corporativo",
+  "jobTitle": "Analista Contable Jr",
+  "location": "Rosario",
+  "status": "Active"
+}

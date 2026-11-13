@@ -1,0 +1,17 @@
+{
+  "id": "643",
+  "firstName": "José",
+  "lastName": "Sosa",
+  "workEmail": "jose.sosa@meridian-andina.example",
+  "employeeNumber": "11551",
+  "supervisorEId": "59",
+  "supervisorId": "10110",
+  "supervisor": "Soria, Gonzalo",
+  "hireDate": "2024-10-25",
+  "terminationDate": null,
+  "department": "Finanzas",
+  "division": "Corporativo",
+  "jobTitle": "Analista de Tesorería Sr",
+  "location": "Buenos Aires",
+  "status": "Active"
+}

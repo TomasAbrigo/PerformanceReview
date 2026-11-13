@@ -1,0 +1,17 @@
+{
+  "id": "593",
+  "firstName": "Noelia",
+  "lastName": "López",
+  "workEmail": "noelia.lopez@meridian-andina.example",
+  "employeeNumber": "11449",
+  "supervisorEId": "61",
+  "supervisorId": "10116",
+  "supervisor": "Peralta, Marcelo",
+  "hireDate": "2024-06-08",
+  "terminationDate": null,
+  "department": "Ventas",
+  "division": "Comercial",
+  "jobTitle": "Sales Analyst Ssr",
+  "location": "Córdoba",
+  "status": "Active"
+}

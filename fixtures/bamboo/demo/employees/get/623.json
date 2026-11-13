@@ -1,0 +1,17 @@
+{
+  "id": "623",
+  "firstName": "Tomás",
+  "lastName": "Ojeda",
+  "workEmail": "tomas.ojeda@meridian-andina.example",
+  "employeeNumber": "11511",
+  "supervisorEId": "243",
+  "supervisorId": "10583",
+  "supervisor": "Bustos, Jimena",
+  "hireDate": "2024-08-16",
+  "terminationDate": null,
+  "department": "Calidad",
+  "division": "Operaciones",
+  "jobTitle": "Analista de Calidad Sr",
+  "location": "Buenos Aires",
+  "status": "Active"
+}

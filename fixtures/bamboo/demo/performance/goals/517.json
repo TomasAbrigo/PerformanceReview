@@ -1,0 +1,169 @@
+{
+  "canAlign": true,
+  "canCreateGoals": false,
+  "filters": [
+    {
+      "id": "status-all",
+      "name": "All"
+    },
+    {
+      "id": "inProgress",
+      "name": "In progress"
+    },
+    {
+      "id": "completed",
+      "name": "Completed"
+    },
+    {
+      "id": "closed",
+      "name": "Closed"
+    }
+  ],
+  "selectedFilter": "status-all",
+  "goals": [
+    {
+      "id": "7463",
+      "title": "Completar la certificación del área",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 65,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2024-06-18",
+      "completionDate": null,
+      "lastChangedDateTime": "2024-10-01T19:02:58Z",
+      "status": "in_progress",
+      "milestones": null,
+      "actions": {
+        "canEdit": false,
+        "canUpdateProgress": false,
+        "canClose": false,
+        "canReopen": false,
+        "canDelete": false,
+        "canComment": false
+      }
+    },
+    {
+      "id": "7466",
+      "title": "Completar la certificación del área",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2024-05-11",
+      "completionDate": "2024-04-02",
+      "lastChangedDateTime": "2024-04-02T14:32:19Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": false,
+        "canUpdateProgress": false,
+        "canClose": false,
+        "canReopen": false,
+        "canDelete": false,
+        "canComment": false
+      }
+    },
+    {
+      "id": "7467",
+      "title": "Completar la certificación del área",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 5,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [
+        67
+      ],
+      "dueDate": "2025-06-10",
+      "completionDate": null,
+      "lastChangedDateTime": "2025-03-15T16:18:29Z",
+      "status": "closed",
+      "milestones": null,
+      "actions": {
+        "canEdit": false,
+        "canUpdateProgress": false,
+        "canClose": false,
+        "canReopen": false,
+        "canDelete": false,
+        "canComment": false
+      }
+    },
+    {
+      "id": "7469",
+      "title": "Migrar los reportes al nuevo tablero",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "percentComplete": 33,
+      "alignsWithOptionId": 9001,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2025-04-04",
+      "completionDate": null,
+      "lastChangedDateTime": "2025-01-23T08:26:23Z",
+      "status": "in_progress",
+      "milestones": [
+        {
+          "id": 1813,
+          "employeeGoalId": 7469,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-01-22T09:20:30Z",
+          "lastUpdateDateTime": "2025-01-22T09:20:30Z",
+          "lastUpdateUserId": 517
+        },
+        {
+          "id": 1814,
+          "employeeGoalId": 7469,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2024-12-30T12:48:59Z",
+          "lastUpdateUserId": 517
+        },
+        {
+          "id": 1815,
+          "employeeGoalId": 7469,
+          "title": "Hito 3",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2024-12-30T17:18:55Z",
+          "lastUpdateUserId": 517
+        }
+      ],
+      "actions": {
+        "canEdit": false,
+        "canUpdateProgress": false,
+        "canClose": false,
+        "canReopen": false,
+        "canDelete": false,
+        "canComment": false
+      }
+    }
+  ],
+  "persons": [
+    {
+      "employeeId": 517,
+      "firstName": "Sofía",
+      "lastName": "Bravo",
+      "preferredName": null
+    },
+    {
+      "employeeId": 67,
+      "firstName": "Noelia",
+      "lastName": "Roldán",
+      "preferredName": null
+    }
+  ],
+  "comments": [
+    {
+      "goalId": "7463",
+      "commentCount": 4
+    },
+    {
+      "goalId": "7467",
+      "commentCount": 3
+    }
+  ]
+}

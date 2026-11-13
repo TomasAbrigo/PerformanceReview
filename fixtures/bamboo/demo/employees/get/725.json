@@ -1,0 +1,17 @@
+{
+  "id": "725",
+  "firstName": "Rodrigo",
+  "lastName": "Medina",
+  "workEmail": "rodrigo.medina@meridian-andina.example",
+  "employeeNumber": "11781",
+  "supervisorEId": "59",
+  "supervisorId": "10110",
+  "supervisor": "Soria, Gonzalo",
+  "hireDate": "2025-05-11",
+  "terminationDate": null,
+  "department": "Finanzas",
+  "division": "Corporativo",
+  "jobTitle": "Analista de Tesorería Ssr",
+  "location": "Buenos Aires",
+  "status": "Active"
+}

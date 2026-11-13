@@ -1,0 +1,163 @@
+{
+  "canAlign": true,
+  "canCreateGoals": true,
+  "filters": [
+    {
+      "id": "status-all",
+      "name": "All"
+    },
+    {
+      "id": "inProgress",
+      "name": "In progress"
+    },
+    {
+      "id": "completed",
+      "name": "Completed"
+    },
+    {
+      "id": "closed",
+      "name": "Closed"
+    }
+  ],
+  "selectedFilter": "status-all",
+  "goals": [
+    {
+      "id": "7829",
+      "title": "Mentorear a dos personas nuevas",
+      "description": "Sirve de base para el próximo ciclo de evaluación.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2024-11-15",
+      "completionDate": "2024-10-30",
+      "lastChangedDateTime": "2024-10-30T18:42:54Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "7830",
+      "title": "Entregar el proyecto Norte sin desvíos",
+      "description": "Sirve de base para el próximo ciclo de evaluación.",
+      "percentComplete": 67,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2024-12-02",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-08-04T15:35:40Z",
+      "status": "in_progress",
+      "milestones": [
+        {
+          "id": 1976,
+          "employeeGoalId": 7830,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2026-07-23T17:55:42Z",
+          "lastUpdateDateTime": "2026-07-23T17:55:42Z",
+          "lastUpdateUserId": 627
+        },
+        {
+          "id": 1977,
+          "employeeGoalId": 7830,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2026-06-10T17:01:01Z",
+          "lastUpdateDateTime": "2026-06-10T17:01:01Z",
+          "lastUpdateUserId": 627
+        },
+        {
+          "id": 1978,
+          "employeeGoalId": 7830,
+          "title": "Hito 3",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2024-09-11T09:41:03Z",
+          "lastUpdateUserId": 627
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "7831",
+      "title": "Reducir los incidentes recurrentes a la mitad",
+      "description": "Sirve de base para el próximo ciclo de evaluación.",
+      "percentComplete": 100,
+      "alignsWithOptionId": 9002,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2025-11-20",
+      "completionDate": "2025-09-24",
+      "lastChangedDateTime": "2025-09-24T09:36:27Z",
+      "status": "completed",
+      "milestones": [
+        {
+          "id": 1979,
+          "employeeGoalId": 7831,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-09-13T16:05:17Z",
+          "lastUpdateDateTime": "2025-09-13T16:05:17Z",
+          "lastUpdateUserId": 627
+        },
+        {
+          "id": 1980,
+          "employeeGoalId": 7831,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-08-20T13:37:51Z",
+          "lastUpdateDateTime": "2025-08-20T13:37:51Z",
+          "lastUpdateUserId": 627
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    }
+  ],
+  "persons": [
+    {
+      "employeeId": 627,
+      "firstName": "Ricardo",
+      "lastName": "Godoy",
+      "preferredName": null
+    }
+  ],
+  "comments": [
+    {
+      "goalId": "7830",
+      "commentCount": 3
+    },
+    {
+      "goalId": "7831",
+      "commentCount": 1
+    }
+  ]
+}

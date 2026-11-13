@@ -1,0 +1,142 @@
+{
+  "canAlign": true,
+  "canCreateGoals": true,
+  "filters": [
+    {
+      "id": "status-all",
+      "name": "All"
+    },
+    {
+      "id": "inProgress",
+      "name": "In progress"
+    },
+    {
+      "id": "completed",
+      "name": "Completed"
+    },
+    {
+      "id": "closed",
+      "name": "Closed"
+    }
+  ],
+  "selectedFilter": "status-all",
+  "goals": [
+    {
+      "id": "6175",
+      "title": "Aumentar la cobertura de pruebas al 80%",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2024-10-21",
+      "completionDate": "2024-06-24",
+      "lastChangedDateTime": "2024-06-24T08:10:23Z",
+      "status": "completed",
+      "milestones": [
+        {
+          "id": 1216,
+          "employeeGoalId": 6175,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2024-06-18T10:10:58Z",
+          "lastUpdateDateTime": "2024-06-18T10:10:58Z",
+          "lastUpdateUserId": 239
+        },
+        {
+          "id": 1217,
+          "employeeGoalId": 6175,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2024-06-20T19:00:03Z",
+          "lastUpdateDateTime": "2024-06-20T19:00:03Z",
+          "lastUpdateUserId": 239
+        },
+        {
+          "id": 1218,
+          "employeeGoalId": 6175,
+          "title": "Hito 3",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2024-06-15T10:09:54Z",
+          "lastUpdateDateTime": "2024-06-15T10:09:54Z",
+          "lastUpdateUserId": 239
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "6178",
+      "title": "Entregar el proyecto Norte sin desvíos",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2025-06-25",
+      "completionDate": "2025-02-24",
+      "lastChangedDateTime": "2025-02-24T12:19:16Z",
+      "status": "completed",
+      "milestones": [
+        {
+          "id": 1219,
+          "employeeGoalId": 6178,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2024-12-12T13:34:44Z",
+          "lastUpdateDateTime": "2024-12-12T13:34:44Z",
+          "lastUpdateUserId": 239
+        },
+        {
+          "id": 1220,
+          "employeeGoalId": 6178,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2024-12-21T11:51:51Z",
+          "lastUpdateDateTime": "2024-12-21T11:51:51Z",
+          "lastUpdateUserId": 239
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    }
+  ],
+  "persons": [
+    {
+      "employeeId": 239,
+      "firstName": "Romina",
+      "lastName": "Navarro",
+      "preferredName": null
+    }
+  ],
+  "comments": [
+    {
+      "goalId": "6175",
+      "commentCount": 1
+    },
+    {
+      "goalId": "6178",
+      "commentCount": 3
+    }
+  ]
+}

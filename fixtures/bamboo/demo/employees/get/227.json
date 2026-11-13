@@ -1,0 +1,17 @@
+{
+  "id": "227",
+  "firstName": "Sebastián",
+  "lastName": "Acosta",
+  "workEmail": "sebastian.acosta@meridian-andina.example",
+  "employeeNumber": "10542",
+  "supervisorEId": "83",
+  "supervisorId": "10177",
+  "supervisor": "Franco, Daniela",
+  "hireDate": "2021-07-30",
+  "terminationDate": null,
+  "department": "Customer Success",
+  "division": "Comercial",
+  "jobTitle": "Customer Success Manager Ssr",
+  "location": "Rosario",
+  "status": "Active"
+}

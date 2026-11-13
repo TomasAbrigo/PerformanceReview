@@ -1,0 +1,17 @@
+{
+  "id": "25",
+  "firstName": "Silvana",
+  "lastName": "Quiroga",
+  "workEmail": "silvana.quiroga@meridian-andina.example",
+  "employeeNumber": "10044",
+  "supervisorEId": "19",
+  "supervisorId": "10028",
+  "supervisor": "Molina, Silvana",
+  "hireDate": "2017-10-01",
+  "terminationDate": null,
+  "department": "Datos",
+  "division": "Tecnología",
+  "jobTitle": "Gerente de Datos",
+  "location": "Buenos Aires",
+  "status": "Active"
+}

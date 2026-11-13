@@ -1,0 +1,17 @@
+{
+  "id": "63",
+  "firstName": "Facundo",
+  "lastName": "Monzón",
+  "workEmail": "facundo.monzon@meridian-andina.example",
+  "employeeNumber": "10135",
+  "supervisorEId": "31",
+  "supervisorId": "10060",
+  "supervisor": "Rivas, Federico",
+  "hireDate": "2023-12-27",
+  "terminationDate": null,
+  "department": "Finanzas",
+  "division": "Corporativo",
+  "jobTitle": "Analista Contable Ssr",
+  "location": "Rosario",
+  "status": "Active"
+}

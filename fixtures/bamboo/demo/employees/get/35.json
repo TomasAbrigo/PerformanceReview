@@ -1,0 +1,17 @@
+{
+  "id": "35",
+  "firstName": "Matías",
+  "lastName": "Ojeda",
+  "workEmail": "matias.ojeda@meridian-andina.example",
+  "employeeNumber": "10053",
+  "supervisorEId": "13",
+  "supervisorId": "10012",
+  "supervisor": "Zárate, Daniela",
+  "hireDate": "2017-08-27",
+  "terminationDate": null,
+  "department": "Datos",
+  "division": "Tecnología",
+  "jobTitle": "Gerente de Datos",
+  "location": "Buenos Aires",
+  "status": "Active"
+}

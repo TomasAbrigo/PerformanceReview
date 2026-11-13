@@ -1,0 +1,17 @@
+{
+  "id": "675",
+  "firstName": "Nicolás",
+  "lastName": "Ibáñez",
+  "workEmail": "nicolas.ibanez@meridian-andina.example",
+  "employeeNumber": "11635",
+  "supervisorEId": "51",
+  "supervisorId": "10084",
+  "supervisor": "Toledo, Gonzalo",
+  "hireDate": "2025-01-24",
+  "terminationDate": null,
+  "department": "People",
+  "division": "Corporativo",
+  "jobTitle": "Reclutador Jr",
+  "location": "Buenos Aires",
+  "status": "Active"
+}

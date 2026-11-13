@@ -1,0 +1,180 @@
+{
+  "canAlign": true,
+  "canCreateGoals": true,
+  "filters": [
+    {
+      "id": "status-all",
+      "name": "All"
+    },
+    {
+      "id": "inProgress",
+      "name": "In progress"
+    },
+    {
+      "id": "completed",
+      "name": "Completed"
+    },
+    {
+      "id": "closed",
+      "name": "Closed"
+    }
+  ],
+  "selectedFilter": "status-all",
+  "goals": [
+    {
+      "id": "5877",
+      "title": "Entregar el proyecto Norte sin desvíos",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 60,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2023-06-16",
+      "completionDate": null,
+      "lastChangedDateTime": "2024-01-08T14:41:42Z",
+      "status": "closed",
+      "milestones": null,
+      "actions": {
+        "canEdit": false,
+        "canUpdateProgress": false,
+        "canClose": false,
+        "canReopen": true,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "5879",
+      "title": "Implementar el calendario editorial",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "percentComplete": 20,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2025-04-24",
+      "completionDate": null,
+      "lastChangedDateTime": "2025-06-11T08:24:05Z",
+      "status": "closed",
+      "milestones": null,
+      "actions": {
+        "canEdit": false,
+        "canUpdateProgress": false,
+        "canClose": false,
+        "canReopen": true,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "5880",
+      "title": "Migrar los reportes al nuevo tablero",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 40,
+      "alignsWithOptionId": 9002,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2026-06-07",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-05-28T17:53:53Z",
+      "status": "in_progress",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "5882",
+      "title": "Mentorear a dos personas nuevas",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 0,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2026-06-16",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-07-30T16:46:49Z",
+      "status": "in_progress",
+      "milestones": [
+        {
+          "id": 1105,
+          "employeeGoalId": 5882,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2026-01-20T08:39:01Z",
+          "lastUpdateUserId": 181
+        },
+        {
+          "id": 1106,
+          "employeeGoalId": 5882,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2026-01-20T17:26:49Z",
+          "lastUpdateUserId": 181
+        },
+        {
+          "id": 1107,
+          "employeeGoalId": 5882,
+          "title": "Hito 3",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2026-01-20T10:41:43Z",
+          "lastUpdateUserId": 181
+        },
+        {
+          "id": 1108,
+          "employeeGoalId": 5882,
+          "title": "Hito 4",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2026-01-20T13:00:50Z",
+          "lastUpdateUserId": 181
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    }
+  ],
+  "persons": [
+    {
+      "employeeId": 181,
+      "firstName": "Laura",
+      "lastName": "Olmos",
+      "preferredName": null
+    }
+  ],
+  "comments": [
+    {
+      "goalId": "5877",
+      "commentCount": 4
+    },
+    {
+      "goalId": "5879",
+      "commentCount": 4
+    },
+    {
+      "goalId": "5880",
+      "commentCount": 3
+    },
+    {
+      "goalId": "5882",
+      "commentCount": 4
+    }
+  ]
+}

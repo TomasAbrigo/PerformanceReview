@@ -1,0 +1,17 @@
+{
+  "id": "413",
+  "firstName": "Victoria",
+  "lastName": "Escobar",
+  "workEmail": "victoria.escobar@meridian-andina.example",
+  "employeeNumber": "11029",
+  "supervisorEId": "241",
+  "supervisorId": "10574",
+  "supervisor": "Reyes, Daniela",
+  "hireDate": "2022-12-30",
+  "terminationDate": null,
+  "department": "Marketing",
+  "division": "Comercial",
+  "jobTitle": "Content Specialist Ssr",
+  "location": "Montevideo",
+  "status": "Active"
+}

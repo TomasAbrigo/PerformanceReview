@@ -1,0 +1,118 @@
+{
+  "canAlign": true,
+  "canCreateGoals": true,
+  "filters": [
+    {
+      "id": "status-all",
+      "name": "All"
+    },
+    {
+      "id": "inProgress",
+      "name": "In progress"
+    },
+    {
+      "id": "completed",
+      "name": "Completed"
+    },
+    {
+      "id": "closed",
+      "name": "Closed"
+    }
+  ],
+  "selectedFilter": "status-all",
+  "goals": [
+    {
+      "id": "7996",
+      "title": "Implementar el calendario editorial",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 55,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2025-06-05",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-10-22T14:06:51Z",
+      "status": "in_progress",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "7997",
+      "title": "Implementar el calendario editorial",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [
+        61
+      ],
+      "dueDate": "2026-10-07",
+      "completionDate": "2026-09-28",
+      "lastChangedDateTime": "2026-09-28T10:53:06Z",
+      "status": "completed",
+      "milestones": [
+        {
+          "id": 2053,
+          "employeeGoalId": 7997,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2026-05-03T13:17:56Z",
+          "lastUpdateDateTime": "2026-05-03T13:17:56Z",
+          "lastUpdateUserId": 691
+        },
+        {
+          "id": 2054,
+          "employeeGoalId": 7997,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2026-06-27T14:39:55Z",
+          "lastUpdateDateTime": "2026-06-27T14:39:55Z",
+          "lastUpdateUserId": 691
+        },
+        {
+          "id": 2055,
+          "employeeGoalId": 7997,
+          "title": "Hito 3",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2026-08-04T12:14:27Z",
+          "lastUpdateDateTime": "2026-08-04T12:14:27Z",
+          "lastUpdateUserId": 691
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    }
+  ],
+  "persons": [
+    {
+      "employeeId": 691,
+      "firstName": "Fernando",
+      "lastName": "Franco",
+      "preferredName": "Fer"
+    },
+    {
+      "employeeId": 61,
+      "firstName": "Marcelo",
+      "lastName": "Peralta",
+      "preferredName": null
+    }
+  ],
+  "comments": []
+}

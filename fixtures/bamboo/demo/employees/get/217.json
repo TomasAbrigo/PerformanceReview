@@ -1,0 +1,17 @@
+{
+  "id": "217",
+  "firstName": "Diego",
+  "lastName": "Lezcano",
+  "workEmail": "diego.lezcano@meridian-andina.example",
+  "employeeNumber": "10526",
+  "supervisorEId": "59",
+  "supervisorId": "10110",
+  "supervisor": "Soria, Gonzalo",
+  "hireDate": "2021-06-01",
+  "terminationDate": null,
+  "department": "Finanzas",
+  "division": "Corporativo",
+  "jobTitle": "Analista de Tesorería Jr",
+  "location": "Montevideo",
+  "status": "Active"
+}

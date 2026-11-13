@@ -1,0 +1,188 @@
+{
+  "canAlign": true,
+  "canCreateGoals": true,
+  "filters": [
+    {
+      "id": "status-all",
+      "name": "All"
+    },
+    {
+      "id": "inProgress",
+      "name": "In progress"
+    },
+    {
+      "id": "completed",
+      "name": "Completed"
+    },
+    {
+      "id": "closed",
+      "name": "Closed"
+    }
+  ],
+  "selectedFilter": "status-all",
+  "goals": [
+    {
+      "id": "5198",
+      "title": "Renovar las cuentas clave del trimestre",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2024-12-07",
+      "completionDate": "2024-10-11",
+      "lastChangedDateTime": "2024-10-11T18:01:12Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "5201",
+      "title": "Completar la certificación del área",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2025-06-11",
+      "completionDate": "2025-03-10",
+      "lastChangedDateTime": "2025-03-10T11:21:00Z",
+      "status": "completed",
+      "milestones": [
+        {
+          "id": 792,
+          "employeeGoalId": 5201,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-03-05T15:59:15Z",
+          "lastUpdateDateTime": "2025-03-05T15:59:15Z",
+          "lastUpdateUserId": 59
+        },
+        {
+          "id": 793,
+          "employeeGoalId": 5201,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-03-07T11:08:22Z",
+          "lastUpdateDateTime": "2025-03-07T11:08:22Z",
+          "lastUpdateUserId": 59
+        },
+        {
+          "id": 794,
+          "employeeGoalId": 5201,
+          "title": "Hito 3",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-02-26T15:22:09Z",
+          "lastUpdateDateTime": "2025-02-26T15:22:09Z",
+          "lastUpdateUserId": 59
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "5204",
+      "title": "Lanzar el nuevo flujo de onboarding",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 0,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2026-12-16",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-08-17T14:04:42Z",
+      "status": "in_progress",
+      "milestones": [
+        {
+          "id": 795,
+          "employeeGoalId": 5204,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2026-04-20T12:01:02Z",
+          "lastUpdateUserId": 59
+        },
+        {
+          "id": 796,
+          "employeeGoalId": 5204,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2026-04-20T11:29:20Z",
+          "lastUpdateUserId": 59
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "5206",
+      "title": "Completar la certificación del área",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2026-06-03",
+      "completionDate": "2026-02-02",
+      "lastChangedDateTime": "2026-02-02T09:40:48Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    }
+  ],
+  "persons": [
+    {
+      "employeeId": 59,
+      "firstName": "Cecilia",
+      "lastName": "Gutiérrez",
+      "preferredName": null
+    }
+  ],
+  "comments": [
+    {
+      "goalId": "5198",
+      "commentCount": 2
+    },
+    {
+      "goalId": "5201",
+      "commentCount": 4
+    },
+    {
+      "goalId": "5206",
+      "commentCount": 4
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "id": "697",
+  "firstName": "Silvana",
+  "lastName": "Garrido",
+  "workEmail": "silvana.garrido@meridian-andina.example",
+  "employeeNumber": "11706",
+  "supervisorEId": "65",
+  "supervisorId": "10126",
+  "supervisor": "Díaz, Valentina",
+  "hireDate": "2025-03-04",
+  "terminationDate": null,
+  "department": "Marketing",
+  "division": "Comercial",
+  "jobTitle": "Content Specialist Jr",
+  "location": "Buenos Aires",
+  "status": "Active"
+}

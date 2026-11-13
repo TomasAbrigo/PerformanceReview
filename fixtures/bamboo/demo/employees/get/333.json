@@ -1,0 +1,17 @@
+{
+  "id": "333",
+  "firstName": "Martín",
+  "lastName": "Domínguez",
+  "workEmail": "martin.dominguez@meridian-andina.example",
+  "employeeNumber": "10828",
+  "supervisorEId": "49",
+  "supervisorId": "10081",
+  "supervisor": "Monzón, Milagros",
+  "hireDate": "2022-05-13",
+  "terminationDate": null,
+  "department": "Calidad",
+  "division": "Operaciones",
+  "jobTitle": "Analista de Calidad Ssr",
+  "location": "Buenos Aires",
+  "status": "Active"
+}

@@ -1,0 +1,216 @@
+{
+  "canAlign": true,
+  "canCreateGoals": true,
+  "filters": [
+    {
+      "id": "status-all",
+      "name": "All"
+    },
+    {
+      "id": "inProgress",
+      "name": "In progress"
+    },
+    {
+      "id": "completed",
+      "name": "Completed"
+    },
+    {
+      "id": "closed",
+      "name": "Closed"
+    }
+  ],
+  "selectedFilter": "status-all",
+  "goals": [
+    {
+      "id": "6769",
+      "title": "Cerrar el plan de capacitación anual",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 80,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2023-04-06",
+      "completionDate": null,
+      "lastChangedDateTime": "2025-03-16T12:03:33Z",
+      "status": "in_progress",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "6772",
+      "title": "Migrar los reportes al nuevo tablero",
+      "description": "Sirve de base para el próximo ciclo de evaluación.",
+      "percentComplete": 85,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2023-03-03",
+      "completionDate": null,
+      "lastChangedDateTime": "2024-04-29T13:13:14Z",
+      "status": "in_progress",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "6773",
+      "title": "Automatizar la conciliación mensual",
+      "description": "Sirve de base para el próximo ciclo de evaluación.",
+      "percentComplete": 50,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2025-08-03",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-07-24T10:01:41Z",
+      "status": "in_progress",
+      "milestones": [
+        {
+          "id": 1484,
+          "employeeGoalId": 6773,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2026-06-14T17:02:36Z",
+          "lastUpdateDateTime": "2026-06-14T17:02:36Z",
+          "lastUpdateUserId": 365
+        },
+        {
+          "id": 1485,
+          "employeeGoalId": 6773,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2024-12-30T15:04:03Z",
+          "lastUpdateUserId": 365
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "6775",
+      "title": "Cerrar el plan de capacitación anual",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2026-05-06",
+      "completionDate": "2026-05-11",
+      "lastChangedDateTime": "2026-05-11T09:56:08Z",
+      "status": "completed",
+      "milestones": [
+        {
+          "id": 1486,
+          "employeeGoalId": 6775,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2026-03-09T14:15:08Z",
+          "lastUpdateDateTime": "2026-03-09T14:15:08Z",
+          "lastUpdateUserId": 365
+        },
+        {
+          "id": 1487,
+          "employeeGoalId": 6775,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2026-04-23T17:50:11Z",
+          "lastUpdateDateTime": "2026-04-23T17:50:11Z",
+          "lastUpdateUserId": 365
+        },
+        {
+          "id": 1488,
+          "employeeGoalId": 6775,
+          "title": "Hito 3",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2026-01-12T13:26:36Z",
+          "lastUpdateDateTime": "2026-01-12T13:26:36Z",
+          "lastUpdateUserId": 365
+        },
+        {
+          "id": 1489,
+          "employeeGoalId": 6775,
+          "title": "Hito 4",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2026-03-06T12:26:40Z",
+          "lastUpdateDateTime": "2026-03-06T12:26:40Z",
+          "lastUpdateUserId": 365
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "6776",
+      "title": "Renovar las cuentas clave del trimestre",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 45,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2026-04-08",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-06-08T12:39:08Z",
+      "status": "in_progress",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    }
+  ],
+  "persons": [
+    {
+      "employeeId": 365,
+      "firstName": "María",
+      "lastName": "Peralta",
+      "preferredName": "Mari"
+    }
+  ],
+  "comments": [
+    {
+      "goalId": "6769",
+      "commentCount": 4
+    },
+    {
+      "goalId": "6775",
+      "commentCount": 4
+    }
+  ]
+}

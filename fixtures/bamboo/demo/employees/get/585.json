@@ -1,0 +1,17 @@
+{
+  "id": "585",
+  "firstName": "Bruno",
+  "lastName": "Cabrera",
+  "workEmail": "bruno.cabrera@meridian-andina.example",
+  "employeeNumber": "11441",
+  "supervisorEId": "65",
+  "supervisorId": "10126",
+  "supervisor": "Díaz, Valentina",
+  "hireDate": "2024-05-16",
+  "terminationDate": null,
+  "department": "Marketing",
+  "division": "Comercial",
+  "jobTitle": "Diseñador de Marca Ssr",
+  "location": "Buenos Aires",
+  "status": "Active"
+}

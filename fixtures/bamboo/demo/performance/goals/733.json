@@ -1,0 +1,180 @@
+{
+  "canAlign": true,
+  "canCreateGoals": true,
+  "filters": [
+    {
+      "id": "status-all",
+      "name": "All"
+    },
+    {
+      "id": "inProgress",
+      "name": "In progress"
+    },
+    {
+      "id": "completed",
+      "name": "Completed"
+    },
+    {
+      "id": "closed",
+      "name": "Closed"
+    }
+  ],
+  "selectedFilter": "status-all",
+  "goals": [
+    {
+      "id": "8103",
+      "title": "Documentar los procesos críticos",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "percentComplete": 0,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [
+        241
+      ],
+      "dueDate": "2025-08-23",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-07-02T17:41:28Z",
+      "status": "in_progress",
+      "milestones": [
+        {
+          "id": 2110,
+          "employeeGoalId": 8103,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2025-06-06T19:09:31Z",
+          "lastUpdateUserId": 733
+        },
+        {
+          "id": 2111,
+          "employeeGoalId": 8103,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2025-06-06T16:29:40Z",
+          "lastUpdateUserId": 733
+        },
+        {
+          "id": 2112,
+          "employeeGoalId": 8103,
+          "title": "Hito 3",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2025-06-06T16:50:03Z",
+          "lastUpdateUserId": 733
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "8105",
+      "title": "Aumentar la cobertura de pruebas al 80%",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [
+        241
+      ],
+      "dueDate": "2026-06-25",
+      "completionDate": "2026-05-29",
+      "lastChangedDateTime": "2026-05-29T10:05:38Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "8107",
+      "title": "Mentorear a dos personas nuevas",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "percentComplete": 33,
+      "alignsWithOptionId": 9001,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2026-11-24",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-10-05T18:26:01Z",
+      "status": "in_progress",
+      "milestones": [
+        {
+          "id": 2113,
+          "employeeGoalId": 8107,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2026-05-15T09:59:17Z",
+          "lastUpdateDateTime": "2026-05-15T09:59:17Z",
+          "lastUpdateUserId": 733
+        },
+        {
+          "id": 2114,
+          "employeeGoalId": 8107,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2026-05-08T09:40:11Z",
+          "lastUpdateUserId": 733
+        },
+        {
+          "id": 2115,
+          "employeeGoalId": 8107,
+          "title": "Hito 3",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2026-05-08T11:17:36Z",
+          "lastUpdateUserId": 733
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    }
+  ],
+  "persons": [
+    {
+      "employeeId": 733,
+      "firstName": "Maximiliano",
+      "lastName": "Cáceres",
+      "preferredName": null
+    },
+    {
+      "employeeId": 241,
+      "firstName": "Daniela",
+      "lastName": "Reyes",
+      "preferredName": null
+    }
+  ],
+  "comments": [
+    {
+      "goalId": "8107",
+      "commentCount": 4
+    }
+  ]
+}

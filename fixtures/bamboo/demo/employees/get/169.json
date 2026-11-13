@@ -1,0 +1,17 @@
+{
+  "id": "169",
+  "firstName": "Hernán",
+  "lastName": "Escobar",
+  "workEmail": "hernan.escobar@meridian-andina.example",
+  "employeeNumber": "10397",
+  "supervisorEId": "65",
+  "supervisorId": "10126",
+  "supervisor": "Díaz, Valentina",
+  "hireDate": "2020-11-16",
+  "terminationDate": null,
+  "department": "Marketing",
+  "division": "Comercial",
+  "jobTitle": "Content Specialist Sr",
+  "location": "Rosario",
+  "status": "Active"
+}

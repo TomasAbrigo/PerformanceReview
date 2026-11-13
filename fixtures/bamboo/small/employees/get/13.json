@@ -1,0 +1,17 @@
+{
+  "id": "13",
+  "firstName": "Santiago",
+  "lastName": "Garrido",
+  "workEmail": "santiago.garrido@meridian-andina.example",
+  "employeeNumber": "10015",
+  "supervisorEId": "11",
+  "supervisorId": "10009",
+  "supervisor": "Delgado, Marcela",
+  "hireDate": "2014-06-20",
+  "terminationDate": null,
+  "department": "Dirección de Comercial",
+  "division": "Comercial",
+  "jobTitle": "VP de Comercial",
+  "location": "Buenos Aires",
+  "status": "Active"
+}

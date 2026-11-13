@@ -1,0 +1,174 @@
+{
+  "canAlign": true,
+  "canCreateGoals": true,
+  "filters": [
+    {
+      "id": "status-all",
+      "name": "All"
+    },
+    {
+      "id": "inProgress",
+      "name": "In progress"
+    },
+    {
+      "id": "completed",
+      "name": "Completed"
+    },
+    {
+      "id": "closed",
+      "name": "Closed"
+    }
+  ],
+  "selectedFilter": "status-all",
+  "goals": [
+    {
+      "id": "8152",
+      "title": "Aumentar la cobertura de pruebas al 80%",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2026-02-02",
+      "completionDate": "2025-11-27",
+      "lastChangedDateTime": "2025-11-27T15:49:04Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "8154",
+      "title": "Cerrar el plan de capacitación anual",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 100,
+      "alignsWithOptionId": 9001,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2026-09-14",
+      "completionDate": "2026-04-06",
+      "lastChangedDateTime": "2026-04-06T19:44:19Z",
+      "status": "completed",
+      "milestones": [
+        {
+          "id": 2134,
+          "employeeGoalId": 8154,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2026-04-04T15:59:19Z",
+          "lastUpdateDateTime": "2026-04-04T15:59:19Z",
+          "lastUpdateUserId": 751
+        },
+        {
+          "id": 2135,
+          "employeeGoalId": 8154,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2026-03-28T13:31:01Z",
+          "lastUpdateDateTime": "2026-03-28T13:31:01Z",
+          "lastUpdateUserId": 751
+        },
+        {
+          "id": 2136,
+          "employeeGoalId": 8154,
+          "title": "Hito 3",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2026-04-02T17:32:35Z",
+          "lastUpdateDateTime": "2026-04-02T17:32:35Z",
+          "lastUpdateUserId": 751
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "8157",
+      "title": "Reducir el tiempo de primera respuesta un 20%",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "percentComplete": 0,
+      "alignsWithOptionId": 9001,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2026-08-30",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-08-20T15:22:16Z",
+      "status": "in_progress",
+      "milestones": [
+        {
+          "id": 2137,
+          "employeeGoalId": 8157,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2026-05-02T14:09:44Z",
+          "lastUpdateUserId": 751
+        },
+        {
+          "id": 2138,
+          "employeeGoalId": 8157,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2026-05-02T18:58:13Z",
+          "lastUpdateUserId": 751
+        },
+        {
+          "id": 2139,
+          "employeeGoalId": 8157,
+          "title": "Hito 3",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2026-05-02T18:36:55Z",
+          "lastUpdateUserId": 751
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    }
+  ],
+  "persons": [
+    {
+      "employeeId": 751,
+      "firstName": "Franco",
+      "lastName": "Reyes",
+      "preferredName": null
+    }
+  ],
+  "comments": [
+    {
+      "goalId": "8152",
+      "commentCount": 4
+    },
+    {
+      "goalId": "8154",
+      "commentCount": 3
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "id": "791",
+  "firstName": "Marcelo",
+  "lastName": "Yáñez",
+  "workEmail": "marcelo.yanez@meridian-andina.example",
+  "employeeNumber": "11936",
+  "supervisorEId": "321",
+  "supervisorId": "10792",
+  "supervisor": "Figueroa, Facundo",
+  "hireDate": "2025-08-26",
+  "terminationDate": null,
+  "department": "Finanzas",
+  "division": "Corporativo",
+  "jobTitle": "Analista de Tesorería Ssr",
+  "location": "Córdoba",
+  "status": "Active"
+}

@@ -1,0 +1,151 @@
+{
+  "canAlign": true,
+  "canCreateGoals": true,
+  "filters": [
+    {
+      "id": "status-all",
+      "name": "All"
+    },
+    {
+      "id": "inProgress",
+      "name": "In progress"
+    },
+    {
+      "id": "completed",
+      "name": "Completed"
+    },
+    {
+      "id": "closed",
+      "name": "Closed"
+    }
+  ],
+  "selectedFilter": "status-all",
+  "goals": [
+    {
+      "id": "5388",
+      "title": "Implementar el calendario editorial",
+      "description": "Sirve de base para el próximo ciclo de evaluación.",
+      "percentComplete": 60,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2023-09-25",
+      "completionDate": null,
+      "lastChangedDateTime": "2024-09-30T19:17:59Z",
+      "status": "in_progress",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "5391",
+      "title": "Mejorar el NPS interno del equipo",
+      "description": "Sirve de base para el próximo ciclo de evaluación.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2025-11-24",
+      "completionDate": "2025-10-17",
+      "lastChangedDateTime": "2025-10-17T18:40:25Z",
+      "status": "completed",
+      "milestones": [
+        {
+          "id": 885,
+          "employeeGoalId": 5391,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-08-23T17:56:59Z",
+          "lastUpdateDateTime": "2025-08-23T17:56:59Z",
+          "lastUpdateUserId": 89
+        },
+        {
+          "id": 886,
+          "employeeGoalId": 5391,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-10-04T16:22:31Z",
+          "lastUpdateDateTime": "2025-10-04T16:22:31Z",
+          "lastUpdateUserId": 89
+        },
+        {
+          "id": 887,
+          "employeeGoalId": 5391,
+          "title": "Hito 3",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-09-25T12:25:51Z",
+          "lastUpdateDateTime": "2025-09-25T12:25:51Z",
+          "lastUpdateUserId": 89
+        },
+        {
+          "id": 888,
+          "employeeGoalId": 5391,
+          "title": "Hito 4",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-10-16T15:34:14Z",
+          "lastUpdateDateTime": "2025-10-16T15:34:14Z",
+          "lastUpdateUserId": 89
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "5393",
+      "title": "Completar la certificación del área",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 100,
+      "alignsWithOptionId": 9004,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2025-02-17",
+      "completionDate": "2025-02-05",
+      "lastChangedDateTime": "2025-02-05T09:31:17Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    }
+  ],
+  "persons": [
+    {
+      "employeeId": 89,
+      "firstName": "Fernando",
+      "lastName": "Barrios",
+      "preferredName": "Fer"
+    }
+  ],
+  "comments": [
+    {
+      "goalId": "5391",
+      "commentCount": 1
+    },
+    {
+      "goalId": "5393",
+      "commentCount": 1
+    }
+  ]
+}

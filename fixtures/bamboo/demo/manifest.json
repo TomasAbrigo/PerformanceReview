@@ -1,0 +1,27 @@
+{
+  "size": "demo",
+  "seed": 2002,
+  "asOf": "2026-11-01",
+  "cycles": [
+    "Evaluación de desempeño 2023",
+    "Evaluación de desempeño 2024",
+    "Evaluación de desempeño 2025"
+  ],
+  "pageLimit": 100,
+  "counts": {
+    "employees": 400,
+    "terminations": 30,
+    "rehires": 8,
+    "managerChanges": 70,
+    "jobInfoRows": 567,
+    "employmentStatusRows": 430,
+    "goals": 1649,
+    "assessments": 915,
+    "feedbackRequests": 2764,
+    "renames": 6,
+    "misspelledNames": 12,
+    "namesakePairs": 1,
+    "outsiderRows": 18,
+    "apiFiles": 807
+  }
+}

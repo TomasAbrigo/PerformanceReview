@@ -1,0 +1,17 @@
+{
+  "id": "589",
+  "firstName": "Santiago",
+  "lastName": "Castro",
+  "workEmail": "santiago.castro@meridian-andina.example",
+  "employeeNumber": "11444",
+  "supervisorEId": "111",
+  "supervisorId": "10253",
+  "supervisor": "Peralta, Martín",
+  "hireDate": "2024-05-28",
+  "terminationDate": null,
+  "department": "Datos",
+  "division": "Tecnología",
+  "jobTitle": "Data Engineer Ssr",
+  "location": "Buenos Aires",
+  "status": "Active"
+}

@@ -1,0 +1,17 @@
+{
+  "id": "561",
+  "firstName": "Elena",
+  "lastName": "Bustos",
+  "workEmail": "elena.bustos@meridian-andina.example",
+  "employeeNumber": "11386",
+  "supervisorEId": "43",
+  "supervisorId": "10070",
+  "supervisor": "Soria, Eugenia",
+  "hireDate": "2024-04-05",
+  "terminationDate": null,
+  "department": "Legales",
+  "division": "Corporativo",
+  "jobTitle": "Abogado Corporativo Jr",
+  "location": "Buenos Aires",
+  "status": "Active"
+}

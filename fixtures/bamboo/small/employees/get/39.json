@@ -1,0 +1,17 @@
+{
+  "id": "39",
+  "firstName": "Verónica",
+  "lastName": "Márquez",
+  "workEmail": "veronica.marquez@meridian-andina.example",
+  "employeeNumber": "10079",
+  "supervisorEId": "29",
+  "supervisorId": "10058",
+  "supervisor": "Ibáñez, Rocío",
+  "hireDate": "2019-04-06",
+  "terminationDate": null,
+  "department": "People",
+  "division": "Corporativo",
+  "jobTitle": "HR Business Partner Ssr",
+  "location": "Buenos Aires",
+  "status": "Active"
+}

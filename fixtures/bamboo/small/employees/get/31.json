@@ -1,0 +1,17 @@
+{
+  "id": "31",
+  "firstName": "Federico",
+  "lastName": "Rivas",
+  "workEmail": "federico.rivas@meridian-andina.example",
+  "employeeNumber": "10060",
+  "supervisorEId": "21",
+  "supervisorId": "10035",
+  "supervisor": "Ibáñez, Mateo",
+  "hireDate": "2018-03-03",
+  "terminationDate": null,
+  "department": "Finanzas",
+  "division": "Corporativo",
+  "jobTitle": "Líder de Finanzas",
+  "location": "Remoto",
+  "status": "Active"
+}

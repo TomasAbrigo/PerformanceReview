@@ -1,0 +1,17 @@
+{
+  "id": "547",
+  "firstName": "Santiago",
+  "lastName": "Giménez",
+  "workEmail": "santiago.gimenez@meridian-andina.example",
+  "employeeNumber": "11337",
+  "supervisorEId": "147",
+  "supervisorId": "10339",
+  "supervisor": "Páez, Paula",
+  "hireDate": "2024-03-04",
+  "terminationDate": null,
+  "department": "Legales",
+  "division": "Corporativo",
+  "jobTitle": "Abogado Corporativo Ssr",
+  "location": "Buenos Aires",
+  "status": "Active"
+}

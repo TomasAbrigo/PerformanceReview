@@ -1,0 +1,17 @@
+{
+  "id": "85",
+  "firstName": "Sofía",
+  "lastName": "Valdez",
+  "workEmail": "sofia.valdez2@meridian-andina.example",
+  "employeeNumber": "10155",
+  "supervisorEId": "37",
+  "supervisorId": "10075",
+  "supervisor": "Ríos, Hugo",
+  "hireDate": "2026-02-04",
+  "terminationDate": null,
+  "department": "Datos",
+  "division": "Tecnología",
+  "jobTitle": "Data Engineer Ssr",
+  "location": "Buenos Aires",
+  "status": "Active"
+}

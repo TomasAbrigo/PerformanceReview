@@ -1,0 +1,148 @@
+{
+  "canAlign": true,
+  "canCreateGoals": true,
+  "filters": [
+    {
+      "id": "status-all",
+      "name": "All"
+    },
+    {
+      "id": "inProgress",
+      "name": "In progress"
+    },
+    {
+      "id": "completed",
+      "name": "Completed"
+    },
+    {
+      "id": "closed",
+      "name": "Closed"
+    }
+  ],
+  "selectedFilter": "status-all",
+  "goals": [
+    {
+      "id": "7887",
+      "title": "Aumentar la cobertura de pruebas al 80%",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 100,
+      "alignsWithOptionId": 9004,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2025-02-18",
+      "completionDate": "2025-02-17",
+      "lastChangedDateTime": "2025-02-17T19:01:20Z",
+      "status": "completed",
+      "milestones": [
+        {
+          "id": 2006,
+          "employeeGoalId": 7887,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2024-12-05T13:42:26Z",
+          "lastUpdateDateTime": "2024-12-05T13:42:26Z",
+          "lastUpdateUserId": 651
+        },
+        {
+          "id": 2007,
+          "employeeGoalId": 7887,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2024-12-06T09:40:07Z",
+          "lastUpdateDateTime": "2024-12-06T09:40:07Z",
+          "lastUpdateUserId": 651
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "7889",
+      "title": "Mentorear a dos personas nuevas",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2025-10-11",
+      "completionDate": "2025-09-30",
+      "lastChangedDateTime": "2025-09-30T19:18:06Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "7891",
+      "title": "Mejorar el NPS interno del equipo",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "percentComplete": 50,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2026-12-02",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-08-05T13:07:34Z",
+      "status": "in_progress",
+      "milestones": [
+        {
+          "id": 2008,
+          "employeeGoalId": 7891,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2026-08-01T12:16:45Z",
+          "lastUpdateDateTime": "2026-08-01T12:16:45Z",
+          "lastUpdateUserId": 651
+        },
+        {
+          "id": 2009,
+          "employeeGoalId": 7891,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2026-05-19T19:41:02Z",
+          "lastUpdateUserId": 651
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    }
+  ],
+  "persons": [
+    {
+      "employeeId": 651,
+      "firstName": "Candela",
+      "lastName": "Pérez",
+      "preferredName": null
+    }
+  ],
+  "comments": [
+    {
+      "goalId": "7889",
+      "commentCount": 4
+    }
+  ]
+}

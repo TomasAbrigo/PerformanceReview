@@ -1,0 +1,17 @@
+{
+  "id": "29",
+  "firstName": "Rocío",
+  "lastName": "Ibáñez",
+  "workEmail": "rocio.ibanez@meridian-andina.example",
+  "employeeNumber": "10058",
+  "supervisorEId": "27",
+  "supervisorId": "10051",
+  "supervisor": "Lagos, Marcelo",
+  "hireDate": "2018-02-06",
+  "terminationDate": null,
+  "department": "People",
+  "division": "Corporativo",
+  "jobTitle": "Líder de People",
+  "location": "Córdoba",
+  "status": "Active"
+}

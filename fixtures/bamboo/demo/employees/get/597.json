@@ -1,0 +1,17 @@
+{
+  "id": "597",
+  "firstName": "Lucía",
+  "lastName": "Barrios",
+  "workEmail": "lucia.barrios@meridian-andina.example",
+  "employeeNumber": "11457",
+  "supervisorEId": "49",
+  "supervisorId": "10081",
+  "supervisor": "Monzón, Milagros",
+  "hireDate": "2024-06-15",
+  "terminationDate": null,
+  "department": "Calidad",
+  "division": "Operaciones",
+  "jobTitle": "Auditor de Procesos Jr",
+  "location": "Rosario",
+  "status": "Active"
+}

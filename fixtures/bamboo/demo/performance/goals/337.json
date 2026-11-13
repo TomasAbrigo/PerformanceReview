@@ -1,0 +1,173 @@
+{
+  "canAlign": true,
+  "canCreateGoals": true,
+  "filters": [
+    {
+      "id": "status-all",
+      "name": "All"
+    },
+    {
+      "id": "inProgress",
+      "name": "In progress"
+    },
+    {
+      "id": "completed",
+      "name": "Completed"
+    },
+    {
+      "id": "closed",
+      "name": "Closed"
+    }
+  ],
+  "selectedFilter": "status-all",
+  "goals": [
+    {
+      "id": "6635",
+      "title": "Migrar los reportes al nuevo tablero",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 100,
+      "alignsWithOptionId": 9001,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2023-11-07",
+      "completionDate": "2023-05-16",
+      "lastChangedDateTime": "2023-05-16T11:23:25Z",
+      "status": "completed",
+      "milestones": [
+        {
+          "id": 1435,
+          "employeeGoalId": 6635,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2023-04-20T08:35:58Z",
+          "lastUpdateDateTime": "2023-04-20T08:35:58Z",
+          "lastUpdateUserId": 337
+        },
+        {
+          "id": 1436,
+          "employeeGoalId": 6635,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2023-04-22T13:52:25Z",
+          "lastUpdateDateTime": "2023-04-22T13:52:25Z",
+          "lastUpdateUserId": 337
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "6638",
+      "title": "Implementar el calendario editorial",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "percentComplete": 45,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [
+        111
+      ],
+      "dueDate": "2023-03-28",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-04-24T14:42:17Z",
+      "status": "closed",
+      "milestones": null,
+      "actions": {
+        "canEdit": false,
+        "canUpdateProgress": false,
+        "canClose": false,
+        "canReopen": true,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "6640",
+      "title": "Migrar los reportes al nuevo tablero",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2025-08-15",
+      "completionDate": "2025-08-31",
+      "lastChangedDateTime": "2025-08-31T18:34:55Z",
+      "status": "completed",
+      "milestones": [
+        {
+          "id": 1437,
+          "employeeGoalId": 6640,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-05-20T17:59:30Z",
+          "lastUpdateDateTime": "2025-05-20T17:59:30Z",
+          "lastUpdateUserId": 337
+        },
+        {
+          "id": 1438,
+          "employeeGoalId": 6640,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-07-05T09:09:26Z",
+          "lastUpdateDateTime": "2025-07-05T09:09:26Z",
+          "lastUpdateUserId": 337
+        },
+        {
+          "id": 1439,
+          "employeeGoalId": 6640,
+          "title": "Hito 3",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-05-16T13:11:38Z",
+          "lastUpdateDateTime": "2025-05-16T13:11:38Z",
+          "lastUpdateUserId": 337
+        },
+        {
+          "id": 1440,
+          "employeeGoalId": 6640,
+          "title": "Hito 4",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-04-27T14:12:12Z",
+          "lastUpdateDateTime": "2025-04-27T14:12:12Z",
+          "lastUpdateUserId": 337
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    }
+  ],
+  "persons": [
+    {
+      "employeeId": 337,
+      "firstName": "Brenda",
+      "lastName": "Trejo",
+      "preferredName": null
+    },
+    {
+      "employeeId": 111,
+      "firstName": "Martín",
+      "lastName": "Peralta",
+      "preferredName": null
+    }
+  ],
+  "comments": []
+}

@@ -1,0 +1,275 @@
+{
+  "canAlign": true,
+  "canCreateGoals": true,
+  "filters": [
+    {
+      "id": "status-all",
+      "name": "All"
+    },
+    {
+      "id": "inProgress",
+      "name": "In progress"
+    },
+    {
+      "id": "completed",
+      "name": "Completed"
+    },
+    {
+      "id": "closed",
+      "name": "Closed"
+    }
+  ],
+  "selectedFilter": "status-all",
+  "goals": [
+    {
+      "id": "5953",
+      "title": "Cerrar el plan de capacitación anual",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2023-04-12",
+      "completionDate": "2023-03-24",
+      "lastChangedDateTime": "2023-03-24T14:31:09Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "5955",
+      "title": "Reducir los incidentes recurrentes a la mitad",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2024-05-26",
+      "completionDate": "2024-06-11",
+      "lastChangedDateTime": "2024-06-11T16:27:27Z",
+      "status": "completed",
+      "milestones": [
+        {
+          "id": 1136,
+          "employeeGoalId": 5955,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2024-05-03T14:36:13Z",
+          "lastUpdateDateTime": "2024-05-03T14:36:13Z",
+          "lastUpdateUserId": 197
+        },
+        {
+          "id": 1137,
+          "employeeGoalId": 5955,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2024-03-03T13:16:16Z",
+          "lastUpdateDateTime": "2024-03-03T13:16:16Z",
+          "lastUpdateUserId": 197
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "5957",
+      "title": "Migrar los reportes al nuevo tablero",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [
+        59
+      ],
+      "dueDate": "2024-04-17",
+      "completionDate": "2024-02-16",
+      "lastChangedDateTime": "2024-02-16T12:30:52Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "5958",
+      "title": "Migrar los reportes al nuevo tablero",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "percentComplete": 50,
+      "alignsWithOptionId": 9004,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2025-11-13",
+      "completionDate": null,
+      "lastChangedDateTime": "2025-12-29T14:40:46Z",
+      "status": "in_progress",
+      "milestones": [
+        {
+          "id": 1138,
+          "employeeGoalId": 5958,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-10-11T16:05:57Z",
+          "lastUpdateDateTime": "2025-10-11T16:05:57Z",
+          "lastUpdateUserId": 197
+        },
+        {
+          "id": 1139,
+          "employeeGoalId": 5958,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2025-06-23T09:27:46Z",
+          "lastUpdateUserId": 197
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "5960",
+      "title": "Migrar los reportes al nuevo tablero",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 100,
+      "alignsWithOptionId": 9002,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2025-04-12",
+      "completionDate": "2024-12-11",
+      "lastChangedDateTime": "2024-12-11T14:36:17Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "5961",
+      "title": "Aumentar la cobertura de pruebas al 80%",
+      "description": "Sirve de base para el próximo ciclo de evaluación.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2026-03-11",
+      "completionDate": "2025-11-01",
+      "lastChangedDateTime": "2025-11-01T19:23:00Z",
+      "status": "completed",
+      "milestones": [
+        {
+          "id": 1140,
+          "employeeGoalId": 5961,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-07-27T11:41:40Z",
+          "lastUpdateDateTime": "2025-07-27T11:41:40Z",
+          "lastUpdateUserId": 197
+        },
+        {
+          "id": 1141,
+          "employeeGoalId": 5961,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-10-26T12:22:32Z",
+          "lastUpdateDateTime": "2025-10-26T12:22:32Z",
+          "lastUpdateUserId": 197
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "5964",
+      "title": "Entregar el proyecto Norte sin desvíos",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 70,
+      "alignsWithOptionId": 9004,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2026-06-17",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-10-06T14:17:45Z",
+      "status": "in_progress",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    }
+  ],
+  "persons": [
+    {
+      "employeeId": 197,
+      "firstName": "Mateo",
+      "lastName": "Aguirre",
+      "preferredName": null
+    },
+    {
+      "employeeId": 59,
+      "firstName": "Gonzalo",
+      "lastName": "Soria",
+      "preferredName": null
+    }
+  ],
+  "comments": [
+    {
+      "goalId": "5953",
+      "commentCount": 3
+    },
+    {
+      "goalId": "5958",
+      "commentCount": 4
+    },
+    {
+      "goalId": "5960",
+      "commentCount": 4
+    },
+    {
+      "goalId": "5964",
+      "commentCount": 2
+    }
+  ]
+}

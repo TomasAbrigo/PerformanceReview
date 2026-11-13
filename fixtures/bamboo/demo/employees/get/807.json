@@ -1,0 +1,17 @@
+{
+  "id": "807",
+  "firstName": "Maximiliano",
+  "lastName": "Coronel",
+  "workEmail": "maximiliano.coronel@meridian-andina.example",
+  "employeeNumber": "11445",
+  "supervisorEId": "59",
+  "supervisorId": "10110",
+  "supervisor": "Soria, Gonzalo",
+  "hireDate": "2026-05-21",
+  "terminationDate": null,
+  "department": "Finanzas",
+  "division": "Corporativo",
+  "jobTitle": "Analista de Tesorería Jr",
+  "location": "Buenos Aires",
+  "status": "Active"
+}

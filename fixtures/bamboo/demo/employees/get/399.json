@@ -1,0 +1,17 @@
+{
+  "id": "399",
+  "firstName": "Cristian",
+  "lastName": "Villalba",
+  "workEmail": "cristian.villalba@meridian-andina.example",
+  "employeeNumber": "10999",
+  "supervisorEId": "67",
+  "supervisorId": "10132",
+  "supervisor": "Roldán, Noelia",
+  "hireDate": "2022-12-01",
+  "terminationDate": null,
+  "department": "Datos",
+  "division": "Tecnología",
+  "jobTitle": "Data Engineer Jr",
+  "location": "Buenos Aires",
+  "status": "Active"
+}

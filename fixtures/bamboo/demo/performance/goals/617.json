@@ -1,0 +1,167 @@
+{
+  "canAlign": true,
+  "canCreateGoals": true,
+  "filters": [
+    {
+      "id": "status-all",
+      "name": "All"
+    },
+    {
+      "id": "inProgress",
+      "name": "In progress"
+    },
+    {
+      "id": "completed",
+      "name": "Completed"
+    },
+    {
+      "id": "closed",
+      "name": "Closed"
+    }
+  ],
+  "selectedFilter": "status-all",
+  "goals": [
+    {
+      "id": "7800",
+      "title": "Lanzar el nuevo flujo de onboarding",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 100,
+      "alignsWithOptionId": 9003,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2024-10-10",
+      "completionDate": "2024-08-21",
+      "lastChangedDateTime": "2024-08-21T17:23:10Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "7803",
+      "title": "Migrar los reportes al nuevo tablero",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2024-11-17",
+      "completionDate": "2024-10-22",
+      "lastChangedDateTime": "2024-10-22T15:05:48Z",
+      "status": "completed",
+      "milestones": [
+        {
+          "id": 1966,
+          "employeeGoalId": 7803,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2024-09-12T18:54:54Z",
+          "lastUpdateDateTime": "2024-09-12T18:54:54Z",
+          "lastUpdateUserId": 617
+        },
+        {
+          "id": 1967,
+          "employeeGoalId": 7803,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2024-08-17T10:29:24Z",
+          "lastUpdateDateTime": "2024-08-17T10:29:24Z",
+          "lastUpdateUserId": 617
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "7806",
+      "title": "Lanzar el nuevo flujo de onboarding",
+      "description": "Sirve de base para el próximo ciclo de evaluación.",
+      "percentComplete": 33,
+      "alignsWithOptionId": 9004,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2026-11-25",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-10-17T16:09:38Z",
+      "status": "in_progress",
+      "milestones": [
+        {
+          "id": 1968,
+          "employeeGoalId": 7806,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2026-07-02T09:18:18Z",
+          "lastUpdateDateTime": "2026-07-02T09:18:18Z",
+          "lastUpdateUserId": 617
+        },
+        {
+          "id": 1969,
+          "employeeGoalId": 7806,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2026-05-28T19:26:33Z",
+          "lastUpdateUserId": 617
+        },
+        {
+          "id": 1970,
+          "employeeGoalId": 7806,
+          "title": "Hito 3",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2026-05-28T18:32:18Z",
+          "lastUpdateUserId": 617
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    }
+  ],
+  "persons": [
+    {
+      "employeeId": 617,
+      "firstName": "Tomás",
+      "lastName": "Olmos",
+      "preferredName": null
+    }
+  ],
+  "comments": [
+    {
+      "goalId": "7800",
+      "commentCount": 3
+    },
+    {
+      "goalId": "7803",
+      "commentCount": 1
+    },
+    {
+      "goalId": "7806",
+      "commentCount": 1
+    }
+  ]
+}

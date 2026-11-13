@@ -1,0 +1,17 @@
+{
+  "id": "49",
+  "firstName": "Santiago",
+  "lastName": "Benítez",
+  "workEmail": "santiago.benitez@meridian-andina.example",
+  "employeeNumber": "10100",
+  "supervisorEId": "37",
+  "supervisorId": "10075",
+  "supervisor": "Ríos, Hugo",
+  "hireDate": "2021-04-03",
+  "terminationDate": null,
+  "department": "Datos",
+  "division": "Tecnología",
+  "jobTitle": "Data Engineer Jr",
+  "location": "Montevideo",
+  "status": "Active"
+}

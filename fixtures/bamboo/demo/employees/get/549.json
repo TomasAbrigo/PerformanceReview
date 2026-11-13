@@ -1,0 +1,17 @@
+{
+  "id": "549",
+  "firstName": "Eugenia",
+  "lastName": "Trejo",
+  "workEmail": "eugenia.trejo@meridian-andina.example",
+  "employeeNumber": "11338",
+  "supervisorEId": "59",
+  "supervisorId": "10110",
+  "supervisor": "Soria, Gonzalo",
+  "hireDate": "2024-03-06",
+  "terminationDate": null,
+  "department": "Finanzas",
+  "division": "Corporativo",
+  "jobTitle": "Analista de Tesorería Ssr",
+  "location": "Córdoba",
+  "status": "Active"
+}

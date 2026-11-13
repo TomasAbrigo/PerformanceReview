@@ -1,0 +1,99 @@
+{
+  "canAlign": true,
+  "canCreateGoals": true,
+  "filters": [
+    {
+      "id": "status-all",
+      "name": "All"
+    },
+    {
+      "id": "inProgress",
+      "name": "In progress"
+    },
+    {
+      "id": "completed",
+      "name": "Completed"
+    },
+    {
+      "id": "closed",
+      "name": "Closed"
+    }
+  ],
+  "selectedFilter": "status-all",
+  "goals": [
+    {
+      "id": "6777",
+      "title": "Automatizar la conciliación mensual",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2023-12-27",
+      "completionDate": "2023-11-08",
+      "lastChangedDateTime": "2023-11-08T09:03:00Z",
+      "status": "completed",
+      "milestones": [
+        {
+          "id": 1490,
+          "employeeGoalId": 6777,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2023-11-01T09:35:27Z",
+          "lastUpdateDateTime": "2023-11-01T09:35:27Z",
+          "lastUpdateUserId": 367
+        },
+        {
+          "id": 1491,
+          "employeeGoalId": 6777,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2023-11-04T16:27:01Z",
+          "lastUpdateDateTime": "2023-11-04T16:27:01Z",
+          "lastUpdateUserId": 367
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "6778",
+      "title": "Documentar los procesos críticos",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 15,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2024-12-22",
+      "completionDate": null,
+      "lastChangedDateTime": "2024-12-09T15:12:23Z",
+      "status": "in_progress",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    }
+  ],
+  "persons": [
+    {
+      "employeeId": 367,
+      "firstName": "Gustavo",
+      "lastName": "Ibáñez",
+      "preferredName": null
+    }
+  ],
+  "comments": []
+}

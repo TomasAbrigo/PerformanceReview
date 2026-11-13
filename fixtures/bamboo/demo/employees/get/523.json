@@ -1,0 +1,17 @@
+{
+  "id": "523",
+  "firstName": "Florencia",
+  "lastName": "Molina",
+  "workEmail": "florencia.molina@meridian-andina.example",
+  "employeeNumber": "11275",
+  "supervisorEId": "167",
+  "supervisorId": "10390",
+  "supervisor": "Escobar, Marcela",
+  "hireDate": "2023-12-27",
+  "terminationDate": null,
+  "department": "Infraestructura",
+  "division": "Tecnología",
+  "jobTitle": "Site Reliability Engineer Ssr",
+  "location": "Buenos Aires",
+  "status": "Active"
+}

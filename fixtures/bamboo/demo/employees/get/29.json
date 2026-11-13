@@ -1,0 +1,17 @@
+{
+  "id": "29",
+  "firstName": "Andrés",
+  "lastName": "Morales",
+  "workEmail": "andres.morales@meridian-andina.example",
+  "employeeNumber": "10043",
+  "supervisorEId": "15",
+  "supervisorId": "10013",
+  "supervisor": "Toledo, Ivana",
+  "hireDate": "2016-09-16",
+  "terminationDate": null,
+  "department": "Ventas",
+  "division": "Comercial",
+  "jobTitle": "Gerente de Ventas",
+  "location": "Buenos Aires",
+  "status": "Active"
+}

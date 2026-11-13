@@ -1,0 +1,220 @@
+{
+  "canAlign": true,
+  "canCreateGoals": true,
+  "filters": [
+    {
+      "id": "status-all",
+      "name": "All"
+    },
+    {
+      "id": "inProgress",
+      "name": "In progress"
+    },
+    {
+      "id": "completed",
+      "name": "Completed"
+    },
+    {
+      "id": "closed",
+      "name": "Closed"
+    }
+  ],
+  "selectedFilter": "status-all",
+  "goals": [
+    {
+      "id": "7123",
+      "title": "Implementar el calendario editorial",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 100,
+      "alignsWithOptionId": 9001,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2023-12-22",
+      "completionDate": "2023-11-26",
+      "lastChangedDateTime": "2023-11-26T19:09:51Z",
+      "status": "completed",
+      "milestones": [
+        {
+          "id": 1640,
+          "employeeGoalId": 7123,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2023-10-26T09:49:27Z",
+          "lastUpdateDateTime": "2023-10-26T09:49:27Z",
+          "lastUpdateUserId": 445
+        },
+        {
+          "id": 1641,
+          "employeeGoalId": 7123,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2023-10-12T11:04:49Z",
+          "lastUpdateDateTime": "2023-10-12T11:04:49Z",
+          "lastUpdateUserId": 445
+        },
+        {
+          "id": 1642,
+          "employeeGoalId": 7123,
+          "title": "Hito 3",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2023-10-23T11:44:33Z",
+          "lastUpdateDateTime": "2023-10-23T11:44:33Z",
+          "lastUpdateUserId": 445
+        },
+        {
+          "id": 1643,
+          "employeeGoalId": 7123,
+          "title": "Hito 4",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2023-10-29T14:18:12Z",
+          "lastUpdateDateTime": "2023-10-29T14:18:12Z",
+          "lastUpdateUserId": 445
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "7126",
+      "title": "Mejorar el NPS interno del equipo",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2024-11-05",
+      "completionDate": "2024-08-30",
+      "lastChangedDateTime": "2024-08-30T19:51:44Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "7128",
+      "title": "Implementar el calendario editorial",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2025-04-06",
+      "completionDate": "2025-04-08",
+      "lastChangedDateTime": "2025-04-08T08:20:10Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "7131",
+      "title": "Reducir el tiempo de primera respuesta un 20%",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 0,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [
+        211
+      ],
+      "dueDate": "2026-12-27",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-10-23T09:15:20Z",
+      "status": "in_progress",
+      "milestones": [
+        {
+          "id": 1644,
+          "employeeGoalId": 7131,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2026-10-21T18:33:53Z",
+          "lastUpdateUserId": 445
+        },
+        {
+          "id": 1645,
+          "employeeGoalId": 7131,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2026-10-21T18:22:25Z",
+          "lastUpdateUserId": 445
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "7134",
+      "title": "Mentorear a dos personas nuevas",
+      "description": "Sirve de base para el próximo ciclo de evaluación.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2026-09-08",
+      "completionDate": "2026-05-17",
+      "lastChangedDateTime": "2026-05-17T11:48:59Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    }
+  ],
+  "persons": [
+    {
+      "employeeId": 445,
+      "firstName": "Victoria",
+      "lastName": "Suárez",
+      "preferredName": "Vico"
+    },
+    {
+      "employeeId": 211,
+      "firstName": "Santiago",
+      "lastName": "Reyes",
+      "preferredName": "Santi"
+    }
+  ],
+  "comments": [
+    {
+      "goalId": "7134",
+      "commentCount": 2
+    }
+  ]
+}

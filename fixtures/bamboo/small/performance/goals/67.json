@@ -1,0 +1,254 @@
+{
+  "canAlign": true,
+  "canCreateGoals": false,
+  "filters": [
+    {
+      "id": "status-all",
+      "name": "All"
+    },
+    {
+      "id": "inProgress",
+      "name": "In progress"
+    },
+    {
+      "id": "completed",
+      "name": "Completed"
+    },
+    {
+      "id": "closed",
+      "name": "Closed"
+    }
+  ],
+  "selectedFilter": "status-all",
+  "goals": [
+    {
+      "id": "5232",
+      "title": "Implementar el calendario editorial",
+      "description": "Sirve de base para el próximo ciclo de evaluación.",
+      "percentComplete": 75,
+      "alignsWithOptionId": 9003,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2024-11-18",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-04-07T11:56:22Z",
+      "status": "in_progress",
+      "milestones": null,
+      "actions": {
+        "canEdit": false,
+        "canUpdateProgress": false,
+        "canClose": false,
+        "canReopen": false,
+        "canDelete": false,
+        "canComment": false
+      }
+    },
+    {
+      "id": "5234",
+      "title": "Cerrar el plan de capacitación anual",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2024-11-17",
+      "completionDate": "2024-10-08",
+      "lastChangedDateTime": "2024-10-08T10:03:53Z",
+      "status": "completed",
+      "milestones": [
+        {
+          "id": 803,
+          "employeeGoalId": 5234,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2024-09-13T15:52:44Z",
+          "lastUpdateDateTime": "2024-09-13T15:52:44Z",
+          "lastUpdateUserId": 67
+        },
+        {
+          "id": 804,
+          "employeeGoalId": 5234,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2024-09-05T13:14:41Z",
+          "lastUpdateDateTime": "2024-09-05T13:14:41Z",
+          "lastUpdateUserId": 67
+        }
+      ],
+      "actions": {
+        "canEdit": false,
+        "canUpdateProgress": false,
+        "canClose": false,
+        "canReopen": false,
+        "canDelete": false,
+        "canComment": false
+      }
+    },
+    {
+      "id": "5237",
+      "title": "Renovar las cuentas clave del trimestre",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 33,
+      "alignsWithOptionId": 9004,
+      "sharedWithEmployeeIds": [
+        31
+      ],
+      "dueDate": "2025-05-29",
+      "completionDate": null,
+      "lastChangedDateTime": "2025-09-05T09:07:04Z",
+      "status": "closed",
+      "milestones": [
+        {
+          "id": 805,
+          "employeeGoalId": 5237,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-04-30T13:01:52Z",
+          "lastUpdateDateTime": "2025-04-30T13:01:52Z",
+          "lastUpdateUserId": 67
+        },
+        {
+          "id": 806,
+          "employeeGoalId": 5237,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2025-02-04T12:22:42Z",
+          "lastUpdateUserId": 67
+        },
+        {
+          "id": 807,
+          "employeeGoalId": 5237,
+          "title": "Hito 3",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2025-02-04T15:42:53Z",
+          "lastUpdateUserId": 67
+        }
+      ],
+      "actions": {
+        "canEdit": false,
+        "canUpdateProgress": false,
+        "canClose": false,
+        "canReopen": false,
+        "canDelete": false,
+        "canComment": false
+      }
+    },
+    {
+      "id": "5240",
+      "title": "Aumentar la cobertura de pruebas al 80%",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 0,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2025-02-02",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-01-02T10:00:50Z",
+      "status": "in_progress",
+      "milestones": null,
+      "actions": {
+        "canEdit": false,
+        "canUpdateProgress": false,
+        "canClose": false,
+        "canReopen": false,
+        "canDelete": false,
+        "canComment": false
+      }
+    },
+    {
+      "id": "5243",
+      "title": "Documentar los procesos críticos",
+      "description": "Sirve de base para el próximo ciclo de evaluación.",
+      "percentComplete": 25,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2025-06-18",
+      "completionDate": null,
+      "lastChangedDateTime": "2025-12-05T19:57:24Z",
+      "status": "in_progress",
+      "milestones": [
+        {
+          "id": 808,
+          "employeeGoalId": 5243,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-03-12T10:38:45Z",
+          "lastUpdateDateTime": "2025-03-12T10:38:45Z",
+          "lastUpdateUserId": 67
+        },
+        {
+          "id": 809,
+          "employeeGoalId": 5243,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2025-02-23T14:39:06Z",
+          "lastUpdateUserId": 67
+        },
+        {
+          "id": 810,
+          "employeeGoalId": 5243,
+          "title": "Hito 3",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2025-02-23T08:52:16Z",
+          "lastUpdateUserId": 67
+        },
+        {
+          "id": 811,
+          "employeeGoalId": 5243,
+          "title": "Hito 4",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2025-02-23T15:02:34Z",
+          "lastUpdateUserId": 67
+        }
+      ],
+      "actions": {
+        "canEdit": false,
+        "canUpdateProgress": false,
+        "canClose": false,
+        "canReopen": false,
+        "canDelete": false,
+        "canComment": false
+      }
+    }
+  ],
+  "persons": [
+    {
+      "employeeId": 67,
+      "firstName": "Maximiliano",
+      "lastName": "Acosta",
+      "preferredName": "Maxi"
+    },
+    {
+      "employeeId": 31,
+      "firstName": "Federico",
+      "lastName": "Rivas",
+      "preferredName": "Fede"
+    }
+  ],
+  "comments": [
+    {
+      "goalId": "5243",
+      "commentCount": 1
+    }
+  ]
+}

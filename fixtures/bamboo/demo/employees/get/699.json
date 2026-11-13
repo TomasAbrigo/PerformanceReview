@@ -1,0 +1,17 @@
+{
+  "id": "699",
+  "firstName": "Bruno",
+  "lastName": "Pereyra",
+  "workEmail": "bruno.pereyra@meridian-andina.example",
+  "employeeNumber": "11715",
+  "supervisorEId": "241",
+  "supervisorId": "10574",
+  "supervisor": "Reyes, Daniela",
+  "hireDate": "2025-03-05",
+  "terminationDate": null,
+  "department": "Marketing",
+  "division": "Comercial",
+  "jobTitle": "Content Specialist Sr",
+  "location": "Rosario",
+  "status": "Active"
+}

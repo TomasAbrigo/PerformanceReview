@@ -1,0 +1,17 @@
+{
+  "id": "431",
+  "firstName": "Lucía",
+  "lastName": "Soria",
+  "workEmail": "lucia.soria@meridian-andina.example",
+  "employeeNumber": "11071",
+  "supervisorEId": "341",
+  "supervisorId": "10847",
+  "supervisor": "López, Silvana",
+  "hireDate": "2023-02-27",
+  "terminationDate": null,
+  "department": "Ventas",
+  "division": "Comercial",
+  "jobTitle": "Business Developer Ssr",
+  "location": "Montevideo",
+  "status": "Active"
+}

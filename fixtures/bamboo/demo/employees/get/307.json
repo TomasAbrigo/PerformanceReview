@@ -1,0 +1,17 @@
+{
+  "id": "307",
+  "firstName": "Camila",
+  "lastName": "Valdez",
+  "workEmail": "camila.valdez@meridian-andina.example",
+  "employeeNumber": "10759",
+  "supervisorEId": "67",
+  "supervisorId": "10132",
+  "supervisor": "Roldán, Noelia",
+  "hireDate": "2022-03-02",
+  "terminationDate": null,
+  "department": "Datos",
+  "division": "Tecnología",
+  "jobTitle": "Data Analyst Ssr",
+  "location": "Remoto",
+  "status": "Active"
+}

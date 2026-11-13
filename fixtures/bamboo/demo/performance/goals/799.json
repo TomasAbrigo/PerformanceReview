@@ -1,0 +1,139 @@
+{
+  "canAlign": true,
+  "canCreateGoals": true,
+  "filters": [
+    {
+      "id": "status-all",
+      "name": "All"
+    },
+    {
+      "id": "inProgress",
+      "name": "In progress"
+    },
+    {
+      "id": "completed",
+      "name": "Completed"
+    },
+    {
+      "id": "closed",
+      "name": "Closed"
+    }
+  ],
+  "selectedFilter": "status-all",
+  "goals": [
+    {
+      "id": "8260",
+      "title": "Reducir los incidentes recurrentes a la mitad",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 25,
+      "alignsWithOptionId": 9004,
+      "sharedWithEmployeeIds": [
+        65
+      ],
+      "dueDate": "2027-02-01",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-08-15T13:07:38Z",
+      "status": "in_progress",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "8263",
+      "title": "Reducir el tiempo de primera respuesta un 20%",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2027-01-11",
+      "completionDate": "2026-09-30",
+      "lastChangedDateTime": "2026-09-30T13:59:25Z",
+      "status": "completed",
+      "milestones": [
+        {
+          "id": 2196,
+          "employeeGoalId": 8263,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2026-08-14T19:12:35Z",
+          "lastUpdateDateTime": "2026-08-14T19:12:35Z",
+          "lastUpdateUserId": 799
+        },
+        {
+          "id": 2197,
+          "employeeGoalId": 8263,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2026-06-10T17:01:45Z",
+          "lastUpdateDateTime": "2026-06-10T17:01:45Z",
+          "lastUpdateUserId": 799
+        },
+        {
+          "id": 2198,
+          "employeeGoalId": 8263,
+          "title": "Hito 3",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2026-08-16T09:59:21Z",
+          "lastUpdateDateTime": "2026-08-16T09:59:21Z",
+          "lastUpdateUserId": 799
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "8266",
+      "title": "Cerrar el plan de capacitación anual",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 100,
+      "alignsWithOptionId": 9003,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2026-05-10",
+      "completionDate": "2026-03-14",
+      "lastChangedDateTime": "2026-03-14T16:44:52Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    }
+  ],
+  "persons": [
+    {
+      "employeeId": 799,
+      "firstName": "Federico",
+      "lastName": "Rivas",
+      "preferredName": null
+    },
+    {
+      "employeeId": 65,
+      "firstName": "Valentina",
+      "lastName": "Díaz",
+      "preferredName": "Vale"
+    }
+  ],
+  "comments": []
+}

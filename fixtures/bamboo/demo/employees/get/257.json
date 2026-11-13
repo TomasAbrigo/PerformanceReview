@@ -1,0 +1,17 @@
+{
+  "id": "257",
+  "firstName": "Silvana",
+  "lastName": "Quiroga",
+  "workEmail": "silvana.quiroga@meridian-andina.example",
+  "employeeNumber": "10624",
+  "supervisorEId": "147",
+  "supervisorId": "10339",
+  "supervisor": "Páez, Paula",
+  "hireDate": "2021-11-01",
+  "terminationDate": null,
+  "department": "Legales",
+  "division": "Corporativo",
+  "jobTitle": "Abogado Corporativo Ssr",
+  "location": "Buenos Aires",
+  "status": "Active"
+}

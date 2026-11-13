@@ -1,0 +1,182 @@
+{
+  "canAlign": true,
+  "canCreateGoals": false,
+  "filters": [
+    {
+      "id": "status-all",
+      "name": "All"
+    },
+    {
+      "id": "inProgress",
+      "name": "In progress"
+    },
+    {
+      "id": "completed",
+      "name": "Completed"
+    },
+    {
+      "id": "closed",
+      "name": "Closed"
+    }
+  ],
+  "selectedFilter": "status-all",
+  "goals": [
+    {
+      "id": "7272",
+      "title": "Completar la certificación del área",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2023-11-02",
+      "completionDate": "2023-10-31",
+      "lastChangedDateTime": "2023-10-31T10:28:20Z",
+      "status": "completed",
+      "milestones": [
+        {
+          "id": 1727,
+          "employeeGoalId": 7272,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2023-07-19T09:33:34Z",
+          "lastUpdateDateTime": "2023-07-19T09:33:34Z",
+          "lastUpdateUserId": 473
+        },
+        {
+          "id": 1728,
+          "employeeGoalId": 7272,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2023-08-31T19:08:57Z",
+          "lastUpdateDateTime": "2023-08-31T19:08:57Z",
+          "lastUpdateUserId": 473
+        },
+        {
+          "id": 1729,
+          "employeeGoalId": 7272,
+          "title": "Hito 3",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2023-08-04T09:41:26Z",
+          "lastUpdateDateTime": "2023-08-04T09:41:26Z",
+          "lastUpdateUserId": 473
+        }
+      ],
+      "actions": {
+        "canEdit": false,
+        "canUpdateProgress": false,
+        "canClose": false,
+        "canReopen": false,
+        "canDelete": false,
+        "canComment": false
+      }
+    },
+    {
+      "id": "7274",
+      "title": "Lanzar el nuevo flujo de onboarding",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 20,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2023-10-06",
+      "completionDate": null,
+      "lastChangedDateTime": "2024-05-26T13:21:57Z",
+      "status": "closed",
+      "milestones": null,
+      "actions": {
+        "canEdit": false,
+        "canUpdateProgress": false,
+        "canClose": false,
+        "canReopen": false,
+        "canDelete": false,
+        "canComment": false
+      }
+    },
+    {
+      "id": "7276",
+      "title": "Aumentar la cobertura de pruebas al 80%",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 55,
+      "alignsWithOptionId": 9001,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2023-11-28",
+      "completionDate": null,
+      "lastChangedDateTime": "2023-08-30T19:08:39Z",
+      "status": "in_progress",
+      "milestones": null,
+      "actions": {
+        "canEdit": false,
+        "canUpdateProgress": false,
+        "canClose": false,
+        "canReopen": false,
+        "canDelete": false,
+        "canComment": false
+      }
+    },
+    {
+      "id": "7277",
+      "title": "Aumentar la cobertura de pruebas al 80%",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2024-03-22",
+      "completionDate": "2024-03-12",
+      "lastChangedDateTime": "2024-03-12T12:08:17Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": false,
+        "canUpdateProgress": false,
+        "canClose": false,
+        "canReopen": false,
+        "canDelete": false,
+        "canComment": false
+      }
+    },
+    {
+      "id": "7280",
+      "title": "Reducir el tiempo de primera respuesta un 20%",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2024-03-08",
+      "completionDate": "2024-01-13",
+      "lastChangedDateTime": "2024-01-13T17:12:25Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": false,
+        "canUpdateProgress": false,
+        "canClose": false,
+        "canReopen": false,
+        "canDelete": false,
+        "canComment": false
+      }
+    }
+  ],
+  "persons": [
+    {
+      "employeeId": 473,
+      "firstName": "Gabriela",
+      "lastName": "Figueroa",
+      "preferredName": "Gabi"
+    }
+  ],
+  "comments": [
+    {
+      "goalId": "7272",
+      "commentCount": 1
+    },
+    {
+      "goalId": "7277",
+      "commentCount": 1
+    }
+  ]
+}

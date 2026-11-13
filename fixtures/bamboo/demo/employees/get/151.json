@@ -1,0 +1,17 @@
+{
+  "id": "151",
+  "firstName": "Carolina",
+  "lastName": "Romero",
+  "workEmail": "carolina.romero@meridian-andina.example",
+  "employeeNumber": "10354",
+  "supervisorEId": "189",
+  "supervisorId": "10450",
+  "supervisor": "Quiroga, Lucía",
+  "hireDate": "2020-07-19",
+  "terminationDate": null,
+  "department": "Customer Success",
+  "division": "Comercial",
+  "jobTitle": "Customer Success Manager Jr",
+  "location": "Montevideo",
+  "status": "Active"
+}

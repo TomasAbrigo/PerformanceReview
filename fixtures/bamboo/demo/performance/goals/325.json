@@ -1,0 +1,212 @@
+{
+  "canAlign": true,
+  "canCreateGoals": true,
+  "filters": [
+    {
+      "id": "status-all",
+      "name": "All"
+    },
+    {
+      "id": "inProgress",
+      "name": "In progress"
+    },
+    {
+      "id": "completed",
+      "name": "Completed"
+    },
+    {
+      "id": "closed",
+      "name": "Closed"
+    }
+  ],
+  "selectedFilter": "status-all",
+  "goals": [
+    {
+      "id": "6573",
+      "title": "Migrar los reportes al nuevo tablero",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2023-02-11",
+      "completionDate": "2023-02-04",
+      "lastChangedDateTime": "2023-02-04T12:54:47Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "6575",
+      "title": "Automatizar la conciliación mensual",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2023-09-03",
+      "completionDate": "2023-08-25",
+      "lastChangedDateTime": "2023-08-25T17:25:36Z",
+      "status": "completed",
+      "milestones": [
+        {
+          "id": 1387,
+          "employeeGoalId": 6575,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2023-08-22T15:46:46Z",
+          "lastUpdateDateTime": "2023-08-22T15:46:46Z",
+          "lastUpdateUserId": 325
+        },
+        {
+          "id": 1388,
+          "employeeGoalId": 6575,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2023-07-04T10:35:17Z",
+          "lastUpdateDateTime": "2023-07-04T10:35:17Z",
+          "lastUpdateUserId": 325
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "6578",
+      "title": "Entregar el proyecto Norte sin desvíos",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 0,
+      "alignsWithOptionId": 9002,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2025-12-28",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-10-26T08:52:39Z",
+      "status": "in_progress",
+      "milestones": [
+        {
+          "id": 1389,
+          "employeeGoalId": 6578,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2025-06-15T08:36:30Z",
+          "lastUpdateUserId": 325
+        },
+        {
+          "id": 1390,
+          "employeeGoalId": 6578,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2025-06-15T19:24:42Z",
+          "lastUpdateUserId": 325
+        },
+        {
+          "id": 1391,
+          "employeeGoalId": 6578,
+          "title": "Hito 3",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2025-06-15T14:33:54Z",
+          "lastUpdateUserId": 325
+        },
+        {
+          "id": 1392,
+          "employeeGoalId": 6578,
+          "title": "Hito 4",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2025-06-15T11:59:29Z",
+          "lastUpdateUserId": 325
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "6581",
+      "title": "Entregar el proyecto Norte sin desvíos",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2026-10-19",
+      "completionDate": "2026-06-18",
+      "lastChangedDateTime": "2026-06-18T12:18:13Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "6584",
+      "title": "Entregar el proyecto Norte sin desvíos",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 25,
+      "alignsWithOptionId": 9004,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2026-06-11",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-04-01T08:17:25Z",
+      "status": "in_progress",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    }
+  ],
+  "persons": [
+    {
+      "employeeId": 325,
+      "firstName": "Emiliano",
+      "lastName": "Valdez",
+      "preferredName": null
+    }
+  ],
+  "comments": [
+    {
+      "goalId": "6575",
+      "commentCount": 2
+    }
+  ]
+}

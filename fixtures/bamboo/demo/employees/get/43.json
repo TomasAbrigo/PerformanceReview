@@ -1,0 +1,17 @@
+{
+  "id": "43",
+  "firstName": "Eugenia",
+  "lastName": "Soria",
+  "workEmail": "eugenia.soria@meridian-andina.example",
+  "employeeNumber": "10070",
+  "supervisorEId": "19",
+  "supervisorId": "10023",
+  "supervisor": "Acosta, Cristian",
+  "hireDate": "2017-11-04",
+  "terminationDate": null,
+  "department": "Legales",
+  "division": "Corporativo",
+  "jobTitle": "Líder de Legales",
+  "location": "Remoto",
+  "status": "Active"
+}

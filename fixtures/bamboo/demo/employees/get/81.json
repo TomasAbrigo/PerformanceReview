@@ -1,0 +1,17 @@
+{
+  "id": "81",
+  "firstName": "Lorena",
+  "lastName": "Páez",
+  "workEmail": "lorena.paez@meridian-andina.example",
+  "employeeNumber": "10170",
+  "supervisorEId": "39",
+  "supervisorId": "10062",
+  "supervisor": "Navarro, Rocío",
+  "hireDate": "2019-02-24",
+  "terminationDate": "2025-09-10",
+  "department": "Soporte",
+  "division": "Operaciones",
+  "jobTitle": "Líder de Soporte",
+  "location": "Montevideo",
+  "status": "Inactive"
+}

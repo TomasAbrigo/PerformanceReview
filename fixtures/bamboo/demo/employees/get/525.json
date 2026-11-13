@@ -1,0 +1,17 @@
+{
+  "id": "525",
+  "firstName": "Diego",
+  "lastName": "Yáñez",
+  "workEmail": "diego.yanez@meridian-andina.example",
+  "employeeNumber": "11278",
+  "supervisorEId": "43",
+  "supervisorId": "10070",
+  "supervisor": "Soria, Eugenia",
+  "hireDate": "2023-12-27",
+  "terminationDate": null,
+  "department": "Legales",
+  "division": "Corporativo",
+  "jobTitle": "Abogado Corporativo Sr",
+  "location": "Buenos Aires",
+  "status": "Active"
+}

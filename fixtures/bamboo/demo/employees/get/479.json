@@ -1,0 +1,17 @@
+{
+  "id": "479",
+  "firstName": "Lucía",
+  "lastName": "Pereyra",
+  "workEmail": "lucia.pereyra@meridian-andina.example",
+  "employeeNumber": "11187",
+  "supervisorEId": "59",
+  "supervisorId": "10110",
+  "supervisor": "Soria, Gonzalo",
+  "hireDate": "2023-07-28",
+  "terminationDate": null,
+  "department": "Finanzas",
+  "division": "Corporativo",
+  "jobTitle": "Controller Sr",
+  "location": "Córdoba",
+  "status": "Active"
+}

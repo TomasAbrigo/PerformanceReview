@@ -1,0 +1,93 @@
+{
+  "canAlign": true,
+  "canCreateGoals": true,
+  "filters": [
+    {
+      "id": "status-all",
+      "name": "All"
+    },
+    {
+      "id": "inProgress",
+      "name": "In progress"
+    },
+    {
+      "id": "completed",
+      "name": "Completed"
+    },
+    {
+      "id": "closed",
+      "name": "Closed"
+    }
+  ],
+  "selectedFilter": "status-all",
+  "goals": [
+    {
+      "id": "5209",
+      "title": "Cerrar el plan de capacitación anual",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "percentComplete": 60,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [
+        29
+      ],
+      "dueDate": "2025-06-25",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-10-07T10:52:53Z",
+      "status": "closed",
+      "milestones": null,
+      "actions": {
+        "canEdit": false,
+        "canUpdateProgress": false,
+        "canClose": false,
+        "canReopen": true,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "5210",
+      "title": "Implementar el calendario editorial",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2025-03-23",
+      "completionDate": "2024-12-20",
+      "lastChangedDateTime": "2024-12-20T14:23:49Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    }
+  ],
+  "persons": [
+    {
+      "employeeId": 61,
+      "firstName": "Martín",
+      "lastName": "Fuentes",
+      "preferredName": null
+    },
+    {
+      "employeeId": 29,
+      "firstName": "Rocío",
+      "lastName": "Ibáñez",
+      "preferredName": null
+    }
+  ],
+  "comments": [
+    {
+      "goalId": "5209",
+      "commentCount": 1
+    },
+    {
+      "goalId": "5210",
+      "commentCount": 4
+    }
+  ]
+}

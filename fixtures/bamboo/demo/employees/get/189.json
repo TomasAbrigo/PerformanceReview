@@ -1,0 +1,17 @@
+{
+  "id": "189",
+  "firstName": "Lucía",
+  "lastName": "Quiroga",
+  "workEmail": "lucia.quiroga@meridian-andina.example",
+  "employeeNumber": "10450",
+  "supervisorEId": "23",
+  "supervisorId": "10029",
+  "supervisor": "Medina, María",
+  "hireDate": "2021-03-19",
+  "terminationDate": null,
+  "department": "Customer Success",
+  "division": "Comercial",
+  "jobTitle": "Líder de Customer Success",
+  "location": "Buenos Aires",
+  "status": "Active"
+}

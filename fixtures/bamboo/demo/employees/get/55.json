@@ -1,0 +1,17 @@
+{
+  "id": "55",
+  "firstName": "Tomás",
+  "lastName": "Medina",
+  "workEmail": "tomas.medina@meridian-andina.example",
+  "employeeNumber": "10096",
+  "supervisorEId": "15",
+  "supervisorId": "10013",
+  "supervisor": "Toledo, Ivana",
+  "hireDate": "2018-04-26",
+  "terminationDate": null,
+  "department": "Marketing",
+  "division": "Comercial",
+  "jobTitle": "Gerente de Marketing",
+  "location": "Buenos Aires",
+  "status": "Active"
+}

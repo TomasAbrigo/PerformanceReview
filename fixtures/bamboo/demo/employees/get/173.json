@@ -1,0 +1,17 @@
+{
+  "id": "173",
+  "firstName": "Ivana",
+  "lastName": "Cáceres",
+  "workEmail": "ivana.caceres@meridian-andina.example",
+  "employeeNumber": "10407",
+  "supervisorEId": "43",
+  "supervisorId": "10070",
+  "supervisor": "Soria, Eugenia",
+  "hireDate": "2020-12-13",
+  "terminationDate": null,
+  "department": "Legales",
+  "division": "Corporativo",
+  "jobTitle": "Analista de Compliance Ssr",
+  "location": "Córdoba",
+  "status": "Active"
+}

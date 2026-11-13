@@ -1,0 +1,17 @@
+{
+  "id": "517",
+  "firstName": "Sofía",
+  "lastName": "Bravo",
+  "workEmail": "sofia.bravo@meridian-andina.example",
+  "employeeNumber": "11265",
+  "supervisorEId": "67",
+  "supervisorId": "10132",
+  "supervisor": "Roldán, Noelia",
+  "hireDate": "2023-11-08",
+  "terminationDate": "2025-04-27",
+  "department": "Datos",
+  "division": "Tecnología",
+  "jobTitle": "Data Analyst Ssr",
+  "location": "Buenos Aires",
+  "status": "Inactive"
+}

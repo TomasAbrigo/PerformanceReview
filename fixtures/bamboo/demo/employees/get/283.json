@@ -1,0 +1,17 @@
+{
+  "id": "283",
+  "firstName": "Belén",
+  "lastName": "Benítez",
+  "workEmail": "belen.benitez@meridian-andina.example",
+  "employeeNumber": "10692",
+  "supervisorEId": "243",
+  "supervisorId": "10583",
+  "supervisor": "Bustos, Jimena",
+  "hireDate": "2022-01-17",
+  "terminationDate": null,
+  "department": "Calidad",
+  "division": "Operaciones",
+  "jobTitle": "Analista de Calidad Ssr",
+  "location": "Santiago de Chile",
+  "status": "Active"
+}

@@ -1,0 +1,17 @@
+{
+  "id": "569",
+  "firstName": "Emiliano",
+  "lastName": "Figueroa",
+  "workEmail": "emiliano.figueroa@meridian-andina.example",
+  "employeeNumber": "11397",
+  "supervisorEId": "63",
+  "supervisorId": "10119",
+  "supervisor": "Rivas, Alejandro",
+  "hireDate": "2024-04-20",
+  "terminationDate": null,
+  "department": "Operaciones",
+  "division": "Operaciones",
+  "jobTitle": "Analista de Operaciones Ssr",
+  "location": "Buenos Aires",
+  "status": "Active"
+}

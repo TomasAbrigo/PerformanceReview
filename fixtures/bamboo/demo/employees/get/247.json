@@ -1,0 +1,17 @@
+{
+  "id": "247",
+  "firstName": "Camila",
+  "lastName": "Pereyra",
+  "workEmail": "camila.pereyra@meridian-andina.example",
+  "employeeNumber": "10590",
+  "supervisorEId": "117",
+  "supervisorId": "10275",
+  "supervisor": "Núñez, Mariana",
+  "hireDate": "2021-09-25",
+  "terminationDate": null,
+  "department": "Infraestructura",
+  "division": "Tecnología",
+  "jobTitle": "Site Reliability Engineer Ssr",
+  "location": "Córdoba",
+  "status": "Active"
+}

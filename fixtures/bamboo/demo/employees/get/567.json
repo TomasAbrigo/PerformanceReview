@@ -1,0 +1,17 @@
+{
+  "id": "567",
+  "firstName": "Gustavo",
+  "lastName": "Núñez",
+  "workEmail": "gustavo.nunez@meridian-andina.example",
+  "employeeNumber": "11394",
+  "supervisorEId": "301",
+  "supervisorId": "10749",
+  "supervisor": "Carrizo, Silvana",
+  "hireDate": "2024-04-16",
+  "terminationDate": null,
+  "department": "Operaciones",
+  "division": "Operaciones",
+  "jobTitle": "Analista de Operaciones Sr",
+  "location": "Buenos Aires",
+  "status": "Active"
+}

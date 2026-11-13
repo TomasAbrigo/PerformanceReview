@@ -1,0 +1,17 @@
+{
+  "id": "435",
+  "firstName": "Adrián",
+  "lastName": "Luna",
+  "workEmail": "adrian.luna@meridian-andina.example",
+  "employeeNumber": "11080",
+  "supervisorEId": "93",
+  "supervisorId": "10213",
+  "supervisor": "Herrera, Rocío",
+  "hireDate": "2023-03-14",
+  "terminationDate": null,
+  "department": "Infraestructura",
+  "division": "Tecnología",
+  "jobTitle": "Site Reliability Engineer Sr",
+  "location": "Córdoba",
+  "status": "Active"
+}

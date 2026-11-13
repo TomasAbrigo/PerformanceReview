@@ -1,0 +1,17 @@
+{
+  "id": "499",
+  "firstName": "Martín",
+  "lastName": "Heredia",
+  "workEmail": "martin.heredia@meridian-andina.example",
+  "employeeNumber": "11230",
+  "supervisorEId": "33",
+  "supervisorId": "10050",
+  "supervisor": "Romero, Brenda",
+  "hireDate": "2023-09-22",
+  "terminationDate": null,
+  "department": "Ingeniería",
+  "division": "Tecnología",
+  "jobTitle": "Backend Developer Jr",
+  "location": "Montevideo",
+  "status": "Active"
+}

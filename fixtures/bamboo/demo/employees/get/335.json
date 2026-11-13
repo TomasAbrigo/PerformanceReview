@@ -1,0 +1,17 @@
+{
+  "id": "335",
+  "firstName": "Elena",
+  "lastName": "Toledo",
+  "workEmail": "elena.toledo@meridian-andina.example",
+  "employeeNumber": "10832",
+  "supervisorEId": "241",
+  "supervisorId": "10574",
+  "supervisor": "Reyes, Daniela",
+  "hireDate": "2022-05-18",
+  "terminationDate": null,
+  "department": "Marketing",
+  "division": "Comercial",
+  "jobTitle": "Diseñador de Marca Ssr",
+  "location": "Buenos Aires",
+  "status": "Active"
+}

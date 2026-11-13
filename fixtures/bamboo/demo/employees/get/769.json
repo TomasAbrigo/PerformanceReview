@@ -1,0 +1,17 @@
+{
+  "id": "769",
+  "firstName": "Mariana",
+  "lastName": "Paz",
+  "workEmail": "mariana.paz@meridian-andina.example",
+  "employeeNumber": "11881",
+  "supervisorEId": "301",
+  "supervisorId": "10749",
+  "supervisor": "Carrizo, Silvana",
+  "hireDate": "2025-07-27",
+  "terminationDate": null,
+  "department": "Operaciones",
+  "division": "Operaciones",
+  "jobTitle": "Coordinador de Procesos Sr",
+  "location": "Montevideo",
+  "status": "Active"
+}

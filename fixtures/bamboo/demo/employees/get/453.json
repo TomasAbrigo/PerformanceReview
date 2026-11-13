@@ -1,0 +1,17 @@
+{
+  "id": "453",
+  "firstName": "Matías",
+  "lastName": "Vázquez",
+  "workEmail": "matias.vazquez@meridian-andina.example",
+  "employeeNumber": "11122",
+  "supervisorEId": "51",
+  "supervisorId": "10084",
+  "supervisor": "Toledo, Gonzalo",
+  "hireDate": "2023-05-06",
+  "terminationDate": null,
+  "department": "People",
+  "division": "Corporativo",
+  "jobTitle": "Reclutador Ssr",
+  "location": "Buenos Aires",
+  "status": "Active"
+}

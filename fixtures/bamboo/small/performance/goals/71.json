@@ -1,0 +1,94 @@
+{
+  "canAlign": true,
+  "canCreateGoals": false,
+  "filters": [
+    {
+      "id": "status-all",
+      "name": "All"
+    },
+    {
+      "id": "inProgress",
+      "name": "In progress"
+    },
+    {
+      "id": "completed",
+      "name": "Completed"
+    },
+    {
+      "id": "closed",
+      "name": "Closed"
+    }
+  ],
+  "selectedFilter": "status-all",
+  "goals": [
+    {
+      "id": "5259",
+      "title": "Mejorar el NPS interno del equipo",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2025-04-10",
+      "completionDate": "2025-04-02",
+      "lastChangedDateTime": "2025-04-02T18:46:39Z",
+      "status": "completed",
+      "milestones": [
+        {
+          "id": 815,
+          "employeeGoalId": 5259,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-02-01T08:34:35Z",
+          "lastUpdateDateTime": "2025-02-01T08:34:35Z",
+          "lastUpdateUserId": 71
+        },
+        {
+          "id": 816,
+          "employeeGoalId": 5259,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-02-18T16:40:18Z",
+          "lastUpdateDateTime": "2025-02-18T16:40:18Z",
+          "lastUpdateUserId": 71
+        },
+        {
+          "id": 817,
+          "employeeGoalId": 5259,
+          "title": "Hito 3",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-01-31T19:52:19Z",
+          "lastUpdateDateTime": "2025-01-31T19:52:19Z",
+          "lastUpdateUserId": 71
+        }
+      ],
+      "actions": {
+        "canEdit": false,
+        "canUpdateProgress": false,
+        "canClose": false,
+        "canReopen": false,
+        "canDelete": false,
+        "canComment": false
+      }
+    }
+  ],
+  "persons": [
+    {
+      "employeeId": 71,
+      "firstName": "Franco",
+      "lastName": "Morales",
+      "preferredName": null
+    }
+  ],
+  "comments": [
+    {
+      "goalId": "5259",
+      "commentCount": 1
+    }
+  ]
+}

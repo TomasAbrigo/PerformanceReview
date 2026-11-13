@@ -1,0 +1,17 @@
+{
+  "id": "19",
+  "firstName": "Cristian",
+  "lastName": "Acosta",
+  "workEmail": "cristian.acosta@meridian-andina.example",
+  "employeeNumber": "10023",
+  "supervisorEId": "17",
+  "supervisorId": "10016",
+  "supervisor": "Martínez, Camila",
+  "hireDate": "2015-11-30",
+  "terminationDate": null,
+  "department": "Legales",
+  "division": "Corporativo",
+  "jobTitle": "Gerente de Legales",
+  "location": "Buenos Aires",
+  "status": "Active"
+}

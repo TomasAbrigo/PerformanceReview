@@ -1,0 +1,194 @@
+{
+  "canAlign": true,
+  "canCreateGoals": false,
+  "filters": [
+    {
+      "id": "status-all",
+      "name": "All"
+    },
+    {
+      "id": "inProgress",
+      "name": "In progress"
+    },
+    {
+      "id": "completed",
+      "name": "Completed"
+    },
+    {
+      "id": "closed",
+      "name": "Closed"
+    }
+  ],
+  "selectedFilter": "status-all",
+  "goals": [
+    {
+      "id": "8085",
+      "title": "Implementar el calendario editorial",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 100,
+      "alignsWithOptionId": 9004,
+      "sharedWithEmployeeIds": [
+        135
+      ],
+      "dueDate": "2025-10-06",
+      "completionDate": "2025-07-24",
+      "lastChangedDateTime": "2025-07-24T10:17:50Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": false,
+        "canUpdateProgress": false,
+        "canClose": false,
+        "canReopen": false,
+        "canDelete": false,
+        "canComment": false
+      }
+    },
+    {
+      "id": "8086",
+      "title": "Renovar las cuentas clave del trimestre",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 50,
+      "alignsWithOptionId": 9001,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2025-11-27",
+      "completionDate": null,
+      "lastChangedDateTime": "2025-11-03T09:41:05Z",
+      "status": "in_progress",
+      "milestones": [
+        {
+          "id": 2094,
+          "employeeGoalId": 8086,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-09-11T11:18:28Z",
+          "lastUpdateDateTime": "2025-09-11T11:18:28Z",
+          "lastUpdateUserId": 727
+        },
+        {
+          "id": 2095,
+          "employeeGoalId": 8086,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2025-06-30T13:28:04Z",
+          "lastUpdateUserId": 727
+        }
+      ],
+      "actions": {
+        "canEdit": false,
+        "canUpdateProgress": false,
+        "canClose": false,
+        "canReopen": false,
+        "canDelete": false,
+        "canComment": false
+      }
+    },
+    {
+      "id": "8087",
+      "title": "Mejorar el NPS interno del equipo",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2025-11-04",
+      "completionDate": "2025-08-22",
+      "lastChangedDateTime": "2025-08-22T08:46:26Z",
+      "status": "completed",
+      "milestones": [
+        {
+          "id": 2096,
+          "employeeGoalId": 8087,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-08-10T09:13:59Z",
+          "lastUpdateDateTime": "2025-08-10T09:13:59Z",
+          "lastUpdateUserId": 727
+        },
+        {
+          "id": 2097,
+          "employeeGoalId": 8087,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-05-16T14:07:47Z",
+          "lastUpdateDateTime": "2025-05-16T14:07:47Z",
+          "lastUpdateUserId": 727
+        },
+        {
+          "id": 2098,
+          "employeeGoalId": 8087,
+          "title": "Hito 3",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-07-31T18:36:59Z",
+          "lastUpdateDateTime": "2025-07-31T18:36:59Z",
+          "lastUpdateUserId": 727
+        },
+        {
+          "id": 2099,
+          "employeeGoalId": 8087,
+          "title": "Hito 4",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-07-16T12:08:51Z",
+          "lastUpdateDateTime": "2025-07-16T12:08:51Z",
+          "lastUpdateUserId": 727
+        }
+      ],
+      "actions": {
+        "canEdit": false,
+        "canUpdateProgress": false,
+        "canClose": false,
+        "canReopen": false,
+        "canDelete": false,
+        "canComment": false
+      }
+    },
+    {
+      "id": "8090",
+      "title": "Automatizar la conciliación mensual",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2026-03-20",
+      "completionDate": "2026-02-23",
+      "lastChangedDateTime": "2026-02-23T19:14:23Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": false,
+        "canUpdateProgress": false,
+        "canClose": false,
+        "canReopen": false,
+        "canDelete": false,
+        "canComment": false
+      }
+    }
+  ],
+  "persons": [
+    {
+      "employeeId": 727,
+      "firstName": "Candela",
+      "lastName": "Álvarez",
+      "preferredName": "Cande"
+    },
+    {
+      "employeeId": 135,
+      "firstName": "Marcela",
+      "lastName": "Trejo",
+      "preferredName": null
+    }
+  ],
+  "comments": []
+}

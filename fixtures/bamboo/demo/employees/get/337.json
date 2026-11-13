@@ -1,0 +1,17 @@
+{
+  "id": "337",
+  "firstName": "Brenda",
+  "lastName": "Trejo",
+  "workEmail": "brenda.trejo@meridian-andina.example",
+  "employeeNumber": "10834",
+  "supervisorEId": "111",
+  "supervisorId": "10253",
+  "supervisor": "Peralta, Martín",
+  "hireDate": "2022-05-21",
+  "terminationDate": null,
+  "department": "Datos",
+  "division": "Tecnología",
+  "jobTitle": "Analytics Engineer Ssr",
+  "location": "Santiago de Chile",
+  "status": "Active"
+}

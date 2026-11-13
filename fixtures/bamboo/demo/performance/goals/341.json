@@ -1,0 +1,176 @@
+{
+  "canAlign": true,
+  "canCreateGoals": true,
+  "filters": [
+    {
+      "id": "status-all",
+      "name": "All"
+    },
+    {
+      "id": "inProgress",
+      "name": "In progress"
+    },
+    {
+      "id": "completed",
+      "name": "Completed"
+    },
+    {
+      "id": "closed",
+      "name": "Closed"
+    }
+  ],
+  "selectedFilter": "status-all",
+  "goals": [
+    {
+      "id": "6649",
+      "title": "Documentar los procesos críticos",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2023-04-14",
+      "completionDate": "2022-10-04",
+      "lastChangedDateTime": "2022-10-04T10:51:51Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "6650",
+      "title": "Mejorar el NPS interno del equipo",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 50,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2025-05-30",
+      "completionDate": null,
+      "lastChangedDateTime": "2025-07-23T14:34:59Z",
+      "status": "in_progress",
+      "milestones": [
+        {
+          "id": 1443,
+          "employeeGoalId": 6650,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-07-04T19:40:34Z",
+          "lastUpdateDateTime": "2025-07-04T19:40:34Z",
+          "lastUpdateUserId": 341
+        },
+        {
+          "id": 1444,
+          "employeeGoalId": 6650,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-01-28T15:48:02Z",
+          "lastUpdateDateTime": "2025-01-28T15:48:02Z",
+          "lastUpdateUserId": 341
+        },
+        {
+          "id": 1445,
+          "employeeGoalId": 6650,
+          "title": "Hito 3",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2024-12-22T09:09:15Z",
+          "lastUpdateUserId": 341
+        },
+        {
+          "id": 1446,
+          "employeeGoalId": 6650,
+          "title": "Hito 4",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2024-12-22T08:19:40Z",
+          "lastUpdateUserId": 341
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "6651",
+      "title": "Reducir el tiempo de primera respuesta un 20%",
+      "description": "Sirve de base para el próximo ciclo de evaluación.",
+      "percentComplete": 15,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2026-04-10",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-10-20T09:00:58Z",
+      "status": "in_progress",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "6652",
+      "title": "Mentorear a dos personas nuevas",
+      "description": "Sirve de base para el próximo ciclo de evaluación.",
+      "percentComplete": 100,
+      "alignsWithOptionId": 9003,
+      "sharedWithEmployeeIds": [
+        29
+      ],
+      "dueDate": "2026-06-15",
+      "completionDate": "2026-04-10",
+      "lastChangedDateTime": "2026-04-10T16:11:39Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    }
+  ],
+  "persons": [
+    {
+      "employeeId": 341,
+      "firstName": "Silvana",
+      "lastName": "López",
+      "preferredName": null
+    },
+    {
+      "employeeId": 29,
+      "firstName": "Andrés",
+      "lastName": "Morales",
+      "preferredName": null
+    }
+  ],
+  "comments": [
+    {
+      "goalId": "6650",
+      "commentCount": 3
+    }
+  ]
+}

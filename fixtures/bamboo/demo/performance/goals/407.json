@@ -1,0 +1,157 @@
+{
+  "canAlign": true,
+  "canCreateGoals": true,
+  "filters": [
+    {
+      "id": "status-all",
+      "name": "All"
+    },
+    {
+      "id": "inProgress",
+      "name": "In progress"
+    },
+    {
+      "id": "completed",
+      "name": "Completed"
+    },
+    {
+      "id": "closed",
+      "name": "Closed"
+    }
+  ],
+  "selectedFilter": "status-all",
+  "goals": [
+    {
+      "id": "6938",
+      "title": "Renovar las cuentas clave del trimestre",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2023-08-13",
+      "completionDate": "2023-07-13",
+      "lastChangedDateTime": "2023-07-13T14:03:18Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "6940",
+      "title": "Automatizar la conciliación mensual",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2024-06-24",
+      "completionDate": "2024-06-25",
+      "lastChangedDateTime": "2024-06-25T13:55:18Z",
+      "status": "completed",
+      "milestones": [
+        {
+          "id": 1551,
+          "employeeGoalId": 6940,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2024-06-14T15:52:12Z",
+          "lastUpdateDateTime": "2024-06-14T15:52:12Z",
+          "lastUpdateUserId": 407
+        },
+        {
+          "id": 1552,
+          "employeeGoalId": 6940,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2024-04-01T09:47:41Z",
+          "lastUpdateDateTime": "2024-04-01T09:47:41Z",
+          "lastUpdateUserId": 407
+        },
+        {
+          "id": 1553,
+          "employeeGoalId": 6940,
+          "title": "Hito 3",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2024-05-07T08:50:39Z",
+          "lastUpdateDateTime": "2024-05-07T08:50:39Z",
+          "lastUpdateUserId": 407
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "6942",
+      "title": "Reducir el tiempo de primera respuesta un 20%",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2024-05-18",
+      "completionDate": "2024-05-21",
+      "lastChangedDateTime": "2024-05-21T11:19:55Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "6944",
+      "title": "Mejorar el NPS interno del equipo",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2024-08-24",
+      "completionDate": "2024-06-28",
+      "lastChangedDateTime": "2024-06-28T16:38:11Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    }
+  ],
+  "persons": [
+    {
+      "employeeId": 407,
+      "firstName": "Hernán",
+      "lastName": "Trejo",
+      "preferredName": null
+    }
+  ],
+  "comments": [
+    {
+      "goalId": "6938",
+      "commentCount": 2
+    }
+  ]
+}

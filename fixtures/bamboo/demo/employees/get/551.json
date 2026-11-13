@@ -1,0 +1,17 @@
+{
+  "id": "551",
+  "firstName": "Gonzalo",
+  "lastName": "Rojas",
+  "workEmail": "gonzalo.rojas@meridian-andina.example",
+  "employeeNumber": "11347",
+  "supervisorEId": "111",
+  "supervisorId": "10253",
+  "supervisor": "Peralta, Martín",
+  "hireDate": "2024-03-11",
+  "terminationDate": null,
+  "department": "Datos",
+  "division": "Tecnología",
+  "jobTitle": "Data Analyst Ssr",
+  "location": "Córdoba",
+  "status": "Active"
+}

@@ -1,0 +1,17 @@
+{
+  "id": "131",
+  "firstName": "Rocío",
+  "lastName": "Ledesma",
+  "workEmail": "rocio.ledesma@meridian-andina.example",
+  "employeeNumber": "10305",
+  "supervisorEId": "59",
+  "supervisorId": "10110",
+  "supervisor": "Soria, Gonzalo",
+  "hireDate": "2020-01-14",
+  "terminationDate": null,
+  "department": "Finanzas",
+  "division": "Corporativo",
+  "jobTitle": "Analista de Tesorería Jr",
+  "location": "Buenos Aires",
+  "status": "Active"
+}

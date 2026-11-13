@@ -1,0 +1,17 @@
+{
+  "id": "469",
+  "firstName": "Patricia",
+  "lastName": "Flores",
+  "workEmail": "patricia.flores@meridian-andina.example",
+  "employeeNumber": "11162",
+  "supervisorEId": "59",
+  "supervisorId": "10110",
+  "supervisor": "Soria, Gonzalo",
+  "hireDate": "2023-06-25",
+  "terminationDate": null,
+  "department": "Finanzas",
+  "division": "Corporativo",
+  "jobTitle": "Controller Ssr",
+  "location": "Buenos Aires",
+  "status": "Active"
+}

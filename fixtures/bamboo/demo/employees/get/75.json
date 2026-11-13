@@ -1,0 +1,17 @@
+{
+  "id": "75",
+  "firstName": "Nicolás",
+  "lastName": "Álvarez",
+  "workEmail": "nicolas.alvarez@meridian-andina.example",
+  "employeeNumber": "10153",
+  "supervisorEId": "341",
+  "supervisorId": "10847",
+  "supervisor": "López, Silvana",
+  "hireDate": "2019-01-12",
+  "terminationDate": null,
+  "department": "Ventas",
+  "division": "Comercial",
+  "jobTitle": "Business Developer Jr",
+  "location": "Buenos Aires",
+  "status": "Active"
+}

@@ -1,0 +1,171 @@
+{
+  "data": [
+    {
+      "employeeId": "71",
+      "firstName": "Franco",
+      "lastName": "Morales",
+      "preferredName": null,
+      "jobTitleName": "Analista Contable Jr",
+      "status": "Inactive",
+      "workEmail": "franco.morales@meridian-andina.example",
+      "employeeNumber": "10162",
+      "reportsToId": "31",
+      "hireDate": "2024-08-27",
+      "department": "Finanzas",
+      "division": "Corporativo",
+      "location": "Córdoba"
+    },
+    {
+      "employeeId": "73",
+      "firstName": "Cristian",
+      "lastName": "Esquivel",
+      "preferredName": null,
+      "jobTitleName": "Backend Developer Jr",
+      "status": "Inactive",
+      "workEmail": "cristian.esquivel@meridian-andina.example",
+      "employeeNumber": "10169",
+      "reportsToId": "35",
+      "hireDate": "2024-10-03",
+      "department": "Ingeniería",
+      "division": "Tecnología",
+      "location": "Montevideo"
+    },
+    {
+      "employeeId": "75",
+      "firstName": "Victoria",
+      "lastName": "Yáñez",
+      "preferredName": "Vico",
+      "jobTitleName": "Analista de People Ssr",
+      "status": "Inactive",
+      "workEmail": "victoria.yanez@meridian-andina.example",
+      "employeeNumber": "10176",
+      "reportsToId": "29",
+      "hireDate": "2024-10-22",
+      "department": "People",
+      "division": "Corporativo",
+      "location": "Córdoba"
+    },
+    {
+      "employeeId": "77",
+      "firstName": "Patricia",
+      "lastName": "Romero",
+      "preferredName": null,
+      "jobTitleName": "Analytics Engineer Ssr",
+      "status": "Active",
+      "workEmail": "patricia.romero@meridian-andina.example",
+      "employeeNumber": "10114",
+      "reportsToId": "37",
+      "hireDate": "2024-10-23",
+      "department": "Datos",
+      "division": "Tecnología",
+      "location": "Buenos Aires"
+    },
+    {
+      "employeeId": "79",
+      "firstName": "Rocío",
+      "lastName": "Fuentes",
+      "preferredName": null,
+      "jobTitleName": "Data Analyst Sr",
+      "status": "Active",
+      "workEmail": "rocio.fuentes@meridian-andina.example",
+      "employeeNumber": "10180",
+      "reportsToId": "37",
+      "hireDate": "2024-11-24",
+      "department": "Datos",
+      "division": "Tecnología",
+      "location": "Buenos Aires"
+    },
+    {
+      "employeeId": "81",
+      "firstName": "Adrián",
+      "lastName": "Cabrera",
+      "preferredName": null,
+      "jobTitleName": "Analista Contable Ssr",
+      "status": "Active",
+      "workEmail": "adrian.cabrera@meridian-andina.example",
+      "employeeNumber": "10184",
+      "reportsToId": "31",
+      "hireDate": "2025-08-03",
+      "department": "Finanzas",
+      "division": "Corporativo",
+      "location": "Remoto"
+    },
+    {
+      "employeeId": "83",
+      "firstName": "Natalia",
+      "lastName": "Lezcano",
+      "preferredName": null,
+      "jobTitleName": "Analista de People Sr",
+      "status": "Active",
+      "workEmail": "natalia.lezcano@meridian-andina.example",
+      "employeeNumber": "10186",
+      "reportsToId": "29",
+      "hireDate": "2025-08-17",
+      "department": "People",
+      "division": "Corporativo",
+      "location": "Buenos Aires"
+    },
+    {
+      "employeeId": "85",
+      "firstName": "Sofía",
+      "lastName": "Valdez",
+      "preferredName": null,
+      "jobTitleName": "Data Engineer Ssr",
+      "status": "Active",
+      "workEmail": "sofia.valdez2@meridian-andina.example",
+      "employeeNumber": "10155",
+      "reportsToId": "37",
+      "hireDate": "2026-02-04",
+      "department": "Datos",
+      "division": "Tecnología",
+      "location": "Buenos Aires"
+    },
+    {
+      "employeeId": "87",
+      "firstName": "Cristian",
+      "lastName": "Esquivel",
+      "preferredName": null,
+      "jobTitleName": "Data Analyst Jr",
+      "status": "Active",
+      "workEmail": "cristian.esquivel@meridian-andina.example",
+      "employeeNumber": "10169",
+      "reportsToId": "37",
+      "hireDate": "2026-03-13",
+      "department": "Datos",
+      "division": "Tecnología",
+      "location": "Montevideo"
+    },
+    {
+      "employeeId": "89",
+      "firstName": "Bruno",
+      "lastName": "Campos",
+      "preferredName": null,
+      "jobTitleName": "Analytics Engineer Ssr",
+      "status": "Active",
+      "workEmail": "bruno.campos@meridian-andina.example",
+      "employeeNumber": "10089",
+      "reportsToId": "37",
+      "hireDate": "2026-09-02",
+      "department": "Datos",
+      "division": "Tecnología",
+      "location": "Córdoba"
+    }
+  ],
+  "meta": {
+    "total": 40,
+    "page": {
+      "limit": 15,
+      "nextCursor": null,
+      "prevCursor": "eyJiZWZvcmUiOiI3MSJ9"
+    }
+  },
+  "_links": {
+    "self": {
+      "href": "/api/v1/employees?sort=employeeId&page[limit]=15&page[cursor]=eyJhZnRlciI6IjY5In0%3D"
+    },
+    "next": null,
+    "prev": {
+      "href": "/api/v1/employees?sort=employeeId&page[limit]=15&page[cursor]=eyJiZWZvcmUiOiI3MSJ9"
+    }
+  }
+}

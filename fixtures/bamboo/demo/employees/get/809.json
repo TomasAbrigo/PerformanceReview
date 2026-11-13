@@ -1,0 +1,17 @@
+{
+  "id": "809",
+  "firstName": "Candela",
+  "lastName": "Álvarez",
+  "workEmail": "candela.alvarez2@meridian-andina.example",
+  "employeeNumber": "11790",
+  "supervisorEId": "135",
+  "supervisorId": "10316",
+  "supervisor": "Trejo, Marcela",
+  "hireDate": "2026-09-30",
+  "terminationDate": null,
+  "department": "Calidad",
+  "division": "Operaciones",
+  "jobTitle": "Auditor de Procesos Sr",
+  "location": "Buenos Aires",
+  "status": "Active"
+}

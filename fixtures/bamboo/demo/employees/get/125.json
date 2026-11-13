@@ -1,0 +1,17 @@
+{
+  "id": "125",
+  "firstName": "Tomás",
+  "lastName": "Navarro",
+  "workEmail": "tomas.navarro@meridian-andina.example",
+  "employeeNumber": "10294",
+  "supervisorEId": "27",
+  "supervisorId": "10040",
+  "supervisor": "Díaz, Carolina",
+  "hireDate": "2020-01-06",
+  "terminationDate": null,
+  "department": "Ingeniería",
+  "division": "Tecnología",
+  "jobTitle": "Líder de Ingeniería",
+  "location": "Buenos Aires",
+  "status": "Active"
+}

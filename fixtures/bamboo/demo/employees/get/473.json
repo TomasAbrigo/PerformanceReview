@@ -1,0 +1,17 @@
+{
+  "id": "473",
+  "firstName": "Gabriela",
+  "lastName": "Figueroa",
+  "workEmail": "gabriela.figueroa@meridian-andina.example",
+  "employeeNumber": "11172",
+  "supervisorEId": "83",
+  "supervisorId": "10177",
+  "supervisor": "Franco, Daniela",
+  "hireDate": "2023-07-03",
+  "terminationDate": "2025-05-30",
+  "department": "Customer Success",
+  "division": "Comercial",
+  "jobTitle": "Onboarding Specialist Sr",
+  "location": "Buenos Aires",
+  "status": "Inactive"
+}

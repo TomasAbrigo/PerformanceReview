@@ -1,0 +1,17 @@
+{
+  "id": "331",
+  "firstName": "Lorena",
+  "lastName": "Gómez",
+  "workEmail": "lorena.gomez@meridian-andina.example",
+  "employeeNumber": "10820",
+  "supervisorEId": "41",
+  "supervisorId": "10067",
+  "supervisor": "Morales, Florencia",
+  "hireDate": "2022-05-10",
+  "terminationDate": null,
+  "department": "Customer Success",
+  "division": "Comercial",
+  "jobTitle": "Onboarding Specialist Ssr",
+  "location": "Buenos Aires",
+  "status": "Active"
+}

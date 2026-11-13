@@ -1,0 +1,17 @@
+{
+  "id": "409",
+  "firstName": "Pablo",
+  "lastName": "Ledesma",
+  "workEmail": "pablo.ledesma@meridian-andina.example",
+  "employeeNumber": "11022",
+  "supervisorEId": "321",
+  "supervisorId": "10792",
+  "supervisor": "Figueroa, Facundo",
+  "hireDate": "2022-12-19",
+  "terminationDate": null,
+  "department": "Finanzas",
+  "division": "Corporativo",
+  "jobTitle": "Analista de Tesorería Ssr",
+  "location": "Buenos Aires",
+  "status": "Active"
+}

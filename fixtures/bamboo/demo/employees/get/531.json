@@ -1,0 +1,17 @@
+{
+  "id": "531",
+  "firstName": "Esteban",
+  "lastName": "Benítez",
+  "workEmail": "esteban.benitez@meridian-andina.example",
+  "employeeNumber": "11291",
+  "supervisorEId": "243",
+  "supervisorId": "10583",
+  "supervisor": "Bustos, Jimena",
+  "hireDate": "2024-01-05",
+  "terminationDate": null,
+  "department": "Calidad",
+  "division": "Operaciones",
+  "jobTitle": "Auditor de Procesos Ssr",
+  "location": "Córdoba",
+  "status": "Active"
+}

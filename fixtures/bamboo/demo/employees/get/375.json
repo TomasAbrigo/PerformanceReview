@@ -1,0 +1,17 @@
+{
+  "id": "375",
+  "firstName": "Belén",
+  "lastName": "Paz",
+  "workEmail": "belen.paz@meridian-andina.example",
+  "employeeNumber": "10927",
+  "supervisorEId": "321",
+  "supervisorId": "10792",
+  "supervisor": "Figueroa, Facundo",
+  "hireDate": "2022-09-30",
+  "terminationDate": null,
+  "department": "Finanzas",
+  "division": "Corporativo",
+  "jobTitle": "Analista de Tesorería Jr",
+  "location": "Buenos Aires",
+  "status": "Active"
+}

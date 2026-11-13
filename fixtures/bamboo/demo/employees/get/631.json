@@ -1,0 +1,17 @@
+{
+  "id": "631",
+  "firstName": "Marcelo",
+  "lastName": "Páez",
+  "workEmail": "marcelo.paez@meridian-andina.example",
+  "employeeNumber": "11522",
+  "supervisorEId": "301",
+  "supervisorId": "10749",
+  "supervisor": "Carrizo, Silvana",
+  "hireDate": "2024-09-18",
+  "terminationDate": null,
+  "department": "Operaciones",
+  "division": "Operaciones",
+  "jobTitle": "Analista de Operaciones Ssr",
+  "location": "Remoto",
+  "status": "Active"
+}

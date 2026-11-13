@@ -1,0 +1,17 @@
+{
+  "id": "415",
+  "firstName": "Florencia",
+  "lastName": "Fuentes",
+  "workEmail": "florencia.fuentes@meridian-andina.example",
+  "employeeNumber": "11036",
+  "supervisorEId": "321",
+  "supervisorId": "10792",
+  "supervisor": "Figueroa, Facundo",
+  "hireDate": "2023-01-09",
+  "terminationDate": null,
+  "department": "Finanzas",
+  "division": "Corporativo",
+  "jobTitle": "Analista de Tesorería Ssr",
+  "location": "Córdoba",
+  "status": "Active"
+}

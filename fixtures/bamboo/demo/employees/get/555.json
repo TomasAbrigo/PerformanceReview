@@ -1,0 +1,17 @@
+{
+  "id": "555",
+  "firstName": "Ramiro",
+  "lastName": "Aguirre",
+  "workEmail": "ramiro.aguirre@meridian-andina.example",
+  "employeeNumber": "11360",
+  "supervisorEId": "135",
+  "supervisorId": "10316",
+  "supervisor": "Trejo, Marcela",
+  "hireDate": "2024-03-13",
+  "terminationDate": null,
+  "department": "Calidad",
+  "division": "Operaciones",
+  "jobTitle": "Auditor de Procesos Ssr",
+  "location": "Rosario",
+  "status": "Active"
+}

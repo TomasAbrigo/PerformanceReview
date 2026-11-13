@@ -1,0 +1,17 @@
+{
+  "id": "107",
+  "firstName": "Leandro",
+  "lastName": "Luna",
+  "workEmail": "leandro.luna@meridian-andina.example",
+  "employeeNumber": "10245",
+  "supervisorEId": "43",
+  "supervisorId": "10070",
+  "supervisor": "Soria, Eugenia",
+  "hireDate": "2019-09-04",
+  "terminationDate": null,
+  "department": "Legales",
+  "division": "Corporativo",
+  "jobTitle": "Abogado Corporativo Sr",
+  "location": "Buenos Aires",
+  "status": "Active"
+}

@@ -1,0 +1,204 @@
+{
+  "canAlign": true,
+  "canCreateGoals": true,
+  "filters": [
+    {
+      "id": "status-all",
+      "name": "All"
+    },
+    {
+      "id": "inProgress",
+      "name": "In progress"
+    },
+    {
+      "id": "completed",
+      "name": "Completed"
+    },
+    {
+      "id": "closed",
+      "name": "Closed"
+    }
+  ],
+  "selectedFilter": "status-all",
+  "goals": [
+    {
+      "id": "6431",
+      "title": "Lanzar el nuevo flujo de onboarding",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2023-02-16",
+      "completionDate": "2023-02-23",
+      "lastChangedDateTime": "2023-02-23T18:55:21Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "6433",
+      "title": "Renovar las cuentas clave del trimestre",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [
+        137
+      ],
+      "dueDate": "2023-05-29",
+      "completionDate": "2023-05-13",
+      "lastChangedDateTime": "2023-05-13T18:31:59Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "6435",
+      "title": "Mejorar el NPS interno del equipo",
+      "description": "Sirve de base para el próximo ciclo de evaluación.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2023-02-27",
+      "completionDate": "2023-02-08",
+      "lastChangedDateTime": "2023-02-08T11:53:28Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "6438",
+      "title": "Implementar el calendario editorial",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [
+        241
+      ],
+      "dueDate": "2025-11-02",
+      "completionDate": "2025-09-28",
+      "lastChangedDateTime": "2025-09-28T16:23:05Z",
+      "status": "completed",
+      "milestones": [
+        {
+          "id": 1342,
+          "employeeGoalId": 6438,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-08-23T13:01:46Z",
+          "lastUpdateDateTime": "2025-08-23T13:01:46Z",
+          "lastUpdateUserId": 297
+        },
+        {
+          "id": 1343,
+          "employeeGoalId": 6438,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-08-26T13:13:07Z",
+          "lastUpdateDateTime": "2025-08-26T13:13:07Z",
+          "lastUpdateUserId": 297
+        },
+        {
+          "id": 1344,
+          "employeeGoalId": 6438,
+          "title": "Hito 3",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-08-22T09:24:29Z",
+          "lastUpdateDateTime": "2025-08-22T09:24:29Z",
+          "lastUpdateUserId": 297
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "6439",
+      "title": "Renovar las cuentas clave del trimestre",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [
+        241
+      ],
+      "dueDate": "2025-08-09",
+      "completionDate": "2025-04-27",
+      "lastChangedDateTime": "2025-04-27T09:32:37Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    }
+  ],
+  "persons": [
+    {
+      "employeeId": 297,
+      "firstName": "Javier",
+      "lastName": "Urquiza",
+      "preferredName": null
+    },
+    {
+      "employeeId": 137,
+      "firstName": "Marcela",
+      "lastName": "Lezcano",
+      "preferredName": null
+    },
+    {
+      "employeeId": 241,
+      "firstName": "Daniela",
+      "lastName": "Reyes",
+      "preferredName": null
+    }
+  ],
+  "comments": [
+    {
+      "goalId": "6431",
+      "commentCount": 3
+    },
+    {
+      "goalId": "6433",
+      "commentCount": 4
+    },
+    {
+      "goalId": "6435",
+      "commentCount": 2
+    }
+  ]
+}

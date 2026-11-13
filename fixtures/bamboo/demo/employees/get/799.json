@@ -1,0 +1,17 @@
+{
+  "id": "799",
+  "firstName": "Federico",
+  "lastName": "Rivas",
+  "workEmail": "federico.rivas@meridian-andina.example",
+  "employeeNumber": "10554",
+  "supervisorEId": "65",
+  "supervisorId": "10126",
+  "supervisor": "Díaz, Valentina",
+  "hireDate": "2026-01-30",
+  "terminationDate": null,
+  "department": "Marketing",
+  "division": "Comercial",
+  "jobTitle": "Diseñador de Marca Jr",
+  "location": "Montevideo",
+  "status": "Active"
+}

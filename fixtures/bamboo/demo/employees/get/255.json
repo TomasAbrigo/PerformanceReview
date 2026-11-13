@@ -1,0 +1,17 @@
+{
+  "id": "255",
+  "firstName": "Mariana",
+  "lastName": "Aguirre",
+  "workEmail": "mariana.aguirre@meridian-andina.example",
+  "employeeNumber": "10620",
+  "supervisorEId": "105",
+  "supervisorId": "10244",
+  "supervisor": "Ibáñez, Lucía",
+  "hireDate": "2021-10-29",
+  "terminationDate": null,
+  "department": "Ingeniería",
+  "division": "Tecnología",
+  "jobTitle": "Frontend Developer Sr",
+  "location": "Buenos Aires",
+  "status": "Active"
+}

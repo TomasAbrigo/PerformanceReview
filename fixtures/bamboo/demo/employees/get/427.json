@@ -1,0 +1,17 @@
+{
+  "id": "427",
+  "firstName": "Esteban",
+  "lastName": "Reyes",
+  "workEmail": "esteban.reyes@meridian-andina.example",
+  "employeeNumber": "11062",
+  "supervisorEId": "111",
+  "supervisorId": "10253",
+  "supervisor": "Peralta, Martín",
+  "hireDate": "2023-02-16",
+  "terminationDate": null,
+  "department": "Datos",
+  "division": "Tecnología",
+  "jobTitle": "Analytics Engineer Sr",
+  "location": "Córdoba",
+  "status": "Active"
+}

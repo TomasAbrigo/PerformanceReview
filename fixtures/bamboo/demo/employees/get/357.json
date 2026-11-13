@@ -1,0 +1,17 @@
+{
+  "id": "357",
+  "firstName": "Joaquín",
+  "lastName": "Reyes",
+  "workEmail": "joaquin.reyes@meridian-andina.example",
+  "employeeNumber": "10885",
+  "supervisorEId": "243",
+  "supervisorId": "10583",
+  "supervisor": "Bustos, Jimena",
+  "hireDate": "2022-08-01",
+  "terminationDate": null,
+  "department": "Calidad",
+  "division": "Operaciones",
+  "jobTitle": "Analista de Calidad Jr",
+  "location": "Buenos Aires",
+  "status": "Active"
+}

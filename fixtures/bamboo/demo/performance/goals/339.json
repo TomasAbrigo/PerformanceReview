@@ -1,0 +1,149 @@
+{
+  "canAlign": true,
+  "canCreateGoals": false,
+  "filters": [
+    {
+      "id": "status-all",
+      "name": "All"
+    },
+    {
+      "id": "inProgress",
+      "name": "In progress"
+    },
+    {
+      "id": "completed",
+      "name": "Completed"
+    },
+    {
+      "id": "closed",
+      "name": "Closed"
+    }
+  ],
+  "selectedFilter": "status-all",
+  "goals": [
+    {
+      "id": "6641",
+      "title": "Documentar los procesos críticos",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2023-03-09",
+      "completionDate": "2022-11-16",
+      "lastChangedDateTime": "2022-11-16T08:10:42Z",
+      "status": "completed",
+      "milestones": [
+        {
+          "id": 1441,
+          "employeeGoalId": 6641,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2022-10-09T18:36:10Z",
+          "lastUpdateDateTime": "2022-10-09T18:36:10Z",
+          "lastUpdateUserId": 339
+        },
+        {
+          "id": 1442,
+          "employeeGoalId": 6641,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2022-11-03T10:10:43Z",
+          "lastUpdateDateTime": "2022-11-03T10:10:43Z",
+          "lastUpdateUserId": 339
+        }
+      ],
+      "actions": {
+        "canEdit": false,
+        "canUpdateProgress": false,
+        "canClose": false,
+        "canReopen": false,
+        "canDelete": false,
+        "canComment": false
+      }
+    },
+    {
+      "id": "6644",
+      "title": "Aumentar la cobertura de pruebas al 80%",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 20,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [
+        23
+      ],
+      "dueDate": "2023-05-19",
+      "completionDate": null,
+      "lastChangedDateTime": "2024-08-13T08:16:10Z",
+      "status": "in_progress",
+      "milestones": null,
+      "actions": {
+        "canEdit": false,
+        "canUpdateProgress": false,
+        "canClose": false,
+        "canReopen": false,
+        "canDelete": false,
+        "canComment": false
+      }
+    },
+    {
+      "id": "6645",
+      "title": "Cerrar el plan de capacitación anual",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2023-11-19",
+      "completionDate": "2023-08-15",
+      "lastChangedDateTime": "2023-08-15T16:05:11Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": false,
+        "canUpdateProgress": false,
+        "canClose": false,
+        "canReopen": false,
+        "canDelete": false,
+        "canComment": false
+      }
+    },
+    {
+      "id": "6648",
+      "title": "Entregar el proyecto Norte sin desvíos",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2024-05-17",
+      "completionDate": "2024-01-08",
+      "lastChangedDateTime": "2024-01-08T16:23:52Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": false,
+        "canUpdateProgress": false,
+        "canClose": false,
+        "canReopen": false,
+        "canDelete": false,
+        "canComment": false
+      }
+    }
+  ],
+  "persons": [
+    {
+      "employeeId": 339,
+      "firstName": "Marcela",
+      "lastName": "Maldonado",
+      "preferredName": null
+    },
+    {
+      "employeeId": 23,
+      "firstName": "María",
+      "lastName": "Medina",
+      "preferredName": null
+    }
+  ],
+  "comments": []
+}

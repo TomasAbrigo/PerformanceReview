@@ -1,0 +1,17 @@
+{
+  "id": "35",
+  "firstName": "Carolina",
+  "lastName": "Núñez",
+  "workEmail": "carolina.nunez@meridian-andina.example",
+  "employeeNumber": "10073",
+  "supervisorEId": "23",
+  "supervisorId": "10039",
+  "supervisor": "Bustos, Adrián",
+  "hireDate": "2018-03-26",
+  "terminationDate": null,
+  "department": "Ingeniería",
+  "division": "Tecnología",
+  "jobTitle": "Líder de Ingeniería",
+  "location": "Buenos Aires",
+  "status": "Active"
+}

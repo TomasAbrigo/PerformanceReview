@@ -1,0 +1,17 @@
+{
+  "id": "713",
+  "firstName": "Nicolás",
+  "lastName": "Morales",
+  "workEmail": "nicolas.morales@meridian-andina.example",
+  "employeeNumber": "11750",
+  "supervisorEId": "31",
+  "supervisorId": "10044",
+  "supervisor": "Ríos, Antonella",
+  "hireDate": "2025-03-28",
+  "terminationDate": null,
+  "department": "Infraestructura",
+  "division": "Tecnología",
+  "jobTitle": "DevOps Engineer Sr",
+  "location": "Remoto",
+  "status": "Active"
+}

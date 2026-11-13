@@ -1,0 +1,17 @@
+{
+  "id": "467",
+  "firstName": "Martín",
+  "lastName": "Romero",
+  "workEmail": "martin.romero@meridian-andina.example",
+  "employeeNumber": "11153",
+  "supervisorEId": "111",
+  "supervisorId": "10253",
+  "supervisor": "Peralta, Martín",
+  "hireDate": "2023-06-21",
+  "terminationDate": null,
+  "department": "Datos",
+  "division": "Tecnología",
+  "jobTitle": "Data Analyst Sr",
+  "location": "Buenos Aires",
+  "status": "Active"
+}

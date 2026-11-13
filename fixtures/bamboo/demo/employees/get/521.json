@@ -1,0 +1,17 @@
+{
+  "id": "521",
+  "firstName": "Damián",
+  "lastName": "Martínez",
+  "workEmail": "damian.martinez@meridian-andina.example",
+  "employeeNumber": "11272",
+  "supervisorEId": "41",
+  "supervisorId": "10067",
+  "supervisor": "Morales, Florencia",
+  "hireDate": "2023-12-02",
+  "terminationDate": null,
+  "department": "Customer Success",
+  "division": "Comercial",
+  "jobTitle": "Customer Success Manager Ssr",
+  "location": "Buenos Aires",
+  "status": "Active"
+}

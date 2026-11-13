@@ -1,0 +1,17 @@
+{
+  "id": "683",
+  "firstName": "Tomás",
+  "lastName": "Peralta",
+  "workEmail": "tomas.peralta@meridian-andina.example",
+  "employeeNumber": "11654",
+  "supervisorEId": "93",
+  "supervisorId": "10213",
+  "supervisor": "Herrera, Rocío",
+  "hireDate": "2025-02-03",
+  "terminationDate": null,
+  "department": "Infraestructura",
+  "division": "Tecnología",
+  "jobTitle": "DevOps Engineer Jr",
+  "location": "Remoto",
+  "status": "Active"
+}

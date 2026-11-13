@@ -1,0 +1,17 @@
+{
+  "id": "457",
+  "firstName": "Laura",
+  "lastName": "Carrizo",
+  "workEmail": "laura.carrizo@meridian-andina.example",
+  "employeeNumber": "11134",
+  "supervisorEId": "243",
+  "supervisorId": "10583",
+  "supervisor": "Bustos, Jimena",
+  "hireDate": "2023-05-29",
+  "terminationDate": "2024-12-07",
+  "department": "Calidad",
+  "division": "Operaciones",
+  "jobTitle": "Auditor de Procesos Ssr",
+  "location": "Remoto",
+  "status": "Inactive"
+}

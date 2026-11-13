@@ -1,0 +1,17 @@
+{
+  "id": "645",
+  "firstName": "Esteban",
+  "lastName": "Trejo",
+  "workEmail": "esteban.trejo@meridian-andina.example",
+  "employeeNumber": "11552",
+  "supervisorEId": "321",
+  "supervisorId": "10792",
+  "supervisor": "Figueroa, Facundo",
+  "hireDate": "2024-11-07",
+  "terminationDate": null,
+  "department": "Finanzas",
+  "division": "Corporativo",
+  "jobTitle": "Controller Jr",
+  "location": "Buenos Aires",
+  "status": "Active"
+}

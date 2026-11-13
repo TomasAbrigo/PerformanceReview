@@ -1,0 +1,181 @@
+{
+  "canAlign": true,
+  "canCreateGoals": true,
+  "filters": [
+    {
+      "id": "status-all",
+      "name": "All"
+    },
+    {
+      "id": "inProgress",
+      "name": "In progress"
+    },
+    {
+      "id": "completed",
+      "name": "Completed"
+    },
+    {
+      "id": "closed",
+      "name": "Closed"
+    }
+  ],
+  "selectedFilter": "status-all",
+  "goals": [
+    {
+      "id": "6931",
+      "title": "Completar la certificación del área",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [
+        111
+      ],
+      "dueDate": "2023-12-08",
+      "completionDate": "2023-08-10",
+      "lastChangedDateTime": "2023-08-10T17:06:15Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "6933",
+      "title": "Migrar los reportes al nuevo tablero",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "percentComplete": 100,
+      "alignsWithOptionId": 9002,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2023-08-23",
+      "completionDate": "2023-04-30",
+      "lastChangedDateTime": "2023-04-30T17:04:25Z",
+      "status": "completed",
+      "milestones": [
+        {
+          "id": 1547,
+          "employeeGoalId": 6933,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2023-04-18T19:29:39Z",
+          "lastUpdateDateTime": "2023-04-18T19:29:39Z",
+          "lastUpdateUserId": 405
+        },
+        {
+          "id": 1548,
+          "employeeGoalId": 6933,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2023-04-16T11:38:33Z",
+          "lastUpdateDateTime": "2023-04-16T11:38:33Z",
+          "lastUpdateUserId": 405
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "6936",
+      "title": "Renovar las cuentas clave del trimestre",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2024-08-06",
+      "completionDate": "2024-06-20",
+      "lastChangedDateTime": "2024-06-20T19:59:15Z",
+      "status": "completed",
+      "milestones": [
+        {
+          "id": 1549,
+          "employeeGoalId": 6936,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2024-06-03T19:06:31Z",
+          "lastUpdateDateTime": "2024-06-03T19:06:31Z",
+          "lastUpdateUserId": 405
+        },
+        {
+          "id": 1550,
+          "employeeGoalId": 6936,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2024-05-10T18:45:11Z",
+          "lastUpdateDateTime": "2024-05-10T18:45:11Z",
+          "lastUpdateUserId": 405
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "6937",
+      "title": "Completar la certificación del área",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "percentComplete": 55,
+      "alignsWithOptionId": 9004,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2026-08-06",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-04-11T14:23:36Z",
+      "status": "in_progress",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    }
+  ],
+  "persons": [
+    {
+      "employeeId": 405,
+      "firstName": "Santiago",
+      "lastName": "Roldán",
+      "preferredName": "Santi"
+    },
+    {
+      "employeeId": 111,
+      "firstName": "Martín",
+      "lastName": "Peralta",
+      "preferredName": null
+    }
+  ],
+  "comments": [
+    {
+      "goalId": "6931",
+      "commentCount": 4
+    },
+    {
+      "goalId": "6936",
+      "commentCount": 4
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "id": "71",
+  "firstName": "Franco",
+  "lastName": "Morales",
+  "workEmail": "franco.morales@meridian-andina.example",
+  "employeeNumber": "10162",
+  "supervisorEId": "31",
+  "supervisorId": "10060",
+  "supervisor": "Rivas, Federico",
+  "hireDate": "2024-08-27",
+  "terminationDate": "2025-08-15",
+  "department": "Finanzas",
+  "division": "Corporativo",
+  "jobTitle": "Analista Contable Jr",
+  "location": "Córdoba",
+  "status": "Inactive"
+}

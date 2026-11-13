@@ -1,0 +1,17 @@
+{
+  "id": "249",
+  "firstName": "Emiliano",
+  "lastName": "Ojeda",
+  "workEmail": "emiliano.ojeda@meridian-andina.example",
+  "employeeNumber": "10599",
+  "supervisorEId": "241",
+  "supervisorId": "10574",
+  "supervisor": "Reyes, Daniela",
+  "hireDate": "2021-09-30",
+  "terminationDate": null,
+  "department": "Marketing",
+  "division": "Comercial",
+  "jobTitle": "Content Specialist Ssr",
+  "location": "Buenos Aires",
+  "status": "Active"
+}

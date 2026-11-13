@@ -1,0 +1,17 @@
+{
+  "id": "759",
+  "firstName": "Eugenia",
+  "lastName": "Sosa",
+  "workEmail": "eugenia.sosa@meridian-andina.example",
+  "employeeNumber": "11848",
+  "supervisorEId": "137",
+  "supervisorId": "10320",
+  "supervisor": "Lezcano, Marcela",
+  "hireDate": "2025-07-21",
+  "terminationDate": null,
+  "department": "Customer Success",
+  "division": "Comercial",
+  "jobTitle": "Customer Success Manager Jr",
+  "location": "Córdoba",
+  "status": "Active"
+}

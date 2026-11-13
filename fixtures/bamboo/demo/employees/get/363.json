@@ -1,0 +1,17 @@
+{
+  "id": "363",
+  "firstName": "Agustina",
+  "lastName": "Navarro",
+  "workEmail": "agustina.navarro@meridian-andina.example",
+  "employeeNumber": "10907",
+  "supervisorEId": "19",
+  "supervisorId": "10023",
+  "supervisor": "Acosta, Cristian",
+  "hireDate": "2022-08-10",
+  "terminationDate": null,
+  "department": "Legales",
+  "division": "Corporativo",
+  "jobTitle": "Líder de Legales",
+  "location": "Buenos Aires",
+  "status": "Active"
+}

@@ -1,0 +1,17 @@
+{
+  "id": "293",
+  "firstName": "Carolina",
+  "lastName": "Rojas",
+  "workEmail": "carolina.rojas@meridian-andina.example",
+  "employeeNumber": "10716",
+  "supervisorEId": "61",
+  "supervisorId": "10116",
+  "supervisor": "Peralta, Marcelo",
+  "hireDate": "2022-01-27",
+  "terminationDate": null,
+  "department": "Ventas",
+  "division": "Comercial",
+  "jobTitle": "Ejecutivo de Cuentas Jr",
+  "location": "Buenos Aires",
+  "status": "Active"
+}

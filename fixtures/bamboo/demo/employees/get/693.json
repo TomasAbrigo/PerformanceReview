@@ -1,0 +1,17 @@
+{
+  "id": "693",
+  "firstName": "Mariana",
+  "lastName": "Yáñez",
+  "workEmail": "mariana.yanez@meridian-andina.example",
+  "employeeNumber": "11688",
+  "supervisorEId": "59",
+  "supervisorId": "10110",
+  "supervisor": "Soria, Gonzalo",
+  "hireDate": "2025-02-25",
+  "terminationDate": "2025-10-01",
+  "department": "Finanzas",
+  "division": "Corporativo",
+  "jobTitle": "Analista de Tesorería Sr",
+  "location": "Buenos Aires",
+  "status": "Inactive"
+}

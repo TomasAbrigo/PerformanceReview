@@ -1,0 +1,119 @@
+{
+  "canAlign": true,
+  "canCreateGoals": true,
+  "filters": [
+    {
+      "id": "status-all",
+      "name": "All"
+    },
+    {
+      "id": "inProgress",
+      "name": "In progress"
+    },
+    {
+      "id": "completed",
+      "name": "Completed"
+    },
+    {
+      "id": "closed",
+      "name": "Closed"
+    }
+  ],
+  "selectedFilter": "status-all",
+  "goals": [
+    {
+      "id": "7959",
+      "title": "Entregar el proyecto Norte sin desvíos",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2025-05-31",
+      "completionDate": "2025-03-15",
+      "lastChangedDateTime": "2025-03-15T09:48:08Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "7961",
+      "title": "Lanzar el nuevo flujo de onboarding",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2025-05-09",
+      "completionDate": "2025-03-30",
+      "lastChangedDateTime": "2025-03-30T15:36:19Z",
+      "status": "completed",
+      "milestones": [
+        {
+          "id": 2033,
+          "employeeGoalId": 7961,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-03-01T10:27:15Z",
+          "lastUpdateDateTime": "2025-03-01T10:27:15Z",
+          "lastUpdateUserId": 677
+        },
+        {
+          "id": 2034,
+          "employeeGoalId": 7961,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-01-30T10:05:41Z",
+          "lastUpdateDateTime": "2025-01-30T10:05:41Z",
+          "lastUpdateUserId": 677
+        },
+        {
+          "id": 2035,
+          "employeeGoalId": 7961,
+          "title": "Hito 3",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-03-22T17:46:22Z",
+          "lastUpdateDateTime": "2025-03-22T17:46:22Z",
+          "lastUpdateUserId": 677
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    }
+  ],
+  "persons": [
+    {
+      "employeeId": 677,
+      "firstName": "Soledad",
+      "lastName": "Carrizo",
+      "preferredName": null
+    }
+  ],
+  "comments": [
+    {
+      "goalId": "7959",
+      "commentCount": 1
+    },
+    {
+      "goalId": "7961",
+      "commentCount": 2
+    }
+  ]
+}

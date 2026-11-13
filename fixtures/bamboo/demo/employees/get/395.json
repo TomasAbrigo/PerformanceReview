@@ -1,0 +1,17 @@
+{
+  "id": "395",
+  "firstName": "Valentina",
+  "lastName": "Rodríguez",
+  "workEmail": "valentina.rodriguez@meridian-andina.example",
+  "employeeNumber": "10990",
+  "supervisorEId": "147",
+  "supervisorId": "10339",
+  "supervisor": "Páez, Paula",
+  "hireDate": "2022-11-20",
+  "terminationDate": null,
+  "department": "Legales",
+  "division": "Corporativo",
+  "jobTitle": "Analista de Compliance Jr",
+  "location": "Buenos Aires",
+  "status": "Active"
+}

@@ -1,0 +1,138 @@
+{
+  "canAlign": true,
+  "canCreateGoals": true,
+  "filters": [
+    {
+      "id": "status-all",
+      "name": "All"
+    },
+    {
+      "id": "inProgress",
+      "name": "In progress"
+    },
+    {
+      "id": "completed",
+      "name": "Completed"
+    },
+    {
+      "id": "closed",
+      "name": "Closed"
+    }
+  ],
+  "selectedFilter": "status-all",
+  "goals": [
+    {
+      "id": "7655",
+      "title": "Documentar los procesos críticos",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 100,
+      "alignsWithOptionId": 9001,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2024-12-25",
+      "completionDate": "2024-11-06",
+      "lastChangedDateTime": "2024-11-06T09:42:17Z",
+      "status": "completed",
+      "milestones": [
+        {
+          "id": 1886,
+          "employeeGoalId": 7655,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2024-10-30T14:17:56Z",
+          "lastUpdateDateTime": "2024-10-30T14:17:56Z",
+          "lastUpdateUserId": 567
+        },
+        {
+          "id": 1887,
+          "employeeGoalId": 7655,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2024-10-16T17:21:56Z",
+          "lastUpdateDateTime": "2024-10-16T17:21:56Z",
+          "lastUpdateUserId": 567
+        },
+        {
+          "id": 1888,
+          "employeeGoalId": 7655,
+          "title": "Hito 3",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2024-10-20T17:29:53Z",
+          "lastUpdateDateTime": "2024-10-20T17:29:53Z",
+          "lastUpdateUserId": 567
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "7658",
+      "title": "Migrar los reportes al nuevo tablero",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2026-05-25",
+      "completionDate": "2026-05-17",
+      "lastChangedDateTime": "2026-05-17T12:17:17Z",
+      "status": "completed",
+      "milestones": [
+        {
+          "id": 1889,
+          "employeeGoalId": 7658,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2026-04-11T14:18:47Z",
+          "lastUpdateDateTime": "2026-04-11T14:18:47Z",
+          "lastUpdateUserId": 567
+        },
+        {
+          "id": 1890,
+          "employeeGoalId": 7658,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2026-04-14T08:58:32Z",
+          "lastUpdateDateTime": "2026-04-14T08:58:32Z",
+          "lastUpdateUserId": 567
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    }
+  ],
+  "persons": [
+    {
+      "employeeId": 567,
+      "firstName": "Gustavo",
+      "lastName": "Núñez",
+      "preferredName": null
+    }
+  ],
+  "comments": [
+    {
+      "goalId": "7658",
+      "commentCount": 1
+    }
+  ]
+}

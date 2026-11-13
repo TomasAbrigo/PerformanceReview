@@ -1,0 +1,17 @@
+{
+  "id": "317",
+  "firstName": "José",
+  "lastName": "Cabrera",
+  "workEmail": "jose.cabrera@meridian-andina.example",
+  "employeeNumber": "10781",
+  "supervisorEId": "31",
+  "supervisorId": "10044",
+  "supervisor": "Ríos, Antonella",
+  "hireDate": "2022-03-30",
+  "terminationDate": null,
+  "department": "Infraestructura",
+  "division": "Tecnología",
+  "jobTitle": "SysAdmin Ssr",
+  "location": "Montevideo",
+  "status": "Active"
+}

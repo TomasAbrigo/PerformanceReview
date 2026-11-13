@@ -1,0 +1,17 @@
+{
+  "id": "345",
+  "firstName": "Esteban",
+  "lastName": "Rivas",
+  "workEmail": "esteban.rivas@meridian-andina.example",
+  "employeeNumber": "10853",
+  "supervisorEId": "241",
+  "supervisorId": "10574",
+  "supervisor": "Reyes, Daniela",
+  "hireDate": "2022-06-27",
+  "terminationDate": null,
+  "department": "Marketing",
+  "division": "Comercial",
+  "jobTitle": "Content Specialist Jr",
+  "location": "Buenos Aires",
+  "status": "Active"
+}

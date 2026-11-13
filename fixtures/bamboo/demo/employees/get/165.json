@@ -1,0 +1,17 @@
+{
+  "id": "165",
+  "firstName": "Agustina",
+  "lastName": "Pérez",
+  "workEmail": "agustina.perez@meridian-andina.example",
+  "employeeNumber": "10389",
+  "supervisorEId": "47",
+  "supervisorId": "10080",
+  "supervisor": "Olmos, Candela",
+  "hireDate": "2020-11-02",
+  "terminationDate": null,
+  "department": "Soporte",
+  "division": "Operaciones",
+  "jobTitle": "Agente de Soporte Sr",
+  "location": "Córdoba",
+  "status": "Active"
+}

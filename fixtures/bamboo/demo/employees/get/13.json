@@ -1,0 +1,17 @@
+{
+  "id": "13",
+  "firstName": "Daniela",
+  "lastName": "Zárate",
+  "workEmail": "daniela.zarate@meridian-andina.example",
+  "employeeNumber": "10012",
+  "supervisorEId": "11",
+  "supervisorId": "10009",
+  "supervisor": "Lezcano, Damián",
+  "hireDate": "2014-05-30",
+  "terminationDate": null,
+  "department": "Dirección de Tecnología",
+  "division": "Tecnología",
+  "jobTitle": "VP de Tecnología",
+  "location": "Buenos Aires",
+  "status": "Active"
+}

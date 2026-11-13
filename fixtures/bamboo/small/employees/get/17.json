@@ -1,0 +1,17 @@
+{
+  "id": "17",
+  "firstName": "Silvana",
+  "lastName": "Arias",
+  "workEmail": "silvana.arias@meridian-andina.example",
+  "employeeNumber": "10026",
+  "supervisorEId": "11",
+  "supervisorId": "10009",
+  "supervisor": "Delgado, Marcela",
+  "hireDate": "2016-07-17",
+  "terminationDate": null,
+  "department": "Dirección de Corporativo",
+  "division": "Corporativo",
+  "jobTitle": "VP de Corporativo",
+  "location": "Buenos Aires",
+  "status": "Active"
+}

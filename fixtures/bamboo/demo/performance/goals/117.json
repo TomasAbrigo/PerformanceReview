@@ -1,0 +1,393 @@
+{
+  "canAlign": true,
+  "canCreateGoals": true,
+  "filters": [
+    {
+      "id": "status-all",
+      "name": "All"
+    },
+    {
+      "id": "inProgress",
+      "name": "In progress"
+    },
+    {
+      "id": "completed",
+      "name": "Completed"
+    },
+    {
+      "id": "closed",
+      "name": "Closed"
+    }
+  ],
+  "selectedFilter": "status-all",
+  "goals": [
+    {
+      "id": "5506",
+      "title": "Aumentar la cobertura de pruebas al 80%",
+      "description": "Sirve de base para el próximo ciclo de evaluación.",
+      "percentComplete": 20,
+      "alignsWithOptionId": 9003,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2023-02-05",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-04-13T14:34:17Z",
+      "status": "in_progress",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "5507",
+      "title": "Completar la certificación del área",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2024-06-13",
+      "completionDate": "2024-06-01",
+      "lastChangedDateTime": "2024-06-01T18:53:34Z",
+      "status": "completed",
+      "milestones": [
+        {
+          "id": 926,
+          "employeeGoalId": 5507,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2024-02-27T18:11:31Z",
+          "lastUpdateDateTime": "2024-02-27T18:11:31Z",
+          "lastUpdateUserId": 117
+        },
+        {
+          "id": 927,
+          "employeeGoalId": 5507,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2024-02-14T16:47:52Z",
+          "lastUpdateDateTime": "2024-02-14T16:47:52Z",
+          "lastUpdateUserId": 117
+        },
+        {
+          "id": 928,
+          "employeeGoalId": 5507,
+          "title": "Hito 3",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2024-03-25T12:20:46Z",
+          "lastUpdateDateTime": "2024-03-25T12:20:46Z",
+          "lastUpdateUserId": 117
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "5509",
+      "title": "Migrar los reportes al nuevo tablero",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 0,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [
+        21
+      ],
+      "dueDate": "2024-11-24",
+      "completionDate": null,
+      "lastChangedDateTime": "2025-10-11T14:10:43Z",
+      "status": "closed",
+      "milestones": [
+        {
+          "id": 929,
+          "employeeGoalId": 5509,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2024-06-18T09:40:45Z",
+          "lastUpdateUserId": 117
+        },
+        {
+          "id": 930,
+          "employeeGoalId": 5509,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2024-06-18T14:38:11Z",
+          "lastUpdateUserId": 117
+        }
+      ],
+      "actions": {
+        "canEdit": false,
+        "canUpdateProgress": false,
+        "canClose": false,
+        "canReopen": true,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "5511",
+      "title": "Reducir el tiempo de primera respuesta un 20%",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 100,
+      "alignsWithOptionId": 9004,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2025-05-18",
+      "completionDate": "2025-03-14",
+      "lastChangedDateTime": "2025-03-14T10:03:18Z",
+      "status": "completed",
+      "milestones": [
+        {
+          "id": 931,
+          "employeeGoalId": 5511,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2024-12-17T17:27:38Z",
+          "lastUpdateDateTime": "2024-12-17T17:27:38Z",
+          "lastUpdateUserId": 117
+        },
+        {
+          "id": 932,
+          "employeeGoalId": 5511,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-01-22T17:47:50Z",
+          "lastUpdateDateTime": "2025-01-22T17:47:50Z",
+          "lastUpdateUserId": 117
+        },
+        {
+          "id": 933,
+          "employeeGoalId": 5511,
+          "title": "Hito 3",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2024-12-01T19:18:00Z",
+          "lastUpdateDateTime": "2024-12-01T19:18:00Z",
+          "lastUpdateUserId": 117
+        },
+        {
+          "id": 934,
+          "employeeGoalId": 5511,
+          "title": "Hito 4",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2024-12-05T12:54:37Z",
+          "lastUpdateDateTime": "2024-12-05T12:54:37Z",
+          "lastUpdateUserId": 117
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "5513",
+      "title": "Reducir los incidentes recurrentes a la mitad",
+      "description": "Sirve de base para el próximo ciclo de evaluación.",
+      "percentComplete": 55,
+      "alignsWithOptionId": 9004,
+      "sharedWithEmployeeIds": [
+        21
+      ],
+      "dueDate": "2025-05-04",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-02-24T12:57:33Z",
+      "status": "in_progress",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "5516",
+      "title": "Reducir el tiempo de primera respuesta un 20%",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "percentComplete": 75,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2026-11-06",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-08-11T15:27:58Z",
+      "status": "in_progress",
+      "milestones": [
+        {
+          "id": 935,
+          "employeeGoalId": 5516,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2026-07-26T16:17:11Z",
+          "lastUpdateDateTime": "2026-07-26T16:17:11Z",
+          "lastUpdateUserId": 117
+        },
+        {
+          "id": 936,
+          "employeeGoalId": 5516,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2026-08-09T08:08:43Z",
+          "lastUpdateDateTime": "2026-08-09T08:08:43Z",
+          "lastUpdateUserId": 117
+        },
+        {
+          "id": 937,
+          "employeeGoalId": 5516,
+          "title": "Hito 3",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2026-07-24T18:10:58Z",
+          "lastUpdateDateTime": "2026-07-24T18:10:58Z",
+          "lastUpdateUserId": 117
+        },
+        {
+          "id": 938,
+          "employeeGoalId": 5516,
+          "title": "Hito 4",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2026-07-24T18:09:26Z",
+          "lastUpdateUserId": 117
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "5517",
+      "title": "Reducir los incidentes recurrentes a la mitad",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2026-07-02",
+      "completionDate": "2026-04-01",
+      "lastChangedDateTime": "2026-04-01T13:49:42Z",
+      "status": "completed",
+      "milestones": [
+        {
+          "id": 939,
+          "employeeGoalId": 5517,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-11-30T19:06:14Z",
+          "lastUpdateDateTime": "2025-11-30T19:06:14Z",
+          "lastUpdateUserId": 117
+        },
+        {
+          "id": 940,
+          "employeeGoalId": 5517,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2026-02-13T12:26:29Z",
+          "lastUpdateDateTime": "2026-02-13T12:26:29Z",
+          "lastUpdateUserId": 117
+        },
+        {
+          "id": 941,
+          "employeeGoalId": 5517,
+          "title": "Hito 3",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2026-01-20T11:01:12Z",
+          "lastUpdateDateTime": "2026-01-20T11:01:12Z",
+          "lastUpdateUserId": 117
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    }
+  ],
+  "persons": [
+    {
+      "employeeId": 117,
+      "firstName": "Mariana",
+      "lastName": "Núñez",
+      "preferredName": null
+    },
+    {
+      "employeeId": 21,
+      "firstName": "Lucas",
+      "lastName": "Navarro",
+      "preferredName": null
+    }
+  ],
+  "comments": [
+    {
+      "goalId": "5506",
+      "commentCount": 1
+    },
+    {
+      "goalId": "5507",
+      "commentCount": 3
+    },
+    {
+      "goalId": "5509",
+      "commentCount": 4
+    },
+    {
+      "goalId": "5513",
+      "commentCount": 1
+    },
+    {
+      "goalId": "5516",
+      "commentCount": 1
+    }
+  ]
+}

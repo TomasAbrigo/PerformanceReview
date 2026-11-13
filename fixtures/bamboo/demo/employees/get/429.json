@@ -1,0 +1,17 @@
+{
+  "id": "429",
+  "firstName": "Leandro",
+  "lastName": "Soria",
+  "workEmail": "leandro.soria@meridian-andina.example",
+  "employeeNumber": "11070",
+  "supervisorEId": "65",
+  "supervisorId": "10126",
+  "supervisor": "Díaz, Valentina",
+  "hireDate": "2023-02-20",
+  "terminationDate": null,
+  "department": "Marketing",
+  "division": "Comercial",
+  "jobTitle": "Diseñador de Marca Sr",
+  "location": "Buenos Aires",
+  "status": "Active"
+}

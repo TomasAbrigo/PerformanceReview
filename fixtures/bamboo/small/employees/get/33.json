@@ -1,0 +1,17 @@
+{
+  "id": "33",
+  "firstName": "Jimena",
+  "lastName": "Coronel",
+  "workEmail": "jimena.coronel@meridian-andina.example",
+  "employeeNumber": "10067",
+  "supervisorEId": "15",
+  "supervisorId": "10021",
+  "supervisor": "Ibáñez, Marcelo",
+  "hireDate": "2018-03-17",
+  "terminationDate": null,
+  "department": "Ventas",
+  "division": "Comercial",
+  "jobTitle": "Líder de Ventas",
+  "location": "Remoto",
+  "status": "Active"
+}

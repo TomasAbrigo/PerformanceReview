@@ -1,0 +1,205 @@
+{
+  "canAlign": true,
+  "canCreateGoals": true,
+  "filters": [
+    {
+      "id": "status-all",
+      "name": "All"
+    },
+    {
+      "id": "inProgress",
+      "name": "In progress"
+    },
+    {
+      "id": "completed",
+      "name": "Completed"
+    },
+    {
+      "id": "closed",
+      "name": "Closed"
+    }
+  ],
+  "selectedFilter": "status-all",
+  "goals": [
+    {
+      "id": "7984",
+      "title": "Aumentar la cobertura de pruebas al 80%",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "percentComplete": 100,
+      "alignsWithOptionId": 9001,
+      "sharedWithEmployeeIds": [
+        117
+      ],
+      "dueDate": "2025-10-22",
+      "completionDate": "2025-09-26",
+      "lastChangedDateTime": "2025-09-26T19:16:14Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "7986",
+      "title": "Reducir el tiempo de primera respuesta un 20%",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [
+        117
+      ],
+      "dueDate": "2025-07-21",
+      "completionDate": "2025-04-21",
+      "lastChangedDateTime": "2025-04-21T11:50:37Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "7989",
+      "title": "Implementar el calendario editorial",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "percentComplete": 25,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2025-11-27",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-09-15T14:24:30Z",
+      "status": "in_progress",
+      "milestones": [
+        {
+          "id": 2047,
+          "employeeGoalId": 7989,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2026-05-11T14:52:53Z",
+          "lastUpdateDateTime": "2026-05-11T14:52:53Z",
+          "lastUpdateUserId": 687
+        },
+        {
+          "id": 2048,
+          "employeeGoalId": 7989,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2025-06-25T09:29:41Z",
+          "lastUpdateUserId": 687
+        },
+        {
+          "id": 2049,
+          "employeeGoalId": 7989,
+          "title": "Hito 3",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2025-06-25T12:00:50Z",
+          "lastUpdateUserId": 687
+        },
+        {
+          "id": 2050,
+          "employeeGoalId": 7989,
+          "title": "Hito 4",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2025-06-25T15:01:23Z",
+          "lastUpdateUserId": 687
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "7991",
+      "title": "Migrar los reportes al nuevo tablero",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2026-06-03",
+      "completionDate": "2026-01-12",
+      "lastChangedDateTime": "2026-01-12T17:03:02Z",
+      "status": "completed",
+      "milestones": [
+        {
+          "id": 2051,
+          "employeeGoalId": 7991,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-12-07T19:05:01Z",
+          "lastUpdateDateTime": "2025-12-07T19:05:01Z",
+          "lastUpdateUserId": 687
+        },
+        {
+          "id": 2052,
+          "employeeGoalId": 7991,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2026-01-11T08:40:03Z",
+          "lastUpdateDateTime": "2026-01-11T08:40:03Z",
+          "lastUpdateUserId": 687
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    }
+  ],
+  "persons": [
+    {
+      "employeeId": 687,
+      "firstName": "Candela",
+      "lastName": "Maldonado",
+      "preferredName": null
+    },
+    {
+      "employeeId": 117,
+      "firstName": "Mariana",
+      "lastName": "Núñez",
+      "preferredName": null
+    }
+  ],
+  "comments": [
+    {
+      "goalId": "7986",
+      "commentCount": 1
+    },
+    {
+      "goalId": "7991",
+      "commentCount": 2
+    }
+  ]
+}

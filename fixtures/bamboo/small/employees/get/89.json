@@ -1,0 +1,17 @@
+{
+  "id": "89",
+  "firstName": "Bruno",
+  "lastName": "Campos",
+  "workEmail": "bruno.campos@meridian-andina.example",
+  "employeeNumber": "10089",
+  "supervisorEId": "37",
+  "supervisorId": "10075",
+  "supervisor": "Ríos, Hugo",
+  "hireDate": "2026-09-02",
+  "terminationDate": null,
+  "department": "Datos",
+  "division": "Tecnología",
+  "jobTitle": "Analytics Engineer Ssr",
+  "location": "Córdoba",
+  "status": "Active"
+}

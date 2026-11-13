@@ -1,0 +1,17 @@
+{
+  "id": "577",
+  "firstName": "Javier",
+  "lastName": "Carrizo",
+  "workEmail": "javier.carrizo@meridian-andina.example",
+  "employeeNumber": "11422",
+  "supervisorEId": "61",
+  "supervisorId": "10116",
+  "supervisor": "Peralta, Marcelo",
+  "hireDate": "2024-04-28",
+  "terminationDate": null,
+  "department": "Ventas",
+  "division": "Comercial",
+  "jobTitle": "Sales Analyst Sr",
+  "location": "Córdoba",
+  "status": "Active"
+}

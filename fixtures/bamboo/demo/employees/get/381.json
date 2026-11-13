@@ -1,0 +1,17 @@
+{
+  "id": "381",
+  "firstName": "Lucía",
+  "lastName": "Flores",
+  "workEmail": "lucia.flores@meridian-andina.example",
+  "employeeNumber": "10946",
+  "supervisorEId": "185",
+  "supervisorId": "10436",
+  "supervisor": "Martínez, Bruno",
+  "hireDate": "2022-10-16",
+  "terminationDate": "2023-08-12",
+  "department": "Operaciones",
+  "division": "Operaciones",
+  "jobTitle": "Analista de Operaciones Sr",
+  "location": "Remoto",
+  "status": "Inactive"
+}

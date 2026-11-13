@@ -1,0 +1,17 @@
+{
+  "id": "219",
+  "firstName": "Sebastián",
+  "lastName": "Coronel",
+  "workEmail": "sebastian.coronel@meridian-andina.example",
+  "employeeNumber": "10527",
+  "supervisorEId": "49",
+  "supervisorId": "10081",
+  "supervisor": "Monzón, Milagros",
+  "hireDate": "2021-06-30",
+  "terminationDate": null,
+  "department": "Calidad",
+  "division": "Operaciones",
+  "jobTitle": "Auditor de Procesos Ssr",
+  "location": "Buenos Aires",
+  "status": "Active"
+}

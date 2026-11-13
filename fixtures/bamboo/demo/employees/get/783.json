@@ -1,0 +1,17 @@
+{
+  "id": "783",
+  "firstName": "Natalia",
+  "lastName": "López",
+  "workEmail": "natalia.lopez@meridian-andina.example",
+  "employeeNumber": "11921",
+  "supervisorEId": "125",
+  "supervisorId": "10294",
+  "supervisor": "Navarro, Tomás",
+  "hireDate": "2025-08-19",
+  "terminationDate": null,
+  "department": "Ingeniería",
+  "division": "Tecnología",
+  "jobTitle": "Backend Developer Jr",
+  "location": "Montevideo",
+  "status": "Active"
+}

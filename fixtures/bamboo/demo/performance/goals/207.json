@@ -1,0 +1,176 @@
+{
+  "canAlign": true,
+  "canCreateGoals": true,
+  "filters": [
+    {
+      "id": "status-all",
+      "name": "All"
+    },
+    {
+      "id": "inProgress",
+      "name": "In progress"
+    },
+    {
+      "id": "completed",
+      "name": "Completed"
+    },
+    {
+      "id": "closed",
+      "name": "Closed"
+    }
+  ],
+  "selectedFilter": "status-all",
+  "goals": [
+    {
+      "id": "5996",
+      "title": "Implementar el calendario editorial",
+      "description": "Sirve de base para el próximo ciclo de evaluación.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2024-05-25",
+      "completionDate": "2024-03-06",
+      "lastChangedDateTime": "2024-03-06T12:14:33Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "5999",
+      "title": "Completar la certificación del área",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 25,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2025-10-01",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-01-18T16:03:17Z",
+      "status": "closed",
+      "milestones": [
+        {
+          "id": 1147,
+          "employeeGoalId": 5999,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-10-29T13:55:31Z",
+          "lastUpdateDateTime": "2025-10-29T13:55:31Z",
+          "lastUpdateUserId": 207
+        },
+        {
+          "id": 1148,
+          "employeeGoalId": 5999,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2025-04-14T14:39:45Z",
+          "lastUpdateUserId": 207
+        },
+        {
+          "id": 1149,
+          "employeeGoalId": 5999,
+          "title": "Hito 3",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2025-04-14T12:44:14Z",
+          "lastUpdateUserId": 207
+        },
+        {
+          "id": 1150,
+          "employeeGoalId": 5999,
+          "title": "Hito 4",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2025-04-14T14:10:31Z",
+          "lastUpdateUserId": 207
+        }
+      ],
+      "actions": {
+        "canEdit": false,
+        "canUpdateProgress": false,
+        "canClose": false,
+        "canReopen": true,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "6002",
+      "title": "Cerrar el plan de capacitación anual",
+      "description": "Sirve de base para el próximo ciclo de evaluación.",
+      "percentComplete": 55,
+      "alignsWithOptionId": 9002,
+      "sharedWithEmployeeIds": [
+        95
+      ],
+      "dueDate": "2025-07-29",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-07-04T17:10:51Z",
+      "status": "closed",
+      "milestones": null,
+      "actions": {
+        "canEdit": false,
+        "canUpdateProgress": false,
+        "canClose": false,
+        "canReopen": true,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "6003",
+      "title": "Implementar el calendario editorial",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "percentComplete": 85,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2026-12-23",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-10-02T14:30:06Z",
+      "status": "in_progress",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    }
+  ],
+  "persons": [
+    {
+      "employeeId": 207,
+      "firstName": "María",
+      "lastName": "Ledesma",
+      "preferredName": "Mari"
+    },
+    {
+      "employeeId": 95,
+      "firstName": "José",
+      "lastName": "Fernández",
+      "preferredName": null
+    }
+  ],
+  "comments": [
+    {
+      "goalId": "5996",
+      "commentCount": 1
+    }
+  ]
+}

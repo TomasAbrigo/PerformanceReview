@@ -1,0 +1,17 @@
+{
+  "id": "385",
+  "firstName": "Valentina",
+  "lastName": "Correa",
+  "workEmail": "valentina.correa@meridian-andina.example",
+  "employeeNumber": "10954",
+  "supervisorEId": "67",
+  "supervisorId": "10132",
+  "supervisor": "Roldán, Noelia",
+  "hireDate": "2022-10-25",
+  "terminationDate": null,
+  "department": "Datos",
+  "division": "Tecnología",
+  "jobTitle": "Analytics Engineer Jr",
+  "location": "Rosario",
+  "status": "Active"
+}

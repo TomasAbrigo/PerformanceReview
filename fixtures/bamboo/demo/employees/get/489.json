@@ -1,0 +1,17 @@
+{
+  "id": "489",
+  "firstName": "José",
+  "lastName": "Roldán",
+  "workEmail": "jose.roldan@meridian-andina.example",
+  "employeeNumber": "11206",
+  "supervisorEId": "93",
+  "supervisorId": "10213",
+  "supervisor": "Herrera, Rocío",
+  "hireDate": "2023-09-05",
+  "terminationDate": null,
+  "department": "Infraestructura",
+  "division": "Tecnología",
+  "jobTitle": "DevOps Engineer Ssr",
+  "location": "Remoto",
+  "status": "Active"
+}

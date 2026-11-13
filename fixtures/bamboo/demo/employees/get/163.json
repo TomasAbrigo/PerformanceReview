@@ -1,0 +1,17 @@
+{
+  "id": "163",
+  "firstName": "Sebastián",
+  "lastName": "Heredia",
+  "workEmail": "sebastian.heredia@meridian-andina.example",
+  "employeeNumber": "10386",
+  "supervisorEId": "211",
+  "supervisorId": "10504",
+  "supervisor": "Reyes, Santiago",
+  "hireDate": "2020-10-11",
+  "terminationDate": null,
+  "department": "Operaciones",
+  "division": "Operaciones",
+  "jobTitle": "Coordinador de Procesos Ssr",
+  "location": "Remoto",
+  "status": "Active"
+}

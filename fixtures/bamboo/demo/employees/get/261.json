@@ -1,0 +1,17 @@
+{
+  "id": "261",
+  "firstName": "Patricia",
+  "lastName": "Monzón",
+  "workEmail": "patricia.monzon@meridian-andina.example",
+  "employeeNumber": "10631",
+  "supervisorEId": "59",
+  "supervisorId": "10110",
+  "supervisor": "Soria, Gonzalo",
+  "hireDate": "2021-11-17",
+  "terminationDate": null,
+  "department": "Finanzas",
+  "division": "Corporativo",
+  "jobTitle": "Analista Contable Sr",
+  "location": "Montevideo",
+  "status": "Active"
+}

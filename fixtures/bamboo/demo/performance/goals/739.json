@@ -1,0 +1,209 @@
+{
+  "canAlign": true,
+  "canCreateGoals": true,
+  "filters": [
+    {
+      "id": "status-all",
+      "name": "All"
+    },
+    {
+      "id": "inProgress",
+      "name": "In progress"
+    },
+    {
+      "id": "completed",
+      "name": "Completed"
+    },
+    {
+      "id": "closed",
+      "name": "Closed"
+    }
+  ],
+  "selectedFilter": "status-all",
+  "goals": [
+    {
+      "id": "8122",
+      "title": "Entregar el proyecto Norte sin desvíos",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 100,
+      "alignsWithOptionId": 9004,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2025-12-23",
+      "completionDate": "2025-12-15",
+      "lastChangedDateTime": "2025-12-15T10:26:43Z",
+      "status": "completed",
+      "milestones": [
+        {
+          "id": 2124,
+          "employeeGoalId": 8122,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-08-30T11:15:53Z",
+          "lastUpdateDateTime": "2025-08-30T11:15:53Z",
+          "lastUpdateUserId": 739
+        },
+        {
+          "id": 2125,
+          "employeeGoalId": 8122,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-12-14T08:13:52Z",
+          "lastUpdateDateTime": "2025-12-14T08:13:52Z",
+          "lastUpdateUserId": 739
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "8123",
+      "title": "Documentar los procesos críticos",
+      "description": "Sirve de base para el próximo ciclo de evaluación.",
+      "percentComplete": 50,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2025-11-13",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-08-20T10:33:32Z",
+      "status": "closed",
+      "milestones": null,
+      "actions": {
+        "canEdit": false,
+        "canUpdateProgress": false,
+        "canClose": false,
+        "canReopen": true,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "8126",
+      "title": "Cerrar el plan de capacitación anual",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2025-10-25",
+      "completionDate": "2025-07-07",
+      "lastChangedDateTime": "2025-07-07T19:35:41Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "8127",
+      "title": "Entregar el proyecto Norte sin desvíos",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2026-02-23",
+      "completionDate": "2025-12-23",
+      "lastChangedDateTime": "2025-12-23T09:14:03Z",
+      "status": "completed",
+      "milestones": [
+        {
+          "id": 2126,
+          "employeeGoalId": 8127,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-11-23T10:11:40Z",
+          "lastUpdateDateTime": "2025-11-23T10:11:40Z",
+          "lastUpdateUserId": 739
+        },
+        {
+          "id": 2127,
+          "employeeGoalId": 8127,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-12-12T08:22:03Z",
+          "lastUpdateDateTime": "2025-12-12T08:22:03Z",
+          "lastUpdateUserId": 739
+        },
+        {
+          "id": 2128,
+          "employeeGoalId": 8127,
+          "title": "Hito 3",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-10-24T11:05:52Z",
+          "lastUpdateDateTime": "2025-10-24T11:05:52Z",
+          "lastUpdateUserId": 739
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "8128",
+      "title": "Mentorear a dos personas nuevas",
+      "description": "Sirve de base para el próximo ciclo de evaluación.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2026-08-13",
+      "completionDate": "2026-06-10",
+      "lastChangedDateTime": "2026-06-10T18:24:41Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    }
+  ],
+  "persons": [
+    {
+      "employeeId": 739,
+      "firstName": "Santiago",
+      "lastName": "Bravo",
+      "preferredName": "Santi"
+    }
+  ],
+  "comments": [
+    {
+      "goalId": "8123",
+      "commentCount": 2
+    },
+    {
+      "goalId": "8126",
+      "commentCount": 1
+    },
+    {
+      "goalId": "8127",
+      "commentCount": 2
+    }
+  ]
+}

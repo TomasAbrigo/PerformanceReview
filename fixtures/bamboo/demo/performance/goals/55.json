@@ -1,0 +1,224 @@
+{
+  "canAlign": true,
+  "canCreateGoals": true,
+  "filters": [
+    {
+      "id": "status-all",
+      "name": "All"
+    },
+    {
+      "id": "inProgress",
+      "name": "In progress"
+    },
+    {
+      "id": "completed",
+      "name": "Completed"
+    },
+    {
+      "id": "closed",
+      "name": "Closed"
+    }
+  ],
+  "selectedFilter": "status-all",
+  "goals": [
+    {
+      "id": "5228",
+      "title": "Migrar los reportes al nuevo tablero",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [
+        15
+      ],
+      "dueDate": "2024-04-03",
+      "completionDate": "2024-02-25",
+      "lastChangedDateTime": "2024-02-25T16:40:10Z",
+      "status": "completed",
+      "milestones": [
+        {
+          "id": 805,
+          "employeeGoalId": 5228,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2023-10-31T17:01:37Z",
+          "lastUpdateDateTime": "2023-10-31T17:01:37Z",
+          "lastUpdateUserId": 55
+        },
+        {
+          "id": 806,
+          "employeeGoalId": 5228,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2023-11-20T17:12:06Z",
+          "lastUpdateDateTime": "2023-11-20T17:12:06Z",
+          "lastUpdateUserId": 55
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "5229",
+      "title": "Renovar las cuentas clave del trimestre",
+      "description": "Sirve de base para el próximo ciclo de evaluación.",
+      "percentComplete": 20,
+      "alignsWithOptionId": 9004,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2024-07-27",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-10-28T10:47:48Z",
+      "status": "closed",
+      "milestones": null,
+      "actions": {
+        "canEdit": false,
+        "canUpdateProgress": false,
+        "canClose": false,
+        "canReopen": true,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "5232",
+      "title": "Reducir los incidentes recurrentes a la mitad",
+      "description": "Sirve de base para el próximo ciclo de evaluación.",
+      "percentComplete": 100,
+      "alignsWithOptionId": 9003,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2024-12-21",
+      "completionDate": "2024-07-13",
+      "lastChangedDateTime": "2024-07-13T19:23:00Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "5233",
+      "title": "Reducir los incidentes recurrentes a la mitad",
+      "description": "Sirve de base para el próximo ciclo de evaluación.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2025-08-16",
+      "completionDate": "2025-05-01",
+      "lastChangedDateTime": "2025-05-01T18:56:56Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "5234",
+      "title": "Cerrar el plan de capacitación anual",
+      "description": "Sirve de base para el próximo ciclo de evaluación.",
+      "percentComplete": 50,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2026-08-12",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-05-20T16:23:32Z",
+      "status": "in_progress",
+      "milestones": [
+        {
+          "id": 807,
+          "employeeGoalId": 5234,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2026-04-28T16:57:53Z",
+          "lastUpdateDateTime": "2026-04-28T16:57:53Z",
+          "lastUpdateUserId": 55
+        },
+        {
+          "id": 808,
+          "employeeGoalId": 5234,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2026-05-12T16:32:11Z",
+          "lastUpdateDateTime": "2026-05-12T16:32:11Z",
+          "lastUpdateUserId": 55
+        },
+        {
+          "id": 809,
+          "employeeGoalId": 5234,
+          "title": "Hito 3",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2026-04-16T19:16:18Z",
+          "lastUpdateUserId": 55
+        },
+        {
+          "id": 810,
+          "employeeGoalId": 5234,
+          "title": "Hito 4",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2026-04-16T10:04:48Z",
+          "lastUpdateUserId": 55
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    }
+  ],
+  "persons": [
+    {
+      "employeeId": 55,
+      "firstName": "Tomás",
+      "lastName": "Medina",
+      "preferredName": null
+    },
+    {
+      "employeeId": 15,
+      "firstName": "Ivana",
+      "lastName": "Toledo",
+      "preferredName": null
+    }
+  ],
+  "comments": [
+    {
+      "goalId": "5228",
+      "commentCount": 2
+    },
+    {
+      "goalId": "5233",
+      "commentCount": 1
+    }
+  ]
+}

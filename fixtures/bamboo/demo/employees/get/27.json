@@ -1,0 +1,17 @@
+{
+  "id": "27",
+  "firstName": "Carolina",
+  "lastName": "Díaz",
+  "workEmail": "carolina.diaz@meridian-andina.example",
+  "employeeNumber": "10040",
+  "supervisorEId": "13",
+  "supervisorId": "10012",
+  "supervisor": "Zárate, Daniela",
+  "hireDate": "2016-09-06",
+  "terminationDate": null,
+  "department": "Ingeniería",
+  "division": "Tecnología",
+  "jobTitle": "Gerente de Ingeniería",
+  "location": "Montevideo",
+  "status": "Active"
+}

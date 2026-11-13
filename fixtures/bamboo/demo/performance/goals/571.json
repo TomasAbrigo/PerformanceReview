@@ -1,0 +1,151 @@
+{
+  "canAlign": true,
+  "canCreateGoals": true,
+  "filters": [
+    {
+      "id": "status-all",
+      "name": "All"
+    },
+    {
+      "id": "inProgress",
+      "name": "In progress"
+    },
+    {
+      "id": "completed",
+      "name": "Completed"
+    },
+    {
+      "id": "closed",
+      "name": "Closed"
+    }
+  ],
+  "selectedFilter": "status-all",
+  "goals": [
+    {
+      "id": "7665",
+      "title": "Implementar el calendario editorial",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 100,
+      "alignsWithOptionId": 9004,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2024-10-21",
+      "completionDate": "2024-06-08",
+      "lastChangedDateTime": "2024-06-08T16:36:12Z",
+      "status": "completed",
+      "milestones": [
+        {
+          "id": 1894,
+          "employeeGoalId": 7665,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2024-05-01T18:30:21Z",
+          "lastUpdateDateTime": "2024-05-01T18:30:21Z",
+          "lastUpdateUserId": 571
+        },
+        {
+          "id": 1895,
+          "employeeGoalId": 7665,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2024-05-31T08:42:57Z",
+          "lastUpdateDateTime": "2024-05-31T08:42:57Z",
+          "lastUpdateUserId": 571
+        },
+        {
+          "id": 1896,
+          "employeeGoalId": 7665,
+          "title": "Hito 3",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2024-04-30T09:57:26Z",
+          "lastUpdateDateTime": "2024-04-30T09:57:26Z",
+          "lastUpdateUserId": 571
+        },
+        {
+          "id": 1897,
+          "employeeGoalId": 7665,
+          "title": "Hito 4",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2024-05-31T12:02:07Z",
+          "lastUpdateDateTime": "2024-05-31T12:02:07Z",
+          "lastUpdateUserId": 571
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "7666",
+      "title": "Entregar el proyecto Norte sin desvíos",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "percentComplete": 100,
+      "alignsWithOptionId": 9003,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2025-08-21",
+      "completionDate": "2025-04-15",
+      "lastChangedDateTime": "2025-04-15T18:07:24Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "7668",
+      "title": "Mejorar el NPS interno del equipo",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 40,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2026-06-09",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-08-27T09:34:37Z",
+      "status": "in_progress",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    }
+  ],
+  "persons": [
+    {
+      "employeeId": 571,
+      "firstName": "Ricardo",
+      "lastName": "Lagos",
+      "preferredName": null
+    }
+  ],
+  "comments": [
+    {
+      "goalId": "7665",
+      "commentCount": 1
+    },
+    {
+      "goalId": "7668",
+      "commentCount": 3
+    }
+  ]
+}

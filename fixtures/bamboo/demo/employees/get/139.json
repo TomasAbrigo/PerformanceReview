@@ -1,0 +1,17 @@
+{
+  "id": "139",
+  "firstName": "Sebastián",
+  "lastName": "Delgado",
+  "workEmail": "sebastian.delgado@meridian-andina.example",
+  "employeeNumber": "10327",
+  "supervisorEId": "43",
+  "supervisorId": "10070",
+  "supervisor": "Soria, Eugenia",
+  "hireDate": "2020-04-02",
+  "terminationDate": null,
+  "department": "Legales",
+  "division": "Corporativo",
+  "jobTitle": "Analista de Compliance Sr",
+  "location": "Córdoba",
+  "status": "Active"
+}

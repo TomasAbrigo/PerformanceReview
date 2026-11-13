@@ -1,0 +1,104 @@
+{
+  "canAlign": true,
+  "canCreateGoals": false,
+  "filters": [
+    {
+      "id": "status-all",
+      "name": "All"
+    },
+    {
+      "id": "inProgress",
+      "name": "In progress"
+    },
+    {
+      "id": "completed",
+      "name": "Completed"
+    },
+    {
+      "id": "closed",
+      "name": "Closed"
+    }
+  ],
+  "selectedFilter": "status-all",
+  "goals": [
+    {
+      "id": "7936",
+      "title": "Completar la certificación del área",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "percentComplete": 100,
+      "alignsWithOptionId": 9003,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2025-08-19",
+      "completionDate": "2025-09-03",
+      "lastChangedDateTime": "2025-09-03T17:10:17Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": false,
+        "canUpdateProgress": false,
+        "canClose": false,
+        "canReopen": false,
+        "canDelete": false,
+        "canComment": false
+      }
+    },
+    {
+      "id": "7938",
+      "title": "Automatizar la conciliación mensual",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2025-07-28",
+      "completionDate": "2025-03-12",
+      "lastChangedDateTime": "2025-03-12T15:28:54Z",
+      "status": "completed",
+      "milestones": [
+        {
+          "id": 2020,
+          "employeeGoalId": 7938,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-03-11T11:23:30Z",
+          "lastUpdateDateTime": "2025-03-11T11:23:30Z",
+          "lastUpdateUserId": 667
+        },
+        {
+          "id": 2021,
+          "employeeGoalId": 7938,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-03-11T19:52:31Z",
+          "lastUpdateDateTime": "2025-03-11T19:52:31Z",
+          "lastUpdateUserId": 667
+        }
+      ],
+      "actions": {
+        "canEdit": false,
+        "canUpdateProgress": false,
+        "canClose": false,
+        "canReopen": false,
+        "canDelete": false,
+        "canComment": false
+      }
+    }
+  ],
+  "persons": [
+    {
+      "employeeId": 667,
+      "firstName": "Jimena",
+      "lastName": "Álvarez",
+      "preferredName": null
+    }
+  ],
+  "comments": [
+    {
+      "goalId": "7938",
+      "commentCount": 3
+    }
+  ]
+}

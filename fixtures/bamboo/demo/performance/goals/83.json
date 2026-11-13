@@ -1,0 +1,182 @@
+{
+  "canAlign": true,
+  "canCreateGoals": true,
+  "filters": [
+    {
+      "id": "status-all",
+      "name": "All"
+    },
+    {
+      "id": "inProgress",
+      "name": "In progress"
+    },
+    {
+      "id": "completed",
+      "name": "Completed"
+    },
+    {
+      "id": "closed",
+      "name": "Closed"
+    }
+  ],
+  "selectedFilter": "status-all",
+  "goals": [
+    {
+      "id": "5356",
+      "title": "Reducir el tiempo de primera respuesta un 20%",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 100,
+      "alignsWithOptionId": 9004,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2023-08-26",
+      "completionDate": "2023-04-07",
+      "lastChangedDateTime": "2023-04-07T16:54:39Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "5358",
+      "title": "Reducir los incidentes recurrentes a la mitad",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 70,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2025-03-22",
+      "completionDate": null,
+      "lastChangedDateTime": "2025-11-28T18:13:33Z",
+      "status": "in_progress",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "5359",
+      "title": "Entregar el proyecto Norte sin desvíos",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "percentComplete": 100,
+      "alignsWithOptionId": 9004,
+      "sharedWithEmployeeIds": [
+        23
+      ],
+      "dueDate": "2025-12-28",
+      "completionDate": "2025-12-27",
+      "lastChangedDateTime": "2025-12-27T18:54:00Z",
+      "status": "completed",
+      "milestones": [
+        {
+          "id": 869,
+          "employeeGoalId": 5359,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-12-03T16:43:12Z",
+          "lastUpdateDateTime": "2025-12-03T16:43:12Z",
+          "lastUpdateUserId": 83
+        },
+        {
+          "id": 870,
+          "employeeGoalId": 5359,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-10-16T10:08:10Z",
+          "lastUpdateDateTime": "2025-10-16T10:08:10Z",
+          "lastUpdateUserId": 83
+        },
+        {
+          "id": 871,
+          "employeeGoalId": 5359,
+          "title": "Hito 3",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-12-14T17:57:04Z",
+          "lastUpdateDateTime": "2025-12-14T17:57:04Z",
+          "lastUpdateUserId": 83
+        },
+        {
+          "id": 872,
+          "employeeGoalId": 5359,
+          "title": "Hito 4",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-08-31T12:48:13Z",
+          "lastUpdateDateTime": "2025-08-31T12:48:13Z",
+          "lastUpdateUserId": 83
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "5360",
+      "title": "Cerrar el plan de capacitación anual",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 30,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [
+        23
+      ],
+      "dueDate": "2026-12-23",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-10-28T11:12:39Z",
+      "status": "in_progress",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    }
+  ],
+  "persons": [
+    {
+      "employeeId": 83,
+      "firstName": "Daniela",
+      "lastName": "Franco",
+      "preferredName": null
+    },
+    {
+      "employeeId": 23,
+      "firstName": "María",
+      "lastName": "Medina",
+      "preferredName": null
+    }
+  ],
+  "comments": [
+    {
+      "goalId": "5356",
+      "commentCount": 2
+    },
+    {
+      "goalId": "5360",
+      "commentCount": 1
+    }
+  ]
+}

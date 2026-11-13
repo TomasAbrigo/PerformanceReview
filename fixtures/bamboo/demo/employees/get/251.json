@@ -1,0 +1,17 @@
+{
+  "id": "251",
+  "firstName": "Ivana",
+  "lastName": "Nieto",
+  "workEmail": "ivana.nieto@meridian-andina.example",
+  "employeeNumber": "10606",
+  "supervisorEId": "341",
+  "supervisorId": "10847",
+  "supervisor": "López, Silvana",
+  "hireDate": "2021-10-06",
+  "terminationDate": null,
+  "department": "Ventas",
+  "division": "Comercial",
+  "jobTitle": "Sales Analyst Ssr",
+  "location": "Montevideo",
+  "status": "Active"
+}

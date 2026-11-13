@@ -1,0 +1,17 @@
+{
+  "id": "309",
+  "firstName": "Valentina",
+  "lastName": "Figueroa",
+  "workEmail": "valentina.figueroa@meridian-andina.example",
+  "employeeNumber": "10762",
+  "supervisorEId": "67",
+  "supervisorId": "10132",
+  "supervisor": "Roldán, Noelia",
+  "hireDate": "2022-03-03",
+  "terminationDate": null,
+  "department": "Datos",
+  "division": "Tecnología",
+  "jobTitle": "Data Engineer Sr",
+  "location": "Buenos Aires",
+  "status": "Active"
+}

@@ -1,0 +1,17 @@
+{
+  "id": "673",
+  "firstName": "Sofía",
+  "lastName": "Olmos",
+  "workEmail": "sofia.olmos@meridian-andina.example",
+  "employeeNumber": "11626",
+  "supervisorEId": "241",
+  "supervisorId": "10574",
+  "supervisor": "Reyes, Daniela",
+  "hireDate": "2025-01-24",
+  "terminationDate": null,
+  "department": "Marketing",
+  "division": "Comercial",
+  "jobTitle": "Diseñador de Marca Jr",
+  "location": "Córdoba",
+  "status": "Active"
+}

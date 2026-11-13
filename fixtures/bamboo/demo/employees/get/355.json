@@ -1,0 +1,17 @@
+{
+  "id": "355",
+  "firstName": "Romina",
+  "lastName": "Gutiérrez",
+  "workEmail": "romina.gutierrez@meridian-andina.example",
+  "employeeNumber": "10881",
+  "supervisorEId": "65",
+  "supervisorId": "10126",
+  "supervisor": "Díaz, Valentina",
+  "hireDate": "2022-07-31",
+  "terminationDate": null,
+  "department": "Marketing",
+  "division": "Comercial",
+  "jobTitle": "Content Specialist Jr",
+  "location": "Rosario",
+  "status": "Active"
+}

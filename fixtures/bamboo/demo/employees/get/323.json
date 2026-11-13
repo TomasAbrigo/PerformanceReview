@@ -1,0 +1,17 @@
+{
+  "id": "323",
+  "firstName": "Gabriela",
+  "lastName": "Paz",
+  "workEmail": "gabriela.paz@meridian-andina.example",
+  "employeeNumber": "10796",
+  "supervisorEId": "265",
+  "supervisorId": "10640",
+  "supervisor": "Olmos, Ivana",
+  "hireDate": "2022-04-27",
+  "terminationDate": null,
+  "department": "Infraestructura",
+  "division": "Tecnología",
+  "jobTitle": "DevOps Engineer Ssr",
+  "location": "Córdoba",
+  "status": "Active"
+}

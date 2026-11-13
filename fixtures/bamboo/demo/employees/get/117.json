@@ -1,0 +1,17 @@
+{
+  "id": "117",
+  "firstName": "Mariana",
+  "lastName": "Núñez",
+  "workEmail": "mariana.nunez@meridian-andina.example",
+  "employeeNumber": "10275",
+  "supervisorEId": "21",
+  "supervisorId": "10026",
+  "supervisor": "Navarro, Lucas",
+  "hireDate": "2019-11-10",
+  "terminationDate": null,
+  "department": "Infraestructura",
+  "division": "Tecnología",
+  "jobTitle": "Líder de Infraestructura",
+  "location": "Córdoba",
+  "status": "Active"
+}

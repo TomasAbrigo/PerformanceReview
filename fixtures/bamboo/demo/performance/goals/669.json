@@ -1,0 +1,155 @@
+{
+  "canAlign": true,
+  "canCreateGoals": true,
+  "filters": [
+    {
+      "id": "status-all",
+      "name": "All"
+    },
+    {
+      "id": "inProgress",
+      "name": "In progress"
+    },
+    {
+      "id": "completed",
+      "name": "Completed"
+    },
+    {
+      "id": "closed",
+      "name": "Closed"
+    }
+  ],
+  "selectedFilter": "status-all",
+  "goals": [
+    {
+      "id": "7939",
+      "title": "Cerrar el plan de capacitación anual",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 45,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [
+        67
+      ],
+      "dueDate": "2025-08-24",
+      "completionDate": null,
+      "lastChangedDateTime": "2025-04-19T13:44:45Z",
+      "status": "in_progress",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "7942",
+      "title": "Completar la certificación del área",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 85,
+      "alignsWithOptionId": 9001,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2025-10-08",
+      "completionDate": null,
+      "lastChangedDateTime": "2025-03-29T15:26:55Z",
+      "status": "in_progress",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "7945",
+      "title": "Automatizar la conciliación mensual",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2025-07-23",
+      "completionDate": "2025-05-01",
+      "lastChangedDateTime": "2025-05-01T18:06:27Z",
+      "status": "completed",
+      "milestones": [
+        {
+          "id": 2022,
+          "employeeGoalId": 7945,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-03-12T18:42:54Z",
+          "lastUpdateDateTime": "2025-03-12T18:42:54Z",
+          "lastUpdateUserId": 669
+        },
+        {
+          "id": 2023,
+          "employeeGoalId": 7945,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-03-25T12:21:09Z",
+          "lastUpdateDateTime": "2025-03-25T12:21:09Z",
+          "lastUpdateUserId": 669
+        },
+        {
+          "id": 2024,
+          "employeeGoalId": 7945,
+          "title": "Hito 3",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-04-15T19:03:20Z",
+          "lastUpdateDateTime": "2025-04-15T19:03:20Z",
+          "lastUpdateUserId": 669
+        },
+        {
+          "id": 2025,
+          "employeeGoalId": 7945,
+          "title": "Hito 4",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-01-11T13:36:16Z",
+          "lastUpdateDateTime": "2025-01-11T13:36:16Z",
+          "lastUpdateUserId": 669
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    }
+  ],
+  "persons": [
+    {
+      "employeeId": 669,
+      "firstName": "Bruno",
+      "lastName": "Sosa",
+      "preferredName": null
+    },
+    {
+      "employeeId": 67,
+      "firstName": "Noelia",
+      "lastName": "Roldán",
+      "preferredName": null
+    }
+  ],
+  "comments": [
+    {
+      "goalId": "7945",
+      "commentCount": 3
+    }
+  ]
+}

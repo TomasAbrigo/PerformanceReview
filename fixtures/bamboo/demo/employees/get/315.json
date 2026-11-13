@@ -1,0 +1,17 @@
+{
+  "id": "315",
+  "firstName": "Adrián",
+  "lastName": "Bravo",
+  "workEmail": "adrian.bravo@meridian-andina.example",
+  "employeeNumber": "10778",
+  "supervisorEId": "243",
+  "supervisorId": "10583",
+  "supervisor": "Bustos, Jimena",
+  "hireDate": "2022-03-23",
+  "terminationDate": null,
+  "department": "Calidad",
+  "division": "Operaciones",
+  "jobTitle": "Analista de Calidad Sr",
+  "location": "Buenos Aires",
+  "status": "Active"
+}

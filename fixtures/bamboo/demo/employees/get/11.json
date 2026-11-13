@@ -1,0 +1,17 @@
+{
+  "id": "11",
+  "firstName": "Damián",
+  "lastName": "Lezcano",
+  "workEmail": "damian.lezcano@meridian-andina.example",
+  "employeeNumber": "10009",
+  "supervisorEId": null,
+  "supervisorId": null,
+  "supervisor": null,
+  "hireDate": "2013-02-01",
+  "terminationDate": null,
+  "department": "Dirección General",
+  "division": "Corporativo",
+  "jobTitle": "CEO",
+  "location": "Buenos Aires",
+  "status": "Active"
+}

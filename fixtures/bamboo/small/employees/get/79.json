@@ -1,0 +1,17 @@
+{
+  "id": "79",
+  "firstName": "Rocío",
+  "lastName": "Fuentes",
+  "workEmail": "rocio.fuentes@meridian-andina.example",
+  "employeeNumber": "10180",
+  "supervisorEId": "37",
+  "supervisorId": "10075",
+  "supervisor": "Ríos, Hugo",
+  "hireDate": "2024-11-24",
+  "terminationDate": null,
+  "department": "Datos",
+  "division": "Tecnología",
+  "jobTitle": "Data Analyst Sr",
+  "location": "Buenos Aires",
+  "status": "Active"
+}

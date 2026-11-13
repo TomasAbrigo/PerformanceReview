@@ -1,0 +1,17 @@
+{
+  "id": "59",
+  "firstName": "Gonzalo",
+  "lastName": "Soria",
+  "workEmail": "gonzalo.soria@meridian-andina.example",
+  "employeeNumber": "10110",
+  "supervisorEId": "53",
+  "supervisorId": "10087",
+  "supervisor": "Ortiz, Brenda",
+  "hireDate": "2018-07-12",
+  "terminationDate": null,
+  "department": "Finanzas",
+  "division": "Corporativo",
+  "jobTitle": "Líder de Finanzas",
+  "location": "Buenos Aires",
+  "status": "Active"
+}

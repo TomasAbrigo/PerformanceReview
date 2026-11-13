@@ -1,0 +1,206 @@
+{
+  "canAlign": true,
+  "canCreateGoals": true,
+  "filters": [
+    {
+      "id": "status-all",
+      "name": "All"
+    },
+    {
+      "id": "inProgress",
+      "name": "In progress"
+    },
+    {
+      "id": "completed",
+      "name": "Completed"
+    },
+    {
+      "id": "closed",
+      "name": "Closed"
+    }
+  ],
+  "selectedFilter": "status-all",
+  "goals": [
+    {
+      "id": "5257",
+      "title": "Documentar los procesos críticos",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2023-04-05",
+      "completionDate": "2023-04-15",
+      "lastChangedDateTime": "2023-04-15T18:22:24Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "5259",
+      "title": "Migrar los reportes al nuevo tablero",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 50,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2023-03-23",
+      "completionDate": null,
+      "lastChangedDateTime": "2025-05-07T17:32:55Z",
+      "status": "in_progress",
+      "milestones": [
+        {
+          "id": 820,
+          "employeeGoalId": 5259,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2023-11-28T08:46:12Z",
+          "lastUpdateDateTime": "2023-11-28T08:46:12Z",
+          "lastUpdateUserId": 61
+        },
+        {
+          "id": 821,
+          "employeeGoalId": 5259,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-02-21T17:43:04Z",
+          "lastUpdateDateTime": "2025-02-21T17:43:04Z",
+          "lastUpdateUserId": 61
+        },
+        {
+          "id": 822,
+          "employeeGoalId": 5259,
+          "title": "Hito 3",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2022-12-13T10:56:01Z",
+          "lastUpdateUserId": 61
+        },
+        {
+          "id": 823,
+          "employeeGoalId": 5259,
+          "title": "Hito 4",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2022-12-13T13:29:24Z",
+          "lastUpdateUserId": 61
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "5260",
+      "title": "Reducir el tiempo de primera respuesta un 20%",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 67,
+      "alignsWithOptionId": 9003,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2025-09-26",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-05-19T08:42:32Z",
+      "status": "in_progress",
+      "milestones": [
+        {
+          "id": 824,
+          "employeeGoalId": 5260,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-06-28T12:19:31Z",
+          "lastUpdateDateTime": "2025-06-28T12:19:31Z",
+          "lastUpdateUserId": 61
+        },
+        {
+          "id": 825,
+          "employeeGoalId": 5260,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2026-01-25T16:52:29Z",
+          "lastUpdateDateTime": "2026-01-25T16:52:29Z",
+          "lastUpdateUserId": 61
+        },
+        {
+          "id": 826,
+          "employeeGoalId": 5260,
+          "title": "Hito 3",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2025-02-08T14:52:49Z",
+          "lastUpdateUserId": 61
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "5262",
+      "title": "Aumentar la cobertura de pruebas al 80%",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "percentComplete": 70,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2025-06-30",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-09-18T09:56:04Z",
+      "status": "closed",
+      "milestones": null,
+      "actions": {
+        "canEdit": false,
+        "canUpdateProgress": false,
+        "canClose": false,
+        "canReopen": true,
+        "canDelete": true,
+        "canComment": true
+      }
+    }
+  ],
+  "persons": [
+    {
+      "employeeId": 61,
+      "firstName": "Marcelo",
+      "lastName": "Peralta",
+      "preferredName": null
+    }
+  ],
+  "comments": [
+    {
+      "goalId": "5260",
+      "commentCount": 1
+    },
+    {
+      "goalId": "5262",
+      "commentCount": 2
+    }
+  ]
+}

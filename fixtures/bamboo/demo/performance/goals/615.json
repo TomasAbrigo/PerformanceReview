@@ -1,0 +1,233 @@
+{
+  "canAlign": true,
+  "canCreateGoals": true,
+  "filters": [
+    {
+      "id": "status-all",
+      "name": "All"
+    },
+    {
+      "id": "inProgress",
+      "name": "In progress"
+    },
+    {
+      "id": "completed",
+      "name": "Completed"
+    },
+    {
+      "id": "closed",
+      "name": "Closed"
+    }
+  ],
+  "selectedFilter": "status-all",
+  "goals": [
+    {
+      "id": "7791",
+      "title": "Aumentar la cobertura de pruebas al 80%",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "percentComplete": 33,
+      "alignsWithOptionId": 9004,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2024-11-16",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-01-26T08:54:27Z",
+      "status": "in_progress",
+      "milestones": [
+        {
+          "id": 1957,
+          "employeeGoalId": 7791,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-08-10T08:32:48Z",
+          "lastUpdateDateTime": "2025-08-10T08:32:48Z",
+          "lastUpdateUserId": 615
+        },
+        {
+          "id": 1958,
+          "employeeGoalId": 7791,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2024-07-14T19:33:33Z",
+          "lastUpdateUserId": 615
+        },
+        {
+          "id": 1959,
+          "employeeGoalId": 7791,
+          "title": "Hito 3",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2024-07-14T12:59:24Z",
+          "lastUpdateUserId": 615
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "7794",
+      "title": "Cerrar el plan de capacitación anual",
+      "description": "Sirve de base para el próximo ciclo de evaluación.",
+      "percentComplete": 100,
+      "alignsWithOptionId": 9001,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2024-10-22",
+      "completionDate": "2024-11-03",
+      "lastChangedDateTime": "2024-11-03T11:23:43Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "7796",
+      "title": "Mentorear a dos personas nuevas",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [
+        241
+      ],
+      "dueDate": "2025-03-07",
+      "completionDate": "2025-03-16",
+      "lastChangedDateTime": "2025-03-16T11:57:29Z",
+      "status": "completed",
+      "milestones": [
+        {
+          "id": 1960,
+          "employeeGoalId": 7796,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2024-10-28T13:00:39Z",
+          "lastUpdateDateTime": "2024-10-28T13:00:39Z",
+          "lastUpdateUserId": 615
+        },
+        {
+          "id": 1961,
+          "employeeGoalId": 7796,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2024-11-23T08:09:54Z",
+          "lastUpdateDateTime": "2024-11-23T08:09:54Z",
+          "lastUpdateUserId": 615
+        },
+        {
+          "id": 1962,
+          "employeeGoalId": 7796,
+          "title": "Hito 3",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-01-30T13:26:23Z",
+          "lastUpdateDateTime": "2025-01-30T13:26:23Z",
+          "lastUpdateUserId": 615
+        },
+        {
+          "id": 1963,
+          "employeeGoalId": 7796,
+          "title": "Hito 4",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2024-12-06T08:06:10Z",
+          "lastUpdateDateTime": "2024-12-06T08:06:10Z",
+          "lastUpdateUserId": 615
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "7798",
+      "title": "Mentorear a dos personas nuevas",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2026-09-05",
+      "completionDate": "2026-07-29",
+      "lastChangedDateTime": "2026-07-29T19:54:01Z",
+      "status": "completed",
+      "milestones": [
+        {
+          "id": 1964,
+          "employeeGoalId": 7798,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2026-02-24T15:05:47Z",
+          "lastUpdateDateTime": "2026-02-24T15:05:47Z",
+          "lastUpdateUserId": 615
+        },
+        {
+          "id": 1965,
+          "employeeGoalId": 7798,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2026-05-03T16:07:20Z",
+          "lastUpdateDateTime": "2026-05-03T16:07:20Z",
+          "lastUpdateUserId": 615
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    }
+  ],
+  "persons": [
+    {
+      "employeeId": 615,
+      "firstName": "Ivana",
+      "lastName": "López",
+      "preferredName": null
+    },
+    {
+      "employeeId": 241,
+      "firstName": "Daniela",
+      "lastName": "Reyes",
+      "preferredName": null
+    }
+  ],
+  "comments": [
+    {
+      "goalId": "7791",
+      "commentCount": 2
+    }
+  ]
+}

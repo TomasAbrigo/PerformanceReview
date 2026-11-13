@@ -1,0 +1,17 @@
+{
+  "id": "265",
+  "firstName": "Ivana",
+  "lastName": "Olmos",
+  "workEmail": "ivana.olmos@meridian-andina.example",
+  "employeeNumber": "10640",
+  "supervisorEId": "21",
+  "supervisorId": "10026",
+  "supervisor": "Navarro, Lucas",
+  "hireDate": "2021-11-29",
+  "terminationDate": null,
+  "department": "Infraestructura",
+  "division": "Tecnología",
+  "jobTitle": "Líder de Infraestructura",
+  "location": "Buenos Aires",
+  "status": "Active"
+}

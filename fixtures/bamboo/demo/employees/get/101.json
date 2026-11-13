@@ -1,0 +1,17 @@
+{
+  "id": "101",
+  "firstName": "Julieta",
+  "lastName": "Cabrera",
+  "workEmail": "julieta.cabrera@meridian-andina.example",
+  "employeeNumber": "10235",
+  "supervisorEId": "67",
+  "supervisorId": "10132",
+  "supervisor": "Roldán, Noelia",
+  "hireDate": "2019-08-12",
+  "terminationDate": null,
+  "department": "Datos",
+  "division": "Tecnología",
+  "jobTitle": "Data Engineer Ssr",
+  "location": "Buenos Aires",
+  "status": "Active"
+}

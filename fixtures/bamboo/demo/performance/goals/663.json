@@ -1,0 +1,198 @@
+{
+  "canAlign": true,
+  "canCreateGoals": true,
+  "filters": [
+    {
+      "id": "status-all",
+      "name": "All"
+    },
+    {
+      "id": "inProgress",
+      "name": "In progress"
+    },
+    {
+      "id": "completed",
+      "name": "Completed"
+    },
+    {
+      "id": "closed",
+      "name": "Closed"
+    }
+  ],
+  "selectedFilter": "status-all",
+  "goals": [
+    {
+      "id": "7924",
+      "title": "Aumentar la cobertura de pruebas al 80%",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 100,
+      "alignsWithOptionId": 9001,
+      "sharedWithEmployeeIds": [
+        63
+      ],
+      "dueDate": "2025-12-01",
+      "completionDate": "2025-11-06",
+      "lastChangedDateTime": "2025-11-06T08:57:22Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "7926",
+      "title": "Aumentar la cobertura de pruebas al 80%",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [
+        63
+      ],
+      "dueDate": "2025-04-17",
+      "completionDate": "2025-01-15",
+      "lastChangedDateTime": "2025-01-15T17:25:27Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "7928",
+      "title": "Implementar el calendario editorial",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2027-01-28",
+      "completionDate": "2026-09-08",
+      "lastChangedDateTime": "2026-09-08T09:31:51Z",
+      "status": "completed",
+      "milestones": [
+        {
+          "id": 2017,
+          "employeeGoalId": 7928,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2026-08-19T17:44:21Z",
+          "lastUpdateDateTime": "2026-08-19T17:44:21Z",
+          "lastUpdateUserId": 663
+        },
+        {
+          "id": 2018,
+          "employeeGoalId": 7928,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2026-08-26T16:04:55Z",
+          "lastUpdateDateTime": "2026-08-26T16:04:55Z",
+          "lastUpdateUserId": 663
+        },
+        {
+          "id": 2019,
+          "employeeGoalId": 7928,
+          "title": "Hito 3",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2026-08-29T13:17:36Z",
+          "lastUpdateDateTime": "2026-08-29T13:17:36Z",
+          "lastUpdateUserId": 663
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "7931",
+      "title": "Aumentar la cobertura de pruebas al 80%",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 10,
+      "alignsWithOptionId": 9002,
+      "sharedWithEmployeeIds": [
+        63
+      ],
+      "dueDate": "2026-07-12",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-06-05T11:30:22Z",
+      "status": "in_progress",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "7933",
+      "title": "Lanzar el nuevo flujo de onboarding",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 90,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2027-01-23",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-07-27T15:18:36Z",
+      "status": "in_progress",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    }
+  ],
+  "persons": [
+    {
+      "employeeId": 663,
+      "firstName": "Maximiliano",
+      "lastName": "Trejo",
+      "preferredName": "Maxi"
+    },
+    {
+      "employeeId": 63,
+      "firstName": "Alejandro",
+      "lastName": "Rivas",
+      "preferredName": null
+    }
+  ],
+  "comments": [
+    {
+      "goalId": "7924",
+      "commentCount": 4
+    },
+    {
+      "goalId": "7931",
+      "commentCount": 2
+    },
+    {
+      "goalId": "7933",
+      "commentCount": 1
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "id": "393",
+  "firstName": "Cristian",
+  "lastName": "Ojeda",
+  "workEmail": "cristian.ojeda@meridian-andina.example",
+  "employeeNumber": "10982",
+  "supervisorEId": "237",
+  "supervisorId": "10566",
+  "supervisor": "Benítez, Florencia",
+  "hireDate": "2022-11-10",
+  "terminationDate": null,
+  "department": "Infraestructura",
+  "division": "Tecnología",
+  "jobTitle": "Site Reliability Engineer Jr",
+  "location": "Buenos Aires",
+  "status": "Active"
+}

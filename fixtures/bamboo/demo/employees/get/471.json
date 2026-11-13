@@ -1,0 +1,17 @@
+{
+  "id": "471",
+  "firstName": "Hugo",
+  "lastName": "Soria",
+  "workEmail": "hugo.soria@meridian-andina.example",
+  "employeeNumber": "11165",
+  "supervisorEId": "341",
+  "supervisorId": "10847",
+  "supervisor": "López, Silvana",
+  "hireDate": "2023-07-03",
+  "terminationDate": null,
+  "department": "Ventas",
+  "division": "Comercial",
+  "jobTitle": "Ejecutivo de Cuentas Jr",
+  "location": "Buenos Aires",
+  "status": "Active"
+}

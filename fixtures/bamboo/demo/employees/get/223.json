@@ -1,0 +1,17 @@
+{
+  "id": "223",
+  "firstName": "Sofía",
+  "lastName": "Yáñez",
+  "workEmail": "sofia.yanez@meridian-andina.example",
+  "employeeNumber": "10533",
+  "supervisorEId": "59",
+  "supervisorId": "10110",
+  "supervisor": "Soria, Gonzalo",
+  "hireDate": "2021-07-11",
+  "terminationDate": null,
+  "department": "Finanzas",
+  "division": "Corporativo",
+  "jobTitle": "Analista de Tesorería Sr",
+  "location": "Córdoba",
+  "status": "Active"
+}

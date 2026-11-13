@@ -1,0 +1,17 @@
+{
+  "id": "595",
+  "firstName": "Eugenia",
+  "lastName": "Zárate",
+  "workEmail": "eugenia.zarate@meridian-andina.example",
+  "employeeNumber": "11454",
+  "supervisorEId": "93",
+  "supervisorId": "10213",
+  "supervisor": "Herrera, Rocío",
+  "hireDate": "2024-06-11",
+  "terminationDate": null,
+  "department": "Infraestructura",
+  "division": "Tecnología",
+  "jobTitle": "Site Reliability Engineer Jr",
+  "location": "Córdoba",
+  "status": "Active"
+}

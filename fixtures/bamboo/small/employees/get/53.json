@@ -1,0 +1,17 @@
+{
+  "id": "53",
+  "firstName": "Santiago",
+  "lastName": "Fernández",
+  "workEmail": "santiago.fernandez@meridian-andina.example",
+  "employeeNumber": "10113",
+  "supervisorEId": "33",
+  "supervisorId": "10067",
+  "supervisor": "Coronel, Jimena",
+  "hireDate": "2022-02-01",
+  "terminationDate": null,
+  "department": "Ventas",
+  "division": "Comercial",
+  "jobTitle": "Sales Analyst Ssr",
+  "location": "Córdoba",
+  "status": "Active"
+}

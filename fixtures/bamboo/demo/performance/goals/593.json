@@ -1,0 +1,147 @@
+{
+  "canAlign": true,
+  "canCreateGoals": true,
+  "filters": [
+    {
+      "id": "status-all",
+      "name": "All"
+    },
+    {
+      "id": "inProgress",
+      "name": "In progress"
+    },
+    {
+      "id": "completed",
+      "name": "Completed"
+    },
+    {
+      "id": "closed",
+      "name": "Closed"
+    }
+  ],
+  "selectedFilter": "status-all",
+  "goals": [
+    {
+      "id": "7727",
+      "title": "Reducir el tiempo de primera respuesta un 20%",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 75,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2024-11-09",
+      "completionDate": null,
+      "lastChangedDateTime": "2024-09-13T14:39:44Z",
+      "status": "in_progress",
+      "milestones": [
+        {
+          "id": 1922,
+          "employeeGoalId": 7727,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2024-08-09T09:40:27Z",
+          "lastUpdateDateTime": "2024-08-09T09:40:27Z",
+          "lastUpdateUserId": 593
+        },
+        {
+          "id": 1923,
+          "employeeGoalId": 7727,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2024-08-25T16:54:10Z",
+          "lastUpdateDateTime": "2024-08-25T16:54:10Z",
+          "lastUpdateUserId": 593
+        },
+        {
+          "id": 1924,
+          "employeeGoalId": 7727,
+          "title": "Hito 3",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2024-09-02T19:57:49Z",
+          "lastUpdateDateTime": "2024-09-02T19:57:49Z",
+          "lastUpdateUserId": 593
+        },
+        {
+          "id": 1925,
+          "employeeGoalId": 7727,
+          "title": "Hito 4",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2024-08-04T13:07:24Z",
+          "lastUpdateUserId": 593
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "7729",
+      "title": "Entregar el proyecto Norte sin desvíos",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "percentComplete": 65,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2025-03-20",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-07-31T14:29:02Z",
+      "status": "in_progress",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "7732",
+      "title": "Reducir el tiempo de primera respuesta un 20%",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2025-06-20",
+      "completionDate": "2025-04-07",
+      "lastChangedDateTime": "2025-04-07T11:05:40Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    }
+  ],
+  "persons": [
+    {
+      "employeeId": 593,
+      "firstName": "Noelia",
+      "lastName": "López",
+      "preferredName": null
+    }
+  ],
+  "comments": [
+    {
+      "goalId": "7732",
+      "commentCount": 2
+    }
+  ]
+}

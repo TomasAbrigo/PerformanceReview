@@ -1,0 +1,17 @@
+{
+  "id": "289",
+  "firstName": "Belén",
+  "lastName": "Soria",
+  "workEmail": "belen.soria@meridian-andina.example",
+  "employeeNumber": "10706",
+  "supervisorEId": "111",
+  "supervisorId": "10253",
+  "supervisor": "Peralta, Martín",
+  "hireDate": "2022-01-26",
+  "terminationDate": null,
+  "department": "Datos",
+  "division": "Tecnología",
+  "jobTitle": "Analytics Engineer Sr",
+  "location": "Buenos Aires",
+  "status": "Active"
+}

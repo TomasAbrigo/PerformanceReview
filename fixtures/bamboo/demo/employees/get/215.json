@@ -1,0 +1,17 @@
+{
+  "id": "215",
+  "firstName": "Lucía",
+  "lastName": "Romero",
+  "workEmail": "lucia.romero@meridian-andina.example",
+  "employeeNumber": "10517",
+  "supervisorEId": "51",
+  "supervisorId": "10084",
+  "supervisor": "Toledo, Gonzalo",
+  "hireDate": "2021-05-27",
+  "terminationDate": null,
+  "department": "People",
+  "division": "Corporativo",
+  "jobTitle": "HR Business Partner Ssr",
+  "location": "Rosario",
+  "status": "Active"
+}

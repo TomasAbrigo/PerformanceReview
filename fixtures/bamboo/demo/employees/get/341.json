@@ -1,0 +1,17 @@
+{
+  "id": "341",
+  "firstName": "Silvana",
+  "lastName": "López",
+  "workEmail": "silvana.lopez@meridian-andina.example",
+  "employeeNumber": "10847",
+  "supervisorEId": "29",
+  "supervisorId": "10043",
+  "supervisor": "Morales, Andrés",
+  "hireDate": "2022-06-04",
+  "terminationDate": null,
+  "department": "Ventas",
+  "division": "Comercial",
+  "jobTitle": "Líder de Ventas",
+  "location": "Montevideo",
+  "status": "Active"
+}

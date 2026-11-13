@@ -1,0 +1,17 @@
+{
+  "id": "273",
+  "firstName": "Cristian",
+  "lastName": "Lezcano",
+  "workEmail": "cristian.lezcano@meridian-andina.example",
+  "employeeNumber": "10663",
+  "supervisorEId": "135",
+  "supervisorId": "10316",
+  "supervisor": "Trejo, Marcela",
+  "hireDate": "2021-12-26",
+  "terminationDate": null,
+  "department": "Calidad",
+  "division": "Operaciones",
+  "jobTitle": "Analista de Calidad Sr",
+  "location": "Buenos Aires",
+  "status": "Active"
+}

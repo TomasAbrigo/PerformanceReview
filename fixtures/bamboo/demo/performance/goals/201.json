@@ -1,0 +1,140 @@
+{
+  "canAlign": true,
+  "canCreateGoals": true,
+  "filters": [
+    {
+      "id": "status-all",
+      "name": "All"
+    },
+    {
+      "id": "inProgress",
+      "name": "In progress"
+    },
+    {
+      "id": "completed",
+      "name": "Completed"
+    },
+    {
+      "id": "closed",
+      "name": "Closed"
+    }
+  ],
+  "selectedFilter": "status-all",
+  "goals": [
+    {
+      "id": "5974",
+      "title": "Automatizar la conciliación mensual",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "percentComplete": 15,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2024-05-16",
+      "completionDate": null,
+      "lastChangedDateTime": "2025-02-27T19:00:34Z",
+      "status": "in_progress",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "5977",
+      "title": "Documentar los procesos críticos",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 90,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2025-11-14",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-06-19T08:14:43Z",
+      "status": "in_progress",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "5978",
+      "title": "Completar la certificación del área",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2026-10-18",
+      "completionDate": "2026-07-31",
+      "lastChangedDateTime": "2026-07-31T10:43:04Z",
+      "status": "completed",
+      "milestones": [
+        {
+          "id": 1144,
+          "employeeGoalId": 5978,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2026-07-19T12:21:23Z",
+          "lastUpdateDateTime": "2026-07-19T12:21:23Z",
+          "lastUpdateUserId": 201
+        },
+        {
+          "id": 1145,
+          "employeeGoalId": 5978,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2026-07-15T14:38:54Z",
+          "lastUpdateDateTime": "2026-07-15T14:38:54Z",
+          "lastUpdateUserId": 201
+        },
+        {
+          "id": 1146,
+          "employeeGoalId": 5978,
+          "title": "Hito 3",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2026-07-23T18:40:45Z",
+          "lastUpdateDateTime": "2026-07-23T18:40:45Z",
+          "lastUpdateUserId": 201
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    }
+  ],
+  "persons": [
+    {
+      "employeeId": 201,
+      "firstName": "Patricia",
+      "lastName": "Lezcano",
+      "preferredName": null
+    }
+  ],
+  "comments": [
+    {
+      "goalId": "5977",
+      "commentCount": 2
+    },
+    {
+      "goalId": "5978",
+      "commentCount": 1
+    }
+  ]
+}

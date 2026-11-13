@@ -1,0 +1,17 @@
+{
+  "id": "259",
+  "firstName": "Hugo",
+  "lastName": "Martínez",
+  "workEmail": "hugo.martinez@meridian-andina.example",
+  "employeeNumber": "10627",
+  "supervisorEId": "49",
+  "supervisorId": "10081",
+  "supervisor": "Monzón, Milagros",
+  "hireDate": "2021-11-17",
+  "terminationDate": null,
+  "department": "Calidad",
+  "division": "Operaciones",
+  "jobTitle": "Auditor de Procesos Ssr",
+  "location": "Córdoba",
+  "status": "Active"
+}

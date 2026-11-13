@@ -1,0 +1,17 @@
+{
+  "id": "75",
+  "firstName": "Victoria",
+  "lastName": "Yáñez",
+  "workEmail": "victoria.yanez@meridian-andina.example",
+  "employeeNumber": "10176",
+  "supervisorEId": "29",
+  "supervisorId": "10058",
+  "supervisor": "Ibáñez, Rocío",
+  "hireDate": "2024-10-22",
+  "terminationDate": "2025-09-27",
+  "department": "People",
+  "division": "Corporativo",
+  "jobTitle": "Analista de People Ssr",
+  "location": "Córdoba",
+  "status": "Inactive"
+}

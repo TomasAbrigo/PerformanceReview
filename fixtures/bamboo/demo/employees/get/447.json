@@ -1,0 +1,17 @@
+{
+  "id": "447",
+  "firstName": "Mateo",
+  "lastName": "Coronel",
+  "workEmail": "mateo.coronel@meridian-andina.example",
+  "employeeNumber": "11106",
+  "supervisorEId": "111",
+  "supervisorId": "10253",
+  "supervisor": "Peralta, Martín",
+  "hireDate": "2023-04-22",
+  "terminationDate": null,
+  "department": "Datos",
+  "division": "Tecnología",
+  "jobTitle": "Analytics Engineer Jr",
+  "location": "Buenos Aires",
+  "status": "Active"
+}

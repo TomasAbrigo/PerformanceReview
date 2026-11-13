@@ -1,0 +1,284 @@
+{
+  "canAlign": true,
+  "canCreateGoals": true,
+  "filters": [
+    {
+      "id": "status-all",
+      "name": "All"
+    },
+    {
+      "id": "inProgress",
+      "name": "In progress"
+    },
+    {
+      "id": "completed",
+      "name": "Completed"
+    },
+    {
+      "id": "closed",
+      "name": "Closed"
+    }
+  ],
+  "selectedFilter": "status-all",
+  "goals": [
+    {
+      "id": "6825",
+      "title": "Documentar los procesos críticos",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 70,
+      "alignsWithOptionId": 9003,
+      "sharedWithEmployeeIds": [
+        167
+      ],
+      "dueDate": "2023-05-09",
+      "completionDate": null,
+      "lastChangedDateTime": "2024-10-07T14:52:14Z",
+      "status": "in_progress",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "6828",
+      "title": "Migrar los reportes al nuevo tablero",
+      "description": "Sirve de base para el próximo ciclo de evaluación.",
+      "percentComplete": 65,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2024-12-31",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-05-07T16:48:39Z",
+      "status": "in_progress",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "6831",
+      "title": "Documentar los procesos críticos",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "percentComplete": 100,
+      "alignsWithOptionId": 9001,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2024-09-05",
+      "completionDate": "2024-06-28",
+      "lastChangedDateTime": "2024-06-28T14:46:11Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "6833",
+      "title": "Automatizar la conciliación mensual",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 60,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2024-03-26",
+      "completionDate": null,
+      "lastChangedDateTime": "2024-11-22T19:14:55Z",
+      "status": "closed",
+      "milestones": null,
+      "actions": {
+        "canEdit": false,
+        "canUpdateProgress": false,
+        "canClose": false,
+        "canReopen": true,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "6835",
+      "title": "Reducir el tiempo de primera respuesta un 20%",
+      "description": "Sirve de base para el próximo ciclo de evaluación.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2025-04-01",
+      "completionDate": "2024-12-30",
+      "lastChangedDateTime": "2024-12-30T10:28:09Z",
+      "status": "completed",
+      "milestones": [
+        {
+          "id": 1509,
+          "employeeGoalId": 6835,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2024-11-28T12:05:20Z",
+          "lastUpdateDateTime": "2024-11-28T12:05:20Z",
+          "lastUpdateUserId": 383
+        },
+        {
+          "id": 1510,
+          "employeeGoalId": 6835,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2024-12-06T19:02:17Z",
+          "lastUpdateDateTime": "2024-12-06T19:02:17Z",
+          "lastUpdateUserId": 383
+        },
+        {
+          "id": 1511,
+          "employeeGoalId": 6835,
+          "title": "Hito 3",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2024-11-18T09:53:33Z",
+          "lastUpdateDateTime": "2024-11-18T09:53:33Z",
+          "lastUpdateUserId": 383
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "6837",
+      "title": "Aumentar la cobertura de pruebas al 80%",
+      "description": "Sirve de base para el próximo ciclo de evaluación.",
+      "percentComplete": 0,
+      "alignsWithOptionId": 9001,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2025-11-30",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-01-31T12:54:12Z",
+      "status": "in_progress",
+      "milestones": [
+        {
+          "id": 1512,
+          "employeeGoalId": 6837,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2025-07-06T10:27:34Z",
+          "lastUpdateUserId": 383
+        },
+        {
+          "id": 1513,
+          "employeeGoalId": 6837,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2025-07-06T14:11:19Z",
+          "lastUpdateUserId": 383
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "6839",
+      "title": "Automatizar la conciliación mensual",
+      "description": "Sirve de base para el próximo ciclo de evaluación.",
+      "percentComplete": 0,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2025-12-22",
+      "completionDate": null,
+      "lastChangedDateTime": "2025-12-09T10:13:56Z",
+      "status": "in_progress",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "6841",
+      "title": "Cerrar el plan de capacitación anual",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 50,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [
+        237
+      ],
+      "dueDate": "2027-03-21",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-09-19T13:16:47Z",
+      "status": "in_progress",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    }
+  ],
+  "persons": [
+    {
+      "employeeId": 383,
+      "firstName": "Jimena",
+      "lastName": "Molina",
+      "preferredName": null
+    },
+    {
+      "employeeId": 167,
+      "firstName": "Marcela",
+      "lastName": "Escobar",
+      "preferredName": null
+    },
+    {
+      "employeeId": 237,
+      "firstName": "Florencia",
+      "lastName": "Benítez",
+      "preferredName": "Flor"
+    }
+  ],
+  "comments": [
+    {
+      "goalId": "6825",
+      "commentCount": 4
+    },
+    {
+      "goalId": "6837",
+      "commentCount": 3
+    }
+  ]
+}

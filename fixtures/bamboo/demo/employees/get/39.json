@@ -1,0 +1,17 @@
+{
+  "id": "39",
+  "firstName": "Rocío",
+  "lastName": "Navarro",
+  "workEmail": "rocio.navarro@meridian-andina.example",
+  "employeeNumber": "10062",
+  "supervisorEId": "25",
+  "supervisorId": "10035",
+  "supervisor": "Silva, Agustina",
+  "hireDate": "2017-09-22",
+  "terminationDate": null,
+  "department": "Soporte",
+  "division": "Operaciones",
+  "jobTitle": "Gerente de Soporte",
+  "location": "Remoto",
+  "status": "Active"
+}

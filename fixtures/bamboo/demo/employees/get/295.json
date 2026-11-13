@@ -1,0 +1,17 @@
+{
+  "id": "295",
+  "firstName": "Matías",
+  "lastName": "Morales",
+  "workEmail": "matias.morales@meridian-andina.example",
+  "employeeNumber": "10725",
+  "supervisorEId": "65",
+  "supervisorId": "10126",
+  "supervisor": "Díaz, Valentina",
+  "hireDate": "2022-01-28",
+  "terminationDate": "2023-06-23",
+  "department": "Marketing",
+  "division": "Comercial",
+  "jobTitle": "Growth Analyst Ssr",
+  "location": "Montevideo",
+  "status": "Inactive"
+}

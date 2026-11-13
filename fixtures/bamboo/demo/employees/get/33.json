@@ -1,0 +1,17 @@
+{
+  "id": "33",
+  "firstName": "Brenda",
+  "lastName": "Romero",
+  "workEmail": "brenda.romero@meridian-andina.example",
+  "employeeNumber": "10050",
+  "supervisorEId": "27",
+  "supervisorId": "10040",
+  "supervisor": "Díaz, Carolina",
+  "hireDate": "2017-08-19",
+  "terminationDate": null,
+  "department": "Ingeniería",
+  "division": "Tecnología",
+  "jobTitle": "Líder de Ingeniería",
+  "location": "Buenos Aires",
+  "status": "Active"
+}

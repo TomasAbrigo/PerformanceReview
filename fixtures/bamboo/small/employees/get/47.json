@@ -1,0 +1,17 @@
+{
+  "id": "47",
+  "firstName": "Ramiro",
+  "lastName": "Valdez",
+  "workEmail": "ramiro.valdez@meridian-andina.example",
+  "employeeNumber": "10095",
+  "supervisorEId": "31",
+  "supervisorId": "10060",
+  "supervisor": "Rivas, Federico",
+  "hireDate": "2021-02-25",
+  "terminationDate": null,
+  "department": "Finanzas",
+  "division": "Corporativo",
+  "jobTitle": "Controller Sr",
+  "location": "Remoto",
+  "status": "Active"
+}

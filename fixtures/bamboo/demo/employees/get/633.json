@@ -1,0 +1,17 @@
+{
+  "id": "633",
+  "firstName": "Andrés",
+  "lastName": "Domínguez",
+  "workEmail": "andres.dominguez@meridian-andina.example",
+  "employeeNumber": "11525",
+  "supervisorEId": "137",
+  "supervisorId": "10320",
+  "supervisor": "Lezcano, Marcela",
+  "hireDate": "2024-09-23",
+  "terminationDate": null,
+  "department": "Customer Success",
+  "division": "Comercial",
+  "jobTitle": "Onboarding Specialist Ssr",
+  "location": "Buenos Aires",
+  "status": "Active"
+}

@@ -1,0 +1,183 @@
+{
+  "canAlign": true,
+  "canCreateGoals": true,
+  "filters": [
+    {
+      "id": "status-all",
+      "name": "All"
+    },
+    {
+      "id": "inProgress",
+      "name": "In progress"
+    },
+    {
+      "id": "completed",
+      "name": "Completed"
+    },
+    {
+      "id": "closed",
+      "name": "Closed"
+    }
+  ],
+  "selectedFilter": "status-all",
+  "goals": [
+    {
+      "id": "5672",
+      "title": "Renovar las cuentas clave del trimestre",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 25,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2024-06-25",
+      "completionDate": null,
+      "lastChangedDateTime": "2023-12-03T09:18:31Z",
+      "status": "in_progress",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "5674",
+      "title": "Renovar las cuentas clave del trimestre",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "percentComplete": 100,
+      "alignsWithOptionId": 9004,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2024-11-28",
+      "completionDate": "2024-12-01",
+      "lastChangedDateTime": "2024-12-01T09:20:49Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "5676",
+      "title": "Entregar el proyecto Norte sin desvíos",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [
+        189
+      ],
+      "dueDate": "2024-04-12",
+      "completionDate": "2024-02-23",
+      "lastChangedDateTime": "2024-02-23T08:06:40Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "5678",
+      "title": "Cerrar el plan de capacitación anual",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2026-11-27",
+      "completionDate": "2026-09-25",
+      "lastChangedDateTime": "2026-09-25T11:19:30Z",
+      "status": "completed",
+      "milestones": [
+        {
+          "id": 1005,
+          "employeeGoalId": 5678,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2026-09-13T17:21:14Z",
+          "lastUpdateDateTime": "2026-09-13T17:21:14Z",
+          "lastUpdateUserId": 151
+        },
+        {
+          "id": 1006,
+          "employeeGoalId": 5678,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2026-08-23T12:46:43Z",
+          "lastUpdateDateTime": "2026-08-23T12:46:43Z",
+          "lastUpdateUserId": 151
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "5681",
+      "title": "Renovar las cuentas clave del trimestre",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 60,
+      "alignsWithOptionId": 9003,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2027-01-22",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-08-10T16:39:56Z",
+      "status": "in_progress",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    }
+  ],
+  "persons": [
+    {
+      "employeeId": 151,
+      "firstName": "Carolina",
+      "lastName": "Romero",
+      "preferredName": null
+    },
+    {
+      "employeeId": 189,
+      "firstName": "Lucía",
+      "lastName": "Quiroga",
+      "preferredName": null
+    }
+  ],
+  "comments": [
+    {
+      "goalId": "5674",
+      "commentCount": 1
+    },
+    {
+      "goalId": "5678",
+      "commentCount": 3
+    },
+    {
+      "goalId": "5681",
+      "commentCount": 2
+    }
+  ]
+}

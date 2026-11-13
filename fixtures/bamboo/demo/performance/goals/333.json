@@ -1,0 +1,319 @@
+{
+  "canAlign": true,
+  "canCreateGoals": true,
+  "filters": [
+    {
+      "id": "status-all",
+      "name": "All"
+    },
+    {
+      "id": "inProgress",
+      "name": "In progress"
+    },
+    {
+      "id": "completed",
+      "name": "Completed"
+    },
+    {
+      "id": "closed",
+      "name": "Closed"
+    }
+  ],
+  "selectedFilter": "status-all",
+  "goals": [
+    {
+      "id": "6614",
+      "title": "Aumentar la cobertura de pruebas al 80%",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2023-04-28",
+      "completionDate": "2023-02-25",
+      "lastChangedDateTime": "2023-02-25T14:47:37Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "6616",
+      "title": "Mentorear a dos personas nuevas",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [
+        49
+      ],
+      "dueDate": "2023-06-26",
+      "completionDate": "2023-05-05",
+      "lastChangedDateTime": "2023-05-05T10:15:08Z",
+      "status": "completed",
+      "milestones": [
+        {
+          "id": 1413,
+          "employeeGoalId": 6616,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2023-04-02T11:07:21Z",
+          "lastUpdateDateTime": "2023-04-02T11:07:21Z",
+          "lastUpdateUserId": 333
+        },
+        {
+          "id": 1414,
+          "employeeGoalId": 6616,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2023-04-08T11:51:23Z",
+          "lastUpdateDateTime": "2023-04-08T11:51:23Z",
+          "lastUpdateUserId": 333
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "6618",
+      "title": "Reducir el tiempo de primera respuesta un 20%",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2024-08-28",
+      "completionDate": "2024-06-28",
+      "lastChangedDateTime": "2024-06-28T17:56:05Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "6621",
+      "title": "Completar la certificación del área",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2024-03-06",
+      "completionDate": "2024-01-30",
+      "lastChangedDateTime": "2024-01-30T18:36:41Z",
+      "status": "completed",
+      "milestones": [
+        {
+          "id": 1415,
+          "employeeGoalId": 6621,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2023-12-17T15:57:38Z",
+          "lastUpdateDateTime": "2023-12-17T15:57:38Z",
+          "lastUpdateUserId": 333
+        },
+        {
+          "id": 1416,
+          "employeeGoalId": 6621,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2023-11-11T12:33:03Z",
+          "lastUpdateDateTime": "2023-11-11T12:33:03Z",
+          "lastUpdateUserId": 333
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "6622",
+      "title": "Aumentar la cobertura de pruebas al 80%",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 100,
+      "alignsWithOptionId": 9002,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2024-11-13",
+      "completionDate": "2024-11-15",
+      "lastChangedDateTime": "2024-11-15T16:10:59Z",
+      "status": "completed",
+      "milestones": [
+        {
+          "id": 1417,
+          "employeeGoalId": 6622,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2024-07-17T12:16:47Z",
+          "lastUpdateDateTime": "2024-07-17T12:16:47Z",
+          "lastUpdateUserId": 333
+        },
+        {
+          "id": 1418,
+          "employeeGoalId": 6622,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2024-08-25T08:10:15Z",
+          "lastUpdateDateTime": "2024-08-25T08:10:15Z",
+          "lastUpdateUserId": 333
+        },
+        {
+          "id": 1419,
+          "employeeGoalId": 6622,
+          "title": "Hito 3",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2024-07-17T13:48:13Z",
+          "lastUpdateDateTime": "2024-07-17T13:48:13Z",
+          "lastUpdateUserId": 333
+        },
+        {
+          "id": 1420,
+          "employeeGoalId": 6622,
+          "title": "Hito 4",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2024-08-20T19:54:44Z",
+          "lastUpdateDateTime": "2024-08-20T19:54:44Z",
+          "lastUpdateUserId": 333
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "6623",
+      "title": "Implementar el calendario editorial",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "percentComplete": 40,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2025-08-06",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-01-20T14:42:17Z",
+      "status": "in_progress",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "6624",
+      "title": "Reducir el tiempo de primera respuesta un 20%",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 33,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2027-01-09",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-09-06T18:42:44Z",
+      "status": "in_progress",
+      "milestones": [
+        {
+          "id": 1421,
+          "employeeGoalId": 6624,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2026-09-02T18:37:16Z",
+          "lastUpdateDateTime": "2026-09-02T18:37:16Z",
+          "lastUpdateUserId": 333
+        },
+        {
+          "id": 1422,
+          "employeeGoalId": 6624,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2026-09-01T09:50:04Z",
+          "lastUpdateUserId": 333
+        },
+        {
+          "id": 1423,
+          "employeeGoalId": 6624,
+          "title": "Hito 3",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2026-09-01T19:16:03Z",
+          "lastUpdateUserId": 333
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    }
+  ],
+  "persons": [
+    {
+      "employeeId": 333,
+      "firstName": "Martín",
+      "lastName": "Domínguez",
+      "preferredName": null
+    },
+    {
+      "employeeId": 49,
+      "firstName": "Milagros",
+      "lastName": "Monzón",
+      "preferredName": null
+    }
+  ],
+  "comments": [
+    {
+      "goalId": "6623",
+      "commentCount": 1
+    }
+  ]
+}

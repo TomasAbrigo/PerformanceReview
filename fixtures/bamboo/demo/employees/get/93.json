@@ -1,0 +1,17 @@
+{
+  "id": "93",
+  "firstName": "Rocío",
+  "lastName": "Herrera",
+  "workEmail": "rocio.herrera@meridian-andina.example",
+  "employeeNumber": "10213",
+  "supervisorEId": "21",
+  "supervisorId": "10026",
+  "supervisor": "Navarro, Lucas",
+  "hireDate": "2019-05-15",
+  "terminationDate": null,
+  "department": "Infraestructura",
+  "division": "Tecnología",
+  "jobTitle": "Líder de Infraestructura",
+  "location": "Remoto",
+  "status": "Active"
+}

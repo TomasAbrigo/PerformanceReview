@@ -1,0 +1,17 @@
+{
+  "id": "529",
+  "firstName": "Santiago",
+  "lastName": "Olmos",
+  "workEmail": "santiago.olmos@meridian-andina.example",
+  "employeeNumber": "11283",
+  "supervisorEId": "361",
+  "supervisorId": "10899",
+  "supervisor": "Suárez, Adrián",
+  "hireDate": "2024-01-03",
+  "terminationDate": null,
+  "department": "Customer Success",
+  "division": "Comercial",
+  "jobTitle": "Customer Success Manager Sr",
+  "location": "Rosario",
+  "status": "Active"
+}

@@ -1,0 +1,17 @@
+{
+  "id": "135",
+  "firstName": "Marcela",
+  "lastName": "Trejo",
+  "workEmail": "marcela.trejo@meridian-andina.example",
+  "employeeNumber": "10316",
+  "supervisorEId": "37",
+  "supervisorId": "10058",
+  "supervisor": "Reyes, Cristian",
+  "hireDate": "2020-02-08",
+  "terminationDate": null,
+  "department": "Calidad",
+  "division": "Operaciones",
+  "jobTitle": "Líder de Calidad",
+  "location": "Buenos Aires",
+  "status": "Active"
+}

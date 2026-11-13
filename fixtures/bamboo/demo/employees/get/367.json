@@ -1,0 +1,17 @@
+{
+  "id": "367",
+  "firstName": "Gustavo",
+  "lastName": "Ibáñez",
+  "workEmail": "gustavo.ibanez@meridian-andina.example",
+  "employeeNumber": "10916",
+  "supervisorEId": "41",
+  "supervisorId": "10067",
+  "supervisor": "Morales, Florencia",
+  "hireDate": "2022-08-22",
+  "terminationDate": null,
+  "department": "Customer Success",
+  "division": "Comercial",
+  "jobTitle": "Onboarding Specialist Ssr",
+  "location": "Santiago de Chile",
+  "status": "Active"
+}

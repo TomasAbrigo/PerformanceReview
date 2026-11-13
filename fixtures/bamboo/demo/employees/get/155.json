@@ -1,0 +1,17 @@
+{
+  "id": "155",
+  "firstName": "Florencia",
+  "lastName": "Fernández",
+  "workEmail": "florencia.fernandez@meridian-andina.example",
+  "employeeNumber": "10365",
+  "supervisorEId": "33",
+  "supervisorId": "10050",
+  "supervisor": "Romero, Brenda",
+  "hireDate": "2020-08-26",
+  "terminationDate": null,
+  "department": "Ingeniería",
+  "division": "Tecnología",
+  "jobTitle": "Mobile Developer Sr",
+  "location": "Buenos Aires",
+  "status": "Active"
+}

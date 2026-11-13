@@ -1,0 +1,17 @@
+{
+  "id": "181",
+  "firstName": "Laura",
+  "lastName": "Olmos",
+  "workEmail": "laura.olmos@meridian-andina.example",
+  "employeeNumber": "10429",
+  "supervisorEId": "49",
+  "supervisorId": "10081",
+  "supervisor": "Monzón, Milagros",
+  "hireDate": "2021-02-22",
+  "terminationDate": null,
+  "department": "Calidad",
+  "division": "Operaciones",
+  "jobTitle": "Auditor de Procesos Sr",
+  "location": "Rosario",
+  "status": "Active"
+}

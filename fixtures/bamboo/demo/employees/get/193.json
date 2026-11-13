@@ -1,0 +1,17 @@
+{
+  "id": "193",
+  "firstName": "Lucía",
+  "lastName": "Nieto",
+  "workEmail": "lucia.nieto@meridian-andina.example",
+  "employeeNumber": "10459",
+  "supervisorEId": "137",
+  "supervisorId": "10320",
+  "supervisor": "Lezcano, Marcela",
+  "hireDate": "2021-03-30",
+  "terminationDate": null,
+  "department": "Customer Success",
+  "division": "Comercial",
+  "jobTitle": "Customer Success Manager Ssr",
+  "location": "Rosario",
+  "status": "Active"
+}

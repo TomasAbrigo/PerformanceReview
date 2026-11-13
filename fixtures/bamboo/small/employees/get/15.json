@@ -1,0 +1,17 @@
+{
+  "id": "15",
+  "firstName": "Marcelo",
+  "lastName": "Ibáñez",
+  "workEmail": "marcelo.ibanez@meridian-andina.example",
+  "employeeNumber": "10021",
+  "supervisorEId": "13",
+  "supervisorId": "10015",
+  "supervisor": "Garrido, Santiago",
+  "hireDate": "2015-08-15",
+  "terminationDate": null,
+  "department": "Ventas",
+  "division": "Comercial",
+  "jobTitle": "Gerente de Ventas",
+  "location": "Córdoba",
+  "status": "Active"
+}

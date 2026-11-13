@@ -1,0 +1,17 @@
+{
+  "id": "581",
+  "firstName": "Silvana",
+  "lastName": "Esquivel",
+  "workEmail": "silvana.esquivel@meridian-andina.example",
+  "employeeNumber": "11425",
+  "supervisorEId": "65",
+  "supervisorId": "10126",
+  "supervisor": "Díaz, Valentina",
+  "hireDate": "2024-05-11",
+  "terminationDate": null,
+  "department": "Marketing",
+  "division": "Comercial",
+  "jobTitle": "Diseñador de Marca Ssr",
+  "location": "Córdoba",
+  "status": "Active"
+}

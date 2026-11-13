@@ -1,0 +1,17 @@
+{
+  "id": "625",
+  "firstName": "Agustina",
+  "lastName": "Rodríguez",
+  "workEmail": "agustina.rodriguez@meridian-andina.example",
+  "employeeNumber": "11516",
+  "supervisorEId": "125",
+  "supervisorId": "10294",
+  "supervisor": "Navarro, Tomás",
+  "hireDate": "2024-08-20",
+  "terminationDate": null,
+  "department": "Ingeniería",
+  "division": "Tecnología",
+  "jobTitle": "Frontend Developer Sr",
+  "location": "Buenos Aires",
+  "status": "Active"
+}

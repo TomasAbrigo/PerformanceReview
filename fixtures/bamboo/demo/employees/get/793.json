@@ -1,0 +1,17 @@
+{
+  "id": "793",
+  "firstName": "Mariana",
+  "lastName": "Romero",
+  "workEmail": "mariana.romero@meridian-andina.example",
+  "employeeNumber": "11940",
+  "supervisorEId": "241",
+  "supervisorId": "10574",
+  "supervisor": "Reyes, Daniela",
+  "hireDate": "2025-08-28",
+  "terminationDate": null,
+  "department": "Marketing",
+  "division": "Comercial",
+  "jobTitle": "Content Specialist Jr",
+  "location": "Buenos Aires",
+  "status": "Active"
+}

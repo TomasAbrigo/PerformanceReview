@@ -1,0 +1,17 @@
+{
+  "id": "513",
+  "firstName": "José",
+  "lastName": "Duarte",
+  "workEmail": "jose.duarte@meridian-andina.example",
+  "employeeNumber": "11255",
+  "supervisorEId": "241",
+  "supervisorId": "10574",
+  "supervisor": "Reyes, Daniela",
+  "hireDate": "2023-10-30",
+  "terminationDate": null,
+  "department": "Marketing",
+  "division": "Comercial",
+  "jobTitle": "Growth Analyst Ssr",
+  "location": "Buenos Aires",
+  "status": "Active"
+}

@@ -1,0 +1,17 @@
+{
+  "id": "25",
+  "firstName": "Agustina",
+  "lastName": "Silva",
+  "workEmail": "agustina.silva@meridian-andina.example",
+  "employeeNumber": "10035",
+  "supervisorEId": "11",
+  "supervisorId": "10009",
+  "supervisor": "Lezcano, Damián",
+  "hireDate": "2016-07-28",
+  "terminationDate": null,
+  "department": "Dirección de Operaciones",
+  "division": "Operaciones",
+  "jobTitle": "VP de Operaciones",
+  "location": "Buenos Aires",
+  "status": "Active"
+}

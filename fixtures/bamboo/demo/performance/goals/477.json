@@ -1,0 +1,134 @@
+{
+  "canAlign": true,
+  "canCreateGoals": true,
+  "filters": [
+    {
+      "id": "status-all",
+      "name": "All"
+    },
+    {
+      "id": "inProgress",
+      "name": "In progress"
+    },
+    {
+      "id": "completed",
+      "name": "Completed"
+    },
+    {
+      "id": "closed",
+      "name": "Closed"
+    }
+  ],
+  "selectedFilter": "status-all",
+  "goals": [
+    {
+      "id": "7295",
+      "title": "Implementar el calendario editorial",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 100,
+      "alignsWithOptionId": 9003,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2023-09-28",
+      "completionDate": "2023-09-13",
+      "lastChangedDateTime": "2023-09-13T16:58:47Z",
+      "status": "completed",
+      "milestones": [
+        {
+          "id": 1732,
+          "employeeGoalId": 7295,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2023-09-01T08:37:29Z",
+          "lastUpdateDateTime": "2023-09-01T08:37:29Z",
+          "lastUpdateUserId": 477
+        },
+        {
+          "id": 1733,
+          "employeeGoalId": 7295,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2023-08-10T09:24:08Z",
+          "lastUpdateDateTime": "2023-08-10T09:24:08Z",
+          "lastUpdateUserId": 477
+        },
+        {
+          "id": 1734,
+          "employeeGoalId": 7295,
+          "title": "Hito 3",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2023-09-02T15:24:37Z",
+          "lastUpdateDateTime": "2023-09-02T15:24:37Z",
+          "lastUpdateUserId": 477
+        },
+        {
+          "id": 1735,
+          "employeeGoalId": 7295,
+          "title": "Hito 4",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2023-08-14T09:42:39Z",
+          "lastUpdateDateTime": "2023-08-14T09:42:39Z",
+          "lastUpdateUserId": 477
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "7298",
+      "title": "Renovar las cuentas clave del trimestre",
+      "description": "Sirve de base para el próximo ciclo de evaluación.",
+      "percentComplete": 45,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [
+        67
+      ],
+      "dueDate": "2024-05-03",
+      "completionDate": null,
+      "lastChangedDateTime": "2025-11-16T08:40:55Z",
+      "status": "in_progress",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    }
+  ],
+  "persons": [
+    {
+      "employeeId": 477,
+      "firstName": "Eugenia",
+      "lastName": "Ledesma",
+      "preferredName": null
+    },
+    {
+      "employeeId": 67,
+      "firstName": "Noelia",
+      "lastName": "Roldán",
+      "preferredName": null
+    }
+  ],
+  "comments": [
+    {
+      "goalId": "7298",
+      "commentCount": 3
+    }
+  ]
+}

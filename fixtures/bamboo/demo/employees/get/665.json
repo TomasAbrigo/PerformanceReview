@@ -1,0 +1,17 @@
+{
+  "id": "665",
+  "firstName": "Daniela",
+  "lastName": "Barrios",
+  "workEmail": "daniela.barrios@meridian-andina.example",
+  "employeeNumber": "11612",
+  "supervisorEId": "65",
+  "supervisorId": "10126",
+  "supervisor": "Díaz, Valentina",
+  "hireDate": "2024-12-31",
+  "terminationDate": null,
+  "department": "Marketing",
+  "division": "Comercial",
+  "jobTitle": "Diseñador de Marca Jr",
+  "location": "Buenos Aires",
+  "status": "Active"
+}

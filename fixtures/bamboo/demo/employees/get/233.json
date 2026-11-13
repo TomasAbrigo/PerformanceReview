@@ -1,0 +1,17 @@
+{
+  "id": "233",
+  "firstName": "Federico",
+  "lastName": "Rivas",
+  "workEmail": "federico.rivas@meridian-andina.example",
+  "employeeNumber": "10554",
+  "supervisorEId": "241",
+  "supervisorId": "10574",
+  "supervisor": "Reyes, Daniela",
+  "hireDate": "2021-08-20",
+  "terminationDate": "2025-10-27",
+  "department": "Marketing",
+  "division": "Comercial",
+  "jobTitle": "Diseñador de Marca Ssr",
+  "location": "Montevideo",
+  "status": "Inactive"
+}

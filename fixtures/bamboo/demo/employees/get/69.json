@@ -1,0 +1,17 @@
+{
+  "id": "69",
+  "firstName": "Natalia",
+  "lastName": "Olmos",
+  "workEmail": "natalia.olmos@meridian-andina.example",
+  "employeeNumber": "10135",
+  "supervisorEId": "49",
+  "supervisorId": "10081",
+  "supervisor": "Monzón, Milagros",
+  "hireDate": "2019-01-03",
+  "terminationDate": null,
+  "department": "Calidad",
+  "division": "Operaciones",
+  "jobTitle": "Auditor de Procesos Ssr",
+  "location": "Buenos Aires",
+  "status": "Active"
+}

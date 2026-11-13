@@ -1,0 +1,17 @@
+{
+  "id": "61",
+  "firstName": "Martín",
+  "lastName": "Fuentes",
+  "workEmail": "martin.fuentes@meridian-andina.example",
+  "employeeNumber": "10132",
+  "supervisorEId": "37",
+  "supervisorId": "10075",
+  "supervisor": "Ríos, Hugo",
+  "hireDate": "2023-12-26",
+  "terminationDate": null,
+  "department": "Datos",
+  "division": "Tecnología",
+  "jobTitle": "Data Engineer Sr",
+  "location": "Remoto",
+  "status": "Active"
+}

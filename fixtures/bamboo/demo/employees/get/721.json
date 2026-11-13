@@ -1,0 +1,17 @@
+{
+  "id": "721",
+  "firstName": "Matías",
+  "lastName": "Delgado",
+  "workEmail": "matias.delgado@meridian-andina.example",
+  "employeeNumber": "11770",
+  "supervisorEId": "65",
+  "supervisorId": "10126",
+  "supervisor": "Díaz, Valentina",
+  "hireDate": "2025-04-22",
+  "terminationDate": null,
+  "department": "Marketing",
+  "division": "Comercial",
+  "jobTitle": "Diseñador de Marca Sr",
+  "location": "Buenos Aires",
+  "status": "Active"
+}

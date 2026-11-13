@@ -1,0 +1,17 @@
+{
+  "id": "433",
+  "firstName": "José",
+  "lastName": "Godoy",
+  "workEmail": "jose.godoy@meridian-andina.example",
+  "employeeNumber": "11079",
+  "supervisorEId": "159",
+  "supervisorId": "10370",
+  "supervisor": "Ríos, Marcela",
+  "hireDate": "2023-03-12",
+  "terminationDate": null,
+  "department": "Datos",
+  "division": "Tecnología",
+  "jobTitle": "Data Analyst Jr",
+  "location": "Rosario",
+  "status": "Active"
+}

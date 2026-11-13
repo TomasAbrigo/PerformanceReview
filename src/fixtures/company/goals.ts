@@ -186,6 +186,8 @@ function buildMilestones(
     const completedOn = completed
       ? dateBetween(goal.created, goal.changedOn, rng.int)
       : null;
+    const completedAt =
+      completedOn === null ? null : dateTime(completedOn, rng);
     return {
       id: ++counters.milestone,
       employeeGoalId: Number(goal.goalId),
@@ -193,9 +195,8 @@ function buildMilestones(
       startValue: 0,
       endValue: 1,
       currentValue: completed ? 1 : 0,
-      completedDateTime:
-        completedOn === null ? null : dateTime(completedOn, rng),
-      lastUpdateDateTime: dateTime(completedOn ?? goal.created, rng),
+      completedDateTime: completedAt,
+      lastUpdateDateTime: completedAt ?? dateTime(goal.created, rng),
       lastUpdateUserId: Number(goal.ownerId),
     };
   });

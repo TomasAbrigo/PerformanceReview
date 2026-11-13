@@ -1,0 +1,146 @@
+{
+  "canAlign": true,
+  "canCreateGoals": true,
+  "filters": [
+    {
+      "id": "status-all",
+      "name": "All"
+    },
+    {
+      "id": "inProgress",
+      "name": "In progress"
+    },
+    {
+      "id": "completed",
+      "name": "Completed"
+    },
+    {
+      "id": "closed",
+      "name": "Closed"
+    }
+  ],
+  "selectedFilter": "status-all",
+  "goals": [
+    {
+      "id": "7865",
+      "title": "Reducir el tiempo de primera respuesta un 20%",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "percentComplete": 33,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [
+        167
+      ],
+      "dueDate": "2025-02-20",
+      "completionDate": null,
+      "lastChangedDateTime": "2025-05-21T10:10:42Z",
+      "status": "in_progress",
+      "milestones": [
+        {
+          "id": 2001,
+          "employeeGoalId": 7865,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2024-12-17T14:30:52Z",
+          "lastUpdateDateTime": "2024-12-17T14:30:52Z",
+          "lastUpdateUserId": 641
+        },
+        {
+          "id": 2002,
+          "employeeGoalId": 7865,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2024-10-20T08:52:54Z",
+          "lastUpdateUserId": 641
+        },
+        {
+          "id": 2003,
+          "employeeGoalId": 7865,
+          "title": "Hito 3",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2024-10-20T12:39:21Z",
+          "lastUpdateUserId": 641
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "7868",
+      "title": "Lanzar el nuevo flujo de onboarding",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "percentComplete": 80,
+      "alignsWithOptionId": 9002,
+      "sharedWithEmployeeIds": [
+        167
+      ],
+      "dueDate": "2027-03-11",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-09-09T11:51:50Z",
+      "status": "in_progress",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "7871",
+      "title": "Completar la certificación del área",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 85,
+      "alignsWithOptionId": 9001,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2026-11-07",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-08-13T12:02:04Z",
+      "status": "in_progress",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    }
+  ],
+  "persons": [
+    {
+      "employeeId": 641,
+      "firstName": "Julieta",
+      "lastName": "Heredia",
+      "preferredName": null
+    },
+    {
+      "employeeId": 167,
+      "firstName": "Marcela",
+      "lastName": "Escobar",
+      "preferredName": null
+    }
+  ],
+  "comments": [
+    {
+      "goalId": "7868",
+      "commentCount": 2
+    }
+  ]
+}

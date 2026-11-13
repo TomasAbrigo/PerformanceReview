@@ -1,0 +1,17 @@
+{
+  "id": "95",
+  "firstName": "José",
+  "lastName": "Fernández",
+  "workEmail": "jose.fernandez@meridian-andina.example",
+  "employeeNumber": "10220",
+  "supervisorEId": "57",
+  "supervisorId": "10101",
+  "supervisor": "Trejo, Adrián",
+  "hireDate": "2019-05-29",
+  "terminationDate": null,
+  "department": "Operaciones",
+  "division": "Operaciones",
+  "jobTitle": "Líder de Operaciones",
+  "location": "Buenos Aires",
+  "status": "Active"
+}

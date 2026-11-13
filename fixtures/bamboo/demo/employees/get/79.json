@@ -1,0 +1,17 @@
+{
+  "id": "79",
+  "firstName": "Silvana",
+  "lastName": "Torres",
+  "workEmail": "silvana.torres@meridian-andina.example",
+  "employeeNumber": "10169",
+  "supervisorEId": "65",
+  "supervisorId": "10126",
+  "supervisor": "Díaz, Valentina",
+  "hireDate": "2019-02-15",
+  "terminationDate": null,
+  "department": "Marketing",
+  "division": "Comercial",
+  "jobTitle": "Growth Analyst Ssr",
+  "location": "Buenos Aires",
+  "status": "Active"
+}

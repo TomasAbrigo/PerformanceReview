@@ -1,0 +1,17 @@
+{
+  "id": "133",
+  "firstName": "Gabriela",
+  "lastName": "Lezcano",
+  "workEmail": "gabriela.lezcano@meridian-andina.example",
+  "employeeNumber": "10307",
+  "supervisorEId": "117",
+  "supervisorId": "10275",
+  "supervisor": "Núñez, Mariana",
+  "hireDate": "2020-01-22",
+  "terminationDate": null,
+  "department": "Infraestructura",
+  "division": "Tecnología",
+  "jobTitle": "DevOps Engineer Sr",
+  "location": "Buenos Aires",
+  "status": "Active"
+}

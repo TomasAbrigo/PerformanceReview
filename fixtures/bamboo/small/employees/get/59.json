@@ -1,0 +1,17 @@
+{
+  "id": "59",
+  "firstName": "Cecilia",
+  "lastName": "Gutiérrez",
+  "workEmail": "cecilia.gutierrez@meridian-andina.example",
+  "employeeNumber": "10125",
+  "supervisorEId": "29",
+  "supervisorId": "10058",
+  "supervisor": "Ibáñez, Rocío",
+  "hireDate": "2023-05-19",
+  "terminationDate": null,
+  "department": "People",
+  "division": "Corporativo",
+  "jobTitle": "Analista de People Jr",
+  "location": "Buenos Aires",
+  "status": "Active"
+}

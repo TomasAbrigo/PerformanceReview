@@ -1,0 +1,165 @@
+{
+  "canAlign": true,
+  "canCreateGoals": true,
+  "filters": [
+    {
+      "id": "status-all",
+      "name": "All"
+    },
+    {
+      "id": "inProgress",
+      "name": "In progress"
+    },
+    {
+      "id": "completed",
+      "name": "Completed"
+    },
+    {
+      "id": "closed",
+      "name": "Closed"
+    }
+  ],
+  "selectedFilter": "status-all",
+  "goals": [
+    {
+      "id": "7481",
+      "title": "Migrar los reportes al nuevo tablero",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2024-11-09",
+      "completionDate": "2024-08-27",
+      "lastChangedDateTime": "2024-08-27T12:34:18Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "7482",
+      "title": "Documentar los procesos críticos",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 67,
+      "alignsWithOptionId": 9003,
+      "sharedWithEmployeeIds": [
+        41
+      ],
+      "dueDate": "2025-09-25",
+      "completionDate": null,
+      "lastChangedDateTime": "2025-07-11T12:11:05Z",
+      "status": "closed",
+      "milestones": [
+        {
+          "id": 1819,
+          "employeeGoalId": 7482,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-06-29T17:09:46Z",
+          "lastUpdateDateTime": "2025-06-29T17:09:46Z",
+          "lastUpdateUserId": 521
+        },
+        {
+          "id": 1820,
+          "employeeGoalId": 7482,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-05-26T18:16:16Z",
+          "lastUpdateDateTime": "2025-05-26T18:16:16Z",
+          "lastUpdateUserId": 521
+        },
+        {
+          "id": 1821,
+          "employeeGoalId": 7482,
+          "title": "Hito 3",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2025-03-26T16:18:28Z",
+          "lastUpdateUserId": 521
+        }
+      ],
+      "actions": {
+        "canEdit": false,
+        "canUpdateProgress": false,
+        "canClose": false,
+        "canReopen": true,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "7485",
+      "title": "Lanzar el nuevo flujo de onboarding",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 40,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2025-08-20",
+      "completionDate": null,
+      "lastChangedDateTime": "2025-07-11T09:40:07Z",
+      "status": "in_progress",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "7487",
+      "title": "Automatizar la conciliación mensual",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 100,
+      "alignsWithOptionId": 9002,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2026-04-18",
+      "completionDate": "2026-01-18",
+      "lastChangedDateTime": "2026-01-18T15:46:49Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    }
+  ],
+  "persons": [
+    {
+      "employeeId": 521,
+      "firstName": "Damián",
+      "lastName": "Martínez",
+      "preferredName": null
+    },
+    {
+      "employeeId": 41,
+      "firstName": "Florencia",
+      "lastName": "Morales",
+      "preferredName": "Flor"
+    }
+  ],
+  "comments": [
+    {
+      "goalId": "7482",
+      "commentCount": 3
+    }
+  ]
+}

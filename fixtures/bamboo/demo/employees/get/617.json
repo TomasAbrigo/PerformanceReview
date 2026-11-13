@@ -1,0 +1,17 @@
+{
+  "id": "617",
+  "firstName": "Tomás",
+  "lastName": "Olmos",
+  "workEmail": "tomas.olmos@meridian-andina.example",
+  "employeeNumber": "11501",
+  "supervisorEId": "265",
+  "supervisorId": "10640",
+  "supervisor": "Olmos, Ivana",
+  "hireDate": "2024-07-26",
+  "terminationDate": null,
+  "department": "Infraestructura",
+  "division": "Tecnología",
+  "jobTitle": "SysAdmin Jr",
+  "location": "Córdoba",
+  "status": "Active"
+}

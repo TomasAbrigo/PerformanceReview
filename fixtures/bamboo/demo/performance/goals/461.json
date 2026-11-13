@@ -1,0 +1,209 @@
+{
+  "canAlign": true,
+  "canCreateGoals": true,
+  "filters": [
+    {
+      "id": "status-all",
+      "name": "All"
+    },
+    {
+      "id": "inProgress",
+      "name": "In progress"
+    },
+    {
+      "id": "completed",
+      "name": "Completed"
+    },
+    {
+      "id": "closed",
+      "name": "Closed"
+    }
+  ],
+  "selectedFilter": "status-all",
+  "goals": [
+    {
+      "id": "7205",
+      "title": "Migrar los reportes al nuevo tablero",
+      "description": "Sirve de base para el próximo ciclo de evaluación.",
+      "percentComplete": 25,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2023-08-14",
+      "completionDate": null,
+      "lastChangedDateTime": "2025-08-08T09:46:18Z",
+      "status": "in_progress",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "7207",
+      "title": "Entregar el proyecto Norte sin desvíos",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [
+        147
+      ],
+      "dueDate": "2023-08-31",
+      "completionDate": "2023-07-29",
+      "lastChangedDateTime": "2023-07-29T19:43:46Z",
+      "status": "completed",
+      "milestones": [
+        {
+          "id": 1693,
+          "employeeGoalId": 7207,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2023-07-27T19:55:43Z",
+          "lastUpdateDateTime": "2023-07-27T19:55:43Z",
+          "lastUpdateUserId": 461
+        },
+        {
+          "id": 1694,
+          "employeeGoalId": 7207,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2023-06-27T17:42:14Z",
+          "lastUpdateDateTime": "2023-06-27T17:42:14Z",
+          "lastUpdateUserId": 461
+        },
+        {
+          "id": 1695,
+          "employeeGoalId": 7207,
+          "title": "Hito 3",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2023-06-13T18:08:23Z",
+          "lastUpdateDateTime": "2023-06-13T18:08:23Z",
+          "lastUpdateUserId": 461
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "7208",
+      "title": "Mejorar el NPS interno del equipo",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 100,
+      "alignsWithOptionId": 9003,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2024-09-16",
+      "completionDate": "2024-08-02",
+      "lastChangedDateTime": "2024-08-02T18:47:11Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "7209",
+      "title": "Automatizar la conciliación mensual",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "percentComplete": 55,
+      "alignsWithOptionId": 9004,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2025-10-06",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-06-01T11:23:51Z",
+      "status": "in_progress",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "7211",
+      "title": "Completar la certificación del área",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "percentComplete": 0,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2025-09-09",
+      "completionDate": null,
+      "lastChangedDateTime": "2025-12-14T18:50:06Z",
+      "status": "in_progress",
+      "milestones": [
+        {
+          "id": 1696,
+          "employeeGoalId": 7211,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2025-03-06T12:28:42Z",
+          "lastUpdateUserId": 461
+        },
+        {
+          "id": 1697,
+          "employeeGoalId": 7211,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2025-03-06T17:49:45Z",
+          "lastUpdateUserId": 461
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    }
+  ],
+  "persons": [
+    {
+      "employeeId": 461,
+      "firstName": "Brenda",
+      "lastName": "Morales",
+      "preferredName": null
+    },
+    {
+      "employeeId": 147,
+      "firstName": "Paula",
+      "lastName": "Páez",
+      "preferredName": null
+    }
+  ],
+  "comments": [
+    {
+      "goalId": "7207",
+      "commentCount": 3
+    }
+  ]
+}
