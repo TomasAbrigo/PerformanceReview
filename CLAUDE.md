@@ -49,4 +49,13 @@ Supabase: api 55321, db 55322, shadow 55320, studio 55323, inbucket 55324, analy
 
 ## Hard rule: no deploy, local only
 
-Do **not** deploy anywhere, do **not** push to GitHub remotes unless explicitly asked, and do **not** run `vercel` or link a Vercel/Supabase cloud project. Everything runs locally against the Docker Supabase stack. (`.mcp.json` points to a Supabase MCP server; do not use it to modify remote projects.)
+Do **not** deploy anywhere, do **not** run `vercel`, and do **not** link or modify a Vercel/Supabase cloud project. Everything runs locally against the Docker Supabase stack. (`.mcp.json` points to a Supabase MCP server; do not use it to modify remote projects.)
+
+## Git and GitHub workflow
+
+The owner asked that everything lives on GitHub (`TomasAbrigo/PerformanceReview`). Pushing is allowed and expected:
+
+- One branch per issue, named `tomas/issue-<n>-<short-desc>`, based on `main`.
+- Commit with conventional messages referencing the issue, push the branch (`git push -u origin <branch>`) and open a PR against `main` with `gh pr create` whose body contains `Closes #<n>` (or `Part of #<n>` for partial slices).
+- The orchestrator merges PRs; do not merge your own PR, do not push to `main` directly, never force-push.
+- Jira is not used for this repo for now.
