@@ -1,0 +1,17 @@
+{
+  "id": "205",
+  "firstName": "Ricardo",
+  "lastName": "Soria",
+  "workEmail": "ricardo.soria@meridian-andina.example",
+  "employeeNumber": "10479",
+  "supervisorEId": "95",
+  "supervisorId": "10199",
+  "supervisor": "Fernández, José",
+  "hireDate": "2021-05-01",
+  "terminationDate": null,
+  "department": "Operaciones",
+  "division": "Operaciones",
+  "jobTitle": "Analista de Operaciones Jr",
+  "location": "Buenos Aires",
+  "status": "Active"
+}

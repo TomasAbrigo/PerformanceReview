@@ -1,0 +1,17 @@
+{
+  "id": "613",
+  "firstName": "Matías",
+  "lastName": "Díaz",
+  "workEmail": "matias.diaz@meridian-andina.example",
+  "employeeNumber": "11491",
+  "supervisorEId": "65",
+  "supervisorId": "10117",
+  "supervisor": "Díaz, Valentina",
+  "hireDate": "2024-07-13",
+  "terminationDate": null,
+  "department": "Marketing",
+  "division": "Comercial",
+  "jobTitle": "Growth Analyst Jr",
+  "location": "Rosario",
+  "status": "Active"
+}

@@ -1,0 +1,17 @@
+{
+  "id": "37",
+  "firstName": "Hugo",
+  "lastName": "Ríos",
+  "workEmail": "hugo.rios@meridian-andina.example",
+  "employeeNumber": "10072",
+  "supervisorEId": "25",
+  "supervisorId": "10040",
+  "supervisor": "Quiroga, Silvana",
+  "hireDate": "2018-08-21",
+  "terminationDate": null,
+  "department": "Datos",
+  "division": "Tecnología",
+  "jobTitle": "Líder de Datos",
+  "location": "Buenos Aires",
+  "status": "Active"
+}

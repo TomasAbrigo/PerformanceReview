@@ -1,0 +1,130 @@
+{
+  "canAlign": true,
+  "canCreateGoals": false,
+  "filters": [
+    {
+      "id": "status-all",
+      "name": "All"
+    },
+    {
+      "id": "inProgress",
+      "name": "In progress"
+    },
+    {
+      "id": "completed",
+      "name": "Completed"
+    },
+    {
+      "id": "closed",
+      "name": "Closed"
+    }
+  ],
+  "selectedFilter": "status-all",
+  "goals": [
+    {
+      "id": "6933",
+      "title": "Migrar los reportes al nuevo tablero",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 100,
+      "alignsWithOptionId": 9003,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2023-09-05",
+      "completionDate": "2023-08-30",
+      "lastChangedDateTime": "2023-08-30T14:29:44Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": false,
+        "canUpdateProgress": false,
+        "canClose": false,
+        "canReopen": false,
+        "canDelete": false,
+        "canComment": false
+      }
+    },
+    {
+      "id": "6936",
+      "title": "Reducir los incidentes recurrentes a la mitad",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 75,
+      "alignsWithOptionId": 9002,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2025-12-28",
+      "completionDate": null,
+      "lastChangedDateTime": "2025-10-29T11:27:08Z",
+      "status": "in_progress",
+      "milestones": [
+        {
+          "id": 1568,
+          "employeeGoalId": 6936,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-08-25T16:39:38Z",
+          "lastUpdateDateTime": "2025-08-25T16:39:38Z",
+          "lastUpdateUserId": 443
+        },
+        {
+          "id": 1569,
+          "employeeGoalId": 6936,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-07-31T09:36:50Z",
+          "lastUpdateDateTime": "2025-07-31T09:36:50Z",
+          "lastUpdateUserId": 443
+        },
+        {
+          "id": 1570,
+          "employeeGoalId": 6936,
+          "title": "Hito 3",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-08-31T08:03:49Z",
+          "lastUpdateDateTime": "2025-08-31T08:03:49Z",
+          "lastUpdateUserId": 443
+        },
+        {
+          "id": 1571,
+          "employeeGoalId": 6936,
+          "title": "Hito 4",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2025-07-24T08:19:45Z",
+          "lastUpdateUserId": 443
+        }
+      ],
+      "actions": {
+        "canEdit": false,
+        "canUpdateProgress": false,
+        "canClose": false,
+        "canReopen": false,
+        "canDelete": false,
+        "canComment": false
+      }
+    }
+  ],
+  "persons": [
+    {
+      "employeeId": 443,
+      "firstName": "José",
+      "lastName": "Maldonado",
+      "preferredName": "Pepe"
+    }
+  ],
+  "comments": [
+    {
+      "goalId": "6933",
+      "commentCount": 4
+    },
+    {
+      "goalId": "6936",
+      "commentCount": 1
+    }
+  ]
+}

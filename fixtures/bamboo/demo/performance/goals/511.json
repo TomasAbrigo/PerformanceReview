@@ -1,0 +1,152 @@
+{
+  "canAlign": true,
+  "canCreateGoals": true,
+  "filters": [
+    {
+      "id": "status-all",
+      "name": "All"
+    },
+    {
+      "id": "inProgress",
+      "name": "In progress"
+    },
+    {
+      "id": "completed",
+      "name": "Completed"
+    },
+    {
+      "id": "closed",
+      "name": "Closed"
+    }
+  ],
+  "selectedFilter": "status-all",
+  "goals": [
+    {
+      "id": "7196",
+      "title": "Entregar el proyecto Norte sin desvíos",
+      "description": "Sirve de base para el próximo ciclo de evaluación.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2024-04-23",
+      "completionDate": "2024-02-23",
+      "lastChangedDateTime": "2024-02-23T15:14:12Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "7198",
+      "title": "Implementar el calendario editorial",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 50,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2026-10-09",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-05-26T14:14:49Z",
+      "status": "in_progress",
+      "milestones": [
+        {
+          "id": 1708,
+          "employeeGoalId": 7198,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2026-04-18T14:16:27Z",
+          "lastUpdateDateTime": "2026-04-18T14:16:27Z",
+          "lastUpdateUserId": 511
+        },
+        {
+          "id": 1709,
+          "employeeGoalId": 7198,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2026-02-26T15:02:01Z",
+          "lastUpdateUserId": 511
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "7200",
+      "title": "Completar la certificación del área",
+      "description": "Sirve de base para el próximo ciclo de evaluación.",
+      "percentComplete": 100,
+      "alignsWithOptionId": 9001,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2026-02-08",
+      "completionDate": "2025-11-14",
+      "lastChangedDateTime": "2025-11-14T18:29:38Z",
+      "status": "completed",
+      "milestones": [
+        {
+          "id": 1710,
+          "employeeGoalId": 7200,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-11-09T19:21:40Z",
+          "lastUpdateDateTime": "2025-11-09T19:21:40Z",
+          "lastUpdateUserId": 511
+        },
+        {
+          "id": 1711,
+          "employeeGoalId": 7200,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-11-14T11:41:14Z",
+          "lastUpdateDateTime": "2025-11-14T11:41:14Z",
+          "lastUpdateUserId": 511
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    }
+  ],
+  "persons": [
+    {
+      "employeeId": 511,
+      "firstName": "Ivana",
+      "lastName": "Escobar",
+      "preferredName": null
+    }
+  ],
+  "comments": [
+    {
+      "goalId": "7198",
+      "commentCount": 3
+    },
+    {
+      "goalId": "7200",
+      "commentCount": 3
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "id": "275",
+  "firstName": "Verónica",
+  "lastName": "Escobar",
+  "workEmail": "veronica.escobar@meridian-andina.example",
+  "employeeNumber": "10661",
+  "supervisorEId": "83",
+  "supervisorId": "10163",
+  "supervisor": "Franco, Daniela",
+  "hireDate": "2022-01-03",
+  "terminationDate": null,
+  "department": "Customer Success",
+  "division": "Comercial",
+  "jobTitle": "Onboarding Specialist Jr",
+  "location": "Rosario",
+  "status": "Active"
+}

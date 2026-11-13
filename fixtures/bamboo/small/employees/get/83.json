@@ -1,0 +1,17 @@
+{
+  "id": "83",
+  "firstName": "Natalia",
+  "lastName": "Lezcano",
+  "workEmail": "natalia.lezcano@meridian-andina.example",
+  "employeeNumber": "10185",
+  "supervisorEId": "29",
+  "supervisorId": "10049",
+  "supervisor": "Ibáñez, Rocío",
+  "hireDate": "2025-08-17",
+  "terminationDate": null,
+  "department": "People",
+  "division": "Corporativo",
+  "jobTitle": "Analista de People Sr",
+  "location": "Buenos Aires",
+  "status": "Active"
+}

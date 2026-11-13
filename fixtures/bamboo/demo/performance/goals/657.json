@@ -1,0 +1,155 @@
+{
+  "canAlign": true,
+  "canCreateGoals": true,
+  "filters": [
+    {
+      "id": "status-all",
+      "name": "All"
+    },
+    {
+      "id": "inProgress",
+      "name": "In progress"
+    },
+    {
+      "id": "completed",
+      "name": "Completed"
+    },
+    {
+      "id": "closed",
+      "name": "Closed"
+    }
+  ],
+  "selectedFilter": "status-all",
+  "goals": [
+    {
+      "id": "7662",
+      "title": "Lanzar el nuevo flujo de onboarding",
+      "description": "Sirve de base para el próximo ciclo de evaluación.",
+      "percentComplete": 100,
+      "alignsWithOptionId": 9003,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2025-03-20",
+      "completionDate": "2025-01-15",
+      "lastChangedDateTime": "2025-01-15T16:04:35Z",
+      "status": "completed",
+      "milestones": [
+        {
+          "id": 1924,
+          "employeeGoalId": 7662,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2024-12-18T16:48:25Z",
+          "lastUpdateDateTime": "2024-12-18T16:48:25Z",
+          "lastUpdateUserId": 657
+        },
+        {
+          "id": 1925,
+          "employeeGoalId": 7662,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2024-12-11T11:20:01Z",
+          "lastUpdateDateTime": "2024-12-11T11:20:01Z",
+          "lastUpdateUserId": 657
+        },
+        {
+          "id": 1926,
+          "employeeGoalId": 7662,
+          "title": "Hito 3",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2024-12-12T10:07:11Z",
+          "lastUpdateDateTime": "2024-12-12T10:07:11Z",
+          "lastUpdateUserId": 657
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "7664",
+      "title": "Aumentar la cobertura de pruebas al 80%",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 100,
+      "alignsWithOptionId": 9002,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2025-06-12",
+      "completionDate": "2025-05-18",
+      "lastChangedDateTime": "2025-05-18T17:40:46Z",
+      "status": "completed",
+      "milestones": [
+        {
+          "id": 1927,
+          "employeeGoalId": 7664,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-03-04T08:58:15Z",
+          "lastUpdateDateTime": "2025-03-04T08:58:15Z",
+          "lastUpdateUserId": 657
+        },
+        {
+          "id": 1928,
+          "employeeGoalId": 7664,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-01-11T15:14:52Z",
+          "lastUpdateDateTime": "2025-01-11T15:14:52Z",
+          "lastUpdateUserId": 657
+        },
+        {
+          "id": 1929,
+          "employeeGoalId": 7664,
+          "title": "Hito 3",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-02-11T09:32:19Z",
+          "lastUpdateDateTime": "2025-02-11T09:32:19Z",
+          "lastUpdateUserId": 657
+        },
+        {
+          "id": 1930,
+          "employeeGoalId": 7664,
+          "title": "Hito 4",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-03-21T09:45:35Z",
+          "lastUpdateDateTime": "2025-03-21T09:45:35Z",
+          "lastUpdateUserId": 657
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    }
+  ],
+  "persons": [
+    {
+      "employeeId": 657,
+      "firstName": "Lucía",
+      "lastName": "Ledesma",
+      "preferredName": null
+    }
+  ],
+  "comments": []
+}

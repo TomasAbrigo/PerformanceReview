@@ -21,7 +21,8 @@
     "db:studio": "drizzle-kit studio",
     "db:reset": "supabase db reset",
     "ingest": "tsx scripts/ingest.ts",
-    "ingest:employees": "tsx scripts/ingest-employees.ts"
+    "ingest:employees": "tsx scripts/ingest-employees.ts",
+    "fixtures:build": "tsx src/fixtures/build.ts"
   },
   "dependencies": {
     "@base-ui/react": "^1.9.0",

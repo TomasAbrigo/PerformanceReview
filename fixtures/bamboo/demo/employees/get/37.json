@@ -1,0 +1,17 @@
+{
+  "id": "37",
+  "firstName": "Cristian",
+  "lastName": "Reyes",
+  "workEmail": "cristian.reyes@meridian-andina.example",
+  "employeeNumber": "10060",
+  "supervisorEId": "25",
+  "supervisorId": "10031",
+  "supervisor": "Silva, Agustina",
+  "hireDate": "2017-09-01",
+  "terminationDate": null,
+  "department": "Calidad",
+  "division": "Operaciones",
+  "jobTitle": "Gerente de Calidad",
+  "location": "Buenos Aires",
+  "status": "Active"
+}

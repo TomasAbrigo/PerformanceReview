@@ -1,0 +1,17 @@
+{
+  "id": "311",
+  "firstName": "Mariana",
+  "lastName": "Heredia",
+  "workEmail": "mariana.heredia@meridian-andina.example",
+  "employeeNumber": "10753",
+  "supervisorEId": "65",
+  "supervisorId": "10117",
+  "supervisor": "Díaz, Valentina",
+  "hireDate": "2022-03-19",
+  "terminationDate": null,
+  "department": "Marketing",
+  "division": "Comercial",
+  "jobTitle": "Growth Analyst Jr",
+  "location": "Remoto",
+  "status": "Active"
+}

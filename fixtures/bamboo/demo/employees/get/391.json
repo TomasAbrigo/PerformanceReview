@@ -1,0 +1,17 @@
+{
+  "id": "391",
+  "firstName": "Julieta",
+  "lastName": "Esquivel",
+  "workEmail": "julieta.esquivel@meridian-andina.example",
+  "employeeNumber": "10958",
+  "supervisorEId": "41",
+  "supervisorId": "10066",
+  "supervisor": "Morales, Florencia",
+  "hireDate": "2022-11-09",
+  "terminationDate": null,
+  "department": "Customer Success",
+  "division": "Comercial",
+  "jobTitle": "Customer Success Manager Jr",
+  "location": "Remoto",
+  "status": "Active"
+}

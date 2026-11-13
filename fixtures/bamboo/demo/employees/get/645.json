@@ -1,0 +1,17 @@
+{
+  "id": "645",
+  "firstName": "Esteban",
+  "lastName": "Trejo",
+  "workEmail": "esteban.trejo@meridian-andina.example",
+  "employeeNumber": "11554",
+  "supervisorEId": "59",
+  "supervisorId": "10104",
+  "supervisor": "Soria, Gonzalo",
+  "hireDate": "2024-11-07",
+  "terminationDate": null,
+  "department": "Finanzas",
+  "division": "Corporativo",
+  "jobTitle": "Controller Ssr",
+  "location": "Buenos Aires",
+  "status": "Active"
+}

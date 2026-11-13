@@ -1,0 +1,17 @@
+{
+  "id": "175",
+  "firstName": "Damián",
+  "lastName": "Aguirre",
+  "workEmail": "damian.aguirre@meridian-andina.example",
+  "employeeNumber": "10405",
+  "supervisorEId": "49",
+  "supervisorId": "10081",
+  "supervisor": "Monzón, Milagros",
+  "hireDate": "2021-01-01",
+  "terminationDate": null,
+  "department": "Calidad",
+  "division": "Operaciones",
+  "jobTitle": "Analista de Calidad Ssr",
+  "location": "Santiago de Chile",
+  "status": "Active"
+}

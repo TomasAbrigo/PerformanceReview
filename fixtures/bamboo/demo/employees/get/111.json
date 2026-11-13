@@ -1,0 +1,17 @@
+{
+  "id": "111",
+  "firstName": "Martín",
+  "lastName": "Peralta",
+  "workEmail": "martin.peralta@meridian-andina.example",
+  "employeeNumber": "10250",
+  "supervisorEId": "35",
+  "supervisorId": "10053",
+  "supervisor": "Ojeda, Matías",
+  "hireDate": "2019-10-06",
+  "terminationDate": null,
+  "department": "Datos",
+  "division": "Tecnología",
+  "jobTitle": "Líder de Datos",
+  "location": "Córdoba",
+  "status": "Active"
+}

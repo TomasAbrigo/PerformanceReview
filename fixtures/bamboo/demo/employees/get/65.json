@@ -1,0 +1,17 @@
+{
+  "id": "65",
+  "firstName": "Valentina",
+  "lastName": "Díaz",
+  "workEmail": "valentina.diaz@meridian-andina.example",
+  "employeeNumber": "10117",
+  "supervisorEId": "55",
+  "supervisorId": "10095",
+  "supervisor": "Medina, Tomás",
+  "hireDate": "2018-09-03",
+  "terminationDate": null,
+  "department": "Marketing",
+  "division": "Comercial",
+  "jobTitle": "Líder de Marketing",
+  "location": "Buenos Aires",
+  "status": "Active"
+}

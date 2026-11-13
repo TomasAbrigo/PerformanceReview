@@ -1,0 +1,157 @@
+{
+  "canAlign": true,
+  "canCreateGoals": true,
+  "filters": [
+    {
+      "id": "status-all",
+      "name": "All"
+    },
+    {
+      "id": "inProgress",
+      "name": "In progress"
+    },
+    {
+      "id": "completed",
+      "name": "Completed"
+    },
+    {
+      "id": "closed",
+      "name": "Closed"
+    }
+  ],
+  "selectedFilter": "status-all",
+  "goals": [
+    {
+      "id": "7505",
+      "title": "Documentar los procesos críticos",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "percentComplete": 0,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2025-08-11",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-10-05T18:32:28Z",
+      "status": "in_progress",
+      "milestones": [
+        {
+          "id": 1857,
+          "employeeGoalId": 7505,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2024-12-23T11:56:52Z",
+          "lastUpdateUserId": 607
+        },
+        {
+          "id": 1858,
+          "employeeGoalId": 7505,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2024-12-23T19:13:41Z",
+          "lastUpdateUserId": 607
+        },
+        {
+          "id": 1859,
+          "employeeGoalId": 7505,
+          "title": "Hito 3",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2024-12-23T10:45:23Z",
+          "lastUpdateUserId": 607
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "7508",
+      "title": "Implementar el calendario editorial",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [
+        49
+      ],
+      "dueDate": "2025-08-13",
+      "completionDate": "2025-06-13",
+      "lastChangedDateTime": "2025-06-13T18:02:39Z",
+      "status": "completed",
+      "milestones": [
+        {
+          "id": 1860,
+          "employeeGoalId": 7508,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2024-12-24T14:11:20Z",
+          "lastUpdateDateTime": "2024-12-24T14:11:20Z",
+          "lastUpdateUserId": 607
+        },
+        {
+          "id": 1861,
+          "employeeGoalId": 7508,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-01-25T19:30:08Z",
+          "lastUpdateDateTime": "2025-01-25T19:30:08Z",
+          "lastUpdateUserId": 607
+        },
+        {
+          "id": 1862,
+          "employeeGoalId": 7508,
+          "title": "Hito 3",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-03-10T14:36:31Z",
+          "lastUpdateDateTime": "2025-03-10T14:36:31Z",
+          "lastUpdateUserId": 607
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    }
+  ],
+  "persons": [
+    {
+      "employeeId": 607,
+      "firstName": "Federico",
+      "lastName": "Franco",
+      "preferredName": "Fede"
+    },
+    {
+      "employeeId": 49,
+      "firstName": "Milagros",
+      "lastName": "Monzón",
+      "preferredName": null
+    }
+  ],
+  "comments": [
+    {
+      "goalId": "7505",
+      "commentCount": 1
+    }
+  ]
+}

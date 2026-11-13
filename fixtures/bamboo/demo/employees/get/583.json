@@ -1,0 +1,17 @@
+{
+  "id": "583",
+  "firstName": "Camila",
+  "lastName": "Trejo",
+  "workEmail": "camila.trejo@meridian-andina.example",
+  "employeeNumber": "11425",
+  "supervisorEId": "65",
+  "supervisorId": "10117",
+  "supervisor": "Díaz, Valentina",
+  "hireDate": "2024-05-15",
+  "terminationDate": "2024-11-25",
+  "department": "Marketing",
+  "division": "Comercial",
+  "jobTitle": "Diseñador de Marca Jr",
+  "location": "Buenos Aires",
+  "status": "Inactive"
+}

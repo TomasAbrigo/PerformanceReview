@@ -1,0 +1,17 @@
+{
+  "id": "349",
+  "firstName": "Javier",
+  "lastName": "Ramírez",
+  "workEmail": "javier.ramirez@meridian-andina.example",
+  "employeeNumber": "10857",
+  "supervisorEId": "147",
+  "supervisorId": "10339",
+  "supervisor": "Páez, Paula",
+  "hireDate": "2022-07-10",
+  "terminationDate": null,
+  "department": "Legales",
+  "division": "Corporativo",
+  "jobTitle": "Abogado Corporativo Ssr",
+  "location": "Buenos Aires",
+  "status": "Active"
+}

@@ -1,0 +1,17 @@
+{
+  "id": "271",
+  "firstName": "Marcelo",
+  "lastName": "Rojas",
+  "workEmail": "marcelo.rojas@meridian-andina.example",
+  "employeeNumber": "10648",
+  "supervisorEId": "135",
+  "supervisorId": "10312",
+  "supervisor": "Trejo, Marcela",
+  "hireDate": "2021-12-24",
+  "terminationDate": "2024-07-09",
+  "department": "Calidad",
+  "division": "Operaciones",
+  "jobTitle": "Analista de Calidad Ssr",
+  "location": "Remoto",
+  "status": "Inactive"
+}

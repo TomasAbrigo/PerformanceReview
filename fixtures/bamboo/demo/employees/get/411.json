@@ -1,0 +1,17 @@
+{
+  "id": "411",
+  "firstName": "Alejandro",
+  "lastName": "Domínguez",
+  "workEmail": "alejandro.dominguez@meridian-andina.example",
+  "employeeNumber": "11019",
+  "supervisorEId": "147",
+  "supervisorId": "10339",
+  "supervisor": "Páez, Paula",
+  "hireDate": "2022-12-24",
+  "terminationDate": null,
+  "department": "Legales",
+  "division": "Corporativo",
+  "jobTitle": "Analista de Compliance Sr",
+  "location": "Santiago de Chile",
+  "status": "Active"
+}

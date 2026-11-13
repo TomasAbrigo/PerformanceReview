@@ -1,0 +1,17 @@
+{
+  "id": "777",
+  "firstName": "Daniela",
+  "lastName": "Villalba",
+  "workEmail": "daniela.villalba@meridian-andina.example",
+  "employeeNumber": "11885",
+  "supervisorEId": "159",
+  "supervisorId": "10368",
+  "supervisor": "Ríos, Marcela",
+  "hireDate": "2025-08-15",
+  "terminationDate": null,
+  "department": "Datos",
+  "division": "Tecnología",
+  "jobTitle": "Analytics Engineer Ssr",
+  "location": "Santiago de Chile",
+  "status": "Active"
+}

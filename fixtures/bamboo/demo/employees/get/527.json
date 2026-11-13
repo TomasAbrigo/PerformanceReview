@@ -1,0 +1,17 @@
+{
+  "id": "527",
+  "firstName": "Verónica",
+  "lastName": "Navarro",
+  "workEmail": "veronica.navarro@meridian-andina.example",
+  "employeeNumber": "11286",
+  "supervisorEId": "159",
+  "supervisorId": "10368",
+  "supervisor": "Ríos, Marcela",
+  "hireDate": "2024-01-02",
+  "terminationDate": null,
+  "department": "Datos",
+  "division": "Tecnología",
+  "jobTitle": "Data Analyst Jr",
+  "location": "Córdoba",
+  "status": "Active"
+}

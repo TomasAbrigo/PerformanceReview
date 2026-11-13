@@ -1,0 +1,17 @@
+{
+  "id": "285",
+  "firstName": "Gabriela",
+  "lastName": "Morales",
+  "workEmail": "gabriela.morales@meridian-andina.example",
+  "employeeNumber": "10683",
+  "supervisorEId": "63",
+  "supervisorId": "10109",
+  "supervisor": "Rivas, Alejandro",
+  "hireDate": "2022-01-18",
+  "terminationDate": null,
+  "department": "Operaciones",
+  "division": "Operaciones",
+  "jobTitle": "Analista de Operaciones Jr",
+  "location": "Buenos Aires",
+  "status": "Active"
+}

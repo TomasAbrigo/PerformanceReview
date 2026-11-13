@@ -1,0 +1,17 @@
+{
+  "id": "743",
+  "firstName": "Ivana",
+  "lastName": "Páez",
+  "workEmail": "ivana.paez@meridian-andina.example",
+  "employeeNumber": "11809",
+  "supervisorEId": "363",
+  "supervisorId": "10890",
+  "supervisor": "Navarro, Agustina",
+  "hireDate": "2025-06-28",
+  "terminationDate": null,
+  "department": "Legales",
+  "division": "Corporativo",
+  "jobTitle": "Analista de Compliance Jr",
+  "location": "Buenos Aires",
+  "status": "Active"
+}

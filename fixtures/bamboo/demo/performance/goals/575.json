@@ -1,0 +1,156 @@
+{
+  "canAlign": true,
+  "canCreateGoals": true,
+  "filters": [
+    {
+      "id": "status-all",
+      "name": "All"
+    },
+    {
+      "id": "inProgress",
+      "name": "In progress"
+    },
+    {
+      "id": "completed",
+      "name": "Completed"
+    },
+    {
+      "id": "closed",
+      "name": "Closed"
+    }
+  ],
+  "selectedFilter": "status-all",
+  "goals": [
+    {
+      "id": "7400",
+      "title": "Mejorar el NPS interno del equipo",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [
+        93
+      ],
+      "dueDate": "2024-10-05",
+      "completionDate": "2024-08-21",
+      "lastChangedDateTime": "2024-08-21T12:56:10Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "7401",
+      "title": "Reducir los incidentes recurrentes a la mitad",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [
+        93
+      ],
+      "dueDate": "2025-09-22",
+      "completionDate": "2025-07-03",
+      "lastChangedDateTime": "2025-07-03T17:08:34Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "7402",
+      "title": "Renovar las cuentas clave del trimestre",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 67,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [
+        93
+      ],
+      "dueDate": "2025-10-18",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-07-11T12:13:12Z",
+      "status": "in_progress",
+      "milestones": [
+        {
+          "id": 1807,
+          "employeeGoalId": 7402,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2026-02-23T11:27:46Z",
+          "lastUpdateDateTime": "2026-02-23T11:27:46Z",
+          "lastUpdateUserId": 575
+        },
+        {
+          "id": 1808,
+          "employeeGoalId": 7402,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2026-06-22T10:28:53Z",
+          "lastUpdateDateTime": "2026-06-22T10:28:53Z",
+          "lastUpdateUserId": 575
+        },
+        {
+          "id": 1809,
+          "employeeGoalId": 7402,
+          "title": "Hito 3",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2025-07-28T10:59:41Z",
+          "lastUpdateUserId": 575
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    }
+  ],
+  "persons": [
+    {
+      "employeeId": 575,
+      "firstName": "Rodrigo",
+      "lastName": "Juárez",
+      "preferredName": null
+    },
+    {
+      "employeeId": 93,
+      "firstName": "Rocío",
+      "lastName": "Herrera",
+      "preferredName": null
+    }
+  ],
+  "comments": [
+    {
+      "goalId": "7400",
+      "commentCount": 3
+    },
+    {
+      "goalId": "7401",
+      "commentCount": 4
+    },
+    {
+      "goalId": "7402",
+      "commentCount": 4
+    }
+  ]
+}

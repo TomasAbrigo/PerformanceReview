@@ -1,0 +1,17 @@
+{
+  "id": "61",
+  "firstName": "Marcelo",
+  "lastName": "Peralta",
+  "workEmail": "marcelo.peralta@meridian-andina.example",
+  "employeeNumber": "10107",
+  "supervisorEId": "29",
+  "supervisorId": "10046",
+  "supervisor": "Morales, Andrés",
+  "hireDate": "2018-07-25",
+  "terminationDate": null,
+  "department": "Ventas",
+  "division": "Comercial",
+  "jobTitle": "Líder de Ventas",
+  "location": "Remoto",
+  "status": "Active"
+}

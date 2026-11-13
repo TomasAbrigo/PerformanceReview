@@ -1,0 +1,17 @@
+{
+  "id": "405",
+  "firstName": "Santiago",
+  "lastName": "Roldán",
+  "workEmail": "santiago.roldan@meridian-andina.example",
+  "employeeNumber": "11000",
+  "supervisorEId": "111",
+  "supervisorId": "10250",
+  "supervisor": "Peralta, Martín",
+  "hireDate": "2022-12-13",
+  "terminationDate": null,
+  "department": "Datos",
+  "division": "Tecnología",
+  "jobTitle": "Data Analyst Ssr",
+  "location": "Montevideo",
+  "status": "Active"
+}

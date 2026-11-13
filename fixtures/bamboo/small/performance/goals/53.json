@@ -1,0 +1,161 @@
+{
+  "canAlign": true,
+  "canCreateGoals": true,
+  "filters": [
+    {
+      "id": "status-all",
+      "name": "All"
+    },
+    {
+      "id": "inProgress",
+      "name": "In progress"
+    },
+    {
+      "id": "completed",
+      "name": "Completed"
+    },
+    {
+      "id": "closed",
+      "name": "Closed"
+    }
+  ],
+  "selectedFilter": "status-all",
+  "goals": [
+    {
+      "id": "5156",
+      "title": "Cerrar el plan de capacitación anual",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "percentComplete": 100,
+      "alignsWithOptionId": 9001,
+      "sharedWithEmployeeIds": [
+        33
+      ],
+      "dueDate": "2024-03-02",
+      "completionDate": "2023-11-02",
+      "lastChangedDateTime": "2023-11-02T08:46:05Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "5157",
+      "title": "Completar la certificación del área",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 100,
+      "alignsWithOptionId": 9004,
+      "sharedWithEmployeeIds": [
+        33
+      ],
+      "dueDate": "2024-11-10",
+      "completionDate": "2024-11-06",
+      "lastChangedDateTime": "2024-11-06T14:49:44Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "5159",
+      "title": "Lanzar el nuevo flujo de onboarding",
+      "description": "Sirve de base para el próximo ciclo de evaluación.",
+      "percentComplete": 75,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2025-10-13",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-07-03T19:26:14Z",
+      "status": "in_progress",
+      "milestones": [
+        {
+          "id": 766,
+          "employeeGoalId": 5159,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-08-19T15:30:51Z",
+          "lastUpdateDateTime": "2025-08-19T15:30:51Z",
+          "lastUpdateUserId": 53
+        },
+        {
+          "id": 767,
+          "employeeGoalId": 5159,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-12-26T10:33:53Z",
+          "lastUpdateDateTime": "2025-12-26T10:33:53Z",
+          "lastUpdateUserId": 53
+        },
+        {
+          "id": 768,
+          "employeeGoalId": 5159,
+          "title": "Hito 3",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-11-17T15:01:09Z",
+          "lastUpdateDateTime": "2025-11-17T15:01:09Z",
+          "lastUpdateUserId": 53
+        },
+        {
+          "id": 769,
+          "employeeGoalId": 5159,
+          "title": "Hito 4",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2025-03-22T08:02:39Z",
+          "lastUpdateUserId": 53
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    }
+  ],
+  "persons": [
+    {
+      "employeeId": 53,
+      "firstName": "Santiago",
+      "lastName": "Fernández",
+      "preferredName": null
+    },
+    {
+      "employeeId": 33,
+      "firstName": "Jimena",
+      "lastName": "Coronel",
+      "preferredName": null
+    }
+  ],
+  "comments": [
+    {
+      "goalId": "5156",
+      "commentCount": 3
+    },
+    {
+      "goalId": "5157",
+      "commentCount": 1
+    }
+  ]
+}
