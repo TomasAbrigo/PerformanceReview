@@ -62,6 +62,7 @@ describe("runIngest (employees from fixtures)", () => {
       rejected: 0,
       deleted: 0,
       issues: 0,
+      ignored: 0,
     });
     expect(await db.select().from(person)).toHaveLength(3);
     expect(await db.select().from(rawRecord)).toHaveLength(3);
@@ -103,6 +104,7 @@ describe("runIngest (employees from fixtures)", () => {
       rejected: 0,
       deleted: 0,
       issues: 0,
+      ignored: 0,
     });
     expect(await db.select().from(person)).toHaveLength(3);
     expect(await db.select().from(rawRecord)).toHaveLength(3);

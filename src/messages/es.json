@@ -260,6 +260,11 @@
       "already_resolved": "Este caso ya se resolvió de otra manera.",
       "already_applied": "El registro ya se aplicó a otra persona.",
       "unknown": "Algo salió mal."
+    },
+    "pagination": {
+      "label": "Páginas",
+      "older": "Casos anteriores",
+      "newest": "Volver a los más recientes"
     }
   }
 }

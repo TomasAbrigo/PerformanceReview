@@ -74,6 +74,11 @@ export const identityMatchIssue = pgTable(
     sourceId: text("source_id").notNull(),
     rawRecordId: uuid("raw_record_id").references(() => rawRecord.id),
     payload: jsonb("payload").notNull(),
+    /**
+     * Hash of the payload as extracted (jsonb does not keep the exact
+     * serialization), what "this exact record was ignored" compares against.
+     */
+    payloadHash: text("payload_hash").notNull(),
     reason: identityIssueReason("reason").notNull(),
     candidates: jsonb("candidates")
       .$type<IdentityCandidate[]>()

@@ -1,3 +1,5 @@
+import { rm } from "node:fs/promises";
+import path from "node:path";
 import { and, eq, isNull } from "drizzle-orm";
 import { afterAll, afterEach, beforeEach, describe, expect, it } from "vitest";
 import { closeDb, db } from "@/db/client";
@@ -9,6 +11,8 @@ import {
   rawRecord,
   sourceIdentity,
 } from "@/db/schema";
+import { openIssueSourceIds } from "./raise";
+import { ignoreIssue } from "./service";
 import {
   addEmployee,
   carlaRehire,
@@ -137,6 +141,29 @@ describe("identity resolution during ingest", () => {
       },
     ]);
     expect(await db.select().from(person)).toHaveLength(3);
+  });
+
+  it("does not propose a person only by an employment that was soft-deleted", async () => {
+    await ingest(dir);
+    // Ana is gone from the full extraction: her employment is soft-deleted.
+    await editPage(dir, "employees-page-1.json", (page) => {
+      page.data.splice(0, 1);
+    });
+    await rm(path.join(dir, "employee-101.json"));
+    expect((await ingest(dir)).counts).toMatchObject({ deleted: 1 });
+    await addEmployee(dir, {
+      id: 202,
+      employeeNumber: "7777",
+      displayName: "Ana García",
+      workEmail: "ana.g.new@example.com",
+      status: "Active",
+      hireDate: "2019-03-01",
+    });
+
+    const { counts } = await ingest(dir);
+
+    expect(counts).toMatchObject({ inserted: 1, issues: 0 });
+    expect(await issues()).toEqual([]);
   });
 
   it("ranks candidates matched by stronger keys higher", async () => {
@@ -280,8 +307,87 @@ describe("identity resolution during ingest", () => {
     expect(run.rejects).toEqual([]);
   });
 
-  it("never drops a row: read = inserted + updated + unchanged + rejected + issues", async () => {
+  it("knows which source records have an open issue", async () => {
     await ingest(dir);
+    expect(await openIssueSourceIds(db, "bamboo_api", "employee")).toEqual(
+      new Set(),
+    );
+    await addEmployee(dir, carlaRehire());
+    await ingest(dir);
+    const [issue] = await issues();
+
+    expect(await openIssueSourceIds(db, "bamboo_api", "employee")).toEqual(
+      new Set(["201"]),
+    );
+    await ignoreIssue(db, issue.id);
+    expect(await openIssueSourceIds(db, "bamboo_api", "employee")).toEqual(
+      new Set(),
+    );
+  });
+
+  describe("a conflict whose row does not change", () => {
+    const conflictWithAna = (page: { data: Record<string, unknown>[] }) => {
+      page.data[1].workEmail = "ana.garcia@example.com";
+    };
+
+    it("stays queued and counted while the other person still holds the value", async () => {
+      await ingest(dir);
+      await editPage(dir, "employees-page-1.json", conflictWithAna);
+      await ingest(dir);
+
+      const { counts, runId } = await ingest(dir);
+
+      expect(counts).toMatchObject({ unchanged: 2, issues: 1 });
+      const [issue] = await issues();
+      expect(issue).toMatchObject({
+        status: "open",
+        reason: "conflict",
+        ingestRunId: runId,
+      });
+    });
+
+    it("is resolved when the holder frees the value, though Bamboo resends the same row", async () => {
+      await ingest(dir);
+      await editPage(dir, "employees-page-1.json", conflictWithAna);
+      await ingest(dir);
+      // Ana moves to a new address; Bruno's row is byte for byte the same.
+      await editPage(dir, "employees-page-1.json", (page) => {
+        page.data[0].workEmail = "ana.nueva@example.com";
+      });
+
+      const { counts } = await ingest(dir);
+
+      expect(counts).toMatchObject({ updated: 2, unchanged: 1, issues: 0 });
+      const bruno = await personNamed("Bruno Pérez");
+      const open = await db
+        .select({ kind: sourceIdentity.kind, value: sourceIdentity.value })
+        .from(sourceIdentity)
+        .where(
+          and(
+            eq(sourceIdentity.personId, bruno.id),
+            isNull(sourceIdentity.validTo),
+          ),
+        );
+      expect(open).toContainEqual({
+        kind: "work_email",
+        value: "ana.garcia@example.com",
+      });
+      const [issue] = await issues();
+      expect(issue).toMatchObject({
+        status: "resolved",
+        resolution: { action: "link", personId: bruno.id, auto: true },
+      });
+      expect(issue.resolvedAt).toBeInstanceOf(Date);
+    });
+  });
+
+  it("never drops a row: read = inserted + updated + unchanged + rejected + issues + ignored", async () => {
+    await ingest(dir);
+    // A reviewer already decided to ignore this exact record.
+    await addEmployee(dir, carlaRehire({ id: 208, employeeNumber: "0001" }));
+    await ingest(dir);
+    const [carla208] = await issues();
+    await ignoreIssue(db, carla208.id);
     await editPage(dir, "employees-page-1.json", (page) => {
       page.data[0].status = "Inactive"; // updated
       page.data[1].workEmail = "carla.romero@example.com"; // conflict
@@ -297,19 +403,21 @@ describe("identity resolution during ingest", () => {
     const { counts } = await ingest(dir);
 
     expect(counts).toMatchObject({
-      read: 6,
+      read: 7,
       inserted: 1,
       updated: 1,
       unchanged: 1,
       rejected: 1,
       issues: 2,
+      ignored: 1,
     });
     expect(
       counts.inserted +
         counts.updated +
         counts.unchanged +
         counts.rejected +
-        counts.issues,
+        counts.issues +
+        counts.ignored,
     ).toBe(counts.read);
   });
 

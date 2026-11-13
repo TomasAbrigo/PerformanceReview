@@ -8,6 +8,8 @@ import { db } from "@/db/client";
 import { routing } from "@/i18n/routing";
 import { countOpenIssues, listIssues } from "@/modules/identity";
 
+const HISTORY_PAGE_SIZE = 25;
+
 async function QueueData({
   params,
   searchParams,
@@ -16,17 +18,26 @@ async function QueueData({
   if (!hasLocale(routing.locales, locale)) notFound();
   setRequestLocale(locale);
   await connection();
-  const { tab } = await searchParams;
+  const { tab, cursor } = await searchParams;
   const history = tab === "history";
-  const [issues, openCount] = await Promise.all([
-    listIssues(db, { status: history ? ["resolved", "ignored"] : "open" }),
+  const after = history && typeof cursor === "string" ? cursor : undefined;
+  const [page, openCount] = await Promise.all([
+    history
+      ? listIssues(db, {
+          status: ["resolved", "ignored"],
+          limit: HISTORY_PAGE_SIZE,
+          cursor: after,
+        })
+      : listIssues(db, { status: "open" }),
     countOpenIssues(db),
   ]);
   return (
     <IdentityQueue
-      issues={issues}
+      issues={page.items}
       tab={history ? "history" : "open"}
       openCount={openCount}
+      nextCursor={page.nextCursor}
+      paged={Boolean(after)}
     />
   );
 }

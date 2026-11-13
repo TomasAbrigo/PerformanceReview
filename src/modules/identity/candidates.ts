@@ -87,7 +87,12 @@ export async function findCandidates(
       .select({ personId: person.id, displayName: person.displayName })
       .from(person)
       .innerJoin(employment, eq(employment.personId, person.id))
-      .where(eq(employment.hireDate, staged.hireDate));
+      .where(
+        and(
+          eq(employment.hireDate, staged.hireDate),
+          isNull(employment.deletedAt),
+        ),
+      );
     for (const r of sameHire) {
       if (normalizeName(r.displayName) === name) {
         pairs.push([r.personId, "name_hire_date"]);

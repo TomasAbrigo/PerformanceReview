@@ -18,10 +18,16 @@ export function IdentityQueue({
   issues,
   tab,
   openCount,
+  nextCursor = null,
+  paged = false,
 }: {
   issues: IssueListItem[];
   tab: QueueTab;
   openCount: number;
+  /** Cursor of the next (older) page of the history, if there is one. */
+  nextCursor?: string | null;
+  /** This is not the first page of the history. */
+  paged?: boolean;
 }) {
   const t = useTranslations("Identity");
   const format = useFormatter();
@@ -128,6 +134,26 @@ export function IdentityQueue({
           </TableBody>
         </Table>
       )}
+      {history && (paged || nextCursor) ? (
+        <nav aria-label={t("pagination.label")} className="flex gap-2">
+          {paged ? (
+            <Link
+              href="/imports/identity?tab=history"
+              className={buttonVariants({ variant: "ghost", size: "sm" })}
+            >
+              {t("pagination.newest")}
+            </Link>
+          ) : null}
+          {nextCursor ? (
+            <Link
+              href={`/imports/identity?tab=history&cursor=${encodeURIComponent(nextCursor)}`}
+              className={buttonVariants({ variant: "outline", size: "sm" })}
+            >
+              {t("pagination.older")}
+            </Link>
+          ) : null}
+        </nav>
+      ) : null}
     </div>
   );
 }

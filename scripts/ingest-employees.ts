@@ -1,6 +1,8 @@
 /**
- * pnpm ingest:employees --source fixture|bamboo [--dir path]
+ * pnpm ingest:employees --source fixture|bamboo [--dir path] [--unmatched create|queue]
  * bamboo needs BAMBOO_COMPANY_DOMAIN and BAMBOO_API_KEY.
+ * --unmatched: what to do with a record that matches nobody and resembles
+ * nobody: create the person (default) or queue it for review at /imports/identity.
  */
 import path from "node:path";
 import { parseArgs } from "node:util";
@@ -26,8 +28,14 @@ async function main() {
     options: {
       source: { type: "string", default: "fixture" },
       dir: { type: "string", default: DEFAULT_DIR },
+      unmatched: { type: "string", default: "create" },
     },
   });
+  if (values.unmatched !== "create" && values.unmatched !== "queue") {
+    throw new Error(
+      `--unmatched must be create or queue (got ${values.unmatched})`,
+    );
+  }
 
   let adapter: SourceAdapter;
   if (values.source === "fixture") {
@@ -51,7 +59,12 @@ async function main() {
     adapter,
     entity: "employee",
     db,
-    params: { source: values.source, dir: values.dir },
+    params: {
+      source: values.source,
+      dir: values.dir,
+      unmatched: values.unmatched,
+    },
+    unmatched: values.unmatched,
   });
   console.log(`ingest_run ${runId}`);
   console.log(JSON.stringify(counts));

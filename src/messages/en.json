@@ -260,6 +260,11 @@
       "already_resolved": "This case was already resolved in a different way.",
       "already_applied": "The record was already applied to another person.",
       "unknown": "Something went wrong."
+    },
+    "pagination": {
+      "label": "Pages",
+      "older": "Older cases",
+      "newest": "Back to the newest"
     }
   }
 }

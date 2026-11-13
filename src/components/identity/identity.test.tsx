@@ -174,6 +174,64 @@ describe("IdentityQueue", () => {
     expect(within(rows[1]).getByText("Ignored")).toBeInTheDocument();
   });
 
+  it.each([
+    ["es", "Casos anteriores", "Volver a los más recientes"],
+    ["en", "Older cases", "Back to the newest"],
+  ] as const)(
+    "pages the history with the cursor in %s",
+    (locale, older, newest) => {
+      const { unmount } = renderIn(
+        locale,
+        <IdentityQueue
+          tab="history"
+          openCount={0}
+          issues={[item({ status: "resolved", resolvedAt: new Date() })]}
+          nextCursor="0:1700000000000000:i1"
+        />,
+      );
+
+      expect(screen.getByRole("link", { name: older })).toHaveAttribute(
+        "href",
+        "/imports/identity?tab=history&cursor=0%3A1700000000000000%3Ai1",
+      );
+      expect(
+        screen.queryByRole("link", { name: newest }),
+      ).not.toBeInTheDocument();
+      unmount();
+
+      renderIn(
+        locale,
+        <IdentityQueue
+          tab="history"
+          openCount={0}
+          paged
+          issues={[item({ status: "resolved", resolvedAt: new Date() })]}
+        />,
+      );
+      expect(screen.getByRole("link", { name: newest })).toHaveAttribute(
+        "href",
+        "/imports/identity?tab=history",
+      );
+      expect(
+        screen.queryByRole("link", { name: older }),
+      ).not.toBeInTheDocument();
+    },
+  );
+
+  it("offers no paging on a single page", () => {
+    renderIn(
+      "en",
+      <IdentityQueue
+        tab="history"
+        openCount={0}
+        issues={[item({ status: "resolved", resolvedAt: new Date() })]}
+      />,
+    );
+    expect(
+      screen.queryByRole("navigation", { name: "Pages" }),
+    ).not.toBeInTheDocument();
+  });
+
   it("shows an empty history", () => {
     renderIn("es", <IdentityQueue issues={[]} tab="history" openCount={1} />);
     expect(

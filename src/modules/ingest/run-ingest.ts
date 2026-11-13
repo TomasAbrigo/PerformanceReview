@@ -12,7 +12,13 @@ import {
 // Direct file imports (not the identity barrel): the identity service imports
 // this file back, and a barrel would close the cycle.
 import { toCandidates } from "@/modules/identity/candidates";
-import { closeOpenIssue, raiseIssue } from "@/modules/identity/raise";
+import { lockSourceRecord } from "@/modules/identity/lock";
+import {
+  closeOpenIssue,
+  hasOpenIssue,
+  openIssueSourceIds,
+  raiseIssue,
+} from "@/modules/identity/raise";
 import {
   resolvePerson,
   type ResolveContext,
@@ -68,14 +74,22 @@ function targetPeriod(
 export type Decision =
   { action: "link"; personId: string } | { action: "create" };
 
-export type UpsertContext = ResolveContext & { decision?: Decision };
+export type UpsertContext = ResolveContext & {
+  decision?: Decision;
+  /**
+   * Source ids with an open issue when the run started. Saves a lookup per
+   * record; without it the database is asked.
+   */
+  openIssues?: ReadonlySet<string>;
+};
 
 /**
  * `issue`: the record was held in the identity queue, or applied except for
  * an identifier another person holds (flagged as a conflict).
+ * `ignored`: held back because a reviewer already ignored this exact record.
  */
 export type Outcome = {
-  result: "inserted" | "updated" | "unchanged" | "issue";
+  result: "inserted" | "updated" | "unchanged" | "issue" | "ignored";
   personId: string | null;
 };
 
@@ -87,22 +101,43 @@ export async function upsertEmployee(
   ctx: UpsertContext,
 ): Promise<Outcome> {
   const now = new Date();
-  const periods = await tx
-    .select()
-    .from(employment)
-    .where(
-      and(
-        eq(employment.sourceSystem, source),
-        eq(employment.sourceId, staged.sourceId),
-      ),
-    )
-    .orderBy(sql`${employment.hireDate} desc nulls last`);
+  const loadPeriods = () =>
+    tx
+      .select()
+      .from(employment)
+      .where(
+        and(
+          eq(employment.sourceSystem, source),
+          eq(employment.sourceId, staged.sourceId),
+        ),
+      )
+      .orderBy(sql`${employment.hireDate} desc nulls last`);
+  const openIssue = () => hasOpenIssue(tx, source, "employee", staged.sourceId);
+
+  let periods = await loadPeriods();
+  // A reviewer settling the record's issue is the only thing that can change
+  // what we decide here, so coordinate with them when the record has no
+  // employment yet or is waiting in the queue. (A resolution already holds
+  // the lock in its own transaction.)
+  let waiting = ctx.decision
+    ? false
+    : ctx.openIssues
+      ? ctx.openIssues.has(staged.sourceId)
+      : await openIssue();
+  if (!ctx.decision && (periods.length === 0 || waiting)) {
+    await lockSourceRecord(tx, source, "employee", staged.sourceId);
+    periods = await loadPeriods();
+    waiting = await openIssue();
+  }
   const target = targetPeriod(periods, staged);
 
+  // An unchanged row is skipped, unless its open issue may be settled by now
+  // (the holder of a conflicting identifier may have let go of it).
   if (
     target !== "new" &&
     target.payloadHash === ctx.hash &&
-    !target.deletedAt
+    !target.deletedAt &&
+    !waiting
   ) {
     return { result: "unchanged", personId: target.personId };
   }
@@ -127,7 +162,7 @@ export async function upsertEmployee(
     if ("issueId" in resolved) return { result: "issue", personId: null };
     // A reviewer already chose to ignore exactly this payload.
     if ("ignoredIssueId" in resolved) {
-      return { result: "unchanged", personId: null };
+      return { result: "ignored", personId: null };
     }
     personId = resolved.personId;
   }
@@ -166,7 +201,9 @@ export async function upsertEmployee(
   };
   if (conflicts.length === 0) {
     // It applies cleanly now: whatever was waiting for it is moot.
-    await closeOpenIssue(tx, row, { action: "link", personId, auto: true });
+    if (waiting) {
+      await closeOpenIssue(tx, row, { action: "link", personId, auto: true });
+    }
     return { result, personId };
   }
   const raised = await raiseIssue(tx, {
@@ -217,9 +254,11 @@ export async function runIngest({
     rejected: 0,
     deleted: 0,
     issues: 0,
+    ignored: 0,
   };
   const rejects: IngestReject[] = [];
   const seen = new Set<string>();
+  const openIssues = await openIssueSourceIds(db, source, entity);
 
   try {
     for await (const record of adapter.extract({}, entity)) {
@@ -255,6 +294,7 @@ export async function runIngest({
           hash,
           payload: record.payload,
           unmatched,
+          openIssues,
         }),
       );
       counts[result === "issue" ? "issues" : result]++;

@@ -1,13 +1,16 @@
-import { and, eq, isNull } from "drizzle-orm";
+import { and, eq, isNull, sql } from "drizzle-orm";
 import { afterAll, afterEach, beforeEach, describe, expect, it } from "vitest";
 import { closeDb, db } from "@/db/client";
 import {
   employment,
   identityMatchIssue,
   person,
+  rawRecord,
   sourceIdentity,
 } from "@/db/schema";
+import { payloadHash } from "@/modules/ingest";
 import { getPerson } from "@/modules/people/queries";
+import { lockSourceRecord } from "./lock";
 import {
   countOpenIssues,
   getIssue,
@@ -77,13 +80,17 @@ describe("identity queue", () => {
         entity: "employee",
         sourceId: "999",
         payload: { id: 999, displayName: "Old Case" },
+        payloadHash: payloadHash({ id: 999, displayName: "Old Case" }),
         reason: "no_match",
         status: "resolved",
         resolution: { action: "create" },
         resolvedAt: new Date(),
       });
 
-      const open = await listIssues(db, { status: "open" });
+      const { items: open, nextCursor } = await listIssues(db, {
+        status: "open",
+      });
+      expect(nextCursor).toBeNull();
       expect(open).toHaveLength(1);
       expect(open[0]).toMatchObject({
         id: issue.id,
@@ -103,9 +110,11 @@ describe("identity queue", () => {
       const all = await listIssues(db, {
         status: ["open", "resolved", "ignored"],
       });
-      expect(all.map((i) => i.status)).toEqual(["open", "resolved"]);
+      expect(all.items.map((i) => i.status)).toEqual(["open", "resolved"]);
       expect(
-        (await listIssues(db, { status: "resolved" })).map((i) => i.sourceId),
+        (await listIssues(db, { status: "resolved" })).items.map(
+          (i) => i.sourceId,
+        ),
       ).toEqual(["999"]);
     });
 
@@ -136,11 +145,105 @@ describe("identity queue", () => {
       });
     });
 
+    it("does not list a candidate's soft-deleted employments", async () => {
+      const { issue } = await queueCarlasRehire();
+      await db
+        .update(employment)
+        .set({ deletedAt: new Date() })
+        .where(eq(employment.sourceId, "103"));
+
+      const detail = await getIssue(db, issue.id);
+
+      expect(detail?.candidates).toHaveLength(1);
+      expect(detail?.candidates[0].employments).toEqual([]);
+    });
+
     it("returns null for an unknown or malformed id", async () => {
       expect(
         await getIssue(db, "00000000-0000-4000-8000-000000000000"),
       ).toBeNull();
       expect(await getIssue(db, "not-a-uuid")).toBeNull();
+    });
+  });
+
+  describe("listIssues pagination", () => {
+    /** Open Carla issue + five history rows, two of them created at the same instant. */
+    async function seedHistory() {
+      const { issue } = await queueCarlasRehire();
+      const row = (n: number, status: "resolved" | "ignored") => {
+        const payload = { id: n, displayName: `Case ${n}` };
+        return {
+          ingestRunId: issue.ingestRunId,
+          sourceSystem: "bamboo_api" as const,
+          entity: "employee",
+          sourceId: String(n),
+          payload,
+          payloadHash: payloadHash(payload),
+          reason: "no_match" as const,
+          status,
+          resolution: { action: "create" as const },
+        };
+      };
+      for (const n of [901, 902, 903]) {
+        await db.insert(identityMatchIssue).values(row(n, "resolved"));
+      }
+      // One statement, one now(): the same timestamp, so the id breaks the tie.
+      await db
+        .insert(identityMatchIssue)
+        .values([row(904, "ignored"), row(905, "ignored")]);
+      return issue;
+    }
+
+    const STATUSES = ["open", "resolved", "ignored"] as const;
+
+    it("returns pages of the limit with the cursor of the next one", async () => {
+      await seedHistory();
+
+      const first = await listIssues(db, { status: [...STATUSES], limit: 4 });
+      expect(first.items).toHaveLength(4);
+      expect(first.nextCursor).toEqual(expect.any(String));
+      const second = await listIssues(db, {
+        status: [...STATUSES],
+        limit: 4,
+        cursor: first.nextCursor ?? undefined,
+      });
+      expect(second.items).toHaveLength(2);
+      expect(second.nextCursor).toBeNull();
+    });
+
+    it("walks every issue once, in the same order as one big page", async () => {
+      await seedHistory();
+      const everything = await listIssues(db, { status: [...STATUSES] });
+      expect(everything.items).toHaveLength(6);
+      expect(everything.nextCursor).toBeNull();
+      expect(everything.items[0].status).toBe("open");
+
+      const walked: string[] = [];
+      let cursor: string | undefined;
+      do {
+        const page = await listIssues(db, {
+          status: [...STATUSES],
+          limit: 1,
+          cursor,
+        });
+        walked.push(...page.items.map((i) => i.id));
+        cursor = page.nextCursor ?? undefined;
+      } while (cursor);
+
+      expect(walked).toEqual(everything.items.map((i) => i.id));
+    });
+
+    it("starts from the beginning when the cursor is garbage", async () => {
+      await seedHistory();
+
+      const page = await listIssues(db, {
+        status: [...STATUSES],
+        limit: 2,
+        cursor: "1:drop table identity_match_issue:x",
+      });
+
+      expect(page.items).toHaveLength(2);
+      expect(page.items[0].status).toBe("open");
     });
   });
 
@@ -404,7 +507,12 @@ describe("identity queue", () => {
       await ignoreIssue(db, issue.id);
 
       const same = await ingest(dir);
-      expect(same.counts).toMatchObject({ read: 4, unchanged: 4, issues: 0 });
+      expect(same.counts).toMatchObject({
+        read: 4,
+        unchanged: 3,
+        ignored: 1,
+        issues: 0,
+      });
       expect(await countOpenIssues(db)).toBe(0);
 
       await editPage(dir, "employees-page-2.json", (page) => {
@@ -434,9 +542,84 @@ describe("identity queue", () => {
       ).rejects.toMatchObject({ code: "invalid_action" });
 
       await ignoreIssue(db, issue.id);
-      expect((await listIssues(db, { status: "ignored" }))[0].reason).toBe(
-        "conflict",
+      expect(
+        (await listIssues(db, { status: "ignored" })).items[0].reason,
+      ).toBe("conflict");
+    });
+  });
+
+  describe("one source record at a time", () => {
+    const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+    it("resolving waits for whoever holds the record", async () => {
+      const { issue } = await queueCarlasRehire();
+      const carla = await personNamed("Carla Romero");
+      const events: string[] = [];
+
+      const holder = db.transaction(async (tx) => {
+        await lockSourceRecord(tx, "bamboo_api", "employee", "201");
+        events.push("locked");
+        await sleep(300);
+        events.push("released");
+      });
+      await sleep(100);
+      const resolving = resolveIssue(db, issue.id, {
+        action: "link",
+        personId: carla.id,
+      }).then(() => events.push("resolved"));
+      await Promise.all([holder, resolving]);
+
+      expect(events).toEqual(["locked", "released", "resolved"]);
+    });
+
+    it("an ingest racing a resolution sees its employment instead of raising a new issue", async () => {
+      const { issue } = await queueCarlasRehire();
+      const carla = await personNamed("Carla Romero");
+
+      // The reviewer's transaction is open (employment written, issue settled,
+      // nothing committed yet) while Bamboo's next extraction arrives.
+      const resolving = db.transaction(async (tx) => {
+        await resolveIssue(tx, issue.id, {
+          action: "link",
+          personId: carla.id,
+        });
+        await sleep(400);
+      });
+      await sleep(100);
+      const { counts } = await ingest(dir);
+      await resolving;
+
+      expect(counts).toMatchObject({ read: 4, unchanged: 4, issues: 0 });
+      const all = await db.select().from(identityMatchIssue);
+      expect(all).toHaveLength(1);
+      expect(all[0].status).toBe("resolved");
+      expect(await employmentsOf("201")).toHaveLength(1);
+    });
+  });
+
+  describe("payload hash", () => {
+    it("is stored with the issue and matches the extracted record", async () => {
+      const { issue } = await queueCarlasRehire();
+
+      const [raw] = await db
+        .select()
+        .from(rawRecord)
+        .where(eq(rawRecord.sourceId, "201"));
+      expect(issue.payloadHash).toBe(raw.payloadHash);
+    });
+
+    it("decides what stays ignored, whatever jsonb does to the stored payload", async () => {
+      const { issue } = await queueCarlasRehire();
+      await ignoreIssue(db, issue.id);
+      // The stored copy no longer hashes like the original extraction.
+      await db.execute(
+        sql`UPDATE identity_match_issue SET payload = '{"id": 201}'::jsonb WHERE id = ${issue.id}`,
       );
+
+      const { counts } = await ingest(dir);
+
+      expect(counts).toMatchObject({ ignored: 1, issues: 0 });
+      expect(await db.select().from(identityMatchIssue)).toHaveLength(1);
     });
   });
 

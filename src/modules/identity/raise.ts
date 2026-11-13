@@ -8,7 +8,6 @@ import {
   type IdentityResolution,
   type SourceSystem,
 } from "@/db/schema";
-import { payloadHash } from "@/modules/ingest/hash";
 import type { Entity } from "@/modules/ingest/types";
 
 export type RaiseInput = {
@@ -66,6 +65,7 @@ export async function raiseIssue(
     ingestRunId: input.runId,
     rawRecordId: raw?.id ?? null,
     payload: input.payload,
+    payloadHash: hash,
     reason: input.reason,
     candidates: input.candidates,
   };
@@ -79,7 +79,7 @@ export async function raiseIssue(
     return { issueId: open.id };
   }
   const ignored = known.find(
-    (i) => i.status === "ignored" && payloadHash(i.payload) === hash,
+    (i) => i.status === "ignored" && i.payloadHash === hash,
   );
   if (ignored) return { ignoredIssueId: ignored.id };
 
@@ -107,4 +107,45 @@ export async function closeOpenIssue(
         eq(identityMatchIssue.status, "open"),
       ),
     );
+}
+
+/** Source ids that have an open issue: lets an ingest skip per-record lookups. */
+export async function openIssueSourceIds(
+  tx: DbOrTx,
+  source: SourceSystem,
+  entity: Entity,
+): Promise<Set<string>> {
+  const rows = await tx
+    .select({ sourceId: identityMatchIssue.sourceId })
+    .from(identityMatchIssue)
+    .where(
+      and(
+        eq(identityMatchIssue.sourceSystem, source),
+        eq(identityMatchIssue.entity, entity),
+        eq(identityMatchIssue.status, "open"),
+      ),
+    );
+  return new Set(rows.map((r) => r.sourceId));
+}
+
+/** Whether one source record has an open issue right now. */
+export async function hasOpenIssue(
+  tx: DbOrTx,
+  source: SourceSystem,
+  entity: Entity,
+  sourceId: string,
+): Promise<boolean> {
+  const [row] = await tx
+    .select({ id: identityMatchIssue.id })
+    .from(identityMatchIssue)
+    .where(
+      and(
+        eq(identityMatchIssue.sourceSystem, source),
+        eq(identityMatchIssue.entity, entity),
+        eq(identityMatchIssue.sourceId, sourceId),
+        eq(identityMatchIssue.status, "open"),
+      ),
+    )
+    .limit(1);
+  return Boolean(row);
 }

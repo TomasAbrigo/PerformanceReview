@@ -18,6 +18,8 @@ export type IngestCounts = {
   deleted: number;
   /** Records held (or flagged) in the identity queue instead of applied. */
   issues: number;
+  /** Records a reviewer already decided to ignore, resent unchanged. */
+  ignored: number;
 };
 
 export type IngestReject = { sourceId: string | null; reason: string };

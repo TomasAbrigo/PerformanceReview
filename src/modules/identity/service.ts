@@ -1,10 +1,9 @@
-import { and, eq, inArray, sql } from "drizzle-orm";
+import { and, eq, inArray, isNull, sql } from "drizzle-orm";
 import type { DbOrTx } from "@/db/client";
 import {
   employment,
   identityMatchIssue,
   person,
-  rawRecord,
   type IdentityCandidate,
   type IdentityIssueReason,
   type IdentityIssueStatus,
@@ -12,12 +11,11 @@ import {
   type IdentityResolution,
   type SourceSystem,
 } from "@/db/schema";
-import { payloadHash } from "@/modules/ingest/hash";
+import { isUuid } from "@/lib/uuid";
 import { upsertEmployee, type Decision } from "@/modules/ingest/run-ingest";
 import { stagedEmployeeSchema } from "@/modules/ingest/staging";
 import { IdentityError } from "./errors";
-
-const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+import { lockSourceRecord } from "./lock";
 
 /** What a reviewer needs to recognize the row, whatever the source. */
 export type PayloadSummary = {
@@ -99,25 +97,70 @@ const toListItem = (row: IdentityMatchIssue): IssueListItem => ({
   resolvedAt: row.resolvedAt,
 });
 
-/** Issues in the given status(es): open ones first, then newest history. */
+/** Open first, then newest (resolved or created), the id breaking ties. */
+const SORT_KEY = sql`(extract(epoch from coalesce(${identityMatchIssue.resolvedAt}, ${identityMatchIssue.createdAt})) * 1000000)::bigint`;
+const IS_OPEN = sql`(${identityMatchIssue.status} = 'open')`;
+
+const CURSOR = /^([01]):(\d{1,19}):([0-9a-f-]{36})$/;
+
+export type IssuePage = {
+  items: IssueListItem[];
+  /** Pass as `cursor` to get the next page; null on the last one. */
+  nextCursor: string | null;
+};
+
+/**
+ * Issues in the given status(es): open ones first, then newest history.
+ * Paged by keyset (`limit` + `cursor`) so a long history stays cheap; without
+ * a limit everything comes back in one page. An unreadable cursor starts over.
+ */
 export async function listIssues(
   db: DbOrTx,
-  { status }: { status: IdentityIssueStatus | IdentityIssueStatus[] },
-): Promise<IssueListItem[]> {
-  const rows = await db
-    .select()
+  {
+    status,
+    limit,
+    cursor,
+  }: {
+    status: IdentityIssueStatus | IdentityIssueStatus[];
+    limit?: number;
+    cursor?: string;
+  },
+): Promise<IssuePage> {
+  const after = cursor ? CURSOR.exec(cursor) : null;
+  const afterCursor =
+    after && isUuid(after[3])
+      ? sql`(${IS_OPEN}, ${SORT_KEY}, ${identityMatchIssue.id}) < (${after[1] === "1"}, ${after[2]}::bigint, ${after[3]}::uuid)`
+      : undefined;
+  const query = db
+    .select({
+      row: identityMatchIssue,
+      sortKey: sql<string>`${SORT_KEY}::text`,
+    })
     .from(identityMatchIssue)
     .where(
-      inArray(
-        identityMatchIssue.status,
-        Array.isArray(status) ? status : [status],
+      and(
+        inArray(
+          identityMatchIssue.status,
+          Array.isArray(status) ? status : [status],
+        ),
+        afterCursor,
       ),
     )
     .orderBy(
-      sql`(${identityMatchIssue.status} = 'open') desc`,
-      sql`coalesce(${identityMatchIssue.resolvedAt}, ${identityMatchIssue.createdAt}) desc`,
+      sql`${IS_OPEN} desc`,
+      sql`${SORT_KEY} desc`,
+      sql`${identityMatchIssue.id} desc`,
     );
-  return rows.map(toListItem);
+  const rows = await (limit === undefined ? query : query.limit(limit + 1));
+  const page = limit === undefined ? rows : rows.slice(0, limit);
+  const last = page.at(-1);
+  return {
+    items: page.map((r) => toListItem(r.row)),
+    nextCursor:
+      last && rows.length > page.length
+        ? `${last.row.status === "open" ? 1 : 0}:${last.sortKey}:${last.row.id}`
+        : null,
+  };
 }
 
 export async function countOpenIssues(db: DbOrTx): Promise<number> {
@@ -146,7 +189,7 @@ export async function getIssue(
   db: DbOrTx,
   id: string,
 ): Promise<IssueDetailData | null> {
-  if (!UUID.test(id)) return null;
+  if (!isUuid(id)) return null;
   const [row] = await db
     .select()
     .from(identityMatchIssue)
@@ -168,7 +211,9 @@ export async function getIssue(
           status: employment.status,
         })
         .from(employment)
-        .where(inArray(employment.personId, ids))
+        .where(
+          and(inArray(employment.personId, ids), isNull(employment.deletedAt)),
+        )
         .orderBy(sql`${employment.hireDate} desc nulls last`)
     : [];
 
@@ -225,8 +270,19 @@ export async function resolveIssue(
   issueId: string,
   input: ResolveInput,
 ): Promise<IdentityMatchIssue> {
-  if (!UUID.test(issueId)) throw new IdentityError("not_found");
+  if (!isUuid(issueId)) throw new IdentityError("not_found");
   return db.transaction(async (tx) => {
+    // Same lock as an ingest touching this record, taken before the row lock.
+    const [peek] = await tx
+      .select({
+        sourceSystem: identityMatchIssue.sourceSystem,
+        entity: identityMatchIssue.entity,
+        sourceId: identityMatchIssue.sourceId,
+      })
+      .from(identityMatchIssue)
+      .where(eq(identityMatchIssue.id, issueId));
+    if (!peek) throw new IdentityError("not_found");
+    await lockSourceRecord(tx, peek.sourceSystem, peek.entity, peek.sourceId);
     const [issue] = await tx
       .select()
       .from(identityMatchIssue)
@@ -262,7 +318,7 @@ export async function resolveIssue(
     let decision: Decision = { action: "create" };
     if (input.action === "link") {
       if (!input.personId) throw new IdentityError("person_required");
-      if (!UUID.test(input.personId)) throw new IdentityError("not_found");
+      if (!isUuid(input.personId)) throw new IdentityError("not_found");
       const [target] = await tx
         .select({ id: person.id })
         .from(person)
@@ -294,15 +350,9 @@ export async function resolveIssue(
     // Settled first, so a conflict the row raises on its own is a new issue
     // instead of overwriting this one.
     const settled = await settle(resolution);
-    const [raw] = issue.rawRecordId
-      ? await tx
-          .select({ hash: rawRecord.payloadHash })
-          .from(rawRecord)
-          .where(eq(rawRecord.id, issue.rawRecordId))
-      : [];
     const outcome = await upsertEmployee(tx, issue.sourceSystem, staged.data, {
       runId: issue.ingestRunId,
-      hash: raw?.hash ?? payloadHash(issue.payload),
+      hash: issue.payloadHash,
       payload: issue.payload,
       decision,
     });
