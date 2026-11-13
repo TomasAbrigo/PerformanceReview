@@ -1,3 +1,4 @@
+import { createGoalsEndpoints, type GoalsEndpoints } from "./goals";
 import { createHttp, type BambooConfig } from "./http";
 import {
   changedEmployeesSchema,
@@ -9,6 +10,12 @@ import {
 } from "./schemas";
 
 export { BambooError, type BambooConfig } from "./http";
+export type {
+  BambooGoal,
+  BambooGoalComment,
+  BambooGoalMilestone,
+  BambooGoalsAggregate,
+} from "./goals";
 export type {
   BambooEmployee,
   ChangedEmployees,
@@ -23,7 +30,7 @@ export type ListEmployeesOptions = {
   limit?: number;
 };
 
-export type BambooClient = {
+export type BambooClient = GoalsEndpoints & {
   listEmployees(options: ListEmployeesOptions): AsyncIterable<BambooEmployee>;
   /** Same records unparsed: what ingest stores in raw_record and hashes. */
   listEmployeesRaw(
@@ -58,6 +65,8 @@ export function createBambooClient(config: BambooConfig): BambooClient {
   }
 
   return {
+    ...createGoalsEndpoints(get),
+
     listEmployeesRaw,
 
     async *listEmployees(options) {
