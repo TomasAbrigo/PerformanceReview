@@ -4,3 +4,4 @@ export * from "./people";
 export * from "./rating-scales";
 export * from "./templates";
 export * from "./goals";
+export * from "./org-history";

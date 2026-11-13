@@ -2,8 +2,6 @@ import { expect, test } from "@playwright/test";
 
 test.describe.configure({ mode: "serial" });
 
-// The DB is seeded once by e2e/global-setup.ts (3 employees from the fixtures).
-
 test("people list shows every ingested person and searches", async ({
   page,
 }) => {

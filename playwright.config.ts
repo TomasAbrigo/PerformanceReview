@@ -5,7 +5,6 @@ const PORT = 3100;
 
 export default defineConfig({
   testDir: "./e2e",
-  // Seeds the DB once (employees, then goals) before any spec runs.
   globalSetup: "./e2e/global-setup.ts",
   fullyParallel: true,
   forbidOnly: !!process.env.CI,

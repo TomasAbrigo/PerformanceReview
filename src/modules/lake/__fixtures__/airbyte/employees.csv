@@ -1,0 +1,4 @@
+id,displayName,firstName,lastName,workEmail,jobTitle,department,division,location,supervisor,_airbyte_raw_id,_airbyte_extracted_at,_airbyte_meta
+101,Ana Lopez,Ana,Lopez,ana.lopez@example.test,Engineer,Engineering,Product,Buenos Aires,"Perez, Beto",8b1c1f4e-0000-4000-8000-000000000001,2026-01-10T10:00:00Z,"{""changes"":[],""sync_id"":1}"
+102,Beto Perez,Beto,Perez,beto.perez@example.test,Senior Engineer,Engineering,Product,Cordoba,,8b1c1f4e-0000-4000-8000-000000000002,2026-01-10T10:00:00Z,"{""changes"":[],""sync_id"":1}"
+103,Carla Gomez,Carla,Gomez,carla.gomez@example.test,People Partner,People,Corporate,Buenos Aires,"Martinez, Eva",8b1c1f4e-0000-4000-8000-000000000003,2026-01-10T10:05:00Z,"{""changes"":[],""sync_id"":1}"

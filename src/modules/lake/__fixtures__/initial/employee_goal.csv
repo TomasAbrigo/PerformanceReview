@@ -1,0 +1,5 @@
+employee_id,goal_id,_fivetran_synced,_fivetran_deleted
+101,301,2026-01-10T10:00:00Z,false
+102,301,2026-01-10T10:00:00Z,false
+102,302,2026-01-10T10:00:00Z,false
+105,303,2026-01-10T10:05:00Z,false

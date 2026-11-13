@@ -22,7 +22,8 @@
     "db:reset": "supabase db reset",
     "ingest:employees": "tsx scripts/ingest-employees.ts",
     "ingest:goals": "tsx scripts/ingest-employees.ts --entity goal",
-    "fixtures:build": "tsx src/fixtures/build.ts"
+    "fixtures:build": "tsx src/fixtures/build.ts",
+    "fixtures:parquet": "tsx scripts/fixtures-parquet.ts"
   },
   "dependencies": {
     "@base-ui/react": "^1.9.0",
@@ -40,6 +41,7 @@
     "zod": "^4.6.7"
   },
   "devDependencies": {
+    "@duckdb/node-api": "2.0.0-r.1",
     "@playwright/test": "^1.65.0",
     "@tailwindcss/turbopack": "4.3.3",
     "@testing-library/dom": "^10.4.2",
@@ -53,9 +55,11 @@
     "drizzle-kit": "^0.31.11",
     "eslint": "^9",
     "eslint-config-next": "16.4.6",
+    "fflate": "0.8.3",
     "jsdom": "^31.0.0",
     "prettier": "^3.10.1",
     "prettier-plugin-tailwindcss": "^0.8.1",
+    "read-excel-file": "9.3.13",
     "tailwindcss": "4.3.3",
     "tsx": "^4.23.15",
     "typescript": "^5",

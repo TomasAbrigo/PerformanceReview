@@ -1,7 +1,9 @@
 /**
- * pnpm ingest:employees --source fixture|bamboo [--dir path] [--entity employee|goal]
- * pnpm ingest:goals     (same, --entity goal: goals of the active employees,
- *                        so run the employee ingest first)
+ * pnpm ingest:employees --source fixture|bamboo [--dir path] [--entity employee|job_history|goal]
+ * job_history (jobInfo + employmentStatus tables) needs employees ingested first.
+ * goal (goals of the active employees) needs employees ingested first;
+ * `pnpm ingest:goals` is the same with --entity goal.
+ * --since <ISO> (bamboo, job_history only): only employees whose tables changed.
  * bamboo needs BAMBOO_COMPANY_DOMAIN and BAMBOO_API_KEY.
  */
 import path from "node:path";
@@ -13,8 +15,11 @@ import {
   BambooApiAdapter,
   FixtureAdapter,
   runIngest,
+  type Entity,
   type SourceAdapter,
 } from "../src/modules/ingest";
+
+const ENTITIES: readonly Entity[] = ["employee", "job_history", "goal"];
 
 try {
   process.loadEnvFile(".env.local");
@@ -30,10 +35,16 @@ async function main() {
       source: { type: "string", default: "fixture" },
       dir: { type: "string", default: DEFAULT_DIR },
       entity: { type: "string", default: "employee" },
+      since: { type: "string" },
     },
   });
-  if (values.entity !== "employee" && values.entity !== "goal") {
-    throw new Error(`--entity must be employee or goal (got ${values.entity})`);
+  const entity = values.entity as Entity;
+  if (!ENTITIES.includes(entity)) {
+    throw new Error(`--entity must be one of ${ENTITIES.join(", ")}`);
+  }
+
+  if (values.since && entity !== "job_history") {
+    throw new Error("--since is only supported with --entity job_history");
   }
 
   let adapter: SourceAdapter;
@@ -54,11 +65,21 @@ async function main() {
     );
   }
 
-  const params = { source: values.source, dir: values.dir };
+  const params = {
+    source: values.source,
+    dir: values.dir,
+    since: values.since,
+  };
   const { runId, counts } =
-    values.entity === "goal"
+    entity === "goal"
       ? await runGoalIngest({ adapter, db, params })
-      : await runIngest({ adapter, entity: "employee", db, params });
+      : await runIngest({
+          adapter,
+          entity,
+          db,
+          params,
+          extract: { since: values.since },
+        });
   console.log(`ingest_run ${runId}`);
   console.log(JSON.stringify(counts));
 }

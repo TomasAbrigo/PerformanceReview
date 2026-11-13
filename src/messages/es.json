@@ -161,6 +161,28 @@
       "empty": "Sin períodos de empleo."
     }
   },
+  "Org": {
+    "title": "Organigrama",
+    "nav": "Organigrama",
+    "treeLabel": "Organigrama",
+    "dateLabel": "Fecha",
+    "show": "Ver",
+    "empty": "No hay nadie en la organización en esa fecha.",
+    "expand": "Expandir {name}",
+    "collapse": "Contraer {name}",
+    "history": {
+      "title": "Historial de puesto",
+      "validFrom": "Desde",
+      "validTo": "Hasta",
+      "jobTitle": "Puesto",
+      "area": "Área",
+      "manager": "Manager",
+      "location": "Ubicación",
+      "current": "Actual",
+      "unresolved": "{name} (sin resolver)",
+      "empty": "Sin historial de puesto."
+    }
+  },
   "Goals": {
     "title": "Objetivos",
     "nav": "Objetivos del equipo",

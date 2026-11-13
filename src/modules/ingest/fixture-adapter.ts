@@ -4,11 +4,13 @@ import {
   parseGoalComments,
   parseGoalsAggregate,
 } from "@/modules/bamboo-client";
+import { tableRowSchema } from "@/modules/bamboo-client/schemas";
 import { extractGoals, type GoalSource } from "./goals-extract";
 import type {
   Entity,
   ExtractContext,
   ExtractedRecord,
+  JobHistoryPayload,
   SourceAdapter,
 } from "./types";
 
@@ -23,14 +25,17 @@ const isObject = (v: unknown): v is Json =>
  * get-employee files (`{ id, ... }`) only add ids missing from the pages.
  * Other shapes (e.g. the changed feed) are ignored.
  *
- * Goals: `goals/<employeeId>.json` is the aggregate response of an employee
+ * `job_history` reads `tables-jobInfo.json` and `tables-employmentStatus.json`
+ * (responses of /employees/all/tables/{table}), grouped per employee.
+ *
+ * `goal`: `goals/<employeeId>.json` is the aggregate response of an employee
  * and `goal-comments/<goalId>.json` the comments of a goal; a missing file
  * means no goals / no comments.
  */
 export class FixtureAdapter implements SourceAdapter {
   readonly source = "bamboo_api" as const;
   readonly name = "fixture";
-  readonly entities = ["employee", "goal"] as const;
+  readonly entities = ["employee", "job_history", "goal"] as const;
 
   constructor(readonly dir: string) {}
 
@@ -50,17 +55,39 @@ export class FixtureAdapter implements SourceAdapter {
       parseGoalComments(await this.readJson("goal-comments", `${goalId}.json`)),
   };
 
-  async *extract(
-    ctx: ExtractContext,
-    entity: Entity,
-  ): AsyncIterable<ExtractedRecord> {
-    if (!this.entities.includes(entity)) {
-      throw new Error(`Unsupported entity ${String(entity)}`);
+  private async readTable(table: string): Promise<unknown[]> {
+    let body: unknown;
+    try {
+      body = JSON.parse(
+        await readFile(path.join(this.dir, `tables-${table}.json`), "utf8"),
+      );
+    } catch (err) {
+      if ((err as NodeJS.ErrnoException).code === "ENOENT") return [];
+      throw err;
     }
+    return Array.isArray(body) ? body : [];
+  }
+
+  extract(ctx: ExtractContext, entity: Entity): AsyncIterable<ExtractedRecord> {
+    if (entity === "job_history") return this.extractJobHistory();
+    if (entity === "employee") return this.extractEmployees();
     if (entity === "goal") {
-      yield* extractGoals(this.goalSource, ctx.employeeIds ?? [], ctx.onSkip);
-      return;
+      return extractGoals(this.goalSource, ctx.employeeIds ?? [], ctx.onSkip);
     }
+    throw new Error(`Unsupported entity ${String(entity)}`);
+  }
+
+  private async *extractJobHistory(): AsyncIterable<ExtractedRecord> {
+    const extractedAt = new Date();
+    for (const payload of groupTables(
+      await this.readTable("jobInfo"),
+      await this.readTable("employmentStatus"),
+    )) {
+      yield { sourceId: payload.employeeId, payload, extractedAt };
+    }
+  }
+
+  private async *extractEmployees(): AsyncIterable<ExtractedRecord> {
     const files = (await readdir(this.dir))
       .filter((f) => f.endsWith(".json"))
       .sort();
@@ -88,4 +115,38 @@ export class FixtureAdapter implements SourceAdapter {
       if (!fromPages.has(sourceId)) yield { sourceId, payload, extractedAt };
     }
   }
+}
+
+/**
+ * Table rows of all employees → one payload per employee, sorted by id. Rows
+ * go through tableRowSchema (ids as strings, other fields untouched) so the
+ * API and fixture adapters hash the same data identically; rows without an
+ * id/employeeId are dropped.
+ */
+export function groupTables(
+  jobInfo: unknown[],
+  employmentStatus: unknown[],
+): JobHistoryPayload[] {
+  const byEmployee = new Map<string, JobHistoryPayload>();
+  const get = (id: string) => {
+    let p = byEmployee.get(id);
+    if (!p) {
+      p = { employeeId: id, jobInfo: [], employmentStatus: [] };
+      byEmployee.set(id, p);
+    }
+    return p;
+  };
+  for (const raw of jobInfo) {
+    const r = tableRowSchema.safeParse(raw);
+    if (r.success) get(r.data.employeeId).jobInfo.push(r.data);
+  }
+  for (const raw of employmentStatus) {
+    const r = tableRowSchema.safeParse(raw);
+    if (r.success) get(r.data.employeeId).employmentStatus.push(r.data);
+  }
+  return [...byEmployee.values()].sort(
+    (a, b) =>
+      Number(a.employeeId) - Number(b.employeeId) ||
+      a.employeeId.localeCompare(b.employeeId),
+  );
 }

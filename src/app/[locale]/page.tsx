@@ -21,6 +21,7 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
   const tHome = await getTranslations("Home");
   const tSettings = await getTranslations("Settings.nav");
   const tPeople = await getTranslations("People");
+  const tOrg = await getTranslations("Org");
   const tGoals = await getTranslations("Goals");
 
   return (
@@ -37,6 +38,9 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
           <nav aria-label={tHome("settings")} className="flex flex-col gap-1">
             <Link href="/people" className="underline">
               {tPeople("nav")}
+            </Link>
+            <Link href="/org" className="underline">
+              {tOrg("nav")}
             </Link>
             <Link href="/team/goals" className="underline">
               {tGoals("nav")}

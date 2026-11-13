@@ -70,6 +70,8 @@ export const employment = pgTable(
     hireDate: date("hire_date"),
     terminationDate: date("termination_date"),
     status: text("status"),
+    /** Source id of the current supervisor, as of the latest employee ingest. */
+    supervisorSourceId: text("supervisor_source_id"),
     ...sourceColumns,
   },
   (t) => [

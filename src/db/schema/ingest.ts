@@ -16,6 +16,8 @@ export type IngestCounts = {
   rejected: number;
   /** Employments soft-deleted because a full extraction no longer had them. */
   deleted: number;
+  /** job_history: rows whose reportsTo could not be resolved to one person. */
+  managerUnresolved?: number;
 };
 
 export type IngestReject = { sourceId: string | null; reason: string };
