@@ -4,6 +4,7 @@ import {
   desc,
   eq,
   gt,
+  inArray,
   isNull,
   lte,
   or,
@@ -19,7 +20,8 @@ import {
 /** ISO date (YYYY-MM-DD). Intervals are [valid_from, valid_to). */
 export type IsoDate = string;
 
-const validOn = (date: IsoDate) =>
+/** Job rows valid on `date` (not soft-deleted). */
+export const jobValidOn = (date: IsoDate) =>
   and(
     isNull(employeeJobHistory.deletedAt),
     lte(employeeJobHistory.validFrom, date),
@@ -38,9 +40,25 @@ export async function jobAsOf(
   const [row] = await db
     .select()
     .from(employeeJobHistory)
-    .where(and(eq(employeeJobHistory.personId, personId), validOn(date)))
+    .where(and(eq(employeeJobHistory.personId, personId), jobValidOn(date)))
     .limit(1);
   return row ?? null;
+}
+
+/** Job rows valid on `date` for many people in one query, keyed by person id. */
+export async function jobsAsOf(
+  db: DbOrTx,
+  personIds: string[],
+  date: IsoDate,
+): Promise<Map<string, EmployeeJobHistory>> {
+  if (personIds.length === 0) return new Map();
+  const rows = await db
+    .select()
+    .from(employeeJobHistory)
+    .where(
+      and(inArray(employeeJobHistory.personId, personIds), jobValidOn(date)),
+    );
+  return new Map(rows.map((r) => [r.personId, r]));
 }
 
 /**

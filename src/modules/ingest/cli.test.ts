@@ -84,6 +84,39 @@ describe("parseIngestArgs", () => {
     });
   });
 
+  it("takes --unmatched for employee records that match nobody", () => {
+    expect(
+      parseIngestArgs(
+        ["employee", "--source", "fixture", "--unmatched", "queue"],
+        registry,
+      ).unmatched,
+    ).toBe("queue");
+    expect(
+      parseIngestArgs(
+        ["--all", "--source", "fixture", "--unmatched", "create"],
+        registry,
+      ).unmatched,
+    ).toBe("create");
+    expect(
+      parseIngestArgs(["employee", "--source", "fixture"], registry).unmatched,
+    ).toBeUndefined();
+  });
+
+  it("rejects an --unmatched other than create or queue, or for an entity without employees", () => {
+    expect(() =>
+      parseIngestArgs(
+        ["employee", "--source", "fixture", "--unmatched", "skip"],
+        registry,
+      ),
+    ).toThrow(/--unmatched must be create or queue \(got skip\)/);
+    expect(() =>
+      parseIngestArgs(
+        ["job_history", "--source", "fixture", "--unmatched", "queue"],
+        registry,
+      ),
+    ).toThrow(UsageError);
+  });
+
   it("--all means every registered entity, in registry order", () => {
     expect(
       parseIngestArgs(["--all", "--source", "bamboo"], registry).entities,
@@ -224,6 +257,33 @@ describe("REGISTRY", () => {
     }
   });
 
+  it("hands --unmatched to runIngest for employees", async () => {
+    const adapter = adapterOf("fixture");
+    const ran = vi.spyOn(runIngestModule, "runIngest").mockResolvedValue({
+      runId: "run-11",
+      counts,
+    });
+    try {
+      await REGISTRY.get("employee")!.run({
+        adapter,
+        db: {} as Database,
+        params: { source: "fixture" },
+        unmatched: "queue",
+      });
+
+      expect(ran).toHaveBeenCalledWith({
+        adapter,
+        entity: "employee",
+        db: {},
+        params: { source: "fixture" },
+        extract: { since: undefined },
+        unmatched: "queue",
+      });
+    } finally {
+      ran.mockRestore();
+    }
+  });
+
   it("runs goal through its own pipeline (a full read, so no since)", async () => {
     const adapter = adapterOf("fixture");
     const ran = vi.spyOn(goalsModule, "runGoalIngest").mockResolvedValue({
@@ -281,10 +341,12 @@ describe("runIngestCli", () => {
       "unchanged",
       "deleted",
       "rejected",
+      "issues",
+      "ignored",
       "duration",
       "run",
     ]);
-    expect(row.split(/\s+/).slice(0, 9)).toEqual([
+    expect(row.split(/\s+/).slice(0, 11)).toEqual([
       "employee",
       "fixture",
       "succeeded",
@@ -294,6 +356,8 @@ describe("runIngestCli", () => {
       "0",
       "0",
       "0",
+      "-",
+      "-",
     ]);
     expect(row).toContain("run-1");
     expect(t.stderr()).toBe("");
@@ -440,6 +504,20 @@ describe("runIngestCli", () => {
 
     const input = employee.run.mock.calls[0][0];
     expect(input.since).toBe("2026-11-01T00:00:00.000Z");
+  });
+
+  it("--unmatched is passed to the run and kept in the run params", async () => {
+    const employee = entry();
+    const t = setup({ employee });
+
+    await runIngestCli(
+      ["employee", "--source", "fixture", "--unmatched", "queue"],
+      t.deps,
+    );
+
+    const input = employee.run.mock.calls[0][0];
+    expect(input.unmatched).toBe("queue");
+    expect(input.params).toMatchObject({ unmatched: "queue" });
   });
 
   it("serializes runs of the same entity through the lock", async () => {

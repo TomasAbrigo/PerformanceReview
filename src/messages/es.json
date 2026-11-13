@@ -191,7 +191,9 @@
         "unchanged": "Sin cambios",
         "deleted": "Eliminados",
         "rejected": "Rechazados",
-        "issues": "Incidencias",
+        "issues": "En cola",
+        "ignored": "Ignorados",
+        "log": "Entradas del log",
         "duration": "Duración"
       },
       "status": {
@@ -273,6 +275,246 @@
       "noReports": "{manager} no tiene reportes directos.",
       "chooseManager": "Elegí un manager para ver los objetivos de su equipo.",
       "noManagers": "No hay managers con reportes directos."
+    }
+  },
+  "Identity": {
+    "title": "Cola de identidad",
+    "nav": "Cola de identidad",
+    "description": "Registros que la importación no pudo asignar sola a una persona. Revisá cada caso: vinculalo a una persona existente, creá una persona nueva o ignoralo.",
+    "tabs": {
+      "label": "Vistas de la cola",
+      "open": "Abiertos ({count})",
+      "history": "Historial"
+    },
+    "empty": {
+      "open": "No hay nada para revisar: todos los registros se asignaron.",
+      "history": "Todavía no hay casos resueltos."
+    },
+    "columns": {
+      "name": "Nombre",
+      "sourceId": "ID Bamboo",
+      "reason": "Motivo",
+      "candidates": "Candidatos",
+      "detected": "Detectado",
+      "resolved": "Resuelto",
+      "resolution": "Resolución"
+    },
+    "unnamed": "Sin nombre",
+    "review": "Revisar",
+    "reason": {
+      "no_match": "Sin coincidencia",
+      "ambiguous": "Posible coincidencia",
+      "conflict": "Conflicto"
+    },
+    "reasonHelp": {
+      "no_match": "Ningún identificador coincide con una persona existente y nadie se le parece.",
+      "ambiguous": "El ID de Bamboo es nuevo, pero el legajo, el email o el nombre con la fecha de ingreso coinciden con personas existentes. Puede ser un reingreso.",
+      "conflict": "El registro ya se aplicó, salvo un identificador que pertenece a otra persona. Esa persona lo conserva; ignorá el caso cuando lo hayas revisado."
+    },
+    "candidatesCount": "{count, plural, =0 {Sin candidatos} =1 {1 candidato} other {# candidatos}}",
+    "resolution": {
+      "link": "Vinculado a {name}",
+      "create": "Persona nueva: {name}",
+      "ignore": "Ignorado",
+      "auto": "Resuelto automáticamente: el registro se aplicó sin necesidad de revisión",
+      "note": "Nota: {note}",
+      "unknownPerson": "una persona",
+      "short": {
+        "link": "Vinculado",
+        "create": "Persona nueva",
+        "ignore": "Ignorado"
+      }
+    },
+    "detail": {
+      "back": "← Volver a la cola",
+      "notFound": "Caso no encontrado.",
+      "record": "Registro de Bamboo",
+      "fields": {
+        "sourceId": "ID Bamboo",
+        "employeeNumber": "Legajo",
+        "workEmail": "Email",
+        "hireDate": "Ingreso",
+        "terminationDate": "Egreso",
+        "status": "Estado"
+      },
+      "candidates": "Personas sugeridas",
+      "involved": "Personas involucradas",
+      "noCandidates": "Ninguna persona existente se parece a este registro.",
+      "matchedOn": "Coincide en",
+      "match": {
+        "bamboo_id": "ID Bamboo",
+        "employee_number": "Legajo",
+        "work_email": "Email",
+        "name_hire_date": "Nombre e ingreso"
+      },
+      "score": "{score}% de coincidencia",
+      "employments": "Empleos",
+      "employmentLine": "{hire} → {end}",
+      "noDate": "—",
+      "resolutionTitle": "Resolución",
+      "resolvedAt": "Resuelto el {date}",
+      "viewPerson": "Ver persona"
+    },
+    "actions": {
+      "title": "Resolver",
+      "linkTo": "Vincular a {name}",
+      "link": "Vincular a esta persona",
+      "create": "Crear persona nueva",
+      "ignore": "Ignorar",
+      "note": "Nota (opcional)",
+      "search": "Buscar otra persona",
+      "searchLabel": "Buscar por nombre o email",
+      "searchButton": "Buscar",
+      "noResults": "No se encontró ninguna persona.",
+      "searchResults": "Resultados de la búsqueda"
+    },
+    "errors": {
+      "not_found": "El caso o la persona ya no existe.",
+      "person_required": "Elegí la persona a la que vincular el registro.",
+      "invalid_action": "Esta acción no aplica a este caso.",
+      "invalid_payload": "El registro guardado ya no es válido y no se puede procesar.",
+      "already_resolved": "Este caso ya se resolvió de otra manera.",
+      "already_applied": "El registro ya se aplicó a otra persona.",
+      "unknown": "Algo salió mal."
+    },
+    "pagination": {
+      "label": "Páginas",
+      "older": "Casos anteriores",
+      "newest": "Volver a los más recientes"
+    }
+  },
+  "Cycles": {
+    "nav": "Ciclos de evaluación",
+    "title": "Ciclos de evaluación",
+    "new": "Nuevo ciclo",
+    "back": "Volver a ciclos",
+    "empty": "Todavía no hay ciclos.",
+    "columns": {
+      "name": "Nombre",
+      "status": "Estado",
+      "period": "Período",
+      "participants": "Participantes"
+    },
+    "period": "{start} → {end}",
+    "status": {
+      "draft": "Borrador",
+      "nominations": "Nominaciones",
+      "collecting": "Recolección",
+      "manager_review": "Revisión del manager",
+      "calibration": "Calibración",
+      "sharing": "Compartir resultados",
+      "closed": "Cerrado"
+    },
+    "wizard": {
+      "title": "Nuevo ciclo",
+      "stepsLabel": "Pasos",
+      "stepOf": "Paso {current} de {total}",
+      "steps": {
+        "people": "Personas",
+        "components": "Componentes y anonimato",
+        "dates": "Fechas por fase",
+        "review": "Revisar y lanzar"
+      },
+      "next": "Siguiente",
+      "previous": "Anterior",
+      "saveDraft": "Guardar borrador",
+      "launch": "Crear y lanzar",
+      "mode": "¿Quiénes participan?",
+      "modeAll": "Todas las personas activas",
+      "modeFilter": "Por filtro",
+      "modePeople": "Personas individuales",
+      "filters": {
+        "departments": "Área",
+        "divisions": "División",
+        "locations": "Ubicación",
+        "jobTitles": "Puesto",
+        "statuses": "Estado"
+      },
+      "count": "{count, plural, =0 {Ninguna persona coincide} one {# persona coincide} other {# personas coinciden}}",
+      "counting": "Contando…",
+      "sample": "Muestra",
+      "components": "Componentes",
+      "componentNames": {
+        "self": "Autoevaluación",
+        "manager": "Evaluación del manager",
+        "peer": "Evaluación de pares",
+        "upward": "Evaluación ascendente",
+        "calibration": "Calibración"
+      },
+      "anonymity": "Anonimato",
+      "anonymityPeer": "Anonimato de pares",
+      "anonymityUpward": "Anonimato ascendente",
+      "anonymityModes": {
+        "transparent": "Transparente",
+        "anonymous_to_employee": "Anónimo para la persona evaluada",
+        "fully_anonymous": "Totalmente anónimo"
+      },
+      "template": "Plantilla",
+      "finalScale": "Escala final",
+      "none": "Sin seleccionar",
+      "name": "Nombre del ciclo",
+      "description": "Descripción",
+      "periodStart": "Inicio del período",
+      "periodEnd": "Fin del período",
+      "snapshotDate": "Fecha de snapshot organizacional",
+      "dueDates": "Fechas límite por fase",
+      "phases": {
+        "nominations": "Nominaciones",
+        "self": "Autoevaluación",
+        "peer": "Pares",
+        "manager": "Manager",
+        "calibration": "Calibración",
+        "sharing": "Compartir",
+        "acknowledge": "Acuse de recibo"
+      },
+      "summary": "Resumen",
+      "participantsToLaunch": "{count, plural, one {Se lanzará con # participante} other {Se lanzará con # participantes}}",
+      "snapshotHint": "Los participantes se resuelven a la fecha de snapshot organizacional."
+    },
+    "detail": {
+      "snapshotDate": "Snapshot al {date}",
+      "participants": "Participantes",
+      "transitions": "Historial de estados",
+      "stats": "{active} activos · {removed} quitados · {withoutManager} sin manager",
+      "questions": "{count, plural, one {# pregunta congelada} other {# preguntas congeladas}}",
+      "actions": "Acciones de fase",
+      "moveTo": "Pasar a {status}",
+      "launch": "Lanzar ciclo",
+      "confirmTitle": "¿Confirmás el cambio de fase?",
+      "confirmBody": "El ciclo pasará de {from} a {to}.",
+      "confirm": "Confirmar",
+      "cancel": "Cancelar",
+      "noActions": "No hay acciones disponibles.",
+      "noParticipants": "Este ciclo todavía no tiene participantes.",
+      "noTransitions": "Sin cambios de estado todavía.",
+      "noManager": "Sin manager",
+      "removed": "Quitado",
+      "columns": {
+        "name": "Persona",
+        "manager": "Manager (snapshot)",
+        "department": "Área",
+        "jobTitle": "Puesto",
+        "from": "De",
+        "to": "A",
+        "actor": "Quién",
+        "when": "Cuándo",
+        "note": "Nota"
+      },
+      "system": "Sistema"
+    },
+    "errors": {
+      "validation": "Revisá los campos marcados.",
+      "not_found": "El ciclo ya no existe.",
+      "not_draft": "El ciclo ya fue lanzado.",
+      "not_active": "El ciclo no está activo.",
+      "invalid_transition": "Ese cambio de fase no está permitido.",
+      "no_participants": "El filtro no incluye a ninguna persona.",
+      "no_template": "Elegí una plantilla.",
+      "already_participant": "La persona ya participa del ciclo.",
+      "date_order": "Las fechas deben estar en orden.",
+      "required": "Este campo es obligatorio.",
+      "invalid": "Valor inválido.",
+      "unknown": "Ocurrió un error inesperado."
     }
   },
   "Upload": {

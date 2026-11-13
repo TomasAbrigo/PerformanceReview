@@ -6,11 +6,10 @@ import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 
 import type { LocalizedText as Localized } from "@/db/schema/rating-scales";
-import type { FieldIssue } from "@/modules/templates/errors";
+import type { ActionResult } from "@/lib/action-result";
+import type { FieldIssue } from "@/lib/domain-error";
 
-export type { FieldIssue, Localized };
-export type ActionResult<T = unknown> =
-  ({ ok: true } & T) | { ok: false; code: string; issues: FieldIssue[] };
+export type { ActionResult, FieldIssue, Localized };
 
 /** Picks the label in the current UI locale. */
 export function useLocalized() {

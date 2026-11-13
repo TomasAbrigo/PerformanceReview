@@ -2,6 +2,7 @@ import { and, eq, isNull, notInArray } from "drizzle-orm";
 import type { z } from "zod";
 import type { DbOrTx } from "@/db/client";
 import { employment, type IngestCounts, type SourceSystem } from "@/db/schema";
+import { openIssueSourceIds } from "@/modules/identity/raise";
 import { upsertEmployee } from "./employee";
 import {
   stagedJobHistorySchema,
@@ -15,12 +16,24 @@ export type HandlerContext = {
   source: SourceSystem;
   hash: string;
   runId: string;
+  /** The record as extracted (kept on an identity issue if one is raised). */
+  payload: unknown;
+  /** employee: what to do with a record that matches and resembles nobody. */
+  unmatched?: "create" | "queue";
   /** Per-run scratch space (memoized lookups shared by all records). */
   cache: Map<string, unknown>;
 };
 
 export type HandlerOutcome = {
-  result: "inserted" | "updated" | "unchanged" | "rejected";
+  result:
+    | "inserted"
+    | "updated"
+    | "unchanged"
+    | "rejected"
+    /** employee: held in (or flagged for) the identity queue. */
+    | "issues"
+    /** employee: held back, a reviewer already ignored this exact record. */
+    | "ignored";
   rejects: string[];
   /** Extra counters added to the run's counts. */
   counts?: Partial<IngestCounts>;
@@ -62,15 +75,26 @@ const defineHandler = <S>(h: EntityHandler<S>) => h;
 export const entityHandlers: Partial<Record<Entity, EntityHandler<unknown>>> = {
   employee: defineHandler({
     schema: stagedEmployeeSchema,
-    async upsert(tx, staged, { source, hash, runId }) {
-      const { result, conflicts } = await upsertEmployee(
-        tx,
-        source,
-        staged,
-        hash,
+    counts: { issues: 0, ignored: 0 },
+    async upsert(
+      tx,
+      staged,
+      { source, hash, runId, cache, payload, unmatched },
+    ) {
+      // Saves a lookup per record: only these may have an issue to settle.
+      let openIssues = cache.get("openIssues") as Set<string> | undefined;
+      if (!openIssues) {
+        openIssues = await openIssueSourceIds(tx, source, "employee");
+        cache.set("openIssues", openIssues);
+      }
+      const { result } = await upsertEmployee(tx, source, staged, {
         runId,
-      );
-      return { result, rejects: conflicts };
+        hash,
+        payload,
+        unmatched,
+        openIssues,
+      });
+      return { result: result === "issue" ? "issues" : result, rejects: [] };
     },
     // Extractions are full: employments not seen are soft-deleted. An empty
     // extraction is far more likely a broken source, so it never deletes.

@@ -39,6 +39,8 @@ const succeeded: RunListItem = {
     unchanged: 0,
     deleted: 0,
     rejected: 1,
+    issues: 1,
+    ignored: 2,
   },
   issues: 2,
   error: null,
@@ -102,23 +104,35 @@ describe("RunsList", () => {
         "employee",
         okLabel,
       ]);
-      // read, inserted, updated, unchanged, deleted, rejected, issues, duration
-      expect(rest.slice(0, 7)).toEqual(["4", "3", "1", "0", "0", "1", "2"]);
-      expect(rest[7]).toMatch(/1[.,]5/);
+      // read, inserted, updated, unchanged, deleted, rejected, issues, ignored, log, duration
+      expect(rest.slice(0, 9)).toEqual([
+        "4",
+        "3",
+        "1",
+        "0",
+        "0",
+        "1",
+        "1",
+        "2",
+        "2",
+      ]);
+      expect(rest[9]).toMatch(/1[.,]5/);
 
       expect(cellTexts(rows[1])[4]).toBe(errorLabel);
-      expect(cellTexts(rows[1]).slice(5, 12)).toEqual([
+      expect(cellTexts(rows[1]).slice(5, 14)).toEqual([
         "2",
         "2",
+        "—",
+        "—",
         "—",
         "—",
         "—",
         "—",
         "0",
       ]);
-      expect(cellTexts(rows[1])[12]).toMatch(/2/);
+      expect(cellTexts(rows[1])[14]).toMatch(/2/);
       expect(cellTexts(rows[2])[4]).toBe(runningLabel);
-      expect(cellTexts(rows[2])[12]).toBe("—");
+      expect(cellTexts(rows[2])[14]).toBe("—");
     },
   );
 
@@ -222,6 +236,8 @@ const detail: RunDetail = {
     unchanged: 0,
     deleted: 0,
     rejected: 1,
+    issues: 2,
+    ignored: 0,
   },
   rejects: [
     { sourceId: "105", reason: "employee has no name" },
@@ -265,6 +281,8 @@ describe("RunDetailView", () => {
         [expect.any(String), "0"],
         [expect.any(String), "0"],
         [expect.any(String), "1"],
+        [expect.any(String), "2"],
+        [expect.any(String), "0"],
       ]);
       expect(screen.getByText(raw)).toBeInTheDocument();
       expect(screen.getByText(/"dir": "fixtures"/)).toBeInTheDocument();
@@ -340,6 +358,8 @@ describe("RunDetailView", () => {
       ).toEqual([
         [expect.any(String), "2"],
         [expect.any(String), "2"],
+        [expect.any(String), "—"],
+        [expect.any(String), "—"],
         [expect.any(String), "—"],
         [expect.any(String), "—"],
         [expect.any(String), "—"],
