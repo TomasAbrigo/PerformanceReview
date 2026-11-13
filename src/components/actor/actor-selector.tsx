@@ -36,9 +36,11 @@ export function ActorSelector({
   const [pending, startTransition] = useTransition();
 
   const q = query.trim().toLocaleLowerCase();
+  // Only the current person and search matches are listed (not everyone).
   const matches = people.filter(
     (p) =>
-      p.id === personId || !q || p.displayName.toLocaleLowerCase().includes(q),
+      p.id === personId ||
+      (q !== "" && p.displayName.toLocaleLowerCase().includes(q)),
   );
   const name = actorName ?? (actor.role === "hr" ? t("hrName") : t("noPerson"));
   const current =

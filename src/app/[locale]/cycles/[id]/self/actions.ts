@@ -21,42 +21,40 @@ export async function saveDraftAction(
   requestId: string,
   input: review.AnswerInput[],
 ) {
-  return actionResult(async () => {
-    await review.saveDraft(
-      db,
-      await getActor(),
-      parse(id, requestId, review.ReviewError),
-      parse(answers, input, review.ReviewError),
-    );
-  });
-}
-
-export async function submitAction(requestId: string) {
   return actionResult(
     async () => {
-      await review.submit(
+      await review.saveDraft(
         db,
         await getActor(),
         parse(id, requestId, review.ReviewError),
+        parse(answers, input, review.ReviewError),
       );
     },
-    { refreshPage: true },
+    undefined,
+    { refreshPage: false },
   );
+}
+
+export async function submitAction(requestId: string) {
+  return actionResult(async () => {
+    await review.submit(
+      db,
+      await getActor(),
+      parse(id, requestId, review.ReviewError),
+    );
+  });
 }
 
 export async function unlockAction(
   requestId: string,
   unlockNote: string | null,
 ) {
-  return actionResult(
-    async () => {
-      await review.unlock(
-        db,
-        await getActor(),
-        parse(id, requestId, review.ReviewError),
-        parse(note, unlockNote, review.ReviewError),
-      );
-    },
-    { refreshPage: true },
-  );
+  return actionResult(async () => {
+    await review.unlock(
+      db,
+      await getActor(),
+      parse(id, requestId, review.ReviewError),
+      parse(note, unlockNote, review.ReviewError),
+    );
+  });
 }
