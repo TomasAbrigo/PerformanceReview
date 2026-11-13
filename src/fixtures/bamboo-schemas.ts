@@ -23,7 +23,8 @@ export const employeeStatusSchema = z.enum(["Active", "Inactive"]);
 
 const nullableText = z.string().nullable();
 
-const linkSchema = z.object({ href: z.string() });
+/** Pagination links are plain URL paths; `{ href }` objects are tolerated. */
+const linkSchema = z.union([z.string(), z.object({ href: z.string() })]);
 
 // --- GET /api/v1/employees (cursor-paginated list) -----------------------
 

@@ -1510,12 +1510,8 @@
     }
   },
   "_links": {
-    "self": {
-      "href": "/api/v1/employees?sort=employeeId&page[limit]=100"
-    },
-    "next": {
-      "href": "/api/v1/employees?sort=employeeId&page[limit]=100&page[cursor]=eyJhZnRlciI6IjIwOSJ9"
-    },
+    "self": "/api/v1/employees?sort=employeeId&page[limit]=100",
+    "next": "/api/v1/employees?sort=employeeId&page[limit]=100&page[after]=eyJhZnRlciI6IjIwOSJ9",
     "prev": null
   }
 }

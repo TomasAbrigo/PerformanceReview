@@ -24,9 +24,15 @@ function cursor(direction: "after" | "before", employeeId: string): string {
   return btoa(JSON.stringify({ [direction]: employeeId }));
 }
 
-function listUrl(limit: number, pageCursor?: string): string {
+/** Same query style as the list endpoint: `page[after]` / `page[before]`. */
+function listUrl(
+  limit: number,
+  position?: { param: "after" | "before"; cursor: string },
+): string {
   const query = [`sort=employeeId`, `page[limit]=${limit}`];
-  if (pageCursor) query.push(`page[cursor]=${encodeURIComponent(pageCursor)}`);
+  if (position) {
+    query.push(`page[${position.param}]=${encodeURIComponent(position.cursor)}`);
+  }
   return `/api/v1/employees?${query.join("&")}`;
 }
 
@@ -173,11 +179,14 @@ export function serializeBambooApi(company: CompanyFixture): FixtureFile[] {
       data: chunk.map(listEmployee),
       meta: { total: employees.length, page: { limit, nextCursor, prevCursor } },
       _links: {
-        self: {
-          href: listUrl(limit, i > 0 ? cursor("after", chunks[i - 1].at(-1)!.id) : undefined),
-        },
-        next: nextCursor ? { href: listUrl(limit, nextCursor) } : null,
-        prev: prevCursor ? { href: listUrl(limit, prevCursor) } : null,
+        self: listUrl(
+          limit,
+          i > 0
+            ? { param: "after", cursor: cursor("after", chunks[i - 1].at(-1)!.id) }
+            : undefined,
+        ),
+        next: nextCursor ? listUrl(limit, { param: "after", cursor: nextCursor }) : null,
+        prev: prevCursor ? listUrl(limit, { param: "before", cursor: prevCursor }) : null,
       },
     };
     files.push(jsonFile(`employees/list/page-${String(i + 1).padStart(3, "0")}.json`, page));

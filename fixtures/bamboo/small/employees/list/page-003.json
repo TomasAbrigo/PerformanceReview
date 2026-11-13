@@ -160,12 +160,8 @@
     }
   },
   "_links": {
-    "self": {
-      "href": "/api/v1/employees?sort=employeeId&page[limit]=15&page[cursor]=eyJhZnRlciI6IjY5In0%3D"
-    },
+    "self": "/api/v1/employees?sort=employeeId&page[limit]=15&page[after]=eyJhZnRlciI6IjY5In0%3D",
     "next": null,
-    "prev": {
-      "href": "/api/v1/employees?sort=employeeId&page[limit]=15&page[cursor]=eyJiZWZvcmUiOiI3MSJ9"
-    }
+    "prev": "/api/v1/employees?sort=employeeId&page[limit]=15&page[before]=eyJiZWZvcmUiOiI3MSJ9"
   }
 }

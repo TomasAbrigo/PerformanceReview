@@ -235,12 +235,8 @@
     }
   },
   "_links": {
-    "self": {
-      "href": "/api/v1/employees?sort=employeeId&page[limit]=15"
-    },
-    "next": {
-      "href": "/api/v1/employees?sort=employeeId&page[limit]=15&page[cursor]=eyJhZnRlciI6IjM5In0%3D"
-    },
+    "self": "/api/v1/employees?sort=employeeId&page[limit]=15",
+    "next": "/api/v1/employees?sort=employeeId&page[limit]=15&page[after]=eyJhZnRlciI6IjM5In0%3D",
     "prev": null
   }
 }

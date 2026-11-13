@@ -27,12 +27,20 @@ const listEmployee = {
 const page = (data: unknown[]) => ({
   data,
   meta: { total: data.length, page: { limit: 15, nextCursor: null, prevCursor: null } },
-  _links: { self: { href: "/api/v1/employees?page[limit]=15" }, next: null, prev: null },
+  _links: { self: "/api/v1/employees?page[limit]=15", next: null, prev: null },
 });
 
 describe("list-employees page schema", () => {
   it("accepts the documented shape", () => {
     expect(listEmployeesPageSchema.safeParse(page([listEmployee])).success).toBe(true);
+  });
+
+  it("tolerates pagination links given as { href } objects", () => {
+    const withObjects = {
+      ...page([listEmployee]),
+      _links: { self: { href: "/api/v1/employees" }, next: { href: "/n" } },
+    };
+    expect(listEmployeesPageSchema.safeParse(withObjects).success).toBe(true);
   });
 
   it("rejects numeric ids and statuses outside the enum", () => {

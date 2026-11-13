@@ -1510,12 +1510,8 @@
     }
   },
   "_links": {
-    "self": {
-      "href": "/api/v1/employees?sort=employeeId&page[limit]=100&page[cursor]=eyJhZnRlciI6IjYwOSJ9"
-    },
+    "self": "/api/v1/employees?sort=employeeId&page[limit]=100&page[after]=eyJhZnRlciI6IjYwOSJ9",
     "next": null,
-    "prev": {
-      "href": "/api/v1/employees?sort=employeeId&page[limit]=100&page[cursor]=eyJiZWZvcmUiOiI2MTEifQ%3D%3D"
-    }
+    "prev": "/api/v1/employees?sort=employeeId&page[limit]=100&page[before]=eyJiZWZvcmUiOiI2MTEifQ%3D%3D"
   }
 }
