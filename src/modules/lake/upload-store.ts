@@ -69,7 +69,7 @@ export type StoredUpload = {
 const UPLOAD_ID = /^([0-9a-f]{64})(\.[a-z]+)$/;
 
 async function exists(path: string): Promise<boolean> {
-  return stat(path).then(
+  return stat(/*turbopackIgnore: true*/ path).then(
     (s) => s.isFile(),
     () => false,
   );
@@ -104,7 +104,7 @@ export async function storeUpload(
   const sha256 = createHash("sha256").update(file.bytes).digest("hex");
   const id = `${sha256}${ext}`;
   const dir = uploadsDirOf(store);
-  const path = join(dir, id);
+  const path = join(/*turbopackIgnore: true*/ dir, id);
   const stored = {
     id,
     sha256,
@@ -137,8 +137,8 @@ export async function resolveUpload(
   if (!match || !UPLOAD_EXTENSIONS.includes(match[2])) {
     throw new UploadError("unknown_upload", "Unknown upload");
   }
-  const path = join(uploadsDirOf(store), id);
-  const info = await stat(path).catch(() => null);
+  const path = join(/*turbopackIgnore: true*/ uploadsDirOf(store), id);
+  const info = await stat(/*turbopackIgnore: true*/ path).catch(() => null);
   if (!info?.isFile()) {
     throw new UploadError("unknown_upload", "Unknown upload");
   }
@@ -201,11 +201,19 @@ export async function listProfiles(
   store: UploadStore = {},
 ): Promise<SourceProfile[]> {
   const custom: SourceProfile[] = [];
-  const files = await readdir(profilesDirOf(store)).catch(() => []);
+  const files = await readdir(
+    /*turbopackIgnore: true*/ profilesDirOf(store),
+  ).catch(() => []);
   for (const file of files.filter((f) => f.endsWith(".json")).sort()) {
     try {
       const raw: unknown = JSON.parse(
-        await readFile(join(profilesDirOf(store), file), "utf8"),
+        await readFile(
+          /*turbopackIgnore: true*/ join(
+            /*turbopackIgnore: true*/ profilesDirOf(store),
+            file,
+          ),
+          "utf8",
+        ),
       );
       // The file name is the profile name, as saveProfile wrote it.
       const profile = parseCustomProfile(raw);
