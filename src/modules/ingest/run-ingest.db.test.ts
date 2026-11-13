@@ -6,6 +6,7 @@ import { afterAll, afterEach, beforeEach, describe, expect, it } from "vitest";
 import { closeDb, db } from "@/db/client";
 import {
   employment,
+  identityMatchIssue,
   ingestRun,
   person,
   rawRecord,
@@ -20,7 +21,7 @@ let dir: string;
 
 async function reset() {
   await db.execute(
-    sql`TRUNCATE source_identity, employment, person, raw_record, ingest_run CASCADE`,
+    sql`TRUNCATE source_identity, employment, person, raw_record, ingest_run, identity_match_issue CASCADE`,
   );
 }
 
@@ -60,6 +61,7 @@ describe("runIngest (employees from fixtures)", () => {
       unchanged: 0,
       rejected: 0,
       deleted: 0,
+      issues: 0,
     });
     expect(await db.select().from(person)).toHaveLength(3);
     expect(await db.select().from(rawRecord)).toHaveLength(3);
@@ -100,6 +102,7 @@ describe("runIngest (employees from fixtures)", () => {
       unchanged: 3,
       rejected: 0,
       deleted: 0,
+      issues: 0,
     });
     expect(await db.select().from(person)).toHaveLength(3);
     expect(await db.select().from(rawRecord)).toHaveLength(3);
@@ -254,7 +257,7 @@ describe("runIngest (employees from fixtures)", () => {
     ]);
   });
 
-  it("records an identity conflict when two active employees share an email, keeping the holder's", async () => {
+  it("queues an identity conflict when two active employees share an email, keeping the holder's", async () => {
     await ingest();
     await editPage("employees-page-1.json", (page) => {
       page.data[1].workEmail = "ana.garcia@example.com";
@@ -275,11 +278,11 @@ describe("runIngest (employees from fixtures)", () => {
       .select()
       .from(ingestRun)
       .where(eq(ingestRun.id, runId));
-    expect(run.rejects).toEqual([
-      {
-        sourceId: "102",
-        reason: expect.stringContaining("identity_conflict"),
-      },
+    expect(run.rejects).toEqual([]);
+    expect(run.counts).toMatchObject({ issues: 1 });
+    const queued = await db.select().from(identityMatchIssue);
+    expect(queued).toMatchObject([
+      { sourceId: "102", reason: "conflict", status: "open" },
     ]);
   });
 

@@ -16,6 +16,8 @@ export type IngestCounts = {
   rejected: number;
   /** Employments soft-deleted because a full extraction no longer had them. */
   deleted: number;
+  /** Records held (or flagged) in the identity queue instead of applied. */
+  issues: number;
 };
 
 export type IngestReject = { sourceId: string | null; reason: string };

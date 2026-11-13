@@ -1,142 +1,47 @@
-import { createHash } from "node:crypto";
-import { and, eq, isNull, ne, notInArray, sql } from "drizzle-orm";
+import { and, eq, isNull, notInArray, sql } from "drizzle-orm";
 import type { DbOrTx } from "@/db/client";
 import {
   employment,
   ingestRun,
-  person,
   rawRecord,
-  sourceIdentity,
   type Employment,
-  type IdentityKind,
   type IngestCounts,
   type IngestReject,
   type SourceSystem,
 } from "@/db/schema";
+// Direct file imports (not the identity barrel): the identity service imports
+// this file back, and a barrel would close the cycle.
+import { toCandidates } from "@/modules/identity/candidates";
+import { closeOpenIssue, raiseIssue } from "@/modules/identity/raise";
+import {
+  resolvePerson,
+  type ResolveContext,
+} from "@/modules/identity/resolve-person";
+import {
+  createPerson,
+  isCurrentStint,
+  syncIdentities,
+  updatePerson,
+} from "@/modules/identity/sync";
+import { payloadHash } from "./hash";
 import { stagedEmployeeSchema, type StagedEmployee } from "./staging";
 import type { Entity, SourceAdapter } from "./types";
+
+export { payloadHash };
 
 export type RunIngestInput = {
   adapter: SourceAdapter;
   entity: Entity;
   db: DbOrTx;
   params?: Record<string, unknown>;
+  /**
+   * What to do with a record that matches nobody and resembles nobody:
+   * create the person (default) or queue it for review.
+   */
+  unmatched?: "create" | "queue";
 };
 
 export type RunIngestResult = { runId: string; counts: IngestCounts };
-
-/** JSON with sorted keys, so key order never changes the hash. */
-function canonical(value: unknown): string {
-  if (Array.isArray(value)) return `[${value.map(canonical).join(",")}]`;
-  if (value && typeof value === "object") {
-    return `{${Object.keys(value)
-      .sort()
-      .map(
-        (k) =>
-          `${JSON.stringify(k)}:${canonical((value as Record<string, unknown>)[k])}`,
-      )
-      .join(",")}}`;
-  }
-  return JSON.stringify(value) ?? "null";
-}
-
-export const payloadHash = (payload: unknown) =>
-  createHash("sha256").update(canonical(payload)).digest("hex");
-
-/**
- * Identity resolution seam. Minimal for now: match on the source's own id
- * (bamboo_id). Matching by employee_number / email and the manual-review
- * queue belong to the identity module (issue #5).
- */
-export async function resolvePerson(
-  tx: DbOrTx,
-  source: SourceSystem,
-  staged: StagedEmployee,
-): Promise<string | null> {
-  const [match] = await tx
-    .select({ personId: sourceIdentity.personId })
-    .from(sourceIdentity)
-    .where(
-      and(
-        eq(sourceIdentity.sourceSystem, source),
-        eq(sourceIdentity.kind, "bamboo_id"),
-        eq(sourceIdentity.value, staged.sourceId),
-        isNull(sourceIdentity.validTo),
-      ),
-    );
-  return match?.personId ?? null;
-}
-
-/**
- * Makes `value` the person's open identity of `kind`. If another person holds
- * it open, nothing changes and a conflict reason is returned (for #5's
- * queue); the old identity is only closed after the new one is in place.
- */
-async function syncIdentity(
-  tx: DbOrTx,
-  personId: string,
-  source: SourceSystem,
-  kind: IdentityKind,
-  value: string | null,
-  now: Date,
-): Promise<string | null> {
-  const open = and(
-    eq(sourceIdentity.sourceSystem, source),
-    eq(sourceIdentity.kind, kind),
-    isNull(sourceIdentity.validTo),
-  );
-  const current = await tx
-    .select()
-    .from(sourceIdentity)
-    .where(and(open, eq(sourceIdentity.personId, personId)));
-  if (current.some((c) => c.value === value)) return null;
-
-  if (value !== null) {
-    const [holder] = await tx
-      .select({ personId: sourceIdentity.personId })
-      .from(sourceIdentity)
-      .where(
-        and(
-          open,
-          eq(sourceIdentity.value, value),
-          ne(sourceIdentity.personId, personId),
-        ),
-      );
-    if (holder) {
-      return `identity_conflict: ${kind}=${value} is held by person ${holder.personId}`;
-    }
-    await tx
-      .insert(sourceIdentity)
-      .values({ personId, sourceSystem: source, kind, value, validFrom: now });
-  }
-  for (const c of current) {
-    await tx
-      .update(sourceIdentity)
-      .set({ validTo: now, updatedAt: now })
-      .where(eq(sourceIdentity.id, c.id));
-  }
-  return null;
-}
-
-async function syncIdentities(
-  tx: DbOrTx,
-  personId: string,
-  source: SourceSystem,
-  staged: StagedEmployee,
-  now: Date,
-): Promise<string[]> {
-  const wanted: [IdentityKind, string | null][] = [
-    ["bamboo_id", staged.sourceId],
-    ["employee_number", staged.employeeNumber],
-    ["work_email", staged.workEmail],
-  ];
-  const conflicts: string[] = [];
-  for (const [kind, value] of wanted) {
-    const conflict = await syncIdentity(tx, personId, source, kind, value, now);
-    if (conflict) conflicts.push(conflict);
-  }
-  return conflicts;
-}
 
 /**
  * Picks the employment period a payload describes: same hire date, else a
@@ -159,17 +64,27 @@ function targetPeriod(
   return rehire ? "new" : latest;
 }
 
-type Outcome = {
-  result: "inserted" | "updated" | "unchanged";
-  conflicts: string[];
+/** A reviewer's choice for a record that was held in the identity queue. */
+export type Decision =
+  { action: "link"; personId: string } | { action: "create" };
+
+export type UpsertContext = ResolveContext & { decision?: Decision };
+
+/**
+ * `issue`: the record was held in the identity queue, or applied except for
+ * an identifier another person holds (flagged as a conflict).
+ */
+export type Outcome = {
+  result: "inserted" | "updated" | "unchanged" | "issue";
+  personId: string | null;
 };
 
-async function upsertEmployee(
+/** Domain upsert of one staged employee; also what resolving an issue runs. */
+export async function upsertEmployee(
   tx: DbOrTx,
   source: SourceSystem,
   staged: StagedEmployee,
-  hash: string,
-  runId: string,
+  ctx: UpsertContext,
 ): Promise<Outcome> {
   const now = new Date();
   const periods = await tx
@@ -184,40 +99,50 @@ async function upsertEmployee(
     .orderBy(sql`${employment.hireDate} desc nulls last`);
   const target = targetPeriod(periods, staged);
 
-  if (target !== "new" && target.payloadHash === hash && !target.deletedAt) {
-    return { result: "unchanged", conflicts: [] };
+  if (
+    target !== "new" &&
+    target.payloadHash === ctx.hash &&
+    !target.deletedAt
+  ) {
+    return { result: "unchanged", personId: target.personId };
   }
 
   const employmentValues = {
     hireDate: staged.hireDate,
     terminationDate: staged.terminationDate,
     status: staged.status,
-    ingestRunId: runId,
-    payloadHash: hash,
+    ingestRunId: ctx.runId,
+    payloadHash: ctx.hash,
     updatedAt: now,
     deletedAt: null,
   };
 
-  let personId =
-    periods[0]?.personId ?? (await resolvePerson(tx, source, staged));
-  if (personId) {
-    await tx
-      .update(person)
-      .set({
-        displayName: staged.displayName,
-        workEmail: staged.workEmail,
-        updatedAt: now,
-      })
-      .where(eq(person.id, personId));
-  } else {
-    const [created] = await tx
-      .insert(person)
-      .values({ displayName: staged.displayName, workEmail: staged.workEmail })
-      .returning({ id: person.id });
-    personId = created.id;
+  let personId = periods[0]?.personId;
+  if (!personId) {
+    const resolved = !ctx.decision
+      ? await resolvePerson(tx, source, staged, ctx)
+      : ctx.decision.action === "link"
+        ? { personId: ctx.decision.personId }
+        : { personId: await createPerson(tx, staged) };
+    if ("issueId" in resolved) return { result: "issue", personId: null };
+    // A reviewer already chose to ignore exactly this payload.
+    if ("ignoredIssueId" in resolved) {
+      return { result: "unchanged", personId: null };
+    }
+    personId = resolved.personId;
   }
-  const conflicts = await syncIdentities(tx, personId, source, staged, now);
+  const current = await isCurrentStint(tx, personId, staged);
+  if (current) await updatePerson(tx, personId, staged, now);
+  const conflicts = await syncIdentities(
+    tx,
+    personId,
+    source,
+    staged,
+    now,
+    current,
+  );
 
+  let result: Outcome["result"];
   if (target === "new") {
     await tx.insert(employment).values({
       ...employmentValues,
@@ -225,13 +150,45 @@ async function upsertEmployee(
       sourceSystem: source,
       sourceId: staged.sourceId,
     });
-    return { result: periods.length ? "updated" : "inserted", conflicts };
+    result = periods.length ? "updated" : "inserted";
+  } else {
+    await tx
+      .update(employment)
+      .set(employmentValues)
+      .where(eq(employment.id, target.id));
+    result = "updated";
   }
-  await tx
-    .update(employment)
-    .set(employmentValues)
-    .where(eq(employment.id, target.id));
-  return { result: "updated", conflicts };
+
+  const row = {
+    source,
+    entity: "employee" as const,
+    sourceId: staged.sourceId,
+  };
+  if (conflicts.length === 0) {
+    // It applies cleanly now: whatever was waiting for it is moot.
+    await closeOpenIssue(tx, row, {
+      action: "link",
+      personId,
+      actorNote: "auto",
+    });
+    return { result, personId };
+  }
+  const raised = await raiseIssue(tx, {
+    ...row,
+    runId: ctx.runId,
+    payload: ctx.payload,
+    hash: ctx.hash,
+    reason: "conflict",
+    candidates: toCandidates([
+      [personId, "bamboo_id"],
+      ...conflicts.map((c): [string, typeof c.kind] => [
+        c.holderPersonId,
+        c.kind,
+      ]),
+    ]),
+  });
+  // A conflict a reviewer already waved through is not raised again.
+  return { result: "ignoredIssueId" in raised ? result : "issue", personId };
 }
 
 /**
@@ -243,6 +200,7 @@ export async function runIngest({
   entity,
   db,
   params = {},
+  unmatched,
 }: RunIngestInput): Promise<RunIngestResult> {
   const source = adapter.source;
   const [run] = await db
@@ -262,6 +220,7 @@ export async function runIngest({
     unchanged: 0,
     rejected: 0,
     deleted: 0,
+    issues: 0,
   };
   const rejects: IngestReject[] = [];
   const seen = new Set<string>();
@@ -294,13 +253,15 @@ export async function runIngest({
         continue;
       }
 
-      const { result, conflicts } = await db.transaction((tx) =>
-        upsertEmployee(tx, source, parsed.data, hash, run.id),
+      const { result } = await db.transaction((tx) =>
+        upsertEmployee(tx, source, parsed.data, {
+          runId: run.id,
+          hash,
+          payload: record.payload,
+          unmatched,
+        }),
       );
-      counts[result]++;
-      for (const reason of conflicts) {
-        rejects.push({ sourceId: record.sourceId, reason });
-      }
+      counts[result === "issue" ? "issues" : result]++;
     }
 
     // Guard: an empty extraction is far more likely a broken source than a
