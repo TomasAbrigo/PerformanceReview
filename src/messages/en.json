@@ -160,5 +160,36 @@
       "status": "Status",
       "empty": "No employment periods."
     }
+  },
+  "Goals": {
+    "title": "Goals",
+    "nav": "Team goals",
+    "empty": "No goals imported yet.",
+    "status": {
+      "in_progress": "In progress",
+      "completed": "Completed",
+      "closed": "Closed"
+    },
+    "progress": "Progress",
+    "dueDate": "Due {date}",
+    "noDueDate": "No due date",
+    "completedOn": "Completed on {date}",
+    "milestones": {
+      "title": "Milestones",
+      "summary": "{done} of {total, plural, =1 {1 milestone} other {# milestones}}",
+      "done": "Done",
+      "pending": "Pending"
+    },
+    "comments": "{count, plural, =0 {No comments} =1 {1 comment} other {# comments}}",
+    "sharedWith": "Shared with {names}",
+    "team": {
+      "title": "Team goals",
+      "description": "Goals of {manager}'s direct reports.",
+      "goalCount": "{count, plural, =1 {1 goal} other {# goals}}",
+      "noGoals": "No goals.",
+      "noReports": "{manager} has no direct reports.",
+      "chooseManager": "Choose a manager to see their team's goals.",
+      "noManagers": "No managers with direct reports."
+    }
   }
 }

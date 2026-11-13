@@ -1,4 +1,8 @@
-export { listDirectReports, type DirectReport } from "./direct-reports";
+export {
+  listDirectReports,
+  listManagers,
+  type DirectReport,
+} from "./direct-reports";
 export {
   listActiveEmployeeIds,
   runGoalIngest,

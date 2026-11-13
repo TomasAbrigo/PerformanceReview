@@ -7,7 +7,7 @@ import { closeDb, db } from "@/db/client";
 import { employment, goalMilestone, person } from "@/db/schema";
 import { FixtureAdapter, runIngest } from "@/modules/ingest";
 import { runGoalIngest } from "./ingest";
-import { listDirectReports } from "./direct-reports";
+import { listDirectReports, listManagers } from "./direct-reports";
 import { getTeamGoals, listPersonGoals } from "./queries";
 import {
   editJson,
@@ -182,6 +182,26 @@ describe("goal queries", () => {
       expect(await listDirectReports(db, await personId("Ana García"))).toEqual(
         [],
       );
+    });
+  });
+
+  describe("listManagers", () => {
+    it("lists the people who have at least one active direct report", async () => {
+      await ingestAll();
+
+      expect(await listManagers(db)).toEqual([
+        { id: await personId("Ana García"), displayName: "Ana García" },
+      ]);
+    });
+
+    it("is empty when nobody reports to anybody", async () => {
+      await ingestAll();
+      await db
+        .update(employment)
+        .set({ status: "Inactive" })
+        .where(eq(employment.sourceId, "102"));
+
+      expect(await listManagers(db)).toEqual([]);
     });
   });
 
