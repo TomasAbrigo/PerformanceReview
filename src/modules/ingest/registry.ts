@@ -25,6 +25,8 @@ export type EntityRunInput = {
   params: Record<string, unknown>;
   /** Incremental lower bound (a watermark); undefined means a full extraction. */
   since?: string;
+  /** employee: what to do with a record that matches nobody (default: create). */
+  unmatched?: "create" | "queue";
 };
 
 export type EntityEntry = {
@@ -58,8 +60,15 @@ const adapters: EntityEntry["adapters"] = {
 /** The entities that `runIngest` knows (an entry in `entityHandlers`). */
 const viaRunIngest = (entity: Entity): EntityEntry => ({
   adapters,
-  run: ({ adapter, db, params, since }) =>
-    runIngest({ adapter, entity, db, params, extract: { since } }),
+  run: ({ adapter, db, params, since, unmatched }) =>
+    runIngest({
+      adapter,
+      entity,
+      db,
+      params,
+      extract: { since },
+      ...(unmatched ? { unmatched } : {}),
+    }),
 });
 
 /**

@@ -34,10 +34,14 @@ export type PersonDetailData = {
   }[];
 };
 
-/** People, optionally filtered by name/email substring (case-insensitive). */
+/**
+ * People, optionally filtered by name/email substring (case-insensitive) and
+ * capped at `limit` (after sorting by name).
+ */
 export async function listPeople(
   db: DbOrTx,
   query = "",
+  { limit }: { limit?: number } = {},
 ): Promise<PersonListItem[]> {
   const q = query.trim();
   const latestStatus = sql<string | null>`(
@@ -46,7 +50,7 @@ export async function listPeople(
     order by e.hire_date desc nulls last limit 1
   )`;
   const pattern = `%${q.replace(/[\\%_]/g, (c) => `\\${c}`)}%`;
-  return db
+  const list = db
     .select({
       id: person.id,
       displayName: person.displayName,
@@ -68,6 +72,7 @@ export async function listPeople(
       ),
     )
     .orderBy(asc(person.displayName));
+  return limit === undefined ? list : list.limit(limit);
 }
 
 export async function getPerson(

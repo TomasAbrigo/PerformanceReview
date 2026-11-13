@@ -2,6 +2,7 @@ import { execFileSync } from "node:child_process";
 import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
+import { resetIdentityCase } from "./identity-case";
 
 const UUID = "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}";
 
@@ -39,7 +40,10 @@ function ingest(args: string[]) {
  * The ids of the runs the specs look at are handed over in E2E_RUN_OK (the
  * employee re-run) and E2E_RUN_FAILED (the failed one).
  */
-export default function globalSetup() {
+export default async function globalSetup() {
+  // The identity spec links a rehire (it runs last): forget it from a previous run.
+  await resetIdentityCase();
+
   const seed = ingest(["--all", "--source", "fixture"]);
   if (seed.status !== 0) throw new Error(`seeding failed:\n${seed.stdout}`);
   const rerun = ingest(["--all", "--source", "fixture"]);

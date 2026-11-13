@@ -25,7 +25,16 @@ describe("DomainError / parse", () => {
   });
 });
 
-describe("actionResult", () => {
+describe("actionResult with DomainError", () => {
+  it("can skip the page refresh", async () => {
+    const { refresh } = await import("next/cache");
+    vi.mocked(refresh).mockClear();
+    await actionResult(async () => {}, undefined, { refreshPage: false });
+    expect(refresh).not.toHaveBeenCalled();
+    await actionResult(async () => {});
+    expect(refresh).toHaveBeenCalledTimes(1);
+  });
+
   it("wraps values and maps domain errors to codes", async () => {
     expect(await actionResult(async () => ({ id: "a" }))).toEqual({
       ok: true,

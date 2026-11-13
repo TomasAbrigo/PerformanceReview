@@ -17,48 +17,43 @@ export async function previewParticipantsAction(
   filter: cycles.ParticipantFilterInput,
   asOf: string,
 ) {
-  return actionResult(() =>
-    cycles.previewParticipants(
-      db,
-      filter,
-      10,
-      parse(isoDate, asOf, cycles.CyclesError),
-    ),
+  return actionResult(
+    () =>
+      cycles.previewParticipants(
+        db,
+        filter,
+        10,
+        parse(isoDate, asOf, cycles.CyclesError),
+      ),
+    undefined,
+    { refreshPage: false },
   );
 }
 
 export async function createCycleAction(input: cycles.CycleInput) {
-  return actionResult(async () => ({
-    id: (await cycles.createCycle(db, input)).id,
-  }));
+  return actionResult(
+    async () => ({ id: (await cycles.createCycle(db, input)).id }),
+    undefined,
+    { refreshPage: false },
+  );
 }
 
 export async function launchCycleAction(id: string) {
-  return actionResult(
-    async () => {
-      await cycles.launchCycle(
-        db,
-        parse(cycleId, id, cycles.CyclesError),
-        ACTOR,
-      );
-    },
-    { refreshPage: true },
-  );
+  return actionResult(async () => {
+    await cycles.launchCycle(db, parse(cycleId, id, cycles.CyclesError), ACTOR);
+  });
 }
 
 export async function transitionCycleAction(
   id: string,
   to: cycles.CycleStatus,
 ) {
-  return actionResult(
-    async () => {
-      await cycles.transition(
-        db,
-        parse(cycleId, id, cycles.CyclesError),
-        parse(z.enum(cycleStatuses), to, cycles.CyclesError),
-        ACTOR,
-      );
-    },
-    { refreshPage: true },
-  );
+  return actionResult(async () => {
+    await cycles.transition(
+      db,
+      parse(cycleId, id, cycles.CyclesError),
+      parse(z.enum(cycleStatuses), to, cycles.CyclesError),
+      ACTOR,
+    );
+  });
 }
