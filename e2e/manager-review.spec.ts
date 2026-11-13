@@ -46,13 +46,14 @@ async function templateWithHiddenQuestion(page: Page, name: string) {
 async function collectingCycle(page: Page, name: string, template: string) {
   await page.goto("/es/cycles/new");
   await expect(page.getByText("Paso 1 de 4")).toBeVisible();
+  await page.getByLabel("Fecha de snapshot organizacional").fill("2022-06-01");
+  await expect(page.getByText(/\d+ personas coinciden/)).toBeVisible();
   await page.getByRole("button", { name: "Siguiente" }).click();
   await page.getByLabel("Plantilla").selectOption({ label: template });
   await page.getByRole("button", { name: "Siguiente" }).click();
   await page.getByLabel("Nombre del ciclo").fill(name);
   await page.getByLabel("Inicio del período").fill("2022-01-01");
   await page.getByLabel("Fin del período").fill("2022-06-30");
-  await page.getByLabel("Fecha de snapshot organizacional").fill("2022-06-01");
   await page.getByRole("button", { name: "Siguiente" }).click();
   await page.getByRole("button", { name: "Crear y lanzar" }).click();
   await expect(page).toHaveURL(/\/es\/cycles\/[0-9a-f-]{36}$/);
