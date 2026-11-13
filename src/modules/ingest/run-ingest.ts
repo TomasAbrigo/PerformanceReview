@@ -7,16 +7,21 @@ import {
   type IngestReject,
 } from "@/db/schema";
 import { payloadHash } from "./canonical";
-import { entityHandlers } from "./handlers";
-import type { Entity, ExtractContext, SourceAdapter } from "./types";
+import { handlerFor } from "./handlers";
+import type { ExtractContext, IngestEntity, SourceAdapter } from "./types";
 
 export { canonical, payloadHash } from "./canonical";
 export { resolvePerson } from "./employee";
 
 export type RunIngestInput = {
   adapter: SourceAdapter;
-  entity: Entity;
+  entity: IngestEntity;
   db: DbOrTx;
+  /**
+   * Landing mode: only write raw_record (and the run), no staging or domain
+   * upsert. Required for entities without a domain handler yet.
+   */
+  landing?: boolean;
   params?: Record<string, unknown>;
   /** Passed to the adapter (e.g. `since` for an incremental extraction). */
   extract?: ExtractContext;
@@ -32,9 +37,11 @@ export async function runIngest({
   adapter,
   entity,
   db,
+  landing = false,
   params = {},
   extract = {},
 }: RunIngestInput): Promise<RunIngestResult> {
+  const handler = handlerFor(entity, landing); // fails before opening a run
   const source = adapter.source;
   const [run] = await db
     .insert(ingestRun)
@@ -46,7 +53,6 @@ export async function runIngest({
     })
     .returning({ id: ingestRun.id });
 
-  const handler = entityHandlers[entity];
   const counts: IngestCounts = {
     read: 0,
     inserted: 0,
@@ -54,7 +60,7 @@ export async function runIngest({
     unchanged: 0,
     rejected: 0,
     deleted: 0,
-    ...handler.counts,
+    ...("landing" in handler ? {} : handler.counts),
   };
   const rejects: IngestReject[] = [];
   const seen = new Set<string>();
@@ -63,9 +69,14 @@ export async function runIngest({
   try {
     for await (const record of adapter.extract(extract, entity)) {
       counts.read++;
+      if ("rejected" in record) {
+        counts.rejected++;
+        rejects.push({ sourceId: record.sourceId, reason: record.reason });
+        continue;
+      }
       seen.add(record.sourceId);
       const hash = payloadHash(record.payload);
-      await db
+      const landed = await db
         .insert(rawRecord)
         .values({
           runId: run.id,
@@ -76,7 +87,13 @@ export async function runIngest({
           payloadHash: hash,
           extractedAt: record.extractedAt,
         })
-        .onConflictDoNothing();
+        .onConflictDoNothing()
+        .returning({ id: rawRecord.id });
+
+      if ("landing" in handler) {
+        counts[landed.length ? "inserted" : "unchanged"]++;
+        continue;
+      }
 
       const staged = handler.schema.safeParse(record.payload);
       if (!staged.success) {
@@ -98,7 +115,7 @@ export async function runIngest({
     }
 
     // Incremental extractions (since) never see everything: skip finish.
-    if (handler.finish && !extract.since) {
+    if (!("landing" in handler) && handler.finish && !extract.since) {
       addCounts(
         counts,
         await handler.finish(db, { source, runId: run.id, seen }),

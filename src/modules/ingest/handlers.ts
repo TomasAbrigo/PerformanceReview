@@ -9,7 +9,7 @@ import {
   upsertJobHistory,
 } from "./job-history";
 import { stagedEmployeeSchema } from "./staging";
-import type { Entity } from "./types";
+import type { Entity, IngestEntity } from "./types";
 
 export type HandlerContext = {
   source: SourceSystem;
@@ -41,6 +41,30 @@ export type EntityHandler<S> = {
     run: { source: SourceSystem; runId: string; seen: Set<string> },
   ): Promise<Partial<IngestCounts>>;
 };
+
+/**
+ * Landing mode: the record is stored in raw_record and nothing else (no
+ * staging, no domain upsert, no soft-delete pass). For entities whose domain
+ * mapping does not exist yet (assessments, feedback, goals from files...): the
+ * raw rows are kept so mapping them later needs no re-upload. Inserted /
+ * unchanged counts come from raw_record itself (same hash = unchanged).
+ */
+export type LandingHandler = { landing: true };
+export const landingHandler: LandingHandler = { landing: true };
+
+/** The handler for an entity: landing mode, or its domain handler. */
+export function handlerFor(
+  entity: IngestEntity,
+  landing: boolean,
+): EntityHandler<unknown> | LandingHandler {
+  if (landing) return landingHandler;
+  if (!(entity in entityHandlers)) {
+    throw new Error(
+      `No domain handler for entity "${entity}": its records can only be landed in raw_record (landing mode)`,
+    );
+  }
+  return entityHandlers[entity as Entity];
+}
 
 const defineHandler = <S>(h: EntityHandler<S>) => h;
 
