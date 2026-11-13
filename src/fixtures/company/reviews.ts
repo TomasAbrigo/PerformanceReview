@@ -37,7 +37,7 @@ export function buildCycles(): FixtureCycle[] {
 export interface ReviewsInput {
   employees: FixtureEmployee[];
   jobHistory: FixtureJobRow[];
-  identity: IdentityGroundTruth;
+  identity: Omit<IdentityGroundTruth, "misspellings" | "outsiders">;
 }
 
 export interface Reviews {

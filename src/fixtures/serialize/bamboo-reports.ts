@@ -1,4 +1,4 @@
-import type { CompanyFixture, FixtureEmployee } from "../company";
+import type { CompanyFixture } from "../company";
 import {
   CUSTOM_QUESTIONS,
   MANAGER_QUESTIONS,

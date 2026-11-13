@@ -639,7 +639,33 @@ describe("headline counts hold for any seed", () => {
     expect(c.employees.filter((e) => e.managerId === null)).toHaveLength(1);
     expect(c.identity.renames.length).toBe(size === "small" ? 2 : 6);
     expect(c.identity.duplicateNames).toHaveLength(1);
+    expect(c.identity.misspellings).toHaveLength(size === "small" ? 3 : 12);
   });
+
+  it.each([3, 4, 5, 6])(
+    "keeps managers employed and histories dated with seed %i",
+    (seed) => {
+      const c = generateCompany({ size: "small", seed });
+      const byId = new Map(c.employees.map((e) => [e.id, e]));
+      for (const e of c.employees) {
+        const rows = rowsOf(c, e.id);
+        expect(rows[0].date).toBe(e.hireDate);
+        expect(new Set(rows.map((r) => r.date)).size).toBe(rows.length);
+        for (const row of rows) {
+          if (row.managerId === null) continue;
+          const manager = byId.get(row.managerId)!;
+          expect(manager.hireDate <= row.date).toBe(true);
+          expect(
+            manager.terminationDate === null ||
+              row.date < manager.terminationDate,
+          ).toBe(true);
+        }
+        if (e.status === "Active" && e.managerId !== null) {
+          expect(byId.get(e.managerId)!.status).toBe("Active");
+        }
+      }
+    },
+  );
 });
 
 describe("generateCompany determinism", () => {

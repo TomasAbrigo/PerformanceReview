@@ -39,6 +39,57 @@ pnpm lint
 pnpm format      # Prettier
 ```
 
+## Fixtures
+
+Empresa sintética y determinista con la forma exacta de lo que devuelve Bamboo, para desarrollar y testear sin API key. Cuando haya credenciales reales, el primer paso es grabar respuestas reales y compararlas con estos archivos.
+
+```bash
+pnpm fixtures:build   # regenera fixtures/bamboo/{small,demo} y fixtures/bamboo-reports/{small,demo}
+```
+
+El generador (`src/fixtures/company/`) es puro y usa una semilla fija (`1001` para small y `2002` para demo, en `src/fixtures/write.ts`): misma semilla, mismos archivos byte a byte. Un test unitario falla si lo commiteado no coincide con lo que genera el código; si tocás el generador, corré `pnpm fixtures:build` y commiteá el resultado.
+
+| Tamaño | Registros Bamboo | Bajas | Reingresos | Cambios de manager | Goals | Assessments | Pedidos de feedback |
+| ------ | ---------------- | ----- | ---------- | ------------------ | ----- | ----------- | ------------------- |
+| small  | 40               | 10    | 4          | 26                 | 157   | 80          | 215                 |
+| demo   | 400              | 30    | 8          | 70                 | 1649  | 915         | 2764                |
+
+Ambos tienen 5 niveles (CEO, VP de división, gerente de área, líder de equipo, individual), varias divisiones, áreas y ubicaciones, una sola persona sin manager (el CEO) y 3 ciclos históricos anuales (2023, 2024 y 2025).
+
+**`fixtures/bamboo/<size>/`**: respuestas JSON de la API pública (ids siempre string, fechas ISO, `null` en vez de `0000-00-00`).
+
+- `employees/list/page-NNN.json`: list-employees paginado por cursor (`data`, `meta.page.nextCursor`, `_links`).
+- `employees/get/<id>.json`: get-employee con `supervisorEId`, `supervisorId` y `supervisor`.
+- `employees/tables/jobInfo/all.json` y `employees/tables/employmentStatus/all.json`: historial completo.
+- `employees/changed.json`: feed de cambios (full load).
+- `performance/goals/<id>.json`: goals aggregate v1_2 por empleado (milestones, comments).
+- `manifest.json`: semilla y conteos.
+
+**`fixtures/bamboo-reports/<size>/`**: CSV con la forma de los reportes estándar de Performance de Bamboo (`employee-performance`, `feedback-status`, `goal-status`, `assessment-progress`) para los 3 ciclos. Identifican personas solo por nombre ("Nombre Apellido"). Las columnas exactas de Bamboo no están verificadas (ver `docs/research/07`); se replicaron las documentadas.
+
+Trampas intencionales (las que va a tener que resolver la ingesta):
+
+- `reportsTo` (jobInfo) y `supervisor` son el nombre ("Apellido, Nombre"), no el id; `supervisorEId` es el id interno y `supervisorId` es el legajo del manager.
+- Reingresos: mismo legajo y mismo email (o email nuevo en algunos), id de Bamboo nuevo.
+- Los CSV muestran el manager y el área **actuales**, no los del momento de la review; el manager de entonces solo se recupera del historial de jobInfo.
+- Nombres sucios en los CSV: personas renombradas (el CSV de ciclos viejos tiene el nombre anterior), nombres mal escritos en un ciclo, dos personas distintas con el mismo nombre y filas de personas que no existen en el HRIS.
+
+La verdad de base de esas trampas está en `company.identity` (`persons`, `renames`, `duplicateNames`, `misspellings`, `outsiders`).
+
+Desde código:
+
+```ts
+import { generateCompany } from "@/fixtures/company";
+import { serializeBambooApi } from "@/fixtures/serialize/bamboo-api";
+
+const company = generateCompany({ size: "small", seed: 1001 });
+const files = serializeBambooApi(company); // [{ path, content }]
+```
+
+Los esquemas zod de cada respuesta están en `src/fixtures/bamboo-schemas.ts` (los tests validan los JSON generados contra ellos y el cliente real los va a reutilizar).
+
+**Sembrar la base:** todavía no. Las tablas de personas llegan con los issues #3 y #4; este slice solo genera archivos y datos en memoria. Cuando existan, el comando que resetea y siembra la base local (`pnpm db:reset` + `pnpm db:migrate` + seed) va a leer esta misma generación.
+
 ## Base de datos
 
 - Esquema de Drizzle: `src/db/schema/*.ts`. Migraciones generadas en `drizzle/` (`pnpm db:generate`, `pnpm db:migrate`).
