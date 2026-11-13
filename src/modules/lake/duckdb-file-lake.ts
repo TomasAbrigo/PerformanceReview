@@ -1,4 +1,5 @@
-import { readdir } from "node:fs/promises";
+import { mkdtemp, readdir, rm, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
 import { basename, extname, join, resolve } from "node:path";
 import {
   DuckDBInstance,
@@ -13,6 +14,7 @@ import type {
   LakeRow,
   ReadOptions,
 } from "./types";
+import { xlsxToCsv } from "./xlsx";
 
 /**
  * Hidden last tiebreaker: position of the row in the file. Without it, rows
@@ -22,6 +24,8 @@ const ROW_POSITION = "__lake_row_position";
 
 /** Quote an SQL identifier. */
 const quote = (id: string) => `"${id.replaceAll('"', '""')}"`;
+
+const XLSX = ".xlsx";
 
 /** File extension -> DuckDB table function that reads it. */
 const READERS: Record<string, string> = {
@@ -42,32 +46,62 @@ function maxWatermark(rows: LakeRow[], column: string): string | null {
 }
 
 /**
- * Lake over a directory of `<table>.{csv,parquet,json,ndjson}` files, queried
- * in process with DuckDB. Table names come only from the directory listing.
+ * Lake over a directory of `<table>.{csv,parquet,json,ndjson,xlsx}` files,
+ * queried in process with DuckDB. Table names come only from the directory
+ * listing.
  */
 export class DuckDbFileLake implements LakeAdapter {
   private constructor(
     private readonly conn: DuckDBConnection,
     private readonly files: Map<string, string>,
+    private readonly conversions: string | undefined,
   ) {}
 
+  /**
+   * Open the lake over the files of `dir` (not recursive). One table per
+   * file, named after the file without extension. `.xlsx` files are converted
+   * to csv in a temporary folder, removed on `close()`.
+   */
   static async open(dir: string): Promise<DuckDbFileLake> {
-    const files = new Map<string, string>();
+    const listing = new Map<string, string>(); // table -> file name
     for (const file of await readdir(dir)) {
-      if (!READERS[extname(file)]) continue;
-      const table = basename(file, extname(file));
-      if (files.has(table)) {
+      const ext = extname(file);
+      // Skip editor swap files and Office lock files (~$report.xlsx).
+      if (file.startsWith(".") || file.startsWith("~$")) continue;
+      if (!READERS[ext] && ext !== XLSX) continue;
+      const table = basename(file, ext);
+      const other = listing.get(table);
+      if (other) {
         throw new Error(
-          `Ambiguous table "${table}": more than one file in ${dir} (${basename(files.get(table)!)}, ${file})`,
+          `Ambiguous table "${table}": ${other} and ${file} in ${dir}`,
         );
       }
-      files.set(table, resolve(join(dir, file)));
+      listing.set(table, file);
     }
-    const instance = await DuckDBInstance.create(":memory:");
-    const conn = await instance.connect();
-    // Rendering of timestamps must not depend on the machine's time zone.
-    await conn.run(`SET TimeZone='UTC'`);
-    return new DuckDbFileLake(conn, files);
+
+    const files = new Map<string, string>(); // table -> path DuckDB reads
+    let conversions: string | undefined;
+    try {
+      for (const [table, file] of listing) {
+        const path = resolve(dir, file);
+        if (extname(file) !== XLSX) {
+          files.set(table, path);
+          continue;
+        }
+        conversions ??= await mkdtemp(join(tmpdir(), "lake-xlsx-conv-"));
+        const csvPath = join(conversions, `${table}.csv`);
+        await writeFile(csvPath, await xlsxToCsv(path));
+        files.set(table, csvPath);
+      }
+      const instance = await DuckDBInstance.create(":memory:");
+      const conn = await instance.connect();
+      // Rendering of timestamps must not depend on the machine's time zone.
+      await conn.run(`SET TimeZone='UTC'`);
+      return new DuckDbFileLake(conn, files, conversions);
+    } catch (error) {
+      if (conversions) await rm(conversions, { recursive: true, force: true });
+      throw error;
+    }
   }
 
   /** SQL table expression for a table. The path comes from our own listing. */
@@ -178,5 +212,8 @@ export class DuckDbFileLake implements LakeAdapter {
 
   async close(): Promise<void> {
     this.conn.closeSync();
+    if (this.conversions) {
+      await rm(this.conversions, { recursive: true, force: true });
+    }
   }
 }
