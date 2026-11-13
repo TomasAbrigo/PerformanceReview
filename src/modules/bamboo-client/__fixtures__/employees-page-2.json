@@ -1,0 +1,20 @@
+{
+  "data": [
+    {
+      "id": 103,
+      "employeeNumber": "0003",
+      "firstName": "Carla",
+      "lastName": "Romero",
+      "displayName": "Carla Romero",
+      "workEmail": "carla.romero@example.com",
+      "status": "Inactive",
+      "hireDate": "2018-01-10",
+      "terminationDate": "2024-06-30",
+      "supervisorEId": "101",
+      "supervisorId": "0001",
+      "_restrictedFields": ["hireDate"]
+    }
+  ],
+  "meta": { "page": { "limit": 2, "nextCursor": null } },
+  "_links": {}
+}

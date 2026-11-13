@@ -1,0 +1,34 @@
+{
+  "data": [
+    {
+      "id": 101,
+      "employeeNumber": "0001",
+      "firstName": "Ana",
+      "lastName": "García",
+      "displayName": "Ana García",
+      "workEmail": "ana.garcia@example.com",
+      "status": "Active",
+      "hireDate": "2019-03-01",
+      "terminationDate": null,
+      "supervisorEId": null,
+      "supervisorId": null,
+      "_restrictedFields": []
+    },
+    {
+      "id": "102",
+      "employeeNumber": "0002",
+      "firstName": "Bruno",
+      "lastName": "Pérez",
+      "displayName": "Bruno Pérez",
+      "workEmail": "bruno.perez@example.com",
+      "status": "Active",
+      "hireDate": "2021-07-15",
+      "terminationDate": null,
+      "supervisorEId": 101,
+      "supervisorId": "0001",
+      "_restrictedFields": []
+    }
+  ],
+  "meta": { "page": { "limit": 2, "nextCursor": "cursor-page-2" } },
+  "_links": { "next": "/api/v1/employees?page[after]=cursor-page-2" }
+}

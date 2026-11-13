@@ -1,0 +1,13 @@
+{
+  "id": "101",
+  "employeeNumber": "0001",
+  "firstName": "Ana",
+  "lastName": "García",
+  "displayName": "Ana García",
+  "workEmail": "ana.garcia@example.com",
+  "status": "Active",
+  "hireDate": "2019-03-01",
+  "terminationDate": null,
+  "supervisorEId": null,
+  "supervisorId": null
+}
