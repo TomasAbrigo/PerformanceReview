@@ -84,6 +84,12 @@ const goalCommentsSchema = z
   ])
   .transform((r) => (Array.isArray(r) ? r : (r.comments ?? [])));
 
+/** Parsers shared with the fixture adapter, so files and API normalize alike. */
+export const parseGoalsAggregate = (body: unknown) =>
+  goalsAggregateSchema.parse(body);
+export const parseGoalComments = (body: unknown) =>
+  goalCommentsSchema.parse(body);
+
 export type BambooGoal = z.infer<typeof goalSchema>;
 export type BambooGoalMilestone = BambooGoal["milestones"][number];
 export type BambooGoalsAggregate = z.infer<typeof goalsAggregateSchema>;
@@ -104,7 +110,7 @@ export function createGoalsEndpoints(get: HttpGet): GoalsEndpoints {
 
   return {
     async getGoalsAggregate(employeeId) {
-      return goalsAggregateSchema.parse(
+      return parseGoalsAggregate(
         await get(`/api/v1_2${employeePath(employeeId)}/goals/aggregate`, {
           filter: "status-all",
         }),
@@ -112,7 +118,7 @@ export function createGoalsEndpoints(get: HttpGet): GoalsEndpoints {
     },
 
     async getGoalComments(employeeId, goalId) {
-      return goalCommentsSchema.parse(
+      return parseGoalComments(
         await get(
           `/api/v1${employeePath(employeeId)}/goals/${encodeURIComponent(goalId)}/comments`,
         ),

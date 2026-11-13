@@ -1,6 +1,16 @@
 import { readdir, readFile } from "node:fs/promises";
 import path from "node:path";
-import type { Entity, ExtractedRecord, SourceAdapter } from "./types";
+import {
+  parseGoalComments,
+  parseGoalsAggregate,
+} from "@/modules/bamboo-client";
+import { extractGoals, type GoalSource } from "./goals-extract";
+import type {
+  Entity,
+  ExtractContext,
+  ExtractedRecord,
+  SourceAdapter,
+} from "./types";
 
 type Json = Record<string, unknown>;
 
@@ -12,19 +22,42 @@ const isObject = (v: unknown): v is Json =>
  * List-employees pages (`{ data: [...] }`) are authoritative; single
  * get-employee files (`{ id, ... }`) only add ids missing from the pages.
  * Other shapes (e.g. the changed feed) are ignored.
+ *
+ * Goals: `goals/<employeeId>.json` is the aggregate response of an employee
+ * and `goal-comments/<goalId>.json` the comments of a goal; a missing file
+ * means no goals / no comments.
  */
 export class FixtureAdapter implements SourceAdapter {
   readonly source = "bamboo_api" as const;
   readonly name = "fixture";
-  readonly entities = ["employee"] as const;
+  readonly entities = ["employee", "goal"] as const;
 
   constructor(readonly dir: string) {}
 
+  private async readJson(...parts: string[]): Promise<unknown> {
+    try {
+      return JSON.parse(await readFile(path.join(this.dir, ...parts), "utf8"));
+    } catch (err) {
+      if ((err as NodeJS.ErrnoException).code === "ENOENT") return {};
+      throw err;
+    }
+  }
+
+  private readonly goalSource: GoalSource = {
+    getGoalsAggregate: async (employeeId) =>
+      parseGoalsAggregate(await this.readJson("goals", `${employeeId}.json`)),
+    getGoalComments: async (_employeeId, goalId) =>
+      parseGoalComments(await this.readJson("goal-comments", `${goalId}.json`)),
+  };
+
   async *extract(
-    _ctx: unknown,
+    ctx: ExtractContext,
     entity: Entity,
   ): AsyncIterable<ExtractedRecord> {
-    if (entity !== "employee") throw new Error(`Unsupported entity ${entity}`);
+    if (entity === "goal") {
+      yield* extractGoals(this.goalSource, ctx.employeeIds ?? []);
+      return;
+    }
     const files = (await readdir(this.dir))
       .filter((f) => f.endsWith(".json"))
       .sort();

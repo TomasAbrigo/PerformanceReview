@@ -1,15 +1,24 @@
 import type { SourceSystem } from "@/db/schema";
 
-export type Entity = "employee";
+export type Entity = "employee" | "goal";
 
 export type ExtractedRecord = {
   /** The source's own immutable key (Bamboo internal id), as a string. */
   sourceId: string;
   payload: unknown;
   extractedAt: Date;
+  /**
+   * Goal records only: fetches the goal's comments (one extra request), so
+   * the caller pays for it only when the comment count changed.
+   */
+  loadComments?: () => Promise<unknown[]>;
 };
 
-export type ExtractContext = { signal?: AbortSignal };
+export type ExtractContext = {
+  signal?: AbortSignal;
+  /** Entity "goal": Bamboo ids of the employees whose goals to read. */
+  employeeIds?: string[];
+};
 
 /** Anything that can produce raw records for our entities. */
 export interface SourceAdapter {

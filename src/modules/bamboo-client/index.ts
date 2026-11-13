@@ -10,6 +10,7 @@ import {
 } from "./schemas";
 
 export { BambooError, type BambooConfig } from "./http";
+export { parseGoalComments, parseGoalsAggregate } from "./goals";
 export type {
   BambooGoal,
   BambooGoalComment,
