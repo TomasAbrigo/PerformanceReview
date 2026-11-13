@@ -1,0 +1,141 @@
+{
+  "canAlign": true,
+  "canCreateGoals": true,
+  "filters": [{ "id": "status-all", "name": "All" }],
+  "selectedFilter": "status-all",
+  "goals": [
+    {
+      "id": 9101,
+      "title": "Reducir el tiempo de primera respuesta de soporte",
+      "description": "Bajar la mediana de primera respuesta a menos de 4 horas.",
+      "percentComplete": 55,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2026-12-31",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-11-05T10:30:00Z",
+      "status": "in_progress",
+      "milestones": [
+        {
+          "id": 5101,
+          "employeeGoalId": 9101,
+          "title": "Medir la línea de base",
+          "currentValue": 1,
+          "startValue": 0,
+          "endValue": 1,
+          "completedDateTime": "2026-08-15T12:00:00Z",
+          "lastUpdateDateTime": "2026-08-15T12:00:00Z",
+          "lastUpdateUserId": 8102
+        },
+        {
+          "id": 5102,
+          "employeeGoalId": 9101,
+          "title": "Automatizar el triage",
+          "currentValue": 1,
+          "startValue": 0,
+          "endValue": 1,
+          "completedDateTime": "2026-10-10T12:00:00Z",
+          "lastUpdateDateTime": "2026-10-10T12:00:00Z",
+          "lastUpdateUserId": 8102
+        },
+        {
+          "id": 5103,
+          "employeeGoalId": 9101,
+          "title": "Cubrir el turno noche",
+          "currentValue": 0,
+          "startValue": 0,
+          "endValue": 1,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2026-10-10T12:00:00Z",
+          "lastUpdateUserId": 8102
+        }
+      ],
+      "actions": {}
+    },
+    {
+      "id": 9102,
+      "title": "Obtener la certificación AWS",
+      "description": "Solutions Architect Associate.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2026-09-30",
+      "completionDate": "2026-09-20",
+      "lastChangedDateTime": "2026-09-20T18:00:00Z",
+      "status": "completed",
+      "milestones": [],
+      "actions": {}
+    },
+    {
+      "id": "9103",
+      "title": "Documentar los runbooks de guardia",
+      "description": null,
+      "percentComplete": 0,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2027-02-28",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-11-01T08:00:00Z",
+      "status": "in_progress",
+      "milestones": null,
+      "actions": {}
+    },
+    {
+      "id": 9001,
+      "title": "Definir el plan de carrera del área",
+      "description": "Roles, niveles y criterios de promoción para el área de People.",
+      "percentComplete": 50,
+      "alignsWithOptionId": "12",
+      "sharedWithEmployeeIds": [102],
+      "dueDate": "2026-12-15",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-11-02T14:20:00Z",
+      "status": "in_progress",
+      "milestones": [
+        {
+          "id": 5001,
+          "employeeGoalId": 9001,
+          "title": "Mapear roles actuales",
+          "currentValue": 1,
+          "startValue": 0,
+          "endValue": 1,
+          "completedDateTime": "2026-10-01T12:00:00Z",
+          "lastUpdateDateTime": "2026-10-01T12:00:00Z",
+          "lastUpdateUserId": 8101
+        },
+        {
+          "id": 5002,
+          "employeeGoalId": 9001,
+          "title": "Publicar el framework",
+          "currentValue": 0,
+          "startValue": 0,
+          "endValue": 1,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2026-10-01T12:00:00Z",
+          "lastUpdateUserId": 8101
+        }
+      ],
+      "actions": {}
+    }
+  ],
+  "persons": [
+    {
+      "employeeId": 101,
+      "userId": 8101,
+      "displayFirstName": "Ana",
+      "lastName": "García",
+      "photoUrl": null
+    },
+    {
+      "employeeId": 102,
+      "userId": 8102,
+      "displayFirstName": "Bruno",
+      "lastName": "Pérez",
+      "photoUrl": null
+    }
+  ],
+  "comments": [
+    { "goalId": 9101, "commentCount": 1 },
+    { "goalId": "9001", "commentCount": 2 }
+  ]
+}

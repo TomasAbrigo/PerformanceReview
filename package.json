@@ -21,6 +21,7 @@
     "db:studio": "drizzle-kit studio",
     "db:reset": "supabase db reset",
     "ingest:employees": "tsx scripts/ingest-employees.ts",
+    "ingest:goals": "tsx scripts/ingest-employees.ts --entity goal",
     "fixtures:build": "tsx src/fixtures/build.ts",
     "fixtures:parquet": "tsx scripts/fixtures-parquet.ts"
   },

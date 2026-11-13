@@ -1,8 +1,14 @@
 import { readdir, readFile } from "node:fs/promises";
 import path from "node:path";
+import {
+  parseGoalComments,
+  parseGoalsAggregate,
+} from "@/modules/bamboo-client";
 import { tableRowSchema } from "@/modules/bamboo-client/schemas";
+import { extractGoals, type GoalSource } from "./goals-extract";
 import type {
   Entity,
+  ExtractContext,
   ExtractedRecord,
   JobHistoryPayload,
   SourceAdapter,
@@ -21,13 +27,33 @@ const isObject = (v: unknown): v is Json =>
  *
  * `job_history` reads `tables-jobInfo.json` and `tables-employmentStatus.json`
  * (responses of /employees/all/tables/{table}), grouped per employee.
+ *
+ * `goal`: `goals/<employeeId>.json` is the aggregate response of an employee
+ * and `goal-comments/<goalId>.json` the comments of a goal; a missing file
+ * means no goals / no comments.
  */
 export class FixtureAdapter implements SourceAdapter {
   readonly source = "bamboo_api" as const;
   readonly name = "fixture";
-  readonly entities = ["employee", "job_history"] as const;
+  readonly entities = ["employee", "job_history", "goal"] as const;
 
   constructor(readonly dir: string) {}
+
+  private async readJson(...parts: string[]): Promise<unknown> {
+    try {
+      return JSON.parse(await readFile(path.join(this.dir, ...parts), "utf8"));
+    } catch (err) {
+      if ((err as NodeJS.ErrnoException).code === "ENOENT") return {};
+      throw err;
+    }
+  }
+
+  private readonly goalSource: GoalSource = {
+    getGoalsAggregate: async (employeeId) =>
+      parseGoalsAggregate(await this.readJson("goals", `${employeeId}.json`)),
+    getGoalComments: async (_employeeId, goalId) =>
+      parseGoalComments(await this.readJson("goal-comments", `${goalId}.json`)),
+  };
 
   private async readTable(table: string): Promise<unknown[]> {
     let body: unknown;
@@ -42,10 +68,13 @@ export class FixtureAdapter implements SourceAdapter {
     return Array.isArray(body) ? body : [];
   }
 
-  extract(_ctx: unknown, entity: Entity): AsyncIterable<ExtractedRecord> {
+  extract(ctx: ExtractContext, entity: Entity): AsyncIterable<ExtractedRecord> {
     if (entity === "job_history") return this.extractJobHistory();
     if (entity === "employee") return this.extractEmployees();
-    throw new Error(`Unsupported entity ${entity}`);
+    if (entity === "goal") {
+      return extractGoals(this.goalSource, ctx.employeeIds ?? [], ctx.onSkip);
+    }
+    throw new Error(`Unsupported entity ${String(entity)}`);
   }
 
   private async *extractJobHistory(): AsyncIterable<ExtractedRecord> {

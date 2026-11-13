@@ -1,5 +1,6 @@
 export { BambooApiAdapter, EMPLOYEE_FIELDS } from "./bamboo-api-adapter";
 export { FixtureAdapter } from "./fixture-adapter";
+export type { GoalCommentPayload, GoalPayload } from "./goals-extract";
 export {
   payloadHash,
   resolvePerson,
@@ -12,5 +13,6 @@ export type {
   Entity,
   ExtractContext,
   ExtractedRecord,
+  SkippedEmployee,
   SourceAdapter,
 } from "./types";

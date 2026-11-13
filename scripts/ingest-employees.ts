@@ -1,6 +1,8 @@
 /**
- * pnpm ingest:employees --source fixture|bamboo [--dir path] [--entity employee|job_history]
+ * pnpm ingest:employees --source fixture|bamboo [--dir path] [--entity employee|job_history|goal]
  * job_history (jobInfo + employmentStatus tables) needs employees ingested first.
+ * goal (goals of the active employees) needs employees ingested first;
+ * `pnpm ingest:goals` is the same with --entity goal.
  * --since <ISO> (bamboo, job_history only): only employees whose tables changed.
  * bamboo needs BAMBOO_COMPANY_DOMAIN and BAMBOO_API_KEY.
  */
@@ -8,6 +10,7 @@ import path from "node:path";
 import { parseArgs } from "node:util";
 import { closeDb, db } from "../src/db/client";
 import { createBambooClient } from "../src/modules/bamboo-client";
+import { runGoalIngest } from "../src/modules/goals";
 import {
   BambooApiAdapter,
   FixtureAdapter,
@@ -16,7 +19,7 @@ import {
   type SourceAdapter,
 } from "../src/modules/ingest";
 
-const ENTITIES: readonly Entity[] = ["employee", "job_history"];
+const ENTITIES: readonly Entity[] = ["employee", "job_history", "goal"];
 
 try {
   process.loadEnvFile(".env.local");
@@ -62,13 +65,21 @@ async function main() {
     );
   }
 
-  const { runId, counts } = await runIngest({
-    adapter,
-    entity,
-    db,
-    params: { source: values.source, dir: values.dir, since: values.since },
-    extract: { since: values.since },
-  });
+  const params = {
+    source: values.source,
+    dir: values.dir,
+    since: values.since,
+  };
+  const { runId, counts } =
+    entity === "goal"
+      ? await runGoalIngest({ adapter, db, params })
+      : await runIngest({
+          adapter,
+          entity,
+          db,
+          params,
+          extract: { since: values.since },
+        });
   console.log(`ingest_run ${runId}`);
   console.log(JSON.stringify(counts));
 }
