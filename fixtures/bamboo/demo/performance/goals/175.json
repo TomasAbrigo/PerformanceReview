@@ -1,0 +1,110 @@
+{
+  "canAlign": true,
+  "canCreateGoals": true,
+  "filters": [
+    {
+      "id": "status-all",
+      "name": "All"
+    },
+    {
+      "id": "inProgress",
+      "name": "In progress"
+    },
+    {
+      "id": "completed",
+      "name": "Completed"
+    },
+    {
+      "id": "closed",
+      "name": "Closed"
+    }
+  ],
+  "selectedFilter": "status-all",
+  "goals": [
+    {
+      "id": "5744",
+      "title": "Mentorear a dos personas nuevas",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2025-04-30",
+      "completionDate": "2025-04-22",
+      "lastChangedDateTime": "2025-04-22T17:10:18Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "5746",
+      "title": "Reducir los incidentes recurrentes a la mitad",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2025-10-02",
+      "completionDate": "2025-05-21",
+      "lastChangedDateTime": "2025-05-21T15:57:59Z",
+      "status": "completed",
+      "milestones": [
+        {
+          "id": 1023,
+          "employeeGoalId": 5746,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-05-12T15:07:49Z",
+          "lastUpdateDateTime": "2025-05-12T15:07:49Z",
+          "lastUpdateUserId": 175
+        },
+        {
+          "id": 1024,
+          "employeeGoalId": 5746,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-03-04T10:37:52Z",
+          "lastUpdateDateTime": "2025-03-04T10:37:52Z",
+          "lastUpdateUserId": 175
+        },
+        {
+          "id": 1025,
+          "employeeGoalId": 5746,
+          "title": "Hito 3",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-05-17T08:15:58Z",
+          "lastUpdateDateTime": "2025-05-17T08:15:58Z",
+          "lastUpdateUserId": 175
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    }
+  ],
+  "persons": [
+    {
+      "employeeId": 175,
+      "firstName": "Damián",
+      "lastName": "Aguirre",
+      "preferredName": null
+    }
+  ],
+  "comments": []
+}

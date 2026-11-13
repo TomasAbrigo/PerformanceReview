@@ -1,0 +1,17 @@
+{
+  "id": "191",
+  "firstName": "Elena",
+  "lastName": "Acosta",
+  "workEmail": "elena.acosta@meridian-andina.example",
+  "employeeNumber": "10444",
+  "supervisorEId": "31",
+  "supervisorId": "10049",
+  "supervisor": "Ríos, Antonella",
+  "hireDate": "2021-03-23",
+  "terminationDate": null,
+  "department": "Infraestructura",
+  "division": "Tecnología",
+  "jobTitle": "DevOps Engineer Ssr",
+  "location": "Buenos Aires",
+  "status": "Active"
+}

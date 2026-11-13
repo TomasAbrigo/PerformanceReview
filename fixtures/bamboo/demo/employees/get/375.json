@@ -1,0 +1,17 @@
+{
+  "id": "375",
+  "firstName": "Belén",
+  "lastName": "Paz",
+  "workEmail": "belen.paz@meridian-andina.example",
+  "employeeNumber": "10922",
+  "supervisorEId": "49",
+  "supervisorId": "10081",
+  "supervisor": "Monzón, Milagros",
+  "hireDate": "2022-09-30",
+  "terminationDate": null,
+  "department": "Calidad",
+  "division": "Operaciones",
+  "jobTitle": "Analista de Calidad Ssr",
+  "location": "Buenos Aires",
+  "status": "Active"
+}

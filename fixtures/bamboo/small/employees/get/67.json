@@ -1,0 +1,17 @@
+{
+  "id": "67",
+  "firstName": "Maximiliano",
+  "lastName": "Acosta",
+  "workEmail": "maximiliano.acosta@meridian-andina.example",
+  "employeeNumber": "10140",
+  "supervisorEId": "31",
+  "supervisorId": "10056",
+  "supervisor": "Rivas, Federico",
+  "hireDate": "2024-04-11",
+  "terminationDate": "2026-05-05",
+  "department": "Finanzas",
+  "division": "Corporativo",
+  "jobTitle": "Analista de Tesorería Sr",
+  "location": "Buenos Aires",
+  "status": "Inactive"
+}

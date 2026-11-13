@@ -1,0 +1,150 @@
+{
+  "canAlign": true,
+  "canCreateGoals": true,
+  "filters": [
+    {
+      "id": "status-all",
+      "name": "All"
+    },
+    {
+      "id": "inProgress",
+      "name": "In progress"
+    },
+    {
+      "id": "completed",
+      "name": "Completed"
+    },
+    {
+      "id": "closed",
+      "name": "Closed"
+    }
+  ],
+  "selectedFilter": "status-all",
+  "goals": [
+    {
+      "id": "7298",
+      "title": "Automatizar la conciliación mensual",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2025-07-05",
+      "completionDate": "2025-06-29",
+      "lastChangedDateTime": "2025-06-29T08:52:11Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "7301",
+      "title": "Entregar el proyecto Norte sin desvíos",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2026-08-28",
+      "completionDate": "2026-08-23",
+      "lastChangedDateTime": "2026-08-23T09:36:15Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "7302",
+      "title": "Documentar los procesos críticos",
+      "description": "Sirve de base para el próximo ciclo de evaluación.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2026-09-30",
+      "completionDate": "2026-07-20",
+      "lastChangedDateTime": "2026-07-20T18:40:51Z",
+      "status": "completed",
+      "milestones": [
+        {
+          "id": 1763,
+          "employeeGoalId": 7302,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2026-04-06T13:15:09Z",
+          "lastUpdateDateTime": "2026-04-06T13:15:09Z",
+          "lastUpdateUserId": 545
+        },
+        {
+          "id": 1764,
+          "employeeGoalId": 7302,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2026-05-11T09:36:38Z",
+          "lastUpdateDateTime": "2026-05-11T09:36:38Z",
+          "lastUpdateUserId": 545
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "7303",
+      "title": "Implementar el calendario editorial",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2026-02-09",
+      "completionDate": "2026-01-26",
+      "lastChangedDateTime": "2026-01-26T14:27:39Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    }
+  ],
+  "persons": [
+    {
+      "employeeId": 545,
+      "firstName": "Soledad",
+      "lastName": "Ruiz",
+      "preferredName": null
+    }
+  ],
+  "comments": [
+    {
+      "goalId": "7302",
+      "commentCount": 4
+    },
+    {
+      "goalId": "7303",
+      "commentCount": 3
+    }
+  ]
+}

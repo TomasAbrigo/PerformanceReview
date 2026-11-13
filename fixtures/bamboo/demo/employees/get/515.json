@@ -1,0 +1,17 @@
+{
+  "id": "515",
+  "firstName": "Silvana",
+  "lastName": "Medina",
+  "workEmail": "silvana.medina@meridian-andina.example",
+  "employeeNumber": "11266",
+  "supervisorEId": "43",
+  "supervisorId": "10072",
+  "supervisor": "Soria, Eugenia",
+  "hireDate": "2023-11-08",
+  "terminationDate": null,
+  "department": "Legales",
+  "division": "Corporativo",
+  "jobTitle": "Analista de Compliance Sr",
+  "location": "Buenos Aires",
+  "status": "Active"
+}

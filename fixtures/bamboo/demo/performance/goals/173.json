@@ -1,0 +1,149 @@
+{
+  "canAlign": true,
+  "canCreateGoals": true,
+  "filters": [
+    {
+      "id": "status-all",
+      "name": "All"
+    },
+    {
+      "id": "inProgress",
+      "name": "In progress"
+    },
+    {
+      "id": "completed",
+      "name": "Completed"
+    },
+    {
+      "id": "closed",
+      "name": "Closed"
+    }
+  ],
+  "selectedFilter": "status-all",
+  "goals": [
+    {
+      "id": "5742",
+      "title": "Reducir los incidentes recurrentes a la mitad",
+      "description": "Sirve de base para el próximo ciclo de evaluación.",
+      "percentComplete": 0,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2023-11-04",
+      "completionDate": null,
+      "lastChangedDateTime": "2024-10-09T19:10:29Z",
+      "status": "in_progress",
+      "milestones": [
+        {
+          "id": 1017,
+          "employeeGoalId": 5742,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2023-04-15T17:52:53Z",
+          "lastUpdateUserId": 173
+        },
+        {
+          "id": 1018,
+          "employeeGoalId": 5742,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2023-04-15T18:53:44Z",
+          "lastUpdateUserId": 173
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "5743",
+      "title": "Migrar los reportes al nuevo tablero",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 75,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2024-11-20",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-09-17T17:06:37Z",
+      "status": "in_progress",
+      "milestones": [
+        {
+          "id": 1019,
+          "employeeGoalId": 5743,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2026-02-28T19:02:23Z",
+          "lastUpdateDateTime": "2026-02-28T19:02:23Z",
+          "lastUpdateUserId": 173
+        },
+        {
+          "id": 1020,
+          "employeeGoalId": 5743,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-06-05T12:30:21Z",
+          "lastUpdateDateTime": "2025-06-05T12:30:21Z",
+          "lastUpdateUserId": 173
+        },
+        {
+          "id": 1021,
+          "employeeGoalId": 5743,
+          "title": "Hito 3",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2024-11-15T13:37:07Z",
+          "lastUpdateDateTime": "2024-11-15T13:37:07Z",
+          "lastUpdateUserId": 173
+        },
+        {
+          "id": 1022,
+          "employeeGoalId": 5743,
+          "title": "Hito 4",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2024-09-15T09:00:21Z",
+          "lastUpdateUserId": 173
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    }
+  ],
+  "persons": [
+    {
+      "employeeId": 173,
+      "firstName": "Ivana",
+      "lastName": "Cáceres",
+      "preferredName": null
+    }
+  ],
+  "comments": [
+    {
+      "goalId": "5743",
+      "commentCount": 1
+    }
+  ]
+}

@@ -1,0 +1,160 @@
+{
+  "canAlign": true,
+  "canCreateGoals": true,
+  "filters": [
+    {
+      "id": "status-all",
+      "name": "All"
+    },
+    {
+      "id": "inProgress",
+      "name": "In progress"
+    },
+    {
+      "id": "completed",
+      "name": "Completed"
+    },
+    {
+      "id": "closed",
+      "name": "Closed"
+    }
+  ],
+  "selectedFilter": "status-all",
+  "goals": [
+    {
+      "id": "7318",
+      "title": "Migrar los reportes al nuevo tablero",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "percentComplete": 67,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2024-08-13",
+      "completionDate": null,
+      "lastChangedDateTime": "2024-06-23T15:03:10Z",
+      "status": "in_progress",
+      "milestones": [
+        {
+          "id": 1775,
+          "employeeGoalId": 7318,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2024-05-15T11:22:07Z",
+          "lastUpdateDateTime": "2024-05-15T11:22:07Z",
+          "lastUpdateUserId": 553
+        },
+        {
+          "id": 1776,
+          "employeeGoalId": 7318,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2024-05-21T16:20:38Z",
+          "lastUpdateDateTime": "2024-05-21T16:20:38Z",
+          "lastUpdateUserId": 553
+        },
+        {
+          "id": 1777,
+          "employeeGoalId": 7318,
+          "title": "Hito 3",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2024-05-14T18:05:24Z",
+          "lastUpdateUserId": 553
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "7319",
+      "title": "Renovar las cuentas clave del trimestre",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2025-05-02",
+      "completionDate": "2025-05-12",
+      "lastChangedDateTime": "2025-05-12T10:57:54Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "7322",
+      "title": "Automatizar la conciliación mensual",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 75,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2026-11-10",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-09-10T14:19:49Z",
+      "status": "in_progress",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "7323",
+      "title": "Reducir el tiempo de primera respuesta un 20%",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [
+        243
+      ],
+      "dueDate": "2026-03-04",
+      "completionDate": "2026-01-09",
+      "lastChangedDateTime": "2026-01-09T16:13:55Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    }
+  ],
+  "persons": [
+    {
+      "employeeId": 553,
+      "firstName": "Federico",
+      "lastName": "Coronel",
+      "preferredName": "Fede"
+    },
+    {
+      "employeeId": 243,
+      "firstName": "Jimena",
+      "lastName": "Bustos",
+      "preferredName": null
+    }
+  ],
+  "comments": []
+}

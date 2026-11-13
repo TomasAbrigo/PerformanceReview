@@ -1,0 +1,17 @@
+{
+  "id": "717",
+  "firstName": "Daniela",
+  "lastName": "Peralta",
+  "workEmail": "daniela.peralta@meridian-andina.example",
+  "employeeNumber": "11752",
+  "supervisorEId": "41",
+  "supervisorId": "10066",
+  "supervisor": "Morales, Florencia",
+  "hireDate": "2025-04-03",
+  "terminationDate": null,
+  "department": "Customer Success",
+  "division": "Comercial",
+  "jobTitle": "Customer Success Manager Ssr",
+  "location": "Montevideo",
+  "status": "Active"
+}

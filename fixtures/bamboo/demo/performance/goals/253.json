@@ -1,0 +1,81 @@
+{
+  "canAlign": true,
+  "canCreateGoals": true,
+  "filters": [
+    {
+      "id": "status-all",
+      "name": "All"
+    },
+    {
+      "id": "inProgress",
+      "name": "In progress"
+    },
+    {
+      "id": "completed",
+      "name": "Completed"
+    },
+    {
+      "id": "closed",
+      "name": "Closed"
+    }
+  ],
+  "selectedFilter": "status-all",
+  "goals": [
+    {
+      "id": "6118",
+      "title": "Migrar los reportes al nuevo tablero",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 60,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2024-02-15",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-03-14T17:47:04Z",
+      "status": "in_progress",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "6121",
+      "title": "Reducir el tiempo de primera respuesta un 20%",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2025-02-27",
+      "completionDate": "2025-02-07",
+      "lastChangedDateTime": "2025-02-07T10:09:55Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    }
+  ],
+  "persons": [
+    {
+      "employeeId": 253,
+      "firstName": "Marcela",
+      "lastName": "Barrios",
+      "preferredName": null
+    }
+  ],
+  "comments": [
+    {
+      "goalId": "6118",
+      "commentCount": 3
+    }
+  ]
+}

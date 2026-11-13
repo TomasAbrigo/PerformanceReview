@@ -1,0 +1,224 @@
+{
+  "canAlign": true,
+  "canCreateGoals": true,
+  "filters": [
+    {
+      "id": "status-all",
+      "name": "All"
+    },
+    {
+      "id": "inProgress",
+      "name": "In progress"
+    },
+    {
+      "id": "completed",
+      "name": "Completed"
+    },
+    {
+      "id": "closed",
+      "name": "Closed"
+    }
+  ],
+  "selectedFilter": "status-all",
+  "goals": [
+    {
+      "id": "6184",
+      "title": "Entregar el proyecto Norte sin desvíos",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2023-06-01",
+      "completionDate": "2023-01-13",
+      "lastChangedDateTime": "2023-01-13T13:14:29Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "6186",
+      "title": "Implementar el calendario editorial",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [
+        65
+      ],
+      "dueDate": "2024-12-14",
+      "completionDate": "2024-12-15",
+      "lastChangedDateTime": "2024-12-15T18:35:01Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "6188",
+      "title": "Mentorear a dos personas nuevas",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2024-09-28",
+      "completionDate": "2024-05-06",
+      "lastChangedDateTime": "2024-05-06T14:00:33Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "6189",
+      "title": "Reducir el tiempo de primera respuesta un 20%",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2025-02-27",
+      "completionDate": "2025-03-10",
+      "lastChangedDateTime": "2025-03-10T14:35:44Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "6191",
+      "title": "Mentorear a dos personas nuevas",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 50,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [
+        65
+      ],
+      "dueDate": "2025-11-11",
+      "completionDate": null,
+      "lastChangedDateTime": "2025-08-02T10:16:52Z",
+      "status": "in_progress",
+      "milestones": [
+        {
+          "id": 1227,
+          "employeeGoalId": 6191,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-06-30T17:25:34Z",
+          "lastUpdateDateTime": "2025-06-30T17:25:34Z",
+          "lastUpdateUserId": 269
+        },
+        {
+          "id": 1228,
+          "employeeGoalId": 6191,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-07-30T10:48:59Z",
+          "lastUpdateDateTime": "2025-07-30T10:48:59Z",
+          "lastUpdateUserId": 269
+        },
+        {
+          "id": 1229,
+          "employeeGoalId": 6191,
+          "title": "Hito 3",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2025-06-21T19:23:54Z",
+          "lastUpdateUserId": 269
+        },
+        {
+          "id": 1230,
+          "employeeGoalId": 6191,
+          "title": "Hito 4",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2025-06-21T15:34:29Z",
+          "lastUpdateUserId": 269
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "6194",
+      "title": "Reducir los incidentes recurrentes a la mitad",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "percentComplete": 60,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2027-02-23",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-10-09T09:01:41Z",
+      "status": "in_progress",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    }
+  ],
+  "persons": [
+    {
+      "employeeId": 269,
+      "firstName": "Cristian",
+      "lastName": "Carrizo",
+      "preferredName": null
+    },
+    {
+      "employeeId": 65,
+      "firstName": "Valentina",
+      "lastName": "Díaz",
+      "preferredName": "Vale"
+    }
+  ],
+  "comments": [
+    {
+      "goalId": "6186",
+      "commentCount": 1
+    },
+    {
+      "goalId": "6188",
+      "commentCount": 3
+    }
+  ]
+}

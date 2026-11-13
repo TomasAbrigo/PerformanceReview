@@ -1,0 +1,17 @@
+{
+  "id": "57",
+  "firstName": "Pablo",
+  "lastName": "Monzón",
+  "workEmail": "pablo.monzon@meridian-andina.example",
+  "employeeNumber": "10118",
+  "supervisorEId": "33",
+  "supervisorId": "10063",
+  "supervisor": "Coronel, Jimena",
+  "hireDate": "2022-10-14",
+  "terminationDate": null,
+  "department": "Ventas",
+  "division": "Comercial",
+  "jobTitle": "Business Developer Jr",
+  "location": "Buenos Aires",
+  "status": "Active"
+}

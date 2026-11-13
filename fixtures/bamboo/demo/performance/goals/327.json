@@ -1,0 +1,106 @@
+{
+  "canAlign": true,
+  "canCreateGoals": true,
+  "filters": [
+    {
+      "id": "status-all",
+      "name": "All"
+    },
+    {
+      "id": "inProgress",
+      "name": "In progress"
+    },
+    {
+      "id": "completed",
+      "name": "Completed"
+    },
+    {
+      "id": "closed",
+      "name": "Closed"
+    }
+  ],
+  "selectedFilter": "status-all",
+  "goals": [
+    {
+      "id": "6409",
+      "title": "Reducir el tiempo de primera respuesta un 20%",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 100,
+      "alignsWithOptionId": 9004,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2023-05-12",
+      "completionDate": "2023-02-13",
+      "lastChangedDateTime": "2023-02-13T16:18:33Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "6412",
+      "title": "Reducir el tiempo de primera respuesta un 20%",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 45,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2024-10-14",
+      "completionDate": null,
+      "lastChangedDateTime": "2024-09-08T14:53:42Z",
+      "status": "closed",
+      "milestones": null,
+      "actions": {
+        "canEdit": false,
+        "canUpdateProgress": false,
+        "canClose": false,
+        "canReopen": true,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "6414",
+      "title": "Cerrar el plan de capacitación anual",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2024-05-08",
+      "completionDate": "2024-04-02",
+      "lastChangedDateTime": "2024-04-02T10:08:02Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    }
+  ],
+  "persons": [
+    {
+      "employeeId": 327,
+      "firstName": "Tomás",
+      "lastName": "Maldonado",
+      "preferredName": null
+    }
+  ],
+  "comments": [
+    {
+      "goalId": "6409",
+      "commentCount": 3
+    },
+    {
+      "goalId": "6412",
+      "commentCount": 3
+    }
+  ]
+}

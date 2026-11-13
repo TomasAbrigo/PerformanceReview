@@ -1,0 +1,283 @@
+{
+  "canAlign": true,
+  "canCreateGoals": true,
+  "filters": [
+    {
+      "id": "status-all",
+      "name": "All"
+    },
+    {
+      "id": "inProgress",
+      "name": "In progress"
+    },
+    {
+      "id": "completed",
+      "name": "Completed"
+    },
+    {
+      "id": "closed",
+      "name": "Closed"
+    }
+  ],
+  "selectedFilter": "status-all",
+  "goals": [
+    {
+      "id": "7334",
+      "title": "Lanzar el nuevo flujo de onboarding",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "percentComplete": 40,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [
+        33
+      ],
+      "dueDate": "2024-10-18",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-06-18T16:18:43Z",
+      "status": "in_progress",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "7337",
+      "title": "Renovar las cuentas clave del trimestre",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 100,
+      "alignsWithOptionId": 9002,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2024-07-24",
+      "completionDate": "2024-07-08",
+      "lastChangedDateTime": "2024-07-08T18:40:03Z",
+      "status": "completed",
+      "milestones": [
+        {
+          "id": 1782,
+          "employeeGoalId": 7337,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2024-05-26T16:12:20Z",
+          "lastUpdateDateTime": "2024-05-26T16:12:20Z",
+          "lastUpdateUserId": 557
+        },
+        {
+          "id": 1783,
+          "employeeGoalId": 7337,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2024-05-01T13:46:18Z",
+          "lastUpdateDateTime": "2024-05-01T13:46:18Z",
+          "lastUpdateUserId": 557
+        },
+        {
+          "id": 1784,
+          "employeeGoalId": 7337,
+          "title": "Hito 3",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2024-05-05T09:28:27Z",
+          "lastUpdateDateTime": "2024-05-05T09:28:27Z",
+          "lastUpdateUserId": 557
+        },
+        {
+          "id": 1785,
+          "employeeGoalId": 7337,
+          "title": "Hito 4",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2024-04-24T16:09:01Z",
+          "lastUpdateDateTime": "2024-04-24T16:09:01Z",
+          "lastUpdateUserId": 557
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "7340",
+      "title": "Mejorar el NPS interno del equipo",
+      "description": "Sirve de base para el próximo ciclo de evaluación.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [
+        33
+      ],
+      "dueDate": "2025-12-05",
+      "completionDate": "2025-08-25",
+      "lastChangedDateTime": "2025-08-25T14:56:08Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "7343",
+      "title": "Automatizar la conciliación mensual",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 85,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [
+        33
+      ],
+      "dueDate": "2027-02-19",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-09-21T13:25:13Z",
+      "status": "in_progress",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "7345",
+      "title": "Entregar el proyecto Norte sin desvíos",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "percentComplete": 33,
+      "alignsWithOptionId": 9004,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2027-01-29",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-10-30T17:56:23Z",
+      "status": "in_progress",
+      "milestones": [
+        {
+          "id": 1786,
+          "employeeGoalId": 7345,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2026-10-17T11:11:34Z",
+          "lastUpdateDateTime": "2026-10-17T11:11:34Z",
+          "lastUpdateUserId": 557
+        },
+        {
+          "id": 1787,
+          "employeeGoalId": 7345,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2026-10-17T12:36:25Z",
+          "lastUpdateUserId": 557
+        },
+        {
+          "id": 1788,
+          "employeeGoalId": 7345,
+          "title": "Hito 3",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2026-10-17T18:37:28Z",
+          "lastUpdateUserId": 557
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "7348",
+      "title": "Cerrar el plan de capacitación anual",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 50,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2027-02-21",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-09-30T15:08:42Z",
+      "status": "in_progress",
+      "milestones": [
+        {
+          "id": 1789,
+          "employeeGoalId": 7348,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2026-09-29T19:56:33Z",
+          "lastUpdateDateTime": "2026-09-29T19:56:33Z",
+          "lastUpdateUserId": 557
+        },
+        {
+          "id": 1790,
+          "employeeGoalId": 7348,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2026-07-15T19:19:07Z",
+          "lastUpdateUserId": 557
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    }
+  ],
+  "persons": [
+    {
+      "employeeId": 557,
+      "firstName": "Maximiliano",
+      "lastName": "Romero",
+      "preferredName": null
+    },
+    {
+      "employeeId": 33,
+      "firstName": "Brenda",
+      "lastName": "Romero",
+      "preferredName": null
+    }
+  ],
+  "comments": [
+    {
+      "goalId": "7343",
+      "commentCount": 1
+    },
+    {
+      "goalId": "7345",
+      "commentCount": 1
+    }
+  ]
+}

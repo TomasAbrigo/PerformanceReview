@@ -1,0 +1,17 @@
+{
+  "id": "371",
+  "firstName": "Mariana",
+  "lastName": "Correa",
+  "workEmail": "mariana.correa@meridian-andina.example",
+  "employeeNumber": "10910",
+  "supervisorEId": "65",
+  "supervisorId": "10117",
+  "supervisor": "Díaz, Valentina",
+  "hireDate": "2022-09-28",
+  "terminationDate": null,
+  "department": "Marketing",
+  "division": "Comercial",
+  "jobTitle": "Content Specialist Ssr",
+  "location": "Rosario",
+  "status": "Active"
+}

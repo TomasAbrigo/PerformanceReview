@@ -1,0 +1,17 @@
+{
+  "id": "167",
+  "firstName": "Marcela",
+  "lastName": "Escobar",
+  "workEmail": "marcela.escobar@meridian-andina.example",
+  "employeeNumber": "10382",
+  "supervisorEId": "21",
+  "supervisorId": "10026",
+  "supervisor": "Navarro, Lucas",
+  "hireDate": "2020-11-06",
+  "terminationDate": null,
+  "department": "Infraestructura",
+  "division": "Tecnología",
+  "jobTitle": "Líder de Infraestructura",
+  "location": "Buenos Aires",
+  "status": "Active"
+}

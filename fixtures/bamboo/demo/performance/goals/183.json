@@ -1,0 +1,121 @@
+{
+  "canAlign": true,
+  "canCreateGoals": false,
+  "filters": [
+    {
+      "id": "status-all",
+      "name": "All"
+    },
+    {
+      "id": "inProgress",
+      "name": "In progress"
+    },
+    {
+      "id": "completed",
+      "name": "Completed"
+    },
+    {
+      "id": "closed",
+      "name": "Closed"
+    }
+  ],
+  "selectedFilter": "status-all",
+  "goals": [
+    {
+      "id": "5777",
+      "title": "Lanzar el nuevo flujo de onboarding",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 100,
+      "alignsWithOptionId": 9004,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2023-04-29",
+      "completionDate": "2023-02-13",
+      "lastChangedDateTime": "2023-02-13T08:10:48Z",
+      "status": "completed",
+      "milestones": [
+        {
+          "id": 1037,
+          "employeeGoalId": 5777,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2022-12-27T13:44:27Z",
+          "lastUpdateDateTime": "2022-12-27T13:44:27Z",
+          "lastUpdateUserId": 183
+        },
+        {
+          "id": 1038,
+          "employeeGoalId": 5777,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2022-12-31T15:27:50Z",
+          "lastUpdateDateTime": "2022-12-31T15:27:50Z",
+          "lastUpdateUserId": 183
+        },
+        {
+          "id": 1039,
+          "employeeGoalId": 5777,
+          "title": "Hito 3",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2022-12-17T11:29:31Z",
+          "lastUpdateDateTime": "2022-12-17T11:29:31Z",
+          "lastUpdateUserId": 183
+        },
+        {
+          "id": 1040,
+          "employeeGoalId": 5777,
+          "title": "Hito 4",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2023-01-23T13:44:37Z",
+          "lastUpdateDateTime": "2023-01-23T13:44:37Z",
+          "lastUpdateUserId": 183
+        }
+      ],
+      "actions": {
+        "canEdit": false,
+        "canUpdateProgress": false,
+        "canClose": false,
+        "canReopen": false,
+        "canDelete": false,
+        "canComment": false
+      }
+    },
+    {
+      "id": "5778",
+      "title": "Implementar el calendario editorial",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2023-07-25",
+      "completionDate": "2023-05-23",
+      "lastChangedDateTime": "2023-05-23T16:09:00Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": false,
+        "canUpdateProgress": false,
+        "canClose": false,
+        "canReopen": false,
+        "canDelete": false,
+        "canComment": false
+      }
+    }
+  ],
+  "persons": [
+    {
+      "employeeId": 183,
+      "firstName": "Camila",
+      "lastName": "Cabrera",
+      "preferredName": null
+    }
+  ],
+  "comments": []
+}

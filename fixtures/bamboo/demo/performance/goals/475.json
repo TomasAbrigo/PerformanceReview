@@ -1,0 +1,55 @@
+{
+  "canAlign": true,
+  "canCreateGoals": true,
+  "filters": [
+    {
+      "id": "status-all",
+      "name": "All"
+    },
+    {
+      "id": "inProgress",
+      "name": "In progress"
+    },
+    {
+      "id": "completed",
+      "name": "Completed"
+    },
+    {
+      "id": "closed",
+      "name": "Closed"
+    }
+  ],
+  "selectedFilter": "status-all",
+  "goals": [
+    {
+      "id": "7071",
+      "title": "Migrar los reportes al nuevo tablero",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 55,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2025-09-18",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-05-11T09:31:21Z",
+      "status": "in_progress",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    }
+  ],
+  "persons": [
+    {
+      "employeeId": 475,
+      "firstName": "Emiliano",
+      "lastName": "Esquivel",
+      "preferredName": null
+    }
+  ],
+  "comments": []
+}

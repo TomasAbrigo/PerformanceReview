@@ -1,0 +1,63 @@
+{
+  "canAlign": true,
+  "canCreateGoals": false,
+  "filters": [
+    {
+      "id": "status-all",
+      "name": "All"
+    },
+    {
+      "id": "inProgress",
+      "name": "In progress"
+    },
+    {
+      "id": "completed",
+      "name": "Completed"
+    },
+    {
+      "id": "closed",
+      "name": "Closed"
+    }
+  ],
+  "selectedFilter": "status-all",
+  "goals": [
+    {
+      "id": "6268",
+      "title": "Reducir los incidentes recurrentes a la mitad",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 5,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [
+        43
+      ],
+      "dueDate": "2025-07-21",
+      "completionDate": null,
+      "lastChangedDateTime": "2025-04-03T19:53:10Z",
+      "status": "closed",
+      "milestones": null,
+      "actions": {
+        "canEdit": false,
+        "canUpdateProgress": false,
+        "canClose": false,
+        "canReopen": false,
+        "canDelete": false,
+        "canComment": false
+      }
+    }
+  ],
+  "persons": [
+    {
+      "employeeId": 287,
+      "firstName": "Fernando",
+      "lastName": "Olmos",
+      "preferredName": "Fer"
+    },
+    {
+      "employeeId": 43,
+      "firstName": "Eugenia",
+      "lastName": "Soria",
+      "preferredName": null
+    }
+  ],
+  "comments": []
+}

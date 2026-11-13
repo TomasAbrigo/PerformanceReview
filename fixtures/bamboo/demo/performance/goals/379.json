@@ -1,0 +1,176 @@
+{
+  "canAlign": true,
+  "canCreateGoals": true,
+  "filters": [
+    {
+      "id": "status-all",
+      "name": "All"
+    },
+    {
+      "id": "inProgress",
+      "name": "In progress"
+    },
+    {
+      "id": "completed",
+      "name": "Completed"
+    },
+    {
+      "id": "closed",
+      "name": "Closed"
+    }
+  ],
+  "selectedFilter": "status-all",
+  "goals": [
+    {
+      "id": "6637",
+      "title": "Reducir el tiempo de primera respuesta un 20%",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 100,
+      "alignsWithOptionId": 9002,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2024-09-01",
+      "completionDate": "2024-07-05",
+      "lastChangedDateTime": "2024-07-05T13:47:30Z",
+      "status": "completed",
+      "milestones": [
+        {
+          "id": 1418,
+          "employeeGoalId": 6637,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2024-05-16T09:53:50Z",
+          "lastUpdateDateTime": "2024-05-16T09:53:50Z",
+          "lastUpdateUserId": 379
+        },
+        {
+          "id": 1419,
+          "employeeGoalId": 6637,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2024-07-02T19:13:32Z",
+          "lastUpdateDateTime": "2024-07-02T19:13:32Z",
+          "lastUpdateUserId": 379
+        },
+        {
+          "id": 1420,
+          "employeeGoalId": 6637,
+          "title": "Hito 3",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2024-06-09T08:37:02Z",
+          "lastUpdateDateTime": "2024-06-09T08:37:02Z",
+          "lastUpdateUserId": 379
+        },
+        {
+          "id": 1421,
+          "employeeGoalId": 6637,
+          "title": "Hito 4",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2024-04-24T11:10:52Z",
+          "lastUpdateDateTime": "2024-04-24T11:10:52Z",
+          "lastUpdateUserId": 379
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "6640",
+      "title": "Migrar los reportes al nuevo tablero",
+      "description": "Sirve de base para el próximo ciclo de evaluación.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2024-09-16",
+      "completionDate": "2024-08-05",
+      "lastChangedDateTime": "2024-08-05T17:53:54Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "6641",
+      "title": "Reducir el tiempo de primera respuesta un 20%",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "percentComplete": 35,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2025-09-29",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-01-20T11:38:19Z",
+      "status": "in_progress",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "6643",
+      "title": "Entregar el proyecto Norte sin desvíos",
+      "description": "Sirve de base para el próximo ciclo de evaluación.",
+      "percentComplete": 25,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2027-01-31",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-10-25T16:34:10Z",
+      "status": "in_progress",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    }
+  ],
+  "persons": [
+    {
+      "employeeId": 379,
+      "firstName": "Cristian",
+      "lastName": "Flores",
+      "preferredName": null
+    }
+  ],
+  "comments": [
+    {
+      "goalId": "6637",
+      "commentCount": 2
+    },
+    {
+      "goalId": "6641",
+      "commentCount": 1
+    },
+    {
+      "goalId": "6643",
+      "commentCount": 1
+    }
+  ]
+}

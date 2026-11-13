@@ -1,0 +1,174 @@
+{
+  "canAlign": true,
+  "canCreateGoals": true,
+  "filters": [
+    {
+      "id": "status-all",
+      "name": "All"
+    },
+    {
+      "id": "inProgress",
+      "name": "In progress"
+    },
+    {
+      "id": "completed",
+      "name": "Completed"
+    },
+    {
+      "id": "closed",
+      "name": "Closed"
+    }
+  ],
+  "selectedFilter": "status-all",
+  "goals": [
+    {
+      "id": "7753",
+      "title": "Automatizar la conciliación mensual",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2025-07-24",
+      "completionDate": "2025-05-30",
+      "lastChangedDateTime": "2025-05-30T13:07:27Z",
+      "status": "completed",
+      "milestones": [
+        {
+          "id": 1977,
+          "employeeGoalId": 7753,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-05-05T15:40:42Z",
+          "lastUpdateDateTime": "2025-05-05T15:40:42Z",
+          "lastUpdateUserId": 715
+        },
+        {
+          "id": 1978,
+          "employeeGoalId": 7753,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-04-01T13:09:37Z",
+          "lastUpdateDateTime": "2025-04-01T13:09:37Z",
+          "lastUpdateUserId": 715
+        },
+        {
+          "id": 1979,
+          "employeeGoalId": 7753,
+          "title": "Hito 3",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-04-15T12:37:03Z",
+          "lastUpdateDateTime": "2025-04-15T12:37:03Z",
+          "lastUpdateUserId": 715
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "7754",
+      "title": "Aumentar la cobertura de pruebas al 80%",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "percentComplete": 33,
+      "alignsWithOptionId": 9004,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2026-10-10",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-08-21T08:54:27Z",
+      "status": "in_progress",
+      "milestones": [
+        {
+          "id": 1980,
+          "employeeGoalId": 7754,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2026-07-09T08:32:48Z",
+          "lastUpdateDateTime": "2026-07-09T08:32:48Z",
+          "lastUpdateUserId": 715
+        },
+        {
+          "id": 1981,
+          "employeeGoalId": 7754,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2026-03-30T19:33:33Z",
+          "lastUpdateUserId": 715
+        },
+        {
+          "id": 1982,
+          "employeeGoalId": 7754,
+          "title": "Hito 3",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2026-03-30T12:59:24Z",
+          "lastUpdateUserId": 715
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "7757",
+      "title": "Cerrar el plan de capacitación anual",
+      "description": "Sirve de base para el próximo ciclo de evaluación.",
+      "percentComplete": 100,
+      "alignsWithOptionId": 9001,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2026-07-07",
+      "completionDate": "2026-07-10",
+      "lastChangedDateTime": "2026-07-10T11:23:43Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    }
+  ],
+  "persons": [
+    {
+      "employeeId": 715,
+      "firstName": "Cecilia",
+      "lastName": "Garrido",
+      "preferredName": null
+    }
+  ],
+  "comments": [
+    {
+      "goalId": "7753",
+      "commentCount": 2
+    },
+    {
+      "goalId": "7754",
+      "commentCount": 2
+    }
+  ]
+}

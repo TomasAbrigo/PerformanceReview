@@ -1,0 +1,170 @@
+{
+  "canAlign": true,
+  "canCreateGoals": true,
+  "filters": [
+    {
+      "id": "status-all",
+      "name": "All"
+    },
+    {
+      "id": "inProgress",
+      "name": "In progress"
+    },
+    {
+      "id": "completed",
+      "name": "Completed"
+    },
+    {
+      "id": "closed",
+      "name": "Closed"
+    }
+  ],
+  "selectedFilter": "status-all",
+  "goals": [
+    {
+      "id": "6286",
+      "title": "Aumentar la cobertura de pruebas al 80%",
+      "description": "Sirve de base para el próximo ciclo de evaluación.",
+      "percentComplete": 50,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2023-05-22",
+      "completionDate": null,
+      "lastChangedDateTime": "2024-08-31T09:41:05Z",
+      "status": "in_progress",
+      "milestones": [
+        {
+          "id": 1271,
+          "employeeGoalId": 6286,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2023-06-19T11:56:34Z",
+          "lastUpdateDateTime": "2023-06-19T11:56:34Z",
+          "lastUpdateUserId": 293
+        },
+        {
+          "id": 1272,
+          "employeeGoalId": 6286,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2022-12-16T17:51:04Z",
+          "lastUpdateUserId": 293
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "6287",
+      "title": "Cerrar el plan de capacitación anual",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2023-08-31",
+      "completionDate": "2023-06-20",
+      "lastChangedDateTime": "2023-06-20T09:49:30Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "6289",
+      "title": "Cerrar el plan de capacitación anual",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2024-02-20",
+      "completionDate": "2023-12-28",
+      "lastChangedDateTime": "2023-12-28T13:02:08Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "6291",
+      "title": "Completar la certificación del área",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 0,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2024-05-17",
+      "completionDate": null,
+      "lastChangedDateTime": "2025-02-04T17:49:52Z",
+      "status": "in_progress",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "6292",
+      "title": "Cerrar el plan de capacitación anual",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 90,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [
+        61
+      ],
+      "dueDate": "2025-09-16",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-07-11T08:21:22Z",
+      "status": "in_progress",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    }
+  ],
+  "persons": [
+    {
+      "employeeId": 293,
+      "firstName": "Carolina",
+      "lastName": "Rojas",
+      "preferredName": null
+    },
+    {
+      "employeeId": 61,
+      "firstName": "Marcelo",
+      "lastName": "Peralta",
+      "preferredName": null
+    }
+  ],
+  "comments": []
+}

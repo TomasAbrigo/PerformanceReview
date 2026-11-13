@@ -1,0 +1,136 @@
+{
+  "canAlign": true,
+  "canCreateGoals": true,
+  "filters": [
+    {
+      "id": "status-all",
+      "name": "All"
+    },
+    {
+      "id": "inProgress",
+      "name": "In progress"
+    },
+    {
+      "id": "completed",
+      "name": "Completed"
+    },
+    {
+      "id": "closed",
+      "name": "Closed"
+    }
+  ],
+  "selectedFilter": "status-all",
+  "goals": [
+    {
+      "id": "5244",
+      "title": "Documentar los procesos críticos",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 100,
+      "alignsWithOptionId": 9004,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2025-10-31",
+      "completionDate": "2025-09-21",
+      "lastChangedDateTime": "2025-09-21T19:14:50Z",
+      "status": "completed",
+      "milestones": [
+        {
+          "id": 832,
+          "employeeGoalId": 5244,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-08-12T13:41:29Z",
+          "lastUpdateDateTime": "2025-08-12T13:41:29Z",
+          "lastUpdateUserId": 81
+        },
+        {
+          "id": 833,
+          "employeeGoalId": 5244,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-09-16T18:06:02Z",
+          "lastUpdateDateTime": "2025-09-16T18:06:02Z",
+          "lastUpdateUserId": 81
+        },
+        {
+          "id": 834,
+          "employeeGoalId": 5244,
+          "title": "Hito 3",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-08-22T12:26:21Z",
+          "lastUpdateDateTime": "2025-08-22T12:26:21Z",
+          "lastUpdateUserId": 81
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "5247",
+      "title": "Renovar las cuentas clave del trimestre",
+      "description": "Sirve de base para el próximo ciclo de evaluación.",
+      "percentComplete": 40,
+      "alignsWithOptionId": 9003,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2026-11-09",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-09-16T08:50:09Z",
+      "status": "in_progress",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "5248",
+      "title": "Mentorear a dos personas nuevas",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 35,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2027-01-31",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-09-19T12:15:19Z",
+      "status": "in_progress",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    }
+  ],
+  "persons": [
+    {
+      "employeeId": 81,
+      "firstName": "Adrián",
+      "lastName": "Cabrera",
+      "preferredName": null
+    }
+  ],
+  "comments": [
+    {
+      "goalId": "5248",
+      "commentCount": 4
+    }
+  ]
+}

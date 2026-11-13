@@ -1,0 +1,17 @@
+{
+  "id": "685",
+  "firstName": "Ricardo",
+  "lastName": "Márquez",
+  "workEmail": "ricardo.marquez@meridian-andina.example",
+  "employeeNumber": "11653",
+  "supervisorEId": "43",
+  "supervisorId": "10072",
+  "supervisor": "Soria, Eugenia",
+  "hireDate": "2025-02-15",
+  "terminationDate": null,
+  "department": "Legales",
+  "division": "Corporativo",
+  "jobTitle": "Abogado Corporativo Ssr",
+  "location": "Remoto",
+  "status": "Active"
+}

@@ -1,0 +1,17 @@
+{
+  "id": "729",
+  "firstName": "Ignacio",
+  "lastName": "Urquiza",
+  "workEmail": "ignacio.urquiza@meridian-andina.example",
+  "employeeNumber": "11778",
+  "supervisorEId": "321",
+  "supervisorId": "10788",
+  "supervisor": "Figueroa, Facundo",
+  "hireDate": "2025-05-19",
+  "terminationDate": null,
+  "department": "Finanzas",
+  "division": "Corporativo",
+  "jobTitle": "Controller Ssr",
+  "location": "Montevideo",
+  "status": "Active"
+}

@@ -1,0 +1,17 @@
+{
+  "id": "145",
+  "firstName": "Carolina",
+  "lastName": "Villalba",
+  "workEmail": "carolina.villalba@meridian-andina.example",
+  "employeeNumber": "10338",
+  "supervisorEId": "189",
+  "supervisorId": "10436",
+  "supervisor": "Quiroga, Lucía",
+  "hireDate": "2020-06-20",
+  "terminationDate": null,
+  "department": "Customer Success",
+  "division": "Comercial",
+  "jobTitle": "Onboarding Specialist Sr",
+  "location": "Buenos Aires",
+  "status": "Active"
+}

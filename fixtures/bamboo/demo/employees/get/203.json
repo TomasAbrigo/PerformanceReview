@@ -1,0 +1,17 @@
+{
+  "id": "203",
+  "firstName": "Lucía",
+  "lastName": "Fuentes",
+  "workEmail": "lucia.fuentes@meridian-andina.example",
+  "employeeNumber": "10473",
+  "supervisorEId": "41",
+  "supervisorId": "10066",
+  "supervisor": "Morales, Florencia",
+  "hireDate": "2021-04-08",
+  "terminationDate": null,
+  "department": "Customer Success",
+  "division": "Comercial",
+  "jobTitle": "Customer Success Manager Jr",
+  "location": "Buenos Aires",
+  "status": "Active"
+}

@@ -1,0 +1,17 @@
+{
+  "id": "241",
+  "firstName": "Daniela",
+  "lastName": "Reyes",
+  "workEmail": "daniela.reyes@meridian-andina.example",
+  "employeeNumber": "10570",
+  "supervisorEId": "55",
+  "supervisorId": "10095",
+  "supervisor": "Medina, Tomás",
+  "hireDate": "2021-09-10",
+  "terminationDate": null,
+  "department": "Marketing",
+  "division": "Comercial",
+  "jobTitle": "Líder de Marketing",
+  "location": "Rosario",
+  "status": "Active"
+}

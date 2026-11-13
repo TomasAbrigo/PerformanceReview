@@ -1,0 +1,115 @@
+{
+  "canAlign": true,
+  "canCreateGoals": true,
+  "filters": [
+    {
+      "id": "status-all",
+      "name": "All"
+    },
+    {
+      "id": "inProgress",
+      "name": "In progress"
+    },
+    {
+      "id": "completed",
+      "name": "Completed"
+    },
+    {
+      "id": "closed",
+      "name": "Closed"
+    }
+  ],
+  "selectedFilter": "status-all",
+  "goals": [
+    {
+      "id": "5921",
+      "title": "Automatizar la conciliación mensual",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "percentComplete": 30,
+      "alignsWithOptionId": 9004,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2026-04-04",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-03-31T17:25:09Z",
+      "status": "in_progress",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "5924",
+      "title": "Mejorar el NPS interno del equipo",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 67,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2026-03-31",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-02-09T15:32:57Z",
+      "status": "in_progress",
+      "milestones": [
+        {
+          "id": 1118,
+          "employeeGoalId": 5924,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-12-23T12:50:27Z",
+          "lastUpdateDateTime": "2025-12-23T12:50:27Z",
+          "lastUpdateUserId": 211
+        },
+        {
+          "id": 1119,
+          "employeeGoalId": 5924,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-09-20T09:13:49Z",
+          "lastUpdateDateTime": "2025-09-20T09:13:49Z",
+          "lastUpdateUserId": 211
+        },
+        {
+          "id": 1120,
+          "employeeGoalId": 5924,
+          "title": "Hito 3",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2025-09-06T11:42:51Z",
+          "lastUpdateUserId": 211
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    }
+  ],
+  "persons": [
+    {
+      "employeeId": 211,
+      "firstName": "Santiago",
+      "lastName": "Reyes",
+      "preferredName": "Santi"
+    }
+  ],
+  "comments": [
+    {
+      "goalId": "5921",
+      "commentCount": 4
+    }
+  ]
+}

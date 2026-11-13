@@ -1,0 +1,60 @@
+{
+  "canAlign": true,
+  "canCreateGoals": false,
+  "filters": [
+    {
+      "id": "status-all",
+      "name": "All"
+    },
+    {
+      "id": "inProgress",
+      "name": "In progress"
+    },
+    {
+      "id": "completed",
+      "name": "Completed"
+    },
+    {
+      "id": "closed",
+      "name": "Closed"
+    }
+  ],
+  "selectedFilter": "status-all",
+  "goals": [
+    {
+      "id": "7422",
+      "title": "Implementar el calendario editorial",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "percentComplete": 60,
+      "alignsWithOptionId": 9003,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2024-11-02",
+      "completionDate": null,
+      "lastChangedDateTime": "2024-09-21T11:55:08Z",
+      "status": "closed",
+      "milestones": null,
+      "actions": {
+        "canEdit": false,
+        "canUpdateProgress": false,
+        "canClose": false,
+        "canReopen": false,
+        "canDelete": false,
+        "canComment": false
+      }
+    }
+  ],
+  "persons": [
+    {
+      "employeeId": 583,
+      "firstName": "Camila",
+      "lastName": "Trejo",
+      "preferredName": null
+    }
+  ],
+  "comments": [
+    {
+      "goalId": "7422",
+      "commentCount": 1
+    }
+  ]
+}

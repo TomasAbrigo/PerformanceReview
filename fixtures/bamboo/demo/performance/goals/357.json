@@ -1,0 +1,230 @@
+{
+  "canAlign": true,
+  "canCreateGoals": true,
+  "filters": [
+    {
+      "id": "status-all",
+      "name": "All"
+    },
+    {
+      "id": "inProgress",
+      "name": "In progress"
+    },
+    {
+      "id": "completed",
+      "name": "Completed"
+    },
+    {
+      "id": "closed",
+      "name": "Closed"
+    }
+  ],
+  "selectedFilter": "status-all",
+  "goals": [
+    {
+      "id": "6544",
+      "title": "Mejorar el NPS interno del equipo",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 100,
+      "alignsWithOptionId": 9003,
+      "sharedWithEmployeeIds": [
+        243
+      ],
+      "dueDate": "2023-03-19",
+      "completionDate": "2023-02-15",
+      "lastChangedDateTime": "2023-02-15T14:39:12Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "6545",
+      "title": "Reducir los incidentes recurrentes a la mitad",
+      "description": "Sirve de base para el próximo ciclo de evaluación.",
+      "percentComplete": 70,
+      "alignsWithOptionId": 9003,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2023-06-14",
+      "completionDate": null,
+      "lastChangedDateTime": "2023-05-17T18:19:57Z",
+      "status": "closed",
+      "milestones": null,
+      "actions": {
+        "canEdit": false,
+        "canUpdateProgress": false,
+        "canClose": false,
+        "canReopen": true,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "6546",
+      "title": "Renovar las cuentas clave del trimestre",
+      "description": "Sirve de base para el próximo ciclo de evaluación.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2023-08-22",
+      "completionDate": "2023-08-25",
+      "lastChangedDateTime": "2023-08-25T18:28:34Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "6548",
+      "title": "Lanzar el nuevo flujo de onboarding",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [
+        243
+      ],
+      "dueDate": "2025-07-20",
+      "completionDate": "2025-02-25",
+      "lastChangedDateTime": "2025-02-25T16:58:30Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "6549",
+      "title": "Reducir los incidentes recurrentes a la mitad",
+      "description": "Sirve de base para el próximo ciclo de evaluación.",
+      "percentComplete": 25,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2026-12-26",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-09-30T10:54:08Z",
+      "status": "in_progress",
+      "milestones": [
+        {
+          "id": 1375,
+          "employeeGoalId": 6549,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2026-09-18T11:50:53Z",
+          "lastUpdateDateTime": "2026-09-18T11:50:53Z",
+          "lastUpdateUserId": 357
+        },
+        {
+          "id": 1376,
+          "employeeGoalId": 6549,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2026-08-21T13:19:10Z",
+          "lastUpdateUserId": 357
+        },
+        {
+          "id": 1377,
+          "employeeGoalId": 6549,
+          "title": "Hito 3",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2026-08-21T14:36:56Z",
+          "lastUpdateUserId": 357
+        },
+        {
+          "id": 1378,
+          "employeeGoalId": 6549,
+          "title": "Hito 4",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2026-08-21T12:53:19Z",
+          "lastUpdateUserId": 357
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "6551",
+      "title": "Mejorar el NPS interno del equipo",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [
+        243
+      ],
+      "dueDate": "2026-07-14",
+      "completionDate": "2026-04-30",
+      "lastChangedDateTime": "2026-04-30T12:30:02Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    }
+  ],
+  "persons": [
+    {
+      "employeeId": 357,
+      "firstName": "Joaquín",
+      "lastName": "Reyes",
+      "preferredName": null
+    },
+    {
+      "employeeId": 243,
+      "firstName": "Jimena",
+      "lastName": "Bustos",
+      "preferredName": null
+    }
+  ],
+  "comments": [
+    {
+      "goalId": "6544",
+      "commentCount": 3
+    },
+    {
+      "goalId": "6548",
+      "commentCount": 3
+    },
+    {
+      "goalId": "6549",
+      "commentCount": 1
+    }
+  ]
+}

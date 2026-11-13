@@ -1,0 +1,193 @@
+{
+  "canAlign": true,
+  "canCreateGoals": true,
+  "filters": [
+    {
+      "id": "status-all",
+      "name": "All"
+    },
+    {
+      "id": "inProgress",
+      "name": "In progress"
+    },
+    {
+      "id": "completed",
+      "name": "Completed"
+    },
+    {
+      "id": "closed",
+      "name": "Closed"
+    }
+  ],
+  "selectedFilter": "status-all",
+  "goals": [
+    {
+      "id": "5140",
+      "title": "Reducir los incidentes recurrentes a la mitad",
+      "description": "Sirve de base para el próximo ciclo de evaluación.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2023-02-18",
+      "completionDate": "2022-09-02",
+      "lastChangedDateTime": "2022-09-02T08:54:03Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "5141",
+      "title": "Reducir el tiempo de primera respuesta un 20%",
+      "description": "Sirve de base para el próximo ciclo de evaluación.",
+      "percentComplete": 25,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2023-02-18",
+      "completionDate": null,
+      "lastChangedDateTime": "2025-09-21T09:45:27Z",
+      "status": "in_progress",
+      "milestones": [
+        {
+          "id": 765,
+          "employeeGoalId": 5141,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2024-09-14T12:01:27Z",
+          "lastUpdateDateTime": "2024-09-14T12:01:27Z",
+          "lastUpdateUserId": 35
+        },
+        {
+          "id": 766,
+          "employeeGoalId": 5141,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2022-12-02T13:00:10Z",
+          "lastUpdateUserId": 35
+        },
+        {
+          "id": 767,
+          "employeeGoalId": 5141,
+          "title": "Hito 3",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2022-12-02T14:04:43Z",
+          "lastUpdateUserId": 35
+        },
+        {
+          "id": 768,
+          "employeeGoalId": 5141,
+          "title": "Hito 4",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2022-12-02T08:09:40Z",
+          "lastUpdateUserId": 35
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "5142",
+      "title": "Reducir el tiempo de primera respuesta un 20%",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "percentComplete": 100,
+      "alignsWithOptionId": 9002,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2024-10-04",
+      "completionDate": "2024-09-21",
+      "lastChangedDateTime": "2024-09-21T11:14:04Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "5145",
+      "title": "Reducir los incidentes recurrentes a la mitad",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 40,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2024-09-05",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-02-18T08:27:32Z",
+      "status": "in_progress",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "5147",
+      "title": "Automatizar la conciliación mensual",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 75,
+      "alignsWithOptionId": 9001,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2025-05-13",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-05-05T17:54:04Z",
+      "status": "in_progress",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    }
+  ],
+  "persons": [
+    {
+      "employeeId": 35,
+      "firstName": "Matías",
+      "lastName": "Ojeda",
+      "preferredName": null
+    }
+  ],
+  "comments": [
+    {
+      "goalId": "5140",
+      "commentCount": 4
+    },
+    {
+      "goalId": "5147",
+      "commentCount": 3
+    }
+  ]
+}

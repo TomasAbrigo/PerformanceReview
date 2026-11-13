@@ -1,0 +1,17 @@
+{
+  "id": "23",
+  "firstName": "María",
+  "lastName": "Medina",
+  "workEmail": "maria.medina@meridian-andina.example",
+  "employeeNumber": "10028",
+  "supervisorEId": "15",
+  "supervisorId": "10012",
+  "supervisor": "Toledo, Ivana",
+  "hireDate": "2016-04-04",
+  "terminationDate": null,
+  "department": "Customer Success",
+  "division": "Comercial",
+  "jobTitle": "Gerente de Customer Success",
+  "location": "Buenos Aires",
+  "status": "Active"
+}

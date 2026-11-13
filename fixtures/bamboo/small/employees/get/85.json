@@ -1,0 +1,17 @@
+{
+  "id": "85",
+  "firstName": "Sofía",
+  "lastName": "Valdez",
+  "workEmail": "sofia.valdez2@meridian-andina.example",
+  "employeeNumber": "10148",
+  "supervisorEId": "35",
+  "supervisorId": "10065",
+  "supervisor": "Núñez, Carolina",
+  "hireDate": "2026-02-04",
+  "terminationDate": null,
+  "department": "Ingeniería",
+  "division": "Tecnología",
+  "jobTitle": "Frontend Developer Ssr",
+  "location": "Buenos Aires",
+  "status": "Active"
+}

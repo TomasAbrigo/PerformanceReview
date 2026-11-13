@@ -1,0 +1,17 @@
+{
+  "id": "365",
+  "firstName": "María",
+  "lastName": "Peralta",
+  "workEmail": "maria.peralta@meridian-andina.example",
+  "employeeNumber": "10895",
+  "supervisorEId": "43",
+  "supervisorId": "10072",
+  "supervisor": "Soria, Eugenia",
+  "hireDate": "2022-08-11",
+  "terminationDate": null,
+  "department": "Legales",
+  "division": "Corporativo",
+  "jobTitle": "Analista de Compliance Sr",
+  "location": "Córdoba",
+  "status": "Active"
+}

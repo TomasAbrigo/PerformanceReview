@@ -1,0 +1,178 @@
+{
+  "canAlign": true,
+  "canCreateGoals": true,
+  "filters": [
+    {
+      "id": "status-all",
+      "name": "All"
+    },
+    {
+      "id": "inProgress",
+      "name": "In progress"
+    },
+    {
+      "id": "completed",
+      "name": "Completed"
+    },
+    {
+      "id": "closed",
+      "name": "Closed"
+    }
+  ],
+  "selectedFilter": "status-all",
+  "goals": [
+    {
+      "id": "5396",
+      "title": "Completar la certificación del área",
+      "description": "Sirve de base para el próximo ciclo de evaluación.",
+      "percentComplete": 60,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [
+        57
+      ],
+      "dueDate": "2023-06-07",
+      "completionDate": null,
+      "lastChangedDateTime": "2023-11-30T14:13:37Z",
+      "status": "closed",
+      "milestones": null,
+      "actions": {
+        "canEdit": false,
+        "canUpdateProgress": false,
+        "canClose": false,
+        "canReopen": true,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "5397",
+      "title": "Reducir el tiempo de primera respuesta un 20%",
+      "description": "Sirve de base para el próximo ciclo de evaluación.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2025-05-13",
+      "completionDate": "2025-05-23",
+      "lastChangedDateTime": "2025-05-23T19:44:09Z",
+      "status": "completed",
+      "milestones": [
+        {
+          "id": 870,
+          "employeeGoalId": 5397,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-01-03T11:27:34Z",
+          "lastUpdateDateTime": "2025-01-03T11:27:34Z",
+          "lastUpdateUserId": 95
+        },
+        {
+          "id": 871,
+          "employeeGoalId": 5397,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-03-25T18:32:25Z",
+          "lastUpdateDateTime": "2025-03-25T18:32:25Z",
+          "lastUpdateUserId": 95
+        },
+        {
+          "id": 872,
+          "employeeGoalId": 5397,
+          "title": "Hito 3",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2024-12-31T12:04:49Z",
+          "lastUpdateDateTime": "2024-12-31T12:04:49Z",
+          "lastUpdateUserId": 95
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "5398",
+      "title": "Cerrar el plan de capacitación anual",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2025-02-25",
+      "completionDate": "2025-01-09",
+      "lastChangedDateTime": "2025-01-09T13:46:43Z",
+      "status": "completed",
+      "milestones": [
+        {
+          "id": 873,
+          "employeeGoalId": 5398,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2024-12-14T12:18:52Z",
+          "lastUpdateDateTime": "2024-12-14T12:18:52Z",
+          "lastUpdateUserId": 95
+        },
+        {
+          "id": 874,
+          "employeeGoalId": 5398,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-01-02T09:35:28Z",
+          "lastUpdateDateTime": "2025-01-02T09:35:28Z",
+          "lastUpdateUserId": 95
+        },
+        {
+          "id": 875,
+          "employeeGoalId": 5398,
+          "title": "Hito 3",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-01-09T10:01:21Z",
+          "lastUpdateDateTime": "2025-01-09T10:01:21Z",
+          "lastUpdateUserId": 95
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    }
+  ],
+  "persons": [
+    {
+      "employeeId": 95,
+      "firstName": "José",
+      "lastName": "Fernández",
+      "preferredName": null
+    },
+    {
+      "employeeId": 57,
+      "firstName": "Adrián",
+      "lastName": "Trejo",
+      "preferredName": null
+    }
+  ],
+  "comments": [
+    {
+      "goalId": "5398",
+      "commentCount": 4
+    }
+  ]
+}

@@ -1,0 +1,712 @@
+[
+  {
+    "id": "1001",
+    "employeeId": "11",
+    "date": "2013-02-01",
+    "location": "Buenos Aires",
+    "department": "Dirección General",
+    "division": "Corporativo",
+    "jobTitle": "CEO",
+    "reportsTo": null
+  },
+  {
+    "id": "1002",
+    "employeeId": "13",
+    "date": "2014-06-20",
+    "location": "Buenos Aires",
+    "department": "Dirección de Comercial",
+    "division": "Comercial",
+    "jobTitle": "VP de Comercial",
+    "reportsTo": "Delgado, Marcela"
+  },
+  {
+    "id": "1003",
+    "employeeId": "15",
+    "date": "2015-08-15",
+    "location": "Córdoba",
+    "department": "Ventas",
+    "division": "Comercial",
+    "jobTitle": "Gerente de Ventas",
+    "reportsTo": "Garrido, Santiago"
+  },
+  {
+    "id": "1004",
+    "employeeId": "17",
+    "date": "2016-07-17",
+    "location": "Buenos Aires",
+    "department": "Dirección de Corporativo",
+    "division": "Corporativo",
+    "jobTitle": "VP de Corporativo",
+    "reportsTo": "Delgado, Marcela"
+  },
+  {
+    "id": "1005",
+    "employeeId": "19",
+    "date": "2016-07-23",
+    "location": "Buenos Aires",
+    "department": "Dirección de Tecnología",
+    "division": "Tecnología",
+    "jobTitle": "VP de Tecnología",
+    "reportsTo": "Delgado, Marcela"
+  },
+  {
+    "id": "1006",
+    "employeeId": "21",
+    "date": "2017-06-22",
+    "location": "Montevideo",
+    "department": "Finanzas",
+    "division": "Corporativo",
+    "jobTitle": "Gerente de Finanzas",
+    "reportsTo": "Arias, Silvana"
+  },
+  {
+    "id": "1007",
+    "employeeId": "23",
+    "date": "2017-07-14",
+    "location": "Montevideo",
+    "department": "Ingeniería",
+    "division": "Tecnología",
+    "jobTitle": "Gerente de Ingeniería",
+    "reportsTo": "Molina, Silvana"
+  },
+  {
+    "id": "1008",
+    "employeeId": "25",
+    "date": "2017-10-01",
+    "location": "Buenos Aires",
+    "department": "Datos",
+    "division": "Tecnología",
+    "jobTitle": "Gerente de Datos",
+    "reportsTo": "Molina, Silvana"
+  },
+  {
+    "id": "1009",
+    "employeeId": "27",
+    "date": "2017-10-05",
+    "location": "Córdoba",
+    "department": "People",
+    "division": "Corporativo",
+    "jobTitle": "Gerente de People",
+    "reportsTo": "Arias, Silvana"
+  },
+  {
+    "id": "1010",
+    "employeeId": "29",
+    "date": "2018-02-06",
+    "location": "Córdoba",
+    "department": "People",
+    "division": "Corporativo",
+    "jobTitle": "Líder de People",
+    "reportsTo": "Lagos, Marcelo"
+  },
+  {
+    "id": "1011",
+    "employeeId": "31",
+    "date": "2018-03-03",
+    "location": "Remoto",
+    "department": "Finanzas",
+    "division": "Corporativo",
+    "jobTitle": "Líder de Finanzas",
+    "reportsTo": "Ibáñez, Mateo"
+  },
+  {
+    "id": "1012",
+    "employeeId": "33",
+    "date": "2018-03-17",
+    "location": "Remoto",
+    "department": "Ventas",
+    "division": "Comercial",
+    "jobTitle": "Líder de Ventas",
+    "reportsTo": "Ibáñez, Marcelo"
+  },
+  {
+    "id": "1013",
+    "employeeId": "35",
+    "date": "2018-03-26",
+    "location": "Buenos Aires",
+    "department": "Ingeniería",
+    "division": "Tecnología",
+    "jobTitle": "Líder de Ingeniería",
+    "reportsTo": "Bustos, Adrián"
+  },
+  {
+    "id": "1014",
+    "employeeId": "37",
+    "date": "2018-08-21",
+    "location": "Buenos Aires",
+    "department": "Datos",
+    "division": "Tecnología",
+    "jobTitle": "Líder de Datos",
+    "reportsTo": "Quiroga, Silvana"
+  },
+  {
+    "id": "1015",
+    "employeeId": "39",
+    "date": "2019-04-06",
+    "location": "Buenos Aires",
+    "department": "People",
+    "division": "Corporativo",
+    "jobTitle": "Analista de People Ssr",
+    "reportsTo": "Ibáñez, Rocío"
+  },
+  {
+    "id": "1016",
+    "employeeId": "41",
+    "date": "2019-11-28",
+    "location": "Buenos Aires",
+    "department": "Datos",
+    "division": "Tecnología",
+    "jobTitle": "Líder de Datos",
+    "reportsTo": "Quiroga, Silvana"
+  },
+  {
+    "id": "1017",
+    "employeeId": "43",
+    "date": "2020-10-10",
+    "location": "Córdoba",
+    "department": "Datos",
+    "division": "Tecnología",
+    "jobTitle": "Analytics Engineer Ssr",
+    "reportsTo": "Ríos, Hugo"
+  },
+  {
+    "id": "1018",
+    "employeeId": "45",
+    "date": "2020-12-24",
+    "location": "Rosario",
+    "department": "Datos",
+    "division": "Tecnología",
+    "jobTitle": "Data Engineer Sr",
+    "reportsTo": "González, Milagros"
+  },
+  {
+    "id": "1019",
+    "employeeId": "47",
+    "date": "2021-02-25",
+    "location": "Remoto",
+    "department": "Finanzas",
+    "division": "Corporativo",
+    "jobTitle": "Analista de Tesorería Sr",
+    "reportsTo": "Rivas, Federico"
+  },
+  {
+    "id": "1020",
+    "employeeId": "49",
+    "date": "2021-04-03",
+    "location": "Montevideo",
+    "department": "Datos",
+    "division": "Tecnología",
+    "jobTitle": "Data Engineer Jr",
+    "reportsTo": "González, Milagros"
+  },
+  {
+    "id": "1021",
+    "employeeId": "51",
+    "date": "2021-04-25",
+    "location": "Buenos Aires",
+    "department": "Finanzas",
+    "division": "Corporativo",
+    "jobTitle": "Analista de Tesorería Sr",
+    "reportsTo": "Rivas, Federico"
+  },
+  {
+    "id": "1022",
+    "employeeId": "53",
+    "date": "2022-02-01",
+    "location": "Córdoba",
+    "department": "Ventas",
+    "division": "Comercial",
+    "jobTitle": "Sales Analyst Jr",
+    "reportsTo": "Coronel, Jimena"
+  },
+  {
+    "id": "1023",
+    "employeeId": "55",
+    "date": "2022-05-17",
+    "location": "Buenos Aires",
+    "department": "Datos",
+    "division": "Tecnología",
+    "jobTitle": "Analytics Engineer Jr",
+    "reportsTo": "Ríos, Hugo"
+  },
+  {
+    "id": "1024",
+    "employeeId": "57",
+    "date": "2022-10-14",
+    "location": "Buenos Aires",
+    "department": "Datos",
+    "division": "Tecnología",
+    "jobTitle": "Analytics Engineer Jr",
+    "reportsTo": "González, Milagros"
+  },
+  {
+    "id": "1025",
+    "employeeId": "49",
+    "date": "2022-11-30",
+    "location": "Montevideo",
+    "department": "Datos",
+    "division": "Tecnología",
+    "jobTitle": "Data Engineer Ssr",
+    "reportsTo": "González, Milagros"
+  },
+  {
+    "id": "1026",
+    "employeeId": "49",
+    "date": "2023-01-30",
+    "location": "Montevideo",
+    "department": "Datos",
+    "division": "Tecnología",
+    "jobTitle": "Data Engineer Ssr",
+    "reportsTo": "Ríos, Hugo"
+  },
+  {
+    "id": "1027",
+    "employeeId": "47",
+    "date": "2023-02-15",
+    "location": "Remoto",
+    "department": "People",
+    "division": "Corporativo",
+    "jobTitle": "Reclutador Sr",
+    "reportsTo": "Ibáñez, Rocío"
+  },
+  {
+    "id": "1028",
+    "employeeId": "51",
+    "date": "2023-03-03",
+    "location": "Buenos Aires",
+    "department": "People",
+    "division": "Corporativo",
+    "jobTitle": "Analista de People Sr",
+    "reportsTo": "Ibáñez, Rocío"
+  },
+  {
+    "id": "1029",
+    "employeeId": "43",
+    "date": "2023-04-23",
+    "location": "Córdoba",
+    "department": "Datos",
+    "division": "Tecnología",
+    "jobTitle": "Analytics Engineer Ssr",
+    "reportsTo": "González, Milagros"
+  },
+  {
+    "id": "1030",
+    "employeeId": "59",
+    "date": "2023-05-19",
+    "location": "Buenos Aires",
+    "department": "People",
+    "division": "Corporativo",
+    "jobTitle": "Analista de People Jr",
+    "reportsTo": "Ibáñez, Rocío"
+  },
+  {
+    "id": "1031",
+    "employeeId": "45",
+    "date": "2023-08-12",
+    "location": "Remoto",
+    "department": "Datos",
+    "division": "Tecnología",
+    "jobTitle": "Data Engineer Sr",
+    "reportsTo": "González, Milagros"
+  },
+  {
+    "id": "1032",
+    "employeeId": "47",
+    "date": "2023-08-17",
+    "location": "Remoto",
+    "department": "Finanzas",
+    "division": "Corporativo",
+    "jobTitle": "Analista de Tesorería Sr",
+    "reportsTo": "Rivas, Federico"
+  },
+  {
+    "id": "1033",
+    "employeeId": "55",
+    "date": "2023-09-15",
+    "location": "Buenos Aires",
+    "department": "Datos",
+    "division": "Tecnología",
+    "jobTitle": "Analytics Engineer Jr",
+    "reportsTo": "González, Milagros"
+  },
+  {
+    "id": "1034",
+    "employeeId": "45",
+    "date": "2023-12-10",
+    "location": "Remoto",
+    "department": "Datos",
+    "division": "Tecnología",
+    "jobTitle": "Data Engineer Sr",
+    "reportsTo": "Ríos, Hugo"
+  },
+  {
+    "id": "1035",
+    "employeeId": "61",
+    "date": "2023-12-26",
+    "location": "Remoto",
+    "department": "Finanzas",
+    "division": "Corporativo",
+    "jobTitle": "Analista de Tesorería Sr",
+    "reportsTo": "Rivas, Federico"
+  },
+  {
+    "id": "1036",
+    "employeeId": "63",
+    "date": "2023-12-27",
+    "location": "Rosario",
+    "department": "Finanzas",
+    "division": "Corporativo",
+    "jobTitle": "Analista Contable Ssr",
+    "reportsTo": "Rivas, Federico"
+  },
+  {
+    "id": "1037",
+    "employeeId": "65",
+    "date": "2024-02-06",
+    "location": "Buenos Aires",
+    "department": "People",
+    "division": "Corporativo",
+    "jobTitle": "Reclutador Sr",
+    "reportsTo": "Ibáñez, Rocío"
+  },
+  {
+    "id": "1038",
+    "employeeId": "59",
+    "date": "2024-02-11",
+    "location": "Buenos Aires",
+    "department": "Finanzas",
+    "division": "Corporativo",
+    "jobTitle": "Analista de Tesorería Jr",
+    "reportsTo": "Rivas, Federico"
+  },
+  {
+    "id": "1039",
+    "employeeId": "43",
+    "date": "2024-03-26",
+    "location": "Córdoba",
+    "department": "Ingeniería",
+    "division": "Tecnología",
+    "jobTitle": "Frontend Developer Ssr",
+    "reportsTo": "Núñez, Carolina"
+  },
+  {
+    "id": "1040",
+    "employeeId": "57",
+    "date": "2024-03-29",
+    "location": "Buenos Aires",
+    "department": "Datos",
+    "division": "Tecnología",
+    "jobTitle": "Analytics Engineer Jr",
+    "reportsTo": "Ríos, Hugo"
+  },
+  {
+    "id": "1041",
+    "employeeId": "67",
+    "date": "2024-04-11",
+    "location": "Buenos Aires",
+    "department": "Finanzas",
+    "division": "Corporativo",
+    "jobTitle": "Analista de Tesorería Ssr",
+    "reportsTo": "Rivas, Federico"
+  },
+  {
+    "id": "1042",
+    "employeeId": "47",
+    "date": "2024-05-22",
+    "location": "Remoto",
+    "department": "People",
+    "division": "Corporativo",
+    "jobTitle": "HR Business Partner Sr",
+    "reportsTo": "Ibáñez, Rocío"
+  },
+  {
+    "id": "1043",
+    "employeeId": "69",
+    "date": "2024-06-18",
+    "location": "Buenos Aires",
+    "department": "Datos",
+    "division": "Tecnología",
+    "jobTitle": "Data Engineer Ssr",
+    "reportsTo": "Ríos, Hugo"
+  },
+  {
+    "id": "1044",
+    "employeeId": "71",
+    "date": "2024-08-27",
+    "location": "Córdoba",
+    "department": "Finanzas",
+    "division": "Corporativo",
+    "jobTitle": "Analista Contable Jr",
+    "reportsTo": "Rivas, Federico"
+  },
+  {
+    "id": "1045",
+    "employeeId": "53",
+    "date": "2024-09-12",
+    "location": "Córdoba",
+    "department": "Finanzas",
+    "division": "Corporativo",
+    "jobTitle": "Controller Jr",
+    "reportsTo": "Rivas, Federico"
+  },
+  {
+    "id": "1046",
+    "employeeId": "73",
+    "date": "2024-10-03",
+    "location": "Montevideo",
+    "department": "Datos",
+    "division": "Tecnología",
+    "jobTitle": "Data Analyst Jr",
+    "reportsTo": "Ríos, Hugo"
+  },
+  {
+    "id": "1047",
+    "employeeId": "75",
+    "date": "2024-10-22",
+    "location": "Córdoba",
+    "department": "People",
+    "division": "Corporativo",
+    "jobTitle": "Analista de People Ssr",
+    "reportsTo": "Ibáñez, Rocío"
+  },
+  {
+    "id": "1048",
+    "employeeId": "49",
+    "date": "2024-10-23",
+    "location": "Montevideo",
+    "department": "Ingeniería",
+    "division": "Tecnología",
+    "jobTitle": "Backend Developer Ssr",
+    "reportsTo": "Núñez, Carolina"
+  },
+  {
+    "id": "1049",
+    "employeeId": "77",
+    "date": "2024-10-23",
+    "location": "Buenos Aires",
+    "department": "Datos",
+    "division": "Tecnología",
+    "jobTitle": "Analytics Engineer Jr",
+    "reportsTo": "Ríos, Hugo"
+  },
+  {
+    "id": "1050",
+    "employeeId": "79",
+    "date": "2024-11-24",
+    "location": "Buenos Aires",
+    "department": "Datos",
+    "division": "Tecnología",
+    "jobTitle": "Data Analyst Sr",
+    "reportsTo": "Ríos, Hugo"
+  },
+  {
+    "id": "1051",
+    "employeeId": "61",
+    "date": "2024-11-27",
+    "location": "Remoto",
+    "department": "People",
+    "division": "Corporativo",
+    "jobTitle": "HR Business Partner Sr",
+    "reportsTo": "Ibáñez, Rocío"
+  },
+  {
+    "id": "1052",
+    "employeeId": "71",
+    "date": "2025-01-25",
+    "location": "Córdoba",
+    "department": "Ingeniería",
+    "division": "Tecnología",
+    "jobTitle": "Mobile Developer Jr",
+    "reportsTo": "Núñez, Carolina"
+  },
+  {
+    "id": "1053",
+    "employeeId": "53",
+    "date": "2025-04-30",
+    "location": "Córdoba",
+    "department": "Ingeniería",
+    "division": "Tecnología",
+    "jobTitle": "Backend Developer Jr",
+    "reportsTo": "Núñez, Carolina"
+  },
+  {
+    "id": "1054",
+    "employeeId": "57",
+    "date": "2025-05-27",
+    "location": "Buenos Aires",
+    "department": "Ventas",
+    "division": "Comercial",
+    "jobTitle": "Business Developer Jr",
+    "reportsTo": "Coronel, Jimena"
+  },
+  {
+    "id": "1055",
+    "employeeId": "49",
+    "date": "2025-06-12",
+    "location": "Montevideo",
+    "department": "Datos",
+    "division": "Tecnología",
+    "jobTitle": "Data Engineer Ssr",
+    "reportsTo": "Ríos, Hugo"
+  },
+  {
+    "id": "1056",
+    "employeeId": "79",
+    "date": "2025-06-23",
+    "location": "Montevideo",
+    "department": "Datos",
+    "division": "Tecnología",
+    "jobTitle": "Data Analyst Sr",
+    "reportsTo": "Ríos, Hugo"
+  },
+  {
+    "id": "1057",
+    "employeeId": "81",
+    "date": "2025-08-03",
+    "location": "Remoto",
+    "department": "Finanzas",
+    "division": "Corporativo",
+    "jobTitle": "Analista Contable Ssr",
+    "reportsTo": "Rivas, Federico"
+  },
+  {
+    "id": "1058",
+    "employeeId": "83",
+    "date": "2025-08-17",
+    "location": "Buenos Aires",
+    "department": "Finanzas",
+    "division": "Corporativo",
+    "jobTitle": "Analista Contable Sr",
+    "reportsTo": "Rivas, Federico"
+  },
+  {
+    "id": "1059",
+    "employeeId": "63",
+    "date": "2025-08-22",
+    "location": "Rosario",
+    "department": "People",
+    "division": "Corporativo",
+    "jobTitle": "HR Business Partner Ssr",
+    "reportsTo": "Ibáñez, Rocío"
+  },
+  {
+    "id": "1060",
+    "employeeId": "75",
+    "date": "2025-08-23",
+    "location": "Córdoba",
+    "department": "Finanzas",
+    "division": "Corporativo",
+    "jobTitle": "Analista de Tesorería Ssr",
+    "reportsTo": "Rivas, Federico"
+  },
+  {
+    "id": "1061",
+    "employeeId": "39",
+    "date": "2025-09-29",
+    "location": "Buenos Aires",
+    "department": "Finanzas",
+    "division": "Corporativo",
+    "jobTitle": "Analista Contable Ssr",
+    "reportsTo": "Rivas, Federico"
+  },
+  {
+    "id": "1062",
+    "employeeId": "85",
+    "date": "2026-02-04",
+    "location": "Buenos Aires",
+    "department": "Datos",
+    "division": "Tecnología",
+    "jobTitle": "Data Engineer Ssr",
+    "reportsTo": "Ríos, Hugo"
+  },
+  {
+    "id": "1063",
+    "employeeId": "67",
+    "date": "2026-02-10",
+    "location": "Buenos Aires",
+    "department": "Finanzas",
+    "division": "Corporativo",
+    "jobTitle": "Analista de Tesorería Sr",
+    "reportsTo": "Rivas, Federico"
+  },
+  {
+    "id": "1064",
+    "employeeId": "83",
+    "date": "2026-02-22",
+    "location": "Buenos Aires",
+    "department": "People",
+    "division": "Corporativo",
+    "jobTitle": "Analista de People Sr",
+    "reportsTo": "Ibáñez, Rocío"
+  },
+  {
+    "id": "1065",
+    "employeeId": "59",
+    "date": "2026-03-10",
+    "location": "Buenos Aires",
+    "department": "Finanzas",
+    "division": "Corporativo",
+    "jobTitle": "Analista de Tesorería Ssr",
+    "reportsTo": "Rivas, Federico"
+  },
+  {
+    "id": "1066",
+    "employeeId": "87",
+    "date": "2026-03-13",
+    "location": "Montevideo",
+    "department": "Datos",
+    "division": "Tecnología",
+    "jobTitle": "Data Analyst Jr",
+    "reportsTo": "Ríos, Hugo"
+  },
+  {
+    "id": "1067",
+    "employeeId": "39",
+    "date": "2026-05-04",
+    "location": "Buenos Aires",
+    "department": "Finanzas",
+    "division": "Corporativo",
+    "jobTitle": "Analista Contable Sr",
+    "reportsTo": "Rivas, Federico"
+  },
+  {
+    "id": "1068",
+    "employeeId": "77",
+    "date": "2026-06-03",
+    "location": "Buenos Aires",
+    "department": "Ingeniería",
+    "division": "Tecnología",
+    "jobTitle": "Backend Developer Jr",
+    "reportsTo": "Núñez, Carolina"
+  },
+  {
+    "id": "1069",
+    "employeeId": "85",
+    "date": "2026-08-06",
+    "location": "Buenos Aires",
+    "department": "Ingeniería",
+    "division": "Tecnología",
+    "jobTitle": "Frontend Developer Ssr",
+    "reportsTo": "Núñez, Carolina"
+  },
+  {
+    "id": "1070",
+    "employeeId": "53",
+    "date": "2026-08-10",
+    "location": "Córdoba",
+    "department": "Ingeniería",
+    "division": "Tecnología",
+    "jobTitle": "Backend Developer Ssr",
+    "reportsTo": "Núñez, Carolina"
+  },
+  {
+    "id": "1071",
+    "employeeId": "89",
+    "date": "2026-09-02",
+    "location": "Córdoba",
+    "department": "Ingeniería",
+    "division": "Tecnología",
+    "jobTitle": "Frontend Developer Ssr",
+    "reportsTo": "Núñez, Carolina"
+  }
+]

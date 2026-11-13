@@ -1,0 +1,110 @@
+{
+  "canAlign": true,
+  "canCreateGoals": true,
+  "filters": [
+    {
+      "id": "status-all",
+      "name": "All"
+    },
+    {
+      "id": "inProgress",
+      "name": "In progress"
+    },
+    {
+      "id": "completed",
+      "name": "Completed"
+    },
+    {
+      "id": "closed",
+      "name": "Closed"
+    }
+  ],
+  "selectedFilter": "status-all",
+  "goals": [
+    {
+      "id": "6902",
+      "title": "Migrar los reportes al nuevo tablero",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2023-09-15",
+      "completionDate": "2023-07-07",
+      "lastChangedDateTime": "2023-07-07T15:00:47Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "6903",
+      "title": "Mentorear a dos personas nuevas",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2024-11-12",
+      "completionDate": "2024-07-04",
+      "lastChangedDateTime": "2024-07-04T10:17:11Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "6906",
+      "title": "Migrar los reportes al nuevo tablero",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 55,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [
+        49
+      ],
+      "dueDate": "2026-11-02",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-09-16T09:44:17Z",
+      "status": "in_progress",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    }
+  ],
+  "persons": [
+    {
+      "employeeId": 437,
+      "firstName": "Pablo",
+      "lastName": "Álvarez",
+      "preferredName": null
+    },
+    {
+      "employeeId": 49,
+      "firstName": "Milagros",
+      "lastName": "Monzón",
+      "preferredName": null
+    }
+  ],
+  "comments": [
+    {
+      "goalId": "6902",
+      "commentCount": 4
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "id": "445",
+  "firstName": "Victoria",
+  "lastName": "Suárez",
+  "workEmail": "victoria.suarez@meridian-andina.example",
+  "employeeNumber": "11099",
+  "supervisorEId": "47",
+  "supervisorId": "10080",
+  "supervisor": "Olmos, Candela",
+  "hireDate": "2023-03-31",
+  "terminationDate": null,
+  "department": "Soporte",
+  "division": "Operaciones",
+  "jobTitle": "Agente de Soporte Jr",
+  "location": "Buenos Aires",
+  "status": "Active"
+}

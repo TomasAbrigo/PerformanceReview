@@ -1,0 +1,155 @@
+{
+  "canAlign": true,
+  "canCreateGoals": true,
+  "filters": [
+    {
+      "id": "status-all",
+      "name": "All"
+    },
+    {
+      "id": "inProgress",
+      "name": "In progress"
+    },
+    {
+      "id": "completed",
+      "name": "Completed"
+    },
+    {
+      "id": "closed",
+      "name": "Closed"
+    }
+  ],
+  "selectedFilter": "status-all",
+  "goals": [
+    {
+      "id": "7648",
+      "title": "Documentar los procesos críticos",
+      "description": "Sirve de base para el próximo ciclo de evaluación.",
+      "percentComplete": 30,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2025-09-25",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-01-10T08:56:02Z",
+      "status": "in_progress",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "7649",
+      "title": "Mejorar el NPS interno del equipo",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "percentComplete": 55,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2025-12-23",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-07-04T13:59:19Z",
+      "status": "in_progress",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "7651",
+      "title": "Implementar el calendario editorial",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "percentComplete": 75,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [
+        265
+      ],
+      "dueDate": "2025-10-21",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-06-21T18:16:38Z",
+      "status": "in_progress",
+      "milestones": [
+        {
+          "id": 1914,
+          "employeeGoalId": 7651,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2026-04-23T08:21:43Z",
+          "lastUpdateDateTime": "2026-04-23T08:21:43Z",
+          "lastUpdateUserId": 651
+        },
+        {
+          "id": 1915,
+          "employeeGoalId": 7651,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2026-03-09T15:29:26Z",
+          "lastUpdateDateTime": "2026-03-09T15:29:26Z",
+          "lastUpdateUserId": 651
+        },
+        {
+          "id": 1916,
+          "employeeGoalId": 7651,
+          "title": "Hito 3",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-09-19T18:48:56Z",
+          "lastUpdateDateTime": "2025-09-19T18:48:56Z",
+          "lastUpdateUserId": 651
+        },
+        {
+          "id": 1917,
+          "employeeGoalId": 7651,
+          "title": "Hito 4",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2025-06-18T18:04:55Z",
+          "lastUpdateUserId": 651
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    }
+  ],
+  "persons": [
+    {
+      "employeeId": 651,
+      "firstName": "Candela",
+      "lastName": "Pérez",
+      "preferredName": null
+    },
+    {
+      "employeeId": 265,
+      "firstName": "Ivana",
+      "lastName": "Olmos",
+      "preferredName": null
+    }
+  ],
+  "comments": [
+    {
+      "goalId": "7648",
+      "commentCount": 4
+    }
+  ]
+}
