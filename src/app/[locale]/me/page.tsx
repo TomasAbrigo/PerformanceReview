@@ -19,7 +19,10 @@ async function Tasks({ params }: PageProps<"/[locale]/me">) {
   return (
     <MyTasksView
       hasPerson={actor.personId !== null}
-      tasks={{ selfAssessments: tasks.selfAssessments }}
+      tasks={{
+        selfAssessments: tasks.selfAssessments,
+        sharedReviews: tasks.sharedReviews,
+      }}
     />
   );
 }

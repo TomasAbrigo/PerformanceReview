@@ -61,11 +61,9 @@ export const reviewRequest = pgTable(
     ...sourceColumns,
   },
   (t) => [
-    unique("review_request_participant_rel_reviewer_uq").on(
-      t.participantId,
-      t.relationship,
-      t.reviewerPersonId,
-    ).nullsNotDistinct(),
+    unique("review_request_participant_rel_reviewer_uq")
+      .on(t.participantId, t.relationship, t.reviewerPersonId)
+      .nullsNotDistinct(),
     unique().on(t.sourceSystem, t.sourceId),
     index("review_request_reviewer_idx").on(t.reviewerPersonId, t.status),
     index("review_request_cycle_idx").on(t.cycleId),

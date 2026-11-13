@@ -170,3 +170,31 @@ export async function sendReminder(
     actorPersonId: actor.personId,
   });
 }
+
+/**
+ * Reviewee name and self request id of a participant, for the manager form.
+ * Only ids: reading the self review still goes through getReview/canRead.
+ */
+export async function participantRefs(
+  db: DbOrTx,
+  participantId: string,
+): Promise<{ revieweeName: string; selfRequestId: string | null } | null> {
+  if (!UUID.test(participantId)) return null;
+  const [row] = await db
+    .select({
+      revieweeName: person.displayName,
+      selfRequestId: reviewRequest.id,
+    })
+    .from(cycleParticipant)
+    .innerJoin(person, eq(person.id, cycleParticipant.revieweePersonId))
+    .leftJoin(
+      reviewRequest,
+      and(
+        eq(reviewRequest.participantId, cycleParticipant.id),
+        eq(reviewRequest.relationship, "self"),
+        isNull(reviewRequest.deletedAt),
+      ),
+    )
+    .where(eq(cycleParticipant.id, participantId));
+  return row ?? null;
+}
