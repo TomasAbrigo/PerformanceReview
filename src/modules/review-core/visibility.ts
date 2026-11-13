@@ -1,6 +1,7 @@
 import type { ActorContext } from "@/modules/actor/types";
 import type { Relationship } from "@/modules/templates/constants";
 import type { RequestStatus } from "./request-status";
+import type { CycleStatus } from "./status";
 
 /** The request fields visibility depends on. */
 export type VisibilityRequest = {
@@ -13,9 +14,23 @@ export type VisibilityContext = {
   request: VisibilityRequest;
   participant: { revieweePersonId: string };
   /** Cycle settings (anonymity, sharing) used by the manager/peer rules. */
-  cycle?: { status: string };
+  cycle?: { status: CycleStatus };
   /** Per-question rules (visible_to_reviewee) come with #12. */
   questionRevision?: { visibleToReviewee: boolean };
+};
+
+/** Where a request lives: the cycle phase and whether the reviewee is still in. */
+export type WriteScope = {
+  cycle: { status: CycleStatus };
+  participant: { removedAt: Date | null };
+};
+
+/** Cycle phases in which each kind of review can be written. */
+export const writablePhases: Record<Relationship, readonly CycleStatus[]> = {
+  self: ["collecting"],
+  peer: ["collecting"],
+  upward: ["collecting"],
+  manager: ["manager_review"],
 };
 
 const isReviewer = (actor: ActorContext, r: VisibilityRequest) =>
@@ -23,30 +38,30 @@ const isReviewer = (actor: ActorContext, r: VisibilityRequest) =>
 
 /**
  * The single place that decides whether `actor` may read a review request
- * (and its answers). HR (People) reads everything; the author reads their
- * own request. Everything else is denied for now:
- * - manager reading the report's self review, the reviewee reading the
- *   manager review after sharing (double blind): #12;
- * - reviewee/manager reading peer and upward reviews (anonymity): #14.
+ * (and its answers): HR (People) reads everything, the author reads their
+ * own request, nobody else reads anything yet.
+ * TODO(#12): manager reads the report's self review once the double blind
+ * lifts; the reviewee reads the manager review once shared.
+ * TODO(#14): aggregated/anonymized peer and upward views.
  */
 export function canRead(actor: ActorContext, ctx: VisibilityContext): boolean {
-  if (actor.role === "hr") return true;
-  if (isReviewer(actor, ctx.request)) return true;
-  switch (ctx.request.relationship) {
-    case "self":
-      return false; // #12: the manager reads it once the double blind lifts.
-    case "manager":
-      return false; // #12: the reviewee reads it once shared.
-    case "peer":
-    case "upward":
-      return false; // #14: aggregated/anonymized views.
-  }
+  return actor.role === "hr" || isReviewer(actor, ctx.request);
 }
 
-/** Only the reviewer writes, and only while the request is a draft. */
+/**
+ * Only the reviewer writes, only while the request is a draft, the cycle is
+ * in a phase where that kind of review is written, and the reviewee is
+ * still a participant.
+ */
 export function canWrite(
   actor: ActorContext,
   request: VisibilityRequest,
+  scope: WriteScope,
 ): boolean {
-  return isReviewer(actor, request) && request.status === "draft";
+  return (
+    isReviewer(actor, request) &&
+    request.status === "draft" &&
+    writablePhases[request.relationship].includes(scope.cycle.status) &&
+    scope.participant.removedAt === null
+  );
 }

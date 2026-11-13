@@ -22,6 +22,7 @@ import {
   launchCycle,
   listMyTasks,
   listSelfRequests,
+  removeParticipant,
   ReviewError,
   saveDraft,
   submit,
@@ -375,5 +376,26 @@ describe("listMyTasks", () => {
       .where(eq(cycleParticipant.revieweePersonId, bruno));
     expect((await listMyTasks(db, as(bruno))).selfAssessments).toEqual([]);
     void cycle;
+  });
+});
+
+describe("write scope", () => {
+  it("rejects saving a self review after collecting", async () => {
+    const cycle = await collectingCycle();
+    const review = await brunoRequest(cycle.id);
+    await transition(db, cycle.id, "manager_review", null);
+    await expect(
+      saveDraft(db, as(bruno), review.request.id, fillAll(review)),
+    ).rejects.toMatchObject({ code: "forbidden" });
+    expect((await brunoRequest(cycle.id)).canWrite).toBe(false);
+  });
+
+  it("rejects saving for a removed participant", async () => {
+    const cycle = await collectingCycle();
+    const review = await brunoRequest(cycle.id);
+    await removeParticipant(db, cycle.id, bruno);
+    await expect(
+      saveDraft(db, as(bruno), review.request.id, fillAll(review)),
+    ).rejects.toMatchObject({ code: "forbidden" });
   });
 });

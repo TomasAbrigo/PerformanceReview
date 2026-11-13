@@ -1,4 +1,4 @@
-import type { FieldIssue } from "@/modules/templates/errors";
+import { DomainError } from "@/lib/domain-error";
 
 export type ReviewErrorCode =
   | "not_found"
@@ -8,14 +8,4 @@ export type ReviewErrorCode =
   | "not_submitted";
 
 /** Errors of review requests and answers (issues: per-question paths). */
-export class ReviewError extends Error {
-  constructor(
-    readonly code: ReviewErrorCode,
-    readonly issues: FieldIssue[] = [],
-  ) {
-    super(
-      issues.length ? `${code}: ${issues.map((i) => i.path).join(", ")}` : code,
-    );
-    this.name = "ReviewError";
-  }
-}
+export class ReviewError extends DomainError<ReviewErrorCode> {}

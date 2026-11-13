@@ -7,9 +7,12 @@ import { ActorSelector } from "@/components/actor/actor-selector";
 import en from "@/messages/en.json";
 import es from "@/messages/es.json";
 import { MyTasksView } from "./my-tasks";
+import { SelfStatusCell } from "./self-status-cell";
 import { type SelfReviewData, SelfReviewForm } from "./self-review-form";
 
+const routerRefresh = vi.fn();
 vi.mock("@/i18n/navigation", () => ({
+  useRouter: () => ({ refresh: routerRefresh, push: vi.fn() }),
   Link: ({ href, children }: { href: string; children: ReactNode }) => (
     <a href={href}>{children}</a>
   ),
@@ -304,4 +307,91 @@ describe("ActorSelector", () => {
       expect(setActor).toHaveBeenCalledWith(BRUNO, "employee"),
     );
   });
+});
+
+// ------------------------------------------------------- autosave vs submit
+
+describe("SelfReviewForm submit while saving", () => {
+  it("disables Submit while a save is in flight", async () => {
+    let resolve!: (v: { ok: true }) => void;
+    const a = actions();
+    a.save.mockImplementationOnce(
+      () => new Promise<{ ok: true }>((r) => (resolve = r)),
+    );
+    renderIn("es", <SelfReviewForm review={review()} actions={a} />);
+    await userEvent.type(screen.getByLabelText(/¿Qué lograste\?/), "x");
+    await userEvent.tab();
+    expect(screen.getByRole("button", { name: "Enviar" })).toBeDisabled();
+    resolve({ ok: true });
+    await waitFor(() =>
+      expect(screen.getByRole("button", { name: "Enviar" })).toBeEnabled(),
+    );
+  });
+
+  it("waits for the pending autosave before submitting", async () => {
+    const order: string[] = [];
+    let resolve!: (v: { ok: true }) => void;
+    const a = actions();
+    a.save.mockImplementationOnce(
+      () =>
+        new Promise<{ ok: true }>((r) => {
+          resolve = (v) => {
+            order.push("saved");
+            r(v);
+          };
+        }),
+    );
+    a.submit.mockImplementation(async () => {
+      order.push("submit");
+      return { ok: true as const };
+    });
+    renderIn("es", <SelfReviewForm review={review()} actions={a} />);
+    await userEvent.click(screen.getByRole("button", { name: "Enviar" }));
+    await userEvent.type(screen.getByLabelText(/¿Qué lograste\?/), "x");
+    // Clicking confirm blurs the textarea: the save starts, then submit.
+    await userEvent.click(
+      screen.getByRole("button", { name: "Confirmar envío" }),
+    );
+    expect(a.submit).not.toHaveBeenCalled();
+    resolve({ ok: true });
+    await waitFor(() => expect(order).toEqual(["saved", "submit"]));
+  });
+});
+
+// ------------------------------------------------------------ unlock cell
+
+describe("SelfStatusCell", () => {
+  it.each([
+    ["es", "La evaluación no está enviada."],
+    ["en", "The review is not submitted."],
+  ] as const)(
+    "shows the server error and refreshes in %s",
+    async (locale, msg) => {
+      const unlock = vi.fn(async () => ({
+        ok: false as const,
+        code: "not_submitted",
+        issues: [],
+      }));
+      renderIn(
+        locale,
+        <SelfStatusCell
+          request={{ requestId: REQ, status: "submitted" }}
+          canUnlock
+          unlock={unlock}
+        />,
+      );
+      await userEvent.click(
+        screen.getByRole("button", {
+          name: locale === "es" ? "Desbloquear" : "Unlock",
+        }),
+      );
+      await userEvent.click(
+        screen.getByRole("button", {
+          name: locale === "es" ? "Confirmar desbloqueo" : "Confirm unlock",
+        }),
+      );
+      expect(await screen.findByRole("alert")).toHaveTextContent(msg);
+      expect(routerRefresh).toHaveBeenCalled();
+    },
+  );
 });

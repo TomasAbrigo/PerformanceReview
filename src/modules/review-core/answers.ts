@@ -85,7 +85,7 @@ export async function getSelfReview(
         valueOf(byId.get(a.questionRevisionId), a),
       ]),
     ),
-    canWrite: canWrite(actor, request),
+    canWrite: canWrite(actor, request, row),
   };
 }
 
@@ -120,7 +120,7 @@ function columns(q: QuestionRevision, value: AnswerValue) {
 
 async function writable(db: DbOrTx, actor: ActorContext, requestId: string) {
   const row = await loadRequest(db, actor, requestId, { forUpdate: true });
-  if (!canWrite(actor, row.request)) throw new ReviewError("forbidden");
+  if (!canWrite(actor, row.request, row)) throw new ReviewError("forbidden");
   return row;
 }
 
