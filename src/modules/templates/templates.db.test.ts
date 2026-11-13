@@ -15,6 +15,7 @@ import {
   seedSystemTemplates,
   TemplatesError,
   updateQuestion,
+  updateTemplate,
 } from ".";
 
 const t = (es: string, en: string) => ({ es, en });
@@ -249,5 +250,45 @@ describe("templates module", () => {
       reorder(db, { kind: "questions", parentId: section.id, ids: [a.id] }),
     ).rejects.toMatchObject({ code: "validation" });
     await deleteTemplate(db, template.id);
+  });
+
+  it("renaming a template keeps its description", async () => {
+    const clone = await cloneTemplate(
+      db,
+      (await systemTemplate("year_end")).id,
+    );
+    await updateTemplate(db, clone.id, { name: t("Renombrado", "Renamed") });
+    const after = await getTemplate(db, clone.id);
+    expect(after!.name).toEqual(t("Renombrado", "Renamed"));
+    expect(after!.description?.en).toBe(
+      "Self-reflection, manager review and peer feedback.",
+    );
+    await deleteTemplate(db, clone.id);
+  });
+
+  it("rejects a reorder that repeats an id", async () => {
+    const { template, section } = await customTemplateWithSection();
+    const q = (en: string) =>
+      addQuestion(db, section.id, {
+        kind: "text",
+        appliesTo: ["self"],
+        prompt: t(en, en),
+      });
+    const a = await q("a");
+    await q("b");
+    await expect(
+      reorder(db, {
+        kind: "questions",
+        parentId: section.id,
+        ids: [a.id, a.id],
+      }),
+    ).rejects.toMatchObject({ code: "validation" });
+    await deleteTemplate(db, template.id);
+  });
+
+  it("cloning a disabled template keeps it disabled", async () => {
+    const clone = await cloneTemplate(db, (await systemTemplate("upward")).id);
+    expect(clone.enabled).toBe(false);
+    await deleteTemplate(db, clone.id);
   });
 });

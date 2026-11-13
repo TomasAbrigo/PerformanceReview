@@ -6,14 +6,16 @@ import { useId, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Field, FieldLabel } from "@/components/ui/field";
+import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import {
   type ActionResult,
   ErrorAlert,
+  type FieldIssue,
   type Localized,
   LocalizedInputs,
   useAction,
+  useErrorText,
   useLocalized,
 } from "./shared";
 
@@ -32,10 +34,14 @@ export type ScaleActions = {
 };
 
 const emptyText: Localized = { es: "", en: "" };
-const blankOptions = () => [
-  { value: 1, label: emptyText },
-  { value: 2, label: emptyText },
+/** Option values are kept as typed (so a field can be emptied) and coerced on submit. */
+type DraftOption = { value: string; label: Localized };
+const blankOptions = (): DraftOption[] => [
+  { value: "1", label: emptyText },
+  { value: "2", label: emptyText },
 ];
+const toNumber = (raw: string) =>
+  raw.trim() === "" ? Number.NaN : Number(raw);
 
 export function ScalesView({
   scales,
@@ -126,7 +132,14 @@ function ScaleForm({ create }: { create: ScaleActions["create"] }) {
           onSubmit={(e) => {
             e.preventDefault();
             run(
-              () => create({ name, options }),
+              () =>
+                create({
+                  name,
+                  options: options.map((o) => ({
+                    value: toNumber(o.value),
+                    label: o.label,
+                  })),
+                }),
               () => {
                 setName(emptyText);
                 setOptions(blankOptions());
@@ -144,7 +157,10 @@ function ScaleForm({ create }: { create: ScaleActions["create"] }) {
           />
           {options.map((option, i) => (
             <div key={i} className="flex flex-col gap-2 rounded-lg border p-3">
-              <Field className="max-w-32">
+              <Field
+                className="max-w-32"
+                data-invalid={issueAt(`options.${i}.value`) ? true : undefined}
+              >
                 <FieldLabel htmlFor={`${id}-value-${i}`}>
                   {t("value")}
                 </FieldLabel>
@@ -156,11 +172,12 @@ function ScaleForm({ create }: { create: ScaleActions["create"] }) {
                   onChange={(e) =>
                     setOptions(
                       options.map((o, j) =>
-                        j === i ? { ...o, value: Number(e.target.value) } : o,
+                        j === i ? { ...o, value: e.target.value } : o,
                       ),
                     )
                   }
                 />
+                <IssueText issue={issueAt(`options.${i}.value`)} />
               </Field>
               <LocalizedInputs
                 id={`${id}-label-${i}`}
@@ -190,6 +207,7 @@ function ScaleForm({ create }: { create: ScaleActions["create"] }) {
               ) : null}
             </div>
           ))}
+          <IssueText issue={issueAt("options")} />
           <div className="flex gap-2">
             <Button
               type="button"
@@ -198,7 +216,14 @@ function ScaleForm({ create }: { create: ScaleActions["create"] }) {
                 setOptions([
                   ...options,
                   {
-                    value: Math.max(...options.map((o) => o.value)) + 1,
+                    value: String(
+                      Math.max(
+                        0,
+                        ...options
+                          .map((o) => toNumber(o.value))
+                          .filter(Number.isFinite),
+                      ) + 1,
+                    ),
                     label: emptyText,
                   },
                 ])
@@ -215,4 +240,9 @@ function ScaleForm({ create }: { create: ScaleActions["create"] }) {
       </CardContent>
     </Card>
   );
+}
+
+function IssueText({ issue }: { issue: FieldIssue | undefined }) {
+  const text = useErrorText();
+  return issue ? <FieldError>{text.issue(issue)}</FieldError> : null;
 }

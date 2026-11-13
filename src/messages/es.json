@@ -117,6 +117,7 @@
     "choiceEs": "Opción {n} (español)",
     "choiceEn": "Opción {n} (inglés)",
     "addChoice": "Agregar opción",
-    "hiddenFromReviewee": "Oculta para la persona evaluada"
+    "hiddenFromReviewee": "Oculta para la persona evaluada",
+    "chooseScale": "Elegí una escala"
   }
 }

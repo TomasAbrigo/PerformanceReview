@@ -27,4 +27,5 @@ export type {
   ScaleInput,
   SectionInput,
   TemplateInput,
+  TemplateUpdateInput,
 } from "./validation";

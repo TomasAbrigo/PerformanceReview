@@ -42,3 +42,16 @@ test("clones a system template and adds a question in both languages", async ({
   await page.goto(page.url().replace("/es/", "/en/"));
   await expect(page.getByText("What should they start doing?")).toBeVisible();
 });
+
+// With Cache Components the static shell starts a 200 response before the
+// request-time lookup runs, so notFound() renders the not-found UI + noindex
+// rather than changing the HTTP status (see Next docs, "The HTTP contract").
+test("an unknown template id renders not-found", async ({ page }) => {
+  for (const id of ["not-a-uuid", "00000000-0000-0000-0000-000000000000"]) {
+    await page.goto(`/es/settings/templates/${id}`);
+    await expect(
+      page.locator('meta[name="robots"][content="noindex"]').first(),
+    ).toBeAttached();
+    await expect(page.getByText("This page could not be found.")).toBeVisible();
+  }
+});

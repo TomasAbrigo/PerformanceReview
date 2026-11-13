@@ -1,5 +1,5 @@
 import { eq } from "drizzle-orm";
-import type { Database } from "@/db/client";
+import type { DbOrTx } from "@/db/client";
 import {
   type LocalizedText,
   question,
@@ -307,7 +307,7 @@ const templates: SeedTemplate[] = [
 ];
 
 /** Inserts the system scales and templates that are missing. Safe to run repeatedly. */
-export async function seedSystemTemplates(db: Database): Promise<void> {
+export async function seedSystemTemplates(db: DbOrTx): Promise<void> {
   const scaleIds = {} as Record<ScaleKey, string>;
   for (const [key, input] of Object.entries(scales) as [
     ScaleKey,
@@ -330,7 +330,7 @@ export async function seedSystemTemplates(db: Database): Promise<void> {
     if (existing) continue;
     await db.transaction(async (tx) => {
       const template = await createTemplate(
-        tx as unknown as Database,
+        tx,
         { name: seed.name, description: seed.description },
         { isSystem: true, systemKey: seed.key, enabled: seed.enabled ?? true },
       );

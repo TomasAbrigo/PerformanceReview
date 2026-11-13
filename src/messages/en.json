@@ -117,6 +117,7 @@
     "choiceEs": "Option {n} (Spanish)",
     "choiceEn": "Option {n} (English)",
     "addChoice": "Add option",
-    "hiddenFromReviewee": "Hidden from the reviewee"
+    "hiddenFromReviewee": "Hidden from the reviewee",
+    "chooseScale": "Choose a scale"
   }
 }

@@ -5,8 +5,10 @@ import { useState, useTransition } from "react";
 import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 
-export type Localized = { es: string; en: string };
-export type FieldIssue = { path: string; message: string };
+import type { LocalizedText as Localized } from "@/db/schema/rating-scales";
+import type { FieldIssue } from "@/modules/templates/errors";
+
+export type { FieldIssue, Localized };
 export type ActionResult<T = unknown> =
   ({ ok: true } & T) | { ok: false; code: string; issues: FieldIssue[] };
 

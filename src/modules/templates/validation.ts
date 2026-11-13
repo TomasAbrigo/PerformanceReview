@@ -24,6 +24,9 @@ export const templateInput = z.object({
   description: localizedText.nullish(),
 });
 
+/** Partial update: only the provided fields change. */
+export const templateUpdateInput = templateInput.partial();
+
 export const sectionInput = z.object({ title: localizedText });
 
 export const questionInput = z
@@ -69,5 +72,6 @@ export const questionInput = z
 
 export type ScaleInput = z.input<typeof scaleInput>;
 export type TemplateInput = z.input<typeof templateInput>;
+export type TemplateUpdateInput = z.input<typeof templateUpdateInput>;
 export type SectionInput = z.input<typeof sectionInput>;
 export type QuestionInput = z.input<typeof questionInput>;

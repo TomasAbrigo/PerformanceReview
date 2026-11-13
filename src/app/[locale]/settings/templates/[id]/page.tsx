@@ -43,9 +43,7 @@ async function Editor({ params }: { params: Params }) {
     UUID.test(id) ? getTemplate(db, id) : null,
     listScales(db),
   ]);
-  if (!template) {
-    return <p role="alert">{t("notFound")}</p>;
-  }
+  if (!template) notFound();
   const name = locale === "en" ? template.name.en : template.name.es;
 
   return (

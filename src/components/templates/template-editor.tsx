@@ -15,6 +15,12 @@ import {
 import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 import { useRouter } from "@/i18n/navigation";
 import {
+  type QuestionKind,
+  questionKinds as KINDS,
+  type Relationship,
+  relationships as RELATIONSHIPS,
+} from "@/modules/templates/constants";
+import {
   type ActionResult,
   ErrorAlert,
   type Localized,
@@ -24,10 +30,7 @@ import {
   useLocalized,
 } from "./shared";
 
-export const KINDS = ["text", "rating", "single_choice"] as const;
-export const RELATIONSHIPS = ["self", "manager", "peer", "upward"] as const;
-type Kind = (typeof KINDS)[number];
-type Relationship = (typeof RELATIONSHIPS)[number];
+type Kind = QuestionKind;
 
 export type EditorQuestion = {
   id: string;
@@ -552,7 +555,7 @@ function QuestionForm({
               aria-invalid={scaleIssue ? true : undefined}
               onChange={(e) => set({ scaleId: e.target.value || null })}
             >
-              <option value="">—</option>
+              <option value="">{t("chooseScale")}</option>
               {scales.map((s) => (
                 <option key={s.id} value={s.id}>
                   {localized(s.name)}

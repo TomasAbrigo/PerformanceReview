@@ -11,11 +11,17 @@ import {
 import { type LocalizedText, ratingScale } from "./rating-scales";
 import { sourceColumns } from "./source";
 
-export const questionKinds = ["text", "rating", "single_choice"] as const;
-export type QuestionKind = (typeof questionKinds)[number];
+import type {
+  QuestionKind,
+  Relationship,
+} from "../../modules/templates/constants";
 
-export const relationships = ["self", "manager", "peer", "upward"] as const;
-export type Relationship = (typeof relationships)[number];
+export {
+  type QuestionKind,
+  questionKinds,
+  type Relationship,
+  relationships,
+} from "../../modules/templates/constants";
 
 export type Choice = { value: string; label: LocalizedText };
 

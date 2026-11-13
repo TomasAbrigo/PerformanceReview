@@ -1,6 +1,6 @@
-import { and, asc, eq, inArray } from "drizzle-orm";
+import { asc, eq, inArray, sql } from "drizzle-orm";
 import type { ZodType } from "zod";
-import type { Database } from "@/db/client";
+import type { DbOrTx } from "@/db/client";
 import {
   question,
   type Question,
@@ -23,6 +23,8 @@ import {
   sectionInput,
   type TemplateInput,
   templateInput,
+  type TemplateUpdateInput,
+  templateUpdateInput,
 } from "./validation";
 
 export type ScaleWithOptions = RatingScale & { options: RatingScaleOption[] };
@@ -47,7 +49,7 @@ export function normalizeValues(values: number[]): number[] {
 // ---------------------------------------------------------------- scales
 
 export async function createScale(
-  db: Database,
+  db: DbOrTx,
   input: ScaleInput,
   opts: { isSystem?: boolean; systemKey?: string } = {},
 ): Promise<ScaleWithOptions> {
@@ -79,7 +81,7 @@ export async function createScale(
   });
 }
 
-export async function listScales(db: Database): Promise<ScaleWithOptions[]> {
+export async function listScales(db: DbOrTx): Promise<ScaleWithOptions[]> {
   const scales = await db
     .select()
     .from(ratingScale)
@@ -101,7 +103,7 @@ export async function listScales(db: Database): Promise<ScaleWithOptions[]> {
   }));
 }
 
-export async function deleteScale(db: Database, id: string): Promise<void> {
+export async function deleteScale(db: DbOrTx, id: string): Promise<void> {
   const [scale] = await db
     .select()
     .from(ratingScale)
@@ -119,7 +121,7 @@ export async function deleteScale(db: Database, id: string): Promise<void> {
 
 // ------------------------------------------------------------- templates
 
-export async function listTemplates(db: Database): Promise<ReviewTemplate[]> {
+export async function listTemplates(db: DbOrTx): Promise<ReviewTemplate[]> {
   return db
     .select()
     .from(reviewTemplate)
@@ -127,7 +129,7 @@ export async function listTemplates(db: Database): Promise<ReviewTemplate[]> {
 }
 
 export async function getTemplate(
-  db: Database,
+  db: DbOrTx,
   id: string,
 ): Promise<TemplateDetail | null> {
   const [template] = await db
@@ -162,7 +164,7 @@ export async function getTemplate(
 }
 
 export async function createTemplate(
-  db: Database,
+  db: DbOrTx,
   input: TemplateInput,
   opts: { isSystem?: boolean; systemKey?: string; enabled?: boolean } = {},
 ): Promise<ReviewTemplate> {
@@ -182,7 +184,7 @@ export async function createTemplate(
 
 /** Throws unless the template exists and is editable (not a system template). */
 async function editableTemplate(
-  db: Database,
+  db: DbOrTx,
   templateId: string,
 ): Promise<ReviewTemplate> {
   const [template] = await db
@@ -195,52 +197,62 @@ async function editableTemplate(
 }
 
 async function editableSection(
-  db: Database,
+  db: DbOrTx,
   sectionId: string,
 ): Promise<TemplateSection> {
-  const [section] = await db
-    .select()
+  const [found] = await db
+    .select({ section: templateSection, isSystem: reviewTemplate.isSystem })
     .from(templateSection)
+    .innerJoin(
+      reviewTemplate,
+      eq(reviewTemplate.id, templateSection.templateId),
+    )
     .where(eq(templateSection.id, sectionId));
-  if (!section) throw new TemplatesError("not_found");
-  await editableTemplate(db, section.templateId);
-  return section;
+  if (!found) throw new TemplatesError("not_found");
+  if (found.isSystem) throw new TemplatesError("system_readonly");
+  return found.section;
 }
 
 async function editableQuestion(
-  db: Database,
+  db: DbOrTx,
   questionId: string,
 ): Promise<Question> {
   const [found] = await db
-    .select()
+    .select({ question, isSystem: reviewTemplate.isSystem })
     .from(question)
+    .innerJoin(templateSection, eq(templateSection.id, question.sectionId))
+    .innerJoin(
+      reviewTemplate,
+      eq(reviewTemplate.id, templateSection.templateId),
+    )
     .where(eq(question.id, questionId));
   if (!found) throw new TemplatesError("not_found");
-  await editableSection(db, found.sectionId);
-  return found;
+  if (found.isSystem) throw new TemplatesError("system_readonly");
+  return found.question;
 }
 
 export async function updateTemplate(
-  db: Database,
+  db: DbOrTx,
   id: string,
-  input: TemplateInput,
+  input: TemplateUpdateInput,
 ): Promise<void> {
-  const data = parse(templateInput, input);
+  const data = parse(templateUpdateInput, input);
   await editableTemplate(db, id);
-  await db
-    .update(reviewTemplate)
-    .set({ name: data.name, description: data.description ?? null })
-    .where(eq(reviewTemplate.id, id));
+  const changes: Partial<typeof reviewTemplate.$inferInsert> = {};
+  if (data.name !== undefined) changes.name = data.name;
+  if (data.description !== undefined) changes.description = data.description;
+  if (Object.keys(changes).length === 0) return;
+  await db.update(reviewTemplate).set(changes).where(eq(reviewTemplate.id, id));
 }
 
-export async function deleteTemplate(db: Database, id: string): Promise<void> {
+export async function deleteTemplate(db: DbOrTx, id: string): Promise<void> {
   await editableTemplate(db, id);
   await db.delete(reviewTemplate).where(eq(reviewTemplate.id, id));
 }
 
 /** Copies a template (system or custom) with its sections and questions; questions keep their scale. */
 export async function cloneTemplate(
-  db: Database,
+  db: DbOrTx,
   id: string,
   overrides: { name?: TemplateInput["name"] } = {},
 ): Promise<ReviewTemplate> {
@@ -255,7 +267,7 @@ export async function cloneTemplate(
       .values({
         name,
         description: source.description,
-        enabled: true,
+        enabled: source.enabled,
         clonedFromId: source.id,
       })
       .returning();
@@ -291,7 +303,7 @@ export async function cloneTemplate(
 // ------------------------------------------------- sections & questions
 
 async function nextSort(
-  db: Database,
+  db: DbOrTx,
   parent: "template" | "section",
   parentId: string,
 ): Promise<number> {
@@ -309,7 +321,7 @@ async function nextSort(
 }
 
 export async function addSection(
-  db: Database,
+  db: DbOrTx,
   templateId: string,
   input: SectionInput,
 ): Promise<TemplateSection> {
@@ -324,7 +336,7 @@ export async function addSection(
 }
 
 export async function updateSection(
-  db: Database,
+  db: DbOrTx,
   sectionId: string,
   input: SectionInput,
 ): Promise<void> {
@@ -337,7 +349,7 @@ export async function updateSection(
 }
 
 export async function deleteSection(
-  db: Database,
+  db: DbOrTx,
   sectionId: string,
 ): Promise<void> {
   await editableSection(db, sectionId);
@@ -357,7 +369,7 @@ function questionValues(data: ReturnType<typeof questionInput.parse>) {
 }
 
 export async function addQuestion(
-  db: Database,
+  db: DbOrTx,
   sectionId: string,
   input: QuestionInput,
 ): Promise<Question> {
@@ -372,7 +384,7 @@ export async function addQuestion(
 }
 
 export async function updateQuestion(
-  db: Database,
+  db: DbOrTx,
   questionId: string,
   input: QuestionInput,
 ): Promise<Question> {
@@ -387,7 +399,7 @@ export async function updateQuestion(
 }
 
 export async function deleteQuestion(
-  db: Database,
+  db: DbOrTx,
   questionId: string,
 ): Promise<void> {
   await editableQuestion(db, questionId);
@@ -399,7 +411,7 @@ export async function deleteQuestion(
  * section's questions (`parentId` = section id). `ids` must list every child.
  */
 export async function reorder(
-  db: Database,
+  db: DbOrTx,
   target: { kind: "sections" | "questions"; parentId: string; ids: string[] },
 ): Promise<void> {
   const current =
@@ -415,34 +427,23 @@ export async function reorder(
           .from(question)
           .where(eq(question.sectionId, target.parentId)));
   const expected = new Set(current.map((r) => r.id));
+  const given = new Set(target.ids);
   if (
-    target.ids.length !== expected.size ||
+    given.size !== target.ids.length ||
+    given.size !== expected.size ||
     !target.ids.every((id) => expected.has(id))
   ) {
     throw new TemplatesError("validation", [
       { path: "ids", message: "must_list_every_child" },
     ]);
   }
-  await db.transaction(async (tx) => {
-    for (const [sort, id] of target.ids.entries()) {
-      if (target.kind === "sections") {
-        await tx
-          .update(templateSection)
-          .set({ sort })
-          .where(
-            and(
-              eq(templateSection.id, id),
-              eq(templateSection.templateId, target.parentId),
-            ),
-          );
-      } else {
-        await tx
-          .update(question)
-          .set({ sort })
-          .where(
-            and(eq(question.id, id), eq(question.sectionId, target.parentId)),
-          );
-      }
-    }
-  });
+  // One UPDATE ... FROM (VALUES ...) for the whole new order.
+  const values = sql.join(
+    target.ids.map((id, sort) => sql`(${id}::uuid, ${sort}::int)`),
+    sql`, `,
+  );
+  const table = target.kind === "sections" ? templateSection : question;
+  await db.execute(
+    sql`update ${table} set sort = v.sort from (values ${values}) as v(id, sort) where ${table}.id = v.id`,
+  );
 }
