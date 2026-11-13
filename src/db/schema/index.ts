@@ -17,3 +17,6 @@ export const ingestRun = pgTable("ingest_run", {
 
 export type IngestRun = typeof ingestRun.$inferSelect;
 export type NewIngestRun = typeof ingestRun.$inferInsert;
+
+export * from "./rating-scales";
+export * from "./templates";
