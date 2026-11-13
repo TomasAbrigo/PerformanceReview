@@ -1,13 +1,18 @@
 "use server";
 
+import type { ActionResult } from "@/components/templates/shared";
 import type { QuestionPayload } from "@/components/templates/template-editor";
 import { db } from "@/db/client";
-import { actionResult } from "@/lib/action-result";
 import type { LocalizedText } from "@/db/schema";
+import { actionResult } from "@/lib/action-result";
 import * as templates from "@/modules/templates";
 
-const result = <T extends object = object>(fn: () => Promise<T | void>) =>
-  actionResult(fn, { refreshPage: true });
+const isTemplatesError = (error: unknown): error is templates.TemplatesError =>
+  error instanceof templates.TemplatesError;
+
+const result = <T extends object = object>(
+  fn: () => Promise<T | void>,
+): Promise<ActionResult<T>> => actionResult(fn, isTemplatesError);
 
 // Scales
 

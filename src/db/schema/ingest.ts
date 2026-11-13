@@ -20,6 +20,10 @@ export type IngestCounts = {
   deleted: number;
   /** job_history: rows whose reportsTo could not be resolved to one person. */
   managerUnresolved?: number;
+  /** employee: records held (or flagged) in the identity queue instead of applied. */
+  issues?: number;
+  /** employee: records a reviewer already decided to ignore, resent unchanged. */
+  ignored?: number;
 };
 
 /** The counters every run shows (the optional ones are entity-specific extras). */
@@ -30,6 +34,8 @@ export const INGEST_COUNT_KEYS = [
   "unchanged",
   "deleted",
   "rejected",
+  "issues",
+  "ignored",
 ] as const satisfies readonly (keyof IngestCounts)[];
 
 export type IngestReject = { sourceId: string | null; reason: string };

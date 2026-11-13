@@ -1,5 +1,5 @@
 {
-  "id": "85a666a2-d2cf-4911-8fe4-685255e7404b",
+  "id": "d3594d2c-1e31-469f-98af-14175ee3fff2",
   "prevId": "66ebcc8c-b2d7-48d4-baa4-af9a72d25baf",
   "version": "7",
   "dialect": "postgresql",
@@ -556,6 +556,166 @@
           ]
         }
       },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.identity_match_issue": {
+      "name": "identity_match_issue",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "ingest_run_id": {
+          "name": "ingest_run_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "source_system": {
+          "name": "source_system",
+          "type": "source_system",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "entity": {
+          "name": "entity",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "source_id": {
+          "name": "source_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "raw_record_id": {
+          "name": "raw_record_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "payload": {
+          "name": "payload",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "payload_hash": {
+          "name": "payload_hash",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "reason": {
+          "name": "reason",
+          "type": "identity_issue_reason",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "candidates": {
+          "name": "candidates",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'[]'::jsonb"
+        },
+        "status": {
+          "name": "status",
+          "type": "identity_issue_status",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'open'"
+        },
+        "resolution": {
+          "name": "resolution",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "resolved_at": {
+          "name": "resolved_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {
+        "identity_match_issue_open_uq": {
+          "name": "identity_match_issue_open_uq",
+          "columns": [
+            {
+              "expression": "source_system",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "entity",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "source_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "where": "status = 'open'",
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "identity_match_issue_ingest_run_id_ingest_run_id_fk": {
+          "name": "identity_match_issue_ingest_run_id_ingest_run_id_fk",
+          "tableFrom": "identity_match_issue",
+          "tableTo": "ingest_run",
+          "columnsFrom": [
+            "ingest_run_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "identity_match_issue_raw_record_id_raw_record_id_fk": {
+          "name": "identity_match_issue_raw_record_id_raw_record_id_fk",
+          "tableFrom": "identity_match_issue",
+          "tableTo": "raw_record",
+          "columnsFrom": [
+            "raw_record_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
@@ -1962,603 +2122,6 @@
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
-    },
-    "public.cycle_participant": {
-      "name": "cycle_participant",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true,
-          "default": "gen_random_uuid()"
-        },
-        "cycle_id": {
-          "name": "cycle_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "reviewee_person_id": {
-          "name": "reviewee_person_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "snapshot_as_of": {
-          "name": "snapshot_as_of",
-          "type": "date",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "snap_manager_person_id": {
-          "name": "snap_manager_person_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "snap_department": {
-          "name": "snap_department",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "snap_division": {
-          "name": "snap_division",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "snap_job_title": {
-          "name": "snap_job_title",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "snap_location": {
-          "name": "snap_location",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "snap_job_history_id": {
-          "name": "snap_job_history_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "added_at": {
-          "name": "added_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        },
-        "removed_at": {
-          "name": "removed_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": false
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "cycle_participant_cycle_id_review_cycle_id_fk": {
-          "name": "cycle_participant_cycle_id_review_cycle_id_fk",
-          "tableFrom": "cycle_participant",
-          "tableTo": "review_cycle",
-          "columnsFrom": [
-            "cycle_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "cycle_participant_reviewee_person_id_person_id_fk": {
-          "name": "cycle_participant_reviewee_person_id_person_id_fk",
-          "tableFrom": "cycle_participant",
-          "tableTo": "person",
-          "columnsFrom": [
-            "reviewee_person_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        },
-        "cycle_participant_snap_manager_person_id_person_id_fk": {
-          "name": "cycle_participant_snap_manager_person_id_person_id_fk",
-          "tableFrom": "cycle_participant",
-          "tableTo": "person",
-          "columnsFrom": [
-            "snap_manager_person_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        },
-        "cycle_participant_snap_job_history_id_employee_job_history_id_fk": {
-          "name": "cycle_participant_snap_job_history_id_employee_job_history_id_fk",
-          "tableFrom": "cycle_participant",
-          "tableTo": "employee_job_history",
-          "columnsFrom": [
-            "snap_job_history_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "set null",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {
-        "cycle_participant_cycle_reviewee_uq": {
-          "name": "cycle_participant_cycle_reviewee_uq",
-          "nullsNotDistinct": false,
-          "columns": [
-            "cycle_id",
-            "reviewee_person_id"
-          ]
-        }
-      },
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public.cycle_transition": {
-      "name": "cycle_transition",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true,
-          "default": "gen_random_uuid()"
-        },
-        "cycle_id": {
-          "name": "cycle_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "from_status": {
-          "name": "from_status",
-          "type": "cycle_status",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "to_status": {
-          "name": "to_status",
-          "type": "cycle_status",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "actor_person_id": {
-          "name": "actor_person_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "note": {
-          "name": "note",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        }
-      },
-      "indexes": {
-        "cycle_transition_cycle_idx": {
-          "name": "cycle_transition_cycle_idx",
-          "columns": [
-            {
-              "expression": "cycle_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "created_at",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
-      "foreignKeys": {
-        "cycle_transition_cycle_id_review_cycle_id_fk": {
-          "name": "cycle_transition_cycle_id_review_cycle_id_fk",
-          "tableFrom": "cycle_transition",
-          "tableTo": "review_cycle",
-          "columnsFrom": [
-            "cycle_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "cycle_transition_actor_person_id_person_id_fk": {
-          "name": "cycle_transition_actor_person_id_person_id_fk",
-          "tableFrom": "cycle_transition",
-          "tableTo": "person",
-          "columnsFrom": [
-            "actor_person_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public.question_revision": {
-      "name": "question_revision",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true,
-          "default": "gen_random_uuid()"
-        },
-        "cycle_id": {
-          "name": "cycle_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "question_id": {
-          "name": "question_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "section_title": {
-          "name": "section_title",
-          "type": "jsonb",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "prompt": {
-          "name": "prompt",
-          "type": "jsonb",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "kind": {
-          "name": "kind",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "applies_to": {
-          "name": "applies_to",
-          "type": "text[]",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "visible_to_reviewee": {
-          "name": "visible_to_reviewee",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "required": {
-          "name": "required",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "scale": {
-          "name": "scale",
-          "type": "jsonb",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "choices": {
-          "name": "choices",
-          "type": "jsonb",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "sort": {
-          "name": "sort",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        }
-      },
-      "indexes": {
-        "question_revision_cycle_idx": {
-          "name": "question_revision_cycle_idx",
-          "columns": [
-            {
-              "expression": "cycle_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "sort",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
-      "foreignKeys": {
-        "question_revision_cycle_id_review_cycle_id_fk": {
-          "name": "question_revision_cycle_id_review_cycle_id_fk",
-          "tableFrom": "question_revision",
-          "tableTo": "review_cycle",
-          "columnsFrom": [
-            "cycle_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "question_revision_question_id_question_id_fk": {
-          "name": "question_revision_question_id_question_id_fk",
-          "tableFrom": "question_revision",
-          "tableTo": "question",
-          "columnsFrom": [
-            "question_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "set null",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public.review_cycle": {
-      "name": "review_cycle",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true,
-          "default": "gen_random_uuid()"
-        },
-        "name": {
-          "name": "name",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "description": {
-          "name": "description",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "period_start": {
-          "name": "period_start",
-          "type": "date",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "period_end": {
-          "name": "period_end",
-          "type": "date",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "snapshot_date": {
-          "name": "snapshot_date",
-          "type": "date",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "status": {
-          "name": "status",
-          "type": "cycle_status",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'draft'"
-        },
-        "components": {
-          "name": "components",
-          "type": "jsonb",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "anonymity": {
-          "name": "anonymity",
-          "type": "jsonb",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "final_scale_id": {
-          "name": "final_scale_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "template_id": {
-          "name": "template_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "due_dates": {
-          "name": "due_dates",
-          "type": "jsonb",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'{}'::jsonb"
-        },
-        "schedule_kind": {
-          "name": "schedule_kind",
-          "type": "schedule_kind",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'fixed'"
-        },
-        "hire_date_schedule": {
-          "name": "hire_date_schedule",
-          "type": "jsonb",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "participant_filter": {
-          "name": "participant_filter",
-          "type": "jsonb",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'{\"kind\":\"all\"}'::jsonb"
-        },
-        "launched_at": {
-          "name": "launched_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "source_system": {
-          "name": "source_system",
-          "type": "source_system",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'native'"
-        },
-        "source_id": {
-          "name": "source_id",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "ingest_run_id": {
-          "name": "ingest_run_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "payload_hash": {
-          "name": "payload_hash",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        },
-        "deleted_at": {
-          "name": "deleted_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": false
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "review_cycle_final_scale_id_rating_scale_id_fk": {
-          "name": "review_cycle_final_scale_id_rating_scale_id_fk",
-          "tableFrom": "review_cycle",
-          "tableTo": "rating_scale",
-          "columnsFrom": [
-            "final_scale_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "restrict",
-          "onUpdate": "no action"
-        },
-        "review_cycle_template_id_review_template_id_fk": {
-          "name": "review_cycle_template_id_review_template_id_fk",
-          "tableFrom": "review_cycle",
-          "tableTo": "review_template",
-          "columnsFrom": [
-            "template_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "restrict",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {
-        "review_cycle_source_system_source_id_unique": {
-          "name": "review_cycle_source_system_source_id_unique",
-          "nullsNotDistinct": false,
-          "columns": [
-            "source_system",
-            "source_id"
-          ]
-        }
-      },
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
     }
   },
   "enums": {
@@ -2569,6 +2132,24 @@
         "in_progress",
         "completed",
         "closed"
+      ]
+    },
+    "public.identity_issue_reason": {
+      "name": "identity_issue_reason",
+      "schema": "public",
+      "values": [
+        "no_match",
+        "ambiguous",
+        "conflict"
+      ]
+    },
+    "public.identity_issue_status": {
+      "name": "identity_issue_status",
+      "schema": "public",
+      "values": [
+        "open",
+        "resolved",
+        "ignored"
       ]
     },
     "public.source_system": {
@@ -2588,27 +2169,6 @@
         "running",
         "succeeded",
         "error"
-      ]
-    },
-    "public.cycle_status": {
-      "name": "cycle_status",
-      "schema": "public",
-      "values": [
-        "draft",
-        "nominations",
-        "collecting",
-        "manager_review",
-        "calibration",
-        "sharing",
-        "closed"
-      ]
-    },
-    "public.schedule_kind": {
-      "name": "schedule_kind",
-      "schema": "public",
-      "values": [
-        "fixed",
-        "hire_date"
       ]
     }
   },

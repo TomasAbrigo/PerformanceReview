@@ -21,6 +21,11 @@ export type RunIngestInput = {
   params?: Record<string, unknown>;
   /** Passed to the adapter (e.g. `since` for an incremental extraction). */
   extract?: ExtractContext;
+  /**
+   * employee: what to do with a record that matches nobody and resembles
+   * nobody: create the person (default) or queue it for review.
+   */
+  unmatched?: "create" | "queue";
 };
 
 export type RunIngestResult = { runId: string; counts: IngestCounts };
@@ -59,6 +64,7 @@ export async function runIngest({
   db,
   params = {},
   extract = {},
+  unmatched,
 }: RunIngestInput): Promise<RunIngestResult> {
   const handler = entityHandlers[entity];
   if (!handler) throw new Error(`Unsupported entity ${entity}`);
@@ -119,9 +125,16 @@ export async function runIngest({
         continue;
       }
       const outcome = await db.transaction((tx) =>
-        handler.upsert(tx, staged.data, { source, hash, runId: run.id, cache }),
+        handler.upsert(tx, staged.data, {
+          source,
+          hash,
+          runId: run.id,
+          payload: record.payload,
+          unmatched,
+          cache,
+        }),
       );
-      counts[outcome.result]++;
+      counts[outcome.result] = (counts[outcome.result] ?? 0) + 1;
       addCounts(counts, outcome.counts);
       for (const reason of outcome.rejects) {
         rejects.push({ sourceId: record.sourceId, reason });

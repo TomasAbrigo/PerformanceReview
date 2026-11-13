@@ -1,6 +1,6 @@
 {
-  "id": "751f46c5-c7fc-459f-83cc-5c557cf19470",
-  "prevId": "85a666a2-d2cf-4911-8fe4-685255e7404b",
+  "id": "567aa971-33d4-4fd4-8535-13b94044d987",
+  "prevId": "d3594d2c-1e31-469f-98af-14175ee3fff2",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -556,6 +556,166 @@
           ]
         }
       },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.identity_match_issue": {
+      "name": "identity_match_issue",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "ingest_run_id": {
+          "name": "ingest_run_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "source_system": {
+          "name": "source_system",
+          "type": "source_system",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "entity": {
+          "name": "entity",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "source_id": {
+          "name": "source_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "raw_record_id": {
+          "name": "raw_record_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "payload": {
+          "name": "payload",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "payload_hash": {
+          "name": "payload_hash",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "reason": {
+          "name": "reason",
+          "type": "identity_issue_reason",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "candidates": {
+          "name": "candidates",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'[]'::jsonb"
+        },
+        "status": {
+          "name": "status",
+          "type": "identity_issue_status",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'open'"
+        },
+        "resolution": {
+          "name": "resolution",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "resolved_at": {
+          "name": "resolved_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {
+        "identity_match_issue_open_uq": {
+          "name": "identity_match_issue_open_uq",
+          "columns": [
+            {
+              "expression": "source_system",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "entity",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "source_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "where": "status = 'open'",
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "identity_match_issue_ingest_run_id_ingest_run_id_fk": {
+          "name": "identity_match_issue_ingest_run_id_ingest_run_id_fk",
+          "tableFrom": "identity_match_issue",
+          "tableTo": "ingest_run",
+          "columnsFrom": [
+            "ingest_run_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "identity_match_issue_raw_record_id_raw_record_id_fk": {
+          "name": "identity_match_issue_raw_record_id_raw_record_id_fk",
+          "tableFrom": "identity_match_issue",
+          "tableTo": "raw_record",
+          "columnsFrom": [
+            "raw_record_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
@@ -2559,457 +2719,6 @@
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
-    },
-    "public.answer": {
-      "name": "answer",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true,
-          "default": "gen_random_uuid()"
-        },
-        "request_id": {
-          "name": "request_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "question_revision_id": {
-          "name": "question_revision_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "option_value": {
-          "name": "option_value",
-          "type": "numeric",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "option_label": {
-          "name": "option_label",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "normalized": {
-          "name": "normalized",
-          "type": "numeric",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "text_value": {
-          "name": "text_value",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "answer_request_id_review_request_id_fk": {
-          "name": "answer_request_id_review_request_id_fk",
-          "tableFrom": "answer",
-          "tableTo": "review_request",
-          "columnsFrom": [
-            "request_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "answer_question_revision_id_question_revision_id_fk": {
-          "name": "answer_question_revision_id_question_revision_id_fk",
-          "tableFrom": "answer",
-          "tableTo": "question_revision",
-          "columnsFrom": [
-            "question_revision_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {
-        "answer_request_question_uq": {
-          "name": "answer_request_question_uq",
-          "nullsNotDistinct": false,
-          "columns": [
-            "request_id",
-            "question_revision_id"
-          ]
-        }
-      },
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public.review_audit": {
-      "name": "review_audit",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true,
-          "default": "gen_random_uuid()"
-        },
-        "request_id": {
-          "name": "request_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "action": {
-          "name": "action",
-          "type": "review_audit_action",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "actor_person_id": {
-          "name": "actor_person_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "note": {
-          "name": "note",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        }
-      },
-      "indexes": {
-        "review_audit_request_idx": {
-          "name": "review_audit_request_idx",
-          "columns": [
-            {
-              "expression": "request_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "created_at",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
-      "foreignKeys": {
-        "review_audit_request_id_review_request_id_fk": {
-          "name": "review_audit_request_id_review_request_id_fk",
-          "tableFrom": "review_audit",
-          "tableTo": "review_request",
-          "columnsFrom": [
-            "request_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "review_audit_actor_person_id_person_id_fk": {
-          "name": "review_audit_actor_person_id_person_id_fk",
-          "tableFrom": "review_audit",
-          "tableTo": "person",
-          "columnsFrom": [
-            "actor_person_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public.review_request": {
-      "name": "review_request",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true,
-          "default": "gen_random_uuid()"
-        },
-        "cycle_id": {
-          "name": "cycle_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "participant_id": {
-          "name": "participant_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "reviewer_person_id": {
-          "name": "reviewer_person_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "relationship": {
-          "name": "relationship",
-          "type": "review_relationship",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "status": {
-          "name": "status",
-          "type": "review_request_status",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'draft'"
-        },
-        "anonymous": {
-          "name": "anonymous",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": true,
-          "default": false
-        },
-        "requested_at": {
-          "name": "requested_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        },
-        "submitted_at": {
-          "name": "submitted_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "declined_at": {
-          "name": "declined_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "decline_reason": {
-          "name": "decline_reason",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "unlocked_at": {
-          "name": "unlocked_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "unlocked_by": {
-          "name": "unlocked_by",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "source_system": {
-          "name": "source_system",
-          "type": "source_system",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'native'"
-        },
-        "source_id": {
-          "name": "source_id",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "ingest_run_id": {
-          "name": "ingest_run_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "payload_hash": {
-          "name": "payload_hash",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        },
-        "deleted_at": {
-          "name": "deleted_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": false
-        }
-      },
-      "indexes": {
-        "review_request_reviewer_idx": {
-          "name": "review_request_reviewer_idx",
-          "columns": [
-            {
-              "expression": "reviewer_person_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "status",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "review_request_cycle_idx": {
-          "name": "review_request_cycle_idx",
-          "columns": [
-            {
-              "expression": "cycle_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
-      "foreignKeys": {
-        "review_request_cycle_id_review_cycle_id_fk": {
-          "name": "review_request_cycle_id_review_cycle_id_fk",
-          "tableFrom": "review_request",
-          "tableTo": "review_cycle",
-          "columnsFrom": [
-            "cycle_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "review_request_participant_id_cycle_participant_id_fk": {
-          "name": "review_request_participant_id_cycle_participant_id_fk",
-          "tableFrom": "review_request",
-          "tableTo": "cycle_participant",
-          "columnsFrom": [
-            "participant_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "review_request_reviewer_person_id_person_id_fk": {
-          "name": "review_request_reviewer_person_id_person_id_fk",
-          "tableFrom": "review_request",
-          "tableTo": "person",
-          "columnsFrom": [
-            "reviewer_person_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        },
-        "review_request_unlocked_by_person_id_fk": {
-          "name": "review_request_unlocked_by_person_id_fk",
-          "tableFrom": "review_request",
-          "tableTo": "person",
-          "columnsFrom": [
-            "unlocked_by"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {
-        "review_request_participant_rel_reviewer_uq": {
-          "name": "review_request_participant_rel_reviewer_uq",
-          "nullsNotDistinct": false,
-          "columns": [
-            "participant_id",
-            "relationship",
-            "reviewer_person_id"
-          ]
-        },
-        "review_request_source_system_source_id_unique": {
-          "name": "review_request_source_system_source_id_unique",
-          "nullsNotDistinct": false,
-          "columns": [
-            "source_system",
-            "source_id"
-          ]
-        }
-      },
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
     }
   },
   "enums": {
@@ -3020,6 +2729,24 @@
         "in_progress",
         "completed",
         "closed"
+      ]
+    },
+    "public.identity_issue_reason": {
+      "name": "identity_issue_reason",
+      "schema": "public",
+      "values": [
+        "no_match",
+        "ambiguous",
+        "conflict"
+      ]
+    },
+    "public.identity_issue_status": {
+      "name": "identity_issue_status",
+      "schema": "public",
+      "values": [
+        "open",
+        "resolved",
+        "ignored"
       ]
     },
     "public.source_system": {
@@ -3060,32 +2787,6 @@
       "values": [
         "fixed",
         "hire_date"
-      ]
-    },
-    "public.review_audit_action": {
-      "name": "review_audit_action",
-      "schema": "public",
-      "values": [
-        "unlock"
-      ]
-    },
-    "public.review_relationship": {
-      "name": "review_relationship",
-      "schema": "public",
-      "values": [
-        "self",
-        "manager",
-        "peer",
-        "upward"
-      ]
-    },
-    "public.review_request_status": {
-      "name": "review_request_status",
-      "schema": "public",
-      "values": [
-        "draft",
-        "submitted",
-        "declined"
       ]
     }
   },
