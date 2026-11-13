@@ -58,7 +58,8 @@ export const listEmployeeSchema = z
   })
   .transform((item, ctx) => {
     if (item.id != null) return { ...item, id: item.id };
-    if (item.employeeId != null) return { ...item, id: String(item.employeeId) };
+    if (item.employeeId != null)
+      return { ...item, id: String(item.employeeId) };
     ctx.addIssue({
       code: "custom",
       message: "employee list item has neither id nor employeeId",
