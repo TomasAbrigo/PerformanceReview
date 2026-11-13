@@ -1,11 +1,14 @@
 /**
- * pnpm ingest:employees --source fixture|bamboo [--dir path]
+ * pnpm ingest:employees --source fixture|bamboo [--dir path] [--entity employee|goal]
+ * pnpm ingest:goals     (same, --entity goal: goals of the active employees,
+ *                        so run the employee ingest first)
  * bamboo needs BAMBOO_COMPANY_DOMAIN and BAMBOO_API_KEY.
  */
 import path from "node:path";
 import { parseArgs } from "node:util";
 import { closeDb, db } from "../src/db/client";
 import { createBambooClient } from "../src/modules/bamboo-client";
+import { runGoalIngest } from "../src/modules/goals";
 import {
   BambooApiAdapter,
   FixtureAdapter,
@@ -26,8 +29,12 @@ async function main() {
     options: {
       source: { type: "string", default: "fixture" },
       dir: { type: "string", default: DEFAULT_DIR },
+      entity: { type: "string", default: "employee" },
     },
   });
+  if (values.entity !== "employee" && values.entity !== "goal") {
+    throw new Error(`--entity must be employee or goal (got ${values.entity})`);
+  }
 
   let adapter: SourceAdapter;
   if (values.source === "fixture") {
@@ -47,12 +54,11 @@ async function main() {
     );
   }
 
-  const { runId, counts } = await runIngest({
-    adapter,
-    entity: "employee",
-    db,
-    params: { source: values.source, dir: values.dir },
-  });
+  const params = { source: values.source, dir: values.dir };
+  const { runId, counts } =
+    values.entity === "goal"
+      ? await runGoalIngest({ adapter, db, params })
+      : await runIngest({ adapter, entity: "employee", db, params });
   console.log(`ingest_run ${runId}`);
   console.log(JSON.stringify(counts));
 }
