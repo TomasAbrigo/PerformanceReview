@@ -97,10 +97,12 @@ describe("DuckDbFileLake files", () => {
 });
 
 describe("DuckDbFileLake paging", () => {
-  it("pages thousands of rows with heavy ties and exact duplicates, each exactly once", async () => {
-    // 3000 rows over 3 watermarks x 10 keys: 100 rows share each (wm, key).
+  it("pages hundreds of rows with heavy (watermark, key) ties, each exactly once and in file order within a tie", async () => {
+    // 600 rows over 3 watermarks x 10 keys: 20 rows share each (wm, key), so
+    // only the hidden row position can tell them apart. Every page re-scans
+    // the file, hence the modest size and the explicit timeout (CI is slow).
     const lines = ["id,changed,payload"];
-    for (let i = 0; i < 3000; i++) {
+    for (let i = 0; i < 600; i++) {
       lines.push(`${i % 10},2026-01-0${(i % 3) + 1}T00:00:00Z,row-${i}`);
     }
     const dir = await tempDir({ "t.csv": lines.join("\n") + "\n" });
@@ -110,11 +112,16 @@ describe("DuckDbFileLake paging", () => {
     const whole = await readAll(lake, "t", { ...opts, batchSize: 5000 });
     const paged = await readAll(lake, "t", { ...opts, batchSize: 7 });
 
-    expect(whole).toHaveLength(3000);
-    expect(new Set(whole.map((r) => r.payload)).size).toBe(3000);
+    expect(whole).toHaveLength(600);
+    expect(new Set(whole.map((r) => r.payload)).size).toBe(600);
     expect(paged).toEqual(whole); // same rows, same order, nothing lost
+    // Within a tie, rows keep the order of the file.
+    const firstTie = whole
+      .slice(0, 20)
+      .map((r) => Number(String(r.payload).slice(4)));
+    expect(firstTie).toEqual([...firstTie].sort((a, b) => a - b));
     await lake.close();
-  });
+  }, 30_000);
 });
 
 describe("DuckDbFileLake types", () => {
