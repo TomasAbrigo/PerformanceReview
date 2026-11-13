@@ -51,7 +51,11 @@ export function generateCompany(
   const rng = createRng(options.seed);
   const identities = new IdentityPool(rng);
   const workforce = buildWorkforce(rng, identities, SIZE_CONFIG[options.size]);
-  const reviews = buildReviews(rng, workforce);
+  const { reportNoise, ...reviews } = buildReviews(
+    rng,
+    workforce,
+    SIZE_CONFIG[options.size],
+  );
   const goals = buildGoals(rng, { ...workforce, asOf: AS_OF });
   return {
     size: options.size,
@@ -59,6 +63,7 @@ export function generateCompany(
     asOf: AS_OF,
     ...workforce,
     ...reviews,
+    identity: { ...workforce.identity, ...reportNoise },
     goals,
   };
 }

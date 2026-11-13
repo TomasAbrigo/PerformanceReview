@@ -1,4 +1,4 @@
-import type { CompanyFixture, FixtureAssessment, FixtureEmployee } from "../company";
+import type { CompanyFixture, FixtureEmployee } from "../company";
 import {
   CUSTOM_QUESTIONS,
   MANAGER_QUESTIONS,
@@ -6,6 +6,7 @@ import {
 } from "../company/questions";
 import { toCsv } from "./csv";
 import type { FixtureFile } from "./files";
+import { createReportNamer } from "./report-names";
 
 export const EMPLOYEE_PERFORMANCE_HEADER = [
   "Employee Name",
@@ -63,57 +64,71 @@ const GOAL_STATUS_LABEL = {
   closed: "Closed",
 } as const;
 
-const displayName = (e: Pick<FixtureEmployee, "firstName" | "lastName">): string =>
-  `${e.firstName} ${e.lastName}`;
+/** Plain code-unit ordering keeps the output identical on every machine. */
+const byText = (a: string, b: string): number => (a < b ? -1 : a > b ? 1 : 0);
+
+function sortRows(rows: string[][], ...columns: number[]): string[][] {
+  return [...rows].sort((a, b) => {
+    for (const column of columns) {
+      const order = byText(String(a[column]), String(b[column]));
+      if (order !== 0) return order;
+    }
+    return 0;
+  });
+}
 
 /**
  * CSV files shaped like Bamboo's standard Performance reports, relative to
  * `fixtures/bamboo-reports/<size>/`. Reports identify people by NAME only.
  * Manager and Department are the CURRENT ones at export time (Bamboo quirk),
- * not those in force when the review happened.
+ * not those in force when the review happened. Names are the ones in force
+ * during each cycle, plus a few typos and rows about people who are not in
+ * the HRIS (see `company.identity`).
  */
 export function serializeBambooReports(company: CompanyFixture): FixtureFile[] {
   const byId = new Map(company.employees.map((e) => [e.id, e]));
-  const managerName = (e: FixtureEmployee): string =>
-    e.managerId === null ? "" : displayName(byId.get(e.managerId)!);
+  const names = createReportNamer(company);
+  const managerName = (managerId: string | null): string =>
+    managerId === null ? "" : names.current(managerId);
+  const cycleName = (index: number): string => company.cycles[index].name;
 
-  const completed = company.assessments.filter(
-    (a): a is FixtureAssessment & { employeeId: string } =>
-      a.selfStatus === "Submitted" &&
-      a.managerStatus === "Submitted" &&
-      a.employeeId !== null,
-  );
-  const performanceRows = completed.map((a) => {
-    const employee = byId.get(a.employeeId)!;
-    const self = a.selfAnswers!;
-    const manager = a.managerAnswers!;
-    return [
-      displayName(employee),
-      managerName(employee),
-      employee.department,
-      company.cycles[a.cycle].name,
-      a.managerSubmittedOn!,
-      self.q1,
-      self.q2,
-      self.q3,
-      self.q4,
-      manager.q1,
-      manager.q2,
-      manager.q3,
-      manager.q4,
-      self.custom1,
-      manager.custom1,
-      self.custom2,
-      manager.custom2,
-    ];
-  });
+  // Employee Performance: completed self + manager assessments only.
+  const performanceRows = company.assessments
+    .filter((a) => a.selfStatus === "Submitted" && a.managerStatus === "Submitted")
+    .map((a) => {
+      const employee = a.employeeId === null ? null : byId.get(a.employeeId)!;
+      const self = a.selfAnswers!;
+      const manager = a.managerAnswers!;
+      return [
+        employee === null ? a.outsiderName! : names.inCycle(employee.id, a.cycle),
+        employee === null
+          ? managerName(a.managerIdAtReview)
+          : managerName(employee.managerId),
+        (employee ?? byId.get(a.managerIdAtReview!)!).department,
+        cycleName(a.cycle),
+        a.managerSubmittedOn!,
+        self.q1,
+        self.q2,
+        self.q3,
+        self.q4,
+        manager.q1,
+        manager.q2,
+        manager.q3,
+        manager.q4,
+        String(self.custom1),
+        String(manager.custom1),
+        String(self.custom2),
+        String(manager.custom2),
+      ];
+    });
 
+  // Feedback Status: who gives feedback to whom.
   const feedbackRows = company.feedback.map((f) => [
-    displayName(byId.get(f.employeeId)!),
-    f.reviewerId === null ? f.reviewerName! : displayName(byId.get(f.reviewerId)!),
+    names.inCycle(f.employeeId, f.cycle),
+    f.reviewerId === null ? f.reviewerName! : names.inCycle(f.reviewerId, f.cycle),
     f.completedOn ?? "",
     f.dueDate,
-    company.cycles[f.cycle].name,
+    cycleName(f.cycle),
   ]);
 
   // Goal Status: a snapshot of today, active people only.
@@ -121,7 +136,11 @@ export function serializeBambooReports(company: CompanyFixture): FixtureFile[] {
   for (const employee of company.employees) {
     if (employee.status !== "Active") continue;
     const goals = company.goals.filter((g) => g.employeeId === employee.id);
-    const who = [displayName(employee), managerName(employee), employee.department];
+    const who = [
+      names.current(employee.id),
+      managerName(employee.managerId),
+      employee.department,
+    ];
     if (goals.length === 0) {
       goalRows.push([...who, "", "", "", "No Goals Set", ""]);
     }
@@ -138,6 +157,7 @@ export function serializeBambooReports(company: CompanyFixture): FixtureFile[] {
     }
   }
 
+  // Assessment Progress: everyone invited to the cycle.
   const progressRows = company.assessments
     .filter((a) => a.employeeId !== null)
     .map((a) => {
@@ -146,10 +166,10 @@ export function serializeBambooReports(company: CompanyFixture): FixtureFile[] {
       const noneStarted =
         a.selfStatus === "Not Started" && a.managerStatus === "Not Started";
       return [
-        displayName(employee),
-        managerName(employee),
+        names.inCycle(employee.id, a.cycle),
+        managerName(employee.managerId),
         employee.department,
-        company.cycles[a.cycle].name,
+        cycleName(a.cycle),
         bothDone ? "Complete" : noneStarted ? "Not Started" : "In Progress",
         a.selfStatus,
         a.managerStatus,
@@ -160,19 +180,19 @@ export function serializeBambooReports(company: CompanyFixture): FixtureFile[] {
   return [
     {
       path: "employee-performance.csv",
-      content: toCsv(EMPLOYEE_PERFORMANCE_HEADER, performanceRows),
+      content: toCsv(EMPLOYEE_PERFORMANCE_HEADER, sortRows(performanceRows, 3, 0)),
     },
     {
       path: "feedback-status.csv",
-      content: toCsv(FEEDBACK_STATUS_HEADER, feedbackRows),
+      content: toCsv(FEEDBACK_STATUS_HEADER, sortRows(feedbackRows, 4, 0, 1)),
     },
     {
       path: "goal-status.csv",
-      content: toCsv(GOAL_STATUS_HEADER, goalRows),
+      content: toCsv(GOAL_STATUS_HEADER, sortRows(goalRows, 0, 4, 3)),
     },
     {
       path: "assessment-progress.csv",
-      content: toCsv(ASSESSMENT_PROGRESS_HEADER, progressRows),
+      content: toCsv(ASSESSMENT_PROGRESS_HEADER, sortRows(progressRows, 3, 0)),
     },
   ];
 }

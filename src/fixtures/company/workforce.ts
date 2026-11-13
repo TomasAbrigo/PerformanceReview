@@ -66,7 +66,7 @@ export interface Workforce {
   employees: FixtureEmployee[];
   jobHistory: FixtureJobRow[];
   employmentHistory: FixtureEmploymentRow[];
-  identity: IdentityGroundTruth;
+  identity: Omit<IdentityGroundTruth, "misspellings" | "outsiders">;
 }
 
 interface DepartmentInSim extends DepartmentDef {
@@ -666,7 +666,7 @@ function finalize(
       idByKey.get(r.key)!,
     ]);
   }
-  const identity: IdentityGroundTruth = {
+  const identity: Workforce["identity"] = {
     persons: [...idsByPerson.values()].map((employeeIds) => ({ employeeIds })),
     renames: renames.map((r) => ({
       employeeId: idByKey.get(r.record.key)!,

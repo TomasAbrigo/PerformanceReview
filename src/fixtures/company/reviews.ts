@@ -1,4 +1,7 @@
+import { OUTSIDER_NAMES } from "./catalog";
+import type { SizeConfig } from "./config";
 import { addDays, dateBetween } from "./dates";
+import { fullName, misspell } from "./identity";
 import {
   FOLLOW_UP_NOTES,
   MANAGER_IMPROVEMENTS,
@@ -41,6 +44,8 @@ export interface Reviews {
   cycles: FixtureCycle[];
   assessments: FixtureAssessment[];
   feedback: FixtureFeedback[];
+  /** Report-only noise, to be merged into the identity ground truth. */
+  reportNoise: Pick<IdentityGroundTruth, "misspellings" | "outsiders">;
 }
 
 /** jobInfo row in force for `employeeId` on `date` (last one on or before it). */
@@ -80,7 +85,11 @@ function letterFor(score: number, letters: string): string {
   return letters[index];
 }
 
-export function buildReviews(rng: Rng, input: ReviewsInput): Reviews {
+export function buildReviews(
+  rng: Rng,
+  input: ReviewsInput,
+  config: SizeConfig,
+): Reviews {
   const cycles = buildCycles();
   const rowsByEmployee = groupJobRows(input.jobHistory);
   const personOf = new Map<string, number>();
@@ -90,6 +99,7 @@ export function buildReviews(rng: Rng, input: ReviewsInput): Reviews {
   const performance = new Map<number, number>();
   const assessments: FixtureAssessment[] = [];
   const feedback: FixtureFeedback[] = [];
+  const outsiders: IdentityGroundTruth["outsiders"] = [];
 
   const answers = (
     score: number,
@@ -211,7 +221,99 @@ export function buildReviews(rng: Rng, input: ReviewsInput): Reviews {
         });
       }
     }
+
+    // Rows in the reports that belong to nobody in the HRIS.
+    const peopleInCycle = assessments.filter(
+      (a) => a.cycle === cycleIndex && a.managerIdAtReview !== null,
+    );
+    for (let i = 0; i < config.outsidersPerCycle; i++) {
+      const slot = cycleIndex * config.outsidersPerCycle + i;
+      const name = OUTSIDER_NAMES[slot % OUTSIDER_NAMES.length];
+      const score = 2 + rng.next() * 2.5;
+      const selfOn = dateBetween(
+        cycle.assessmentOpen,
+        addDays(cycle.assessmentDue, -3),
+        rng.int,
+      );
+      assessments.push({
+        cycle: cycleIndex,
+        employeeId: null,
+        outsiderName: name,
+        managerIdAtReview: rng.pick(peopleInCycle).managerIdAtReview,
+        selfStatus: "Submitted",
+        managerStatus: "Submitted",
+        selfSubmittedOn: selfOn,
+        managerSubmittedOn: dateBetween(selfOn, cycle.assessmentDue, rng.int),
+        selfAnswers: answers(score, "self"),
+        managerAnswers: answers(score, "manager"),
+        followUpNote: null,
+      });
+      outsiders.push({
+        cycle: cycleIndex,
+        name,
+        report: "employee-performance",
+      });
+
+      const reviewer =
+        OUTSIDER_NAMES[
+          (slot + OUTSIDER_NAMES.length / 2) % OUTSIDER_NAMES.length
+        ];
+      feedback.push({
+        cycle: cycleIndex,
+        employeeId: rng.pick(peopleInCycle).employeeId!,
+        reviewerId: null,
+        reviewerName: reviewer,
+        dueDate: cycle.feedbackDue,
+        completedOn: dateBetween(
+          cycle.feedbackOpen,
+          cycle.feedbackDue,
+          rng.int,
+        ),
+      });
+      outsiders.push({
+        cycle: cycleIndex,
+        name: reviewer,
+        report: "feedback-status",
+      });
+    }
   });
 
-  return { cycles, assessments, feedback };
+  // Typos in a few names, in one cycle's report each (hand-edited sheets).
+  const spared = new Set([
+    ...input.identity.renames.map((r) => r.employeeId),
+    ...input.identity.duplicateNames.flatMap((d) => d.employeeIds),
+  ]);
+  const known = new Set(input.employees.map(fullName));
+  const byEmployee = new Map(input.employees.map((e) => [e.id, e]));
+  const misspellings: IdentityGroundTruth["misspellings"] = [];
+  for (
+    let guard = 0;
+    misspellings.length < config.misspellings && guard < 1000;
+    guard++
+  ) {
+    const cycle = rng.int(0, cycles.length - 1);
+    const candidates = assessments.filter(
+      (a) =>
+        a.cycle === cycle &&
+        a.employeeId !== null &&
+        !spared.has(a.employeeId) &&
+        a.selfStatus === "Submitted" &&
+        a.managerStatus === "Submitted" &&
+        !misspellings.some((m) => m.employeeId === a.employeeId),
+    );
+    if (candidates.length === 0) continue;
+    const target = byEmployee.get(rng.pick(candidates).employeeId!)!;
+    misspellings.push({
+      employeeId: target.id,
+      cycle,
+      csvName: misspell(target, rng, known),
+    });
+  }
+
+  return {
+    cycles,
+    assessments,
+    feedback,
+    reportNoise: { misspellings, outsiders },
+  };
 }

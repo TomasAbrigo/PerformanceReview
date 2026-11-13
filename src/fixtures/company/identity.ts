@@ -76,3 +76,30 @@ export class IdentityPool {
     return String(this.nextEmployeeNumber);
   }
 }
+
+/**
+ * A plausible typo of a full name that matches nobody in `known`: accents
+ * dropped, two letters swapped in the last name, or a letter lost.
+ */
+export function misspell(
+  name: PersonName,
+  rng: Rng,
+  known: ReadonlySet<string>,
+): string {
+  const full = fullName(name);
+  const last = name.lastName;
+  const swapAt = last.length >= 4 ? rng.int(1, last.length - 3) : 1;
+  const swapped = `${last.slice(0, swapAt)}${last[swapAt + 1] ?? ""}${last[swapAt]}${last.slice(swapAt + 2)}`;
+  const options = [
+    stripAccents(full),
+    `${name.firstName} ${swapped}`,
+    `${name.firstName} ${last.slice(0, -1)}`,
+    `${name.firstName.slice(0, -1)} ${last}`,
+  ];
+  const first = rng.int(0, options.length - 1);
+  for (let i = 0; i < options.length; i++) {
+    const candidate = options[(first + i) % options.length];
+    if (candidate !== full && !known.has(candidate)) return candidate;
+  }
+  return `${full}.`;
+}

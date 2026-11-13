@@ -24,6 +24,19 @@ function table(files: FixtureFile[], path: string): { header: string[]; rows: Ro
 const fullName = (e: { firstName: string; lastName: string }) =>
   `${e.firstName} ${e.lastName}`;
 
+/** The name a report printed for someone in a cycle (spec of the noise rules). */
+function nameInCycle(c: CompanyFixture, employeeId: string, cycle: number): string {
+  const typo = c.identity.misspellings.find(
+    (m) => m.employeeId === employeeId && m.cycle === cycle,
+  );
+  if (typo) return typo.csvName;
+  const rename = c.identity.renames.find((r) => r.employeeId === employeeId);
+  if (rename && c.cycles[cycle].assessmentDue < rename.renamedOn) {
+    return `${rename.previousFirstName} ${rename.previousLastName}`;
+  }
+  return fullName(c.employees.find((e) => e.id === employeeId)!);
+}
+
 describe("employee-performance.csv", () => {
   it.each([
     ["small", small, smallFiles],
@@ -83,7 +96,10 @@ describe("employee-performance.csv", () => {
     const { rows } = table(files, "employee-performance.csv");
     const byId = new Map(c.employees.map((e) => [e.id, e]));
     const completed = c.assessments.filter(
-      (a) => a.selfStatus === "Submitted" && a.managerStatus === "Submitted",
+      (a) =>
+        a.employeeId !== null &&
+        a.selfStatus === "Submitted" &&
+        a.managerStatus === "Submitted",
     );
     for (const a of completed) {
       const employee = byId.get(a.employeeId!)!;
@@ -118,12 +134,11 @@ describe("feedback-status.csv", () => {
       new Set(c.cycles.map((cycle) => cycle.name)),
     );
     expect(rows).toHaveLength(c.feedback.length);
-    const byId = new Map(c.employees.map((e) => [e.id, e]));
     for (const f of c.feedback.filter((x) => x.reviewerId !== null)) {
       const match = rows.filter(
         (r) =>
-          r["Employee Name"] === fullName(byId.get(f.employeeId)!) &&
-          r["Receiving Feedback From"] === fullName(byId.get(f.reviewerId!)!) &&
+          r["Employee Name"] === nameInCycle(c, f.employeeId, f.cycle) &&
+          r["Receiving Feedback From"] === nameInCycle(c, f.reviewerId!, f.cycle) &&
           r["Due Date"] === f.dueDate &&
           r["Date Completed"] === (f.completedOn ?? "") &&
           r["Review Cycle"] === c.cycles[f.cycle].name,
@@ -216,6 +231,89 @@ describe("assessment-progress.csv", () => {
     const ceoRows = rows.filter((r) => r["Employee Name"] === fullName(ceo));
     expect(ceoRows).toHaveLength(3);
     expect(ceoRows.every((r) => r["Manager"] === "")).toBe(true);
+  });
+});
+
+describe("dirty names for the identity queue", () => {
+  it.each([
+    ["small", small, smallFiles],
+    ["demo", demo, demoFiles],
+  ])("%s reports renamed people under their name at review time", (_, c, files) => {
+    const { rows } = table(files, "employee-performance.csv");
+    const byId = new Map(c.employees.map((e) => [e.id, e]));
+    let oldNames = 0;
+    for (const r of c.identity.renames) {
+      const current = fullName(byId.get(r.employeeId)!);
+      const previous = `${r.previousFirstName} ${r.previousLastName}`;
+      const done = c.assessments.filter(
+        (a) =>
+          a.employeeId === r.employeeId &&
+          a.selfStatus === "Submitted" &&
+          a.managerStatus === "Submitted",
+      );
+      for (const a of done) {
+        const cycle = c.cycles[a.cycle];
+        const expected = cycle.assessmentDue < r.renamedOn ? previous : current;
+        const found = rows.filter(
+          (row) =>
+            row["Review Cycle"] === cycle.name &&
+            row["Assessment Date"] === a.managerSubmittedOn &&
+            row["Employee Name"] === expected,
+        );
+        expect(found.length, `${r.employeeId} in ${cycle.name}`).toBe(1);
+        if (expected === previous) oldNames++;
+      }
+    }
+    expect(oldNames).toBeGreaterThan(0);
+  });
+
+  it.each([
+    ["small", small, smallFiles, 3],
+    ["demo", demo, demoFiles, 12],
+  ])("%s has misspelled names that match nobody exactly", (_, c, files, count) => {
+    const { rows } = table(files, "employee-performance.csv");
+    const known = new Set(c.employees.map(fullName));
+    expect(c.identity.misspellings).toHaveLength(count);
+    for (const m of c.identity.misspellings) {
+      const employee = c.employees.find((e) => e.id === m.employeeId)!;
+      expect(m.csvName).not.toBe(fullName(employee));
+      expect(known.has(m.csvName)).toBe(false);
+      const cycleName = c.cycles[m.cycle].name;
+      expect(
+        rows.some((r) => r["Review Cycle"] === cycleName && r["Employee Name"] === m.csvName),
+      ).toBe(true);
+    }
+  });
+
+  it.each([
+    ["small", small, smallFiles],
+    ["demo", demo, demoFiles],
+  ])("%s has one name shared by two people in the same cycle", (_, c, files) => {
+    const { rows } = table(files, "assessment-progress.csv");
+    const [{ name, employeeIds }] = c.identity.duplicateNames;
+    const firstCycle = c.cycles[0].name;
+    const same = rows.filter((r) => r["Employee Name"] === name && r["Review Cycle"] === firstCycle);
+    expect(same).toHaveLength(employeeIds.length);
+  });
+
+  it.each([
+    ["small", small, smallFiles, 1],
+    ["demo", demo, demoFiles, 3],
+  ])("%s has report rows for people who are not in the HRIS", (_, c, files, perCycle) => {
+    const known = new Set(c.employees.map(fullName));
+    const reports = {
+      "employee-performance": table(files, "employee-performance.csv"),
+      "feedback-status": table(files, "feedback-status.csv"),
+    };
+    expect(c.identity.outsiders).toHaveLength(perCycle * 3 * 2);
+    for (const o of c.identity.outsiders) {
+      expect(known.has(o.name)).toBe(false);
+      const { rows } = reports[o.report];
+      const column = o.report === "feedback-status" ? "Receiving Feedback From" : "Employee Name";
+      expect(
+        rows.some((r) => r["Review Cycle"] === c.cycles[o.cycle].name && r[column] === o.name),
+      ).toBe(true);
+    }
   });
 });
 

@@ -46,11 +46,28 @@ export interface FixtureDuplicateName {
   employeeIds: string[];
 }
 
+/** A name typed wrong in one cycle's reports. */
+export interface FixtureMisspelling {
+  employeeId: string;
+  /** Index into `cycles`. */
+  cycle: number;
+  csvName: string;
+}
+
+/** A report row about someone who is not in the HRIS at all. */
+export interface FixtureOutsider {
+  cycle: number;
+  name: string;
+  report: "employee-performance" | "feedback-status";
+}
+
 /** What a perfect identity resolver should find (ground truth for tests). */
 export interface IdentityGroundTruth {
   persons: FixturePerson[];
   renames: FixtureRename[];
   duplicateNames: FixtureDuplicateName[];
+  misspellings: FixtureMisspelling[];
+  outsiders: FixtureOutsider[];
 }
 
 /** One row of the Bamboo `jobInfo` table (reportsTo is resolved on serialize). */
