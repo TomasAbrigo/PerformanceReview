@@ -1,0 +1,4 @@
+Employee,Reporting To,Department,Review Cycle,Self Assessment Date,Manager Assessment Date,Self: Feels Valued,Manager: Engagement,Manager: Job Offer Response,Custom: Collaboration (1-5)
+Ana Lopez,"Perez, Beto",Engineering,2025 Year-End,2025-12-02,2025-12-10,Highly valued,Highly engaged,Do everything to keep,5
+Beto Perez,"Martinez, Eva",Engineering,2025 Year-End,2025-12-03,2025-12-11,Sometimes valued,Engaged,Convince to stay,4
+Carla Gomez,"Martinez, Eva",People,2025 Year-End,2025-12-04,,Not sure others value me,Moderately engaged,,3
