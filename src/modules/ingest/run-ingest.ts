@@ -8,18 +8,21 @@ import {
 } from "@/db/schema";
 import { payloadHash } from "./canonical";
 import { handlerFor } from "./handlers";
+import { advanceSyncState } from "./sync-state";
 import type { ExtractContext, IngestEntity, SourceAdapter } from "./types";
 
 export { canonical, payloadHash } from "./canonical";
 export { resolvePerson } from "./employee";
 
 export type RunIngestInput = {
-  adapter: SourceAdapter;
+  adapter: SourceAdapter<IngestEntity>;
   entity: IngestEntity;
   db: DbOrTx;
   /**
-   * Landing mode: only write raw_record (and the run), no staging or domain
-   * upsert. Required for entities without a domain handler yet.
+   * Landing mode: only write raw_record and the run (counts: new records or
+   * same hash = unchanged), with no staging, domain upsert or soft-delete, and
+   * no `sync_state`: a file upload is not an incremental source. The only way
+   * to run an entity that has no domain handler.
    */
   landing?: boolean;
   params?: Record<string, unknown>;
@@ -30,8 +33,32 @@ export type RunIngestInput = {
 export type RunIngestResult = { runId: string; counts: IngestCounts };
 
 /**
+ * A run that ended in status `error`. The run row (with the counts reached so
+ * far and the message) is already saved; `runId` points at it.
+ */
+export class IngestRunError extends Error {
+  constructor(
+    message: string,
+    readonly runId: string,
+    readonly counts: IngestCounts,
+    options?: ErrorOptions,
+  ) {
+    super(message, options);
+    this.name = "IngestRunError";
+  }
+}
+
+/**
  * raw → staged (zod) → domain upsert, recorded as one ingest_run. What each
- * entity does lives in `entityHandlers` (handlers.ts).
+ * entity does lives in `entityHandlers` (handlers.ts). Throws before opening a
+ * run for an entity without a handler (unless `landing`).
+ *
+ * Every record commits on its own, so the watermark in `sync_state` (per
+ * source, adapter and entity) only advances once the whole run is done, in the
+ * same transaction that marks it `succeeded`. A run that throws ends in
+ * `error` (with `finished_at`) as an `IngestRunError` and leaves the previous
+ * watermark untouched; re-running is safe (idempotent). An incremental run
+ * (`extract.since`) never runs the handler's `finish` (e.g. soft-deletes).
  */
 export async function runIngest({
   adapter,
@@ -41,17 +68,22 @@ export async function runIngest({
   params = {},
   extract = {},
 }: RunIngestInput): Promise<RunIngestResult> {
-  const handler = handlerFor(entity, landing); // fails before opening a run
+  const handler = handlerFor(entity, landing);
   const source = adapter.source;
   const [run] = await db
     .insert(ingestRun)
     .values({
       sourceSystem: source,
       adapter: adapter.name,
-      params: { entity, ...params },
+      entity,
+      params: {
+        entity,
+        ...params,
+        ...(extract.since ? { since: extract.since } : {}),
+      },
       status: "running",
     })
-    .returning({ id: ingestRun.id });
+    .returning({ id: ingestRun.id, startedAt: ingestRun.startedAt });
 
   const counts: IngestCounts = {
     read: 0,
@@ -125,22 +157,35 @@ export async function runIngest({
       );
     }
 
-    await db
-      .update(ingestRun)
-      .set({ status: "succeeded", finishedAt: new Date(), counts, rejects })
-      .where(eq(ingestRun.id, run.id));
+    await db.transaction(async (tx) => {
+      await tx
+        .update(ingestRun)
+        .set({ status: "succeeded", finishedAt: new Date(), counts, rejects })
+        .where(eq(ingestRun.id, run.id));
+      if (!landing) {
+        await advanceSyncState(tx, {
+          sourceSystem: source,
+          adapter: adapter.name,
+          entity,
+          // Start of the extraction: changes made while it ran are re-read next time.
+          watermark: run.startedAt.toISOString(),
+          runId: run.id,
+        });
+      }
+    });
   } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
     await db
       .update(ingestRun)
       .set({
-        status: "failed",
+        status: "error",
         finishedAt: new Date(),
         counts,
         rejects,
-        error: (err as Error).message,
+        error: message,
       })
       .where(eq(ingestRun.id, run.id));
-    throw err;
+    throw new IngestRunError(message, run.id, counts, { cause: err });
   }
 
   return { runId: run.id, counts };

@@ -52,23 +52,14 @@ export type EntityHandler<S> = {
 export type LandingHandler = { landing: true };
 export const landingHandler: LandingHandler = { landing: true };
 
-/** The handler for an entity: landing mode, or its domain handler. */
-export function handlerFor(
-  entity: IngestEntity,
-  landing: boolean,
-): EntityHandler<unknown> | LandingHandler {
-  if (landing) return landingHandler;
-  if (!(entity in entityHandlers)) {
-    throw new Error(
-      `No domain handler for entity "${entity}": its records can only be landed in raw_record (landing mode)`,
-    );
-  }
-  return entityHandlers[entity as Entity];
-}
-
 const defineHandler = <S>(h: EntityHandler<S>) => h;
 
-export const entityHandlers: Record<Entity, EntityHandler<unknown>> = {
+/**
+ * Entities `runIngest` can stage and upsert. Goals are not here: they need
+ * the active employees, lazy comments and owner resolution, so they have
+ * their own runner (`runGoalIngest`).
+ */
+export const entityHandlers: Partial<Record<Entity, EntityHandler<unknown>>> = {
   employee: defineHandler({
     schema: stagedEmployeeSchema,
     async upsert(tx, staged, { source, hash, runId }) {
@@ -125,3 +116,23 @@ export const entityHandlers: Record<Entity, EntityHandler<unknown>> = {
     },
   }),
 };
+
+/**
+ * The handler for a run: the landing one, or the entity's domain handler.
+ * Throws for an entity that has none (so no run is opened for it).
+ */
+export function handlerFor(
+  entity: IngestEntity,
+  landing: boolean,
+): EntityHandler<unknown> | LandingHandler {
+  if (landing) return landingHandler;
+  const handler = (
+    entityHandlers as Partial<Record<string, EntityHandler<unknown>>>
+  )[entity];
+  if (!handler) {
+    throw new Error(
+      `Unsupported entity ${entity}: it has no domain handler, so its records can only be landed in raw_record (landing mode)`,
+    );
+  }
+  return handler;
+}

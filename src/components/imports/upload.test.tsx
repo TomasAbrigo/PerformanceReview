@@ -9,10 +9,12 @@ import { builtinProfiles, getBuiltinProfile } from "@/modules/lake/profiles";
 import type { ImportResult, InspectResult } from "@/modules/lake/upload-shared";
 import { UploadForm, type UploadActions } from "./upload-form";
 
+const push = vi.fn();
 vi.mock("@/i18n/navigation", () => ({
   Link: ({ href, children }: { href: string; children: ReactNode }) => (
     <a href={href}>{children}</a>
   ),
+  useRouter: () => ({ push }),
 }));
 
 const messages = { es, en };
@@ -371,6 +373,19 @@ describe.each(["es", "en"] as const)("UploadForm (%s)", (locale) => {
         screen.getByRole("link", { name: t.result.viewRun }),
       ).toHaveAttribute("href", "/imports/runs/run-1");
       expect(screen.queryByText(t.result.noNew)).toBeNull();
+    });
+
+    it("opens the run's page once the import is done", async () => {
+      push.mockClear();
+      await previewFile(locale);
+
+      await userEvent.click(
+        screen.getByRole("button", { name: t.preview.import }),
+      );
+
+      await waitFor(() =>
+        expect(push).toHaveBeenCalledWith("/imports/runs/run-1"),
+      );
     });
 
     it("says nothing new was created when the file had already been imported", async () => {

@@ -5,6 +5,7 @@ import { useId, useMemo, useState, useTransition } from "react";
 import { Button } from "@/components/ui/button";
 import { Field, FieldDescription, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { useRouter } from "@/i18n/navigation";
 import {
   validateAgainstSchema,
   type ProfileEntity,
@@ -56,7 +57,8 @@ function formatSize(bytes: number): string {
 
 /**
  * Upload flow: choose a file, preview its columns and first rows against a
- * source profile (built-in, saved or new), import, see the result.
+ * source profile (built-in, saved or new), import, then go to the run's page
+ * (`/imports/runs/<id>`), with a simple inline result in the meantime.
  */
 export function UploadForm({
   profiles: initialProfiles,
@@ -71,6 +73,7 @@ export function UploadForm({
   const [error, setError] = useState<UploadErrorCode | "unknown" | null>(null);
   const [pending, startTransition] = useTransition();
   const fileId = useId();
+  const router = useRouter();
 
   const errorText = (code: UploadErrorCode | "unknown") =>
     t(`errors.${code}`, { max: MAX_MB });
@@ -137,6 +140,9 @@ export function UploadForm({
             }
             if (isNew) setProfiles((all) => [...all, profile]);
             setPhase({ step: "done", result });
+            // The run's page has the full detail; the result below stays
+            // as the fallback while it loads.
+            router.push(`/imports/runs/${result.runId}`);
           });
         }}
       />

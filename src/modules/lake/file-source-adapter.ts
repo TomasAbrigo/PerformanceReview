@@ -36,7 +36,7 @@ export type FileSourceAdapterOptions = {
  * columns under their canonical names), `extra` (every other column) and
  * `raw` (the row as read, under the original headers).
  */
-export class FileSourceAdapter implements SourceAdapter {
+export class FileSourceAdapter implements SourceAdapter<IngestEntity> {
   readonly source: SourceSystem;
   readonly name = "file";
   readonly entities: readonly IngestEntity[];

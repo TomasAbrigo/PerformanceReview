@@ -1,6 +1,6 @@
 import { readFileSync } from "node:fs";
 import path from "node:path";
-import { expect, test } from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
 
 const REPORTS = path.resolve("fixtures/bamboo-reports/small");
 
@@ -23,6 +23,22 @@ function csvRows(file: string): number {
 }
 
 const employeePerformance = path.join(REPORTS, "employee-performance.csv");
+const total = csvRows(employeePerformance);
+
+/** Upload the file in English, pick the profile, import and land on the run page. */
+async function importEmployeePerformance(page: Page) {
+  await page.goto("/en/imports/upload");
+  await page
+    .getByLabel("File", { exact: true })
+    .setInputFiles(employeePerformance);
+  await page.getByRole("button", { name: "Preview" }).click();
+  await page
+    .getByLabel("Source profile")
+    .selectOption("bamboo-employee-performance");
+  await page.getByRole("button", { name: "Import" }).click();
+  await expect(page).toHaveURL(/\/en\/imports\/runs\/[0-9a-f-]{36}$/);
+  return page.getByRole("table", { name: "Counts" });
+}
 
 test("uploads the employee performance report, previews it and imports it", async ({
   page,
@@ -44,6 +60,9 @@ test("uploads the employee performance report, previews it and imports it", asyn
   await expect(
     page.getByRole("heading", { level: 2, name: "Vista previa" }),
   ).toBeVisible();
+  await expect(page.getByLabel("Perfil de fuente")).toHaveValue(
+    "bamboo-employee-performance",
+  );
   await page
     .getByLabel("Perfil de fuente")
     .selectOption("bamboo-employee-performance");
@@ -59,48 +78,39 @@ test("uploads the employee performance report, previews it and imports it", asyn
 
   await page.getByRole("button", { name: "Importar" }).click();
 
+  // The run's page: the rows read are all the rows of the file.
+  await expect(page).toHaveURL(/\/es\/imports\/runs\/[0-9a-f-]{36}$/);
   await expect(
-    page.getByRole("heading", { level: 2, name: "Importación terminada" }),
+    page.getByRole("heading", { level: 1, name: "Corrida de importación" }),
   ).toBeVisible();
-  await expect(page.locator('[data-count="read"] dd')).toHaveText(
-    String(csvRows(employeePerformance)),
-  );
   await expect(
-    page.getByRole("link", { name: "Ver la corrida" }),
-  ).toHaveAttribute("href", /\/es\/imports\/runs\/[0-9a-f-]{36}$/);
+    page
+      .getByRole("table", { name: "Conteos" })
+      .getByRole("row", { name: `Leídos ${total}`, exact: true }),
+  ).toBeVisible();
+  await expect(
+    page.getByText(/"profile": "bamboo-employee-performance"/),
+  ).toBeVisible();
+  await expect(
+    page.getByText(/"fileName": "employee-performance.csv"/),
+  ).toBeVisible();
 });
 
 test("importing the same file again creates no new records", async ({
   page,
 }) => {
-  const total = String(csvRows(employeePerformance));
-  await page.goto("/en/imports/upload");
+  await importEmployeePerformance(page); // new, or already there from another test
 
-  async function importOnce() {
-    await page
-      .getByLabel("File", { exact: true })
-      .setInputFiles(employeePerformance);
-    await page.getByRole("button", { name: "Preview" }).click();
-    await page
-      .getByLabel("Source profile")
-      .selectOption("bamboo-employee-performance");
-    await page.getByRole("button", { name: "Import" }).click();
-    await expect(
-      page.getByRole("heading", { level: 2, name: "Import finished" }),
-    ).toBeVisible();
-    await expect(page.locator('[data-count="read"] dd')).toHaveText(total);
-  }
+  const counts = await importEmployeePerformance(page);
 
-  await importOnce(); // new, or already there from another test
-  await page.getByRole("button", { name: "Upload another file" }).click();
-  await importOnce();
-
-  await expect(page.locator('[data-count="inserted"] dd')).toHaveText("0");
-  await expect(page.locator('[data-count="unchanged"] dd')).toHaveText(total);
   await expect(
-    page.getByText(
-      "No new records were created: this file had already been imported.",
-    ),
+    counts.getByRole("row", { name: `Read ${total}`, exact: true }),
+  ).toBeVisible();
+  await expect(
+    counts.getByRole("row", { name: "Inserted 0", exact: true }),
+  ).toBeVisible();
+  await expect(
+    counts.getByRole("row", { name: `Unchanged ${total}`, exact: true }),
   ).toBeVisible();
 });
 
@@ -125,7 +135,6 @@ test("a file missing a column of the profile is flagged and cannot be imported",
   const alert = page
     .getByRole("alert")
     .filter({ hasText: "does not match the profile" });
-  await expect(alert).toContainText("The file does not match the profile");
   await expect(alert).toContainText("Review Cycle");
   await expect(
     page
