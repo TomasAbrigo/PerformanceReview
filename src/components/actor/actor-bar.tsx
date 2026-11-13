@@ -1,8 +1,8 @@
 import { connection } from "next/server";
 import { db } from "@/db/client";
 import { setActorAction } from "@/modules/actor/actions";
+import { listActorOptions } from "@/modules/actor/queries";
 import { getActor } from "@/modules/actor/server";
-import { listPeople } from "@/modules/people/queries";
 import { personName } from "@/modules/review-core";
 import { ActorSelector } from "./actor-selector";
 
@@ -11,7 +11,7 @@ export async function ActorBar() {
   await connection();
   const actor = await getActor();
   const [people, actorName] = await Promise.all([
-    listPeople(db),
+    listActorOptions(db),
     personName(db, actor.personId),
   ]);
   return (
@@ -19,7 +19,7 @@ export async function ActorBar() {
       key={`${actor.personId}-${actor.role}`}
       actor={actor}
       actorName={actorName}
-      people={people.map((p) => ({ id: p.id, displayName: p.displayName }))}
+      people={people}
       setActor={setActorAction}
     />
   );

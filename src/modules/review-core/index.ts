@@ -64,4 +64,6 @@ export {
   canWrite,
   type VisibilityContext,
   type VisibilityRequest,
+  type WriteScope,
+  writablePhases,
 } from "./visibility";

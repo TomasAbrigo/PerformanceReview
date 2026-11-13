@@ -8,14 +8,13 @@ import {
   reviewRequest,
   type ReviewRequest,
 } from "@/db/schema";
+import { isUuid } from "@/lib/uuid";
 import type { ActorContext } from "@/modules/actor/types";
 import { isSkipLevel } from "./manager";
 import type { RequestStatus } from "./request-status";
 import { ReviewError } from "./review-errors";
 import type { CycleStatus } from "./status";
 import { canRead, type VisibilityContext } from "./visibility";
-
-const UUID = /^[0-9a-f-]{36}$/i;
 
 /**
  * Ensures the requests of a cycle (self, then manager: see
@@ -213,7 +212,7 @@ export async function loadRequest(
   requestId: string,
   { forUpdate = false } = {},
 ) {
-  if (!UUID.test(requestId)) throw new ReviewError("not_found");
+  if (!isUuid(requestId)) throw new ReviewError("not_found");
   const query = db
     .select({
       request: reviewRequest,
@@ -244,7 +243,7 @@ export async function findMySelfRequestId(
   actor: ActorContext,
   cycleId: string,
 ): Promise<string | null> {
-  if (!actor.personId || !UUID.test(cycleId)) return null;
+  if (!actor.personId || !isUuid(cycleId)) return null;
   const [row] = await db
     .select({ id: reviewRequest.id })
     .from(reviewRequest)
@@ -272,7 +271,7 @@ export async function listSelfRequests(
   actor: ActorContext,
   cycleId: string,
 ): Promise<SelfRequestItem[]> {
-  if (actor.role !== "hr" || !UUID.test(cycleId)) return [];
+  if (actor.role !== "hr" || !isUuid(cycleId)) return [];
   return db
     .select({
       requestId: reviewRequest.id,
@@ -390,7 +389,7 @@ export async function findMySharedReviewId(
   actor: ActorContext,
   cycleId: string,
 ): Promise<string | null> {
-  if (!actor.personId || !UUID.test(cycleId)) return null;
+  if (!actor.personId || !isUuid(cycleId)) return null;
   const [row] = await db
     .select({ id: reviewRequest.id })
     .from(reviewRequest)
@@ -450,7 +449,7 @@ export async function personName(
   db: DbOrTx,
   personId: string | null,
 ): Promise<string | null> {
-  if (!personId || !UUID.test(personId)) return null;
+  if (!personId || !isUuid(personId)) return null;
   const [row] = await db
     .select({ name: person.displayName })
     .from(person)

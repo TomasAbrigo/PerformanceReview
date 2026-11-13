@@ -1,27 +1,18 @@
 "use server";
 
-import { refresh } from "next/cache";
 import type { ActionResult } from "@/components/templates/shared";
 import type { QuestionPayload } from "@/components/templates/template-editor";
 import { db } from "@/db/client";
 import type { LocalizedText } from "@/db/schema";
+import { actionResult } from "@/lib/action-result";
 import * as templates from "@/modules/templates";
 
-async function result<T extends object = object>(
+const isTemplatesError = (error: unknown): error is templates.TemplatesError =>
+  error instanceof templates.TemplatesError;
+
+const result = <T extends object = object>(
   fn: () => Promise<T | void>,
-): Promise<ActionResult<T>> {
-  try {
-    const value = (await fn()) ?? ({} as T);
-    refresh();
-    return { ok: true, ...value };
-  } catch (error) {
-    if (error instanceof templates.TemplatesError) {
-      return { ok: false, code: error.code, issues: error.issues };
-    }
-    console.error(error);
-    return { ok: false, code: "unknown", issues: [] };
-  }
-}
+): Promise<ActionResult<T>> => actionResult(fn, isTemplatesError);
 
 // Scales
 

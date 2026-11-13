@@ -98,11 +98,24 @@ export function SelfReviewForm({
         ? tErr(code as "unknown")
         : tErr("unknown");
 
+  /** Autosaves in flight: submit waits for them so no answer is lost. */
+  const inFlight = useRef<Set<Promise<unknown>>>(new Set());
+  const [savingCount, setSavingCount] = useState(0);
+
   async function save(questionRevisionId: string, value: AnswerValue) {
     setSaveState("saving");
-    const result = await actions.save(review.requestId, [
+    const promise = actions.save(review.requestId, [
       { questionRevisionId, value },
     ]);
+    inFlight.current.add(promise);
+    setSavingCount((n) => n + 1);
+    let result;
+    try {
+      result = await promise;
+    } finally {
+      inFlight.current.delete(promise);
+      setSavingCount((n) => n - 1);
+    }
     if (result.ok) {
       lastSaved.current[questionRevisionId] = value;
       setSaveState("saved");
@@ -120,6 +133,7 @@ export function SelfReviewForm({
 
   function submit() {
     startTransition(async () => {
+      await Promise.allSettled([...inFlight.current]);
       const result = await actions.submit(review.requestId);
       setConfirming(false);
       if (result.ok) {
@@ -274,7 +288,10 @@ export function SelfReviewForm({
       {!readOnly ? (
         <div className="flex flex-col gap-2">
           <div className="flex items-center gap-4">
-            <Button onClick={() => setConfirming(true)} disabled={pending}>
+            <Button
+              onClick={() => setConfirming(true)}
+              disabled={pending || savingCount > 0}
+            >
               {t("submit")}
             </Button>
             <span aria-live="polite" className="text-sm text-muted-foreground">

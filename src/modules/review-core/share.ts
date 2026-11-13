@@ -1,11 +1,10 @@
 import { and, eq, isNull } from "drizzle-orm";
 import type { DbOrTx } from "@/db/client";
+import { isUuid } from "@/lib/uuid";
 import { reviewAudit, reviewRequest, type ReviewRequest } from "@/db/schema";
 import type { ActorContext } from "@/modules/actor/types";
 import { loadRequest } from "./requests";
 import { ReviewError } from "./review-errors";
-
-const UUID = /^[0-9a-f-]{36}$/i;
 
 /**
  * Shares a submitted manager review with the reviewee (sets shared_at,
@@ -52,7 +51,7 @@ export async function shareAll(
   cycleId: string,
 ): Promise<number> {
   if (actor.role !== "hr") throw new ReviewError("forbidden");
-  if (!UUID.test(cycleId)) throw new ReviewError("not_found");
+  if (!isUuid(cycleId)) throw new ReviewError("not_found");
   return db.transaction(async (tx) => {
     const shared = await tx
       .update(reviewRequest)

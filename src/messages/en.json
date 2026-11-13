@@ -161,6 +161,69 @@
       "empty": "No employment periods."
     }
   },
+  "Imports": {
+    "nav": "Imports",
+    "runs": {
+      "title": "Import runs",
+      "description": "Every ingestion execution (CLI or cron) with its counts and rejects.",
+      "empty": "There are no import runs yet.",
+      "emptyFiltered": "No run matches the filters.",
+      "back": "← Back to runs",
+      "notFound": "Run not found.",
+      "filters": {
+        "label": "Filter runs",
+        "source": "Source",
+        "entity": "Entity",
+        "status": "Status",
+        "all": "All",
+        "apply": "Filter",
+        "clear": "Clear"
+      },
+      "columns": {
+        "started": "Started",
+        "source": "Source",
+        "adapter": "Adapter",
+        "entity": "Entity",
+        "status": "Status",
+        "read": "Read",
+        "inserted": "Inserted",
+        "updated": "Updated",
+        "unchanged": "Unchanged",
+        "deleted": "Deleted",
+        "rejected": "Rejected",
+        "issues": "In queue",
+        "ignored": "Ignored",
+        "log": "Log entries",
+        "duration": "Duration"
+      },
+      "status": {
+        "running": "Running",
+        "succeeded": "Succeeded",
+        "error": "Failed"
+      },
+      "pagination": {
+        "label": "Pagination",
+        "next": "Older runs →"
+      },
+      "detail": {
+        "title": "Import run",
+        "id": "Run ID",
+        "finished": "Finished",
+        "params": "Parameters",
+        "noParams": "No parameters.",
+        "counts": "Counts",
+        "metric": "Metric",
+        "count": "Count",
+        "rawRecords": "Raw records stored by this run: {count}",
+        "error": "Error",
+        "rejects": "Rejects and issues",
+        "rejectSourceId": "Source ID",
+        "rejectReason": "Reason",
+        "noRejects": "This run had no rejects or issues.",
+        "noSourceId": "No source ID"
+      }
+    }
+  },
   "Org": {
     "title": "Org chart",
     "nav": "Org chart",
@@ -181,6 +244,143 @@
       "current": "Current",
       "unresolved": "{name} (unresolved)",
       "empty": "No job history."
+    }
+  },
+  "Goals": {
+    "title": "Goals",
+    "nav": "Team goals",
+    "empty": "No goals imported yet.",
+    "status": {
+      "in_progress": "In progress",
+      "completed": "Completed",
+      "closed": "Closed"
+    },
+    "progress": "Progress",
+    "dueDate": "Due {date}",
+    "noDueDate": "No due date",
+    "completedOn": "Completed on {date}",
+    "milestones": {
+      "title": "Milestones",
+      "summary": "{done} of {total, plural, =1 {1 milestone} other {# milestones}}",
+      "done": "Done",
+      "pending": "Pending"
+    },
+    "comments": "{count, plural, =0 {No comments} =1 {1 comment} other {# comments}}",
+    "sharedWith": "Shared with {names}",
+    "team": {
+      "title": "Team goals",
+      "description": "Goals of {manager}'s direct reports.",
+      "goalCount": "{count, plural, =1 {1 goal} other {# goals}}",
+      "noGoals": "No goals.",
+      "noReports": "{manager} has no direct reports.",
+      "chooseManager": "Choose a manager to see their team's goals.",
+      "noManagers": "No managers with direct reports."
+    }
+  },
+  "Identity": {
+    "title": "Identity queue",
+    "nav": "Identity queue",
+    "description": "Records the import could not attach to a person on its own. Review each case: link it to an existing person, create a new person or ignore it.",
+    "tabs": {
+      "label": "Queue views",
+      "open": "Open ({count})",
+      "history": "History"
+    },
+    "empty": {
+      "open": "Nothing to review: every record was matched.",
+      "history": "No resolved cases yet."
+    },
+    "columns": {
+      "name": "Name",
+      "sourceId": "Bamboo ID",
+      "reason": "Reason",
+      "candidates": "Candidates",
+      "detected": "Detected",
+      "resolved": "Resolved",
+      "resolution": "Resolution"
+    },
+    "unnamed": "No name",
+    "review": "Review",
+    "reason": {
+      "no_match": "No match",
+      "ambiguous": "Possible match",
+      "conflict": "Conflict"
+    },
+    "reasonHelp": {
+      "no_match": "No identifier matches an existing person and nobody looks like it.",
+      "ambiguous": "The Bamboo ID is new, but the employee number, the email or the name with the hire date match existing people. It may be a rehire.",
+      "conflict": "The record was already applied, except for an identifier that belongs to another person. That person keeps it; ignore the case once you have reviewed it."
+    },
+    "candidatesCount": "{count, plural, =0 {No candidates} =1 {1 candidate} other {# candidates}}",
+    "resolution": {
+      "link": "Linked to {name}",
+      "create": "New person: {name}",
+      "ignore": "Ignored",
+      "auto": "Resolved automatically: the record applied without needing review",
+      "note": "Note: {note}",
+      "unknownPerson": "a person",
+      "short": {
+        "link": "Linked",
+        "create": "New person",
+        "ignore": "Ignored"
+      }
+    },
+    "detail": {
+      "back": "← Back to the queue",
+      "notFound": "Case not found.",
+      "record": "Record from Bamboo",
+      "fields": {
+        "sourceId": "Bamboo ID",
+        "employeeNumber": "Employee number",
+        "workEmail": "Email",
+        "hireDate": "Hire date",
+        "terminationDate": "Termination date",
+        "status": "Status"
+      },
+      "candidates": "Suggested people",
+      "involved": "People involved",
+      "noCandidates": "No existing person looks like this record.",
+      "matchedOn": "Matched on",
+      "match": {
+        "bamboo_id": "Bamboo ID",
+        "employee_number": "Employee number",
+        "work_email": "Email",
+        "name_hire_date": "Name and hire date"
+      },
+      "score": "{score}% match",
+      "employments": "Employment",
+      "employmentLine": "{hire} → {end}",
+      "noDate": "—",
+      "resolutionTitle": "Resolution",
+      "resolvedAt": "Resolved on {date}",
+      "viewPerson": "View person"
+    },
+    "actions": {
+      "title": "Resolve",
+      "linkTo": "Link to {name}",
+      "link": "Link to this person",
+      "create": "Create new person",
+      "ignore": "Ignore",
+      "note": "Note (optional)",
+      "search": "Search another person",
+      "searchLabel": "Search by name or email",
+      "searchButton": "Search",
+      "noResults": "No person found.",
+      "searchResults": "Search results"
+    },
+    "errors": {
+      "not_found": "The case or the person no longer exists.",
+      "person_required": "Choose the person to link the record to.",
+      "invalid_action": "This action does not apply to this case.",
+      "invalid_payload": "The stored record is no longer valid and cannot be processed.",
+      "already_resolved": "This case was already resolved in a different way.",
+      "already_applied": "The record was already applied to another person.",
+      "unknown": "Something went wrong."
+    },
+    "pagination": {
+      "label": "Pages",
+      "older": "Older cases",
+      "newest": "Back to the newest"
     }
   },
   "Cycles": {
@@ -268,7 +468,8 @@
         "acknowledge": "Acknowledgement"
       },
       "summary": "Summary",
-      "participantsToLaunch": "{count, plural, one {Will launch with # participant} other {Will launch with # participants}}"
+      "participantsToLaunch": "{count, plural, one {Will launch with # participant} other {Will launch with # participants}}",
+      "snapshotHint": "Participants are resolved as of the org snapshot date."
     },
     "detail": {
       "snapshotDate": "Snapshot as of {date}",

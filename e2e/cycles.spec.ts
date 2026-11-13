@@ -9,8 +9,11 @@ test("creates and launches a cycle with a frozen org snapshot", async ({
   ).toBeVisible();
   await page.getByRole("link", { name: "Nuevo ciclo" }).click();
 
-  // Step 1: everyone active (Ana and Bruno in the seed; Carla left in 2024).
+  // Step 1: everyone in the org on the snapshot date.
   await expect(page.getByText("Paso 1 de 4")).toBeVisible();
+  // Participants are resolved (and frozen) as of 2022-06-01, when Bruno
+  // still reported to Carla.
+  await page.getByLabel("Fecha de snapshot organizacional").fill("2022-06-01");
   await expect(page.getByText(/\d+ personas coinciden/)).toBeVisible();
   await page.getByRole("button", { name: "Siguiente" }).click();
 
@@ -18,12 +21,11 @@ test("creates and launches a cycle with a frozen org snapshot", async ({
   await expect(page.getByText("Paso 2 de 4")).toBeVisible();
   await page.getByRole("button", { name: "Siguiente" }).click();
 
-  // Step 3: snapshot on 2022-06-01, when Bruno still reported to Carla.
+  // Step 3: name, period and due dates.
   const name = `Ciclo e2e ${Date.now()}`;
   await page.getByLabel("Nombre del ciclo").fill(name);
   await page.getByLabel("Inicio del período").fill("2022-01-01");
   await page.getByLabel("Fin del período").fill("2022-06-30");
-  await page.getByLabel("Fecha de snapshot organizacional").fill("2022-06-01");
   await page.getByLabel("Autoevaluación").fill("2022-07-15");
   await page.getByRole("button", { name: "Siguiente" }).click();
 

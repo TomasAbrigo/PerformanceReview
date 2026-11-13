@@ -43,10 +43,31 @@ describe("canRead", () => {
 });
 
 describe("canWrite", () => {
+  const open = {
+    cycle: { status: "collecting" as const },
+    participant: { removedAt: null },
+  };
   it("lets only the reviewer write, and only while in draft", () => {
-    expect(canWrite(as(BRUNO), request())).toBe(true);
-    expect(canWrite(as(BRUNO), request({ status: "submitted" }))).toBe(false);
-    expect(canWrite(as(ANA), request())).toBe(false);
-    expect(canWrite(as(null, "hr"), request())).toBe(false);
+    expect(canWrite(as(BRUNO), request(), open)).toBe(true);
+    expect(canWrite(as(BRUNO), request({ status: "submitted" }), open)).toBe(
+      false,
+    );
+    expect(canWrite(as(ANA), request(), open)).toBe(false);
+    expect(canWrite(as(null, "hr"), request(), open)).toBe(false);
+  });
+  it("allows writing a self review only while the cycle is collecting", () => {
+    for (const status of ["nominations", "manager_review", "closed"] as const) {
+      expect(
+        canWrite(as(BRUNO), request(), { ...open, cycle: { status } }),
+      ).toBe(false);
+    }
+  });
+  it("denies writing for a removed participant", () => {
+    expect(
+      canWrite(as(BRUNO), request(), {
+        ...open,
+        participant: { removedAt: new Date() },
+      }),
+    ).toBe(false);
   });
 });

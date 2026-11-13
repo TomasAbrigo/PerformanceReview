@@ -18,12 +18,13 @@ async function actAs(page: Page, person: string | null, role: string) {
 async function collectingCycle(page: Page, name: string): Promise<string> {
   await page.goto("/es/cycles/new");
   await expect(page.getByText("Paso 1 de 4")).toBeVisible();
+  await page.getByLabel("Fecha de snapshot organizacional").fill("2022-06-01");
+  await expect(page.getByText(/\d+ personas coinciden/)).toBeVisible();
   await page.getByRole("button", { name: "Siguiente" }).click();
   await page.getByRole("button", { name: "Siguiente" }).click();
   await page.getByLabel("Nombre del ciclo").fill(name);
   await page.getByLabel("Inicio del período").fill("2022-01-01");
   await page.getByLabel("Fin del período").fill("2022-06-30");
-  await page.getByLabel("Fecha de snapshot organizacional").fill("2022-06-01");
   await page.getByLabel("Autoevaluación").fill("2022-07-15");
   await page.getByRole("button", { name: "Siguiente" }).click();
   await page.getByRole("button", { name: "Crear y lanzar" }).click();

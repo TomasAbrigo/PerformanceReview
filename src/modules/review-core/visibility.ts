@@ -1,7 +1,11 @@
 import type { ActorContext } from "@/modules/actor/types";
 import type { Relationship } from "@/modules/templates/constants";
 import type { RequestStatus } from "./request-status";
-import { type CycleComponents, isDoubleBlind } from "./status";
+import {
+  type CycleComponents,
+  type CycleStatus,
+  isDoubleBlind,
+} from "./status";
 
 /** The request fields visibility depends on. */
 export type VisibilityRequest = {
@@ -21,7 +25,7 @@ export type VisibilityContext = {
   };
   /** Cycle settings (double blind, anonymity) used by the reading rules. */
   cycle?: {
-    status: string;
+    status: CycleStatus;
     components?: Pick<CycleComponents, "doubleBlind">;
   };
   /** Self rows: the participant's manager request (double blind). */
@@ -85,10 +89,37 @@ export function canRead(actor: ActorContext, ctx: VisibilityContext): boolean {
   }
 }
 
-/** Only the reviewer writes, and only while the request is a draft. */
+/** Where a request lives: the cycle phase and whether the reviewee is still in. */
+export type WriteScope = {
+  cycle: { status: CycleStatus };
+  participant: { removedAt: Date | null };
+};
+
+/**
+ * Cycle phases in which each kind of review can be written. Managers write
+ * from collecting (PRD): double blind controls reading, not writing.
+ */
+export const writablePhases: Record<Relationship, readonly CycleStatus[]> = {
+  self: ["collecting"],
+  peer: ["collecting"],
+  upward: ["collecting"],
+  manager: ["collecting", "manager_review"],
+};
+
+/**
+ * Only the reviewer writes, only while the request is a draft, the cycle is
+ * in a phase where that kind of review is written, and the reviewee is
+ * still a participant.
+ */
 export function canWrite(
   actor: ActorContext,
   request: VisibilityRequest,
+  scope: WriteScope,
 ): boolean {
-  return isReviewer(actor, request) && request.status === "draft";
+  return (
+    isReviewer(actor, request) &&
+    request.status === "draft" &&
+    writablePhases[request.relationship].includes(scope.cycle.status) &&
+    scope.participant.removedAt === null
+  );
 }

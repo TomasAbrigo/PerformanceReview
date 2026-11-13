@@ -1,5 +1,6 @@
 import type { BambooClient } from "@/modules/bamboo-client";
 import { groupTables } from "./fixture-adapter";
+import { extractGoals } from "./goals-extract";
 import type {
   Entity,
   ExtractContext,
@@ -24,7 +25,7 @@ export const EMPLOYEE_FIELDS = [
 export class BambooApiAdapter implements SourceAdapter {
   readonly source = "bamboo_api" as const;
   readonly name = "bamboo";
-  readonly entities = ["employee", "job_history"] as const;
+  readonly entities = ["employee", "job_history", "goal"] as const;
 
   constructor(private readonly client: BambooClient) {}
 
@@ -45,7 +46,13 @@ export class BambooApiAdapter implements SourceAdapter {
       }
       return;
     }
-    if (entity !== "employee") throw new Error(`Unsupported entity ${entity}`);
+    if (entity === "goal") {
+      yield* extractGoals(this.client, ctx.employeeIds ?? [], ctx.onSkip);
+      return;
+    }
+    if (entity !== "employee") {
+      throw new Error(`Unsupported entity ${String(entity)}`);
+    }
     // Raw payloads (not the zod-normalized ones): raw_record stays raw and the
     // hash matches any other adapter fed the same Bamboo JSON.
     for await (const payload of this.client.listEmployeesRaw({

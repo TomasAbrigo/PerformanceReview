@@ -1,0 +1,20 @@
+{
+  "comments": [
+    {
+      "id": "7001",
+      "authorUserId": 8101,
+      "createdAt": "2026-10-05T10:00:00Z",
+      "text": "Avance del mapeo listo, falta validarlo con People.",
+      "canEdit": false,
+      "canDelete": false
+    },
+    {
+      "id": 7002,
+      "authorUserId": 8102,
+      "createdAt": "2026-10-20T16:45:00Z",
+      "text": "Podemos revisar el framework en el 1:1 del jueves.",
+      "canEdit": true,
+      "canDelete": true
+    }
+  ]
+}

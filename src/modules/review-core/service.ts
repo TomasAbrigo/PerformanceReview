@@ -6,12 +6,14 @@ import {
   eq,
   getTableColumns,
   inArray,
+  isNotNull,
   isNull,
   sql,
   type SQL,
 } from "drizzle-orm";
 import type { AnyPgColumn } from "drizzle-orm/pg-core";
 import type { ZodType } from "zod";
+import { parse as parseOr } from "@/lib/domain-error";
 import type { DbOrTx } from "@/db/client";
 import {
   cycleParticipant,
@@ -28,7 +30,13 @@ import {
   templateSection,
   type ParticipantFilter,
 } from "@/db/schema";
-import { jobAsOf, type IsoDate } from "@/modules/org-history/queries";
+import { isUuid } from "@/lib/uuid";
+import { todayLocal } from "@/modules/org-history/dates";
+import {
+  jobsAsOf,
+  jobValidOn,
+  type IsoDate,
+} from "@/modules/org-history/queries";
 import { CyclesError } from "./errors";
 import { ensureSelfRequests } from "./requests";
 import { allowedTransitions, type CycleStatus, launchStatus } from "./status";
@@ -41,17 +49,11 @@ import {
   type ParticipantFilterInput,
 } from "./validation";
 
-function parse<T>(schema: ZodType<T>, input: unknown): T {
-  const result = schema.safeParse(input);
-  if (!result.success) throw CyclesError.fromZod(result.error);
-  return result.data;
-}
-
-const today = (): IsoDate => new Date().toISOString().slice(0, 10);
-const UUID = /^[0-9a-f-]{36}$/i;
+const parse = <T>(schema: ZodType<T>, input: unknown): T =>
+  parseOr(schema, input, CyclesError);
 
 async function findCycle(db: DbOrTx, id: string): Promise<ReviewCycle> {
-  const [cycle] = UUID.test(id)
+  const [cycle] = isUuid(id)
     ? await db.select().from(reviewCycle).where(eq(reviewCycle.id, id))
     : [];
   if (!cycle || cycle.deletedAt) throw new CyclesError("not_found");
@@ -113,19 +115,22 @@ export type ParticipantCandidate = {
 };
 
 /** Status of the person's most recent live employment. */
-const latestEmployment = (column: "status" | "termination_date") =>
-  sql`(select e.${sql.raw(column)} from ${employment} e
+const latestStatus = () =>
+  sql`(select e.status from ${employment} e
     where e.person_id = ${person.id} and e.deleted_at is null
     order by e.hire_date desc nulls last limit 1)`;
 
 /**
- * People matching a participant filter, using their current job row (area,
- * division, location, title) and their latest live employment (status).
- * Without an explicit status filter, terminated people are left out.
+ * People matching a participant filter as of `asOf` (the cycle's snapshot
+ * date): "all" and "filter" take whoever had a job row valid that day and
+ * match area/division/location/title on that row, so the matched set and the
+ * frozen snapshot agree. Status matches the latest live employment.
+ * Individually picked people are taken as-is.
  */
 async function matchParticipants(
   db: DbOrTx,
   filterInput: ParticipantFilterInput,
+  asOf: IsoDate,
 ): Promise<ParticipantCandidate[]> {
   const filter = parse(participantFilterInput, filterInput);
   const where: (SQL | undefined)[] = [
@@ -137,9 +142,8 @@ async function matchParticipants(
   } else {
     const statuses = filter.kind === "filter" ? filter.statuses : undefined;
     where.push(
-      statuses?.length
-        ? inArray(latestEmployment("status"), statuses)
-        : sql`${latestEmployment("termination_date")} is null`,
+      isNotNull(employeeJobHistory.id),
+      statuses?.length ? inArray(latestStatus(), statuses) : undefined,
     );
     if (filter.kind === "filter") {
       const by = (column: AnyPgColumn, v?: string[]) =>
@@ -162,11 +166,7 @@ async function matchParticipants(
     .from(person)
     .leftJoin(
       employeeJobHistory,
-      and(
-        eq(employeeJobHistory.personId, person.id),
-        isNull(employeeJobHistory.deletedAt),
-        isNull(employeeJobHistory.validTo),
-      ),
+      and(eq(employeeJobHistory.personId, person.id), jobValidOn(asOf)),
     )
     .where(and(...where))
     .orderBy(asc(person.displayName));
@@ -177,12 +177,14 @@ export type ParticipantPreview = {
   sample: ParticipantCandidate[];
 };
 
+/** Who a filter selects as of `asOf` (pass the cycle's snapshot date). */
 export async function previewParticipants(
   db: DbOrTx,
   filter: ParticipantFilterInput,
   sampleSize = 10,
+  asOf: IsoDate = todayLocal(),
 ): Promise<ParticipantPreview> {
-  const people = await matchParticipants(db, filter);
+  const people = await matchParticipants(db, filter, asOf);
   return { count: people.length, sample: people.slice(0, sampleSize) };
 }
 
@@ -227,7 +229,7 @@ export async function participantFilterOptions(db: DbOrTx): Promise<{
         .from(employment)
         .where(isNull(employment.deletedAt))
         .orderBy(asc(employment.status)),
-      matchParticipants(db, { kind: "all" }),
+      matchParticipants(db, { kind: "all" }, todayLocal()),
     ]);
   return {
     departments,
@@ -239,25 +241,28 @@ export async function participantFilterOptions(db: DbOrTx): Promise<{
   };
 }
 
-/** Org snapshot of a reviewee as of `date`, via org-history jobAsOf. */
-async function snapshot(
+/** Org snapshots of reviewees as of `date`, via one org-history jobsAsOf query. */
+async function snapshots(
   db: DbOrTx,
   cycleId: string,
-  personId: string,
+  personIds: string[],
   date: IsoDate,
 ) {
-  const job = await jobAsOf(db, personId, date);
-  return {
-    cycleId,
-    revieweePersonId: personId,
-    snapshotAsOf: date,
-    snapManagerPersonId: job?.managerPersonId ?? null,
-    snapDepartment: job?.department ?? null,
-    snapDivision: job?.division ?? null,
-    snapJobTitle: job?.jobTitle ?? null,
-    snapLocation: job?.location ?? null,
-    snapJobHistoryId: job?.id ?? null,
-  };
+  const jobs = await jobsAsOf(db, personIds, date);
+  return personIds.map((personId) => {
+    const job = jobs.get(personId);
+    return {
+      cycleId,
+      revieweePersonId: personId,
+      snapshotAsOf: date,
+      snapManagerPersonId: job?.managerPersonId ?? null,
+      snapDepartment: job?.department ?? null,
+      snapDivision: job?.division ?? null,
+      snapJobTitle: job?.jobTitle ?? null,
+      snapLocation: job?.location ?? null,
+      snapJobHistoryId: job?.id ?? null,
+    };
+  });
 }
 
 /** Copies the template's questions (and their scales) as immutable revisions. */
@@ -320,14 +325,21 @@ export async function launchCycle(
     const cycle = await findCycle(tx, id);
     if (cycle.status !== "draft") throw new CyclesError("not_draft");
     if (!cycle.templateId) throw new CyclesError("no_template");
-    const people = await matchParticipants(tx, cycle.participantFilter);
+    const people = await matchParticipants(
+      tx,
+      cycle.participantFilter,
+      cycle.snapshotDate,
+    );
     if (people.length === 0) throw new CyclesError("no_participants");
 
-    const rows = [];
-    for (const p of people) {
-      rows.push(await snapshot(tx, id, p.personId, cycle.snapshotDate));
-    }
-    await tx.insert(cycleParticipant).values(rows);
+    await tx.insert(cycleParticipant).values(
+      await snapshots(
+        tx,
+        id,
+        people.map((p) => p.personId),
+        cycle.snapshotDate,
+      ),
+    );
     await copyQuestions(tx, id, cycle.templateId);
 
     const to = launchStatus(cycle.components);
@@ -394,34 +406,34 @@ export async function addParticipant(
   db: DbOrTx,
   cycleId: string,
   personId: string,
-  asOf: IsoDate = today(),
+  asOf: IsoDate = todayLocal(),
 ): Promise<CycleParticipant> {
-  await activeCycle(db, cycleId);
-  const [existing] = await db
-    .select()
-    .from(cycleParticipant)
-    .where(
-      and(
-        eq(cycleParticipant.cycleId, cycleId),
-        eq(cycleParticipant.revieweePersonId, personId),
-      ),
-    );
-  if (existing && !existing.removedAt) {
-    throw new CyclesError("already_participant");
-  }
-  const values = await snapshot(db, cycleId, personId, asOf);
-  if (existing) {
-    const [row] = await db
-      .update(cycleParticipant)
-      .set({ ...values, addedAt: new Date(), removedAt: null })
-      .where(eq(cycleParticipant.id, existing.id))
-      .returning();
-    await ensureSelfRequests(db, cycleId, row.id);
+  // Participant and its self request are created together (or not at all).
+  return db.transaction(async (tx) => {
+    await activeCycle(tx, cycleId);
+    const [existing] = await tx
+      .select()
+      .from(cycleParticipant)
+      .where(
+        and(
+          eq(cycleParticipant.cycleId, cycleId),
+          eq(cycleParticipant.revieweePersonId, personId),
+        ),
+      );
+    if (existing && !existing.removedAt) {
+      throw new CyclesError("already_participant");
+    }
+    const [values] = await snapshots(tx, cycleId, [personId], asOf);
+    const [row] = existing
+      ? await tx
+          .update(cycleParticipant)
+          .set({ ...values, addedAt: new Date(), removedAt: null })
+          .where(eq(cycleParticipant.id, existing.id))
+          .returning()
+      : await tx.insert(cycleParticipant).values(values).returning();
+    await ensureSelfRequests(tx, cycleId, row.id);
     return row;
-  }
-  const [row] = await db.insert(cycleParticipant).values(values).returning();
-  await ensureSelfRequests(db, cycleId, row.id);
-  return row;
+  });
 }
 
 /** Removes a reviewee from a launched cycle; the row (and its history) stays. */
@@ -489,7 +501,7 @@ export async function getCycle(
   db: DbOrTx,
   id: string,
 ): Promise<CycleDetail | null> {
-  if (!UUID.test(id)) return null;
+  if (!isUuid(id)) return null;
   const [cycle] = await db
     .select()
     .from(reviewCycle)

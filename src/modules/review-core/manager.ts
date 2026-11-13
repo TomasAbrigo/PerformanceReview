@@ -1,6 +1,7 @@
 import { and, asc, eq, isNull, notInArray } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 import type { DbOrTx } from "@/db/client";
+import { isUuid } from "@/lib/uuid";
 import {
   type CycleParticipant,
   cycleParticipant,
@@ -14,8 +15,6 @@ import { jobAsOf } from "@/modules/org-history/queries";
 import type { RequestStatus } from "./request-status";
 import { ReviewError } from "./review-errors";
 import type { CycleStatus } from "./status";
-
-const UUID = /^[0-9a-f-]{36}$/i;
 
 /**
  * Whether the actor is the participant's skip-level manager: the manager of
@@ -44,7 +43,7 @@ export async function findManagerRequestId(
   actor: ActorContext,
   participantId: string,
 ): Promise<string | null> {
-  if (!UUID.test(participantId)) return null;
+  if (!isUuid(participantId)) return null;
   const [row] = await db
     .select({
       id: reviewRequest.id,
@@ -149,7 +148,7 @@ export async function sendReminder(
 ): Promise<void> {
   // Not loadRequest: the manager may remind about a self review they cannot
   // read yet (double blind).
-  const [row] = UUID.test(requestId)
+  const [row] = isUuid(requestId)
     ? await db
         .select({ manager: cycleParticipant.snapManagerPersonId })
         .from(reviewRequest)
@@ -179,7 +178,7 @@ export async function participantRefs(
   db: DbOrTx,
   participantId: string,
 ): Promise<{ revieweeName: string; selfRequestId: string | null } | null> {
-  if (!UUID.test(participantId)) return null;
+  if (!isUuid(participantId)) return null;
   const [row] = await db
     .select({
       revieweeName: person.displayName,

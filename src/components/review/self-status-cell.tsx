@@ -6,6 +6,7 @@ import type { ActionResult } from "@/components/templates/shared";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useRouter } from "@/i18n/navigation";
 import type { RequestStatus } from "@/modules/review-core/request-status";
 
 export type SelfReviewColumn = {
@@ -25,6 +26,8 @@ export function SelfStatusCell({
   unlock: SelfReviewColumn["unlock"];
 }) {
   const t = useTranslations("Review");
+  const tErr = useTranslations("Review.errors");
+  const router = useRouter();
   const id = useId();
   const [open, setOpen] = useState(false);
   const [note, setNote] = useState("");
@@ -35,8 +38,18 @@ export function SelfStatusCell({
   function confirm() {
     startTransition(async () => {
       const result = await unlock(request!.requestId, note || null);
-      if (result.ok) setOpen(false);
-      else setError(t("errors.unknown"));
+      if (result.ok) {
+        setError(null);
+        setOpen(false);
+      } else {
+        // The row may be stale (already unlocked, removed...): show why, reload.
+        setError(
+          tErr.has(result.code as "unknown")
+            ? tErr(result.code as "unknown")
+            : tErr("unknown"),
+        );
+        router.refresh();
+      }
     });
   }
 
