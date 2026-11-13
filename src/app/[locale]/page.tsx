@@ -22,6 +22,7 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
   const tSettings = await getTranslations("Settings.nav");
   const tPeople = await getTranslations("People");
   const tOrg = await getTranslations("Org");
+  const tCycles = await getTranslations("Cycles");
 
   return (
     <main className="flex flex-1 items-center justify-center p-8">
@@ -40,6 +41,9 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
             </Link>
             <Link href="/org" className="underline">
               {tOrg("nav")}
+            </Link>
+            <Link href="/cycles" className="underline">
+              {tCycles("nav")}
             </Link>
             <Link href="/settings/templates" className="underline">
               {tSettings("templates")}

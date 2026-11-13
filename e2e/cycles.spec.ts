@@ -1,0 +1,61 @@
+import { expect, test } from "@playwright/test";
+
+test("creates and launches a cycle with a frozen org snapshot", async ({
+  page,
+}) => {
+  await page.goto("/es/cycles");
+  await expect(
+    page.getByRole("heading", { level: 1, name: "Ciclos de evaluación" }),
+  ).toBeVisible();
+  await page.getByRole("link", { name: "Nuevo ciclo" }).click();
+
+  // Step 1: everyone active (Ana and Bruno in the seed; Carla left in 2024).
+  await expect(page.getByText("Paso 1 de 4")).toBeVisible();
+  await expect(page.getByText(/\d+ personas coinciden/)).toBeVisible();
+  await page.getByRole("button", { name: "Siguiente" }).click();
+
+  // Step 2: defaults.
+  await expect(page.getByText("Paso 2 de 4")).toBeVisible();
+  await page.getByRole("button", { name: "Siguiente" }).click();
+
+  // Step 3: snapshot on 2022-06-01, when Bruno still reported to Carla.
+  const name = `Ciclo e2e ${Date.now()}`;
+  await page.getByLabel("Nombre del ciclo").fill(name);
+  await page.getByLabel("Inicio del período").fill("2022-01-01");
+  await page.getByLabel("Fin del período").fill("2022-06-30");
+  await page.getByLabel("Fecha de snapshot organizacional").fill("2022-06-01");
+  await page.getByLabel("Autoevaluación").fill("2022-07-15");
+  await page.getByRole("button", { name: "Siguiente" }).click();
+
+  // Step 4: review and launch.
+  await expect(page.getByText("Paso 4 de 4")).toBeVisible();
+  await expect(
+    page.getByText(/Se lanzará con \d+ participantes/),
+  ).toBeVisible();
+  await page.getByRole("button", { name: "Crear y lanzar" }).click();
+
+  await expect(page).toHaveURL(/\/es\/cycles\/[0-9a-f-]{36}$/);
+  await expect(page.getByRole("heading", { level: 1, name })).toBeVisible();
+  await expect(page.getByText("Nominaciones").first()).toBeVisible();
+
+  const participants = page.getByRole("table", { name: "Participantes" });
+  const bruno = participants
+    .getByRole("row")
+    .filter({ hasText: "Bruno Pérez" });
+  await expect(bruno.getByText("Carla Romero")).toBeVisible();
+  await expect(bruno.getByText("Developer", { exact: true })).toBeVisible();
+  const ana = participants.getByRole("row").filter({ hasText: "Ana García" });
+  await expect(ana.getByText("Sin manager")).toBeVisible();
+
+  const log = page.getByRole("table", { name: "Historial de estados" });
+  await expect(log.getByText("Borrador")).toBeVisible();
+
+  // Phase action with confirmation.
+  await page.getByRole("button", { name: "Pasar a Recolección" }).click();
+  await page.getByRole("button", { name: "Confirmar" }).click();
+  await expect(log.getByRole("row")).toHaveCount(3);
+
+  // The cycle shows up in the list.
+  await page.goto("/es/cycles");
+  await expect(page.getByRole("link", { name })).toBeVisible();
+});

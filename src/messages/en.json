@@ -182,5 +182,138 @@
       "unresolved": "{name} (unresolved)",
       "empty": "No job history."
     }
+  },
+  "Cycles": {
+    "nav": "Review cycles",
+    "title": "Review cycles",
+    "new": "New cycle",
+    "back": "Back to cycles",
+    "empty": "There are no cycles yet.",
+    "columns": {
+      "name": "Name",
+      "status": "Status",
+      "period": "Period",
+      "participants": "Participants"
+    },
+    "period": "{start} → {end}",
+    "status": {
+      "draft": "Draft",
+      "nominations": "Nominations",
+      "collecting": "Collecting",
+      "manager_review": "Manager review",
+      "calibration": "Calibration",
+      "sharing": "Sharing",
+      "closed": "Closed"
+    },
+    "wizard": {
+      "title": "New cycle",
+      "stepsLabel": "Steps",
+      "stepOf": "Step {current} of {total}",
+      "steps": {
+        "people": "People",
+        "components": "Components and anonymity",
+        "dates": "Phase due dates",
+        "review": "Review and launch"
+      },
+      "next": "Next",
+      "previous": "Back",
+      "saveDraft": "Save draft",
+      "launch": "Create and launch",
+      "mode": "Who takes part?",
+      "modeAll": "Everyone currently active",
+      "modeFilter": "By filter",
+      "modePeople": "Individual people",
+      "filters": {
+        "departments": "Department",
+        "divisions": "Division",
+        "locations": "Location",
+        "jobTitles": "Job title",
+        "statuses": "Status"
+      },
+      "count": "{count, plural, =0 {No one matches} one {# person matches} other {# people match}}",
+      "counting": "Counting…",
+      "sample": "Sample",
+      "components": "Components",
+      "componentNames": {
+        "self": "Self review",
+        "manager": "Manager review",
+        "peer": "Peer review",
+        "upward": "Upward review",
+        "calibration": "Calibration"
+      },
+      "anonymity": "Anonymity",
+      "anonymityPeer": "Peer anonymity",
+      "anonymityUpward": "Upward anonymity",
+      "anonymityModes": {
+        "transparent": "Transparent",
+        "anonymous_to_employee": "Anonymous to the reviewee",
+        "fully_anonymous": "Fully anonymous"
+      },
+      "template": "Template",
+      "finalScale": "Final scale",
+      "none": "Not selected",
+      "name": "Cycle name",
+      "description": "Description",
+      "periodStart": "Period start",
+      "periodEnd": "Period end",
+      "snapshotDate": "Org snapshot date",
+      "dueDates": "Phase due dates",
+      "phases": {
+        "nominations": "Nominations",
+        "self": "Self review",
+        "peer": "Peers",
+        "manager": "Manager",
+        "calibration": "Calibration",
+        "sharing": "Sharing",
+        "acknowledge": "Acknowledgement"
+      },
+      "summary": "Summary",
+      "participantsToLaunch": "{count, plural, one {Will launch with # participant} other {Will launch with # participants}}"
+    },
+    "detail": {
+      "snapshotDate": "Snapshot as of {date}",
+      "participants": "Participants",
+      "transitions": "Status history",
+      "stats": "{active} active · {removed} removed · {withoutManager} without manager",
+      "questions": "{count, plural, one {# frozen question} other {# frozen questions}}",
+      "actions": "Phase actions",
+      "moveTo": "Move to {status}",
+      "launch": "Launch cycle",
+      "confirmTitle": "Confirm the phase change?",
+      "confirmBody": "The cycle will move from {from} to {to}.",
+      "confirm": "Confirm",
+      "cancel": "Cancel",
+      "noActions": "No actions available.",
+      "noParticipants": "This cycle has no participants yet.",
+      "noTransitions": "No status changes yet.",
+      "noManager": "No manager",
+      "removed": "Removed",
+      "columns": {
+        "name": "Person",
+        "manager": "Manager (snapshot)",
+        "department": "Department",
+        "jobTitle": "Job title",
+        "from": "From",
+        "to": "To",
+        "actor": "Who",
+        "when": "When",
+        "note": "Note"
+      },
+      "system": "System"
+    },
+    "errors": {
+      "validation": "Check the highlighted fields.",
+      "not_found": "The cycle no longer exists.",
+      "not_draft": "The cycle was already launched.",
+      "not_active": "The cycle is not active.",
+      "invalid_transition": "That phase change is not allowed.",
+      "no_participants": "The filter matches no one.",
+      "no_template": "Choose a template.",
+      "already_participant": "The person already takes part in the cycle.",
+      "date_order": "Dates must be in order.",
+      "required": "This field is required.",
+      "invalid": "Invalid value.",
+      "unknown": "An unexpected error occurred."
+    }
   }
 }
