@@ -1,0 +1,10 @@
+.next
+node_modules
+coverage
+playwright-report
+test-results
+pnpm-lock.yaml
+drizzle
+supabase/.temp
+# shadcn/ui generated components: keep as generated to ease `shadcn add --overwrite`
+src/components/ui

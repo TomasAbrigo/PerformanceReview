@@ -1,0 +1,15 @@
+{
+  "App": {
+    "title": "Performance Review",
+    "description": "Herramienta interna de evaluaciones de desempeño"
+  },
+  "Home": {
+    "heading": "Evaluaciones de desempeño",
+    "welcome": "Bienvenido a Performance Review."
+  },
+  "LocaleSwitcher": {
+    "label": "Idioma",
+    "es": "Español",
+    "en": "English"
+  }
+}

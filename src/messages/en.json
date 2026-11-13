@@ -1,0 +1,15 @@
+{
+  "App": {
+    "title": "Performance Review",
+    "description": "Internal performance review tool"
+  },
+  "Home": {
+    "heading": "Performance reviews",
+    "welcome": "Welcome to Performance Review."
+  },
+  "LocaleSwitcher": {
+    "label": "Language",
+    "es": "Español",
+    "en": "English"
+  }
+}
