@@ -49,6 +49,29 @@ export const changedEmployeesSchema = z.looseObject({
 
 export type ChangedEmployees = z.infer<typeof changedEmployeesSchema>;
 
+/** A row of an employee table (jobInfo, employmentStatus, ...). Other fields pass. */
+export const tableRowSchema = z.looseObject({
+  id: bambooId,
+  employeeId: bambooId,
+});
+
+export type BambooTableRow = z.infer<typeof tableRowSchema>;
+
+export const tableRowsSchema = z.array(tableRowSchema);
+
+export const changedTablesSchema = z.looseObject({
+  latest: z.string().optional(),
+  employees: z.record(
+    z.string(),
+    z.looseObject({
+      lastChanged: z.string().optional(),
+      rows: tableRowsSchema,
+    }),
+  ),
+});
+
+export type ChangedTables = z.infer<typeof changedTablesSchema>;
+
 /** A list-employees item exactly as Bamboo returned it. */
 export type RawBambooEmployee = Record<string, unknown> & {
   id: string | number;

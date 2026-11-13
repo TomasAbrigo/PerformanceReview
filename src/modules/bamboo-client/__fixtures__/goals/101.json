@@ -1,0 +1,79 @@
+{
+  "canAlign": true,
+  "canCreateGoals": true,
+  "filters": [
+    { "id": "status-all", "name": "All" },
+    { "id": "inProgress", "name": "In progress" }
+  ],
+  "selectedFilter": "status-all",
+  "goals": [
+    {
+      "id": 9001,
+      "title": "Definir el plan de carrera del área",
+      "description": "Roles, niveles y criterios de promoción para el área de People.",
+      "percentComplete": 50,
+      "alignsWithOptionId": "12",
+      "sharedWithEmployeeIds": [102],
+      "dueDate": "2026-12-15",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-11-02T14:20:00Z",
+      "status": "in_progress",
+      "milestones": [
+        {
+          "id": 5001,
+          "employeeGoalId": 9001,
+          "title": "Mapear roles actuales",
+          "currentValue": 1,
+          "startValue": 0,
+          "endValue": 1,
+          "completedDateTime": "2026-10-01T12:00:00Z",
+          "lastUpdateDateTime": "2026-10-01T12:00:00Z",
+          "lastUpdateUserId": 8101
+        },
+        {
+          "id": 5002,
+          "employeeGoalId": 9001,
+          "title": "Publicar el framework",
+          "currentValue": 0,
+          "startValue": 0,
+          "endValue": 1,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2026-10-01T12:00:00Z",
+          "lastUpdateUserId": 8101
+        }
+      ],
+      "actions": {}
+    },
+    {
+      "id": "9002",
+      "title": "Migrar legajos al nuevo sistema",
+      "description": "Cerrado: el alcance cambió y se retomará el año próximo.",
+      "percentComplete": 60,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2026-06-30",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-07-01T09:00:00Z",
+      "status": "closed",
+      "milestones": null,
+      "actions": null
+    }
+  ],
+  "persons": [
+    {
+      "employeeId": 101,
+      "userId": 8101,
+      "displayFirstName": "Ana",
+      "lastName": "García",
+      "photoUrl": null
+    },
+    {
+      "employeeId": 102,
+      "userId": 8102,
+      "displayFirstName": "Bruno",
+      "lastName": "Pérez",
+      "photoUrl": null
+    }
+  ],
+  "comments": [{ "goalId": "9001", "commentCount": 2 }]
+}

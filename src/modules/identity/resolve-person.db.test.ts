@@ -416,8 +416,8 @@ describe("identity resolution during ingest", () => {
         counts.updated +
         counts.unchanged +
         counts.rejected +
-        counts.issues +
-        counts.ignored,
+        (counts.issues ?? 0) +
+        (counts.ignored ?? 0),
     ).toBe(counts.read);
   });
 

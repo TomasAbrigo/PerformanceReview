@@ -12,7 +12,7 @@ import {
   type SourceSystem,
 } from "@/db/schema";
 import { isUuid } from "@/lib/uuid";
-import { upsertEmployee, type Decision } from "@/modules/ingest/run-ingest";
+import { upsertEmployee, type Decision } from "@/modules/ingest/employee";
 import { stagedEmployeeSchema } from "@/modules/ingest/staging";
 import { IdentityError } from "./errors";
 import { lockSourceRecord } from "./lock";

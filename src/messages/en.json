@@ -161,6 +161,122 @@
       "empty": "No employment periods."
     }
   },
+  "Imports": {
+    "nav": "Imports",
+    "runs": {
+      "title": "Import runs",
+      "description": "Every ingestion execution (CLI or cron) with its counts and rejects.",
+      "empty": "There are no import runs yet.",
+      "emptyFiltered": "No run matches the filters.",
+      "back": "← Back to runs",
+      "notFound": "Run not found.",
+      "filters": {
+        "label": "Filter runs",
+        "source": "Source",
+        "entity": "Entity",
+        "status": "Status",
+        "all": "All",
+        "apply": "Filter",
+        "clear": "Clear"
+      },
+      "columns": {
+        "started": "Started",
+        "source": "Source",
+        "adapter": "Adapter",
+        "entity": "Entity",
+        "status": "Status",
+        "read": "Read",
+        "inserted": "Inserted",
+        "updated": "Updated",
+        "unchanged": "Unchanged",
+        "deleted": "Deleted",
+        "rejected": "Rejected",
+        "issues": "In queue",
+        "ignored": "Ignored",
+        "log": "Log entries",
+        "duration": "Duration"
+      },
+      "status": {
+        "running": "Running",
+        "succeeded": "Succeeded",
+        "error": "Failed"
+      },
+      "pagination": {
+        "label": "Pagination",
+        "next": "Older runs →"
+      },
+      "detail": {
+        "title": "Import run",
+        "id": "Run ID",
+        "finished": "Finished",
+        "params": "Parameters",
+        "noParams": "No parameters.",
+        "counts": "Counts",
+        "metric": "Metric",
+        "count": "Count",
+        "rawRecords": "Raw records stored by this run: {count}",
+        "error": "Error",
+        "rejects": "Rejects and issues",
+        "rejectSourceId": "Source ID",
+        "rejectReason": "Reason",
+        "noRejects": "This run had no rejects or issues.",
+        "noSourceId": "No source ID"
+      }
+    }
+  },
+  "Org": {
+    "title": "Org chart",
+    "nav": "Org chart",
+    "treeLabel": "Org chart",
+    "dateLabel": "Date",
+    "show": "Show",
+    "empty": "Nobody was in the organization on that date.",
+    "expand": "Expand {name}",
+    "collapse": "Collapse {name}",
+    "history": {
+      "title": "Job history",
+      "validFrom": "From",
+      "validTo": "To",
+      "jobTitle": "Job title",
+      "area": "Area",
+      "manager": "Manager",
+      "location": "Location",
+      "current": "Current",
+      "unresolved": "{name} (unresolved)",
+      "empty": "No job history."
+    }
+  },
+  "Goals": {
+    "title": "Goals",
+    "nav": "Team goals",
+    "empty": "No goals imported yet.",
+    "status": {
+      "in_progress": "In progress",
+      "completed": "Completed",
+      "closed": "Closed"
+    },
+    "progress": "Progress",
+    "dueDate": "Due {date}",
+    "noDueDate": "No due date",
+    "completedOn": "Completed on {date}",
+    "milestones": {
+      "title": "Milestones",
+      "summary": "{done} of {total, plural, =1 {1 milestone} other {# milestones}}",
+      "done": "Done",
+      "pending": "Pending"
+    },
+    "comments": "{count, plural, =0 {No comments} =1 {1 comment} other {# comments}}",
+    "sharedWith": "Shared with {names}",
+    "team": {
+      "title": "Team goals",
+      "description": "Goals of {manager}'s direct reports.",
+      "goalCount": "{count, plural, =1 {1 goal} other {# goals}}",
+      "noGoals": "No goals.",
+      "noReports": "{manager} has no direct reports.",
+      "chooseManager": "Choose a manager to see their team's goals.",
+      "noManagers": "No managers with direct reports."
+    }
+  },
   "Identity": {
     "title": "Identity queue",
     "nav": "Identity queue",

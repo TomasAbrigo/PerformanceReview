@@ -1,12 +1,12 @@
 import { and, asc, desc, eq, ilike, isNull, or, sql } from "drizzle-orm";
 import type { DbOrTx } from "@/db/client";
+import { isUuid } from "@/lib/uuid";
 import {
   employment,
   person,
   sourceIdentity,
   type IdentityKind,
 } from "@/db/schema";
-import { isUuid } from "@/lib/uuid";
 
 export type PersonListItem = {
   id: string;

@@ -1,7 +1,7 @@
 import { createHash } from "node:crypto";
 
-/** JSON with sorted keys, so key order never changes the hash. */
-function canonical(value: unknown): string {
+/** JSON with keys sorted at every level, so key order never matters. */
+export function canonical(value: unknown): string {
   if (Array.isArray(value)) return `[${value.map(canonical).join(",")}]`;
   if (value && typeof value === "object") {
     return `{${Object.keys(value)

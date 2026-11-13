@@ -1,78 +1,27 @@
 /**
- * pnpm ingest:employees --source fixture|bamboo [--dir path] [--unmatched create|queue]
- * bamboo needs BAMBOO_COMPANY_DOMAIN and BAMBOO_API_KEY.
- * --unmatched: what to do with a record that matches nobody and resembles
- * nobody: create the person (default) or queue it for review at /imports/identity.
+ * Alias of the generic CLI, kept for existing callers (docs, scripts):
+ *   pnpm ingest:employees [--source fixture|bamboo] [--dir path] [--entity employee|job_history] [--since <iso>]
+ * is `pnpm ingest <entity> ...` with --entity defaulting to employee and
+ * --source defaulting to fixture. New code should call `pnpm ingest` directly.
  */
-import path from "node:path";
-import { parseArgs } from "node:util";
-import { closeDb, db } from "../src/db/client";
-import { createBambooClient } from "../src/modules/bamboo-client";
-import {
-  BambooApiAdapter,
-  FixtureAdapter,
-  runIngest,
-  type SourceAdapter,
-} from "../src/modules/ingest";
+import { cliMain } from "../src/modules/ingest/cli";
 
-try {
-  process.loadEnvFile(".env.local");
-} catch {
-  // rely on the real environment
-}
+const args = process.argv.slice(2);
 
-const DEFAULT_DIR = "src/modules/bamboo-client/__fixtures__";
-
-async function main() {
-  const { values } = parseArgs({
-    options: {
-      source: { type: "string", default: "fixture" },
-      dir: { type: "string", default: DEFAULT_DIR },
-      unmatched: { type: "string", default: "create" },
-    },
-  });
-  if (values.unmatched !== "create" && values.unmatched !== "queue") {
-    throw new Error(
-      `--unmatched must be create or queue (got ${values.unmatched})`,
-    );
-  }
-
-  let adapter: SourceAdapter;
-  if (values.source === "fixture") {
-    adapter = new FixtureAdapter(path.resolve(values.dir));
-  } else if (values.source === "bamboo") {
-    const companyDomain = process.env.BAMBOO_COMPANY_DOMAIN;
-    const apiKey = process.env.BAMBOO_API_KEY;
-    if (!companyDomain || !apiKey) {
-      throw new Error("Set BAMBOO_COMPANY_DOMAIN and BAMBOO_API_KEY");
-    }
-    adapter = new BambooApiAdapter(
-      createBambooClient({ companyDomain, apiKey }),
-    );
+let entity = "employee";
+const rest: string[] = [];
+for (let i = 0; i < args.length; i++) {
+  const arg = args[i];
+  if (arg === "--entity") {
+    entity = args[++i] ?? "";
+  } else if (arg.startsWith("--entity=")) {
+    entity = arg.slice("--entity=".length);
   } else {
-    throw new Error(
-      `--source must be fixture or bamboo (got ${values.source})`,
-    );
+    rest.push(arg);
   }
-
-  const { runId, counts } = await runIngest({
-    adapter,
-    entity: "employee",
-    db,
-    params: {
-      source: values.source,
-      dir: values.dir,
-      unmatched: values.unmatched,
-    },
-    unmatched: values.unmatched,
-  });
-  console.log(`ingest_run ${runId}`);
-  console.log(JSON.stringify(counts));
 }
+const hasSource = rest.some(
+  (a) => a === "--source" || a.startsWith("--source="),
+);
 
-main()
-  .catch((err) => {
-    console.error(err instanceof Error ? err.message : err);
-    process.exitCode = 1;
-  })
-  .finally(() => closeDb());
+await cliMain([entity, ...(hasSource ? [] : ["--source", "fixture"]), ...rest]);

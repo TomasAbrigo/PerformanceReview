@@ -20,6 +20,26 @@ export type ResolveContext = {
 
 export type ResolveResult = { personId: string } | RaiseResult;
 
+/** The person that holds a source's own id (bamboo_id), if any: conclusive. */
+export async function findPersonByBambooId(
+  tx: DbOrTx,
+  source: SourceSystem,
+  sourceId: string,
+): Promise<string | null> {
+  const [match] = await tx
+    .select({ personId: sourceIdentity.personId })
+    .from(sourceIdentity)
+    .where(
+      and(
+        eq(sourceIdentity.sourceSystem, source),
+        eq(sourceIdentity.kind, "bamboo_id"),
+        eq(sourceIdentity.value, sourceId),
+        isNull(sourceIdentity.validTo),
+      ),
+    );
+  return match?.personId ?? null;
+}
+
 /**
  * Identity resolution for a record whose employment we have not seen.
  *
@@ -36,18 +56,8 @@ export async function resolvePerson(
   staged: StagedEmployee,
   ctx: ResolveContext,
 ): Promise<ResolveResult> {
-  const [byId] = await tx
-    .select({ personId: sourceIdentity.personId })
-    .from(sourceIdentity)
-    .where(
-      and(
-        eq(sourceIdentity.sourceSystem, source),
-        eq(sourceIdentity.kind, "bamboo_id"),
-        eq(sourceIdentity.value, staged.sourceId),
-        isNull(sourceIdentity.validTo),
-      ),
-    );
-  if (byId) return { personId: byId.personId };
+  const byId = await findPersonByBambooId(tx, source, staged.sourceId);
+  if (byId) return { personId: byId };
 
   const candidates = await findCandidates(tx, source, staged);
   if (candidates.length === 0 && (ctx.unmatched ?? "create") === "create") {

@@ -3,51 +3,25 @@ import { cp, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { test as setup } from "@playwright/test";
-import postgres from "postgres";
-
-try {
-  process.loadEnvFile(".env.local");
-} catch {
-  // rely on the real environment (CI)
-}
+import { REHIRE_ID } from "./identity-case";
 
 const FIXTURES = "src/modules/bamboo-client/__fixtures__";
 
-const ingest = (from: string) =>
-  execFileSync(
-    "pnpm",
-    ["ingest:employees", "--source", "fixture", "--dir", from],
-    { stdio: "inherit" },
-  );
-
 /**
- * Runs once per `playwright test`, before any spec (project dependency), so the
- * specs never race each other over the shared database.
- *
- * Carla (Bamboo id 103, legajo 0003, terminated) comes back as id 201 with the
- * same legajo and email: the import must ask before linking it to her.
+ * Queues the rehire case for identity.spec.ts: one more employee run, with
+ * Carla coming back as id 201. It runs once, after every spec that only reads
+ * (project dependency), because the extra run would change what they count and
+ * resolving the case changes Carla.
  */
-setup("seed the rehire case for the identity queue", async () => {
-  setup.setTimeout(180_000);
-
-  const sql = postgres(process.env.DATABASE_URL ?? "", { max: 1 });
-  try {
-    // Leftovers from a previous run against this database.
-    await sql`DELETE FROM identity_match_issue WHERE source_id = '201'`;
-    await sql`DELETE FROM employment WHERE source_id = '201'`;
-    await sql`DELETE FROM source_identity WHERE kind = 'bamboo_id' AND value = '201'`;
-    await sql`DELETE FROM raw_record WHERE source_id = '201'`;
-  } finally {
-    await sql.end();
-  }
-
+setup("queue the rehire case", async () => {
+  setup.setTimeout(120_000);
   const dir = await mkdtemp(path.join(tmpdir(), "identity-e2e-"));
   try {
     await cp(FIXTURES, dir, { recursive: true });
     const file = path.join(dir, "employees-page-2.json");
     const page = JSON.parse(await readFile(file, "utf8"));
     page.data.push({
-      id: 201,
+      id: Number(REHIRE_ID),
       employeeNumber: "0003",
       firstName: "Carla",
       lastName: "Romero",
@@ -59,8 +33,11 @@ setup("seed the rehire case for the identity queue", async () => {
     });
     await writeFile(file, JSON.stringify(page));
 
-    ingest(FIXTURES);
-    ingest(dir);
+    execFileSync(
+      "pnpm",
+      ["ingest", "employee", "--source", "fixture", "--dir", dir],
+      { stdio: "inherit" },
+    );
   } finally {
     await rm(dir, { recursive: true, force: true });
   }

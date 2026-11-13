@@ -8,6 +8,7 @@ CREATE TABLE "identity_match_issue" (
 	"source_id" text NOT NULL,
 	"raw_record_id" uuid,
 	"payload" jsonb NOT NULL,
+	"payload_hash" text NOT NULL,
 	"reason" "identity_issue_reason" NOT NULL,
 	"candidates" jsonb DEFAULT '[]'::jsonb NOT NULL,
 	"status" "identity_issue_status" DEFAULT 'open' NOT NULL,

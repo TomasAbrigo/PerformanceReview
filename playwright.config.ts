@@ -5,9 +5,8 @@ const PORT = 3100;
 
 export default defineConfig({
   testDir: "./e2e",
+  globalSetup: "./e2e/global-setup.ts",
   fullyParallel: true,
-  // The specs seed and mutate one shared database: run them one at a time.
-  workers: 1,
   // `next dev` compiles routes on first hit; give assertions room on a cold or busy machine.
   expect: { timeout: 10_000 },
   forbidOnly: !!process.env.CI,
@@ -19,12 +18,23 @@ export default defineConfig({
     trace: "on-first-retry",
   },
   projects: [
-    // Seeds the shared database once before any spec (see e2e/identity.setup.ts).
-    { name: "setup", testMatch: /.*\.setup\.ts/ },
     {
       name: "chromium",
       use: { ...devices["Desktop Chrome"] },
-      dependencies: ["setup"],
+      testIgnore: /identity\.spec\.ts/,
+    },
+    // The identity spec resolves a case (it links a rehire to Carla), so it
+    // runs on its own, once every spec that only reads is done.
+    {
+      name: "identity-setup",
+      testMatch: /identity\.setup\.ts/,
+      dependencies: ["chromium"],
+    },
+    {
+      name: "identity",
+      use: { ...devices["Desktop Chrome"] },
+      testMatch: /identity\.spec\.ts/,
+      dependencies: ["identity-setup"],
     },
   ],
   webServer: {

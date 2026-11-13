@@ -1,0 +1,62 @@
+[
+  {
+    "id": 1,
+    "employeeId": 101,
+    "date": "2019-03-01",
+    "location": "Córdoba",
+    "department": "Dirección",
+    "division": "Corporativo",
+    "jobTitle": "CEO",
+    "reportsTo": null
+  },
+  {
+    "id": "2",
+    "employeeId": "103",
+    "date": "2018-05-01",
+    "location": "Córdoba",
+    "department": "Ingeniería",
+    "division": "Corporativo",
+    "jobTitle": "Engineering Manager",
+    "reportsTo": "Ana García"
+  },
+  {
+    "id": "3",
+    "employeeId": "102",
+    "date": "2021-07-15",
+    "location": "Rosario",
+    "department": "Ingeniería",
+    "division": "Corporativo",
+    "jobTitle": "Developer",
+    "reportsTo": "Carla Romero"
+  },
+  {
+    "id": "4",
+    "employeeId": "102",
+    "date": "2023-01-01",
+    "location": "Rosario",
+    "department": "Ingeniería",
+    "division": "Corporativo",
+    "jobTitle": "Senior Developer",
+    "reportsTo": "Carla Romero"
+  },
+  {
+    "id": "5",
+    "employeeId": "102",
+    "date": "2023-01-01",
+    "location": "Rosario",
+    "department": "Ingeniería",
+    "division": "Corporativo",
+    "jobTitle": "Senior Developer",
+    "reportsTo": "Ana García"
+  },
+  {
+    "id": "6",
+    "employeeId": "102",
+    "date": "2024-01-01",
+    "location": "Rosario",
+    "department": "Ingeniería",
+    "division": "Corporativo",
+    "jobTitle": "Senior Developer",
+    "reportsTo": "Ana García"
+  }
+]

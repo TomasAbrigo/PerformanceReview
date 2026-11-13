@@ -21,7 +21,10 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
   const tHome = await getTranslations("Home");
   const tSettings = await getTranslations("Settings.nav");
   const tPeople = await getTranslations("People");
+  const tImports = await getTranslations("Imports");
   const tIdentity = await getTranslations("Identity");
+  const tOrg = await getTranslations("Org");
+  const tGoals = await getTranslations("Goals");
 
   return (
     <main className="flex flex-1 items-center justify-center p-8">
@@ -37,6 +40,15 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
           <nav aria-label={tHome("settings")} className="flex flex-col gap-1">
             <Link href="/people" className="underline">
               {tPeople("nav")}
+            </Link>
+            <Link href="/org" className="underline">
+              {tOrg("nav")}
+            </Link>
+            <Link href="/team/goals" className="underline">
+              {tGoals("nav")}
+            </Link>
+            <Link href="/imports/runs" className="underline">
+              {tImports("nav")}
             </Link>
             <Link href="/imports/identity" className="underline">
               {tIdentity("nav")}

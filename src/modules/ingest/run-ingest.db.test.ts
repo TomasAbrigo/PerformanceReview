@@ -333,4 +333,12 @@ describe("runIngest (employees from fixtures)", () => {
     ]);
     expect(new Set(periods.map((p) => p.personId)).size).toBe(1);
   });
+
+  it("fails fast on an entity it has no handler for, without opening a run", async () => {
+    await expect(
+      runIngest({ adapter: new FixtureAdapter(dir), entity: "goal", db }),
+    ).rejects.toThrow("Unsupported entity goal");
+
+    expect(await db.select().from(ingestRun)).toEqual([]);
+  });
 });

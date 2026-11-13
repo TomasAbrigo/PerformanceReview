@@ -26,15 +26,36 @@
     {
       "idx": 3,
       "version": "7",
-      "when": 1794574407942,
-      "tag": "0003_identity_queue",
+      "when": 1794574375558,
+      "tag": "0003_org_history",
       "breakpoints": true
     },
     {
       "idx": 4,
       "version": "7",
-      "when": 1794603367772,
-      "tag": "0004_identity_issue_payload_hash",
+      "when": 1794602122866,
+      "tag": "0004_flippant_galactus",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1794603513199,
+      "tag": "0005_goals",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1794603896160,
+      "tag": "0006_sync_state",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1794604395383,
+      "tag": "0007_identity_queue",
       "breakpoints": true
     }
   ]

@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-// The rehire case (Carla, id 201) is seeded once by identity.setup.ts.
+// The rehire case (Carla, id 201) is queued by identity.setup.ts, right before this spec.
 test.describe.configure({ mode: "serial" });
 
 test("the queue holds the ambiguous row and suggests the person", async ({
