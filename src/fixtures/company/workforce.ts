@@ -120,6 +120,7 @@ export function buildWorkforce(
       | "termination"
       | "employmentStatus"
       | "personKey"
+      | "name"
     > & {
       name?: PersonName;
       employmentStatus?: string;

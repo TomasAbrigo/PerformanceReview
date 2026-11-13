@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { addDays } from "./dates";
 import { generateCompany } from "./index";
 
 const small = generateCompany({ size: "small", seed: 1001 });
@@ -379,6 +380,241 @@ describe("identity ground truth", () => {
     expect(new Set(c.identity.duplicateNames[0].employeeIds)).toEqual(
       new Set(clashes[0]),
     );
+  });
+});
+
+describe("review cycles", () => {
+  it.each([
+    ["small", small],
+    ["demo", demo],
+  ])("%s has three consecutive historical cycles with ordered windows", (_, c) => {
+    expect(c.cycles).toHaveLength(3);
+    c.cycles.forEach((cycle, i) => {
+      expect(cycle.name.length).toBeGreaterThan(0);
+      const dates = [
+        cycle.periodStart,
+        cycle.feedbackOpen,
+        cycle.feedbackDue,
+        cycle.assessmentOpen,
+        cycle.assessmentDue,
+        cycle.periodEnd,
+      ];
+      expect([...dates].sort()).toEqual(dates);
+      expect(cycle.periodEnd < c.asOf).toBe(true);
+      if (i > 0) expect(c.cycles[i - 1].periodEnd < cycle.periodStart).toBe(true);
+    });
+  });
+});
+
+function managerAsOf(c: typeof small, employeeId: string, date: string) {
+  const rows = rowsOf(c, employeeId).filter((r) => r.date <= date);
+  return rows[rows.length - 1].managerId;
+}
+
+describe("assessments", () => {
+  it.each([
+    ["small", small],
+    ["demo", demo],
+  ])("%s has one assessment per participant in each of the 3 cycles", (_, c) => {
+    c.cycles.forEach((cycle, index) => {
+      const rows = c.assessments.filter(
+        (a) => a.cycle === index && a.employeeId !== null,
+      );
+      const expected = c.employees.filter(
+        (e) =>
+          e.hireDate <= addDays(cycle.assessmentOpen, -60) &&
+          (e.terminationDate === null || e.terminationDate > cycle.assessmentDue),
+      );
+      expect(rows.map((a) => a.employeeId).sort()).toEqual(
+        expected.map((e) => e.id).sort(),
+      );
+    });
+  });
+
+  it.each([
+    ["small", small],
+    ["demo", demo],
+  ])("%s records the manager at the window close (the CEO has none)", (_, c) => {
+    for (const a of c.assessments.filter((x) => x.employeeId !== null)) {
+      const close = c.cycles[a.cycle].assessmentDue;
+      expect(a.managerIdAtReview).toBe(managerAsOf(c, a.employeeId!, close));
+    }
+    const ceo = c.employees.find((e) => e.managerId === null)!;
+    const ceoRows = c.assessments.filter((a) => a.employeeId === ceo.id);
+    expect(ceoRows).toHaveLength(3);
+    expect(ceoRows.every((a) => a.managerIdAtReview === null)).toBe(true);
+    expect(ceoRows.every((a) => a.selfStatus === "Not Started" && a.managerStatus === "Not Started")).toBe(true);
+  });
+
+  it.each([
+    ["small", small],
+    ["demo", demo],
+  ])("%s has assessments whose reviewer is no longer the current manager", (_, c) => {
+    const byId = new Map(c.employees.map((e) => [e.id, e]));
+    const stale = c.assessments.filter(
+      (a) =>
+        a.employeeId !== null &&
+        a.managerIdAtReview !== null &&
+        a.managerIdAtReview !== byId.get(a.employeeId)!.managerId,
+    );
+    expect(stale.length).toBeGreaterThanOrEqual(3);
+  });
+
+  it.each([
+    ["small", small],
+    ["demo", demo],
+  ])("%s mixes complete, in-progress and not-started assessments", (_, c) => {
+    const done = c.assessments.filter(
+      (a) => a.selfStatus === "Submitted" && a.managerStatus === "Submitted",
+    );
+    const started = c.assessments.filter(
+      (a) => a.selfStatus === "Not Started" && a.managerStatus === "Not Started",
+    );
+    expect(done.length).toBeGreaterThan(c.assessments.length / 2);
+    expect(started.length).toBeGreaterThanOrEqual(2);
+    expect(done.length + started.length).toBeLessThan(c.assessments.length);
+  });
+
+  it.each([
+    ["small", small],
+    ["demo", demo],
+  ])("%s submissions fall inside the window with valid letter-coded answers", (_, c) => {
+    for (const a of c.assessments) {
+      const cycle = c.cycles[a.cycle];
+      for (const [status, on, answers, q1Letters] of [
+        [a.selfStatus, a.selfSubmittedOn, a.selfAnswers, "ABCD"],
+        [a.managerStatus, a.managerSubmittedOn, a.managerAnswers, "ABCDE"],
+      ] as const) {
+        if (status !== "Submitted") {
+          expect(on).toBeNull();
+          expect(answers).toBeNull();
+          continue;
+        }
+        expect(on! >= cycle.assessmentOpen && on! <= cycle.assessmentDue).toBe(true);
+        expect(q1Letters).toContain(answers!.q1);
+        expect("ABCDE").toContain(answers!.q2);
+        expect(answers!.q3.length).toBeGreaterThan(0);
+        expect(answers!.q4.length).toBeGreaterThan(0);
+        for (const rating of [answers!.custom1, answers!.custom2]) {
+          expect(Number.isInteger(rating) && rating >= 1 && rating <= 5).toBe(true);
+        }
+      }
+      if (a.managerSubmittedOn && a.selfSubmittedOn) {
+        expect(a.managerSubmittedOn >= a.selfSubmittedOn).toBe(true);
+      }
+    }
+  });
+});
+
+describe("peer feedback requests", () => {
+  it.each([
+    ["small", small],
+    ["demo", demo],
+  ])("%s asks 2-4 colleagues per person per cycle, never the CEO or oneself", (_, c) => {
+    const byId = new Map(c.employees.map((e) => [e.id, e]));
+    const ceo = c.employees.find((e) => e.managerId === null)!;
+    c.cycles.forEach((cycle, index) => {
+      const requests = c.feedback.filter((f) => f.cycle === index && f.reviewerId !== null);
+      const perEmployee = new Map<string, number>();
+      for (const f of requests) {
+        perEmployee.set(f.employeeId, (perEmployee.get(f.employeeId) ?? 0) + 1);
+        expect(f.employeeId).not.toBe(ceo.id);
+        expect(f.reviewerId).not.toBe(f.employeeId);
+        expect(f.dueDate).toBe(cycle.feedbackDue);
+        const reviewer = byId.get(f.reviewerId!)!;
+        expect(reviewer.hireDate < cycle.feedbackOpen).toBe(true);
+        expect(
+          reviewer.terminationDate === null || reviewer.terminationDate > cycle.feedbackDue,
+        ).toBe(true);
+        if (f.completedOn !== null) {
+          expect(f.completedOn >= cycle.feedbackOpen && f.completedOn <= cycle.feedbackDue).toBe(true);
+        }
+      }
+      expect(perEmployee.size).toBeGreaterThan(0);
+      for (const count of perEmployee.values()) {
+        expect(count >= 2 && count <= 4).toBe(true);
+      }
+    });
+  });
+
+  it.each([
+    ["small", small],
+    ["demo", demo],
+  ])("%s has requests that were completed and requests left past due", (_, c) => {
+    expect(c.feedback.some((f) => f.completedOn !== null)).toBe(true);
+    expect(c.feedback.some((f) => f.completedOn === null)).toBe(true);
+  });
+});
+
+describe("goals", () => {
+  it.each([
+    ["small", small],
+    ["demo", demo],
+  ])("%s goals have unique string ids and stay inside the owner's employment", (_, c) => {
+    const byId = new Map(c.employees.map((e) => [e.id, e]));
+    expect(new Set(c.goals.map((g) => g.id)).size).toBe(c.goals.length);
+    for (const g of c.goals) {
+      expect(g.id).toMatch(/^\d+$/);
+      const owner = byId.get(g.employeeId)!;
+      expect(owner, `owner of goal ${g.id}`).toBeDefined();
+      const lastDay = owner.terminationDate ?? c.asOf;
+      expect(g.lastChangedDateTime.slice(0, 10) >= owner.hireDate).toBe(true);
+      expect(g.lastChangedDateTime.slice(0, 10) <= lastDay).toBe(true);
+      expect(g.dueDate >= owner.hireDate).toBe(true);
+      for (const shared of g.sharedWithEmployeeIds) {
+        expect(byId.has(shared)).toBe(true);
+      }
+    }
+  });
+
+  it.each([
+    ["small", small],
+    ["demo", demo],
+  ])("%s goal status, progress and completion date agree", (_, c) => {
+    expect(new Set(c.goals.map((g) => g.status))).toEqual(
+      new Set(["in_progress", "completed", "closed"]),
+    );
+    for (const g of c.goals) {
+      expect(g.percentComplete >= 0 && g.percentComplete <= 100).toBe(true);
+      if (g.status === "completed") {
+        expect(g.percentComplete).toBe(100);
+        expect(g.completionDate).not.toBeNull();
+      } else {
+        expect(g.completionDate).toBeNull();
+      }
+      if (g.status === "in_progress") expect(g.percentComplete).toBeLessThan(100);
+    }
+  });
+
+  it.each([
+    ["small", small],
+    ["demo", demo],
+  ])("%s milestone goals derive progress from their milestones", (_, c) => {
+    const withMilestones = c.goals.filter((g) => g.milestones !== null);
+    expect(withMilestones.length).toBeGreaterThan(0);
+    expect(c.goals.some((g) => g.milestones === null)).toBe(true);
+    const milestoneIds = withMilestones.flatMap((g) => g.milestones!.map((m) => m.id));
+    expect(new Set(milestoneIds).size).toBe(milestoneIds.length);
+    for (const g of withMilestones) {
+      const done = g.milestones!.filter((m) => m.completedDateTime !== null).length;
+      expect(g.percentComplete).toBe(Math.round((100 * done) / g.milestones!.length));
+      for (const m of g.milestones!) {
+        expect(m.employeeGoalId).toBe(Number(g.id));
+        expect(m.currentValue === m.endValue).toBe(m.completedDateTime !== null);
+      }
+    }
+  });
+
+  it.each([
+    ["small", small],
+    ["demo", demo],
+  ])("%s has goals due in every cycle year and employees without goals", (_, c) => {
+    for (const year of [2023, 2024, 2025]) {
+      expect(c.goals.some((g) => g.dueDate.startsWith(String(year)))).toBe(true);
+    }
+    const owners = new Set(c.goals.map((g) => g.employeeId));
+    expect(c.employees.some((e) => e.status === "Active" && !owners.has(e.id))).toBe(true);
+    expect(c.goals.some((g) => g.commentCount > 0)).toBe(true);
   });
 });
 

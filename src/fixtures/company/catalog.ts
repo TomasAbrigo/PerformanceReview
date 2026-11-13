@@ -309,8 +309,11 @@ export const TERMINATION_COMMENTS = [
   "Nueva oportunidad en otra empresa",
 ] as const;
 
-export const TERMINATION_TYPES = [
+export const TERMINATION_TYPES: ReadonlyArray<{
+  id: string;
+  reasons: ReadonlyArray<{ id: string; label: string }>;
+}> = [
   { id: "1", reasons: [{ id: "11", label: "Mejor oferta laboral" }] },
   { id: "2", reasons: [{ id: "21", label: "Reestructuración" }] },
   { id: "3", reasons: [{ id: "31", label: "Motivos personales" }] },
-] as const;
+];
