@@ -23,6 +23,7 @@ In-house performance review tool replacing BambooHR's performance module. Data i
 | `pnpm build` / `pnpm start`        | Production build / serve                                                                            |
 | `pnpm typecheck`                   | `next typegen` + `tsc --noEmit`                                                                     |
 | `pnpm lint` / `pnpm format`        | ESLint / Prettier (`format:check` for CI)                                                           |
+| `pnpm check`                       | typecheck + lint + format:check + test:unit (same as the CI `checks` job)                           |
 | `pnpm test`                        | All Vitest projects (unit + db)                                                                     |
 | `pnpm test:unit`                   | jsdom unit/component tests (`src/**/*.test.{ts,tsx}`)                                               |
 | `pnpm test:db`                     | Node tests against `DATABASE_URL` (`src/**/*.db.test.ts`); applies pending Drizzle migrations first |
@@ -58,4 +59,5 @@ The owner asked that everything lives on GitHub (`TomasAbrigo/PerformanceReview`
 - One branch per issue, named `tomas/issue-<n>-<short-desc>`, based on `main`.
 - Commit with conventional messages referencing the issue, push the branch (`git push -u origin <branch>`) and open a PR against `main` with `gh pr create` whose body contains `Closes #<n>` (or `Part of #<n>` for partial slices).
 - The orchestrator merges PRs; do not merge your own PR, do not push to `main` directly, never force-push.
+- CI (`.github/workflows/ci.yml`) runs on every PR and push to `main`: `checks` (typecheck, lint, format:check, unit), `db-tests` (postgres:17 service, `pnpm test:db`, `pnpm build`) and `e2e` (Playwright). Run `pnpm check` before pushing; PRs should be green before the orchestrator merges.
 - Jira is not used for this repo for now.
