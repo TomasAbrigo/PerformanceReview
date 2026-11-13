@@ -1,15 +1,6 @@
-import { execFileSync } from "node:child_process";
 import { expect, test } from "@playwright/test";
 
 test.describe.configure({ mode: "serial" });
-
-// Seeds the DB from the hand-made Bamboo fixtures (3 employees). Idempotent,
-// so re-running against an already-seeded DB yields the same people.
-test.beforeAll(() => {
-  execFileSync("pnpm", ["ingest:employees", "--source", "fixture"], {
-    stdio: "inherit",
-  });
-});
 
 test("people list shows every ingested person and searches", async ({
   page,

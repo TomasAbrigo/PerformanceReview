@@ -4,6 +4,7 @@ import page2 from "./__fixtures__/employees-page-2.json";
 import employee101 from "./__fixtures__/employee-101.json";
 import employee103 from "./__fixtures__/employee-103.json";
 import changed from "./__fixtures__/employees-changed.json";
+import jobInfo from "./__fixtures__/tables-jobInfo.json";
 import { createLimiter } from "./http";
 import { BambooError, createBambooClient } from "./index";
 
@@ -251,6 +252,53 @@ describe("createBambooClient", () => {
     for await (const e of client.listEmployeesRaw({ fields: [] })) raw.push(e);
 
     expect(raw).toEqual([...page1.data, ...page2.data]);
+  });
+});
+
+describe("employee tables", () => {
+  it("getEmployeeTable fetches all rows of a table with ids as strings", async () => {
+    const { fetch, calls } = fakeFetch(() => json(jobInfo));
+    const client = createBambooClient({ ...config, fetch });
+
+    const rows = await client.getEmployeeTable("all", "jobInfo");
+
+    expect(calls[0].url.pathname).toBe("/api/v1/employees/all/tables/jobInfo");
+    expect(rows).toHaveLength(6);
+    expect(rows[0]).toMatchObject({
+      id: "1",
+      employeeId: "101",
+      reportsTo: null,
+      jobTitle: "CEO",
+    });
+  });
+
+  it("getChangedEmployeeTables returns rows of changed employees", async () => {
+    const { fetch, calls } = fakeFetch(() =>
+      json({
+        latest: "2026-11-12T10:00:00+00:00",
+        employees: {
+          "102": {
+            lastChanged: "2026-11-12T09:30:00+00:00",
+            rows: [{ id: 5, employeeId: 102, date: "2023-01-01" }],
+          },
+        },
+      }),
+    );
+    const client = createBambooClient({ ...config, fetch });
+
+    const result = await client.getChangedEmployeeTables(
+      "jobInfo",
+      "2026-11-10T00:00:00Z",
+    );
+
+    expect(calls[0].url.pathname).toBe(
+      "/api/v1/employees/changed/tables/jobInfo",
+    );
+    expect(calls[0].url.searchParams.get("since")).toBe("2026-11-10T00:00:00Z");
+    expect(result.employees["102"].rows[0]).toMatchObject({
+      id: "5",
+      employeeId: "102",
+    });
   });
 });
 

@@ -2,8 +2,9 @@ import type { DbOrTx } from "@/db/client";
 import { createBambooClient, type BambooClient } from "@/modules/bamboo-client";
 import { BambooApiAdapter } from "./bamboo-api-adapter";
 import { FixtureAdapter } from "./fixture-adapter";
+import { entityHandlers } from "./handlers";
 import { runIngest, type RunIngestResult } from "./run-ingest";
-import type { SourceAdapter } from "./types";
+import type { Entity, SourceAdapter } from "./types";
 
 /** Where the saved Bamboo API responses used by the `fixture` source live. */
 export const DEFAULT_FIXTURES_DIR = "src/modules/bamboo-client/__fixtures__";
@@ -48,22 +49,30 @@ export function bambooClientFromEnv(
   return createBambooClient({ companyDomain, apiKey });
 }
 
+const adapters: EntityEntry["adapters"] = {
+  fixture: ({ dir }) => new FixtureAdapter(dir),
+  bamboo: ({ bambooClient }) => new BambooApiAdapter(bambooClient()),
+};
+
+/** The entities that `runIngest` knows (an entry in `entityHandlers`). */
+const viaRunIngest = (entity: Entity): EntityEntry => ({
+  adapters,
+  run: ({ adapter, db, params, since }) =>
+    runIngest({ adapter, entity, db, params, extract: { since } }),
+});
+
 /**
- * Every entity `pnpm ingest` can run, by name. `--all` runs them in insertion
- * order, so register an entity after the ones it depends on. To add an entity
- * (job_history, goal, ...) add one entry here; the CLI, the run log and
- * `sync_state` pick it up without further changes.
+ * Every entity `pnpm ingest` can run, by name: one per handler in
+ * `entityHandlers` (handlers.ts), in that order, which is also the `--all`
+ * order (employee before job_history, which resolves people through it). To
+ * add an entity that `runIngest` can stage (goals, ...) add its handler there
+ * and nothing else: the CLI, the run log and `sync_state` pick it up. One that
+ * needs its own pipeline can be registered here with a custom `run`; it must
+ * record an `ingest_run` and call `advanceSyncState` when it succeeds.
  */
-export const REGISTRY = new Map<string, EntityEntry>([
-  [
-    "employee",
-    {
-      adapters: {
-        fixture: ({ dir }) => new FixtureAdapter(dir),
-        bamboo: ({ bambooClient }) => new BambooApiAdapter(bambooClient()),
-      },
-      run: ({ adapter, db, params, since }) =>
-        runIngest({ adapter, entity: "employee", db, params, since }),
-    },
-  ],
-]);
+export const REGISTRY = new Map<string, EntityEntry>(
+  (Object.keys(entityHandlers) as Entity[]).map((entity) => [
+    entity,
+    viaRunIngest(entity),
+  ]),
+);

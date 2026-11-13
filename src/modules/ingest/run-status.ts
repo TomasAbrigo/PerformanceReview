@@ -1,7 +1,9 @@
-/** Lifecycle of an `ingest_run` (stored as text in `ingest_run.status`). */
-export const RUN_STATUSES = ["running", "succeeded", "error"] as const;
+import { ingestRunStatus, type IngestRunStatus } from "@/db/schema/ingest";
 
-export type RunStatus = (typeof RUN_STATUSES)[number];
+/** Lifecycle of an `ingest_run`: the `ingest_run_status` enum of the schema. */
+export const RUN_STATUSES = ingestRunStatus.enumValues;
+
+export type RunStatus = IngestRunStatus;
 
 export const isRunStatus = (value: unknown): value is RunStatus =>
   (RUN_STATUSES as readonly unknown[]).includes(value);

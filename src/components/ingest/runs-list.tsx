@@ -8,6 +8,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { INGEST_COUNT_KEYS } from "@/db/schema/ingest";
 import { Link } from "@/i18n/navigation";
 import { RUN_STATUSES } from "@/modules/ingest/run-status";
 import type {
@@ -16,15 +17,6 @@ import type {
 } from "@/modules/ingest/runs-queries";
 import { RunStatusBadge } from "./run-status-badge";
 import { useRunFormat } from "./use-run-format";
-
-export const COUNT_KEYS = [
-  "read",
-  "inserted",
-  "updated",
-  "unchanged",
-  "deleted",
-  "rejected",
-] as const;
 
 function FilterSelect({
   name,
@@ -134,7 +126,7 @@ export function RunsList({
               <TableHead>{t("columns.adapter")}</TableHead>
               <TableHead>{t("columns.entity")}</TableHead>
               <TableHead>{t("columns.status")}</TableHead>
-              {COUNT_KEYS.map((k) => (
+              {INGEST_COUNT_KEYS.map((k) => (
                 <TableHead key={k} className="text-right">
                   {t(`columns.${k}`)}
                 </TableHead>
@@ -160,11 +152,11 @@ export function RunsList({
                 </TableCell>
                 <TableCell>{run.sourceSystem ?? "—"}</TableCell>
                 <TableCell>{run.adapter ?? "—"}</TableCell>
-                <TableCell>{run.entity ?? "—"}</TableCell>
+                <TableCell>{run.entity}</TableCell>
                 <TableCell>
                   <RunStatusBadge status={run.status} />
                 </TableCell>
-                {COUNT_KEYS.map((k) => (
+                {INGEST_COUNT_KEYS.map((k) => (
                   <TableCell key={k} className="text-right tabular-nums">
                     {run.counts[k] ?? "—"}
                   </TableCell>

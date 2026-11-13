@@ -8,10 +8,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { INGEST_COUNT_KEYS } from "@/db/schema/ingest";
 import { Link } from "@/i18n/navigation";
 import type { RunDetail } from "@/modules/ingest/runs-queries";
 import { RunStatusBadge } from "./run-status-badge";
-import { COUNT_KEYS } from "./runs-list";
 import { useRunFormat } from "./use-run-format";
 
 export function RunDetailView({ run }: { run: RunDetail }) {
@@ -28,7 +28,7 @@ export function RunDetailView({ run }: { run: RunDetail }) {
     },
     { label: t("columns.source"), value: run.sourceSystem ?? "—" },
     { label: t("columns.adapter"), value: run.adapter ?? "—" },
-    { label: t("columns.entity"), value: run.entity ?? "—" },
+    { label: t("columns.entity"), value: run.entity },
     { label: t("columns.started"), value: dateTime(run.startedAt) },
     { label: t("detail.finished"), value: dateTime(run.finishedAt) },
     {
@@ -73,7 +73,7 @@ export function RunDetailView({ run }: { run: RunDetail }) {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {COUNT_KEYS.map((k) => (
+            {INGEST_COUNT_KEYS.map((k) => (
               <TableRow key={k}>
                 <TableHead scope="row" className="font-normal">
                   {t(`columns.${k}`)}

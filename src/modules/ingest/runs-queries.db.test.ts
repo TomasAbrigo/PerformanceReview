@@ -4,7 +4,7 @@ import path from "node:path";
 import { sql } from "drizzle-orm";
 import { afterAll, beforeEach, describe, expect, it } from "vitest";
 import { closeDb, db } from "@/db/client";
-import { ingestRun, rawRecord } from "@/db/schema";
+import { ingestRun, rawRecord, type IngestRunStatus } from "@/db/schema";
 import { FixtureAdapter } from "./fixture-adapter";
 import { runIngest } from "./run-ingest";
 import { getRun, listRunEntities, listRuns } from "./runs-queries";
@@ -21,7 +21,7 @@ type NewRun = {
   sourceSystem?: string;
   adapter?: string;
   entity?: string;
-  status?: string;
+  status?: IngestRunStatus;
   /** ISO instant, may carry microseconds. */
   startedAt: string;
   counts?: Record<string, number>;
@@ -35,6 +35,7 @@ async function insertRun(r: NewRun): Promise<string> {
     .values({
       sourceSystem: r.sourceSystem ?? "bamboo_api",
       adapter: r.adapter ?? "fixture",
+      entity: r.entity ?? "employee",
       params: { entity: r.entity ?? "employee" },
       status: r.status ?? "succeeded",
       startedAt: sql`${r.startedAt}::timestamptz`,
@@ -124,6 +125,15 @@ describe("listRuns", () => {
       await ids({ source: "bamboo_api", entity: "employee", status: "error" }),
     ).toEqual([failed]);
     expect(await ids({ source: "native" })).toEqual([]);
+  });
+
+  it("a status that does not exist matches nothing instead of failing", async () => {
+    await insertRun({ startedAt: "2026-11-01T10:00:00Z" });
+
+    expect(await listRuns(db, { status: "failed" })).toEqual({
+      runs: [],
+      nextCursor: null,
+    });
   });
 
   it("pages are stable: no gaps or repeats, even with identical start times", async () => {

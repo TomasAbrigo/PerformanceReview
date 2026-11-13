@@ -106,13 +106,13 @@ pnpm ingest --all --source bamboo        # todas las entidades registradas, en o
 pnpm ingest --help
 ```
 
-- **Entidades:** las del registro `src/modules/ingest/registry.ts` (hoy `employee`). Para sumar una (job_history, goal, ...) se agrega una entrada `{ adapters: { fixture, bamboo }, run }` al `Map`; el CLI, el log de corridas y `sync_state` la toman sin más cambios. Con `--all` se ejecutan en el orden del registro y una falla no frena a las siguientes.
+- **Entidades:** las del registro `src/modules/ingest/registry.ts` (hoy `employee` y `job_history`), una por cada handler de `entityHandlers` (`src/modules/ingest/handlers.ts`). Para sumar una que `runIngest` ya sabe procesar basta con agregar su handler: el CLI, el log de corridas y `sync_state` la toman sin más cambios. Una con pipeline propio se registra con un `run` a medida (`{ adapters: { fixture, bamboo }, run }`) que debe dejar un `ingest_run` y llamar a `advanceSyncState` al terminar bien. Con `--all` se ejecutan en el orden de los handlers (`employee` antes que `job_history`, que resuelve personas a través de él) y una falla no frena a las siguientes.
 - **`--source fixture`** lee respuestas de Bamboo guardadas en `--dir` (por defecto `src/modules/bamboo-client/__fixtures__`). **`--source bamboo`** llama a la API y necesita `BAMBOO_COMPANY_DOMAIN` y `BAMBOO_API_KEY` (en `.env.local` o en el entorno).
-- **`--since`** acota la extracción a lo cambiado desde ese instante (ISO 8601); `last` usa el watermark guardado para esa fuente y entidad (si no hay, la corrida es completa). Una corrida con `--since` es incremental y nunca da de baja lo que no devolvió. Hoy el adaptador de Bamboo igual lee la lista completa (la reingesta es idempotente); el feed de cambios lo aprovechará sin cambiar el CLI.
-- **Watermark:** `sync_state` guarda, por (fuente, entidad), el inicio de la última corrida exitosa. Solo avanza en la misma transacción que marca la corrida como `succeeded`; una corrida que falla queda en `error` (con `finished_at` y el mensaje) y deja el watermark anterior intacto.
-- **Salida:** una tabla resumen (leídos, insertados, actualizados, sin cambios, eliminados, rechazados, duración e id de corrida). Código de salida `0` si todo salió bien, `1` si alguna corrida falló y `2` si los argumentos son inválidos.
-- Dos corridas de la misma entidad nunca se pisan: la segunda espera a la primera (lock de Postgres por entidad).
-- `pnpm ingest:employees` queda como alias de `pnpm ingest employee` (con `--source fixture` por defecto).
+- **`--since`** acota la extracción a lo cambiado desde ese instante, en ISO 8601 estricto (`2026-11-01`, o con hora y zona: `2026-11-01T10:00:00Z`, `2026-11-01T10:00:00-03:00`; `5` o `2026-02-30` se rechazan con código 2); `last` usa el watermark guardado para esa fuente, adaptador y entidad (si no hay, la corrida es completa). Una corrida con `--since` es incremental y nunca da de baja lo que no devolvió. El adaptador de Bamboo lo aprovecha en `job_history` (solo empleados con cambios); en `employee` lee la lista completa (la reingesta es idempotente).
+- **Watermark:** `sync_state` guarda, por (fuente, adaptador, entidad), el inicio de la última corrida exitosa; los fixtures (adaptador `fixture`) no mueven el watermark de la API real (`bamboo`). Solo avanza en la misma transacción que marca la corrida como `succeeded`; una corrida que falla queda en `error` (con `finished_at` y el mensaje) y deja el watermark anterior intacto.
+- **Salida:** una tabla resumen (leídos, insertados, actualizados, sin cambios, eliminados, rechazados, duración e id de corrida). Código de salida `0` si todo salió bien, `1` si alguna corrida falló y `2` si los argumentos o la configuración son inválidos (falta `BAMBOO_*` o `DATABASE_URL`, `--since` mal formado): en ese caso no se intenta ninguna corrida.
+- Dos corridas de la misma entidad nunca se pisan: la segunda espera a la primera (`pg_advisory_xact_lock` por entidad, tomado en una transacción que queda abierta durante la corrida, así que sirve también detrás de un pooler en modo transacción; si el servidor define `idle_in_transaction_session_timeout`, debe superar la corrida más larga).
+- `pnpm ingest:employees [--entity employee|job_history] [--since <iso>]` queda como alias de `pnpm ingest <entidad>` (con `--source fixture` por defecto).
 
 Ejemplo de cron (crontab del servidor; cada 15 minutos incremental y una completa por la noche, que es la que da de baja a quien ya no está en Bamboo):
 
@@ -122,6 +122,96 @@ Ejemplo de cron (crontab del servidor; cada 15 minutos incremental y una complet
 ```
 
 El código de salida distinto de cero permite alertar desde el propio cron (por ejemplo con `MAILTO` o un wrapper que avise a un canal).
+
+## Lake adapter
+
+`src/modules/lake/` lee tablas de un data lake (o de una carpeta de archivos que hace de lake) detrás de una interfaz única, `LakeAdapter` (`listTables`, `describeTable`, `readBatches`, `close`). Hoy hay una implementación, `DuckDbFileLake`; los conectores reales (BigQuery, Snowflake, Databricks, Redshift, Postgres) tendrán que pasar la misma suite de contrato.
+
+### Apuntarlo a una carpeta
+
+```ts
+import { DuckDbFileLake } from "@/modules/lake";
+
+const lake = await DuckDbFileLake.open("/ruta/a/la/carpeta");
+await lake.listTables(); // una tabla por archivo
+
+for await (const { rows, watermark } of lake.readBatches("employee", {
+  keyColumns: ["id"],
+  watermarkColumn: "_fivetran_synced",
+  since: ultimoWatermarkCommiteado, // null/undefined = lectura completa
+  batchSize: 500,
+})) {
+  // guardar rows y, recién después del commit, persistir `watermark`
+}
+await lake.close();
+```
+
+- **Formatos:** `csv`, `parquet`, `json`, `ndjson`/`jsonl` y `xlsx` (primera hoja; se convierte a CSV en una carpeta temporal que `close()` borra y se lee **como texto**, sin inferir tipos: cada celda llega tal como está escrita, con las fechas en ISO 8601 UTC). El nombre de la tabla es el del archivo sin extensión (los nombres salen solo del listado del directorio); dos archivos con el mismo nombre dan error. Solo cuentan los archivos regulares: se ignoran carpetas, archivos ocultos y `~$` de Office.
+- **Snapshot por tabla:** la primera vez que se usa una tabla (`describeTable` o `readBatches`) se carga una sola vez en una tabla temporal en memoria y se pagina desde esa copia; los cambios posteriores del archivo no se ven hasta volver a abrir el lake. La columna `__lake_row_position` está reservada (si un archivo la trae, se rechaza con un error claro).
+- **Paginación estable:** orden por (watermark, claves) con paginado keyset. Cada fila sale exactamente una vez por pasada, aunque haya empates de watermark, claves duplicadas, filas idénticas o NULL (los NULL salen al final).
+- **`since` es at-least-once:** se leen las filas con `watermark >= since` (el consumidor hace upsert, así que releer el borde es inocuo). Las filas con watermark NULL se leen siempre porque no se puede probar que sean viejas. `batch.watermark` es el mayor no nulo del lote. `since` es un instante: acepta offset (`2026-01-10T07:05:00-03:00`), y en columnas sin zona horaria (`TIMESTAMP`, `DATE`) se interpreta y compara en UTC.
+- **Valores JSON-safe:** BIGINT y DECIMAL llegan como string (sin perder dígitos), los timestamps en UTC (`2026-01-10 10:00:00+00`) sin depender de la zona horaria de la máquina, y los faltantes como `null`.
+- **Tipos de CSV:** DuckDB infiere los tipos leyendo todo el archivo (no aplica a `xlsx`, que va como texto). Ojo: columnas con `yes`/`no`/`true`/`false` pasan a booleano y los decimales a `DOUBLE`.
+- **Rendimiento:** el archivo se lee una sola vez, pero cada página es un top-N sobre toda la copia en memoria y toda la tabla vive en memoria; está pensado para archivos de miles o pocos cientos de miles de filas, no para cargas masivas.
+- **Dónde corre:** solo en CLI/worker, nunca dentro de un request handler. `@duckdb/node-api` está pineado en `devDependencies` y en `serverExternalPackages` de `next.config.ts` (si se necesita en producción hay que pasarlo a `dependencies`).
+
+### Perfiles de fuente
+
+Un perfil (`SourceProfile`, esquema zod en `src/modules/lake/profiles.ts`) dice cómo una tabla del lake se convierte en registros canónicos:
+
+| Campo              | Qué es                                                                                                                   |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------ |
+| `name`             | Identificador del perfil (por ejemplo `bamboo-employee-performance`).                                                    |
+| `table`            | Tabla del lake. Para un archivo subido es el nombre del archivo sin extensión.                                           |
+| `keyColumns`       | Columnas que identifican la fila en el origen (una o varias).                                                            |
+| `watermarkColumn`  | Columna de cambio para lecturas incrementales (opcional).                                                                |
+| `softDeleteColumn` | Columna cuyo valor verdadero (o una fecha) marca la fila como borrada en el origen.                                      |
+| `entity`           | `employee`, `job_history`, `goal`, `assessment` o `feedback`.                                                            |
+| `columnMap`        | Columna del origen → nombre canónico del campo.                                                                          |
+| `columnTypes`      | Opcional: familia de tipo esperada por columna (`string`, `number`, `boolean`, `date`, `timestamp`) para detectar drift. |
+
+```ts
+import {
+  applyProfile,
+  getBuiltinProfile,
+  readOptionsFor,
+  validateAgainstSchema,
+} from "@/modules/lake";
+
+const profile = getBuiltinProfile("fivetran-bamboohr-employee")!;
+
+// 1. Antes de ingestar: ¿el archivo/tabla tiene lo que el perfil necesita?
+const issues = validateAgainstSchema(
+  profile,
+  await lake.describeTable(profile.table),
+);
+// [] si está todo; si no, { kind: "missing_column" | "type_mismatch", column, message, ... }
+
+// 2. Leer y convertir
+for await (const { rows } of lake.readBatches(
+  profile.table,
+  readOptionsFor(profile, { since }),
+)) {
+  const records = rows.map((row) => applyProfile(profile, row));
+  // { entity, sourceId, fields, extra, deleted, watermark }
+}
+```
+
+- `validateAgainstSchema` informa columnas **faltantes** (con el rol: clave, watermark, soft-delete o mapeada, y una sugerencia si solo cambia mayúsculas o espacios) y **tipos incompatibles** (el watermark debe ser fecha, timestamp o número; `columnTypes` fija las demás). Una columna nueva que el perfil no menciona no es un problema. Los mensajes son para logs; la UI debe mapear `kind` a claves i18n.
+- `applyProfile` arma `sourceId` con el valor de la clave (si hay varias, un arreglo JSON, que no es ambiguo), pone en `fields` las columnas mapeadas con su nombre canónico y deja el resto intacto en `extra` (así las preguntas custom de los reportes de Bamboo no se pierden). Falla con un mensaje claro si una clave viene vacía.
+- **Perfiles incluidos** (`builtinProfiles`): `fivetran-bamboohr-employee`, `-goal`, `-employee-goal`, `-milestone` (watermark `_fivetran_synced`, soft-delete `_fivetran_deleted`), `airbyte-bamboohr-employees` (watermark `_airbyte_extracted_at`) y los reportes estándar de Bamboo: `bamboo-employee-performance`, `bamboo-feedback-status`, `bamboo-goal-status`, `bamboo-assessment-progress`. Los reportes de Bamboo no traen ids (ver `docs/research/02`) e identifican a las personas solo por nombre, así que se identifican por columnas naturales y son snapshots completos, sin watermark. Sus columnas son las de `fixtures/bamboo-reports/<tamaño>/` (el generador de #2; siguen sin estar verificadas contra un export real de Bamboo):
+  - `bamboo-employee-performance`: clave `Employee Name` + `Review Cycle` + `Assessment Date` (la fecha separa a dos personas con el mismo nombre en un ciclo). Las columnas de preguntas (`Employee Q1: ...`, `Manager Custom Q2: ...`) no se mapean: su encabezado incluye el texto de la pregunta y el nombre de la empresa, y las preguntas custom cambian por cuenta, así que quedan en `extra` con el encabezado exacto.
+  - `bamboo-feedback-status`: clave `Employee Name` + `Receiving Feedback From` + `Review Cycle`.
+  - `bamboo-goal-status`: clave `Employee Name` + `Goal` + `Due Date`. Quien no tiene metas aparece en una sola fila con estado `No Goals Set` y `Goal`/`Due Date` vacíos; esa fila no tiene clave, así que `applyProfile` falla y el consumidor tiene que descartar las filas con `Goal` vacío antes de aplicar el perfil.
+  - `bamboo-assessment-progress`: clave `Employee Name` + `Review Cycle` + `Department` (`Manager` puede venir vacío, así que no sirve como clave).
+  - `Manager` y `Department` son los vigentes al momento del export, no los del ciclo: por eso solo entran en una clave donde no hay otra forma de separar homónimos.
+- Para otra fuente, crear un perfil propio con el mismo esquema (o copiar uno incluido y ajustar `columnMap`).
+
+### Tests y fixtures
+
+- `runLakeAdapterContractTests(name, openAdapter)` (`src/modules/lake/contract.ts`) es la suite de contrato: `openAdapter(scenario)` debe devolver el adaptador abierto sobre la carpeta de `src/modules/lake/__fixtures__/<scenario>/` (o su equivalente en el lake real). Escenarios: `initial`, `delta-1` (update, insert y soft-delete), `schema-drift` (columna nueva y cambio de tipo) y `messy` (NULL, claves duplicadas, empates y watermark NULL, BIGINT mayor a 2^53). Los fixtures son CSV sintéticos escritos a mano; además hay `airbyte/` y `bamboo-reports/` para los perfiles (este último usa los encabezados reales de `fixtures/bamboo-reports/`, y `profiles.test.ts` valida cada perfil de Bamboo contra los CSV de `fixtures/bamboo-reports/small/`).
+- `duckdb-file-lake.test.ts` corre la suite sobre CSV y `parquet.test.ts` sobre la variante Parquet, generada al vuelo con DuckDB `COPY`. Para obtener los archivos Parquet: `pnpm fixtures:parquet [carpetaDeSalida]` (por defecto `build/lake-parquet/<escenario>/`, ignorado por git).
+- No pongas exports reales en los fixtures (contienen datos personales).
 
 ## Puertos (Supabase local)
 

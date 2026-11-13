@@ -81,11 +81,21 @@ describe("scripts/ingest.ts", () => {
     expect(state).toMatchObject({ entity: "employee", lastRunId: run.id });
   });
 
-  it("--all runs every registered entity", async () => {
+  it("--all runs every registered entity, employees first", async () => {
     const { code, stdout } = await ingest(["--all", "--source", "fixture"]);
 
     expect(code).toBe(0);
     expect(stdout).toMatch(/employee\s+fixture\s+succeeded/);
+    expect(stdout).toMatch(/job_history\s+fixture\s+succeeded/);
+    expect(stdout.indexOf("employee")).toBeLessThan(
+      stdout.indexOf("job_history"),
+    );
+    const states = await db.select().from(syncState);
+    expect(states.map((s) => s.entity).sort()).toEqual([
+      "employee",
+      "job_history",
+    ]);
+    expect(states.every((s) => s.adapter === "fixture")).toBe(true);
   });
 
   it("a second run is idempotent and `--since last` resumes from the watermark", async () => {
@@ -133,14 +143,39 @@ describe("scripts/ingest.ts", () => {
     }
   });
 
-  it("exits 1 when bamboo is not configured", async () => {
+  it("exits 2 when bamboo is not configured and writes no run", async () => {
     const { code, stderr } = await ingest(["employee", "--source", "bamboo"], {
       BAMBOO_COMPANY_DOMAIN: "",
       BAMBOO_API_KEY: "",
     });
 
-    expect(code).toBe(1);
+    expect(code).toBe(2);
     expect(stderr).toContain("BAMBOO_API_KEY");
+    expect(await db.select().from(ingestRun)).toEqual([]);
+  });
+
+  it("exits 2 when DATABASE_URL is not set", async () => {
+    // (an empty value is not overridden by .env.local)
+    const { code, stderr } = await ingest(["employee", "--source", "fixture"], {
+      DATABASE_URL: "",
+    });
+
+    expect(code).toBe(2);
+    expect(stderr).toContain("DATABASE_URL");
+  });
+
+  it("rejects a --since that is not an ISO date or `last`", async () => {
+    const { code, stderr } = await ingest([
+      "employee",
+      "--source",
+      "fixture",
+      "--since",
+      "5",
+    ]);
+
+    expect(code).toBe(2);
+    expect(stderr).toContain("--since");
+    expect(await db.select().from(ingestRun)).toEqual([]);
   });
 
   it("exits 2 on an unknown entity and writes no run", async () => {
@@ -172,5 +207,39 @@ describe("scripts/ingest.ts", () => {
       .from(ingestRun)
       .where(eq(ingestRun.status, "succeeded"));
     expect(run.params).toMatchObject({ entity: "employee", source: "fixture" });
+  });
+
+  it("the alias keeps --entity and --since", async () => {
+    await ingest(["employee", "--source", "fixture"]);
+
+    const out = await new Promise<Result>((resolve) => {
+      execFile(
+        "pnpm",
+        [
+          "exec",
+          "tsx",
+          "scripts/ingest-employees.ts",
+          "--entity",
+          "job_history",
+          "--since",
+          "2026-01-01T00:00:00Z",
+        ],
+        { env: process.env },
+        (error, stdout, stderr) =>
+          resolve({
+            code: error ? ((error as { code?: number }).code ?? 1) : 0,
+            stdout,
+            stderr,
+          }),
+      );
+    });
+
+    expect(out.code).toBe(0);
+    const run = await lastRun();
+    expect(run).toMatchObject({ status: "succeeded", entity: "job_history" });
+    expect(run.params).toMatchObject({
+      entity: "job_history",
+      since: "2026-01-01T00:00:00.000Z",
+    });
   });
 });

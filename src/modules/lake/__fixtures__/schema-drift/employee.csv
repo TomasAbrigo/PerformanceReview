@@ -1,0 +1,4 @@
+id,employee_number,first_name,last_name,work_email,department,job_title,hire_date,last_changed,_fivetran_synced,_fivetran_deleted,pronouns
+101,E-1001,Ana,Lopez,ana.lopez@example.test,Engineering,Engineer,2020-03-02,2026-01-05T09:00:00Z,2026-01-10T10:00:00Z,false,she/her
+102,E-1002,Beto,Perez,beto.perez@example.test,Engineering,Senior Engineer,2019-07-15,2026-01-06T09:00:00Z,2026-01-10T10:00:00Z,false,he/him
+103,E-1003,Carla,Gomez,carla.gomez@example.test,People,People Partner,2021-01-11,2026-01-07T09:00:00Z,2026-01-10T10:00:00Z,false,

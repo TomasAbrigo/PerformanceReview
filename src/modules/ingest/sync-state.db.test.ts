@@ -72,8 +72,21 @@ const run = (id: string) =>
     .where(eq(ingestRun.id, id))
     .then(([r]) => r);
 
-const state = () =>
-  getSyncState(db, { sourceSystem: "bamboo_api", entity: "employee" });
+const state = (adapter = "fixture") =>
+  getSyncState(db, { sourceSystem: "bamboo_api", adapter, entity: "employee" });
+
+/** Same data, reported under another adapter name (e.g. the live "bamboo"). */
+class RenamedAdapter implements SourceAdapter {
+  readonly source = "bamboo_api" as const;
+  readonly entities = ["employee"] as const;
+  private readonly inner = new FixtureAdapter(dir);
+
+  constructor(readonly name: string) {}
+
+  extract(ctx: ExtractContext, entity: Entity) {
+    return this.inner.extract(ctx, entity);
+  }
+}
 
 describe("sync_state and run outcome", () => {
   beforeEach(async () => {
@@ -109,7 +122,7 @@ describe("sync_state and run outcome", () => {
     expect(after?.watermark).toBe(finished.startedAt?.toISOString());
   });
 
-  it("keeps a single row per source and entity across runs", async () => {
+  it("keeps a single row per source, adapter and entity across runs", async () => {
     await runIngest({
       adapter: new FixtureAdapter(dir),
       entity: "employee",
@@ -196,7 +209,7 @@ describe("sync_state and run outcome", () => {
       adapter,
       entity: "employee",
       db,
-      since: "2026-11-01T00:00:00.000Z",
+      extract: { since: "2026-11-01T00:00:00.000Z" },
     });
 
     expect(adapter.contexts).toEqual([{ since: "2026-11-01T00:00:00.000Z" }]);
@@ -204,6 +217,28 @@ describe("sync_state and run outcome", () => {
       entity: "employee",
       since: "2026-11-01T00:00:00.000Z",
     });
+  });
+
+  it("a fixture run never moves the live Bamboo watermark", async () => {
+    // The fixtures also report source "bamboo_api": they must not make the
+    // next `--since last` against the real API skip everything.
+    const live = await runIngest({
+      adapter: new RenamedAdapter("bamboo"),
+      entity: "employee",
+      db,
+    });
+    const liveBefore = await state("bamboo");
+    expect(liveBefore?.lastRunId).toBe(live.runId);
+
+    const fixture = await runIngest({
+      adapter: new FixtureAdapter(dir),
+      entity: "employee",
+      db,
+    });
+
+    expect(await state("bamboo")).toEqual(liveBefore);
+    expect((await state("fixture"))?.lastRunId).toBe(fixture.runId);
+    expect(await db.select().from(syncState)).toHaveLength(2);
   });
 
   it("never soft-deletes on an incremental run (a partial extraction)", async () => {
@@ -218,7 +253,7 @@ describe("sync_state and run outcome", () => {
       adapter: new FirstRecordsAdapter(2),
       entity: "employee",
       db,
-      since: "2026-11-01T00:00:00.000Z",
+      extract: { since: "2026-11-01T00:00:00.000Z" },
     });
 
     expect(incremental.counts).toMatchObject({ read: 2, deleted: 0 });
@@ -244,17 +279,21 @@ describe("advanceSyncState", () => {
     await closeDb();
   });
 
-  it("upserts by (source, entity)", async () => {
+  it("upserts by (source, adapter, entity)", async () => {
     await reset();
     const [a] = await db
       .insert(ingestRun)
-      .values({ status: "succeeded" })
+      .values({ entity: "goal", status: "succeeded" })
       .returning({ id: ingestRun.id });
     const [b] = await db
       .insert(ingestRun)
-      .values({ status: "succeeded" })
+      .values({ entity: "goal", status: "succeeded" })
       .returning({ id: ingestRun.id });
-    const key = { sourceSystem: "bamboo_api", entity: "goal" } as const;
+    const key = {
+      sourceSystem: "bamboo_api",
+      adapter: "bamboo",
+      entity: "goal",
+    } as const;
 
     await advanceSyncState(db, { ...key, watermark: "w1", runId: a.id });
     await advanceSyncState(db, {
@@ -270,5 +309,15 @@ describe("advanceSyncState", () => {
       lastRunId: b.id,
     });
     expect(await db.select().from(syncState)).toHaveLength(1);
+
+    // Another adapter of the same source keeps its own watermark.
+    await advanceSyncState(db, {
+      ...key,
+      adapter: "fixture",
+      watermark: "w3",
+      runId: a.id,
+    });
+    expect(await getSyncState(db, key)).toMatchObject({ watermark: "w2" });
+    expect(await db.select().from(syncState)).toHaveLength(2);
   });
 });

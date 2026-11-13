@@ -2,12 +2,17 @@ import { and, eq } from "drizzle-orm";
 import type { DbOrTx } from "@/db/client";
 import { syncState, type SourceSystem, type SyncState } from "@/db/schema";
 
-export type SyncKey = { sourceSystem: SourceSystem; entity: string };
+export type SyncKey = {
+  sourceSystem: SourceSystem;
+  /** `SourceAdapter.name`: fixtures and the live API keep separate watermarks. */
+  adapter: string;
+  entity: string;
+};
 
-/** The stored watermark/cursor for one entity of one source, if any run has succeeded. */
+/** The stored watermark/cursor for one entity of one adapter, if any run has succeeded. */
 export async function getSyncState(
   db: DbOrTx,
-  { sourceSystem, entity }: SyncKey,
+  { sourceSystem, adapter, entity }: SyncKey,
 ): Promise<SyncState | null> {
   const [row] = await db
     .select()
@@ -15,6 +20,7 @@ export async function getSyncState(
     .where(
       and(
         eq(syncState.sourceSystem, sourceSystem),
+        eq(syncState.adapter, adapter),
         eq(syncState.entity, entity),
       ),
     );
@@ -38,6 +44,7 @@ export async function advanceSyncState(
   db: DbOrTx,
   {
     sourceSystem,
+    adapter,
     entity,
     watermark,
     cursor = null,
@@ -52,9 +59,9 @@ export async function advanceSyncState(
   };
   await db
     .insert(syncState)
-    .values({ sourceSystem, entity, ...values })
+    .values({ sourceSystem, adapter, entity, ...values })
     .onConflictDoUpdate({
-      target: [syncState.sourceSystem, syncState.entity],
+      target: [syncState.sourceSystem, syncState.adapter, syncState.entity],
       set: values,
     });
 }

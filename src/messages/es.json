@@ -197,8 +197,7 @@
       "status": {
         "running": "En curso",
         "succeeded": "Exitosa",
-        "error": "Con error",
-        "unknown": "Desconocido"
+        "error": "Con error"
       },
       "pagination": {
         "label": "Paginación",
@@ -221,6 +220,28 @@
         "noRejects": "Esta corrida no tuvo rechazos ni incidencias.",
         "noSourceId": "Sin ID de origen"
       }
+    }
+  },
+  "Org": {
+    "title": "Organigrama",
+    "nav": "Organigrama",
+    "treeLabel": "Organigrama",
+    "dateLabel": "Fecha",
+    "show": "Ver",
+    "empty": "No hay nadie en la organización en esa fecha.",
+    "expand": "Expandir {name}",
+    "collapse": "Contraer {name}",
+    "history": {
+      "title": "Historial de puesto",
+      "validFrom": "Desde",
+      "validTo": "Hasta",
+      "jobTitle": "Puesto",
+      "area": "Área",
+      "manager": "Manager",
+      "location": "Ubicación",
+      "current": "Actual",
+      "unresolved": "{name} (sin resolver)",
+      "empty": "Sin historial de puesto."
     }
   }
 }

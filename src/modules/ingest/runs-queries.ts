@@ -6,12 +6,14 @@ import {
   type IngestCounts,
   type IngestReject,
 } from "@/db/schema";
+import { isRunStatus, type RunStatus } from "./run-status";
 
 export type RunListFilters = {
   /** `ingest_run.source_system`, e.g. "bamboo_api". */
   source?: string;
-  /** Entity name stored in the run params, e.g. "employee". */
+  /** `ingest_run.entity`, e.g. "employee". */
   entity?: string;
+  /** Anything that is not a run status matches no run. */
   status?: string;
 };
 
@@ -26,9 +28,9 @@ export type RunListItem = {
   id: string;
   sourceSystem: string | null;
   adapter: string | null;
-  entity: string | null;
-  status: string | null;
-  startedAt: Date | null;
+  entity: string;
+  status: RunStatus;
+  startedAt: Date;
   finishedAt: Date | null;
   counts: Partial<IngestCounts>;
   /** Entries in the reject log (staging failures and identity conflicts). */
@@ -49,16 +51,12 @@ const DEFAULT_LIMIT = 25;
 const MAX_LIMIT = 200;
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
-const entityOf = sql<string | null>`${ingestRun.params}->>'entity'`;
-// A run without a start time sorts as the oldest.
-const startedKey = sql`coalesce(${ingestRun.startedAt}, 'epoch'::timestamptz)`;
-
 /**
- * Keyset cursor over (started_at, id). The instant travels as text with
- * microseconds: a JS Date would truncate to milliseconds and rows within that
- * millisecond could be skipped or repeated.
+ * Keyset cursor over (started_at, id), the order of `ingest_run_started_at_idx`.
+ * The instant travels as text with microseconds: a JS Date would truncate to
+ * milliseconds and rows within that millisecond could be skipped or repeated.
  */
-const cursorInstant = sql<string>`to_char(${startedKey} at time zone 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.US"Z"')`;
+const cursorInstant = sql<string>`to_char(${ingestRun.startedAt} at time zone 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.US"Z"')`;
 
 function encodeCursor(instant: string, id: string): string {
   return Buffer.from(JSON.stringify([instant, id])).toString("base64url");
@@ -98,12 +96,16 @@ export async function listRuns(
     MAX_LIMIT,
   );
   const after = cursor ? decodeCursor(cursor) : null;
+  // status is an enum: comparing it with a made-up value would be a SQL error.
+  if (status !== undefined && !isRunStatus(status)) {
+    return { runs: [], nextCursor: null };
+  }
   const where: (SQL | undefined)[] = [
     source ? eq(ingestRun.sourceSystem, source) : undefined,
-    entity ? eq(entityOf, entity) : undefined,
+    entity ? eq(ingestRun.entity, entity) : undefined,
     status ? eq(ingestRun.status, status) : undefined,
     after
-      ? sql`(${startedKey}, ${ingestRun.id}) < (${after[0]}::timestamptz, ${after[1]}::uuid)`
+      ? sql`(${ingestRun.startedAt}, ${ingestRun.id}) < (${after[0]}::timestamptz, ${after[1]}::uuid)`
       : undefined,
   ];
 
@@ -112,7 +114,7 @@ export async function listRuns(
       id: ingestRun.id,
       sourceSystem: ingestRun.sourceSystem,
       adapter: ingestRun.adapter,
-      entity: entityOf,
+      entity: ingestRun.entity,
       status: ingestRun.status,
       startedAt: ingestRun.startedAt,
       finishedAt: ingestRun.finishedAt,
@@ -124,7 +126,7 @@ export async function listRuns(
     })
     .from(ingestRun)
     .where(and(...where))
-    .orderBy(desc(startedKey), desc(ingestRun.id))
+    .orderBy(desc(ingestRun.startedAt), desc(ingestRun.id))
     .limit(size + 1);
 
   const page = rows.slice(0, size);
@@ -158,7 +160,7 @@ export async function getRun(
       id: ingestRun.id,
       sourceSystem: ingestRun.sourceSystem,
       adapter: ingestRun.adapter,
-      entity: entityOf,
+      entity: ingestRun.entity,
       status: ingestRun.status,
       startedAt: ingestRun.startedAt,
       finishedAt: ingestRun.finishedAt,
@@ -186,9 +188,8 @@ export async function getRun(
 /** Distinct entities that have at least one run (for the list filter). */
 export async function listRunEntities(db: DbOrTx): Promise<string[]> {
   const rows = await db
-    .selectDistinct({ entity: entityOf })
+    .selectDistinct({ entity: ingestRun.entity })
     .from(ingestRun)
-    .where(sql`${entityOf} is not null`)
-    .orderBy(entityOf);
-  return rows.flatMap((r) => (r.entity ? [r.entity] : []));
+    .orderBy(ingestRun.entity);
+  return rows.map((r) => r.entity);
 }

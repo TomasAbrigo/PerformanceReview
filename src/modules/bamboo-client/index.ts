@@ -1,6 +1,10 @@
 import { createHttp, type BambooConfig } from "./http";
 import {
   changedEmployeesSchema,
+  changedTablesSchema,
+  tableRowsSchema,
+  type BambooTableRow,
+  type ChangedTables,
   employeeSchema,
   listEmployeesPageSchema,
   type BambooEmployee,
@@ -10,6 +14,8 @@ import {
 
 export { BambooError, type BambooConfig } from "./http";
 export type {
+  BambooTableRow,
+  ChangedTables,
   BambooEmployee,
   ChangedEmployees,
   RawBambooEmployee,
@@ -31,7 +37,17 @@ export type BambooClient = {
   ): AsyncIterable<RawBambooEmployee>;
   getEmployee(id: string, fields: string[]): Promise<BambooEmployee>;
   getChangedEmployees(since: Date | string): Promise<ChangedEmployees>;
+  /** Rows of an employee table (e.g. jobInfo) for one employee or "all". */
+  getEmployeeTable(id: string, table: string): Promise<BambooTableRow[]>;
+  /** All rows of `table` for employees whose rows changed since `since`. */
+  getChangedEmployeeTables(
+    table: string,
+    since: Date | string,
+  ): Promise<ChangedTables>;
 };
+
+const isoOf = (since: Date | string) =>
+  typeof since === "string" ? since : since.toISOString();
 
 export function createBambooClient(config: BambooConfig): BambooClient {
   const get = createHttp(config);
@@ -75,9 +91,28 @@ export function createBambooClient(config: BambooConfig): BambooClient {
     },
 
     async getChangedEmployees(since) {
-      const iso = typeof since === "string" ? since : since.toISOString();
       return changedEmployeesSchema.parse(
-        await get("/api/v1/employees/changed", { since: iso, type: "all" }),
+        await get("/api/v1/employees/changed", {
+          since: isoOf(since),
+          type: "all",
+        }),
+      );
+    },
+
+    async getEmployeeTable(id, table) {
+      return tableRowsSchema.parse(
+        await get(
+          `/api/v1/employees/${encodeURIComponent(id)}/tables/${encodeURIComponent(table)}`,
+        ),
+      );
+    },
+
+    async getChangedEmployeeTables(table, since) {
+      return changedTablesSchema.parse(
+        await get(
+          `/api/v1/employees/changed/tables/${encodeURIComponent(table)}`,
+          { since: isoOf(since) },
+        ),
       );
     },
   };

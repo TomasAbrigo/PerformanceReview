@@ -1,47 +1,16 @@
-import { execFileSync } from "node:child_process";
-import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
-import { tmpdir } from "node:os";
-import path from "node:path";
 import { expect, test } from "@playwright/test";
 
-test.describe.configure({ mode: "serial" });
+// The runs these specs look at are made once by e2e/global-setup.ts (through
+// the CLI, the only way runs get created): the employee re-run, where
+// everything is unchanged, and a run that failed on a broken fixture file.
+const okRun = process.env.E2E_RUN_OK ?? "";
+const failedRun = process.env.E2E_RUN_FAILED ?? "";
 
-const UUID = /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/;
-
-function ingest(args: string[]) {
-  return execFileSync("pnpm", ["ingest", ...args], { encoding: "utf8" });
-}
-
-function runIdOf(output: string) {
-  const match = UUID.exec(output);
-  if (!match) throw new Error(`No run id in CLI output:\n${output}`);
-  return match[0];
-}
-
-let okRun: string;
-let failedRun: string;
-
-// The CLI is the only way runs get created. The second fixture run is the one
-// we assert on: the first may insert people on a fresh DB, the second is
-// always a pure re-run (everything unchanged).
 test.beforeAll(() => {
-  ingest(["employee", "--source", "fixture"]);
-  okRun = runIdOf(ingest(["employee", "--source", "fixture"]));
-
-  const broken = mkdtempSync(path.join(tmpdir(), "e2e-broken-"));
-  try {
-    writeFileSync(path.join(broken, "employees-page-1.json"), "{not json");
-    try {
-      ingest(["employee", "--source", "fixture", "--dir", broken]);
-      throw new Error("the CLI should have exited non-zero");
-    } catch (error) {
-      const failure = error as { status?: number; stdout?: string };
-      expect(failure.status).toBe(1);
-      failedRun = runIdOf(failure.stdout ?? "");
-    }
-  } finally {
-    rmSync(broken, { recursive: true, force: true });
-  }
+  expect(okRun, "E2E_RUN_OK is set by e2e/global-setup.ts").not.toBe("");
+  expect(failedRun, "E2E_RUN_FAILED is set by e2e/global-setup.ts").not.toBe(
+    "",
+  );
 });
 
 const rowOf = (page: import("@playwright/test").Page, runId: string) =>

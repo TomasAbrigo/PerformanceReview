@@ -1,7 +1,7 @@
 import path from "node:path";
 import { parseArgs } from "node:util";
 import { closeDb, db, type DbOrTx } from "@/db/client";
-import type { IngestCounts } from "@/db/schema";
+import { INGEST_COUNT_KEYS, type IngestCounts } from "@/db/schema";
 import { withAdvisoryLock } from "./lock";
 import {
   bambooClientFromEnv,
@@ -10,6 +10,7 @@ import {
   type EntityEntry,
 } from "./registry";
 import { IngestRunError } from "./run-ingest";
+import type { SourceAdapter } from "./types";
 import { getSyncState, type SyncKey } from "./sync-state";
 
 export { DEFAULT_FIXTURES_DIR };
@@ -47,12 +48,40 @@ export function usage(registry: Registry): string {
     "  --source  fixture reads saved Bamboo responses (--dir, default " +
       `${DEFAULT_FIXTURES_DIR});`,
     "            bamboo calls the API (BAMBOO_COMPANY_DOMAIN and BAMBOO_API_KEY)",
-    "  --since   only what changed since that instant; `last` uses the stored",
-    "            watermark. Without it the extraction is full.",
+    "  --since   only what changed since that instant (ISO 8601: 2026-11-01 or",
+    "            2026-11-01T10:00:00Z, with an offset when a time is given);",
+    "            `last` uses the stored watermark. Without it the extraction is full.",
     "  --all     every entity, in registry order; keeps going after a failure",
     "",
-    "Exit code: 0 all runs succeeded, 1 a run failed, 2 bad arguments.",
+    "Exit code: 0 all runs succeeded, 1 a run failed, 2 bad arguments or",
+    "configuration (missing BAMBOO_* / DATABASE_URL).",
   ].join("\n");
+}
+
+const ISO_INSTANT =
+  /^(\d{4})-(\d{2})-(\d{2})(?:T(\d{2}):(\d{2})(?::(\d{2})(?:\.\d{1,9})?)?(Z|[+-]\d{2}:\d{2}))?$/;
+
+/**
+ * Strict ISO 8601: a date (UTC midnight) or an instant with an explicit
+ * offset. `new Date(value)` alone would take "5" or "2026-02-30" and make a
+ * different watermark than the one meant. Returns the UTC instant, or null.
+ */
+export function parseIsoInstant(value: string): string | null {
+  const m = ISO_INSTANT.exec(value);
+  if (!m) return null;
+  const [year, month, day] = [Number(m[1]), Number(m[2]), Number(m[3])];
+  const daysInMonth = new Date(Date.UTC(year, month, 0)).getUTCDate();
+  if (month < 1 || month > 12 || day < 1 || day > daysInMonth) return null;
+  if (m[4] !== undefined) {
+    if (Number(m[4]) > 23 || Number(m[5]) > 59) return null;
+    if (m[6] !== undefined && Number(m[6]) > 59) return null;
+    const offset = m[7].match(/^[+-](\d{2}):(\d{2})$/);
+    if (offset && (Number(offset[1]) > 23 || Number(offset[2]) > 59)) {
+      return null;
+    }
+  }
+  const at = new Date(value);
+  return Number.isNaN(at.getTime()) ? null : at.toISOString();
 }
 
 export function parseIngestArgs(
@@ -108,13 +137,13 @@ export function parseIngestArgs(
   if (values.since === "last") {
     since = "last";
   } else if (values.since !== undefined) {
-    const at = new Date(values.since);
-    if (Number.isNaN(at.getTime())) {
+    const instant = parseIsoInstant(values.since);
+    if (!instant) {
       throw new UsageError(
-        `--since must be an ISO date/time or "last" (got ${values.since})`,
+        `--since must be an ISO 8601 date or instant (2026-11-01, 2026-11-01T10:00:00Z) or "last" (got "${values.since}")`,
       );
     }
-    since = at.toISOString();
+    since = instant;
   }
 
   return { entities, source: source as CliSource, dir: values.dir, since };
@@ -128,6 +157,8 @@ export type IngestCliDeps = {
   stderr?: (line: string) => void;
   /** Runs `fn` exclusively per key. Defaults to no locking. */
   lock?: <T>(key: string, fn: () => Promise<T>) => Promise<T>;
+  /** Variables that must be set for any run; a missing one exits 2 before anything starts. */
+  requireEnv?: readonly string[];
   /** The stored watermark for `--since last`. Defaults to `sync_state`. */
   readWatermark?: (key: SyncKey) => Promise<string | null>;
 };
@@ -142,21 +173,12 @@ type Outcome = {
   error?: string;
 };
 
-const COUNT_COLUMNS = [
-  "read",
-  "inserted",
-  "updated",
-  "unchanged",
-  "deleted",
-  "rejected",
-] as const;
-
 export function formatSummary(outcomes: Outcome[]): string {
   const header = [
     "entity",
     "adapter",
     "status",
-    ...COUNT_COLUMNS,
+    ...INGEST_COUNT_KEYS,
     "duration",
     "run",
   ];
@@ -164,7 +186,7 @@ export function formatSummary(outcomes: Outcome[]): string {
     o.entity,
     o.adapter,
     o.status,
-    ...COUNT_COLUMNS.map((c) => String(o.counts?.[c] ?? "-")),
+    ...INGEST_COUNT_KEYS.map((c) => String(o.counts?.[c] ?? "-")),
     `${(o.durationMs / 1000).toFixed(1)}s`,
     o.runId ?? "-",
   ]);
@@ -216,6 +238,12 @@ export async function runIngestCli(
     return 2;
   }
 
+  const missing = (deps.requireEnv ?? []).filter((name) => !env[name]);
+  if (missing.length > 0) {
+    stderr(`${missing.join(", ")} not set (see .env.example)`);
+    return 2;
+  }
+
   const ctx = {
     dir: path.resolve(args.dir),
     bambooClient: () => bambooClientFromEnv(env),
@@ -225,19 +253,34 @@ export async function runIngestCli(
       ? { source: args.source, dir: args.dir }
       : { source: args.source };
 
+  // Build every adapter before running anything: a missing credential is a
+  // configuration problem (exit 2), not a run that failed.
+  const adapters = new Map<string, SourceAdapter>();
+  try {
+    for (const entity of args.entities) {
+      adapters.set(entity, registry.get(entity)!.adapters[args.source](ctx));
+    }
+  } catch (err) {
+    stderr(err instanceof Error ? err.message : String(err));
+    return 2;
+  }
+
   const outcomes: Outcome[] = [];
   for (const entity of args.entities) {
     const entry = registry.get(entity)!;
+    const adapter = adapters.get(entity)!;
     const started = Date.now();
     try {
-      const adapter = entry.adapters[args.source](ctx);
       const result = await lock(`ingest:${entity}`, async () => {
         // Read after taking the lock: a run ahead of us may have advanced it.
         let since = args.since;
         if (since === "last") {
           since =
-            (await readWatermark({ sourceSystem: adapter.source, entity })) ??
-            undefined;
+            (await readWatermark({
+              sourceSystem: adapter.source,
+              adapter: adapter.name,
+              entity,
+            })) ?? undefined;
         }
         return entry.run({ adapter, db: deps.db, params, since });
       });
@@ -253,7 +296,7 @@ export async function runIngestCli(
       const failed = err instanceof IngestRunError ? err : undefined;
       outcomes.push({
         entity,
-        adapter: args.source,
+        adapter: adapter.name,
         status: "error",
         counts: failed?.counts,
         runId: failed?.runId,
@@ -283,7 +326,8 @@ export async function cliMain(argv: string[]): Promise<void> {
     process.exitCode = await runIngestCli(argv, {
       db,
       env: process.env,
-      lock: withAdvisoryLock,
+      requireEnv: ["DATABASE_URL"],
+      lock: (key, fn) => withAdvisoryLock(db, key, fn),
     });
   } finally {
     await closeDb();

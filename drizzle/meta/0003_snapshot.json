@@ -1,5 +1,5 @@
 {
-  "id": "618af5ba-c9d5-4c2a-a72e-c717ea33dc8e",
+  "id": "8b7911e5-9eff-4c7c-af56-aa29ececfedf",
   "prevId": "087ad922-42b4-476b-8003-56f8cea19f64",
   "version": "7",
   "dialect": "postgresql",
@@ -935,8 +935,8 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.sync_state": {
-      "name": "sync_state",
+    "public.employee_job_history": {
+      "name": "employee_job_history",
       "schema": "",
       "columns": {
         "id": {
@@ -946,52 +946,169 @@
           "notNull": true,
           "default": "gen_random_uuid()"
         },
+        "person_id": {
+          "name": "person_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "employment_id": {
+          "name": "employment_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "valid_from": {
+          "name": "valid_from",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "valid_to": {
+          "name": "valid_to",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "manager_person_id": {
+          "name": "manager_person_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "manager_raw": {
+          "name": "manager_raw",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "department": {
+          "name": "department",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "division": {
+          "name": "division",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "job_title": {
+          "name": "job_title",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "location": {
+          "name": "location",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
         "source_system": {
           "name": "source_system",
           "type": "source_system",
           "typeSchema": "public",
           "primaryKey": false,
-          "notNull": true
+          "notNull": true,
+          "default": "'native'"
         },
-        "entity": {
-          "name": "entity",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "watermark": {
-          "name": "watermark",
+        "source_id": {
+          "name": "source_id",
           "type": "text",
           "primaryKey": false,
           "notNull": false
         },
-        "cursor": {
-          "name": "cursor",
+        "ingest_run_id": {
+          "name": "ingest_run_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "payload_hash": {
+          "name": "payload_hash",
           "type": "text",
           "primaryKey": false,
           "notNull": false
         },
-        "last_success_at": {
-          "name": "last_success_at",
+        "created_at": {
+          "name": "created_at",
           "type": "timestamp with time zone",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true,
+          "default": "now()"
         },
-        "last_run_id": {
-          "name": "last_run_id",
-          "type": "uuid",
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "deleted_at": {
+          "name": "deleted_at",
+          "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": false
         }
       },
-      "indexes": {},
+      "indexes": {
+        "employee_job_history_manager_idx": {
+          "name": "employee_job_history_manager_idx",
+          "columns": [
+            {
+              "expression": "manager_person_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "valid_from",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {
-        "sync_state_last_run_id_ingest_run_id_fk": {
-          "name": "sync_state_last_run_id_ingest_run_id_fk",
-          "tableFrom": "sync_state",
-          "tableTo": "ingest_run",
+        "employee_job_history_person_id_person_id_fk": {
+          "name": "employee_job_history_person_id_person_id_fk",
+          "tableFrom": "employee_job_history",
+          "tableTo": "person",
           "columnsFrom": [
-            "last_run_id"
+            "person_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "employee_job_history_employment_id_employment_id_fk": {
+          "name": "employee_job_history_employment_id_employment_id_fk",
+          "tableFrom": "employee_job_history",
+          "tableTo": "employment",
+          "columnsFrom": [
+            "employment_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "employee_job_history_manager_person_id_person_id_fk": {
+          "name": "employee_job_history_manager_person_id_person_id_fk",
+          "tableFrom": "employee_job_history",
+          "tableTo": "person",
+          "columnsFrom": [
+            "manager_person_id"
           ],
           "columnsTo": [
             "id"
@@ -1002,12 +1119,137 @@
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
-        "sync_state_source_entity_uq": {
-          "name": "sync_state_source_entity_uq",
+        "employee_job_history_person_from_uq": {
+          "name": "employee_job_history_person_from_uq",
           "nullsNotDistinct": false,
           "columns": [
-            "source_system",
-            "entity"
+            "person_id",
+            "valid_from"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.employee_status_history": {
+      "name": "employee_status_history",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "person_id": {
+          "name": "person_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "valid_from": {
+          "name": "valid_from",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "valid_to": {
+          "name": "valid_to",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "employment_status": {
+          "name": "employment_status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "comment": {
+          "name": "comment",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "termination_raw": {
+          "name": "termination_raw",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "source_system": {
+          "name": "source_system",
+          "type": "source_system",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'native'"
+        },
+        "source_id": {
+          "name": "source_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "ingest_run_id": {
+          "name": "ingest_run_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "payload_hash": {
+          "name": "payload_hash",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "deleted_at": {
+          "name": "deleted_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "employee_status_history_person_id_person_id_fk": {
+          "name": "employee_status_history_person_id_person_id_fk",
+          "tableFrom": "employee_status_history",
+          "tableTo": "person",
+          "columnsFrom": [
+            "person_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "employee_status_history_person_from_uq": {
+          "name": "employee_status_history_person_from_uq",
+          "nullsNotDistinct": false,
+          "columns": [
+            "person_id",
+            "valid_from"
           ]
         }
       },

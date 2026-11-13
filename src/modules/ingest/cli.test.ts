@@ -7,6 +7,8 @@ import {
   type IngestCliDeps,
 } from "./cli";
 import { DEFAULT_FIXTURES_DIR, REGISTRY, type EntityEntry } from "./registry";
+import { entityHandlers } from "./handlers";
+import * as runIngestModule from "./run-ingest";
 import { IngestRunError } from "./run-ingest";
 import type { SourceAdapter } from "./types";
 
@@ -106,6 +108,40 @@ describe("parseIngestArgs", () => {
     });
   });
 
+  it.each([
+    ["a date", "2026-11-01", "2026-11-01T00:00:00.000Z"],
+    ["an instant in UTC", "2026-11-01T10:00Z", "2026-11-01T10:00:00.000Z"],
+    [
+      "an instant with fractions and an offset",
+      "2026-11-01T10:00:00.5-03:00",
+      "2026-11-01T13:00:00.500Z",
+    ],
+  ])("accepts --since as %s", (_name, value, iso) => {
+    expect(
+      parseIngestArgs(
+        ["employee", "--source", "fixture", "--since", value],
+        registry,
+      ).since,
+    ).toBe(iso);
+  });
+
+  it.each([
+    ["a bare number", "5"],
+    ["a year", "2026"],
+    ["a timestamp in milliseconds", "1793000000000"],
+    ["a word", "tomorrow"],
+    ["a day that does not exist", "2026-02-30"],
+    ["a month that does not exist", "2026-13-01"],
+    ["an hour that does not exist", "2026-11-01T25:00:00Z"],
+    ["a time without an offset (local time is ambiguous)", "2026-11-01T10:00"],
+    ["a space instead of the T", "2026-11-01 10:00:00Z"],
+    ["an empty value", ""],
+  ])("rejects --since as %s", (_name, value) => {
+    const argv = ["employee", "--source", "fixture", "--since", value];
+    expect(() => parseIngestArgs(argv, registry)).toThrow(UsageError);
+    expect(() => parseIngestArgs(argv, registry)).toThrow(/--since/);
+  });
+
   it("accepts --since last to continue from the stored watermark", () => {
     expect(
       parseIngestArgs(
@@ -147,6 +183,44 @@ describe("parseIngestArgs", () => {
   ])("rejects %s", (_name, argv, message) => {
     expect(() => parseIngestArgs(argv, registry)).toThrow(UsageError);
     expect(() => parseIngestArgs(argv, registry)).toThrow(message);
+  });
+});
+
+describe("REGISTRY", () => {
+  it("has one entry per entity handler, dependencies first", () => {
+    expect([...REGISTRY.keys()]).toEqual(Object.keys(entityHandlers));
+    // job_history resolves its people through employee ingestion.
+    expect([...REGISTRY.keys()].slice(0, 2)).toEqual([
+      "employee",
+      "job_history",
+    ]);
+  });
+
+  it("runs an entity through runIngest with the adapter's source, entity and since", async () => {
+    const adapter = adapterOf("fixture");
+    const ran = vi.spyOn(runIngestModule, "runIngest").mockResolvedValue({
+      runId: "run-9",
+      counts,
+    });
+    try {
+      const result = await REGISTRY.get("job_history")!.run({
+        adapter,
+        db: {} as Database,
+        params: { source: "fixture" },
+        since: "2026-11-01T00:00:00.000Z",
+      });
+
+      expect(result.runId).toBe("run-9");
+      expect(ran).toHaveBeenCalledWith({
+        adapter,
+        entity: "job_history",
+        db: {},
+        params: { source: "fixture" },
+        extract: { since: "2026-11-01T00:00:00.000Z" },
+      });
+    } finally {
+      ran.mockRestore();
+    }
   });
 });
 
@@ -222,25 +296,34 @@ describe("runIngestCli", () => {
     expect(t.stderr()).toContain("run-bad");
   });
 
-  it("exits non-zero when the adapter cannot even be built", async () => {
-    const t = setup(
-      { employee: entry() },
-      {
-        registry: new Map([
-          [
-            "employee",
-            {
-              ...entry(),
-              adapters: {
-                fixture: () => {
-                  throw new Error("fixtures directory missing");
-                },
-                bamboo: () => adapterOf("bamboo"),
-              },
-            },
-          ],
-        ]),
+  it("a source that cannot be configured exits 2 before running anything", async () => {
+    const employee = entry();
+    const jobHistory = {
+      ...entry(),
+      adapters: {
+        fixture: () => {
+          throw new Error("fixtures directory missing");
+        },
+        bamboo: () => adapterOf("bamboo"),
       },
+    };
+    const t = setup({ employee, job_history: jobHistory });
+
+    const code = await runIngestCli(["--all", "--source", "fixture"], t.deps);
+
+    expect(code).toBe(2);
+    expect(t.stderr()).toContain("fixtures directory missing");
+    // Not a "run failed": nothing was attempted, not even the entity whose
+    // adapter was fine.
+    expect(employee.run).not.toHaveBeenCalled();
+    expect(t.stdout()).toBe("");
+  });
+
+  it("a missing required variable exits 2 and runs nothing", async () => {
+    const employee = entry();
+    const t = setup(
+      { employee },
+      { env: { OTHER: "x" }, requireEnv: ["DATABASE_URL"] },
     );
 
     const code = await runIngestCli(
@@ -248,8 +331,14 @@ describe("runIngestCli", () => {
       t.deps,
     );
 
-    expect(code).toBe(1);
-    expect(t.stderr()).toContain("fixtures directory missing");
+    expect(code).toBe(2);
+    expect(t.stderr()).toContain("DATABASE_URL");
+    expect(employee.run).not.toHaveBeenCalled();
+  });
+
+  it("--help does not need the environment", async () => {
+    const t = setup({ employee: entry() }, { requireEnv: ["DATABASE_URL"] });
+    expect(await runIngestCli(["--help"], t.deps)).toBe(0);
   });
 
   it("a usage error exits 2, prints the usage and runs nothing", async () => {
@@ -271,14 +360,15 @@ describe("runIngestCli", () => {
     expect(t.stdout()).toContain("employee");
   });
 
-  it("bamboo needs credentials: without them it fails before touching the source", async () => {
+  it("bamboo needs credentials: without them it exits 2 and says which", async () => {
     const t = setup({}, { registry: REGISTRY, env: {} });
 
     const code = await runIngestCli(["employee", "--source", "bamboo"], t.deps);
 
-    expect(code).toBe(1);
+    expect(code).toBe(2);
     expect(t.stderr()).toContain("BAMBOO_COMPANY_DOMAIN");
     expect(t.stderr()).toContain("BAMBOO_API_KEY");
+    expect(t.stdout()).toBe("");
   });
 
   it("--since last continues from the stored watermark of that source and entity", async () => {
@@ -293,6 +383,7 @@ describe("runIngestCli", () => {
 
     expect(readWatermark).toHaveBeenCalledWith({
       sourceSystem: "bamboo_api",
+      adapter: "fixture",
       entity: "employee",
     });
     expect(employee.run.mock.calls[0][0].since).toBe(

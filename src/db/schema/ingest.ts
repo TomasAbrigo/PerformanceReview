@@ -1,5 +1,7 @@
 import {
+  index,
   jsonb,
+  pgEnum,
   pgTable,
   text,
   timestamp,
@@ -16,23 +18,60 @@ export type IngestCounts = {
   rejected: number;
   /** Employments soft-deleted because a full extraction no longer had them. */
   deleted: number;
+  /** job_history: rows whose reportsTo could not be resolved to one person. */
+  managerUnresolved?: number;
 };
+
+/** The counters every run shows (the optional ones are entity-specific extras). */
+export const INGEST_COUNT_KEYS = [
+  "read",
+  "inserted",
+  "updated",
+  "unchanged",
+  "deleted",
+  "rejected",
+] as const satisfies readonly (keyof IngestCounts)[];
 
 export type IngestReject = { sourceId: string | null; reason: string };
 
+/** Lifecycle of an `ingest_run`; a run that threw ends in `error`. */
+export const ingestRunStatus = pgEnum("ingest_run_status", [
+  "running",
+  "succeeded",
+  "error",
+]);
+
+export type IngestRunStatus = (typeof ingestRunStatus.enumValues)[number];
+
 /** One execution of an ingestion adapter (e.g. a BambooHR import). */
-export const ingestRun = pgTable("ingest_run", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  sourceSystem: text("source_system"),
-  adapter: text("adapter"),
-  params: jsonb("params").$type<Record<string, unknown>>(),
-  status: text("status"),
-  startedAt: timestamp("started_at", { withTimezone: true }).defaultNow(),
-  finishedAt: timestamp("finished_at", { withTimezone: true }),
-  counts: jsonb("counts").$type<Partial<IngestCounts>>(),
-  rejects: jsonb("rejects").$type<IngestReject[]>(),
-  error: text("error"),
-});
+export const ingestRun = pgTable(
+  "ingest_run",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    sourceSystem: text("source_system"),
+    adapter: text("adapter"),
+    /** What the run ingested ("employee", "job_history", ...): also in `params`. */
+    entity: text("entity").notNull(),
+    params: jsonb("params").$type<Record<string, unknown>>(),
+    status: ingestRunStatus("status").notNull().default("running"),
+    startedAt: timestamp("started_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    finishedAt: timestamp("finished_at", { withTimezone: true }),
+    counts: jsonb("counts").$type<Partial<IngestCounts>>(),
+    rejects: jsonb("rejects").$type<IngestReject[]>(),
+    error: text("error"),
+  },
+  (t) => [
+    // The run log is read newest first, with or without an entity filter.
+    index("ingest_run_started_at_idx").on(t.startedAt.desc(), t.id.desc()),
+    index("ingest_run_entity_started_at_idx").on(
+      t.entity,
+      t.startedAt.desc(),
+      t.id.desc(),
+    ),
+  ],
+);
 
 export type IngestRun = typeof ingestRun.$inferSelect;
 export type NewIngestRun = typeof ingestRun.$inferInsert;

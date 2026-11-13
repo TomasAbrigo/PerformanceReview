@@ -1,6 +1,17 @@
 import type { SourceSystem } from "@/db/schema";
 
-export type Entity = "employee";
+/**
+ * `employee`: one record per employee. `job_history`: one record per employee
+ * with all its jobInfo and employmentStatus rows (see JobHistoryPayload).
+ */
+export type Entity = "employee" | "job_history";
+
+/** Raw payload of a `job_history` record: table rows exactly as Bamboo sent them. */
+export type JobHistoryPayload = {
+  employeeId: string;
+  jobInfo: Record<string, unknown>[];
+  employmentStatus: Record<string, unknown>[];
+};
 
 export type ExtractedRecord = {
   /** The source's own immutable key (Bamboo internal id), as a string. */
