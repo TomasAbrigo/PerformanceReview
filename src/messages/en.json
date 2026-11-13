@@ -160,5 +160,27 @@
       "status": "Status",
       "empty": "No employment periods."
     }
+  },
+  "Org": {
+    "title": "Org chart",
+    "nav": "Org chart",
+    "treeLabel": "Org chart",
+    "dateLabel": "Date",
+    "show": "Show",
+    "empty": "Nobody was in the organization on that date.",
+    "expand": "Expand {name}",
+    "collapse": "Collapse {name}",
+    "history": {
+      "title": "Job history",
+      "validFrom": "From",
+      "validTo": "To",
+      "jobTitle": "Job title",
+      "area": "Area",
+      "manager": "Manager",
+      "location": "Location",
+      "current": "Current",
+      "unresolved": "{name} (unresolved)",
+      "empty": "No job history."
+    }
   }
 }

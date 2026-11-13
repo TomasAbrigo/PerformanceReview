@@ -1,5 +1,6 @@
 /**
- * pnpm ingest:employees --source fixture|bamboo [--dir path]
+ * pnpm ingest:employees --source fixture|bamboo [--dir path] [--entity employee|job_history]
+ * job_history (jobInfo + employmentStatus tables) needs employees ingested first.
  * bamboo needs BAMBOO_COMPANY_DOMAIN and BAMBOO_API_KEY.
  */
 import path from "node:path";
@@ -10,8 +11,11 @@ import {
   BambooApiAdapter,
   FixtureAdapter,
   runIngest,
+  type Entity,
   type SourceAdapter,
 } from "../src/modules/ingest";
+
+const ENTITIES: readonly Entity[] = ["employee", "job_history"];
 
 try {
   process.loadEnvFile(".env.local");
@@ -26,8 +30,13 @@ async function main() {
     options: {
       source: { type: "string", default: "fixture" },
       dir: { type: "string", default: DEFAULT_DIR },
+      entity: { type: "string", default: "employee" },
     },
   });
+  const entity = values.entity as Entity;
+  if (!ENTITIES.includes(entity)) {
+    throw new Error(`--entity must be one of ${ENTITIES.join(", ")}`);
+  }
 
   let adapter: SourceAdapter;
   if (values.source === "fixture") {
@@ -49,7 +58,7 @@ async function main() {
 
   const { runId, counts } = await runIngest({
     adapter,
-    entity: "employee",
+    entity,
     db,
     params: { source: values.source, dir: values.dir },
   });

@@ -1,5 +1,6 @@
 import { readdir, readFile } from "node:fs/promises";
 import path from "node:path";
+import { tableRowSchema } from "@/modules/bamboo-client/schemas";
 import type {
   Entity,
   ExtractedRecord,
@@ -28,7 +29,7 @@ export class FixtureAdapter implements SourceAdapter {
 
   constructor(readonly dir: string) {}
 
-  private async readTable(table: string): Promise<Json[]> {
+  private async readTable(table: string): Promise<unknown[]> {
     let body: unknown;
     try {
       body = JSON.parse(
@@ -38,7 +39,7 @@ export class FixtureAdapter implements SourceAdapter {
       if ((err as NodeJS.ErrnoException).code === "ENOENT") return [];
       throw err;
     }
-    return Array.isArray(body) ? body.filter(isObject) : [];
+    return Array.isArray(body) ? body : [];
   }
 
   extract(_ctx: unknown, entity: Entity): AsyncIterable<ExtractedRecord> {
@@ -87,10 +88,15 @@ export class FixtureAdapter implements SourceAdapter {
   }
 }
 
-/** Table rows of all employees → one payload per employee, sorted by id. */
+/**
+ * Table rows of all employees → one payload per employee, sorted by id. Rows
+ * go through tableRowSchema (ids as strings, other fields untouched) so the
+ * API and fixture adapters hash the same data identically; rows without an
+ * id/employeeId are dropped.
+ */
 export function groupTables(
-  jobInfo: Json[],
-  employmentStatus: Json[],
+  jobInfo: unknown[],
+  employmentStatus: unknown[],
 ): JobHistoryPayload[] {
   const byEmployee = new Map<string, JobHistoryPayload>();
   const get = (id: string) => {
@@ -101,13 +107,13 @@ export function groupTables(
     }
     return p;
   };
-  for (const r of jobInfo) {
-    if (r.employeeId != null) get(String(r.employeeId)).jobInfo.push(r);
+  for (const raw of jobInfo) {
+    const r = tableRowSchema.safeParse(raw);
+    if (r.success) get(r.data.employeeId).jobInfo.push(r.data);
   }
-  for (const r of employmentStatus) {
-    if (r.employeeId != null) {
-      get(String(r.employeeId)).employmentStatus.push(r);
-    }
+  for (const raw of employmentStatus) {
+    const r = tableRowSchema.safeParse(raw);
+    if (r.success) get(r.data.employeeId).employmentStatus.push(r.data);
   }
   return [...byEmployee.values()].sort(
     (a, b) =>
