@@ -14,6 +14,7 @@ import {
   type SourceSystem,
 } from "@/db/schema";
 import { stagedEmployeeSchema, type StagedEmployee } from "./staging";
+import { advanceSyncState } from "./sync-state";
 import type { Entity, SourceAdapter } from "./types";
 
 export type RunIngestInput = {
@@ -21,9 +22,30 @@ export type RunIngestInput = {
   entity: Entity;
   db: DbOrTx;
   params?: Record<string, unknown>;
+  /**
+   * Incremental extraction: only what changed since this watermark. A partial
+   * extraction never soft-deletes what it did not return.
+   */
+  since?: string;
 };
 
 export type RunIngestResult = { runId: string; counts: IngestCounts };
+
+/**
+ * A run that ended in status `error`. The run row (with the counts reached so
+ * far and the message) is already saved; `runId` points at it.
+ */
+export class IngestRunError extends Error {
+  constructor(
+    message: string,
+    readonly runId: string,
+    readonly counts: IngestCounts,
+    options?: ErrorOptions,
+  ) {
+    super(message, options);
+    this.name = "IngestRunError";
+  }
+}
 
 /** JSON with sorted keys, so key order never changes the hash. */
 function canonical(value: unknown): string {
@@ -236,13 +258,20 @@ async function upsertEmployee(
 
 /**
  * raw → staged (zod) → domain upsert, recorded as one ingest_run. Extractions
- * are full: employments not seen in a successful run are soft-deleted.
+ * are full unless `since` is given: employments not seen in a successful full
+ * run are soft-deleted.
+ *
+ * Every record commits on its own, so the watermark in `sync_state` only
+ * advances once the whole run is done, in the same transaction that marks it
+ * `succeeded`. A run that throws ends in `error` (with `finished_at`) and
+ * leaves the previous watermark untouched; re-running is safe (idempotent).
  */
 export async function runIngest({
   adapter,
   entity,
   db,
   params = {},
+  since,
 }: RunIngestInput): Promise<RunIngestResult> {
   const source = adapter.source;
   const [run] = await db
@@ -250,10 +279,10 @@ export async function runIngest({
     .values({
       sourceSystem: source,
       adapter: adapter.name,
-      params: { entity, ...params },
+      params: { entity, ...params, ...(since ? { since } : {}) },
       status: "running",
     })
-    .returning({ id: ingestRun.id });
+    .returning({ id: ingestRun.id, startedAt: ingestRun.startedAt });
 
   const counts: IngestCounts = {
     read: 0,
@@ -267,7 +296,7 @@ export async function runIngest({
   const seen = new Set<string>();
 
   try {
-    for await (const record of adapter.extract({}, entity)) {
+    for await (const record of adapter.extract({ since }, entity)) {
       counts.read++;
       seen.add(record.sourceId);
       const hash = payloadHash(record.payload);
@@ -303,9 +332,9 @@ export async function runIngest({
       }
     }
 
-    // Guard: an empty extraction is far more likely a broken source than a
-    // company with nobody left, so it never deletes.
-    if (seen.size > 0) {
+    // Guards: an empty extraction is far more likely a broken source than a
+    // company with nobody left, and an incremental one only lists what changed.
+    if (seen.size > 0 && since === undefined) {
       const now = new Date();
       const deleted = await db
         .update(employment)
@@ -321,22 +350,32 @@ export async function runIngest({
       counts.deleted = deleted.length;
     }
 
-    await db
-      .update(ingestRun)
-      .set({ status: "succeeded", finishedAt: new Date(), counts, rejects })
-      .where(eq(ingestRun.id, run.id));
+    await db.transaction(async (tx) => {
+      await tx
+        .update(ingestRun)
+        .set({ status: "succeeded", finishedAt: new Date(), counts, rejects })
+        .where(eq(ingestRun.id, run.id));
+      await advanceSyncState(tx, {
+        sourceSystem: source,
+        entity,
+        // Start of the extraction: changes made while it ran are re-read next time.
+        watermark: (run.startedAt ?? new Date()).toISOString(),
+        runId: run.id,
+      });
+    });
   } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
     await db
       .update(ingestRun)
       .set({
-        status: "failed",
+        status: "error",
         finishedAt: new Date(),
         counts,
         rejects,
-        error: (err as Error).message,
+        error: message,
       })
       .where(eq(ingestRun.id, run.id));
-    throw err;
+    throw new IngestRunError(message, run.id, counts, { cause: err });
   }
 
   return { runId: run.id, counts };
