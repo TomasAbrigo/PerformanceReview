@@ -1,4 +1,4 @@
-import { and, desc, eq, isNull, sql } from "drizzle-orm";
+import { and, eq, isNull, sql } from "drizzle-orm";
 import { z } from "zod";
 import type { DbOrTx } from "@/db/client";
 import {
@@ -6,8 +6,6 @@ import {
   employeeStatusHistory,
   employment,
   person,
-  rawRecord,
-  sourceIdentity,
   type SourceSystem,
 } from "@/db/schema";
 import { bambooId } from "@/modules/bamboo-client/schemas";
@@ -16,6 +14,8 @@ import {
   buildStatusHistory,
   isTermination,
 } from "@/modules/org-history/build";
+import { canonical } from "./canonical";
+import { resolvePerson } from "./employee";
 import { optionalDate, optionalText } from "./staging";
 
 const jobInfoRow = z
@@ -70,59 +70,19 @@ export type JobHistoryOutcome = {
   managerUnresolved: number;
 };
 
-async function personByBambooId(
+/** Display name → person id, for names that exactly one person has. */
+export async function uniqueNameIndex(
   tx: DbOrTx,
-  source: SourceSystem,
-  id: string,
-): Promise<string | null> {
-  const [m] = await tx
-    .select({ personId: sourceIdentity.personId })
-    .from(sourceIdentity)
-    .where(
-      and(
-        eq(sourceIdentity.sourceSystem, source),
-        eq(sourceIdentity.kind, "bamboo_id"),
-        eq(sourceIdentity.value, id),
-        isNull(sourceIdentity.validTo),
-      ),
-    );
-  return m?.personId ?? null;
-}
-
-/** supervisorEId of the latest extracted employee payload. */
-async function currentSupervisor(
-  tx: DbOrTx,
-  source: SourceSystem,
-  employeeId: string,
-): Promise<string | null> {
-  const [latest] = await tx
-    .select({ payload: rawRecord.payload })
-    .from(rawRecord)
-    .where(
-      and(
-        eq(rawRecord.sourceSystem, source),
-        eq(rawRecord.entity, "employee"),
-        eq(rawRecord.sourceId, employeeId),
-      ),
-    )
-    .orderBy(desc(rawRecord.extractedAt))
-    .limit(1);
-  const id = (latest?.payload as { supervisorEId?: unknown } | undefined)
-    ?.supervisorEId;
-  return id == null || id === "" ? null : String(id);
-}
-
-/** A person whose display name is exactly `name`, only if exactly one. */
-async function personByUniqueName(
-  tx: DbOrTx,
-  name: string,
-): Promise<string | null> {
-  const matches = await tx
-    .select({ id: person.id })
+): Promise<Map<string, string>> {
+  const rows = await tx
+    .select({
+      name: person.displayName,
+      id: sql<string>`min(${person.id}::text)`,
+    })
     .from(person)
-    .where(eq(person.displayName, name))
-    .limit(2);
-  return matches.length === 1 ? matches[0].id : null;
+    .groupBy(person.displayName)
+    .having(sql`count(*) = 1`);
+  return new Map(rows.map((r) => [r.name, r.id]));
 }
 
 type JobValues = {
@@ -162,8 +122,11 @@ export async function upsertJobHistory(
   staged: StagedJobHistory,
   hash: string,
   runId: string,
+  names?: Map<string, string>,
 ): Promise<JobHistoryOutcome> {
-  const personId = await personByBambooId(tx, source, staged.employeeId);
+  const personId = await resolvePerson(tx, source, {
+    bambooId: staged.employeeId,
+  });
   if (!personId) {
     return {
       result: "rejected",
@@ -172,13 +135,13 @@ export async function upsertJobHistory(
     };
   }
 
-  const terminations = staged.employmentStatus
-    .filter((s) => s.date && isTermination(s.status))
-    .map((s) => s.date!);
-  const built = buildJobHistory(staged.jobInfo, terminations);
-
   const periods = await tx
-    .select({ id: employment.id, hireDate: employment.hireDate })
+    .select({
+      id: employment.id,
+      hireDate: employment.hireDate,
+      terminationDate: employment.terminationDate,
+      supervisorSourceId: employment.supervisorSourceId,
+    })
     .from(employment)
     .where(
       and(
@@ -188,6 +151,18 @@ export async function upsertJobHistory(
       ),
     )
     .orderBy(sql`${employment.hireDate} desc nulls last`);
+
+  // employment.terminationDate (from the employee record) is authoritative;
+  // a "Terminated" status row only adds dates the record does not have.
+  const terminations = [
+    ...periods.flatMap((p) => (p.terminationDate ? [p.terminationDate] : [])),
+    ...staged.employmentStatus
+      .filter((s) => s.date && isTermination(s.status))
+      .map((s) => s.date!),
+  ];
+  const built = buildJobHistory(staged.jobInfo, terminations);
+  const nameIndex = names ?? (await uniqueNameIndex(tx));
+
   const employmentFor = (from: string) =>
     (
       periods.find((p) => p.hireDate !== null && p.hireDate <= from) ??
@@ -199,11 +174,13 @@ export async function upsertJobHistory(
   for (const [i, r] of built.entries()) {
     let managerPersonId: string | null = null;
     if (i === built.length - 1) {
-      const sup = await currentSupervisor(tx, source, staged.employeeId);
-      if (sup) managerPersonId = await personByBambooId(tx, source, sup);
+      // Current supervisor as persisted by the latest employee ingest.
+      const sup = periods[0]?.supervisorSourceId;
+      if (sup)
+        managerPersonId = await resolvePerson(tx, source, { bambooId: sup });
     }
     if (!managerPersonId && r.managerRaw) {
-      managerPersonId = await personByUniqueName(tx, r.managerRaw);
+      managerPersonId = nameIndex.get(r.managerRaw) ?? null;
       if (!managerPersonId) managerUnresolved++;
     }
     desired.push({
@@ -283,15 +260,6 @@ export async function upsertJobHistory(
   };
 }
 
-const sortedJson = (v: Record<string, unknown> | null) =>
-  JSON.stringify(
-    Object.entries(v ?? {}).sort(([a], [b]) => a.localeCompare(b)),
-  );
-const sameJson = (
-  a: Record<string, unknown> | null,
-  b: Record<string, unknown> | null,
-) => sortedJson(a) === sortedJson(b);
-
 /** Rebuilds employee_status_history; true when nothing changed. */
 async function syncStatusHistory(
   tx: DbOrTx,
@@ -331,7 +299,7 @@ async function syncStatusHistory(
         e.employmentStatus === d.employmentStatus &&
         e.comment === d.comment &&
         e.sourceId === d.sourceId &&
-        sameJson(e.terminationRaw, d.terminationRaw)
+        canonical(e.terminationRaw ?? {}) === canonical(d.terminationRaw)
       );
     });
   if (same) return true;

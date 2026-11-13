@@ -208,6 +208,39 @@ describe("runIngest job_history (jobInfo + employmentStatus fixtures)", () => {
     expect(run.counts).toMatchObject({ managerUnresolved: 1 });
   });
 
+  it("uses the supervisor of the latest employee ingest, even after a revert", async () => {
+    type Page = { data: { id: unknown; supervisorEId: unknown }[] };
+    const setSupervisor = (id: unknown) =>
+      editJson<Page>("employees-page-1.json", (page) => {
+        page.data.find((e) => String(e.id) === "102")!.supervisorEId = id;
+      });
+    await ingest("employee"); // 101
+    await setSupervisor("103");
+    await ingest("employee");
+    await setSupervisor(101); // byte-identical to the first payload
+    await ingest("employee");
+
+    await ingest("job_history");
+
+    const b = await historyOf(await personId("Bruno Pérez"));
+    expect(b.at(-1)!.managerPersonId).toBe(await personId("Ana García"));
+  });
+
+  it("closes the open row at the employment's termination date even without a Terminated status", async () => {
+    type Row = Record<string, unknown>;
+    await editJson<Row[]>("tables-employmentStatus.json", (rows) => {
+      rows.splice(
+        rows.findIndex((r) => r.employmentStatus === "Terminated"),
+        1,
+      );
+    });
+    await ingest("employee");
+    await ingest("job_history");
+
+    const c = await historyOf(await personId("Carla Romero"));
+    expect(c.map((r) => r.validTo)).toEqual(["2024-07-01"]);
+  });
+
   it("rejects rows of employees that were never ingested", async () => {
     const { counts } = await ingest("job_history");
 

@@ -26,6 +26,7 @@ export const stagedEmployeeSchema = z
     status: optionalText,
     hireDate: optionalDate,
     terminationDate: optionalDate,
+    supervisorEId: optionalText,
   })
   .transform((e, ctx) => {
     const displayName =
@@ -43,6 +44,7 @@ export const stagedEmployeeSchema = z
       status: e.status,
       hireDate: e.hireDate,
       terminationDate: e.terminationDate,
+      supervisorSourceId: e.supervisorEId,
     };
   });
 

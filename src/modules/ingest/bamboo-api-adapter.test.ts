@@ -95,4 +95,42 @@ describe("BambooApiAdapter", () => {
 
     expect(api).toEqual(fixture);
   });
+
+  it("job_history with since only extracts changed employees, with both tables", async () => {
+    const requested: URL[] = [];
+    const rowsOf = (rows: { employeeId: unknown }[], id: string) =>
+      rows.filter((r) => String(r.employeeId) === id);
+    const fetch = (async (input: RequestInfo | URL) => {
+      const url = new URL(String(input));
+      requested.push(url);
+      let body: unknown;
+      if (url.pathname.includes("/changed/tables/jobInfo")) {
+        // 102 changed its job; its status rows did not change.
+        body = { employees: { "102": { rows: rowsOf(jobInfo, "102") } } };
+      } else if (url.pathname.includes("/changed/tables/employmentStatus")) {
+        body = { employees: {} };
+      } else if (url.pathname.endsWith("/102/tables/employmentStatus")) {
+        body = rowsOf(employmentStatus, "102");
+      } else {
+        return new Response("unexpected", { status: 500 });
+      }
+      return new Response(JSON.stringify(body), { status: 200 });
+    }) as typeof globalThis.fetch;
+    const adapter = new BambooApiAdapter(
+      createBambooClient({ companyDomain: "acme", apiKey: "k", fetch }),
+    );
+
+    const out = [];
+    for await (const r of adapter.extract(
+      { since: "2025-01-01T00:00:00Z" },
+      "job_history",
+    )) {
+      out.push(r);
+    }
+
+    expect(requested[0].searchParams.get("since")).toBe("2025-01-01T00:00:00Z");
+    expect(out.map((r) => r.sourceId)).toEqual(["102"]);
+    const full = await hashes(new FixtureAdapter(FIXTURES), "job_history");
+    expect(payloadHash(out[0].payload)).toBe(full.get("102"));
+  });
 });

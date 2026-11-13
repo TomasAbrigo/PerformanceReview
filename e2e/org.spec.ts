@@ -1,18 +1,6 @@
-import { execFileSync } from "node:child_process";
 import { expect, test } from "@playwright/test";
 
 test.describe.configure({ mode: "serial" });
-
-// Seeds employees, then their jobInfo/employmentStatus history (idempotent).
-test.beforeAll(() => {
-  for (const entity of ["employee", "job_history"]) {
-    execFileSync(
-      "pnpm",
-      ["ingest:employees", "--source", "fixture", "--entity", entity],
-      { stdio: "inherit" },
-    );
-  }
-});
 
 const parentOf = (page: import("@playwright/test").Page, name: string) =>
   page
