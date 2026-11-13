@@ -6,7 +6,13 @@ import { afterAll, afterEach, beforeEach, describe, expect, it } from "vitest";
 import { closeDb, db } from "@/db/client";
 import { person } from "@/db/schema";
 import { FixtureAdapter, runIngest } from "@/modules/ingest";
-import { getJobHistory, jobAsOf, managerAsOf, orgTreeAsOf } from "./queries";
+import {
+  getJobHistory,
+  jobAsOf,
+  jobsAsOf,
+  managerAsOf,
+  orgTreeAsOf,
+} from "./queries";
 
 const FIXTURES = path.resolve("src/modules/bamboo-client/__fixtures__");
 
@@ -78,6 +84,14 @@ describe("managerAsOf", () => {
 
 describe("jobAsOf / getJobHistory", () => {
   beforeEach(ingestAll);
+
+  it("jobsAsOf returns the rows valid on the date for many people at once", async () => {
+    const jobs = await jobsAsOf(db, [ana, bruno, carla], "2025-01-01");
+    expect(jobs.get(bruno)?.managerPersonId).toBe(ana);
+    expect(jobs.get(ana)?.managerPersonId).toBeNull();
+    expect(jobs.has(carla)).toBe(false);
+    expect((await jobsAsOf(db, [], "2025-01-01")).size).toBe(0);
+  });
 
   it("returns the job row valid on the date", async () => {
     expect(await jobAsOf(db, bruno, "2022-06-01")).toMatchObject({

@@ -40,15 +40,29 @@
     {
       "idx": 5,
       "version": "7",
-      "when": 1794603354230,
-      "tag": "0005_review_cycles",
+      "when": 1794603513199,
+      "tag": "0005_goals",
       "breakpoints": true
     },
     {
       "idx": 6,
       "version": "7",
-      "when": 1794604109510,
-      "tag": "0006_review_requests",
+      "when": 1794603896160,
+      "tag": "0006_sync_state",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1794604480326,
+      "tag": "0007_review_cycles",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1794604975848,
+      "tag": "0008_review_requests",
       "breakpoints": true
     }
   ]

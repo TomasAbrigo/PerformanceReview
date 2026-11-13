@@ -44,7 +44,12 @@ export type EntityHandler<S> = {
 
 const defineHandler = <S>(h: EntityHandler<S>) => h;
 
-export const entityHandlers: Record<Entity, EntityHandler<unknown>> = {
+/**
+ * Entities `runIngest` can stage and upsert. Goals are not here: they need
+ * the active employees, lazy comments and owner resolution, so they have
+ * their own runner (`runGoalIngest`).
+ */
+export const entityHandlers: Partial<Record<Entity, EntityHandler<unknown>>> = {
   employee: defineHandler({
     schema: stagedEmployeeSchema,
     async upsert(tx, staged, { source, hash, runId }) {

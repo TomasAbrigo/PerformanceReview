@@ -161,6 +161,67 @@
       "empty": "Sin períodos de empleo."
     }
   },
+  "Imports": {
+    "nav": "Importaciones",
+    "runs": {
+      "title": "Corridas de importación",
+      "description": "Cada ejecución de una ingesta (CLI o cron) con sus conteos y rechazos.",
+      "empty": "Todavía no hay corridas de importación.",
+      "emptyFiltered": "Ninguna corrida coincide con los filtros.",
+      "back": "← Volver a corridas",
+      "notFound": "Corrida no encontrada.",
+      "filters": {
+        "label": "Filtrar corridas",
+        "source": "Fuente",
+        "entity": "Entidad",
+        "status": "Estado",
+        "all": "Todas",
+        "apply": "Filtrar",
+        "clear": "Limpiar"
+      },
+      "columns": {
+        "started": "Inicio",
+        "source": "Fuente",
+        "adapter": "Adaptador",
+        "entity": "Entidad",
+        "status": "Estado",
+        "read": "Leídos",
+        "inserted": "Insertados",
+        "updated": "Actualizados",
+        "unchanged": "Sin cambios",
+        "deleted": "Eliminados",
+        "rejected": "Rechazados",
+        "issues": "Incidencias",
+        "duration": "Duración"
+      },
+      "status": {
+        "running": "En curso",
+        "succeeded": "Exitosa",
+        "error": "Con error"
+      },
+      "pagination": {
+        "label": "Paginación",
+        "next": "Corridas anteriores →"
+      },
+      "detail": {
+        "title": "Corrida de importación",
+        "id": "ID de corrida",
+        "finished": "Fin",
+        "params": "Parámetros",
+        "noParams": "Sin parámetros.",
+        "counts": "Conteos",
+        "metric": "Métrica",
+        "count": "Cantidad",
+        "rawRecords": "Registros crudos guardados por esta corrida: {count}",
+        "error": "Error",
+        "rejects": "Rechazos e incidencias",
+        "rejectSourceId": "ID de origen",
+        "rejectReason": "Motivo",
+        "noRejects": "Esta corrida no tuvo rechazos ni incidencias.",
+        "noSourceId": "Sin ID de origen"
+      }
+    }
+  },
   "Org": {
     "title": "Organigrama",
     "nav": "Organigrama",
@@ -181,6 +242,37 @@
       "current": "Actual",
       "unresolved": "{name} (sin resolver)",
       "empty": "Sin historial de puesto."
+    }
+  },
+  "Goals": {
+    "title": "Objetivos",
+    "nav": "Objetivos del equipo",
+    "empty": "Todavía no hay objetivos importados.",
+    "status": {
+      "in_progress": "En curso",
+      "completed": "Completado",
+      "closed": "Cerrado"
+    },
+    "progress": "Progreso",
+    "dueDate": "Vence {date}",
+    "noDueDate": "Sin fecha límite",
+    "completedOn": "Completado el {date}",
+    "milestones": {
+      "title": "Hitos",
+      "summary": "{done} de {total, plural, =1 {1 hito} other {# hitos}}",
+      "done": "Hecho",
+      "pending": "Pendiente"
+    },
+    "comments": "{count, plural, =0 {Sin comentarios} =1 {1 comentario} other {# comentarios}}",
+    "sharedWith": "Compartido con {names}",
+    "team": {
+      "title": "Objetivos del equipo",
+      "description": "Objetivos de los reportes directos de {manager}.",
+      "goalCount": "{count, plural, =1 {1 objetivo} other {# objetivos}}",
+      "noGoals": "Sin objetivos.",
+      "noReports": "{manager} no tiene reportes directos.",
+      "chooseManager": "Elegí un manager para ver los objetivos de su equipo.",
+      "noManagers": "No hay managers con reportes directos."
     }
   },
   "Cycles": {
@@ -268,7 +360,8 @@
         "acknowledge": "Acuse de recibo"
       },
       "summary": "Resumen",
-      "participantsToLaunch": "{count, plural, one {Se lanzará con # participante} other {Se lanzará con # participantes}}"
+      "participantsToLaunch": "{count, plural, one {Se lanzará con # participante} other {Se lanzará con # participantes}}",
+      "snapshotHint": "Los participantes se resuelven a la fecha de snapshot organizacional."
     },
     "detail": {
       "snapshotDate": "Snapshot al {date}",

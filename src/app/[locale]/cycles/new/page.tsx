@@ -6,6 +6,7 @@ import { Suspense } from "react";
 import { CycleWizard } from "@/components/cycles/cycle-wizard";
 import { db } from "@/db/client";
 import { routing } from "@/i18n/routing";
+import { todayLocal } from "@/modules/org-history/dates";
 import { participantFilterOptions } from "@/modules/review-core";
 import { listScales, listTemplates } from "@/modules/templates";
 import {
@@ -26,6 +27,7 @@ async function Wizard({ params }: PageProps<"/[locale]/cycles/new">) {
   ]);
   return (
     <CycleWizard
+      defaultSnapshotDate={todayLocal()}
       options={{
         ...filterOptions,
         templates: templates

@@ -1,8 +1,8 @@
 "use client";
 
-import { useLocale, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
 import { useEffect, useId, useState, useTransition } from "react";
-import type { ActionResult } from "@/components/templates/shared";
+import { type ActionResult, useLocalized } from "@/components/templates/shared";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -43,6 +43,7 @@ type Candidate = {
 export type WizardActions = {
   preview: (
     filter: ParticipantFilterInput,
+    asOf: string,
   ) => Promise<ActionResult<{ count: number; sample: Candidate[] }>>;
   create: (input: CycleInput) => Promise<ActionResult<{ id: string }>>;
   launch: (id: string) => Promise<ActionResult>;
@@ -70,17 +71,18 @@ const DATE_FIELDS = ["periodStart", "periodEnd", "snapshotDate"] as const;
 export function CycleWizard({
   options,
   actions,
+  defaultSnapshotDate = "",
 }: {
   options: WizardOptions;
   actions: WizardActions;
+  /** Initial org snapshot date (the page passes today in the company zone). */
+  defaultSnapshotDate?: string;
 }) {
   const t = useTranslations("Cycles.wizard");
-  const locale = useLocale();
   const router = useRouter();
   const errorText = useCycleError();
   const id = useId();
-  const localized = (text: LocalizedText) =>
-    locale === "en" ? text.en : text.es;
+  const localized = useLocalized();
 
   const [step, setStep] = useState(0);
   const [mode, setMode] = useState<Mode>("all");
@@ -109,7 +111,7 @@ export function CycleWizard({
   const [description, setDescription] = useState("");
   const [dates, setDates] = useState<
     Record<(typeof DATE_FIELDS)[number], string>
-  >({ periodStart: "", periodEnd: "", snapshotDate: "" });
+  >({ periodStart: "", periodEnd: "", snapshotDate: defaultSnapshotDate });
   const [dueDates, setDueDates] = useState<
     Partial<Record<DueDatePhase, string>>
   >({});
@@ -128,11 +130,13 @@ export function CycleWizard({
         ? { kind: "filter", ...criteria }
         : { kind: "people", personIds };
   const filterKey = JSON.stringify(filter);
+  const asOf = dates.snapshotDate;
+  const [createdId, setCreatedId] = useState<string | null>(null);
 
   useEffect(() => {
     let current = true;
     const parsed = JSON.parse(filterKey) as ParticipantFilterInput;
-    if (parsed.kind === "people" && parsed.personIds.length === 0) {
+    if (!asOf || (parsed.kind === "people" && parsed.personIds.length === 0)) {
       Promise.resolve().then(() => {
         if (current) setPreview({ count: 0, sample: [] });
       });
@@ -140,7 +144,7 @@ export function CycleWizard({
         current = false;
       };
     }
-    actions.preview(parsed).then((result) => {
+    actions.preview(parsed, asOf).then((result) => {
       if (current && result.ok) {
         setPreview({ count: result.count, sample: result.sample });
       }
@@ -148,7 +152,7 @@ export function CycleWizard({
     return () => {
       current = false;
     };
-  }, [filterKey, actions]);
+  }, [filterKey, asOf, actions]);
 
   function buildInput(): CycleInput {
     const due = Object.fromEntries(
@@ -192,26 +196,35 @@ export function CycleWizard({
   }
 
   function next() {
+    if (STEPS[step] === "people" && !dates.snapshotDate) {
+      setIssues({ snapshotDate: "required" });
+      return;
+    }
     if (STEPS[step] === "dates" && !validateDates()) return;
     setStep((s) => Math.min(s + 1, STEPS.length - 1));
   }
 
   function submit(launch: boolean) {
     startTransition(async () => {
-      const created = await actions.create(buildInput());
-      if (!created.ok) {
-        setError(errorText(created.code));
-        return;
+      // A failed launch keeps the draft: retrying launches it, not a copy.
+      let cycleId = createdId;
+      if (!cycleId) {
+        const created = await actions.create(buildInput());
+        if (!created.ok) {
+          setError(errorText(created.code));
+          return;
+        }
+        cycleId = created.id;
+        setCreatedId(cycleId);
       }
       if (launch) {
-        const launched = await actions.launch(created.id);
+        const launched = await actions.launch(cycleId);
         if (!launched.ok) {
           setError(errorText(launched.code));
-          router.push(`/cycles/${created.id}`);
           return;
         }
       }
-      router.push(`/cycles/${created.id}`);
+      router.push(`/cycles/${cycleId}`);
     });
   }
 
@@ -256,6 +269,22 @@ export function CycleWizard({
       >
         {STEPS[step] === "people" ? (
           <>
+            <div className="flex max-w-xs flex-col gap-1">
+              <Label htmlFor={`${id}-snapshotDate`}>{t("snapshotDate")}</Label>
+              <Input
+                id={`${id}-snapshotDate`}
+                type="date"
+                value={dates.snapshotDate}
+                aria-invalid={issues.snapshotDate ? true : undefined}
+                onChange={(e) =>
+                  setDates({ ...dates, snapshotDate: e.target.value })
+                }
+              />
+              <p className="text-sm text-muted-foreground">
+                {t("snapshotHint")}
+              </p>
+              {fieldError("snapshotDate")}
+            </div>
             <fieldset className="flex flex-col gap-2">
               <legend className="mb-2 font-medium">{t("mode")}</legend>
               {(["all", "filter", "people"] as const).map((m) => (
@@ -435,7 +464,7 @@ export function CycleWizard({
               />
             </div>
             <div className="grid gap-4 sm:grid-cols-3">
-              {DATE_FIELDS.map((field) => (
+              {(["periodStart", "periodEnd"] as const).map((field) => (
                 <div key={field} className="flex flex-col gap-1">
                   <Label htmlFor={`${id}-${field}`}>{t(field)}</Label>
                   <Input
@@ -538,7 +567,9 @@ export function CycleWizard({
             </Button>
             <Button
               onClick={() => submit(true)}
-              disabled={pending || !preview || preview.count === 0}
+              disabled={
+                pending || !templateId || !preview || preview.count === 0
+              }
             >
               {t("launch")}
             </Button>
