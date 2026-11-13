@@ -13,6 +13,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  type SelfReviewColumn,
+  SelfStatusCell,
+} from "@/components/review/self-status-cell";
 import { Link } from "@/i18n/navigation";
 import type { CycleStatus } from "@/modules/review-core/status";
 import { CycleStatusBadge } from "./cycle-status-badge";
@@ -55,11 +59,15 @@ export type CycleDetailActions = {
 export function CycleDetailView({
   cycle,
   actions,
+  selfReview,
 }: {
   cycle: CycleDetailData;
   actions: CycleDetailActions;
+  /** Self review status per participant (HR view, #11). */
+  selfReview?: SelfReviewColumn;
 }) {
   const t = useTranslations("Cycles");
+  const tReview = useTranslations("Review");
   const td = useTranslations("Cycles.detail");
   const format = useFormatter();
   const errorText = useCycleError();
@@ -189,6 +197,9 @@ export function CycleDetailView({
                   <TableHead>{td("columns.manager")}</TableHead>
                   <TableHead>{td("columns.department")}</TableHead>
                   <TableHead>{td("columns.jobTitle")}</TableHead>
+                  {selfReview ? (
+                    <TableHead>{tReview("selfColumn")}</TableHead>
+                  ) : null}
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -212,6 +223,15 @@ export function CycleDetailView({
                     </TableCell>
                     <TableCell>{p.snapDepartment ?? "—"}</TableCell>
                     <TableCell>{p.snapJobTitle ?? "—"}</TableCell>
+                    {selfReview ? (
+                      <TableCell>
+                        <SelfStatusCell
+                          request={selfReview.byParticipant[p.id]}
+                          canUnlock={selfReview.canUnlock}
+                          unlock={selfReview.unlock}
+                        />
+                      </TableCell>
+                    ) : null}
                   </TableRow>
                 ))}
               </TableBody>

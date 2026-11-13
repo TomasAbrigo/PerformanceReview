@@ -3,6 +3,8 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { hasLocale, NextIntlClientProvider } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
+import { Suspense } from "react";
+import { ActorBar } from "@/components/actor/actor-bar";
 import { routing } from "@/i18n/routing";
 import "../globals.css";
 
@@ -47,7 +49,14 @@ export default async function LocaleLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="flex min-h-full flex-col">
-        <NextIntlClientProvider>{children}</NextIntlClientProvider>
+        <NextIntlClientProvider>
+          <header className="border-b px-8 py-2">
+            <Suspense fallback={<div aria-busy="true" className="h-8" />}>
+              <ActorBar />
+            </Suspense>
+          </header>
+          {children}
+        </NextIntlClientProvider>
       </body>
     </html>
   );
