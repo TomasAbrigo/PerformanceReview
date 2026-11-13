@@ -160,5 +160,67 @@
       "status": "Status",
       "empty": "No employment periods."
     }
+  },
+  "Imports": {
+    "nav": "Imports",
+    "runs": {
+      "title": "Import runs",
+      "description": "Every ingestion execution (CLI or cron) with its counts and rejects.",
+      "empty": "There are no import runs yet.",
+      "emptyFiltered": "No run matches the filters.",
+      "back": "← Back to runs",
+      "notFound": "Run not found.",
+      "filters": {
+        "label": "Filter runs",
+        "source": "Source",
+        "entity": "Entity",
+        "status": "Status",
+        "all": "All",
+        "apply": "Filter",
+        "clear": "Clear"
+      },
+      "columns": {
+        "started": "Started",
+        "source": "Source",
+        "adapter": "Adapter",
+        "entity": "Entity",
+        "status": "Status",
+        "read": "Read",
+        "inserted": "Inserted",
+        "updated": "Updated",
+        "unchanged": "Unchanged",
+        "deleted": "Deleted",
+        "rejected": "Rejected",
+        "issues": "Issues",
+        "duration": "Duration"
+      },
+      "status": {
+        "running": "Running",
+        "succeeded": "Succeeded",
+        "error": "Failed",
+        "unknown": "Unknown"
+      },
+      "pagination": {
+        "label": "Pagination",
+        "next": "Older runs →"
+      },
+      "detail": {
+        "title": "Import run",
+        "id": "Run ID",
+        "finished": "Finished",
+        "params": "Parameters",
+        "noParams": "No parameters.",
+        "counts": "Counts",
+        "metric": "Metric",
+        "count": "Count",
+        "rawRecords": "Raw records stored by this run: {count}",
+        "error": "Error",
+        "rejects": "Rejects and issues",
+        "rejectSourceId": "Source ID",
+        "rejectReason": "Reason",
+        "noRejects": "This run had no rejects or issues.",
+        "noSourceId": "No source ID"
+      }
+    }
   }
 }

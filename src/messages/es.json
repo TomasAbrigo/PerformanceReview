@@ -160,5 +160,67 @@
       "status": "Estado",
       "empty": "Sin períodos de empleo."
     }
+  },
+  "Imports": {
+    "nav": "Importaciones",
+    "runs": {
+      "title": "Corridas de importación",
+      "description": "Cada ejecución de una ingesta (CLI o cron) con sus conteos y rechazos.",
+      "empty": "Todavía no hay corridas de importación.",
+      "emptyFiltered": "Ninguna corrida coincide con los filtros.",
+      "back": "← Volver a corridas",
+      "notFound": "Corrida no encontrada.",
+      "filters": {
+        "label": "Filtrar corridas",
+        "source": "Fuente",
+        "entity": "Entidad",
+        "status": "Estado",
+        "all": "Todas",
+        "apply": "Filtrar",
+        "clear": "Limpiar"
+      },
+      "columns": {
+        "started": "Inicio",
+        "source": "Fuente",
+        "adapter": "Adaptador",
+        "entity": "Entidad",
+        "status": "Estado",
+        "read": "Leídos",
+        "inserted": "Insertados",
+        "updated": "Actualizados",
+        "unchanged": "Sin cambios",
+        "deleted": "Eliminados",
+        "rejected": "Rechazados",
+        "issues": "Incidencias",
+        "duration": "Duración"
+      },
+      "status": {
+        "running": "En curso",
+        "succeeded": "Exitosa",
+        "error": "Con error",
+        "unknown": "Desconocido"
+      },
+      "pagination": {
+        "label": "Paginación",
+        "next": "Corridas anteriores →"
+      },
+      "detail": {
+        "title": "Corrida de importación",
+        "id": "ID de corrida",
+        "finished": "Fin",
+        "params": "Parámetros",
+        "noParams": "Sin parámetros.",
+        "counts": "Conteos",
+        "metric": "Métrica",
+        "count": "Cantidad",
+        "rawRecords": "Registros crudos guardados por esta corrida: {count}",
+        "error": "Error",
+        "rejects": "Rechazos e incidencias",
+        "rejectSourceId": "ID de origen",
+        "rejectReason": "Motivo",
+        "noRejects": "Esta corrida no tuvo rechazos ni incidencias.",
+        "noSourceId": "Sin ID de origen"
+      }
+    }
   }
 }

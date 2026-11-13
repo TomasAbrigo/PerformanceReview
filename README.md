@@ -45,6 +45,33 @@ pnpm format      # Prettier
 - `supabase/migrations/` queda reservado para SQL específico de Supabase (RLS, extensiones, funciones).
 - `pnpm db:studio` abre Drizzle Studio.
 
+## Ingesta
+
+La ingesta corre fuera de la app (CLI o cron), nunca dentro de un request. Cada corrida queda registrada en `ingest_run` y se ve en `/es/imports/runs` (lista con conteos y detalle con rechazos).
+
+```bash
+pnpm ingest <entidad> --source fixture|bamboo [--dir <ruta>] [--since <iso>|last]
+pnpm ingest --all --source bamboo        # todas las entidades registradas, en orden
+pnpm ingest --help
+```
+
+- **Entidades:** las del registro `src/modules/ingest/registry.ts` (hoy `employee`). Para sumar una (job_history, goal, ...) se agrega una entrada `{ adapters: { fixture, bamboo }, run }` al `Map`; el CLI, el log de corridas y `sync_state` la toman sin más cambios. Con `--all` se ejecutan en el orden del registro y una falla no frena a las siguientes.
+- **`--source fixture`** lee respuestas de Bamboo guardadas en `--dir` (por defecto `src/modules/bamboo-client/__fixtures__`). **`--source bamboo`** llama a la API y necesita `BAMBOO_COMPANY_DOMAIN` y `BAMBOO_API_KEY` (en `.env.local` o en el entorno).
+- **`--since`** acota la extracción a lo cambiado desde ese instante (ISO 8601); `last` usa el watermark guardado para esa fuente y entidad (si no hay, la corrida es completa). Una corrida con `--since` es incremental y nunca da de baja lo que no devolvió. Hoy el adaptador de Bamboo igual lee la lista completa (la reingesta es idempotente); el feed de cambios lo aprovechará sin cambiar el CLI.
+- **Watermark:** `sync_state` guarda, por (fuente, entidad), el inicio de la última corrida exitosa. Solo avanza en la misma transacción que marca la corrida como `succeeded`; una corrida que falla queda en `error` (con `finished_at` y el mensaje) y deja el watermark anterior intacto.
+- **Salida:** una tabla resumen (leídos, insertados, actualizados, sin cambios, eliminados, rechazados, duración e id de corrida). Código de salida `0` si todo salió bien, `1` si alguna corrida falló y `2` si los argumentos son inválidos.
+- Dos corridas de la misma entidad nunca se pisan: la segunda espera a la primera (lock de Postgres por entidad).
+- `pnpm ingest:employees` queda como alias de `pnpm ingest employee` (con `--source fixture` por defecto).
+
+Ejemplo de cron (crontab del servidor; cada 15 minutos incremental y una completa por la noche, que es la que da de baja a quien ya no está en Bamboo):
+
+```cron
+*/15 * * * * cd /srv/performance-review && pnpm ingest --all --source bamboo --since last >> /var/log/pr-ingest.log 2>&1
+0 3 * * *    cd /srv/performance-review && pnpm ingest --all --source bamboo >> /var/log/pr-ingest.log 2>&1
+```
+
+El código de salida distinto de cero permite alertar desde el propio cron (por ejemplo con `MAILTO` o un wrapper que avise a un canal).
+
 ## Puertos (Supabase local)
 
 Se usan puertos propios para no chocar con otros proyectos locales.
