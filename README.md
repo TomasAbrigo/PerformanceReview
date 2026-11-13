@@ -1,5 +1,7 @@
 # Performance Review
 
+[![CI](https://github.com/TomasAbrigo/PerformanceReview/actions/workflows/ci.yml/badge.svg)](https://github.com/TomasAbrigo/PerformanceReview/actions/workflows/ci.yml)
+
 Herramienta interna de evaluaciones de desempeño que reemplaza el módulo de performance de BambooHR. Los datos se ingestan desde Bamboo conservando sus IDs de origen.
 
 **Stack:** Next.js (App Router, TypeScript estricto, Tailwind v4, shadcn/ui) · next-intl (`es` por defecto, `en`) · Supabase local · Drizzle ORM (postgres-js) · Vitest · Playwright.
@@ -31,6 +33,7 @@ pnpm test:unit   # Vitest (jsdom) — *.test.ts(x)
 pnpm test:db     # Vitest (node) contra DATABASE_URL — *.db.test.ts (requiere supabase start)
 pnpm test:e2e    # Playwright (levanta next dev en :3100); la primera vez: pnpm exec playwright install chromium
 pnpm test        # unit + db
+pnpm check       # typecheck + lint + format:check + test:unit (como el job `checks` de CI)
 pnpm typecheck
 pnpm lint
 pnpm format      # Prettier
