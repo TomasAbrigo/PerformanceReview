@@ -14,6 +14,8 @@ export type IngestCounts = {
   updated: number;
   unchanged: number;
   rejected: number;
+  /** Employments soft-deleted because a full extraction no longer had them. */
+  deleted: number;
 };
 
 export type IngestReject = { sourceId: string | null; reason: string };

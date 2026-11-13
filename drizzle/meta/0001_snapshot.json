@@ -1,5 +1,5 @@
 {
-  "id": "e4bd5699-be73-4b4c-b162-4d169089b550",
+  "id": "abd23f2a-f2c3-47dc-b930-204891efb979",
   "prevId": "73bf4b67-c0d7-4802-83b1-aecbee0ac1a6",
   "version": "7",
   "dialect": "postgresql",
@@ -271,29 +271,7 @@
           "notNull": false
         }
       },
-      "indexes": {
-        "employment_source_uq": {
-          "name": "employment_source_uq",
-          "columns": [
-            {
-              "expression": "source_system",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "source_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": true,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
+      "indexes": {},
       "foreignKeys": {
         "employment_person_id_person_id_fk": {
           "name": "employment_person_id_person_id_fk",
@@ -310,7 +288,17 @@
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
+      "uniqueConstraints": {
+        "employment_source_period_uq": {
+          "name": "employment_source_period_uq",
+          "nullsNotDistinct": true,
+          "columns": [
+            "source_system",
+            "source_id",
+            "hire_date"
+          ]
+        }
+      },
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
@@ -426,8 +414,8 @@
         }
       },
       "indexes": {
-        "source_identity_system_kind_value_uq": {
-          "name": "source_identity_system_kind_value_uq",
+        "source_identity_open_uq": {
+          "name": "source_identity_open_uq",
           "columns": [
             {
               "expression": "source_system",
@@ -449,6 +437,7 @@
             }
           ],
           "isUnique": true,
+          "where": "valid_to is null",
           "concurrently": false,
           "method": "btree",
           "with": {}

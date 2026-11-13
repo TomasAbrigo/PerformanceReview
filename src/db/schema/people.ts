@@ -1,8 +1,10 @@
+import { sql } from "drizzle-orm";
 import {
   date,
   pgTable,
   text,
   timestamp,
+  unique,
   uniqueIndex,
   uuid,
 } from "drizzle-orm/pg-core";
@@ -43,17 +45,21 @@ export const sourceIdentity = pgTable(
     ...timestamps(),
   },
   (t) => [
-    uniqueIndex("source_identity_system_kind_value_uq").on(
-      t.sourceSystem,
-      t.kind,
-      t.value,
-    ),
+    // Only one OPEN holder per value; closed rows keep history and a value
+    // can later be held again (by the same or another person).
+    uniqueIndex("source_identity_open_uq")
+      .on(t.sourceSystem, t.kind, t.value)
+      .where(sql`valid_to is null`),
   ],
 );
 
 export type SourceIdentity = typeof sourceIdentity.$inferSelect;
 
-/** Employment period of a person (hire → termination). */
+/**
+ * Employment period of a person (hire → termination). `source_id` is the
+ * Bamboo employee id; a rehire under the same id is a new period, so periods
+ * are keyed by (source_system, source_id, hire_date).
+ */
 export const employment = pgTable(
   "employment",
   {
@@ -66,7 +72,11 @@ export const employment = pgTable(
     status: text("status"),
     ...sourceColumns(),
   },
-  (t) => [uniqueIndex("employment_source_uq").on(t.sourceSystem, t.sourceId)],
+  (t) => [
+    unique("employment_source_period_uq")
+      .on(t.sourceSystem, t.sourceId, t.hireDate)
+      .nullsNotDistinct(),
+  ],
 );
 
 export type Employment = typeof employment.$inferSelect;

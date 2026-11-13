@@ -2,7 +2,6 @@ import { useFormatter, useTranslations } from "next-intl";
 import {
   Table,
   TableBody,
-  TableCaption,
   TableCell,
   TableHead,
   TableHeader,
@@ -31,9 +30,6 @@ export function PersonDetail({ person }: { person: PersonDetailData }) {
       <section className="flex flex-col gap-2">
         <h2 className="text-lg font-medium">{t("identities.title")}</h2>
         <Table aria-label={t("identities.title")}>
-          <TableCaption className="sr-only">
-            {t("identities.title")}
-          </TableCaption>
           <TableHeader>
             <TableRow>
               <TableHead>{t("identities.kind")}</TableHead>

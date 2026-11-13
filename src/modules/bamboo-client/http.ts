@@ -5,10 +5,14 @@ export type BambooConfig = {
   baseUrl?: string;
   /** Max in-flight requests (default 4). */
   concurrency?: number;
-  /** Per-request timeout in ms (default 30s). */
+  /** Per-request timeout in ms, covering headers and body (default 30s). */
   timeoutMs?: number;
   /** Max attempts per request including the first (default 6). */
   maxAttempts?: number;
+  /** Longest Retry-After we honor; longer values fall back to backoff (default 60s). */
+  maxRetryAfterMs?: number;
+  /** Aborts in-flight requests and retry waits (e.g. on CLI shutdown). */
+  signal?: AbortSignal;
   /** Injected for tests; defaults to global fetch. */
   fetch?: typeof fetch;
 };
@@ -44,19 +48,65 @@ function backoffMs(attempt: number): number {
   return Math.min(30_000, base) * (0.5 + Math.random() / 2);
 }
 
-const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+function abortError(signal: AbortSignal): Error {
+  return signal.reason instanceof Error
+    ? signal.reason
+    : new Error("The operation was aborted");
+}
 
-function createLimiter(max: number) {
+/** setTimeout that rejects as soon as `signal` aborts. */
+function sleep(ms: number, signal?: AbortSignal): Promise<void> {
+  return new Promise((resolve, reject) => {
+    if (signal?.aborted) return reject(abortError(signal));
+    const onAbort = () => {
+      clearTimeout(timer);
+      reject(abortError(signal!));
+    };
+    const timer = setTimeout(() => {
+      signal?.removeEventListener("abort", onAbort);
+      resolve();
+    }, ms);
+    signal?.addEventListener("abort", onAbort, { once: true });
+  });
+}
+
+/** Reads the body as JSON, cancelling the stream if `signal` aborts first. */
+async function readJson(res: Response, signal: AbortSignal): Promise<unknown> {
+  if (signal.aborted) {
+    await res.body?.cancel().catch(() => {});
+    throw abortError(signal);
+  }
+  let onAbort: () => void = () => {};
+  const aborted = new Promise<never>((_, reject) => {
+    onAbort = () => {
+      res.body?.cancel().catch(() => {});
+      reject(abortError(signal));
+    };
+    signal.addEventListener("abort", onAbort, { once: true });
+  });
+  try {
+    return await Promise.race([res.json(), aborted]);
+  } finally {
+    signal.removeEventListener("abort", onAbort);
+  }
+}
+
+/**
+ * At most `max` tasks run at once. A finishing task hands its slot directly
+ * to the next waiter (no decrement/increment gap a newcomer could slip into).
+ */
+export function createLimiter(max: number) {
   let active = 0;
   const queue: (() => void)[] = [];
   return async function limit<T>(task: () => Promise<T>): Promise<T> {
-    if (active >= max) await new Promise<void>((r) => queue.push(r));
-    active++;
+    if (active < max) active++;
+    else await new Promise<void>((r) => queue.push(r));
     try {
       return await task();
     } finally {
-      active--;
-      queue.shift()?.();
+      const next = queue.shift();
+      if (next) next();
+      else active--;
     }
   };
 }
@@ -74,7 +124,9 @@ export function createHttp(config: BambooConfig): HttpGet {
   const auth = `Basic ${Buffer.from(`${config.apiKey}:x`).toString("base64")}`;
   const timeoutMs = config.timeoutMs ?? 30_000;
   const maxAttempts = config.maxAttempts ?? 6;
+  const maxRetryAfterMs = config.maxRetryAfterMs ?? 60_000;
   const limit = createLimiter(config.concurrency ?? 4);
+  const outer = config.signal;
 
   return async function get(path, query = {}) {
     const url = new URL(baseUrl + path);
@@ -83,37 +135,51 @@ export function createHttp(config: BambooConfig): HttpGet {
     }
     // `url` never contains the key; errors only ever reference it.
     const where = `GET ${url.pathname}`;
+    const fail = (message: string, status: number | null = null) =>
+      new BambooError(message, status, null, url.toString());
 
     for (let attempt = 1; ; attempt++) {
+      const timeout = AbortSignal.timeout(timeoutMs);
+      const signal = outer ? AbortSignal.any([outer, timeout]) : timeout;
       let res: Response;
+      let body: unknown;
       try {
-        res = await limit(() =>
-          doFetch(url, {
+        res = await limit(async () => {
+          const r = await doFetch(url, {
             method: "GET",
             headers: { Accept: "application/json", Authorization: auth },
-            signal: AbortSignal.timeout(timeoutMs),
-          }),
-        );
+            signal,
+          });
+          // Body is read under the same signal so a stalled stream times out.
+          if (r.ok) body = await readJson(r, signal);
+          return r;
+        });
       } catch (err) {
-        if (attempt >= maxAttempts) {
-          throw new BambooError(
-            `${where} failed: ${(err as Error).message}`,
-            null,
-            null,
-            url.toString(),
-          );
+        if (outer?.aborted || attempt >= maxAttempts) {
+          throw fail(`${where} failed: ${(err as Error).message}`);
         }
-        await sleep(backoffMs(attempt));
+        try {
+          await sleep(backoffMs(attempt), outer);
+        } catch (abort) {
+          throw fail(`${where} aborted: ${(abort as Error).message}`);
+        }
         continue;
       }
 
-      if (res.ok) return res.json();
+      if (res.ok) return body;
+      await res.body?.cancel().catch(() => {});
 
       if (RETRYABLE.has(res.status) && attempt < maxAttempts) {
-        await res.body?.cancel();
+        const retryAfter = parseRetryAfter(res.headers.get("retry-after"));
         const wait =
-          parseRetryAfter(res.headers.get("retry-after")) ?? backoffMs(attempt);
-        await sleep(wait);
+          retryAfter !== null && retryAfter <= maxRetryAfterMs
+            ? retryAfter
+            : backoffMs(attempt);
+        try {
+          await sleep(wait, outer);
+        } catch (abort) {
+          throw fail(`${where} aborted: ${(abort as Error).message}`);
+        }
         continue;
       }
 

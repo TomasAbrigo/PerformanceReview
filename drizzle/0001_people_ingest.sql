@@ -22,7 +22,8 @@ CREATE TABLE "employment" (
 	"payload_hash" text,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
-	"deleted_at" timestamp with time zone
+	"deleted_at" timestamp with time zone,
+	CONSTRAINT "employment_source_period_uq" UNIQUE NULLS NOT DISTINCT("source_system","source_id","hire_date")
 );
 --> statement-breakpoint
 CREATE TABLE "person" (
@@ -51,5 +52,4 @@ ALTER TABLE "raw_record" ADD CONSTRAINT "raw_record_run_id_ingest_run_id_fk" FOR
 ALTER TABLE "employment" ADD CONSTRAINT "employment_person_id_person_id_fk" FOREIGN KEY ("person_id") REFERENCES "public"."person"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "source_identity" ADD CONSTRAINT "source_identity_person_id_person_id_fk" FOREIGN KEY ("person_id") REFERENCES "public"."person"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 CREATE UNIQUE INDEX "raw_record_source_entity_id_hash_uq" ON "raw_record" USING btree ("source_system","entity","source_id","payload_hash");--> statement-breakpoint
-CREATE UNIQUE INDEX "employment_source_uq" ON "employment" USING btree ("source_system","source_id");--> statement-breakpoint
-CREATE UNIQUE INDEX "source_identity_system_kind_value_uq" ON "source_identity" USING btree ("source_system","kind","value");
+CREATE UNIQUE INDEX "source_identity_open_uq" ON "source_identity" USING btree ("source_system","kind","value") WHERE valid_to is null;

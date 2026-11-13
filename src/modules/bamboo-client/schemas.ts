@@ -24,7 +24,8 @@ export type BambooEmployee = Record<string, unknown> & {
 };
 
 export const listEmployeesPageSchema = z.looseObject({
-  data: z.array(employeeSchema),
+  // Items stay unparsed (raw) here; callers parse with employeeSchema.
+  data: z.array(z.looseObject({ id: z.union([z.string(), z.number()]) })),
   meta: z
     .looseObject({
       page: z
@@ -47,3 +48,8 @@ export const changedEmployeesSchema = z.looseObject({
 });
 
 export type ChangedEmployees = z.infer<typeof changedEmployeesSchema>;
+
+/** A list-employees item exactly as Bamboo returned it. */
+export type RawBambooEmployee = Record<string, unknown> & {
+  id: string | number;
+};

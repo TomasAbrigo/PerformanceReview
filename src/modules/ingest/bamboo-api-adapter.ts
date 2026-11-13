@@ -27,10 +27,16 @@ export class BambooApiAdapter implements SourceAdapter {
     entity: Entity,
   ): AsyncIterable<ExtractedRecord> {
     if (entity !== "employee") throw new Error(`Unsupported entity ${entity}`);
-    for await (const payload of this.client.listEmployees({
+    // Raw payloads (not the zod-normalized ones): raw_record stays raw and the
+    // hash matches any other adapter fed the same Bamboo JSON.
+    for await (const payload of this.client.listEmployeesRaw({
       fields: EMPLOYEE_FIELDS,
     })) {
-      yield { sourceId: payload.id, payload, extractedAt: new Date() };
+      yield {
+        sourceId: String(payload.id),
+        payload,
+        extractedAt: new Date(),
+      };
     }
   }
 }

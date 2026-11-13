@@ -4,6 +4,7 @@ import page2 from "./__fixtures__/employees-page-2.json";
 import employee101 from "./__fixtures__/employee-101.json";
 import employee103 from "./__fixtures__/employee-103.json";
 import changed from "./__fixtures__/employees-changed.json";
+import { createLimiter } from "./http";
 import { BambooError, createBambooClient } from "./index";
 
 type Handler = (url: URL, init: RequestInit) => Response | Promise<Response>;
@@ -169,5 +170,112 @@ describe("createBambooClient", () => {
       "2026-11-10T00:00:00.000Z",
     );
     expect(result.employees["103"].id).toBe("103");
+  });
+
+  it("caps an absurd Retry-After and falls back to backoff", async () => {
+    vi.useFakeTimers();
+    let n = 0;
+    const { fetch, calls } = fakeFetch(() =>
+      ++n === 1
+        ? new Response(null, {
+            status: 429,
+            headers: { "Retry-After": "86400" },
+          })
+        : json(employee101),
+    );
+    const client = createBambooClient({ ...config, fetch });
+
+    const promise = client.getEmployee("101", []);
+    await vi.advanceTimersByTimeAsync(60_000);
+
+    expect(calls).toHaveLength(2);
+    await expect(promise).resolves.toMatchObject({ id: "101" });
+  });
+
+  it("aborts a retry wait when the caller's signal aborts", async () => {
+    vi.useFakeTimers();
+    const controller = new AbortController();
+    const { fetch, calls } = fakeFetch(
+      () =>
+        new Response(null, { status: 429, headers: { "Retry-After": "30" } }),
+    );
+    const client = createBambooClient({
+      ...config,
+      fetch,
+      signal: controller.signal,
+    });
+
+    const promise = client.getEmployee("101", []).catch((e) => e);
+    await vi.advanceTimersByTimeAsync(10);
+    controller.abort();
+
+    expect(await promise).toBeInstanceOf(BambooError);
+    expect(calls).toHaveLength(1);
+  });
+
+  it("times out while reading a body that never ends", async () => {
+    vi.useFakeTimers();
+    const stalled = new ReadableStream({ start() {} });
+    const { fetch } = fakeFetch(() => new Response(stalled, { status: 200 }));
+    const client = createBambooClient({
+      ...config,
+      fetch,
+      timeoutMs: 1_000,
+      maxAttempts: 1,
+    });
+
+    const promise = client.getEmployee("101", []).catch((e) => e);
+    await vi.advanceTimersByTimeAsync(1_000);
+
+    expect(await promise).toBeInstanceOf(BambooError);
+  });
+
+  it("releases the body of a non-retryable error response", async () => {
+    const cancel = vi.fn();
+    const body = new ReadableStream({ cancel });
+    const { fetch } = fakeFetch(() => new Response(body, { status: 404 }));
+    const client = createBambooClient({ ...config, fetch });
+
+    await client.getEmployee("101", []).catch(() => undefined);
+
+    expect(cancel).toHaveBeenCalled();
+  });
+
+  it("listEmployeesRaw yields the payloads exactly as Bamboo sent them", async () => {
+    const { fetch } = fakeFetch((url) =>
+      url.searchParams.get("page[after]") ? json(page2) : json(page1),
+    );
+    const client = createBambooClient({ ...config, fetch });
+
+    const raw = [];
+    for await (const e of client.listEmployeesRaw({ fields: [] })) raw.push(e);
+
+    expect(raw).toEqual([...page1.data, ...page2.data]);
+  });
+});
+
+describe("createLimiter", () => {
+  it("never exceeds the limit when a slot is handed to a waiter", async () => {
+    const limit = createLimiter(1);
+    let active = 0;
+    let peak = 0;
+    const task = async () => {
+      active++;
+      peak = Math.max(peak, active);
+      await Promise.resolve();
+      active--;
+    };
+
+    const first = limit(task);
+    const second = limit(task);
+    // A newcomer arriving right as the first slot is released.
+    const third = first.then(() => limit(task));
+    const fourth = (async () => {
+      await first;
+      return limit(task);
+    })();
+    await Promise.all([first, second, third, fourth]);
+
+    expect(peak).toBe(1);
   });
 });

@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { bambooId } from "@/modules/bamboo-client/schemas";
 
 const optionalText = z
   .union([z.string(), z.number()])
@@ -16,7 +17,7 @@ const optionalDate = optionalText.transform((v) =>
 /** Validated, normalized employee ready for the domain upsert. */
 export const stagedEmployeeSchema = z
   .looseObject({
-    id: z.union([z.string(), z.number()]).transform(String),
+    id: bambooId,
     displayName: optionalText,
     firstName: optionalText,
     lastName: optionalText,

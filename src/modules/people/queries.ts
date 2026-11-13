@@ -54,12 +54,17 @@ export async function listPeople(
     })
     .from(person)
     .where(
-      q
-        ? or(
-            ilike(person.displayName, pattern),
-            ilike(person.workEmail, pattern),
-          )
-        : undefined,
+      and(
+        // Only people with at least one live (not soft-deleted) employment.
+        sql`exists (select 1 from ${employment} e
+          where e.person_id = "person"."id" and e.deleted_at is null)`,
+        q
+          ? or(
+              ilike(person.displayName, pattern),
+              ilike(person.workEmail, pattern),
+            )
+          : undefined,
+      ),
     )
     .orderBy(asc(person.displayName));
 }

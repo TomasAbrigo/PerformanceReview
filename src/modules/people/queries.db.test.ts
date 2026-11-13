@@ -60,4 +60,14 @@ describe("people queries", () => {
     ]);
     expect(await getPerson(db, "not-a-uuid")).toBeNull();
   });
+
+  it("excludes people whose employments are all soft-deleted", async () => {
+    await db.execute(
+      sql`UPDATE employment SET deleted_at = now() WHERE source_id = '103'`,
+    );
+    expect((await listPeople(db)).map((p) => p.displayName)).toEqual([
+      "Ana García",
+      "Bruno Pérez",
+    ]);
+  });
 });

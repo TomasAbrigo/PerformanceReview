@@ -1,7 +1,7 @@
 import { cp, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
-import { eq, sql } from "drizzle-orm";
+import { and, eq, isNull, sql } from "drizzle-orm";
 import { afterAll, afterEach, beforeEach, describe, expect, it } from "vitest";
 import { closeDb, db } from "@/db/client";
 import {
@@ -59,6 +59,7 @@ describe("runIngest (employees from fixtures)", () => {
       updated: 0,
       unchanged: 0,
       rejected: 0,
+      deleted: 0,
     });
     expect(await db.select().from(person)).toHaveLength(3);
     expect(await db.select().from(rawRecord)).toHaveLength(3);
@@ -98,6 +99,7 @@ describe("runIngest (employees from fixtures)", () => {
       updated: 0,
       unchanged: 3,
       rejected: 0,
+      deleted: 0,
     });
     expect(await db.select().from(person)).toHaveLength(3);
     expect(await db.select().from(rawRecord)).toHaveLength(3);
@@ -194,5 +196,136 @@ describe("runIngest (employees from fixtures)", () => {
     expect(run.rejects).toEqual([
       { sourceId: "105", reason: expect.any(String) },
     ]);
+  });
+
+  async function openIdentities(displayName: string) {
+    return db
+      .select({ kind: sourceIdentity.kind, value: sourceIdentity.value })
+      .from(sourceIdentity)
+      .innerJoin(person, eq(person.id, sourceIdentity.personId))
+      .where(
+        and(
+          eq(person.displayName, displayName),
+          isNull(sourceIdentity.validTo),
+        ),
+      );
+  }
+
+  it("lets a new employee take over a legajo that was released", async () => {
+    await ingest();
+    await editPage("employees-page-1.json", (page) => {
+      page.data[0].employeeNumber = "9999";
+    });
+    await ingest();
+    await editPage("employees-page-2.json", (page) => {
+      page.data.push({
+        ...page.data[0],
+        id: 104,
+        employeeNumber: "0001",
+        displayName: "Diego Sosa",
+        workEmail: "diego.sosa@example.com",
+      });
+    });
+    await ingest();
+
+    expect(await openIdentities("Diego Sosa")).toContainEqual({
+      kind: "employee_number",
+      value: "0001",
+    });
+  });
+
+  it("handles an email going A → B → A", async () => {
+    await ingest();
+    const setEmail = (email: string) =>
+      editPage("employees-page-1.json", (page) => {
+        page.data[1].workEmail = email;
+      });
+    await setEmail("bruno.b@example.com");
+    await ingest();
+    await setEmail("bruno.perez@example.com");
+    const { counts } = await ingest();
+
+    expect(counts).toMatchObject({ updated: 1 });
+    const emails = (await openIdentities("Bruno Pérez")).filter(
+      (i) => i.kind === "work_email",
+    );
+    expect(emails).toEqual([
+      { kind: "work_email", value: "bruno.perez@example.com" },
+    ]);
+  });
+
+  it("records an identity conflict when two active employees share an email, keeping the holder's", async () => {
+    await ingest();
+    await editPage("employees-page-1.json", (page) => {
+      page.data[1].workEmail = "ana.garcia@example.com";
+    });
+
+    const { runId } = await ingest();
+
+    expect(await openIdentities("Ana García")).toContainEqual({
+      kind: "work_email",
+      value: "ana.garcia@example.com",
+    });
+    // Bruno keeps his previous email open rather than ending with none.
+    expect(await openIdentities("Bruno Pérez")).toContainEqual({
+      kind: "work_email",
+      value: "bruno.perez@example.com",
+    });
+    const [run] = await db
+      .select()
+      .from(ingestRun)
+      .where(eq(ingestRun.id, runId));
+    expect(run.rejects).toEqual([
+      {
+        sourceId: "102",
+        reason: expect.stringContaining("identity_conflict"),
+      },
+    ]);
+  });
+
+  it("soft-deletes employments missing from a full extraction", async () => {
+    await ingest();
+    await editPage("employees-page-2.json", (page) => {
+      page.data = [];
+    });
+    await rm(path.join(dir, "employee-103.json"));
+
+    const { counts } = await ingest();
+
+    expect(counts).toMatchObject({ read: 2, deleted: 1 });
+    const [carla] = await db
+      .select()
+      .from(employment)
+      .where(eq(employment.sourceId, "103"));
+    expect(carla.deletedAt).toBeInstanceOf(Date);
+  });
+
+  it("keeps both periods when a terminated employee is rehired under the same id", async () => {
+    await editPage("employees-page-2.json", (page) => {
+      page.data[0].hireDate = "2018-01-10";
+    });
+    await ingest();
+    await editPage("employees-page-2.json", (page) => {
+      Object.assign(page.data[0], {
+        hireDate: "2025-02-01",
+        terminationDate: null,
+        status: "Active",
+      });
+    });
+
+    await ingest();
+
+    const periods = await db
+      .select()
+      .from(employment)
+      .where(eq(employment.sourceId, "103"))
+      .orderBy(employment.hireDate);
+    expect(
+      periods.map((p) => [p.hireDate, p.terminationDate, p.status]),
+    ).toEqual([
+      ["2018-01-10", "2024-06-30", "Inactive"],
+      ["2025-02-01", null, "Active"],
+    ]);
+    expect(new Set(periods.map((p) => p.personId)).size).toBe(1);
   });
 });
