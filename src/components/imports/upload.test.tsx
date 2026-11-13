@@ -107,10 +107,7 @@ function setup(
     inspect: vi.fn<UploadActions["inspect"]>(async () => inspect),
     importFile: vi.fn<UploadActions["importFile"]>(async () => importResult),
   };
-  renderIn(
-    locale,
-    <UploadForm profiles={builtinProfiles} actions={actions} />,
-  );
+  renderIn(locale, <UploadForm profiles={builtinProfiles} actions={actions} />);
   return actions;
 }
 
@@ -125,9 +122,7 @@ async function previewFile(
   const actions = setup(locale, options);
   const t = messages[locale].Upload;
   await userEvent.upload(screen.getByLabelText(t.choose.fileLabel), file);
-  await userEvent.click(
-    screen.getByRole("button", { name: t.choose.submit }),
-  );
+  await userEvent.click(screen.getByRole("button", { name: t.choose.submit }));
   await screen.findByRole("heading", { name: t.preview.title });
   return actions;
 }
@@ -234,7 +229,9 @@ describe.each(["es", "en"] as const)("UploadForm (%s)", (locale) => {
       const columns = screen.getByRole("table", { name: t.preview.columns });
       const goal = within(columns).getByRole("row", { name: /^Goal\b/ });
       expect(within(goal).getByText(t.roles.key)).toBeInTheDocument();
-      expect(screen.getByRole("button", { name: t.preview.import })).toBeEnabled();
+      expect(
+        screen.getByRole("button", { name: t.preview.import }),
+      ).toBeEnabled();
     });
 
     it("highlights missing columns and blocks the import", async () => {
@@ -258,7 +255,9 @@ describe.each(["es", "en"] as const)("UploadForm (%s)", (locale) => {
       expect(
         within(columns).getByRole("row", { name: /^Employee Name\b/ }),
       ).not.toHaveAttribute("data-issue");
-      expect(screen.getByRole("button", { name: t.preview.import })).toBeDisabled();
+      expect(
+        screen.getByRole("button", { name: t.preview.import }),
+      ).toBeDisabled();
       expect(screen.getByText(t.preview.blocked)).toBeInTheDocument();
     });
 
@@ -315,7 +314,9 @@ describe.each(["es", "en"] as const)("UploadForm (%s)", (locale) => {
         name: "_fivetran_synced",
       });
       expect(header).toHaveAttribute("data-issue", "type_mismatch");
-      expect(screen.getByRole("button", { name: t.preview.import })).toBeDisabled();
+      expect(
+        screen.getByRole("button", { name: t.preview.import }),
+      ).toBeDisabled();
     });
 
     it("says so when the same content was uploaded before, and when there are no rows", async () => {
@@ -357,17 +358,18 @@ describe.each(["es", "en"] as const)("UploadForm (%s)", (locale) => {
       });
       const read = screen.getByText(t.result.read).closest("div");
       expect(read).toHaveTextContent("119");
-      expect(screen.getByText(t.result.inserted).closest("div")).toHaveTextContent(
-        "117",
-      );
-      expect(screen.getByText(t.result.rejected).closest("div")).toHaveTextContent(
-        "2",
-      );
-      expect(screen.getByText(/key column "Goal" is empty/)).toBeInTheDocument();
-      expect(screen.getByRole("link", { name: t.result.viewRun })).toHaveAttribute(
-        "href",
-        "/imports/runs/run-1",
-      );
+      expect(
+        screen.getByText(t.result.inserted).closest("div"),
+      ).toHaveTextContent("117");
+      expect(
+        screen.getByText(t.result.rejected).closest("div"),
+      ).toHaveTextContent("2");
+      expect(
+        screen.getByText(/key column "Goal" is empty/),
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole("link", { name: t.result.viewRun }),
+      ).toHaveAttribute("href", "/imports/runs/run-1");
       expect(screen.queryByText(t.result.noNew)).toBeNull();
     });
 
@@ -386,6 +388,30 @@ describe.each(["es", "en"] as const)("UploadForm (%s)", (locale) => {
       );
 
       expect(await screen.findByText(t.result.noNew)).toBeInTheDocument();
+    });
+
+    it("does not claim the file was imported before when every row was rejected", async () => {
+      await previewFile(locale, csv(), {
+        importResult: {
+          ok: true,
+          runId: "run-3",
+          counts: {
+            ...counts,
+            read: 2,
+            inserted: 0,
+            unchanged: 0,
+            rejected: 2,
+          },
+          rejects: [],
+        },
+      });
+
+      await userEvent.click(
+        screen.getByRole("button", { name: t.preview.import }),
+      );
+
+      await screen.findByRole("heading", { name: t.result.title });
+      expect(screen.queryByText(t.result.noNew)).toBeNull();
     });
 
     it("starts over after a result", async () => {
@@ -451,9 +477,7 @@ describe.each(["es", "en"] as const)("UploadForm (%s)", (locale) => {
         ),
       );
       await userEvent.type(
-        screen.getByLabelText(
-          t.custom.fieldLabel.replace("{column}", "Goal"),
-        ),
+        screen.getByLabelText(t.custom.fieldLabel.replace("{column}", "Goal")),
         "title",
       );
       await userEvent.click(

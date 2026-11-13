@@ -38,6 +38,21 @@ export type UploadFailure = {
   issues: ProfileIssue[];
 };
 
+/** What is inside an upload: detected columns (with types) and a few rows. */
+export type UploadInspection = {
+  columns: LakeColumn[];
+  /** The first rows (see {@link PREVIEW_ROWS}), ordered by the first column. */
+  rows: LakeRow[];
+};
+
+/** What an import did: its run and counts, and the first rejected rows. */
+export type ImportUploadResult = {
+  runId: string;
+  counts: IngestCounts;
+  /** The first rejected rows; all of them stay on the run. */
+  rejects: IngestReject[];
+};
+
 /** Result of storing and looking inside an uploaded file. */
 export type InspectResult =
   | {
@@ -54,12 +69,4 @@ export type InspectResult =
   | UploadFailure;
 
 /** Result of landing the file's rows. */
-export type ImportResult =
-  | {
-      ok: true;
-      runId: string;
-      counts: IngestCounts;
-      /** The first rejected rows; all of them are on the run. */
-      rejects: IngestReject[];
-    }
-  | UploadFailure;
+export type ImportResult = ({ ok: true } & ImportUploadResult) | UploadFailure;

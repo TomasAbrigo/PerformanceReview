@@ -64,9 +64,7 @@ export class FileSourceAdapter implements SourceAdapter {
     return this.read(ctx);
   }
 
-  private async *read(
-    ctx: ExtractContext,
-  ): AsyncGenerator<ExtractedRecord> {
+  private async *read(ctx: ExtractContext): AsyncGenerator<ExtractedRecord> {
     const { profile } = this;
     const extractedAt = new Date();
     const options = readOptionsFor(profile, {

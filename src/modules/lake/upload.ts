@@ -3,8 +3,8 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { eq } from "drizzle-orm";
 import type { DbOrTx } from "@/db/client";
-import { ingestRun, type IngestReject } from "@/db/schema";
-import { runIngest, type RunIngestResult } from "@/modules/ingest/run-ingest";
+import { ingestRun } from "@/db/schema";
+import { runIngest } from "@/modules/ingest/run-ingest";
 import { DuckDbFileLake } from "./duckdb-file-lake";
 import { FileSourceAdapter } from "./file-source-adapter";
 import {
@@ -13,7 +13,7 @@ import {
   type ProfileIssue,
   type SourceProfile,
 } from "./profiles";
-import type { LakeAdapter, LakeColumn, LakeRow } from "./types";
+import type { LakeAdapter, LakeRow } from "./types";
 import {
   parseCustomProfile,
   resolveUpload,
@@ -22,7 +22,11 @@ import {
   type StoredUpload,
   type UploadStore,
 } from "./upload-store";
-import { PREVIEW_ROWS } from "./upload-shared";
+import {
+  PREVIEW_ROWS,
+  type ImportUploadResult,
+  type UploadInspection,
+} from "./upload-shared";
 
 // One import point for everything about uploads (the store has no DuckDB).
 export {
@@ -38,7 +42,9 @@ export {
   PREVIEW_ROWS,
   UPLOAD_EXTENSIONS,
   UPLOAD_MAX_BYTES,
+  type ImportUploadResult,
   type UploadErrorCode,
+  type UploadInspection,
 } from "./upload-shared";
 
 /**
@@ -91,12 +97,6 @@ async function readable<T>(read: () => Promise<T>): Promise<T> {
   }
 }
 
-export type UploadInspection = {
-  columns: LakeColumn[];
-  /** The first rows (see {@link PREVIEW_ROWS}), ordered by the first column. */
-  rows: LakeRow[];
-};
-
 /** What is inside an upload: detected columns (with types) and a few rows. */
 export async function inspectUpload(
   id: string,
@@ -134,11 +134,6 @@ export type ImportUploadInput = {
   profile: SourceProfile;
   db: DbOrTx;
   store?: UploadStore;
-};
-
-export type ImportUploadResult = RunIngestResult & {
-  /** The first rejected rows; all of them are on the run. */
-  rejects: IngestReject[];
 };
 
 function mismatchMessage(profile: SourceProfile, issues: ProfileIssue[]) {

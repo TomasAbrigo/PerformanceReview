@@ -48,7 +48,10 @@ export function useIssueText() {
 /** What the profile does with each column of the file, for the columns table. */
 function usesOf(profile: SourceProfile | null, column: string) {
   if (!profile) return [];
-  const uses: { kind: "key" | "watermark" | "soft_delete" | "mapped"; field?: string }[] = [];
+  const uses: {
+    kind: "key" | "watermark" | "soft_delete" | "mapped";
+    field?: string;
+  }[] = [];
   if (profile.keyColumns.includes(column)) uses.push({ kind: "key" });
   if (profile.watermarkColumn === column) uses.push({ kind: "watermark" });
   if (profile.softDeleteColumn === column) uses.push({ kind: "soft_delete" });

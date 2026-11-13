@@ -1,9 +1,10 @@
-import { createHash } from "node:crypto";
+import { createHash, randomUUID } from "node:crypto";
 import {
   mkdir,
   readdir,
   readFile,
   rename,
+  rm,
   stat,
   writeFile,
 } from "node:fs/promises";
@@ -114,10 +115,16 @@ export async function storeUpload(
   if (await exists(path)) return { ...stored, existed: true };
 
   await mkdir(dir, { recursive: true });
-  // Write aside and rename, so a reader never sees a half-written upload.
-  const partial = `${path}.${process.pid}.partial`;
-  await writeFile(partial, file.bytes);
-  await rename(partial, path);
+  // Write aside (under a unique name: the same file may arrive twice at once)
+  // and rename, so a reader never sees a half-written upload.
+  const partial = `${path}.${randomUUID()}.partial`;
+  try {
+    await writeFile(partial, file.bytes);
+    await rename(partial, path);
+  } catch (error) {
+    await rm(partial, { force: true });
+    throw error;
+  }
   return { ...stored, existed: false };
 }
 
@@ -209,4 +216,3 @@ export async function listProfiles(
   }
   return [...builtinProfiles, ...custom];
 }
-

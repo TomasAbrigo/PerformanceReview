@@ -77,11 +77,27 @@ describe("storeUpload", () => {
     const bytes = text("a,b\n1,2\n");
 
     const first = await storeUpload({ name: "one.csv", bytes }, store);
-    const second = await storeUpload({ name: "copia de one.csv", bytes }, store);
+    const second = await storeUpload(
+      { name: "copia de one.csv", bytes },
+      store,
+    );
 
     expect(second.existed).toBe(true);
     expect(second.id).toBe(first.id);
     expect(await readdir(store.uploadsDir)).toHaveLength(1);
+  });
+
+  it("copes with the same file arriving twice at once", async () => {
+    const bytes = text("a,b\n1,2\n");
+
+    const stored = await Promise.all(
+      Array.from({ length: 8 }, () =>
+        storeUpload({ name: "same.csv", bytes }, store),
+      ),
+    );
+
+    expect(new Set(stored.map((s) => s.id)).size).toBe(1);
+    expect(await readdir(store.uploadsDir)).toEqual([stored[0].id]);
   });
 
   it("keeps different content apart, even for the same file name", async () => {
@@ -121,10 +137,13 @@ describe("storeUpload", () => {
     ).toBe("empty_file");
     expect(
       await codeOf(
-        storeUpload({ name: "a.csv", bytes: text("abcdef") }, {
-          ...store,
-          maxBytes: 5,
-        }),
+        storeUpload(
+          { name: "a.csv", bytes: text("abcdef") },
+          {
+            ...store,
+            maxBytes: 5,
+          },
+        ),
       ),
     ).toBe("file_too_large");
     expect(UPLOAD_MAX_BYTES).toBe(50 * 1024 * 1024);
@@ -253,14 +272,20 @@ describe("profiles", () => {
   it("lists the built-in profiles when there are no custom ones", async () => {
     const profiles = await listProfiles(store);
 
-    expect(profiles.map((p) => p.name)).toContain("bamboo-employee-performance");
+    expect(profiles.map((p) => p.name)).toContain(
+      "bamboo-employee-performance",
+    );
     expect(profiles).toHaveLength(9);
   });
 
   it("saves a custom profile as JSON under the profiles folder and lists it", async () => {
     await saveProfile(custom, store);
 
-    expect(JSON.parse(await readFile(join(store.profilesDir, "mis-ventas.json"), "utf8"))).toEqual(custom);
+    expect(
+      JSON.parse(
+        await readFile(join(store.profilesDir, "mis-ventas.json"), "utf8"),
+      ),
+    ).toEqual(custom);
     const profiles = await listProfiles(store);
     expect(profiles.at(-1)).toEqual(custom);
     expect(profiles).toHaveLength(10);
@@ -280,9 +305,9 @@ describe("profiles", () => {
   it("does not shadow a built-in profile", async () => {
     const builtin = getBuiltinProfile("bamboo-goal-status")!;
 
-    expect(await codeOf(saveProfile({ ...builtin, keyColumns: ["Goal"] }, store))).toBe(
-      "profile_exists",
-    );
+    expect(
+      await codeOf(saveProfile({ ...builtin, keyColumns: ["Goal"] }, store)),
+    ).toBe("profile_exists");
   });
 
   it.each(["../escape", "con espacios", "Mayusculas", "", "a/b", ".hidden"])(
@@ -295,9 +320,9 @@ describe("profiles", () => {
   );
 
   it("refuses a definition without key columns", async () => {
-    expect(await codeOf(saveProfile({ ...custom, keyColumns: [] }, store))).toBe(
-      "invalid_profile_definition",
-    );
+    expect(
+      await codeOf(saveProfile({ ...custom, keyColumns: [] }, store)),
+    ).toBe("invalid_profile_definition");
   });
 
   it("ignores saved files that are not valid profiles", async () => {

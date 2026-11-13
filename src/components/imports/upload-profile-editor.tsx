@@ -46,7 +46,11 @@ export const emptyDraft: ProfileDraft = {
   fields: {},
 };
 
-export type DraftErrors = { name: boolean; key: boolean; duplicateField: boolean };
+export type DraftErrors = {
+  name: boolean;
+  key: boolean;
+  duplicateField: boolean;
+};
 
 /**
  * The profile a draft describes (null while it is not valid) and what is
@@ -71,11 +75,14 @@ export function buildProfile(
     name: draft.name,
     table: draft.name,
     entity: draft.entity,
-    keyColumns: columns.map((c) => c.name).filter((c) => draft.keys.includes(c)),
+    keyColumns: columns
+      .map((c) => c.name)
+      .filter((c) => draft.keys.includes(c)),
     ...(draft.watermark ? { watermarkColumn: draft.watermark } : {}),
     columnMap,
   });
-  const valid = parsed.success && !errors.name && !errors.key && !errors.duplicateField;
+  const valid =
+    parsed.success && !errors.name && !errors.key && !errors.duplicateField;
   return { profile: valid ? parsed.data : null, errors };
 }
 
@@ -104,7 +111,9 @@ export function ProfileEditor({
     <fieldset className="flex flex-col gap-4 rounded-lg border p-4">
       <legend className="px-1 text-sm font-medium">{t("custom.title")}</legend>
       <div className="grid gap-4 sm:grid-cols-2">
-        <Field data-invalid={draft.name !== "" && errors.name ? true : undefined}>
+        <Field
+          data-invalid={draft.name !== "" && errors.name ? true : undefined}
+        >
           <FieldLabel htmlFor={`${id}-name`}>{t("custom.name")}</FieldLabel>
           <Input
             id={`${id}-name`}
@@ -197,7 +206,10 @@ export function ProfileEditor({
                   autoComplete="off"
                   onChange={(e) =>
                     patch({
-                      fields: { ...draft.fields, [column.name]: e.target.value },
+                      fields: {
+                        ...draft.fields,
+                        [column.name]: e.target.value,
+                      },
                     })
                   }
                 />

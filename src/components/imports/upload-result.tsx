@@ -44,7 +44,7 @@ export function UploadResult({
           </div>
         ))}
       </dl>
-      {counts.read > 0 && counts.inserted === 0 ? (
+      {counts.inserted === 0 && counts.unchanged > 0 ? (
         <p className="text-sm text-muted-foreground">{t("noNew")}</p>
       ) : null}
       {rejects.length > 0 ? (

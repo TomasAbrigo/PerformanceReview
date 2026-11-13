@@ -14,7 +14,8 @@ import type { UploadFailure } from "./upload-shared";
 
 export type WorkerCommand = "inspect" | "import";
 
-export type WorkerResponse<T extends object> = ({ ok: true } & T) | UploadFailure;
+export type WorkerResponse<T extends object> =
+  ({ ok: true } & T) | UploadFailure;
 
 export type WorkerOptions = {
   /** Extra environment for the worker (it inherits the current one). */

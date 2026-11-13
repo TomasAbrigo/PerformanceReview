@@ -48,5 +48,8 @@ export interface SourceAdapter {
   /** Free-form adapter name stored on ingest_run (e.g. "fixture"). */
   readonly name: string;
   readonly entities: readonly IngestEntity[];
-  extract(ctx: ExtractContext, entity: IngestEntity): AsyncIterable<ExtractedRecord>;
+  extract(
+    ctx: ExtractContext,
+    entity: IngestEntity,
+  ): AsyncIterable<ExtractedRecord>;
 }

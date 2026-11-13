@@ -180,7 +180,11 @@ describe("FileSourceAdapter", () => {
     const profile = profileNamed("bamboo-employee-performance");
     const lake = await open(REPORTS);
 
-    const adapter = new FileSourceAdapter(profile, lake, "employee-performance");
+    const adapter = new FileSourceAdapter(
+      profile,
+      lake,
+      "employee-performance",
+    );
 
     expect(adapter.entities).toEqual(["assessment"]);
     expect((await collect(adapter)).records).toHaveLength(69);

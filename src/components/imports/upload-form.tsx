@@ -24,11 +24,7 @@ import {
   ProfileEditor,
   type ProfileDraft,
 } from "./upload-profile-editor";
-import {
-  ColumnsTable,
-  IssueList,
-  RowsTable,
-} from "./upload-preview";
+import { ColumnsTable, IssueList, RowsTable } from "./upload-preview";
 import { UploadResult } from "./upload-result";
 
 /** The server actions the form drives (injected, so the form is testable). */
@@ -168,7 +164,9 @@ export function UploadForm({
             name="file"
             accept={UPLOAD_EXTENSIONS.join(",")}
           />
-          <FieldDescription>{t("choose.hint", { max: MAX_MB })}</FieldDescription>
+          <FieldDescription>
+            {t("choose.hint", { max: MAX_MB })}
+          </FieldDescription>
         </Field>
         <div>
           <Button type="submit" disabled={pending}>
@@ -237,7 +235,9 @@ function Preview({
           })}
         </p>
         {file.existed ? (
-          <p className="text-sm text-muted-foreground">{t("preview.existed")}</p>
+          <p className="text-sm text-muted-foreground">
+            {t("preview.existed")}
+          </p>
         ) : null}
       </div>
 
