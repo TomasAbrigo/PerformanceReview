@@ -50,8 +50,11 @@ export type IdentityCandidate = {
 
 export type IdentityResolution = {
   action: "link" | "create" | "ignore";
+  /** The person linked to, or the one created. */
   personId?: string;
   actorNote?: string;
+  /** Closed by a later ingest that applied the row, not by a reviewer. */
+  auto?: boolean;
 };
 
 /**

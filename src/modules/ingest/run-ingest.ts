@@ -166,11 +166,7 @@ export async function upsertEmployee(
   };
   if (conflicts.length === 0) {
     // It applies cleanly now: whatever was waiting for it is moot.
-    await closeOpenIssue(tx, row, {
-      action: "link",
-      personId,
-      actorNote: "auto",
-    });
+    await closeOpenIssue(tx, row, { action: "link", personId, auto: true });
     return { result, personId };
   }
   const raised = await raiseIssue(tx, {

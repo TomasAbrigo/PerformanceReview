@@ -21,6 +21,7 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
   const tHome = await getTranslations("Home");
   const tSettings = await getTranslations("Settings.nav");
   const tPeople = await getTranslations("People");
+  const tIdentity = await getTranslations("Identity");
 
   return (
     <main className="flex flex-1 items-center justify-center p-8">
@@ -36,6 +37,9 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
           <nav aria-label={tHome("settings")} className="flex flex-col gap-1">
             <Link href="/people" className="underline">
               {tPeople("nav")}
+            </Link>
+            <Link href="/imports/identity" className="underline">
+              {tIdentity("nav")}
             </Link>
             <Link href="/settings/templates" className="underline">
               {tSettings("templates")}
