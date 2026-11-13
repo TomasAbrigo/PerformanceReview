@@ -1,4 +1,4 @@
-import { mkdtemp, readdir, rm, writeFile } from "node:fs/promises";
+import { mkdtemp, readdir, rm, stat, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { basename, extname, join, resolve } from "node:path";
 import {
@@ -6,6 +6,7 @@ import {
   type DuckDBConnection,
   type DuckDBValue,
 } from "@duckdb/node-api";
+import { quote, sqlString } from "./sql";
 import type {
   JsonValue,
   LakeAdapter,
@@ -18,12 +19,10 @@ import { xlsxToCsv } from "./xlsx";
 
 /**
  * Hidden last tiebreaker: position of the row in the file. Without it, rows
- * identical in (watermark, keys) would be skipped by keyset paging.
+ * identical in (watermark, keys) would be skipped by keyset paging. A source
+ * column with this name is refused.
  */
 const ROW_POSITION = "__lake_row_position";
-
-/** Quote an SQL identifier. */
-const quote = (id: string) => `"${id.replaceAll('"', '""')}"`;
 
 const XLSX = ".xlsx";
 
@@ -36,6 +35,19 @@ const READERS: Record<string, string> = {
   ".jsonl": "read_ndjson",
 };
 
+/** Where a table's rows come from. */
+interface TableFile {
+  path: string;
+  /** Converted from .xlsx: read as text, exactly as written in the cells. */
+  textOnly: boolean;
+}
+
+/** A table loaded into the in-memory database, with its source columns. */
+interface LoadedTable {
+  sqlName: string;
+  columns: LakeColumn[];
+}
+
 /** Rows come ordered by watermark, NULLs last: the max is the last non-NULL. */
 function maxWatermark(rows: LakeRow[], column: string): string | null {
   for (let i = rows.length - 1; i >= 0; i--) {
@@ -46,21 +58,47 @@ function maxWatermark(rows: LakeRow[], column: string): string | null {
 }
 
 /**
+ * SQL casting the bound `since` text to the watermark's type. For temporal
+ * columns `since` is parsed as an instant first: casting text such as
+ * `2026-01-10T10:30:00-03:00` straight to a zone-less TIMESTAMP would drop the
+ * offset. Zone-less columns are therefore read as UTC.
+ */
+function sinceAs(type: string, param: string): string {
+  if (type === "TIMESTAMP WITH TIME ZONE") return `CAST(${param} AS ${type})`;
+  if (type === "DATE" || type.startsWith("TIMESTAMP")) {
+    return `CAST(CAST(${param} AS TIMESTAMP WITH TIME ZONE) AS ${type})`;
+  }
+  return `CAST(${param} AS ${type})`;
+}
+
+/**
  * Lake over a directory of `<table>.{csv,parquet,json,ndjson,xlsx}` files,
  * queried in process with DuckDB. Table names come only from the directory
  * listing.
+ *
+ * A table is read from its file once, on first use, into a temporary
+ * in-memory table (types are inferred from the whole file there), and every
+ * page is served from that snapshot: later edits of the file are not seen
+ * until the lake is opened again. Each page is a top-N over the snapshot, so
+ * this is meant for files of up to a few hundred thousand rows.
  */
 export class DuckDbFileLake implements LakeAdapter {
+  private readonly tables = new Map<string, Promise<LoadedTable>>();
+  private loadedCount = 0;
+  private closed = false;
+
   private constructor(
+    private readonly instance: DuckDBInstance,
     private readonly conn: DuckDBConnection,
-    private readonly files: Map<string, string>,
+    private readonly files: Map<string, TableFile>,
     private readonly conversions: string | undefined,
   ) {}
 
   /**
-   * Open the lake over the files of `dir` (not recursive). One table per
-   * file, named after the file without extension. `.xlsx` files are converted
-   * to csv in a temporary folder, removed on `close()`.
+   * Open the lake over the files of `dir` (not recursive; folders are
+   * ignored). One table per file, named after the file without extension.
+   * `.xlsx` files are converted to csv in a temporary folder, removed on
+   * `close()`.
    */
   static async open(dir: string): Promise<DuckDbFileLake> {
     const listing = new Map<string, string>(); // table -> file name
@@ -69,6 +107,13 @@ export class DuckDbFileLake implements LakeAdapter {
       // Skip editor swap files and Office lock files (~$report.xlsx).
       if (file.startsWith(".") || file.startsWith("~$")) continue;
       if (!READERS[ext] && ext !== XLSX) continue;
+      // Regular files only (symlinks are followed): a folder named
+      // employee.parquet is not a table.
+      const isFile = await stat(resolve(dir, file)).then(
+        (s) => s.isFile(),
+        () => false,
+      );
+      if (!isFile) continue;
       const table = basename(file, ext);
       const other = listing.get(table);
       if (other) {
@@ -79,26 +124,28 @@ export class DuckDbFileLake implements LakeAdapter {
       listing.set(table, file);
     }
 
-    const files = new Map<string, string>(); // table -> path DuckDB reads
+    const files = new Map<string, TableFile>();
     let conversions: string | undefined;
+    let instance: DuckDBInstance | undefined;
     try {
       for (const [table, file] of listing) {
         const path = resolve(dir, file);
         if (extname(file) !== XLSX) {
-          files.set(table, path);
+          files.set(table, { path, textOnly: false });
           continue;
         }
         conversions ??= await mkdtemp(join(tmpdir(), "lake-xlsx-conv-"));
         const csvPath = join(conversions, `${table}.csv`);
         await writeFile(csvPath, await xlsxToCsv(path));
-        files.set(table, csvPath);
+        files.set(table, { path: csvPath, textOnly: true });
       }
-      const instance = await DuckDBInstance.create(":memory:");
+      instance = await DuckDBInstance.create(":memory:");
       const conn = await instance.connect();
       // Rendering of timestamps must not depend on the machine's time zone.
       await conn.run(`SET TimeZone='UTC'`);
-      return new DuckDbFileLake(conn, files, conversions);
+      return new DuckDbFileLake(instance, conn, files, conversions);
     } catch (error) {
+      instance?.closeSync();
       if (conversions) await rm(conversions, { recursive: true, force: true });
       throw error;
     }
@@ -106,13 +153,55 @@ export class DuckDbFileLake implements LakeAdapter {
 
   /** SQL table expression for a table. The path comes from our own listing. */
   private source(table: string): string {
-    const path = this.files.get(table);
-    if (!path) throw new Error(`Unknown table "${table}"`);
-    const literal = path.replaceAll("'", "''");
+    const file = this.files.get(table);
+    if (!file) throw new Error(`Unknown table "${table}"`);
+    const path = sqlString(file.path);
+    if (file.textOnly) return `read_csv(${path}, all_varchar=true)`;
     // sample_size=-1: infer types from the whole file, not a 20k-row sample.
-    return extname(path) === ".csv"
-      ? `read_csv('${literal}', sample_size=-1)`
-      : `${READERS[extname(path)]}('${literal}')`;
+    return extname(file.path) === ".csv"
+      ? `read_csv(${path}, sample_size=-1)`
+      : `${READERS[extname(file.path)]}(${path})`;
+  }
+
+  /** The table loaded into memory, loading it on first use. */
+  private load(table: string): Promise<LoadedTable> {
+    let loaded = this.tables.get(table);
+    if (!loaded) {
+      loaded = this.materialize(table);
+      this.tables.set(table, loaded);
+      // A failed load is not cached: the next call retries.
+      loaded.catch(() => this.tables.delete(table));
+    }
+    return loaded;
+  }
+
+  private async materialize(table: string): Promise<LoadedTable> {
+    const source = this.source(table); // fails fast on unknown tables
+    const sqlName = `__lake_table_${this.loadedCount++}`;
+    await this.conn.run(
+      `CREATE TEMP TABLE ${quote(sqlName)} AS
+       SELECT *, row_number() OVER () AS ${quote(ROW_POSITION)} FROM ${source}`,
+    );
+    const described = await this.conn.runAndReadAll(
+      `DESCRIBE SELECT * FROM ${quote(sqlName)}`,
+    );
+    const columns = described.getRowObjectsJson().map((row) => ({
+      name: String(row.column_name),
+      type: String(row.column_type),
+      nullable: row.null === "YES",
+    }));
+    // If the file already has a column with our name, DuckDB renames ours.
+    const ours = columns.pop();
+    if (
+      ours?.name !== ROW_POSITION ||
+      columns.some((c) => c.name === ROW_POSITION)
+    ) {
+      await this.conn.run(`DROP TABLE ${quote(sqlName)}`);
+      throw new Error(
+        `Table "${table}" has a column named "${ROW_POSITION}", which is reserved by the lake adapter for paging: rename it in the file`,
+      );
+    }
+    return { sqlName, columns };
   }
 
   async listTables(): Promise<string[]> {
@@ -120,21 +209,15 @@ export class DuckDbFileLake implements LakeAdapter {
   }
 
   async describeTable(table: string): Promise<LakeColumn[]> {
-    const result = await this.conn.runAndReadAll(
-      `DESCRIBE SELECT * FROM ${this.source(table)}`,
-    );
-    return result.getRowObjectsJson().map((row) => ({
-      name: String(row.column_name),
-      type: String(row.column_type),
-      nullable: row.null === "YES",
-    }));
+    const { columns } = await this.load(table);
+    return columns.map((column) => ({ ...column }));
   }
 
   async *readBatches(
     table: string,
     opts: ReadOptions,
   ): AsyncGenerator<LakeBatch> {
-    const columns = await this.describeTable(table);
+    const { sqlName, columns } = await this.load(table);
     const types = new Map(columns.map((c) => [c.name, c.type]));
     const { watermarkColumn: wm, keyColumns } = opts;
     const batchSize = opts.batchSize ?? 1000;
@@ -172,8 +255,6 @@ export class DuckDbFileLake implements LakeAdapter {
           : `${col(c)} AS ${quote(c)}`,
       )
       .join(", ");
-    // `OVER ()` follows file order because DuckDB preserves insertion order.
-    const from = `(SELECT *, row_number() OVER () AS ${quote(ROW_POSITION)} FROM ${this.source(table)}) AS src`;
 
     let cursor: JsonValue[] | null = null; // order columns of the last row
     for (;;) {
@@ -184,7 +265,7 @@ export class DuckDbFileLake implements LakeAdapter {
         // NULL watermarks can't be proven old, so they are always read.
         params.since = opts.since;
         filters.push(
-          `(${col(wm)} >= CAST($since AS ${types.get(wm)}) OR ${col(wm)} IS NULL)`,
+          `(${col(wm)} >= ${sinceAs(types.get(wm)!, "$since")} OR ${col(wm)} IS NULL)`,
         );
       }
       if (cursor) {
@@ -198,7 +279,7 @@ export class DuckDbFileLake implements LakeAdapter {
       }
       const where = filters.length ? filters.join(" AND ") : "TRUE";
       const result = await this.conn.runAndReadAll(
-        `SELECT ${select} FROM ${from} WHERE ${where} ORDER BY ${order} LIMIT $batch_size`,
+        `SELECT ${select} FROM ${quote(sqlName)} AS src WHERE ${where} ORDER BY ${order} LIMIT $batch_size`,
         params,
       );
       const rows = result.getRowObjectsJson() as LakeRow[];
@@ -210,10 +291,17 @@ export class DuckDbFileLake implements LakeAdapter {
     }
   }
 
+  /** Release the database and delete temporary conversions. Safe to repeat. */
   async close(): Promise<void> {
-    this.conn.closeSync();
-    if (this.conversions) {
-      await rm(this.conversions, { recursive: true, force: true });
+    if (this.closed) return;
+    this.closed = true;
+    try {
+      this.conn.closeSync();
+      this.instance.closeSync();
+    } finally {
+      if (this.conversions) {
+        await rm(this.conversions, { recursive: true, force: true });
+      }
     }
   }
 }

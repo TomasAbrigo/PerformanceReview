@@ -20,6 +20,7 @@ export {
   type ColumnRole,
   type ProfileEntity,
   type ProfileIssue,
+  type ReadOverrides,
   type SourceProfile,
   type TypeFamily,
 } from "./profiles";

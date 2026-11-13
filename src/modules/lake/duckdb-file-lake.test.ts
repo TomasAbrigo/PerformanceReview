@@ -1,7 +1,7 @@
 // @vitest-environment node
 import { DuckDBInstance } from "@duckdb/node-api";
 import { execFile } from "node:child_process";
-import { mkdtemp, rm, writeFile } from "node:fs/promises";
+import { mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -94,15 +94,95 @@ describe("DuckDbFileLake files", () => {
       /ambiguous.*employee/i,
     );
   });
+
+  it("only lists regular files: a folder named like a table is not a table", async () => {
+    const dir = await tempDir({ "b.csv": "id\n1\n" });
+    await mkdir(join(dir, "employee.parquet")); // e.g. a hive-style folder
+    await mkdir(join(dir, "other.csv"));
+    const lake = await DuckDbFileLake.open(dir);
+
+    expect(await lake.listTables()).toEqual(["b"]);
+    await lake.close();
+  });
+
+  it("refuses a table that uses the column name the adapter reserves for paging", async () => {
+    const dir = await tempDir({ "t.csv": "id,__lake_row_position\n1,x\n" });
+    const lake = await DuckDbFileLake.open(dir);
+
+    await expect(lake.describeTable("t")).rejects.toThrow(
+      /__lake_row_position.*reserved/i,
+    );
+    await expect(readAll(lake, "t", { keyColumns: ["id"] })).rejects.toThrow(
+      /reserved/i,
+    );
+    await lake.close();
+  });
+
+  it("can be closed twice", async () => {
+    const lake = await DuckDbFileLake.open(fixtureDir("initial"));
+
+    await lake.close();
+
+    await expect(lake.close()).resolves.toBeUndefined();
+  });
+});
+
+describe("DuckDbFileLake `since`", () => {
+  const sinceIds = async (
+    files: Record<string, string>,
+    watermarkColumn: string,
+    since: string,
+  ) => {
+    const lake = await DuckDbFileLake.open(await tempDir(files));
+    const rows = await readAll(lake, "t", {
+      keyColumns: ["id"],
+      watermarkColumn,
+      since,
+    });
+    await lake.close();
+    return rows.map((row) => row.id);
+  };
+  const zoneless = {
+    "t.csv":
+      "id,changed\n1,2026-01-10 10:00:00\n2,2026-01-10 13:00:00\n3,2026-01-10 14:00:00\n",
+  };
+
+  it("is an instant: an offset is honoured on zone-less columns, which are read as UTC", async () => {
+    // 10:30-03:00 is 13:30 UTC: only the 14:00 row is at or after it.
+    expect(
+      await sinceIds(zoneless, "changed", "2026-01-10T10:30:00-03:00"),
+    ).toEqual(["3"]);
+    expect(await sinceIds(zoneless, "changed", "2026-01-10T13:30:00Z")).toEqual(
+      ["3"],
+    );
+    // A zone-less since is UTC as well.
+    expect(await sinceIds(zoneless, "changed", "2026-01-10 13:00:00")).toEqual([
+      "2",
+      "3",
+    ]);
+  });
+
+  it("works on DATE columns (the UTC date of the instant) and on numeric versions", async () => {
+    const dates = {
+      "t.csv": "id,day\n1,2026-01-09\n2,2026-01-10\n3,2026-01-11\n",
+    };
+    expect(await sinceIds(dates, "day", "2026-01-10")).toEqual(["2", "3"]);
+    expect(await sinceIds(dates, "day", "2026-01-10T23:00:00Z")).toEqual([
+      "2",
+      "3",
+    ]);
+    const versions = { "t.csv": "id,version\n1,1\n2,2\n3,3\n" };
+    expect(await sinceIds(versions, "version", "2")).toEqual(["2", "3"]);
+  });
 });
 
 describe("DuckDbFileLake paging", () => {
-  it("pages hundreds of rows with heavy (watermark, key) ties, each exactly once and in file order within a tie", async () => {
-    // 600 rows over 3 watermarks x 10 keys: 20 rows share each (wm, key), so
-    // only the hidden row position can tell them apart. Every page re-scans
-    // the file, hence the modest size and the explicit timeout (CI is slow).
+  it("pages thousands of rows with heavy (watermark, key) ties, each exactly once and in file order within a tie", async () => {
+    // 4000 rows over 3 watermarks x 10 keys: ~133 rows share each (wm, key),
+    // so only the hidden row position can tell them apart. 4000 / 7 = 572
+    // pages: the file must be read once, not once per page.
     const lines = ["id,changed,payload"];
-    for (let i = 0; i < 600; i++) {
+    for (let i = 0; i < 4000; i++) {
       lines.push(`${i % 10},2026-01-0${(i % 3) + 1}T00:00:00Z,row-${i}`);
     }
     const dir = await tempDir({ "t.csv": lines.join("\n") + "\n" });
@@ -112,16 +192,35 @@ describe("DuckDbFileLake paging", () => {
     const whole = await readAll(lake, "t", { ...opts, batchSize: 5000 });
     const paged = await readAll(lake, "t", { ...opts, batchSize: 7 });
 
-    expect(whole).toHaveLength(600);
-    expect(new Set(whole.map((r) => r.payload)).size).toBe(600);
+    expect(whole).toHaveLength(4000);
+    expect(new Set(whole.map((r) => r.payload)).size).toBe(4000);
     expect(paged).toEqual(whole); // same rows, same order, nothing lost
-    // Within a tie, rows keep the order of the file.
+    // Within a (watermark, key) tie rows keep the order of the file.
     const firstTie = whole
-      .slice(0, 20)
+      .filter((r) => r.id === "0" && String(r.changed).startsWith("2026-01-01"))
       .map((r) => Number(String(r.payload).slice(4)));
+    expect(firstTie.length).toBeGreaterThan(100);
     expect(firstTie).toEqual([...firstTie].sort((a, b) => a - b));
     await lake.close();
   }, 30_000);
+
+  it("takes a snapshot of a table on first use: editing the file mid-pass changes nothing", async () => {
+    const dir = await tempDir({ "t.csv": "id\n1\n2\n3\n" });
+    const lake = await DuckDbFileLake.open(dir);
+    const seen: unknown[] = [];
+
+    for await (const batch of lake.readBatches("t", {
+      keyColumns: ["id"],
+      batchSize: 1,
+    })) {
+      seen.push(...batch.rows.map((row) => row.id));
+      // Rewrite the file after the first batch: the pass must not notice.
+      await writeFile(join(dir, "t.csv"), "id\n7\n8\n9\n10\n");
+    }
+
+    expect(seen).toEqual(["1", "2", "3"]);
+    await lake.close();
+  });
 });
 
 describe("DuckDbFileLake types", () => {
@@ -136,6 +235,7 @@ describe("DuckDbFileLake types", () => {
        TO '${join(dir, "ledger.parquet")}' (FORMAT PARQUET)`,
     );
     conn.closeSync();
+    db.closeSync();
     const lake = await DuckDbFileLake.open(dir);
 
     const columns = await lake.describeTable("ledger");

@@ -231,14 +231,25 @@ export function validateAgainstSchema(
  */
 export function readOptionsFor(
   profile: SourceProfile,
-  overrides: Partial<ReadOptions> = {},
+  overrides: ReadOverrides = {},
 ): ReadOptions {
-  return {
-    keyColumns: profile.keyColumns,
-    watermarkColumn: profile.watermarkColumn,
-    ...overrides,
-  };
+  const options: ReadOptions = { keyColumns: profile.keyColumns };
+  if (profile.watermarkColumn)
+    options.watermarkColumn = profile.watermarkColumn;
+  // Only what the caller really set: an explicit `undefined` must not wipe a
+  // default, and the profile's keys and watermark are not overridable.
+  if (overrides.since !== undefined) options.since = overrides.since;
+  if (overrides.batchSize !== undefined)
+    options.batchSize = overrides.batchSize;
+  if (overrides.columns !== undefined) options.columns = overrides.columns;
+  return options;
 }
+
+/** What a caller may add to a profile's read options. */
+export type ReadOverrides = Pick<
+  ReadOptions,
+  "since" | "batchSize" | "columns"
+>;
 
 // --- Built-in profiles -----------------------------------------------------
 //

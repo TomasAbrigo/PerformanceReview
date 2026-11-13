@@ -143,7 +143,7 @@ describe("xlsxToCsv", () => {
 });
 
 describe("DuckDbFileLake over xlsx files", () => {
-  it("serves an .xlsx like any other table, with types inferred from the content", async () => {
+  it("serves an .xlsx as a table of text: every cell exactly as written, blanks as null", async () => {
     const dir = await dirWith({
       "report.xlsx": buildXlsx(REPORT),
       "plain.csv": "id\n1\n",
@@ -159,19 +159,13 @@ describe("DuckDbFileLake over xlsx files", () => {
     }
 
     expect(await lake.listTables()).toEqual(["plain", "report"]);
-    expect(Object.fromEntries(columns.map((c) => [c.name, c.type]))).toEqual({
-      id: "BIGINT",
-      name: "VARCHAR",
-      active: "BOOLEAN",
-      hired: "DATE",
-      seen: "TIMESTAMP WITH TIME ZONE",
-      notes: "VARCHAR",
-    });
+    // No type inference: a csv would guess BIGINT/BOOLEAN/DATE here.
+    expect(columns.map((c) => c.type)).toEqual(Array(6).fill("VARCHAR"));
     expect(rows).toEqual([
       {
         id: "2",
         name: 'José "Pepe" Díaz',
-        active: false,
+        active: "false",
         hired: null,
         seen: null,
         notes: null,
@@ -179,11 +173,37 @@ describe("DuckDbFileLake over xlsx files", () => {
       {
         id: "9007199254740993",
         name: "Ana, López",
-        active: true,
+        active: "true",
         hired: "2026-01-01",
-        seen: "2026-01-01 12:00:00+00",
+        seen: "2026-01-01T12:00:00.000Z",
         notes: "line 1\nline 2",
       },
+    ]);
+    await lake.close();
+  });
+
+  it("does not let type inference touch numbers: a mixed column keeps every digit", async () => {
+    // A csv sniffer would make this column DOUBLE: 12.50 -> 12.5 and the long
+    // id would round to ...992.
+    const dir = await dirWith({
+      "t.xlsx": buildXlsx([
+        ["id", "amount"],
+        [{ raw: "1" }, { raw: "12.50" }],
+        [{ raw: "2" }, { raw: "9007199254740993" }],
+        [{ raw: "3" }, { raw: "0.10" }],
+      ]),
+    });
+    const lake = await DuckDbFileLake.open(dir);
+
+    const rows = [];
+    for await (const batch of lake.readBatches("t", { keyColumns: ["id"] })) {
+      rows.push(...batch.rows);
+    }
+
+    expect(rows).toEqual([
+      { id: "1", amount: "12.50" },
+      { id: "2", amount: "9007199254740993" },
+      { id: "3", amount: "0.10" },
     ]);
     await lake.close();
   });

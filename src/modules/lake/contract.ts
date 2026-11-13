@@ -184,6 +184,22 @@ export function runLakeAdapterContractTests(
       expect(await readIds("2026-01-10T10:05:01Z")).toEqual([]);
     });
 
+    it("reads `since` as an instant, whatever offset it is written with", async () => {
+      const lake = await open("initial");
+
+      const rows = (
+        await collect(
+          lake.readBatches("employee", {
+            ...EMPLOYEE_READ,
+            // 07:05 at -03:00 is 10:05 UTC, the watermark of the newest row.
+            since: "2026-01-10T07:05:00-03:00",
+          }),
+        )
+      ).flatMap((b) => b.rows);
+
+      expect(ids(rows)).toEqual(["105"]);
+    });
+
     it("accepts a watermark it handed out as `since`", async () => {
       const lake = await open("initial");
       const [first] = await collect(

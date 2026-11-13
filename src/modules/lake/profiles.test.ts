@@ -12,9 +12,10 @@ import {
   readOptionsFor,
   sourceProfileSchema,
   validateAgainstSchema,
+  type ReadOverrides,
   type SourceProfile,
 } from "./profiles";
-import type { LakeColumn, ReadOptions } from "./types";
+import type { LakeColumn } from "./types";
 
 const employeeProfile: SourceProfile = {
   name: "test-employee",
@@ -264,6 +265,47 @@ describe("validateAgainstSchema", () => {
   });
 });
 
+describe("readOptionsFor", () => {
+  it("starts from the profile's keys and watermark and adds the caller's options", () => {
+    expect(
+      readOptionsFor(employeeProfile, { since: "2026-01-10", batchSize: 50 }),
+    ).toStrictEqual({
+      keyColumns: ["id"],
+      watermarkColumn: "_fivetran_synced",
+      since: "2026-01-10",
+      batchSize: 50,
+    });
+  });
+
+  it("ignores options that are explicitly undefined instead of wiping anything", () => {
+    expect(
+      readOptionsFor(employeeProfile, {
+        since: undefined,
+        batchSize: undefined,
+        columns: undefined,
+      }),
+    ).toStrictEqual({
+      keyColumns: ["id"],
+      watermarkColumn: "_fivetran_synced",
+    });
+  });
+
+  it("never lets the caller replace the profile's keys or watermark", () => {
+    // Not allowed by the types; this is what a loosely typed caller could do.
+    const sneaky = {
+      keyColumns: undefined,
+      watermarkColumn: "other",
+      since: "x",
+    } as unknown as Parameters<typeof readOptionsFor>[1];
+
+    expect(readOptionsFor(employeeProfile, sneaky)).toStrictEqual({
+      keyColumns: ["id"],
+      watermarkColumn: "_fivetran_synced",
+      since: "x",
+    });
+  });
+});
+
 /** Which fixture lake each built-in profile is exercised against. */
 const scenarioFor = (profile: SourceProfile) =>
   profile.name.startsWith("fivetran-")
@@ -275,7 +317,7 @@ const scenarioFor = (profile: SourceProfile) =>
 async function readAll(
   scenario: string,
   profile: SourceProfile,
-  overrides: Partial<ReadOptions> = {},
+  overrides: ReadOverrides = {},
 ) {
   const lake = await DuckDbFileLake.open(fixtureDir(scenario));
   try {

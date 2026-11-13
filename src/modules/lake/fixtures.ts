@@ -2,6 +2,7 @@ import { DuckDBInstance } from "@duckdb/node-api";
 import { mkdir, readdir } from "node:fs/promises";
 import { basename, extname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { sqlString } from "./sql";
 
 /** Directory holding one sub-directory of hand-written files per scenario. */
 export const FIXTURES_ROOT = fileURLToPath(
@@ -12,8 +13,6 @@ export const FIXTURES_ROOT = fileURLToPath(
 export function fixtureDir(scenario: string): string {
   return join(FIXTURES_ROOT, scenario);
 }
-
-const sqlString = (value: string) => `'${value.replaceAll("'", "''")}'`;
 
 /**
  * Convert every `<table>.csv` in `srcDir` to `<table>.parquet` in `destDir`
@@ -42,5 +41,6 @@ export async function csvDirToParquet(
     return written;
   } finally {
     conn.closeSync();
+    instance.closeSync();
   }
 }

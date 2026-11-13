@@ -26,12 +26,17 @@ function csvField(text: string): string {
  * read it like any other file. The first row is the header. Numeric cells
  * keep the digits stored in the file (no float round trip), dates become
  * ISO 8601 in UTC, blank rows are dropped.
+ *
+ * The text is only exact if the reader does not re-type it: `DuckDbFileLake`
+ * reads these conversions with `all_varchar`, because a CSV type sniffer
+ * would turn a mixed numeric column into DOUBLE (12.50 -> 12.5, long ids
+ * rounded).
  */
 export async function xlsxToCsv(path: string): Promise<string> {
   let rows: Cell[][];
   try {
-    // parseNumber: keep numbers as the text stored in the file, so a long id
-    // is not rounded and 12.50 stays 12.50.
+    // parseNumber: hand numbers over as the text stored in the file instead of
+    // a JS number, so nothing is rounded or reformatted on the way to the csv.
     const sheet = await readSheet(path, { parseNumber: (text) => text });
     rows = sheet as unknown as Cell[][];
   } catch (error) {
