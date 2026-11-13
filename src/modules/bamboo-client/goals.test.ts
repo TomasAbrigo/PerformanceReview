@@ -45,7 +45,7 @@ describe("getGoalsAggregate", () => {
 
     const { goals, comments, persons } = await client.getGoalsAggregate("101");
 
-    const goal = goals.find((g) => g.title.startsWith("Definir"))!;
+    const goal = goals.find((g) => g.id === "9001")!;
     // 9001 is numeric in the payload, 9002 a string: both come out as strings.
     expect(goals.map((g) => g.id)).toEqual(["9001", "9002"]);
     expect(goal.sharedWithEmployeeIds).toEqual(["102"]);
