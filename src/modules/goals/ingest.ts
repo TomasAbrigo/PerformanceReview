@@ -14,6 +14,8 @@ import {
   type SourceSystem,
 } from "@/db/schema";
 import {
+  advanceSyncState,
+  IngestRunError,
   payloadHash,
   type ExtractedRecord,
   type SkippedEmployee,
@@ -262,6 +264,10 @@ function chooseOwnerCopy(
  * goal, or an employee whose goals could not be read), one reject entry each.
  * Problems with a goal that is still stored (a comment or share that could
  * not be resolved) are reject entries only; the goal is revisited next run.
+ *
+ * Always a full read (change detection is the hash, not a watermark), so there
+ * is no `since`. The run still advances `sync_state` when it succeeds and ends
+ * in `error` as an `IngestRunError` when it throws, like `runIngest`.
  */
 export async function runGoalIngest({
   adapter,
@@ -277,10 +283,11 @@ export async function runGoalIngest({
     .values({
       sourceSystem: source,
       adapter: adapter.name,
+      entity: "goal",
       params: { entity: "goal", ...params },
       status: "running",
     })
-    .returning({ id: ingestRun.id });
+    .returning({ id: ingestRun.id, startedAt: ingestRun.startedAt });
 
   const counts: IngestCounts = {
     read: 0,
@@ -498,22 +505,33 @@ export async function runGoalIngest({
 
     if (extractionError) throw extractionError;
 
-    await db
-      .update(ingestRun)
-      .set({ status: "succeeded", finishedAt: new Date(), counts, rejects })
-      .where(eq(ingestRun.id, run.id));
+    // The watermark moves in the transaction that marks the run succeeded.
+    await db.transaction(async (tx) => {
+      await tx
+        .update(ingestRun)
+        .set({ status: "succeeded", finishedAt: new Date(), counts, rejects })
+        .where(eq(ingestRun.id, run.id));
+      await advanceSyncState(tx, {
+        sourceSystem: source,
+        adapter: adapter.name,
+        entity: "goal",
+        watermark: run.startedAt.toISOString(),
+        runId: run.id,
+      });
+    });
   } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
     await db
       .update(ingestRun)
       .set({
-        status: "failed",
+        status: "error",
         finishedAt: new Date(),
         counts,
         rejects,
-        error: (err as Error).message,
+        error: message,
       })
       .where(eq(ingestRun.id, run.id));
-    throw err;
+    throw new IngestRunError(message, run.id, counts, { cause: err });
   }
 
   return { runId: run.id, counts };

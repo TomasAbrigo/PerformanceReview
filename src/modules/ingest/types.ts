@@ -29,7 +29,10 @@ export type ExtractedRecord = {
 
 export type ExtractContext = {
   signal?: AbortSignal;
-  /** Incremental extraction: only records changed since then (if supported). */
+  /**
+   * Incremental lower bound (the previous watermark). Adapters that cannot
+   * filter by it return everything; ingestion is idempotent either way.
+   */
   since?: string;
   /** Entity "goal": Bamboo ids of the employees whose goals to read. */
   employeeIds?: string[];

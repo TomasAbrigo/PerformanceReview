@@ -15,6 +15,8 @@ import {
 } from "@/db/schema";
 import {
   FixtureAdapter,
+  getSyncState,
+  IngestRunError,
   runIngest,
   type SourceAdapter,
 } from "@/modules/ingest";
@@ -599,8 +601,62 @@ describe("runGoalIngest (goals from fixtures)", () => {
       .select()
       .from(ingestRun)
       .where(eq(sql`${ingestRun.params}->>'entity'`, "goal"));
-    expect(run).toMatchObject({ status: "failed", error: "boom" });
+    expect(run).toMatchObject({ status: "error", error: "boom" });
+    expect(run.finishedAt).toBeInstanceOf(Date);
     expect(await db.select().from(goal)).toHaveLength(5);
+  });
+
+  it("records the run for the log: entity column, IngestRunError with the run id", async () => {
+    const failing: SourceAdapter = {
+      source: "bamboo_api",
+      name: "failing",
+      entities: ["goal"],
+      async *extract() {
+        throw new Error("boom");
+      },
+    };
+
+    const failure = await ingestGoals(failing).catch((e: unknown) => e);
+
+    expect(failure).toBeInstanceOf(IngestRunError);
+    const { runId } = failure as IngestRunError;
+    const [run] = await db
+      .select()
+      .from(ingestRun)
+      .where(eq(ingestRun.id, runId));
+    expect(run).toMatchObject({ entity: "goal", adapter: "failing" });
+  });
+
+  it("advances the goal watermark only when the run succeeds", async () => {
+    const state = () =>
+      getSyncState(db, {
+        sourceSystem: "bamboo_api",
+        adapter: "fixture",
+        entity: "goal",
+      });
+    expect(await state()).toBeNull();
+
+    const { runId } = await ingestGoals();
+    const [run] = await db
+      .select()
+      .from(ingestRun)
+      .where(eq(ingestRun.id, runId));
+    const after = await state();
+    expect(after).toMatchObject({ lastRunId: runId });
+    // The start of the extraction, like every other entity.
+    expect(after?.watermark).toBe(run.startedAt.toISOString());
+
+    const failing: SourceAdapter = {
+      source: "bamboo_api",
+      name: "fixture",
+      entities: ["goal"],
+      async *extract(ctx, entity) {
+        yield* new FixtureAdapter(dir).extract(ctx, entity);
+        throw new Error("boom");
+      },
+    };
+    await expect(ingestGoals(failing)).rejects.toThrow("boom");
+    expect(await state()).toEqual(after);
   });
 
   it("retries a comment that failed staging on the next run", async () => {
@@ -745,7 +801,7 @@ describe("runGoalIngest (goals from fixtures)", () => {
       .select()
       .from(ingestRun)
       .where(eq(sql`${ingestRun.params}->>'entity'`, "goal"));
-    expect(run).toMatchObject({ status: "failed" });
+    expect(run).toMatchObject({ status: "error" });
     expect(run.rejects).toHaveLength(2);
   });
 
