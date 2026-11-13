@@ -13,6 +13,7 @@ import {
   type IngestReject,
   type SourceSystem,
 } from "@/db/schema";
+import { stagedJobHistorySchema, upsertJobHistory } from "./job-history";
 import { stagedEmployeeSchema, type StagedEmployee } from "./staging";
 import type { Entity, SourceAdapter } from "./types";
 
@@ -262,6 +263,7 @@ export async function runIngest({
     unchanged: 0,
     rejected: 0,
     deleted: 0,
+    ...(entity === "job_history" ? { managerUnresolved: 0 } : {}),
   };
   const rejects: IngestReject[] = [];
   const seen = new Set<string>();
@@ -284,6 +286,28 @@ export async function runIngest({
         })
         .onConflictDoNothing();
 
+      if (entity === "job_history") {
+        const staged = stagedJobHistorySchema.safeParse(record.payload);
+        if (!staged.success) {
+          counts.rejected++;
+          rejects.push({
+            sourceId: record.sourceId,
+            reason: staged.error.issues.map((i) => i.message).join("; "),
+          });
+          continue;
+        }
+        const outcome = await db.transaction((tx) =>
+          upsertJobHistory(tx, source, staged.data, hash, run.id),
+        );
+        counts[outcome.result]++;
+        counts.managerUnresolved =
+          (counts.managerUnresolved ?? 0) + outcome.managerUnresolved;
+        if (outcome.reason) {
+          rejects.push({ sourceId: record.sourceId, reason: outcome.reason });
+        }
+        continue;
+      }
+
       const parsed = stagedEmployeeSchema.safeParse(record.payload);
       if (!parsed.success) {
         counts.rejected++;
@@ -305,7 +329,7 @@ export async function runIngest({
 
     // Guard: an empty extraction is far more likely a broken source than a
     // company with nobody left, so it never deletes.
-    if (seen.size > 0) {
+    if (entity === "employee" && seen.size > 0) {
       const now = new Date();
       const deleted = await db
         .update(employment)

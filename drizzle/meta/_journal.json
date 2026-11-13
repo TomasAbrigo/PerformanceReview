@@ -22,6 +22,13 @@
       "when": 1794573783772,
       "tag": "0002_people_ingest",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1794574375558,
+      "tag": "0003_org_history",
+      "breakpoints": true
     }
   ]
 }

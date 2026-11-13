@@ -1,0 +1,46 @@
+[
+  {
+    "id": "1",
+    "employeeId": "101",
+    "date": "2019-03-01",
+    "employmentStatus": "Full-Time",
+    "comment": null,
+    "terminationReasonId": null,
+    "terminationTypeId": null,
+    "terminationRehireId": null,
+    "terminationRegrettableId": null
+  },
+  {
+    "id": "2",
+    "employeeId": "102",
+    "date": "2021-07-15",
+    "employmentStatus": "Full-Time",
+    "comment": null,
+    "terminationReasonId": null,
+    "terminationTypeId": null,
+    "terminationRehireId": null,
+    "terminationRegrettableId": null
+  },
+  {
+    "id": "3",
+    "employeeId": "103",
+    "date": "2018-05-01",
+    "employmentStatus": "Full-Time",
+    "comment": null,
+    "terminationReasonId": null,
+    "terminationTypeId": null,
+    "terminationRehireId": null,
+    "terminationRegrettableId": null
+  },
+  {
+    "id": 4,
+    "employeeId": 103,
+    "date": "2024-06-30",
+    "employmentStatus": "Terminated",
+    "comment": "Renuncia",
+    "terminationReasonId": "Better opportunity",
+    "terminationTypeId": "Resignation (Voluntary)",
+    "terminationRehireId": "Yes",
+    "terminationRegrettableId": "Regrettable"
+  }
+]
