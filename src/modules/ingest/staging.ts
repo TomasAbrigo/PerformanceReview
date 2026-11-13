@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { bambooId } from "@/modules/bamboo-client/schemas";
 
-const optionalText = z
+export const optionalText = z
   .union([z.string(), z.number()])
   .nullish()
   .transform((v) => {
@@ -10,7 +10,7 @@ const optionalText = z
   });
 
 /** Bamboo uses "0000-00-00" for empty dates. */
-const optionalDate = optionalText.transform((v) =>
+export const optionalDate = optionalText.transform((v) =>
   v && /^\d{4}-\d{2}-\d{2}$/.test(v) && !v.startsWith("0000") ? v : null,
 );
 
@@ -26,6 +26,7 @@ export const stagedEmployeeSchema = z
     status: optionalText,
     hireDate: optionalDate,
     terminationDate: optionalDate,
+    supervisorEId: optionalText,
   })
   .transform((e, ctx) => {
     const displayName =
@@ -43,6 +44,7 @@ export const stagedEmployeeSchema = z
       status: e.status,
       hireDate: e.hireDate,
       terminationDate: e.terminationDate,
+      supervisorSourceId: e.supervisorEId,
     };
   });
 
