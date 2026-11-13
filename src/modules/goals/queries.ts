@@ -7,6 +7,7 @@ import {
   person,
   type GoalStatus,
 } from "@/db/schema";
+import { isUuid } from "@/lib/uuid";
 import { listDirectReports } from "./direct-reports";
 
 export type GoalMilestoneView = {
@@ -39,7 +40,17 @@ export type TeamGoalsData = {
   reports: TeamGoalsReport[];
 };
 
-const isUuid = (id: string) => /^[0-9a-f-]{36}$/i.test(id);
+/** Groups `items` by key, keeping their order within each group. */
+function groupBy<T>(items: T[], key: (item: T) => string): Map<string, T[]> {
+  const groups = new Map<string, T[]>();
+  for (const item of items) {
+    const k = key(item);
+    const group = groups.get(k);
+    if (group) group.push(item);
+    else groups.set(k, [item]);
+  }
+  return groups;
+}
 
 /** Goals of the given people (never deleted ones), by due date, none last. */
 async function loadGoals(
@@ -82,6 +93,8 @@ async function loadGoals(
     .where(inArray(goalShare.goalId, goalIds))
     .orderBy(asc(person.displayName), asc(person.id));
 
+  const milestonesByGoal = groupBy(milestones, (m) => m.goalId);
+  const sharesByGoal = groupBy(shares, (s) => s.goalId);
   for (const g of rows) {
     byPerson.get(g.personId)?.push({
       id: g.id,
@@ -92,12 +105,15 @@ async function loadGoals(
       dueDate: g.dueDate,
       completionDate: g.completionDate,
       commentCount: g.commentCount,
-      milestones: milestones
-        .filter((m) => m.goalId === g.id)
-        .map((m) => ({ id: m.id, title: m.title, completedAt: m.completedAt })),
-      sharedWith: shares
-        .filter((s) => s.goalId === g.id)
-        .map((s) => ({ personId: s.personId, displayName: s.displayName })),
+      milestones: (milestonesByGoal.get(g.id) ?? []).map((m) => ({
+        id: m.id,
+        title: m.title,
+        completedAt: m.completedAt,
+      })),
+      sharedWith: (sharesByGoal.get(g.id) ?? []).map((s) => ({
+        personId: s.personId,
+        displayName: s.displayName,
+      })),
     });
   }
   return byPerson;

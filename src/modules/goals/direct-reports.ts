@@ -1,5 +1,6 @@
 import { sql } from "drizzle-orm";
 import type { DbOrTx } from "@/db/client";
+import { activeEmploymentCte } from "@/modules/people/employment";
 
 export type DirectReport = { id: string; displayName: string };
 
@@ -13,28 +14,19 @@ export type DirectReport = { id: string; displayName: string };
  * contract); nothing else in goals depends on how reports are found.
  *
  * `reports(report_id, source_system, supervisor_eid)`: people currently
- * employed (latest live employment neither terminated nor Inactive).
+ * employed (see `activeEmploymentCte`).
  */
 const currentReports = sql`
-  with latest as (
-    select distinct on (e.person_id)
-      e.person_id, e.source_system, e.source_id, e.payload_hash,
-      e.status, e.termination_date
-    from employment e
-    where e.deleted_at is null
-    order by e.person_id, e.hire_date desc nulls last
-  ),
+  with ${activeEmploymentCte},
   reports as (
-    select l.person_id as report_id, l.source_system,
+    select a.person_id as report_id, a.source_system,
       r.payload ->> 'supervisorEId' as supervisor_eid
-    from latest l
+    from active_employment a
     join raw_record r
-      on r.source_system = l.source_system
+      on r.source_system = a.source_system
      and r.entity = 'employee'
-     and r.source_id = l.source_id
-     and r.payload_hash = l.payload_hash
-    where (l.termination_date is null or l.termination_date > current_date)
-      and lower(coalesce(l.status, '')) <> 'inactive'
+     and r.source_id = a.source_id
+     and r.payload_hash = a.payload_hash
   )
 `;
 

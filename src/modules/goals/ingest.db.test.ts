@@ -62,6 +62,51 @@ function tracked(inner: SourceAdapter) {
   return { adapter, loaded };
 }
 
+/** The same records in the opposite order (employee 102's aggregate first). */
+function reversed(inner: SourceAdapter): SourceAdapter {
+  return {
+    source: inner.source,
+    name: inner.name,
+    entities: inner.entities,
+    async *extract(ctx, entity) {
+      const all = [];
+      for await (const r of inner.extract(ctx, entity)) all.push(r);
+      yield* all.reverse();
+    },
+  };
+}
+
+/** An adapter that could not read one employee's goals (Bamboo answered `status`). */
+function skipping(
+  inner: SourceAdapter,
+  employeeId: string,
+  status: number,
+): SourceAdapter {
+  return {
+    source: inner.source,
+    name: inner.name,
+    entities: inner.entities,
+    extract(ctx, entity) {
+      ctx.onSkip?.({ employeeId, status });
+      return inner.extract(
+        {
+          ...ctx,
+          employeeIds: ctx.employeeIds?.filter((id) => id !== employeeId),
+        },
+        entity,
+      );
+    },
+  };
+}
+
+const runRejects = async (runId: string) => {
+  const [run] = await db
+    .select()
+    .from(ingestRun)
+    .where(eq(ingestRun.id, runId));
+  return run.rejects;
+};
+
 const ingestEmployees = () =>
   runIngest({ adapter: new FixtureAdapter(dir), entity: "employee", db });
 const ingestGoals = (adapter: SourceAdapter = new FixtureAdapter(dir)) =>
@@ -483,7 +528,8 @@ describe("runGoalIngest (goals from fixtures)", () => {
 
     const { counts, runId } = await ingestGoals();
 
-    expect(counts).toMatchObject({ read: 3, inserted: 3 });
+    // The unstored shared goal counts as read and rejected, like any reject.
+    expect(counts).toMatchObject({ read: 4, inserted: 3, rejected: 1 });
     expect(await goalBySource("9001")).toBeUndefined();
     const [run] = await db
       .select()
@@ -555,5 +601,169 @@ describe("runGoalIngest (goals from fixtures)", () => {
       .where(eq(sql`${ingestRun.params}->>'entity'`, "goal"));
     expect(run).toMatchObject({ status: "failed", error: "boom" });
     expect(await db.select().from(goal)).toHaveLength(5);
+  });
+
+  it("retries a comment that failed staging on the next run", async () => {
+    const flaky = (broken: boolean): SourceAdapter => {
+      const inner = new FixtureAdapter(dir);
+      return {
+        source: inner.source,
+        name: inner.name,
+        entities: inner.entities,
+        async *extract(ctx, entity) {
+          for await (const r of inner.extract(ctx, entity)) {
+            const load = r.loadComments;
+            yield broken && load && r.sourceId === "9001"
+              ? {
+                  ...r,
+                  // The second comment has no id: it cannot be staged.
+                  loadComments: async () => [
+                    ...(await load()).slice(0, 1),
+                    { text: "sin id", authorUserId: 8102 },
+                  ],
+                }
+              : r;
+          }
+        },
+      };
+    };
+
+    const first = await ingestGoals(flaky(true));
+
+    const plan = await goalBySource("9001");
+    expect(
+      await db
+        .select()
+        .from(goalComment)
+        .where(eq(goalComment.goalId, plan.id)),
+    ).toHaveLength(1);
+    // Bamboo says 2 comments; only 1 was stored, so the count must not claim 2.
+    expect(plan.commentCount).toBe(1);
+    expect(await runRejects(first.runId)).toEqual([
+      { sourceId: "9001", reason: expect.stringContaining("goal_comment") },
+    ]);
+
+    const { adapter, loaded } = tracked(flaky(false));
+    await ingestGoals(adapter);
+
+    expect(loaded).toEqual(["9001"]);
+    expect(
+      await db
+        .select()
+        .from(goalComment)
+        .where(eq(goalComment.goalId, plan.id)),
+    ).toHaveLength(2);
+    expect((await goalBySource("9001")).commentCount).toBe(2);
+  });
+
+  describe("goal owner when the goal is listed in several aggregates", () => {
+    it.each([
+      ["in extraction order", (a: SourceAdapter) => a],
+      ["in reverse extraction order", reversed],
+    ])(
+      "the copy that lists the most people it is shared with owns it, even if the sharee's copy omits itself (%s)",
+      async (_name, order) => {
+        // Bruno's copy lists nobody (not even himself): both copies look like owner copies.
+        await editGoals("goals/102.json", (json) => {
+          goalOf(json, 9001).sharedWithEmployeeIds = [];
+        });
+
+        const { counts } = await ingestGoals(order(new FixtureAdapter(dir)));
+
+        const ana = await personByName("Ana García");
+        expect((await goalBySource("9001")).personId).toBe(ana.id);
+        expect(counts).toMatchObject({ read: 5, inserted: 5, rejected: 0 });
+      },
+    );
+
+    it.each([
+      ["in extraction order", (a: SourceAdapter) => a],
+      ["in reverse extraction order", reversed],
+    ])(
+      "an undecidable owner is chosen by employee id, not by arrival, and reported (%s)",
+      async (_name, order) => {
+        // Nobody is listed as sharee in either copy: nothing tells them apart.
+        await editGoals("goals/101.json", (json) => {
+          goalOf(json, 9001).sharedWithEmployeeIds = [];
+        });
+        await editGoals("goals/102.json", (json) => {
+          goalOf(json, 9001).sharedWithEmployeeIds = [];
+        });
+
+        const { runId } = await ingestGoals(order(new FixtureAdapter(dir)));
+
+        const ana = await personByName("Ana García");
+        expect((await goalBySource("9001")).personId).toBe(ana.id);
+        expect(await runRejects(runId)).toEqual([
+          {
+            sourceId: "9001",
+            reason: expect.stringMatching(/owner.*101.*102/),
+          },
+        ]);
+      },
+    );
+  });
+
+  it("skips an employee whose goals Bamboo refuses to give and keeps going", async () => {
+    const { counts, runId } = await ingestGoals(
+      skipping(new FixtureAdapter(dir), "101", 404),
+    );
+
+    // Ana's goals are missing; Bruno's own are stored, and the plan he only
+    // has shared stays out because its owner was not read.
+    expect(counts).toEqual({
+      read: 5,
+      inserted: 3,
+      updated: 0,
+      unchanged: 0,
+      rejected: 2,
+      deleted: 0,
+    });
+    expect(await runRejects(runId)).toEqual([
+      { sourceId: "101", reason: expect.stringContaining("404") },
+      { sourceId: "9001", reason: expect.stringContaining("owner") },
+    ]);
+    expect(await db.select().from(goal)).toHaveLength(3);
+  });
+
+  it("fails the run when Bamboo refuses every employee (a systematic problem, not a bad record)", async () => {
+    const refusing: SourceAdapter = {
+      ...new FixtureAdapter(dir),
+      source: "bamboo_api",
+      name: "refusing",
+      entities: ["goal"],
+      async *extract(ctx) {
+        for (const employeeId of ctx.employeeIds ?? []) {
+          ctx.onSkip?.({ employeeId, status: 403 });
+        }
+      },
+    };
+
+    await expect(ingestGoals(refusing)).rejects.toThrow(/no employee/i);
+
+    const [run] = await db
+      .select()
+      .from(ingestRun)
+      .where(eq(sql`${ingestRun.params}->>'entity'`, "goal"));
+    expect(run).toMatchObject({ status: "failed" });
+    expect(run.rejects).toHaveLength(2);
+  });
+
+  it("rejects a goal with a milestone without a title and keeps going", async () => {
+    // The goal is listed in Ana's and in Bruno's aggregate: both copies are broken.
+    for (const file of ["goals/101.json", "goals/102.json"]) {
+      await editGoals(file, (json) => {
+        const [milestone] = goalOf(json, 9001).milestones!;
+        milestone.title = "  ";
+      });
+    }
+
+    const { counts, runId } = await ingestGoals();
+
+    expect(counts).toMatchObject({ read: 5, inserted: 4, rejected: 1 });
+    expect(await goalBySource("9001")).toBeUndefined();
+    expect(await runRejects(runId)).toEqual([
+      { sourceId: "9001", reason: expect.stringContaining("milestone") },
+    ]);
   });
 });

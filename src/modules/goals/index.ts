@@ -4,7 +4,6 @@ export {
   type DirectReport,
 } from "./direct-reports";
 export {
-  listActiveEmployeeIds,
   runGoalIngest,
   type RunGoalIngestInput,
   type RunGoalIngestResult,

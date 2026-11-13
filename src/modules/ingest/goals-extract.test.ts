@@ -1,11 +1,19 @@
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
-import { createBambooClient } from "@/modules/bamboo-client";
+import {
+  BambooError,
+  createBambooClient,
+  parseGoalsAggregate,
+} from "@/modules/bamboo-client";
 import { BambooApiAdapter } from "./bamboo-api-adapter";
 import { FixtureAdapter } from "./fixture-adapter";
+import {
+  extractGoals as extractGoalRecords,
+  type GoalSource,
+} from "./goals-extract";
 import { payloadHash } from "./run-ingest";
-import type { ExtractedRecord, SourceAdapter } from "./types";
+import type { Entity, ExtractedRecord, SourceAdapter } from "./types";
 
 const FIXTURES = path.resolve("src/modules/bamboo-client/__fixtures__");
 
@@ -43,9 +51,13 @@ function apiServingFixtures() {
   };
 }
 
-async function extractGoals(adapter: SourceAdapter, employeeIds: string[]) {
+async function extractGoals(
+  adapter: SourceAdapter,
+  employeeIds: string[],
+  entity: Entity = "goal",
+) {
   const out: ExtractedRecord[] = [];
-  for await (const r of adapter.extract({ employeeIds }, "goal")) out.push(r);
+  for await (const r of adapter.extract({ employeeIds }, entity)) out.push(r);
   return out;
 }
 
@@ -143,6 +155,104 @@ describe("goal extraction", () => {
     const last = requested.at(-1)!;
     expect(last.pathname).toBe(
       "/api/v1/performance/employees/102/goals/9101/comments",
+    );
+  });
+});
+
+describe("goal extraction when an employee's goals cannot be read", () => {
+  const aggregate = (goalId: string) =>
+    parseGoalsAggregate({
+      goals: [{ id: goalId, title: "Goal", status: "in_progress" }],
+    });
+
+  /** A source whose aggregate request fails with `status` for employee "102". */
+  const failingFor = (status: number | null): GoalSource => ({
+    getGoalsAggregate: async (employeeId) => {
+      if (employeeId === "102") {
+        throw new BambooError("boom", status, null, "https://x/102");
+      }
+      return aggregate(`g${employeeId}`);
+    },
+    getGoalComments: async () => [],
+  });
+
+  async function run(source: GoalSource) {
+    const skipped: { employeeId: string; status: number }[] = [];
+    const out: string[] = [];
+    for await (const r of extractGoalRecords(
+      source,
+      ["101", "102", "103"],
+      (s) => skipped.push(s),
+    )) {
+      out.push(r.sourceId);
+    }
+    return { out, skipped };
+  }
+
+  it.each([403, 404])(
+    "reports the employee (HTTP %s) and goes on with the others",
+    async (status) => {
+      const { out, skipped } = await run(failingFor(status));
+
+      expect(out).toEqual(["g101", "g103"]);
+      expect(skipped).toEqual([{ employeeId: "102", status }]);
+    },
+  );
+
+  it.each([401, 429, 503, null])(
+    "stops the extraction on %s (credentials, rate limit, outage or network)",
+    async (status) => {
+      await expect(run(failingFor(status))).rejects.toBeInstanceOf(BambooError);
+    },
+  );
+
+  it("does not swallow errors that are not Bamboo answers", async () => {
+    const source: GoalSource = {
+      getGoalsAggregate: async () => {
+        throw new TypeError("bug");
+      },
+      getGoalComments: async () => [],
+    };
+
+    await expect(run(source)).rejects.toThrow("bug");
+  });
+
+  it("the adapters pass the skip callback through the extract context", async () => {
+    const fetch = (async (input: RequestInfo | URL) =>
+      String(input).includes("/102/")
+        ? new Response(null, { status: 404 })
+        : new Response("{}")) as typeof globalThis.fetch;
+    const adapter = new BambooApiAdapter(
+      createBambooClient({ companyDomain: "acme", apiKey: "k", fetch }),
+    );
+    const skipped: { employeeId: string; status: number }[] = [];
+
+    for await (const r of adapter.extract(
+      { employeeIds: ["101", "102"], onSkip: (s) => skipped.push(s) },
+      "goal",
+    )) {
+      void r;
+    }
+
+    expect(skipped).toEqual([{ employeeId: "102", status: 404 }]);
+  });
+});
+
+describe("adapters fail fast on an entity they do not handle", () => {
+  const unknown = "review" as Entity;
+  const adapters: [string, SourceAdapter][] = [
+    ["FixtureAdapter", new FixtureAdapter(FIXTURES)],
+    [
+      "BambooApiAdapter",
+      new BambooApiAdapter(
+        createBambooClient({ companyDomain: "acme", apiKey: "k" }),
+      ),
+    ],
+  ];
+
+  it.each(adapters)("%s throws Unsupported entity", async (_name, adapter) => {
+    await expect(extractGoals(adapter, [], unknown)).rejects.toThrow(
+      "Unsupported entity review",
     );
   });
 });

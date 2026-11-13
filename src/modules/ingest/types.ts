@@ -18,7 +18,15 @@ export type ExtractContext = {
   signal?: AbortSignal;
   /** Entity "goal": Bamboo ids of the employees whose goals to read. */
   employeeIds?: string[];
+  /**
+   * Entity "goal": called for an employee whose goals the source refused to
+   * give (403/404, `status` is the HTTP status); extraction goes on with the
+   * next employee. Other failures abort the extraction.
+   */
+  onSkip?: (skipped: SkippedEmployee) => void;
 };
+
+export type SkippedEmployee = { employeeId: string; status: number };
 
 /** Anything that can produce raw records for our entities. */
 export interface SourceAdapter {

@@ -32,8 +32,11 @@ export class BambooApiAdapter implements SourceAdapter {
     ctx: ExtractContext,
     entity: Entity,
   ): AsyncIterable<ExtractedRecord> {
+    if (!this.entities.includes(entity)) {
+      throw new Error(`Unsupported entity ${String(entity)}`);
+    }
     if (entity === "goal") {
-      yield* extractGoals(this.client, ctx.employeeIds ?? []);
+      yield* extractGoals(this.client, ctx.employeeIds ?? [], ctx.onSkip);
       return;
     }
     // Raw payloads (not the zod-normalized ones): raw_record stays raw and the

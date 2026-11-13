@@ -13,5 +13,6 @@ export type {
   Entity,
   ExtractContext,
   ExtractedRecord,
+  SkippedEmployee,
   SourceAdapter,
 } from "./types";

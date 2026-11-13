@@ -234,9 +234,13 @@ async function upsertEmployee(
   return { result: "updated", conflicts };
 }
 
+/** Entities `runIngest` can stage and upsert; goals have their own runner. */
+const HANDLED_ENTITIES: readonly Entity[] = ["employee"];
+
 /**
  * raw → staged (zod) → domain upsert, recorded as one ingest_run. Extractions
  * are full: employments not seen in a successful run are soft-deleted.
+ * Throws before opening a run for an entity it has no handler for.
  */
 export async function runIngest({
   adapter,
@@ -244,6 +248,9 @@ export async function runIngest({
   db,
   params = {},
 }: RunIngestInput): Promise<RunIngestResult> {
+  if (!HANDLED_ENTITIES.includes(entity)) {
+    throw new Error(`Unsupported entity ${entity}`);
+  }
   const source = adapter.source;
   const [run] = await db
     .insert(ingestRun)

@@ -54,6 +54,25 @@ export const stagedGoalSchema = z
       ctx.addIssue({ code: "custom", message: "goal has no title" });
       return z.NEVER;
     }
+    // A milestone is a checklist line: one without text would render as an
+    // empty row, so the goal is held back like one without a title.
+    const milestones = [];
+    for (const [position, m] of (g.milestones ?? []).entries()) {
+      if (!m.title) {
+        ctx.addIssue({
+          code: "custom",
+          message: `milestone ${m.id} has no title`,
+        });
+        return z.NEVER;
+      }
+      milestones.push({
+        sourceId: m.id,
+        title: m.title,
+        position,
+        completedAt: m.completedDateTime,
+        lastUpdateAt: m.lastUpdateDateTime,
+      });
+    }
     return {
       sourceId: g.id,
       ownerEmployeeId: p.employeeId,
@@ -70,13 +89,7 @@ export const stagedGoalSchema = z
       alignsWithSourceId: g.alignsWithOptionId,
       commentCount: p.commentCount ?? 0,
       sharedWithEmployeeIds: [...new Set(g.sharedWithEmployeeIds ?? [])],
-      milestones: (g.milestones ?? []).map((m, position) => ({
-        sourceId: m.id,
-        title: m.title ?? "",
-        position,
-        completedAt: m.completedDateTime,
-        lastUpdateAt: m.lastUpdateDateTime,
-      })),
+      milestones,
     };
   });
 

@@ -1,16 +1,6 @@
-import {
-  and,
-  asc,
-  eq,
-  isNotNull,
-  isNull,
-  notInArray,
-  or,
-  sql,
-} from "drizzle-orm";
+import { and, eq, isNull, notInArray } from "drizzle-orm";
 import type { DbOrTx } from "@/db/client";
 import {
-  employment,
   goal,
   goalComment,
   goalMilestone,
@@ -26,8 +16,10 @@ import {
 import {
   payloadHash,
   type ExtractedRecord,
+  type SkippedEmployee,
   type SourceAdapter,
 } from "@/modules/ingest";
+import { listActiveEmployeeIds } from "@/modules/people/employment";
 import {
   stagedCommentSchema,
   stagedGoalSchema,
@@ -42,30 +34,6 @@ export type RunGoalIngestInput = {
 };
 
 export type RunGoalIngestResult = { runId: string; counts: IngestCounts };
-
-/** Bamboo ids of employees that can have live goals: not terminated, not deleted. */
-export async function listActiveEmployeeIds(
-  db: DbOrTx,
-  source: SourceSystem,
-): Promise<string[]> {
-  const rows = await db
-    .selectDistinct({ employeeId: employment.sourceId })
-    .from(employment)
-    .where(
-      and(
-        eq(employment.sourceSystem, source),
-        isNotNull(employment.sourceId),
-        isNull(employment.deletedAt),
-        or(
-          isNull(employment.terminationDate),
-          sql`${employment.terminationDate} > current_date`,
-        ),
-        sql`lower(coalesce(${employment.status}, '')) <> 'inactive'`,
-      ),
-    )
-    .orderBy(asc(employment.sourceId));
-  return rows.flatMap((r) => (r.employeeId ? [r.employeeId] : []));
-}
 
 /** Bamboo employee id → person id, from the open bamboo_id identities. */
 async function loadPeopleByBambooId(
@@ -95,6 +63,12 @@ type UpsertInput = {
   existing: Goal | undefined;
   /** Null when the comments were not (re)fetched. */
   comments: StagedComment[] | null;
+  /**
+   * The count to store with the goal when comments were fetched: Bamboo's own,
+   * or only what was stored when some failed staging (so the next run sees the
+   * difference and fetches them again).
+   */
+  commentCount: number;
   hash: string | null;
   sharePersonIds: string[];
   people: People;
@@ -109,6 +83,7 @@ async function upsertGoal(
     ownerPersonId,
     existing,
     comments,
+    commentCount,
     hash,
     sharePersonIds,
     people,
@@ -125,7 +100,7 @@ async function upsertGoal(
     completionDate: staged.completionDate,
     lastChangedAt: staged.lastChangedAt,
     alignsWithSourceId: staged.alignsWithSourceId,
-    ...(comments ? { commentCount: staged.commentCount } : {}),
+    ...(comments ? { commentCount } : {}),
     ingestRunId: runId,
     payloadHash: hash,
     updatedAt: now,
@@ -234,6 +209,43 @@ async function upsertGoal(
   return existing ? "updated" : "inserted";
 }
 
+/** Ids as Bamboo numbers them: 2 before 10. */
+const byEmployeeId = (a: string, b: string) =>
+  a.localeCompare(b, "en", { numeric: true });
+
+/** One aggregate's view of a goal. */
+type Copy = { record: ExtractedRecord; staged: StagedGoal };
+
+/**
+ * Who owns a goal listed in several aggregates (the owner's and those of the
+ * people it is shared with). Bamboo's aggregate has no owner field, so it is
+ * inferred: a copy that lists its own employee among the sharees is a
+ * sharee's. If several copies still qualify (a sharee's omits itself), the one
+ * listing the most sharees wins, being the owner's full view; a tie is
+ * settled by employee id, never by arrival order, and reported.
+ * Null when every copy is a sharee's: the owner was not read.
+ */
+function chooseOwnerCopy(
+  copies: Copy[],
+): { owner: Copy; tied: string[] } | null {
+  const candidates = copies.filter(
+    (c) => !c.staged.sharedWithEmployeeIds.includes(c.staged.ownerEmployeeId),
+  );
+  if (candidates.length === 0) return null;
+  const most = Math.max(
+    ...candidates.map((c) => c.staged.sharedWithEmployeeIds.length),
+  );
+  const top = candidates
+    .filter((c) => c.staged.sharedWithEmployeeIds.length === most)
+    .sort((a, b) =>
+      byEmployeeId(a.staged.ownerEmployeeId, b.staged.ownerEmployeeId),
+    );
+  return {
+    owner: top[0],
+    tied: top.length > 1 ? top.map((c) => c.staged.ownerEmployeeId) : [],
+  };
+}
+
 /**
  * Goals of every active employee: raw → staged (zod) → domain upsert,
  * recorded as one ingest_run. Goals are only ever added or updated: a goal
@@ -243,8 +255,13 @@ async function upsertGoal(
  * the comment count). Comments cost one request per goal, so they are only
  * fetched when Bamboo's count differs from the one stored at the last sync.
  *
- * A goal shared with someone is listed in their aggregate too; the owner is
- * the employee who is not in its `sharedWithEmployeeIds`.
+ * A shared goal is listed in several aggregates: all copies are read first,
+ * then `chooseOwnerCopy` picks the owner's.
+ *
+ * Counts: `read` and `rejected` include every unit that was refused whole (a
+ * goal, or an employee whose goals could not be read), one reject entry each.
+ * Problems with a goal that is still stored (a comment or share that could
+ * not be resolved) are reject entries only; the goal is revisited next run.
  */
 export async function runGoalIngest({
   adapter,
@@ -274,9 +291,6 @@ export async function runGoalIngest({
     deleted: 0,
   };
   const rejects: IngestReject[] = [];
-  const seen = new Set<string>();
-  /** Copies read from the aggregate of someone the goal is shared with. */
-  const sharedCopies = new Map<string, string>();
 
   const saveRaw = (
     entity: string,
@@ -298,8 +312,37 @@ export async function runGoalIngest({
       })
       .onConflictDoNothing();
 
-  async function processGoal(record: ExtractedRecord, staged: StagedGoal) {
+  /** A unit refused whole: one read, one rejected, one reject entry. */
+  const rejectUnit = (reject: IngestReject) => {
+    counts.read++;
+    counts.rejected++;
+    rejects.push(reject);
+  };
+
+  async function rejectRecord(record: ExtractedRecord, reject: IngestReject) {
+    rejectUnit(reject);
+    await saveRaw(
+      "goal",
+      record.sourceId,
+      record.payload,
+      payloadHash(record.payload),
+      record.extractedAt,
+    );
+  }
+
+  async function processGoal(
+    { record, staged }: Copy,
+    issues: string[],
+  ): Promise<void> {
+    counts.read++;
     const hash = payloadHash(record.payload);
+    await saveRaw(
+      "goal",
+      record.sourceId,
+      record.payload,
+      hash,
+      record.extractedAt,
+    );
     const [existing] = await db
       .select()
       .from(goal)
@@ -324,14 +367,15 @@ export async function runGoalIngest({
       existing &&
       !existing.deletedAt &&
       existing.payloadHash === hash &&
-      !commentsChanged
+      !commentsChanged &&
+      issues.length === 0
     ) {
       counts.unchanged++;
       return;
     }
 
-    const issues: string[] = [];
     let comments: StagedComment[] | null = null;
+    let commentCount = staged.commentCount;
     if (commentsChanged) {
       const rawComments = await record.loadComments!();
       await saveRaw(
@@ -347,6 +391,9 @@ export async function runGoalIngest({
         if (parsed.success) comments.push(parsed.data);
         else issues.push(`goal_comment: ${parsed.error.issues[0]?.message}`);
       }
+      // Do not claim comments that were not stored: the difference with
+      // Bamboo's count is what makes the next run fetch them again.
+      if (comments.length < rawComments.length) commentCount = comments.length;
     }
 
     const sharePersonIds: string[] = [];
@@ -367,6 +414,7 @@ export async function runGoalIngest({
         ownerPersonId,
         existing,
         comments,
+        commentCount,
         // Without a hash the goal is revisited next run, once the missing
         // people or comments can be resolved.
         hash: issues.length ? null : hash,
@@ -381,45 +429,74 @@ export async function runGoalIngest({
   }
 
   try {
-    for await (const record of adapter.extract({ employeeIds }, "goal")) {
-      const parsed = stagedGoalSchema.safeParse(record.payload);
-      if (parsed.success) {
-        const staged = parsed.data;
-        if (staged.sharedWithEmployeeIds.includes(staged.ownerEmployeeId)) {
-          sharedCopies.set(staged.sourceId, staged.ownerEmployeeId);
-          continue;
+    // Phase 1: read every aggregate. Goals are grouped by id because a shared
+    // goal comes once per person it is shared with.
+    const copies = new Map<string, Copy[]>();
+    const unreadable = new Map<
+      string,
+      { record: ExtractedRecord; reason: string }
+    >();
+    let extractionError: unknown = null;
+    let skippedEmployees = 0;
+    try {
+      const ctx = {
+        employeeIds,
+        onSkip: ({ employeeId, status }: SkippedEmployee) => {
+          skippedEmployees++;
+          rejectUnit({
+            sourceId: employeeId,
+            reason: `goals of employee ${employeeId} not read: Bamboo answered ${status}`,
+          });
+        },
+      };
+      for await (const record of adapter.extract(ctx, "goal")) {
+        const parsed = stagedGoalSchema.safeParse(record.payload);
+        if (parsed.success) {
+          const list = copies.get(parsed.data.sourceId) ?? [];
+          list.push({ record, staged: parsed.data });
+          copies.set(parsed.data.sourceId, list);
+        } else if (!unreadable.has(record.sourceId)) {
+          unreadable.set(record.sourceId, {
+            record,
+            reason: parsed.error.issues.map((i) => i.message).join("; "),
+          });
         }
-        if (seen.has(staged.sourceId)) continue;
       }
-      seen.add(record.sourceId);
+      // Everyone refused is a permissions or setup problem, not bad records.
+      if (employeeIds.length > 0 && skippedEmployees === employeeIds.length) {
+        throw new Error(
+          `no employee's goals could be read (Bamboo refused all ${employeeIds.length})`,
+        );
+      }
+    } catch (err) {
+      // Keep what was read: the goals stored from it survive the failed run.
+      extractionError = err;
+    }
 
-      counts.read++;
-      await saveRaw(
-        "goal",
-        record.sourceId,
-        record.payload,
-        payloadHash(record.payload),
-        record.extractedAt,
-      );
-      if (!parsed.success) {
-        counts.rejected++;
-        rejects.push({
-          sourceId: record.sourceId,
-          reason: parsed.error.issues.map((i) => i.message).join("; "),
+    // Phase 2: store.
+    for (const [sourceId, { record, reason }] of unreadable) {
+      if (!copies.has(sourceId))
+        await rejectRecord(record, { sourceId, reason });
+    }
+    for (const [sourceId, list] of copies) {
+      const chosen = chooseOwnerCopy(list);
+      if (!chosen) {
+        const sharees = list.map((c) => c.staged.ownerEmployeeId).join(", ");
+        await rejectRecord(list[0].record, {
+          sourceId,
+          reason: `goal only seen shared with employee ${sharees}: its owner was not read (owners must be active employees)`,
         });
         continue;
       }
-      await processGoal(record, parsed.data);
+      const issues = chosen.tied.length
+        ? [
+            `goal owner is ambiguous: listed by employees ${chosen.tied.join(", ")} with the same sharing; chose ${chosen.tied[0]}`,
+          ]
+        : [];
+      await processGoal(chosen.owner, issues);
     }
 
-    for (const [sourceId, employeeId] of sharedCopies) {
-      if (!seen.has(sourceId)) {
-        rejects.push({
-          sourceId,
-          reason: `goal only seen shared with employee ${employeeId}: its owner was not read (owners must be active employees)`,
-        });
-      }
-    }
+    if (extractionError) throw extractionError;
 
     await db
       .update(ingestRun)
