@@ -1,5 +1,5 @@
 import { and, asc, desc, eq, ilike, isNull, or, sql } from "drizzle-orm";
-import type { Database } from "@/db/client";
+import type { DbOrTx } from "@/db/client";
 import {
   employment,
   person,
@@ -35,7 +35,7 @@ export type PersonDetailData = {
 
 /** People, optionally filtered by name/email substring (case-insensitive). */
 export async function listPeople(
-  db: Database,
+  db: DbOrTx,
   query = "",
 ): Promise<PersonListItem[]> {
   const q = query.trim();
@@ -70,7 +70,7 @@ export async function listPeople(
 }
 
 export async function getPerson(
-  db: Database,
+  db: DbOrTx,
   id: string,
 ): Promise<PersonDetailData | null> {
   if (!/^[0-9a-f-]{36}$/i.test(id)) return null;

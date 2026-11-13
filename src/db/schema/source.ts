@@ -10,24 +10,29 @@ export const sourceSystem = pgEnum("source_system", [
 
 export type SourceSystem = (typeof sourceSystem.enumValues)[number];
 
-export const timestamps = () => ({
+/** created_at / updated_at for tables that are not source-backed. */
+export const timestamps = {
   createdAt: timestamp("created_at", { withTimezone: true })
     .notNull()
     .defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true })
     .notNull()
-    .defaultNow(),
-});
+    .defaultNow()
+    .$onUpdate(() => new Date()),
+};
 
 /**
- * Columns every source-backed domain table carries (PRD "Convenciones de
- * datos"). Pair with a unique index on (source_system, source_id).
+ * Columns every domain table carries (PRD "Convenciones de datos",
+ * docs/research/03): where the row came from (`native` for rows created in
+ * this app), its id in that source, the run that last wrote it, the payload
+ * hash, audit timestamps and soft delete. Pair with a unique constraint on
+ * (source_system, source_id).
  */
-export const sourceColumns = () => ({
-  sourceSystem: sourceSystem("source_system").notNull(),
-  sourceId: text("source_id").notNull(),
+export const sourceColumns = {
+  sourceSystem: sourceSystem("source_system").notNull().default("native"),
+  sourceId: text("source_id"),
   ingestRunId: uuid("ingest_run_id"),
   payloadHash: text("payload_hash"),
-  ...timestamps(),
+  ...timestamps,
   deletedAt: timestamp("deleted_at", { withTimezone: true }),
-});
+};

@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
 import { and, eq, isNull, ne, notInArray, sql } from "drizzle-orm";
-import type { Database } from "@/db/client";
+import type { DbOrTx } from "@/db/client";
 import {
   employment,
   ingestRun,
@@ -16,12 +16,10 @@ import {
 import { stagedEmployeeSchema, type StagedEmployee } from "./staging";
 import type { Entity, SourceAdapter } from "./types";
 
-type Tx = Parameters<Parameters<Database["transaction"]>[0]>[0];
-
 export type RunIngestInput = {
   adapter: SourceAdapter;
   entity: Entity;
-  db: Database;
+  db: DbOrTx;
   params?: Record<string, unknown>;
 };
 
@@ -51,7 +49,7 @@ export const payloadHash = (payload: unknown) =>
  * queue belong to the identity module (issue #5).
  */
 export async function resolvePerson(
-  tx: Tx,
+  tx: DbOrTx,
   source: SourceSystem,
   staged: StagedEmployee,
 ): Promise<string | null> {
@@ -75,7 +73,7 @@ export async function resolvePerson(
  * queue); the old identity is only closed after the new one is in place.
  */
 async function syncIdentity(
-  tx: Tx,
+  tx: DbOrTx,
   personId: string,
   source: SourceSystem,
   kind: IdentityKind,
@@ -121,7 +119,7 @@ async function syncIdentity(
 }
 
 async function syncIdentities(
-  tx: Tx,
+  tx: DbOrTx,
   personId: string,
   source: SourceSystem,
   staged: StagedEmployee,
@@ -167,7 +165,7 @@ type Outcome = {
 };
 
 async function upsertEmployee(
-  tx: Tx,
+  tx: DbOrTx,
   source: SourceSystem,
   staged: StagedEmployee,
   hash: string,

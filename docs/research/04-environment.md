@@ -1,4 +1,5 @@
 # Local environment (2026-11-13)
+
 node 24.15.0 (nvm), npm 11.12.1, pnpm 12.10.1, yarn 1.22.22; no bun. docker 29.5.2 + compose 5.1.4 running (Docker.app). git 2.54, gh 2.93 logged in as TomasAbrigo. python3 3.9.6 system, uv 0.11.18. no duckdb CLI. vercel CLI 54.21.1 (not used). supabase CLI 2.119.0 at ~/.local/bin (3.1.0 available). No native postgres; nothing on 5432.
 Running Supabase local stack belongs to ~/Desktop/Client eNPS-sandbox (project_id ydpjkjwyvgwljingpthu): Postgres 17.11 on 54322, Kong 54321, inbucket 54324, shadow 54320, studio 54323 (not running). Also 54327 and 5433 (arcapp-postgres) taken.
 Decision: own Supabase stack for this project, project_id performance-review, ports api 55321 / db 55322 / studio 55323 / shadow 55320 / inbucket 55324. PGlite optional for fast unit tests.

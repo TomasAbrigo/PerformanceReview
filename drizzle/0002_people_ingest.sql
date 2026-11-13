@@ -16,8 +16,8 @@ CREATE TABLE "employment" (
 	"hire_date" date,
 	"termination_date" date,
 	"status" text,
-	"source_system" "source_system" NOT NULL,
-	"source_id" text NOT NULL,
+	"source_system" "source_system" DEFAULT 'native' NOT NULL,
+	"source_id" text,
 	"ingest_run_id" uuid,
 	"payload_hash" text,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
@@ -46,8 +46,14 @@ CREATE TABLE "source_identity" (
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
+ALTER TABLE "rating_scale" ALTER COLUMN "source_system" SET DEFAULT 'native'::"public"."source_system";--> statement-breakpoint
+ALTER TABLE "rating_scale" ALTER COLUMN "source_system" SET DATA TYPE "public"."source_system" USING "source_system"::"public"."source_system";--> statement-breakpoint
+ALTER TABLE "review_template" ALTER COLUMN "source_system" SET DEFAULT 'native'::"public"."source_system";--> statement-breakpoint
+ALTER TABLE "review_template" ALTER COLUMN "source_system" SET DATA TYPE "public"."source_system" USING "source_system"::"public"."source_system";--> statement-breakpoint
 ALTER TABLE "ingest_run" ADD COLUMN "params" jsonb;--> statement-breakpoint
 ALTER TABLE "ingest_run" ADD COLUMN "rejects" jsonb;--> statement-breakpoint
+ALTER TABLE "rating_scale" ADD COLUMN "deleted_at" timestamp with time zone;--> statement-breakpoint
+ALTER TABLE "review_template" ADD COLUMN "deleted_at" timestamp with time zone;--> statement-breakpoint
 ALTER TABLE "raw_record" ADD CONSTRAINT "raw_record_run_id_ingest_run_id_fk" FOREIGN KEY ("run_id") REFERENCES "public"."ingest_run"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "employment" ADD CONSTRAINT "employment_person_id_person_id_fk" FOREIGN KEY ("person_id") REFERENCES "public"."person"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "source_identity" ADD CONSTRAINT "source_identity_person_id_person_id_fk" FOREIGN KEY ("person_id") REFERENCES "public"."person"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint

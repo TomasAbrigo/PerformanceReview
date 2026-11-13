@@ -6,7 +6,7 @@ import {
   uniqueIndex,
   uuid,
 } from "drizzle-orm/pg-core";
-import { sourceSystem } from "./common";
+import { sourceSystem } from "./source";
 
 export type IngestCounts = {
   read: number;

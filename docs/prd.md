@@ -23,6 +23,7 @@ UI en español e inglés desde el inicio. Primera versión sin login: modo admin
 ## User Stories
 
 ### Datos y sincronización
+
 1. Como People, quiero importar el padrón completo de empleados desde BambooHR (id interno, legajo, email, nombre, puesto, área, división, ubicación, manager, fecha de ingreso, estado), para tener la base organizacional sin cargarla a mano.
 2. Como People, quiero que el sistema traiga el historial de puesto y manager de cada persona (tabla jobInfo y employmentStatus) con fechas de vigencia, para saber quién era el manager en cualquier fecha.
 3. Como People, quiero que las sincronizaciones posteriores sean incrementales (feed de cambios de Bamboo con watermark), para no recargar todo cada vez.
@@ -41,12 +42,14 @@ UI en español e inglés desde el inicio. Primera versión sin login: modo admin
 16. Como People, quiero exportar cualquier tabla o reporte a CSV con id de persona, legajo, id de manager, área y ciclo en cada fila, para analizarlo fuera del sistema.
 
 ### Personas y organización
+
 17. Como People, quiero ver la ficha de una persona con sus identificadores de origen, períodos de empleo e historial de puesto/manager, para verificar que el cruce es correcto.
 18. Como People, quiero ver el organigrama a una fecha dada (manager de cada persona en esa fecha), para reconstruir el contexto de un ciclo pasado.
 19. Como People, quiero un panel de calidad de datos (personas sin manager, reviews cuyo evaluador no coincide con el manager del snapshot, identidades sin resolver, snapshots incompletos), para corregir problemas antes de analizar.
 20. Como People, quiero asignar un evaluador alternativo o adicional a una persona en un ciclo (manager con licencia, línea punteada, CEO sin manager), para que nadie quede sin evaluar.
 
 ### Templates y configuración
+
 21. Como People, quiero crear templates de evaluación con secciones y preguntas de tipo texto, rating con escala y opción única, para adaptar el proceso a la empresa.
 22. Como People, quiero definir para cada pregunta a quién aplica (self, manager, par, upward) y si el evaluado la ve, para controlar la visibilidad por pregunta.
 23. Como People, quiero una biblioteca de escalas de rating (default 4 puntos descriptiva: Necesita desarrollo / Cumple expectativas / Supera a menudo / Marca un nuevo estándar; además 5 puntos y Nunca…Siempre) con valores numéricos y normalizados, para comparar entre ciclos aunque cambie la escala.
@@ -56,6 +59,7 @@ UI en español e inglés desde el inicio. Primera versión sin login: modo admin
 27. Como People, quiero templates distintos por grupo de participantes dentro de un mismo ciclo, para no tener que crear un ciclo por área como en Bamboo.
 
 ### Ciclos
+
 28. Como People, quiero crear un ciclo con nombre, período evaluado, template, participantes (todos, por filtro de área/división/ubicación/puesto/estado/equipo, o individuales) y fechas límite por fase, para lanzar una evaluación.
 29. Como People, quiero elegir qué componentes incluye el ciclo (autoevaluación, evaluación del manager, feedback de pares, upward, calibración) y los modos de anonimato, para configurar desde un ciclo simple hasta un 360.
 30. Como People, quiero que al lanzar el ciclo se congele un snapshot de manager, área, división, puesto y ubicación de cada participante, para que los análisis no cambien cuando alguien se mueve de equipo.
@@ -68,6 +72,7 @@ UI en español e inglés desde el inicio. Primera versión sin login: modo admin
 37. Como People, quiero que el ciclo soporte una cadencia por fecha de ingreso (30/60/90 días, 6 meses, 1 año) además de fechas fijas, para evaluaciones de período de prueba.
 
 ### Autoevaluación (empleado)
+
 38. Como empleado, quiero ver mis tareas pendientes del ciclo (autoevaluación, nominar pares, feedback a dar, acuse de recibo) con sus fechas límite, para saber qué me falta.
 39. Como empleado, quiero completar mi autoevaluación reflexiva (progreso en goals e impacto, bloqueos, cómo me desarrollé, habilidades a desarrollar) guardando borradores, para enviarla cuando esté lista.
 40. Como empleado, quiero ver mis goals del período como bloque de solo lectura dentro de la autoevaluación, para apoyar mis respuestas en datos.
@@ -78,6 +83,7 @@ UI en español e inglés desde el inicio. Primera versión sin login: modo admin
 45. Como empleado, quiero ver mi historial de evaluaciones finalizadas (ciclo, manager en ese momento, rating final, respuestas compartidas), para seguir mi evolución.
 
 ### Evaluación del manager
+
 46. Como manager, quiero ver el estado de mi equipo en el ciclo (quién completó qué, quién está atrasado) y enviar recordatorios, para cumplir los plazos.
 47. Como manager, quiero aprobar o rechazar las nominaciones de pares de cada reporte directo, individualmente o en bloque, para asegurar feedback relevante.
 48. Como manager, quiero completar la evaluación de cada reporte (rating de goals con comentario, logros, oportunidades de mejora con próximos pasos, foco del próximo período, rating general), para evaluar con estructura.
@@ -89,6 +95,7 @@ UI en español e inglés desde el inicio. Primera versión sin login: modo admin
 54. Como manager, quiero ver el historial de ciclos de cada reporte directo, incluyendo los ciclos en que no era su manager, para conocer su trayectoria.
 
 ### Feedback de pares y upward
+
 55. Como par, quiero recibir solicitudes de feedback con las preguntas del ciclo y poder guardar borrador, para responder con tiempo.
 56. Como par, quiero saber si mi feedback será visible con nombre para el evaluado, para el manager, o anónimo, antes de escribirlo.
 57. Como par, quiero poder declinar una solicitud con un motivo, para no bloquear el proceso.
@@ -97,6 +104,7 @@ UI en español e inglés desde el inicio. Primera versión sin login: modo admin
 60. Como reporte directo, quiero dar feedback upward a mi manager de forma anónima, y que el resultado se muestre al manager solo agregado y con un mínimo de respuestas, para hablar con libertad (v2).
 
 ### Calibración
+
 61. Como People, quiero crear grupos de calibración (por área, por manager o manual) e invitar calibradores con acceso de solo lectura, para revisar ratings en conjunto.
 62. Como People, quiero una tabla de calibración por grupo con empleado, manager, rating original, rating propuesto, motivo obligatorio y marca, para ajustar con criterio.
 63. Como People, quiero un histograma de distribución de ratings por área y por manager, sin curva forzada, para detectar sesgos.
@@ -106,6 +114,7 @@ UI en español e inglés desde el inicio. Primera versión sin login: modo admin
 67. Como People, quiero exigir que una evaluación ya compartida se des-comparta antes de poder editarla, para que el empleado no vea cambios silenciosos.
 
 ### Dashboards y análisis
+
 68. Como People, quiero un dashboard del ciclo con avance por fase, por área, por manager y por tipo de evaluación, para seguir la ejecución.
 69. Como People, quiero ver la distribución de ratings por ciclo (pre y post calibración), agrupada por área, manager, ubicación o puesto, para comparar.
 70. Como People, quiero ver la evolución de una persona a lo largo de los ciclos con rating normalizado, manager y puesto de cada momento, para analizar trayectorias.
@@ -116,12 +125,14 @@ UI en español e inglés desde el inicio. Primera versión sin login: modo admin
 75. Como dirección, quiero vistas agregadas sin individuos (distribución por área, participación, brecha self vs manager), para seguir el proceso sin ver datos personales.
 
 ### Goals
+
 76. Como empleado, quiero ver mis goals (importados o nativos) con progreso, milestones y comentarios, para seguirlos en el mismo lugar que la evaluación.
 77. Como manager, quiero ver los goals de mi equipo y su estado, para preparar 1:1 y evaluaciones.
 78. Como People, quiero relacionar goals con ciclos por período (automático) o con vínculo explícito, para alimentar el bloque de goals de cada review.
 79. Como empleado, quiero crear y actualizar goals nativos con milestones cuando ya no usemos Bamboo, para que el módulo sea autosuficiente (v2).
 
 ### Operación, notificaciones y administración
+
 80. Como People, quiero que el sistema envíe recordatorios automáticos antes de cada fecha límite (7 y 1 días) y permita enviar uno manual, para sostener la participación.
 81. Como People, quiero completar o editar una evaluación en nombre de otro con registro de auditoría, para resolver bloqueos.
 82. Como People, quiero desbloquear una evaluación enviada para que se corrija y reenvíe, para arreglar errores sin romper el historial.
@@ -134,11 +145,13 @@ UI en español e inglés desde el inicio. Primera versión sin login: modo admin
 ## Implementation Decisions
 
 **Arquitectura general**
+
 - Monolito Next.js (App Router) con Server Components y Server Actions; la lógica de dominio vive en módulos TypeScript puros fuera de la capa web, invocables desde la UI, desde una CLI y desde tests.
 - Postgres en Supabase local como única base; Drizzle como ORM "SQL-first" (CTEs, vistas, upserts). Sin login en v1; roles simulados por el selector "actuar como", pero toda consulta de dominio recibe un contexto de actor con rol y persona para que agregar Supabase Auth después no toque el modelo.
 - i18n con next-intl, locales es (default) y en; cada string de UI tiene clave; preguntas, secciones y etiquetas de escala guardan texto por locale en el modelo.
 
 **Módulos (profundos, interfaz chica)**
+
 1. `bamboo-client`: cliente tipado de la API pública de Bamboo (API key o OAuth), con reintentos por 429/5xx respetando Retry-After, límite de concurrencia, tres iteradores de paginación (cursor, página/page_size, página en body), normalización de IDs a string y fechas a ISO. Cubre employees (list, get, directory, tables, changed), goals (aggregate v1_2, list, comments), datasets (list, fields, data v2), custom reports, meta y webhooks. Tipos generados desde el OpenAPI oficial.
 2. `source-adapters`: interfaz `SourceAdapter` (fuente, entidades, extract por entidad como iterable asíncrono de {sourceId, payload, extractedAt}) e interfaz `LakeAdapter` (listTables, describeTable, readBatches con keyColumns/watermark/since/batchSize). Implementaciones v1: `BambooApiAdapter`, `FileAdapter` (CSV/XLSX/Parquet/NDJSON vía DuckDB en proceso), `FixtureAdapter` (tests). `LakeSqlAdapter` para BigQuery/Snowflake/Databricks/Redshift/Postgres en v2 con la misma suite de contrato. Perfiles de fuente en configuración: tabla, claves, columna watermark, soft-delete, mapeo de columnas.
 3. `ingest`: pipeline raw → staged → dominio. Tabla `raw_record` (fuente, entidad, source_id, payload jsonb, hash, extracted_at; única por fuente+entidad+source_id+hash), validación con zod en staging, upsert por (source_system, source_id) solo cuando cambia el hash, SCD2 para historial, soft-delete cuando una entidad falta en una extracción completa, `ingest_run` con conteos y rechazos. Watermark se avanza solo tras commit. Corre fuera de request handlers (CLI/worker).
@@ -151,17 +164,20 @@ UI en español e inglés desde el inicio. Primera versión sin login: modo admin
 10. `fixtures/seed`: generador determinista (semilla fija) de empresa sintética con la forma exacta de las respuestas de la API de Bamboo (employees list/get, tables jobInfo/employmentStatus, goals aggregate) y archivos CSV con la forma de los reportes estándar de Bamboo; incluye 3 ciclos históricos, bajas, reingresos, cambios de manager, personas sin manager y datos sucios para la cola de identidad. Dos tamaños: chico para tests, ~400 para demo.
 
 **Convenciones de datos**
+
 - Toda tabla de dominio lleva source_system (bamboo_api | bamboo_export | lake | native), source_id, ingest_run_id, payload_hash, created_at, updated_at, deleted_at; único por (source_system, source_id). Las joins usan solo el UUID interno.
 - Nunca se usa el legajo (employeeNumber) como clave; el id interno de Bamboo es la clave de origen.
 - Las respuestas de rating guardan valor numérico, etiqueta y valor normalizado en el momento de responder.
 - Nada se borra físicamente: soft-delete y tablas append-only para ratings finales y cambios de calibración.
 
 **Proceso default (templates del sistema)**
+
 - Ciclo evaluativo de fin de año: autoevaluación reflexiva (4 preguntas de texto), evaluación del manager (rating de goals + comentario, logros, mejora y próximos pasos, foco próximo período, rating general 4 puntos), feedback de pares (3 preguntas, hasta 5 pares, aprobación del manager, anónimo para el evaluado), calibración lite, publicación, acuse 7 días. Cronograma sugerido 6 semanas.
 - Ciclo de desarrollo de mitad de año: sin rating ni calibración.
 - Upward y autoevaluación con rating existen como opciones apagadas.
 
 **Decisiones explícitas**
+
 - Sin deploy ni ambientes compartidos hasta que el módulo esté listo; sin Jira por ahora; tracker = GitHub Issues del repo.
 - Rating final de una sola fuente (manager) pasando por calibración; el empleado ve solo el valor final.
 - Sin curva de distribución forzada; sin decisiones de compensación dentro del módulo.

@@ -8,14 +8,14 @@ import {
   uniqueIndex,
   uuid,
 } from "drizzle-orm/pg-core";
-import { sourceColumns, sourceSystem, timestamps } from "./common";
+import { sourceColumns, sourceSystem, timestamps } from "./source";
 
 /** Golden person record (native). */
 export const person = pgTable("person", {
   id: uuid("id").primaryKey().defaultRandom(),
   displayName: text("display_name").notNull(),
   workEmail: text("work_email"),
-  ...timestamps(),
+  ...timestamps,
 });
 
 export type Person = typeof person.$inferSelect;
@@ -42,7 +42,7 @@ export const sourceIdentity = pgTable(
       .notNull()
       .defaultNow(),
     validTo: timestamp("valid_to", { withTimezone: true }),
-    ...timestamps(),
+    ...timestamps,
   },
   (t) => [
     // Only one OPEN holder per value; closed rows keep history and a value
@@ -70,7 +70,7 @@ export const employment = pgTable(
     hireDate: date("hire_date"),
     terminationDate: date("termination_date"),
     status: text("status"),
-    ...sourceColumns(),
+    ...sourceColumns,
   },
   (t) => [
     unique("employment_source_period_uq")
