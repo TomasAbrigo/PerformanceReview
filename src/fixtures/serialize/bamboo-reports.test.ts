@@ -163,17 +163,32 @@ describe("feedback-status.csv", () => {
         new Set(c.cycles.map((cycle) => cycle.name)),
       );
       expect(rows).toHaveLength(c.feedback.length);
+      // Index rows once: the demo dataset has thousands of feedback rows and
+      // a nested filter per row timed out on the CI runner.
+      const rowKey = (...parts: string[]) => parts.join("\u0000");
+      const rowKeys = new Set(
+        rows.map((r) =>
+          rowKey(
+            r["Employee Name"],
+            r["Receiving Feedback From"],
+            r["Due Date"],
+            r["Date Completed"],
+            r["Review Cycle"],
+          ),
+        ),
+      );
       for (const f of c.feedback.filter((x) => x.reviewerId !== null)) {
-        const match = rows.filter(
-          (r) =>
-            r["Employee Name"] === nameInCycle(c, f.employeeId, f.cycle) &&
-            r["Receiving Feedback From"] ===
-              nameInCycle(c, f.reviewerId!, f.cycle) &&
-            r["Due Date"] === f.dueDate &&
-            r["Date Completed"] === (f.completedOn ?? "") &&
-            r["Review Cycle"] === c.cycles[f.cycle].name,
-        );
-        expect(match.length).toBeGreaterThan(0);
+        expect(
+          rowKeys.has(
+            rowKey(
+              nameInCycle(c, f.employeeId, f.cycle),
+              nameInCycle(c, f.reviewerId!, f.cycle),
+              f.dueDate,
+              f.completedOn ?? "",
+              c.cycles[f.cycle].name,
+            ),
+          ),
+        ).toBe(true);
       }
       expect(rows.some((r) => r["Date Completed"] === "")).toBe(true);
     },
