@@ -49,6 +49,22 @@ export type CycleDueDates = Partial<Record<DueDatePhase, string>>;
 export const scheduleKinds = ["fixed", "hire_date"] as const;
 export type ScheduleKind = (typeof scheduleKinds)[number];
 
+/** Hire-date milestones, in days after hire (6 months = 180, 1 year = 365). */
+export const hireMilestoneDays = [30, 60, 90, 180, 365] as const;
+export type HireMilestoneDays = (typeof hireMilestoneDays)[number];
+/** Length of the window (weeks) that opens at the milestone. */
+export const hireWindowWeeks = [1, 2, 3, 4] as const;
+export type HireWindowWeeks = (typeof hireWindowWeeks)[number];
+
+/**
+ * Cadence of a `hire_date` cycle: each person joins when hire date +
+ * `milestoneDays` is reached and has `windowWeeks` weeks to complete it.
+ */
+export type HireDateSchedule = {
+  milestoneDays: HireMilestoneDays;
+  windowWeeks: HireWindowWeeks;
+};
+
 export function phasesFor(components: CycleComponents): CycleStatus[] {
   return cycleStatuses.filter(
     (s) =>
