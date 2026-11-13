@@ -119,5 +119,46 @@
     "addChoice": "Add option",
     "hiddenFromReviewee": "Hidden from the reviewee",
     "chooseScale": "Choose a scale"
+  },
+  "People": {
+    "title": "People",
+    "nav": "People",
+    "searchLabel": "Search by name or email",
+    "searchPlaceholder": "Name or email",
+    "search": "Search",
+    "total": "{count, plural, =1 {1 person} other {# people}}",
+    "empty": "No people to show.",
+    "back": "← Back to people",
+    "notFound": "Person not found.",
+    "columns": {
+      "name": "Name",
+      "email": "Email",
+      "status": "Status"
+    },
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive",
+      "unknown": "No status"
+    },
+    "identities": {
+      "title": "Source identifiers",
+      "kind": "Kind",
+      "value": "Value",
+      "validFrom": "From",
+      "validTo": "To",
+      "current": "Current",
+      "kinds": {
+        "bamboo_id": "Bamboo ID",
+        "employee_number": "Employee number",
+        "work_email": "Email"
+      }
+    },
+    "employments": {
+      "title": "Employment periods",
+      "hireDate": "Hire date",
+      "terminationDate": "Termination date",
+      "status": "Status",
+      "empty": "No employment periods."
+    }
   }
 }

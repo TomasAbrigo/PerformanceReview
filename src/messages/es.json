@@ -119,5 +119,46 @@
     "addChoice": "Agregar opción",
     "hiddenFromReviewee": "Oculta para la persona evaluada",
     "chooseScale": "Elegí una escala"
+  },
+  "People": {
+    "title": "Personas",
+    "nav": "Personas",
+    "searchLabel": "Buscar por nombre o email",
+    "searchPlaceholder": "Nombre o email",
+    "search": "Buscar",
+    "total": "{count, plural, =1 {1 persona} other {# personas}}",
+    "empty": "No hay personas para mostrar.",
+    "back": "← Volver a personas",
+    "notFound": "Persona no encontrada.",
+    "columns": {
+      "name": "Nombre",
+      "email": "Email",
+      "status": "Estado"
+    },
+    "status": {
+      "active": "Activo",
+      "inactive": "Inactivo",
+      "unknown": "Sin estado"
+    },
+    "identities": {
+      "title": "Identificadores de origen",
+      "kind": "Tipo",
+      "value": "Valor",
+      "validFrom": "Desde",
+      "validTo": "Hasta",
+      "current": "Vigente",
+      "kinds": {
+        "bamboo_id": "ID Bamboo",
+        "employee_number": "Legajo",
+        "work_email": "Email"
+      }
+    },
+    "employments": {
+      "title": "Períodos de empleo",
+      "hireDate": "Ingreso",
+      "terminationDate": "Egreso",
+      "status": "Estado",
+      "empty": "Sin períodos de empleo."
+    }
   }
 }
