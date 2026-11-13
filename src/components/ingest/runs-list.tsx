@@ -131,9 +131,7 @@ export function RunsList({
                   {t(`columns.${k}`)}
                 </TableHead>
               ))}
-              <TableHead className="text-right">
-                {t("columns.issues")}
-              </TableHead>
+              <TableHead className="text-right">{t("columns.log")}</TableHead>
               <TableHead className="text-right">
                 {t("columns.duration")}
               </TableHead>

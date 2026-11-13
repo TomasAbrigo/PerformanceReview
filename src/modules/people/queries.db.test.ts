@@ -31,6 +31,15 @@ describe("people queries", () => {
     ]);
   });
 
+  it("caps the list at the limit, after sorting by name", async () => {
+    expect(
+      (await listPeople(db, "", { limit: 2 })).map((p) => p.displayName),
+    ).toEqual(["Ana García", "Bruno Pérez"]);
+    expect(
+      (await listPeople(db, "a", { limit: 1 })).map((p) => p.displayName),
+    ).toEqual(["Ana García"]);
+  });
+
   it("searches by name or email, case-insensitively", async () => {
     expect((await listPeople(db, "CARLA")).map((p) => p.displayName)).toEqual([
       "Carla Romero",
