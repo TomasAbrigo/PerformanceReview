@@ -1,4 +1,4 @@
-Assessed,Review Cycle,Self Status,Manager Status,Follow-up Notes
-Ana Lopez,2025 Year-End,Complete,Complete,Discuss promotion path
-Beto Perez,2025 Year-End,Complete,In Progress,
-Carla Gomez,2025 Year-End,Not Started,Not Started,
+Employee Name,Manager,Department,Review Cycle,Assessed,Self Status,Manager Status,Follow-up Notes
+Ana Lopez,Beto Perez,Ingenieria,2025 Year-End,Complete,Submitted,Submitted,Discuss promotion path
+Beto Perez,Eva Martinez,Ingenieria,2025 Year-End,In Progress,Submitted,Not Started,
+Carla Gomez,,Datos,2025 Year-End,Not Started,Not Started,Not Started,

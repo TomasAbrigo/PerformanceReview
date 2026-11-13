@@ -343,51 +343,60 @@ export const builtinProfiles: SourceProfile[] = [
       supervisor: "manager_name",
     },
   },
-  // Bamboo standard report exports (Reports > Performance and Culture). They
-  // carry no ids (docs/research/02), so rows are keyed by natural columns, and
-  // they are full snapshots: no watermark. Columns the profile does not map,
-  // such as custom review questions, are kept in `extra`. Headers are the
-  // documented ones; confirm against a real export.
+  // Bamboo standard report exports (Reports > Performance and Culture). Headers
+  // are the ones in fixtures/bamboo-reports (see fixtures/README). The reports
+  // carry no ids (docs/research/02) and identify people by name only, so rows
+  // are keyed by natural columns, and they are full snapshots: no watermark.
+  // Manager and Department are the CURRENT ones at export time, so they are
+  // used in a key only where nothing else tells namesakes apart. Columns the
+  // profile does not map land in `extra` under their exact header.
   {
     name: "bamboo-employee-performance",
     table: "employee-performance",
-    keyColumns: ["Employee", "Review Cycle"],
+    // Assessment Date keeps two employees with the same name apart in a cycle.
+    keyColumns: ["Employee Name", "Review Cycle", "Assessment Date"],
     entity: "assessment",
+    // The question columns are deliberately not mapped: their headers embed
+    // the question text ("Employee Q1: How well does <company> recognize my
+    // value?") and the company's custom questions, so they vary per account.
+    // They stay in `extra`, keyed by header ("Employee Q1: ...",
+    // "Manager Custom Q2: ...").
     columnMap: {
-      Employee: "employee_name",
-      "Reporting To": "manager_name",
+      "Employee Name": "employee_name",
+      Manager: "manager_name",
       Department: "department",
       "Review Cycle": "review_cycle",
-      "Self Assessment Date": "self_completed_on",
-      "Manager Assessment Date": "manager_completed_on",
-      "Self: Feels Valued": "self_feels_valued",
-      "Manager: Engagement": "manager_engagement",
-      "Manager: Job Offer Response": "manager_job_offer_response",
+      "Assessment Date": "assessment_date",
     },
   },
   {
     name: "bamboo-feedback-status",
     table: "feedback-status",
-    keyColumns: ["Employee Name", "Direction", "From/To", "Due Date"],
+    keyColumns: ["Employee Name", "Receiving Feedback From", "Review Cycle"],
     entity: "feedback",
     columnMap: {
       "Employee Name": "employee_name",
-      Direction: "direction",
-      "From/To": "counterpart_name",
-      Status: "status",
-      "Due Date": "due_date",
+      "Receiving Feedback From": "reviewer_name",
       "Date Completed": "completed_on",
+      "Due Date": "due_date",
+      "Review Cycle": "review_cycle",
     },
   },
   {
     name: "bamboo-goal-status",
     table: "goal-status",
-    keyColumns: ["Employee", "Goal"],
+    // People without goals appear as one row with status "No Goals Set" and an
+    // empty Goal and Due Date: they have no key, so applyProfile rejects them.
+    // The consumer drops rows with an empty Goal before applying the profile.
+    keyColumns: ["Employee Name", "Goal", "Due Date"],
     entity: "goal",
     columnMap: {
-      Employee: "employee_name",
+      "Employee Name": "employee_name",
+      Manager: "manager_name",
+      Department: "department",
       Goal: "title",
       "Due Date": "due_date",
+      // Text such as "33%".
       Progress: "percent_complete",
       Status: "status",
       "Last Comment": "last_comment",
@@ -396,11 +405,17 @@ export const builtinProfiles: SourceProfile[] = [
   {
     name: "bamboo-assessment-progress",
     table: "assessment-progress",
-    keyColumns: ["Assessed", "Review Cycle"],
+    // Department keeps namesakes apart (Manager can be empty, so it cannot be
+    // part of a key).
+    keyColumns: ["Employee Name", "Review Cycle", "Department"],
     entity: "assessment",
     columnMap: {
-      Assessed: "employee_name",
+      "Employee Name": "employee_name",
+      Manager: "manager_name",
+      Department: "department",
       "Review Cycle": "review_cycle",
+      // Overall state of the assessment: Complete, In Progress or Not Started.
+      Assessed: "assessed",
       "Self Status": "self_status",
       "Manager Status": "manager_status",
       "Follow-up Notes": "follow_up_notes",

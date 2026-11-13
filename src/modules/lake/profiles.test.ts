@@ -2,6 +2,7 @@
 import { mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 import { DuckDbFileLake } from "./duckdb-file-lake";
 import { fixtureDir } from "./fixtures";
@@ -15,7 +16,7 @@ import {
   type ReadOverrides,
   type SourceProfile,
 } from "./profiles";
-import type { LakeColumn } from "./types";
+import type { LakeColumn, LakeRow } from "./types";
 
 const employeeProfile: SourceProfile = {
   name: "test-employee",
@@ -430,41 +431,46 @@ describe("built-in profiles", () => {
     expect(records[2].watermark).toMatch(/^2026-01-10 10:05:00/);
   });
 
-  it("bamboo employee performance: natural key, canonical fields, custom questions kept as extra", async () => {
+  it("bamboo employee performance: natural key, canonical fields, question columns kept as extra", async () => {
     const profile = getBuiltinProfile("bamboo-employee-performance")!;
 
     const records = await readAll("bamboo-reports", profile);
 
     expect(records.map((r) => r.sourceId)).toEqual([
-      '["Ana Lopez","2025 Year-End"]',
-      '["Beto Perez","2025 Year-End"]',
-      '["Carla Gomez","2025 Year-End"]',
+      '["Ana Lopez","2025 Year-End","2025-12-10"]',
+      '["Beto Perez","2025 Year-End","2025-12-11"]',
+      '["Carla Gomez","2025 Year-End","2025-12-12"]',
     ]);
     expect(records[0]).toMatchObject({
       entity: "assessment",
       fields: {
         employee_name: "Ana Lopez",
+        manager_name: "Beto Perez",
+        department: "Ingenieria",
         review_cycle: "2025 Year-End",
-        manager_name: "Perez, Beto",
-        self_feels_valued: "Highly valued",
-        manager_engagement: "Highly engaged",
+        assessment_date: "2025-12-10",
       },
-      extra: { "Custom: Collaboration (1-5)": "5" },
       watermark: null,
       deleted: false,
     });
-    // Carla's manager assessment is still pending.
-    expect(records[2].fields.manager_completed_on).toBeNull();
+    // 4 employee + 4 manager + 2 + 2 company-defined questions, by full header.
+    const questionColumns = Object.keys(records[0].extra);
+    expect(questionColumns).toHaveLength(12);
+    expect(questionColumns).toContain("Employee Q4: How could I improve?");
+    expect(questionColumns).toContain(
+      "Manager Custom Q2: [Employee] entrega resultados con la calidad esperada.",
+    );
+    expect(
+      records[0].extra[
+        "Employee Custom Q1: Mis objetivos del período están claros."
+      ],
+    ).toBe("5");
   });
 
-  it("the other bamboo reports map to feedback, goal and assessment records", async () => {
+  it("the feedback and assessment progress reports map to canonical records", async () => {
     const feedback = await readAll(
       "bamboo-reports",
       getBuiltinProfile("bamboo-feedback-status")!,
-    );
-    const goals = await readAll(
-      "bamboo-reports",
-      getBuiltinProfile("bamboo-goal-status")!,
     );
     const progress = await readAll(
       "bamboo-reports",
@@ -474,23 +480,126 @@ describe("built-in profiles", () => {
     expect(feedback).toHaveLength(3);
     expect(feedback[1]).toMatchObject({
       entity: "feedback",
+      sourceId: '["Ana Lopez","Diego Fernandez","2025 Year-End"]',
       fields: {
         employee_name: "Ana Lopez",
-        direction: "Receiving",
-        counterpart_name: "Diego Fernandez",
-        status: "Past Due",
+        reviewer_name: "Diego Fernandez",
+        due_date: "2025-12-15",
         completed_on: null,
+        review_cycle: "2025 Year-End",
       },
     });
-    expect(goals[0]).toMatchObject({
-      entity: "goal",
-      fields: { title: "Ship onboarding revamp", status: "In Progress" },
-    });
-    expect(progress[2]).toMatchObject({
+    expect(progress).toHaveLength(3);
+    expect(progress[1]).toMatchObject({
       entity: "assessment",
-      fields: { self_status: "Not Started", manager_status: "Not Started" },
+      fields: {
+        assessed: "In Progress",
+        self_status: "Submitted",
+        manager_status: "Not Started",
+        follow_up_notes: null,
+      },
+    });
+    // Carla's row has no manager; Department still tells her apart.
+    expect(progress[2]).toMatchObject({
+      sourceId: '["Carla Gomez","2025 Year-End","Datos"]',
+      fields: { manager_name: null, assessed: "Not Started" },
     });
   });
+
+  it("goal status: people without goals have no key and are dropped by the consumer", async () => {
+    const profile = getBuiltinProfile("bamboo-goal-status")!;
+    const lake = await DuckDbFileLake.open(fixtureDir("bamboo-reports"));
+    try {
+      const rows: LakeRow[] = [];
+      for await (const batch of lake.readBatches(
+        profile.table,
+        readOptionsFor(profile),
+      )) {
+        rows.push(...batch.rows);
+      }
+      expect(rows).toHaveLength(3);
+      const withGoal = rows.filter((row) => row["Goal"] !== null);
+      expect(() => rows.map((row) => applyProfile(profile, row))).toThrow(
+        'key column "Goal" is empty',
+      );
+
+      const goals = withGoal.map((row) => applyProfile(profile, row));
+      expect(goals[0]).toMatchObject({
+        entity: "goal",
+        sourceId: '["Ana Lopez","Ship onboarding revamp","2026-06-30"]',
+        fields: {
+          title: "Ship onboarding revamp",
+          due_date: "2026-06-30",
+          percent_complete: "60%",
+          status: "In Progress",
+          last_comment: "On track after the pilot",
+        },
+      });
+    } finally {
+      await lake.close();
+    }
+  });
+});
+
+describe("bamboo report profiles against the real fixtures", () => {
+  const realReports = fileURLToPath(
+    new URL("../../../fixtures/bamboo-reports/small", import.meta.url),
+  );
+  const reportProfiles = builtinProfiles.filter((p) =>
+    p.name.startsWith("bamboo-"),
+  );
+
+  it("covers the four standard reports", () => {
+    expect(reportProfiles.map((p) => p.table)).toEqual([
+      "employee-performance",
+      "feedback-status",
+      "goal-status",
+      "assessment-progress",
+    ]);
+  });
+
+  it.each(reportProfiles.map((p) => [p.name, p] as const))(
+    "%s validates against the headers of fixtures/bamboo-reports/small",
+    async (_name, profile) => {
+      const lake = await DuckDbFileLake.open(realReports);
+      try {
+        const columns = await lake.describeTable(profile.table);
+
+        expect(validateAgainstSchema(profile, columns)).toEqual([]);
+      } finally {
+        await lake.close();
+      }
+    },
+  );
+
+  it.each(reportProfiles.map((p) => [p.name, p] as const))(
+    "%s keys every row of the real report to a distinct source id",
+    async (_name, profile) => {
+      const lake = await DuckDbFileLake.open(realReports);
+      try {
+        const sourceIds = [];
+        let total = 0;
+        for await (const batch of lake.readBatches(
+          profile.table,
+          readOptionsFor(profile),
+        )) {
+          for (const row of batch.rows) {
+            total += 1;
+            // "No Goals Set" rows have no goal, so no key (see the profile).
+            if (profile.table === "goal-status" && row["Goal"] === null) {
+              continue;
+            }
+            sourceIds.push(applyProfile(profile, row).sourceId);
+          }
+        }
+
+        expect(total).toBeGreaterThan(50);
+        expect(new Set(sourceIds).size).toBe(sourceIds.length);
+      } finally {
+        await lake.close();
+      }
+    },
+  );
 });
 
 describe("profiles against a drifted or damaged lake", () => {
@@ -520,7 +629,7 @@ describe("profiles against a drifted or damaged lake", () => {
     try {
       await writeFile(
         join(dir, "employee-performance.csv"),
-        "Employee,Reporting To,Department,review cycle\nAna Lopez,Beto,Eng,2025\n",
+        "Employee Name,Manager,Department,review cycle\nAna Lopez,Beto,Eng,2025\n",
       );
       const lake = await DuckDbFileLake.open(dir);
       const profile = getBuiltinProfile("bamboo-employee-performance")!;
@@ -539,7 +648,7 @@ describe("profiles against a drifted or damaged lake", () => {
       expect(issues[0].message).toBe(
         'Column "Review Cycle" (key column of profile "bamboo-employee-performance") is missing from table "employee-performance"; did you mean "review cycle"?',
       );
-      expect(issues.map((i) => i.column)).toContain("Self: Feels Valued");
+      expect(issues.map((i) => i.column)).toContain("Assessment Date");
       await lake.close();
     } finally {
       await rm(dir, { recursive: true, force: true });
