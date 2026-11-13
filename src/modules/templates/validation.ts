@@ -35,7 +35,9 @@ export const questionInput = z
     prompt: localizedText,
     scaleId: z.uuid().nullish(),
     choices: z
-      .array(z.object({ value: z.string().trim().min(1), label: localizedText }))
+      .array(
+        z.object({ value: z.string().trim().min(1), label: localizedText }),
+      )
       .nullish(),
   })
   .superRefine((q, ctx) => {
@@ -50,7 +52,11 @@ export const questionInput = z
       });
     }
     if (q.kind === "single_choice" && (q.choices?.length ?? 0) < 2) {
-      ctx.addIssue({ code: "custom", message: "min_options", path: ["choices"] });
+      ctx.addIssue({
+        code: "custom",
+        message: "min_options",
+        path: ["choices"],
+      });
     }
     if (q.kind !== "single_choice" && q.choices?.length) {
       ctx.addIssue({

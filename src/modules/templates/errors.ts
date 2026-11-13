@@ -1,10 +1,7 @@
 import type { ZodError } from "zod";
 
 export type TemplatesErrorCode =
-  | "validation"
-  | "not_found"
-  | "system_readonly"
-  | "in_use";
+  "validation" | "not_found" | "system_readonly" | "in_use";
 
 export type FieldIssue = { path: string; message: string };
 

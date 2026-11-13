@@ -262,7 +262,11 @@ export async function cloneTemplate(
     for (const section of source.sections) {
       const [newSection] = await tx
         .insert(templateSection)
-        .values({ templateId: copy.id, sort: section.sort, title: section.title })
+        .values({
+          templateId: copy.id,
+          sort: section.sort,
+          title: section.title,
+        })
         .returning();
       if (section.questions.length) {
         await tx.insert(question).values(

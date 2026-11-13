@@ -78,7 +78,9 @@ describe("templates module", () => {
       db,
       (await systemTemplate("mid_year_development")).id,
     );
-    const kinds = detail!.sections.flatMap((s) => s.questions.map((q) => q.kind));
+    const kinds = detail!.sections.flatMap((s) =>
+      s.questions.map((q) => q.kind),
+    );
     expect(kinds.length).toBeGreaterThan(0);
     expect(kinds).not.toContain("rating");
   });
@@ -165,7 +167,11 @@ describe("templates module", () => {
       kind: "rating",
       scaleId: scale.id,
     });
-    expect(updated).toMatchObject({ kind: "rating", scaleId: scale.id, choices: null });
+    expect(updated).toMatchObject({
+      kind: "rating",
+      scaleId: scale.id,
+      choices: null,
+    });
     await deleteTemplate(db, template.id);
   });
 
@@ -173,13 +179,12 @@ describe("templates module", () => {
     const scales = await listScales(db);
     const four = scales.find((s) => s.name.en === "4-point descriptive")!;
     const five = scales.find((s) => s.name.en === "5-point agreement")!;
-    expect(four.options.map((o) => o.normalized)).toEqual([
-      0,
-      1 / 3,
-      2 / 3,
-      1,
-    ].map((n) => expect.closeTo(n, 5)));
-    expect(five.options.map((o) => o.normalized)).toEqual([0, 0.25, 0.5, 0.75, 1]);
+    expect(four.options.map((o) => o.normalized)).toEqual(
+      [0, 1 / 3, 2 / 3, 1].map((n) => expect.closeTo(n, 5)),
+    );
+    expect(five.options.map((o) => o.normalized)).toEqual([
+      0, 0.25, 0.5, 0.75, 1,
+    ]);
     // "Meets expectations" (2/4) sits below "Agree" (4/5) on the common 0..1 axis.
     expect(four.options[1].normalized).toBeLessThan(five.options[3].normalized);
 

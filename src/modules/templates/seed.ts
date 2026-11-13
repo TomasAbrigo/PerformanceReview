@@ -23,8 +23,14 @@ const scales: Record<ScaleKey, ScaleInput> = {
   four_point_descriptive: {
     name: { es: "4 puntos descriptiva", en: "4-point descriptive" },
     options: [
-      { value: 1, label: { es: "Necesita desarrollo", en: "Needs development" } },
-      { value: 2, label: { es: "Cumple expectativas", en: "Meets expectations" } },
+      {
+        value: 1,
+        label: { es: "Necesita desarrollo", en: "Needs development" },
+      },
+      {
+        value: 2,
+        label: { es: "Cumple expectativas", en: "Meets expectations" },
+      },
       { value: 3, label: { es: "Supera a menudo", en: "Often exceeds" } },
       {
         value: 4,
@@ -42,7 +48,10 @@ const scales: Record<ScaleKey, ScaleInput> = {
       { value: 2, label: { es: "En desacuerdo", en: "Disagree" } },
       { value: 3, label: { es: "Neutral", en: "Neutral" } },
       { value: 4, label: { es: "De acuerdo", en: "Agree" } },
-      { value: 5, label: { es: "Totalmente de acuerdo", en: "Strongly agree" } },
+      {
+        value: 5,
+        label: { es: "Totalmente de acuerdo", en: "Strongly agree" },
+      },
     ],
   },
   never_always: {
@@ -78,11 +87,7 @@ const self = (es: string, en: string): SeedQuestion => ({
   appliesTo: ["self"],
   required: true,
 });
-const manager = (
-  es: string,
-  en: string,
-  scale?: ScaleKey,
-): SeedQuestion => ({
+const manager = (es: string, en: string, scale?: ScaleKey): SeedQuestion => ({
   prompt: { es, en },
   appliesTo: ["manager"],
   kind: scale ? "rating" : "text",
@@ -280,15 +285,13 @@ const templates: SeedTemplate[] = [
                 "My manager recognizes me when I do good work.",
               ],
             ] as const
-          ).map(
-            ([es, en]): SeedQuestion => ({
-              prompt: { es, en },
-              appliesTo: ["upward"],
-              kind: "rating",
-              scale: "never_always",
-              required: true,
-            }),
-          ),
+          ).map(([es, en]): SeedQuestion => ({
+            prompt: { es, en },
+            appliesTo: ["upward"],
+            kind: "rating",
+            scale: "never_always",
+            required: true,
+          })),
           {
             prompt: {
               es: "¿Cuáles son las mayores fortalezas de tu manager?",
