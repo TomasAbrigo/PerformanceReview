@@ -7,6 +7,7 @@ import {
   type IngestCliDeps,
 } from "./cli";
 import { DEFAULT_FIXTURES_DIR, REGISTRY, type EntityEntry } from "./registry";
+import * as goalsModule from "@/modules/goals";
 import { entityHandlers } from "./handlers";
 import * as runIngestModule from "./run-ingest";
 import { IngestRunError } from "./run-ingest";
@@ -187,16 +188,16 @@ describe("parseIngestArgs", () => {
 });
 
 describe("REGISTRY", () => {
-  it("has one entry per entity handler, dependencies first", () => {
-    expect([...REGISTRY.keys()]).toEqual(Object.keys(entityHandlers));
-    // job_history resolves its people through employee ingestion.
-    expect([...REGISTRY.keys()].slice(0, 2)).toEqual([
-      "employee",
-      "job_history",
+  it("has the handler entities and goal, dependencies first", () => {
+    expect([...REGISTRY.keys()]).toEqual([
+      ...Object.keys(entityHandlers),
+      "goal",
     ]);
+    // job_history and goal resolve people through employee ingestion.
+    expect([...REGISTRY.keys()]).toEqual(["employee", "job_history", "goal"]);
   });
 
-  it("runs an entity through runIngest with the adapter's source, entity and since", async () => {
+  it("runs a handler entity through runIngest with the adapter's entity and since", async () => {
     const adapter = adapterOf("fixture");
     const ran = vi.spyOn(runIngestModule, "runIngest").mockResolvedValue({
       runId: "run-9",
@@ -217,6 +218,31 @@ describe("REGISTRY", () => {
         db: {},
         params: { source: "fixture" },
         extract: { since: "2026-11-01T00:00:00.000Z" },
+      });
+    } finally {
+      ran.mockRestore();
+    }
+  });
+
+  it("runs goal through its own pipeline (a full read, so no since)", async () => {
+    const adapter = adapterOf("fixture");
+    const ran = vi.spyOn(goalsModule, "runGoalIngest").mockResolvedValue({
+      runId: "run-10",
+      counts,
+    });
+    try {
+      const result = await REGISTRY.get("goal")!.run({
+        adapter,
+        db: {} as Database,
+        params: { source: "fixture" },
+        since: "2026-11-01T00:00:00.000Z",
+      });
+
+      expect(result.runId).toBe("run-10");
+      expect(ran).toHaveBeenCalledWith({
+        adapter,
+        db: {},
+        params: { source: "fixture" },
       });
     } finally {
       ran.mockRestore();

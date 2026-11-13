@@ -1,0 +1,24 @@
+{
+  "canAlign": false,
+  "canCreateGoals": false,
+  "filters": [{ "id": "status-all", "name": "All" }],
+  "selectedFilter": "status-all",
+  "goals": [
+    {
+      "id": 9201,
+      "title": "Cerrar el traspaso de cuentas",
+      "description": "Goal de una persona dada de baja: su aggregate no se consulta.",
+      "percentComplete": 20,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2024-06-30",
+      "completionDate": null,
+      "lastChangedDateTime": "2024-05-01T08:00:00Z",
+      "status": "in_progress",
+      "milestones": null,
+      "actions": {}
+    }
+  ],
+  "persons": [],
+  "comments": []
+}

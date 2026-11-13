@@ -1,5 +1,6 @@
 import type { DbOrTx } from "@/db/client";
 import { createBambooClient, type BambooClient } from "@/modules/bamboo-client";
+import { runGoalIngest } from "@/modules/goals";
 import { BambooApiAdapter } from "./bamboo-api-adapter";
 import { FixtureAdapter } from "./fixture-adapter";
 import { entityHandlers } from "./handlers";
@@ -62,17 +63,29 @@ const viaRunIngest = (entity: Entity): EntityEntry => ({
 });
 
 /**
- * Every entity `pnpm ingest` can run, by name: one per handler in
- * `entityHandlers` (handlers.ts), in that order, which is also the `--all`
- * order (employee before job_history, which resolves people through it). To
- * add an entity that `runIngest` can stage (goals, ...) add its handler there
- * and nothing else: the CLI, the run log and `sync_state` pick it up. One that
- * needs its own pipeline can be registered here with a custom `run`; it must
- * record an `ingest_run` and call `advanceSyncState` when it succeeds.
+ * Every entity `pnpm ingest` can run, by name, in `--all` order: employee
+ * first, then what resolves people through it (job_history, goal).
+ *
+ * - One per handler in `entityHandlers` (handlers.ts), via `runIngest`: to add
+ *   an entity that `runIngest` can stage, add its handler there and nothing
+ *   else; the CLI, the run log and `sync_state` pick it up.
+ * - Entities with their own pipeline (goal: it reads the active employees and
+ *   fetches comments lazily) are registered with a custom `run`. It must record
+ *   an `ingest_run` (with its `entity`), advance `sync_state` in the
+ *   transaction that marks it succeeded, and throw an `IngestRunError` when the
+ *   run ends in error, as `runGoalIngest` does.
  */
-export const REGISTRY = new Map<string, EntityEntry>(
-  (Object.keys(entityHandlers) as Entity[]).map((entity) => [
-    entity,
-    viaRunIngest(entity),
-  ]),
-);
+export const REGISTRY = new Map<string, EntityEntry>([
+  ...(Object.keys(entityHandlers) as Entity[]).map(
+    (entity) => [entity, viaRunIngest(entity)] as const,
+  ),
+  [
+    "goal",
+    {
+      adapters,
+      // Always a full read: goals have no incremental extraction (`since` is
+      // ignored); what changed is found by comparing hashes.
+      run: ({ adapter, db, params }) => runGoalIngest({ adapter, db, params }),
+    },
+  ],
+]);

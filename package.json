@@ -22,6 +22,7 @@
     "db:reset": "supabase db reset",
     "ingest": "tsx scripts/ingest.ts",
     "ingest:employees": "tsx scripts/ingest-employees.ts",
+    "ingest:goals": "tsx scripts/ingest-employees.ts --entity goal",
     "fixtures:build": "tsx src/fixtures/build.ts",
     "fixtures:parquet": "tsx scripts/fixtures-parquet.ts"
   },

@@ -87,12 +87,15 @@ describe("scripts/ingest.ts", () => {
     expect(code).toBe(0);
     expect(stdout).toMatch(/employee\s+fixture\s+succeeded/);
     expect(stdout).toMatch(/job_history\s+fixture\s+succeeded/);
+    expect(stdout).toMatch(/goal\s+fixture\s+succeeded/);
     expect(stdout.indexOf("employee")).toBeLessThan(
       stdout.indexOf("job_history"),
     );
+    expect(stdout.indexOf("employee")).toBeLessThan(stdout.indexOf("goal"));
     const states = await db.select().from(syncState);
     expect(states.map((s) => s.entity).sort()).toEqual([
       "employee",
+      "goal",
       "job_history",
     ]);
     expect(states.every((s) => s.adapter === "fixture")).toBe(true);

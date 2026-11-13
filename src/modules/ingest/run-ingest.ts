@@ -43,7 +43,8 @@ export class IngestRunError extends Error {
 
 /**
  * raw → staged (zod) → domain upsert, recorded as one ingest_run. What each
- * entity does lives in `entityHandlers` (handlers.ts).
+ * entity does lives in `entityHandlers` (handlers.ts). Throws before opening a
+ * run for an entity without a handler.
  *
  * Every record commits on its own, so the watermark in `sync_state` (per
  * source, adapter and entity) only advances once the whole run is done, in the
@@ -59,6 +60,8 @@ export async function runIngest({
   params = {},
   extract = {},
 }: RunIngestInput): Promise<RunIngestResult> {
+  const handler = entityHandlers[entity];
+  if (!handler) throw new Error(`Unsupported entity ${entity}`);
   const source = adapter.source;
   const [run] = await db
     .insert(ingestRun)
@@ -75,7 +78,6 @@ export async function runIngest({
     })
     .returning({ id: ingestRun.id, startedAt: ingestRun.startedAt });
 
-  const handler = entityHandlers[entity];
   const counts: IngestCounts = {
     read: 0,
     inserted: 0,

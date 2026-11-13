@@ -243,5 +243,36 @@
       "unresolved": "{name} (sin resolver)",
       "empty": "Sin historial de puesto."
     }
+  },
+  "Goals": {
+    "title": "Objetivos",
+    "nav": "Objetivos del equipo",
+    "empty": "Todavía no hay objetivos importados.",
+    "status": {
+      "in_progress": "En curso",
+      "completed": "Completado",
+      "closed": "Cerrado"
+    },
+    "progress": "Progreso",
+    "dueDate": "Vence {date}",
+    "noDueDate": "Sin fecha límite",
+    "completedOn": "Completado el {date}",
+    "milestones": {
+      "title": "Hitos",
+      "summary": "{done} de {total, plural, =1 {1 hito} other {# hitos}}",
+      "done": "Hecho",
+      "pending": "Pendiente"
+    },
+    "comments": "{count, plural, =0 {Sin comentarios} =1 {1 comentario} other {# comentarios}}",
+    "sharedWith": "Compartido con {names}",
+    "team": {
+      "title": "Objetivos del equipo",
+      "description": "Objetivos de los reportes directos de {manager}.",
+      "goalCount": "{count, plural, =1 {1 objetivo} other {# objetivos}}",
+      "noGoals": "Sin objetivos.",
+      "noReports": "{manager} no tiene reportes directos.",
+      "chooseManager": "Elegí un manager para ver los objetivos de su equipo.",
+      "noManagers": "No hay managers con reportes directos."
+    }
   }
 }

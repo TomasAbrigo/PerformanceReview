@@ -40,8 +40,15 @@
     {
       "idx": 5,
       "version": "7",
-      "when": 1794603583805,
-      "tag": "0005_sync_state",
+      "when": 1794603513199,
+      "tag": "0005_goals",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1794603896160,
+      "tag": "0006_sync_state",
       "breakpoints": true
     }
   ]
