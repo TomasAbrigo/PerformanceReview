@@ -1,8 +1,11 @@
 import { expect, test } from "@playwright/test";
+import { employees } from "./seed-data";
 
 // The runs these specs look at are made once by e2e/global-setup.ts (through
-// the CLI, the only way runs get created): the employee re-run, where
-// everything is unchanged, and a run that failed on a broken fixture file.
+// the CLIs, the only way runs get created): the employee re-run of `pnpm
+// db:seed`, where everything is unchanged, and a run that failed on a broken
+// fixture file.
+const N = String(employees.length);
 const okRun = process.env.E2E_RUN_OK ?? "";
 const failedRun = process.env.E2E_RUN_FAILED ?? "";
 
@@ -40,8 +43,8 @@ test("the list shows the run the CLI just made, with its counts", async ({
   await expect(row).toContainText("employee");
   await expect(row).toContainText("Exitosa");
   // read, inserted, updated, unchanged, deleted, rejected, issues
-  await expect(row.getByRole("cell").nth(5)).toHaveText("3");
-  await expect(row.getByRole("cell").nth(8)).toHaveText("3");
+  await expect(row.getByRole("cell").nth(5)).toHaveText(N);
+  await expect(row.getByRole("cell").nth(8)).toHaveText(N);
   await expect(row.getByRole("cell").nth(11)).toHaveText("0");
 });
 
@@ -73,10 +76,10 @@ test("opening a run shows its exact counts and rejects", async ({ page }) => {
 
   const counts = page.getByRole("table", { name: "Conteos" });
   for (const [label, value] of [
-    ["Leídos", "3"],
+    ["Leídos", N],
     ["Insertados", "0"],
     ["Actualizados", "0"],
-    ["Sin cambios", "3"],
+    ["Sin cambios", N],
     ["Eliminados", "0"],
     ["Rechazados", "0"],
   ]) {
@@ -99,7 +102,7 @@ test("the detail is available in English too", async ({ page }) => {
   await expect(
     page
       .getByRole("table", { name: "Counts" })
-      .getByRole("row", { name: "Read 3", exact: true }),
+      .getByRole("row", { name: `Read ${N}`, exact: true }),
   ).toBeVisible();
   await page.getByRole("link", { name: "← Back to runs" }).click();
   await expect(page).toHaveURL(/\/en\/imports\/runs$/);

@@ -39,6 +39,8 @@ pnpm lint
 pnpm format      # Prettier
 ```
 
+Ojo: `pnpm test:e2e` siembra la empresa `small` con `--reset` (ver Seed): vacía lo ingestado en la base de `DATABASE_URL` antes de correr los specs. Para trabajar con otros datos, usá otra base (por ejemplo `CREATE DATABASE` aparte y otro `.env.local`).
+
 ## Fixtures
 
 Empresa sintética y determinista con la forma exacta de lo que devuelve Bamboo, para desarrollar y testear sin API key. Cuando haya credenciales reales, el primer paso es grabar respuestas reales y compararlas con estos archivos.
@@ -86,9 +88,25 @@ const company = generateCompany({ size: "small", seed: 1001 });
 const files = serializeBambooApi(company); // [{ path, content }]
 ```
 
-Los esquemas zod de cada respuesta están en `src/fixtures/bamboo-schemas.ts` (los tests validan los JSON generados contra ellos y el cliente real los va a reutilizar).
+Los esquemas zod de las respuestas de Bamboo viven en un único módulo, `src/modules/bamboo-client/schemas.ts`: lo usan el cliente, los adapters y los tests del generador (`src/fixtures/bamboo-schemas.ts` solo lo re-exporta, no define nada), así que lo generado y lo que lee el cliente no pueden divergir. Son tolerantes a propósito: los ids pueden llegar como número o string y se normalizan a string, y list-employees acepta `employeeId` (la API real) o `id`, siempre normalizado a `id`. Los valores (fechas, estados) se validan por registro en el staging de cada entidad, no acá.
 
-**Sembrar la base:** todavía no. Las tablas de personas llegan con los issues #3 y #4; este slice solo genera archivos y datos en memoria. Cuando existan, el comando que resetea y siembra la base local (`pnpm db:reset` + `pnpm db:migrate` + seed) va a leer esta misma generación.
+## Seed
+
+Puebla la base local con la empresa sintética de `fixtures/bamboo/<size>` pasando por las mismas pipelines de ingesta que usa el cron (las del registro de `src/modules/ingest/registry.ts`, en su orden: `employee`, `job_history`, `goal`):
+
+```bash
+pnpm db:seed                       # --size small por defecto
+pnpm db:seed --size small --reset  # vacía las tablas de dominio y siembra
+pnpm db:seed --size demo           # 400 personas
+```
+
+- **Qué deja:** `small` son 40 registros de Bamboo (una persona por registro: los 4 reingresos son ids nuevos, y recién el módulo de identidad #5 los va a fusionar; la verdad de base del generador son 36 personas), 71 filas de historial de puesto y 117 goals. `demo` son 400 personas, 564 filas de historial y 1409 goals. Los goals son los de los empleados activos (la pipeline de goals solo lee a esos, ver #6), no los 143 / 1484 del fixture. Los comentarios de goals traen el conteo pero no el texto (los fixtures no tienen cuerpos).
+- **`--reset`** hace `TRUNCATE` (no `DROP`) de las tablas que llena la ingesta, hijas primero: `person`, `source_identity`, `employment`, historiales, `goal*`, `raw_record`, `ingest_run` y `sync_state` (lista en `RESET_TABLES`, `src/modules/ingest/seed.ts`). No toca lo que es de la app (escalas y plantillas de evaluación). Solo corre contra una base local: si `DATABASE_URL` no apunta a `localhost`/`127.0.0.1` se niega. Un test falla si aparece una tabla nueva que no esté clasificada en `RESET_TABLES` o `KEPT_TABLES`.
+- **Idempotente:** una segunda corrida lee lo mismo y todo da `unchanged`. Imprime una tabla (entidad, leídos, insertados, actualizados, sin cambios, rechazados, incidencias y el id de la corrida) y los totales; las corridas quedan en `/es/imports/runs`. Las incidencias (`issues`) son las entradas de `rejects` de la corrida; hoy `employee` informa los conflictos de identidad de los reingresos (mismo legajo o email, id nuevo).
+- **Historial de puesto:** el manager actual de cada persona se resuelve (sale de `supervisorEId`); el de las filas anteriores viene como nombre ("Apellido, Nombre") y queda sin resolver (se ve como "(sin resolver)") hasta que el módulo de identidad matchee nombres.
+- **Desde código:** `seedFromFixtures({ size, db })` (`src/modules/ingest/seed.ts`) corre las pipelines y devuelve un resumen por entidad; `resetDomainTables(db)` vacía. Los usa `pnpm db:seed` y `e2e/global-setup.ts` (siembra `small` con `--reset` y lo repite para tener una corrida de `employee` sin cambios; `e2e/seed-data.ts` calcula lo que los specs esperan a partir del mismo generador).
+- **`FixtureAdapter`** lee ese layout (`employees/list/page-NNN.json`, `employees/get/<id>.json`, `employees/tables/<tabla>/all.json`, `performance/goals/<id>.json`) y también el plano escrito a mano de `src/modules/bamboo-client/__fixtures__` (casos borde de los tests). Para ingestar el generado con la CLI genérica: `pnpm ingest --all --source fixture --dir fixtures/bamboo/small`.
+- Los CSV de `fixtures/bamboo-reports/<size>` todavía no se siembran (llegan con #22).
 
 ## Base de datos
 
@@ -107,7 +125,7 @@ pnpm ingest --help
 ```
 
 - **Entidades:** las del registro `src/modules/ingest/registry.ts`: `employee`, `job_history` y `goal`, en ese orden (el de `--all`: las dos últimas resuelven personas a través de `employee`). Las que `runIngest` ya sabe procesar salen de `entityHandlers` (`src/modules/ingest/handlers.ts`): para sumar otra basta con agregar su handler y el CLI, el log de corridas y `sync_state` la toman sin más cambios. Una con pipeline propio, como `goal` (`runGoalIngest`, que lee los goals de los empleados activos), se registra con un `run` a medida que debe dejar un `ingest_run` (con su `entity`), avanzar `sync_state` en la transacción que lo marca `succeeded` y lanzar `IngestRunError` si termina en `error`. Con `--all` una falla no frena a las siguientes.
-- **`--source fixture`** lee respuestas de Bamboo guardadas en `--dir` (por defecto `src/modules/bamboo-client/__fixtures__`). **`--source bamboo`** llama a la API y necesita `BAMBOO_COMPANY_DOMAIN` y `BAMBOO_API_KEY` (en `.env.local` o en el entorno).
+- **`--source fixture`** lee respuestas de Bamboo guardadas en `--dir` (por defecto `src/modules/bamboo-client/__fixtures__`, tres empleados escritos a mano; también entiende el layout generado de `fixtures/bamboo/<size>`, ver Seed). **`--source bamboo`** llama a la API y necesita `BAMBOO_COMPANY_DOMAIN` y `BAMBOO_API_KEY` (en `.env.local` o en el entorno).
 - **`--since`** acota la extracción a lo cambiado desde ese instante, en ISO 8601 estricto (`2026-11-01`, o con hora y zona: `2026-11-01T10:00:00Z`, `2026-11-01T10:00:00-03:00`; `5` o `2026-02-30` se rechazan con código 2); `last` usa el watermark guardado para esa fuente, adaptador y entidad (si no hay, la corrida es completa). Una corrida con `--since` es incremental y nunca da de baja lo que no devolvió. El adaptador de Bamboo lo aprovecha en `job_history` (solo empleados con cambios); `employee` lee la lista completa (la reingesta es idempotente) y `goal` siempre lee los goals de todos los empleados activos (detecta cambios por hash) e ignora `--since`.
 - **Watermark:** `sync_state` guarda, por (fuente, adaptador, entidad), el inicio de la última corrida exitosa; los fixtures (adaptador `fixture`) no mueven el watermark de la API real (`bamboo`). Solo avanza en la misma transacción que marca la corrida como `succeeded`; una corrida que falla queda en `error` (con `finished_at` y el mensaje) y deja el watermark anterior intacto.
 - **Salida:** una tabla resumen (leídos, insertados, actualizados, sin cambios, eliminados, rechazados, duración e id de corrida). Código de salida `0` si todo salió bien, `1` si alguna corrida falló y `2` si los argumentos o la configuración son inválidos (falta `BAMBOO_*` o `DATABASE_URL`, `--since` mal formado): en ese caso no se intenta ninguna corrida.

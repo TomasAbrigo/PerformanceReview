@@ -24,7 +24,8 @@ export const nullableBambooId = bambooId.nullable().optional();
 /** An id exactly as Bamboo sent it, for items that must stay raw. */
 const rawId = z.union([z.string(), z.number()]);
 
-const text = z.string().nullish();
+/** A content field: text or number (Bamboo is not consistent), null or absent. */
+const text = z.union([z.string(), z.number()]).nullish();
 
 /** Pagination links are plain URL paths; `{ href }` objects are tolerated. */
 const link = z.union([z.string(), z.looseObject({ href: z.string() })]);

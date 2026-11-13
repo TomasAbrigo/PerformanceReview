@@ -5,7 +5,7 @@ import path from "node:path";
 
 const UUID = "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}";
 
-/** The run id in the summary table row of `entity` printed by `pnpm ingest`. */
+/** The run id in the summary table row of `entity` printed by `pnpm ingest` / `pnpm db:seed`. */
 function runIdOf(output: string, entity: string) {
   const match = new RegExp(`^${entity}\\s.*\\b(${UUID})\\s*$`, "m").exec(
     output,
@@ -14,10 +14,10 @@ function runIdOf(output: string, entity: string) {
   return match[1];
 }
 
-/** `pnpm ingest ...`: its stdout, and the exit status (the CLI exits 1 when a run fails). */
-function ingest(args: string[]) {
+/** `pnpm <script> ...`: its stdout, and the exit status (the CLIs exit 1 when a run fails). */
+function run(script: string, args: string[]) {
   try {
-    const stdout = execFileSync("pnpm", ["ingest", ...args], {
+    const stdout = execFileSync("pnpm", [script, ...args], {
       encoding: "utf8",
       stdio: ["ignore", "pipe", "inherit"],
     });
@@ -28,21 +28,23 @@ function ingest(args: string[]) {
   }
 }
 
+const ingest = (args: string[]) => run("ingest", args);
+
 /**
- * Seeds the DB once, before any spec (specs only read), through the same CLI
- * as cron: every registered entity from the hand-made Bamboo fixtures
- * (employees, then their jobInfo/employmentStatus history), twice, so the
- * second run of each is a pure re-run (everything unchanged). Then one run
- * that fails, for the runs log. Idempotent: running it against a seeded DB
- * yields the same data (plus two more runs in the log).
+ * Seeds the DB once, before any spec (specs only read): `pnpm db:seed --size
+ * small --reset` (the small generated company, 40 people: e2e/seed-data.ts
+ * has its ground truth), then the same again without --reset, so the second
+ * run of each entity is a pure re-run (everything unchanged). Then one run
+ * that fails, for the runs log. Idempotent: it starts from empty tables every
+ * time, so the specs always see the same data.
  *
  * The ids of the runs the specs look at are handed over in E2E_RUN_OK (the
  * employee re-run) and E2E_RUN_FAILED (the failed one).
  */
 export default function globalSetup() {
-  const seed = ingest(["--all", "--source", "fixture"]);
+  const seed = run("db:seed", ["--size", "small", "--reset"]);
   if (seed.status !== 0) throw new Error(`seeding failed:\n${seed.stdout}`);
-  const rerun = ingest(["--all", "--source", "fixture"]);
+  const rerun = run("db:seed", ["--size", "small"]);
   if (rerun.status !== 0) throw new Error(`re-run failed:\n${rerun.stdout}`);
   process.stdout.write(rerun.stdout);
   process.env.E2E_RUN_OK = runIdOf(rerun.stdout, "employee");
