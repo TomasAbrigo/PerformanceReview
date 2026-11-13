@@ -22,9 +22,7 @@ describe("parseEnrollArgs", () => {
   });
 
   it("rejects dates that do not exist", () => {
-    expect(() => parseEnrollArgs(["--as-of", "2026-02-30"])).toThrow(
-      /--as-of/,
-    );
+    expect(() => parseEnrollArgs(["--as-of", "2026-02-30"])).toThrow(/--as-of/);
     expect(() => parseEnrollArgs(["--as-of", "hoy"])).toThrow(/--as-of/);
   });
 

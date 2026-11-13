@@ -6,8 +6,13 @@ import { Suspense } from "react";
 import { CycleDetailView } from "@/components/cycles/cycle-detail";
 import { db } from "@/db/client";
 import { routing } from "@/i18n/routing";
-import { getCycle } from "@/modules/review-core";
-import { launchCycleAction, transitionCycleAction } from "../actions";
+import { getCycle, listCycleGroups } from "@/modules/review-core";
+import { listTemplates } from "@/modules/templates";
+import {
+  duplicateCycleAction,
+  launchCycleAction,
+  transitionCycleAction,
+} from "../actions";
 
 async function Detail({ params }: PageProps<"/[locale]/cycles/[id]">) {
   const { locale, id } = await params;
@@ -16,6 +21,10 @@ async function Detail({ params }: PageProps<"/[locale]/cycles/[id]">) {
   await connection();
   const cycle = await getCycle(db, id);
   if (!cycle) notFound();
+  const [groups, templates] = await Promise.all([
+    listCycleGroups(db, cycle.id),
+    listTemplates(db),
+  ]);
   return (
     <CycleDetailView
       cycle={{
@@ -28,6 +37,18 @@ async function Detail({ params }: PageProps<"/[locale]/cycles/[id]">) {
         questionCount: cycle.questionCount,
         stats: cycle.stats,
         allowedTransitions: cycle.allowedTransitions,
+        scheduleKind: cycle.scheduleKind,
+        hireDateSchedule: cycle.hireDateSchedule,
+        defaultTemplateName:
+          templates.find((t) => t.id === cycle.templateId)?.name ?? null,
+        groups: groups.map((g) => ({
+          id: g.id,
+          name: g.name,
+          templateName: g.templateName,
+          filter: g.filter,
+          participantCount: g.participantCount,
+          questionCount: g.questionCount,
+        })),
         participants: cycle.participants.map((p) => ({
           id: p.id,
           displayName: p.displayName,
@@ -36,12 +57,15 @@ async function Detail({ params }: PageProps<"/[locale]/cycles/[id]">) {
           snapJobTitle: p.snapJobTitle,
           withoutManager: p.withoutManager,
           removedAt: p.removedAt,
+          templateGroupId: p.templateGroupId,
+          dueDates: p.dueDates,
         })),
         transitions: cycle.transitions,
       }}
       actions={{
         transition: transitionCycleAction,
         launch: launchCycleAction,
+        duplicate: duplicateCycleAction,
       }}
     />
   );

@@ -14,13 +14,24 @@ import {
   type CycleComponents,
   dueDatePhases,
   type DueDatePhase,
+  type HireDateSchedule,
+  type ScheduleKind,
 } from "@/modules/review-core/status";
 import {
+  type CycleGroupInput,
+  cycleGroupsInput,
   cycleInput,
   type CycleInput,
   type ParticipantFilterInput,
 } from "@/modules/review-core/validation";
 import { useCycleError } from "./errors";
+import {
+  groupFilter,
+  type GroupDraft,
+  GroupTemplates,
+  type GroupsPreviewData,
+} from "./group-templates";
+import { HireDateScheduleFields, type SampleHire } from "./hire-date-schedule";
 
 export type WizardOptions = {
   departments: string[];
@@ -31,6 +42,8 @@ export type WizardOptions = {
   people: { id: string; displayName: string }[];
   templates: { id: string; name: LocalizedText }[];
   scales: { id: string; name: LocalizedText }[];
+  /** A recent hire, to preview the dates of a hire-date cycle. */
+  sampleHire?: SampleHire | null;
 };
 
 type Candidate = {
@@ -45,11 +58,20 @@ export type WizardActions = {
     filter: ParticipantFilterInput,
     asOf: string,
   ) => Promise<ActionResult<{ count: number; sample: Candidate[] }>>;
-  create: (input: CycleInput) => Promise<ActionResult<{ id: string }>>;
+  /** People per group (first match wins) and the ones left without one. */
+  previewGroups: (
+    filter: ParticipantFilterInput,
+    groups: { filter: ParticipantFilterInput }[],
+    asOf: string,
+  ) => Promise<ActionResult<GroupsPreviewData & { total: number }>>;
+  create: (
+    input: CycleInput,
+    groups: CycleGroupInput[],
+  ) => Promise<ActionResult<{ id: string }>>;
   launch: (id: string) => Promise<ActionResult>;
 };
 
-const STEPS = ["people", "components", "dates", "review"] as const;
+const STEPS = ["people", "components", "groups", "dates", "review"] as const;
 const FILTER_KEYS = [
   "departments",
   "divisions",
@@ -79,6 +101,7 @@ export function CycleWizard({
   defaultSnapshotDate?: string;
 }) {
   const t = useTranslations("Cycles.wizard");
+  const tx = useTranslations("Cycles.extras");
   const router = useRouter();
   const errorText = useCycleError();
   const id = useId();
@@ -115,6 +138,16 @@ export function CycleWizard({
   const [dueDates, setDueDates] = useState<
     Partial<Record<DueDatePhase, string>>
   >({});
+  const [groups, setGroups] = useState<GroupDraft[]>([]);
+  const [groupIssues, setGroupIssues] = useState<Record<string, string>>({});
+  const [groupsPreview, setGroupsPreview] = useState<
+    (GroupsPreviewData & { key: string }) | null
+  >(null);
+  const [scheduleKind, setScheduleKind] = useState<ScheduleKind>("fixed");
+  const [schedule, setSchedule] = useState<HireDateSchedule>({
+    milestoneDays: 90,
+    windowWeeks: 2,
+  });
   const [issues, setIssues] = useState<Record<string, string>>({});
   const [error, setError] = useState<string | null>(null);
   const [preview, setPreview] = useState<{
@@ -154,6 +187,51 @@ export function CycleWizard({
     };
   }, [filterKey, asOf, actions]);
 
+  // People per group; the preview is only valid for the groups it was asked for.
+  const groupFiltersKey = JSON.stringify(
+    groups.map((g) => ({ filter: groupFilter(g) })),
+  );
+  const previewKey = `${filterKey}|${groupFiltersKey}|${asOf}`;
+  useEffect(() => {
+    const parsed = JSON.parse(filterKey) as ParticipantFilterInput;
+    if (
+      !asOf ||
+      groupFiltersKey === "[]" ||
+      (parsed.kind === "people" && parsed.personIds.length === 0)
+    ) {
+      return;
+    }
+    let current = true;
+    actions
+      .previewGroups(
+        parsed,
+        JSON.parse(groupFiltersKey) as { filter: ParticipantFilterInput }[],
+        asOf,
+      )
+      .then((result) => {
+        if (current && result.ok) {
+          setGroupsPreview({
+            key: previewKey,
+            groups: result.groups,
+            remainder: result.remainder,
+          });
+        }
+      });
+    return () => {
+      current = false;
+    };
+  }, [filterKey, groupFiltersKey, asOf, previewKey, actions]);
+
+  const byHireDate = scheduleKind === "hire_date";
+
+  function buildGroups(): CycleGroupInput[] {
+    return groups.map((g) => ({
+      name: g.name,
+      templateId: g.templateId,
+      filter: groupFilter(g),
+    }));
+  }
+
   function buildInput(): CycleInput {
     const due = Object.fromEntries(
       Object.entries(dueDates).filter(([, v]) => v),
@@ -166,9 +244,28 @@ export function CycleWizard({
       anonymity,
       templateId: templateId || null,
       finalScaleId: finalScaleId || null,
-      dueDates: due,
+      // Hire-date cycles have per-person deadlines instead of phase dates.
+      dueDates: byHireDate ? {} : due,
+      scheduleKind,
+      hireDateSchedule: byHireDate ? schedule : null,
       participantFilter: filter,
     };
+  }
+
+  function validateGroups(): boolean {
+    const result = cycleGroupsInput.safeParse(buildGroups());
+    const found: Record<string, string> = {};
+    if (!result.success) {
+      for (const issue of result.error.issues) {
+        const path = issue.path.join(".");
+        if (/^\d+\.(name|templateId)$/.test(path)) {
+          found[path] =
+            issue.message === "duplicate_name" ? "duplicate_name" : "required";
+        }
+      }
+    }
+    setGroupIssues(found);
+    return Object.keys(found).length === 0;
   }
 
   function validateDates(): boolean {
@@ -200,6 +297,7 @@ export function CycleWizard({
       setIssues({ snapshotDate: "required" });
       return;
     }
+    if (STEPS[step] === "groups" && !validateGroups()) return;
     if (STEPS[step] === "dates" && !validateDates()) return;
     setStep((s) => Math.min(s + 1, STEPS.length - 1));
   }
@@ -209,7 +307,7 @@ export function CycleWizard({
       // A failed launch keeps the draft: retrying launches it, not a copy.
       let cycleId = createdId;
       if (!cycleId) {
-        const created = await actions.create(buildInput());
+        const created = await actions.create(buildInput(), buildGroups());
         if (!created.ok) {
           setError(errorText(created.code));
           return;
@@ -239,6 +337,8 @@ export function CycleWizard({
   const countText = preview
     ? t("count", { count: preview.count })
     : t("counting");
+  const stepLabel = (s: (typeof STEPS)[number]) =>
+    s === "groups" ? tx("steps.groups") : t(`steps.${s}`);
 
   return (
     <div className="flex flex-col gap-6">
@@ -254,7 +354,7 @@ export function CycleWizard({
               aria-current={i === step ? "step" : undefined}
               className={i === step ? "font-semibold" : "text-muted-foreground"}
             >
-              {i + 1}. {t(`steps.${s}`)}
+              {i + 1}. {stepLabel(s)}
             </li>
           ))}
         </ol>
@@ -264,7 +364,7 @@ export function CycleWizard({
       </header>
 
       <section
-        aria-label={t(`steps.${STEPS[step]}`)}
+        aria-label={stepLabel(STEPS[step])}
         className="flex flex-col gap-4"
       >
         {STEPS[step] === "people" ? (
@@ -443,6 +543,22 @@ export function CycleWizard({
           </>
         ) : null}
 
+        {STEPS[step] === "groups" ? (
+          <GroupTemplates
+            groups={groups}
+            onChange={setGroups}
+            options={{
+              departments: options.departments,
+              divisions: options.divisions,
+              locations: options.locations,
+              jobTitles: options.jobTitles,
+              templates: options.templates,
+            }}
+            preview={groupsPreview?.key === previewKey ? groupsPreview : null}
+            issues={groupIssues}
+          />
+        ) : null}
+
         {STEPS[step] === "dates" ? (
           <>
             <div className="flex flex-col gap-1">
@@ -480,28 +596,54 @@ export function CycleWizard({
                 </div>
               ))}
             </div>
-            <fieldset className="grid gap-4 sm:grid-cols-3">
-              <legend className="mb-2 font-medium">{t("dueDates")}</legend>
-              {dueDatePhases.map((phase) => (
-                <div key={phase} className="flex flex-col gap-1">
-                  <Label htmlFor={`${id}-due-${phase}`}>
-                    {t(`phases.${phase}`)}
-                  </Label>
-                  <Input
-                    id={`${id}-due-${phase}`}
-                    type="date"
-                    value={dueDates[phase] ?? ""}
-                    aria-invalid={
-                      issues[`dueDates.${phase}`] ? true : undefined
-                    }
-                    onChange={(e) =>
-                      setDueDates({ ...dueDates, [phase]: e.target.value })
-                    }
+            <fieldset className="flex flex-col gap-2">
+              <legend className="mb-2 font-medium">
+                {tx("schedule.legend")}
+              </legend>
+              {(["fixed", "hire_date"] as const).map((kind) => (
+                <label key={kind} className="flex items-center gap-2">
+                  <input
+                    type="radio"
+                    name={`${id}-schedule`}
+                    checked={scheduleKind === kind}
+                    onChange={() => setScheduleKind(kind)}
                   />
-                  {fieldError(`dueDates.${phase}`)}
-                </div>
+                  {tx(
+                    kind === "fixed" ? "schedule.fixed" : "schedule.hireDate",
+                  )}
+                </label>
               ))}
             </fieldset>
+            {byHireDate ? (
+              <HireDateScheduleFields
+                value={schedule}
+                onChange={setSchedule}
+                sample={options.sampleHire ?? null}
+              />
+            ) : (
+              <fieldset className="grid gap-4 sm:grid-cols-3">
+                <legend className="mb-2 font-medium">{t("dueDates")}</legend>
+                {dueDatePhases.map((phase) => (
+                  <div key={phase} className="flex flex-col gap-1">
+                    <Label htmlFor={`${id}-due-${phase}`}>
+                      {t(`phases.${phase}`)}
+                    </Label>
+                    <Input
+                      id={`${id}-due-${phase}`}
+                      type="date"
+                      value={dueDates[phase] ?? ""}
+                      aria-invalid={
+                        issues[`dueDates.${phase}`] ? true : undefined
+                      }
+                      onChange={(e) =>
+                        setDueDates({ ...dueDates, [phase]: e.target.value })
+                      }
+                    />
+                    {fieldError(`dueDates.${phase}`)}
+                  </div>
+                ))}
+              </fieldset>
+            )}
           </>
         ) : null}
 
@@ -521,18 +663,44 @@ export function CycleWizard({
                 .map((k) => t(`componentNames.${k}`))
                 .join(", ")}
             </dd>
-            <dt className="font-medium">{t("dueDates")}</dt>
-            <dd>
-              {dueDatePhases
-                .filter((p) => dueDates[p])
-                .map((p) => `${t(`phases.${p}`)}: ${dueDates[p]}`)
-                .join(" · ")}
-            </dd>
+            {byHireDate ? (
+              <>
+                <dt className="font-medium">{tx("schedule.legend")}</dt>
+                <dd>
+                  {tx("schedule.summary", {
+                    milestone: tx(
+                      `schedule.milestones.${schedule.milestoneDays}`,
+                    ),
+                    window: tx("schedule.weeks", {
+                      count: schedule.windowWeeks,
+                    }),
+                  })}
+                </dd>
+              </>
+            ) : (
+              <>
+                <dt className="font-medium">{t("dueDates")}</dt>
+                <dd>
+                  {dueDatePhases
+                    .filter((p) => dueDates[p])
+                    .map((p) => `${t(`phases.${p}`)}: ${dueDates[p]}`)
+                    .join(" · ")}
+                </dd>
+              </>
+            )}
+            {groups.length > 0 ? (
+              <>
+                <dt className="font-medium">{tx("groups.title")}</dt>
+                <dd>{groups.map((g) => g.name).join(" · ")}</dd>
+              </>
+            ) : null}
             <dt className="font-medium">{t("steps.people")}</dt>
             <dd aria-live="polite">
-              {preview
-                ? t("participantsToLaunch", { count: preview.count })
-                : t("counting")}
+              {!preview
+                ? t("counting")
+                : byHireDate
+                  ? tx("schedule.inScope", { count: preview.count })
+                  : t("participantsToLaunch", { count: preview.count })}
             </dd>
           </dl>
         ) : null}

@@ -37,7 +37,9 @@ export function parseEnrollArgs(argv: string[]): EnrollArgs {
       strict: true,
     }).values;
   } catch (error) {
-    throw new UsageError(error instanceof Error ? error.message : String(error));
+    throw new UsageError(
+      error instanceof Error ? error.message : String(error),
+    );
   }
   if (values.cycle !== undefined && !isUuid(values.cycle)) {
     throw new UsageError("--cycle must be a cycle id (uuid)");
@@ -53,7 +55,9 @@ export function parseEnrollArgs(argv: string[]): EnrollArgs {
 }
 
 function report(result: EnrollResult, out: (line: string) => void) {
-  out(`cycle ${result.cycleId} as of ${result.asOf}: ${result.enrolled.length} enrolled`);
+  out(
+    `cycle ${result.cycleId} as of ${result.asOf}: ${result.enrolled.length} enrolled`,
+  );
   for (const e of result.enrolled) {
     out(
       `  ${e.displayName}: hired ${e.hireDate}, milestone ${e.milestoneDate}, due ${e.dueDates.self}`,
