@@ -1,0 +1,17 @@
+{
+  "id": "313",
+  "firstName": "Natalia",
+  "lastName": "Coronel",
+  "workEmail": "natalia.coronel@meridian-andina.example",
+  "employeeNumber": "10762",
+  "supervisorEId": "135",
+  "supervisorId": "10312",
+  "supervisor": "Trejo, Marcela",
+  "hireDate": "2022-03-19",
+  "terminationDate": null,
+  "department": "Calidad",
+  "division": "Operaciones",
+  "jobTitle": "Auditor de Procesos Ssr",
+  "location": "Montevideo",
+  "status": "Active"
+}

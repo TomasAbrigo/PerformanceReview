@@ -1,0 +1,17 @@
+{
+  "id": "177",
+  "firstName": "Sebastián",
+  "lastName": "Silva",
+  "workEmail": "sebastian.silva@meridian-andina.example",
+  "employeeNumber": "10407",
+  "supervisorEId": "27",
+  "supervisorId": "10037",
+  "supervisor": "Díaz, Carolina",
+  "hireDate": "2021-01-16",
+  "terminationDate": null,
+  "department": "Ingeniería",
+  "division": "Tecnología",
+  "jobTitle": "Líder de Ingeniería",
+  "location": "Montevideo",
+  "status": "Active"
+}

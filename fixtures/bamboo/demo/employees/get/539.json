@@ -1,0 +1,17 @@
+{
+  "id": "539",
+  "firstName": "Laura",
+  "lastName": "Sosa",
+  "workEmail": "laura.sosa@meridian-andina.example",
+  "employeeNumber": "11309",
+  "supervisorEId": "125",
+  "supervisorId": "10282",
+  "supervisor": "Navarro, Tomás",
+  "hireDate": "2024-01-23",
+  "terminationDate": null,
+  "department": "Ingeniería",
+  "division": "Tecnología",
+  "jobTitle": "Backend Developer Sr",
+  "location": "Buenos Aires",
+  "status": "Active"
+}

@@ -1,0 +1,17 @@
+{
+  "id": "449",
+  "firstName": "Santiago",
+  "lastName": "Franco",
+  "workEmail": "santiago.franco@meridian-andina.example",
+  "employeeNumber": "11108",
+  "supervisorEId": "159",
+  "supervisorId": "10368",
+  "supervisor": "Ríos, Marcela",
+  "hireDate": "2023-04-23",
+  "terminationDate": null,
+  "department": "Datos",
+  "division": "Tecnología",
+  "jobTitle": "Data Analyst Jr",
+  "location": "Remoto",
+  "status": "Active"
+}

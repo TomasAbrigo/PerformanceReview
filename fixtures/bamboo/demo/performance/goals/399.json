@@ -1,0 +1,240 @@
+{
+  "canAlign": true,
+  "canCreateGoals": true,
+  "filters": [
+    {
+      "id": "status-all",
+      "name": "All"
+    },
+    {
+      "id": "inProgress",
+      "name": "In progress"
+    },
+    {
+      "id": "completed",
+      "name": "Completed"
+    },
+    {
+      "id": "closed",
+      "name": "Closed"
+    }
+  ],
+  "selectedFilter": "status-all",
+  "goals": [
+    {
+      "id": "6724",
+      "title": "Mentorear a dos personas nuevas",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2023-11-13",
+      "completionDate": "2023-09-01",
+      "lastChangedDateTime": "2023-09-01T13:39:03Z",
+      "status": "completed",
+      "milestones": [
+        {
+          "id": 1467,
+          "employeeGoalId": 6724,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2023-05-07T13:22:03Z",
+          "lastUpdateDateTime": "2023-05-07T13:22:03Z",
+          "lastUpdateUserId": 399
+        },
+        {
+          "id": 1468,
+          "employeeGoalId": 6724,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2023-06-09T09:09:34Z",
+          "lastUpdateDateTime": "2023-06-09T09:09:34Z",
+          "lastUpdateUserId": 399
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "6727",
+      "title": "Implementar el calendario editorial",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 5,
+      "alignsWithOptionId": 9003,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2023-12-24",
+      "completionDate": null,
+      "lastChangedDateTime": "2024-11-12T10:45:13Z",
+      "status": "in_progress",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "6728",
+      "title": "Aumentar la cobertura de pruebas al 80%",
+      "description": "Sirve de base para el próximo ciclo de evaluación.",
+      "percentComplete": 33,
+      "alignsWithOptionId": 9001,
+      "sharedWithEmployeeIds": [
+        67
+      ],
+      "dueDate": "2023-05-15",
+      "completionDate": null,
+      "lastChangedDateTime": "2023-09-16T15:40:27Z",
+      "status": "in_progress",
+      "milestones": [
+        {
+          "id": 1469,
+          "employeeGoalId": 6728,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2023-04-25T11:45:23Z",
+          "lastUpdateDateTime": "2023-04-25T11:45:23Z",
+          "lastUpdateUserId": 399
+        },
+        {
+          "id": 1470,
+          "employeeGoalId": 6728,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2023-02-05T15:52:12Z",
+          "lastUpdateUserId": 399
+        },
+        {
+          "id": 1471,
+          "employeeGoalId": 6728,
+          "title": "Hito 3",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2023-02-05T17:54:17Z",
+          "lastUpdateUserId": 399
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "6729",
+      "title": "Lanzar el nuevo flujo de onboarding",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [
+        67
+      ],
+      "dueDate": "2025-03-17",
+      "completionDate": "2025-02-05",
+      "lastChangedDateTime": "2025-02-05T19:20:11Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "6732",
+      "title": "Implementar el calendario editorial",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "percentComplete": 20,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2026-05-30",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-09-14T10:04:23Z",
+      "status": "closed",
+      "milestones": null,
+      "actions": {
+        "canEdit": false,
+        "canUpdateProgress": false,
+        "canClose": false,
+        "canReopen": true,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "6734",
+      "title": "Documentar los procesos críticos",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2026-03-02",
+      "completionDate": "2026-02-12",
+      "lastChangedDateTime": "2026-02-12T19:08:10Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    }
+  ],
+  "persons": [
+    {
+      "employeeId": 399,
+      "firstName": "Cristian",
+      "lastName": "Villalba",
+      "preferredName": null
+    },
+    {
+      "employeeId": 67,
+      "firstName": "Noelia",
+      "lastName": "Roldán",
+      "preferredName": null
+    }
+  ],
+  "comments": [
+    {
+      "goalId": "6724",
+      "commentCount": 3
+    },
+    {
+      "goalId": "6728",
+      "commentCount": 3
+    },
+    {
+      "goalId": "6732",
+      "commentCount": 2
+    }
+  ]
+}

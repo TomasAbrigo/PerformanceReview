@@ -1,0 +1,17 @@
+{
+  "id": "75",
+  "firstName": "Victoria",
+  "lastName": "Yáñez",
+  "workEmail": "victoria.yanez@meridian-andina.example",
+  "employeeNumber": "10167",
+  "supervisorEId": "31",
+  "supervisorId": "10056",
+  "supervisor": "Rivas, Federico",
+  "hireDate": "2024-10-22",
+  "terminationDate": "2025-09-27",
+  "department": "Finanzas",
+  "division": "Corporativo",
+  "jobTitle": "Analista de Tesorería Ssr",
+  "location": "Córdoba",
+  "status": "Inactive"
+}

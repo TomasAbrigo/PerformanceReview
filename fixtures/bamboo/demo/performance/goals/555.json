@@ -1,0 +1,173 @@
+{
+  "canAlign": true,
+  "canCreateGoals": true,
+  "filters": [
+    {
+      "id": "status-all",
+      "name": "All"
+    },
+    {
+      "id": "inProgress",
+      "name": "In progress"
+    },
+    {
+      "id": "completed",
+      "name": "Completed"
+    },
+    {
+      "id": "closed",
+      "name": "Closed"
+    }
+  ],
+  "selectedFilter": "status-all",
+  "goals": [
+    {
+      "id": "7324",
+      "title": "Migrar los reportes al nuevo tablero",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 0,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2024-07-30",
+      "completionDate": null,
+      "lastChangedDateTime": "2024-06-18T14:05:08Z",
+      "status": "in_progress",
+      "milestones": [
+        {
+          "id": 1778,
+          "employeeGoalId": 7324,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2024-03-13T09:47:54Z",
+          "lastUpdateUserId": 555
+        },
+        {
+          "id": 1779,
+          "employeeGoalId": 7324,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2024-03-13T12:12:41Z",
+          "lastUpdateUserId": 555
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "7327",
+      "title": "Lanzar el nuevo flujo de onboarding",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2025-03-15",
+      "completionDate": "2024-11-10",
+      "lastChangedDateTime": "2024-11-10T11:00:18Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "7329",
+      "title": "Reducir los incidentes recurrentes a la mitad",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2025-08-20",
+      "completionDate": "2025-04-21",
+      "lastChangedDateTime": "2025-04-21T10:28:25Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "7331",
+      "title": "Mentorear a dos personas nuevas",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 50,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2025-04-18",
+      "completionDate": null,
+      "lastChangedDateTime": "2025-11-01T12:07:43Z",
+      "status": "in_progress",
+      "milestones": [
+        {
+          "id": 1780,
+          "employeeGoalId": 7331,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-06-11T19:22:43Z",
+          "lastUpdateDateTime": "2025-06-11T19:22:43Z",
+          "lastUpdateUserId": 555
+        },
+        {
+          "id": 1781,
+          "employeeGoalId": 7331,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2024-11-19T14:33:15Z",
+          "lastUpdateUserId": 555
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    }
+  ],
+  "persons": [
+    {
+      "employeeId": 555,
+      "firstName": "Ramiro",
+      "lastName": "Aguirre",
+      "preferredName": null
+    }
+  ],
+  "comments": [
+    {
+      "goalId": "7327",
+      "commentCount": 3
+    },
+    {
+      "goalId": "7331",
+      "commentCount": 1
+    }
+  ]
+}

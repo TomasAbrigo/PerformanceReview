@@ -1,0 +1,17 @@
+{
+  "id": "471",
+  "firstName": "Hugo",
+  "lastName": "Soria",
+  "workEmail": "hugo.soria@meridian-andina.example",
+  "employeeNumber": "11159",
+  "supervisorEId": "61",
+  "supervisorId": "10107",
+  "supervisor": "Peralta, Marcelo",
+  "hireDate": "2023-07-03",
+  "terminationDate": null,
+  "department": "Ventas",
+  "division": "Comercial",
+  "jobTitle": "Ejecutivo de Cuentas Ssr",
+  "location": "Remoto",
+  "status": "Active"
+}

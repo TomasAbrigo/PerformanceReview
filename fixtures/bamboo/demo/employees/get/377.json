@@ -1,0 +1,17 @@
+{
+  "id": "377",
+  "firstName": "Florencia",
+  "lastName": "Juárez",
+  "workEmail": "florencia.juarez@meridian-andina.example",
+  "employeeNumber": "10930",
+  "supervisorEId": "189",
+  "supervisorId": "10436",
+  "supervisor": "Quiroga, Lucía",
+  "hireDate": "2022-10-03",
+  "terminationDate": null,
+  "department": "Customer Success",
+  "division": "Comercial",
+  "jobTitle": "Customer Success Manager Sr",
+  "location": "Buenos Aires",
+  "status": "Active"
+}

@@ -1,0 +1,17 @@
+{
+  "id": "417",
+  "firstName": "Mateo",
+  "lastName": "Soria",
+  "workEmail": "mateo.soria@meridian-andina.example",
+  "employeeNumber": "11036",
+  "supervisorEId": "93",
+  "supervisorId": "10190",
+  "supervisor": "Herrera, Rocío",
+  "hireDate": "2023-01-17",
+  "terminationDate": null,
+  "department": "Infraestructura",
+  "division": "Tecnología",
+  "jobTitle": "DevOps Engineer Sr",
+  "location": "Montevideo",
+  "status": "Active"
+}

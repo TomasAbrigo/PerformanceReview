@@ -1,0 +1,17 @@
+{
+  "id": "751",
+  "firstName": "Franco",
+  "lastName": "Reyes",
+  "workEmail": "franco.reyes@meridian-andina.example",
+  "employeeNumber": "11838",
+  "supervisorEId": "105",
+  "supervisorId": "10225",
+  "supervisor": "Ibáñez, Lucía",
+  "hireDate": "2025-07-06",
+  "terminationDate": null,
+  "department": "Ingeniería",
+  "division": "Tecnología",
+  "jobTitle": "Frontend Developer Jr",
+  "location": "Buenos Aires",
+  "status": "Active"
+}

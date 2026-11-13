@@ -1,0 +1,17 @@
+{
+  "id": "801",
+  "firstName": "Jimena",
+  "lastName": "Álvarez",
+  "workEmail": "jimena.alvarez@meridian-andina.example",
+  "employeeNumber": "11599",
+  "supervisorEId": "321",
+  "supervisorId": "10788",
+  "supervisor": "Figueroa, Facundo",
+  "hireDate": "2026-04-20",
+  "terminationDate": null,
+  "department": "Finanzas",
+  "division": "Corporativo",
+  "jobTitle": "Controller Jr",
+  "location": "Buenos Aires",
+  "status": "Active"
+}

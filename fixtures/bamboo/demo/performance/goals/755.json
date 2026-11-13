@@ -1,0 +1,125 @@
+{
+  "canAlign": true,
+  "canCreateGoals": true,
+  "filters": [
+    {
+      "id": "status-all",
+      "name": "All"
+    },
+    {
+      "id": "inProgress",
+      "name": "In progress"
+    },
+    {
+      "id": "completed",
+      "name": "Completed"
+    },
+    {
+      "id": "closed",
+      "name": "Closed"
+    }
+  ],
+  "selectedFilter": "status-all",
+  "goals": [
+    {
+      "id": "7849",
+      "title": "Automatizar la conciliación mensual",
+      "description": "Sirve de base para el próximo ciclo de evaluación.",
+      "percentComplete": 45,
+      "alignsWithOptionId": 9003,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2025-10-12",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-03-28T14:03:58Z",
+      "status": "in_progress",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "7851",
+      "title": "Lanzar el nuevo flujo de onboarding",
+      "description": "Sirve de base para el próximo ciclo de evaluación.",
+      "percentComplete": 60,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2026-11-09",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-10-27T11:30:44Z",
+      "status": "in_progress",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "7853",
+      "title": "Migrar los reportes al nuevo tablero",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2026-08-01",
+      "completionDate": "2026-04-01",
+      "lastChangedDateTime": "2026-04-01T19:14:24Z",
+      "status": "completed",
+      "milestones": [
+        {
+          "id": 2016,
+          "employeeGoalId": 7853,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2026-02-24T17:54:17Z",
+          "lastUpdateDateTime": "2026-02-24T17:54:17Z",
+          "lastUpdateUserId": 755
+        },
+        {
+          "id": 2017,
+          "employeeGoalId": 7853,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2026-01-28T10:50:08Z",
+          "lastUpdateDateTime": "2026-01-28T10:50:08Z",
+          "lastUpdateUserId": 755
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    }
+  ],
+  "persons": [
+    {
+      "employeeId": 755,
+      "firstName": "Sebastián",
+      "lastName": "Maldonado",
+      "preferredName": "Seba"
+    }
+  ],
+  "comments": [
+    {
+      "goalId": "7851",
+      "commentCount": 4
+    }
+  ]
+}

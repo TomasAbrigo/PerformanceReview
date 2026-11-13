@@ -1,0 +1,17 @@
+{
+  "id": "41",
+  "firstName": "Milagros",
+  "lastName": "González",
+  "workEmail": "milagros.gonzalez@meridian-andina.example",
+  "employeeNumber": "10080",
+  "supervisorEId": "25",
+  "supervisorId": "10040",
+  "supervisor": "Quiroga, Silvana",
+  "hireDate": "2019-11-28",
+  "terminationDate": "2024-05-10",
+  "department": "Datos",
+  "division": "Tecnología",
+  "jobTitle": "Líder de Datos",
+  "location": "Buenos Aires",
+  "status": "Inactive"
+}

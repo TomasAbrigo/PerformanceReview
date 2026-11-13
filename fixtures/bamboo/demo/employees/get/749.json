@@ -1,0 +1,17 @@
+{
+  "id": "749",
+  "firstName": "Santiago",
+  "lastName": "Díaz",
+  "workEmail": "santiago.diaz@meridian-andina.example",
+  "employeeNumber": "11829",
+  "supervisorEId": "189",
+  "supervisorId": "10436",
+  "supervisor": "Quiroga, Lucía",
+  "hireDate": "2025-07-04",
+  "terminationDate": null,
+  "department": "Customer Success",
+  "division": "Comercial",
+  "jobTitle": "Customer Success Manager Sr",
+  "location": "Buenos Aires",
+  "status": "Active"
+}

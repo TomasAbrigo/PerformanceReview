@@ -1,0 +1,17 @@
+{
+  "id": "309",
+  "firstName": "Valentina",
+  "lastName": "Figueroa",
+  "workEmail": "valentina.figueroa@meridian-andina.example",
+  "employeeNumber": "10744",
+  "supervisorEId": "65",
+  "supervisorId": "10117",
+  "supervisor": "Díaz, Valentina",
+  "hireDate": "2022-03-03",
+  "terminationDate": null,
+  "department": "Marketing",
+  "division": "Comercial",
+  "jobTitle": "Diseñador de Marca Ssr",
+  "location": "Buenos Aires",
+  "status": "Active"
+}

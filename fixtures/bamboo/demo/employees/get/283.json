@@ -1,0 +1,17 @@
+{
+  "id": "283",
+  "firstName": "Belén",
+  "lastName": "Benítez",
+  "workEmail": "belen.benitez@meridian-andina.example",
+  "employeeNumber": "10677",
+  "supervisorEId": "47",
+  "supervisorId": "10080",
+  "supervisor": "Olmos, Candela",
+  "hireDate": "2022-01-17",
+  "terminationDate": null,
+  "department": "Soporte",
+  "division": "Operaciones",
+  "jobTitle": "Especialista de Soporte Ssr",
+  "location": "Santiago de Chile",
+  "status": "Active"
+}

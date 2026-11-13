@@ -32,6 +32,7 @@ In-house performance review tool replacing BambooHR's performance module. Data i
 | `pnpm db:migrate`                  | Apply Drizzle migrations to `DATABASE_URL`                                                          |
 | `pnpm db:studio`                   | Drizzle Studio                                                                                      |
 | `pnpm db:reset`                    | `supabase db reset` (wipes the DB; re-run `pnpm db:migrate` afterwards)                             |
+| `pnpm fixtures:build`              | Regenerate the synthetic Bamboo fixtures in `fixtures/` (deterministic; commit the output)          |
 
 ## Local ports
 

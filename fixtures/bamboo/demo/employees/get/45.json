@@ -1,0 +1,17 @@
+{
+  "id": "45",
+  "firstName": "Facundo",
+  "lastName": "Molina",
+  "workEmail": "facundo.molina@meridian-andina.example",
+  "employeeNumber": "10077",
+  "supervisorEId": "17",
+  "supervisorId": "10016",
+  "supervisor": "Martínez, Camila",
+  "hireDate": "2017-12-16",
+  "terminationDate": null,
+  "department": "People",
+  "division": "Corporativo",
+  "jobTitle": "Gerente de People",
+  "location": "Montevideo",
+  "status": "Active"
+}

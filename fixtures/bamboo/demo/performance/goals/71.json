@@ -1,0 +1,212 @@
+{
+  "canAlign": true,
+  "canCreateGoals": true,
+  "filters": [
+    {
+      "id": "status-all",
+      "name": "All"
+    },
+    {
+      "id": "inProgress",
+      "name": "In progress"
+    },
+    {
+      "id": "completed",
+      "name": "Completed"
+    },
+    {
+      "id": "closed",
+      "name": "Closed"
+    }
+  ],
+  "selectedFilter": "status-all",
+  "goals": [
+    {
+      "id": "5296",
+      "title": "Lanzar el nuevo flujo de onboarding",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 100,
+      "alignsWithOptionId": 9004,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2023-10-20",
+      "completionDate": "2023-05-04",
+      "lastChangedDateTime": "2023-05-04T16:01:40Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "5299",
+      "title": "Mejorar el NPS interno del equipo",
+      "description": "Sirve de base para el próximo ciclo de evaluación.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [
+        51
+      ],
+      "dueDate": "2024-02-29",
+      "completionDate": "2024-03-01",
+      "lastChangedDateTime": "2024-03-01T14:07:15Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "5302",
+      "title": "Renovar las cuentas clave del trimestre",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2024-05-30",
+      "completionDate": "2023-12-21",
+      "lastChangedDateTime": "2023-12-21T09:27:54Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "5303",
+      "title": "Entregar el proyecto Norte sin desvíos",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 0,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [
+        51
+      ],
+      "dueDate": "2025-03-13",
+      "completionDate": null,
+      "lastChangedDateTime": "2025-06-18T11:02:17Z",
+      "status": "in_progress",
+      "milestones": [
+        {
+          "id": 833,
+          "employeeGoalId": 5303,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2024-11-21T10:33:36Z",
+          "lastUpdateUserId": 71
+        },
+        {
+          "id": 834,
+          "employeeGoalId": 5303,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2024-11-21T14:01:07Z",
+          "lastUpdateUserId": 71
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "5306",
+      "title": "Mejorar el NPS interno del equipo",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "percentComplete": 100,
+      "alignsWithOptionId": 9003,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2025-10-15",
+      "completionDate": "2025-07-26",
+      "lastChangedDateTime": "2025-07-26T11:09:16Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "5308",
+      "title": "Renovar las cuentas clave del trimestre",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "percentComplete": 85,
+      "alignsWithOptionId": 9004,
+      "sharedWithEmployeeIds": [
+        51
+      ],
+      "dueDate": "2026-11-14",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-10-18T19:13:48Z",
+      "status": "in_progress",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    }
+  ],
+  "persons": [
+    {
+      "employeeId": 71,
+      "firstName": "Agustina",
+      "lastName": "Quiroga",
+      "preferredName": null
+    },
+    {
+      "employeeId": 51,
+      "firstName": "Gonzalo",
+      "lastName": "Toledo",
+      "preferredName": "Gonza"
+    }
+  ],
+  "comments": [
+    {
+      "goalId": "5296",
+      "commentCount": 4
+    },
+    {
+      "goalId": "5299",
+      "commentCount": 3
+    },
+    {
+      "goalId": "5303",
+      "commentCount": 3
+    },
+    {
+      "goalId": "5306",
+      "commentCount": 2
+    }
+  ]
+}

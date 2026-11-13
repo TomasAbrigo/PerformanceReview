@@ -1,0 +1,33 @@
+{
+  "canAlign": true,
+  "canCreateGoals": true,
+  "filters": [
+    {
+      "id": "status-all",
+      "name": "All"
+    },
+    {
+      "id": "inProgress",
+      "name": "In progress"
+    },
+    {
+      "id": "completed",
+      "name": "Completed"
+    },
+    {
+      "id": "closed",
+      "name": "Closed"
+    }
+  ],
+  "selectedFilter": "status-all",
+  "goals": [],
+  "persons": [
+    {
+      "employeeId": 731,
+      "firstName": "Cristian",
+      "lastName": "Rodríguez",
+      "preferredName": null
+    }
+  ],
+  "comments": []
+}

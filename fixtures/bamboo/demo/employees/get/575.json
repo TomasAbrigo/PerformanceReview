@@ -1,0 +1,17 @@
+{
+  "id": "575",
+  "firstName": "Rodrigo",
+  "lastName": "Juárez",
+  "workEmail": "rodrigo.juarez@meridian-andina.example",
+  "employeeNumber": "11406",
+  "supervisorEId": "93",
+  "supervisorId": "10190",
+  "supervisor": "Herrera, Rocío",
+  "hireDate": "2024-04-26",
+  "terminationDate": null,
+  "department": "Infraestructura",
+  "division": "Tecnología",
+  "jobTitle": "Site Reliability Engineer Ssr",
+  "location": "Montevideo",
+  "status": "Active"
+}

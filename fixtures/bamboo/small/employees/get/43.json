@@ -1,0 +1,17 @@
+{
+  "id": "43",
+  "firstName": "Bruno",
+  "lastName": "Campos",
+  "workEmail": "bruno.campos@meridian-andina.example",
+  "employeeNumber": "10084",
+  "supervisorEId": "35",
+  "supervisorId": "10065",
+  "supervisor": "Núñez, Carolina",
+  "hireDate": "2020-10-10",
+  "terminationDate": "2025-10-09",
+  "department": "Ingeniería",
+  "division": "Tecnología",
+  "jobTitle": "Frontend Developer Ssr",
+  "location": "Córdoba",
+  "status": "Inactive"
+}

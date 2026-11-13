@@ -1,0 +1,17 @@
+{
+  "id": "91",
+  "firstName": "Noelia",
+  "lastName": "Ojeda",
+  "workEmail": "noelia.ojeda@meridian-andina.example",
+  "employeeNumber": "10186",
+  "supervisorEId": "65",
+  "supervisorId": "10117",
+  "supervisor": "Díaz, Valentina",
+  "hireDate": "2019-04-11",
+  "terminationDate": null,
+  "department": "Marketing",
+  "division": "Comercial",
+  "jobTitle": "Diseñador de Marca Jr",
+  "location": "Buenos Aires",
+  "status": "Active"
+}

@@ -1,0 +1,17 @@
+{
+  "id": "679",
+  "firstName": "Lucía",
+  "lastName": "Coronel",
+  "workEmail": "lucia.coronel@meridian-andina.example",
+  "employeeNumber": "11635",
+  "supervisorEId": "167",
+  "supervisorId": "10382",
+  "supervisor": "Escobar, Marcela",
+  "hireDate": "2025-01-29",
+  "terminationDate": null,
+  "department": "Infraestructura",
+  "division": "Tecnología",
+  "jobTitle": "Site Reliability Engineer Ssr",
+  "location": "Córdoba",
+  "status": "Active"
+}

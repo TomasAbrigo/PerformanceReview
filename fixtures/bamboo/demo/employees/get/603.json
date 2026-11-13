@@ -1,0 +1,17 @@
+{
+  "id": "603",
+  "firstName": "Damián",
+  "lastName": "Sosa",
+  "workEmail": "damian.sosa@meridian-andina.example",
+  "employeeNumber": "11478",
+  "supervisorEId": "361",
+  "supervisorId": "10885",
+  "supervisor": "Suárez, Adrián",
+  "hireDate": "2024-06-26",
+  "terminationDate": null,
+  "department": "Customer Success",
+  "division": "Comercial",
+  "jobTitle": "Onboarding Specialist Ssr",
+  "location": "Buenos Aires",
+  "status": "Active"
+}

@@ -1,0 +1,17 @@
+{
+  "id": "691",
+  "firstName": "Fernando",
+  "lastName": "Franco",
+  "workEmail": "fernando.franco@meridian-andina.example",
+  "employeeNumber": "11663",
+  "supervisorEId": "61",
+  "supervisorId": "10107",
+  "supervisor": "Peralta, Marcelo",
+  "hireDate": "2025-02-24",
+  "terminationDate": null,
+  "department": "Ventas",
+  "division": "Comercial",
+  "jobTitle": "Ejecutivo de Cuentas Sr",
+  "location": "Buenos Aires",
+  "status": "Active"
+}

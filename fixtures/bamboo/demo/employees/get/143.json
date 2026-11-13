@@ -1,0 +1,17 @@
+{
+  "id": "143",
+  "firstName": "Fernando",
+  "lastName": "Soria",
+  "workEmail": "fernando.soria@meridian-andina.example",
+  "employeeNumber": "10331",
+  "supervisorEId": "137",
+  "supervisorId": "10314",
+  "supervisor": "Lezcano, Marcela",
+  "hireDate": "2020-04-26",
+  "terminationDate": null,
+  "department": "Customer Success",
+  "division": "Comercial",
+  "jobTitle": "Customer Success Manager Ssr",
+  "location": "Córdoba",
+  "status": "Active"
+}

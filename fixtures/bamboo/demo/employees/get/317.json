@@ -1,0 +1,17 @@
+{
+  "id": "317",
+  "firstName": "José",
+  "lastName": "Cabrera",
+  "workEmail": "jose.cabrera@meridian-andina.example",
+  "employeeNumber": "10778",
+  "supervisorEId": "67",
+  "supervisorId": "10118",
+  "supervisor": "Roldán, Noelia",
+  "hireDate": "2022-03-30",
+  "terminationDate": null,
+  "department": "Datos",
+  "division": "Tecnología",
+  "jobTitle": "Analytics Engineer Sr",
+  "location": "Montevideo",
+  "status": "Active"
+}

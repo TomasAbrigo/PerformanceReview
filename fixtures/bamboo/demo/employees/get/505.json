@@ -1,0 +1,17 @@
+{
+  "id": "505",
+  "firstName": "Cristian",
+  "lastName": "Ledesma",
+  "workEmail": "cristian.ledesma@meridian-andina.example",
+  "employeeNumber": "11241",
+  "supervisorEId": "363",
+  "supervisorId": "10890",
+  "supervisor": "Navarro, Agustina",
+  "hireDate": "2023-10-09",
+  "terminationDate": null,
+  "department": "Legales",
+  "division": "Corporativo",
+  "jobTitle": "Analista de Compliance Ssr",
+  "location": "Buenos Aires",
+  "status": "Active"
+}

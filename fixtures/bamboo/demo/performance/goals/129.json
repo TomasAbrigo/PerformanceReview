@@ -1,0 +1,126 @@
+{
+  "canAlign": true,
+  "canCreateGoals": true,
+  "filters": [
+    {
+      "id": "status-all",
+      "name": "All"
+    },
+    {
+      "id": "inProgress",
+      "name": "In progress"
+    },
+    {
+      "id": "completed",
+      "name": "Completed"
+    },
+    {
+      "id": "closed",
+      "name": "Closed"
+    }
+  ],
+  "selectedFilter": "status-all",
+  "goals": [
+    {
+      "id": "5525",
+      "title": "Cerrar el plan de capacitación anual",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "percentComplete": 60,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2026-02-12",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-01-24T11:37:52Z",
+      "status": "in_progress",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "5528",
+      "title": "Cerrar el plan de capacitación anual",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 100,
+      "alignsWithOptionId": 9003,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2026-09-29",
+      "completionDate": "2026-09-06",
+      "lastChangedDateTime": "2026-09-06T12:08:50Z",
+      "status": "completed",
+      "milestones": [
+        {
+          "id": 933,
+          "employeeGoalId": 5528,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2026-06-03T11:27:02Z",
+          "lastUpdateDateTime": "2026-06-03T11:27:02Z",
+          "lastUpdateUserId": 129
+        },
+        {
+          "id": 934,
+          "employeeGoalId": 5528,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2026-04-13T14:23:10Z",
+          "lastUpdateDateTime": "2026-04-13T14:23:10Z",
+          "lastUpdateUserId": 129
+        },
+        {
+          "id": 935,
+          "employeeGoalId": 5528,
+          "title": "Hito 3",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2026-06-17T10:58:18Z",
+          "lastUpdateDateTime": "2026-06-17T10:58:18Z",
+          "lastUpdateUserId": 129
+        },
+        {
+          "id": 936,
+          "employeeGoalId": 5528,
+          "title": "Hito 4",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2026-07-21T18:19:40Z",
+          "lastUpdateDateTime": "2026-07-21T18:19:40Z",
+          "lastUpdateUserId": 129
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    }
+  ],
+  "persons": [
+    {
+      "employeeId": 129,
+      "firstName": "Ivana",
+      "lastName": "Maldonado",
+      "preferredName": null
+    }
+  ],
+  "comments": [
+    {
+      "goalId": "5525",
+      "commentCount": 3
+    }
+  ]
+}

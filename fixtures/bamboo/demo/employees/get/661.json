@@ -1,0 +1,17 @@
+{
+  "id": "661",
+  "firstName": "Javier",
+  "lastName": "Bustos",
+  "workEmail": "javier.bustos@meridian-andina.example",
+  "employeeNumber": "11588",
+  "supervisorEId": "111",
+  "supervisorId": "10250",
+  "supervisor": "Peralta, Martín",
+  "hireDate": "2024-12-09",
+  "terminationDate": null,
+  "department": "Datos",
+  "division": "Tecnología",
+  "jobTitle": "Data Engineer Sr",
+  "location": "Buenos Aires",
+  "status": "Active"
+}

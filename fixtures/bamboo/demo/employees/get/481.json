@@ -1,0 +1,17 @@
+{
+  "id": "481",
+  "firstName": "Verónica",
+  "lastName": "Gutiérrez",
+  "workEmail": "veronica.gutierrez@meridian-andina.example",
+  "employeeNumber": "11182",
+  "supervisorEId": "49",
+  "supervisorId": "10081",
+  "supervisor": "Monzón, Milagros",
+  "hireDate": "2023-08-01",
+  "terminationDate": null,
+  "department": "Calidad",
+  "division": "Operaciones",
+  "jobTitle": "Analista de Calidad Ssr",
+  "location": "Montevideo",
+  "status": "Active"
+}

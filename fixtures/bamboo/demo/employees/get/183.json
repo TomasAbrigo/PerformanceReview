@@ -1,0 +1,17 @@
+{
+  "id": "183",
+  "firstName": "Camila",
+  "lastName": "Cabrera",
+  "workEmail": "camila.cabrera@meridian-andina.example",
+  "employeeNumber": "10426",
+  "supervisorEId": "65",
+  "supervisorId": "10117",
+  "supervisor": "Díaz, Valentina",
+  "hireDate": "2021-02-23",
+  "terminationDate": "2025-02-09",
+  "department": "Marketing",
+  "division": "Comercial",
+  "jobTitle": "Growth Analyst Sr",
+  "location": "Buenos Aires",
+  "status": "Inactive"
+}

@@ -1,0 +1,17 @@
+{
+  "id": "199",
+  "firstName": "Rodrigo",
+  "lastName": "Torres",
+  "workEmail": "rodrigo.torres@meridian-andina.example",
+  "employeeNumber": "10466",
+  "supervisorEId": "59",
+  "supervisorId": "10104",
+  "supervisor": "Soria, Gonzalo",
+  "hireDate": "2021-04-03",
+  "terminationDate": null,
+  "department": "Finanzas",
+  "division": "Corporativo",
+  "jobTitle": "Analista Contable Ssr",
+  "location": "Santiago de Chile",
+  "status": "Active"
+}

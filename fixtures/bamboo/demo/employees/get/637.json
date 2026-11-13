@@ -1,0 +1,17 @@
+{
+  "id": "637",
+  "firstName": "Matías",
+  "lastName": "Coronel",
+  "workEmail": "matias.coronel@meridian-andina.example",
+  "employeeNumber": "11541",
+  "supervisorEId": "265",
+  "supervisorId": "10627",
+  "supervisor": "Olmos, Ivana",
+  "hireDate": "2024-10-20",
+  "terminationDate": null,
+  "department": "Infraestructura",
+  "division": "Tecnología",
+  "jobTitle": "SysAdmin Ssr",
+  "location": "Córdoba",
+  "status": "Active"
+}

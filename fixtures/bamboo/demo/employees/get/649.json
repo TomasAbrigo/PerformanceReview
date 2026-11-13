@@ -1,0 +1,17 @@
+{
+  "id": "649",
+  "firstName": "Maximiliano",
+  "lastName": "Campos",
+  "workEmail": "maximiliano.campos@meridian-andina.example",
+  "employeeNumber": "11559",
+  "supervisorEId": "241",
+  "supervisorId": "10570",
+  "supervisor": "Reyes, Daniela",
+  "hireDate": "2024-11-27",
+  "terminationDate": null,
+  "department": "Marketing",
+  "division": "Comercial",
+  "jobTitle": "Diseñador de Marca Ssr",
+  "location": "Buenos Aires",
+  "status": "Active"
+}
