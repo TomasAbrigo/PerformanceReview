@@ -8,6 +8,8 @@ export default defineConfig({
   fullyParallel: true,
   // The specs seed and mutate one shared database: run them one at a time.
   workers: 1,
+  // `next dev` compiles routes on first hit; give assertions room on a cold or busy machine.
+  expect: { timeout: 10_000 },
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
   // In CI also write the HTML report (playwright-report/) that the workflow uploads on failure.

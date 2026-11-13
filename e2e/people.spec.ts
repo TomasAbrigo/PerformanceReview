@@ -1,15 +1,9 @@
-import { execFileSync } from "node:child_process";
 import { expect, test } from "@playwright/test";
 
 test.describe.configure({ mode: "serial" });
 
-// Seeds the DB from the hand-made Bamboo fixtures (3 employees). Idempotent,
-// so re-running against an already-seeded DB yields the same people.
-test.beforeAll(() => {
-  execFileSync("pnpm", ["ingest:employees", "--source", "fixture"], {
-    stdio: "inherit",
-  });
-});
+// The DB is seeded once, before any spec, by the setup project (identity.setup.ts):
+// the 3 hand-made Bamboo fixtures plus the identity spec's rehire case.
 
 test("people list shows every ingested person and searches", async ({
   page,
@@ -38,7 +32,8 @@ test("person detail shows source identities and employment", async ({
     page.getByRole("heading", { level: 1, name: "Carla Romero" }),
   ).toBeVisible();
   const ids = page.getByRole("table", { name: "Source identifiers" });
-  await expect(ids.getByText("Bamboo ID")).toBeVisible();
+  // A rehire linked by the identity spec adds a second Bamboo ID row.
+  await expect(ids.getByText("Bamboo ID").first()).toBeVisible();
   await expect(ids.getByText("103", { exact: true })).toBeVisible();
   await expect(ids.getByText("0003")).toBeVisible();
   const periods = page.getByRole("table", { name: "Employment periods" });
