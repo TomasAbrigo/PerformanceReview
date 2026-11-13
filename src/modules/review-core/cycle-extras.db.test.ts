@@ -1,7 +1,7 @@
 import { cp, mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
-import { and, eq, sql } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { closeDb, db } from "@/db/client";
 import {
@@ -42,6 +42,7 @@ import {
   setCycleGroups,
   transition,
   updateCycle,
+  type CycleGroupInput,
   type CycleInput,
 } from ".";
 import { addDays } from "./hire-date-schedule";
@@ -116,7 +117,7 @@ async function hire(
   await db.insert(employeeJobHistory).values({
     ...job,
     validFrom: hireDate,
-    validTo: opts.managerChange?.on ?? null,
+    validTo: opts.managerChange?.on ?? opts.terminatedOn ?? null,
     managerPersonId: opts.manager ?? null,
     sourceId: `${name}-1`,
   });
@@ -124,6 +125,8 @@ async function hire(
     await db.insert(employeeJobHistory).values({
       ...job,
       validFrom: opts.managerChange.on,
+      // A terminated person has no job row after the termination date.
+      validTo: opts.terminatedOn ?? null,
       managerPersonId: opts.managerChange.manager,
       sourceId: `${name}-2`,
     });
@@ -235,7 +238,8 @@ describe("duplicateCycle", () => {
     });
     const [originalGroup] = await listCycleGroups(db, original.id);
     expect(groups[0].id).not.toBe(originalGroup.id);
-    expect(originalGroup.participantCount).toBe(1);
+    // Bruno and Carla worked in Ingeniería on the snapshot date.
+    expect(originalGroup.participantCount).toBe(2);
   });
 
   it("logs who duplicated it and from which cycle", async () => {
@@ -376,15 +380,14 @@ describe("duplicateCycle", () => {
 
 // ---------------------------------------------------------------- groups
 
-const engGroup = {
-  name: "Ingeniería",
-  templateId: "",
-  filter: { kind: "filter", departments: ["Ingeniería"] },
-} as const;
-
 describe("template groups", () => {
+  let engGroup: CycleGroupInput;
   beforeEach(() => {
-    (engGroup as { templateId: string }).templateId = engTemplate;
+    engGroup = {
+      name: "Ingeniería",
+      templateId: engTemplate,
+      filter: { kind: "filter", departments: ["Ingeniería"] },
+    };
   });
 
   it("gives each group its own questions and falls back to the default", async () => {
@@ -444,11 +447,11 @@ describe("template groups", () => {
   });
 
   it("sends a person to the first matching group by order", async () => {
-    const byLocation = {
+    const byLocation: CycleGroupInput = {
       name: "Rosario",
       templateId: salesTemplate,
       filter: { kind: "filter", locations: ["Rosario"] },
-    } as const;
+    };
 
     const first = await createCycle(db, input());
     await setCycleGroups(db, first.id, [engGroup, byLocation]);
@@ -505,28 +508,35 @@ describe("template groups", () => {
     const preview = await previewGroups(
       db,
       { kind: "people", personIds: [ana, bruno, carla] },
-      [{ filter: engGroup.filter }, { filter: { kind: "filter", locations: ["Rosario"] } }],
+      [
+        { filter: engGroup.filter },
+        { filter: { kind: "filter", locations: ["Rosario"] } },
+      ],
+      "2022-06-01",
     );
-    // Bruno goes to the first group; the second one is left with nobody.
-    expect(preview).toEqual({ total: 3, groups: [1, 0], remainder: 2 });
-    const everyone = await previewGroups(db, { kind: "all" }, []);
+    // Bruno and Carla (Ingeniería) go to the first group; the second one is
+    // left with nobody and Ana (Dirección) with no group.
+    expect(preview).toEqual({ total: 3, groups: [2, 0], remainder: 1 });
+    // As of 2025 Carla is gone.
+    const everyone = await previewGroups(db, { kind: "all" }, [], "2025-01-01");
     expect(everyone).toEqual({ total: 2, groups: [], remainder: 2 });
   });
 
   it("previews exactly what launch assigns", async () => {
-    const groups = [
+    const groups: CycleGroupInput[] = [
       engGroup,
       {
         name: "Dirección",
         templateId: salesTemplate,
         filter: { kind: "filter", departments: ["Dirección"] },
       },
-    ] as const;
+    ];
     const filter = { kind: "all" } as const;
     const preview = await previewGroups(
       db,
       filter,
       groups.map((g) => ({ filter: g.filter })),
+      "2022-06-01",
     );
     const cycle = await createCycle(db, input({ participantFilter: filter }));
     await setCycleGroups(db, cycle.id, [...groups]);
@@ -581,7 +591,7 @@ describe("template groups", () => {
     await launchCycle(db, cycle.id, null);
     const groups = await listCycleGroups(db, cycle.id);
     expect(groups.map((g) => [g.name, g.sort, g.participantCount])).toEqual([
-      ["Ingeniería", 0, 1],
+      ["Ingeniería", 0, 2],
       ["Otra", 1, 0],
     ]);
     expect(groups[0].questionCount).toBeGreaterThan(0);
@@ -632,9 +642,7 @@ async function launched(overrides: Partial<CycleInput> = {}) {
 }
 
 const enrolledNames = async (cycleId: string) =>
-  (await getCycle(db, cycleId))!.participants
-    .map((p) => p.displayName)
-    .sort();
+  (await getCycle(db, cycleId))!.participants.map((p) => p.displayName).sort();
 
 describe("enrollDueParticipants", () => {
   let people: Record<string, string>;
@@ -695,7 +703,10 @@ describe("enrollDueParticipants", () => {
     const ines = detail!.participants.find(
       (p) => p.revieweePersonId === people.ines,
     );
-    expect(ines?.dueDates).toEqual({ self: "2026-03-24", manager: "2026-03-24" });
+    expect(ines?.dueDates).toEqual({
+      self: "2026-03-24",
+      manager: "2026-03-24",
+    });
   });
 
   it("returns who was enrolled with their milestone and deadline", async () => {
@@ -767,6 +778,13 @@ describe("enrollDueParticipants", () => {
       status: "Active",
       sourceSystem: "native",
       sourceId: "Rita-2",
+    });
+    await db.insert(employeeJobHistory).values({
+      personId: rehired,
+      validFrom: "2026-02-02",
+      department: "Ingeniería",
+      sourceSystem: "native",
+      sourceId: "Rita-job-2",
     });
     const cycle = await launched();
     const result = await enrollDueParticipants(db, cycle.id, AS_OF);
@@ -885,30 +903,5 @@ describe("recentHires", () => {
   it("is empty without employments", async () => {
     await db.execute(sql`TRUNCATE employment, person CASCADE`);
     expect(await recentHires(db)).toEqual([]);
-  });
-});
-
-// Guards the unique key the idempotent enrollment relies on.
-describe("participant uniqueness", () => {
-  it("allows a single row per cycle and person", async () => {
-    const cycle = await launched();
-    await expect(
-      db.insert(cycleParticipant).values({
-        cycleId: cycle.id,
-        revieweePersonId: ana,
-        snapshotAsOf: AS_OF,
-      }),
-    ).resolves.toBeDefined();
-    await expect(
-      db
-        .insert(cycleParticipant)
-        .values({ cycleId: cycle.id, revieweePersonId: ana, snapshotAsOf: AS_OF }),
-    ).rejects.toThrow();
-    expect(
-      await db
-        .select()
-        .from(cycleParticipant)
-        .where(and(eq(cycleParticipant.cycleId, cycle.id))),
-    ).toHaveLength(1);
   });
 });

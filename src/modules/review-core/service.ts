@@ -38,6 +38,8 @@ import {
   type IsoDate,
 } from "@/modules/org-history/queries";
 import { CyclesError } from "./errors";
+import { assignCycleGroups, freezeGroups } from "./groups";
+import { enrollDueParticipants } from "./hire-date";
 import { allowedTransitions, type CycleStatus, launchStatus } from "./status";
 import {
   cycleInput,
@@ -51,7 +53,7 @@ import {
 const parse = <T>(schema: ZodType<T>, input: unknown): T =>
   parseOr(schema, input, CyclesError);
 
-async function findCycle(db: DbOrTx, id: string): Promise<ReviewCycle> {
+export async function findCycle(db: DbOrTx, id: string): Promise<ReviewCycle> {
   const [cycle] = isUuid(id)
     ? await db.select().from(reviewCycle).where(eq(reviewCycle.id, id))
     : [];
@@ -126,7 +128,7 @@ const latestStatus = () =>
  * frozen snapshot agree. Status matches the latest live employment.
  * Individually picked people are taken as-is.
  */
-async function matchParticipants(
+export async function matchParticipants(
   db: DbOrTx,
   filterInput: ParticipantFilterInput,
   asOf: IsoDate,
@@ -241,7 +243,7 @@ export async function participantFilterOptions(db: DbOrTx): Promise<{
 }
 
 /** Org snapshots of reviewees as of `date`, via one org-history jobsAsOf query. */
-async function snapshots(
+export async function snapshots(
   db: DbOrTx,
   cycleId: string,
   personIds: string[],
@@ -264,8 +266,17 @@ async function snapshots(
   });
 }
 
-/** Copies the template's questions (and their scales) as immutable revisions. */
-async function copyQuestions(db: DbOrTx, cycleId: string, templateId: string) {
+/**
+ * Copies the template's questions (and their scales) as immutable revisions;
+ * `groupId` tags them with the template group they belong to (null = the
+ * cycle's default template).
+ */
+export async function copyQuestions(
+  db: DbOrTx,
+  cycleId: string,
+  templateId: string,
+  groupId: string | null = null,
+) {
   const rows = await db
     .select({ section: templateSection, question })
     .from(question)
@@ -286,6 +297,7 @@ async function copyQuestions(db: DbOrTx, cycleId: string, templateId: string) {
   await db.insert(questionRevision).values(
     rows.map(({ section, question: q }, i) => ({
       cycleId,
+      groupId,
       questionId: q.id,
       sectionTitle: section.title,
       prompt: q.prompt,
@@ -324,21 +336,30 @@ export async function launchCycle(
     const cycle = await findCycle(tx, id);
     if (cycle.status !== "draft") throw new CyclesError("not_draft");
     if (!cycle.templateId) throw new CyclesError("no_template");
-    const people = await matchParticipants(
-      tx,
-      cycle.participantFilter,
-      cycle.snapshotDate,
-    );
-    if (people.length === 0) throw new CyclesError("no_participants");
+    // Hire-date cycles start empty: people join as they reach the milestone.
+    const byHireDate = cycle.scheduleKind === "hire_date";
+    const people = byHireDate
+      ? []
+      : await matchParticipants(
+          tx,
+          cycle.participantFilter,
+          cycle.snapshotDate,
+        );
+    if (!byHireDate && people.length === 0) {
+      throw new CyclesError("no_participants");
+    }
 
-    await tx.insert(cycleParticipant).values(
-      await snapshots(
-        tx,
-        id,
-        people.map((p) => p.personId),
-        cycle.snapshotDate,
-      ),
-    );
+    const personIds = people.map((p) => p.personId);
+    const groupOf = await freezeGroups(tx, id, personIds, cycle.snapshotDate);
+    if (personIds.length > 0) {
+      const rows = await snapshots(tx, id, personIds, cycle.snapshotDate);
+      await tx.insert(cycleParticipant).values(
+        rows.map((r) => ({
+          ...r,
+          templateGroupId: groupOf.get(r.revieweePersonId) ?? null,
+        })),
+      );
+    }
     await copyQuestions(tx, id, cycle.templateId);
 
     const to = launchStatus(cycle.components);
@@ -353,6 +374,7 @@ export async function launchCycle(
       toStatus: to,
       actorPersonId,
     });
+    if (byHireDate) await enrollDueParticipants(tx, id, todayLocal());
     return updated;
   });
 }
@@ -418,7 +440,9 @@ export async function addParticipant(
   if (existing && !existing.removedAt) {
     throw new CyclesError("already_participant");
   }
-  const [values] = await snapshots(db, cycleId, [personId], asOf);
+  const [snap] = await snapshots(db, cycleId, [personId], asOf);
+  const groupOf = await assignCycleGroups(db, cycleId, [personId], asOf);
+  const values = { ...snap, templateGroupId: groupOf.get(personId) ?? null };
   if (existing) {
     const [row] = await db
       .update(cycleParticipant)
