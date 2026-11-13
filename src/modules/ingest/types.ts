@@ -1,4 +1,4 @@
-import type { SourceSystem } from "@/db/schema";
+import type { IngestReject, SourceSystem } from "@/db/schema";
 
 /**
  * `employee`: one record per employee. `job_history`: one record per employee
@@ -29,20 +29,17 @@ export type ExtractedRecord = {
   extractedAt: Date;
 };
 
-/**
- * A row the adapter read but could not turn into a record (e.g. a file row
- * with an empty key). It counts as read and rejected, and is not stored.
- */
-export type RejectedRecord = {
-  rejected: true;
-  sourceId: string | null;
-  reason: string;
-};
-
 export type ExtractContext = {
   signal?: AbortSignal;
   /** Incremental extraction: only records changed since then (if supported). */
   since?: string;
+  /**
+   * Where an adapter reports a row it read but cannot turn into a record
+   * (e.g. a file row with an empty key). runIngest counts it as read and
+   * rejected and keeps the reason on the run. An adapter called without it
+   * has nowhere to put the row, so it must fail instead of dropping it.
+   */
+  onReject?: (reject: IngestReject) => void;
 };
 
 /** Anything that can produce raw records for our entities. */
@@ -51,8 +48,5 @@ export interface SourceAdapter {
   /** Free-form adapter name stored on ingest_run (e.g. "fixture"). */
   readonly name: string;
   readonly entities: readonly IngestEntity[];
-  extract(
-    ctx: ExtractContext,
-    entity: IngestEntity,
-  ): AsyncIterable<ExtractedRecord | RejectedRecord>;
+  extract(ctx: ExtractContext, entity: IngestEntity): AsyncIterable<ExtractedRecord>;
 }

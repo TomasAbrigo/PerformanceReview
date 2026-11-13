@@ -3,7 +3,6 @@ import type {
   ExtractContext,
   ExtractedRecord,
   IngestEntity,
-  RejectedRecord,
   SourceAdapter,
 } from "@/modules/ingest/types";
 import { applyProfile, readOptionsFor, type SourceProfile } from "./profiles";
@@ -28,8 +27,10 @@ export type FileSourceAdapterOptions = {
  * `SourceAdapter` over one table of a `LakeAdapter` (an uploaded file, or any
  * lake), seen through a source profile. One record per row; the sourceId is
  * the profile's key. A row the profile cannot map (an empty key column, like
- * Bamboo's "No Goals Set" rows) is reported as a `RejectedRecord` with the
- * reason, never thrown, so one bad row does not stop the run.
+ * Bamboo's "No Goals Set" rows) is handed to `ctx.onReject` with the reason
+ * instead of being thrown, so one bad row does not stop the run. (Without an
+ * `onReject` there is nowhere to report it, so the error is thrown rather
+ * than the row silently dropped.)
  *
  * The payload keeps the row three ways so nothing is lost: `fields` (mapped
  * columns under their canonical names), `extra` (every other column) and
@@ -54,7 +55,7 @@ export class FileSourceAdapter implements SourceAdapter {
   extract(
     ctx: ExtractContext,
     entity: IngestEntity,
-  ): AsyncIterable<ExtractedRecord | RejectedRecord> {
+  ): AsyncIterable<ExtractedRecord> {
     if (entity !== this.profile.entity) {
       throw new Error(
         `Profile "${this.profile.name}" feeds "${this.profile.entity}" records, not "${entity}"`,
@@ -65,7 +66,7 @@ export class FileSourceAdapter implements SourceAdapter {
 
   private async *read(
     ctx: ExtractContext,
-  ): AsyncGenerator<ExtractedRecord | RejectedRecord> {
+  ): AsyncGenerator<ExtractedRecord> {
     const { profile } = this;
     const extractedAt = new Date();
     const options = readOptionsFor(profile, {
@@ -78,11 +79,11 @@ export class FileSourceAdapter implements SourceAdapter {
         try {
           record = applyProfile(profile, row);
         } catch (error) {
-          yield {
-            rejected: true,
+          if (!ctx.onReject) throw error;
+          ctx.onReject({
             sourceId: null,
             reason: `${(error as Error).message} (${describeKey(profile, row)})`,
-          };
+          });
           continue;
         }
         yield {

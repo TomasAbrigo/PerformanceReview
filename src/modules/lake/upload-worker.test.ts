@@ -11,8 +11,11 @@ const EMPLOYEE_PERFORMANCE = resolve(
   "fixtures/bamboo-reports/small/employee-performance.csv",
 );
 
+/** An UploadStore with both folders set. */
+type TestStore = UploadStore & { uploadsDir: string; profilesDir: string };
+
 let root: string;
-let store: UploadStore;
+let store: TestStore;
 beforeEach(async () => {
   root = await mkdtemp(join(tmpdir(), "upload-worker-test-"));
   store = {

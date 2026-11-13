@@ -67,13 +67,16 @@ export async function runIngest({
   const cache = new Map<string, unknown>();
 
   try {
-    for await (const record of adapter.extract(extract, entity)) {
-      counts.read++;
-      if ("rejected" in record) {
+    const context: ExtractContext = {
+      ...extract,
+      onReject(reject) {
+        counts.read++;
         counts.rejected++;
-        rejects.push({ sourceId: record.sourceId, reason: record.reason });
-        continue;
-      }
+        rejects.push(reject);
+      },
+    };
+    for await (const record of adapter.extract(context, entity)) {
+      counts.read++;
       seen.add(record.sourceId);
       const hash = payloadHash(record.payload);
       const landed = await db

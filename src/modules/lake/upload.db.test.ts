@@ -16,8 +16,11 @@ import {
 
 const REPORTS = resolve("fixtures/bamboo-reports/small");
 
+/** An UploadStore with both folders set. */
+type TestStore = UploadStore & { uploadsDir: string; profilesDir: string };
+
 let root: string;
-let store: UploadStore;
+let store: TestStore;
 beforeEach(async () => {
   root = await mkdtemp(join(tmpdir(), "upload-db-test-"));
   store = {

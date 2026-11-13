@@ -1,7 +1,8 @@
 // @vitest-environment node
 import { resolve } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
-import type { ExtractedRecord, RejectedRecord } from "@/modules/ingest/types";
+import type { ExtractedRecord } from "@/modules/ingest/types";
+import type { IngestReject } from "@/db/schema";
 import { DuckDbFileLake } from "./duckdb-file-lake";
 import { FileSourceAdapter, sourceSystemFor } from "./file-source-adapter";
 import { fixtureDir } from "./fixtures";
@@ -28,12 +29,20 @@ function profileNamed(name: string): SourceProfile {
 
 async function collect(adapter: FileSourceAdapter) {
   const records: ExtractedRecord[] = [];
-  const rejected: RejectedRecord[] = [];
-  for await (const item of adapter.extract({}, adapter.entities[0])) {
-    if ("rejected" in item) rejected.push(item);
-    else records.push(item);
+  const rejected: IngestReject[] = [];
+  const ctx = { onReject: (reject: IngestReject) => rejected.push(reject) };
+  for await (const record of adapter.extract(ctx, adapter.entities[0])) {
+    records.push(record);
   }
   return { records, rejected };
+}
+
+async function collectWithoutRejectHandler(adapter: FileSourceAdapter) {
+  const records: ExtractedRecord[] = [];
+  for await (const record of adapter.extract({}, adapter.entities[0])) {
+    records.push(record);
+  }
+  return records;
 }
 
 describe("FileSourceAdapter", () => {
@@ -160,8 +169,8 @@ describe("FileSourceAdapter", () => {
     const latest = watermarks[watermarks.length - 1];
 
     const delta: ExtractedRecord[] = [];
-    for await (const item of adapter.extract({ since: latest }, "employee")) {
-      if (!("rejected" in item)) delta.push(item);
+    for await (const record of adapter.extract({ since: latest }, "employee")) {
+      delta.push(record);
     }
     expect(delta.length).toBeGreaterThan(0);
     expect(delta.length).toBeLessThan(all.records.length);
@@ -178,6 +187,17 @@ describe("FileSourceAdapter", () => {
     await expect(
       collect(new FileSourceAdapter(profile, lake, "nope")),
     ).rejects.toThrow('Unknown table "nope"');
+  });
+
+  it("throws a row it cannot map when nobody can take the reject", async () => {
+    const adapter = new FileSourceAdapter(
+      profileNamed("bamboo-goal-status"),
+      await open(REPORTS),
+    );
+
+    await expect(collectWithoutRejectHandler(adapter)).rejects.toThrow(
+      'key column "Goal" is empty',
+    );
   });
 
   it("refuses to extract an entity the profile does not feed", async () => {
