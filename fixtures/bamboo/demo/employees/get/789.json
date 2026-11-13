@@ -1,0 +1,17 @@
+{
+  "id": "789",
+  "firstName": "José",
+  "lastName": "Pereyra",
+  "workEmail": "jose.pereyra@meridian-andina.example",
+  "employeeNumber": "11924",
+  "supervisorEId": "47",
+  "supervisorId": "10080",
+  "supervisor": "Olmos, Candela",
+  "hireDate": "2025-08-24",
+  "terminationDate": null,
+  "department": "Soporte",
+  "division": "Operaciones",
+  "jobTitle": "Agente de Soporte Ssr",
+  "location": "Córdoba",
+  "status": "Active"
+}

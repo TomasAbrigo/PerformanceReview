@@ -1,0 +1,17 @@
+{
+  "id": "267",
+  "firstName": "Cecilia",
+  "lastName": "Ojeda",
+  "workEmail": "cecilia.ojeda@meridian-andina.example",
+  "employeeNumber": "10636",
+  "supervisorEId": "33",
+  "supervisorId": "10050",
+  "supervisor": "Romero, Brenda",
+  "hireDate": "2021-12-07",
+  "terminationDate": null,
+  "department": "Ingeniería",
+  "division": "Tecnología",
+  "jobTitle": "Frontend Developer Ssr",
+  "location": "Buenos Aires",
+  "status": "Active"
+}

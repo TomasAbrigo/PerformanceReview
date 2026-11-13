@@ -1,0 +1,108 @@
+{
+  "canAlign": true,
+  "canCreateGoals": false,
+  "filters": [
+    {
+      "id": "status-all",
+      "name": "All"
+    },
+    {
+      "id": "inProgress",
+      "name": "In progress"
+    },
+    {
+      "id": "completed",
+      "name": "Completed"
+    },
+    {
+      "id": "closed",
+      "name": "Closed"
+    }
+  ],
+  "selectedFilter": "status-all",
+  "goals": [
+    {
+      "id": "6835",
+      "title": "Completar la certificación del área",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 100,
+      "alignsWithOptionId": 9004,
+      "sharedWithEmployeeIds": [
+        41
+      ],
+      "dueDate": "2025-07-22",
+      "completionDate": "2025-05-29",
+      "lastChangedDateTime": "2025-05-29T10:28:39Z",
+      "status": "completed",
+      "milestones": [
+        {
+          "id": 1515,
+          "employeeGoalId": 6835,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-05-28T09:14:50Z",
+          "lastUpdateDateTime": "2025-05-28T09:14:50Z",
+          "lastUpdateUserId": 423
+        },
+        {
+          "id": 1516,
+          "employeeGoalId": 6835,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-05-10T12:08:51Z",
+          "lastUpdateDateTime": "2025-05-10T12:08:51Z",
+          "lastUpdateUserId": 423
+        },
+        {
+          "id": 1517,
+          "employeeGoalId": 6835,
+          "title": "Hito 3",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-05-24T09:59:47Z",
+          "lastUpdateDateTime": "2025-05-24T09:59:47Z",
+          "lastUpdateUserId": 423
+        },
+        {
+          "id": 1518,
+          "employeeGoalId": 6835,
+          "title": "Hito 4",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-05-25T12:53:00Z",
+          "lastUpdateDateTime": "2025-05-25T12:53:00Z",
+          "lastUpdateUserId": 423
+        }
+      ],
+      "actions": {
+        "canEdit": false,
+        "canUpdateProgress": false,
+        "canClose": false,
+        "canReopen": false,
+        "canDelete": false,
+        "canComment": false
+      }
+    }
+  ],
+  "persons": [
+    {
+      "employeeId": 423,
+      "firstName": "Carla",
+      "lastName": "Suárez",
+      "preferredName": null
+    },
+    {
+      "employeeId": 41,
+      "firstName": "Florencia",
+      "lastName": "Morales",
+      "preferredName": "Flor"
+    }
+  ],
+  "comments": []
+}

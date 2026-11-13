@@ -1,0 +1,17 @@
+{
+  "id": "715",
+  "firstName": "Cecilia",
+  "lastName": "Garrido",
+  "workEmail": "cecilia.garrido@meridian-andina.example",
+  "employeeNumber": "11743",
+  "supervisorEId": "41",
+  "supervisorId": "10066",
+  "supervisor": "Morales, Florencia",
+  "hireDate": "2025-03-30",
+  "terminationDate": null,
+  "department": "Customer Success",
+  "division": "Comercial",
+  "jobTitle": "Onboarding Specialist Sr",
+  "location": "Buenos Aires",
+  "status": "Active"
+}

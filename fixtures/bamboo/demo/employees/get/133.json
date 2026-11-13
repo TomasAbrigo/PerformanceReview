@@ -1,0 +1,17 @@
+{
+  "id": "133",
+  "firstName": "Gabriela",
+  "lastName": "Lezcano",
+  "workEmail": "gabriela.lezcano@meridian-andina.example",
+  "employeeNumber": "10304",
+  "supervisorEId": "117",
+  "supervisorId": "10268",
+  "supervisor": "Núñez, Mariana",
+  "hireDate": "2020-01-22",
+  "terminationDate": null,
+  "department": "Infraestructura",
+  "division": "Tecnología",
+  "jobTitle": "DevOps Engineer Ssr",
+  "location": "Santiago de Chile",
+  "status": "Active"
+}

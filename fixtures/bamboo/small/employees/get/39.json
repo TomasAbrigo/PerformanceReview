@@ -1,0 +1,17 @@
+{
+  "id": "39",
+  "firstName": "Verónica",
+  "lastName": "Márquez",
+  "workEmail": "veronica.marquez@meridian-andina.example",
+  "employeeNumber": "10078",
+  "supervisorEId": "31",
+  "supervisorId": "10056",
+  "supervisor": "Rivas, Federico",
+  "hireDate": "2019-04-06",
+  "terminationDate": null,
+  "department": "Finanzas",
+  "division": "Corporativo",
+  "jobTitle": "Analista Contable Sr",
+  "location": "Buenos Aires",
+  "status": "Active"
+}

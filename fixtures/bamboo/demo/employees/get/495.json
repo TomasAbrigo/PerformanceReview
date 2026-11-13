@@ -1,0 +1,17 @@
+{
+  "id": "495",
+  "firstName": "Noelia",
+  "lastName": "Benítez",
+  "workEmail": "noelia.benitez@meridian-andina.example",
+  "employeeNumber": "11216",
+  "supervisorEId": "117",
+  "supervisorId": "10268",
+  "supervisor": "Núñez, Mariana",
+  "hireDate": "2023-09-15",
+  "terminationDate": null,
+  "department": "Infraestructura",
+  "division": "Tecnología",
+  "jobTitle": "DevOps Engineer Sr",
+  "location": "Córdoba",
+  "status": "Active"
+}

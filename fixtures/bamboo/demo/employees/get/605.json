@@ -1,0 +1,17 @@
+{
+  "id": "605",
+  "firstName": "Bruno",
+  "lastName": "Urquiza",
+  "workEmail": "bruno.urquiza@meridian-andina.example",
+  "employeeNumber": "11480",
+  "supervisorEId": "241",
+  "supervisorId": "10570",
+  "supervisor": "Reyes, Daniela",
+  "hireDate": "2024-07-01",
+  "terminationDate": null,
+  "department": "Marketing",
+  "division": "Comercial",
+  "jobTitle": "Content Specialist Sr",
+  "location": "Remoto",
+  "status": "Active"
+}

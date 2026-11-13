@@ -1,0 +1,110 @@
+{
+  "canAlign": true,
+  "canCreateGoals": true,
+  "filters": [
+    {
+      "id": "status-all",
+      "name": "All"
+    },
+    {
+      "id": "inProgress",
+      "name": "In progress"
+    },
+    {
+      "id": "completed",
+      "name": "Completed"
+    },
+    {
+      "id": "closed",
+      "name": "Closed"
+    }
+  ],
+  "selectedFilter": "status-all",
+  "goals": [
+    {
+      "id": "6092",
+      "title": "Mejorar el NPS interno del equipo",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 80,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2025-10-17",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-03-13T18:50:22Z",
+      "status": "in_progress",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "6095",
+      "title": "Reducir los incidentes recurrentes a la mitad",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 100,
+      "alignsWithOptionId": 9003,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2026-10-07",
+      "completionDate": "2026-09-04",
+      "lastChangedDateTime": "2026-09-04T15:05:24Z",
+      "status": "completed",
+      "milestones": [
+        {
+          "id": 1186,
+          "employeeGoalId": 6095,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2026-07-13T18:25:52Z",
+          "lastUpdateDateTime": "2026-07-13T18:25:52Z",
+          "lastUpdateUserId": 247
+        },
+        {
+          "id": 1187,
+          "employeeGoalId": 6095,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2026-08-15T19:31:54Z",
+          "lastUpdateDateTime": "2026-08-15T19:31:54Z",
+          "lastUpdateUserId": 247
+        },
+        {
+          "id": 1188,
+          "employeeGoalId": 6095,
+          "title": "Hito 3",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2026-07-11T12:20:57Z",
+          "lastUpdateDateTime": "2026-07-11T12:20:57Z",
+          "lastUpdateUserId": 247
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    }
+  ],
+  "persons": [
+    {
+      "employeeId": 247,
+      "firstName": "Camila",
+      "lastName": "Pereyra",
+      "preferredName": null
+    }
+  ],
+  "comments": []
+}

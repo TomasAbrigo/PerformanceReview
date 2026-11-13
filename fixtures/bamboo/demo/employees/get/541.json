@@ -1,0 +1,17 @@
+{
+  "id": "541",
+  "firstName": "Natalia",
+  "lastName": "Salas",
+  "workEmail": "natalia.salas@meridian-andina.example",
+  "employeeNumber": "11312",
+  "supervisorEId": "59",
+  "supervisorId": "10104",
+  "supervisor": "Soria, Gonzalo",
+  "hireDate": "2024-01-31",
+  "terminationDate": null,
+  "department": "Finanzas",
+  "division": "Corporativo",
+  "jobTitle": "Controller Jr",
+  "location": "Buenos Aires",
+  "status": "Active"
+}

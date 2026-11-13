@@ -5,11 +5,160 @@
   },
   "Home": {
     "heading": "Performance reviews",
-    "welcome": "Welcome to Performance Review."
+    "welcome": "Welcome to Performance Review.",
+    "settings": "Settings"
   },
   "LocaleSwitcher": {
     "label": "Language",
     "es": "Español",
     "en": "English"
+  },
+  "Settings": {
+    "title": "Settings",
+    "nav": {
+      "label": "Settings",
+      "home": "Home",
+      "scales": "Rating scales",
+      "templates": "Review templates"
+    }
+  },
+  "Common": {
+    "nameEs": "Name (Spanish)",
+    "nameEn": "Name (English)",
+    "system": "System",
+    "disabled": "Off",
+    "delete": "Delete",
+    "save": "Save",
+    "cancel": "Cancel",
+    "edit": "Edit",
+    "clone": "Clone",
+    "actions": "Actions",
+    "loading": "Loading…"
+  },
+  "Errors": {
+    "missingEs": "The Spanish text is missing.",
+    "missingEn": "The English text is missing.",
+    "required": "This field is required.",
+    "minOptions": "Add at least two options.",
+    "duplicateValues": "Option values must be unique.",
+    "invalid": "Invalid value.",
+    "validation": "Check the highlighted fields.",
+    "not_found": "The item no longer exists.",
+    "system_readonly": "System items cannot be changed or deleted; clone them instead.",
+    "in_use": "The scale is used by a question.",
+    "unknown": "Something went wrong."
+  },
+  "Scales": {
+    "title": "Rating scales",
+    "description": "System scales cannot be deleted. The normalized value (0 to 1) makes different scales comparable.",
+    "empty": "There are no scales yet.",
+    "name": "Name",
+    "options": "Options",
+    "new": "New scale",
+    "create": "Create scale",
+    "value": "Value",
+    "labelEs": "Label (Spanish)",
+    "labelEn": "Label (English)",
+    "addOption": "Add option",
+    "removeOption": "Remove option",
+    "normalized": "normalized {value}",
+    "deleteScale": "Delete scale"
+  },
+  "Templates": {
+    "title": "Review templates",
+    "description": "System templates cannot be edited or deleted: clone them to adapt them.",
+    "empty": "There are no templates yet.",
+    "name": "Name",
+    "new": "New template",
+    "create": "Create template",
+    "deleteTemplate": "Delete template",
+    "cloneTemplate": "Clone template",
+    "back": "Back to templates",
+    "notFound": "The template does not exist."
+  },
+  "Editor": {
+    "systemNotice": "This is a system template: it cannot be edited or deleted, only cloned.",
+    "emptySections": "This template has no sections yet.",
+    "emptyQuestions": "This section has no questions yet.",
+    "saveName": "Save name",
+    "newSection": "New section",
+    "sectionTitleEs": "Title (Spanish)",
+    "sectionTitleEn": "Title (English)",
+    "addSection": "Add section",
+    "deleteSection": "Delete section",
+    "sectionUp": "Move section up",
+    "sectionDown": "Move section down",
+    "newQuestion": "New question",
+    "editQuestion": "Edit question",
+    "addQuestion": "Add question",
+    "saveQuestion": "Save question",
+    "deleteQuestion": "Delete question",
+    "questionUp": "Move question up",
+    "questionDown": "Move question down",
+    "promptEs": "Text (Spanish)",
+    "promptEn": "Text (English)",
+    "kind": "Type",
+    "kinds": {
+      "text": "Text",
+      "rating": "Rating",
+      "single_choice": "Single choice"
+    },
+    "appliesTo": "Answered by",
+    "relationships": {
+      "self": "Self",
+      "manager": "Manager",
+      "peer": "Peer",
+      "upward": "Upward"
+    },
+    "visibleToReviewee": "Visible to the reviewee",
+    "required": "Required",
+    "scale": "Scale",
+    "choices": "Options",
+    "choiceEs": "Option {n} (Spanish)",
+    "choiceEn": "Option {n} (English)",
+    "addChoice": "Add option",
+    "hiddenFromReviewee": "Hidden from the reviewee",
+    "chooseScale": "Choose a scale"
+  },
+  "People": {
+    "title": "People",
+    "nav": "People",
+    "searchLabel": "Search by name or email",
+    "searchPlaceholder": "Name or email",
+    "search": "Search",
+    "total": "{count, plural, =1 {1 person} other {# people}}",
+    "empty": "No people to show.",
+    "back": "← Back to people",
+    "notFound": "Person not found.",
+    "columns": {
+      "name": "Name",
+      "email": "Email",
+      "status": "Status"
+    },
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive",
+      "unknown": "No status"
+    },
+    "identities": {
+      "title": "Source identifiers",
+      "kind": "Kind",
+      "value": "Value",
+      "validFrom": "From",
+      "validTo": "To",
+      "current": "Current",
+      "kinds": {
+        "bamboo_id": "Bamboo ID",
+        "employee_number": "Employee number",
+        "work_email": "Email"
+      }
+    },
+    "employments": {
+      "title": "Employment periods",
+      "hireDate": "Hire date",
+      "terminationDate": "Termination date",
+      "status": "Status",
+      "empty": "No employment periods."
+    }
   }
 }

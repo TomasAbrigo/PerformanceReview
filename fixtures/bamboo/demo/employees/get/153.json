@@ -1,0 +1,17 @@
+{
+  "id": "153",
+  "firstName": "Javier",
+  "lastName": "Cáceres",
+  "workEmail": "javier.caceres@meridian-andina.example",
+  "employeeNumber": "10353",
+  "supervisorEId": "341",
+  "supervisorId": "10833",
+  "supervisor": "López, Silvana",
+  "hireDate": "2020-08-03",
+  "terminationDate": null,
+  "department": "Ventas",
+  "division": "Comercial",
+  "jobTitle": "Business Developer Ssr",
+  "location": "Rosario",
+  "status": "Active"
+}

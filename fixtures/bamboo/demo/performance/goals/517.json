@@ -1,0 +1,188 @@
+{
+  "canAlign": true,
+  "canCreateGoals": false,
+  "filters": [
+    {
+      "id": "status-all",
+      "name": "All"
+    },
+    {
+      "id": "inProgress",
+      "name": "In progress"
+    },
+    {
+      "id": "completed",
+      "name": "Completed"
+    },
+    {
+      "id": "closed",
+      "name": "Closed"
+    }
+  ],
+  "selectedFilter": "status-all",
+  "goals": [
+    {
+      "id": "7207",
+      "title": "Lanzar el nuevo flujo de onboarding",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 100,
+      "alignsWithOptionId": 9004,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2024-04-28",
+      "completionDate": "2024-04-21",
+      "lastChangedDateTime": "2024-04-21T09:47:41Z",
+      "status": "completed",
+      "milestones": [
+        {
+          "id": 1716,
+          "employeeGoalId": 7207,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2024-03-18T09:05:40Z",
+          "lastUpdateDateTime": "2024-03-18T09:05:40Z",
+          "lastUpdateUserId": 517
+        },
+        {
+          "id": 1717,
+          "employeeGoalId": 7207,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2024-03-18T09:07:47Z",
+          "lastUpdateDateTime": "2024-03-18T09:07:47Z",
+          "lastUpdateUserId": 517
+        }
+      ],
+      "actions": {
+        "canEdit": false,
+        "canUpdateProgress": false,
+        "canClose": false,
+        "canReopen": false,
+        "canDelete": false,
+        "canComment": false
+      }
+    },
+    {
+      "id": "7209",
+      "title": "Mejorar el NPS interno del equipo",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 75,
+      "alignsWithOptionId": 9003,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2024-10-03",
+      "completionDate": null,
+      "lastChangedDateTime": "2024-08-01T18:28:56Z",
+      "status": "in_progress",
+      "milestones": null,
+      "actions": {
+        "canEdit": false,
+        "canUpdateProgress": false,
+        "canClose": false,
+        "canReopen": false,
+        "canDelete": false,
+        "canComment": false
+      }
+    },
+    {
+      "id": "7212",
+      "title": "Lanzar el nuevo flujo de onboarding",
+      "description": "Sirve de base para el próximo ciclo de evaluación.",
+      "percentComplete": 33,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2025-10-14",
+      "completionDate": null,
+      "lastChangedDateTime": "2025-03-17T11:35:25Z",
+      "status": "closed",
+      "milestones": [
+        {
+          "id": 1718,
+          "employeeGoalId": 7212,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-03-13T13:26:18Z",
+          "lastUpdateDateTime": "2025-03-13T13:26:18Z",
+          "lastUpdateUserId": 517
+        },
+        {
+          "id": 1719,
+          "employeeGoalId": 7212,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2025-03-11T13:36:28Z",
+          "lastUpdateUserId": 517
+        },
+        {
+          "id": 1720,
+          "employeeGoalId": 7212,
+          "title": "Hito 3",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2025-03-11T15:51:15Z",
+          "lastUpdateUserId": 517
+        }
+      ],
+      "actions": {
+        "canEdit": false,
+        "canUpdateProgress": false,
+        "canClose": false,
+        "canReopen": false,
+        "canDelete": false,
+        "canComment": false
+      }
+    },
+    {
+      "id": "7214",
+      "title": "Entregar el proyecto Norte sin desvíos",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 15,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2025-11-09",
+      "completionDate": null,
+      "lastChangedDateTime": "2025-04-20T14:51:05Z",
+      "status": "closed",
+      "milestones": null,
+      "actions": {
+        "canEdit": false,
+        "canUpdateProgress": false,
+        "canClose": false,
+        "canReopen": false,
+        "canDelete": false,
+        "canComment": false
+      }
+    }
+  ],
+  "persons": [
+    {
+      "employeeId": 517,
+      "firstName": "Sofía",
+      "lastName": "Bravo",
+      "preferredName": null
+    }
+  ],
+  "comments": [
+    {
+      "goalId": "7207",
+      "commentCount": 2
+    },
+    {
+      "goalId": "7209",
+      "commentCount": 3
+    },
+    {
+      "goalId": "7214",
+      "commentCount": 3
+    }
+  ]
+}

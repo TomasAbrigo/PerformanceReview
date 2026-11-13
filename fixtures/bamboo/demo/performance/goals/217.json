@@ -1,0 +1,268 @@
+{
+  "canAlign": true,
+  "canCreateGoals": true,
+  "filters": [
+    {
+      "id": "status-all",
+      "name": "All"
+    },
+    {
+      "id": "inProgress",
+      "name": "In progress"
+    },
+    {
+      "id": "completed",
+      "name": "Completed"
+    },
+    {
+      "id": "closed",
+      "name": "Closed"
+    }
+  ],
+  "selectedFilter": "status-all",
+  "goals": [
+    {
+      "id": "5940",
+      "title": "Implementar el calendario editorial",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2024-05-24",
+      "completionDate": "2024-02-24",
+      "lastChangedDateTime": "2024-02-24T08:19:41Z",
+      "status": "completed",
+      "milestones": [
+        {
+          "id": 1129,
+          "employeeGoalId": 5940,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2024-02-22T16:56:24Z",
+          "lastUpdateDateTime": "2024-02-22T16:56:24Z",
+          "lastUpdateUserId": 217
+        },
+        {
+          "id": 1130,
+          "employeeGoalId": 5940,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2024-02-19T14:40:36Z",
+          "lastUpdateDateTime": "2024-02-19T14:40:36Z",
+          "lastUpdateUserId": 217
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "5943",
+      "title": "Lanzar el nuevo flujo de onboarding",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 35,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2024-12-07",
+      "completionDate": null,
+      "lastChangedDateTime": "2025-08-17T14:17:45Z",
+      "status": "in_progress",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "5945",
+      "title": "Mentorear a dos personas nuevas",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2024-06-30",
+      "completionDate": "2024-07-03",
+      "lastChangedDateTime": "2024-07-03T16:14:34Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "5947",
+      "title": "Documentar los procesos críticos",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 50,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2025-06-30",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-07-15T18:22:32Z",
+      "status": "in_progress",
+      "milestones": [
+        {
+          "id": 1131,
+          "employeeGoalId": 5947,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-12-29T19:34:29Z",
+          "lastUpdateDateTime": "2025-12-29T19:34:29Z",
+          "lastUpdateUserId": 217
+        },
+        {
+          "id": 1132,
+          "employeeGoalId": 5947,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2025-02-04T13:41:51Z",
+          "lastUpdateUserId": 217
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "5949",
+      "title": "Mentorear a dos personas nuevas",
+      "description": "Sirve de base para el próximo ciclo de evaluación.",
+      "percentComplete": 33,
+      "alignsWithOptionId": 9002,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2025-05-07",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-09-27T16:59:39Z",
+      "status": "in_progress",
+      "milestones": [
+        {
+          "id": 1133,
+          "employeeGoalId": 5949,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-10-30T10:47:38Z",
+          "lastUpdateDateTime": "2025-10-30T10:47:38Z",
+          "lastUpdateUserId": 217
+        },
+        {
+          "id": 1134,
+          "employeeGoalId": 5949,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2024-12-26T13:04:12Z",
+          "lastUpdateUserId": 217
+        },
+        {
+          "id": 1135,
+          "employeeGoalId": 5949,
+          "title": "Hito 3",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2024-12-26T09:43:09Z",
+          "lastUpdateUserId": 217
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "5950",
+      "title": "Implementar el calendario editorial",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 50,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2025-03-03",
+      "completionDate": null,
+      "lastChangedDateTime": "2025-03-02T16:10:57Z",
+      "status": "in_progress",
+      "milestones": [
+        {
+          "id": 1136,
+          "employeeGoalId": 5950,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-01-14T16:58:24Z",
+          "lastUpdateDateTime": "2025-01-14T16:58:24Z",
+          "lastUpdateUserId": 217
+        },
+        {
+          "id": 1137,
+          "employeeGoalId": 5950,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2024-10-20T12:08:28Z",
+          "lastUpdateUserId": 217
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    }
+  ],
+  "persons": [
+    {
+      "employeeId": 217,
+      "firstName": "Diego",
+      "lastName": "Lezcano",
+      "preferredName": null
+    }
+  ],
+  "comments": [
+    {
+      "goalId": "5947",
+      "commentCount": 2
+    }
+  ]
+}

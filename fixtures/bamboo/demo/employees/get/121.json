@@ -1,0 +1,17 @@
+{
+  "id": "121",
+  "firstName": "Facundo",
+  "lastName": "Aguirre",
+  "workEmail": "facundo.aguirre@meridian-andina.example",
+  "employeeNumber": "10280",
+  "supervisorEId": "47",
+  "supervisorId": "10080",
+  "supervisor": "Olmos, Candela",
+  "hireDate": "2019-12-23",
+  "terminationDate": "2024-09-25",
+  "department": "Soporte",
+  "division": "Operaciones",
+  "jobTitle": "Agente de Soporte Sr",
+  "location": "Córdoba",
+  "status": "Inactive"
+}

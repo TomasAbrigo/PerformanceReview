@@ -1,0 +1,17 @@
+{
+  "id": "407",
+  "firstName": "Hernán",
+  "lastName": "Trejo",
+  "workEmail": "hernan.trejo@meridian-andina.example",
+  "employeeNumber": "11007",
+  "supervisorEId": "83",
+  "supervisorId": "10163",
+  "supervisor": "Franco, Daniela",
+  "hireDate": "2022-12-18",
+  "terminationDate": null,
+  "department": "Customer Success",
+  "division": "Comercial",
+  "jobTitle": "Onboarding Specialist Jr",
+  "location": "Buenos Aires",
+  "status": "Active"
+}

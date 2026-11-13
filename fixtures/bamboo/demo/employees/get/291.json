@@ -1,0 +1,17 @@
+{
+  "id": "291",
+  "firstName": "Ivana",
+  "lastName": "Roldán",
+  "workEmail": "ivana.roldan@meridian-andina.example",
+  "employeeNumber": "10700",
+  "supervisorEId": "185",
+  "supervisorId": "10427",
+  "supervisor": "Martínez, Bruno",
+  "hireDate": "2022-01-26",
+  "terminationDate": null,
+  "department": "Operaciones",
+  "division": "Operaciones",
+  "jobTitle": "Analista de Operaciones Ssr",
+  "location": "Remoto",
+  "status": "Active"
+}

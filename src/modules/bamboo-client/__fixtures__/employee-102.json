@@ -1,0 +1,13 @@
+{
+  "id": "102",
+  "employeeNumber": "0002",
+  "firstName": "Bruno",
+  "lastName": "Pérez",
+  "displayName": "Bruno Pérez",
+  "workEmail": "bruno.perez@example.com",
+  "status": "Active",
+  "hireDate": "2021-07-15",
+  "terminationDate": null,
+  "supervisorEId": "101",
+  "supervisorId": "0001"
+}

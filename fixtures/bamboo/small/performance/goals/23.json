@@ -1,0 +1,182 @@
+{
+  "canAlign": true,
+  "canCreateGoals": true,
+  "filters": [
+    {
+      "id": "status-all",
+      "name": "All"
+    },
+    {
+      "id": "inProgress",
+      "name": "In progress"
+    },
+    {
+      "id": "completed",
+      "name": "Completed"
+    },
+    {
+      "id": "closed",
+      "name": "Closed"
+    }
+  ],
+  "selectedFilter": "status-all",
+  "goals": [
+    {
+      "id": "5042",
+      "title": "Migrar los reportes al nuevo tablero",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 33,
+      "alignsWithOptionId": 9003,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2023-08-25",
+      "completionDate": null,
+      "lastChangedDateTime": "2025-03-18T10:26:11Z",
+      "status": "in_progress",
+      "milestones": [
+        {
+          "id": 709,
+          "employeeGoalId": 5042,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2023-05-15T08:25:21Z",
+          "lastUpdateDateTime": "2023-05-15T08:25:21Z",
+          "lastUpdateUserId": 23
+        },
+        {
+          "id": 710,
+          "employeeGoalId": 5042,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2023-05-05T15:54:51Z",
+          "lastUpdateUserId": 23
+        },
+        {
+          "id": 711,
+          "employeeGoalId": 5042,
+          "title": "Hito 3",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2023-05-05T13:46:16Z",
+          "lastUpdateUserId": 23
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "5044",
+      "title": "Lanzar el nuevo flujo de onboarding",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 70,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [
+        19
+      ],
+      "dueDate": "2025-07-03",
+      "completionDate": null,
+      "lastChangedDateTime": "2025-09-12T12:10:30Z",
+      "status": "closed",
+      "milestones": null,
+      "actions": {
+        "canEdit": false,
+        "canUpdateProgress": false,
+        "canClose": false,
+        "canReopen": true,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "5045",
+      "title": "Renovar las cuentas clave del trimestre",
+      "description": "Sirve de base para el próximo ciclo de evaluación.",
+      "percentComplete": 67,
+      "alignsWithOptionId": 9004,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2026-10-26",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-07-20T13:19:20Z",
+      "status": "in_progress",
+      "milestones": [
+        {
+          "id": 712,
+          "employeeGoalId": 5045,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2026-07-08T14:35:00Z",
+          "lastUpdateDateTime": "2026-07-08T14:35:00Z",
+          "lastUpdateUserId": 23
+        },
+        {
+          "id": 713,
+          "employeeGoalId": 5045,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2026-07-09T11:44:38Z",
+          "lastUpdateDateTime": "2026-07-09T11:44:38Z",
+          "lastUpdateUserId": 23
+        },
+        {
+          "id": 714,
+          "employeeGoalId": 5045,
+          "title": "Hito 3",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2026-06-28T11:08:30Z",
+          "lastUpdateUserId": 23
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    }
+  ],
+  "persons": [
+    {
+      "employeeId": 23,
+      "firstName": "Adrián",
+      "lastName": "Bustos",
+      "preferredName": null
+    },
+    {
+      "employeeId": 19,
+      "firstName": "Silvana",
+      "lastName": "Molina",
+      "preferredName": null
+    }
+  ],
+  "comments": [
+    {
+      "goalId": "5042",
+      "commentCount": 3
+    },
+    {
+      "goalId": "5044",
+      "commentCount": 1
+    }
+  ]
+}

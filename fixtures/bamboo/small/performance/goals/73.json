@@ -1,0 +1,195 @@
+{
+  "canAlign": true,
+  "canCreateGoals": false,
+  "filters": [
+    {
+      "id": "status-all",
+      "name": "All"
+    },
+    {
+      "id": "inProgress",
+      "name": "In progress"
+    },
+    {
+      "id": "completed",
+      "name": "Completed"
+    },
+    {
+      "id": "closed",
+      "name": "Closed"
+    }
+  ],
+  "selectedFilter": "status-all",
+  "goals": [
+    {
+      "id": "5227",
+      "title": "Cerrar el plan de capacitación anual",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "percentComplete": 0,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2025-09-21",
+      "completionDate": null,
+      "lastChangedDateTime": "2025-05-06T18:46:52Z",
+      "status": "closed",
+      "milestones": [
+        {
+          "id": 817,
+          "employeeGoalId": 5227,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2025-04-03T13:28:47Z",
+          "lastUpdateUserId": 73
+        },
+        {
+          "id": 818,
+          "employeeGoalId": 5227,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2025-04-03T10:39:14Z",
+          "lastUpdateUserId": 73
+        },
+        {
+          "id": 819,
+          "employeeGoalId": 5227,
+          "title": "Hito 3",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2025-04-03T13:32:34Z",
+          "lastUpdateUserId": 73
+        },
+        {
+          "id": 820,
+          "employeeGoalId": 5227,
+          "title": "Hito 4",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2025-04-03T14:54:40Z",
+          "lastUpdateUserId": 73
+        }
+      ],
+      "actions": {
+        "canEdit": false,
+        "canUpdateProgress": false,
+        "canClose": false,
+        "canReopen": false,
+        "canDelete": false,
+        "canComment": false
+      }
+    },
+    {
+      "id": "5228",
+      "title": "Documentar los procesos críticos",
+      "description": "Sirve de base para el próximo ciclo de evaluación.",
+      "percentComplete": 0,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2025-07-11",
+      "completionDate": null,
+      "lastChangedDateTime": "2025-01-12T10:14:02Z",
+      "status": "in_progress",
+      "milestones": null,
+      "actions": {
+        "canEdit": false,
+        "canUpdateProgress": false,
+        "canClose": false,
+        "canReopen": false,
+        "canDelete": false,
+        "canComment": false
+      }
+    },
+    {
+      "id": "5230",
+      "title": "Implementar el calendario editorial",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "percentComplete": 75,
+      "alignsWithOptionId": 9003,
+      "sharedWithEmployeeIds": [
+        37
+      ],
+      "dueDate": "2025-11-16",
+      "completionDate": null,
+      "lastChangedDateTime": "2025-07-08T17:22:50Z",
+      "status": "closed",
+      "milestones": [
+        {
+          "id": 821,
+          "employeeGoalId": 5230,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-07-08T17:22:50Z",
+          "lastUpdateDateTime": "2025-07-08T17:22:50Z",
+          "lastUpdateUserId": 73
+        },
+        {
+          "id": 822,
+          "employeeGoalId": 5230,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-07-06T08:33:28Z",
+          "lastUpdateDateTime": "2025-07-06T08:33:28Z",
+          "lastUpdateUserId": 73
+        },
+        {
+          "id": 823,
+          "employeeGoalId": 5230,
+          "title": "Hito 3",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-07-07T15:26:23Z",
+          "lastUpdateDateTime": "2025-07-07T15:26:23Z",
+          "lastUpdateUserId": 73
+        },
+        {
+          "id": 824,
+          "employeeGoalId": 5230,
+          "title": "Hito 4",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2025-07-04T12:20:37Z",
+          "lastUpdateUserId": 73
+        }
+      ],
+      "actions": {
+        "canEdit": false,
+        "canUpdateProgress": false,
+        "canClose": false,
+        "canReopen": false,
+        "canDelete": false,
+        "canComment": false
+      }
+    }
+  ],
+  "persons": [
+    {
+      "employeeId": 73,
+      "firstName": "Cristian",
+      "lastName": "Esquivel",
+      "preferredName": null
+    },
+    {
+      "employeeId": 37,
+      "firstName": "Hugo",
+      "lastName": "Ríos",
+      "preferredName": null
+    }
+  ],
+  "comments": []
+}

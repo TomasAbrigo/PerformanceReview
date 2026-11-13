@@ -3,6 +3,9 @@ import postgres from "postgres";
 import * as schema from "./schema";
 
 export type Database = PostgresJsDatabase<typeof schema>;
+/** The database or an open transaction: domain functions accept either. */
+export type DbOrTx =
+  Database | Parameters<Parameters<Database["transaction"]>[0]>[0];
 
 let client: ReturnType<typeof postgres> | undefined;
 let instance: Database | undefined;

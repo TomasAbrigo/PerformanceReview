@@ -1,0 +1,17 @@
+{
+  "id": "501",
+  "firstName": "Gustavo",
+  "lastName": "Flores",
+  "workEmail": "gustavo.flores@meridian-andina.example",
+  "employeeNumber": "11230",
+  "supervisorEId": "63",
+  "supervisorId": "10109",
+  "supervisor": "Rivas, Alejandro",
+  "hireDate": "2023-09-27",
+  "terminationDate": null,
+  "department": "Operaciones",
+  "division": "Operaciones",
+  "jobTitle": "Analista de Operaciones Sr",
+  "location": "Buenos Aires",
+  "status": "Active"
+}

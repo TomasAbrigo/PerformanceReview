@@ -1,0 +1,17 @@
+{
+  "id": "723",
+  "firstName": "Joaquín",
+  "lastName": "López",
+  "workEmail": "joaquin.lopez@meridian-andina.example",
+  "employeeNumber": "11765",
+  "supervisorEId": "65",
+  "supervisorId": "10117",
+  "supervisor": "Díaz, Valentina",
+  "hireDate": "2025-04-29",
+  "terminationDate": null,
+  "department": "Marketing",
+  "division": "Comercial",
+  "jobTitle": "Diseñador de Marca Ssr",
+  "location": "Córdoba",
+  "status": "Active"
+}

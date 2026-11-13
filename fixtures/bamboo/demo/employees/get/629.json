@@ -1,0 +1,17 @@
+{
+  "id": "629",
+  "firstName": "Candela",
+  "lastName": "Vázquez",
+  "workEmail": "candela.vazquez@meridian-andina.example",
+  "employeeNumber": "11530",
+  "supervisorEId": "67",
+  "supervisorId": "10118",
+  "supervisor": "Roldán, Noelia",
+  "hireDate": "2024-09-12",
+  "terminationDate": null,
+  "department": "Datos",
+  "division": "Tecnología",
+  "jobTitle": "Data Analyst Ssr",
+  "location": "Córdoba",
+  "status": "Active"
+}

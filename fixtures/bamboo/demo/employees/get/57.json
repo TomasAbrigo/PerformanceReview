@@ -1,0 +1,17 @@
+{
+  "id": "57",
+  "firstName": "Adrián",
+  "lastName": "Trejo",
+  "workEmail": "adrian.trejo@meridian-andina.example",
+  "employeeNumber": "10099",
+  "supervisorEId": "25",
+  "supervisorId": "10031",
+  "supervisor": "Silva, Agustina",
+  "hireDate": "2018-05-16",
+  "terminationDate": null,
+  "department": "Operaciones",
+  "division": "Operaciones",
+  "jobTitle": "Gerente de Operaciones",
+  "location": "Buenos Aires",
+  "status": "Active"
+}

@@ -1,0 +1,17 @@
+{
+  "id": "713",
+  "firstName": "Nicolás",
+  "lastName": "Morales",
+  "workEmail": "nicolas.morales@meridian-andina.example",
+  "employeeNumber": "11734",
+  "supervisorEId": "117",
+  "supervisorId": "10268",
+  "supervisor": "Núñez, Mariana",
+  "hireDate": "2025-03-28",
+  "terminationDate": null,
+  "department": "Infraestructura",
+  "division": "Tecnología",
+  "jobTitle": "DevOps Engineer Sr",
+  "location": "Buenos Aires",
+  "status": "Active"
+}

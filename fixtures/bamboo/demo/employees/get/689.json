@@ -1,0 +1,17 @@
+{
+  "id": "689",
+  "firstName": "Martín",
+  "lastName": "Núñez",
+  "workEmail": "martin.nunez@meridian-andina.example",
+  "employeeNumber": "11659",
+  "supervisorEId": "111",
+  "supervisorId": "10250",
+  "supervisor": "Peralta, Martín",
+  "hireDate": "2025-02-18",
+  "terminationDate": null,
+  "department": "Datos",
+  "division": "Tecnología",
+  "jobTitle": "Data Engineer Jr",
+  "location": "Buenos Aires",
+  "status": "Active"
+}

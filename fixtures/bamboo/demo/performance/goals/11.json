@@ -1,0 +1,261 @@
+{
+  "canAlign": true,
+  "canCreateGoals": true,
+  "filters": [
+    {
+      "id": "status-all",
+      "name": "All"
+    },
+    {
+      "id": "inProgress",
+      "name": "In progress"
+    },
+    {
+      "id": "completed",
+      "name": "Completed"
+    },
+    {
+      "id": "closed",
+      "name": "Closed"
+    }
+  ],
+  "selectedFilter": "status-all",
+  "goals": [
+    {
+      "id": "5001",
+      "title": "Mejorar el NPS interno del equipo",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "percentComplete": 100,
+      "alignsWithOptionId": 9003,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2024-06-14",
+      "completionDate": "2024-02-05",
+      "lastChangedDateTime": "2024-02-05T14:17:22Z",
+      "status": "completed",
+      "milestones": [
+        {
+          "id": 701,
+          "employeeGoalId": 5001,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2023-12-27T14:35:48Z",
+          "lastUpdateDateTime": "2023-12-27T14:35:48Z",
+          "lastUpdateUserId": 11
+        },
+        {
+          "id": 702,
+          "employeeGoalId": 5001,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2023-12-20T19:58:32Z",
+          "lastUpdateDateTime": "2023-12-20T19:58:32Z",
+          "lastUpdateUserId": 11
+        },
+        {
+          "id": 703,
+          "employeeGoalId": 5001,
+          "title": "Hito 3",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2023-12-20T09:20:46Z",
+          "lastUpdateDateTime": "2023-12-20T09:20:46Z",
+          "lastUpdateUserId": 11
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "5004",
+      "title": "Entregar el proyecto Norte sin desvíos",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "percentComplete": 33,
+      "alignsWithOptionId": 9003,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2024-05-13",
+      "completionDate": null,
+      "lastChangedDateTime": "2025-08-11T08:19:19Z",
+      "status": "in_progress",
+      "milestones": [
+        {
+          "id": 704,
+          "employeeGoalId": 5004,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2024-12-25T09:01:15Z",
+          "lastUpdateDateTime": "2024-12-25T09:01:15Z",
+          "lastUpdateUserId": 11
+        },
+        {
+          "id": 705,
+          "employeeGoalId": 5004,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2024-03-09T17:06:28Z",
+          "lastUpdateUserId": 11
+        },
+        {
+          "id": 706,
+          "employeeGoalId": 5004,
+          "title": "Hito 3",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2024-03-09T17:52:00Z",
+          "lastUpdateUserId": 11
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "5006",
+      "title": "Reducir los incidentes recurrentes a la mitad",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 75,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2025-06-29",
+      "completionDate": null,
+      "lastChangedDateTime": "2025-04-29T11:28:03Z",
+      "status": "in_progress",
+      "milestones": [
+        {
+          "id": 707,
+          "employeeGoalId": 5006,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-01-29T08:33:13Z",
+          "lastUpdateDateTime": "2025-01-29T08:33:13Z",
+          "lastUpdateUserId": 11
+        },
+        {
+          "id": 708,
+          "employeeGoalId": 5006,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-03-25T10:24:50Z",
+          "lastUpdateDateTime": "2025-03-25T10:24:50Z",
+          "lastUpdateUserId": 11
+        },
+        {
+          "id": 709,
+          "employeeGoalId": 5006,
+          "title": "Hito 3",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-03-22T14:23:47Z",
+          "lastUpdateDateTime": "2025-03-22T14:23:47Z",
+          "lastUpdateUserId": 11
+        },
+        {
+          "id": 710,
+          "employeeGoalId": 5006,
+          "title": "Hito 4",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2025-01-02T18:59:06Z",
+          "lastUpdateUserId": 11
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "5007",
+      "title": "Migrar los reportes al nuevo tablero",
+      "description": "Sirve de base para el próximo ciclo de evaluación.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2025-09-02",
+      "completionDate": "2025-07-30",
+      "lastChangedDateTime": "2025-07-30T14:40:06Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "5008",
+      "title": "Mejorar el NPS interno del equipo",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "percentComplete": 20,
+      "alignsWithOptionId": 9002,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2027-01-16",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-08-19T14:48:50Z",
+      "status": "in_progress",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    }
+  ],
+  "persons": [
+    {
+      "employeeId": 11,
+      "firstName": "Damián",
+      "lastName": "Lezcano",
+      "preferredName": null
+    }
+  ],
+  "comments": [
+    {
+      "goalId": "5001",
+      "commentCount": 1
+    },
+    {
+      "goalId": "5006",
+      "commentCount": 4
+    }
+  ]
+}

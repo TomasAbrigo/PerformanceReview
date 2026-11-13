@@ -1,0 +1,17 @@
+{
+  "id": "21",
+  "firstName": "Mateo",
+  "lastName": "Ibáñez",
+  "workEmail": "mateo.ibanez@meridian-andina.example",
+  "employeeNumber": "10031",
+  "supervisorEId": "17",
+  "supervisorId": "10020",
+  "supervisor": "Arias, Silvana",
+  "hireDate": "2017-06-22",
+  "terminationDate": null,
+  "department": "Finanzas",
+  "division": "Corporativo",
+  "jobTitle": "Gerente de Finanzas",
+  "location": "Montevideo",
+  "status": "Active"
+}

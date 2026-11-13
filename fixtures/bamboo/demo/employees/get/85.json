@@ -1,0 +1,17 @@
+{
+  "id": "85",
+  "firstName": "Valentina",
+  "lastName": "Vázquez",
+  "workEmail": "valentina.vazquez@meridian-andina.example",
+  "employeeNumber": "10169",
+  "supervisorEId": "47",
+  "supervisorId": "10080",
+  "supervisor": "Olmos, Candela",
+  "hireDate": "2019-03-06",
+  "terminationDate": null,
+  "department": "Soporte",
+  "division": "Operaciones",
+  "jobTitle": "Especialista de Soporte Jr",
+  "location": "Buenos Aires",
+  "status": "Active"
+}

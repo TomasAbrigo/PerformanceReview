@@ -1,0 +1,17 @@
+{
+  "id": "415",
+  "firstName": "Florencia",
+  "lastName": "Fuentes",
+  "workEmail": "florencia.fuentes@meridian-andina.example",
+  "employeeNumber": "11028",
+  "supervisorEId": "147",
+  "supervisorId": "10339",
+  "supervisor": "Páez, Paula",
+  "hireDate": "2023-01-09",
+  "terminationDate": null,
+  "department": "Legales",
+  "division": "Corporativo",
+  "jobTitle": "Analista de Compliance Sr",
+  "location": "Córdoba",
+  "status": "Active"
+}

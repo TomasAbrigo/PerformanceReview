@@ -1,0 +1,17 @@
+{
+  "id": "401",
+  "firstName": "Gabriela",
+  "lastName": "Toledo",
+  "workEmail": "gabriela.toledo@meridian-andina.example",
+  "employeeNumber": "10986",
+  "supervisorEId": "31",
+  "supervisorId": "10049",
+  "supervisor": "Ríos, Antonella",
+  "hireDate": "2022-12-02",
+  "terminationDate": null,
+  "department": "Infraestructura",
+  "division": "Tecnología",
+  "jobTitle": "DevOps Engineer Ssr",
+  "location": "Buenos Aires",
+  "status": "Active"
+}

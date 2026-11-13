@@ -1,0 +1,17 @@
+{
+  "id": "395",
+  "firstName": "Valentina",
+  "lastName": "Rodríguez",
+  "workEmail": "valentina.rodriguez@meridian-andina.example",
+  "employeeNumber": "10970",
+  "supervisorEId": "167",
+  "supervisorId": "10382",
+  "supervisor": "Escobar, Marcela",
+  "hireDate": "2022-11-20",
+  "terminationDate": null,
+  "department": "Infraestructura",
+  "division": "Tecnología",
+  "jobTitle": "SysAdmin Ssr",
+  "location": "Buenos Aires",
+  "status": "Active"
+}

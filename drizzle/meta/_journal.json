@@ -8,6 +8,20 @@
       "when": 1794570674340,
       "tag": "0000_init",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1794572377813,
+      "tag": "0001_rating_scales_templates",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1794573783772,
+      "tag": "0002_people_ingest",
+      "breakpoints": true
     }
   ]
 }

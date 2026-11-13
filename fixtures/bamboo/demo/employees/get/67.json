@@ -1,0 +1,17 @@
+{
+  "id": "67",
+  "firstName": "Noelia",
+  "lastName": "Roldán",
+  "workEmail": "noelia.roldan@meridian-andina.example",
+  "employeeNumber": "10118",
+  "supervisorEId": "35",
+  "supervisorId": "10053",
+  "supervisor": "Ojeda, Matías",
+  "hireDate": "2018-09-04",
+  "terminationDate": null,
+  "department": "Datos",
+  "division": "Tecnología",
+  "jobTitle": "Líder de Datos",
+  "location": "Rosario",
+  "status": "Active"
+}

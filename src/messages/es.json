@@ -5,11 +5,160 @@
   },
   "Home": {
     "heading": "Evaluaciones de desempeño",
-    "welcome": "Bienvenido a Performance Review."
+    "welcome": "Bienvenido a Performance Review.",
+    "settings": "Configuración"
   },
   "LocaleSwitcher": {
     "label": "Idioma",
     "es": "Español",
     "en": "English"
+  },
+  "Settings": {
+    "title": "Configuración",
+    "nav": {
+      "label": "Configuración",
+      "home": "Inicio",
+      "scales": "Escalas de rating",
+      "templates": "Templates de evaluación"
+    }
+  },
+  "Common": {
+    "nameEs": "Nombre (español)",
+    "nameEn": "Nombre (inglés)",
+    "system": "Sistema",
+    "disabled": "Desactivado",
+    "delete": "Borrar",
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "edit": "Editar",
+    "clone": "Clonar",
+    "actions": "Acciones",
+    "loading": "Cargando…"
+  },
+  "Errors": {
+    "missingEs": "Falta el texto en español.",
+    "missingEn": "Falta el texto en inglés.",
+    "required": "Este campo es obligatorio.",
+    "minOptions": "Agregá al menos dos opciones.",
+    "duplicateValues": "Los valores de las opciones no pueden repetirse.",
+    "invalid": "Valor inválido.",
+    "validation": "Revisá los campos marcados.",
+    "not_found": "El elemento ya no existe.",
+    "system_readonly": "Los elementos del sistema no se pueden modificar ni borrar; clonalos.",
+    "in_use": "La escala está en uso por alguna pregunta.",
+    "unknown": "Ocurrió un error inesperado."
+  },
+  "Scales": {
+    "title": "Escalas de rating",
+    "description": "Las escalas del sistema no se pueden borrar. El valor normalizado (0 a 1) permite comparar escalas distintas.",
+    "empty": "Todavía no hay escalas.",
+    "name": "Nombre",
+    "options": "Opciones",
+    "new": "Nueva escala",
+    "create": "Crear escala",
+    "value": "Valor",
+    "labelEs": "Etiqueta (español)",
+    "labelEn": "Etiqueta (inglés)",
+    "addOption": "Agregar opción",
+    "removeOption": "Quitar opción",
+    "normalized": "normalizado {value}",
+    "deleteScale": "Borrar escala"
+  },
+  "Templates": {
+    "title": "Templates de evaluación",
+    "description": "Los templates del sistema no se pueden editar ni borrar: clonalos para adaptarlos.",
+    "empty": "Todavía no hay templates.",
+    "name": "Nombre",
+    "new": "Nuevo template",
+    "create": "Crear template",
+    "deleteTemplate": "Borrar template",
+    "cloneTemplate": "Clonar template",
+    "back": "Volver a templates",
+    "notFound": "El template no existe."
+  },
+  "Editor": {
+    "systemNotice": "Este es un template del sistema: no se puede editar ni borrar, solo clonar.",
+    "emptySections": "Este template todavía no tiene secciones.",
+    "emptyQuestions": "Esta sección todavía no tiene preguntas.",
+    "saveName": "Guardar nombre",
+    "newSection": "Nueva sección",
+    "sectionTitleEs": "Título (español)",
+    "sectionTitleEn": "Título (inglés)",
+    "addSection": "Agregar sección",
+    "deleteSection": "Borrar sección",
+    "sectionUp": "Subir sección",
+    "sectionDown": "Bajar sección",
+    "newQuestion": "Nueva pregunta",
+    "editQuestion": "Editar pregunta",
+    "addQuestion": "Agregar pregunta",
+    "saveQuestion": "Guardar pregunta",
+    "deleteQuestion": "Borrar pregunta",
+    "questionUp": "Subir pregunta",
+    "questionDown": "Bajar pregunta",
+    "promptEs": "Texto (español)",
+    "promptEn": "Texto (inglés)",
+    "kind": "Tipo",
+    "kinds": {
+      "text": "Texto",
+      "rating": "Calificación",
+      "single_choice": "Opción única"
+    },
+    "appliesTo": "Responde",
+    "relationships": {
+      "self": "Autoevaluación",
+      "manager": "Manager",
+      "peer": "Par",
+      "upward": "Upward"
+    },
+    "visibleToReviewee": "Visible para la persona evaluada",
+    "required": "Obligatoria",
+    "scale": "Escala",
+    "choices": "Opciones",
+    "choiceEs": "Opción {n} (español)",
+    "choiceEn": "Opción {n} (inglés)",
+    "addChoice": "Agregar opción",
+    "hiddenFromReviewee": "Oculta para la persona evaluada",
+    "chooseScale": "Elegí una escala"
+  },
+  "People": {
+    "title": "Personas",
+    "nav": "Personas",
+    "searchLabel": "Buscar por nombre o email",
+    "searchPlaceholder": "Nombre o email",
+    "search": "Buscar",
+    "total": "{count, plural, =1 {1 persona} other {# personas}}",
+    "empty": "No hay personas para mostrar.",
+    "back": "← Volver a personas",
+    "notFound": "Persona no encontrada.",
+    "columns": {
+      "name": "Nombre",
+      "email": "Email",
+      "status": "Estado"
+    },
+    "status": {
+      "active": "Activo",
+      "inactive": "Inactivo",
+      "unknown": "Sin estado"
+    },
+    "identities": {
+      "title": "Identificadores de origen",
+      "kind": "Tipo",
+      "value": "Valor",
+      "validFrom": "Desde",
+      "validTo": "Hasta",
+      "current": "Vigente",
+      "kinds": {
+        "bamboo_id": "ID Bamboo",
+        "employee_number": "Legajo",
+        "work_email": "Email"
+      }
+    },
+    "employments": {
+      "title": "Períodos de empleo",
+      "hireDate": "Ingreso",
+      "terminationDate": "Egreso",
+      "status": "Estado",
+      "empty": "Sin períodos de empleo."
+    }
   }
 }

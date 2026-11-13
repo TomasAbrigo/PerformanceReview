@@ -1,0 +1,17 @@
+{
+  "id": "97",
+  "firstName": "Micaela",
+  "lastName": "Molina",
+  "workEmail": "micaela.molina@meridian-andina.example",
+  "employeeNumber": "10206",
+  "supervisorEId": "137",
+  "supervisorId": "10314",
+  "supervisor": "Lezcano, Marcela",
+  "hireDate": "2019-07-01",
+  "terminationDate": null,
+  "department": "Customer Success",
+  "division": "Comercial",
+  "jobTitle": "Customer Success Manager Jr",
+  "location": "Rosario",
+  "status": "Active"
+}

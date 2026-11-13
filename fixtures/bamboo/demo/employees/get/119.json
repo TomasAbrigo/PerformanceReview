@@ -1,0 +1,17 @@
+{
+  "id": "119",
+  "firstName": "Daniela",
+  "lastName": "Coronel",
+  "workEmail": "daniela.coronel@meridian-andina.example",
+  "employeeNumber": "10272",
+  "supervisorEId": "47",
+  "supervisorId": "10080",
+  "supervisor": "Olmos, Candela",
+  "hireDate": "2019-12-15",
+  "terminationDate": null,
+  "department": "Soporte",
+  "division": "Operaciones",
+  "jobTitle": "Agente de Soporte Ssr",
+  "location": "Córdoba",
+  "status": "Active"
+}

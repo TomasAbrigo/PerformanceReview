@@ -1,0 +1,78 @@
+{
+  "canAlign": true,
+  "canCreateGoals": true,
+  "filters": [
+    {
+      "id": "status-all",
+      "name": "All"
+    },
+    {
+      "id": "inProgress",
+      "name": "In progress"
+    },
+    {
+      "id": "completed",
+      "name": "Completed"
+    },
+    {
+      "id": "closed",
+      "name": "Closed"
+    }
+  ],
+  "selectedFilter": "status-all",
+  "goals": [
+    {
+      "id": "7876",
+      "title": "Renovar las cuentas clave del trimestre",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2025-11-01",
+      "completionDate": "2025-08-22",
+      "lastChangedDateTime": "2025-08-22T11:04:31Z",
+      "status": "completed",
+      "milestones": [
+        {
+          "id": 2024,
+          "employeeGoalId": 7876,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-08-04T10:39:48Z",
+          "lastUpdateDateTime": "2025-08-04T10:39:48Z",
+          "lastUpdateUserId": 769
+        },
+        {
+          "id": 2025,
+          "employeeGoalId": 7876,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-08-18T10:40:52Z",
+          "lastUpdateDateTime": "2025-08-18T10:40:52Z",
+          "lastUpdateUserId": 769
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    }
+  ],
+  "persons": [
+    {
+      "employeeId": 769,
+      "firstName": "Mariana",
+      "lastName": "Paz",
+      "preferredName": null
+    }
+  ],
+  "comments": []
+}

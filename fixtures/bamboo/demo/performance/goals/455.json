@@ -1,0 +1,237 @@
+{
+  "canAlign": true,
+  "canCreateGoals": true,
+  "filters": [
+    {
+      "id": "status-all",
+      "name": "All"
+    },
+    {
+      "id": "inProgress",
+      "name": "In progress"
+    },
+    {
+      "id": "completed",
+      "name": "Completed"
+    },
+    {
+      "id": "closed",
+      "name": "Closed"
+    }
+  ],
+  "selectedFilter": "status-all",
+  "goals": [
+    {
+      "id": "6980",
+      "title": "Renovar las cuentas clave del trimestre",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2023-12-05",
+      "completionDate": "2023-09-18",
+      "lastChangedDateTime": "2023-09-18T18:08:14Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "6981",
+      "title": "Completar la certificación del área",
+      "description": "Sirve de base para el próximo ciclo de evaluación.",
+      "percentComplete": 100,
+      "alignsWithOptionId": 9001,
+      "sharedWithEmployeeIds": [
+        159
+      ],
+      "dueDate": "2023-08-15",
+      "completionDate": "2023-07-02",
+      "lastChangedDateTime": "2023-07-02T09:55:55Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "6984",
+      "title": "Reducir los incidentes recurrentes a la mitad",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2024-10-31",
+      "completionDate": "2024-07-22",
+      "lastChangedDateTime": "2024-07-22T17:43:40Z",
+      "status": "completed",
+      "milestones": [
+        {
+          "id": 1586,
+          "employeeGoalId": 6984,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2024-07-19T11:35:56Z",
+          "lastUpdateDateTime": "2024-07-19T11:35:56Z",
+          "lastUpdateUserId": 455
+        },
+        {
+          "id": 1587,
+          "employeeGoalId": 6984,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2024-07-12T11:29:51Z",
+          "lastUpdateDateTime": "2024-07-12T11:29:51Z",
+          "lastUpdateUserId": 455
+        },
+        {
+          "id": 1588,
+          "employeeGoalId": 6984,
+          "title": "Hito 3",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2024-07-15T16:58:35Z",
+          "lastUpdateDateTime": "2024-07-15T16:58:35Z",
+          "lastUpdateUserId": 455
+        },
+        {
+          "id": 1589,
+          "employeeGoalId": 6984,
+          "title": "Hito 4",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2024-07-10T18:12:19Z",
+          "lastUpdateDateTime": "2024-07-10T18:12:19Z",
+          "lastUpdateUserId": 455
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "6986",
+      "title": "Renovar las cuentas clave del trimestre",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 33,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2027-03-09",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-09-15T08:26:21Z",
+      "status": "closed",
+      "milestones": [
+        {
+          "id": 1590,
+          "employeeGoalId": 6986,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2026-09-06T08:52:58Z",
+          "lastUpdateDateTime": "2026-09-06T08:52:58Z",
+          "lastUpdateUserId": 455
+        },
+        {
+          "id": 1591,
+          "employeeGoalId": 6986,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2026-09-01T17:02:03Z",
+          "lastUpdateUserId": 455
+        },
+        {
+          "id": 1592,
+          "employeeGoalId": 6986,
+          "title": "Hito 3",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2026-09-01T11:21:43Z",
+          "lastUpdateUserId": 455
+        }
+      ],
+      "actions": {
+        "canEdit": false,
+        "canUpdateProgress": false,
+        "canClose": false,
+        "canReopen": true,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "6989",
+      "title": "Aumentar la cobertura de pruebas al 80%",
+      "description": "Sirve de base para el próximo ciclo de evaluación.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [
+        159
+      ],
+      "dueDate": "2026-09-20",
+      "completionDate": "2026-06-20",
+      "lastChangedDateTime": "2026-06-20T15:33:58Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    }
+  ],
+  "persons": [
+    {
+      "employeeId": 455,
+      "firstName": "Brenda",
+      "lastName": "Soria",
+      "preferredName": null
+    },
+    {
+      "employeeId": 159,
+      "firstName": "Marcela",
+      "lastName": "Ríos",
+      "preferredName": null
+    }
+  ],
+  "comments": [
+    {
+      "goalId": "6986",
+      "commentCount": 2
+    },
+    {
+      "goalId": "6989",
+      "commentCount": 2
+    }
+  ]
+}
