@@ -7,11 +7,12 @@ import {
   employment,
   goal,
   goalMilestone,
+  identityMatchIssue,
   person,
   ratingScale,
   sourceIdentity,
 } from "@/db/schema";
-import { generateCompany } from "@/fixtures/company";
+import { generateCompany, type CompanyFixture } from "@/fixtures/company";
 import { FIXTURE_SEEDS } from "@/fixtures/write";
 import { seedSystemTemplates } from "@/modules/templates";
 import { REGISTRY } from "./registry";
@@ -23,21 +24,82 @@ import {
   type SeedRun,
 } from "./seed";
 
-const company = generateCompany({ size: "small", seed: FIXTURE_SEEDS.small });
-const records = company.employees;
-const active = new Set(
-  records.filter((e) => e.status === "Active").map((e) => e.id),
-);
-// The goal pipeline reads the goals of the active employees (#6): those of
-// someone who left are not in Bamboo's reach.
-const readableGoals = company.goals.filter((g) => active.has(g.employeeId));
+/**
+ * What the pipelines should leave for a company, from the generator's ground
+ * truth. Bamboo gives a rehire a NEW id with the same legajo (and mostly the
+ * same email): the identity module never links that on its own, it queues it
+ * for a human (#5). So the persons are the ground-truth persons (one per
+ * human), the later ids of the rehires wait in the queue, and until someone
+ * resolves them they have no job history and no goals.
+ */
+function expected(company: CompanyFixture) {
+  const queued = new Set(
+    company.identity.persons.flatMap((p) => p.employeeIds.slice(1)),
+  );
+  const ingested = company.employees.filter((e) => !queued.has(e.id));
+  const ingestedIds = new Set(ingested.map((e) => e.id));
+  // The goal pipeline reads the goals of the active employees (#6): those of
+  // someone who left are not in Bamboo's reach.
+  const activeIds = new Set(
+    ingested.filter((e) => e.status === "Active").map((e) => e.id),
+  );
+  return {
+    records: company.employees.length,
+    queued,
+    ingested,
+    persons: company.identity.persons.length,
+    jobRows: company.jobHistory.filter((r) => ingestedIds.has(r.employeeId)),
+    goals: company.goals.filter((g) => activeIds.has(g.employeeId)),
+  };
+}
 
 async function total(table: PgTable): Promise<number> {
   const [{ n }] = await db.select({ n: count() }).from(table);
   return n;
 }
 
+/** What a run did, to compare a second run against the first. */
+function pipelineChecks(
+  want: ReturnType<typeof expected>,
+  first: SeedRun[],
+  second: SeedRun[],
+) {
+  const [employee, jobHistory, goals] = first;
+  expect(employee.counts).toMatchObject({
+    read: want.records,
+    inserted: want.persons,
+    unchanged: 0,
+    rejected: 0,
+    issues: want.queued.size,
+  });
+  // job_history of a queued id has no person to attach to yet.
+  expect(jobHistory.counts).toMatchObject({
+    read: want.records,
+    inserted: want.persons,
+    rejected: want.queued.size,
+  });
+  expect(goals.counts).toMatchObject({
+    read: want.goals.length,
+    inserted: want.goals.length,
+    rejected: 0,
+  });
+  for (const [i, run] of second.entries()) {
+    // Nothing is inserted or updated again: what was applied is unchanged and
+    // what waited still waits.
+    expect(run.counts).toMatchObject({
+      read: first[i].counts.read,
+      inserted: 0,
+      updated: 0,
+      unchanged: first[i].counts.inserted,
+      rejected: first[i].counts.rejected,
+    });
+    expect(run.issues).toBe(first[i].issues);
+  }
+}
+
 describe("seedFromFixtures (small)", () => {
+  const company = generateCompany({ size: "small", seed: FIXTURE_SEEDS.small });
+  const want = expected(company);
   let first: SeedRun[];
   let second: SeedRun[];
 
@@ -60,27 +122,11 @@ describe("seedFromFixtures (small)", () => {
     ]);
   });
 
-  it("first run inserts everything it read and rejects nothing", () => {
-    for (const run of first) {
-      expect(run.counts.read).toBeGreaterThan(0);
-      expect(run.counts).toMatchObject({
-        inserted: run.counts.read,
-        updated: 0,
-        unchanged: 0,
-        rejected: 0,
-      });
-    }
-  });
-
-  it("leaves one person per Bamboo record: the 40 of the small company", async () => {
-    expect(records).toHaveLength(40);
-    expect(first[0].counts.read).toBe(records.length);
-    expect(await total(person)).toBe(records.length);
-    expect(await total(employment)).toBe(records.length);
-    // Ground truth: a perfect resolver would merge the rehires (a new Bamboo
-    // id for the same human) and leave fewer persons. Identity resolution
-    // does not exist yet (#5), so each Bamboo id is still its own person.
-    expect(company.identity.persons.length).toBeLessThan(records.length);
+  it("reads the 40 Bamboo records and leaves the 36 persons they are", async () => {
+    expect(want.records).toBe(40);
+    expect(want.persons).toBe(36);
+    expect(await total(person)).toBe(want.persons);
+    expect(await total(employment)).toBe(want.persons);
     const bambooIds = await db
       .select({ value: sourceIdentity.value })
       .from(sourceIdentity)
@@ -91,12 +137,23 @@ describe("seedFromFixtures (small)", () => {
         ),
       );
     expect(bambooIds.map((r) => r.value).sort()).toEqual(
-      records.map((e) => e.id).sort(),
+      want.ingested.map((e) => e.id).sort(),
     );
   });
 
-  it("builds the job history of every employee and resolves each current manager", async () => {
-    expect(await total(employeeJobHistory)).toBe(company.jobHistory.length);
+  it("holds the 4 rehires in the identity queue instead of guessing", async () => {
+    expect(want.queued.size).toBe(4);
+    const issues = await db.select().from(identityMatchIssue);
+    expect(issues.map((i) => i.sourceId).sort()).toEqual(
+      [...want.queued].sort(),
+    );
+    for (const issue of issues) {
+      expect(issue).toMatchObject({ status: "open", reason: "ambiguous" });
+    }
+  });
+
+  it("builds the job history of every ingested employee and resolves each current manager", async () => {
+    expect(await total(employeeJobHistory)).toBe(want.jobRows.length);
 
     const idOf = new Map(
       (
@@ -115,14 +172,13 @@ describe("seedFromFixtures (small)", () => {
       const best = latest.get(r.personId);
       if (!best || r.validFrom > best.validFrom) latest.set(r.personId, r);
     }
-    for (const e of records) {
+    for (const e of want.ingested) {
       const row = latest.get(idOf.get(e.id)!);
       expect(row, `job history of employee ${e.id}`).toBeDefined();
       // Current manager = the employee's supervisorEId. Older rows only have
-      // the reportsTo NAME ("Last, First"): they stay unresolved until the
-      // identity module matches names.
+      // the reportsTo NAME ("Last, First"): they stay unresolved.
       expect(row!.managerPersonId).toBe(
-        e.managerId === null ? null : idOf.get(e.managerId),
+        e.managerId === null ? null : (idOf.get(e.managerId) ?? null),
       );
     }
     const resolved = rows.filter((r) => r.managerPersonId !== null).length;
@@ -130,30 +186,21 @@ describe("seedFromFixtures (small)", () => {
   });
 
   it("stores the goals of the active employees, with milestones and comment counts", async () => {
-    expect(first[2].counts.read).toBe(readableGoals.length);
-    expect(await total(goal)).toBe(readableGoals.length);
+    expect(await total(goal)).toBe(want.goals.length);
     const [{ comments }] = await db
       .select({ comments: sql<number>`sum(${goal.commentCount})::int` })
       .from(goal);
     expect(comments).toBe(
-      readableGoals.reduce((sum, g) => sum + g.commentCount, 0),
+      want.goals.reduce((sum, g) => sum + g.commentCount, 0),
     );
     expect(await total(goalMilestone)).toBe(
-      readableGoals.reduce((sum, g) => sum + (g.milestones?.length ?? 0), 0),
+      want.goals.reduce((sum, g) => sum + (g.milestones?.length ?? 0), 0),
     );
   });
 
-  it("is idempotent: a second run finds everything unchanged", () => {
+  it("is idempotent: a second run inserts and updates nothing", () => {
     expect(second.map((r) => r.entity)).toEqual(first.map((r) => r.entity));
-    for (const [i, run] of second.entries()) {
-      expect(run.counts).toMatchObject({
-        read: first[i].counts.read,
-        inserted: 0,
-        updated: 0,
-        unchanged: first[i].counts.read,
-        rejected: 0,
-      });
-    }
+    pipelineChecks(want, first, second);
   });
 });
 
@@ -163,32 +210,20 @@ describe("seedFromFixtures (demo)", () => {
     await closeDb();
   });
 
-  it("leaves the 400 people of the demo company and is idempotent too", async () => {
-    const demo = generateCompany({ size: "demo", seed: FIXTURE_SEEDS.demo });
-    const demoActive = new Set(
-      demo.employees.filter((e) => e.status === "Active").map((e) => e.id),
-    );
+  it("leaves the demo company (400 records) and is idempotent too", async () => {
+    const company = generateCompany({ size: "demo", seed: FIXTURE_SEEDS.demo });
+    const want = expected(company);
     await resetDomainTables(db);
 
     const first = await seedFromFixtures({ size: "demo", db });
     const second = await seedFromFixtures({ size: "demo", db });
 
-    expect(demo.employees).toHaveLength(400);
-    expect(await total(person)).toBe(400);
-    expect(await total(employeeJobHistory)).toBe(demo.jobHistory.length);
-    expect(await total(goal)).toBe(
-      demo.goals.filter((g) => demoActive.has(g.employeeId)).length,
-    );
-    expect(first.map((r) => r.counts.rejected)).toEqual([0, 0, 0]);
-    for (const [i, run] of second.entries()) {
-      expect(run.counts).toMatchObject({
-        read: first[i].counts.read,
-        unchanged: first[i].counts.read,
-        inserted: 0,
-        updated: 0,
-        rejected: 0,
-      });
-    }
+    expect(want.records).toBe(400);
+    expect(await total(person)).toBe(want.persons);
+    expect(await total(identityMatchIssue)).toBe(want.queued.size);
+    expect(await total(employeeJobHistory)).toBe(want.jobRows.length);
+    expect(await total(goal)).toBe(want.goals.length);
+    pipelineChecks(want, first, second);
   }, 120_000);
 });
 
@@ -225,12 +260,14 @@ describe("resetDomainTables", () => {
   });
 
   it("seeds again after a reset, with the same result as the first time", async () => {
+    const company = generateCompany({
+      size: "small",
+      seed: FIXTURE_SEEDS.small,
+    });
     await resetDomainTables(db);
-    const runs = await seedFromFixtures({ size: "small", db });
-    expect(runs.map((r) => r.counts.inserted)).toEqual(
-      runs.map((r) => r.counts.read),
-    );
-    expect(await total(person)).toBe(company.employees.length);
+    const [employees] = await seedFromFixtures({ size: "small", db });
+    expect(employees.counts.inserted).toBe(company.identity.persons.length);
+    expect(await total(person)).toBe(company.identity.persons.length);
     await resetDomainTables(db);
   });
 });

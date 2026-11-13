@@ -7,6 +7,8 @@ export default defineConfig({
   testDir: "./e2e",
   globalSetup: "./e2e/global-setup.ts",
   fullyParallel: true,
+  // `next dev` compiles routes on first hit; give assertions room on a cold or busy machine.
+  expect: { timeout: 10_000 },
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
   // In CI also write the HTML report (playwright-report/) that the workflow uploads on failure.
@@ -15,7 +17,21 @@ export default defineConfig({
     baseURL: `http://localhost:${PORT}`,
     trace: "on-first-retry",
   },
-  projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],
+  projects: [
+    {
+      name: "chromium",
+      use: { ...devices["Desktop Chrome"] },
+      testIgnore: /identity\.spec\.ts/,
+    },
+    // The identity spec resolves a case (it links a seeded rehire to the person
+    // who left), so it runs on its own, once every spec that only reads is done.
+    {
+      name: "identity",
+      use: { ...devices["Desktop Chrome"] },
+      testMatch: /identity\.spec\.ts/,
+      dependencies: ["chromium"],
+    },
+  ],
   webServer: {
     command: `pnpm exec next dev -p ${PORT}`,
     url: `http://localhost:${PORT}/es`,

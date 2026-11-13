@@ -33,6 +33,8 @@ export type IngestCliArgs = {
   dir: string;
   /** ISO instant, or "last" to continue from the stored watermark. */
   since: string | undefined;
+  /** employee: what to do with a record that matches nobody (default: create). */
+  unmatched: "create" | "queue" | undefined;
 };
 
 type Registry = ReadonlyMap<string, EntityEntry>;
@@ -41,8 +43,8 @@ type Env = Record<string, string | undefined>;
 export function usage(registry: Registry): string {
   return [
     "Usage:",
-    "  pnpm ingest <entity> --source fixture|bamboo [--dir <path>] [--since <iso>|last]",
-    "  pnpm ingest --all --source fixture|bamboo [--dir <path>] [--since <iso>|last]",
+    "  pnpm ingest <entity> --source fixture|bamboo [--dir <path>] [--since <iso>|last] [--unmatched create|queue]",
+    "  pnpm ingest --all --source fixture|bamboo [--dir <path>] [--since <iso>|last] [--unmatched create|queue]",
     "",
     `Entities: ${[...registry.keys()].join(", ")}`,
     "  --source  fixture reads saved Bamboo responses (--dir, default " +
@@ -52,6 +54,8 @@ export function usage(registry: Registry): string {
     "            2026-11-01T10:00:00Z, with an offset when a time is given);",
     "            `last` uses the stored watermark. Without it the extraction is full.",
     "  --all     every entity, in registry order; keeps going after a failure",
+    "  --unmatched  employee records that match nobody and resemble nobody: create the",
+    "            person (default) or queue them for review at /imports/identity",
     "",
     "Exit code: 0 all runs succeeded, 1 a run failed, 2 bad arguments or",
     "configuration (missing BAMBOO_* / DATABASE_URL).",
@@ -98,6 +102,7 @@ export function parseIngestArgs(
         dir: { type: "string", default: DEFAULT_FIXTURES_DIR },
         since: { type: "string" },
         all: { type: "boolean", default: false },
+        unmatched: { type: "string" },
       },
     });
   } catch (err) {
@@ -146,7 +151,26 @@ export function parseIngestArgs(
     since = instant;
   }
 
-  return { entities, source: source as CliSource, dir: values.dir, since };
+  let unmatched: IngestCliArgs["unmatched"];
+  if (values.unmatched !== undefined) {
+    if (values.unmatched !== "create" && values.unmatched !== "queue") {
+      throw new UsageError(
+        `--unmatched must be create or queue (got ${values.unmatched})`,
+      );
+    }
+    if (!entities.includes("employee")) {
+      throw new UsageError("--unmatched only applies to the employee entity");
+    }
+    unmatched = values.unmatched;
+  }
+
+  return {
+    entities,
+    source: source as CliSource,
+    dir: values.dir,
+    since,
+    unmatched,
+  };
 }
 
 export type IngestCliDeps = {
@@ -248,10 +272,11 @@ export async function runIngestCli(
     dir: path.resolve(args.dir),
     bambooClient: () => bambooClientFromEnv(env),
   };
-  const params =
-    args.source === "fixture"
-      ? { source: args.source, dir: args.dir }
-      : { source: args.source };
+  const params = {
+    source: args.source,
+    ...(args.source === "fixture" ? { dir: args.dir } : {}),
+    ...(args.unmatched ? { unmatched: args.unmatched } : {}),
+  };
 
   // Build every adapter before running anything: a missing credential is a
   // configuration problem (exit 2), not a run that failed.
@@ -282,7 +307,13 @@ export async function runIngestCli(
               entity,
             })) ?? undefined;
         }
-        return entry.run({ adapter, db: deps.db, params, since });
+        return entry.run({
+          adapter,
+          db: deps.db,
+          params,
+          since,
+          unmatched: entity === "employee" ? args.unmatched : undefined,
+        });
       });
       outcomes.push({
         entity,

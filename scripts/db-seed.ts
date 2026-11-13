@@ -62,6 +62,12 @@ async function main(): Promise<number> {
   console.log(
     `\nperson: ${await count("person")}, job history rows: ${await count("employee_job_history")}, goals: ${await count("goal")}`,
   );
+  const waiting = runs.find((r) => r.entity === "employee")?.issues ?? 0;
+  if (waiting > 0) {
+    console.log(
+      `${waiting} records wait for a person in the identity queue (rehires): /es/imports/identity`,
+    );
+  }
   return 0;
 }
 

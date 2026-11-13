@@ -3,6 +3,11 @@
  * generated company (`pnpm db:seed --size small`), so the specs derive what
  * they expect from the same generator instead of hard-coding names and counts:
  * regenerating the fixtures does not break them.
+ *
+ * Bamboo gives a rehire a new id with the same legajo. The identity module
+ * never links that on its own: the later id waits in the identity queue for a
+ * human, so it is not a person, has no job history and no goals. `employees`
+ * here are the ones that did make it into the database.
  */
 import { generateCompany } from "../src/fixtures/company";
 import type { FixtureEmployee, FixtureGoal } from "../src/fixtures/company";
@@ -13,7 +18,26 @@ export const company = generateCompany({
   seed: FIXTURE_SEEDS.small,
 });
 
-export const employees = company.employees;
+/** Every Bamboo record the seed reads (employee `read`). */
+export const records = company.employees;
+
+/** The rehires: for each person who came back, the ids after the first. */
+export const rehires = company.identity.persons
+  .filter((p) => p.employeeIds.length > 1)
+  .map((p) => ({
+    earlier: p.employeeIds[0],
+    later: p.employeeIds.slice(1),
+  }));
+
+export const recordById = new Map(records.map((e) => [e.id, e]));
+
+const queued = new Set(rehires.flatMap((r) => r.later));
+
+/** Records waiting in the identity queue (employee `issues`). */
+export const queuedRecords = records.filter((e) => queued.has(e.id));
+
+/** The records that became a person: one per human (the ground-truth persons). */
+export const employees = records.filter((e) => !queued.has(e.id));
 
 /** Display name the app shows (first name + last name). */
 export const fullName = (e: Pick<FixtureEmployee, "firstName" | "lastName">) =>
@@ -24,10 +48,7 @@ for (const e of employees) {
   nameCount.set(fullName(e), (nameCount.get(fullName(e)) ?? 0) + 1);
 }
 
-/**
- * Rehires and namesakes share a name, which a link cannot tell apart: specs
- * that navigate by name pick people whose name is unique.
- */
+/** Two persons with the same name cannot be told apart by a link: pick unique ones. */
 export const hasUniqueName = (e: FixtureEmployee) =>
   nameCount.get(fullName(e)) === 1;
 

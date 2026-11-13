@@ -1,5 +1,6 @@
 import { asc, eq, inArray, sql } from "drizzle-orm";
 import type { ZodType } from "zod";
+import { parse as parseOr } from "@/lib/domain-error";
 import type { DbOrTx } from "@/db/client";
 import {
   question,
@@ -33,11 +34,8 @@ export type TemplateDetail = ReviewTemplate & {
   sections: SectionWithQuestions[];
 };
 
-function parse<T>(schema: ZodType<T>, input: unknown): T {
-  const result = schema.safeParse(input);
-  if (!result.success) throw TemplatesError.fromZod(result.error);
-  return result.data;
-}
+const parse = <T>(schema: ZodType<T>, input: unknown): T =>
+  parseOr(schema, input, TemplatesError);
 
 /** Maps each value to (value - min) / (max - min), so 4- and 5-point scales compare. */
 export function normalizeValues(values: number[]): number[] {

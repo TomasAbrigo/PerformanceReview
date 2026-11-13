@@ -1,8 +1,8 @@
 import path from "node:path";
 import { parseArgs } from "node:util";
-import { eq, sql } from "drizzle-orm";
+import { sql } from "drizzle-orm";
 import type { DbOrTx } from "@/db/client";
-import { ingestRun, type IngestCounts } from "@/db/schema";
+import type { IngestCounts } from "@/db/schema";
 import { REGISTRY, type AdapterContext } from "./registry";
 
 /** The sizes of the generated fixtures (`fixtures/bamboo/<size>`). */
@@ -14,17 +14,24 @@ export const seedFixturesDir = (size: SeedSize) =>
   path.join("fixtures", "bamboo", size);
 
 /**
- * What `--reset` empties: everything that ingestion fills (and what hangs
- * from it), children first. Listed by hand on purpose, and checked against
- * the real tables by a test: a new table must be put in one list or the other.
+ * What `--reset` empties: everything that ingestion fills and what hangs from
+ * it, children first. The review cycles go too: they point at people and job
+ * history rows, which are rebuilt with new ids. Listed by hand on purpose, and
+ * checked against the real tables by a test: a new table must be put in one
+ * list or the other.
  */
 export const RESET_TABLES = [
   "goal_share",
   "goal_comment",
   "goal_milestone",
   "goal",
+  "cycle_participant",
+  "cycle_transition",
+  "question_revision",
+  "review_cycle",
   "employee_status_history",
   "employee_job_history",
+  "identity_match_issue",
   "source_identity",
   "employment",
   "person",
@@ -74,7 +81,7 @@ export type SeedRun = {
   entity: string;
   runId: string;
   counts: IngestCounts;
-  /** Entries in the run's `rejects`: rejected records plus unresolved references. */
+  /** Records held in the identity queue instead of applied (employee only). */
   issues: number;
 };
 
@@ -82,8 +89,13 @@ export type SeedRun = {
  * Fills the database from the generated Bamboo fixtures of `size`, running
  * the registered ingest pipelines in registry order (employee, then what
  * resolves people through it), as `pnpm ingest --all --source fixture
- * --dir fixtures/bamboo/<size>` would. Idempotent: on a seeded database every
- * record comes back `unchanged`. Stops at the first pipeline that fails.
+ * --dir fixtures/bamboo/<size>` would. Stops at the first pipeline that fails.
+ *
+ * Idempotent: on a seeded database nothing is inserted or updated and what was
+ * applied comes back `unchanged`. What the identity module holds for a human
+ * (a rehire: known legajo and email under a new Bamboo id) is held again, so
+ * it stays out of the people, the job history and the goals until someone
+ * resolves it in /imports/identity.
  *
  * Does not empty anything: `resetDomainTables` first for a clean start.
  */
@@ -103,7 +115,7 @@ export async function seedFromFixtures({
       throw new Error("The seed reads fixtures, it never calls Bamboo");
     },
   };
-  const params = { source: "fixture", dir, seed: size };
+  const params = { source: "fixture", dir };
 
   const runs: SeedRun[] = [];
   for (const [entity, entry] of REGISTRY) {
@@ -112,11 +124,7 @@ export async function seedFromFixtures({
       db,
       params,
     });
-    const [run] = await db
-      .select({ rejects: ingestRun.rejects })
-      .from(ingestRun)
-      .where(eq(ingestRun.id, runId));
-    runs.push({ entity, runId, counts, issues: run?.rejects?.length ?? 0 });
+    runs.push({ entity, runId, counts, issues: counts.issues ?? 0 });
   }
   return runs;
 }

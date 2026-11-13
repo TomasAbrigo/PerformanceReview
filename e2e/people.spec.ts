@@ -1,16 +1,24 @@
 import { expect, test } from "@playwright/test";
-import { employees, find, fullName, hasUniqueName } from "./seed-data";
+import {
+  employees,
+  find,
+  fullName,
+  hasUniqueName,
+  queuedRecords,
+  records,
+} from "./seed-data";
 
 test.describe.configure({ mode: "serial" });
 
-// The seed is the small generated company: one person per Bamboo record.
+// The seed is the small generated company: one person per human. Its 40
+// Bamboo records include 4 rehires (a new id), held in the identity queue.
 const everyone = employees.length;
 const personas = (n: number) => `${n} ${n === 1 ? "persona" : "personas"}`;
 
 test("people list shows every ingested person and searches", async ({
   page,
 }) => {
-  expect(everyone).toBe(40);
+  expect(records).toHaveLength(employees.length + queuedRecords.length);
   await page.goto("/es/people");
 
   await expect(
