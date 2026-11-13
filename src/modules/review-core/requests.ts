@@ -1,4 +1,4 @@
-import { and, asc, eq, isNull, ne, sql } from "drizzle-orm";
+import { and, asc, eq, inArray, isNotNull, isNull, ne, sql } from "drizzle-orm";
 import type { DbOrTx } from "@/db/client";
 import {
   cycleParticipant,
@@ -9,18 +9,34 @@ import {
   type ReviewRequest,
 } from "@/db/schema";
 import type { ActorContext } from "@/modules/actor/types";
+import { isSkipLevel } from "./manager";
 import type { RequestStatus } from "./request-status";
 import { ReviewError } from "./review-errors";
-import { canRead } from "./visibility";
+import type { CycleStatus } from "./status";
+import { canRead, type VisibilityContext } from "./visibility";
 
 const UUID = /^[0-9a-f-]{36}$/i;
+
+/**
+ * Ensures the requests of a cycle (self, then manager: see
+ * ensureManagerRequests) for every active participant (or only
+ * `participantId`). Called on launch, transitions and added participants.
+ */
+export async function ensureSelfRequests(
+  db: DbOrTx,
+  cycleId: string,
+  participantId?: string,
+): Promise<void> {
+  await ensureOnlySelfRequests(db, cycleId, participantId);
+  await ensureManagerRequests(db, cycleId, participantId);
+}
 
 /**
  * Creates the self request of every active participant of a cycle (or only
  * of `participantId`) when the cycle is collecting with the self component
  * on. Idempotent: existing requests are left as they are.
  */
-export async function ensureSelfRequests(
+async function ensureOnlySelfRequests(
   db: DbOrTx,
   cycleId: string,
   participantId?: string,
@@ -65,6 +81,131 @@ export async function ensureSelfRequests(
     });
 }
 
+/** Phases in which manager reviews exist (and can be written). */
+const MANAGER_PHASES: CycleStatus[] = [
+  "collecting",
+  "manager_review",
+  "calibration",
+  "sharing",
+];
+
+/**
+ * Creates the manager request of every active participant (or only
+ * `participantId`) once the cycle is collecting (or later, but not closed)
+ * with the manager component on. The reviewer is the snapshot manager; a
+ * participant without one gets a request with no reviewer flagged
+ * reviewer_missing (#17 assigns alternates). Idempotent.
+ */
+export async function ensureManagerRequests(
+  db: DbOrTx,
+  cycleId: string,
+  participantId?: string,
+): Promise<void> {
+  const [cycle] = await db
+    .select({ status: reviewCycle.status, components: reviewCycle.components })
+    .from(reviewCycle)
+    .where(eq(reviewCycle.id, cycleId));
+  if (
+    !cycle ||
+    !MANAGER_PHASES.includes(cycle.status) ||
+    !cycle.components.manager
+  ) {
+    return;
+  }
+  const participants = await db
+    .select({
+      id: cycleParticipant.id,
+      managerId: cycleParticipant.snapManagerPersonId,
+    })
+    .from(cycleParticipant)
+    .where(
+      and(
+        eq(cycleParticipant.cycleId, cycleId),
+        isNull(cycleParticipant.removedAt),
+        participantId ? eq(cycleParticipant.id, participantId) : undefined,
+      ),
+    );
+  if (participants.length === 0) return;
+  // A participant keeps a single manager request (even if #17 reassigns it).
+  const existing = new Set(
+    (
+      await db
+        .select({ participantId: reviewRequest.participantId })
+        .from(reviewRequest)
+        .where(
+          and(
+            eq(reviewRequest.relationship, "manager"),
+            inArray(
+              reviewRequest.participantId,
+              participants.map((p) => p.id),
+            ),
+          ),
+        )
+    ).map((r) => r.participantId),
+  );
+  const missing = participants.filter((p) => !existing.has(p.id));
+  if (missing.length === 0) return;
+  await db
+    .insert(reviewRequest)
+    .values(
+      missing.map((p) => ({
+        cycleId,
+        participantId: p.id,
+        reviewerPersonId: p.managerId,
+        reviewerMissing: p.managerId === null,
+        relationship: "manager" as const,
+      })),
+    )
+    .onConflictDoNothing({
+      target: [
+        reviewRequest.participantId,
+        reviewRequest.relationship,
+        reviewRequest.reviewerPersonId,
+      ],
+    });
+}
+
+type LoadedRow = {
+  request: ReviewRequest;
+  participant: typeof cycleParticipant.$inferSelect;
+  cycle: typeof reviewCycle.$inferSelect;
+};
+
+/**
+ * What canRead needs beyond the row: the participant's manager request
+ * (double blind) and whether the actor is skip-level. Only queried when the
+ * actor is neither HR nor the reviewer.
+ */
+async function visibilityContext(
+  db: DbOrTx,
+  actor: ActorContext,
+  row: LoadedRow,
+): Promise<VisibilityContext> {
+  const ctx: VisibilityContext = { ...row };
+  if (
+    actor.role === "hr" ||
+    actor.personId === null ||
+    actor.personId === row.request.reviewerPersonId
+  ) {
+    return ctx;
+  }
+  if (row.request.relationship === "self") {
+    const [managerRequest] = await db
+      .select({ status: reviewRequest.status })
+      .from(reviewRequest)
+      .where(
+        and(
+          eq(reviewRequest.participantId, row.participant.id),
+          eq(reviewRequest.relationship, "manager"),
+          isNull(reviewRequest.deletedAt),
+        ),
+      );
+    ctx.managerRequest = managerRequest ?? null;
+  }
+  ctx.skipLevel = await isSkipLevel(db, actor, row.participant);
+  return ctx;
+}
+
 /** A request with what visibility needs; throws not_found / forbidden. */
 export async function loadRequest(
   db: DbOrTx,
@@ -92,8 +233,9 @@ export async function loadRequest(
     ? await query.for("update", { of: reviewRequest })
     : await query;
   if (!row || row.cycle.deletedAt) throw new ReviewError("not_found");
-  if (!canRead(actor, row)) throw new ReviewError("forbidden");
-  return row;
+  const visibility = await visibilityContext(db, actor, row);
+  if (!canRead(actor, visibility)) throw new ReviewError("forbidden");
+  return { ...row, visibility };
 }
 
 /** Id of the actor's own self request in a cycle, if any. */
@@ -156,9 +298,18 @@ export type SelfAssessmentTask = {
   status: RequestStatus;
 };
 
-/** Pending work of the actor; only self assessments exist for now. */
+export type SharedReviewTask = {
+  requestId: string;
+  cycleId: string;
+  cycleName: string;
+  sharedAt: Date | null;
+};
+
+/** Pending work of the actor. */
 export type MyTasks = {
   selfAssessments: SelfAssessmentTask[];
+  /** Manager reviews shared with the actor ("Evaluación compartida"). */
+  sharedReviews: SharedReviewTask[];
   /** #13: peers to nominate / approve. */
   nominations: never[];
   /** #14: feedback to give to peers / managers. */
@@ -173,6 +324,7 @@ export async function listMyTasks(
 ): Promise<MyTasks> {
   const empty: MyTasks = {
     selfAssessments: [],
+    sharedReviews: [],
     nominations: [],
     feedback: [],
     acknowledgements: [],
@@ -204,7 +356,59 @@ export async function listMyTasks(
       ),
     )
     .orderBy(asc(sql`${reviewCycle.dueDates}->>'self'`), asc(reviewCycle.name));
-  return { ...empty, selfAssessments: rows };
+  const shared = await db
+    .select({
+      requestId: reviewRequest.id,
+      cycleId: reviewCycle.id,
+      cycleName: reviewCycle.name,
+      sharedAt: reviewRequest.sharedAt,
+    })
+    .from(reviewRequest)
+    .innerJoin(reviewCycle, eq(reviewCycle.id, reviewRequest.cycleId))
+    .innerJoin(
+      cycleParticipant,
+      eq(cycleParticipant.id, reviewRequest.participantId),
+    )
+    .where(
+      and(
+        eq(cycleParticipant.revieweePersonId, actor.personId),
+        eq(reviewRequest.relationship, "manager"),
+        eq(reviewRequest.status, "submitted"),
+        isNotNull(reviewRequest.sharedAt),
+        isNull(reviewRequest.deletedAt),
+        isNull(cycleParticipant.removedAt),
+        isNull(reviewCycle.deletedAt),
+      ),
+    )
+    .orderBy(asc(reviewRequest.sharedAt));
+  return { ...empty, selfAssessments: rows, sharedReviews: shared };
+}
+
+/** Id of the actor's manager review in a cycle, once shared with them. */
+export async function findMySharedReviewId(
+  db: DbOrTx,
+  actor: ActorContext,
+  cycleId: string,
+): Promise<string | null> {
+  if (!actor.personId || !UUID.test(cycleId)) return null;
+  const [row] = await db
+    .select({ id: reviewRequest.id })
+    .from(reviewRequest)
+    .innerJoin(
+      cycleParticipant,
+      eq(cycleParticipant.id, reviewRequest.participantId),
+    )
+    .where(
+      and(
+        eq(reviewRequest.cycleId, cycleId),
+        eq(reviewRequest.relationship, "manager"),
+        eq(cycleParticipant.revieweePersonId, actor.personId),
+        eq(reviewRequest.status, "submitted"),
+        isNotNull(reviewRequest.sharedAt),
+        isNull(reviewRequest.deletedAt),
+      ),
+    );
+  return row?.id ?? null;
 }
 
 /** HR returns a submitted request to draft; the unlock is audited. */

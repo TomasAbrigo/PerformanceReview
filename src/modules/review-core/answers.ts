@@ -11,7 +11,7 @@ import {
 import type { ActorContext } from "@/modules/actor/types";
 import { loadRequest } from "./requests";
 import { ReviewError } from "./review-errors";
-import { canWrite } from "./visibility";
+import { canRead, canWrite } from "./visibility";
 
 /** Value of an answer as the form handles it (rating: the scale value). */
 export type AnswerValue = string | number | null;
@@ -51,12 +51,28 @@ function valueOf(q: QuestionRevision | undefined, a: Answer): AnswerValue {
 const isEmpty = (v: AnswerValue) =>
   v === null || (typeof v === "string" && v.trim() === "");
 
+/** A review of any relationship (questions, answers, writability). */
+export type Review = SelfReview;
+
 /** A self review with its questions and answers; null when not visible. */
 export async function getSelfReview(
   db: DbOrTx,
   actor: ActorContext,
   requestId: string,
 ): Promise<SelfReview | null> {
+  return getReview(db, actor, requestId);
+}
+
+/**
+ * A review (self, manager, ...) with the questions and answers the actor may
+ * read (canRead per question: e.g. the reviewee only sees the questions
+ * visible to them); null when the request is not visible at all.
+ */
+export async function getReview(
+  db: DbOrTx,
+  actor: ActorContext,
+  requestId: string,
+): Promise<Review | null> {
   let row;
   try {
     row = await loadRequest(db, actor, requestId);
@@ -64,26 +80,31 @@ export async function getSelfReview(
     if (error instanceof ReviewError) return null;
     throw error;
   }
-  const { request, cycle } = row;
-  const questions = await questionsFor(db, cycle.id, request.relationship);
+  const { request, cycle, visibility } = row;
+  const questions = (
+    await questionsFor(db, cycle.id, request.relationship)
+  ).filter((q) => canRead(actor, { ...visibility, questionRevision: q }));
   const rows = await db
     .select()
     .from(answer)
     .where(eq(answer.requestId, request.id));
   const byId = new Map(questions.map((q) => [q.id, q]));
+  const duePhase = request.relationship === "manager" ? "manager" : "self";
   return {
     request,
     cycle: {
       id: cycle.id,
       name: cycle.name,
-      dueDate: cycle.dueDates.self ?? null,
+      dueDate: cycle.dueDates[duePhase] ?? null,
     },
     questions,
     answers: Object.fromEntries(
-      rows.map((a) => [
-        a.questionRevisionId,
-        valueOf(byId.get(a.questionRevisionId), a),
-      ]),
+      rows
+        .filter((a) => byId.has(a.questionRevisionId))
+        .map((a) => [
+          a.questionRevisionId,
+          valueOf(byId.get(a.questionRevisionId), a),
+        ]),
     ),
     canWrite: canWrite(actor, request),
   };

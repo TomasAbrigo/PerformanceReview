@@ -29,7 +29,15 @@ export type CycleComponents = {
   peer: boolean;
   upward: boolean;
   calibration: boolean;
+  /**
+   * Manager/self double blind: neither sees the other's review until both
+   * are submitted (manager) / it is shared (employee). Missing = on.
+   */
+  doubleBlind?: boolean;
 };
+
+export const isDoubleBlind = (c: Pick<CycleComponents, "doubleBlind">) =>
+  c.doubleBlind !== false;
 
 export type CycleAnonymity = { peer: AnonymityMode; upward: AnonymityMode };
 
