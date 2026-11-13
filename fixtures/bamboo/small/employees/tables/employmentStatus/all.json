@@ -1,0 +1,452 @@
+[
+  {
+    "id": "5001",
+    "employeeId": "11",
+    "date": "2013-02-01",
+    "employmentStatus": "Full-Time",
+    "comment": null,
+    "terminationTypeId": null,
+    "terminationReasonId": null
+  },
+  {
+    "id": "5002",
+    "employeeId": "13",
+    "date": "2014-06-20",
+    "employmentStatus": "Full-Time",
+    "comment": null,
+    "terminationTypeId": null,
+    "terminationReasonId": null
+  },
+  {
+    "id": "5003",
+    "employeeId": "15",
+    "date": "2015-08-15",
+    "employmentStatus": "Full-Time",
+    "comment": null,
+    "terminationTypeId": null,
+    "terminationReasonId": null
+  },
+  {
+    "id": "5004",
+    "employeeId": "17",
+    "date": "2016-07-17",
+    "employmentStatus": "Full-Time",
+    "comment": null,
+    "terminationTypeId": null,
+    "terminationReasonId": null
+  },
+  {
+    "id": "5005",
+    "employeeId": "19",
+    "date": "2016-07-23",
+    "employmentStatus": "Full-Time",
+    "comment": null,
+    "terminationTypeId": null,
+    "terminationReasonId": null
+  },
+  {
+    "id": "5006",
+    "employeeId": "21",
+    "date": "2017-06-22",
+    "employmentStatus": "Full-Time",
+    "comment": null,
+    "terminationTypeId": null,
+    "terminationReasonId": null
+  },
+  {
+    "id": "5007",
+    "employeeId": "23",
+    "date": "2017-07-14",
+    "employmentStatus": "Full-Time",
+    "comment": null,
+    "terminationTypeId": null,
+    "terminationReasonId": null
+  },
+  {
+    "id": "5008",
+    "employeeId": "25",
+    "date": "2017-10-01",
+    "employmentStatus": "Full-Time",
+    "comment": null,
+    "terminationTypeId": null,
+    "terminationReasonId": null
+  },
+  {
+    "id": "5009",
+    "employeeId": "27",
+    "date": "2017-10-05",
+    "employmentStatus": "Full-Time",
+    "comment": null,
+    "terminationTypeId": null,
+    "terminationReasonId": null
+  },
+  {
+    "id": "5010",
+    "employeeId": "29",
+    "date": "2018-02-06",
+    "employmentStatus": "Full-Time",
+    "comment": null,
+    "terminationTypeId": null,
+    "terminationReasonId": null
+  },
+  {
+    "id": "5011",
+    "employeeId": "31",
+    "date": "2018-03-03",
+    "employmentStatus": "Full-Time",
+    "comment": null,
+    "terminationTypeId": null,
+    "terminationReasonId": null
+  },
+  {
+    "id": "5012",
+    "employeeId": "33",
+    "date": "2018-03-17",
+    "employmentStatus": "Full-Time",
+    "comment": null,
+    "terminationTypeId": null,
+    "terminationReasonId": null
+  },
+  {
+    "id": "5013",
+    "employeeId": "35",
+    "date": "2018-03-26",
+    "employmentStatus": "Full-Time",
+    "comment": null,
+    "terminationTypeId": null,
+    "terminationReasonId": null
+  },
+  {
+    "id": "5014",
+    "employeeId": "37",
+    "date": "2018-08-21",
+    "employmentStatus": "Full-Time",
+    "comment": null,
+    "terminationTypeId": null,
+    "terminationReasonId": null
+  },
+  {
+    "id": "5015",
+    "employeeId": "39",
+    "date": "2019-04-06",
+    "employmentStatus": "Full-Time",
+    "comment": null,
+    "terminationTypeId": null,
+    "terminationReasonId": null
+  },
+  {
+    "id": "5016",
+    "employeeId": "41",
+    "date": "2019-11-28",
+    "employmentStatus": "Full-Time",
+    "comment": null,
+    "terminationTypeId": null,
+    "terminationReasonId": null
+  },
+  {
+    "id": "5017",
+    "employeeId": "43",
+    "date": "2020-10-10",
+    "employmentStatus": "Full-Time",
+    "comment": null,
+    "terminationTypeId": null,
+    "terminationReasonId": null
+  },
+  {
+    "id": "5018",
+    "employeeId": "45",
+    "date": "2020-12-24",
+    "employmentStatus": "Full-Time",
+    "comment": null,
+    "terminationTypeId": null,
+    "terminationReasonId": null
+  },
+  {
+    "id": "5019",
+    "employeeId": "47",
+    "date": "2021-02-25",
+    "employmentStatus": "Full-Time",
+    "comment": null,
+    "terminationTypeId": null,
+    "terminationReasonId": null
+  },
+  {
+    "id": "5020",
+    "employeeId": "49",
+    "date": "2021-04-03",
+    "employmentStatus": "Full-Time",
+    "comment": null,
+    "terminationTypeId": null,
+    "terminationReasonId": null
+  },
+  {
+    "id": "5021",
+    "employeeId": "51",
+    "date": "2021-04-25",
+    "employmentStatus": "Full-Time",
+    "comment": null,
+    "terminationTypeId": null,
+    "terminationReasonId": null
+  },
+  {
+    "id": "5022",
+    "employeeId": "53",
+    "date": "2022-02-01",
+    "employmentStatus": "Full-Time",
+    "comment": null,
+    "terminationTypeId": null,
+    "terminationReasonId": null
+  },
+  {
+    "id": "5023",
+    "employeeId": "55",
+    "date": "2022-05-17",
+    "employmentStatus": "Full-Time",
+    "comment": null,
+    "terminationTypeId": null,
+    "terminationReasonId": null
+  },
+  {
+    "id": "5024",
+    "employeeId": "57",
+    "date": "2022-10-14",
+    "employmentStatus": "Full-Time",
+    "comment": null,
+    "terminationTypeId": null,
+    "terminationReasonId": null
+  },
+  {
+    "id": "5025",
+    "employeeId": "59",
+    "date": "2023-05-19",
+    "employmentStatus": "Full-Time",
+    "comment": null,
+    "terminationTypeId": null,
+    "terminationReasonId": null
+  },
+  {
+    "id": "5026",
+    "employeeId": "61",
+    "date": "2023-12-26",
+    "employmentStatus": "Full-Time",
+    "comment": null,
+    "terminationTypeId": null,
+    "terminationReasonId": null
+  },
+  {
+    "id": "5027",
+    "employeeId": "63",
+    "date": "2023-12-27",
+    "employmentStatus": "Full-Time",
+    "comment": null,
+    "terminationTypeId": null,
+    "terminationReasonId": null
+  },
+  {
+    "id": "5028",
+    "employeeId": "65",
+    "date": "2024-02-06",
+    "employmentStatus": "Full-Time",
+    "comment": null,
+    "terminationTypeId": null,
+    "terminationReasonId": null
+  },
+  {
+    "id": "5029",
+    "employeeId": "51",
+    "date": "2024-02-21",
+    "employmentStatus": "Terminated",
+    "comment": null,
+    "terminationTypeId": "1",
+    "terminationReasonId": "11"
+  },
+  {
+    "id": "5030",
+    "employeeId": "55",
+    "date": "2024-02-26",
+    "employmentStatus": "Terminated",
+    "comment": null,
+    "terminationTypeId": "1",
+    "terminationReasonId": "11"
+  },
+  {
+    "id": "5031",
+    "employeeId": "45",
+    "date": "2024-03-01",
+    "employmentStatus": "Terminated",
+    "comment": null,
+    "terminationTypeId": "3",
+    "terminationReasonId": "31"
+  },
+  {
+    "id": "5032",
+    "employeeId": "67",
+    "date": "2024-04-11",
+    "employmentStatus": "Full-Time",
+    "comment": null,
+    "terminationTypeId": null,
+    "terminationReasonId": null
+  },
+  {
+    "id": "5033",
+    "employeeId": "41",
+    "date": "2024-05-10",
+    "employmentStatus": "Terminated",
+    "comment": "Cierre de la posición",
+    "terminationTypeId": "2",
+    "terminationReasonId": "21"
+  },
+  {
+    "id": "5034",
+    "employeeId": "69",
+    "date": "2024-06-18",
+    "employmentStatus": "Full-Time",
+    "comment": null,
+    "terminationTypeId": null,
+    "terminationReasonId": null
+  },
+  {
+    "id": "5035",
+    "employeeId": "71",
+    "date": "2024-08-27",
+    "employmentStatus": "Full-Time",
+    "comment": null,
+    "terminationTypeId": null,
+    "terminationReasonId": null
+  },
+  {
+    "id": "5036",
+    "employeeId": "73",
+    "date": "2024-10-03",
+    "employmentStatus": "Full-Time",
+    "comment": null,
+    "terminationTypeId": null,
+    "terminationReasonId": null
+  },
+  {
+    "id": "5037",
+    "employeeId": "75",
+    "date": "2024-10-22",
+    "employmentStatus": "Full-Time",
+    "comment": null,
+    "terminationTypeId": null,
+    "terminationReasonId": null
+  },
+  {
+    "id": "5038",
+    "employeeId": "77",
+    "date": "2024-10-23",
+    "employmentStatus": "Full-Time",
+    "comment": null,
+    "terminationTypeId": null,
+    "terminationReasonId": null
+  },
+  {
+    "id": "5039",
+    "employeeId": "79",
+    "date": "2024-11-24",
+    "employmentStatus": "Full-Time",
+    "comment": null,
+    "terminationTypeId": null,
+    "terminationReasonId": null
+  },
+  {
+    "id": "5040",
+    "employeeId": "69",
+    "date": "2025-07-23",
+    "employmentStatus": "Terminated",
+    "comment": "Se muda a otro país",
+    "terminationTypeId": "3",
+    "terminationReasonId": "31"
+  },
+  {
+    "id": "5041",
+    "employeeId": "81",
+    "date": "2025-08-03",
+    "employmentStatus": "Full-Time",
+    "comment": null,
+    "terminationTypeId": null,
+    "terminationReasonId": null
+  },
+  {
+    "id": "5042",
+    "employeeId": "71",
+    "date": "2025-08-15",
+    "employmentStatus": "Terminated",
+    "comment": null,
+    "terminationTypeId": "1",
+    "terminationReasonId": "11"
+  },
+  {
+    "id": "5043",
+    "employeeId": "73",
+    "date": "2025-08-15",
+    "employmentStatus": "Terminated",
+    "comment": null,
+    "terminationTypeId": "2",
+    "terminationReasonId": "21"
+  },
+  {
+    "id": "5044",
+    "employeeId": "83",
+    "date": "2025-08-17",
+    "employmentStatus": "Full-Time",
+    "comment": null,
+    "terminationTypeId": null,
+    "terminationReasonId": null
+  },
+  {
+    "id": "5045",
+    "employeeId": "75",
+    "date": "2025-09-27",
+    "employmentStatus": "Terminated",
+    "comment": "Acordó salida con su manager",
+    "terminationTypeId": "2",
+    "terminationReasonId": "21"
+  },
+  {
+    "id": "5046",
+    "employeeId": "43",
+    "date": "2025-10-09",
+    "employmentStatus": "Terminated",
+    "comment": "Se muda a otro país",
+    "terminationTypeId": "2",
+    "terminationReasonId": "21"
+  },
+  {
+    "id": "5047",
+    "employeeId": "85",
+    "date": "2026-02-04",
+    "employmentStatus": "Full-Time",
+    "comment": null,
+    "terminationTypeId": null,
+    "terminationReasonId": null
+  },
+  {
+    "id": "5048",
+    "employeeId": "87",
+    "date": "2026-03-13",
+    "employmentStatus": "Full-Time",
+    "comment": null,
+    "terminationTypeId": null,
+    "terminationReasonId": null
+  },
+  {
+    "id": "5049",
+    "employeeId": "67",
+    "date": "2026-05-05",
+    "employmentStatus": "Terminated",
+    "comment": null,
+    "terminationTypeId": "1",
+    "terminationReasonId": "11"
+  },
+  {
+    "id": "5050",
+    "employeeId": "89",
+    "date": "2026-09-02",
+    "employmentStatus": "Full-Time",
+    "comment": null,
+    "terminationTypeId": null,
+    "terminationReasonId": null
+  }
+]

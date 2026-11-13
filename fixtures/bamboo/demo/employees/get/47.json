@@ -1,0 +1,17 @@
+{
+  "id": "47",
+  "firstName": "Candela",
+  "lastName": "Olmos",
+  "workEmail": "candela.olmos@meridian-andina.example",
+  "employeeNumber": "10080",
+  "supervisorEId": "39",
+  "supervisorId": "10063",
+  "supervisor": "Navarro, Rocío",
+  "hireDate": "2017-12-18",
+  "terminationDate": null,
+  "department": "Soporte",
+  "division": "Operaciones",
+  "jobTitle": "Líder de Soporte",
+  "location": "Buenos Aires",
+  "status": "Active"
+}

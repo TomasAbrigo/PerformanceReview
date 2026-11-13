@@ -1,0 +1,106 @@
+{
+  "canAlign": true,
+  "canCreateGoals": false,
+  "filters": [
+    {
+      "id": "status-all",
+      "name": "All"
+    },
+    {
+      "id": "inProgress",
+      "name": "In progress"
+    },
+    {
+      "id": "completed",
+      "name": "Completed"
+    },
+    {
+      "id": "closed",
+      "name": "Closed"
+    }
+  ],
+  "selectedFilter": "status-all",
+  "goals": [
+    {
+      "id": "6477",
+      "title": "Entregar el proyecto Norte sin desvíos",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2023-06-29",
+      "completionDate": "2023-07-13",
+      "lastChangedDateTime": "2023-07-13T09:53:57Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": false,
+        "canUpdateProgress": false,
+        "canClose": false,
+        "canReopen": false,
+        "canDelete": false,
+        "canComment": false
+      }
+    },
+    {
+      "id": "6479",
+      "title": "Completar la certificación del área",
+      "description": "Sirve de base para el próximo ciclo de evaluación.",
+      "percentComplete": 30,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2023-04-22",
+      "completionDate": null,
+      "lastChangedDateTime": "2024-09-16T16:52:28Z",
+      "status": "in_progress",
+      "milestones": null,
+      "actions": {
+        "canEdit": false,
+        "canUpdateProgress": false,
+        "canClose": false,
+        "canReopen": false,
+        "canDelete": false,
+        "canComment": false
+      }
+    },
+    {
+      "id": "6481",
+      "title": "Documentar los procesos críticos",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 35,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2024-07-10",
+      "completionDate": null,
+      "lastChangedDateTime": "2024-06-26T13:12:31Z",
+      "status": "closed",
+      "milestones": null,
+      "actions": {
+        "canEdit": false,
+        "canUpdateProgress": false,
+        "canClose": false,
+        "canReopen": false,
+        "canDelete": false,
+        "canComment": false
+      }
+    }
+  ],
+  "persons": [
+    {
+      "employeeId": 339,
+      "firstName": "Marcela",
+      "lastName": "Maldonado",
+      "preferredName": null
+    }
+  ],
+  "comments": [
+    {
+      "goalId": "6477",
+      "commentCount": 1
+    },
+    {
+      "goalId": "6481",
+      "commentCount": 1
+    }
+  ]
+}

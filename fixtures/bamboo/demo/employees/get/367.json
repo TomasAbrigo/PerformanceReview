@@ -1,0 +1,17 @@
+{
+  "id": "367",
+  "firstName": "Gustavo",
+  "lastName": "Ibáñez",
+  "workEmail": "gustavo.ibanez@meridian-andina.example",
+  "employeeNumber": "10901",
+  "supervisorEId": "189",
+  "supervisorId": "10436",
+  "supervisor": "Quiroga, Lucía",
+  "hireDate": "2022-08-22",
+  "terminationDate": null,
+  "department": "Customer Success",
+  "division": "Comercial",
+  "jobTitle": "Onboarding Specialist Ssr",
+  "location": "Santiago de Chile",
+  "status": "Active"
+}

@@ -1,0 +1,236 @@
+{
+  "canAlign": true,
+  "canCreateGoals": true,
+  "filters": [
+    {
+      "id": "status-all",
+      "name": "All"
+    },
+    {
+      "id": "inProgress",
+      "name": "In progress"
+    },
+    {
+      "id": "completed",
+      "name": "Completed"
+    },
+    {
+      "id": "closed",
+      "name": "Closed"
+    }
+  ],
+  "selectedFilter": "status-all",
+  "goals": [
+    {
+      "id": "7246",
+      "title": "Aumentar la cobertura de pruebas al 80%",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2024-09-12",
+      "completionDate": "2024-09-10",
+      "lastChangedDateTime": "2024-09-10T14:58:22Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "7247",
+      "title": "Mejorar el NPS interno del equipo",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "percentComplete": 100,
+      "alignsWithOptionId": 9002,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2024-11-30",
+      "completionDate": "2024-08-16",
+      "lastChangedDateTime": "2024-08-16T13:17:52Z",
+      "status": "completed",
+      "milestones": [
+        {
+          "id": 1732,
+          "employeeGoalId": 7247,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2024-07-03T13:56:08Z",
+          "lastUpdateDateTime": "2024-07-03T13:56:08Z",
+          "lastUpdateUserId": 525
+        },
+        {
+          "id": 1733,
+          "employeeGoalId": 7247,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2024-08-11T11:08:41Z",
+          "lastUpdateDateTime": "2024-08-11T11:08:41Z",
+          "lastUpdateUserId": 525
+        },
+        {
+          "id": 1734,
+          "employeeGoalId": 7247,
+          "title": "Hito 3",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2024-06-18T09:05:07Z",
+          "lastUpdateDateTime": "2024-06-18T09:05:07Z",
+          "lastUpdateUserId": 525
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "7249",
+      "title": "Automatizar la conciliación mensual",
+      "description": "Sirve de base para el próximo ciclo de evaluación.",
+      "percentComplete": 50,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2025-07-08",
+      "completionDate": null,
+      "lastChangedDateTime": "2025-09-18T13:11:00Z",
+      "status": "in_progress",
+      "milestones": [
+        {
+          "id": 1735,
+          "employeeGoalId": 7249,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-08-13T13:21:57Z",
+          "lastUpdateDateTime": "2025-08-13T13:21:57Z",
+          "lastUpdateUserId": 525
+        },
+        {
+          "id": 1736,
+          "employeeGoalId": 7249,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2025-03-08T16:18:56Z",
+          "lastUpdateUserId": 525
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "7250",
+      "title": "Automatizar la conciliación mensual",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 0,
+      "alignsWithOptionId": 9002,
+      "sharedWithEmployeeIds": [
+        43
+      ],
+      "dueDate": "2025-12-19",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-05-25T09:32:19Z",
+      "status": "closed",
+      "milestones": [
+        {
+          "id": 1737,
+          "employeeGoalId": 7250,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2025-09-26T16:09:31Z",
+          "lastUpdateUserId": 525
+        },
+        {
+          "id": 1738,
+          "employeeGoalId": 7250,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2025-09-26T09:14:35Z",
+          "lastUpdateUserId": 525
+        }
+      ],
+      "actions": {
+        "canEdit": false,
+        "canUpdateProgress": false,
+        "canClose": false,
+        "canReopen": true,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "7251",
+      "title": "Migrar los reportes al nuevo tablero",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 30,
+      "alignsWithOptionId": 9001,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2027-01-31",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-08-12T09:45:26Z",
+      "status": "in_progress",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    }
+  ],
+  "persons": [
+    {
+      "employeeId": 525,
+      "firstName": "Diego",
+      "lastName": "Yáñez",
+      "preferredName": null
+    },
+    {
+      "employeeId": 43,
+      "firstName": "Eugenia",
+      "lastName": "Soria",
+      "preferredName": null
+    }
+  ],
+  "comments": [
+    {
+      "goalId": "7249",
+      "commentCount": 3
+    },
+    {
+      "goalId": "7250",
+      "commentCount": 3
+    }
+  ]
+}

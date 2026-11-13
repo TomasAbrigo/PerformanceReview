@@ -1,0 +1,131 @@
+{
+  "canAlign": true,
+  "canCreateGoals": true,
+  "filters": [
+    {
+      "id": "status-all",
+      "name": "All"
+    },
+    {
+      "id": "inProgress",
+      "name": "In progress"
+    },
+    {
+      "id": "completed",
+      "name": "Completed"
+    },
+    {
+      "id": "closed",
+      "name": "Closed"
+    }
+  ],
+  "selectedFilter": "status-all",
+  "goals": [
+    {
+      "id": "6324",
+      "title": "Completar la certificación del área",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 50,
+      "alignsWithOptionId": 9001,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2025-09-20",
+      "completionDate": null,
+      "lastChangedDateTime": "2025-08-08T08:29:22Z",
+      "status": "in_progress",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "6326",
+      "title": "Aumentar la cobertura de pruebas al 80%",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2025-03-02",
+      "completionDate": "2025-02-25",
+      "lastChangedDateTime": "2025-02-25T12:59:05Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "6327",
+      "title": "Implementar el calendario editorial",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 100,
+      "alignsWithOptionId": 9001,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2026-02-05",
+      "completionDate": "2025-10-14",
+      "lastChangedDateTime": "2025-10-14T09:49:47Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "6328",
+      "title": "Reducir el tiempo de primera respuesta un 20%",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 10,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [
+        83
+      ],
+      "dueDate": "2026-09-26",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-05-11T13:09:44Z",
+      "status": "in_progress",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    }
+  ],
+  "persons": [
+    {
+      "employeeId": 305,
+      "firstName": "Ricardo",
+      "lastName": "Domínguez",
+      "preferredName": null
+    },
+    {
+      "employeeId": 83,
+      "firstName": "Daniela",
+      "lastName": "Franco",
+      "preferredName": null
+    }
+  ],
+  "comments": [
+    {
+      "goalId": "6328",
+      "commentCount": 4
+    }
+  ]
+}

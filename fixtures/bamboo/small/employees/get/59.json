@@ -1,0 +1,17 @@
+{
+  "id": "59",
+  "firstName": "Cecilia",
+  "lastName": "Pereyra",
+  "workEmail": "cecilia.pereyra@meridian-andina.example",
+  "employeeNumber": "10119",
+  "supervisorEId": "31",
+  "supervisorId": "10056",
+  "supervisor": "Rivas, Federico",
+  "hireDate": "2023-05-19",
+  "terminationDate": null,
+  "department": "Finanzas",
+  "division": "Corporativo",
+  "jobTitle": "Analista de Tesorería Ssr",
+  "location": "Buenos Aires",
+  "status": "Active"
+}

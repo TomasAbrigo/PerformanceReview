@@ -1,0 +1,17 @@
+{
+  "id": "325",
+  "firstName": "Emiliano",
+  "lastName": "Valdez",
+  "workEmail": "emiliano.valdez@meridian-andina.example",
+  "employeeNumber": "10796",
+  "supervisorEId": "159",
+  "supervisorId": "10368",
+  "supervisor": "Ríos, Marcela",
+  "hireDate": "2022-04-30",
+  "terminationDate": null,
+  "department": "Datos",
+  "division": "Tecnología",
+  "jobTitle": "Data Analyst Jr",
+  "location": "Montevideo",
+  "status": "Active"
+}

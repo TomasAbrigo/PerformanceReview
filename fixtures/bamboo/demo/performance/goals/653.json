@@ -1,0 +1,134 @@
+{
+  "canAlign": true,
+  "canCreateGoals": true,
+  "filters": [
+    {
+      "id": "status-all",
+      "name": "All"
+    },
+    {
+      "id": "inProgress",
+      "name": "In progress"
+    },
+    {
+      "id": "completed",
+      "name": "Completed"
+    },
+    {
+      "id": "closed",
+      "name": "Closed"
+    }
+  ],
+  "selectedFilter": "status-all",
+  "goals": [
+    {
+      "id": "7654",
+      "title": "Aumentar la cobertura de pruebas al 80%",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 100,
+      "alignsWithOptionId": 9002,
+      "sharedWithEmployeeIds": [
+        321
+      ],
+      "dueDate": "2025-11-01",
+      "completionDate": "2025-06-19",
+      "lastChangedDateTime": "2025-06-19T10:51:22Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "7655",
+      "title": "Lanzar el nuevo flujo de onboarding",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 25,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2026-10-01",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-06-16T11:25:46Z",
+      "status": "in_progress",
+      "milestones": [
+        {
+          "id": 1918,
+          "employeeGoalId": 7655,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2026-03-28T16:44:37Z",
+          "lastUpdateDateTime": "2026-03-28T16:44:37Z",
+          "lastUpdateUserId": 653
+        },
+        {
+          "id": 1919,
+          "employeeGoalId": 7655,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2026-02-17T13:59:06Z",
+          "lastUpdateUserId": 653
+        },
+        {
+          "id": 1920,
+          "employeeGoalId": 7655,
+          "title": "Hito 3",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2026-02-17T19:15:54Z",
+          "lastUpdateUserId": 653
+        },
+        {
+          "id": 1921,
+          "employeeGoalId": 7655,
+          "title": "Hito 4",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2026-02-17T18:15:52Z",
+          "lastUpdateUserId": 653
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    }
+  ],
+  "persons": [
+    {
+      "employeeId": 653,
+      "firstName": "Ricardo",
+      "lastName": "Garrido",
+      "preferredName": null
+    },
+    {
+      "employeeId": 321,
+      "firstName": "Facundo",
+      "lastName": "Figueroa",
+      "preferredName": null
+    }
+  ],
+  "comments": [
+    {
+      "goalId": "7654",
+      "commentCount": 3
+    }
+  ]
+}

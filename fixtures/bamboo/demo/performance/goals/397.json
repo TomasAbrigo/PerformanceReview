@@ -1,0 +1,261 @@
+{
+  "canAlign": true,
+  "canCreateGoals": true,
+  "filters": [
+    {
+      "id": "status-all",
+      "name": "All"
+    },
+    {
+      "id": "inProgress",
+      "name": "In progress"
+    },
+    {
+      "id": "completed",
+      "name": "Completed"
+    },
+    {
+      "id": "closed",
+      "name": "Closed"
+    }
+  ],
+  "selectedFilter": "status-all",
+  "goals": [
+    {
+      "id": "6714",
+      "title": "Implementar el calendario editorial",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2024-02-11",
+      "completionDate": "2024-01-01",
+      "lastChangedDateTime": "2024-01-01T15:35:23Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "6716",
+      "title": "Documentar los procesos críticos",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 100,
+      "alignsWithOptionId": 9001,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2024-10-15",
+      "completionDate": "2024-07-19",
+      "lastChangedDateTime": "2024-07-19T18:03:46Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "6718",
+      "title": "Entregar el proyecto Norte sin desvíos",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "percentComplete": 0,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2024-04-19",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-01-30T08:59:39Z",
+      "status": "in_progress",
+      "milestones": [
+        {
+          "id": 1457,
+          "employeeGoalId": 6718,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2024-02-16T19:07:36Z",
+          "lastUpdateUserId": 397
+        },
+        {
+          "id": 1458,
+          "employeeGoalId": 6718,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2024-02-16T17:30:32Z",
+          "lastUpdateUserId": 397
+        },
+        {
+          "id": 1459,
+          "employeeGoalId": 6718,
+          "title": "Hito 3",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2024-02-16T17:52:20Z",
+          "lastUpdateUserId": 397
+        },
+        {
+          "id": 1460,
+          "employeeGoalId": 6718,
+          "title": "Hito 4",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2024-02-16T14:03:54Z",
+          "lastUpdateUserId": 397
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "6719",
+      "title": "Reducir los incidentes recurrentes a la mitad",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2025-11-28",
+      "completionDate": "2025-09-21",
+      "lastChangedDateTime": "2025-09-21T11:30:08Z",
+      "status": "completed",
+      "milestones": [
+        {
+          "id": 1461,
+          "employeeGoalId": 6719,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-09-07T13:56:25Z",
+          "lastUpdateDateTime": "2025-09-07T13:56:25Z",
+          "lastUpdateUserId": 397
+        },
+        {
+          "id": 1462,
+          "employeeGoalId": 6719,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-09-04T16:13:00Z",
+          "lastUpdateDateTime": "2025-09-04T16:13:00Z",
+          "lastUpdateUserId": 397
+        },
+        {
+          "id": 1463,
+          "employeeGoalId": 6719,
+          "title": "Hito 3",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-07-13T11:11:09Z",
+          "lastUpdateDateTime": "2025-07-13T11:11:09Z",
+          "lastUpdateUserId": 397
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "6721",
+      "title": "Reducir los incidentes recurrentes a la mitad",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "percentComplete": 67,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2026-11-05",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-10-14T10:28:26Z",
+      "status": "in_progress",
+      "milestones": [
+        {
+          "id": 1464,
+          "employeeGoalId": 6721,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2026-07-17T13:20:23Z",
+          "lastUpdateDateTime": "2026-07-17T13:20:23Z",
+          "lastUpdateUserId": 397
+        },
+        {
+          "id": 1465,
+          "employeeGoalId": 6721,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2026-09-09T12:27:48Z",
+          "lastUpdateDateTime": "2026-09-09T12:27:48Z",
+          "lastUpdateUserId": 397
+        },
+        {
+          "id": 1466,
+          "employeeGoalId": 6721,
+          "title": "Hito 3",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2026-06-25T09:15:50Z",
+          "lastUpdateUserId": 397
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    }
+  ],
+  "persons": [
+    {
+      "employeeId": 397,
+      "firstName": "Carolina",
+      "lastName": "Soria",
+      "preferredName": null
+    }
+  ],
+  "comments": [
+    {
+      "goalId": "6718",
+      "commentCount": 4
+    },
+    {
+      "goalId": "6721",
+      "commentCount": 4
+    }
+  ]
+}

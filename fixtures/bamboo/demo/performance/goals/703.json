@@ -1,0 +1,94 @@
+{
+  "canAlign": true,
+  "canCreateGoals": true,
+  "filters": [
+    {
+      "id": "status-all",
+      "name": "All"
+    },
+    {
+      "id": "inProgress",
+      "name": "In progress"
+    },
+    {
+      "id": "completed",
+      "name": "Completed"
+    },
+    {
+      "id": "closed",
+      "name": "Closed"
+    }
+  ],
+  "selectedFilter": "status-all",
+  "goals": [
+    {
+      "id": "7730",
+      "title": "Automatizar la conciliación mensual",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 0,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2025-08-25",
+      "completionDate": null,
+      "lastChangedDateTime": "2025-08-21T08:13:19Z",
+      "status": "closed",
+      "milestones": [
+        {
+          "id": 1972,
+          "employeeGoalId": 7730,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2025-05-17T09:45:03Z",
+          "lastUpdateUserId": 703
+        },
+        {
+          "id": 1973,
+          "employeeGoalId": 7730,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2025-05-17T18:47:36Z",
+          "lastUpdateUserId": 703
+        },
+        {
+          "id": 1974,
+          "employeeGoalId": 7730,
+          "title": "Hito 3",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2025-05-17T11:56:15Z",
+          "lastUpdateUserId": 703
+        }
+      ],
+      "actions": {
+        "canEdit": false,
+        "canUpdateProgress": false,
+        "canClose": false,
+        "canReopen": true,
+        "canDelete": true,
+        "canComment": true
+      }
+    }
+  ],
+  "persons": [
+    {
+      "employeeId": 703,
+      "firstName": "Hugo",
+      "lastName": "Bustos",
+      "preferredName": null
+    }
+  ],
+  "comments": [
+    {
+      "goalId": "7730",
+      "commentCount": 1
+    }
+  ]
+}

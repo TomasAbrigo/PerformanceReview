@@ -1,0 +1,17 @@
+{
+  "id": "347",
+  "firstName": "Ignacio",
+  "lastName": "Martínez",
+  "workEmail": "ignacio.martinez@meridian-andina.example",
+  "employeeNumber": "10849",
+  "supervisorEId": "241",
+  "supervisorId": "10570",
+  "supervisor": "Reyes, Daniela",
+  "hireDate": "2022-06-30",
+  "terminationDate": "2026-05-02",
+  "department": "Marketing",
+  "division": "Comercial",
+  "jobTitle": "Growth Analyst Ssr",
+  "location": "Buenos Aires",
+  "status": "Inactive"
+}

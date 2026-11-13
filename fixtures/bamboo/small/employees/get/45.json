@@ -1,0 +1,17 @@
+{
+  "id": "45",
+  "firstName": "Franco",
+  "lastName": "Urquiza",
+  "workEmail": "franco.urquiza@meridian-andina.example",
+  "employeeNumber": "10090",
+  "supervisorEId": "37",
+  "supervisorId": "10072",
+  "supervisor": "Ríos, Hugo",
+  "hireDate": "2020-12-24",
+  "terminationDate": "2024-03-01",
+  "department": "Datos",
+  "division": "Tecnología",
+  "jobTitle": "Data Engineer Sr",
+  "location": "Remoto",
+  "status": "Inactive"
+}

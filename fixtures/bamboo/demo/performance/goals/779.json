@@ -1,0 +1,97 @@
+{
+  "canAlign": true,
+  "canCreateGoals": true,
+  "filters": [
+    {
+      "id": "status-all",
+      "name": "All"
+    },
+    {
+      "id": "inProgress",
+      "name": "In progress"
+    },
+    {
+      "id": "completed",
+      "name": "Completed"
+    },
+    {
+      "id": "closed",
+      "name": "Closed"
+    }
+  ],
+  "selectedFilter": "status-all",
+  "goals": [
+    {
+      "id": "7894",
+      "title": "Completar la certificación del área",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 60,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2025-10-21",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-03-26T13:08:33Z",
+      "status": "in_progress",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "7895",
+      "title": "Automatizar la conciliación mensual",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 50,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2025-11-19",
+      "completionDate": null,
+      "lastChangedDateTime": "2025-11-04T18:11:24Z",
+      "status": "in_progress",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "7897",
+      "title": "Renovar las cuentas clave del trimestre",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 20,
+      "alignsWithOptionId": 9004,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2026-07-16",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-04-07T10:46:11Z",
+      "status": "in_progress",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    }
+  ],
+  "persons": [
+    {
+      "employeeId": 779,
+      "firstName": "Valentina",
+      "lastName": "Arias",
+      "preferredName": null
+    }
+  ],
+  "comments": []
+}

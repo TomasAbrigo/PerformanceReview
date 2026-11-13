@@ -1,0 +1,17 @@
+{
+  "id": "83",
+  "firstName": "Daniela",
+  "lastName": "Franco",
+  "workEmail": "daniela.franco@meridian-andina.example",
+  "employeeNumber": "10163",
+  "supervisorEId": "23",
+  "supervisorId": "10028",
+  "supervisor": "Medina, María",
+  "hireDate": "2019-02-28",
+  "terminationDate": null,
+  "department": "Customer Success",
+  "division": "Comercial",
+  "jobTitle": "Líder de Customer Success",
+  "location": "Córdoba",
+  "status": "Active"
+}

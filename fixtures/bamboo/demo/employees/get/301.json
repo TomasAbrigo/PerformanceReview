@@ -1,0 +1,17 @@
+{
+  "id": "301",
+  "firstName": "Silvana",
+  "lastName": "Carrizo",
+  "workEmail": "silvana.carrizo@meridian-andina.example",
+  "employeeNumber": "10729",
+  "supervisorEId": "57",
+  "supervisorId": "10099",
+  "supervisor": "Trejo, Adrián",
+  "hireDate": "2022-02-13",
+  "terminationDate": null,
+  "department": "Operaciones",
+  "division": "Operaciones",
+  "jobTitle": "Líder de Operaciones",
+  "location": "Buenos Aires",
+  "status": "Active"
+}

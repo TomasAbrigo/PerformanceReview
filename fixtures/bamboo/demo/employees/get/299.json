@@ -1,0 +1,17 @@
+{
+  "id": "299",
+  "firstName": "Nicolás",
+  "lastName": "Ledesma",
+  "workEmail": "nicolas.ledesma@meridian-andina.example",
+  "employeeNumber": "10724",
+  "supervisorEId": "47",
+  "supervisorId": "10080",
+  "supervisor": "Olmos, Candela",
+  "hireDate": "2022-02-02",
+  "terminationDate": null,
+  "department": "Soporte",
+  "division": "Operaciones",
+  "jobTitle": "Agente de Soporte Sr",
+  "location": "Remoto",
+  "status": "Active"
+}

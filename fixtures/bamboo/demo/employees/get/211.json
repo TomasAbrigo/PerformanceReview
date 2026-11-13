@@ -1,0 +1,17 @@
+{
+  "id": "211",
+  "firstName": "Santiago",
+  "lastName": "Reyes",
+  "workEmail": "santiago.reyes@meridian-andina.example",
+  "employeeNumber": "10496",
+  "supervisorEId": "57",
+  "supervisorId": "10099",
+  "supervisor": "Trejo, Adrián",
+  "hireDate": "2021-05-10",
+  "terminationDate": null,
+  "department": "Operaciones",
+  "division": "Operaciones",
+  "jobTitle": "Líder de Operaciones",
+  "location": "Montevideo",
+  "status": "Active"
+}

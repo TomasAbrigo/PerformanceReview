@@ -1,0 +1,17 @@
+{
+  "id": "273",
+  "firstName": "Cristian",
+  "lastName": "Lezcano",
+  "workEmail": "cristian.lezcano@meridian-andina.example",
+  "employeeNumber": "10657",
+  "supervisorEId": "211",
+  "supervisorId": "10496",
+  "supervisor": "Reyes, Santiago",
+  "hireDate": "2021-12-26",
+  "terminationDate": null,
+  "department": "Operaciones",
+  "division": "Operaciones",
+  "jobTitle": "Analista de Operaciones Sr",
+  "location": "Santiago de Chile",
+  "status": "Active"
+}

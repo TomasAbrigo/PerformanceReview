@@ -1,0 +1,17 @@
+{
+  "id": "161",
+  "firstName": "Santiago",
+  "lastName": "Zárate",
+  "workEmail": "santiago.zarate@meridian-andina.example",
+  "employeeNumber": "10371",
+  "supervisorEId": "61",
+  "supervisorId": "10107",
+  "supervisor": "Peralta, Marcelo",
+  "hireDate": "2020-10-05",
+  "terminationDate": null,
+  "department": "Ventas",
+  "division": "Comercial",
+  "jobTitle": "Business Developer Ssr",
+  "location": "Buenos Aires",
+  "status": "Active"
+}

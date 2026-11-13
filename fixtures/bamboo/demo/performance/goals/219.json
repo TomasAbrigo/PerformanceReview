@@ -1,0 +1,186 @@
+{
+  "canAlign": true,
+  "canCreateGoals": true,
+  "filters": [
+    {
+      "id": "status-all",
+      "name": "All"
+    },
+    {
+      "id": "inProgress",
+      "name": "In progress"
+    },
+    {
+      "id": "completed",
+      "name": "Completed"
+    },
+    {
+      "id": "closed",
+      "name": "Closed"
+    }
+  ],
+  "selectedFilter": "status-all",
+  "goals": [
+    {
+      "id": "5953",
+      "title": "Automatizar la conciliación mensual",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "percentComplete": 15,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2023-05-16",
+      "completionDate": null,
+      "lastChangedDateTime": "2024-07-10T19:00:34Z",
+      "status": "in_progress",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "5956",
+      "title": "Documentar los procesos críticos",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 90,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2024-11-14",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-03-16T08:14:43Z",
+      "status": "in_progress",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "5957",
+      "title": "Completar la certificación del área",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2025-08-24",
+      "completionDate": "2025-06-07",
+      "lastChangedDateTime": "2025-06-07T10:43:04Z",
+      "status": "completed",
+      "milestones": [
+        {
+          "id": 1138,
+          "employeeGoalId": 5957,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-05-25T12:21:23Z",
+          "lastUpdateDateTime": "2025-05-25T12:21:23Z",
+          "lastUpdateUserId": 219
+        },
+        {
+          "id": 1139,
+          "employeeGoalId": 5957,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-05-21T14:38:54Z",
+          "lastUpdateDateTime": "2025-05-21T14:38:54Z",
+          "lastUpdateUserId": 219
+        },
+        {
+          "id": 1140,
+          "employeeGoalId": 5957,
+          "title": "Hito 3",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-05-29T18:40:45Z",
+          "lastUpdateDateTime": "2025-05-29T18:40:45Z",
+          "lastUpdateUserId": 219
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "5958",
+      "title": "Mejorar el NPS interno del equipo",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2025-12-23",
+      "completionDate": "2025-09-09",
+      "lastChangedDateTime": "2025-09-09T17:10:13Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "5960",
+      "title": "Cerrar el plan de capacitación anual",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2026-04-08",
+      "completionDate": "2026-02-24",
+      "lastChangedDateTime": "2026-02-24T15:24:23Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    }
+  ],
+  "persons": [
+    {
+      "employeeId": 219,
+      "firstName": "Sebastián",
+      "lastName": "Coronel",
+      "preferredName": "Seba"
+    }
+  ],
+  "comments": [
+    {
+      "goalId": "5956",
+      "commentCount": 2
+    },
+    {
+      "goalId": "5957",
+      "commentCount": 1
+    },
+    {
+      "goalId": "5958",
+      "commentCount": 1
+    }
+  ]
+}

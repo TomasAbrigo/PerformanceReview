@@ -1,0 +1,160 @@
+{
+  "canAlign": true,
+  "canCreateGoals": true,
+  "filters": [
+    {
+      "id": "status-all",
+      "name": "All"
+    },
+    {
+      "id": "inProgress",
+      "name": "In progress"
+    },
+    {
+      "id": "completed",
+      "name": "Completed"
+    },
+    {
+      "id": "closed",
+      "name": "Closed"
+    }
+  ],
+  "selectedFilter": "status-all",
+  "goals": [
+    {
+      "id": "5856",
+      "title": "Lanzar el nuevo flujo de onboarding",
+      "description": "Sirve de base para el próximo ciclo de evaluación.",
+      "percentComplete": 10,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [
+        49
+      ],
+      "dueDate": "2023-03-09",
+      "completionDate": null,
+      "lastChangedDateTime": "2025-07-13T09:19:03Z",
+      "status": "closed",
+      "milestones": null,
+      "actions": {
+        "canEdit": false,
+        "canUpdateProgress": false,
+        "canClose": false,
+        "canReopen": true,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "5858",
+      "title": "Aumentar la cobertura de pruebas al 80%",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [
+        49
+      ],
+      "dueDate": "2024-02-19",
+      "completionDate": "2023-08-15",
+      "lastChangedDateTime": "2023-08-15T13:56:33Z",
+      "status": "completed",
+      "milestones": [
+        {
+          "id": 1090,
+          "employeeGoalId": 5858,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2023-07-25T12:20:18Z",
+          "lastUpdateDateTime": "2023-07-25T12:20:18Z",
+          "lastUpdateUserId": 195
+        },
+        {
+          "id": 1091,
+          "employeeGoalId": 5858,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2023-07-31T08:34:25Z",
+          "lastUpdateDateTime": "2023-07-31T08:34:25Z",
+          "lastUpdateUserId": 195
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "5860",
+      "title": "Mejorar el NPS interno del equipo",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2024-11-02",
+      "completionDate": "2024-10-09",
+      "lastChangedDateTime": "2024-10-09T19:06:18Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "5862",
+      "title": "Entregar el proyecto Norte sin desvíos",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 60,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2025-06-16",
+      "completionDate": null,
+      "lastChangedDateTime": "2025-07-05T14:41:42Z",
+      "status": "closed",
+      "milestones": null,
+      "actions": {
+        "canEdit": false,
+        "canUpdateProgress": false,
+        "canClose": false,
+        "canReopen": true,
+        "canDelete": true,
+        "canComment": true
+      }
+    }
+  ],
+  "persons": [
+    {
+      "employeeId": 195,
+      "firstName": "Nicolás",
+      "lastName": "Páez",
+      "preferredName": null
+    },
+    {
+      "employeeId": 49,
+      "firstName": "Milagros",
+      "lastName": "Monzón",
+      "preferredName": null
+    }
+  ],
+  "comments": [
+    {
+      "goalId": "5860",
+      "commentCount": 2
+    },
+    {
+      "goalId": "5862",
+      "commentCount": 4
+    }
+  ]
+}

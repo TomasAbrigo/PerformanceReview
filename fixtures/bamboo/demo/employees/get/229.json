@@ -1,0 +1,17 @@
+{
+  "id": "229",
+  "firstName": "Camila",
+  "lastName": "Salas",
+  "workEmail": "camila.salas@meridian-andina.example",
+  "employeeNumber": "10541",
+  "supervisorEId": "31",
+  "supervisorId": "10049",
+  "supervisor": "Ríos, Antonella",
+  "hireDate": "2021-08-16",
+  "terminationDate": null,
+  "department": "Infraestructura",
+  "division": "Tecnología",
+  "jobTitle": "SysAdmin Ssr",
+  "location": "Santiago de Chile",
+  "status": "Active"
+}

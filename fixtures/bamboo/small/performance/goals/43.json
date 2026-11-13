@@ -1,0 +1,154 @@
+{
+  "canAlign": true,
+  "canCreateGoals": false,
+  "filters": [
+    {
+      "id": "status-all",
+      "name": "All"
+    },
+    {
+      "id": "inProgress",
+      "name": "In progress"
+    },
+    {
+      "id": "completed",
+      "name": "Completed"
+    },
+    {
+      "id": "closed",
+      "name": "Closed"
+    }
+  ],
+  "selectedFilter": "status-all",
+  "goals": [
+    {
+      "id": "5119",
+      "title": "Aumentar la cobertura de pruebas al 80%",
+      "description": "Sirve de base para el próximo ciclo de evaluación.",
+      "percentComplete": 30,
+      "alignsWithOptionId": 9003,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2023-03-17",
+      "completionDate": null,
+      "lastChangedDateTime": "2024-11-08T10:25:02Z",
+      "status": "in_progress",
+      "milestones": null,
+      "actions": {
+        "canEdit": false,
+        "canUpdateProgress": false,
+        "canClose": false,
+        "canReopen": false,
+        "canDelete": false,
+        "canComment": false
+      }
+    },
+    {
+      "id": "5120",
+      "title": "Mejorar el NPS interno del equipo",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [
+        41
+      ],
+      "dueDate": "2024-03-23",
+      "completionDate": "2023-12-21",
+      "lastChangedDateTime": "2023-12-21T13:24:47Z",
+      "status": "completed",
+      "milestones": [
+        {
+          "id": 756,
+          "employeeGoalId": 5120,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2023-11-12T16:03:51Z",
+          "lastUpdateDateTime": "2023-11-12T16:03:51Z",
+          "lastUpdateUserId": 43
+        },
+        {
+          "id": 757,
+          "employeeGoalId": 5120,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2023-09-13T09:57:48Z",
+          "lastUpdateDateTime": "2023-09-13T09:57:48Z",
+          "lastUpdateUserId": 43
+        }
+      ],
+      "actions": {
+        "canEdit": false,
+        "canUpdateProgress": false,
+        "canClose": false,
+        "canReopen": false,
+        "canDelete": false,
+        "canComment": false
+      }
+    },
+    {
+      "id": "5123",
+      "title": "Completar la certificación del área",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 100,
+      "alignsWithOptionId": 9004,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2024-05-21",
+      "completionDate": "2024-02-07",
+      "lastChangedDateTime": "2024-02-07T10:14:06Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": false,
+        "canUpdateProgress": false,
+        "canClose": false,
+        "canReopen": false,
+        "canDelete": false,
+        "canComment": false
+      }
+    },
+    {
+      "id": "5126",
+      "title": "Reducir los incidentes recurrentes a la mitad",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 100,
+      "alignsWithOptionId": 9004,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2025-02-24",
+      "completionDate": "2025-01-04",
+      "lastChangedDateTime": "2025-01-04T12:45:44Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": false,
+        "canUpdateProgress": false,
+        "canClose": false,
+        "canReopen": false,
+        "canDelete": false,
+        "canComment": false
+      }
+    }
+  ],
+  "persons": [
+    {
+      "employeeId": 43,
+      "firstName": "Bruno",
+      "lastName": "Campos",
+      "preferredName": null
+    },
+    {
+      "employeeId": 41,
+      "firstName": "Milagros",
+      "lastName": "González",
+      "preferredName": "Mili"
+    }
+  ],
+  "comments": [
+    {
+      "goalId": "5123",
+      "commentCount": 4
+    }
+  ]
+}

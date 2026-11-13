@@ -1,0 +1,17 @@
+{
+  "id": "321",
+  "firstName": "Facundo",
+  "lastName": "Figueroa",
+  "workEmail": "facundo.figueroa@meridian-andina.example",
+  "employeeNumber": "10788",
+  "supervisorEId": "53",
+  "supervisorId": "10090",
+  "supervisor": "Ortiz, Brenda",
+  "hireDate": "2022-04-23",
+  "terminationDate": null,
+  "department": "Finanzas",
+  "division": "Corporativo",
+  "jobTitle": "Líder de Finanzas",
+  "location": "Remoto",
+  "status": "Active"
+}

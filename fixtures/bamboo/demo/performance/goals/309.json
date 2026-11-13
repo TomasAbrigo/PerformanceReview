@@ -1,0 +1,158 @@
+{
+  "canAlign": true,
+  "canCreateGoals": true,
+  "filters": [
+    {
+      "id": "status-all",
+      "name": "All"
+    },
+    {
+      "id": "inProgress",
+      "name": "In progress"
+    },
+    {
+      "id": "completed",
+      "name": "Completed"
+    },
+    {
+      "id": "closed",
+      "name": "Closed"
+    }
+  ],
+  "selectedFilter": "status-all",
+  "goals": [
+    {
+      "id": "6330",
+      "title": "Reducir el tiempo de primera respuesta un 20%",
+      "description": "Sirve de base para el próximo ciclo de evaluación.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2023-09-19",
+      "completionDate": "2023-07-11",
+      "lastChangedDateTime": "2023-07-11T12:23:16Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "6333",
+      "title": "Mejorar el NPS interno del equipo",
+      "description": "Sirve de base para el próximo ciclo de evaluación.",
+      "percentComplete": 65,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2023-12-19",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-10-26T08:30:25Z",
+      "status": "closed",
+      "milestones": null,
+      "actions": {
+        "canEdit": false,
+        "canUpdateProgress": false,
+        "canClose": false,
+        "canReopen": true,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "6334",
+      "title": "Aumentar la cobertura de pruebas al 80%",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 0,
+      "alignsWithOptionId": 9003,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2024-12-25",
+      "completionDate": null,
+      "lastChangedDateTime": "2025-07-13T15:18:50Z",
+      "status": "in_progress",
+      "milestones": [
+        {
+          "id": 1282,
+          "employeeGoalId": 6334,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2024-06-27T12:07:51Z",
+          "lastUpdateUserId": 309
+        },
+        {
+          "id": 1283,
+          "employeeGoalId": 6334,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2024-06-27T08:11:17Z",
+          "lastUpdateUserId": 309
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "6337",
+      "title": "Cerrar el plan de capacitación anual",
+      "description": "Sirve de base para el próximo ciclo de evaluación.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [
+        65
+      ],
+      "dueDate": "2025-07-06",
+      "completionDate": "2025-01-20",
+      "lastChangedDateTime": "2025-01-20T14:00:26Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    }
+  ],
+  "persons": [
+    {
+      "employeeId": 309,
+      "firstName": "Valentina",
+      "lastName": "Figueroa",
+      "preferredName": "Vale"
+    },
+    {
+      "employeeId": 65,
+      "firstName": "Valentina",
+      "lastName": "Díaz",
+      "preferredName": "Vale"
+    }
+  ],
+  "comments": [
+    {
+      "goalId": "6330",
+      "commentCount": 4
+    },
+    {
+      "goalId": "6334",
+      "commentCount": 4
+    }
+  ]
+}

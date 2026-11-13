@@ -1,0 +1,17 @@
+{
+  "id": "129",
+  "firstName": "Ivana",
+  "lastName": "Maldonado",
+  "workEmail": "ivana.maldonado@meridian-andina.example",
+  "employeeNumber": "10290",
+  "supervisorEId": "135",
+  "supervisorId": "10312",
+  "supervisor": "Trejo, Marcela",
+  "hireDate": "2020-01-12",
+  "terminationDate": null,
+  "department": "Calidad",
+  "division": "Operaciones",
+  "jobTitle": "Auditor de Procesos Jr",
+  "location": "Remoto",
+  "status": "Active"
+}

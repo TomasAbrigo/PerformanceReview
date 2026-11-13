@@ -1,0 +1,17 @@
+{
+  "id": "17",
+  "firstName": "Camila",
+  "lastName": "Martínez",
+  "workEmail": "camila.martinez@meridian-andina.example",
+  "employeeNumber": "10016",
+  "supervisorEId": "11",
+  "supervisorId": "10004",
+  "supervisor": "Lezcano, Damián",
+  "hireDate": "2015-05-05",
+  "terminationDate": null,
+  "department": "Dirección de Corporativo",
+  "division": "Corporativo",
+  "jobTitle": "VP de Corporativo",
+  "location": "Buenos Aires",
+  "status": "Active"
+}

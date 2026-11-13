@@ -1,0 +1,17 @@
+{
+  "id": "197",
+  "firstName": "Mateo",
+  "lastName": "Aguirre",
+  "workEmail": "mateo.aguirre@meridian-andina.example",
+  "employeeNumber": "10462",
+  "supervisorEId": "59",
+  "supervisorId": "10104",
+  "supervisor": "Soria, Gonzalo",
+  "hireDate": "2021-04-02",
+  "terminationDate": null,
+  "department": "Finanzas",
+  "division": "Corporativo",
+  "jobTitle": "Controller Jr",
+  "location": "Santiago de Chile",
+  "status": "Active"
+}

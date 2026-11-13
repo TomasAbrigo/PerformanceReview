@@ -1,0 +1,169 @@
+{
+  "canAlign": true,
+  "canCreateGoals": true,
+  "filters": [
+    {
+      "id": "status-all",
+      "name": "All"
+    },
+    {
+      "id": "inProgress",
+      "name": "In progress"
+    },
+    {
+      "id": "completed",
+      "name": "Completed"
+    },
+    {
+      "id": "closed",
+      "name": "Closed"
+    }
+  ],
+  "selectedFilter": "status-all",
+  "goals": [
+    {
+      "id": "5047",
+      "title": "Entregar el proyecto Norte sin desvíos",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "percentComplete": 100,
+      "alignsWithOptionId": 9004,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2024-07-26",
+      "completionDate": "2024-06-24",
+      "lastChangedDateTime": "2024-06-24T16:06:04Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "5049",
+      "title": "Lanzar el nuevo flujo de onboarding",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 80,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [
+        19
+      ],
+      "dueDate": "2025-03-16",
+      "completionDate": null,
+      "lastChangedDateTime": "2025-01-22T12:59:55Z",
+      "status": "in_progress",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "5050",
+      "title": "Entregar el proyecto Norte sin desvíos",
+      "description": "Sirve de base para el próximo ciclo de evaluación.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2026-08-23",
+      "completionDate": "2026-04-14",
+      "lastChangedDateTime": "2026-04-14T18:10:51Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "5053",
+      "title": "Cerrar el plan de capacitación anual",
+      "description": "Sirve de base para el próximo ciclo de evaluación.",
+      "percentComplete": 33,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2027-03-05",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-10-10T12:23:43Z",
+      "status": "in_progress",
+      "milestones": [
+        {
+          "id": 715,
+          "employeeGoalId": 5053,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2026-10-04T08:24:40Z",
+          "lastUpdateDateTime": "2026-10-04T08:24:40Z",
+          "lastUpdateUserId": 25
+        },
+        {
+          "id": 716,
+          "employeeGoalId": 5053,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2026-09-17T14:29:52Z",
+          "lastUpdateUserId": 25
+        },
+        {
+          "id": 717,
+          "employeeGoalId": 5053,
+          "title": "Hito 3",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2026-09-17T16:57:24Z",
+          "lastUpdateUserId": 25
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    }
+  ],
+  "persons": [
+    {
+      "employeeId": 25,
+      "firstName": "Silvana",
+      "lastName": "Quiroga",
+      "preferredName": null
+    },
+    {
+      "employeeId": 19,
+      "firstName": "Silvana",
+      "lastName": "Molina",
+      "preferredName": null
+    }
+  ],
+  "comments": [
+    {
+      "goalId": "5047",
+      "commentCount": 1
+    },
+    {
+      "goalId": "5049",
+      "commentCount": 4
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "id": "247",
+  "firstName": "Camila",
+  "lastName": "Pereyra",
+  "workEmail": "camila.pereyra@meridian-andina.example",
+  "employeeNumber": "10587",
+  "supervisorEId": "105",
+  "supervisorId": "10225",
+  "supervisor": "Ibáñez, Lucía",
+  "hireDate": "2021-09-25",
+  "terminationDate": null,
+  "department": "Ingeniería",
+  "division": "Tecnología",
+  "jobTitle": "Backend Developer Ssr",
+  "location": "Córdoba",
+  "status": "Active"
+}

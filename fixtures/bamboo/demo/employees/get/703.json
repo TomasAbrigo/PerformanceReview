@@ -1,0 +1,17 @@
+{
+  "id": "703",
+  "firstName": "Hugo",
+  "lastName": "Bustos",
+  "workEmail": "hugo.bustos@meridian-andina.example",
+  "employeeNumber": "11700",
+  "supervisorEId": "49",
+  "supervisorId": "10081",
+  "supervisor": "Monzón, Milagros",
+  "hireDate": "2025-03-13",
+  "terminationDate": null,
+  "department": "Calidad",
+  "division": "Operaciones",
+  "jobTitle": "Analista de Calidad Jr",
+  "location": "Buenos Aires",
+  "status": "Active"
+}

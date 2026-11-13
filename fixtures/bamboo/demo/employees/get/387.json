@@ -1,0 +1,17 @@
+{
+  "id": "387",
+  "firstName": "Camila",
+  "lastName": "Barrios",
+  "workEmail": "camila.barrios@meridian-andina.example",
+  "employeeNumber": "10954",
+  "supervisorEId": "43",
+  "supervisorId": "10072",
+  "supervisor": "Soria, Eugenia",
+  "hireDate": "2022-10-27",
+  "terminationDate": null,
+  "department": "Legales",
+  "division": "Corporativo",
+  "jobTitle": "Analista de Compliance Sr",
+  "location": "Remoto",
+  "status": "Active"
+}

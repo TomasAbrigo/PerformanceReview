@@ -1,0 +1,17 @@
+{
+  "id": "441",
+  "firstName": "Eugenia",
+  "lastName": "López",
+  "workEmail": "eugenia.lopez@meridian-andina.example",
+  "employeeNumber": "11093",
+  "supervisorEId": "83",
+  "supervisorId": "10163",
+  "supervisor": "Franco, Daniela",
+  "hireDate": "2023-03-25",
+  "terminationDate": null,
+  "department": "Customer Success",
+  "division": "Comercial",
+  "jobTitle": "Customer Success Manager Ssr",
+  "location": "Santiago de Chile",
+  "status": "Active"
+}

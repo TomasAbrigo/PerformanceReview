@@ -1,0 +1,224 @@
+{
+  "canAlign": true,
+  "canCreateGoals": true,
+  "filters": [
+    {
+      "id": "status-all",
+      "name": "All"
+    },
+    {
+      "id": "inProgress",
+      "name": "In progress"
+    },
+    {
+      "id": "completed",
+      "name": "Completed"
+    },
+    {
+      "id": "closed",
+      "name": "Closed"
+    }
+  ],
+  "selectedFilter": "status-all",
+  "goals": [
+    {
+      "id": "7911",
+      "title": "Completar la certificación del área",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "percentComplete": 100,
+      "alignsWithOptionId": 9003,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2025-11-28",
+      "completionDate": "2025-12-15",
+      "lastChangedDateTime": "2025-12-15T17:10:17Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "7913",
+      "title": "Automatizar la conciliación mensual",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2025-11-23",
+      "completionDate": "2025-09-04",
+      "lastChangedDateTime": "2025-09-04T15:28:54Z",
+      "status": "completed",
+      "milestones": [
+        {
+          "id": 2032,
+          "employeeGoalId": 7913,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-09-04T11:23:30Z",
+          "lastUpdateDateTime": "2025-09-04T11:23:30Z",
+          "lastUpdateUserId": 787
+        },
+        {
+          "id": 2033,
+          "employeeGoalId": 7913,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-09-03T19:52:31Z",
+          "lastUpdateDateTime": "2025-09-03T19:52:31Z",
+          "lastUpdateUserId": 787
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "7914",
+      "title": "Cerrar el plan de capacitación anual",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 45,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [
+        265
+      ],
+      "dueDate": "2026-09-26",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-03-20T13:44:45Z",
+      "status": "in_progress",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "7917",
+      "title": "Completar la certificación del área",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 70,
+      "alignsWithOptionId": 9001,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2026-12-01",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-05-05T15:26:55Z",
+      "status": "closed",
+      "milestones": null,
+      "actions": {
+        "canEdit": false,
+        "canUpdateProgress": false,
+        "canClose": false,
+        "canReopen": true,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "7920",
+      "title": "Automatizar la conciliación mensual",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2026-08-12",
+      "completionDate": "2026-05-07",
+      "lastChangedDateTime": "2026-05-07T18:06:27Z",
+      "status": "completed",
+      "milestones": [
+        {
+          "id": 2034,
+          "employeeGoalId": 7920,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2026-03-12T18:42:54Z",
+          "lastUpdateDateTime": "2026-03-12T18:42:54Z",
+          "lastUpdateUserId": 787
+        },
+        {
+          "id": 2035,
+          "employeeGoalId": 7920,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2026-03-27T12:21:09Z",
+          "lastUpdateDateTime": "2026-03-27T12:21:09Z",
+          "lastUpdateUserId": 787
+        },
+        {
+          "id": 2036,
+          "employeeGoalId": 7920,
+          "title": "Hito 3",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2026-04-19T19:03:20Z",
+          "lastUpdateDateTime": "2026-04-19T19:03:20Z",
+          "lastUpdateUserId": 787
+        },
+        {
+          "id": 2037,
+          "employeeGoalId": 7920,
+          "title": "Hito 4",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2026-01-03T13:36:16Z",
+          "lastUpdateDateTime": "2026-01-03T13:36:16Z",
+          "lastUpdateUserId": 787
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    }
+  ],
+  "persons": [
+    {
+      "employeeId": 787,
+      "firstName": "Victoria",
+      "lastName": "Martínez",
+      "preferredName": null
+    },
+    {
+      "employeeId": 265,
+      "firstName": "Ivana",
+      "lastName": "Olmos",
+      "preferredName": null
+    }
+  ],
+  "comments": [
+    {
+      "goalId": "7913",
+      "commentCount": 3
+    },
+    {
+      "goalId": "7920",
+      "commentCount": 3
+    }
+  ]
+}

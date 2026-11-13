@@ -1,0 +1,55 @@
+{
+  "canAlign": true,
+  "canCreateGoals": true,
+  "filters": [
+    {
+      "id": "status-all",
+      "name": "All"
+    },
+    {
+      "id": "inProgress",
+      "name": "In progress"
+    },
+    {
+      "id": "completed",
+      "name": "Completed"
+    },
+    {
+      "id": "closed",
+      "name": "Closed"
+    }
+  ],
+  "selectedFilter": "status-all",
+  "goals": [
+    {
+      "id": "7404",
+      "title": "Completar la certificación del área",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "percentComplete": 85,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2025-11-14",
+      "completionDate": null,
+      "lastChangedDateTime": "2025-10-05T14:25:49Z",
+      "status": "in_progress",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    }
+  ],
+  "persons": [
+    {
+      "employeeId": 577,
+      "firstName": "Javier",
+      "lastName": "Carrizo",
+      "preferredName": null
+    }
+  ],
+  "comments": []
+}

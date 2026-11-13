@@ -1,0 +1,17 @@
+{
+  "id": "187",
+  "firstName": "Facundo",
+  "lastName": "Carrizo",
+  "workEmail": "facundo.carrizo@meridian-andina.example",
+  "employeeNumber": "10434",
+  "supervisorEId": "167",
+  "supervisorId": "10382",
+  "supervisor": "Escobar, Marcela",
+  "hireDate": "2021-03-03",
+  "terminationDate": null,
+  "department": "Infraestructura",
+  "division": "Tecnología",
+  "jobTitle": "SysAdmin Jr",
+  "location": "Buenos Aires",
+  "status": "Active"
+}

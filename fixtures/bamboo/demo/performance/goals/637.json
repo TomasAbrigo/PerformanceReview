@@ -1,0 +1,115 @@
+{
+  "canAlign": true,
+  "canCreateGoals": true,
+  "filters": [
+    {
+      "id": "status-all",
+      "name": "All"
+    },
+    {
+      "id": "inProgress",
+      "name": "In progress"
+    },
+    {
+      "id": "completed",
+      "name": "Completed"
+    },
+    {
+      "id": "closed",
+      "name": "Closed"
+    }
+  ],
+  "selectedFilter": "status-all",
+  "goals": [
+    {
+      "id": "7613",
+      "title": "Migrar los reportes al nuevo tablero",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "percentComplete": 67,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2026-06-14",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-05-16T18:50:58Z",
+      "status": "closed",
+      "milestones": [
+        {
+          "id": 1902,
+          "employeeGoalId": 7613,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2026-03-24T14:41:54Z",
+          "lastUpdateDateTime": "2026-03-24T14:41:54Z",
+          "lastUpdateUserId": 637
+        },
+        {
+          "id": 1903,
+          "employeeGoalId": 7613,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2026-03-14T14:33:21Z",
+          "lastUpdateDateTime": "2026-03-14T14:33:21Z",
+          "lastUpdateUserId": 637
+        },
+        {
+          "id": 1904,
+          "employeeGoalId": 7613,
+          "title": "Hito 3",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2026-02-23T18:58:04Z",
+          "lastUpdateUserId": 637
+        }
+      ],
+      "actions": {
+        "canEdit": false,
+        "canUpdateProgress": false,
+        "canClose": false,
+        "canReopen": true,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "7615",
+      "title": "Implementar el calendario editorial",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2026-03-14",
+      "completionDate": "2026-03-19",
+      "lastChangedDateTime": "2026-03-19T18:51:56Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    }
+  ],
+  "persons": [
+    {
+      "employeeId": 637,
+      "firstName": "Matías",
+      "lastName": "Coronel",
+      "preferredName": null
+    }
+  ],
+  "comments": [
+    {
+      "goalId": "7613",
+      "commentCount": 3
+    }
+  ]
+}

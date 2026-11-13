@@ -1,0 +1,17 @@
+{
+  "id": "65",
+  "firstName": "Candela",
+  "lastName": "Campos",
+  "workEmail": "candela.campos@meridian-andina.example",
+  "employeeNumber": "10137",
+  "supervisorEId": "29",
+  "supervisorId": "10049",
+  "supervisor": "Ibáñez, Rocío",
+  "hireDate": "2024-02-06",
+  "terminationDate": null,
+  "department": "People",
+  "division": "Corporativo",
+  "jobTitle": "Reclutador Sr",
+  "location": "Buenos Aires",
+  "status": "Active"
+}

@@ -1,0 +1,108 @@
+{
+  "canAlign": true,
+  "canCreateGoals": false,
+  "filters": [
+    {
+      "id": "status-all",
+      "name": "All"
+    },
+    {
+      "id": "inProgress",
+      "name": "In progress"
+    },
+    {
+      "id": "completed",
+      "name": "Completed"
+    },
+    {
+      "id": "closed",
+      "name": "Closed"
+    }
+  ],
+  "selectedFilter": "status-all",
+  "goals": [
+    {
+      "id": "7763",
+      "title": "Lanzar el nuevo flujo de onboarding",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 100,
+      "alignsWithOptionId": 9003,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2025-07-10",
+      "completionDate": "2025-05-06",
+      "lastChangedDateTime": "2025-05-06T17:23:10Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": false,
+        "canUpdateProgress": false,
+        "canClose": false,
+        "canReopen": false,
+        "canDelete": false,
+        "canComment": false
+      }
+    },
+    {
+      "id": "7766",
+      "title": "Migrar los reportes al nuevo tablero",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2025-09-27",
+      "completionDate": "2025-08-10",
+      "lastChangedDateTime": "2025-08-10T15:05:48Z",
+      "status": "completed",
+      "milestones": [
+        {
+          "id": 1989,
+          "employeeGoalId": 7766,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-06-13T18:54:54Z",
+          "lastUpdateDateTime": "2025-06-13T18:54:54Z",
+          "lastUpdateUserId": 719
+        },
+        {
+          "id": 1990,
+          "employeeGoalId": 7766,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-05-08T10:29:24Z",
+          "lastUpdateDateTime": "2025-05-08T10:29:24Z",
+          "lastUpdateUserId": 719
+        }
+      ],
+      "actions": {
+        "canEdit": false,
+        "canUpdateProgress": false,
+        "canClose": false,
+        "canReopen": false,
+        "canDelete": false,
+        "canComment": false
+      }
+    }
+  ],
+  "persons": [
+    {
+      "employeeId": 719,
+      "firstName": "Lorena",
+      "lastName": "González",
+      "preferredName": null
+    }
+  ],
+  "comments": [
+    {
+      "goalId": "7763",
+      "commentCount": 3
+    },
+    {
+      "goalId": "7766",
+      "commentCount": 1
+    }
+  ]
+}
