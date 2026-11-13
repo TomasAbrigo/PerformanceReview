@@ -45,6 +45,7 @@ import {
   type CycleGroupInput,
   type CycleInput,
 } from ".";
+import { enrollCli } from "./enroll-cli";
 import { addDays } from "./hire-date-schedule";
 
 const FIXTURES = path.resolve("src/modules/bamboo-client/__fixtures__");
@@ -884,6 +885,77 @@ describe("enrollDueParticipants", () => {
     expect(await enrolledNames(b.id)).toEqual([]);
     expect(await enrolledNames(draft.id)).toEqual([]);
     expect(await enrolledNames(fixed.id)).toHaveLength(3);
+  });
+
+  it("reports a cycle that fails without stopping the others", async () => {
+    const good = await launched({ name: "Buena" });
+    const broken = await launched({ name: "Rota" });
+    await db
+      .update(reviewCycle)
+      .set({ hireDateSchedule: null })
+      .where(eq(reviewCycle.id, broken.id));
+    const results = await enrollAllDueParticipants(db, AS_OF);
+    const byCycle = new Map(results.map((r) => [r.cycleId, r]));
+    expect(byCycle.get(broken.id)?.error).toBe("not_hire_date");
+    expect(byCycle.get(good.id)?.error).toBeUndefined();
+    expect(await enrolledNames(good.id)).toHaveLength(4);
+  });
+});
+
+describe("enrollCli", () => {
+  async function run(argv: string[]) {
+    const lines: string[] = [];
+    const code = await enrollCli(argv, { db, out: (l) => lines.push(l) });
+    return { code, text: lines.join("\n") };
+  }
+
+  beforeEach(async () => {
+    await hire("Dana", "2026-01-31");
+    await hire("Hana", "2026-02-09");
+  });
+
+  it("enrolls one cycle as of a date and lists who joined", async () => {
+    const cycle = await launched();
+    const first = await run(["--cycle", cycle.id, "--as-of", AS_OF]);
+    expect(first.code).toBe(0);
+    expect(first.text).toContain(`${cycle.id} as of ${AS_OF}: 1 enrolled`);
+    expect(first.text).toContain("Dana");
+    expect(first.text).toContain("2026-03-16");
+    expect(first.text).not.toContain("Hana");
+  });
+
+  it("is idempotent: the second run enrolls no one", async () => {
+    const cycle = await launched();
+    await run(["--cycle", cycle.id, "--as-of", AS_OF]);
+    const again = await run(["--cycle", cycle.id, "--as-of", AS_OF]);
+    expect(again.code).toBe(0);
+    expect(again.text).toContain("0 enrolled");
+    expect(await enrolledNames(cycle.id)).toEqual(["Dana"]);
+  });
+
+  it("runs on every active hire-date cycle without --cycle", async () => {
+    const a = await launched({ name: "A" });
+    const b = await launched({ name: "B" });
+    const { code, text } = await run(["--as-of", AS_OF]);
+    expect(code).toBe(0);
+    expect(text).toContain(a.id);
+    expect(text).toContain(b.id);
+    expect(await enrolledNames(a.id)).toEqual(["Dana"]);
+    expect(await enrolledNames(b.id)).toEqual(["Dana"]);
+  });
+
+  it("exits 1 when a cycle cannot be enrolled", async () => {
+    const draft = await hireDateCycle();
+    const result = await run(["--cycle", draft.id, "--as-of", AS_OF]);
+    expect(result.code).toBe(1);
+    expect(result.text).toContain("not_active");
+  });
+
+  it("exits 2 on wrong arguments and prints the usage", async () => {
+    const result = await run(["--as-of", "2026-13-01"]);
+    expect(result.code).toBe(2);
+    expect(result.text).toContain("--as-of");
+    expect(result.text).toContain("Usage");
   });
 });
 
