@@ -8,7 +8,7 @@
       "displayName": "Carla Romero",
       "workEmail": "carla.romero@example.com",
       "status": "Inactive",
-      "hireDate": "2018-01-10",
+      "hireDate": null,
       "terminationDate": "2024-06-30",
       "supervisorEId": "101",
       "supervisorId": "0001",

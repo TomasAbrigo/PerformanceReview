@@ -9,6 +9,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Link } from "@/i18n/navigation";
 import { routing } from "@/i18n/routing";
 
 export default async function HomePage({ params }: PageProps<"/[locale]">) {
@@ -18,6 +19,7 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
 
   const tApp = await getTranslations("App");
   const tHome = await getTranslations("Home");
+  const tPeople = await getTranslations("People");
 
   return (
     <main className="flex flex-1 items-center justify-center p-8">
@@ -30,6 +32,9 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
         </CardHeader>
         <CardContent className="flex flex-col gap-4">
           <p>{tHome("welcome")}</p>
+          <Link href="/people" className="underline">
+            {tPeople("nav")}
+          </Link>
           <LocaleSwitcher />
         </CardContent>
       </Card>

@@ -11,9 +11,17 @@ export const employeeSchema = z
     supervisorEId: nullableBambooId,
     _restrictedFields: z.array(z.string()).optional(),
   })
-  .transform((e) => ({ ...e, supervisorEId: e.supervisorEId ?? null }));
+  .transform((e): BambooEmployee => ({
+    ...e,
+    supervisorEId: e.supervisorEId ?? null,
+  }));
 
-export type BambooEmployee = z.infer<typeof employeeSchema>;
+/** Normalized ids; every other field Bamboo returned passes through. */
+export type BambooEmployee = Record<string, unknown> & {
+  id: string;
+  supervisorEId: string | null;
+  _restrictedFields?: string[];
+};
 
 export const listEmployeesPageSchema = z.looseObject({
   data: z.array(employeeSchema),
