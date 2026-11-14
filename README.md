@@ -144,6 +144,27 @@ Ejemplo de cron (crontab del servidor): cada 15 minutos lo incremental barato (`
 
 El código de salida distinto de cero permite alertar desde el propio cron (por ejemplo con `MAILTO` o un wrapper que avise a un canal).
 
+## Ciclos: duplicar, plantillas por grupo y cadencia por fecha de ingreso
+
+- **Duplicar:** el botón "Duplicar ciclo" del detalle (en cualquier estado) crea un borrador "<nombre> (Copia)" con componentes, anonimato, plantilla, escala final, filtro de participantes, programación, fechas límite (tal cual: hay que editarlas) y grupos. No copia participantes ni preguntas congeladas, y la copia no comparte nada con el original. Una plantilla que ya no está disponible (borrada o apagada) no se copia: la copia queda sin plantilla (o sin ese grupo) y el botón lo avisa antes de abrirla.
+- **Plantillas por grupo:** el paso opcional "Grupos" del asistente define grupos (nombre, filtro y plantilla). Cada persona usa la plantilla del **primer** grupo (por orden) cuyo filtro la incluya, evaluado a la fecha de snapshot; quien no entra en ninguno usa la plantilla del ciclo. Al lanzar, las preguntas de cada grupo se congelan con su `group_id` y cada participante guarda su `template_group_id`; los formularios (autoevaluación; el de manager de #12 debe hacer lo mismo) leen las preguntas con `questionsFor(db, cycleId, participant.templateGroupId, relationship)`, el único lector de revisiones.
+- **Cadencia por fecha de ingreso:** en el paso "Fechas" se elige "Por fecha de ingreso", un hito (30, 60, 90, 180 o 365 días) y una ventana (1 a 4 semanas). Al lanzar el ciclo no tiene participantes: cada persona entra cuando `fecha de ingreso + hito` cae dentro de la ventana (`[hoy - ventana, hoy]`), con su snapshot a esa fecha y su propia fecha límite (`ingreso + hito + ventana`, para autoevaluación y manager, en `cycle_participant.due_dates`). Quien fue quitado del ciclo no vuelve a entrar.
+
+La incorporación la hace un comando idempotente que conviene correr **una vez por día** (la ventana más corta es de una semana: si el cron falla varios días seguidos puede perderse a alguien; se puede recuperar con `--as-of`):
+
+```bash
+pnpm cycles:enroll                                 # todos los ciclos activos por fecha de ingreso, a hoy (zona horaria de la empresa)
+pnpm cycles:enroll --cycle <id> --as-of 2026-03-10 # un ciclo, a una fecha dada
+```
+
+```cron
+0 6 * * * cd /srv/performance-review && pnpm cycles:enroll >> /var/log/pr-enroll.log 2>&1
+```
+
+Solo se incorpora a quien sigue empleado a esa fecha (sin baja anterior), aunque su historial de puestos aún no se haya cerrado. Quien cumple el hito pero todavía no tiene historial de puestos (la ingesta no lo trajo) no se puede incorporar: el comando lo lista como `skipped ... no_job_history` y cada corrida lo reintenta mientras dure su ventana. Para recuperar a quien ya se pasó de la ventana (por ejemplo después de una caída del cron), `--lookback-days N` (0 a 365) amplía el rango N días hacia atrás; la fecha límite sigue siendo hito + ventana.
+
+Código de salida `0` si todo salió bien, `1` si algún ciclo falló y `2` si los argumentos son inválidos.
+
 ## Notificaciones
 
 Las notificaciones de v1 son **internas**: se guardan en la tabla `notification` y se ven en la bandeja `/es/inbox` (campana con el contador de no leídas en el header y las 3 últimas no leídas en `/es/me`). **No se envían emails** (fuera de alcance del PRD en v1).
@@ -287,6 +308,60 @@ Lo pesado no corre dentro de un request: las Server Actions solo guardan el arch
 - `runLakeAdapterContractTests(name, openAdapter)` (`src/modules/lake/contract.ts`) es la suite de contrato: `openAdapter(scenario)` debe devolver el adaptador abierto sobre la carpeta de `src/modules/lake/__fixtures__/<scenario>/` (o su equivalente en el lake real). Escenarios: `initial`, `delta-1` (update, insert y soft-delete), `schema-drift` (columna nueva y cambio de tipo) y `messy` (NULL, claves duplicadas, empates y watermark NULL, BIGINT mayor a 2^53). Los fixtures son CSV sintéticos escritos a mano; además hay `airbyte/` y `bamboo-reports/` para los perfiles (este último usa los encabezados reales de `fixtures/bamboo-reports/`, y `profiles.test.ts` valida cada perfil de Bamboo contra los CSV de `fixtures/bamboo-reports/small/`).
 - `duckdb-file-lake.test.ts` corre la suite sobre CSV y `parquet.test.ts` sobre la variante Parquet, generada al vuelo con DuckDB `COPY`. Para obtener los archivos Parquet: `pnpm fixtures:parquet [carpetaDeSalida]` (por defecto `build/lake-parquet/<escenario>/`, ignorado por git).
 - No pongas exports reales en los fixtures (contienen datos personales).
+
+## Calidad de datos, API JSON y exports CSV
+
+### Panel de calidad de datos
+
+`/es/data-quality` (enlace en el inicio) muestra un conteo por indicador y un enlace a la lista de casos (`/es/data-quality/<indicador>`; las identidades sin resolver enlazan a la cola `/es/imports/identity`). Cada indicador es una consulta con nombre en `src/modules/analytics/data-quality.ts` que devuelve `{ key, count, items[] }`; el conteo es `items.length`, así que el número del panel y su lista no pueden diferir. "Activo" y "hoy" siguen la definición del resto de la app (`activeEmploymentCte`, `current_date`).
+
+| Indicador (`key`)                  | Qué cuenta                                                                                                                                                                                                                           |
+| ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `identity_open`                    | Casos abiertos de la cola de identidad.                                                                                                                                                                                              |
+| `no_manager`                       | Activos con puesto vigente sin manager (el tope de la organización, con reportes, va con la insignia "Tope").                                                                                                                        |
+| `participants_no_manager`          | Participantes de ciclos (no removidos) sin manager en el snapshot, agrupados por ciclo.                                                                                                                                              |
+| `participants_incomplete_snapshot` | Participantes cuyo snapshot no tiene área o puesto.                                                                                                                                                                                  |
+| `job_history_overlap_gap`          | Filas del historial de puesto que se superponen con una anterior (aunque sea de otro empleo) o dejan un hueco respecto de la fila anterior del mismo empleo (el hueco de un reingreso no; filas sin empleo asociado no se comparan). |
+| `job_history_open_after_exit`      | Personas que no están activas (se fueron, o no tienen ningún empleo vigente) pero tienen una fila de puesto abierta (`valid_to` nulo).                                                                                               |
+| `active_without_job_history`       | Activos sin ninguna fila de historial de puesto.                                                                                                                                                                                     |
+| `goals_without_employment`         | Goals (no borrados) cuyo dueño no tiene ningún empleo vigente.                                                                                                                                                                       |
+| `duplicate_names`                  | Activos que comparten nombre (sin importar tildes, mayúsculas ni orden de palabras).                                                                                                                                                 |
+| `failed_runs`                      | Corridas de importación con error en los últimos 7 días.                                                                                                                                                                             |
+| `reviewer_mismatch`                | Pedidos de evaluación que el módulo de revisión marcó con `review_request.reviewer_mismatch` (enviados por quien ya no es el manager del snapshot), no borrados y con el participante no removido.                                   |
+
+### API JSON de solo lectura (`/api/v1`)
+
+Handlers en `src/modules/api/handlers.ts`, rutas en `src/app/api/v1/**`. Todos los objetos llevan `id` (uuid interno) y, cuando vienen de una fuente, `source: { system, id }` (`null` para filas creadas en la app; en las personas es su ID de Bamboo vigente). Fechas `YYYY-MM-DD`, instantes ISO 8601 UTC con microsegundos, claves en `snake_case`.
+
+| Endpoint                                                       | Respuesta                                                                                    |
+| -------------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
+| `GET /api/v1/people?q=&active=true\|false`                     | Personas con legajo, estado, puesto y manager vigentes.                                      |
+| `GET /api/v1/people/{id}`                                      | Persona con `source_identities`, `employments` y `job_history` (más nueva primero).          |
+| `GET /api/v1/people/{id}/goals?status=`                        | Goals de una persona.                                                                        |
+| `GET /api/v1/org/as-of?date=YYYY-MM-DD`                        | Quién tenía puesto vigente esa fecha y con qué manager (hoy si falta `date`).                |
+| `GET /api/v1/goals?person_id=&manager_id=&status=`             | Goals con dueño, hitos y a quién se compartieron.                                            |
+| `GET /api/v1/cycles` · `GET /api/v1/cycles/{id}`               | Ciclos; el detalle trae los participantes (removidos incluidos) con su snapshot de org.      |
+| `GET /api/v1/ingest-runs?source=&entity=&status=` · `.../{id}` | Corridas, de la más nueva a la más vieja; el detalle trae `params`, `rejects` y raw records. |
+| `GET /api/v1/identity-issues?status=open\|resolved\|ignored`   | Casos de la cola de identidad con candidatos y payload.                                      |
+
+- **Paginación:** `?limit=` (1-200, por defecto 50) y `?cursor=`. Las listas responden `{ data, next_cursor }`; `next_cursor` es `null` en la última página. Es keyset (no offset) sobre una clave inmutable: `(created_at, id)`, `(started_at desc, id desc)` para corridas e `id` para el org. Una fila nueva nunca corre ni repite las páginas ya leídas. Un cursor ajeno es un 400.
+- **Errores:** `application/problem+json` (RFC 9457). 400 para parámetros inválidos (con `errors: [{ path, message }]`), 404 para ids desconocidos o mal formados, 401 sin token válido.
+- **Auth:** sin sesión en v1. Si la variable `API_TOKEN` está definida, hace falta `Authorization: Bearer <API_TOKEN>` (comparación en tiempo constante); si está vacía o sin definir la API queda abierta (desarrollo local). Los botones "Exportar CSV" son enlaces del navegador y no pueden mandar el header: con `API_TOKEN` definido no se muestran (bajá los CSV con `curl -H "Authorization: Bearer $API_TOKEN"`) hasta que exista la sesión.
+- Todavía no expone datos de revisión (pedidos, respuestas, ratings): van a pasar por `canRead` del actor y quedan para cuando estén cerradas las reglas de visibilidad de la revisión del manager (#12).
+
+### Exports CSV
+
+`GET /api/v1/export/<entidad>.csv` (mismo token y mismos filtros que la API), con "Exportar CSV" en las listas de personas, organigrama, goals, corridas y ciclos. Archivos UTF-8 con BOM (Excel), líneas `CRLF`, comillas RFC 4180 y un apóstrofe delante del texto que una planilla evaluaría como fórmula (`=`, `+`, `-`, `@`). Se arman página por página (streaming): un error antes de la primera fila es un 500 como cualquier otro; si falla una página posterior, el error se registra y el archivo termina con una línea `# EXPORT INTERRUPTED: ...`. Los encabezados salen en el idioma de `?locale=es|en` (por defecto `es`; los botones mandan el idioma de la página). `people.csv` y `GET /api/v1/people` listan a las mismas personas que la pantalla de personas (las que tienen al menos un empleo vigente).
+
+| Archivo                  | Una fila por…                    | Filtros                             |
+| ------------------------ | -------------------------------- | ----------------------------------- |
+| `people.csv`             | persona                          | `q`, `active`                       |
+| `org.csv`                | fila de puesto vigente en `date` | `date`                              |
+| `goals.csv`              | goal                             | `person_id`, `manager_id`, `status` |
+| `ingest-runs.csv`        | corrida                          | `source`, `entity`, `status`        |
+| `cycle-participants.csv` | participante de ciclo            | `cycle_id`                          |
+
+Cada fila trae los ids internos (uuid) y los de Bamboo (`bamboo_id`, `legajo`, y el del manager o del manager del snapshot), más área, división, puesto y ubicación. Falta el export de respuestas (una fila por evaluador × pregunta), que también depende de las reglas de visibilidad (#12).
 
 ## Puertos (Supabase local)
 

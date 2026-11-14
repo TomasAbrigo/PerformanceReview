@@ -7,11 +7,12 @@ import { CycleWizard } from "@/components/cycles/cycle-wizard";
 import { db } from "@/db/client";
 import { routing } from "@/i18n/routing";
 import { todayLocal } from "@/modules/org-history/dates";
-import { participantFilterOptions } from "@/modules/review-core";
+import { participantFilterOptions, recentHires } from "@/modules/review-core";
 import { listScales, listTemplates } from "@/modules/templates";
 import {
   createCycleAction,
   launchCycleAction,
+  previewGroupsAction,
   previewParticipantsAction,
 } from "../actions";
 
@@ -20,10 +21,11 @@ async function Wizard({ params }: PageProps<"/[locale]/cycles/new">) {
   if (!hasLocale(routing.locales, locale)) notFound();
   setRequestLocale(locale);
   await connection();
-  const [filterOptions, templates, scales] = await Promise.all([
+  const [filterOptions, templates, scales, [sampleHire]] = await Promise.all([
     participantFilterOptions(db),
     listTemplates(db),
     listScales(db),
+    recentHires(db, 1),
   ]);
   return (
     <CycleWizard
@@ -34,9 +36,11 @@ async function Wizard({ params }: PageProps<"/[locale]/cycles/new">) {
           .filter((t) => t.enabled && !t.deletedAt)
           .map((t) => ({ id: t.id, name: t.name })),
         scales: scales.map((s) => ({ id: s.id, name: s.name })),
+        sampleHire: sampleHire ?? null,
       }}
       actions={{
         preview: previewParticipantsAction,
+        previewGroups: previewGroupsAction,
         create: createCycleAction,
         launch: launchCycleAction,
       }}

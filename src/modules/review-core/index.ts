@@ -16,9 +16,27 @@ export {
   type ParticipantCandidate,
   type ParticipantPreview,
 } from "./service";
+export { duplicateCycle } from "./duplicate";
+export {
+  assignCycleGroups,
+  listCycleGroups,
+  previewGroups,
+  setCycleGroups,
+  type CycleGroupItem,
+  type GroupsPreview,
+} from "./groups";
+export {
+  enrollAllDueParticipants,
+  enrollDueParticipants,
+  recentHires,
+  type EnrolledParticipant,
+  type EnrollResult,
+  type RecentHire,
+} from "./hire-date";
 export { CyclesError, type CyclesErrorCode } from "./errors";
 export * from "./status";
 export type {
+  CycleGroupInput,
   CycleInput,
   CycleUpdateInput,
   ParticipantFilterInput,
@@ -52,6 +70,7 @@ export {
   getReview,
   type Review,
   getSelfReview,
+  questionsFor,
   saveDraft,
   submit,
   type AnswerInput,

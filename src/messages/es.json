@@ -33,7 +33,8 @@
     "edit": "Editar",
     "clone": "Clonar",
     "actions": "Acciones",
-    "loading": "Cargando…"
+    "loading": "Cargando…",
+    "exportCsv": "Exportar CSV"
   },
   "Errors": {
     "missingEs": "Falta el texto en español.",
@@ -412,6 +413,74 @@
       "calibration": "Calibración",
       "sharing": "Compartir resultados",
       "closed": "Cerrado"
+    },
+    "extras": {
+      "steps": { "groups": "Grupos" },
+      "duplicate": {
+        "button": "Duplicar ciclo",
+        "pending": "Duplicando…",
+        "suffix": "Copia",
+        "from": "Duplicado desde otro ciclo",
+        "warnTemplate": "La plantilla del ciclo ya no está disponible: la copia quedó sin plantilla.",
+        "warnGroup": "El grupo “{name}” se omitió: su plantilla ya no está disponible.",
+        "openCopy": "Abrir la copia"
+      },
+      "groups": {
+        "title": "Plantillas por grupo",
+        "intro": "Opcional. Cada persona usa la plantilla del primer grupo que la incluya; quienes no entran en ninguno usan la plantilla del ciclo.",
+        "empty": "Todavía no hay grupos: todas las personas usan la plantilla del ciclo.",
+        "add": "Agregar grupo",
+        "remove": "Quitar grupo",
+        "moveUp": "Subir",
+        "moveDown": "Bajar",
+        "groupN": "Grupo {n}",
+        "name": "Nombre del grupo",
+        "template": "Plantilla del grupo",
+        "pickTemplate": "Elegí una plantilla",
+        "criteria": "Quiénes entran",
+        "noCriteria": "Sin criterios: entran todas las personas que no pertenezcan a un grupo anterior.",
+        "count": "{count, plural, =0 {Ninguna persona} one {# persona} other {# personas}}",
+        "counting": "Contando…",
+        "previewError": "No pudimos calcular las personas de cada grupo.",
+        "remainder": "{count, plural, =0 {Todas las personas entran en algún grupo} one {# persona sin grupo usa la plantilla del ciclo} other {# personas sin grupo usan la plantilla del ciclo}}",
+        "duplicateName": "Ya hay un grupo con ese nombre.",
+        "defaultTemplate": "Plantilla del ciclo: {name}",
+        "withoutGroup": "{count, plural, one {# persona sin grupo} other {# personas sin grupo}}",
+        "columns": {
+          "group": "Grupo",
+          "template": "Plantilla",
+          "criteria": "Criterio",
+          "people": "Personas",
+          "questions": "Preguntas"
+        },
+        "criteriaAll": "Todas las personas",
+        "criteriaPeople": "{count, plural, one {# persona elegida} other {# personas elegidas}}",
+        "none": "Sin grupo"
+      },
+      "schedule": {
+        "legend": "Programación",
+        "fixed": "Fechas fijas",
+        "hireDate": "Por fecha de ingreso",
+        "hireDateHint": "Cada persona entra al ciclo cuando cumple el hito y tiene su propia fecha límite: no se cargan fechas por fase.",
+        "milestone": "Hito",
+        "window": "Ventana",
+        "milestones": {
+          "30": "30 días",
+          "60": "60 días",
+          "90": "90 días",
+          "180": "6 meses (180 días)",
+          "365": "1 año (365 días)"
+        },
+        "weeks": "{count, plural, one {# semana} other {# semanas}}",
+        "previewTitle": "Vista previa con un ingreso reciente",
+        "sample": "{name}, ingresó el {hireDate}",
+        "milestoneDate": "Cumple el hito el {date}",
+        "dueDate": "Fecha límite de autoevaluación y manager: {date}",
+        "noSample": "No hay ingresos para mostrar de ejemplo.",
+        "inScope": "{count, plural, one {# persona dentro del alcance; se incorpora al cumplir el hito} other {# personas dentro del alcance; se incorporan al cumplir el hito}}",
+        "summary": "Hito: {milestone} · ventana de {window}"
+      },
+      "detail": { "group": "Grupo", "due": "Vence" }
     },
     "wizard": {
       "title": "Nuevo ciclo",
@@ -900,6 +969,161 @@
       "feedback_received": "Recibiste feedback nuevo en el ciclo {cycle}.",
       "calibration_published": "Se publicó la calibración del ciclo {cycle}.",
       "cycle_phase_changed": "{launched, select, yes {El ciclo {cycle} se lanzó y está en la fase {to}.} other {El ciclo {cycle} pasó de la fase {from} a la fase {to}.}}"
+    }
+  },
+  "DataQuality": {
+    "nav": "Calidad de datos",
+    "title": "Calidad de datos",
+    "description": "Casos que conviene corregir antes de analizar o reportar. Cada número coincide con la lista de casos a la que enlaza.",
+    "allClear": "Todo en orden: ningún indicador tiene casos.",
+    "count": "{count, plural, =0 {Sin casos} =1 {1 caso} other {# casos}}",
+    "viewCases": "Ver casos",
+    "viewCasesOf": "Ver casos: {title}",
+    "back": "← Volver al panel",
+    "empty": "No hay casos.",
+    "unnamed": "Sin nombre",
+    "noEnd": "Sin fin",
+    "participantsCount": "{count, plural, =1 {1 participante} other {# participantes}}",
+    "duplicatesCount": "{count} personas",
+    "badges": {
+      "top": "Tope"
+    },
+    "topHelp": "Tiene reportes directos: se espera que no tenga manager.",
+    "kinds": {
+      "overlap": "Superposición",
+      "gap": "Hueco"
+    },
+    "missing": {
+      "department": "Área",
+      "job_title": "Puesto"
+    },
+    "columns": {
+      "name": "Nombre",
+      "email": "Email",
+      "sourceId": "ID Bamboo",
+      "reason": "Motivo",
+      "detected": "Detectado",
+      "managerRaw": "Manager en Bamboo (sin resolver)",
+      "person": "Persona",
+      "missing": "Falta",
+      "kind": "Tipo",
+      "from": "Desde",
+      "to": "Hasta",
+      "openSince": "Puesto abierto desde",
+      "terminationDate": "Egreso",
+      "goal": "Goal",
+      "owner": "Dueño",
+      "duplicates": "Comparten nombre",
+      "started": "Inicio",
+      "entity": "Entidad",
+      "source": "Fuente",
+      "error": "Error",
+      "reviewer": "Evaluador",
+      "snapshotManager": "Manager del snapshot"
+    },
+    "indicators": {
+      "identity_open": {
+        "title": "Identidades sin resolver",
+        "description": "Registros de Bamboo que la importación no pudo asignar a una persona."
+      },
+      "no_manager": {
+        "title": "Personas sin manager",
+        "description": "Personas activas cuyo puesto vigente no tiene manager. El tope de la organización es esperable."
+      },
+      "participants_no_manager": {
+        "title": "Participantes sin manager en el snapshot",
+        "description": "Participantes de ciclos sin manager en el snapshot: nadie podría escribir su evaluación de manager."
+      },
+      "participants_incomplete_snapshot": {
+        "title": "Snapshots incompletos",
+        "description": "Participantes cuyo snapshot no tiene área o puesto."
+      },
+      "job_history_overlap_gap": {
+        "title": "Historial de puesto con superposiciones o huecos",
+        "description": "Períodos del historial de puesto de una persona que se superponen o dejan días sin cubrir (el hueco entre dos empleos no cuenta)."
+      },
+      "job_history_open_after_exit": {
+        "title": "Historial sin cerrar tras la baja",
+        "description": "Personas que ya no están activas pero conservan un puesto vigente abierto."
+      },
+      "active_without_job_history": {
+        "title": "Activos sin historial de puesto",
+        "description": "Personas activas sin ninguna fila de historial de puesto."
+      },
+      "goals_without_employment": {
+        "title": "Goals de personas sin empleo vigente",
+        "description": "Goals cuyo dueño no tiene ningún empleo vigente."
+      },
+      "duplicate_names": {
+        "title": "Nombres duplicados entre activos",
+        "description": "Personas activas que comparten nombre: riesgo al vincular identidades."
+      },
+      "failed_runs": {
+        "title": "Importaciones con error (7 días)",
+        "description": "Corridas de importación que terminaron con error en los últimos 7 días."
+      },
+      "reviewer_mismatch": {
+        "title": "Evaluador distinto del manager del snapshot",
+        "description": "Pedidos de evaluación cuyo evaluador no coincide con el manager del snapshot."
+      }
+    }
+  },
+  "Exports": {
+    "columns": {
+      "person_id": "person_id",
+      "bamboo_id": "bamboo_id",
+      "employee_number": "legajo",
+      "email": "email",
+      "name": "nombre",
+      "status": "estado",
+      "manager_id": "manager_id",
+      "manager_bamboo_id": "manager_bamboo_id",
+      "manager": "manager",
+      "department": "área",
+      "division": "división",
+      "job_title": "puesto",
+      "location": "ubicación",
+      "hire_date": "fecha ingreso",
+      "termination_date": "fecha baja",
+      "as_of": "as_of",
+      "job_history_id": "job_history_id",
+      "valid_from": "vigente desde",
+      "valid_to": "vigente hasta",
+      "goal_id": "goal_id",
+      "goal_bamboo_id": "goal_bamboo_id",
+      "title": "título",
+      "percent_complete": "porcentaje completado",
+      "due_date": "vencimiento",
+      "completion_date": "fecha cierre",
+      "last_changed_at": "última modificación",
+      "milestones": "hitos",
+      "comments": "comentarios",
+      "run_id": "run_id",
+      "source": "fuente",
+      "adapter": "adaptador",
+      "entity": "entidad",
+      "started_at": "inicio",
+      "finished_at": "fin",
+      "read": "leídos",
+      "inserted": "insertados",
+      "updated": "actualizados",
+      "unchanged": "sin cambios",
+      "deleted": "eliminados",
+      "rejected": "rechazados",
+      "issues": "en cola",
+      "ignored": "ignorados",
+      "log_entries": "entradas del log",
+      "error": "error",
+      "cycle_id": "cycle_id",
+      "cycle_source_id": "cycle_source_id",
+      "cycle_name": "ciclo",
+      "snapshot_as_of": "snapshot_as_of",
+      "participant_id": "participant_id",
+      "snapshot_manager_id": "snapshot_manager_id",
+      "snapshot_manager_bamboo_id": "snapshot_manager_bamboo_id",
+      "snapshot_manager": "snapshot_manager",
+      "added_at": "agregado",
+      "removed_at": "removido"
     }
   }
 }
