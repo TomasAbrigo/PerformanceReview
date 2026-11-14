@@ -11,6 +11,13 @@ import {
 import { isUuid } from "@/lib/uuid";
 import type { ActorContext } from "@/modules/actor/types";
 import { isSkipLevel } from "./manager";
+import {
+  ensureUpwardRequests,
+  type FeedbackTask,
+  feedbackTasks,
+  type NominationTask,
+  nominationTasks,
+} from "./peers";
 import type { RequestStatus } from "./request-status";
 import { ReviewError } from "./review-errors";
 import type { CycleStatus } from "./status";
@@ -28,6 +35,7 @@ export async function ensureSelfRequests(
 ): Promise<void> {
   await ensureOnlySelfRequests(db, cycleId, participantId);
   await ensureManagerRequests(db, cycleId, participantId);
+  await ensureUpwardRequests(db, cycleId);
 }
 
 /**
@@ -201,6 +209,24 @@ async function visibilityContext(
       );
     ctx.managerRequest = managerRequest ?? null;
   }
+  if (
+    (row.request.relationship === "peer" ||
+      row.request.relationship === "upward") &&
+    actor.personId === row.participant.revieweePersonId
+  ) {
+    const [shared] = await db
+      .select({ sharedAt: reviewRequest.sharedAt })
+      .from(reviewRequest)
+      .where(
+        and(
+          eq(reviewRequest.participantId, row.participant.id),
+          eq(reviewRequest.relationship, "manager"),
+          isNotNull(reviewRequest.sharedAt),
+          isNull(reviewRequest.deletedAt),
+        ),
+      );
+    ctx.revieweeShared = !!shared;
+  }
   ctx.skipLevel = await isSkipLevel(db, actor, row.participant);
   return ctx;
 }
@@ -309,10 +335,10 @@ export type MyTasks = {
   selfAssessments: SelfAssessmentTask[];
   /** Manager reviews shared with the actor ("Evaluación compartida"). */
   sharedReviews: SharedReviewTask[];
-  /** #13: peers to nominate / approve. */
-  nominations: never[];
-  /** #14: feedback to give to peers / managers. */
-  feedback: never[];
+  /** Cycles where the actor still nominates peers. */
+  nominations: NominationTask[];
+  /** Peer/upward feedback the actor has to write. */
+  feedback: FeedbackTask[];
   /** #15: shared reviews to acknowledge. */
   acknowledgements: never[];
 };
@@ -380,7 +406,13 @@ export async function listMyTasks(
       ),
     )
     .orderBy(asc(reviewRequest.sharedAt));
-  return { ...empty, selfAssessments: rows, sharedReviews: shared };
+  return {
+    ...empty,
+    selfAssessments: rows,
+    sharedReviews: shared,
+    nominations: await nominationTasks(db, actor.personId),
+    feedback: await feedbackTasks(db, actor.personId),
+  };
 }
 
 /** Id of the actor's manager review in a cycle, once shared with them. */

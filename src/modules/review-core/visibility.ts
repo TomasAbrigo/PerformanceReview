@@ -2,6 +2,7 @@ import type { ActorContext } from "@/modules/actor/types";
 import type { Relationship } from "@/modules/templates/constants";
 import type { RequestStatus } from "./request-status";
 import {
+  type CycleAnonymity,
   type CycleComponents,
   type CycleStatus,
   isDoubleBlind,
@@ -27,7 +28,15 @@ export type VisibilityContext = {
   cycle?: {
     status: CycleStatus;
     components?: Pick<CycleComponents, "doubleBlind">;
+    /** Peer/upward anonymity modes (#14). */
+    anonymity?: CycleAnonymity;
   };
+  /**
+   * Peer/upward rows: whether the participant's review was shared with the
+   * reviewee (their manager request has shared_at). Before that the
+   * reviewee never reads peer/upward feedback.
+   */
+  revieweeShared?: boolean;
   /** Self rows: the participant's manager request (double blind). */
   managerRequest?: { status: RequestStatus } | null;
   /** The actor manages the participant's snapshot manager (see isSkipLevel). */
@@ -56,7 +65,9 @@ const isReviewee = (actor: ActorContext, ctx: VisibilityContext) =>
  * - manager: the snapshot manager reads it; the reviewee only once shared
  *   and only the questions visible to the reviewee;
  * - skip-level managers read submitted self/manager reviews (read-only);
- * - peer/upward: #14 (aggregated/anonymized views).
+ * - peer/upward: the snapshot manager (and HR) read them once submitted;
+ *   the reviewee only after their review is shared, and only the questions
+ *   visible to them. Who wrote it is a separate rule: reviewerVisible.
  */
 export function canRead(actor: ActorContext, ctx: VisibilityContext): boolean {
   if (actor.role === "hr") return true;
@@ -85,8 +96,36 @@ export function canRead(actor: ActorContext, ctx: VisibilityContext): boolean {
       return false;
     case "peer":
     case "upward":
-      return false; // #14: aggregated/anonymized views.
+      if (!submitted) return false;
+      if (isManagerOf(actor, ctx)) return true;
+      if (isReviewee(actor, ctx)) {
+        return (
+          !!ctx.revieweeShared &&
+          ctx.questionRevision?.visibleToReviewee !== false
+        );
+      }
+      return false;
   }
+}
+
+/**
+ * Whether `actor` may see who wrote a readable request. Peer/upward follow
+ * the cycle's anonymity mode: transparent shows names to everyone who reads;
+ * anonymous_to_employee hides them from the reviewee ("Par"); fully
+ * anonymous hides them from everyone but the author (HR included; the
+ * reviewer stays stored in the DB).
+ */
+export function reviewerVisible(
+  actor: ActorContext,
+  ctx: VisibilityContext,
+): boolean {
+  const { relationship } = ctx.request;
+  if (relationship !== "peer" && relationship !== "upward") return true;
+  if (isReviewer(actor, ctx.request)) return true;
+  const mode = ctx.cycle?.anonymity?.[relationship] ?? "fully_anonymous";
+  if (mode === "transparent") return true;
+  if (mode === "fully_anonymous") return false;
+  return !isReviewee(actor, ctx);
 }
 
 /** Where a request lives: the cycle phase and whether the reviewee is still in. */

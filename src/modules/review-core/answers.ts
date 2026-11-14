@@ -11,7 +11,7 @@ import {
 import type { ActorContext } from "@/modules/actor/types";
 import { loadRequest } from "./requests";
 import { ReviewError } from "./review-errors";
-import { canRead, canWrite } from "./visibility";
+import { canRead, canWrite, reviewerVisible } from "./visibility";
 
 /** Value of an answer as the form handles it (rating: the scale value). */
 export type AnswerValue = string | number | null;
@@ -24,6 +24,11 @@ export type SelfReview = {
   /** Current answers by question revision id. */
   answers: Record<string, AnswerValue>;
   canWrite: boolean;
+  /**
+   * Whether the actor may know who wrote it (peer/upward anonymity); when
+   * not, request.reviewerPersonId is null.
+   */
+  reviewerVisible: boolean;
 };
 
 const questionsFor = (
@@ -89,9 +94,16 @@ export async function getReview(
     .from(answer)
     .where(eq(answer.requestId, request.id));
   const byId = new Map(questions.map((q) => [q.id, q]));
-  const duePhase = request.relationship === "manager" ? "manager" : "self";
+  const duePhase =
+    request.relationship === "manager"
+      ? "manager"
+      : request.relationship === "self"
+        ? "self"
+        : "peer";
+  const showReviewer = reviewerVisible(actor, visibility);
   return {
-    request,
+    request: showReviewer ? request : { ...request, reviewerPersonId: null },
+    reviewerVisible: showReviewer,
     cycle: {
       id: cycle.id,
       name: cycle.name,

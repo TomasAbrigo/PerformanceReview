@@ -38,6 +38,7 @@ import {
   type IsoDate,
 } from "@/modules/org-history/queries";
 import { CyclesError } from "./errors";
+import { closeNominations } from "./peers";
 import { ensureSelfRequests } from "./requests";
 import { allowedTransitions, type CycleStatus, launchStatus } from "./status";
 import {
@@ -386,6 +387,7 @@ export async function transition(
       actorPersonId,
       note: note || null,
     });
+    if (cycle.status === "nominations") await closeNominations(tx, updated);
     await ensureSelfRequests(tx, id);
     return updated;
   });

@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { connection } from "next/server";
 import { Suspense } from "react";
 import { MyTasksView } from "@/components/review/my-tasks";
+import { PeerTasks } from "@/components/review/peer-tasks";
 import { db } from "@/db/client";
 import { routing } from "@/i18n/routing";
 import { getActor } from "@/modules/actor/server";
@@ -17,13 +18,20 @@ async function Tasks({ params }: PageProps<"/[locale]/me">) {
   const actor = await getActor();
   const tasks = await listMyTasks(db, actor);
   return (
-    <MyTasksView
-      hasPerson={actor.personId !== null}
-      tasks={{
-        selfAssessments: tasks.selfAssessments,
-        sharedReviews: tasks.sharedReviews,
-      }}
-    />
+    <div className="flex flex-col gap-6">
+      <MyTasksView
+        hasPerson={actor.personId !== null}
+        tasks={{
+          selfAssessments: tasks.selfAssessments,
+          sharedReviews: tasks.sharedReviews,
+        }}
+      />
+      <PeerTasks
+        nominations={tasks.nominations}
+        feedback={tasks.feedback}
+        sharedCycles={tasks.sharedReviews}
+      />
+    </div>
   );
 }
 

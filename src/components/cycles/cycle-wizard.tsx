@@ -1,5 +1,7 @@
 "use client";
 
+import { PeerSettingsFields } from "@/components/review/peer-settings-fields";
+import { peerSettingsOf } from "@/modules/review-core/peer-settings";
 import { useTranslations } from "next-intl";
 import { useEffect, useId, useState, useTransition } from "react";
 import { type ActionResult, useLocalized } from "@/components/templates/shared";
@@ -408,6 +410,15 @@ export function CycleWizard({
                 </div>
               ) : null,
             )}
+            {components.peer ? (
+              <PeerSettingsFields
+                id={id}
+                value={peerSettingsOf(components)}
+                onChange={(peerSettings) =>
+                  setComponents({ ...components, peerSettings })
+                }
+              />
+            ) : null}
             <div className="flex flex-col gap-1">
               <Label htmlFor={`${id}-template`}>{t("template")}</Label>
               <select
