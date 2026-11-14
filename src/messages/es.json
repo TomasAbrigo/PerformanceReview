@@ -33,7 +33,8 @@
     "edit": "Editar",
     "clone": "Clonar",
     "actions": "Acciones",
-    "loading": "Cargando…"
+    "loading": "Cargando…",
+    "exportCsv": "Exportar CSV"
   },
   "Errors": {
     "missingEs": "Falta el texto en español.",
@@ -515,6 +516,101 @@
       "required": "Este campo es obligatorio.",
       "invalid": "Valor inválido.",
       "unknown": "Ocurrió un error inesperado."
+    }
+  },
+  "DataQuality": {
+    "nav": "Calidad de datos",
+    "title": "Calidad de datos",
+    "description": "Casos que conviene corregir antes de analizar o reportar. Cada número coincide con la lista de casos a la que enlaza.",
+    "allClear": "Todo en orden: ningún indicador tiene casos.",
+    "count": "{count, plural, =0 {Sin casos} =1 {1 caso} other {# casos}}",
+    "viewCases": "Ver casos",
+    "viewCasesOf": "Ver casos: {title}",
+    "back": "← Volver al panel",
+    "empty": "No hay casos.",
+    "unnamed": "Sin nombre",
+    "noEnd": "Sin fin",
+    "participantsCount": "{count, plural, =1 {1 participante} other {# participantes}}",
+    "duplicatesCount": "{count} personas",
+    "badges": {
+      "top": "Tope"
+    },
+    "topHelp": "Tiene reportes directos: se espera que no tenga manager.",
+    "kinds": {
+      "overlap": "Superposición",
+      "gap": "Hueco"
+    },
+    "missing": {
+      "department": "Área",
+      "job_title": "Puesto"
+    },
+    "columns": {
+      "name": "Nombre",
+      "email": "Email",
+      "sourceId": "ID Bamboo",
+      "reason": "Motivo",
+      "detected": "Detectado",
+      "managerRaw": "Manager en Bamboo (sin resolver)",
+      "person": "Persona",
+      "missing": "Falta",
+      "kind": "Tipo",
+      "from": "Desde",
+      "to": "Hasta",
+      "openSince": "Puesto abierto desde",
+      "terminationDate": "Egreso",
+      "goal": "Goal",
+      "owner": "Dueño",
+      "duplicates": "Comparten nombre",
+      "started": "Inicio",
+      "entity": "Entidad",
+      "source": "Fuente",
+      "error": "Error"
+    },
+    "indicators": {
+      "identity_open": {
+        "title": "Identidades sin resolver",
+        "description": "Registros de Bamboo que la importación no pudo asignar a una persona."
+      },
+      "no_manager": {
+        "title": "Personas sin manager",
+        "description": "Personas activas cuyo puesto vigente no tiene manager. El tope de la organización es esperable."
+      },
+      "participants_no_manager": {
+        "title": "Participantes sin manager en el snapshot",
+        "description": "Participantes de ciclos sin manager en el snapshot: nadie podría escribir su evaluación de manager."
+      },
+      "participants_incomplete_snapshot": {
+        "title": "Snapshots incompletos",
+        "description": "Participantes cuyo snapshot no tiene área o puesto."
+      },
+      "job_history_overlap_gap": {
+        "title": "Historial de puesto con superposiciones o huecos",
+        "description": "Períodos del historial de puesto de una persona que se superponen o dejan días sin cubrir (el hueco entre dos empleos no cuenta)."
+      },
+      "job_history_open_after_exit": {
+        "title": "Historial sin cerrar tras la baja",
+        "description": "Personas que ya no están activas pero conservan un puesto vigente abierto."
+      },
+      "active_without_job_history": {
+        "title": "Activos sin historial de puesto",
+        "description": "Personas activas sin ninguna fila de historial de puesto."
+      },
+      "goals_without_employment": {
+        "title": "Goals de personas sin empleo vigente",
+        "description": "Goals cuyo dueño no tiene ningún empleo vigente."
+      },
+      "duplicate_names": {
+        "title": "Nombres duplicados entre activos",
+        "description": "Personas activas que comparten nombre: riesgo al vincular identidades."
+      },
+      "failed_runs": {
+        "title": "Importaciones con error (7 días)",
+        "description": "Corridas de importación que terminaron con error en los últimos 7 días."
+      },
+      "reviewer_mismatch": {
+        "title": "Evaluador distinto del manager del snapshot",
+        "description": "Pedidos de evaluación cuyo evaluador no coincide con el manager del snapshot."
+      }
     }
   }
 }

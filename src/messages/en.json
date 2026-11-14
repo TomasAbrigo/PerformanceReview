@@ -33,7 +33,8 @@
     "edit": "Edit",
     "clone": "Clone",
     "actions": "Actions",
-    "loading": "Loading…"
+    "loading": "Loading…",
+    "exportCsv": "Export CSV"
   },
   "Errors": {
     "missingEs": "The Spanish text is missing.",
@@ -515,6 +516,101 @@
       "required": "This field is required.",
       "invalid": "Invalid value.",
       "unknown": "An unexpected error occurred."
+    }
+  },
+  "DataQuality": {
+    "nav": "Data quality",
+    "title": "Data quality",
+    "description": "Cases worth fixing before analyzing or reporting. Each number matches the list of cases it links to.",
+    "allClear": "All clear: no indicator has cases.",
+    "count": "{count, plural, =0 {No cases} =1 {1 case} other {# cases}}",
+    "viewCases": "View cases",
+    "viewCasesOf": "View cases: {title}",
+    "back": "← Back to the panel",
+    "empty": "No cases.",
+    "unnamed": "Unnamed",
+    "noEnd": "No end",
+    "participantsCount": "{count, plural, =1 {1 participant} other {# participants}}",
+    "duplicatesCount": "{count} people",
+    "badges": {
+      "top": "Top"
+    },
+    "topHelp": "Has direct reports: not having a manager is expected.",
+    "kinds": {
+      "overlap": "Overlap",
+      "gap": "Gap"
+    },
+    "missing": {
+      "department": "Area",
+      "job_title": "Job title"
+    },
+    "columns": {
+      "name": "Name",
+      "email": "Email",
+      "sourceId": "Bamboo ID",
+      "reason": "Reason",
+      "detected": "Detected",
+      "managerRaw": "Manager in Bamboo (unresolved)",
+      "person": "Person",
+      "missing": "Missing",
+      "kind": "Type",
+      "from": "From",
+      "to": "To",
+      "openSince": "Job open since",
+      "terminationDate": "Termination",
+      "goal": "Goal",
+      "owner": "Owner",
+      "duplicates": "Share a name",
+      "started": "Started",
+      "entity": "Entity",
+      "source": "Source",
+      "error": "Error"
+    },
+    "indicators": {
+      "identity_open": {
+        "title": "Unresolved identities",
+        "description": "Bamboo records the import could not assign to a person."
+      },
+      "no_manager": {
+        "title": "People without a manager",
+        "description": "Active people whose current job has no manager. The top of the organization is expected."
+      },
+      "participants_no_manager": {
+        "title": "Participants without a manager in the snapshot",
+        "description": "Cycle participants with no manager in the snapshot: nobody could write their manager review."
+      },
+      "participants_incomplete_snapshot": {
+        "title": "Incomplete snapshots",
+        "description": "Participants whose snapshot lacks the area or the job title."
+      },
+      "job_history_overlap_gap": {
+        "title": "Job history with overlaps or gaps",
+        "description": "Job history periods of one person that overlap or leave days uncovered (the gap between two employments does not count)."
+      },
+      "job_history_open_after_exit": {
+        "title": "Job history left open after leaving",
+        "description": "People who are no longer active but still have an open current job."
+      },
+      "active_without_job_history": {
+        "title": "Active people without job history",
+        "description": "Active people with no job history row at all."
+      },
+      "goals_without_employment": {
+        "title": "Goals of people without live employment",
+        "description": "Goals whose owner has no live employment."
+      },
+      "duplicate_names": {
+        "title": "Duplicate names among active people",
+        "description": "Active people who share a name: a risk when linking identities."
+      },
+      "failed_runs": {
+        "title": "Import runs in error (7 days)",
+        "description": "Import runs that ended in error in the last 7 days."
+      },
+      "reviewer_mismatch": {
+        "title": "Reviewer different from the snapshot manager",
+        "description": "Review requests whose reviewer does not match the snapshot manager."
+      }
     }
   }
 }

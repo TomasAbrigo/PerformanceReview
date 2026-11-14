@@ -1,4 +1,5 @@
 import { useTranslations } from "next-intl";
+import { ExportCsvLink } from "@/components/data-quality/export-csv-link";
 import { Link } from "@/i18n/navigation";
 import type { TeamGoalsData } from "@/modules/goals";
 import { GoalCard } from "./goal-card";
@@ -9,11 +10,14 @@ export function TeamGoals({ team }: { team: TeamGoalsData }) {
 
   return (
     <div className="flex flex-col gap-6">
-      <div>
-        <h1 className="text-2xl font-semibold">{t("team.title")}</h1>
-        <p className="text-muted-foreground">
-          {t("team.description", { manager: team.manager.displayName })}
-        </p>
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-semibold">{t("team.title")}</h1>
+          <p className="text-muted-foreground">
+            {t("team.description", { manager: team.manager.displayName })}
+          </p>
+        </div>
+        <ExportCsvLink file="goals" params={{ manager_id: team.manager.id }} />
       </div>
 
       {team.reports.length === 0 && (
