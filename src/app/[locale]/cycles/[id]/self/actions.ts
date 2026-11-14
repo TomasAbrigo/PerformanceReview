@@ -6,6 +6,7 @@ import { actionResult } from "@/lib/action-result";
 import { parse } from "@/lib/domain-error";
 import { getActor } from "@/modules/actor/server";
 import * as review from "@/modules/review-core";
+import { unlockRequestOp } from "@/modules/review-core/ops";
 
 const id = z.uuid();
 const answers = z.array(
@@ -50,7 +51,8 @@ export async function unlockAction(
   unlockNote: string | null,
 ) {
   return actionResult(async () => {
-    await review.unlock(
+    // Audited in admin_audit_log (#17) as well as in the request's audit.
+    await unlockRequestOp(
       db,
       await getActor(),
       parse(id, requestId, review.ReviewError),
