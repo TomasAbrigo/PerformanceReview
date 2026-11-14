@@ -82,8 +82,8 @@ export async function onCalibrationPublished(
 const isHr = (actor: ActorContext) => actor.role === "hr";
 
 /**
- * The overall manager rating of a manager review: its LAST rating question
- * (highest sort), e.g. "Overall performance rating" in the system template.
+ * The overall manager rating of a manager review: the answer to the question
+ * with role `overall_rating` (none: no final_rating row is written).
  */
 async function overallRating(db: DbOrTx, request: ReviewRequest) {
   const [row] = await db
@@ -100,11 +100,9 @@ async function overallRating(db: DbOrTx, request: ReviewRequest) {
     .where(
       and(
         eq(answer.requestId, request.id),
-        eq(questionRevision.kind, "rating"),
-        sql`'manager' = ANY(${questionRevision.appliesTo})`,
+        eq(questionRevision.role, "overall_rating"),
       ),
     )
-    .orderBy(desc(questionRevision.sort))
     .limit(1);
   return row?.value == null ? null : row;
 }
@@ -132,7 +130,7 @@ export async function recordManagerRating(
 
 /**
  * Options of a cycle's final scale: its final_scale_id, else the scale of
- * the overall manager question.
+ * the question with role `overall_rating`.
  */
 export async function finalScale(
   db: DbOrTx,
@@ -159,11 +157,9 @@ export async function finalScale(
     .where(
       and(
         eq(questionRevision.cycleId, cycleId),
-        eq(questionRevision.kind, "rating"),
-        sql`'manager' = ANY(${questionRevision.appliesTo})`,
+        eq(questionRevision.role, "overall_rating"),
       ),
     )
-    .orderBy(desc(questionRevision.sort))
     .limit(1);
   return q?.scale?.options ?? [];
 }

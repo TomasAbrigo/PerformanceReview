@@ -46,7 +46,8 @@
     "not_found": "The item no longer exists.",
     "system_readonly": "System items cannot be changed or deleted; clone them instead.",
     "in_use": "The scale is used by a question.",
-    "unknown": "Something went wrong."
+    "unknown": "Something went wrong.",
+    "duplicateRole": "This template already has a question with that role."
   },
   "Scales": {
     "title": "Rating scales",
@@ -118,7 +119,14 @@
     "choiceEn": "Option {n} (English)",
     "addChoice": "Add option",
     "hiddenFromReviewee": "Hidden from the reviewee",
-    "chooseScale": "Choose a scale"
+    "chooseScale": "Choose a scale",
+    "role": "Special role",
+    "roles": {
+      "none": "None",
+      "goals_rating": "Goals rating",
+      "goals_comment": "Goals comment",
+      "overall_rating": "Overall performance rating"
+    }
   },
   "People": {
     "title": "People",
@@ -723,8 +731,6 @@
     "notFound": "You have no manager review for this person.",
     "visible": "The employee will see this",
     "hidden": "The employee will not see this",
-    "goalsTitle": "Goals",
-    "goalsPlaceholder": "The period's goals will be shown here.",
     "selfTitle": "Self assessment",
     "selfHidden": "The self assessment will be shown once both reviews are submitted.",
     "share": "Share with the employee",
@@ -735,6 +741,21 @@
     "resultTitle": "Your manager's review: {cycle}",
     "notSharedYet": "Your review has not been shared yet.",
     "backToTasks": "Back to my tasks"
+  },
+  "GoalsInCycle": {
+    "title": "Goals for the period",
+    "legend": "Progress as of {date}",
+    "empty": "There are no goals in this period. The goals rating and comment are optional.",
+    "dueDate": "Due {date}",
+    "noDueDate": "No due date",
+    "progress": "Progress",
+    "noLongerApplicable": "No longer applicable",
+    "refresh": "Update progress",
+    "refreshing": "Updating…",
+    "refreshHint": "Refreshes the figures of the listed goals; it does not add new goals.",
+    "linkLabel": "Goal to link",
+    "linkPlaceholder": "Choose a goal",
+    "link": "Link goal"
   },
   "Calibration": {
     "title": "Calibration · {cycle}",

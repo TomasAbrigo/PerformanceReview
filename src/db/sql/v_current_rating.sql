@@ -1,4 +1,4 @@
--- Current rating per participant (reference copy; applied in drizzle/0011_calibration.sql).
+-- Current rating per participant (reference copy; applied in drizzle/0012_calibration.sql).
 -- Precedence: override > calibrated > manager > computed; within a stage the latest row wins.
 CREATE VIEW "v_current_rating" AS
 SELECT DISTINCT ON ("participant_id")

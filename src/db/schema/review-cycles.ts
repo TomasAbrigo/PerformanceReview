@@ -25,6 +25,7 @@ import { sourceColumns } from "./source";
 import {
   question,
   type QuestionKind,
+  type QuestionRole,
   type Relationship,
   reviewTemplate,
 } from "./templates";
@@ -148,6 +149,13 @@ export const questionRevision = pgTable(
     choices:
       jsonb("choices").$type<{ value: string; label: LocalizedText }[]>(),
     sort: integer("sort").notNull(),
+    /**
+     * Special meaning copied from the template question. `goals_rating` and
+     * `goals_comment` are the goals rating and its comment: stored apart from
+     * the overall rating, they never feed the final rating or the calibration
+     * (see countsTowardOverall).
+     */
+    role: text("role").$type<QuestionRole>(),
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
       .defaultNow(),

@@ -7,6 +7,7 @@ import { closeDb, db } from "@/db/client";
 import {
   cycleParticipant,
   ratingScale,
+  questionRevision,
   finalRating,
   person,
   reviewAudit,
@@ -574,5 +575,57 @@ describe("review findings", () => {
       "flagged",
       "created_at",
     ]);
+  });
+});
+
+describe("overall rating question (role)", () => {
+  async function launched() {
+    const cycle = await createCycle(db, input());
+    await launchCycle(db, cycle.id, null);
+    const p = await participantOf(cycle.id, bruno);
+    const id = (await findManagerRequestId(db, as(carla), p.id))!;
+    return { cycle, p, id };
+  }
+
+  it("records the overall_rating question even when it is not the last", async () => {
+    const { cycle, p, id } = await launched();
+    await db
+      .update(questionRevision)
+      .set({ sort: -1 })
+      .where(
+        and(
+          eq(questionRevision.cycleId, cycle.id),
+          eq(questionRevision.role, "overall_rating"),
+        ),
+      );
+    const review = (await getReview(db, as(carla), id))!;
+    const overall = review.questions.find((q) => q.role === "overall_rating")!;
+    await saveDraft(
+      db,
+      as(carla),
+      id,
+      fillAll(review, 2).map((a) =>
+        a.questionRevisionId === overall.id ? { ...a, value: 4 } : a,
+      ),
+    );
+    await submit(db, as(carla), id);
+    expect((await currentRatingFor(db, p.id))?.optionValue).toBe(4);
+  });
+
+  it("records nothing when the template has no overall question", async () => {
+    const { cycle, p, id } = await launched();
+    await db
+      .update(questionRevision)
+      .set({ role: null })
+      .where(
+        and(
+          eq(questionRevision.cycleId, cycle.id),
+          eq(questionRevision.role, "overall_rating"),
+        ),
+      );
+    const review = (await getReview(db, as(carla), id))!;
+    await saveDraft(db, as(carla), id, fillAll(review, 3));
+    await submit(db, as(carla), id);
+    expect(await rows(p.id)).toHaveLength(0);
   });
 });

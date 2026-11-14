@@ -1,11 +1,11 @@
 {
-  "id": "5ce71294-d659-4b7e-84ae-7a649994e20e",
+  "id": "04edba5b-619d-4a0b-940d-4878bdf7c93c",
   "prevId": "32c595f1-be31-4d6c-b394-0e4e49f95a36",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
-    "public.calibration_group": {
-      "name": "calibration_group",
+    "public.cycle_goal_link": {
+      "name": "cycle_goal_link",
       "schema": "",
       "columns": {
         "id": {
@@ -21,27 +21,14 @@
           "primaryKey": false,
           "notNull": true
         },
-        "name": {
-          "name": "name",
-          "type": "text",
+        "goal_id": {
+          "name": "goal_id",
+          "type": "uuid",
           "primaryKey": false,
           "notNull": true
         },
-        "kind": {
-          "name": "kind",
-          "type": "calibration_group_kind",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "criteria": {
-          "name": "criteria",
-          "type": "jsonb",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "created_by": {
-          "name": "created_by",
+        "linked_by": {
+          "name": "linked_by",
           "type": "uuid",
           "primaryKey": false,
           "notNull": false
@@ -54,27 +41,11 @@
           "default": "now()"
         }
       },
-      "indexes": {
-        "calibration_group_cycle_idx": {
-          "name": "calibration_group_cycle_idx",
-          "columns": [
-            {
-              "expression": "cycle_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
+      "indexes": {},
       "foreignKeys": {
-        "calibration_group_cycle_id_review_cycle_id_fk": {
-          "name": "calibration_group_cycle_id_review_cycle_id_fk",
-          "tableFrom": "calibration_group",
+        "cycle_goal_link_cycle_id_review_cycle_id_fk": {
+          "name": "cycle_goal_link_cycle_id_review_cycle_id_fk",
+          "tableFrom": "cycle_goal_link",
           "tableTo": "review_cycle",
           "columnsFrom": [
             "cycle_id"
@@ -85,12 +56,25 @@
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
-        "calibration_group_created_by_person_id_fk": {
-          "name": "calibration_group_created_by_person_id_fk",
-          "tableFrom": "calibration_group",
+        "cycle_goal_link_goal_id_goal_id_fk": {
+          "name": "cycle_goal_link_goal_id_goal_id_fk",
+          "tableFrom": "cycle_goal_link",
+          "tableTo": "goal",
+          "columnsFrom": [
+            "goal_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "cycle_goal_link_linked_by_person_id_fk": {
+          "name": "cycle_goal_link_linked_by_person_id_fk",
+          "tableFrom": "cycle_goal_link",
           "tableTo": "person",
           "columnsFrom": [
-            "created_by"
+            "linked_by"
           ],
           "columnsTo": [
             "id"
@@ -100,140 +84,22 @@
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public.calibration_group_calibrator": {
-      "name": "calibration_group_calibrator",
-      "schema": "",
-      "columns": {
-        "group_id": {
-          "name": "group_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "person_id": {
-          "name": "person_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "read_only": {
-          "name": "read_only",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": true,
-          "default": true
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "calibration_group_calibrator_group_id_calibration_group_id_fk": {
-          "name": "calibration_group_calibrator_group_id_calibration_group_id_fk",
-          "tableFrom": "calibration_group_calibrator",
-          "tableTo": "calibration_group",
-          "columnsFrom": [
-            "group_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "calibration_group_calibrator_person_id_person_id_fk": {
-          "name": "calibration_group_calibrator_person_id_person_id_fk",
-          "tableFrom": "calibration_group_calibrator",
-          "tableTo": "person",
-          "columnsFrom": [
-            "person_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {
-        "calibration_group_calibrator_group_id_person_id_pk": {
-          "name": "calibration_group_calibrator_group_id_person_id_pk",
+      "uniqueConstraints": {
+        "cycle_goal_link_cycle_goal_uq": {
+          "name": "cycle_goal_link_cycle_goal_uq",
+          "nullsNotDistinct": false,
           "columns": [
-            "group_id",
-            "person_id"
+            "cycle_id",
+            "goal_id"
           ]
         }
       },
-      "uniqueConstraints": {},
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.calibration_group_member": {
-      "name": "calibration_group_member",
-      "schema": "",
-      "columns": {
-        "group_id": {
-          "name": "group_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "participant_id": {
-          "name": "participant_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "calibration_group_member_group_id_calibration_group_id_fk": {
-          "name": "calibration_group_member_group_id_calibration_group_id_fk",
-          "tableFrom": "calibration_group_member",
-          "tableTo": "calibration_group",
-          "columnsFrom": [
-            "group_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "calibration_group_member_participant_id_cycle_participant_id_fk": {
-          "name": "calibration_group_member_participant_id_cycle_participant_id_fk",
-          "tableFrom": "calibration_group_member",
-          "tableTo": "cycle_participant",
-          "columnsFrom": [
-            "participant_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {
-        "calibration_group_member_group_id_participant_id_pk": {
-          "name": "calibration_group_member_group_id_participant_id_pk",
-          "columns": [
-            "group_id",
-            "participant_id"
-          ]
-        }
-      },
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public.final_rating": {
-      "name": "final_rating",
+    "public.participant_goal_snapshot": {
+      "name": "participant_goal_snapshot",
       "schema": "",
       "columns": {
         "id": {
@@ -249,70 +115,70 @@
           "primaryKey": false,
           "notNull": true
         },
-        "stage": {
-          "name": "stage",
-          "type": "final_rating_stage",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "option_value": {
-          "name": "option_value",
-          "type": "numeric",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "option_label": {
-          "name": "option_label",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "normalized": {
-          "name": "normalized",
-          "type": "numeric",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "actor_person_id": {
-          "name": "actor_person_id",
+        "goal_id": {
+          "name": "goal_id",
           "type": "uuid",
           "primaryKey": false,
           "notNull": false
         },
-        "reason": {
-          "name": "reason",
+        "goal_source_key": {
+          "name": "goal_source_key",
           "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "title": {
+          "name": "title",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "status": {
+          "name": "status",
+          "type": "goal_status",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "percent_complete": {
+          "name": "percent_complete",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "due_date": {
+          "name": "due_date",
+          "type": "date",
           "primaryKey": false,
           "notNull": false
         },
-        "flagged": {
-          "name": "flagged",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": true,
-          "default": false
-        },
-        "created_at": {
-          "name": "created_at",
+        "captured_at": {
+          "name": "captured_at",
           "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": true,
           "default": "now()"
+        },
+        "refreshed_at": {
+          "name": "refreshed_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "no_longer_applicable": {
+          "name": "no_longer_applicable",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
         }
       },
       "indexes": {
-        "final_rating_participant_idx": {
-          "name": "final_rating_participant_idx",
+        "participant_goal_snapshot_goal_idx": {
+          "name": "participant_goal_snapshot_goal_idx",
           "columns": [
             {
-              "expression": "participant_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "created_at",
+              "expression": "goal_id",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
@@ -325,9 +191,9 @@
         }
       },
       "foreignKeys": {
-        "final_rating_participant_id_cycle_participant_id_fk": {
-          "name": "final_rating_participant_id_cycle_participant_id_fk",
-          "tableFrom": "final_rating",
+        "participant_goal_snapshot_participant_id_cycle_participant_id_fk": {
+          "name": "participant_goal_snapshot_participant_id_cycle_participant_id_fk",
+          "tableFrom": "participant_goal_snapshot",
           "tableTo": "cycle_participant",
           "columnsFrom": [
             "participant_id"
@@ -338,22 +204,31 @@
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
-        "final_rating_actor_person_id_person_id_fk": {
-          "name": "final_rating_actor_person_id_person_id_fk",
-          "tableFrom": "final_rating",
-          "tableTo": "person",
+        "participant_goal_snapshot_goal_id_goal_id_fk": {
+          "name": "participant_goal_snapshot_goal_id_goal_id_fk",
+          "tableFrom": "participant_goal_snapshot",
+          "tableTo": "goal",
           "columnsFrom": [
-            "actor_person_id"
+            "goal_id"
           ],
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
+          "onDelete": "set null",
           "onUpdate": "no action"
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
+      "uniqueConstraints": {
+        "participant_goal_snapshot_participant_goal_uq": {
+          "name": "participant_goal_snapshot_participant_goal_uq",
+          "nullsNotDistinct": false,
+          "columns": [
+            "participant_id",
+            "goal_source_key"
+          ]
+        }
+      },
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
@@ -1845,6 +1720,12 @@
           "type": "jsonb",
           "primaryKey": false,
           "notNull": false
+        },
+        "role": {
+          "name": "role",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
         }
       },
       "indexes": {},
@@ -2811,6 +2692,12 @@
           "primaryKey": false,
           "notNull": true
         },
+        "role": {
+          "name": "role",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
         "created_at": {
           "name": "created_at",
           "type": "timestamp with time zone",
@@ -3572,25 +3459,6 @@
     }
   },
   "enums": {
-    "public.calibration_group_kind": {
-      "name": "calibration_group_kind",
-      "schema": "public",
-      "values": [
-        "by_department",
-        "by_manager",
-        "manual"
-      ]
-    },
-    "public.final_rating_stage": {
-      "name": "final_rating_stage",
-      "schema": "public",
-      "values": [
-        "computed",
-        "manager",
-        "calibrated",
-        "override"
-      ]
-    },
     "public.goal_status": {
       "name": "goal_status",
       "schema": "public",
@@ -3666,9 +3534,7 @@
         "shared",
         "unshared",
         "reminder_sent",
-        "reviewer_reassigned",
-        "calibration_published",
-        "rating_override"
+        "reviewer_reassigned"
       ]
     },
     "public.review_relationship": {

@@ -12,10 +12,12 @@ import { getActor } from "@/modules/actor/server";
 import {
   findManagerRequestId,
   getReview,
+  getReviewGoals,
   canShare,
   participantRefs,
   shareableNow,
 } from "@/modules/review-core";
+import { linkGoalAction, refreshGoalsAction } from "../../goals/actions";
 import { saveDraftAction, submitAction } from "../../self/actions";
 import { shareAction } from "./actions";
 
@@ -46,8 +48,20 @@ async function ManagerReview({
       </div>
     );
   }
+  const goals = await getReviewGoals(db, actor, review);
   return (
     <ManagerReviewForm
+      goals={
+        goals
+          ? {
+              data: goals,
+              actions: {
+                refresh: refreshGoalsAction,
+                link: linkGoalAction.bind(null, id),
+              },
+            }
+          : undefined
+      }
       review={{
         ...toReviewData(review),
         cycleId: id,
