@@ -20,13 +20,22 @@ export type IngestCounts = {
   deleted: number;
   /** job_history: rows whose reportsTo could not be resolved to one person. */
   managerUnresolved?: number;
+  /** job_history: managers matched only by the words of the name, in any order. */
+  managerResolvedFuzzy?: number;
   /** employee: records held (or flagged) in the identity queue instead of applied. */
   issues?: number;
   /** employee: records a reviewer already decided to ignore, resent unchanged. */
   ignored?: number;
+  /** assessment: imported manager reviews whose CSV manager is not the one in force. */
+  mismatches?: number;
 };
 
 /** The counters every run shows (the optional ones are entity-specific extras). */
+/** Entity-specific counters the run detail shows only when a run has them. */
+export const INGEST_EXTRA_COUNT_KEYS = [
+  "mismatches",
+] as const satisfies readonly (keyof IngestCounts)[];
+
 export const INGEST_COUNT_KEYS = [
   "read",
   "inserted",

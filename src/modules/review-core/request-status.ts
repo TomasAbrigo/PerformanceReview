@@ -1,6 +1,15 @@
 // Drizzle-free constants shared by the schema, the domain and client components.
 
-export const requestStatuses = ["draft", "submitted", "declined"] as const;
+/**
+ * `superseded`: a submitted manager review replaced by another assessor's
+ * request (#17); kept for history, never written or read as current.
+ */
+export const requestStatuses = [
+  "draft",
+  "submitted",
+  "declined",
+  "superseded",
+] as const;
 export type RequestStatus = (typeof requestStatuses)[number];
 
 export const reviewActions = [

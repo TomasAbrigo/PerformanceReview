@@ -203,7 +203,8 @@
         "issues": "En cola",
         "ignored": "Ignorados",
         "log": "Entradas del log",
-        "duration": "Duración"
+        "duration": "Duración",
+        "mismatches": "Evaluador distinto"
       },
       "status": {
         "running": "En curso",
@@ -354,7 +355,8 @@
         "bamboo_id": "ID Bamboo",
         "employee_number": "Legajo",
         "work_email": "Email",
-        "name_hire_date": "Nombre e ingreso"
+        "name_hire_date": "Nombre e ingreso",
+        "name": "Nombre"
       },
       "score": "{score}% de coincidencia",
       "employments": "Empleos",
@@ -390,6 +392,11 @@
       "label": "Páginas",
       "older": "Casos anteriores",
       "newest": "Volver a los más recientes"
+    },
+    "roles": {
+      "employee": "empleado",
+      "manager": "manager",
+      "reviewer": "evaluador"
     }
   },
   "Cycles": {
@@ -415,7 +422,9 @@
       "closed": "Cerrado"
     },
     "extras": {
-      "steps": { "groups": "Grupos" },
+      "steps": {
+        "groups": "Grupos"
+      },
       "duplicate": {
         "button": "Duplicar ciclo",
         "pending": "Duplicando…",
@@ -480,7 +489,10 @@
         "inScope": "{count, plural, one {# persona dentro del alcance; se incorpora al cumplir el hito} other {# personas dentro del alcance; se incorporan al cumplir el hito}}",
         "summary": "Hito: {milestone} · ventana de {window}"
       },
-      "detail": { "group": "Grupo", "due": "Vence" }
+      "detail": {
+        "group": "Grupo",
+        "due": "Vence"
+      }
     },
     "wizard": {
       "title": "Nuevo ciclo",
@@ -648,6 +660,7 @@
       "draft": "Borrador",
       "submitted": "Enviada",
       "declined": "Rechazada",
+      "superseded": "Reemplazada",
       "none": "—"
     },
     "unlock": "Desbloquear",
@@ -696,7 +709,10 @@
       "import": "Importar",
       "importing": "Importando…",
       "another": "Elegir otro archivo",
-      "blocked": "Corregí los problemas del perfil para poder importar."
+      "blocked": "Corregí los problemas del perfil para poder importar.",
+      "landingOnly": "Solo aterrizar",
+      "historyHint": "Las filas se importan como ciclos de evaluación históricos, con sus participantes, solicitudes y respuestas.",
+      "landingHint": "Las filas se guardan tal cual (crudas), sin crear ciclos."
     },
     "roles": {
       "key": "Clave",
@@ -808,7 +824,145 @@
     "sharedCount": "{count, plural, =0 {No había evaluaciones para compartir.} one {Se compartió # evaluación.} other {Se compartieron # evaluaciones.}}",
     "resultTitle": "Evaluación de tu manager: {cycle}",
     "notSharedYet": "Tu evaluación todavía no fue compartida.",
-    "backToTasks": "Volver a mis tareas"
+    "backToTasks": "Volver a mis tareas",
+    "goalsTitle": "Objetivos",
+    "goalsPlaceholder": "Los objetivos del período se mostrarán aquí."
+  },
+  "Ops": {
+    "actions": {
+      "title": "Operaciones del ciclo",
+      "participants": "Participantes y evaluadores",
+      "audit": "Registro de auditoría",
+      "extend": "Extender una fecha límite",
+      "extendTitle": "Extender una fecha límite",
+      "phase": "Fase",
+      "phaseOption": "{phase} (vence {date})",
+      "newDate": "Nueva fecha límite",
+      "note": "Motivo (opcional)",
+      "confirm": "Extender",
+      "cancel": "Cancelar",
+      "extended": "Fecha límite extendida."
+    },
+    "participants": {
+      "title": "Participantes y evaluadores: {cycle}",
+      "back": "Volver al ciclo",
+      "forbidden": "Solo People puede gestionar los participantes de un ciclo.",
+      "addTitle": "Agregar un participante",
+      "addHint": "Se toma su snapshot organizacional hoy y se crean sus evaluaciones pendientes.",
+      "person": "Persona",
+      "choosePerson": "Elegí una persona",
+      "noCandidates": "Todas las personas elegibles ya participan.",
+      "add": "Agregar participante",
+      "note": "Motivo (opcional)",
+      "tableLabel": "Participantes",
+      "empty": "Este ciclo no tiene participantes.",
+      "columns": {
+        "person": "Persona",
+        "snapshotManager": "Manager del snapshot",
+        "self": "Autoevaluación",
+        "manager": "Evaluación del manager",
+        "change": "Cambio de manager",
+        "actions": "Acciones"
+      },
+      "removed": "Quitado",
+      "noManager": "Sin manager",
+      "noAssessor": "Sin evaluador",
+      "mismatch": "El evaluador difiere del snapshot",
+      "additional": "Adicional",
+      "onBehalf": "Completada en nombre de otro",
+      "noRequest": "—",
+      "changed": "Ahora reporta a {current} (snapshot: {snapshot})",
+      "noSnapshotManager": "sin manager",
+      "noCurrentManager": "nadie",
+      "suggest": {
+        "reassign": "Sugerido: pasar la evaluación a {name}",
+        "add_assessor": "Sugerido: agregar a {name} como evaluador adicional",
+        "none": "Ya resuelto"
+      },
+      "assign": "Asignar evaluador",
+      "remove": "Quitar",
+      "removeTitle": "¿Quitar a {name} del ciclo?",
+      "removeBody": "Sus evaluaciones y respuestas se conservan como historial; ya no se podrán escribir.",
+      "removeConfirm": "Quitar participante",
+      "unlock": "Desbloquear",
+      "unlockTitle": "¿Desbloquear esta evaluación?",
+      "unlockConfirm": "Desbloquear",
+      "complete": "Completar en nombre de",
+      "cancel": "Cancelar",
+      "assessorTitle": "Asignar un evaluador a {name}",
+      "assessor": "Evaluador",
+      "mode": "¿Cómo participa?",
+      "modeReplace": "Reemplaza la evaluación del manager",
+      "modeAdditional": "Es un evaluador adicional",
+      "replaceRequired": "{name} no tiene manager: el evaluador toma a cargo la evaluación del manager.",
+      "assessorConfirm": "Asignar",
+      "done": "Listo."
+    },
+    "complete": {
+      "title": "Completar en nombre de otro: evaluación de {reviewee} por {reviewer}",
+      "back": "Volver a los participantes",
+      "notice": "Estás completando esta evaluación en nombre de {reviewer}. Las respuestas quedan en esta página hasta que confirmes; la acción queda auditada.",
+      "note": "Motivo (opcional)",
+      "saving": "Anotando…",
+      "saved": "Anotado (todavía no guardado)",
+      "confirmTitle": "¿Completar esta evaluación en nombre de {reviewer}?",
+      "notAvailable": "Esta evaluación no se puede completar en nombre de otro ahora.",
+      "notFound": "No se encontró la evaluación.",
+      "forbidden": "Solo People puede completar una evaluación en nombre de otro."
+    },
+    "audit": {
+      "title": "Registro de auditoría: {cycle}",
+      "back": "Volver al ciclo",
+      "forbidden": "Solo People puede leer el registro de auditoría.",
+      "empty": "No se registraron acciones administrativas.",
+      "tableLabel": "Acciones administrativas",
+      "filterLabel": "Filtrar el registro",
+      "filter": "Acción",
+      "allActions": "Todas las acciones",
+      "apply": "Filtrar",
+      "columns": {
+        "when": "Cuándo",
+        "actor": "Quién",
+        "action": "Acción",
+        "target": "Sobre",
+        "note": "Motivo",
+        "details": "Detalle"
+      },
+      "system": "People",
+      "cycleTarget": "El ciclo",
+      "details": "Ver cambios",
+      "changes": "Cambios",
+      "field": "Campo",
+      "before": "Antes",
+      "after": "Después",
+      "noChanges": "No cambió ningún campo.",
+      "actions": {
+        "participant_added": "Participante agregado",
+        "participant_removed": "Participante quitado",
+        "due_date_extended": "Fecha límite extendida",
+        "request_unlocked": "Evaluación desbloqueada",
+        "completed_on_behalf": "Completada en nombre de otro",
+        "assessor_assigned": "Evaluador asignado"
+      }
+    },
+    "errors": {
+      "forbidden": "No tenés permiso para hacer esto.",
+      "not_found": "No se encontró; recargá la página.",
+      "validation": "Hay datos inválidos (las fechas de las fases deben mantener el orden).",
+      "not_active": "El ciclo no está activo.",
+      "already_participant": "Esa persona ya participa del ciclo.",
+      "not_submitted": "La evaluación no está enviada.",
+      "missing_required": "Respondé las preguntas obligatorias.",
+      "date_not_forward": "La nueva fecha debe ser posterior a la fecha límite actual.",
+      "no_manager_request": "Todavía no existen las evaluaciones del manager: esperá a que el ciclo esté en recolección.",
+      "same_reviewer": "Esa persona ya escribe la evaluación del manager.",
+      "already_assigned": "Esa persona ya es evaluadora de este participante.",
+      "replace_required": "Este participante no tiene manager: el evaluador debe reemplazar al faltante.",
+      "reviewer_missing": "La evaluación no tiene evaluador: asigná uno primero.",
+      "not_draft": "La evaluación ya fue enviada: desbloqueala primero.",
+      "not_writable": "La evaluación no se puede escribir ahora (fase o participante quitado).",
+      "unknown": "Ocurrió un error inesperado."
+    }
   },
   "Peers": {
     "maxNominations": "Máximo de nominaciones de pares",
@@ -1103,5 +1257,28 @@
       "normalized": "normalizado",
       "answer_text": "texto"
     }
+  },
+  "ImportHistory": {
+    "title": "Importación histórica",
+    "back": "← Corridas de importación",
+    "summary": "{count, plural, one {# ciclo detectado en el archivo} other {# ciclos detectados en el archivo}}",
+    "cycles": "Ciclos detectados",
+    "columns": {
+      "cycle": "Ciclo",
+      "period": "Período",
+      "rows": "Filas",
+      "participants": "Participantes nuevos",
+      "requests": "Solicitudes",
+      "answers": "Respuestas",
+      "issues": "Casos de identidad",
+      "mismatches": "Evaluador distinto"
+    },
+    "period": "{start} – {end}",
+    "createdUnchanged": "{created} nuevas · {unchanged} sin cambios",
+    "mismatchHint": "Evaluador distinto: el manager del archivo no es el vigente al cierre del período (el participante conserva el vigente).",
+    "viewRun": "Ver la corrida",
+    "viewQueue": "Ver la cola de identidad",
+    "viewResult": "Ver ciclos importados",
+    "notFound": "Esta corrida no importó ciclos históricos."
   }
 }

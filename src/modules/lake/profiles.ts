@@ -43,6 +43,12 @@ export const sourceProfileSchema = z.object({
   columnMap: z.record(name, name),
   /** Optional expected type family per source column, to detect drift. */
   columnTypes: z.record(name, z.enum(TYPE_FAMILIES)).optional(),
+  /**
+   * How ambiguous day/month dates ("03/04/2023") are written: month first
+   * (`mdy`) or day first (`dmy`). ISO dates, and dates where a part is above
+   * 12, never need it; without it an ambiguous date rejects the row.
+   */
+  dateFormat: z.enum(["mdy", "dmy"]).optional(),
 });
 export type SourceProfile = z.infer<typeof sourceProfileSchema>;
 

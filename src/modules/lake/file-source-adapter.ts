@@ -107,6 +107,8 @@ export class FileSourceAdapter implements SourceAdapter<IngestEntity> {
             deleted: record.deleted,
             watermark: record.watermark,
             raw: row,
+            // Only when set: payloads (and their hashes) stay as they were.
+            ...(profile.dateFormat ? { dateFormat: profile.dateFormat } : {}),
           },
           extractedAt,
         };

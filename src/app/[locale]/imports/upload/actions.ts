@@ -67,7 +67,7 @@ export async function inspectUploadAction(
   };
 }
 
-/** Land an uploaded file's rows in raw_record with a profile (landing only). */
+/** Import an uploaded file with a profile (historical cycles or landing). */
 export async function importUploadAction(
   input: z.input<typeof importInputSchema>,
 ): Promise<ImportResult> {
@@ -102,5 +102,6 @@ export async function importUploadAction(
     runId: response.runId,
     counts: response.counts,
     rejects: response.rejects,
+    mode: response.mode,
   };
 }

@@ -63,11 +63,25 @@ export type ProfileChoice =
   | { saved: string }
   | { custom: SourceProfile; replace?: boolean };
 
+/**
+ * Built-in profiles of Bamboo report exports whose rows can be imported as
+ * historical review cycles (domain mode) instead of only landed.
+ */
+export const HISTORY_PROFILES: readonly string[] = [
+  "bamboo-employee-performance",
+  "bamboo-feedback-status",
+];
+
 /** What the import action and the upload worker take. */
 export const importInputSchema = z.object({
   uploadId: z.string(),
   fileName: z.string().max(255),
   profile: profileChoiceSchema,
+  /**
+   * History profiles only: land the rows in raw_record without creating
+   * cycles. Every other profile is always landed.
+   */
+  landing: z.boolean().optional(),
 });
 
 /** What is inside an upload: detected columns (with types) and a few rows. */
@@ -83,6 +97,8 @@ export type ImportUploadResult = {
   counts: IngestCounts;
   /** The first rejected rows; all of them stay on the run. */
   rejects: IngestReject[];
+  /** `domain`: imported as historical cycles; `landing`: rows only landed. */
+  mode?: "domain" | "landing";
 };
 
 /** Result of storing and looking inside an uploaded file. */
