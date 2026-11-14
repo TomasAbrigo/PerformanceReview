@@ -83,3 +83,35 @@ export {
   type GoalsScope,
   type GoalWindow,
 } from "./goal-snapshot";
+export {
+  compareReviews,
+  type CompareQuestion,
+  type CompareRow,
+  type CompareSide,
+  type Comparison,
+} from "./compare";
+export {
+  addFollowUpNote,
+  canAddFollowUp,
+  FOLLOW_UP_MAX_LENGTH,
+  listFollowUpNotes,
+  type FollowUpNote,
+} from "./follow-up";
+export {
+  ACK_NOTE_MAX_LENGTH,
+  acknowledge,
+  AckError,
+  getAcknowledgement,
+  listMyAcknowledgements,
+  type AckErrorCode,
+  type AckOptions,
+  type AckState,
+  type AckTask,
+} from "./acknowledge";
+export {
+  ackStatus,
+  acknowledgeDeadline,
+  DEFAULT_ACK_WINDOW_DAYS,
+  type AckStatus,
+} from "./acknowledge-window";
+export { reviewHistory, type HistoryItem, type HistoryRating } from "./history";

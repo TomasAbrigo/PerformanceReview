@@ -10,7 +10,7 @@ import { routing } from "@/i18n/routing";
 import { getActor } from "@/modules/actor/server";
 import { listNotifications } from "@/modules/notifications";
 import { getUnreadCount } from "@/modules/notifications/server";
-import { listMyTasks } from "@/modules/review-core";
+import { listMyAcknowledgements, listMyTasks } from "@/modules/review-core";
 
 async function Tasks({ params }: PageProps<"/[locale]/me">) {
   const { locale } = await params;
@@ -18,8 +18,9 @@ async function Tasks({ params }: PageProps<"/[locale]/me">) {
   setRequestLocale(locale);
   await connection();
   const actor = await getActor();
-  const [tasks, latest, unread] = await Promise.all([
+  const [tasks, acknowledgements, latest, unread] = await Promise.all([
     listMyTasks(db, actor),
+    listMyAcknowledgements(db, actor),
     listNotifications(db, actor, { unreadOnly: true, limit: 3 }),
     getUnreadCount(actor.personId),
   ]);
@@ -28,9 +29,11 @@ async function Tasks({ params }: PageProps<"/[locale]/me">) {
       <NotificationsPreview items={latest.items} unread={unread} />
       <MyTasksView
         hasPerson={actor.personId !== null}
+        personId={actor.personId}
         tasks={{
           selfAssessments: tasks.selfAssessments,
           sharedReviews: tasks.sharedReviews,
+          acknowledgements,
         }}
       />
     </div>

@@ -10,4 +10,5 @@ export * from "./goal-snapshots";
 export * from "./org-history";
 export * from "./review-cycles";
 export * from "./review-requests";
+export * from "./review-followups";
 export * from "./notifications";
