@@ -6,8 +6,10 @@ import { Suspense } from "react";
 import { CycleDetailView } from "@/components/cycles/cycle-detail";
 import { db } from "@/db/client";
 import { routing } from "@/i18n/routing";
-import { getCycle } from "@/modules/review-core";
+import { getActor } from "@/modules/actor/server";
+import { getCycle, listSelfRequests } from "@/modules/review-core";
 import { launchCycleAction, transitionCycleAction } from "../actions";
+import { unlockAction } from "./self/actions";
 
 async function Detail({ params }: PageProps<"/[locale]/cycles/[id]">) {
   const { locale, id } = await params;
@@ -16,6 +18,8 @@ async function Detail({ params }: PageProps<"/[locale]/cycles/[id]">) {
   await connection();
   const cycle = await getCycle(db, id);
   if (!cycle) notFound();
+  const actor = await getActor();
+  const selfRequests = await listSelfRequests(db, actor, id);
   return (
     <CycleDetailView
       cycle={{
@@ -43,6 +47,20 @@ async function Detail({ params }: PageProps<"/[locale]/cycles/[id]">) {
         transition: transitionCycleAction,
         launch: launchCycleAction,
       }}
+      selfReview={
+        selfRequests.length
+          ? {
+              byParticipant: Object.fromEntries(
+                selfRequests.map((r) => [
+                  r.participantId,
+                  { requestId: r.requestId, status: r.status },
+                ]),
+              ),
+              canUnlock: actor.role === "hr",
+              unlock: unlockAction,
+            }
+          : undefined
+      }
     />
   );
 }

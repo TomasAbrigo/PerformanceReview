@@ -23,3 +23,31 @@ export type {
   CycleUpdateInput,
   ParticipantFilterInput,
 } from "./validation";
+export {
+  findMySelfRequestId,
+  listMyTasks,
+  listSelfRequests,
+  personName,
+  unlock,
+  type MyTasks,
+  type SelfAssessmentTask,
+  type SelfRequestItem,
+} from "./requests";
+export {
+  getSelfReview,
+  saveDraft,
+  submit,
+  type AnswerInput,
+  type AnswerValue,
+  type SelfReview,
+} from "./answers";
+export { ReviewError, type ReviewErrorCode } from "./review-errors";
+export * from "./request-status";
+export {
+  canRead,
+  canWrite,
+  type VisibilityContext,
+  type VisibilityRequest,
+  type WriteScope,
+  writablePhases,
+} from "./visibility";

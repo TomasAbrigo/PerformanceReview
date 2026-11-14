@@ -517,6 +517,70 @@
       "unknown": "An unexpected error occurred."
     }
   },
+  "Actor": {
+    "label": "Act as",
+    "current": "Acting as: {name}",
+    "hrName": "People (HR)",
+    "search": "Search person",
+    "person": "Person",
+    "noPerson": "No person",
+    "role": "Role",
+    "roles": {
+      "hr": "People (HR)",
+      "manager": "Manager",
+      "employee": "Employee",
+      "peer": "Peer",
+      "calibrator": "Calibrator"
+    },
+    "apply": "Apply",
+    "myTasks": "My tasks",
+    "error": "Could not change the actor."
+  },
+  "Me": {
+    "title": "My tasks",
+    "empty": "You have no pending tasks.",
+    "noPerson": "Pick a person in 'Act as' to see their tasks.",
+    "selfAssessments": "Self assessments",
+    "selfTask": "Self assessment: {cycle}",
+    "due": "Due {date}",
+    "noDue": "No due date",
+    "open": "Fill in"
+  },
+  "Review": {
+    "selfTitle": "Self assessment",
+    "back": "Back to my tasks",
+    "due": "Due {date}",
+    "required": "Required",
+    "saving": "Saving…",
+    "saved": "Draft saved",
+    "submit": "Submit",
+    "confirmTitle": "Submit the self assessment?",
+    "confirmBody": "Once submitted you will not be able to change it.",
+    "confirm": "Confirm submission",
+    "cancel": "Cancel",
+    "submittedOn": "Submitted on {date}",
+    "missingRequired": "Answer the required questions.",
+    "requiredError": "This question is required.",
+    "noAnswer": "No answer",
+    "notFound": "You have no self assessment in this cycle.",
+    "selfColumn": "Self assessment",
+    "status": {
+      "draft": "Draft",
+      "submitted": "Submitted",
+      "declined": "Declined",
+      "none": "—"
+    },
+    "unlock": "Unlock",
+    "unlockNote": "Reason for unlocking",
+    "unlockConfirm": "Confirm unlock",
+    "errors": {
+      "not_found": "The review was not found.",
+      "forbidden": "You are not allowed to do this.",
+      "validation": "Some answers are invalid.",
+      "not_submitted": "The review is not submitted.",
+      "unknown": "An unexpected error occurred."
+    }
+  },
   "Upload": {
     "nav": "Upload a file",
     "title": "Upload a file",
