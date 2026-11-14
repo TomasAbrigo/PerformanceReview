@@ -27,7 +27,10 @@ async function Tasks({ params }: PageProps<"/[locale]/me">) {
       <NotificationsPreview items={latest.items} unread={unread} />
       <MyTasksView
         hasPerson={actor.personId !== null}
-        tasks={{ selfAssessments: tasks.selfAssessments }}
+        tasks={{
+          selfAssessments: tasks.selfAssessments,
+          sharedReviews: tasks.sharedReviews,
+        }}
       />
     </div>
   );

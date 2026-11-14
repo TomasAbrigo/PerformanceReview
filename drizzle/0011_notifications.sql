@@ -15,4 +15,4 @@ CREATE TABLE "notification" (
 ALTER TABLE "notification" ADD CONSTRAINT "notification_recipient_person_id_person_id_fk" FOREIGN KEY ("recipient_person_id") REFERENCES "public"."person"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "notification" ADD CONSTRAINT "notification_cycle_id_review_cycle_id_fk" FOREIGN KEY ("cycle_id") REFERENCES "public"."review_cycle"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "notification" ADD CONSTRAINT "notification_request_id_review_request_id_fk" FOREIGN KEY ("request_id") REFERENCES "public"."review_request"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-CREATE INDEX "notification_recipient_idx" ON "notification" USING btree ("recipient_person_id","read_at","created_at");
+CREATE INDEX "notification_inbox_idx" ON "notification" USING btree ("recipient_person_id",("read_at" is not null),"created_at" DESC NULLS FIRST,"id" DESC NULLS FIRST);

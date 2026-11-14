@@ -34,6 +34,23 @@ export {
   type SelfRequestItem,
 } from "./requests";
 export {
+  ensureManagerRequests,
+  findMySharedReviewId,
+  type SharedReviewTask,
+} from "./requests";
+export {
+  findManagerRequestId,
+  isSkipLevel,
+  listTeam,
+  participantRefs,
+  sendReminder,
+  type TeamRow,
+} from "./manager";
+export { shareAll, shareReview, unshare } from "./share";
+export { canShare, isActiveParticipant, shareableNow } from "./visibility";
+export {
+  getReview,
+  type Review,
   getSelfReview,
   saveDraft,
   submit,

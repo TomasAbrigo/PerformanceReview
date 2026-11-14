@@ -40,12 +40,15 @@ export const reviewRequest = pgTable(
     participantId: uuid("participant_id")
       .notNull()
       .references(() => cycleParticipant.id, { onDelete: "cascade" }),
-    reviewerPersonId: uuid("reviewer_person_id")
-      .notNull()
-      .references(() => person.id),
+    /** Null when the reviewer could not be resolved (see reviewerMissing). */
+    reviewerPersonId: uuid("reviewer_person_id").references(() => person.id),
     relationship: reviewRelationship("relationship").notNull(),
     status: reviewRequestStatus("status").notNull().default("draft"),
     anonymous: boolean("anonymous").notNull().default(false),
+    /** Manager request whose participant had no manager at the snapshot. */
+    reviewerMissing: boolean("reviewer_missing").notNull().default(false),
+    /** Submitted by someone who is no longer the snapshot manager. */
+    reviewerMismatch: boolean("reviewer_mismatch").notNull().default(false),
     requestedAt: timestamp("requested_at", { withTimezone: true })
       .notNull()
       .defaultNow(),
@@ -54,14 +57,15 @@ export const reviewRequest = pgTable(
     declineReason: text("decline_reason"),
     unlockedAt: timestamp("unlocked_at", { withTimezone: true }),
     unlockedBy: uuid("unlocked_by").references(() => person.id),
+    /** Manager review shared with the reviewee (visible to them from then). */
+    sharedAt: timestamp("shared_at", { withTimezone: true }),
+    sharedBy: uuid("shared_by").references(() => person.id),
     ...sourceColumns,
   },
   (t) => [
-    unique("review_request_participant_rel_reviewer_uq").on(
-      t.participantId,
-      t.relationship,
-      t.reviewerPersonId,
-    ),
+    unique("review_request_participant_rel_reviewer_uq")
+      .on(t.participantId, t.relationship, t.reviewerPersonId)
+      .nullsNotDistinct(),
     unique().on(t.sourceSystem, t.sourceId),
     index("review_request_reviewer_idx").on(t.reviewerPersonId, t.status),
     index("review_request_cycle_idx").on(t.cycleId),

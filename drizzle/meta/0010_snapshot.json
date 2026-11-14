@@ -1,5 +1,5 @@
 {
-  "id": "557ac2ba-7d1f-438f-b6d0-9066f2313a46",
+  "id": "32c595f1-be31-4d6c-b394-0e4e49f95a36",
   "prevId": "480928f0-07f7-40a0-8d79-3abe1aebb4f7",
   "version": "7",
   "dialect": "postgresql",
@@ -2629,6 +2629,12 @@
           "primaryKey": false,
           "notNull": false
         },
+        "calibration_published_at": {
+          "name": "calibration_published_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
         "source_system": {
           "name": "source_system",
           "type": "source_system",
@@ -2947,7 +2953,7 @@
           "name": "reviewer_person_id",
           "type": "uuid",
           "primaryKey": false,
-          "notNull": true
+          "notNull": false
         },
         "relationship": {
           "name": "relationship",
@@ -2966,6 +2972,20 @@
         },
         "anonymous": {
           "name": "anonymous",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "reviewer_missing": {
+          "name": "reviewer_missing",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "reviewer_mismatch": {
+          "name": "reviewer_mismatch",
           "type": "boolean",
           "primaryKey": false,
           "notNull": true,
@@ -3004,6 +3024,18 @@
         },
         "unlocked_by": {
           "name": "unlocked_by",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "shared_at": {
+          "name": "shared_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "shared_by": {
+          "name": "shared_by",
           "type": "uuid",
           "primaryKey": false,
           "notNull": false
@@ -3145,13 +3177,26 @@
           ],
           "onDelete": "no action",
           "onUpdate": "no action"
+        },
+        "review_request_shared_by_person_id_fk": {
+          "name": "review_request_shared_by_person_id_fk",
+          "tableFrom": "review_request",
+          "tableTo": "person",
+          "columnsFrom": [
+            "shared_by"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
         }
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
         "review_request_participant_rel_reviewer_uq": {
           "name": "review_request_participant_rel_reviewer_uq",
-          "nullsNotDistinct": false,
+          "nullsNotDistinct": true,
           "columns": [
             "participant_id",
             "relationship",
@@ -3164,153 +3209,6 @@
           "columns": [
             "source_system",
             "source_id"
-          ]
-        }
-      },
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public.notification": {
-      "name": "notification",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true,
-          "default": "gen_random_uuid()"
-        },
-        "recipient_person_id": {
-          "name": "recipient_person_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "kind": {
-          "name": "kind",
-          "type": "notification_kind",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "cycle_id": {
-          "name": "cycle_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "request_id": {
-          "name": "request_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "payload": {
-          "name": "payload",
-          "type": "jsonb",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'{}'::jsonb"
-        },
-        "dedupe_key": {
-          "name": "dedupe_key",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        },
-        "read_at": {
-          "name": "read_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": false
-        }
-      },
-      "indexes": {
-        "notification_recipient_idx": {
-          "name": "notification_recipient_idx",
-          "columns": [
-            {
-              "expression": "recipient_person_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "read_at",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "created_at",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
-      "foreignKeys": {
-        "notification_recipient_person_id_person_id_fk": {
-          "name": "notification_recipient_person_id_person_id_fk",
-          "tableFrom": "notification",
-          "tableTo": "person",
-          "columnsFrom": [
-            "recipient_person_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "notification_cycle_id_review_cycle_id_fk": {
-          "name": "notification_cycle_id_review_cycle_id_fk",
-          "tableFrom": "notification",
-          "tableTo": "review_cycle",
-          "columnsFrom": [
-            "cycle_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "notification_request_id_review_request_id_fk": {
-          "name": "notification_request_id_review_request_id_fk",
-          "tableFrom": "notification",
-          "tableTo": "review_request",
-          "columnsFrom": [
-            "request_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {
-        "notification_dedupe_key_unique": {
-          "name": "notification_dedupe_key_unique",
-          "nullsNotDistinct": false,
-          "columns": [
-            "dedupe_key"
           ]
         }
       },
@@ -3391,7 +3289,11 @@
       "name": "review_audit_action",
       "schema": "public",
       "values": [
-        "unlock"
+        "unlock",
+        "shared",
+        "unshared",
+        "reminder_sent",
+        "reviewer_reassigned"
       ]
     },
     "public.review_relationship": {
@@ -3411,18 +3313,6 @@
         "draft",
         "submitted",
         "declined"
-      ]
-    },
-    "public.notification_kind": {
-      "name": "notification_kind",
-      "schema": "public",
-      "values": [
-        "reminder_due",
-        "manual_reminder",
-        "review_shared",
-        "feedback_received",
-        "calibration_published",
-        "cycle_phase_changed"
       ]
     }
   },

@@ -1,3 +1,4 @@
+import { sql } from "drizzle-orm";
 import {
   index,
   jsonb,
@@ -50,10 +51,12 @@ export const notification = pgTable(
     readAt: timestamp("read_at", { withTimezone: true }),
   },
   (t) => [
-    index("notification_recipient_idx").on(
+    // Matches the inbox order (unread first, newest first): see listNotifications.
+    index("notification_inbox_idx").on(
       t.recipientPersonId,
-      t.readAt,
-      t.createdAt,
+      sql`(${t.readAt} is not null)`,
+      t.createdAt.desc().nullsFirst(),
+      t.id.desc().nullsFirst(),
     ),
   ],
 );
