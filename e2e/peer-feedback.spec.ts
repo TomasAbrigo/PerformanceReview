@@ -1,4 +1,38 @@
 import { expect, type Page, test } from "@playwright/test";
+import {
+  byId,
+  company,
+  directReports,
+  employees,
+  find,
+  fullName,
+  hasUniqueName,
+  isActive,
+} from "./seed-data";
+
+const eligible = (e: (typeof employees)[number]) =>
+  isActive(e) && hasUniqueName(e) && directReports(e).length === 0;
+
+// A reviewee whose (active, uniquely named) manager is the snapshot manager,
+// and two active peers to nominate (not the reviewee, not the manager).
+const reviewee = find(
+  employees,
+  (e) =>
+    eligible(e) &&
+    e.managerId !== null &&
+    byId.has(e.managerId) &&
+    isActive(byId.get(e.managerId)!) &&
+    hasUniqueName(byId.get(e.managerId)!),
+  "reviewee with a manager",
+);
+const manager = byId.get(reviewee.managerId!)!;
+const [peer, otherPeer] = employees.filter(
+  (e) => eligible(e) && e.id !== reviewee.id && e.id !== manager.id,
+);
+const revieweeName = fullName(reviewee);
+const managerName = fullName(manager);
+const peerName = fullName(peer);
+const otherPeerName = fullName(otherPeer);
 
 /** Uses the header "Actuar como" selector. */
 async function actAs(page: Page, person: string | null, role: string) {
@@ -18,7 +52,7 @@ async function actAs(page: Page, person: string | null, role: string) {
 async function nominationsCycle(page: Page, name: string) {
   await page.goto("/es/cycles/new");
   await expect(page.getByText("Paso 1 de 4")).toBeVisible();
-  await page.getByLabel("Fecha de snapshot organizacional").fill("2022-06-01");
+  await page.getByLabel("Fecha de snapshot organizacional").fill(company.asOf);
   await expect(page.getByText(/\d+ personas coinciden/)).toBeVisible();
   await page.getByRole("button", { name: "Siguiente" }).click();
   await expect(page.getByLabel("Máximo de nominaciones de pares")).toHaveValue(
@@ -68,36 +102,48 @@ test("nominate, approve, answer: the manager sees the name, the employee a 'Par'
   const name = `Pares e2e ${Date.now()}`;
   const cycleUrl = await nominationsCycle(page, name);
 
-  // Bruno nominates Ana (Carla, his manager, is not eligible).
-  await actAs(page, "Bruno Pérez", "Empleado");
+  // The reviewee nominates two peers (their manager is not eligible).
+  await actAs(page, revieweeName, "Empleado");
   await page.goto("/es/me");
   await openTask(page, `Nominar pares en ${name}`);
   await expect(page.getByText("0 de 5 nominaciones")).toBeVisible();
   await expect(
     page.getByLabel("Colega a nominar").locator("option", {
-      hasText: "Carla Romero",
+      hasText: managerName,
     }),
   ).toHaveCount(0);
-  await page
-    .getByLabel("Colega a nominar")
-    .selectOption({ label: "Ana García" });
+  await page.getByLabel("Colega a nominar").selectOption({ label: peerName });
   await page.getByRole("button", { name: "Nominar" }).click();
   await expect(page.getByText("1 de 5 nominaciones")).toBeVisible();
+  await page
+    .getByLabel("Colega a nominar")
+    .selectOption({ label: otherPeerName });
+  await page.getByRole("button", { name: "Nominar" }).click();
+  await expect(page.getByText("2 de 5 nominaciones")).toBeVisible();
   await expect(
-    page.getByRole("listitem").filter({ hasText: "Ana García" }),
+    page.getByRole("listitem").filter({ hasText: peerName }),
   ).toContainText("Pendiente");
 
-  // Carla approves it from her team page.
-  await actAs(page, "Carla Romero", "Manager");
+  // The manager approves both from the team page.
+  await actAs(page, managerName, "Manager");
   await page.goto("/es/team");
   const approvals = page.getByRole("region", {
     name: "Nominaciones para aprobar",
   });
-  await approvals
-    .getByRole("listitem")
-    .filter({ hasText: name })
-    .getByRole("button", { name: "Aprobar" })
-    .click();
+  for (const nominee of [peerName, otherPeerName]) {
+    await approvals
+      .getByRole("listitem")
+      .filter({ hasText: name })
+      .filter({ hasText: nominee })
+      .getByRole("button", { name: "Aprobar" })
+      .click();
+    await expect(
+      approvals
+        .getByRole("listitem")
+        .filter({ hasText: name })
+        .filter({ hasText: nominee }),
+    ).toHaveCount(0);
+  }
   await expect(
     approvals.getByRole("listitem").filter({ hasText: name }),
   ).toHaveCount(0);
@@ -111,17 +157,17 @@ test("nominate, approve, answer: the manager sees the name, the employee a 'Par'
     page.getByRole("table", { name: "Historial de estados" }).getByRole("row"),
   ).toHaveCount(3);
 
-  // Ana answers.
-  await actAs(page, "Ana García", "Empleado");
+  // The first peer answers.
+  await actAs(page, peerName, "Empleado");
   await page.goto("/es/me");
-  await openTask(page, `Feedback para Bruno Pérez (${name})`);
+  await openTask(page, `Feedback para ${revieweeName} (${name})`);
   await expect(
     page.getByText(/verá tu feedback como "Par", sin tu nombre/),
   ).toBeVisible();
   await fillAndSubmit(page);
 
-  // Bruno submits his self assessment.
-  await actAs(page, "Bruno Pérez", "Empleado");
+  // The reviewee submits their self assessment.
+  await actAs(page, revieweeName, "Empleado");
   await page.goto("/es/me");
   await page
     .getByRole("listitem")
@@ -131,25 +177,25 @@ test("nominate, approve, answer: the manager sees the name, the employee a 'Par'
   await expect(page).toHaveURL(/\/self$/);
   await fillAndSubmit(page);
 
-  // Carla reads it with Ana's name, then reviews and shares.
-  await actAs(page, "Carla Romero", "Manager");
+  // The manager reads it with the peer's name, then reviews.
+  await actAs(page, managerName, "Manager");
   await page.goto("/es/team");
-  await page.getByRole("link", { name: `Bruno Pérez (${name})` }).click();
+  await page.getByRole("link", { name: `${revieweeName} (${name})` }).click();
   await expect(
-    page.getByRole("heading", { level: 2, name: "Ana García" }),
+    page.getByRole("heading", { level: 2, name: peerName }),
   ).toBeVisible();
   await page.goto("/es/team");
   await page
     .getByRole("table", { name: "Reportes directos" })
     .getByRole("row")
     .filter({ hasText: name })
-    .filter({ hasText: "Bruno Pérez" })
+    .filter({ hasText: revieweeName })
     .getByRole("link", { name: "Evaluar" })
     .click();
   await fillAndSubmit(page);
   const managerUrl = page.url();
 
-  // People moves the cycle to sharing; Carla shares.
+  // People moves the cycle to sharing; the manager shares.
   await actAs(page, null, "People (RR. HH.)");
   await page.goto(cycleUrl);
   for (const [phase, rows] of [
@@ -164,17 +210,17 @@ test("nominate, approve, answer: the manager sees the name, the employee a 'Par'
         .getByRole("row"),
     ).toHaveCount(rows);
   }
-  await actAs(page, "Carla Romero", "Manager");
+  await actAs(page, managerName, "Manager");
   await page.goto(managerUrl);
   await page.getByRole("button", { name: "Compartir con el empleado" }).click();
   await expect(page.getByText(/Compartida el/)).toBeVisible();
 
-  // Bruno sees the feedback labelled "Par", without Ana's name.
-  await actAs(page, "Bruno Pérez", "Empleado");
+  // The reviewee sees it labelled "Par", without the peer's name.
+  await actAs(page, revieweeName, "Empleado");
   await page.goto("/es/me");
   await openTask(page, `Ver feedback de pares (${name})`);
   await expect(
     page.getByRole("heading", { level: 2, name: "Par", exact: true }),
   ).toBeVisible();
-  await expect(page.getByRole("main").getByText("Ana García")).toHaveCount(0);
+  await expect(page.getByRole("main").getByText(peerName)).toHaveCount(0);
 });
