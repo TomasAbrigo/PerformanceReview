@@ -16,40 +16,44 @@ In-house performance review tool replacing BambooHR's performance module. Data i
 
 ## Commands
 
-| Command                            | What it does                                                                                        |
-| ---------------------------------- | --------------------------------------------------------------------------------------------------- |
-| `supabase start` / `supabase stop` | Start/stop the local stack (ports in `supabase/config.toml`)                                        |
-| `pnpm dev`                         | Next dev server (http://localhost:3000, redirects to `/es`)                                         |
-| `pnpm build` / `pnpm start`        | Production build / serve                                                                            |
-| `pnpm typecheck`                   | `next typegen` + `tsc --noEmit`                                                                     |
-| `pnpm lint` / `pnpm format`        | ESLint / Prettier (`format:check` for CI)                                                           |
-| `pnpm check`                       | typecheck + lint + format:check + test:unit (same as the CI `checks` job)                           |
-| `pnpm test`                        | All Vitest projects (unit + db)                                                                     |
-| `pnpm test:unit`                   | jsdom unit/component tests (`src/**/*.test.{ts,tsx}`)                                               |
-| `pnpm test:db`                     | Node tests against `DATABASE_URL` (`src/**/*.db.test.ts`); applies pending Drizzle migrations first |
-| `pnpm test:e2e`                    | Playwright on its own `<db>_e2e` DB, `next dev` on :3100; 1st time: `pnpm exec playwright install`  |
-| `pnpm db:generate`                 | Generate a Drizzle migration into `drizzle/` from `src/db/schema/*.ts`                              |
-| `pnpm db:migrate`                  | Apply Drizzle migrations to `DATABASE_URL`                                                          |
-| `pnpm db:studio`                   | Drizzle Studio                                                                                      |
-| `pnpm db:reset`                    | `supabase db reset` (wipes the DB; re-run `pnpm db:migrate` afterwards)                             |
-| `pnpm ingest <entity> --source …`  | Run an ingest entity from the registry (`--all` for every one); see README "Ingesta"                |
-| `pnpm cycles:enroll [--cycle id]`  | Enroll people reaching their hire-date milestone into hire-date cycles (daily cron); see README     |
-| `pnpm db:seed --size small\|demo`  | Seed the DB from `fixtures/bamboo/<size>` (`--reset` truncates first); see README "Seed"            |
-| `pnpm fixtures:build`              | Regenerate the synthetic Bamboo fixtures in `fixtures/` (deterministic; commit the output)          |
+| Command                              | What it does                                                                                                                                                                      |
+| ------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `supabase start` / `supabase stop`   | Start/stop the local stack (ports in `supabase/config.toml`)                                                                                                                      |
+| `pnpm dev`                           | Next dev server (http://localhost:3000, redirects to `/es`)                                                                                                                       |
+| `pnpm build` / `pnpm start`          | Production build / serve                                                                                                                                                          |
+| `pnpm typecheck`                     | `next typegen` + `tsc --noEmit`                                                                                                                                                   |
+| `pnpm lint` / `pnpm format`          | ESLint / Prettier (`format:check` for CI)                                                                                                                                         |
+| `pnpm check`                         | typecheck + lint + format:check + test:unit (same as the CI `checks` job)                                                                                                         |
+| `pnpm test`                          | All Vitest projects (unit + db)                                                                                                                                                   |
+| `pnpm test:unit`                     | jsdom unit/component tests (`src/**/*.test.{ts,tsx}`)                                                                                                                             |
+| `pnpm test:db`                       | Node tests against `DATABASE_URL` (`src/**/*.db.test.ts`); applies pending Drizzle migrations first                                                                               |
+| `pnpm test:e2e`                      | Playwright against its own DB (`E2E_DATABASE_URL`, default `<DATABASE_URL>_e2e`) and a `next dev` on `E2E_PORT` (default 3100); 1st time: `pnpm exec playwright install chromium` |
+| `pnpm db:generate`                   | Generate a Drizzle migration into `drizzle/` from `src/db/schema/*.ts`                                                                                                            |
+| `pnpm db:migrate`                    | Apply Drizzle migrations to `DATABASE_URL`                                                                                                                                        |
+| `pnpm db:studio`                     | Drizzle Studio                                                                                                                                                                    |
+| `pnpm db:reset`                      | `supabase db reset` (wipes the DB; re-run `pnpm db:migrate` afterwards)                                                                                                           |
+| `pnpm ingest <entity> --source …`    | Run an ingest entity from the registry (`--all` for every one); see README "Ingesta"                                                                                              |
+| `pnpm ingest:employees [--entity …]` | Alias of `pnpm ingest` (`--entity employee` and `--source fixture` by default)                                                                                                    |
+| `pnpm ingest:goals`                  | Same alias with `--entity goal`: ingest goals (fixtures unless `--source bamboo`)                                                                                                 |
+| `pnpm cycles:enroll [--cycle id]`    | Enroll people reaching their hire-date milestone into hire-date cycles (daily cron); see README                                                                                   |
+| `pnpm notifications:run`             | Create the due-date reminders of today (`--as-of`, `--offsets`; daily cron); see README "Notificaciones"                                                                          |
+| `pnpm db:seed --size small\|demo`    | Seed the DB from `fixtures/bamboo/<size>` (`--reset` truncates first); see README "Seed"                                                                                          |
+| `pnpm fixtures:build`                | Regenerate the synthetic Bamboo fixtures in `fixtures/` (deterministic; commit the output)                                                                                        |
+| `pnpm fixtures:parquet [outDir]`     | Convert the lake-adapter CSV fixtures to Parquet (default `build/lake-parquet/`, gitignored)                                                                                      |
 
 ## Local ports
 
-Supabase: api 55321, db 55322, shadow 55320, studio 55323, inbucket 55324, analytics 55327, pooler 55329 (disabled). Next dev 3000, Playwright 3100. Ports 54320-54324, 54327 and 5433 belong to other local projects; do not use them.
+Supabase: api 55321, db 55322, shadow 55320, studio 55323, inbucket 55324, analytics 55327, pooler 55329 (disabled). Next dev 3000, Playwright 3100 (`E2E_PORT`). Ports 54320-54324, 54327 and 5433 belong to other local projects; do not use them.
 
 ## Conventions
 
 - **TypeScript strict.** No `any`; prefer inferred Drizzle types (`$inferSelect` / `$inferInsert`).
-- **Drizzle is SQL-first.** Schema lives in `src/db/schema/*.ts`; always change schema then `pnpm db:generate` and commit the generated SQL in `drizzle/`. Never edit applied migrations. `supabase/migrations/` is only for Supabase-specific SQL (RLS policies, extensions, functions).
+- **Drizzle is SQL-first.** Schema lives in `src/db/schema/*.ts`; always change schema then `pnpm db:generate` and commit the generated SQL in `drizzle/`. Never edit applied migrations. `supabase/migrations/` does not exist today (the folder only holds `supabase/config.toml`); create it only if Supabase-specific SQL (RLS policies, extensions, functions) is ever needed, never for tables Drizzle owns.
 - **DB access** goes through `src/db/client.ts` (`db` is lazy; use `closeDb()` in scripts/tests).
 - **TDD: red, green, refactor.** Write a failing test first, make it pass, then refactor. Unit tests next to the code; DB tests are `*.db.test.ts`; e2e in `e2e/`.
 - **i18n: every user-facing string is a message key** in `src/messages/{es,en}.json` (both files must have identical keys; a test enforces it). No hardcoded UI text. Use `Link`/`redirect` from `src/i18n/navigation.ts`, not `next/link`.
 - **Source IDs from Bamboo are preserved** (store them as-is in dedicated source-id columns next to our own UUID primary keys) so re-ingestion is idempotent and traceable.
-- Env vars: local values in `.env.local` (gitignored); keep `.env.example` in sync.
+- Env vars: local values in `.env.local` (gitignored); keep `.env.example` in sync. `NEXT_PUBLIC_SUPABASE_URL` / `NEXT_PUBLIC_SUPABASE_ANON_KEY` are reserved for Supabase Auth (v2) and unused today. e2e: `E2E_DATABASE_URL` (default: `DATABASE_URL` with `_e2e` appended to the database name) and `E2E_PORT` (default 3100).
 - shadcn components live in `src/components/ui` (excluded from Prettier); add more with `pnpm dlx shadcn@latest add <name>`.
 
 ## Hard rule: no deploy, local only
@@ -63,5 +67,5 @@ The owner asked that everything lives on GitHub (`TomasAbrigo/PerformanceReview`
 - One branch per issue, named `tomas/issue-<n>-<short-desc>`, based on `main`.
 - Commit with conventional messages referencing the issue, push the branch (`git push -u origin <branch>`) and open a PR against `main` with `gh pr create` whose body contains `Closes #<n>` (or `Part of #<n>` for partial slices).
 - The orchestrator merges PRs; do not merge your own PR, do not push to `main` directly, never force-push.
-- CI (`.github/workflows/ci.yml`) runs on every PR and push to `main`: `checks` (typecheck, lint, format:check, unit), `db-tests` (postgres:17 service, `pnpm test:db`, `pnpm build`) and `e2e` (Playwright). Run `pnpm check` before pushing; PRs should be green before the orchestrator merges.
+- CI (`.github/workflows/ci.yml`) runs on every PR and push to `main`: `checks` (typecheck, lint, format:check, unit), `db-tests` (postgres:17 service, `pnpm test:db`, `pnpm build`) and `e2e` (Playwright; CI installs the browser with `pnpm exec playwright install --with-deps chromium`, locally `pnpm exec playwright install chromium` is enough). Run `pnpm check` before pushing; PRs should be green before the orchestrator merges.
 - Jira is not used for this repo for now.
