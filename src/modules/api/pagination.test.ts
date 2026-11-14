@@ -6,6 +6,7 @@ import {
   encodeCursor,
   pageOf,
   pageParams,
+  pages,
 } from "./pagination";
 
 const ID = "3f1c9a52-8d6e-4b7a-9c10-5e2f7a8b9c0d";
@@ -21,9 +22,13 @@ describe("cursors", () => {
 
   it("round-trips a (sort position, id) key", () => {
     expect(decodeCursor(encodeCursor(["12", ID]), "n_id")).toEqual(["12", ID]);
-    expect(() => decodeCursor(encodeCursor(["-1", ID]), "n_id")).toThrowError(
-      ApiError,
-    );
+    // A sort position can be negative: it is only an order, never checked > 0.
+    expect(decodeCursor(encodeCursor(["-1", ID]), "n_id")).toEqual(["-1", ID]);
+    for (const bad of ["", "-", "1.5", "abc", "1234567890", "--1"]) {
+      expect(() => decodeCursor(encodeCursor([bad, ID]), "n_id")).toThrowError(
+        ApiError,
+      );
+    }
     expect(() => decodeCursor(encodeCursor([TS, ID]), "n_id")).toThrowError(
       ApiError,
     );
@@ -93,6 +98,33 @@ describe("pageParams", () => {
     expect(pageParams.safeParse({ limit: "0" }).success).toBe(false);
     expect(pageParams.safeParse({ limit: "1.5" }).success).toBe(false);
     expect(pageParams.safeParse({ limit: "abc" }).success).toBe(false);
+  });
+});
+
+describe("pages", () => {
+  it("yields each page whole, handing each cursor to the next fetch", async () => {
+    const seen: (string | null)[] = [];
+    const fetch = async (cursor: string | null) => {
+      seen.push(cursor);
+      return cursor === null
+        ? { items: [1, 2], nextCursor: "a" }
+        : { items: [3], nextCursor: null };
+    };
+    const all: number[][] = [];
+    for await (const page of pages(fetch)) all.push(page.items);
+    expect(all).toEqual([[1, 2], [3]]);
+    expect(seen).toEqual([null, "a"]);
+  });
+
+  it("stops after the first page when there is no next cursor", async () => {
+    const all = [];
+    for await (const page of pages(async () => ({
+      items: [],
+      nextCursor: null,
+    }))) {
+      all.push(page);
+    }
+    expect(all).toHaveLength(1);
   });
 });
 

@@ -89,6 +89,13 @@ export function afterId(
     : undefined;
 }
 
+/** `$1::uuid, $2::uuid, ...` for an `in (...)` over uuids. */
+export const uuidList = (ids: string[]): SQL =>
+  sql.join(
+    ids.map((id) => sql`${id}::uuid`),
+    sql`, `,
+  );
+
 /** `source: { system, id }` of a row, or null when it has no source id (native rows). */
 export const sourceOf = (
   system: string | null,

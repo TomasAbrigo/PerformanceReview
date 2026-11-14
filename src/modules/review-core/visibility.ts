@@ -156,10 +156,17 @@ export function canRead(actor: ActorContext, ctx: VisibilityContext): boolean {
 export function reviewerVisible(
   actor: ActorContext,
   ctx: VisibilityContext,
+  options: {
+    /**
+     * Treat the author like anybody else (no "you wrote it" shortcut): for
+     * readers that must never tell a fully anonymous reviewer, whoever asks.
+     */
+    hideFromAuthor?: boolean;
+  } = {},
 ): boolean {
   const { relationship } = ctx.request;
   if (relationship !== "peer" && relationship !== "upward") return true;
-  if (isReviewer(actor, ctx.request)) return true;
+  if (!options.hideFromAuthor && isReviewer(actor, ctx.request)) return true;
   const mode = ctx.cycle?.anonymity?.[relationship] ?? "fully_anonymous";
   if (mode === "transparent") return true;
   if (mode === "fully_anonymous") return false;

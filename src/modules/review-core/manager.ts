@@ -16,7 +16,7 @@ import {
   type NotificationErrorCode,
 } from "@/modules/notifications/errors";
 import { remind } from "@/modules/notifications/reminders";
-import { jobAsOf } from "@/modules/org-history/queries";
+import { jobAsOf, jobsAsOf } from "@/modules/org-history/queries";
 import { isManagerReplaced } from "./manager-replaced";
 import type { RequestStatus } from "./request-status";
 import { ReviewError, type ReviewErrorCode } from "./review-errors";
@@ -38,6 +38,43 @@ export async function isSkipLevel(
     participant.snapshotAsOf,
   );
   return job?.managerPersonId === actor.personId;
+}
+
+/**
+ * isSkipLevel for many participants at once: the ids of those whose snapshot
+ * manager's manager, on the participant's snapshot date, is the actor. One
+ * query per distinct snapshot date (a page of one cycle has one).
+ */
+export async function skipLevelParticipants(
+  db: DbOrTx,
+  actor: ActorContext,
+  participants: Pick<
+    CycleParticipant,
+    "id" | "snapManagerPersonId" | "snapshotAsOf"
+  >[],
+): Promise<Set<string>> {
+  const found = new Set<string>();
+  if (!actor.personId) return found;
+  const byDate = new Map<string, typeof participants>();
+  for (const p of participants) {
+    if (!p.snapManagerPersonId) continue;
+    byDate.set(p.snapshotAsOf, [...(byDate.get(p.snapshotAsOf) ?? []), p]);
+  }
+  for (const [date, group] of byDate) {
+    const jobs = await jobsAsOf(
+      db,
+      [...new Set(group.map((p) => p.snapManagerPersonId!))],
+      date,
+    );
+    for (const p of group) {
+      if (
+        jobs.get(p.snapManagerPersonId!)?.managerPersonId === actor.personId
+      ) {
+        found.add(p.id);
+      }
+    }
+  }
+  return found;
 }
 
 /**

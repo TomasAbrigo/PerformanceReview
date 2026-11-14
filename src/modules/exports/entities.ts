@@ -7,7 +7,7 @@ import en from "@/messages/en.json";
 import es from "@/messages/es.json";
 import { notFound } from "@/modules/api/errors";
 import { parseQuery } from "@/modules/api/http";
-import { allPages, type Page } from "@/modules/api/pagination";
+import { allPages, pages } from "@/modules/api/pagination";
 import { bool, isoDate, uuid } from "@/modules/api/params";
 import {
   listParticipantRows,
@@ -404,28 +404,23 @@ const answersExport = defineExport({
     { cycle_id, relationship, status, ...scope }: ReviewExportQuery,
   ) {
     const actor = await scopeActor(db, scope);
-    let cursor: string | null = null;
-    do {
-      const page: Page<RequestRow> = await listRequestRows(db, {
+    for await (const page of pages((cursor) =>
+      listRequestRows(db, {
         limit: ANSWER_REQUESTS_PAGE_SIZE,
         cursor,
         cycleId: cycle_id,
         relationship,
         status,
         actor,
-      });
-      const answers = await answersByRequest(
-        db,
-        page.items.map((r) => r.id),
-        actor,
-      );
+      }),
+    )) {
+      const answers = await answersByRequest(db, page.items, actor);
       for (const request of page.items) {
         for (const answer of answers.get(request.id) ?? []) {
           yield { request, answer };
         }
       }
-      cursor = page.nextCursor;
-    } while (cursor);
+    }
   },
   columns: (h) => [
     ...requestColumns<AnswerExportRow>(h, (r) => r.request),

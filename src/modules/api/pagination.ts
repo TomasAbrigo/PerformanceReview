@@ -20,8 +20,8 @@ export function encodeCursor(key: string[]): string {
   return Buffer.from(JSON.stringify(key)).toString("base64url");
 }
 
-/** A sort position (question order): a plain non-negative integer that fits an int4. */
-const SORT_KEY = /^\d{1,9}$/;
+/** A sort position (question order): a plain integer (negative too) that fits an int4. */
+const SORT_KEY = /^-?\d{1,9}$/;
 
 /**
  * Keyset position of a cursor: `ts_id` = (instant with microseconds, uuid),
@@ -81,14 +81,21 @@ export function pageOf<T>(
   };
 }
 
+/** A paged query's pages, fetched one after the other (exports that need a whole page at a time). */
+export async function* pages<T>(
+  fetchPage: (cursor: string | null) => Promise<Page<T>>,
+): AsyncGenerator<Page<T>> {
+  let cursor: string | null = null;
+  do {
+    const page: Page<T> = await fetchPage(cursor);
+    yield page;
+    cursor = page.nextCursor;
+  } while (cursor);
+}
+
 /** Every row of a paged query, fetched page by page (exports stream through this). */
 export async function* allPages<T>(
   fetchPage: (cursor: string | null) => Promise<Page<T>>,
 ): AsyncGenerator<T> {
-  let cursor: string | null = null;
-  do {
-    const page: Page<T> = await fetchPage(cursor);
-    yield* page.items;
-    cursor = page.nextCursor;
-  } while (cursor);
+  for await (const page of pages(fetchPage)) yield* page.items;
 }

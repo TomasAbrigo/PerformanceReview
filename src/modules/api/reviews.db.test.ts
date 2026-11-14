@@ -14,6 +14,8 @@ import { insertParticipant, resetAll } from "@/modules/analytics/test-support";
 import type { ActorContext } from "@/modules/actor/types";
 import { getReview } from "@/modules/review-core";
 import { currentRatingFor } from "@/modules/review-core/calibration";
+import { ApiError } from "./errors";
+import { listAnswerRows, listRequestRows } from "./queries/reviews";
 import type { CycleAnonymity } from "@/modules/review-core/status";
 import {
   getRequestRoute,
@@ -736,6 +738,33 @@ describe("scope parameters", () => {
     },
   );
 
+  it.each(actors)(
+    "counts for %s only the answers they may read: answer_count = what /answers returns",
+    async (_who, actorOf) => {
+      const actor = actorOf();
+      const scope = `as_person=${actor.personId}&role=${actor.role}`;
+      const listed = await requestsOf(cycleId, `?${scope}&limit=200`);
+      for (const row of listed.body.data) {
+        const answers = await answersOf(row.id, `?${scope}&limit=200`);
+        expect(answers.body.data, row.id).toHaveLength(row.answer_count);
+        const detail = await requestOf(row.id, `?${scope}`);
+        expect(detail.body.data.answer_count).toBe(row.answer_count);
+      }
+    },
+  );
+
+  it("does not let the reviewee count the answers hidden from them", async () => {
+    // The manager's rating question is hidden from the reviewee: 3 answers, 2 readable.
+    expect((await requestOf(mgrDora)).body.data.answer_count).toBe(3);
+    const asReviewee = await requestOf(mgrDora, `?as_person=${dora}`);
+    expect(asReviewee.body.data.answer_count).toBe(2);
+    const listed = await requestsOf(
+      cycleId,
+      `?as_person=${dora}&relationship=manager`,
+    );
+    expect(listed.body.data.map((r: Json) => r.answer_count)).toEqual([2]);
+  });
+
   it("fills pages with readable rows only and still pages them stably", async () => {
     const path = `/api/v1/cycles/${cycleId}/requests?as_person=${dora}&role=employee`;
     const all = (
@@ -943,5 +972,152 @@ describe("GET /api/v1/cycles/{id}/question-revisions", () => {
   it("requires the bearer token when API_TOKEN is set", async () => {
     vi.stubEnv("API_TOKEN", "s3cret");
     expect((await revisionsOf(cycleId)).status).toBe(401);
+  });
+});
+
+describe("the cursor is checked before anything is looked up", () => {
+  const revisionsOf = (id: string, query = "") =>
+    call(
+      listQuestionRevisionsRoute,
+      `/api/v1/cycles/${id}/question-revisions${query}`,
+      id,
+    );
+
+  it("answers 400, not 404 or 403, for a bad cursor on an unknown or unreadable target", async () => {
+    const bad = "?cursor=garbage";
+    for (const res of [
+      await requestsOf(MISSING, bad),
+      await requestsOf("not-a-uuid", bad),
+      await requestsOf(MISSING, `${bad}&as_person=${MISSING}`),
+      await answersOf(MISSING, bad),
+      await answersOf("not-a-uuid", bad),
+      await answersOf(selfDora, `${bad}&as_person=${outsider}`),
+      await revisionsOf(MISSING, bad),
+      await revisionsOf("not-a-uuid", bad),
+    ]) {
+      expect(res.status).toBe(400);
+      expect(res.body.errors.map((e: Json) => e.path)).toContain("cursor");
+    }
+  });
+
+  it("is checked by the query functions themselves, ids that cannot exist included", async () => {
+    await expect(
+      listRequestRows(db, { limit: 5, cursor: "garbage", cycleId: "nope" }),
+    ).rejects.toBeInstanceOf(ApiError);
+    await expect(
+      listRequestRows(db, {
+        limit: 5,
+        cursor: "garbage",
+        participantId: "nope",
+      }),
+    ).rejects.toBeInstanceOf(ApiError);
+    await expect(
+      listAnswerRows(db, "nope", { limit: 5, cursor: "garbage" }),
+    ).rejects.toBeInstanceOf(ApiError);
+  });
+});
+
+/** The database with every query it is asked to run counted. */
+function counting() {
+  let count = 0;
+  const queryMethods = new Set(["execute", "select", "selectDistinct"]);
+  const counted = new Proxy(db, {
+    get(target, prop) {
+      const value = Reflect.get(target, prop, target);
+      if (typeof value !== "function") return value;
+      const bound = value.bind(target);
+      return queryMethods.has(String(prop))
+        ? (...args: unknown[]) => {
+            count++;
+            return bound(...args);
+          }
+        : bound;
+    },
+  });
+  return { db: counted as typeof db, queries: () => count };
+}
+
+describe("queries per page", () => {
+  // A page costs a fixed handful of queries (the rows, then the extras
+  // canRead needs, each once per page), never a few per request: the rows
+  // plus at most four extras (double blind, replaced manager, shared, skip-level).
+  const BUDGET = 5;
+  let many: string;
+  let reviewers: string[];
+
+  beforeAll(async () => {
+    many = await insertReviewCycle({ name: "Sesenta pares" });
+    const participant = await insertParticipant({
+      cycleId: many,
+      personId: dora,
+      snapManagerPersonId: bruno,
+    });
+    const people = await db
+      .insert(person)
+      .values(Array.from({ length: 60 }, (_, i) => ({ displayName: `P ${i}` })))
+      .returning({ id: person.id });
+    reviewers = people.map((p) => p.id);
+    const ids = await insertRequests(
+      reviewers.map((id) => ({
+        cycleId: many,
+        participantId: participant,
+        reviewerPersonId: id,
+        relationship: "peer" as const,
+      })),
+    );
+    await insertAnswers(
+      ids.map((requestId) => ({
+        requestId,
+        questionRevisionId: q1,
+        textValue: "x",
+      })),
+    );
+  });
+
+  const actorsOfInterest: [string, () => ActorContext][] = [
+    ["hr", () => ({ personId: null, role: "hr" })],
+    ["the snapshot manager", () => ({ personId: bruno, role: "manager" })],
+    ["the skip-level manager", () => ({ personId: ana, role: "manager" })],
+    ["the reviewee", () => ({ personId: dora, role: "employee" })],
+    ["a stranger", () => ({ personId: outsider, role: "employee" })],
+  ];
+
+  it.each(actorsOfInterest)(
+    "reads 60 requests for %s in a bounded number of queries",
+    async (_who, actorOf) => {
+      const actor = actorOf();
+      const spy = counting();
+      const page = await listRequestRows(spy.db, {
+        cycleId: many,
+        limit: 200,
+        actor,
+      });
+      expect(spy.queries()).toBeLessThanOrEqual(BUDGET);
+      // The manager reads every submitted peer request; the stranger none.
+      expect(page.items.length).toBe(
+        actor.personId === bruno || actor.role === "hr" ? 60 : 0,
+      );
+    },
+  );
+
+  it("reads the same page of the scenario cycle in a bounded number of queries for every actor", async () => {
+    for (const [who, actorOf] of actorsOfInterest) {
+      const spy = counting();
+      await listRequestRows(spy.db, {
+        cycleId,
+        limit: 200,
+        actor: actorOf(),
+      });
+      expect(spy.queries(), who).toBeLessThanOrEqual(BUDGET);
+    }
+  });
+
+  it("reads one request's answers in a bounded number of queries", async () => {
+    const spy = counting();
+    await listAnswerRows(spy.db, mgrDora, {
+      limit: 200,
+      actor: { personId: dora, role: "employee" },
+    });
+    expect(spy.queries()).toBeLessThanOrEqual(BUDGET);
   });
 });

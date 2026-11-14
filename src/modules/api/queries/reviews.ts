@@ -6,23 +6,34 @@ import { isUuid } from "@/lib/uuid";
 import { DEFAULT_ACTOR, type ActorContext } from "@/modules/actor/types";
 import type { FinalRatingStage } from "@/modules/review-core/calibration-constants";
 import type { RequestStatus } from "@/modules/review-core/request-status";
-import { loadRequest } from "@/modules/review-core/requests";
-import { ReviewError } from "@/modules/review-core/review-errors";
-import type { CycleAnonymity, CycleStatus } from "@/modules/review-core/status";
-import { canRead, reviewerVisible } from "@/modules/review-core/visibility";
+import {
+  visibilityContexts,
+  type VisibilityRow,
+} from "@/modules/review-core/requests";
+import type {
+  CycleAnonymity,
+  CycleComponents,
+  CycleStatus,
+} from "@/modules/review-core/status";
+import {
+  canRead,
+  reviewerVisible,
+  type VisibilityContext,
+} from "@/modules/review-core/visibility";
 import type {
   QuestionKind,
   QuestionRole,
   Relationship,
 } from "@/modules/templates/constants";
-import { forbidden, notFound } from "../errors";
-import { encodeCursor, pageOf, type Page } from "../pagination";
+import { forbidden } from "../errors";
+import { decodeCursor, encodeCursor, pageOf, type Page } from "../pagination";
 import {
   afterNId,
   afterTsId,
   identityCtes,
   iso,
   personRef,
+  uuidList,
   type PersonRef,
 } from "./shared";
 
@@ -33,7 +44,10 @@ import {
  * Reading as: the API has no actor, so every function takes the `actor` it
  * reads as. The default is HR (everything, see `scope.ts`); any other actor
  * is filtered through `canRead` of the review module, the one place that
- * decides who reads what.
+ * decides who reads what. A page costs a fixed number of queries: the rows,
+ * then the extras `canRead` needs for the whole page (`visibilityContexts`),
+ * and every row keeps the context it was decided with (`visibility`) so its
+ * answers are gated without asking again.
  *
  * Anonymity is applied here, to every row, so no endpoint or export can leak
  * it: with peer/upward `fully_anonymous` the reviewer is never returned,
@@ -48,61 +62,33 @@ import {
 /** HR, no person: the default scope of the API. */
 export const HR_SCOPE: ActorContext = DEFAULT_ACTOR;
 
-const uuidList = (ids: string[]) =>
-  sql.join(
-    ids.map((id) => sql`${id}::uuid`),
-    sql`, `,
-  );
-
-/** Whether `actor` may read request `id`; HR always (canRead says so). */
-async function canReadRequest(
-  db: DbOrTx,
-  actor: ActorContext,
-  id: string,
-): Promise<boolean> {
-  if (actor.role === "hr") return true;
-  try {
-    await loadRequest(db, actor, id);
-    return true;
-  } catch (error) {
-    if (
-      error instanceof ReviewError &&
-      (error.code === "forbidden" || error.code === "not_found")
-    ) {
-      return false;
-    }
-    throw error;
-  }
-}
-
 /**
  * A page of the rows `actor` may read. The keyset runs over the rows as
- * stored, the readable ones are picked from each batch: a page is full (up to
+ * stored; `keep` picks the readable ones of each batch (all at once, so the
+ * extras it needs are queried per batch, not per row). A page is full (up to
  * `limit`) whenever there are enough readable rows after the cursor, and the
  * cursor is the key of the last row returned, so the next page resumes right
  * after it. HR reads every row: one batch.
  */
-async function readablePage<T>(input: {
+async function readablePage<Scanned, Item>(input: {
   limit: number;
   cursor: string | null | undefined;
-  fetch: (cursor: string | null, take: number) => Promise<T[]>;
-  keep: (row: T) => Promise<boolean> | boolean;
-  cursorOf: (row: T) => string;
-}): Promise<Page<T>> {
-  const { limit, fetch, keep, cursorOf } = input;
-  const kept: T[] = [];
+  fetch: (cursor: string | null, take: number) => Promise<Scanned[]>;
+  keep: (batch: Scanned[]) => Promise<Item[]> | Item[];
+  scannedCursor: (row: Scanned) => string;
+  itemCursor: (item: Item) => string;
+}): Promise<Page<Item>> {
+  const { limit, fetch, keep } = input;
+  const kept: Item[] = [];
   let cursor = input.cursor ?? null;
   for (;;) {
     const batch = await fetch(cursor, limit + 1);
-    for (const row of batch) {
-      if (await keep(row)) kept.push(row);
-      if (kept.length > limit) break;
-    }
+    kept.push(...(await keep(batch)));
     const last = batch.at(-1);
     if (kept.length > limit || batch.length <= limit || !last) break;
-    cursor = cursorOf(last);
+    cursor = input.scannedCursor(last);
   }
-  return pageOf(kept, limit, cursorOf);
+  return pageOf(kept, limit, input.itemCursor);
 }
 
 // -------------------------------------------------------------- requests
@@ -161,15 +147,32 @@ export type RequestRow = {
   unlockedAt: string | null;
   /** Manager reviews: when it was shared with the reviewee. */
   sharedAt: string | null;
+  /** The answers the actor may read (the reviewee does not count the ones hidden from them). */
   answerCount: number;
   createdAt: string;
   updatedAt: string;
+  /**
+   * What canRead decided this row with, for the actor that read it (internal:
+   * gates the answers per question, never serialized; it holds the raw
+   * reviewer id, anonymity or not).
+   */
+  visibility: VisibilityContext;
 };
 
 type RawRequest = Omit<
   RequestRow,
-  "reviewee" | "snapManager" | "reviewer" | "reviewerVisible" | "currentRating"
+  | "reviewee"
+  | "snapManager"
+  | "reviewer"
+  | "reviewerVisible"
+  | "currentRating"
+  | "answerCount"
+  | "visibility"
 > & {
+  cycleComponents: CycleComponents;
+  /** Answers of the request, and those of questions the reviewee may see. */
+  answerTotal: number;
+  answerShown: number;
   ratingStage: FinalRatingStage | null;
   ratingValue: number | null;
   ratingLabel: string | null;
@@ -189,44 +192,41 @@ type RawRequest = Omit<
   reviewerName: string | null;
 };
 
-/**
- * Whether `actor` may be told who wrote a request. Peer/upward follow the
- * cycle's anonymity (`reviewerVisible` of the review module), with one rule
- * on top: `fully_anonymous` never shows the reviewer through the API.
- */
-export function reviewerShown(
-  actor: ActorContext,
-  r: Pick<
-    RawRequest,
-    | "relationship"
-    | "status"
-    | "reviewerId"
-    | "revieweeId"
-    | "managerId"
-    | "cycleStatus"
-    | "cycleAnonymity"
-  >,
-): boolean {
-  if (r.relationship === "peer" || r.relationship === "upward") {
-    const mode = r.cycleAnonymity?.[r.relationship] ?? "fully_anonymous";
-    if (mode === "fully_anonymous") return false;
-  }
-  return reviewerVisible(actor, {
-    request: {
-      relationship: r.relationship,
-      reviewerPersonId: r.reviewerId,
-      status: r.status,
-    },
-    participant: {
-      revieweePersonId: r.revieweeId,
-      snapManagerPersonId: r.managerId,
-    },
-    cycle: { status: r.cycleStatus, anonymity: r.cycleAnonymity },
-  });
-}
+/** What canRead reads, from a selected row. */
+const visibilityRowOf = (raw: RawRequest): VisibilityRow => ({
+  request: {
+    relationship: raw.relationship,
+    reviewerPersonId: raw.reviewerId,
+    status: raw.status,
+    sharedAt: raw.sharedAt ? new Date(raw.sharedAt) : null,
+  },
+  participant: {
+    id: raw.participantId,
+    revieweePersonId: raw.revieweeId,
+    snapManagerPersonId: raw.managerId,
+    snapshotAsOf: raw.snapshotAsOf,
+    removedAt: raw.participantRemovedAt
+      ? new Date(raw.participantRemovedAt)
+      : null,
+  },
+  cycle: {
+    status: raw.cycleStatus,
+    components: raw.cycleComponents,
+    anonymity: raw.cycleAnonymity,
+  },
+});
 
-function toRequestRow(raw: RawRequest, actor: ActorContext): RequestRow {
+function toRequestRow(
+  raw: RawRequest,
+  actor: ActorContext,
+  visibility: VisibilityContext,
+): RequestRow {
   const {
+    // Only canRead reads the components (see visibilityRowOf).
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    cycleComponents: _cycleComponents,
+    answerTotal,
+    answerShown,
     revieweeId,
     revieweeSystem,
     revieweeBambooId,
@@ -246,9 +246,15 @@ function toRequestRow(raw: RawRequest, actor: ActorContext): RequestRow {
     ratingAt,
     ...row
   } = raw;
-  const shown = reviewerShown(actor, raw);
+  // The API never tells a fully anonymous reviewer, not even their author.
+  const shown = reviewerVisible(actor, visibility, { hideFromAuthor: true });
+  const reads = (visibleToReviewee: boolean) =>
+    canRead(actor, { ...visibility, questionRevision: { visibleToReviewee } });
   return {
     ...row,
+    answerCount:
+      (reads(true) ? answerShown : 0) +
+      (reads(false) ? answerTotal - answerShown : 0),
     currentRating:
       actor.role === "hr" && ratingStage && ratingValue !== null && ratingAt
         ? {
@@ -275,6 +281,7 @@ function toRequestRow(raw: RawRequest, actor: ActorContext): RequestRow {
       ? personRef(reviewerId, reviewerSystem, reviewerBambooId, reviewerName)
       : null,
     reviewerVisible: shown,
+    visibility,
   };
 }
 
@@ -282,15 +289,15 @@ async function selectRequests(
   db: DbOrTx,
   where: SQL,
   limit: number,
-  actor: ActorContext,
-): Promise<RequestRow[]> {
-  const raw = rowsOf<RawRequest>(
+): Promise<RawRequest[]> {
+  return rowsOf<RawRequest>(
     await db.execute(sql`
       with ${identityCtes}
       select r.id, r.source_system::text as "sourceSystem", r.source_id as "sourceId",
         r.cycle_id as "cycleId", c.source_system::text as "cycleSourceSystem",
         c.source_id as "cycleSourceId", c.name as "cycleName",
         c.status::text as "cycleStatus", c.anonymity as "cycleAnonymity",
+        c.components as "cycleComponents",
         r.participant_id as "participantId",
         ${iso("cp.removed_at")} as "participantRemovedAt",
         cp.reviewee_person_id as "revieweeId", p.display_name as "revieweeName",
@@ -317,7 +324,7 @@ async function selectRequests(
         cr.stage::text as "ratingStage", cr.option_value::float8 as "ratingValue",
         cr.option_label as "ratingLabel", cr.normalized::float8 as "ratingNormalized",
         ${iso("cr.created_at")} as "ratingAt",
-        (select count(*)::int from answer a where a.request_id = r.id) as "answerCount",
+        ac.total as "answerTotal", ac.shown as "answerShown",
         ${iso("r.created_at")} as "createdAt", ${iso("r.updated_at")} as "updatedAt"
       from review_request r
       join review_cycle c on c.id = r.cycle_id and c.deleted_at is null
@@ -330,12 +337,34 @@ async function selectRequests(
       left join v_current_rating cr on cr.participant_id = r.participant_id
       left join person rp on rp.id = r.reviewer_person_id
       left join bamboo_identity rbi on rbi.person_id = r.reviewer_person_id
+      cross join lateral (
+        select count(*)::int as total,
+          (count(*) filter (where qr.visible_to_reviewee))::int as shown
+        from answer a
+        join question_revision qr on qr.id = a.question_revision_id
+        where a.request_id = r.id
+      ) ac
       where r.deleted_at is null and ${where}
       order by r.created_at, r.id
       limit ${limit}
     `),
   );
-  return raw.map((row) => toRequestRow(row, actor));
+}
+
+/** The rows `actor` may read, with the context each was decided with (one set of extra queries for all). */
+async function readableRequests(
+  db: DbOrTx,
+  actor: ActorContext,
+  raws: RawRequest[],
+): Promise<RequestRow[]> {
+  const contexts = await visibilityContexts(
+    db,
+    actor,
+    raws.map(visibilityRowOf),
+  );
+  return raws.flatMap((raw, i) =>
+    canRead(actor, contexts[i]) ? [toRequestRow(raw, actor, contexts[i])] : [],
+  );
 }
 
 export type ListRequestsInput = {
@@ -367,6 +396,8 @@ export async function listRequestRows(
     actor = HR_SCOPE,
   }: ListRequestsInput,
 ): Promise<Page<RequestRow>> {
+  // A cursor that is not ours is a 400 whatever else is wrong with the query.
+  decodeCursor(cursor, "ts_id");
   // An id that cannot exist matches nothing (and must not reach a uuid cast).
   if (
     (cycleId && !isUuid(cycleId)) ||
@@ -392,10 +423,10 @@ export async function listRequestRows(
             : undefined,
         ) ?? sql`true`,
         take,
-        actor,
       ),
-    keep: (row) => canReadRequest(db, actor, row.id),
-    cursorOf: (r) => encodeCursor([r.createdAt, r.id]),
+    keep: (batch) => readableRequests(db, actor, batch),
+    scannedCursor: (r) => encodeCursor([r.createdAt, r.id]),
+    itemCursor: (r) => encodeCursor([r.createdAt, r.id]),
   });
 }
 
@@ -409,12 +440,15 @@ export async function getRequestRow(
   actor: ActorContext = HR_SCOPE,
 ): Promise<RequestRow | null> {
   if (!isUuid(id)) return null;
-  const [row] = await selectRequests(db, sql`r.id = ${id}::uuid`, 1, actor);
-  if (!row) return null;
-  if (!(await canReadRequest(db, actor, id))) {
+  const [raw] = await selectRequests(db, sql`r.id = ${id}::uuid`, 1);
+  if (!raw) return null;
+  const [visibility] = await visibilityContexts(db, actor, [
+    visibilityRowOf(raw),
+  ]);
+  if (!canRead(actor, visibility)) {
     throw forbidden("The person cannot read this request.");
   }
-  return row;
+  return toRequestRow(raw, actor, visibility);
 }
 
 /** Whether a (not deleted) cycle with this id exists. */
@@ -490,37 +524,18 @@ async function selectAnswers(
   );
 }
 
-type QuestionGate = (q: { visibleToReviewee: boolean }) => boolean;
-
-/**
- * Which questions of request `requestId` `actor` may read (canRead with the
- * question: the reviewee does not see the questions hidden from them). HR
- * reads all; a person who cannot read the request at all is a 403.
- */
-async function questionGate(
-  db: DbOrTx,
+/** Whether `actor` may read the answer to `question` of an already read request (canRead per question). */
+const readsAnswer = (
   actor: ActorContext,
-  requestId: string,
-): Promise<QuestionGate> {
-  if (actor.role === "hr") return () => true;
-  try {
-    const { visibility } = await loadRequest(db, actor, requestId);
-    return (q) => canRead(actor, { ...visibility, questionRevision: q });
-  } catch (error) {
-    if (error instanceof ReviewError && error.code === "forbidden") {
-      throw forbidden("The person cannot read this request.");
-    }
-    if (error instanceof ReviewError && error.code === "not_found") {
-      throw notFound("Request");
-    }
-    throw error;
-  }
-}
+  request: RequestRow,
+  question: AnswerRow["question"],
+) => canRead(actor, { ...request.visibility, questionRevision: question });
 
 /**
  * The answers of one request in question order (sort, revision id), as far as
- * `actor` may read them; null if the request is unknown (or deleted). Throws
- * a 403 when the actor may not read the request.
+ * `actor` may read them (the reviewee does not get the questions hidden from
+ * them); null if the request is unknown (or deleted). Throws a 403 when the
+ * actor may not read the request.
  */
 export async function listAnswerRows(
   db: DbOrTx,
@@ -531,16 +546,9 @@ export async function listAnswerRows(
     actor = HR_SCOPE,
   }: { limit: number; cursor?: string | null; actor?: ActorContext },
 ): Promise<Page<AnswerRow> | null> {
-  if (!isUuid(requestId)) return null;
-  const exists = rowsOf(
-    await db.execute(sql`
-      select 1 from review_request r
-      join review_cycle c on c.id = r.cycle_id and c.deleted_at is null
-      where r.id = ${requestId}::uuid and r.deleted_at is null
-    `),
-  );
-  if (exists.length === 0) return null;
-  const gate = await questionGate(db, actor, requestId);
+  decodeCursor(cursor, "n_id");
+  const request = await getRequestRow(db, requestId, actor);
+  if (!request) return null;
   return readablePage({
     limit,
     cursor,
@@ -554,36 +562,35 @@ export async function listAnswerRows(
         sql`qr.sort, qr.id`,
         take,
       ),
-    keep: (a) => gate(a.question),
-    cursorOf: (a) => encodeCursor([String(a.question.sort), a.question.id]),
+    keep: (batch) =>
+      batch.filter((a) => readsAnswer(actor, request, a.question)),
+    scannedCursor: (a) =>
+      encodeCursor([String(a.question.sort), a.question.id]),
+    itemCursor: (a) => encodeCursor([String(a.question.sort), a.question.id]),
   });
 }
 
 /**
- * The answers of several requests (the export reads a page of requests at a
- * time), grouped by request, each in question order, as far as `actor` may
- * read them.
+ * The answers of several requests already read as `actor` (the export reads
+ * a page of requests at a time), grouped by request, each in question order,
+ * as far as `actor` may read them. One query, whoever reads.
  */
 export async function answersByRequest(
   db: DbOrTx,
-  requestIds: string[],
+  requests: RequestRow[],
   actor: ActorContext = HR_SCOPE,
 ): Promise<Map<string, AnswerRow[]>> {
   const grouped = new Map<string, AnswerRow[]>();
-  if (requestIds.length === 0) return grouped;
+  if (requests.length === 0) return grouped;
+  const byId = new Map(requests.map((r) => [r.id, r]));
   const rows = await selectAnswers(
     db,
-    sql`a.request_id in (${uuidList(requestIds)})`,
+    sql`a.request_id in (${uuidList([...byId.keys()])})`,
     sql`a.request_id, qr.sort, qr.id`,
   );
-  const gates = new Map<string, QuestionGate>();
   for (const row of rows) {
-    let gate = gates.get(row.requestId);
-    if (!gate) {
-      gate = await questionGate(db, actor, row.requestId);
-      gates.set(row.requestId, gate);
-    }
-    if (!gate(row.question)) continue;
+    const request = byId.get(row.requestId);
+    if (!request || !readsAnswer(actor, request, row.question)) continue;
     const list = grouped.get(row.requestId) ?? [];
     list.push(row);
     grouped.set(row.requestId, list);
@@ -622,6 +629,7 @@ export async function listQuestionRevisionRows(
   cycleId: string,
   { limit, cursor }: { limit: number; cursor?: string | null },
 ): Promise<Page<QuestionRevisionRow> | null> {
+  decodeCursor(cursor, "n_id");
   if (!(await cycleExists(db, cycleId))) return null;
   const rows = rowsOf<QuestionRevisionRow>(
     await db.execute(sql`

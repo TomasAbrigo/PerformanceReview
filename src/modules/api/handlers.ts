@@ -9,7 +9,7 @@ import { todayLocal } from "@/modules/org-history/dates";
 import { notFound } from "./errors";
 import { apiRoute, ok, parseQuery } from "./http";
 import { bool, isoDate, uuid } from "./params";
-import { pageParams, type Page } from "./pagination";
+import { decodeCursor, pageParams, type Page } from "./pagination";
 import { getCycleDetail, listCycleRows } from "./queries/cycles";
 import { goalStatuses, listGoalRows } from "./queries/goals";
 import { listIssueRows } from "./queries/issues";
@@ -193,8 +193,13 @@ export const listCycleRequestsRoute = apiRoute<{ id: string }>(
       request,
       requestsQuery,
     );
-    if (!(await cycleExists(db, id))) throw notFound("Cycle");
-    const actor = await scopeActor(db, { scope, as_person, role });
+    // The cursor first: a bad one is a 400 whatever else is wrong.
+    decodeCursor(query.cursor, "ts_id");
+    const [exists, actor] = await Promise.all([
+      cycleExists(db, id),
+      scopeActor(db, { scope, as_person, role }),
+    ]);
+    if (!exists) throw notFound("Cycle");
     const page = await listRequestRows(db, {
       ...query,
       cycleId: id,
@@ -224,6 +229,7 @@ export const listRequestAnswersRoute = apiRoute<{ id: string }>(
       request,
       answersQuery,
     );
+    decodeCursor(query.cursor, "n_id");
     const actor = await scopeActor(db, { scope, as_person, role });
     const page = await detailOr404("Request", () =>
       listAnswerRows(db, id, { ...query, actor }),
