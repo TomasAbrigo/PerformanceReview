@@ -42,6 +42,9 @@ const INSERT_CHUNK = 1000;
 /**
  * Creates `inputs`, skipping those whose dedupe key already exists (so it is
  * safe to run twice, or concurrently). Returns how many were created.
+ *
+ * Every notification is born here, so this is where an email channel would
+ * plug in (return the new rows and hand them over); v1 has none.
  */
 export async function createNotifications(
   db: DbOrTx,

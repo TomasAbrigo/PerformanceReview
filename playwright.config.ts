@@ -1,7 +1,7 @@
 import { defineConfig, devices } from "@playwright/test";
 
 // Dedicated port so e2e never collides with other local projects on :3000.
-const PORT = 3100;
+const PORT = Number(process.env.E2E_PORT ?? 3100);
 
 export default defineConfig({
   testDir: "./e2e",
@@ -21,7 +21,16 @@ export default defineConfig({
     {
       name: "chromium",
       use: { ...devices["Desktop Chrome"] },
-      testIgnore: /identity\.spec\.ts/,
+      testIgnore: /(identity|notifications)\.spec\.ts/,
+    },
+    // Phase changes notify every participant, so counting a person's unread
+    // notifications needs a quiet system: this spec runs once the specs that
+    // launch cycles are done.
+    {
+      name: "notifications",
+      use: { ...devices["Desktop Chrome"] },
+      testMatch: /notifications\.spec\.ts/,
+      dependencies: ["chromium"],
     },
     // The identity spec resolves a case (it links a rehire to Carla), so it
     // runs on its own, once every spec that only reads is done.
