@@ -163,6 +163,23 @@ describe("SelfReviewForm", () => {
     },
   );
 
+  it("renders the intro (the goals block) above the questions", () => {
+    renderIn(
+      "es",
+      <SelfReviewForm
+        review={review()}
+        actions={actions()}
+        intro={<p>Objetivos del período</p>}
+      />,
+    );
+    const intro = screen.getByText("Objetivos del período");
+    const question = screen.getByLabelText(/¿Qué lograste\?/);
+    expect(
+      intro.compareDocumentPosition(question) &
+        Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
+  });
+
   it("autosaves a text answer on blur", async () => {
     const a = actions();
     renderIn("es", <SelfReviewForm review={review()} actions={a} />);
