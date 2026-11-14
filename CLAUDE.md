@@ -27,12 +27,13 @@ In-house performance review tool replacing BambooHR's performance module. Data i
 | `pnpm test`                        | All Vitest projects (unit + db)                                                                     |
 | `pnpm test:unit`                   | jsdom unit/component tests (`src/**/*.test.{ts,tsx}`)                                               |
 | `pnpm test:db`                     | Node tests against `DATABASE_URL` (`src/**/*.db.test.ts`); applies pending Drizzle migrations first |
-| `pnpm test:e2e`                    | Playwright (starts `next dev` on :3100). First time: `pnpm exec playwright install chromium`        |
+| `pnpm test:e2e`                    | Playwright on its own `<db>_e2e` DB, `next dev` on :3100; 1st time: `pnpm exec playwright install`  |
 | `pnpm db:generate`                 | Generate a Drizzle migration into `drizzle/` from `src/db/schema/*.ts`                              |
 | `pnpm db:migrate`                  | Apply Drizzle migrations to `DATABASE_URL`                                                          |
 | `pnpm db:studio`                   | Drizzle Studio                                                                                      |
 | `pnpm db:reset`                    | `supabase db reset` (wipes the DB; re-run `pnpm db:migrate` afterwards)                             |
 | `pnpm ingest <entity> --source …`  | Run an ingest entity from the registry (`--all` for every one); see README "Ingesta"                |
+| `pnpm db:seed --size small\|demo`  | Seed the DB from `fixtures/bamboo/<size>` (`--reset` truncates first); see README "Seed"            |
 | `pnpm fixtures:build`              | Regenerate the synthetic Bamboo fixtures in `fixtures/` (deterministic; commit the output)          |
 
 ## Local ports

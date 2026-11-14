@@ -2,7 +2,7 @@ import path from "node:path";
 import { parseArgs } from "node:util";
 import { closeDb, db, type DbOrTx } from "@/db/client";
 import { INGEST_COUNT_KEYS, type IngestCounts } from "@/db/schema";
-import { withAdvisoryLock } from "./lock";
+import { ingestLockKey, withAdvisoryLock } from "./lock";
 import {
   bambooClientFromEnv,
   DEFAULT_FIXTURES_DIR,
@@ -187,7 +187,7 @@ export type IngestCliDeps = {
   readWatermark?: (key: SyncKey) => Promise<string | null>;
 };
 
-type Outcome = {
+export type Outcome = {
   entity: string;
   adapter: string;
   status: "succeeded" | "error";
@@ -225,6 +225,89 @@ export function formatSummary(outcomes: Outcome[]): string {
         .trimEnd(),
     )
     .join("\n");
+}
+
+export type RunEntitiesInput = {
+  registry: Registry;
+  db: DbOrTx;
+  /** Registered entity names, in the order they run. */
+  entities: readonly string[];
+  /** One adapter per entity, already built. */
+  adapters: ReadonlyMap<string, SourceAdapter>;
+  /** Stored on every ingest_run (source, dir, ...). */
+  params: Record<string, unknown>;
+  /** An ISO instant, "last" (the stored watermark) or undefined (full). */
+  since?: string;
+  unmatched?: "create" | "queue";
+  /** Runs `fn` exclusively per key (the CLI takes an advisory lock per entity). */
+  lock: <T>(key: string, fn: () => Promise<T>) => Promise<T>;
+  readWatermark: (key: SyncKey) => Promise<string | null>;
+};
+
+/**
+ * Runs the entities one after another, each under the lock of its entity, and
+ * returns what each did. A run that fails is an `error` outcome (with its run
+ * id and the counts reached) and the next entity still runs. Shared by
+ * `pnpm ingest` and `pnpm db:seed`.
+ */
+export async function runEntities({
+  registry,
+  db,
+  entities,
+  adapters,
+  params,
+  since: requestedSince,
+  unmatched,
+  lock,
+  readWatermark,
+}: RunEntitiesInput): Promise<Outcome[]> {
+  const outcomes: Outcome[] = [];
+  for (const entity of entities) {
+    const entry = registry.get(entity)!;
+    const adapter = adapters.get(entity)!;
+    const started = Date.now();
+    try {
+      const result = await lock(ingestLockKey(entity), async () => {
+        // Read after taking the lock: a run ahead of us may have advanced it.
+        let since = requestedSince;
+        if (since === "last") {
+          since =
+            (await readWatermark({
+              sourceSystem: adapter.source,
+              adapter: adapter.name,
+              entity,
+            })) ?? undefined;
+        }
+        return entry.run({
+          adapter,
+          db,
+          params,
+          since,
+          unmatched: entity === "employee" ? unmatched : undefined,
+        });
+      });
+      outcomes.push({
+        entity,
+        adapter: adapter.name,
+        status: "succeeded",
+        counts: result.counts,
+        runId: result.runId,
+        durationMs: Date.now() - started,
+      });
+    } catch (err) {
+      const failed = err instanceof IngestRunError ? err : undefined;
+      outcomes.push({
+        entity,
+        adapter: adapter.name,
+        status: "error",
+        counts: failed?.counts,
+        runId: failed?.runId,
+        durationMs: Date.now() - started,
+        error: err instanceof Error ? err.message : String(err),
+      });
+    }
+  }
+  return outcomes;
 }
 
 /**
@@ -290,52 +373,17 @@ export async function runIngestCli(
     return 2;
   }
 
-  const outcomes: Outcome[] = [];
-  for (const entity of args.entities) {
-    const entry = registry.get(entity)!;
-    const adapter = adapters.get(entity)!;
-    const started = Date.now();
-    try {
-      const result = await lock(`ingest:${entity}`, async () => {
-        // Read after taking the lock: a run ahead of us may have advanced it.
-        let since = args.since;
-        if (since === "last") {
-          since =
-            (await readWatermark({
-              sourceSystem: adapter.source,
-              adapter: adapter.name,
-              entity,
-            })) ?? undefined;
-        }
-        return entry.run({
-          adapter,
-          db: deps.db,
-          params,
-          since,
-          unmatched: entity === "employee" ? args.unmatched : undefined,
-        });
-      });
-      outcomes.push({
-        entity,
-        adapter: adapter.name,
-        status: "succeeded",
-        counts: result.counts,
-        runId: result.runId,
-        durationMs: Date.now() - started,
-      });
-    } catch (err) {
-      const failed = err instanceof IngestRunError ? err : undefined;
-      outcomes.push({
-        entity,
-        adapter: adapter.name,
-        status: "error",
-        counts: failed?.counts,
-        runId: failed?.runId,
-        durationMs: Date.now() - started,
-        error: err instanceof Error ? err.message : String(err),
-      });
-    }
-  }
+  const outcomes = await runEntities({
+    registry,
+    db: deps.db,
+    entities: args.entities,
+    adapters,
+    params,
+    since: args.since,
+    unmatched: args.unmatched,
+    lock,
+    readWatermark,
+  });
 
   stdout(formatSummary(outcomes));
   for (const o of outcomes) {
