@@ -414,6 +414,74 @@
       "sharing": "Sharing",
       "closed": "Closed"
     },
+    "extras": {
+      "steps": { "groups": "Groups" },
+      "duplicate": {
+        "button": "Duplicate cycle",
+        "pending": "Duplicating…",
+        "suffix": "Copy",
+        "from": "Duplicated from another cycle",
+        "warnTemplate": "The cycle's template is no longer available: the copy has no template.",
+        "warnGroup": "The group “{name}” was left out: its template is no longer available.",
+        "openCopy": "Open the copy"
+      },
+      "groups": {
+        "title": "Templates per group",
+        "intro": "Optional. Each person uses the template of the first group that includes them; whoever fits no group uses the cycle's template.",
+        "empty": "There are no groups yet: everyone uses the cycle's template.",
+        "add": "Add group",
+        "remove": "Remove group",
+        "moveUp": "Move up",
+        "moveDown": "Move down",
+        "groupN": "Group {n}",
+        "name": "Group name",
+        "template": "Group template",
+        "pickTemplate": "Choose a template",
+        "criteria": "Who is in",
+        "noCriteria": "No criteria: everyone who is not in an earlier group is in.",
+        "count": "{count, plural, =0 {No one} one {# person} other {# people}}",
+        "counting": "Counting…",
+        "previewError": "We could not count the people of each group.",
+        "remainder": "{count, plural, =0 {Everyone is in a group} one {# person without a group uses the cycle's template} other {# people without a group use the cycle's template}}",
+        "duplicateName": "There is already a group with that name.",
+        "defaultTemplate": "Cycle template: {name}",
+        "withoutGroup": "{count, plural, one {# person without a group} other {# people without a group}}",
+        "columns": {
+          "group": "Group",
+          "template": "Template",
+          "criteria": "Criteria",
+          "people": "People",
+          "questions": "Questions"
+        },
+        "criteriaAll": "Everyone",
+        "criteriaPeople": "{count, plural, one {# chosen person} other {# chosen people}}",
+        "none": "No group"
+      },
+      "schedule": {
+        "legend": "Schedule",
+        "fixed": "Fixed dates",
+        "hireDate": "By hire date",
+        "hireDateHint": "Each person joins the cycle when they reach the milestone and has their own deadline: no per-phase dates are set.",
+        "milestone": "Milestone",
+        "window": "Window",
+        "milestones": {
+          "30": "30 days",
+          "60": "60 days",
+          "90": "90 days",
+          "180": "6 months (180 days)",
+          "365": "1 year (365 days)"
+        },
+        "weeks": "{count, plural, one {# week} other {# weeks}}",
+        "previewTitle": "Preview with a recent hire",
+        "sample": "{name}, hired on {hireDate}",
+        "milestoneDate": "Reaches the milestone on {date}",
+        "dueDate": "Self and manager review due on {date}",
+        "noSample": "There are no hires to show as an example.",
+        "inScope": "{count, plural, one {# person in scope; joins on reaching the milestone} other {# people in scope; they join on reaching the milestone}}",
+        "summary": "Milestone: {milestone} · {window} window"
+      },
+      "detail": { "group": "Group", "due": "Due" }
+    },
     "wizard": {
       "title": "New cycle",
       "stepsLabel": "Steps",

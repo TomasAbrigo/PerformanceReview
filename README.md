@@ -144,6 +144,27 @@ Ejemplo de cron (crontab del servidor): cada 15 minutos lo incremental barato (`
 
 El código de salida distinto de cero permite alertar desde el propio cron (por ejemplo con `MAILTO` o un wrapper que avise a un canal).
 
+## Ciclos: duplicar, plantillas por grupo y cadencia por fecha de ingreso
+
+- **Duplicar:** el botón "Duplicar ciclo" del detalle (en cualquier estado) crea un borrador "<nombre> (Copia)" con componentes, anonimato, plantilla, escala final, filtro de participantes, programación, fechas límite (tal cual: hay que editarlas) y grupos. No copia participantes ni preguntas congeladas, y la copia no comparte nada con el original. Una plantilla que ya no está disponible (borrada o apagada) no se copia: la copia queda sin plantilla (o sin ese grupo) y el botón lo avisa antes de abrirla.
+- **Plantillas por grupo:** el paso opcional "Grupos" del asistente define grupos (nombre, filtro y plantilla). Cada persona usa la plantilla del **primer** grupo (por orden) cuyo filtro la incluya, evaluado a la fecha de snapshot; quien no entra en ninguno usa la plantilla del ciclo. Al lanzar, las preguntas de cada grupo se congelan con su `group_id` y cada participante guarda su `template_group_id`; los formularios (autoevaluación; el de manager de #12 debe hacer lo mismo) leen las preguntas con `questionsFor(db, cycleId, participant.templateGroupId, relationship)`, el único lector de revisiones.
+- **Cadencia por fecha de ingreso:** en el paso "Fechas" se elige "Por fecha de ingreso", un hito (30, 60, 90, 180 o 365 días) y una ventana (1 a 4 semanas). Al lanzar el ciclo no tiene participantes: cada persona entra cuando `fecha de ingreso + hito` cae dentro de la ventana (`[hoy - ventana, hoy]`), con su snapshot a esa fecha y su propia fecha límite (`ingreso + hito + ventana`, para autoevaluación y manager, en `cycle_participant.due_dates`). Quien fue quitado del ciclo no vuelve a entrar.
+
+La incorporación la hace un comando idempotente que conviene correr **una vez por día** (la ventana más corta es de una semana: si el cron falla varios días seguidos puede perderse a alguien; se puede recuperar con `--as-of`):
+
+```bash
+pnpm cycles:enroll                                 # todos los ciclos activos por fecha de ingreso, a hoy (zona horaria de la empresa)
+pnpm cycles:enroll --cycle <id> --as-of 2026-03-10 # un ciclo, a una fecha dada
+```
+
+```cron
+0 6 * * * cd /srv/performance-review && pnpm cycles:enroll >> /var/log/pr-enroll.log 2>&1
+```
+
+Solo se incorpora a quien sigue empleado a esa fecha (sin baja anterior), aunque su historial de puestos aún no se haya cerrado. Quien cumple el hito pero todavía no tiene historial de puestos (la ingesta no lo trajo) no se puede incorporar: el comando lo lista como `skipped ... no_job_history` y cada corrida lo reintenta mientras dure su ventana. Para recuperar a quien ya se pasó de la ventana (por ejemplo después de una caída del cron), `--lookback-days N` (0 a 365) amplía el rango N días hacia atrás; la fecha límite sigue siendo hito + ventana.
+
+Código de salida `0` si todo salió bien, `1` si algún ciclo falló y `2` si los argumentos son inválidos.
+
 ## Notificaciones
 
 Las notificaciones de v1 son **internas**: se guardan en la tabla `notification` y se ven en la bandeja `/es/inbox` (campana con el contador de no leídas en el header y las 3 últimas no leídas en `/es/me`). **No se envían emails** (fuera de alcance del PRD en v1).

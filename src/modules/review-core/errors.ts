@@ -8,6 +8,7 @@ export type CyclesErrorCode =
   | "invalid_transition"
   | "no_participants"
   | "no_template"
-  | "already_participant";
+  | "already_participant"
+  | "not_hire_date";
 
 export class CyclesError extends DomainError<CyclesErrorCode> {}

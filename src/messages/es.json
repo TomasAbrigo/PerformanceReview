@@ -414,6 +414,74 @@
       "sharing": "Compartir resultados",
       "closed": "Cerrado"
     },
+    "extras": {
+      "steps": { "groups": "Grupos" },
+      "duplicate": {
+        "button": "Duplicar ciclo",
+        "pending": "Duplicando…",
+        "suffix": "Copia",
+        "from": "Duplicado desde otro ciclo",
+        "warnTemplate": "La plantilla del ciclo ya no está disponible: la copia quedó sin plantilla.",
+        "warnGroup": "El grupo “{name}” se omitió: su plantilla ya no está disponible.",
+        "openCopy": "Abrir la copia"
+      },
+      "groups": {
+        "title": "Plantillas por grupo",
+        "intro": "Opcional. Cada persona usa la plantilla del primer grupo que la incluya; quienes no entran en ninguno usan la plantilla del ciclo.",
+        "empty": "Todavía no hay grupos: todas las personas usan la plantilla del ciclo.",
+        "add": "Agregar grupo",
+        "remove": "Quitar grupo",
+        "moveUp": "Subir",
+        "moveDown": "Bajar",
+        "groupN": "Grupo {n}",
+        "name": "Nombre del grupo",
+        "template": "Plantilla del grupo",
+        "pickTemplate": "Elegí una plantilla",
+        "criteria": "Quiénes entran",
+        "noCriteria": "Sin criterios: entran todas las personas que no pertenezcan a un grupo anterior.",
+        "count": "{count, plural, =0 {Ninguna persona} one {# persona} other {# personas}}",
+        "counting": "Contando…",
+        "previewError": "No pudimos calcular las personas de cada grupo.",
+        "remainder": "{count, plural, =0 {Todas las personas entran en algún grupo} one {# persona sin grupo usa la plantilla del ciclo} other {# personas sin grupo usan la plantilla del ciclo}}",
+        "duplicateName": "Ya hay un grupo con ese nombre.",
+        "defaultTemplate": "Plantilla del ciclo: {name}",
+        "withoutGroup": "{count, plural, one {# persona sin grupo} other {# personas sin grupo}}",
+        "columns": {
+          "group": "Grupo",
+          "template": "Plantilla",
+          "criteria": "Criterio",
+          "people": "Personas",
+          "questions": "Preguntas"
+        },
+        "criteriaAll": "Todas las personas",
+        "criteriaPeople": "{count, plural, one {# persona elegida} other {# personas elegidas}}",
+        "none": "Sin grupo"
+      },
+      "schedule": {
+        "legend": "Programación",
+        "fixed": "Fechas fijas",
+        "hireDate": "Por fecha de ingreso",
+        "hireDateHint": "Cada persona entra al ciclo cuando cumple el hito y tiene su propia fecha límite: no se cargan fechas por fase.",
+        "milestone": "Hito",
+        "window": "Ventana",
+        "milestones": {
+          "30": "30 días",
+          "60": "60 días",
+          "90": "90 días",
+          "180": "6 meses (180 días)",
+          "365": "1 año (365 días)"
+        },
+        "weeks": "{count, plural, one {# semana} other {# semanas}}",
+        "previewTitle": "Vista previa con un ingreso reciente",
+        "sample": "{name}, ingresó el {hireDate}",
+        "milestoneDate": "Cumple el hito el {date}",
+        "dueDate": "Fecha límite de autoevaluación y manager: {date}",
+        "noSample": "No hay ingresos para mostrar de ejemplo.",
+        "inScope": "{count, plural, one {# persona dentro del alcance; se incorpora al cumplir el hito} other {# personas dentro del alcance; se incorporan al cumplir el hito}}",
+        "summary": "Hito: {milestone} · ventana de {window}"
+      },
+      "detail": { "group": "Grupo", "due": "Vence" }
+    },
     "wizard": {
       "title": "Nuevo ciclo",
       "stepsLabel": "Pasos",
