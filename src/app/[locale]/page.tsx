@@ -27,6 +27,7 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
   const tCycles = await getTranslations("Cycles");
   const tGoals = await getTranslations("Goals");
   const tDataQuality = await getTranslations("DataQuality");
+  const tUpload = await getTranslations("Upload");
 
   return (
     <main className="flex flex-1 items-center justify-center p-8">
@@ -54,6 +55,9 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
             </Link>
             <Link href="/imports/runs" className="underline">
               {tImports("nav")}
+            </Link>
+            <Link href="/imports/upload" className="underline">
+              {tUpload("nav")}
             </Link>
             <Link href="/imports/identity" className="underline">
               {tIdentity("nav")}
