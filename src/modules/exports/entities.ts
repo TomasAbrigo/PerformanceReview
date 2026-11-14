@@ -1,6 +1,10 @@
+import { createTranslator } from "next-intl";
 import { z, type ZodType } from "zod";
 import type { DbOrTx } from "@/db/client";
 import { INGEST_COUNT_KEYS } from "@/db/schema/ingest";
+import { routing, type Locale } from "@/i18n/routing";
+import en from "@/messages/en.json";
+import es from "@/messages/es.json";
 import { notFound } from "@/modules/api/errors";
 import { parseQuery } from "@/modules/api/http";
 import { allPages } from "@/modules/api/pagination";
@@ -25,27 +29,50 @@ import { csvResponse, type CsvColumn } from "./csv";
  * CSV exports (`/api/v1/export/<entity>.csv`). Every row carries the internal
  * ids AND the Bamboo ids (person, legajo, manager, source of the row), never
  * just names, so the file joins back to anything. The rows come from the same
- * keyset queries as the JSON API, page by page, so a big export streams.
+ * keyset queries as the JSON API, page by page, so a big export streams. The
+ * header is in the language of `?locale=` (default `es`); the data is the same
+ * in both.
  */
 
 /** Rows fetched per round trip while streaming. */
 const PAGE_SIZE = 500;
+
+const MESSAGES = { es, en } satisfies Record<Locale, unknown>;
+const DEFAULT_LOCALE: Locale = "es";
+
+const localeQuery = z.object({
+  locale: z.enum(routing.locales).default(DEFAULT_LOCALE),
+});
+
+type ColumnKey = keyof (typeof es)["Exports"]["columns"];
+/** Header text of a column in the file's language. */
+type Header = (key: ColumnKey) => string;
+
+const headerIn = (locale: Locale): Header => {
+  const t = createTranslator({
+    locale,
+    messages: MESSAGES[locale],
+    namespace: "Exports.columns",
+  });
+  return (key) => t(key);
+};
 
 type Export<Q, R> = {
   /** File name without extension, from the validated parameters. */
   file: (query: Q) => string;
   query: ZodType<Q>;
   rows: (db: DbOrTx, query: Q) => AsyncIterable<R>;
-  columns: CsvColumn<R>[];
+  columns: (header: Header) => CsvColumn<R>[];
 };
 
 function defineExport<Q, R>(def: Export<Q, R>) {
-  return (db: DbOrTx, request: Request): Response => {
+  return async (db: DbOrTx, request: Request): Promise<Response> => {
+    const { locale } = parseQuery(request, localeQuery);
     const query = parseQuery(request, def.query);
     return csvResponse(
       `${def.file(query)}.csv`,
       def.rows(db, query),
-      def.columns,
+      def.columns(headerIn(locale)),
     );
   };
 }
@@ -62,21 +89,21 @@ const peopleExport = defineExport({
     allPages((cursor) =>
       listPeopleRows(db, { ...query, limit: PAGE_SIZE, cursor }),
     ),
-  columns: [
-    { header: "person_id", value: (p: PersonRow) => p.id },
-    { header: "bamboo_id", value: (p) => p.bambooId },
-    { header: "legajo", value: (p) => p.employeeNumber },
-    { header: "email", value: (p) => p.workEmail },
-    { header: "nombre", value: (p) => p.displayName },
-    { header: "estado", value: (p) => p.status },
-    { header: "manager_id", value: (p) => p.job?.manager?.id },
-    { header: "manager", value: (p) => p.job?.manager?.displayName },
-    { header: "área", value: (p) => p.job?.department },
-    { header: "división", value: (p) => p.job?.division },
-    { header: "puesto", value: (p) => p.job?.jobTitle },
-    { header: "ubicación", value: (p) => p.job?.location },
-    { header: "fecha ingreso", value: (p) => p.hireDate },
-    { header: "fecha baja", value: (p) => p.terminationDate },
+  columns: (h) => [
+    { header: h("person_id"), value: (p: PersonRow) => p.id },
+    { header: h("bamboo_id"), value: (p) => p.bambooId },
+    { header: h("employee_number"), value: (p) => p.employeeNumber },
+    { header: h("email"), value: (p) => p.workEmail },
+    { header: h("name"), value: (p) => p.displayName },
+    { header: h("status"), value: (p) => p.status },
+    { header: h("manager_id"), value: (p) => p.job?.manager?.id },
+    { header: h("manager"), value: (p) => p.job?.manager?.displayName },
+    { header: h("department"), value: (p) => p.job?.department },
+    { header: h("division"), value: (p) => p.job?.division },
+    { header: h("job_title"), value: (p) => p.job?.jobTitle },
+    { header: h("location"), value: (p) => p.job?.location },
+    { header: h("hire_date"), value: (p) => p.hireDate },
+    { header: h("termination_date"), value: (p) => p.terminationDate },
   ],
 });
 
@@ -94,22 +121,25 @@ const orgExport = defineExport({
       yield { ...row, asOf: date };
     }
   },
-  columns: [
-    { header: "as_of", value: (r: OrgRow & { asOf: string }) => r.asOf },
-    { header: "job_history_id", value: (r) => r.id },
-    { header: "person_id", value: (r) => r.person.id },
-    { header: "bamboo_id", value: (r) => r.person.sourceId },
-    { header: "legajo", value: (r) => r.employeeNumber },
-    { header: "nombre", value: (r) => r.person.displayName },
-    { header: "manager_id", value: (r) => r.manager?.id },
-    { header: "manager_bamboo_id", value: (r) => r.manager?.sourceId },
-    { header: "manager", value: (r) => r.manager?.displayName ?? r.managerRaw },
-    { header: "área", value: (r) => r.department },
-    { header: "división", value: (r) => r.division },
-    { header: "puesto", value: (r) => r.jobTitle },
-    { header: "ubicación", value: (r) => r.location },
-    { header: "vigente desde", value: (r) => r.validFrom },
-    { header: "vigente hasta", value: (r) => r.validTo },
+  columns: (h) => [
+    { header: h("as_of"), value: (r: OrgRow & { asOf: string }) => r.asOf },
+    { header: h("job_history_id"), value: (r) => r.id },
+    { header: h("person_id"), value: (r) => r.person.id },
+    { header: h("bamboo_id"), value: (r) => r.person.sourceId },
+    { header: h("employee_number"), value: (r) => r.employeeNumber },
+    { header: h("name"), value: (r) => r.person.displayName },
+    { header: h("manager_id"), value: (r) => r.manager?.id },
+    { header: h("manager_bamboo_id"), value: (r) => r.manager?.sourceId },
+    {
+      header: h("manager"),
+      value: (r) => r.manager?.displayName ?? r.managerRaw,
+    },
+    { header: h("department"), value: (r) => r.department },
+    { header: h("division"), value: (r) => r.division },
+    { header: h("job_title"), value: (r) => r.jobTitle },
+    { header: h("location"), value: (r) => r.location },
+    { header: h("valid_from"), value: (r) => r.validFrom },
+    { header: h("valid_to"), value: (r) => r.validTo },
   ],
 });
 
@@ -132,43 +162,32 @@ const goalsExport = defineExport({
         status,
       }),
     ),
-  columns: [
-    { header: "goal_id", value: (g: GoalRow) => g.id },
-    { header: "goal_bamboo_id", value: (g) => g.sourceId },
-    { header: "person_id", value: (g) => g.person.id },
-    { header: "bamboo_id", value: (g) => g.person.sourceId },
-    { header: "legajo", value: (g) => g.employeeNumber },
-    { header: "nombre", value: (g) => g.person.displayName },
-    { header: "manager_id", value: (g) => g.manager?.id },
-    { header: "manager_bamboo_id", value: (g) => g.manager?.sourceId },
-    { header: "manager", value: (g) => g.manager?.displayName },
-    { header: "área", value: (g) => g.department },
-    { header: "división", value: (g) => g.division },
-    { header: "puesto", value: (g) => g.jobTitle },
-    { header: "ubicación", value: (g) => g.location },
-    { header: "título", value: (g) => g.title },
-    { header: "estado", value: (g) => g.status },
-    { header: "porcentaje completado", value: (g) => g.percentComplete },
-    { header: "vencimiento", value: (g) => g.dueDate },
-    { header: "fecha cierre", value: (g) => g.completionDate },
-    { header: "última modificación", value: (g) => g.lastChangedAt },
-    { header: "hitos", value: (g) => g.milestones.length },
-    { header: "comentarios", value: (g) => g.commentCount },
+  columns: (h) => [
+    { header: h("goal_id"), value: (g: GoalRow) => g.id },
+    { header: h("goal_bamboo_id"), value: (g) => g.sourceId },
+    { header: h("person_id"), value: (g) => g.person.id },
+    { header: h("bamboo_id"), value: (g) => g.person.sourceId },
+    { header: h("employee_number"), value: (g) => g.employeeNumber },
+    { header: h("name"), value: (g) => g.person.displayName },
+    { header: h("manager_id"), value: (g) => g.manager?.id },
+    { header: h("manager_bamboo_id"), value: (g) => g.manager?.sourceId },
+    { header: h("manager"), value: (g) => g.manager?.displayName },
+    { header: h("department"), value: (g) => g.department },
+    { header: h("division"), value: (g) => g.division },
+    { header: h("job_title"), value: (g) => g.jobTitle },
+    { header: h("location"), value: (g) => g.location },
+    { header: h("title"), value: (g) => g.title },
+    { header: h("status"), value: (g) => g.status },
+    { header: h("percent_complete"), value: (g) => g.percentComplete },
+    { header: h("due_date"), value: (g) => g.dueDate },
+    { header: h("completion_date"), value: (g) => g.completionDate },
+    { header: h("last_changed_at"), value: (g) => g.lastChangedAt },
+    { header: h("milestones"), value: (g) => g.milestones.length },
+    { header: h("comments"), value: (g) => g.commentCount },
   ],
 });
 
 // ----------------------------------------------------------- ingest runs
-
-const COUNT_HEADERS: Record<(typeof INGEST_COUNT_KEYS)[number], string> = {
-  read: "leídos",
-  inserted: "insertados",
-  updated: "actualizados",
-  unchanged: "sin cambios",
-  deleted: "eliminados",
-  rejected: "rechazados",
-  issues: "en cola",
-  ignored: "ignorados",
-};
 
 const runsExport = defineExport({
   file: () => "ingest-runs",
@@ -181,20 +200,20 @@ const runsExport = defineExport({
     allPages((cursor) =>
       listRunRows(db, { ...query, limit: PAGE_SIZE, cursor }),
     ),
-  columns: [
-    { header: "run_id", value: (r: RunRow) => r.id },
-    { header: "fuente", value: (r) => r.sourceSystem },
-    { header: "adaptador", value: (r) => r.adapter },
-    { header: "entidad", value: (r) => r.entity },
-    { header: "estado", value: (r) => r.status },
-    { header: "inicio", value: (r) => r.startedAt },
-    { header: "fin", value: (r) => r.finishedAt },
+  columns: (h) => [
+    { header: h("run_id"), value: (r: RunRow) => r.id },
+    { header: h("source"), value: (r) => r.sourceSystem },
+    { header: h("adapter"), value: (r) => r.adapter },
+    { header: h("entity"), value: (r) => r.entity },
+    { header: h("status"), value: (r) => r.status },
+    { header: h("started_at"), value: (r) => r.startedAt },
+    { header: h("finished_at"), value: (r) => r.finishedAt },
     ...INGEST_COUNT_KEYS.map((key) => ({
-      header: COUNT_HEADERS[key],
+      header: h(key),
       value: (r: RunRow) => r.counts[key],
     })),
-    { header: "entradas del log", value: (r: RunRow) => r.issueCount },
-    { header: "error", value: (r: RunRow) => r.error },
+    { header: h("log_entries"), value: (r: RunRow) => r.issueCount },
+    { header: h("error"), value: (r: RunRow) => r.error },
   ],
 });
 
@@ -207,28 +226,31 @@ const participantsExport = defineExport({
     allPages((cursor) =>
       listParticipantRows(db, { limit: PAGE_SIZE, cursor, cycleId: cycle_id }),
     ),
-  columns: [
-    { header: "cycle_id", value: (p: ParticipantRow) => p.cycleId },
-    { header: "cycle_source_id", value: (p) => p.cycleSourceId },
-    { header: "ciclo", value: (p) => p.cycleName },
-    { header: "snapshot_as_of", value: (p) => p.snapshotAsOf },
-    { header: "participant_id", value: (p) => p.id },
-    { header: "person_id", value: (p) => p.person.id },
-    { header: "bamboo_id", value: (p) => p.person.sourceId },
-    { header: "legajo", value: (p) => p.employeeNumber },
-    { header: "nombre", value: (p) => p.person.displayName },
-    { header: "snapshot_manager_id", value: (p) => p.snapManager?.id },
+  columns: (h) => [
+    { header: h("cycle_id"), value: (p: ParticipantRow) => p.cycleId },
+    { header: h("cycle_source_id"), value: (p) => p.cycleSourceId },
+    { header: h("cycle_name"), value: (p) => p.cycleName },
+    { header: h("snapshot_as_of"), value: (p) => p.snapshotAsOf },
+    { header: h("participant_id"), value: (p) => p.id },
+    { header: h("person_id"), value: (p) => p.person.id },
+    { header: h("bamboo_id"), value: (p) => p.person.sourceId },
+    { header: h("employee_number"), value: (p) => p.employeeNumber },
+    { header: h("name"), value: (p) => p.person.displayName },
+    { header: h("snapshot_manager_id"), value: (p) => p.snapManager?.id },
     {
-      header: "snapshot_manager_bamboo_id",
+      header: h("snapshot_manager_bamboo_id"),
       value: (p) => p.snapManager?.sourceId,
     },
-    { header: "snapshot_manager", value: (p) => p.snapManager?.displayName },
-    { header: "área", value: (p) => p.snapDepartment },
-    { header: "división", value: (p) => p.snapDivision },
-    { header: "puesto", value: (p) => p.snapJobTitle },
-    { header: "ubicación", value: (p) => p.snapLocation },
-    { header: "agregado", value: (p) => p.addedAt },
-    { header: "removido", value: (p) => p.removedAt },
+    {
+      header: h("snapshot_manager"),
+      value: (p) => p.snapManager?.displayName,
+    },
+    { header: h("department"), value: (p) => p.snapDepartment },
+    { header: h("division"), value: (p) => p.snapDivision },
+    { header: h("job_title"), value: (p) => p.snapJobTitle },
+    { header: h("location"), value: (p) => p.snapLocation },
+    { header: h("added_at"), value: (p) => p.addedAt },
+    { header: h("removed_at"), value: (p) => p.removedAt },
   ],
 });
 
@@ -244,11 +266,11 @@ export type ExportEntity = keyof typeof EXPORTS;
 export const EXPORT_ENTITIES = Object.keys(EXPORTS) as ExportEntity[];
 
 /** The CSV for `file` ("people.csv", ...), streamed; 404 for anything else. */
-export function exportCsv(
+export async function exportCsv(
   db: DbOrTx,
   file: string,
   request: Request,
-): Response {
+): Promise<Response> {
   const match = /^([a-z-]+)\.csv$/.exec(file);
   const entity = match?.[1];
   if (!entity || !Object.hasOwn(EXPORTS, entity)) throw notFound("Export");

@@ -50,16 +50,16 @@ export const identityCtes = sql`
 
 /**
  * Keyset condition for rows ordered by (timestamp, id): everything after (or,
- * descending, before) the cursor position. `true` on the first page.
+ * descending, before) the cursor position; nothing on the first page.
  */
 export function afterTsId(
   tsColumn: string,
   idColumn: string,
   cursor: string | null | undefined,
   direction: "asc" | "desc" = "asc",
-): SQL {
+): SQL | undefined {
   const position = decodeCursor(cursor, "ts_id");
-  if (!position) return sql`true`;
+  if (!position) return undefined;
   const op = sql.raw(direction === "asc" ? ">" : "<");
   return sql`(${sql.raw(tsColumn)}, ${sql.raw(idColumn)}) ${op} (${position[0]}::timestamptz, ${position[1]}::uuid)`;
 }
@@ -68,18 +68,12 @@ export function afterTsId(
 export function afterId(
   idColumn: string,
   cursor: string | null | undefined,
-): SQL {
+): SQL | undefined {
   const position = decodeCursor(cursor, "id");
   return position
     ? sql`${sql.raw(idColumn)} > ${position[0]}::uuid`
-    : sql`true`;
+    : undefined;
 }
-
-export const and = (conditions: (SQL | undefined)[]): SQL =>
-  sql.join(
-    conditions.filter((c): c is SQL => c !== undefined),
-    sql` and `,
-  );
 
 /** `source: { system, id }` of a row, or null when it has no source id (native rows). */
 export const sourceOf = (
@@ -88,11 +82,19 @@ export const sourceOf = (
 ): { system: string; id: string } | null =>
   system && id !== null ? { system, id } : null;
 
-/** `left join lateral` of the job row of `personColumn` valid today (the latest if several), as `alias`. */
-export const currentJobJoin = (personColumn: string, alias = "j"): SQL =>
+/**
+ * `left join lateral` of the job row of `personColumn` valid on `asOf`
+ * (YYYY-MM-DD; the caller's ONE date for "today", never the database's), the
+ * latest if several, as `alias`.
+ */
+export const currentJobJoin = (
+  personColumn: string,
+  asOf: string,
+  alias = "j",
+): SQL =>
   sql`left join lateral (
     select h.* from employee_job_history h
-    where h.person_id = ${sql.raw(personColumn)} and ${jobValidOn("h")}
+    where h.person_id = ${sql.raw(personColumn)} and ${jobValidOn("h", asOf)}
     order by h.valid_from desc, h.id
     limit 1
   ) ${sql.raw(alias)} on true`;

@@ -1,12 +1,12 @@
-import { sql } from "drizzle-orm";
+import { and, sql } from "drizzle-orm";
 import type { DbOrTx } from "@/db/client";
 import { goalStatuses, type GoalStatus } from "@/db/schema";
 import { rowsOf } from "@/lib/sql";
 import { isUuid } from "@/lib/uuid";
+import { todayLocal } from "@/modules/org-history/dates";
 import { encodeCursor, pageOf, type Page } from "../pagination";
 import {
   afterTsId,
-  and,
   currentJobJoin,
   identityCtes,
   iso,
@@ -59,8 +59,10 @@ export type ListGoalsInput = {
   cursor?: string | null;
   personId?: string;
   status?: GoalStatus;
-  /** Owners whose manager today is this person. */
+  /** Owners whose manager on `asOf` is this person. */
   managerId?: string;
+  /** The day the owner's manager and org data are read at (default: today). */
+  asOf?: string;
 };
 
 type Raw = Omit<GoalRow, "person" | "manager" | "milestones" | "sharedWith"> & {
@@ -83,7 +85,14 @@ const uuidList = (ids: string[]) =>
 /** Goals (never the deleted ones), oldest first by (created_at, id), with milestones and sharing. */
 export async function listGoalRows(
   db: DbOrTx,
-  { limit, cursor, personId, status, managerId }: ListGoalsInput,
+  {
+    limit,
+    cursor,
+    personId,
+    status,
+    managerId,
+    asOf = todayLocal(),
+  }: ListGoalsInput,
 ): Promise<Page<GoalRow>> {
   // An id that cannot exist matches nothing (and must not reach a uuid cast).
   if ((personId && !isUuid(personId)) || (managerId && !isUuid(managerId))) {
@@ -111,16 +120,18 @@ export async function listGoalRows(
       join person p on p.id = g.person_id
       left join bamboo_identity bi on bi.person_id = g.person_id
       left join employee_number en on en.person_id = g.person_id
-      ${currentJobJoin("g.person_id")}
+      ${currentJobJoin("g.person_id", asOf)}
       left join person mp on mp.id = j.manager_person_id
       left join bamboo_identity mbi on mbi.person_id = j.manager_person_id
-      where ${and([
-        sql`g.deleted_at is null`,
-        afterTsId("g.created_at", "g.id", cursor),
-        personId ? sql`g.person_id = ${personId}::uuid` : undefined,
-        status ? sql`g.status = ${status}::goal_status` : undefined,
-        managerId ? sql`j.manager_person_id = ${managerId}::uuid` : undefined,
-      ])}
+      where ${
+        and(
+          sql`g.deleted_at is null`,
+          afterTsId("g.created_at", "g.id", cursor),
+          personId ? sql`g.person_id = ${personId}::uuid` : undefined,
+          status ? sql`g.status = ${status}::goal_status` : undefined,
+          managerId ? sql`j.manager_person_id = ${managerId}::uuid` : undefined,
+        ) ?? sql`true`
+      }
       order by g.created_at, g.id
       limit ${limit + 1}
     `),

@@ -1,14 +1,8 @@
-import { sql } from "drizzle-orm";
+import { and, sql } from "drizzle-orm";
 import type { DbOrTx } from "@/db/client";
 import { jobValidOn, rowsOf } from "@/lib/sql";
 import { encodeCursor, pageOf, type Page } from "../pagination";
-import {
-  afterId,
-  and,
-  identityCtes,
-  personRef,
-  type PersonRef,
-} from "./shared";
+import { afterId, identityCtes, personRef, type PersonRef } from "./shared";
 
 export type OrgRow = {
   /** employee_job_history id. */
@@ -69,7 +63,7 @@ export async function listOrgAsOf(
       left join employee_number en on en.person_id = h.person_id
       left join person mp on mp.id = h.manager_person_id
       left join bamboo_identity mbi on mbi.person_id = h.manager_person_id
-      where ${and([jobValidOn("h", date), afterId("h.id", cursor)])}
+      where ${and(jobValidOn("h", date), afterId("h.id", cursor)) ?? sql`true`}
       order by h.id
       limit ${limit + 1}
     `),

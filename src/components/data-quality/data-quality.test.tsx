@@ -1,7 +1,7 @@
 import { render, screen, within } from "@testing-library/react";
 import { NextIntlClientProvider } from "next-intl";
 import type { ReactNode } from "react";
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import en from "@/messages/en.json";
 import es from "@/messages/es.json";
 import {
@@ -377,14 +377,36 @@ describe("IndicatorDetail", () => {
 });
 
 describe("ExportCsvLink", () => {
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
   it.each([
     ["es", "Exportar CSV"],
     ["en", "Export CSV"],
-  ] as const)("downloads the entity as CSV in %s", (locale, label) => {
-    renderIn(locale, <ExportCsvLink file="people" />);
-    const link = screen.getByRole("link", { name: label });
-    expect(link).toHaveAttribute("href", "/api/v1/export/people.csv");
-    expect(link).toHaveAttribute("download");
+  ] as const)(
+    "downloads the entity as CSV, headers in the page's language, in %s",
+    (locale, label) => {
+      renderIn(locale, <ExportCsvLink file="people" />);
+      const link = screen.getByRole("link", { name: label });
+      expect(link).toHaveAttribute(
+        "href",
+        `/api/v1/export/people.csv?locale=${locale}`,
+      );
+      expect(link).toHaveAttribute("download");
+    },
+  );
+
+  it("is not offered when the API needs a token: a browser download cannot send it", () => {
+    vi.stubEnv("API_TOKEN", "s3cret");
+    renderIn("es", <ExportCsvLink file="people" />);
+    expect(screen.queryByRole("link")).not.toBeInTheDocument();
+  });
+
+  it("is offered when API_TOKEN is empty", () => {
+    vi.stubEnv("API_TOKEN", "");
+    renderIn("es", <ExportCsvLink file="people" />);
+    expect(screen.getByRole("link")).toBeInTheDocument();
   });
 
   it("carries the current filters and drops the empty ones", () => {
@@ -397,7 +419,7 @@ describe("ExportCsvLink", () => {
     );
     expect(screen.getByRole("link")).toHaveAttribute(
       "href",
-      "/api/v1/export/ingest-runs.csv?status=error",
+      "/api/v1/export/ingest-runs.csv?status=error&locale=es",
     );
   });
 });

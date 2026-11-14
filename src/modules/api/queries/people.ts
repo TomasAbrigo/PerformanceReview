@@ -1,12 +1,13 @@
-import { sql } from "drizzle-orm";
+import { and, sql, type SQL } from "drizzle-orm";
 import type { DbOrTx } from "@/db/client";
 import { rowsOf } from "@/lib/sql";
 import { isUuid } from "@/lib/uuid";
-import { activeEmploymentCte } from "@/modules/people/employment";
+import { todayLocal } from "@/modules/org-history/dates";
+import { activeEmploymentCteOn } from "@/modules/people/employment";
+import { peopleListWhere } from "@/modules/people/queries";
 import { encodeCursor, pageOf, type Page } from "../pagination";
 import {
   afterTsId,
-  and,
   currentJobJoin,
   identityCtes,
   iso,
@@ -39,7 +40,7 @@ export type PersonRow = {
   status: string | null;
   hireDate: string | null;
   terminationDate: string | null;
-  /** Employed today (see `activeEmploymentCte`). */
+  /** Employed on the as-of day (see `activeEmploymentCteOn`). */
   active: boolean;
   createdAt: string;
   updatedAt: string;
@@ -105,42 +106,44 @@ export type ListPeopleInput = {
   /** Substring of the name or email, case-insensitive. */
   q?: string;
   active?: boolean;
+  /** The day "active" and the current job are read at (default: today). */
+  asOf?: string;
 };
 
-/** Oldest first by (created_at, id): rows arriving later never shift earlier pages. */
+/**
+ * The people the people screen lists (live employment), oldest first by
+ * (created_at, id): rows arriving later never shift earlier pages.
+ */
 export async function listPeopleRows(
   db: DbOrTx,
-  { limit, cursor, q, active }: ListPeopleInput,
+  { limit, cursor, q, active, asOf = todayLocal() }: ListPeopleInput,
 ): Promise<Page<PersonRow>> {
-  const text = q?.trim();
-  const pattern = text ? `%${text.replace(/[\\%_]/g, (c) => `\\${c}`)}%` : null;
   const rows = await selectPeople(
     db,
-    and([
-      sql`true`,
+    and(
+      peopleListWhere("p", q),
       afterTsId("p.created_at", "p.id", cursor),
-      pattern
-        ? sql`(p.display_name ilike ${pattern} or p.work_email ilike ${pattern})`
-        : undefined,
       active === undefined
         ? undefined
         : active
           ? sql`ae.person_id is not null`
           : sql`ae.person_id is null`,
-    ]),
+    ) ?? sql`true`,
     limit + 1,
+    asOf,
   );
   return pageOf(rows, limit, (r) => encodeCursor([r.createdAt, r.id]));
 }
 
 async function selectPeople(
   db: DbOrTx,
-  where: ReturnType<typeof and>,
+  where: SQL,
   limit: number,
+  asOf: string,
 ): Promise<PersonRow[]> {
   const rows = rowsOf<RawPersonRow>(
     await db.execute(sql`
-      with ${activeEmploymentCte}, ${identityCtes}
+      with ${activeEmploymentCteOn(asOf)}, ${identityCtes}
       select p.id, p.display_name as "displayName", p.work_email as "workEmail",
         bi.source_system as "sourceSystem", bi.value as "bambooId",
         en.value as "employeeNumber",
@@ -165,7 +168,7 @@ async function selectPeople(
         limit 1
       ) le on true
       left join active_employment ae on ae.person_id = p.id
-      ${currentJobJoin("p.id")}
+      ${currentJobJoin("p.id", asOf)}
       left join person mp on mp.id = j.manager_person_id
       left join bamboo_identity mbi on mbi.person_id = j.manager_person_id
       where ${where}
@@ -224,9 +227,10 @@ export type PersonDetail = PersonRow & {
 export async function getPersonDetail(
   db: DbOrTx,
   id: string,
+  asOf = todayLocal(),
 ): Promise<PersonDetail | null> {
   if (!isUuid(id)) return null;
-  const [row] = await selectPeople(db, sql`p.id = ${id}::uuid`, 1);
+  const [row] = await selectPeople(db, sql`p.id = ${id}::uuid`, 1, asOf);
   if (!row) return null;
 
   const identities = rowsOf<IdentityRow>(

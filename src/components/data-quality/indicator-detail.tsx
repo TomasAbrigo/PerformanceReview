@@ -266,13 +266,14 @@ function Cases({ indicator }: { indicator: DataQualityIndicator }) {
           extras={[
             {
               column: "reviewer",
-              cell: (item) => (
-                <PersonLink
-                  key="r"
-                  id={item.reviewerPersonId}
-                  name={item.reviewerName}
-                />
-              ),
+              cell: (item) =>
+                item.reviewerPersonId && item.reviewerName ? (
+                  <PersonLink
+                    key="r"
+                    id={item.reviewerPersonId}
+                    name={item.reviewerName}
+                  />
+                ) : null,
             },
             {
               column: "snapshotManager",

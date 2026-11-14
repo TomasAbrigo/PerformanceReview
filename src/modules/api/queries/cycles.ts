@@ -1,4 +1,4 @@
-import { sql, type SQL } from "drizzle-orm";
+import { and, sql, type SQL } from "drizzle-orm";
 import type { DbOrTx } from "@/db/client";
 import type {
   CycleAnonymity,
@@ -13,7 +13,6 @@ import { isUuid } from "@/lib/uuid";
 import { encodeCursor, pageOf, type Page } from "../pagination";
 import {
   afterTsId,
-  and,
   identityCtes,
   iso,
   personRef,
@@ -67,7 +66,7 @@ export async function listCycleRows(
     await db.execute(sql`
       select ${CYCLE_COLUMNS}
       from review_cycle c
-      where ${and([sql`c.deleted_at is null`, afterTsId("c.created_at", "c.id", cursor)])}
+      where ${and(sql`c.deleted_at is null`, afterTsId("c.created_at", "c.id", cursor)) ?? sql`true`}
       order by c.created_at, c.id
       limit ${limit + 1}
     `),
@@ -177,11 +176,10 @@ export async function listParticipantRows(
   if (cycleId && !isUuid(cycleId)) return { items: [], nextCursor: null };
   const rows = await selectParticipants(
     db,
-    and([
-      sql`true`,
+    and(
       afterTsId("cp.added_at", "cp.id", cursor),
       cycleId ? sql`cp.cycle_id = ${cycleId}::uuid` : undefined,
-    ]),
+    ) ?? sql`true`,
     sql`cp.added_at, cp.id`,
     limit + 1,
   );

@@ -9,7 +9,7 @@ import {
 } from "vitest";
 import { eq } from "drizzle-orm";
 import { closeDb, db } from "@/db/client";
-import { goalMilestone, goalShare, person } from "@/db/schema";
+import { employment, goalMilestone, goalShare, person } from "@/db/schema";
 import {
   employmentIdOf,
   ingestFixtureCompany,
@@ -22,6 +22,7 @@ import {
   insertRun,
   resetAll,
 } from "@/modules/analytics/test-support";
+import { listPeople } from "@/modules/people/queries";
 import {
   getCycleRoute,
   getPersonRoute,
@@ -34,6 +35,7 @@ import {
   orgAsOfRoute,
   personGoalsRoute,
 } from "./handlers";
+import { listPeopleRows } from "./queries/people";
 
 type Json = Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any
 
@@ -112,6 +114,17 @@ beforeAll(async () => {
     )
     .returning({ id: person.id });
   extras = rows.map((r) => r.id);
+  // The people screen only lists people with a live employment: these left.
+  await db.insert(employment).values(
+    extras.map((personId, i) => ({
+      personId,
+      hireDate: `2019-01-0${i + 1}`,
+      terminationDate: "2020-01-01",
+      status: "Inactive",
+    })),
+  );
+  // Nobody to list: no employment at all.
+  await db.insert(person).values({ displayName: "Sin empleo" });
 
   const dora = await insertPerson({
     displayName: "Dora Díaz",
@@ -234,10 +247,43 @@ describe("GET /api/v1/people", () => {
     expect(res.body.data[0]).toMatchObject({
       id: extras[2],
       source: null,
-      status: null,
+      status: "Inactive",
       active: false,
       current_job: null,
     });
+  });
+
+  it("lists exactly the people the people screen lists (live employment only)", async () => {
+    const screen = await listPeople(db);
+    const api = await call(listPeopleRoute, "/api/v1/people?limit=200");
+    expect(api.body.data.map((p: Json) => p.id).sort()).toEqual(
+      screen.map((p) => p.id).sort(),
+    );
+    expect(api.body.data.map((p: Json) => p.display_name)).not.toContain(
+      "Sin empleo",
+    );
+    // Same search, same people.
+    const q = "ex";
+    const found = await call(
+      listPeopleRoute,
+      `/api/v1/people?q=${q}&limit=200`,
+    );
+    expect(found.body.data.map((p: Json) => p.id).sort()).toEqual(
+      (await listPeople(db, q)).map((p) => p.id).sort(),
+    );
+  });
+
+  it("reads the job valid on ONE date: the as-of date, not the database's today", async () => {
+    const then = await listPeopleRows(db, {
+      limit: 200,
+      q: "bruno",
+      asOf: "2022-06-01",
+    });
+    expect(
+      then.items.map((p) => [p.job?.jobTitle, p.job?.manager?.id]),
+    ).toEqual([["Developer", carla]]);
+    const now = await listPeopleRows(db, { limit: 200, q: "bruno" });
+    expect(now.items[0].job?.jobTitle).toBe("Senior Developer");
   });
 
   it("filters by active status", async () => {
@@ -288,6 +334,11 @@ describe("GET /api/v1/people", () => {
       .insert(person)
       .values({ displayName: "Llegada tarde" })
       .returning({ id: person.id });
+    await db.insert(employment).values({
+      personId: late.id,
+      hireDate: "2026-01-01",
+      status: "Active",
+    });
     try {
       const rest = await walk(
         listPeopleRoute,
@@ -300,6 +351,7 @@ describe("GET /api/v1/people", () => {
       expect(seen).toContain(late.id);
       expect(seen.slice(0, 4)).toEqual(first.body.data.map((p: Json) => p.id));
     } finally {
+      await db.delete(employment).where(eq(employment.personId, late.id));
       await db.delete(person).where(eq(person.id, late.id));
     }
   });

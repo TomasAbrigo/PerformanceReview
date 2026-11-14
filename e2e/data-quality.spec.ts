@@ -1,12 +1,32 @@
 import { readFile } from "node:fs/promises";
 import { expect, test } from "@playwright/test";
+import {
+  byId,
+  employees,
+  find,
+  fullName,
+  hasUniqueName,
+  isActive,
+} from "./seed-data";
 
 // The failed run these specs look at is made once by e2e/global-setup.ts.
 const failedRun = process.env.E2E_RUN_FAILED ?? "";
 
+// Ground truth from the generated company: active people with no manager (the
+// CEO), as the "sin manager" indicator counts them.
+const withoutManager = employees.filter(
+  (e) => isActive(e) && e.managerId === null,
+);
+const casos = (n: number) => `${n} ${n === 1 ? "caso" : "casos"}`;
+
 test("the panel flags the CEO without a manager and opens the case list", async ({
   page,
 }) => {
+  const ceo = find(
+    withoutManager,
+    (e) => hasUniqueName(e),
+    "CEO with a unique name",
+  );
   await page.goto("/es");
   await page.getByRole("link", { name: "Calidad de datos" }).click();
 
@@ -18,7 +38,7 @@ test("the panel flags the CEO without a manager and opens the case list", async 
   const card = page.getByRole("article").filter({
     has: page.getByRole("heading", { level: 2, name: "Personas sin manager" }),
   });
-  await expect(card.getByText("1 caso")).toBeVisible();
+  await expect(card.getByText(casos(withoutManager.length))).toBeVisible();
   await card.getByRole("link", { name: /Ver casos/ }).click();
 
   await expect(page).toHaveURL(/\/es\/data-quality\/no_manager$/);
@@ -26,14 +46,13 @@ test("the panel flags the CEO without a manager and opens the case list", async 
     page.getByRole("heading", { level: 1, name: "Personas sin manager" }),
   ).toBeVisible();
   const rows = page.getByRole("row");
-  await expect(rows).toHaveCount(2); // header + Ana
-  const ana = rows.filter({ hasText: "Ana García" });
-  await expect(ana.getByRole("link", { name: "Ana García" })).toHaveAttribute(
-    "href",
-    /\/es\/people\/[0-9a-f-]{36}$/,
-  );
-  // She is the top of the org: expected, so it is badged.
-  await expect(ana.getByText("Tope")).toBeVisible();
+  await expect(rows).toHaveCount(withoutManager.length + 1); // + header
+  const row = rows.filter({ hasText: fullName(ceo) });
+  await expect(
+    row.getByRole("link", { name: fullName(ceo), exact: true }),
+  ).toHaveAttribute("href", /\/es\/people\/[0-9a-f-]{36}$/);
+  // The top of the org has reports: not having a manager is expected, so it is badged.
+  await expect(row.getByText("Tope")).toBeVisible();
 
   await page.getByRole("link", { name: "← Volver al panel" }).click();
   await expect(page).toHaveURL(/\/es\/data-quality$/);
@@ -70,6 +89,13 @@ test("an unknown indicator renders the not-found page", async ({ page }) => {
 test("the people list downloads its CSV: header and one row per person, with ids", async ({
   page,
 }) => {
+  const report = find(
+    employees,
+    (e) => isActive(e) && e.managerId !== null && hasUniqueName(e),
+    "active person with a manager",
+  );
+  const manager = byId.get(report.managerId!)!;
+
   await page.goto("/es/people");
   const download = page.waitForEvent("download");
   await page.getByRole("link", { name: "Exportar CSV" }).click();
@@ -84,29 +110,43 @@ test("the people list downloads its CSV: header and one row per person, with ids
   expect(lines[0]).toBe(
     "person_id,bamboo_id,legajo,email,nombre,estado,manager_id,manager,área,división,puesto,ubicación,fecha ingreso,fecha baja",
   );
-  expect(lines).toHaveLength(4); // header + Ana, Bruno, Carla
-  const bruno = lines.find((l) => l.includes("Bruno Pérez"))!;
-  expect(bruno).toMatch(/^[0-9a-f-]{36},102,0002,bruno\.perez@example\.com,/);
-  expect(bruno).toContain(",Ana García,");
+  // The same people the screen lists: one per human.
+  expect(lines).toHaveLength(employees.length + 1);
+  const row = lines.find((l) => l.includes(`,${report.id},`))!;
+  expect(row).toMatch(
+    new RegExp(
+      `^[0-9a-f-]{36},${report.id},${report.employeeNumber},${report.workEmail},`,
+    ),
+  );
+  expect(row).toContain(fullName(report));
+  expect(row).toContain(fullName(manager));
 });
 
-test("the JSON API serves people with ids and source ids, and 404s unknown ones", async ({
+test("the JSON API pages through every person with ids and source ids, and 404s unknown ones", async ({
   request,
 }) => {
-  const list = await request.get("/api/v1/people?limit=2");
-  expect(list.status()).toBe(200);
-  const body = await list.json();
-  expect(body.data).toHaveLength(2);
+  const first = await request.get("/api/v1/people?limit=10");
+  expect(first.status()).toBe(200);
+  const body = await first.json();
+  expect(body.data).toHaveLength(10);
   expect(typeof body.next_cursor).toBe("string");
   expect(body.data[0]).toMatchObject({
     id: expect.stringMatching(/^[0-9a-f-]{36}$/),
-    source: { system: "bamboo_api", id: expect.any(String) },
+    source: { system: expect.any(String), id: expect.any(String) },
   });
 
-  const next = await request.get(
-    `/api/v1/people?limit=2&cursor=${body.next_cursor}`,
-  );
-  expect((await next.json()).data).toHaveLength(1);
+  // Walk every page: each person exactly once.
+  const ids: string[] = body.data.map((p: { id: string }) => p.id);
+  let cursor: string | null = body.next_cursor;
+  while (cursor) {
+    const page = await (
+      await request.get(`/api/v1/people?limit=10&cursor=${cursor}`)
+    ).json();
+    ids.push(...page.data.map((p: { id: string }) => p.id));
+    cursor = page.next_cursor;
+  }
+  expect(ids).toHaveLength(employees.length);
+  expect(new Set(ids).size).toBe(employees.length);
 
   const missing = await request.get(
     "/api/v1/people/00000000-0000-4000-8000-000000000000",

@@ -272,6 +272,8 @@ export async function insertReviewRequest(r: {
   reviewerPersonId: string;
   relationship: "self" | "manager" | "peer" | "upward";
   deleted?: boolean;
+  /** The flag the review module sets when someone else than the snapshot manager submitted. */
+  reviewerMismatch?: boolean;
 }): Promise<string> {
   const [row] = await db
     .insert(reviewRequest)
@@ -280,6 +282,7 @@ export async function insertReviewRequest(r: {
       participantId: r.participantId,
       reviewerPersonId: r.reviewerPersonId,
       relationship: r.relationship,
+      reviewerMismatch: r.reviewerMismatch ?? false,
       deletedAt: r.deleted ? new Date() : null,
     })
     .returning({ id: reviewRequest.id });

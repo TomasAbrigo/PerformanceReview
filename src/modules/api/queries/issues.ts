@@ -1,4 +1,4 @@
-import { sql } from "drizzle-orm";
+import { and, sql } from "drizzle-orm";
 import type { DbOrTx } from "@/db/client";
 import type {
   IdentityCandidate,
@@ -8,7 +8,7 @@ import type {
 } from "@/db/schema";
 import { rowsOf } from "@/lib/sql";
 import { encodeCursor, pageOf, type Page } from "../pagination";
-import { afterTsId, and, iso } from "./shared";
+import { afterTsId, iso } from "./shared";
 
 export type IssueRow = {
   id: string;
@@ -42,11 +42,12 @@ export async function listIssueRows(
         i.candidates, i.payload, i.resolution,
         ${iso("i.created_at")} as "createdAt", ${iso("i.resolved_at")} as "resolvedAt"
       from identity_match_issue i
-      where ${and([
-        sql`true`,
-        afterTsId("i.created_at", "i.id", cursor),
-        status ? sql`i.status = ${status}::identity_issue_status` : undefined,
-      ])}
+      where ${
+        and(
+          afterTsId("i.created_at", "i.id", cursor),
+          status ? sql`i.status = ${status}::identity_issue_status` : undefined,
+        ) ?? sql`true`
+      }
       order by i.created_at, i.id
       limit ${limit + 1}
     `),

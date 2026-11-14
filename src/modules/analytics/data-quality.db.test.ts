@@ -49,9 +49,18 @@ let ines: string; // no live employment, owns goals
 let maria1: string;
 let maria2: string;
 let ghostManagerless: string; // active, current row without manager
+let nora: string; // gap inside employment 1 while employment 2 has a row in between
+let olga: string; // null employment ids: no way to tell, never reported
+let pablo: string; // overlap between two different employments
+let quique: string; // only has a job row that starts in the future
+let ramiro: string; // exit date 2025-01-01, job row left open
 
 let overlapRow: string;
 let gapRow: string;
+let noraGapRow: string;
+let pabloOverlapRow: string;
+let inesRow: string;
+let ramiroRow: string;
 let hugoRow: string;
 let issueOpen: string;
 let cycleA: string;
@@ -134,6 +143,107 @@ describe("on a crafted dataset", () => {
       employmentId: fedeEmp,
     });
 
+    // Nora has two employments at once; the second one has a row in between
+    // the two rows of the first one, which hides the gap of the first.
+    nora = await insertPerson({
+      displayName: "Nora Quiroga",
+      bambooId: "211",
+      hireDate: "2019-01-01",
+    });
+    const noraFirst = await employmentIdOf(nora);
+    const [noraSecond] = await db
+      .insert(employment)
+      .values({
+        personId: nora,
+        hireDate: "2020-08-01",
+        status: "Active",
+        sourceSystem: "bamboo_api",
+        sourceId: "211b",
+      })
+      .returning({ id: employment.id });
+    await insertJob({
+      personId: nora,
+      validFrom: "2020-01-01",
+      validTo: "2020-06-01",
+      managerPersonId: ana,
+      employmentId: noraFirst,
+    });
+    await insertJob({
+      personId: nora,
+      validFrom: "2020-09-01",
+      validTo: "2020-12-01",
+      managerPersonId: ana,
+      employmentId: noraSecond.id,
+    });
+    noraGapRow = await insertJob({
+      personId: nora,
+      validFrom: "2021-01-01",
+      managerPersonId: ana,
+      employmentId: noraFirst,
+    });
+
+    // Rows without an employment id cannot be compared with each other.
+    olga = await insertPerson({ displayName: "Olga Ríos", bambooId: "212" });
+    await insertJob({
+      personId: olga,
+      validFrom: "2020-01-01",
+      validTo: "2020-06-01",
+      managerPersonId: ana,
+    });
+    await insertJob({
+      personId: olga,
+      validFrom: "2021-01-01",
+      managerPersonId: ana,
+    });
+
+    // Two employments cannot be valid at once: an overlap is always wrong.
+    pablo = await insertPerson({
+      displayName: "Pablo Sosa",
+      bambooId: "213",
+      hireDate: "2019-01-01",
+    });
+    const pabloFirst = await employmentIdOf(pablo);
+    const [pabloSecond] = await db
+      .insert(employment)
+      .values({
+        personId: pablo,
+        hireDate: "2021-01-01",
+        status: "Active",
+        sourceSystem: "bamboo_api",
+        sourceId: "213b",
+      })
+      .returning({ id: employment.id });
+    await insertJob({
+      personId: pablo,
+      validFrom: "2020-01-01",
+      validTo: "2021-06-01",
+      managerPersonId: ana,
+      employmentId: pabloFirst,
+    });
+    pabloOverlapRow = await insertJob({
+      personId: pablo,
+      validFrom: "2021-01-01",
+      managerPersonId: ana,
+      employmentId: pabloSecond.id,
+    });
+
+    // Starts in the future: current only once "today" gets past 2030.
+    quique = await insertPerson({ displayName: "Quique Paz", bambooId: "214" });
+    await insertJob({ personId: quique, validFrom: "2030-01-01" });
+
+    // Active until his termination date (2025-01-01), job row never closed.
+    ramiro = await insertPerson({
+      displayName: "Ramiro Vera",
+      bambooId: "215",
+      hireDate: "2019-01-01",
+      terminationDate: "2025-01-01",
+    });
+    ramiroRow = await insertJob({
+      personId: ramiro,
+      validFrom: "2019-01-01",
+      managerPersonId: ana,
+    });
+
     // Rehire: the gap between the two employments is expected.
     gus = await insertPerson({
       displayName: "Gus Vega",
@@ -185,6 +295,11 @@ describe("on a crafted dataset", () => {
       displayName: "Inés Mora",
       bambooId: "206",
       employmentDeleted: true,
+    });
+    inesRow = await insertJob({
+      personId: ines,
+      validFrom: "2019-01-01",
+      managerPersonId: ana,
     });
     goalOfInes = await insertGoal(ines, "Meta de Inés");
     await insertGoal(ines, "Meta borrada", { deleted: true });
@@ -268,31 +383,36 @@ describe("on a crafted dataset", () => {
       snapDepartment: null,
     });
 
-    // Review requests: only a manager review written by somebody other than
-    // the snapshot manager is a mismatch.
+    // Review requests: the review module sets `reviewer_mismatch` on a manager
+    // request submitted by someone who is no longer the snapshot manager.
     const request = (
       participantId: string,
       reviewerPersonId: string,
       relationship: "self" | "manager" | "peer" | "upward",
-      deleted = false,
+      extra: { deleted?: boolean; reviewerMismatch?: boolean } = {},
     ) =>
       insertReviewRequest({
         cycleId: cycleA,
         participantId,
         reviewerPersonId,
         relationship,
-        deleted,
+        ...extra,
       });
-    mismatchRequest = await request(partOk, bruno, "manager"); // Carla's snapshot manager is Ana
-    await request(partOk, ana, "manager"); // the snapshot manager wrote it
-    await request(partOk, carla, "self"); // about the reviewee, not the manager
-    await request(partOk, bruno, "peer");
-    await request(partOk, dora, "manager", true); // deleted
+    mismatchRequest = await request(partOk, bruno, "manager", {
+      reviewerMismatch: true,
+    });
+    await request(partOk, ana, "manager"); // not flagged
+    await request(partOk, carla, "self");
+    await request(partOk, dora, "manager", {
+      reviewerMismatch: true,
+      deleted: true,
+    });
     await insertReviewRequest({
       cycleId: cycleB,
       participantId: partRemoved,
       reviewerPersonId: bruno,
       relationship: "manager",
+      reviewerMismatch: true,
     }); // removed participant
   });
 
@@ -332,8 +452,19 @@ describe("on a crafted dataset", () => {
     ).toEqual([
       [overlapRow, eli, "overlap", "2021-06-01", "2022-01-01"],
       [gapRow, fede, "gap", "2021-01-01", "2021-03-01"],
+      [noraGapRow, nora, "gap", "2020-06-01", "2021-01-01"],
+      [pabloOverlapRow, pablo, "overlap", "2021-01-01", "2021-06-01"],
     ]);
-    expect(result.count).toBe(2);
+    expect(result.count).toBe(4);
+  });
+
+  it("compares each row with the previous one of the same employment, never across rehires or unknown employments", async () => {
+    const reported = (await jobHistoryGapsAndOverlaps(db)).items.map(
+      (i) => i.personId,
+    );
+    expect(reported).not.toContain(gus); // gap between two employments
+    expect(reported).not.toContain(olga); // null employment ids are distinct
+    expect(reported).toContain(nora); // gap hidden by the other employment's row
   });
 
   it("people who left but still have an open job row", async () => {
@@ -341,8 +472,13 @@ describe("on a crafted dataset", () => {
     expect(result.key).toBe("job_history_open_after_exit");
     expect(
       result.items.map((i) => [i.id, i.personId, i.terminationDate]),
-    ).toEqual([[hugoRow, hugo, "2023-01-01"]]);
-    expect(result.count).toBe(1);
+    ).toEqual([
+      [hugoRow, hugo, "2023-01-01"],
+      // No live employment at all (soft-deleted): nobody is employed there.
+      [inesRow, ines, null],
+      [ramiroRow, ramiro, "2025-01-01"],
+    ]);
+    expect(result.count).toBe(3);
   });
 
   it("active people with no job history row at all", async () => {
@@ -389,7 +525,7 @@ describe("on a crafted dataset", () => {
     expect(result.count).toBe(1);
   });
 
-  it("manager reviews whose reviewer is not the snapshot manager", async () => {
+  it("flagged manager reviews (not deleted, participant not removed)", async () => {
     const result = await reviewerMismatch(db);
     expect(result.key).toBe("reviewer_mismatch");
     expect(
@@ -417,8 +553,8 @@ describe("on a crafted dataset", () => {
       ["no_manager", 2],
       ["participants_no_manager", 1],
       ["participants_incomplete_snapshot", 1],
-      ["job_history_overlap_gap", 2],
-      ["job_history_open_after_exit", 1],
+      ["job_history_overlap_gap", 4],
+      ["job_history_open_after_exit", 3],
       ["active_without_job_history", 1],
       ["goals_without_employment", 1],
       ["duplicate_names", 2],
@@ -429,6 +565,26 @@ describe("on a crafted dataset", () => {
 
   it("an unknown indicator key has no detail", async () => {
     expect(await getIndicator(db, "nope")).toBeNull();
+  });
+});
+
+describe('"today" is one date everywhere', () => {
+  it("a job row that starts in the future counts once `now` gets there", async () => {
+    const todayRows = await peopleWithoutManager(db, { now: NOW });
+    expect(todayRows.items.map((i) => i.id)).not.toContain(quique);
+    const later = await peopleWithoutManager(db, {
+      now: new Date("2031-01-01T12:00:00Z"),
+    });
+    expect(later.items.map((i) => i.id)).toContain(quique);
+  });
+
+  it("who is active follows `now` too (Ramiro's exit date is 2025-01-01)", async () => {
+    const before = await jobHistoryOpenAfterExit(db, {
+      now: new Date("2024-06-01T12:00:00Z"),
+    });
+    expect(before.items.map((i) => i.personId)).not.toContain(ramiro);
+    const after = await jobHistoryOpenAfterExit(db, { now: NOW });
+    expect(after.items.map((i) => i.personId)).toContain(ramiro);
   });
 });
 

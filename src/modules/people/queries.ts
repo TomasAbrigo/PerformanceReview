@@ -1,4 +1,4 @@
-import { and, asc, desc, eq, ilike, isNull, or, sql } from "drizzle-orm";
+import { and, asc, desc, eq, isNull, sql, type SQL } from "drizzle-orm";
 import type { DbOrTx } from "@/db/client";
 import { isUuid } from "@/lib/uuid";
 import {
@@ -35,6 +35,22 @@ export type PersonDetailData = {
 };
 
 /**
+ * Who the people list shows, for the screen, the JSON API and the CSV export
+ * alike: people with at least one live (not soft-deleted) employment,
+ * optionally matching a name/email substring (case-insensitive). `alias` is
+ * how the query names the person table.
+ */
+export function peopleListWhere(alias: string, query = ""): SQL {
+  const q = query.trim();
+  const person = sql.raw(`"${alias}"`);
+  const live = sql`exists (select 1 from ${employment} e
+    where e.person_id = ${person}.id and e.deleted_at is null)`;
+  if (!q) return live;
+  const pattern = `%${q.replace(/[\\%_]/g, (c) => `\\${c}`)}%`;
+  return sql`${live} and (${person}.display_name ilike ${pattern} or ${person}.work_email ilike ${pattern})`;
+}
+
+/**
  * People, optionally filtered by name/email substring (case-insensitive) and
  * capped at `limit` (after sorting by name).
  */
@@ -43,13 +59,11 @@ export async function listPeople(
   query = "",
   { limit }: { limit?: number } = {},
 ): Promise<PersonListItem[]> {
-  const q = query.trim();
   const latestStatus = sql<string | null>`(
     select e.status from ${employment} e
     where e.person_id = "person"."id" and e.deleted_at is null
     order by e.hire_date desc nulls last limit 1
   )`;
-  const pattern = `%${q.replace(/[\\%_]/g, (c) => `\\${c}`)}%`;
   const list = db
     .select({
       id: person.id,
@@ -58,19 +72,7 @@ export async function listPeople(
       status: latestStatus,
     })
     .from(person)
-    .where(
-      and(
-        // Only people with at least one live (not soft-deleted) employment.
-        sql`exists (select 1 from ${employment} e
-          where e.person_id = "person"."id" and e.deleted_at is null)`,
-        q
-          ? or(
-              ilike(person.displayName, pattern),
-              ilike(person.workEmail, pattern),
-            )
-          : undefined,
-      ),
-    )
+    .where(peopleListWhere("person", query))
     .orderBy(asc(person.displayName));
   return limit === undefined ? list : list.limit(limit);
 }

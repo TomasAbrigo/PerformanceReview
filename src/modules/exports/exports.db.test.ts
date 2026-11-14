@@ -9,7 +9,7 @@ import {
 } from "vitest";
 import { sql } from "drizzle-orm";
 import { closeDb, db } from "@/db/client";
-import { person } from "@/db/schema";
+import { employment, person } from "@/db/schema";
 import {
   employmentIdOf,
   ingestFixtureCompany,
@@ -22,6 +22,7 @@ import {
   resetAll,
 } from "@/modules/analytics/test-support";
 import { exportRoute } from "@/modules/api/handlers";
+import { listPeople } from "@/modules/people/queries";
 import { CSV_BOM } from "./csv";
 
 /** RFC 4180 parser: rows of cells (the BOM stripped). */
@@ -108,6 +109,7 @@ beforeAll(async () => {
     department: "Producto, Diseño",
     jobTitle: "=Designer",
   });
+  await insertPerson({ displayName: "Sin empleo", noEmployment: true });
   goalId = await insertGoal(bruno, "Meta de Bruno", { dueDate: "2026-12-31" });
   await insertGoal(dora, "Meta de Dora");
 
@@ -221,6 +223,50 @@ describe("people.csv", () => {
     expect(inactive.rows.map((r) => r.person_id)).toEqual([carla]);
   });
 
+  it("lists the same people as the people screen: live employment only", async () => {
+    const screen = await listPeople(db);
+    const { rows } = await table("people.csv");
+    expect(rows.map((r) => r.person_id).sort()).toEqual(
+      screen.map((p) => p.id).sort(),
+    );
+    expect(rows.map((r) => r.nombre)).not.toContain("Sin empleo");
+    const searched = await table("people.csv", "?q=ana");
+    expect(searched.rows.map((r) => r.person_id).sort()).toEqual(
+      (await listPeople(db, "ana")).map((p) => p.id).sort(),
+    );
+  });
+
+  it("writes the header in the language asked for (es by default)", async () => {
+    const es = (await table("people.csv", "?locale=es")).header;
+    expect(es).toEqual((await table("people.csv")).header);
+    const en = (await table("people.csv", "?locale=en")).header;
+    expect(en).toEqual([
+      "person_id",
+      "bamboo_id",
+      "employee_number",
+      "email",
+      "name",
+      "status",
+      "manager_id",
+      "manager",
+      "department",
+      "division",
+      "job_title",
+      "location",
+      "hire_date",
+      "termination_date",
+    ]);
+    // Same data, whatever the language.
+    const rows = (await table("people.csv", "?locale=en")).rows;
+    expect(rows.find((r) => r.person_id === bruno)).toMatchObject({
+      employee_number: "0002",
+      manager_id: ana,
+      department: "Ingeniería",
+    });
+    const bad = await download("people.csv", "?locale=fr");
+    expect(bad.status).toBe(400);
+  });
+
   it("streams every person even when there are more than one page of them", async () => {
     const extra = await db
       .insert(person)
@@ -228,11 +274,22 @@ describe("people.csv", () => {
         Array.from({ length: 620 }, (_, i) => ({ displayName: `Bulk ${i}` })),
       )
       .returning({ id: person.id });
+    await db.insert(employment).values(
+      extra.map((p, i) => ({
+        personId: p.id,
+        hireDate: `2020-01-${String((i % 28) + 1).padStart(2, "0")}`,
+        sourceSystem: "bamboo_api" as const,
+        sourceId: `bulk-${i}`,
+      })),
+    );
     try {
       const { rows } = await table("people.csv");
       expect(rows).toHaveLength(4 + 620);
       expect(new Set(rows.map((r) => r.person_id)).size).toBe(624);
     } finally {
+      await db.execute(
+        sql`delete from employment where source_id like 'bulk-%'`,
+      );
       await db.execute(
         sql`delete from person where display_name like 'Bulk %'`,
       );
@@ -282,6 +339,40 @@ describe("org.csv", () => {
       "application/problem+json",
     );
   });
+});
+
+describe("every export follows the locale", () => {
+  it.each([
+    [
+      "org.csv",
+      "?date=2022-06-01&locale=en",
+      ["as_of", "job_history_id", "valid_from", "valid_to"],
+    ],
+    [
+      "goals.csv",
+      "?locale=en",
+      ["goal_id", "title", "percent_complete", "due_date"],
+    ],
+    [
+      "ingest-runs.csv",
+      "?locale=en",
+      ["run_id", "source", "started_at", "log_entries"],
+    ],
+    [
+      "cycle-participants.csv",
+      "?locale=en",
+      ["cycle_id", "cycle_name", "snapshot_manager", "added_at"],
+    ],
+  ])(
+    "%s has English headers with ?locale=en",
+    async (file, query, expected) => {
+      const { header } = await table(file, query);
+      expect(header).toEqual(expect.arrayContaining(expected));
+      for (const spanish of ["área", "nombre", "título", "ciclo", "fuente"]) {
+        expect(header).not.toContain(spanish);
+      }
+    },
+  );
 });
 
 describe("goals.csv", () => {

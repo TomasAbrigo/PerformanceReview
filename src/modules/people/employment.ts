@@ -10,10 +10,13 @@ import type { SourceSystem } from "@/db/schema";
  * that employment has not ended (no termination date, or one still ahead) and
  * its status is not Inactive. Older periods never make someone active.
  *
- * SQL fragment for a `WITH` list; defines `active_employment(person_id,
+ * SQL fragment for a `WITH` list (as of `date`, YYYY-MM-DD, or today in the
+ * database); defines `active_employment(person_id,
  * source_system, source_id, payload_hash)` with one row per active person.
  */
-export const activeEmploymentCte = sql`
+export const activeEmploymentCteOn = (date?: string) => {
+  const on = date === undefined ? sql`current_date` : sql`${date}::date`;
+  return sql`
   active_employment as (
     select person_id, source_system, source_id, payload_hash
     from (
@@ -24,10 +27,14 @@ export const activeEmploymentCte = sql`
       where e.deleted_at is null
       order by e.person_id, e.hire_date desc nulls last, e.id
     ) latest
-    where (latest.termination_date is null or latest.termination_date > current_date)
+    where (latest.termination_date is null or latest.termination_date > ${on})
       and lower(coalesce(latest.status, '')) <> 'inactive'
   )
 `;
+};
+
+/** The same, as of today in the database. */
+export const activeEmploymentCte = activeEmploymentCteOn();
 
 /** Bamboo ids of the employees that are active today in `source`, ascending. */
 export async function listActiveEmployeeIds(

@@ -8,7 +8,8 @@ import {
 import { jobValidOn, rowsOf } from "@/lib/sql";
 import { listIssues } from "@/modules/identity";
 import { normalizeName } from "@/modules/identity/normalize";
-import { activeEmploymentCte } from "@/modules/people/employment";
+import { todayLocal } from "@/modules/org-history/dates";
+import { activeEmploymentCteOn } from "@/modules/people/employment";
 
 /**
  * Data-quality indicators (PRD module 8, stories 19 and 74). Each indicator
@@ -53,6 +54,17 @@ export const isDataQualityKey = (key: string): key is DataQualityKey =>
 
 /** How far back "recent" failed ingest runs go. */
 export const FAILED_RUN_DAYS = 7;
+
+type Options = {
+  /** The moment "today" is taken at (default: now). */
+  now?: Date;
+};
+
+/**
+ * ONE definition of today for a run of indicators: the company's calendar day
+ * (`todayLocal`), used for "active" and for "the job row valid today" alike.
+ */
+const asOfOf = ({ now }: Options) => todayLocal(now);
 
 // ---------------------------------------------------------------- identity
 
@@ -105,22 +117,24 @@ export type NoManagerItem = {
  */
 export async function peopleWithoutManager(
   db: DbOrTx,
+  options: Options = {},
 ): Promise<Indicator<"no_manager", NoManagerItem>> {
+  const asOf = asOfOf(options);
   const rows = rowsOf<NoManagerItem>(
     await db.execute(sql`
-      with ${activeEmploymentCte}
+      with ${activeEmploymentCteOn(asOf)}
       select p.id, p.display_name as "displayName", p.work_email as "workEmail",
         j.manager_raw as "managerRaw",
         exists (
           select 1 from employee_job_history r
-          where r.manager_person_id = p.id and ${jobValidOn("r")}
+          where r.manager_person_id = p.id and ${jobValidOn("r", asOf)}
         ) as "isTop"
       from active_employment a
       join person p on p.id = a.person_id
       join lateral (
         select h.manager_person_id, h.manager_raw
         from employee_job_history h
-        where h.person_id = p.id and ${jobValidOn("h")}
+        where h.person_id = p.id and ${jobValidOn("h", asOf)}
         order by h.valid_from desc, h.id
         limit 1
       ) j on true
@@ -141,10 +155,11 @@ export type ActiveWithoutJobItem = {
 /** Active people with no (non-deleted) job history row at all. */
 export async function activeWithoutJobHistory(
   db: DbOrTx,
+  options: Options = {},
 ): Promise<Indicator<"active_without_job_history", ActiveWithoutJobItem>> {
   const rows = rowsOf<ActiveWithoutJobItem>(
     await db.execute(sql`
-      with ${activeEmploymentCte}
+      with ${activeEmploymentCteOn(asOfOf(options))}
       select p.id, p.display_name as "displayName", p.work_email as "workEmail"
       from active_employment a
       join person p on p.id = a.person_id
@@ -171,9 +186,13 @@ export type JobHistoryAnomalyItem = {
 };
 
 /**
- * SCD2 sanity: job rows of a person that overlap an earlier row, or leave a
- * gap after everything before them. A gap between two employments (a rehire)
- * is expected and not reported.
+ * SCD2 sanity. Overlap: a job row that starts before some earlier row of the
+ * same person ended (two employments cannot be valid at once, so rows of
+ * different employments count). Gap: a row that starts after the previous row
+ * OF THE SAME EMPLOYMENT ended, so the gap between two employments (a rehire)
+ * is not reported, nor is one hidden by a row of another employment. Rows
+ * without an employment id each count as an employment of their own: nothing
+ * can be said about their gaps.
  */
 export async function jobHistoryGapsAndOverlaps(
   db: DbOrTx,
@@ -181,32 +200,30 @@ export async function jobHistoryGapsAndOverlaps(
   const rows = rowsOf<JobHistoryAnomalyItem>(
     await db.execute(sql`
       with ordered as (
-        select h.id, h.person_id, h.valid_from, h.valid_to, h.employment_id,
+        select h.id, h.person_id, h.valid_from, h.valid_to,
           max(coalesce(h.valid_to, 'infinity'::date)) over (
             partition by h.person_id order by h.valid_from
             rows between unbounded preceding and 1 preceding
           ) as prev_max_to,
-          lag(h.employment_id) over (
-            partition by h.person_id order by h.valid_from
-          ) as prev_employment_id
+          max(coalesce(h.valid_to, 'infinity'::date)) over (
+            partition by h.person_id, coalesce(h.employment_id::text, h.id::text)
+            order by h.valid_from
+            rows between unbounded preceding and 1 preceding
+          ) as employment_prev_max_to
         from employee_job_history h
         where h.deleted_at is null
       )
       select o.id, o.person_id as "personId", p.display_name as "displayName",
         case when o.valid_from < o.prev_max_to then 'overlap' else 'gap' end as kind,
         (case when o.valid_from < o.prev_max_to
-          then o.valid_from else o.prev_max_to end)::text as "from",
+          then o.valid_from else o.employment_prev_max_to end)::text as "from",
         nullif((case when o.valid_from < o.prev_max_to
           then least(o.prev_max_to, coalesce(o.valid_to, 'infinity'::date))
           else o.valid_from end)::text, 'infinity') as "to"
       from ordered o
       join person p on p.id = o.person_id
-      where o.prev_max_to is not null
-        and (
-          o.valid_from < o.prev_max_to
-          or (o.valid_from > o.prev_max_to
-              and o.prev_employment_id is not distinct from o.employment_id)
-        )
+      where o.valid_from < o.prev_max_to
+        or o.valid_from > o.employment_prev_max_to
       order by p.display_name, p.id, o.valid_from
     `),
   );
@@ -223,13 +240,17 @@ export type OpenAfterExitItem = {
   terminationDate: string | null;
 };
 
-/** People who are no longer active but still have an open (valid_to null) job row. */
+/**
+ * Open (valid_to null) job rows of people who are not active: left, or with
+ * no live employment at all (soft-deleted or none), where nobody is employed.
+ */
 export async function jobHistoryOpenAfterExit(
   db: DbOrTx,
+  options: Options = {},
 ): Promise<Indicator<"job_history_open_after_exit", OpenAfterExitItem>> {
   const rows = rowsOf<OpenAfterExitItem>(
     await db.execute(sql`
-      with ${activeEmploymentCte}
+      with ${activeEmploymentCteOn(asOfOf(options))}
       select h.id, h.person_id as "personId", p.display_name as "displayName",
         h.valid_from::text as "validFrom",
         (select e.termination_date::text from employment e
@@ -238,10 +259,6 @@ export async function jobHistoryOpenAfterExit(
       from employee_job_history h
       join person p on p.id = h.person_id
       where h.deleted_at is null and h.valid_to is null
-        and exists (
-          select 1 from employment e
-          where e.person_id = p.id and e.deleted_at is null
-        )
         and not exists (
           select 1 from active_employment a where a.person_id = p.id
         )
@@ -267,6 +284,7 @@ export type DuplicateNameItem = {
  */
 export async function duplicateDisplayNames(
   db: DbOrTx,
+  options: Options = {},
 ): Promise<Indicator<"duplicate_names", DuplicateNameItem>> {
   const people = rowsOf<{
     id: string;
@@ -274,7 +292,7 @@ export async function duplicateDisplayNames(
     workEmail: string | null;
   }>(
     await db.execute(sql`
-      with ${activeEmploymentCte}
+      with ${activeEmploymentCteOn(asOfOf(options))}
       select p.id, p.display_name as "displayName", p.work_email as "workEmail"
       from active_employment a
       join person p on p.id = a.person_id
@@ -284,7 +302,9 @@ export async function duplicateDisplayNames(
   const groups = new Map<string, typeof people>();
   for (const p of people) {
     const key = normalizeName(p.displayName);
-    groups.set(key, [...(groups.get(key) ?? []), p]);
+    const group = groups.get(key);
+    if (group) group.push(p);
+    else groups.set(key, [p]);
   }
   const items = [...groups.values()]
     .filter((g) => g.length > 1)
@@ -434,17 +454,16 @@ export type ReviewerMismatchItem = {
   /** The reviewee. */
   personId: string;
   displayName: string;
-  reviewerPersonId: string;
-  reviewerName: string;
+  reviewerPersonId: string | null;
+  reviewerName: string | null;
   /** Manager of the participant's snapshot, who should have written it. */
   snapManagerId: string | null;
   snapManagerName: string | null;
 };
 
 /**
- * Manager reviews (not deleted, participant not removed) whose reviewer is
- * not the manager frozen in the participant's snapshot. There is no stored
- * flag: the mismatch is derived from the request and the snapshot.
+ * Requests the review module flagged `reviewer_mismatch` (submitted by someone
+ * who is no longer the snapshot manager), not deleted, participant not removed.
  */
 export async function reviewerMismatch(
   db: DbOrTx,
@@ -461,11 +480,10 @@ export async function reviewerMismatch(
       join cycle_participant cp on cp.id = rr.participant_id
       join review_cycle c on c.id = rr.cycle_id and c.deleted_at is null
       join person p on p.id = cp.reviewee_person_id
-      join person reviewer on reviewer.id = rr.reviewer_person_id
+      left join person reviewer on reviewer.id = rr.reviewer_person_id
       left join person manager on manager.id = cp.snap_manager_person_id
-      where rr.relationship = 'manager' and rr.deleted_at is null
+      where rr.reviewer_mismatch and rr.deleted_at is null
         and cp.removed_at is null
-        and rr.reviewer_person_id is distinct from cp.snap_manager_person_id
       order by c.name, c.id, p.display_name, rr.id
     `),
   );
@@ -487,22 +505,22 @@ export type DataQualityIndicator =
   | Indicator<"failed_runs", FailedRunItem>
   | Indicator<"reviewer_mismatch", ReviewerMismatchItem>;
 
-type Options = { now?: Date };
-
 const QUERIES: Record<
   DataQualityKey,
   (db: DbOrTx, options: Options) => Promise<DataQualityIndicator>
 > = {
   identity_open: (db) => openIdentityIssues(db),
-  no_manager: (db) => peopleWithoutManager(db),
+  no_manager: (db, options) => peopleWithoutManager(db, options),
   participants_no_manager: (db) => participantsWithoutSnapshotManager(db),
   participants_incomplete_snapshot: (db) =>
     participantsWithIncompleteSnapshot(db),
   job_history_overlap_gap: (db) => jobHistoryGapsAndOverlaps(db),
-  job_history_open_after_exit: (db) => jobHistoryOpenAfterExit(db),
-  active_without_job_history: (db) => activeWithoutJobHistory(db),
+  job_history_open_after_exit: (db, options) =>
+    jobHistoryOpenAfterExit(db, options),
+  active_without_job_history: (db, options) =>
+    activeWithoutJobHistory(db, options),
   goals_without_employment: (db) => goalsWithoutLiveEmployment(db),
-  duplicate_names: (db) => duplicateDisplayNames(db),
+  duplicate_names: (db, options) => duplicateDisplayNames(db, options),
   failed_runs: (db, options) => failedIngestRuns(db, options),
   reviewer_mismatch: (db) => reviewerMismatch(db),
 };

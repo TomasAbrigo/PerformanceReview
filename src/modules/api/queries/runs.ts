@@ -1,11 +1,11 @@
-import { sql } from "drizzle-orm";
+import { and, sql } from "drizzle-orm";
 import type { DbOrTx } from "@/db/client";
 import type { IngestCounts, IngestReject } from "@/db/schema";
 import { rowsOf } from "@/lib/sql";
 import { isUuid } from "@/lib/uuid";
 import type { RunStatus } from "@/modules/ingest/run-status";
 import { encodeCursor, pageOf, type Page } from "../pagination";
-import { afterTsId, and, iso } from "./shared";
+import { afterTsId, iso } from "./shared";
 
 export type RunRow = {
   id: string;
@@ -53,13 +53,14 @@ export async function listRunRows(
     await db.execute(sql`
       select ${COLUMNS}
       from ingest_run r
-      where ${and([
-        sql`true`,
-        afterTsId("r.started_at", "r.id", cursor, "desc"),
-        source ? sql`r.source_system = ${source}` : undefined,
-        entity ? sql`r.entity = ${entity}` : undefined,
-        status ? sql`r.status = ${status}::ingest_run_status` : undefined,
-      ])}
+      where ${
+        and(
+          afterTsId("r.started_at", "r.id", cursor, "desc"),
+          source ? sql`r.source_system = ${source}` : undefined,
+          entity ? sql`r.entity = ${entity}` : undefined,
+          status ? sql`r.status = ${status}::ingest_run_status` : undefined,
+        ) ?? sql`true`
+      }
       order by r.started_at desc, r.id desc
       limit ${limit + 1}
     `),
