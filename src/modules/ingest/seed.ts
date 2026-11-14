@@ -30,6 +30,7 @@ export const RESET_TABLES = [
   "goal_comment",
   "goal_milestone",
   "goal",
+  "follow_up_note",
   "cycle_participant",
   "cycle_transition",
   "question_revision",
