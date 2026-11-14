@@ -1,12 +1,13 @@
+import type { z } from "zod";
 import type {
-  BambooEmployee,
-  BambooGoal,
-  EmployeesChanged,
-  EmploymentStatusRow,
-  GoalsAggregate,
-  JobInfoRow,
-  ListEmployee,
-  ListEmployeesPage,
+  changedEmployeesSchema,
+  employeeSchema,
+  employmentStatusRowSchema,
+  goalSchema,
+  goalsAggregateSchema,
+  jobInfoRowSchema,
+  listEmployeeSchema,
+  listEmployeesPageSchema,
 } from "../bamboo-schemas";
 import type { CompanyFixture, FixtureEmployee, FixtureGoal } from "../company";
 import { SIZE_CONFIG } from "../company/config";
@@ -14,6 +15,17 @@ import { groupGoalsByEmployee } from "../company/goals";
 import { lastFirst } from "../company/identity";
 import { groupJobRows } from "../company/job-history";
 import { jsonFile, type FixtureFile } from "./files";
+
+// What we write is the wire shape: the input side of the shared schemas, so
+// the serializer cannot drift from what the client parses.
+type ListEmployee = z.input<typeof listEmployeeSchema>;
+type ListEmployeesPage = z.input<typeof listEmployeesPageSchema>;
+type BambooEmployee = z.input<typeof employeeSchema>;
+type BambooGoal = z.input<typeof goalSchema>;
+type GoalsAggregate = z.input<typeof goalsAggregateSchema>;
+type JobInfoRow = z.input<typeof jobInfoRowSchema>;
+type EmploymentStatusRow = z.input<typeof employmentStatusRowSchema>;
+type EmployeesChanged = z.input<typeof changedEmployeesSchema>;
 
 const byNumericId = (a: FixtureEmployee, b: FixtureEmployee): number =>
   Number(a.id) - Number(b.id);
@@ -138,7 +150,7 @@ function aggregateFor(
       completionDate: g.completionDate,
       lastChangedDateTime: g.lastChangedDateTime,
       status: g.status,
-      milestones: g.milestones,
+      milestones: g.milestones?.map((m) => ({ ...m })) ?? null,
       actions: goalActions(g, employee.status === "Active"),
     })),
     persons: [...people.values()].map((p) => ({

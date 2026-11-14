@@ -1,7 +1,23 @@
 import { defineConfig, devices } from "@playwright/test";
+import { e2eDatabaseUrl } from "./e2e/database";
+
+try {
+  process.loadEnvFile(".env.local");
+} catch {
+  // rely on the real environment (CI)
+}
 
 // Dedicated port so e2e never collides with other local projects on :3000.
 const PORT = Number(process.env.E2E_PORT ?? 3100);
+
+// The e2e empties and reseeds its own database, never the one you develop on
+// (see e2e/database.ts); the dev server below talks to it too.
+let databaseUrl: string | undefined;
+try {
+  databaseUrl = e2eDatabaseUrl();
+} catch {
+  // global setup reports the missing DATABASE_URL
+}
 
 export default defineConfig({
   testDir: "./e2e",
@@ -21,10 +37,11 @@ export default defineConfig({
     {
       name: "chromium",
       use: { ...devices["Desktop Chrome"] },
-      testIgnore: /identity\.spec\.ts/,
+      testIgnore: /identity(-later)?\.spec\.ts/,
     },
-    // The identity spec resolves a case (it links a rehire to Carla), so it
-    // runs on its own, once every spec that only reads is done.
+    // The identity specs resolve and queue cases (they link a seeded rehire to
+    // the person who left, and one more run brings a rehire in), so they run on
+    // their own, once every spec that only reads is done.
     {
       name: "identity-setup",
       testMatch: /identity\.setup\.ts/,
@@ -33,14 +50,18 @@ export default defineConfig({
     {
       name: "identity",
       use: { ...devices["Desktop Chrome"] },
-      testMatch: /identity\.spec\.ts/,
+      testMatch: /identity(-later)?\.spec\.ts/,
       dependencies: ["identity-setup"],
     },
   ],
   webServer: {
-    command: `pnpm exec next dev -p ${PORT}`,
+    // The database must exist (and be migrated) before the first page asks for it.
+    command: `pnpm exec tsx e2e/prepare-database.ts && pnpm exec next dev -p ${PORT}`,
     url: `http://localhost:${PORT}/es`,
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,
+    env: databaseUrl
+      ? { DATABASE_URL: databaseUrl, E2E_DATABASE_URL: databaseUrl }
+      : undefined,
   },
 });
