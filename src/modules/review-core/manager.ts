@@ -7,16 +7,20 @@ import {
   type ReviewCycle,
   cycleParticipant,
   person,
-  reviewAudit,
   reviewCycle,
   reviewRequest,
 } from "@/db/schema";
 import type { ActorContext } from "@/modules/actor/types";
+import {
+  NotificationError,
+  type NotificationErrorCode,
+} from "@/modules/notifications/errors";
+import { remind } from "@/modules/notifications/reminders";
 import { jobAsOf } from "@/modules/org-history/queries";
+import { isManagerReplaced } from "./manager-replaced";
 import type { RequestStatus } from "./request-status";
-import { ReviewError } from "./review-errors";
+import { ReviewError, type ReviewErrorCode } from "./review-errors";
 import type { CycleStatus } from "./status";
-import { isActiveParticipant } from "./visibility";
 
 /**
  * Whether the actor is the participant's skip-level manager: the manager of
@@ -34,36 +38,6 @@ export async function isSkipLevel(
     participant.snapshotAsOf,
   );
   return job?.managerPersonId === actor.personId;
-}
-
-/**
- * Whether HR replaced the participant's snapshot manager as the reviewer of
- * their (primary) manager review (#17 assignAlternateAssessor, mode replace):
- * the request goes to someone else on purpose. The replaced manager no longer
- * reads or shares that participant's reviews or sees them in their team; an
- * additional assessor, or a reassignment back to them, changes nothing.
- */
-export async function isManagerReplaced(
-  db: DbOrTx,
-  participant: Pick<CycleParticipant, "id" | "snapManagerPersonId">,
-): Promise<boolean> {
-  if (!participant.snapManagerPersonId) return false;
-  const [row] = await db
-    .select({ id: reviewRequest.id })
-    .from(reviewRequest)
-    .where(
-      and(
-        eq(reviewRequest.participantId, participant.id),
-        eq(reviewRequest.relationship, "manager"),
-        eq(reviewRequest.additional, false),
-        eq(reviewRequest.assignedByHr, true),
-        ne(reviewRequest.status, "superseded"),
-        isNull(reviewRequest.deletedAt),
-        ne(reviewRequest.reviewerPersonId, participant.snapManagerPersonId),
-      ),
-    )
-    .limit(1);
-  return !!row;
 }
 
 /**
@@ -208,60 +182,33 @@ export async function listTeam(
 }
 
 /**
- * Records a manual reminder to a direct report (only their manager or HR).
- * #18 replaces this with the internal inbox; for now it is an audit row.
+ * Sends a manual reminder ("Recordar") about a request to its reviewer (only
+ * the participant's manager or HR): a `manual_reminder` notification in their
+ * inbox, at most one per sender and request per day (see notifications
+ * `remind`). Not loadRequest: the manager may remind about a self review they
+ * cannot read yet (double blind).
  */
 export async function sendReminder(
   db: DbOrTx,
   actor: ActorContext,
   requestId: string,
 ): Promise<void> {
-  // Not loadRequest: the manager may remind about a self review they cannot
-  // read yet (double blind).
-  const [row] = isUuid(requestId)
-    ? await db
-        .select({
-          participantId: cycleParticipant.id,
-          manager: cycleParticipant.snapManagerPersonId,
-          removedAt: cycleParticipant.removedAt,
-          status: reviewRequest.status,
-          cycleStatus: reviewCycle.status,
-          cycleDeletedAt: reviewCycle.deletedAt,
-        })
-        .from(reviewRequest)
-        .innerJoin(
-          cycleParticipant,
-          eq(cycleParticipant.id, reviewRequest.participantId),
-        )
-        .innerJoin(reviewCycle, eq(reviewCycle.id, reviewRequest.cycleId))
-        .where(
-          and(eq(reviewRequest.id, requestId), isNull(reviewRequest.deletedAt)),
-        )
-    : [];
-  if (!row || row.cycleDeletedAt) throw new ReviewError("not_found");
-  const isManager =
-    actor.personId !== null &&
-    actor.personId === row.manager &&
-    // A snapshot manager HR replaced as reviewer no longer manages the review.
-    !(await isManagerReplaced(db, {
-      id: row.participantId,
-      snapManagerPersonId: row.manager,
-    }));
-  if (actor.role !== "hr" && !isManager) throw new ReviewError("forbidden");
-  if (
-    row.status !== "draft" ||
-    !isActiveParticipant(row) ||
-    row.cycleStatus === "draft" ||
-    row.cycleStatus === "closed"
-  ) {
-    throw new ReviewError("not_remindable");
+  try {
+    await remind(db, actor, requestId);
+  } catch (error) {
+    if (error instanceof NotificationError) {
+      throw new ReviewError(REMIND_ERRORS[error.code], error.issues);
+    }
+    throw error;
   }
-  await db.insert(reviewAudit).values({
-    requestId,
-    action: "reminder_sent",
-    actorPersonId: actor.personId,
-  });
 }
+
+const REMIND_ERRORS: Record<NotificationErrorCode, ReviewErrorCode> = {
+  not_found: "not_found",
+  forbidden: "forbidden",
+  not_pending: "not_remindable",
+  validation: "validation",
+};
 
 export type ParticipantRefs = {
   revieweeName: string;

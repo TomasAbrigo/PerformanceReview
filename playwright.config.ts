@@ -37,7 +37,18 @@ export default defineConfig({
     {
       name: "chromium",
       use: { ...devices["Desktop Chrome"] },
-      testIgnore: /identity(-later)?\.spec\.ts/,
+      testIgnore: /(identity(-later)?|notifications)\.spec\.ts/,
+    },
+    // Phase changes notify every participant, so counting a person's unread
+    // notifications needs a quiet system: this spec runs alone, once the
+    // specs that launch cycles are done and before the identity chain (the
+    // projects form one line: chromium, notifications, identity-setup,
+    // identity).
+    {
+      name: "notifications",
+      use: { ...devices["Desktop Chrome"] },
+      testMatch: /notifications\.spec\.ts/,
+      dependencies: ["chromium"],
     },
     // The identity specs resolve and queue cases (they link a seeded rehire to
     // the person who left, and one more run brings a rehire in), so they run on
@@ -45,7 +56,7 @@ export default defineConfig({
     {
       name: "identity-setup",
       testMatch: /identity\.setup\.ts/,
-      dependencies: ["chromium"],
+      dependencies: ["notifications"],
     },
     {
       name: "identity",

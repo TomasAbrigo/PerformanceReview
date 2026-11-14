@@ -10,7 +10,8 @@ import {
 } from "@/db/schema";
 import { isUuid } from "@/lib/uuid";
 import type { ActorContext } from "@/modules/actor/types";
-import { isManagerReplaced, isSkipLevel } from "./manager";
+import { isSkipLevel } from "./manager";
+import { isManagerReplaced } from "./manager-replaced";
 import type { RequestStatus } from "./request-status";
 import { ReviewError } from "./review-errors";
 import type { CycleStatus } from "./status";
