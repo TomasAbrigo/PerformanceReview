@@ -1,4 +1,5 @@
 import { useTranslations } from "next-intl";
+import { ExportCsvLink } from "@/components/data-quality/export-csv-link";
 import { buttonVariants } from "@/components/ui/button";
 import {
   Table,
@@ -27,9 +28,12 @@ export function CyclesList({ cycles }: { cycles: CycleRow[] }) {
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between gap-4">
         <h1 className="text-2xl font-semibold">{t("title")}</h1>
-        <Link href="/cycles/new" className={buttonVariants()}>
-          {t("new")}
-        </Link>
+        <div className="flex items-center gap-2">
+          <ExportCsvLink file="cycle-participants" />
+          <Link href="/cycles/new" className={buttonVariants()}>
+            {t("new")}
+          </Link>
+        </div>
       </div>
       {cycles.length === 0 ? (
         <p>{t("empty")}</p>

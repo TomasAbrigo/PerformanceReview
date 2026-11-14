@@ -9,9 +9,11 @@ import type { IngestReject, SourceSystem } from "@/db/schema";
 export type Entity = "employee" | "job_history" | "goal";
 
 /**
- * Entities with no domain handler yet: their records can only land in
- * `raw_record` (landing mode, see `RunIngestInput.landing`) until their mapping
- * exists. Any entity can also be landed, e.g. employees or goals from a file.
+ * Entities only files feed (Bamboo report exports): no API or fixture adapter
+ * reads them, so they are not in `pnpm ingest`. Their domain handlers map the
+ * Employee Performance and Feedback Status reports onto imported review
+ * cycles (src/modules/import-history); any entity can also just be landed in
+ * `raw_record` (landing mode, see `RunIngestInput.landing`).
  */
 export type LandingEntity = "assessment" | "feedback";
 

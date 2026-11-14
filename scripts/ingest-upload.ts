@@ -48,11 +48,13 @@ async function run(command: string | undefined, input: unknown) {
     return inspectUpload(uploadId);
   }
   if (command === "import") {
-    const { uploadId, fileName, profile } = importInputSchema.parse(input);
+    const { uploadId, fileName, profile, landing } =
+      importInputSchema.parse(input);
     return importUpload({
       uploadId,
       fileName,
       profile,
+      landing,
       db,
       signal: stop.signal,
     });

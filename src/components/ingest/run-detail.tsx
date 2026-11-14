@@ -8,7 +8,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { INGEST_COUNT_KEYS } from "@/db/schema/ingest";
+import { INGEST_COUNT_KEYS, INGEST_EXTRA_COUNT_KEYS } from "@/db/schema/ingest";
 import { Link } from "@/i18n/navigation";
 import type { RunDetail } from "@/modules/ingest/runs-queries";
 import { RunStatusBadge } from "./run-status-badge";
@@ -73,7 +73,12 @@ export function RunDetailView({ run }: { run: RunDetail }) {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {INGEST_COUNT_KEYS.map((k) => (
+            {[
+              ...INGEST_COUNT_KEYS,
+              ...INGEST_EXTRA_COUNT_KEYS.filter(
+                (k) => run.counts[k] !== undefined,
+              ),
+            ].map((k) => (
               <TableRow key={k}>
                 <TableHead scope="row" className="font-normal">
                   {t(`columns.${k}`)}

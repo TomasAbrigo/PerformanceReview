@@ -3,6 +3,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { connection } from "next/server";
 import { Suspense } from "react";
+import { ExportCsvLink } from "@/components/data-quality/export-csv-link";
 import { OrgDatePicker } from "@/components/org/org-date-picker";
 import { OrgTree } from "@/components/org/org-tree";
 import { db } from "@/db/client";
@@ -22,7 +23,10 @@ async function OrgData({ params, searchParams }: PageProps<"/[locale]/org">) {
 
   return (
     <div className="flex flex-col gap-6">
-      <h1 className="text-2xl font-semibold">{t("title")}</h1>
+      <div className="flex items-center justify-between gap-4">
+        <h1 className="text-2xl font-semibold">{t("title")}</h1>
+        <ExportCsvLink file="org" params={{ date }} />
+      </div>
       <OrgDatePicker date={date} />
       <OrgTree nodes={nodes} />
     </div>

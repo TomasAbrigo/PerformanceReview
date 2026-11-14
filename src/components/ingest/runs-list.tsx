@@ -1,4 +1,5 @@
 import { useTranslations } from "next-intl";
+import { ExportCsvLink } from "@/components/data-quality/export-csv-link";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -74,9 +75,19 @@ export function RunsList({
 
   return (
     <div className="flex flex-col gap-4">
-      <div>
-        <h1 className="text-2xl font-semibold">{t("title")}</h1>
-        <p className="text-muted-foreground">{t("description")}</p>
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-semibold">{t("title")}</h1>
+          <p className="text-muted-foreground">{t("description")}</p>
+        </div>
+        <ExportCsvLink
+          file="ingest-runs"
+          params={{
+            source: filters.source,
+            entity: filters.entity,
+            status: filters.status,
+          }}
+        />
       </div>
 
       <form

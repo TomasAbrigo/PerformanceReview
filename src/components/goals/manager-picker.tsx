@@ -1,4 +1,5 @@
 import { useTranslations } from "next-intl";
+import { ExportCsvLink } from "@/components/data-quality/export-csv-link";
 import { Link } from "@/i18n/navigation";
 
 /**
@@ -14,7 +15,10 @@ export function ManagerPicker({
 
   return (
     <div className="flex flex-col gap-4">
-      <h1 className="text-2xl font-semibold">{t("title")}</h1>
+      <div className="flex items-center justify-between gap-4">
+        <h1 className="text-2xl font-semibold">{t("title")}</h1>
+        <ExportCsvLink file="goals" />
+      </div>
       {managers.length === 0 ? (
         <p>{t("noManagers")}</p>
       ) : (

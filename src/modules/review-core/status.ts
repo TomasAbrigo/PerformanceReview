@@ -1,3 +1,5 @@
+import type { PeerSettings } from "./peer-settings";
+
 /**
  * Cycle status machine (docs/research/06): the phases of a cycle depend on
  * its components (no nominations without peers, no calibration phase when
@@ -34,6 +36,8 @@ export type CycleComponents = {
    * are submitted (manager) / it is shared (employee). Missing = on.
    */
   doubleBlind?: boolean;
+  /** #14: nominations cap, approval and load warning (defaults apply). */
+  peerSettings?: Partial<PeerSettings>;
 };
 
 export const isDoubleBlind = (c: Pick<CycleComponents, "doubleBlind">) =>

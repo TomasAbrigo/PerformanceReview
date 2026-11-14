@@ -5,6 +5,7 @@ import { connection } from "next/server";
 import { Suspense } from "react";
 import { NotificationsPreview } from "@/components/notifications/notifications-preview";
 import { MyTasksView } from "@/components/review/my-tasks";
+import { PeerTasks } from "@/components/review/peer-tasks";
 import { db } from "@/db/client";
 import { routing } from "@/i18n/routing";
 import { getActor } from "@/modules/actor/server";
@@ -32,6 +33,11 @@ async function Tasks({ params }: PageProps<"/[locale]/me">) {
           selfAssessments: tasks.selfAssessments,
           sharedReviews: tasks.sharedReviews,
         }}
+      />
+      <PeerTasks
+        nominations={tasks.nominations}
+        feedback={tasks.feedback}
+        sharedCycles={tasks.sharedReviews}
       />
     </div>
   );
