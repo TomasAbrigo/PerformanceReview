@@ -29,6 +29,11 @@ export type IngestCounts = {
 };
 
 /** The counters every run shows (the optional ones are entity-specific extras). */
+/** Entity-specific counters the run detail shows only when a run has them. */
+export const INGEST_EXTRA_COUNT_KEYS = [
+  "mismatches",
+] as const satisfies readonly (keyof IngestCounts)[];
+
 export const INGEST_COUNT_KEYS = [
   "read",
   "inserted",
@@ -38,7 +43,6 @@ export const INGEST_COUNT_KEYS = [
   "rejected",
   "issues",
   "ignored",
-  "mismatches",
 ] as const satisfies readonly (keyof IngestCounts)[];
 
 export type IngestReject = {
