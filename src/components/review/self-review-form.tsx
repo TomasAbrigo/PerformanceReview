@@ -1,7 +1,7 @@
 "use client";
 
 import { useFormatter, useTranslations } from "next-intl";
-import { useRef, useState, useTransition } from "react";
+import { type ReactNode, useRef, useState, useTransition } from "react";
 import {
   type ActionResult,
   type Localized,
@@ -25,6 +25,16 @@ export type SelfReviewQuestion = {
     options: { value: number; label: Localized; normalized: number }[];
   } | null;
   choices: { value: string; label: Localized }[] | null;
+  /** Manager reviews: whether the reviewee will see the answer. */
+  visibleToReviewee?: boolean;
+};
+
+/** Overrides for reusing the form for other relationships (manager). */
+export type ReviewFormLabels = {
+  title?: string;
+  back?: string;
+  backHref?: string;
+  confirmTitle?: string;
 };
 
 export type SelfReviewData = {
@@ -50,12 +60,45 @@ function optionsOf(q: SelfReviewQuestion) {
   return [];
 }
 
+/** Read-only rendering of one answer (also used next to other forms). */
+export function ReadOnlyAnswer({
+  question,
+  value,
+}: {
+  question: SelfReviewQuestion;
+  value: AnswerValue | undefined;
+}) {
+  const t = useTranslations("Review");
+  const localized = useLocalized();
+  const option = optionsOf(question).find(
+    (o) => String(o.value) === String(value),
+  );
+  const text = option
+    ? localized(option.label)
+    : value === null || value === undefined || value === ""
+      ? null
+      : String(value);
+  return (
+    <p className="whitespace-pre-wrap">
+      {text ?? <span className="text-muted-foreground">{t("noAnswer")}</span>}
+    </p>
+  );
+}
+
 export function SelfReviewForm({
   review,
   actions,
+  labels = {},
+  questionExtra,
+  children,
 }: {
   review: SelfReviewData;
   actions: SelfReviewActions;
+  labels?: ReviewFormLabels;
+  /** Rendered under each question's label (e.g. visibility marks). */
+  questionExtra?: (q: SelfReviewQuestion) => ReactNode;
+  /** Rendered after the questions, before the submit controls. */
+  children?: ReactNode;
 }) {
   const t = useTranslations("Review");
   const tErr = useTranslations("Review.errors");
@@ -140,23 +183,7 @@ export function SelfReviewForm({
 
   function renderAnswer(q: SelfReviewQuestion) {
     const value = values[q.id];
-    if (readOnly) {
-      const option = optionsOf(q).find(
-        (o) => String(o.value) === String(value),
-      );
-      const text = option
-        ? localized(option.label)
-        : value === null || value === undefined || value === ""
-          ? null
-          : String(value);
-      return (
-        <p className="whitespace-pre-wrap">
-          {text ?? (
-            <span className="text-muted-foreground">{t("noAnswer")}</span>
-          )}
-        </p>
-      );
-    }
+    if (readOnly) return <ReadOnlyAnswer question={q} value={value} />;
     if (q.kind === "text") {
       return (
         <textarea
@@ -206,13 +233,13 @@ export function SelfReviewForm({
     <div className="flex flex-col gap-6">
       <header className="flex flex-col gap-2">
         <Link
-          href="/me"
+          href={labels.backHref ?? "/me"}
           className="text-sm text-muted-foreground hover:underline"
         >
-          {t("back")}
+          {labels.back ?? t("back")}
         </Link>
         <h1 className="text-2xl font-semibold">
-          {t("selfTitle")}: {review.cycleName}
+          {labels.title ?? `${t("selfTitle")}: ${review.cycleName}`}
         </h1>
         {review.status === "submitted" && review.submittedAt ? (
           <p className="text-sm">
@@ -253,6 +280,7 @@ export function SelfReviewForm({
                   </>
                 ) : null}
               </label>
+              {questionExtra?.(q)}
               {renderAnswer(q)}
               {missing.has(q.id) ? (
                 <p id={`q-${q.id}-error`} className="text-sm text-destructive">
@@ -263,6 +291,8 @@ export function SelfReviewForm({
           ))}
         </section>
       ))}
+
+      {children}
 
       {!readOnly ? (
         <div className="flex flex-col gap-2">
@@ -288,7 +318,7 @@ export function SelfReviewForm({
               className="flex flex-col gap-2 rounded-md border p-4"
             >
               <p id="submit-title" className="font-medium">
-                {t("confirmTitle")}
+                {labels.confirmTitle ?? t("confirmTitle")}
               </p>
               <p>{t("confirmBody")}</p>
               <div className="flex gap-2">

@@ -1,4 +1,4 @@
-import type { SourceSystem } from "@/db/schema";
+import type { IngestReject, SourceSystem } from "@/db/schema";
 
 /**
  * `employee`: one record per employee. `job_history`: one record per employee
@@ -7,6 +7,16 @@ import type { SourceSystem } from "@/db/schema";
  * GoalPayload); it has its own runner (`runGoalIngest`), not `runIngest`.
  */
 export type Entity = "employee" | "job_history" | "goal";
+
+/**
+ * Entities with no domain handler yet: their records can only land in
+ * `raw_record` (landing mode, see `RunIngestInput.landing`) until their mapping
+ * exists. Any entity can also be landed, e.g. employees or goals from a file.
+ */
+export type LandingEntity = "assessment" | "feedback";
+
+/** Everything an ingest run can be about. */
+export type IngestEntity = Entity | LandingEntity;
 
 /** Raw payload of a `job_history` record: table rows exactly as Bamboo sent them. */
 export type JobHistoryPayload = {
@@ -34,6 +44,13 @@ export type ExtractContext = {
    * filter by it return everything; ingestion is idempotent either way.
    */
   since?: string;
+  /**
+   * Where an adapter reports a row it read but cannot turn into a record
+   * (e.g. a file row with an empty key). runIngest counts it as read and
+   * rejected and keeps the reason on the run. An adapter called without it
+   * has nowhere to put the row, so it must fail instead of dropping it.
+   */
+  onReject?: (reject: IngestReject) => void;
   /** Entity "goal": Bamboo ids of the employees whose goals to read. */
   employeeIds?: string[];
   /**
@@ -46,11 +63,15 @@ export type ExtractContext = {
 
 export type SkippedEmployee = { employeeId: string; status: number };
 
-/** Anything that can produce raw records for our entities. */
-export interface SourceAdapter {
+/**
+ * Anything that can produce raw records for our entities. `E` is the entity
+ * type it understands: the domain `Entity` by default; adapters for landing
+ * mode (files) are `SourceAdapter<IngestEntity>`.
+ */
+export interface SourceAdapter<E extends IngestEntity = Entity> {
   readonly source: SourceSystem;
   /** Free-form adapter name stored on ingest_run (e.g. "fixture"). */
   readonly name: string;
-  readonly entities: readonly Entity[];
-  extract(ctx: ExtractContext, entity: Entity): AsyncIterable<ExtractedRecord>;
+  readonly entities: readonly E[];
+  extract(ctx: ExtractContext, entity: E): AsyncIterable<ExtractedRecord>;
 }

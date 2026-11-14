@@ -8,7 +8,7 @@ try {
 }
 
 // Dedicated port so e2e never collides with other local projects on :3000.
-const PORT = 3100;
+const PORT = Number(process.env.E2E_PORT ?? 3100);
 
 // The e2e empties and reseeds its own database, never the one you develop on
 // (see e2e/database.ts); the dev server below talks to it too.
