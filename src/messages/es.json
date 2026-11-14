@@ -582,7 +582,120 @@
       "validation": "Hay respuestas inválidas.",
       "not_submitted": "La evaluación no está enviada.",
       "unknown": "Ocurrió un error inesperado.",
+      "not_shareable": "La evaluación todavía no se puede compartir en esta fase.",
+      "not_remindable": "No se puede enviar un recordatorio para esta evaluación.",
       "shared": "La evaluación está compartida; des-compartila antes de editar."
+    }
+  },
+  "Upload": {
+    "nav": "Subir archivo",
+    "title": "Subir archivo",
+    "description": "Importá un reporte exportado de Bamboo o una tabla de tu data lake. Las filas se guardan tal cual vienen; su mapeo a personas, evaluaciones o metas es un paso posterior.",
+    "back": "← Volver al inicio",
+    "choose": {
+      "title": "Elegir archivo",
+      "fileLabel": "Archivo",
+      "hint": "CSV, XLSX, Parquet o NDJSON, hasta {max} MB.",
+      "empty": "Elegí un archivo para ver sus columnas y las primeras filas antes de importar.",
+      "submit": "Previsualizar",
+      "reading": "Leyendo el archivo…"
+    },
+    "preview": {
+      "title": "Vista previa",
+      "file": "Archivo: {name} ({size})",
+      "existed": "Este mismo contenido ya se había subido antes: se reutiliza el archivo guardado.",
+      "profile": "Perfil de fuente",
+      "chooseProfile": "Elegí un perfil",
+      "newProfile": "Perfil nuevo…",
+      "profileOption": "{name} ({entity})",
+      "matches": "El archivo tiene todas las columnas que pide el perfil.",
+      "columns": "Columnas detectadas",
+      "columnName": "Columna",
+      "columnType": "Tipo",
+      "columnUse": "Uso en el perfil",
+      "unused": "Sin usar",
+      "missingInFile": "Falta en el archivo",
+      "rows": "Primeras filas",
+      "noRows": "El archivo no tiene filas de datos.",
+      "import": "Importar",
+      "importing": "Importando…",
+      "another": "Elegir otro archivo",
+      "blocked": "Corregí los problemas del perfil para poder importar."
+    },
+    "roles": {
+      "key": "Clave",
+      "watermark": "Watermark",
+      "soft_delete": "Baja lógica",
+      "mapped": "Mapeada a {field}"
+    },
+    "issues": {
+      "title": "El archivo no coincide con el perfil",
+      "missing_column": "Falta la columna «{column}» ({role}).",
+      "suggestion": "¿Quisiste decir «{suggestion}»?",
+      "type_mismatch": "La columna «{column}» es {actual} y el perfil espera {expected}.",
+      "roles": {
+        "key": "clave",
+        "watermark": "watermark",
+        "soft_delete": "baja lógica",
+        "mapped": "mapeada"
+      }
+    },
+    "custom": {
+      "title": "Definí el perfil",
+      "name": "Nombre del perfil",
+      "nameHint": "Minúsculas, números, guiones y guion bajo.",
+      "entity": "Entidad",
+      "key": "Clave",
+      "watermark": "Watermark",
+      "noWatermark": "Sin watermark",
+      "field": "Campo canónico",
+      "keyLabel": "Clave: {column}",
+      "watermarkLabel": "Watermark: {column}",
+      "fieldLabel": "Campo canónico de {column}",
+      "errors": {
+        "name": "Usá minúsculas, números, guiones y guion bajo (hasta 64 caracteres).",
+        "key": "Elegí al menos una columna clave.",
+        "duplicateField": "Dos columnas tienen el mismo campo canónico.",
+        "builtinName": "Ese nombre es de un perfil incluido: elegí otro.",
+        "savedName": "Ya hay un perfil guardado con ese nombre: elegí otro o reemplazalo."
+      },
+      "replace": "Reemplazar el perfil guardado «{name}»"
+    },
+    "entities": {
+      "employee": "Empleados",
+      "job_history": "Historial de puesto",
+      "goal": "Metas",
+      "assessment": "Evaluaciones",
+      "feedback": "Feedback"
+    },
+    "result": {
+      "title": "Importación terminada",
+      "read": "Filas leídas",
+      "inserted": "Registros nuevos",
+      "unchanged": "Sin cambios",
+      "rejected": "Rechazadas",
+      "noNew": "No se crearon registros nuevos: este archivo ya estaba importado.",
+      "rejects": "Filas rechazadas",
+      "viewRun": "Ver la corrida",
+      "another": "Subir otro archivo",
+      "rejectReasons": {
+        "empty_key": "Falta el valor de la columna clave «{column}» ({row}).",
+        "other": "No se pudo importar una fila."
+      }
+    },
+    "errors": {
+      "no_file": "Elegí un archivo.",
+      "empty_file": "El archivo está vacío.",
+      "file_too_large": "El archivo supera el límite de {max} MB.",
+      "unsupported_type": "Formato no soportado: usá CSV, XLSX, Parquet o NDJSON.",
+      "unknown_upload": "No se encontró el archivo subido. Volvé a subirlo.",
+      "unreadable_file": "No se pudo leer el archivo. Revisá que no esté dañado.",
+      "invalid_profile": "El archivo no tiene lo que pide el perfil.",
+      "invalid_profile_definition": "El perfil no es válido: revisá el nombre y las columnas clave.",
+      "profile_exists": "Ya existe un perfil con ese nombre: elegí otro.",
+      "unknown": "Ocurrió un error inesperado.",
+      "unknown_profile": "El perfil elegido ya no existe.",
+      "timeout": "La importación tardó demasiado y se canceló. Probá de nuevo."
     }
   },
   "Team": {

@@ -9,7 +9,11 @@ import { db } from "@/db/client";
 import { Link } from "@/i18n/navigation";
 import { routing } from "@/i18n/routing";
 import { getActor } from "@/modules/actor/server";
-import { getCycle, listSelfRequests } from "@/modules/review-core";
+import {
+  getCycle,
+  listSelfRequests,
+  shareableNow,
+} from "@/modules/review-core";
 import { launchCycleAction, transitionCycleAction } from "../actions";
 import { shareAllAction } from "./manager/[participantId]/actions";
 import { unlockAction } from "./self/actions";
@@ -24,10 +28,7 @@ async function Detail({ params }: PageProps<"/[locale]/cycles/[id]">) {
   const actor = await getActor();
   const selfRequests = await listSelfRequests(db, actor, id);
   const canShareAll =
-    actor.role === "hr" &&
-    cycle.components.manager &&
-    cycle.status !== "draft" &&
-    cycle.status !== "closed";
+    actor.role === "hr" && cycle.components.manager && shareableNow(cycle);
   const canCalibrate =
     (actor.role === "hr" || actor.role === "calibrator") &&
     cycle.status !== "draft";

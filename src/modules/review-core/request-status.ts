@@ -8,6 +8,7 @@ export const reviewActions = [
   "shared",
   "unshared",
   "reminder_sent",
+  "reviewer_reassigned",
   "calibration_published",
   "rating_override",
 ] as const;

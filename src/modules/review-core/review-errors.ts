@@ -6,6 +6,8 @@ export type ReviewErrorCode =
   | "validation"
   | "missing_required"
   | "not_submitted"
+  | "not_shareable"
+  | "not_remindable"
   | "reason_required"
   | "shared";
 

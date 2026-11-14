@@ -75,7 +75,7 @@ export const reviewCycle = pgTable(
       .notNull()
       .default({ kind: "all" }),
     launchedAt: timestamp("launched_at", { withTimezone: true }),
-    /** Calibration published: employees see the current rating from then. */
+    /** Calibration published (#16): employees see the current rating; sharing waits for it. */
     calibrationPublishedAt: timestamp("calibration_published_at", {
       withTimezone: true,
     }),

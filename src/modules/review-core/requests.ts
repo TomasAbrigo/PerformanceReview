@@ -125,23 +125,57 @@ export async function ensureManagerRequests(
       ),
     );
   if (participants.length === 0) return;
-  // A participant keeps a single manager request (even if #17 reassigns it).
-  const existing = new Set(
+  // A participant keeps a single manager request. When the snapshot
+  // manager changed (e.g. re-added after a manager change), a draft is
+  // reassigned (audited); a submitted one is kept and flagged.
+  const existing = new Map(
     (
       await db
-        .select({ participantId: reviewRequest.participantId })
+        .select({
+          id: reviewRequest.id,
+          participantId: reviewRequest.participantId,
+          reviewer: reviewRequest.reviewerPersonId,
+          status: reviewRequest.status,
+          mismatch: reviewRequest.reviewerMismatch,
+        })
         .from(reviewRequest)
         .where(
           and(
             eq(reviewRequest.relationship, "manager"),
+            isNull(reviewRequest.deletedAt),
             inArray(
               reviewRequest.participantId,
               participants.map((p) => p.id),
             ),
           ),
         )
-    ).map((r) => r.participantId),
+    ).map((r) => [r.participantId, r]),
   );
+  for (const p of participants) {
+    const request = existing.get(p.id);
+    if (!request || request.reviewer === p.managerId) continue;
+    if (request.status === "draft") {
+      await db
+        .update(reviewRequest)
+        .set({
+          reviewerPersonId: p.managerId,
+          reviewerMissing: p.managerId === null,
+          reviewerMismatch: false,
+          requestedAt: new Date(),
+        })
+        .where(eq(reviewRequest.id, request.id));
+      await db.insert(reviewAudit).values({
+        requestId: request.id,
+        action: "reviewer_reassigned",
+        note: request.reviewer,
+      });
+    } else if (!request.mismatch) {
+      await db
+        .update(reviewRequest)
+        .set({ reviewerMismatch: true })
+        .where(eq(reviewRequest.id, request.id));
+    }
+  }
   const missing = participants.filter((p) => !existing.has(p.id));
   if (missing.length === 0) return;
   await db
@@ -201,7 +235,11 @@ async function visibilityContext(
       );
     ctx.managerRequest = managerRequest ?? null;
   }
-  ctx.skipLevel = await isSkipLevel(db, actor, row.participant);
+  // The snapshot manager and the reviewee are decided without skip-level.
+  const decided =
+    actor.personId === row.participant.snapManagerPersonId ||
+    actor.personId === row.participant.revieweePersonId;
+  if (!decided) ctx.skipLevel = await isSkipLevel(db, actor, row.participant);
   return ctx;
 }
 
@@ -403,6 +441,7 @@ export async function findMySharedReviewId(
         eq(reviewRequest.relationship, "manager"),
         eq(cycleParticipant.revieweePersonId, actor.personId),
         eq(reviewRequest.status, "submitted"),
+        isNull(cycleParticipant.removedAt),
         isNotNull(reviewRequest.sharedAt),
         isNull(reviewRequest.deletedAt),
       ),

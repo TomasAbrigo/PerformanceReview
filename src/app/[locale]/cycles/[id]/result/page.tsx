@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { connection } from "next/server";
 import { Suspense } from "react";
 import { ManagerResultView } from "@/components/review/manager-result";
+import { toReviewData } from "@/components/review/review-data";
 import { db } from "@/db/client";
 import { routing } from "@/i18n/routing";
 import { getActor } from "@/modules/actor/server";
@@ -43,24 +44,11 @@ async function Result({ params }: PageProps<"/[locale]/cycles/[id]/result">) {
         review={
           review
             ? {
-                requestId: review.request.id,
-                cycleName: review.cycle.name,
+                ...toReviewData(review),
                 dueDate: null,
-                status: review.request.status,
-                submittedAt: review.request.submittedAt,
-                canWrite: false,
-                questions: review.questions
-                  .filter((q) => q.id !== overallId)
-                  .map((q) => ({
-                    id: q.id,
-                    sectionTitle: q.sectionTitle,
-                    prompt: q.prompt,
-                    kind: q.kind,
-                    required: q.required,
-                    scale: q.scale,
-                    choices: q.choices,
-                  })),
-                answers: review.answers,
+                questions: toReviewData(review).questions.filter(
+                  (q) => q.id !== overallId,
+                ),
               }
             : null
         }

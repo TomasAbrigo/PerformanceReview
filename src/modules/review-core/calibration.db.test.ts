@@ -152,7 +152,14 @@ async function submitManager(
   return { participantId: p.id, requestId: id };
 }
 
-/** Cycle in collecting; Carla rated Bruno 2 and Ana rated Carla 3. */
+/** Publishes, moves to sharing (sharing waits for publish) and shares all. */
+async function publishAndShare(cycleId: string) {
+  await publishCalibration(db, hr, cycleId);
+  await transition(db, cycleId, "sharing", null);
+  await shareAll(db, hr, cycleId);
+}
+
+/** Cycle in calibration; Carla rated Bruno 2 and Ana rated Carla 3. */
 async function ratedCycle(overrides: Partial<CycleInput> = {}) {
   const cycle = await createCycle(db, input(overrides));
   await launchCycle(db, cycle.id, null);
@@ -411,9 +418,10 @@ describe("publish and employee visibility", () => {
       reason: "secreto",
     });
     expect(await myPublishedRating(db, as(bruno), cycle.id)).toBeNull();
-    await shareAll(db, hr, cycle.id);
-    expect(await myPublishedRating(db, as(bruno), cycle.id)).toBeNull();
     await publishCalibration(db, hr, cycle.id);
+    expect(await myPublishedRating(db, as(bruno), cycle.id)).toBeNull();
+    await transition(db, cycle.id, "sharing", null);
+    await shareAll(db, hr, cycle.id);
     const mine = await myPublishedRating(db, as(bruno), cycle.id);
     expect(mine).toEqual({
       value: 4,
@@ -424,8 +432,9 @@ describe("publish and employee visibility", () => {
 
   it("editing a shared manager review requires unshare first", async () => {
     const { cycle, b } = await ratedCycle();
+    await publishAndShare(cycle.id);
+    await transition(db, cycle.id, "calibration", null);
     await transition(db, cycle.id, "manager_review", null);
-    await shareAll(db, hr, cycle.id);
     await unlock(db, hr, b.requestId, null);
     const review = (await getReview(db, as(carla), b.requestId))!;
     await expect(
@@ -464,8 +473,7 @@ describe("review findings", () => {
 
   it("after publish, changes are audited overrides with a required reason", async () => {
     const { cycle, b } = await ratedCycle();
-    await shareAll(db, hr, cycle.id);
-    await publishCalibration(db, hr, cycle.id);
+    await publishAndShare(cycle.id);
     await expect(
       proposeRating(db, hr, b.participantId, { value: 3, reason: "" }),
     ).rejects.toMatchObject({ code: "reason_required" });

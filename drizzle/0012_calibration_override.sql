@@ -1,1 +1,0 @@
-ALTER TYPE "public"."review_audit_action" ADD VALUE 'rating_override';

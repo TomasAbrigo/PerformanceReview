@@ -75,22 +75,15 @@
     {
       "idx": 10,
       "version": "7",
-      "when": 1794605585606,
+      "when": 1794619992820,
       "tag": "0010_manager_review",
       "breakpoints": true
     },
     {
       "idx": 11,
       "version": "7",
-      "when": 1794619353667,
+      "when": 1794644936692,
       "tag": "0011_calibration",
-      "breakpoints": true
-    },
-    {
-      "idx": 12,
-      "version": "7",
-      "when": 1794621510504,
-      "tag": "0012_calibration_override",
       "breakpoints": true
     }
   ]

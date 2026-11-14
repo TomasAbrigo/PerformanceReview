@@ -582,7 +582,120 @@
       "validation": "Some answers are invalid.",
       "not_submitted": "The review is not submitted.",
       "unknown": "An unexpected error occurred.",
+      "not_shareable": "The review cannot be shared in this phase yet.",
+      "not_remindable": "A reminder cannot be sent for this review.",
       "shared": "This review was shared; unshare it before editing."
+    }
+  },
+  "Upload": {
+    "nav": "Upload a file",
+    "title": "Upload a file",
+    "description": "Import a report exported from Bamboo or a table from your data lake. Rows are stored exactly as they come; mapping them to people, assessments or goals is a later step.",
+    "back": "← Back to home",
+    "choose": {
+      "title": "Choose a file",
+      "fileLabel": "File",
+      "hint": "CSV, XLSX, Parquet or NDJSON, up to {max} MB.",
+      "empty": "Choose a file to see its columns and first rows before importing.",
+      "submit": "Preview",
+      "reading": "Reading the file…"
+    },
+    "preview": {
+      "title": "Preview",
+      "file": "File: {name} ({size})",
+      "existed": "This exact content was uploaded before: the stored file is reused.",
+      "profile": "Source profile",
+      "chooseProfile": "Choose a profile",
+      "newProfile": "New profile…",
+      "profileOption": "{name} ({entity})",
+      "matches": "The file has every column the profile needs.",
+      "columns": "Detected columns",
+      "columnName": "Column",
+      "columnType": "Type",
+      "columnUse": "Use in the profile",
+      "unused": "Unused",
+      "missingInFile": "Missing from the file",
+      "rows": "First rows",
+      "noRows": "The file has no data rows.",
+      "import": "Import",
+      "importing": "Importing…",
+      "another": "Choose another file",
+      "blocked": "Fix the profile problems to be able to import."
+    },
+    "roles": {
+      "key": "Key",
+      "watermark": "Watermark",
+      "soft_delete": "Soft delete",
+      "mapped": "Mapped to {field}"
+    },
+    "issues": {
+      "title": "The file does not match the profile",
+      "missing_column": "Column “{column}” is missing ({role}).",
+      "suggestion": "Did you mean “{suggestion}”?",
+      "type_mismatch": "Column “{column}” is {actual} but the profile expects {expected}.",
+      "roles": {
+        "key": "key",
+        "watermark": "watermark",
+        "soft_delete": "soft delete",
+        "mapped": "mapped"
+      }
+    },
+    "custom": {
+      "title": "Define the profile",
+      "name": "Profile name",
+      "nameHint": "Lowercase letters, digits, hyphens and underscores.",
+      "entity": "Entity",
+      "key": "Key",
+      "watermark": "Watermark",
+      "noWatermark": "No watermark",
+      "field": "Canonical field",
+      "keyLabel": "Key: {column}",
+      "watermarkLabel": "Watermark: {column}",
+      "fieldLabel": "Canonical field of {column}",
+      "errors": {
+        "name": "Use lowercase letters, digits, hyphens and underscores (up to 64 characters).",
+        "key": "Choose at least one key column.",
+        "duplicateField": "Two columns have the same canonical field.",
+        "builtinName": "That name belongs to a built-in profile: choose another.",
+        "savedName": "A saved profile already has that name: choose another or replace it."
+      },
+      "replace": "Replace the saved profile “{name}”"
+    },
+    "entities": {
+      "employee": "Employees",
+      "job_history": "Job history",
+      "goal": "Goals",
+      "assessment": "Assessments",
+      "feedback": "Feedback"
+    },
+    "result": {
+      "title": "Import finished",
+      "read": "Rows read",
+      "inserted": "New records",
+      "unchanged": "Unchanged",
+      "rejected": "Rejected",
+      "noNew": "No new records were created: this file had already been imported.",
+      "rejects": "Rejected rows",
+      "viewRun": "View the run",
+      "another": "Upload another file",
+      "rejectReasons": {
+        "empty_key": "The key column “{column}” has no value ({row}).",
+        "other": "A row could not be imported."
+      }
+    },
+    "errors": {
+      "no_file": "Choose a file.",
+      "empty_file": "The file is empty.",
+      "file_too_large": "The file is over the {max} MB limit.",
+      "unsupported_type": "Unsupported format: use CSV, XLSX, Parquet or NDJSON.",
+      "unknown_upload": "The uploaded file was not found. Upload it again.",
+      "unreadable_file": "The file could not be read. Check that it is not corrupted.",
+      "invalid_profile": "The file does not have what the profile needs.",
+      "invalid_profile_definition": "The profile is not valid: check the name and the key columns.",
+      "profile_exists": "A profile with that name already exists: choose another.",
+      "unknown": "An unexpected error occurred.",
+      "unknown_profile": "The chosen profile no longer exists.",
+      "timeout": "The import took too long and was cancelled. Try again."
     }
   },
   "Team": {

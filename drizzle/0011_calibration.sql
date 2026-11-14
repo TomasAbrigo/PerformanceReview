@@ -1,6 +1,7 @@
 CREATE TYPE "public"."calibration_group_kind" AS ENUM('by_department', 'by_manager', 'manual');--> statement-breakpoint
 CREATE TYPE "public"."final_rating_stage" AS ENUM('computed', 'manager', 'calibrated', 'override');--> statement-breakpoint
 ALTER TYPE "public"."review_audit_action" ADD VALUE 'calibration_published';--> statement-breakpoint
+ALTER TYPE "public"."review_audit_action" ADD VALUE 'rating_override';--> statement-breakpoint
 CREATE TABLE "calibration_group" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"cycle_id" uuid NOT NULL,
@@ -37,7 +38,6 @@ CREATE TABLE "final_rating" (
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
-ALTER TABLE "review_cycle" ADD COLUMN "calibration_published_at" timestamp with time zone;--> statement-breakpoint
 ALTER TABLE "calibration_group" ADD CONSTRAINT "calibration_group_cycle_id_review_cycle_id_fk" FOREIGN KEY ("cycle_id") REFERENCES "public"."review_cycle"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "calibration_group" ADD CONSTRAINT "calibration_group_created_by_person_id_fk" FOREIGN KEY ("created_by") REFERENCES "public"."person"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "calibration_group_calibrator" ADD CONSTRAINT "calibration_group_calibrator_group_id_calibration_group_id_fk" FOREIGN KEY ("group_id") REFERENCES "public"."calibration_group"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
