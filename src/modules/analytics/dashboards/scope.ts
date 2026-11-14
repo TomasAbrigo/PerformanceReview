@@ -66,10 +66,7 @@ export function scopedCtes(actor: ActorContext, f: DashboardFilters): SQL {
   const manager = dim("snap_manager_person_id", "manager_person_id");
   const location = dim("snap_location", "location");
   const jobTitle = dim("snap_job_title", "job_title");
-  const where: SQL[] = [
-    sql`cp.removed_at is null`,
-    sql`c.status <> 'draft'`,
-  ];
+  const where: SQL[] = [sql`cp.removed_at is null`, sql`c.status <> 'draft'`];
   if (f.cycleId) {
     if (!isUuid(f.cycleId)) throw new ReviewError("not_found");
     where.push(sql`cp.cycle_id = ${f.cycleId}::uuid`);

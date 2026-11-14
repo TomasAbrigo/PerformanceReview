@@ -28,6 +28,7 @@ import {
 } from "@/modules/templates";
 import {
   cycleProgress,
+  dashboardFilterOptions,
   executiveSummary,
   goalsVsRating,
   managerTeam,
@@ -448,9 +449,9 @@ describe("personTrajectory", () => {
     expect(carlaView.points.map((p) => p.cycleId)).toEqual([cycle.id]);
     const anaView = await personTrajectory(db, as(ana, "manager"), bruno);
     expect(anaView.points.map((p) => p.cycleId)).toEqual([cycle.id, c2.id]);
-    await expect(personTrajectory(db, as(carla), bruno)).rejects.toMatchObject(
-      { code: "forbidden" },
-    );
+    await expect(personTrajectory(db, as(carla), bruno)).rejects.toMatchObject({
+      code: "forbidden",
+    });
   });
 });
 
@@ -587,5 +588,29 @@ describe("executiveSummary", () => {
     await expect(
       executiveSummary(db, as(ana, "manager"), { cycleId: cycle.id }),
     ).rejects.toMatchObject({ code: "forbidden" });
+  });
+});
+
+describe("dashboardFilterOptions", () => {
+  it("lists the values of the visible participants per hierarchy", async () => {
+    const { cycle } = await h1();
+    const asOf = await dashboardFilterOptions(db, hr, {
+      cycleId: cycle.id,
+      hierarchy: "asOf",
+    });
+    expect(asOf).toEqual({
+      departments: ["Ingeniería"],
+      managers: [
+        { id: ana, name: "Ana García" },
+        { id: carla, name: "Carla Romero" },
+      ],
+      locations: ["Córdoba", "Rosario"],
+      jobTitles: ["Developer", "Engineering Manager"],
+    });
+    const now = await dashboardFilterOptions(db, as(carla, "manager"), {
+      cycleId: cycle.id,
+      hierarchy: "current",
+    });
+    expect(now.managers).toEqual([]);
   });
 });

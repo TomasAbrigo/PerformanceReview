@@ -465,3 +465,44 @@ export async function executiveSummary(
     suppressed,
   };
 }
+
+export type FilterOptions = {
+  departments: string[];
+  managers: { id: string; name: string }[];
+  locations: string[];
+  jobTitles: string[];
+};
+
+/** Values for the filter selects: what the actor's participants carry. */
+export async function dashboardFilterOptions(
+  db: DbOrTx,
+  actor: ActorContext,
+  f: Pick<DashboardFilters, "cycleId" | "hierarchy">,
+): Promise<FilterOptions> {
+  requireHrOrManager(actor);
+  const rows = await db.execute<{
+    department: string | null;
+    manager_id: string | null;
+    manager_name: string | null;
+    location: string | null;
+    job_title: string | null;
+  }>(sql`
+    with recursive ${scopedCtes(actor, f)}
+    select distinct department, manager_id, manager_name, location, job_title
+    from scoped`);
+  const uniq = (xs: (string | null)[]) =>
+    [...new Set(xs.filter((x): x is string => !!x))].sort();
+  const managers = new Map<string, string>();
+  for (const r of rows) {
+    if (r.manager_id && r.manager_name)
+      managers.set(r.manager_id, r.manager_name);
+  }
+  return {
+    departments: uniq(rows.map((r) => r.department)),
+    managers: [...managers]
+      .map(([id, name]) => ({ id, name }))
+      .sort((a, b) => a.name.localeCompare(b.name)),
+    locations: uniq(rows.map((r) => r.location)),
+    jobTitles: uniq(rows.map((r) => r.job_title)),
+  };
+}

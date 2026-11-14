@@ -414,7 +414,9 @@
       "closed": "Cerrado"
     },
     "extras": {
-      "steps": { "groups": "Grupos" },
+      "steps": {
+        "groups": "Grupos"
+      },
       "duplicate": {
         "button": "Duplicar ciclo",
         "pending": "Duplicando…",
@@ -479,7 +481,10 @@
         "inScope": "{count, plural, one {# persona dentro del alcance; se incorpora al cumplir el hito} other {# personas dentro del alcance; se incorporan al cumplir el hito}}",
         "summary": "Hito: {milestone} · ventana de {window}"
       },
-      "detail": { "group": "Grupo", "due": "Vence" }
+      "detail": {
+        "group": "Grupo",
+        "due": "Vence"
+      }
     },
     "wizard": {
       "title": "Nuevo ciclo",
@@ -917,5 +922,126 @@
     "override": "Registrar override",
     "overrideBadge": "override",
     "publishedNote": "Calibración publicada: cada cambio se registra como override (auditado) y el empleado ve el nuevo valor."
+  },
+  "Dashboards": {
+    "nav": "Dashboards",
+    "title": "Dashboards",
+    "noCycles": "Todavía no hay ciclos lanzados.",
+    "forbidden": "No tenés acceso a estos dashboards.",
+    "filters": {
+      "label": "Filtros",
+      "cycle": "Ciclo",
+      "allCycles": "Todos los ciclos",
+      "department": "Área",
+      "manager": "Manager",
+      "location": "Ubicación",
+      "jobTitle": "Puesto",
+      "any": "Todos",
+      "apply": "Aplicar"
+    },
+    "hierarchy": {
+      "label": "Jerarquía",
+      "asOf": "Al momento de la review",
+      "current": "Actual"
+    },
+    "groupBy": {
+      "label": "Agrupar por",
+      "department": "Área",
+      "manager": "Manager",
+      "location": "Ubicación",
+      "jobTitle": "Puesto"
+    },
+    "stage": {
+      "label": "Rating",
+      "manager": "Pre calibración (manager)",
+      "current": "Post calibración (actual)"
+    },
+    "relationships": {
+      "self": "Autoevaluación",
+      "manager": "Evaluación del manager",
+      "peer": "Pares",
+      "upward": "Upward"
+    },
+    "statuses": {
+      "submitted": "Enviadas",
+      "draft": "Pendientes",
+      "declined": "Rechazadas"
+    },
+    "phase": "Fase del ciclo: {phase}",
+    "none": "Sin asignar",
+    "tableView": "Ver como tabla",
+    "empty": "No hay datos para estos filtros.",
+    "pickCycle": "Elegí un ciclo para ver este panel.",
+    "exportCsv": "Exportar CSV",
+    "progress": {
+      "title": "Avance del ciclo",
+      "meter": "{relationship}: {submitted} de {total} enviadas",
+      "relationship": "Tipo",
+      "total": "Total"
+    },
+    "distribution": {
+      "title": "Distribución de ratings",
+      "hint": "Rating normalizado de 0 a 100 %, comparable entre escalas.",
+      "bin": "{from}–{to} %",
+      "n": "{n, plural, one {# persona} other {# personas}}",
+      "mean": "Promedio {value} %",
+      "all": "Todos",
+      "barLabel": "{group}, {bin}: {count}"
+    },
+    "trajectory": {
+      "title": "Trayectoria de {name}",
+      "link": "Trayectoria",
+      "cycle": "Ciclo",
+      "rating": "Rating normalizado",
+      "manager": "Manager en ese momento",
+      "jobTitle": "Puesto en ese momento",
+      "hidden": "No publicado",
+      "point": "{cycle}: {value}",
+      "chartLabel": "Rating normalizado por ciclo"
+    },
+    "team": {
+      "title": "Equipo",
+      "link": "Ver equipo",
+      "of": "Equipo de {name}",
+      "member": "Persona",
+      "depth": "Nivel",
+      "rating": "Rating",
+      "notInCycle": "No participa",
+      "pickManager": "Elegí un manager en los filtros."
+    },
+    "goals": {
+      "title": "Goals del período vs rating final",
+      "goals": "Goals",
+      "completed": "Completados",
+      "progress": "Avance promedio",
+      "rating": "Rating final",
+      "point": "{name}: avance {progress} %, rating {rating} %",
+      "xAxis": "Avance promedio de goals (%)",
+      "yAxis": "Rating normalizado (%)"
+    },
+    "gap": {
+      "title": "Brecha autoevaluación vs manager",
+      "hint": "Manager menos autoevaluación, en puntos normalizados. Negativo: el manager puntuó más bajo.",
+      "question": "Pregunta",
+      "person": "Persona",
+      "self": "Self",
+      "manager": "Manager",
+      "gap": "Brecha",
+      "n": "Respuestas",
+      "byQuestion": "Por pregunta",
+      "byPerson": "Por persona",
+      "bar": "{label}: {gap} puntos",
+      "lower": "Manager más bajo",
+      "higher": "Manager más alto"
+    },
+    "executive": {
+      "title": "Vista de dirección",
+      "link": "Vista de dirección",
+      "hint": "Solo agregados: sin nombres ni ids. Las áreas con menos de {min} personas se agrupan.",
+      "participants": "Participantes",
+      "completion": "Completitud",
+      "byDepartment": "Por área",
+      "suppressed": "{n, plural, =0 {Ninguna persona en grupos chicos} one {# persona en áreas chicas (no se desglosa)} other {# personas en áreas chicas (no se desglosan)}}"
+    }
   }
 }

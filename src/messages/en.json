@@ -414,7 +414,9 @@
       "closed": "Closed"
     },
     "extras": {
-      "steps": { "groups": "Groups" },
+      "steps": {
+        "groups": "Groups"
+      },
       "duplicate": {
         "button": "Duplicate cycle",
         "pending": "Duplicating…",
@@ -479,7 +481,10 @@
         "inScope": "{count, plural, one {# person in scope; joins on reaching the milestone} other {# people in scope; they join on reaching the milestone}}",
         "summary": "Milestone: {milestone} · {window} window"
       },
-      "detail": { "group": "Group", "due": "Due" }
+      "detail": {
+        "group": "Group",
+        "due": "Due"
+      }
     },
     "wizard": {
       "title": "New cycle",
@@ -917,5 +922,126 @@
     "override": "Record override",
     "overrideBadge": "override",
     "publishedNote": "Calibration published: each change is recorded as an audited override and the employee sees the new value."
+  },
+  "Dashboards": {
+    "nav": "Dashboards",
+    "title": "Dashboards",
+    "noCycles": "There are no launched cycles yet.",
+    "forbidden": "You have no access to these dashboards.",
+    "filters": {
+      "label": "Filters",
+      "cycle": "Cycle",
+      "allCycles": "All cycles",
+      "department": "Department",
+      "manager": "Manager",
+      "location": "Location",
+      "jobTitle": "Job title",
+      "any": "All",
+      "apply": "Apply"
+    },
+    "hierarchy": {
+      "label": "Hierarchy",
+      "asOf": "At review time",
+      "current": "Current"
+    },
+    "groupBy": {
+      "label": "Group by",
+      "department": "Department",
+      "manager": "Manager",
+      "location": "Location",
+      "jobTitle": "Job title"
+    },
+    "stage": {
+      "label": "Rating",
+      "manager": "Pre calibration (manager)",
+      "current": "Post calibration (current)"
+    },
+    "relationships": {
+      "self": "Self assessment",
+      "manager": "Manager review",
+      "peer": "Peers",
+      "upward": "Upward"
+    },
+    "statuses": {
+      "submitted": "Submitted",
+      "draft": "Pending",
+      "declined": "Declined"
+    },
+    "phase": "Cycle phase: {phase}",
+    "none": "Unassigned",
+    "tableView": "View as table",
+    "empty": "No data for these filters.",
+    "pickCycle": "Pick a cycle to see this panel.",
+    "exportCsv": "Export CSV",
+    "progress": {
+      "title": "Cycle progress",
+      "meter": "{relationship}: {submitted} of {total} submitted",
+      "relationship": "Type",
+      "total": "Total"
+    },
+    "distribution": {
+      "title": "Rating distribution",
+      "hint": "Normalized rating from 0 to 100 %, comparable across scales.",
+      "bin": "{from}–{to} %",
+      "n": "{n, plural, one {# person} other {# people}}",
+      "mean": "Average {value} %",
+      "all": "All",
+      "barLabel": "{group}, {bin}: {count}"
+    },
+    "trajectory": {
+      "title": "Trajectory of {name}",
+      "link": "Trajectory",
+      "cycle": "Cycle",
+      "rating": "Normalized rating",
+      "manager": "Manager at the time",
+      "jobTitle": "Job title at the time",
+      "hidden": "Not published",
+      "point": "{cycle}: {value}",
+      "chartLabel": "Normalized rating per cycle"
+    },
+    "team": {
+      "title": "Team",
+      "link": "View team",
+      "of": "Team of {name}",
+      "member": "Person",
+      "depth": "Level",
+      "rating": "Rating",
+      "notInCycle": "Not in cycle",
+      "pickManager": "Pick a manager in the filters."
+    },
+    "goals": {
+      "title": "Period goals vs final rating",
+      "goals": "Goals",
+      "completed": "Completed",
+      "progress": "Average progress",
+      "rating": "Final rating",
+      "point": "{name}: progress {progress} %, rating {rating} %",
+      "xAxis": "Average goal progress (%)",
+      "yAxis": "Normalized rating (%)"
+    },
+    "gap": {
+      "title": "Self vs manager gap",
+      "hint": "Manager minus self assessment, in normalized points. Negative: the manager rated lower.",
+      "question": "Question",
+      "person": "Person",
+      "self": "Self",
+      "manager": "Manager",
+      "gap": "Gap",
+      "n": "Answers",
+      "byQuestion": "By question",
+      "byPerson": "By person",
+      "bar": "{label}: {gap} points",
+      "lower": "Manager lower",
+      "higher": "Manager higher"
+    },
+    "executive": {
+      "title": "Leadership view",
+      "link": "Leadership view",
+      "hint": "Aggregates only: no names or ids. Departments with fewer than {min} people are grouped.",
+      "participants": "Participants",
+      "completion": "Completion",
+      "byDepartment": "By department",
+      "suppressed": "{n, plural, =0 {Nobody in small groups} one {# person in small departments (not broken out)} other {# people in small departments (not broken out)}}"
+    }
   }
 }

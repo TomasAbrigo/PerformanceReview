@@ -1,5 +1,7 @@
 export {
   cycleProgress,
+  dashboardFilterOptions,
+  type FilterOptions,
   executiveSummary,
   goalsVsRating,
   managerTeam,

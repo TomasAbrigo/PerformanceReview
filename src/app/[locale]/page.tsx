@@ -29,6 +29,7 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
   const tGoals = await getTranslations("Goals");
   const tNotifications = await getTranslations("Notifications");
   const tUpload = await getTranslations("Upload");
+  const tDashboards = await getTranslations("Dashboards");
 
   return (
     <main className="flex flex-1 items-center justify-center p-8">
@@ -56,6 +57,9 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
             </Link>
             <Link href="/team/goals" className="underline">
               {tGoals("nav")}
+            </Link>
+            <Link href="/dashboards" className="underline">
+              {tDashboards("nav")}
             </Link>
             <Link href="/inbox" className="underline">
               {tNotifications("nav")}

@@ -6,7 +6,12 @@ import type { Relationship } from "@/modules/templates/constants";
 export const hierarchies = ["asOf", "current"] as const;
 export type Hierarchy = (typeof hierarchies)[number];
 
-export const groupBys = ["department", "manager", "location", "jobTitle"] as const;
+export const groupBys = [
+  "department",
+  "manager",
+  "location",
+  "jobTitle",
+] as const;
 export type GroupBy = (typeof groupBys)[number];
 
 export const ratingStages = ["manager", "current"] as const;
