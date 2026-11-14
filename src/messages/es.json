@@ -680,6 +680,9 @@
       "validation": "Valor inválido.",
       "not_found": "No encontrado.",
       "unknown": "Algo salió mal. Intentá de nuevo."
-    }
+    },
+    "override": "Registrar override",
+    "overrideBadge": "override",
+    "publishedNote": "Calibración publicada: cada cambio se registra como override (auditado) y el empleado ve el nuevo valor."
   }
 }

@@ -680,6 +680,9 @@
       "validation": "Invalid value.",
       "not_found": "Not found.",
       "unknown": "Something went wrong. Try again."
-    }
+    },
+    "override": "Record override",
+    "overrideBadge": "override",
+    "publishedNote": "Calibration published: each change is recorded as an audited override and the employee sees the new value."
   }
 }

@@ -6,6 +6,7 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { closeDb, db } from "@/db/client";
 import {
   cycleParticipant,
+  ratingScale,
   finalRating,
   person,
   reviewAudit,
@@ -93,7 +94,7 @@ afterAll(async () => {
   await closeDb();
 });
 
-const input = (): CycleInput => ({
+const input = (overrides: Partial<CycleInput> = {}): CycleInput => ({
   name: "H1 2022",
   periodStart: "2022-01-01",
   periodEnd: "2022-06-30",
@@ -109,6 +110,7 @@ const input = (): CycleInput => ({
   templateId,
   dueDates: {},
   participantFilter: { kind: "people", personIds: [bruno, carla] },
+  ...overrides,
 });
 
 const participantOf = async (cycleId: string, personId: string) =>
@@ -151,8 +153,8 @@ async function submitManager(
 }
 
 /** Cycle in collecting; Carla rated Bruno 2 and Ana rated Carla 3. */
-async function ratedCycle() {
-  const cycle = await createCycle(db, input());
+async function ratedCycle(overrides: Partial<CycleInput> = {}) {
+  const cycle = await createCycle(db, input(overrides));
   await launchCycle(db, cycle.id, null);
   const b = await submitManager(cycle.id, bruno, carla, 2);
   const c = await submitManager(cycle.id, carla, ana, 3);
@@ -433,5 +435,136 @@ describe("publish and employee visibility", () => {
     await saveDraft(db, as(carla), b.requestId, fillAll(review, 3));
     await submit(db, as(carla), b.requestId);
     expect((await currentRatingFor(db, b.participantId))?.optionValue).toBe(3);
+  });
+});
+
+describe("review findings", () => {
+  it("validates group criteria; manual without ids takes every active participant", async () => {
+    const { cycle } = await ratedCycle();
+    await expect(
+      createGroup(db, hr, cycle.id, {
+        name: "x",
+        kind: "by_manager",
+        managerPersonId: "nope",
+      }),
+    ).rejects.toMatchObject({ code: "validation" });
+    await expect(
+      createGroup(db, hr, cycle.id, {
+        name: "x",
+        kind: "by_department",
+        department: " ",
+      }),
+    ).rejects.toMatchObject({ code: "validation" });
+    const all = await createGroup(db, hr, cycle.id, {
+      name: "Todos",
+      kind: "manual",
+    });
+    expect((await calibrationTable(db, hr, all.id)).rows).toHaveLength(2);
+  });
+
+  it("after publish, changes are audited overrides with a required reason", async () => {
+    const { cycle, b } = await ratedCycle();
+    await shareAll(db, hr, cycle.id);
+    await publishCalibration(db, hr, cycle.id);
+    await expect(
+      proposeRating(db, hr, b.participantId, { value: 3, reason: "" }),
+    ).rejects.toMatchObject({ code: "reason_required" });
+    await proposeRating(db, hr, b.participantId, { value: 3, reason: "Error" });
+    const log = await rows(b.participantId);
+    expect(log.at(-1)).toMatchObject({ stage: "override", optionValue: 3 });
+    const audit = await db
+      .select()
+      .from(reviewAudit)
+      .where(eq(reviewAudit.action, "rating_override"));
+    expect(audit).toHaveLength(1);
+    expect(audit[0]).toMatchObject({ requestId: b.requestId, note: "Error" });
+    expect((await myPublishedRating(db, as(bruno), cycle.id))?.value).toBe(3);
+  });
+
+  it("scopes the distribution to the calibrator's groups", async () => {
+    const { cycle } = await ratedCycle();
+    await expect(
+      distribution(db, as(ana, "calibrator"), cycle.id, {
+        groupBy: "manager",
+        stage: "current",
+      }),
+    ).rejects.toMatchObject({ code: "forbidden" });
+    const g = await createGroup(db, hr, cycle.id, {
+      name: "Carla",
+      kind: "by_manager",
+      managerPersonId: carla,
+    });
+    await addCalibrator(db, hr, g.id, ana);
+    const d = await distribution(db, as(ana, "calibrator"), cycle.id, {
+      groupBy: "manager",
+      stage: "current",
+    });
+    expect(d.series.map((s) => s.key)).toEqual([carla]);
+    expect(d.series[0].counts.reduce((a, c) => a + c, 0)).toBe(1);
+  });
+
+  it("a calibrator with read_only=false may propose in their group", async () => {
+    const { cycle, b, c } = await ratedCycle();
+    const g = await createGroup(db, hr, cycle.id, {
+      name: "Carla",
+      kind: "by_manager",
+      managerPersonId: carla,
+    });
+    await addCalibrator(db, hr, g.id, ana, { readOnly: false });
+    expect((await calibrationTable(db, as(ana), g.id)).canEdit).toBe(true);
+    await proposeRating(db, as(ana, "calibrator"), b.participantId, {
+      value: 3,
+      reason: "ok",
+    });
+    await expect(
+      proposeRating(db, as(ana, "calibrator"), c.participantId, {
+        value: 3,
+        reason: "fuera del grupo",
+      }),
+    ).rejects.toMatchObject({ code: "forbidden" });
+  });
+
+  it("maps the original rating to a differing final scale by normalized value", async () => {
+    const [five] = await db
+      .select({ id: ratingScale.id })
+      .from(ratingScale)
+      .where(eq(ratingScale.systemKey, "five_point_agreement"));
+    // Manager answers 2 on the 4-point scale (normalized 1/3).
+    const { cycle, b } = await ratedCycle({ finalScaleId: five.id });
+    const g = await createGroup(db, hr, cycle.id, {
+      name: "Carla",
+      kind: "by_manager",
+      managerPersonId: carla,
+    });
+    const [row] = (await calibrationTable(db, hr, g.id)).rows;
+    expect(row.participantId).toBe(b.participantId);
+    // Label as the manager chose it, not the 5-point option with value 2.
+    expect(row.managerRating?.label?.es).toBe("Cumple expectativas");
+    const d = await distribution(db, hr, cycle.id, {
+      groupBy: "manager",
+      stage: "manager",
+    });
+    // Nearest normalized option of the 5-point scale: 0.25 (value 2).
+    expect(d.series.find((s) => s.key === carla)!.counts).toEqual([
+      0, 1, 0, 0, 0,
+    ]);
+  });
+
+  it("v_current_rating exists with the expected columns", async () => {
+    const cols = await db.execute<{ column_name: string }>(
+      sql`select column_name from information_schema.columns where table_name = 'v_current_rating' order by ordinal_position`,
+    );
+    expect(cols.map((c) => c.column_name)).toEqual([
+      "id",
+      "participant_id",
+      "stage",
+      "option_value",
+      "option_label",
+      "normalized",
+      "actor_person_id",
+      "reason",
+      "flagged",
+      "created_at",
+    ]);
   });
 });

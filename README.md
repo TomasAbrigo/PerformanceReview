@@ -94,6 +94,7 @@ Los esquemas zod de cada respuesta están en `src/fixtures/bamboo-schemas.ts` (l
 
 - Esquema de Drizzle: `src/db/schema/*.ts`. Migraciones generadas en `drizzle/` (`pnpm db:generate`, `pnpm db:migrate`).
 - `supabase/migrations/` queda reservado para SQL específico de Supabase (RLS, extensiones, funciones).
+- Vistas SQL (p. ej. `v_current_rating`): drizzle-kit no las genera; se mantienen a mano. El `CREATE VIEW` se agrega al final de la migración generada, la copia de referencia vive en `src/db/sql/` y la declaración para consultarla en `src/db/views.ts` (fuera de `src/db/schema/`). Ver `drizzle/custom/README.md`; un test de DB verifica la vista y sus columnas.
 - `pnpm db:studio` abre Drizzle Studio.
 
 ## Ingesta

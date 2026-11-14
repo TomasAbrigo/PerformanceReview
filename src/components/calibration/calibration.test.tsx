@@ -106,6 +106,20 @@ describe("CalibrationTableView", () => {
     );
   });
 
+  it("after publish, changes are overrides (es)", () => {
+    renderIn(
+      "es",
+      <CalibrationTableView
+        table={table({ publishedAt: new Date("2026-03-01") })}
+        propose={vi.fn()}
+      />,
+    );
+    expect(screen.getByRole("note")).toHaveTextContent("Calibración publicada");
+    expect(
+      screen.getByRole("button", { name: "Registrar override" }),
+    ).toBeInTheDocument();
+  });
+
   it("is read-only for calibrators (es)", () => {
     renderIn(
       "es",

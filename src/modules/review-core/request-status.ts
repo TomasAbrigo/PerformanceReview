@@ -9,5 +9,6 @@ export const reviewActions = [
   "unshared",
   "reminder_sent",
   "calibration_published",
+  "rating_override",
 ] as const;
 export type ReviewAction = (typeof reviewActions)[number];

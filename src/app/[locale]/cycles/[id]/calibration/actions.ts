@@ -1,11 +1,9 @@
 "use server";
 
-import { and, eq, isNull } from "drizzle-orm";
 import { z } from "zod";
 import type { NewGroupInput } from "@/components/calibration/groups-panel";
 import type { ProposeInput } from "@/components/calibration/calibration-table";
 import { db } from "@/db/client";
-import { cycleParticipant } from "@/db/schema";
 import { actionResult } from "@/lib/action-result";
 import { parse } from "@/lib/domain-error";
 import { getActor } from "@/modules/actor/server";
@@ -31,7 +29,7 @@ export async function proposeAction(input: ProposeInput) {
   });
 }
 
-/** Manual groups from the UI include every active participant. */
+/** Manual groups from the UI: every active participant (domain default). */
 export async function createGroupAction(cycleId: string, input: NewGroupInput) {
   return actionResult(async () => {
     const cid = parse(id, cycleId, review.ReviewError);
@@ -46,21 +44,7 @@ export async function createGroupAction(cycleId: string, input: NewGroupInput) {
               kind: data.kind,
               managerPersonId: data.criterion,
             }
-          : {
-              name: data.name,
-              kind: "manual",
-              participantIds: (
-                await db
-                  .select({ id: cycleParticipant.id })
-                  .from(cycleParticipant)
-                  .where(
-                    and(
-                      eq(cycleParticipant.cycleId, cid),
-                      isNull(cycleParticipant.removedAt),
-                    ),
-                  )
-              ).map((r) => r.id),
-            };
+          : { name: data.name, kind: "manual" };
     await review.createGroup(db, actor, cid, group);
   });
 }

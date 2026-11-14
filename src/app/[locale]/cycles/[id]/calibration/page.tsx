@@ -34,7 +34,8 @@ async function Calibration({
   const t = await getTranslations("Calibration");
   const isHr = actor.role === "hr";
   const groups = await listGroups(db, actor, id);
-  if (!isHr && actor.role !== "calibrator" && groups.length === 0) notFound();
+  // Non-HR (calibrators included) see only the groups they calibrate.
+  if (!isHr && groups.length === 0) notFound();
   const sp = await searchParams;
   const selectedId =
     (typeof sp.group === "string" ? sp.group : null) ?? groups[0]?.id ?? null;
@@ -46,30 +47,28 @@ async function Calibration({
       if (!(error instanceof ReviewError)) throw error;
     }
   }
-  const canSeeDistribution = isHr || actor.role === "calibrator";
-  const dist = async (
+  // Scoped by the domain: HR the whole cycle, calibrators their groups.
+  const dist = (
     groupBy: "department" | "manager",
     stage: "manager" | "current",
   ) => distribution(db, actor, id, { groupBy, stage });
-  const data = canSeeDistribution
-    ? {
-        department: {
-          manager: await dist("department", "manager"),
-          current: await dist("department", "current"),
-        },
-        manager: {
-          manager: await dist("manager", "manager"),
-          current: await dist("manager", "current"),
-        },
-      }
-    : null;
+  const [deptPre, deptPost, mgrPre, mgrPost] = await Promise.all([
+    dist("department", "manager"),
+    dist("department", "current"),
+    dist("manager", "manager"),
+    dist("manager", "current"),
+  ]);
+  const data = {
+    department: { manager: deptPre, current: deptPost },
+    manager: { manager: mgrPre, current: mgrPost },
+  };
   const active = cycle.participants.filter((p) => !p.removedAt);
   const departments = [
     ...new Set(active.map((p) => p.snapDepartment).filter((d) => d !== null)),
   ].sort();
   const managers = [
     ...new Map(
-      cycle.participants
+      active
         .filter((p) => p.snapManagerPersonId && p.snapManagerName)
         .map((p) => [
           p.snapManagerPersonId!,
@@ -108,7 +107,7 @@ async function Calibration({
       ) : groups.length ? (
         <p className="text-muted-foreground">{t("selectGroup")}</p>
       ) : null}
-      {data ? <DistributionChart data={data} /> : null}
+      <DistributionChart data={data} />
     </div>
   );
 }

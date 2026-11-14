@@ -171,7 +171,11 @@ export async function finalScale(
 export type GroupInput =
   | { name: string; kind: "by_department"; department: string }
   | { name: string; kind: "by_manager"; managerPersonId: string }
-  | { name: string; kind: "manual"; participantIds: string[] };
+  /** Without participantIds: every active participant of the cycle. */
+  | { name: string; kind: "manual"; participantIds?: string[] };
+
+const invalid = (path: string) =>
+  new ReviewError("validation", [{ path, message: "invalid" }]);
 
 /** HR creates a group; members are filled from the snapshot (or given). */
 export async function createGroup(
@@ -187,6 +191,12 @@ export async function createGroup(
       { path: "name", message: "required" },
     ]);
   }
+  if (input.kind === "by_manager" && !isUuid(input.managerPersonId)) {
+    throw invalid("managerPersonId");
+  }
+  if (input.kind === "by_department" && !input.department?.trim()) {
+    throw invalid("department");
+  }
   return db.transaction(async (tx) => {
     const active = and(
       eq(cycleParticipant.cycleId, cycleId),
@@ -197,9 +207,14 @@ export async function createGroup(
         ? eq(cycleParticipant.snapDepartment, input.department)
         : input.kind === "by_manager"
           ? eq(cycleParticipant.snapManagerPersonId, input.managerPersonId)
-          : input.participantIds.filter(isUuid).length
-            ? inArray(cycleParticipant.id, input.participantIds.filter(isUuid))
-            : sql`false`;
+          : !input.participantIds
+            ? undefined
+            : input.participantIds.filter(isUuid).length
+              ? inArray(
+                  cycleParticipant.id,
+                  input.participantIds.filter(isUuid),
+                )
+              : sql`false`;
     const members = await tx
       .select({ id: cycleParticipant.id })
       .from(cycleParticipant)
@@ -236,13 +251,20 @@ export async function addCalibrator(
   actor: ActorContext,
   groupId: string,
   personId: string,
+  { readOnly = true }: { readOnly?: boolean } = {},
 ): Promise<void> {
   if (!isHr(actor)) throw new ReviewError("forbidden");
   if (!isUuid(groupId) || !isUuid(personId)) throw new ReviewError("not_found");
   await db
     .insert(calibrationGroupCalibrator)
-    .values({ groupId, personId })
-    .onConflictDoNothing();
+    .values({ groupId, personId, readOnly })
+    .onConflictDoUpdate({
+      target: [
+        calibrationGroupCalibrator.groupId,
+        calibrationGroupCalibrator.personId,
+      ],
+      set: { readOnly },
+    });
 }
 
 export type GroupItem = {
@@ -284,6 +306,51 @@ export async function listGroups(
     .where(and(eq(calibrationGroup.cycleId, cycleId), mine))
     .groupBy(calibrationGroup.id)
     .orderBy(asc(calibrationGroup.createdAt));
+}
+
+/**
+ * Index of the final-scale option a final_rating row falls in. Rows carry
+ * the normalized value (0-1) of the scale they were chosen on: the manager
+ * answers on the question's scale, which may differ from the cycle's final
+ * scale, so we match by nearest normalized value; by value only when the
+ * row has no normalized value.
+ */
+export function optionIndexFor(
+  scale: ScaleOption[],
+  row: { optionValue: number; normalized: number | null },
+): number {
+  if (row.normalized === null) {
+    return scale.findIndex((o) => o.value === row.optionValue);
+  }
+  let best = -1;
+  for (let i = 0; i < scale.length; i++) {
+    const d = Math.abs(scale[i].normalized - row.normalized);
+    if (best < 0 || d < Math.abs(scale[best].normalized - row.normalized)) {
+      best = i;
+    }
+  }
+  return best;
+}
+
+/** The actor's calibrator memberships in a cycle's groups. */
+async function memberships(db: DbOrTx, actor: ActorContext, cycleId: string) {
+  if (!actor.personId) return [];
+  return db
+    .select({
+      groupId: calibrationGroupCalibrator.groupId,
+      readOnly: calibrationGroupCalibrator.readOnly,
+    })
+    .from(calibrationGroupCalibrator)
+    .innerJoin(
+      calibrationGroup,
+      eq(calibrationGroup.id, calibrationGroupCalibrator.groupId),
+    )
+    .where(
+      and(
+        eq(calibrationGroupCalibrator.personId, actor.personId),
+        eq(calibrationGroup.cycleId, cycleId),
+      ),
+    );
 }
 
 export type RatingCell = {
@@ -337,27 +404,19 @@ export async function calibrationTable(
     .from(calibrationGroup)
     .where(eq(calibrationGroup.id, groupId));
   if (!group) throw new ReviewError("not_found");
-  if (!isHr(actor)) {
-    const [cal] = actor.personId
-      ? await db
-          .select()
-          .from(calibrationGroupCalibrator)
-          .where(
-            and(
-              eq(calibrationGroupCalibrator.groupId, groupId),
-              eq(calibrationGroupCalibrator.personId, actor.personId),
-            ),
-          )
-      : [];
-    if (!cal) throw new ReviewError("forbidden");
-  }
+  const cal = isHr(actor)
+    ? null
+    : (await memberships(db, actor, group.cycleId)).find(
+        (m) => m.groupId === groupId,
+      );
+  if (!isHr(actor) && !cal) throw new ReviewError("forbidden");
   const [cycle] = await db
     .select({ publishedAt: reviewCycle.calibrationPublishedAt })
     .from(reviewCycle)
     .where(eq(reviewCycle.id, group.cycleId));
   const scale = await finalScale(db, group.cycleId);
-  const labelOf = (v: number) =>
-    scale.find((o) => o.value === v)?.label ?? null;
+  const optionOf = (row: { optionValue: number; normalized: number | null }) =>
+    scale[optionIndexFor(scale, row)] ?? null;
   const manager = alias(person, "manager");
   const members = await db
     .select({
@@ -396,7 +455,8 @@ export async function calibrationTable(
       name: group.name,
       kind: group.kind,
     },
-    canEdit: isHr(actor),
+    // HR, or a calibrator of this group with read_only = false.
+    canEdit: isHr(actor) || cal?.readOnly === false,
     publishedAt: cycle?.publishedAt ?? null,
     scale,
     rows: members.map((m) => {
@@ -406,17 +466,23 @@ export async function calibrationTable(
       const calibrated = mine.filter((r) => r.stage !== "manager");
       return {
         ...m,
+        // As the manager chose it (their question's scale and label).
         managerRating: original
           ? {
               value: original.optionValue,
-              label: labelOf(original.optionValue),
+              label:
+                optionOf(original)?.normalized === original.normalized
+                  ? optionOf(original)!.label
+                  : original.optionLabel
+                    ? { es: original.optionLabel, en: original.optionLabel }
+                    : null,
               stage: "manager" as const,
             }
           : null,
         currentRating: cur
           ? {
-              value: cur.optionValue,
-              label: labelOf(cur.optionValue),
+              value: optionOf(cur)?.value ?? cur.optionValue,
+              label: optionOf(cur)?.label ?? null,
               stage: cur.stage,
             }
           : null,
@@ -433,7 +499,10 @@ export async function calibrationTable(
 }
 
 /**
- * HR proposes a calibrated rating (appends a `calibrated` row). The reason
+ * HR (or a calibrator of one of the participant's groups with read_only =
+ * false) proposes a rating: appends a `calibrated` row, or an `override`
+ * row once the calibration is published (also audited as rating_override
+ * on the manager request, since employees may already see it). The reason
  * is required and the value must be an option of the cycle's final scale.
  */
 export async function proposeRating(
@@ -442,15 +511,36 @@ export async function proposeRating(
   participantId: string,
   input: { value: number; reason: string; flag?: boolean },
 ): Promise<void> {
-  if (!isHr(actor)) throw new ReviewError("forbidden");
+  if (!isHr(actor) && !actor.personId) throw new ReviewError("forbidden");
   if (!isUuid(participantId)) throw new ReviewError("not_found");
-  const reason = input.reason?.trim() ?? "";
-  if (!reason) throw new ReviewError("reason_required");
   const [p] = await db
-    .select({ cycleId: cycleParticipant.cycleId })
+    .select({
+      cycleId: cycleParticipant.cycleId,
+      publishedAt: reviewCycle.calibrationPublishedAt,
+    })
     .from(cycleParticipant)
+    .innerJoin(reviewCycle, eq(reviewCycle.id, cycleParticipant.cycleId))
     .where(eq(cycleParticipant.id, participantId));
   if (!p) throw new ReviewError("not_found");
+  if (!isHr(actor)) {
+    const editable = (await memberships(db, actor, p.cycleId))
+      .filter((m) => !m.readOnly)
+      .map((m) => m.groupId);
+    const [inGroup] = editable.length
+      ? await db
+          .select({ id: calibrationGroupMember.groupId })
+          .from(calibrationGroupMember)
+          .where(
+            and(
+              eq(calibrationGroupMember.participantId, participantId),
+              inArray(calibrationGroupMember.groupId, editable),
+            ),
+          )
+      : [];
+    if (!inGroup) throw new ReviewError("forbidden");
+  }
+  const reason = input.reason?.trim() ?? "";
+  if (!reason) throw new ReviewError("reason_required");
   const option = (await finalScale(db, p.cycleId)).find(
     (o) => o.value === Number(input.value),
   );
@@ -459,15 +549,37 @@ export async function proposeRating(
       { path: "value", message: "invalid" },
     ]);
   }
-  await db.insert(finalRating).values({
-    participantId,
-    stage: "calibrated",
-    optionValue: option.value,
-    optionLabel: option.label.es,
-    normalized: option.normalized,
-    actorPersonId: actor.personId,
-    reason,
-    flagged: !!input.flag,
+  const override = p.publishedAt !== null;
+  await db.transaction(async (tx) => {
+    await tx.insert(finalRating).values({
+      participantId,
+      stage: override ? "override" : "calibrated",
+      optionValue: option.value,
+      optionLabel: option.label.es,
+      normalized: option.normalized,
+      actorPersonId: actor.personId,
+      reason,
+      flagged: !!input.flag,
+    });
+    if (!override) return;
+    const [request] = await tx
+      .select({ id: reviewRequest.id })
+      .from(reviewRequest)
+      .where(
+        and(
+          eq(reviewRequest.participantId, participantId),
+          eq(reviewRequest.relationship, "manager"),
+          isNull(reviewRequest.deletedAt),
+        ),
+      );
+    if (request) {
+      await tx.insert(reviewAudit).values({
+        requestId: request.id,
+        action: "rating_override",
+        actorPersonId: actor.personId,
+        note: reason,
+      });
+    }
   });
 }
 
@@ -479,8 +591,10 @@ export type Distribution = {
 
 /**
  * Histogram data of a cycle (no forced curve): participants per option of
- * the final scale, grouped by department or snapshot manager, using the
- * original manager rating (`manager`) or the current one (`current`).
+ * the final scale (see optionIndexFor), grouped by department or snapshot
+ * manager, using the original manager rating (`manager`) or the current one
+ * (`current`). HR sees every participant; a calibrator only the members of
+ * their groups (none: forbidden).
  */
 export async function distribution(
   db: DbOrTx,
@@ -488,10 +602,21 @@ export async function distribution(
   cycleId: string,
   opts: { groupBy: "department" | "manager"; stage: "manager" | "current" },
 ): Promise<Distribution> {
-  if (!isHr(actor) && actor.role !== "calibrator") {
-    throw new ReviewError("forbidden");
-  }
   if (!isUuid(cycleId)) throw new ReviewError("not_found");
+  let scope;
+  if (!isHr(actor)) {
+    const groups = (await memberships(db, actor, cycleId)).map(
+      (m) => m.groupId,
+    );
+    if (!groups.length) throw new ReviewError("forbidden");
+    scope = inArray(
+      cycleParticipant.id,
+      db
+        .select({ id: calibrationGroupMember.participantId })
+        .from(calibrationGroupMember)
+        .where(inArray(calibrationGroupMember.groupId, groups)),
+    );
+  }
   const options = await finalScale(db, cycleId);
   const manager = alias(person, "manager");
   const people = await db
@@ -507,17 +632,21 @@ export async function distribution(
       and(
         eq(cycleParticipant.cycleId, cycleId),
         isNull(cycleParticipant.removedAt),
+        scope,
       ),
     );
   const ids = people.map((p) => p.participantId);
-  const values = new Map<string, number>();
+  const values = new Map<
+    string,
+    { optionValue: number; normalized: number | null }
+  >();
   if (ids.length) {
     if (opts.stage === "current") {
       for (const r of await db
         .select()
         .from(vCurrentRating)
         .where(inArray(vCurrentRating.participantId, ids))) {
-        values.set(r.participantId, r.optionValue);
+        values.set(r.participantId, r);
       }
     } else {
       for (const r of await db
@@ -530,14 +659,14 @@ export async function distribution(
           ),
         )
         .orderBy(asc(finalRating.createdAt))) {
-        values.set(r.participantId, r.optionValue);
+        values.set(r.participantId, r);
       }
     }
   }
   const series = new Map<string, Distribution["series"][number]>();
   for (const p of people) {
     const v = values.get(p.participantId);
-    const i = options.findIndex((o) => o.value === v);
+    const i = v ? optionIndexFor(options, v) : -1;
     if (i < 0) continue;
     const key = opts.groupBy === "department" ? p.department : p.managerId;
     const label = opts.groupBy === "department" ? p.department : p.managerName;

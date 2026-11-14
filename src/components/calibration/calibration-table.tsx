@@ -37,7 +37,9 @@ function ProposeForm({
   scale,
   current,
   propose,
+  override,
 }: {
+  override: boolean;
   participantId: string;
   scale: CalibrationTable["scale"];
   current: number | null;
@@ -120,7 +122,7 @@ function ProposeForm({
         disabled={pending}
         onClick={save}
       >
-        {t("propose")}
+        {override ? t("override") : t("propose")}
       </Button>
       {error ? (
         <p role="alert" className="text-sm text-destructive">
@@ -153,6 +155,11 @@ export function CalibrationTableView({
           <Badge variant="secondary">{t("readOnly")}</Badge>
         ) : null}
       </div>
+      {table.publishedAt && table.canEdit ? (
+        <p role="note" className="rounded-md border p-2 text-sm">
+          {t("publishedNote")}
+        </p>
+      ) : null}
       {table.rows.length === 0 ? (
         <p className="text-muted-foreground">{t("emptyGroup")}</p>
       ) : (
@@ -196,6 +203,11 @@ export function CalibrationTableView({
                             <span className="tabular-nums">{h.value}</span>
                             {" — "}
                             {h.reason}
+                            {h.stage === "override" ? (
+                              <Badge variant="outline" className="ml-1">
+                                {t("overrideBadge")}
+                              </Badge>
+                            ) : null}
                             <span className="text-muted-foreground">
                               {" "}
                               (
@@ -212,6 +224,7 @@ export function CalibrationTableView({
                   {table.canEdit ? (
                     <td className="p-2">
                       <ProposeForm
+                        override={table.publishedAt !== null}
                         participantId={r.participantId}
                         scale={table.scale}
                         current={r.currentRating?.value ?? null}
