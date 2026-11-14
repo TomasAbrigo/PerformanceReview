@@ -21,6 +21,9 @@ export const seedFixturesDir = (size: SeedSize) =>
  * list or the other.
  */
 export const RESET_TABLES = [
+  "answer",
+  "review_audit",
+  "review_request",
   "goal_share",
   "goal_comment",
   "goal_milestone",
