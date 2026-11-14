@@ -1,7 +1,7 @@
 import { cp, mkdtemp, readFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
-import { and, asc, eq, sql } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { closeDb, db } from "@/db/client";
 import {
@@ -152,12 +152,18 @@ const participantOf = async (cycleId: string, personId: string) =>
       )
   )[0];
 
-const snapshotOf = (participantId: string) =>
-  db
-    .select()
-    .from(participantGoalSnapshot)
-    .where(eq(participantGoalSnapshot.participantId, participantId))
-    .orderBy(asc(participantGoalSnapshot.title));
+/**
+ * The snapshot rows by title, ordered here by code unit: the database's own
+ * collation (locale aware or not) decides "C runs" vs "Created" differently
+ * from one Postgres install to another.
+ */
+const snapshotOf = async (participantId: string) =>
+  (
+    await db
+      .select()
+      .from(participantGoalSnapshot)
+      .where(eq(participantGoalSnapshot.participantId, participantId))
+  ).sort((a, b) => (a.title < b.title ? -1 : a.title > b.title ? 1 : 0));
 
 const titles = (rows: { title: string }[]) => rows.map((r) => r.title);
 
