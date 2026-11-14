@@ -673,7 +673,8 @@
       "not_submitted": "The review is not submitted.",
       "unknown": "An unexpected error occurred.",
       "not_shareable": "The review cannot be shared in this phase yet.",
-      "not_remindable": "A reminder cannot be sent for this review."
+      "not_remindable": "A reminder cannot be sent for this review.",
+      "shared": "This review was shared; unshare it before editing."
     }
   },
   "Upload": {
@@ -1257,5 +1258,67 @@
     "viewQueue": "View the identity queue",
     "viewResult": "View imported cycles",
     "notFound": "This run imported no historical cycles."
+  },
+  "Calibration": {
+    "title": "Calibration · {cycle}",
+    "link": "Calibration",
+    "back": "Back to the cycle",
+    "groups": "Groups",
+    "noGroups": "No calibration groups yet.",
+    "groupName": "Name",
+    "groupKind": "Kind",
+    "criterion": "Criterion",
+    "createGroup": "Create group",
+    "kinds": {
+      "by_department": "By department",
+      "by_manager": "By manager",
+      "manual": "Manual (all participants)"
+    },
+    "readOnly": "Read only",
+    "emptyGroup": "This group has no participants.",
+    "employee": "Employee",
+    "manager": "Manager (snapshot)",
+    "original": "Manager rating",
+    "current": "Current rating",
+    "history": "Changes and reasons",
+    "proposed": "Propose",
+    "flag": "Discuss",
+    "flagged": "To discuss",
+    "reason": "Reason",
+    "reasonPlaceholder": "Reason for the change (required)",
+    "propose": "Save change",
+    "none": "—",
+    "distribution": "Rating distribution",
+    "groupBy": "Group by",
+    "by": {
+      "department": "Department",
+      "manager": "Manager"
+    },
+    "stage": "Ratings",
+    "stages": {
+      "manager": "Before (manager)",
+      "current": "After (current)"
+    },
+    "noRatings": "No ratings yet.",
+    "tableView": "Show as table",
+    "publish": "Publish calibration",
+    "publishConfirmTitle": "Publish the calibration?",
+    "publishConfirmBody": "The current ratings become final; employees with a shared review will see only their final rating.",
+    "publishConfirm": "Publish",
+    "cancel": "Cancel",
+    "publishedCount": "{count, plural, one {# participant published} other {# participants published}}",
+    "publishedAt": "Published on {date}",
+    "selectGroup": "Pick a group to see its table.",
+    "finalRating": "Final rating",
+    "errors": {
+      "reason_required": "A reason is required.",
+      "forbidden": "You cannot make this change.",
+      "validation": "Invalid value.",
+      "not_found": "Not found.",
+      "unknown": "Something went wrong. Try again."
+    },
+    "override": "Record override",
+    "overrideBadge": "override",
+    "publishedNote": "Calibration published: each change is recorded as an audited override and the employee sees the new value."
   }
 }
