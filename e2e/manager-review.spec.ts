@@ -1,4 +1,32 @@
 import { expect, type Page, test } from "@playwright/test";
+import {
+  byId,
+  company,
+  directReports,
+  employees,
+  find,
+  fullName,
+  hasUniqueName,
+  isActive,
+} from "./seed-data";
+
+// An employee with no reports (so no other row mentions them), whose manager
+// is a person too: the manager at the snapshot is the current one.
+const employee = find(
+  employees,
+  (e) =>
+    isActive(e) &&
+    hasUniqueName(e) &&
+    directReports(e).length === 0 &&
+    e.managerId !== null &&
+    byId.has(e.managerId) &&
+    isActive(byId.get(e.managerId)!) &&
+    hasUniqueName(byId.get(e.managerId)!),
+  "person with no reports and a manager with a unique name",
+);
+const manager = byId.get(employee.managerId!)!;
+const employeeName = fullName(employee);
+const managerName = fullName(manager);
 
 /** Uses the header "Actuar como" selector. */
 async function actAs(page: Page, person: string | null, role: string) {
@@ -50,7 +78,7 @@ async function collectingCycle(
 ): Promise<string> {
   await page.goto("/es/cycles/new");
   await expect(page.getByText("Paso 1 de 4")).toBeVisible();
-  await page.getByLabel("Fecha de snapshot organizacional").fill("2022-06-01");
+  await page.getByLabel("Fecha de snapshot organizacional").fill(company.asOf);
   await expect(page.getByText(/\d+ personas coinciden/)).toBeVisible();
   await page.getByRole("button", { name: "Siguiente" }).click();
   await page.getByLabel("Plantilla").selectOption({ label: template });
@@ -105,8 +133,8 @@ test("manager reviews under double blind, shares, and the employee sees only vis
   await templateWithHiddenQuestion(page, template);
   const cycleUrl = await collectingCycle(page, name, template);
 
-  // Bruno submits his self assessment.
-  await actAs(page, "Bruno Pérez", "Empleado");
+  // The employee submits their self assessment.
+  await actAs(page, employeeName, "Empleado");
   await page.goto("/es/me");
   await page
     .getByRole("listitem")
@@ -116,18 +144,21 @@ test("manager reviews under double blind, shares, and the employee sees only vis
   await expect(page).toHaveURL(/\/self$/);
   await fillAndSubmit(page);
 
-  // Carla (his manager at the snapshot) opens her team.
-  await actAs(page, "Carla Romero", "Manager");
+  // Their manager (at the snapshot) opens the team.
+  await actAs(page, managerName, "Manager");
   await page.goto("/es/team");
   const row = page
     .getByRole("table", { name: "Reportes directos" })
     .getByRole("row")
     .filter({ hasText: name })
-    .filter({ hasText: "Bruno Pérez" });
+    .filter({ hasText: employeeName });
   await expect(row).toContainText("Enviada");
   await row.getByRole("link", { name: "Evaluar" }).click();
   await expect(
-    page.getByRole("heading", { level: 1, name: "Evaluación de Bruno Pérez" }),
+    page.getByRole("heading", {
+      level: 1,
+      name: `Evaluación de ${employeeName}`,
+    }),
   ).toBeVisible();
 
   // Double blind: the self assessment is hidden until she submits hers.
@@ -153,14 +184,14 @@ test("manager reviews under double blind, shares, and the employee sees only vis
   await moveTo(page, "Revisión del manager", 4);
   await moveTo(page, "Compartir resultados", 5);
 
-  // Carla shares with Bruno.
-  await actAs(page, "Carla Romero", "Manager");
+  // The manager shares with the employee.
+  await actAs(page, managerName, "Manager");
   await page.goto(managerUrl);
   await page.getByRole("button", { name: "Compartir con el empleado" }).click();
   await expect(page.getByText(/Compartida el/)).toBeVisible();
 
-  // Bruno sees the shared review, without the hidden question.
-  await actAs(page, "Bruno Pérez", "Empleado");
+  // The employee sees the shared review, without the hidden question.
+  await actAs(page, employeeName, "Empleado");
   await page.goto("/es/me");
   await page
     .getByRole("listitem")

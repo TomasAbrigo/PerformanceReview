@@ -2,7 +2,7 @@ import { execFileSync } from "node:child_process";
 import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
-import { e2eDatabaseUrl, ensureDatabase } from "./database";
+import { e2eDatabaseUrl, prepareDatabase } from "./database";
 
 const UUID = "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}";
 
@@ -43,15 +43,13 @@ const ingest = (args: string[]) => run("ingest", args);
  * employee re-run) and E2E_RUN_FAILED (the failed one).
  */
 export default async function globalSetup() {
-  // Its own database (see e2e/database.ts): created and migrated here, and the
-  // one the dev server, the seed and the specs' own CLI runs all talk to.
+  // Its own database (see e2e/database.ts): created and migrated (again: the
+  // dev server's start did it first), and the one the dev server, the seed and
+  // the specs' own CLI runs all talk to.
   const databaseUrl = e2eDatabaseUrl();
-  await ensureDatabase(databaseUrl);
+  await prepareDatabase(databaseUrl);
+  process.env.E2E_DATABASE_URL = databaseUrl;
   process.env.DATABASE_URL = databaseUrl;
-  const migrated = run("db:migrate", []);
-  if (migrated.status !== 0) {
-    throw new Error(`migrating the e2e database failed:\n${migrated.stdout}`);
-  }
 
   const seed = run("db:seed", ["--size", "small", "--reset"]);
   if (seed.status !== 0) throw new Error(`seeding failed:\n${seed.stdout}`);

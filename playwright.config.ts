@@ -55,10 +55,13 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: `pnpm exec next dev -p ${PORT}`,
+    // The database must exist (and be migrated) before the first page asks for it.
+    command: `pnpm exec tsx e2e/prepare-database.ts && pnpm exec next dev -p ${PORT}`,
     url: `http://localhost:${PORT}/es`,
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,
-    env: databaseUrl ? { DATABASE_URL: databaseUrl } : undefined,
+    env: databaseUrl
+      ? { DATABASE_URL: databaseUrl, E2E_DATABASE_URL: databaseUrl }
+      : undefined,
   },
 });
