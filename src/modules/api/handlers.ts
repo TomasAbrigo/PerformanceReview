@@ -1,11 +1,12 @@
 import { z } from "zod";
 import { db } from "@/db/client";
 import { identityIssueStatuses } from "@/db/schema";
-import { isUuid } from "@/lib/uuid";
+import { exportCsv } from "@/modules/exports/entities";
 import { RUN_STATUSES } from "@/modules/ingest/run-status";
-import { parseIsoDate, todayLocal } from "@/modules/org-history/dates";
+import { todayLocal } from "@/modules/org-history/dates";
 import { notFound } from "./errors";
 import { apiRoute, ok, parseQuery } from "./http";
+import { bool, isoDate, uuid } from "./params";
 import { pageParams, type Page } from "./pagination";
 import { getCycleDetail, listCycleRows } from "./queries/cycles";
 import { goalStatuses, listGoalRows } from "./queries/goals";
@@ -40,15 +41,6 @@ const envelope = <T, U>(page: Page<T>, serialize: (row: T) => U) => ({
   data: page.items.map(serialize),
   next_cursor: page.nextCursor,
 });
-
-const uuid = z.string().refine(isUuid, "must be a uuid");
-const isoDate = z
-  .string()
-  .refine(
-    (v) => parseIsoDate(v) !== null,
-    "must be a calendar date, YYYY-MM-DD",
-  );
-const bool = z.enum(["true", "false"]).transform((v) => v === "true");
 
 const detailOr404 = async <T>(
   what: string,
@@ -164,3 +156,10 @@ export const listIdentityIssuesRoute = apiRoute(async (request) => {
   const query = parseQuery(request, issuesQuery);
   return ok(envelope(await listIssueRows(db, query), serializeIssue));
 });
+
+// --------------------------------------------------------------- exports
+
+/** `/api/v1/export/<entity>.csv`: see `modules/exports`. */
+export const exportRoute = apiRoute<{ entity: string }>(
+  async (request, { entity }) => exportCsv(db, entity, request),
+);
