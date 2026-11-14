@@ -1,6 +1,10 @@
-import { and, eq, isNull, ne } from "drizzle-orm";
+import { and, eq, inArray, isNotNull, isNull, ne } from "drizzle-orm";
 import type { DbOrTx } from "@/db/client";
-import { type CycleParticipant, reviewRequest } from "@/db/schema";
+import {
+  type CycleParticipant,
+  cycleParticipant,
+  reviewRequest,
+} from "@/db/schema";
 
 /**
  * Whether HR replaced the participant's snapshot manager as the reviewer of
@@ -15,20 +19,39 @@ export async function isManagerReplaced(
   participant: Pick<CycleParticipant, "id" | "snapManagerPersonId">,
 ): Promise<boolean> {
   if (!participant.snapManagerPersonId) return false;
-  const [row] = await db
-    .select({ id: reviewRequest.id })
+  return (await managerReplacedAmong(db, [participant.id])).has(participant.id);
+}
+
+/**
+ * isManagerReplaced for many participants at once (one query): the ids of
+ * those whose snapshot manager was replaced as reviewer.
+ */
+export async function managerReplacedAmong(
+  db: DbOrTx,
+  participantIds: string[],
+): Promise<Set<string>> {
+  if (participantIds.length === 0) return new Set();
+  const rows = await db
+    .selectDistinct({ id: reviewRequest.participantId })
     .from(reviewRequest)
+    .innerJoin(
+      cycleParticipant,
+      eq(cycleParticipant.id, reviewRequest.participantId),
+    )
     .where(
       and(
-        eq(reviewRequest.participantId, participant.id),
+        inArray(reviewRequest.participantId, participantIds),
+        isNotNull(cycleParticipant.snapManagerPersonId),
         eq(reviewRequest.relationship, "manager"),
         eq(reviewRequest.additional, false),
         eq(reviewRequest.assignedByHr, true),
         ne(reviewRequest.status, "superseded"),
         isNull(reviewRequest.deletedAt),
-        ne(reviewRequest.reviewerPersonId, participant.snapManagerPersonId),
+        ne(
+          reviewRequest.reviewerPersonId,
+          cycleParticipant.snapManagerPersonId,
+        ),
       ),
-    )
-    .limit(1);
-  return !!row;
+    );
+  return new Set(rows.map((r) => r.id));
 }

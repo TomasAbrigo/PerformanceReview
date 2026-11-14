@@ -64,6 +64,20 @@ export function afterTsId(
   return sql`(${sql.raw(tsColumn)}, ${sql.raw(idColumn)}) ${op} (${position[0]}::timestamptz, ${position[1]}::uuid)`;
 }
 
+/**
+ * Keyset condition for rows ordered by (sort position, id), ascending: the
+ * frozen questions and the answers, which read in question order.
+ */
+export function afterNId(
+  nColumn: string,
+  idColumn: string,
+  cursor: string | null | undefined,
+): SQL | undefined {
+  const position = decodeCursor(cursor, "n_id");
+  if (!position) return undefined;
+  return sql`(${sql.raw(nColumn)}, ${sql.raw(idColumn)}) > (${position[0]}::int, ${position[1]}::uuid)`;
+}
+
 /** Keyset condition for rows ordered by id. */
 export function afterId(
   idColumn: string,
@@ -74,6 +88,13 @@ export function afterId(
     ? sql`${sql.raw(idColumn)} > ${position[0]}::uuid`
     : undefined;
 }
+
+/** `$1::uuid, $2::uuid, ...` for an `in (...)` over uuids. */
+export const uuidList = (ids: string[]): SQL =>
+  sql.join(
+    ids.map((id) => sql`${id}::uuid`),
+    sql`, `,
+  );
 
 /** `source: { system, id }` of a row, or null when it has no source id (native rows). */
 export const sourceOf = (

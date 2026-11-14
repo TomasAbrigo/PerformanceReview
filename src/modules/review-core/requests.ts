@@ -15,8 +15,8 @@ import {
   acknowledgeDeadline,
   DEFAULT_ACK_WINDOW_DAYS,
 } from "./acknowledge-window";
-import { isCurrentManager, isSkipLevel } from "./manager";
-import { isManagerReplaced } from "./manager-replaced";
+import { currentManagerOf, skipLevelParticipants } from "./manager";
+import { managerReplacedAmong } from "./manager-replaced";
 import {
   ensureUpwardRequests,
   type FeedbackTask,
@@ -220,37 +220,65 @@ export async function ensureManagerRequests(
     });
 }
 
-type LoadedRow = {
-  request: ReviewRequest;
-  participant: typeof cycleParticipant.$inferSelect;
-  cycle: typeof reviewCycle.$inferSelect;
+/**
+ * The fields of a request, its participant and its cycle that canRead (and
+ * what it needs beyond the row) reads: a LoadedRow, or anything selected
+ * with those columns.
+ */
+export type VisibilityRow = {
+  request: Pick<
+    ReviewRequest,
+    "relationship" | "reviewerPersonId" | "status" | "sharedAt"
+  >;
+  participant: Pick<
+    typeof cycleParticipant.$inferSelect,
+    | "id"
+    | "revieweePersonId"
+    | "snapManagerPersonId"
+    | "snapshotAsOf"
+    | "removedAt"
+  >;
+  cycle: Pick<
+    typeof reviewCycle.$inferSelect,
+    "status" | "components" | "anonymity"
+  >;
 };
 
 /**
- * What canRead needs beyond the row: the participant's manager request
- * (double blind, its reviewer, shared) and whether the actor is skip-level or
- * the reviewee's current manager. Only queried when the actor is neither HR
- * nor the reviewer.
+ * What canRead needs beyond the rows, for many rows of one actor at once
+ * (the lists read a page at a time): the participants' manager requests
+ * (double blind, who wrote them, shared), whether the actor was replaced as
+ * snapshot manager, whether peer feedback is released and whether the actor
+ * is skip-level or the reviewee's current manager. Each extra
+ * is one query per call, for the rows that need it, never one per row; none
+ * when the actor is HR or has no person. Rows the actor wrote need nothing
+ * (they read their own).
  */
-async function visibilityContext(
+export async function visibilityContexts(
   db: DbOrTx,
   actor: ActorContext,
-  row: LoadedRow,
-): Promise<VisibilityContext> {
-  const ctx: VisibilityContext = { ...row };
-  if (
-    actor.role === "hr" ||
-    actor.personId === null ||
-    actor.personId === row.request.reviewerPersonId
-  ) {
-    return ctx;
-  }
-  if (row.request.relationship === "self") {
+  rows: VisibilityRow[],
+): Promise<VisibilityContext[]> {
+  const contexts: VisibilityContext[] = rows.map((row) => ({ ...row }));
+  const me = actor.personId;
+  if (actor.role === "hr" || me === null) return contexts;
+  const pending = rows
+    .map((row, i) => ({ row, ctx: contexts[i] }))
+    .filter(({ row }) => row.request.reviewerPersonId !== me);
+  const idsOf = (list: typeof pending) => [
+    ...new Set(list.map(({ row }) => row.participant.id)),
+  ];
+
+  const selfRows = pending.filter(
+    ({ row }) => row.request.relationship === "self",
+  );
+  if (selfRows.length > 0) {
     // A participant may have several manager requests (#17: additional
     // assessors; superseded ones are history, not the current double-blind
     // gate): the actor's own wins, else the primary one.
     const managerRequests = await db
       .select({
+        participantId: reviewRequest.participantId,
         status: reviewRequest.status,
         reviewer: reviewRequest.reviewerPersonId,
         sharedAt: reviewRequest.sharedAt,
@@ -258,41 +286,102 @@ async function visibilityContext(
       .from(reviewRequest)
       .where(
         and(
-          eq(reviewRequest.participantId, row.participant.id),
+          inArray(reviewRequest.participantId, idsOf(selfRows)),
           eq(reviewRequest.relationship, "manager"),
           isNull(reviewRequest.deletedAt),
           ne(reviewRequest.status, "superseded"),
         ),
       )
       .orderBy(asc(reviewRequest.additional), asc(reviewRequest.requestedAt));
-    const own = managerRequests.find((r) => r.reviewer === actor.personId);
-    ctx.assessor = !!own;
-    ctx.managerRequest = own ?? managerRequests[0] ?? null;
+    for (const { row, ctx } of selfRows) {
+      const mine = managerRequests.filter(
+        (r) => r.participantId === row.participant.id,
+      );
+      const own = mine.find((r) => r.reviewer === me);
+      ctx.assessor = !!own;
+      ctx.managerRequest = own ?? mine[0] ?? null;
+    }
   }
+
   // A snapshot manager HR replaced as reviewer loses manager-side access.
-  if (actor.personId === row.participant.snapManagerPersonId) {
-    ctx.snapManagerReplaced = await isManagerReplaced(db, row.participant);
+  const asManager = pending.filter(
+    ({ row }) => row.participant.snapManagerPersonId === me,
+  );
+  if (asManager.length > 0) {
+    const replaced = await managerReplacedAmong(db, idsOf(asManager));
+    for (const { row, ctx } of asManager) {
+      ctx.snapManagerReplaced = replaced.has(row.participant.id);
+    }
   }
-  if (
-    (row.request.relationship === "peer" ||
-      row.request.relationship === "upward") &&
-    actor.personId === row.participant.revieweePersonId
-  ) {
-    ctx.revieweeShared = await peerFeedbackShared(db, row);
+
+  // Peer/upward feedback read by the reviewee: released with the share.
+  const asReviewee = pending.filter(
+    ({ row }) =>
+      (row.request.relationship === "peer" ||
+        row.request.relationship === "upward") &&
+      row.participant.revieweePersonId === me,
+  );
+  if (asReviewee.length > 0) {
+    const needShare = asReviewee.filter(
+      ({ row }) =>
+        peerFeedbackReleased(row.cycle) && row.cycle.components.manager,
+    );
+    const shared = await sharedManagerReviews(db, idsOf(needShare));
+    for (const { row, ctx } of asReviewee) {
+      ctx.revieweeShared =
+        peerFeedbackReleased(row.cycle) &&
+        (!row.cycle.components.manager || shared.has(row.participant.id));
+    }
   }
+
   // The snapshot manager and the reviewee are decided without skip-level.
-  const decided =
-    actor.personId === row.participant.snapManagerPersonId ||
-    actor.personId === row.participant.revieweePersonId;
-  if (!decided) {
-    ctx.skipLevel = await isSkipLevel(db, actor, row.participant);
-    ctx.currentManager = await isCurrentManager(
+  const undecided = pending.filter(
+    ({ row }) =>
+      row.participant.snapManagerPersonId !== me &&
+      row.participant.revieweePersonId !== me,
+  );
+  if (undecided.length > 0) {
+    const skip = await skipLevelParticipants(
       db,
       actor,
-      row.participant.revieweePersonId,
+      undecided.map(({ row }) => row.participant),
     );
+    // Whoever manages the reviewee today follows their trajectory (#15).
+    const current = await currentManagerOf(
+      db,
+      actor,
+      undecided.map(({ row }) => row.participant.revieweePersonId),
+    );
+    for (const { row, ctx } of undecided) {
+      ctx.skipLevel = skip.has(row.participant.id);
+      ctx.currentManager = current.has(row.participant.revieweePersonId);
+    }
   }
-  return ctx;
+  return contexts;
+}
+
+/** The cycle phases that release peer/upward feedback to the reviewee. */
+const peerFeedbackReleased = (cycle: Pick<VisibilityRow["cycle"], "status">) =>
+  cycle.status === "sharing" || cycle.status === "closed";
+
+/** Ids (of the given participants) whose manager review was shared with them. */
+async function sharedManagerReviews(
+  db: DbOrTx,
+  participantIds: string[],
+): Promise<Set<string>> {
+  if (participantIds.length === 0) return new Set();
+  const rows = await db
+    .selectDistinct({ id: reviewRequest.participantId })
+    .from(reviewRequest)
+    .where(
+      and(
+        inArray(reviewRequest.participantId, participantIds),
+        eq(reviewRequest.relationship, "manager"),
+        isNotNull(reviewRequest.sharedAt),
+        isNull(reviewRequest.deletedAt),
+      ),
+    );
+  return new Set(rows.map((r) => r.id));
 }
 
 /**
@@ -303,24 +392,15 @@ async function visibilityContext(
  */
 export async function peerFeedbackShared(
   db: DbOrTx,
-  row: Pick<LoadedRow, "participant" | "cycle">,
+  row: Pick<VisibilityRow, "cycle"> & {
+    participant: Pick<VisibilityRow["participant"], "id">;
+  },
 ): Promise<boolean> {
-  if (row.cycle.status !== "sharing" && row.cycle.status !== "closed") {
-    return false;
-  }
+  if (!peerFeedbackReleased(row.cycle)) return false;
   if (!row.cycle.components.manager) return true;
-  const [shared] = await db
-    .select({ id: reviewRequest.id })
-    .from(reviewRequest)
-    .where(
-      and(
-        eq(reviewRequest.participantId, row.participant.id),
-        eq(reviewRequest.relationship, "manager"),
-        isNotNull(reviewRequest.sharedAt),
-        isNull(reviewRequest.deletedAt),
-      ),
-    );
-  return !!shared;
+  return (await sharedManagerReviews(db, [row.participant.id])).has(
+    row.participant.id,
+  );
 }
 
 /** A request with what visibility needs; throws not_found / forbidden. */
@@ -350,7 +430,7 @@ export async function loadRequest(
     ? await query.for("update", { of: reviewRequest })
     : await query;
   if (!row || row.cycle.deletedAt) throw new ReviewError("not_found");
-  const visibility = await visibilityContext(db, actor, row);
+  const [visibility] = await visibilityContexts(db, actor, [row]);
   if (!canRead(actor, visibility)) throw new ReviewError("forbidden");
   return { ...row, visibility };
 }
