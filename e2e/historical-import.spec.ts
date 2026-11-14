@@ -56,7 +56,7 @@ test("importing the employee performance report creates the historical cycles an
   await expect(
     page
       .getByRole("table", { name: "Participantes" })
-      .getByRole("row", { name: new RegExp(fullName(assessed2023)) }),
+      .getByRole("row", { name: new RegExp(`^${fullName(assessed2023)}`) }),
   ).toBeVisible();
 
   // People the HRIS does not know wait in the identity queue.
