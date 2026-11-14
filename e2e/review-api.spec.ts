@@ -133,8 +133,12 @@ test("a submitted self review shows up in the review endpoints and the answers e
     reviewer_visible: true,
     shared_at: null,
     answer_count: answered,
-    participant: { snapshot: { as_of: company.asOf } },
   });
+  // The participant's snapshot is the cycle's snapshot date.
+  const cycleRes = await request.get(`/api/v1/cycles/${cycleId}`);
+  expect(mine.participant.snapshot.as_of).toBe(
+    (await cycleRes.json()).data.snapshot_date,
+  );
   expect(mine.reviewer.id).toBe(mine.reviewee.id);
   expect(requests.filter((r) => r.status === "submitted")).toHaveLength(1);
 
