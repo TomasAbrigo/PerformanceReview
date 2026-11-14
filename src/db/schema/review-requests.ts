@@ -47,6 +47,8 @@ export const reviewRequest = pgTable(
     anonymous: boolean("anonymous").notNull().default(false),
     /** Manager request whose participant had no manager at the snapshot. */
     reviewerMissing: boolean("reviewer_missing").notNull().default(false),
+    /** Submitted by someone who is no longer the snapshot manager. */
+    reviewerMismatch: boolean("reviewer_mismatch").notNull().default(false),
     requestedAt: timestamp("requested_at", { withTimezone: true })
       .notNull()
       .defaultNow(),

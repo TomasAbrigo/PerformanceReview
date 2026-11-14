@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { connection } from "next/server";
 import { Suspense } from "react";
 import { GoalsBlock } from "@/components/review/goals-block";
+import { toReviewData } from "@/components/review/review-data";
 import { SelfReviewForm } from "@/components/review/self-review-form";
 import { db } from "@/db/client";
 import { Link } from "@/i18n/navigation";
@@ -11,8 +12,8 @@ import { routing } from "@/i18n/routing";
 import { getActor } from "@/modules/actor/server";
 import {
   findMySelfRequestId,
+  getReview,
   getReviewGoals,
-  getSelfReview,
 } from "@/modules/review-core";
 import { linkGoalAction, refreshGoalsAction } from "../goals/actions";
 import { saveDraftAction, submitAction } from "./actions";
@@ -24,7 +25,7 @@ async function SelfReview({ params }: PageProps<"/[locale]/cycles/[id]/self">) {
   await connection();
   const actor = await getActor();
   const requestId = await findMySelfRequestId(db, actor, id);
-  const review = requestId ? await getSelfReview(db, actor, requestId) : null;
+  const review = requestId ? await getReview(db, actor, requestId) : null;
   if (!review) {
     const t = await getTranslations("Review");
     return (
@@ -52,24 +53,7 @@ async function SelfReview({ params }: PageProps<"/[locale]/cycles/[id]/self">) {
           />
         ) : null
       }
-      review={{
-        requestId: review.request.id,
-        cycleName: review.cycle.name,
-        dueDate: review.cycle.dueDate,
-        status: review.request.status,
-        submittedAt: review.request.submittedAt,
-        canWrite: review.canWrite,
-        questions: review.questions.map((q) => ({
-          id: q.id,
-          sectionTitle: q.sectionTitle,
-          prompt: q.prompt,
-          kind: q.kind,
-          required: q.required,
-          scale: q.scale,
-          choices: q.choices,
-        })),
-        answers: review.answers,
-      }}
+      review={toReviewData(review)}
       actions={{ save: saveDraftAction, submit: submitAction }}
     />
   );

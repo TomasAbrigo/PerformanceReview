@@ -53,3 +53,6 @@ next-env.d.ts
 
 # Claude agent worktrees
 .claude/worktrees/
+
+# local data: uploaded files and custom source profiles
+/var/

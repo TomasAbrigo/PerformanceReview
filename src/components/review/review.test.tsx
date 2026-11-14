@@ -42,7 +42,13 @@ describe("MyTasksView", () => {
     ["es", "Mis tareas", "No tenés tareas pendientes."],
     ["en", "My tasks", "You have no pending tasks."],
   ] as const)("shows the empty state in %s", (locale, h, empty) => {
-    renderIn(locale, <MyTasksView hasPerson tasks={{ selfAssessments: [] }} />);
+    renderIn(
+      locale,
+      <MyTasksView
+        hasPerson
+        tasks={{ selfAssessments: [], sharedReviews: [] }}
+      />,
+    );
     expect(screen.getByRole("heading", { level: 1, name: h })).toBeVisible();
     expect(screen.getByText(empty)).toBeVisible();
   });
@@ -50,7 +56,10 @@ describe("MyTasksView", () => {
   it("asks to pick a person when acting without one", () => {
     renderIn(
       "es",
-      <MyTasksView hasPerson={false} tasks={{ selfAssessments: [] }} />,
+      <MyTasksView
+        hasPerson={false}
+        tasks={{ selfAssessments: [], sharedReviews: [] }}
+      />,
     );
     expect(screen.getByText(/Elegí una persona/)).toBeVisible();
   });
@@ -75,6 +84,7 @@ describe("MyTasksView", () => {
                 status: "draft",
               },
             ],
+            sharedReviews: [],
           }}
         />,
       );

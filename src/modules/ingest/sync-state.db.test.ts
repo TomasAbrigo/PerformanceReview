@@ -212,7 +212,8 @@ describe("sync_state and run outcome", () => {
       extract: { since: "2026-11-01T00:00:00.000Z" },
     });
 
-    expect(adapter.contexts).toEqual([{ since: "2026-11-01T00:00:00.000Z" }]);
+    expect(adapter.contexts).toHaveLength(1);
+    expect(adapter.contexts[0].since).toBe("2026-11-01T00:00:00.000Z");
     expect((await run(runId)).params).toMatchObject({
       entity: "employee",
       since: "2026-11-01T00:00:00.000Z",

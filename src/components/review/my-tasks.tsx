@@ -10,7 +10,7 @@ import type {
 
 export type MyTasksData = {
   selfAssessments: SelfAssessmentTask[];
-  sharedReviews?: SharedReviewTask[];
+  sharedReviews: SharedReviewTask[];
 };
 
 /** Formats an ISO date (YYYY-MM-DD) without shifting it by the time zone. */
@@ -32,7 +32,7 @@ export function MyTasksView({
 }) {
   const t = useTranslations("Me");
   const isoDate = useIsoDate();
-  const shared = tasks.sharedReviews ?? [];
+  const shared = tasks.sharedReviews;
   const empty = tasks.selfAssessments.length === 0 && shared.length === 0;
 
   return (

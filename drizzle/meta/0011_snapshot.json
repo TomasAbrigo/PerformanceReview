@@ -1,6 +1,6 @@
 {
-  "id": "c5021db4-5841-4ac1-9ebf-c5a4779c32f2",
-  "prevId": "2f46b668-927f-44f1-a527-f5c1740a7aaf",
+  "id": "04edba5b-619d-4a0b-940d-4878bdf7c93c",
+  "prevId": "32c595f1-be31-4d6c-b394-0e4e49f95a36",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -2870,6 +2870,12 @@
           "primaryKey": false,
           "notNull": false
         },
+        "calibration_published_at": {
+          "name": "calibration_published_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
         "source_system": {
           "name": "source_system",
           "type": "source_system",
@@ -3219,6 +3225,13 @@
           "notNull": true,
           "default": false
         },
+        "reviewer_mismatch": {
+          "name": "reviewer_mismatch",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
         "requested_at": {
           "name": "requested_at",
           "type": "timestamp with time zone",
@@ -3520,7 +3533,8 @@
         "unlock",
         "shared",
         "unshared",
-        "reminder_sent"
+        "reminder_sent",
+        "reviewer_reassigned"
       ]
     },
     "public.review_relationship": {

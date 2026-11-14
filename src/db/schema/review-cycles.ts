@@ -76,6 +76,10 @@ export const reviewCycle = pgTable(
       .notNull()
       .default({ kind: "all" }),
     launchedAt: timestamp("launched_at", { withTimezone: true }),
+    /** Calibration results published (#16); sharing waits for it. */
+    calibrationPublishedAt: timestamp("calibration_published_at", {
+      withTimezone: true,
+    }),
     ...sourceColumns,
   },
   (t) => [unique().on(t.sourceSystem, t.sourceId)],

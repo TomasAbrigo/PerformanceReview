@@ -29,7 +29,8 @@ ALTER TABLE "cycle_goal_link" ADD CONSTRAINT "cycle_goal_link_goal_id_goal_id_fk
 ALTER TABLE "cycle_goal_link" ADD CONSTRAINT "cycle_goal_link_linked_by_person_id_fk" FOREIGN KEY ("linked_by") REFERENCES "public"."person"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "participant_goal_snapshot" ADD CONSTRAINT "participant_goal_snapshot_participant_id_cycle_participant_id_fk" FOREIGN KEY ("participant_id") REFERENCES "public"."cycle_participant"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "participant_goal_snapshot" ADD CONSTRAINT "participant_goal_snapshot_goal_id_goal_id_fk" FOREIGN KEY ("goal_id") REFERENCES "public"."goal"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
-CREATE INDEX "participant_goal_snapshot_goal_idx" ON "participant_goal_snapshot" USING btree ("goal_id");--> statement-breakpoint
+CREATE INDEX "participant_goal_snapshot_goal_idx" ON "participant_goal_snapshot" USING btree ("goal_id");
+--> statement-breakpoint
 -- Backfill: mark the goals rating, its comment and the overall rating in templates created before roles existed (the system year-end template and its clones), then in the revisions of the cycles already launched (by their template question, else by their own prompt).
 UPDATE "question" SET "role" = 'goals_rating' WHERE "kind" = 'rating' AND "applies_to" = ARRAY['manager']::text[] AND "prompt"->>'es' = '¿Cómo calificarías el avance en sus objetivos?';--> statement-breakpoint
 UPDATE "question" SET "role" = 'goals_comment' WHERE "kind" = 'text' AND "applies_to" = ARRAY['manager']::text[] AND "prompt"->>'es' = 'Comenta el avance en sus objetivos.';--> statement-breakpoint

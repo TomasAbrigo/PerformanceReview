@@ -38,7 +38,17 @@ export const INGEST_COUNT_KEYS = [
   "ignored",
 ] as const satisfies readonly (keyof IngestCounts)[];
 
-export type IngestReject = { sourceId: string | null; reason: string };
+export type IngestReject = {
+  sourceId: string | null;
+  /** Human-readable cause, in English (logs, run detail). */
+  reason: string;
+  /** Machine-readable cause, so a UI can word it in its own language. */
+  code?: string;
+  /** The column the cause is about. */
+  column?: string;
+  /** Key values of the row (null = empty), to say which row it was. */
+  values?: Record<string, string | null>;
+};
 
 /** Lifecycle of an `ingest_run`; a run that threw ends in `error`. */
 export const ingestRunStatus = pgEnum("ingest_run_status", [
