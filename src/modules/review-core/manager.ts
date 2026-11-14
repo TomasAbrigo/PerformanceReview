@@ -7,16 +7,19 @@ import {
   type ReviewCycle,
   cycleParticipant,
   person,
-  reviewAudit,
   reviewCycle,
   reviewRequest,
 } from "@/db/schema";
 import type { ActorContext } from "@/modules/actor/types";
+import {
+  NotificationError,
+  type NotificationErrorCode,
+} from "@/modules/notifications/errors";
+import { remind } from "@/modules/notifications/reminders";
 import { jobAsOf } from "@/modules/org-history/queries";
 import type { RequestStatus } from "./request-status";
-import { ReviewError } from "./review-errors";
+import { ReviewError, type ReviewErrorCode } from "./review-errors";
 import type { CycleStatus } from "./status";
-import { isActiveParticipant } from "./visibility";
 
 /**
  * Whether the actor is the participant's skip-level manager: the manager of
@@ -140,52 +143,33 @@ export async function listTeam(
 }
 
 /**
- * Records a manual reminder to a direct report (only their manager or HR).
- * #18 replaces this with the internal inbox; for now it is an audit row.
+ * Sends a manual reminder ("Recordar") about a request to its reviewer (only
+ * the participant's manager or HR): a `manual_reminder` notification in their
+ * inbox, at most one per sender and request per day (see notifications
+ * `remind`). Not loadRequest: the manager may remind about a self review they
+ * cannot read yet (double blind).
  */
 export async function sendReminder(
   db: DbOrTx,
   actor: ActorContext,
   requestId: string,
 ): Promise<void> {
-  // Not loadRequest: the manager may remind about a self review they cannot
-  // read yet (double blind).
-  const [row] = isUuid(requestId)
-    ? await db
-        .select({
-          manager: cycleParticipant.snapManagerPersonId,
-          removedAt: cycleParticipant.removedAt,
-          status: reviewRequest.status,
-          cycleStatus: reviewCycle.status,
-          cycleDeletedAt: reviewCycle.deletedAt,
-        })
-        .from(reviewRequest)
-        .innerJoin(
-          cycleParticipant,
-          eq(cycleParticipant.id, reviewRequest.participantId),
-        )
-        .innerJoin(reviewCycle, eq(reviewCycle.id, reviewRequest.cycleId))
-        .where(
-          and(eq(reviewRequest.id, requestId), isNull(reviewRequest.deletedAt)),
-        )
-    : [];
-  if (!row || row.cycleDeletedAt) throw new ReviewError("not_found");
-  const isManager = actor.personId !== null && actor.personId === row.manager;
-  if (actor.role !== "hr" && !isManager) throw new ReviewError("forbidden");
-  if (
-    row.status !== "draft" ||
-    !isActiveParticipant(row) ||
-    row.cycleStatus === "draft" ||
-    row.cycleStatus === "closed"
-  ) {
-    throw new ReviewError("not_remindable");
+  try {
+    await remind(db, actor, requestId);
+  } catch (error) {
+    if (error instanceof NotificationError) {
+      throw new ReviewError(REMIND_ERRORS[error.code], error.issues);
+    }
+    throw error;
   }
-  await db.insert(reviewAudit).values({
-    requestId,
-    action: "reminder_sent",
-    actorPersonId: actor.personId,
-  });
 }
+
+const REMIND_ERRORS: Record<NotificationErrorCode, ReviewErrorCode> = {
+  not_found: "not_found",
+  forbidden: "forbidden",
+  not_pending: "not_remindable",
+  validation: "validation",
+};
 
 export type ParticipantRefs = {
   revieweeName: string;

@@ -7,6 +7,7 @@ import { closeDb, db } from "@/db/client";
 import {
   cycleParticipant,
   employment,
+  notification,
   peerNomination,
   person,
   reviewRequest,
@@ -409,6 +410,18 @@ describe("peer feedback", () => {
   it("is written via the generic review flow and read per anonymity mode", async () => {
     const { cycle, p, req } = await approvedCycle();
     await answer(req.id);
+    // The reviewee is told feedback arrived (without the author).
+    const notes = await db
+      .select()
+      .from(notification)
+      .where(eq(notification.requestId, req.id));
+    expect(notes).toEqual([
+      expect.objectContaining({
+        recipientPersonId: bruno,
+        kind: "feedback_received",
+      }),
+    ]);
+    expect(JSON.stringify(notes[0].payload)).not.toContain("Dani");
     // The reviewee reads nothing before the share.
     expect(await getReview(db, as(bruno), req.id)).toBeNull();
     expect(await listPeerFeedback(db, as(bruno), p.id)).toHaveLength(0);

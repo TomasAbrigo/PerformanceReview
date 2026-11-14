@@ -15,6 +15,7 @@ import {
   isGoalsQuestion,
 } from "./goal-snapshot";
 import { loadRequest } from "./requests";
+import { notifyFeedbackReceived } from "@/modules/notifications";
 import { ReviewError } from "./review-errors";
 import type { CycleAnonymity, CycleStatus } from "./status";
 import { canRead, canWrite, isReviewer, reviewerVisible } from "./visibility";
@@ -251,7 +252,11 @@ export async function submit(
   requestId: string,
 ): Promise<ReviewRequest> {
   return db.transaction(async (tx) => {
-    const { request, cycle } = await writable(tx, actor, requestId);
+    const { request, cycle, participant } = await writable(
+      tx,
+      actor,
+      requestId,
+    );
     const questions = await questionsFor(tx, cycle.id, request.relationship);
     const answered = new Set(
       (
@@ -279,6 +284,15 @@ export async function submit(
       .set({ status: "submitted", submittedAt: new Date() })
       .where(eq(reviewRequest.id, requestId))
       .returning();
+    // Peer/upward feedback: tell the reviewee it arrived (never who wrote it;
+    // reading it still waits for the share, see canRead).
+    if (request.relationship === "peer" || request.relationship === "upward") {
+      await notifyFeedbackReceived(tx, {
+        cycleId: cycle.id,
+        requestId,
+        recipientPersonId: participant.revieweePersonId,
+      });
+    }
     return updated;
   });
 }

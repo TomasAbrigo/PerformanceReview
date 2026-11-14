@@ -3,11 +3,14 @@ import { setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { connection } from "next/server";
 import { Suspense } from "react";
+import { NotificationsPreview } from "@/components/notifications/notifications-preview";
 import { MyTasksView } from "@/components/review/my-tasks";
 import { PeerTasks } from "@/components/review/peer-tasks";
 import { db } from "@/db/client";
 import { routing } from "@/i18n/routing";
 import { getActor } from "@/modules/actor/server";
+import { listNotifications } from "@/modules/notifications";
+import { getUnreadCount } from "@/modules/notifications/server";
 import { listMyTasks } from "@/modules/review-core";
 
 async function Tasks({ params }: PageProps<"/[locale]/me">) {
@@ -16,9 +19,14 @@ async function Tasks({ params }: PageProps<"/[locale]/me">) {
   setRequestLocale(locale);
   await connection();
   const actor = await getActor();
-  const tasks = await listMyTasks(db, actor);
+  const [tasks, latest, unread] = await Promise.all([
+    listMyTasks(db, actor),
+    listNotifications(db, actor, { unreadOnly: true, limit: 3 }),
+    getUnreadCount(actor.personId),
+  ]);
   return (
     <div className="flex flex-col gap-6">
+      <NotificationsPreview items={latest.items} unread={unread} />
       <MyTasksView
         hasPerson={actor.personId !== null}
         tasks={{
