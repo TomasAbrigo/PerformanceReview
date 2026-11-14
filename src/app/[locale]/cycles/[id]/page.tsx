@@ -1,5 +1,5 @@
 import { hasLocale } from "next-intl";
-import { setRequestLocale } from "next-intl/server";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { connection } from "next/server";
 import { Suspense } from "react";
@@ -7,6 +7,7 @@ import { CycleDetailView } from "@/components/cycles/cycle-detail";
 import { OpsCycleActions } from "@/components/cycles/ops-cycle-actions";
 import { ManagerShareAll } from "@/components/review/manager-share-all";
 import { db } from "@/db/client";
+import { Link } from "@/i18n/navigation";
 import { routing } from "@/i18n/routing";
 import { getActor } from "@/modules/actor/server";
 import {
@@ -38,6 +39,10 @@ async function Detail({ params }: PageProps<"/[locale]/cycles/[id]">) {
   ]);
   const canShareAll =
     actor.role === "hr" && cycle.components.manager && shareableNow(cycle);
+  const canCalibrate =
+    (actor.role === "hr" || actor.role === "calibrator") &&
+    cycle.status !== "draft";
+  const tCal = await getTranslations("Calibration");
   return (
     <>
       <CycleDetailView
@@ -97,6 +102,11 @@ async function Detail({ params }: PageProps<"/[locale]/cycles/[id]">) {
       />
       {canShareAll ? (
         <ManagerShareAll cycleId={cycle.id} shareAll={shareAllAction} />
+      ) : null}
+      {canCalibrate ? (
+        <Link href={`/cycles/${cycle.id}/calibration`} className="underline">
+          {tCal("link")}
+        </Link>
       ) : null}
       {actor.role === "hr" && cycle.status !== "draft" ? (
         <OpsCycleActions

@@ -110,6 +110,27 @@ export {
   writablePhases,
 } from "./visibility";
 export {
+  addCalibrator,
+  calibrationTable,
+  createGroup,
+  currentRatingFor,
+  distribution,
+  finalScale,
+  listGroups,
+  myPublishedRating,
+  proposeRating,
+  publishCalibration,
+  type CalibrationRow,
+  type CalibrationTable,
+  type CurrentRating,
+  type Distribution,
+  type GroupInput,
+  type GroupItem,
+  type RatingCell,
+  type ScaleOption,
+} from "./calibration";
+export * from "./calibration-constants";
+export {
   countsTowardOverall,
   getReviewGoals,
   goalOverlapsPeriod,

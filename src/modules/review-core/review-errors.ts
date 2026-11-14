@@ -12,7 +12,9 @@ export type ReviewErrorCode =
   | "wrong_phase"
   | "no_approval"
   | "not_shareable"
-  | "not_remindable";
+  | "not_remindable"
+  | "reason_required"
+  | "shared";
 
 /** Errors of review requests and answers (issues: per-question paths). */
 export class ReviewError extends DomainError<ReviewErrorCode> {}

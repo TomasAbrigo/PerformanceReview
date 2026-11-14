@@ -129,6 +129,7 @@ async function fillAndSubmit(page: Page) {
 test("manager reviews under double blind, shares, and the employee sees only visible answers", async ({
   page,
 }) => {
+  test.setTimeout(90_000); // long flow; ~26s alone, slower in parallel
   const stamp = Date.now();
   const template = `Fin de año e2e ${stamp}`;
   const name = `Manager e2e ${stamp}`;
@@ -207,8 +208,12 @@ test("manager reviews under double blind, shares, and the employee sees only vis
     }),
   ).toBeVisible();
   await expect(
-    page.getByText("Calificación general de desempeño"),
+    page.getByText("Comenta el avance en sus objetivos."),
   ).toBeVisible();
+  // #16: the overall rating is shown only as the final (calibrated) rating.
+  await expect(page.getByText("Calificación general de desempeño")).toHaveCount(
+    0,
+  );
   await expect(page.getByText(HIDDEN)).toHaveCount(0);
   await expect(page.getByRole("radio")).toHaveCount(0);
 });

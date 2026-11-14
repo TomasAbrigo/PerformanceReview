@@ -10,6 +10,7 @@ import {
   type ReviewRequest,
 } from "@/db/schema";
 import type { ActorContext } from "@/modules/actor/types";
+import { recordManagerRating } from "./calibration";
 import {
   goalsQuestionsOptional,
   type GoalsScope,
@@ -208,6 +209,10 @@ function columns(q: QuestionRevision, value: AnswerValue) {
 async function writable(db: DbOrTx, actor: ActorContext, requestId: string) {
   const row = await loadRequest(db, actor, requestId, { forUpdate: true });
   if (!canWrite(actor, row.request, row)) throw new ReviewError("forbidden");
+  // A shared manager review must be unshared before it is edited again.
+  if (row.request.relationship === "manager" && row.request.sharedAt) {
+    throw new ReviewError("shared");
+  }
   return row;
 }
 
@@ -320,6 +325,7 @@ export async function submit(
       .set({ status: "submitted", submittedAt: new Date() })
       .where(eq(reviewRequest.id, requestId))
       .returning();
+    await recordManagerRating(tx, updated);
     // Peer/upward feedback: tell the reviewee it arrived (never who wrote it;
     // reading it still waits for the share, see canRead).
     if (request.relationship === "peer" || request.relationship === "upward") {
