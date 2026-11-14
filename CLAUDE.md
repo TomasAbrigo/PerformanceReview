@@ -33,6 +33,7 @@ In-house performance review tool replacing BambooHR's performance module. Data i
 | `pnpm db:studio`                   | Drizzle Studio                                                                                      |
 | `pnpm db:reset`                    | `supabase db reset` (wipes the DB; re-run `pnpm db:migrate` afterwards)                             |
 | `pnpm ingest <entity> --source …`  | Run an ingest entity from the registry (`--all` for every one); see README "Ingesta"                |
+| `pnpm cycles:enroll [--cycle id]`  | Enroll people reaching their hire-date milestone into hire-date cycles (daily cron); see README     |
 | `pnpm db:seed --size small\|demo`  | Seed the DB from `fixtures/bamboo/<size>` (`--reset` truncates first); see README "Seed"            |
 | `pnpm fixtures:build`              | Regenerate the synthetic Bamboo fixtures in `fixtures/` (deterministic; commit the output)          |
 

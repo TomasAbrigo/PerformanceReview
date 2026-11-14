@@ -395,7 +395,9 @@ export async function listMyTasks(
       requestId: reviewRequest.id,
       cycleId: reviewCycle.id,
       cycleName: reviewCycle.name,
-      dueDate: sql<string | null>`${reviewCycle.dueDates}->>'self'`,
+      dueDate: sql<
+        string | null
+      >`coalesce(${cycleParticipant.dueDates}->>'self', ${reviewCycle.dueDates}->>'self')`,
       status: reviewRequest.status,
     })
     .from(reviewRequest)
@@ -415,7 +417,12 @@ export async function listMyTasks(
         ne(reviewCycle.status, "closed"),
       ),
     )
-    .orderBy(asc(sql`${reviewCycle.dueDates}->>'self'`), asc(reviewCycle.name));
+    .orderBy(
+      asc(
+        sql`coalesce(${cycleParticipant.dueDates}->>'self', ${reviewCycle.dueDates}->>'self')`,
+      ),
+      asc(reviewCycle.name),
+    );
   const shared = await db
     .select({
       requestId: reviewRequest.id,
