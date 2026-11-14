@@ -16,7 +16,9 @@ Alcance y decisiones: [`docs/prd.md`](docs/prd.md) (issue [#1](https://github.co
 
 - Datos: ingesta desde Bamboo (empleados, historial de puesto y manager, goals) con identidad "golden" y cola de conflictos, organigrama a una fecha, importación por archivo con perfiles de fuente, adaptador de lake sobre archivos, log de corridas, seed y fixtures.
 - Proceso de evaluación completo: escalas y templates, ciclos (asistente, snapshot, grupos, cadencia por fecha de ingreso, duplicar), autoevaluación, evaluación del manager con double-blind, pares, goals en el ciclo, comparación con acuse de recibo e historial, calibración, operación del ciclo e importación histórica de assessments desde CSV de Bamboo.
-- Análisis: notificaciones internas, dashboards, panel de calidad de datos, API JSON de solo lectura y exports CSV.
+- Análisis: notificaciones internas, dashboards, panel de calidad de datos, API JSON de solo lectura (incluidos los pedidos y respuestas de evaluación) y exports CSV (incluido el de respuestas).
+
+Los issues de v1 están cerrados; solo queda abierta la tarea con una persona ([#23](https://github.com/TomasAbrigo/PerformanceReview/issues/23)) más el PRD ([#1](https://github.com/TomasAbrigo/PerformanceReview/issues/1)) como referencia.
 
 **Pendiente o fuera de v1:**
 
@@ -24,7 +26,6 @@ Alcance y decisiones: [`docs/prd.md`](docs/prd.md) (issue [#1](https://github.co
 - **Sin login:** modo administrador con el selector "Actuar como". Supabase Auth, roles reales y RLS son v2 (las variables `NEXT_PUBLIC_SUPABASE_*` están reservadas para eso).
 - **Sin envío de emails:** las notificaciones son internas (bandeja `/inbox`); ver "Email (fuera de alcance)" en Notificaciones.
 - **Conectores reales al lake** (BigQuery, Snowflake, Databricks, Redshift, Postgres) en v2: hoy solo existe `DuckDbFileLake` sobre archivos, con la suite de contrato lista para los reales.
-- **API de datos de revisión** (pedidos, respuestas, export de respuestas): parte 2 de [#20](https://github.com/TomasAbrigo/PerformanceReview/issues/20), en curso en el PR [#51](https://github.com/TomasAbrigo/PerformanceReview/pull/51).
 - **Otros v2 del PRD** (sección "Out of Scope"): upward agregado, autoevaluación con rating, goals nativos editables, 9-box, paquetes PDF, API pública y webhooks salientes.
 - **Sin deploy:** todo corre contra el Supabase local en Docker.
 
@@ -175,7 +176,7 @@ Qué hay en la app, dónde está en la UI y las reglas que conviene conocer. Las
 ### Calidad de datos y API (`/data-quality`, `/api/v1`)
 
 - **Panel `/data-quality`:** un conteo por indicador (identidades sin resolver, personas o participantes sin manager, snapshots incompletos, historial de puesto con huecos o abierto tras la baja, `reviewer_mismatch`, corridas fallidas, etc.) con enlace a la lista de casos.
-- **API JSON `/api/v1` y exports CSV:** de solo lectura, con los IDs internos y de Bamboo en cada objeto, paginación estable por cursor y errores `application/problem+json`. Si `API_TOKEN` está definido, hace falta `Authorization: Bearer <API_TOKEN>`; vacío, queda abierta (desarrollo local).
+- **API JSON `/api/v1` y exports CSV:** de solo lectura, con los IDs internos y de Bamboo en cada objeto, paginación estable por cursor y errores `application/problem+json`. Incluye los pedidos de evaluación, sus respuestas y las preguntas congeladas de cada ciclo (con `requests.csv` y `answers.csv`), que nunca revelan quién escribió un feedback en un ciclo totalmente anónimo. Si `API_TOKEN` está definido, hace falta `Authorization: Bearer <API_TOKEN>`; vacío, queda abierta (desarrollo local).
 - Los indicadores, los endpoints y los CSV están en [Calidad de datos, API JSON y exports CSV](#calidad-de-datos-api-json-y-exports-csv).
 
 ### Importación histórica
