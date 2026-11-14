@@ -1,12 +1,12 @@
 import { describe, expect, it } from "vitest";
+import { z } from "zod";
 import {
+  changedEmployeesSchema,
   employeeSchema,
-  employeesChangedSchema,
-  employmentStatusTableSchema,
+  employmentStatusRowSchema,
   goalsAggregateSchema,
-  jobInfoTableSchema,
+  jobInfoRowSchema,
   listEmployeesPageSchema,
-  type ListEmployeesPage,
 } from "../bamboo-schemas";
 import { generateCompany } from "../company";
 import { serializeBambooApi } from "./bamboo-api";
@@ -23,7 +23,10 @@ function json(files: FixtureFile[], path: string): unknown {
   return JSON.parse(file.content);
 }
 
-function listPages(files: FixtureFile[]): ListEmployeesPage[] {
+const jobInfoTableSchema = z.array(jobInfoRowSchema);
+const employmentStatusTableSchema = z.array(employmentStatusRowSchema);
+
+function listPages(files: FixtureFile[]) {
   return files
     .filter((f) => f.path.startsWith("employees/list/page-"))
     .sort((a, b) => a.path.localeCompare(b.path))
@@ -39,21 +42,21 @@ describe("list-employees pages", () => {
     (_, c, files, limit) => {
       const pages = listPages(files);
       expect(pages.length).toBe(Math.ceil(c.employees.length / limit));
-      const ids = pages.flatMap((p) => p.data.map((e) => e.employeeId));
+      const ids = pages.flatMap((p) => p.data.map((e) => e.id));
       expect(ids).toEqual(
         c.employees.map((e) => e.id).sort((a, b) => Number(a) - Number(b)),
       );
       pages.forEach((page, i) => {
-        expect(page.meta.total).toBe(c.employees.length);
-        expect(page.meta.page.limit).toBe(limit);
+        expect(page.meta?.total).toBe(c.employees.length);
+        expect(page.meta?.page?.limit).toBe(limit);
         const isLast = i === pages.length - 1;
-        expect(page.meta.page.nextCursor === null).toBe(isLast);
-        expect(page.meta.page.prevCursor === null).toBe(i === 0);
-        expect(page._links.next == null).toBe(isLast);
-        expect(page._links.prev == null).toBe(i === 0);
+        expect(page.meta?.page?.nextCursor === null).toBe(isLast);
+        expect(page.meta?.page?.prevCursor === null).toBe(i === 0);
+        expect(page._links?.next == null).toBe(isLast);
+        expect(page._links?.prev == null).toBe(i === 0);
       });
       const cursors = pages.flatMap((p) =>
-        [p.meta.page.nextCursor].filter(Boolean),
+        [p.meta?.page?.nextCursor].filter(Boolean),
       );
       expect(new Set(cursors).size).toBe(pages.length - 1);
     },
@@ -67,7 +70,7 @@ describe("list-employees pages", () => {
     (_, c, files) => {
       const listed = new Map(
         listPages(files).flatMap((p) =>
-          p.data.map((e) => [e.employeeId, e] as const),
+          p.data.map((e) => [String(e.id), e] as const),
         ),
       );
       for (const e of c.employees) {
@@ -195,7 +198,7 @@ describe("employees/changed", () => {
     ["small", small, smallFiles],
     ["demo", demo, demoFiles],
   ])("%s lists every employee with its last change", (_, c, files) => {
-    const feed = employeesChangedSchema.parse(
+    const feed = changedEmployeesSchema.parse(
       json(files, "employees/changed.json"),
     );
     expect(Object.keys(feed.employees).sort()).toEqual(
@@ -226,14 +229,13 @@ describe("goals aggregate v1_2", () => {
     (_, c, files) => {
       let goalCount = 0;
       for (const e of c.employees) {
-        const aggregate = goalsAggregateSchema.parse(
-          json(files, `performance/goals/${e.id}.json`),
-        );
+        const raw = json(files, `performance/goals/${e.id}.json`) as {
+          goals: { sharedWithEmployeeIds: unknown[]; milestones: unknown }[];
+        };
+        const aggregate = goalsAggregateSchema.parse(raw);
         const mine = c.goals.filter((g) => g.employeeId === e.id);
         expect(aggregate.goals.map((g) => g.id)).toEqual(mine.map((g) => g.id));
-        expect(aggregate.persons.map((p) => p.employeeId)).toContain(
-          Number(e.id),
-        );
+        expect(aggregate.persons.map((p) => p.employeeId)).toContain(e.id);
         expect(aggregate.comments).toEqual(
           mine
             .filter((g) => g.commentCount > 0)
@@ -241,9 +243,15 @@ describe("goals aggregate v1_2", () => {
         );
         for (const [i, goal] of aggregate.goals.entries()) {
           expect(goal.sharedWithEmployeeIds).toEqual(
+            mine[i].sharedWithEmployeeIds,
+          );
+          // On the wire Bamboo uses integers for these employee ids.
+          expect(raw.goals[i].sharedWithEmployeeIds).toEqual(
             mine[i].sharedWithEmployeeIds.map(Number),
           );
-          expect(goal.milestones === null).toBe(mine[i].milestones === null);
+          expect(raw.goals[i].milestones === null).toBe(
+            mine[i].milestones === null,
+          );
         }
         goalCount += aggregate.goals.length;
       }
@@ -258,9 +266,7 @@ describe("cross-file consistency", () => {
     ["demo", demo, demoFiles],
   ])("%s uses the same employee ids in every file", (_, c, files) => {
     const ids = new Set(c.employees.map((e) => e.id));
-    const listed = listPages(files).flatMap((p) =>
-      p.data.map((e) => e.employeeId),
-    );
+    const listed = listPages(files).flatMap((p) => p.data.map((e) => e.id));
     const jobIds = jobInfoTableSchema
       .parse(json(files, "employees/tables/jobInfo/all.json"))
       .map((r) => r.employeeId);
@@ -272,7 +278,9 @@ describe("cross-file consistency", () => {
     expect(new Set(statusIds)).toEqual(ids);
     for (const page of listPages(files)) {
       for (const e of page.data) {
-        if (e.reportsToId !== null) expect(ids.has(e.reportsToId)).toBe(true);
+        if (e.reportsToId != null) {
+          expect(ids.has(String(e.reportsToId))).toBe(true);
+        }
       }
     }
   });
@@ -285,4 +293,102 @@ describe("cross-file consistency", () => {
       serializeBambooApi(generateCompany({ size: "small", seed: 1002 })),
     ).not.toEqual(smallFiles);
   });
+});
+
+/** Where Bamboo really sends integers (everything else is a numeric string). */
+const INTEGER_PATH =
+  /\.(persons\[\d+\]\.employeeId|alignsWithOptionId|milestones\[\d+\]\.(id|employeeGoalId|lastUpdateUserId))$/;
+const ID_KEY = /^id$|Id$/;
+/** The schemas do not check values; the generator must still only emit valid ones. */
+const ENUM_PATHS: [RegExp, RegExp][] = [
+  [/^employees\/(list|get)\/.*\.status$/, /^(Active|Inactive)$/],
+  [
+    /^performance\/goals\/.*\.goals\[\d+\]\.status$/,
+    /^(in_progress|completed|closed)$/,
+  ],
+  [
+    /^employees\/changed\.json\.employees\.\d+\.action$/,
+    /^(Inserted|Updated|Deleted)$/,
+  ],
+];
+
+/** Paths of the values that break the wire conventions of the fixtures. */
+function wireProblems(value: unknown, at: string): string[] {
+  if (Array.isArray(value)) {
+    return value.flatMap((v, i) => wireProblems(v, `${at}[${i}]`));
+  }
+  if (value === null || typeof value !== "object") return [];
+  return Object.entries(value).flatMap(([key, v]) => {
+    const where = `${at}.${key}`;
+    if (key === "filters") return []; // ids like "status-all"
+    if (key === "sharedWithEmployeeIds") {
+      return (v as unknown[]).every(Number.isInteger) ? [] : [where];
+    }
+    const enumRule = ENUM_PATHS.find(([path]) => path.test(where));
+    if (enumRule)
+      return typeof v === "string" && enumRule[1].test(v) ? [] : [where];
+    if (/\.percentComplete$/.test(where)) {
+      return typeof v === "number" && v >= 0 && v <= 100 ? [] : [where];
+    }
+    if (v === null) return [];
+    if (INTEGER_PATH.test(where)) return Number.isInteger(v) ? [] : [where];
+    const isString = typeof v === "string";
+    if (ID_KEY.test(key)) return isString && /^\d+$/.test(v) ? [] : [where];
+    if (/DateTime$/.test(key)) {
+      return isString && /^\d{4}-\d{2}-\d{2}T/.test(v) ? [] : [where];
+    }
+    if (/^date$|Date$/.test(key)) {
+      return isString && /^\d{4}-\d{2}-\d{2}$/.test(v) ? [] : [where];
+    }
+    return wireProblems(v, where);
+  });
+}
+
+describe("wire conventions", () => {
+  it("notices a value outside the conventions", () => {
+    expect(
+      wireProblems(
+        {
+          data: [
+            { employeeId: "1", status: "Retired", hireDate: "01/02/2013" },
+          ],
+        },
+        "employees/list/page-001.json",
+      ),
+    ).toEqual([
+      "employees/list/page-001.json.data[0].status",
+      "employees/list/page-001.json.data[0].hireDate",
+    ]);
+    expect(
+      wireProblems(
+        { goals: [{ id: 5, status: "done", percentComplete: 101 }] },
+        "performance/goals/1.json",
+      ),
+    ).toEqual([
+      "performance/goals/1.json.goals[0].id",
+      "performance/goals/1.json.goals[0].status",
+      "performance/goals/1.json.goals[0].percentComplete",
+    ]);
+    expect(
+      wireProblems(
+        { employees: { "11": { id: "11", action: "Moved" } } },
+        "employees/changed.json",
+      ),
+    ).toEqual(["employees/changed.json.employees.11.action"]);
+  });
+
+  it.each([
+    ["small", smallFiles],
+    ["demo", demoFiles],
+  ])(
+    "%s: ids are numeric strings, dates are ISO, nothing is 0000-00-00",
+    (_, files) => {
+      const jsonFiles = files.filter((f) => f.path.endsWith(".json"));
+      expect(jsonFiles.length).toBeGreaterThan(0);
+      expect(
+        jsonFiles.flatMap((f) => wireProblems(JSON.parse(f.content), f.path)),
+      ).toEqual([]);
+      expect(files.some((f) => f.content.includes("0000-00-00"))).toBe(false);
+    },
+  );
 });
