@@ -1,4 +1,33 @@
 import { expect, type Page, test } from "@playwright/test";
+import {
+  byId,
+  company,
+  directReports,
+  employees,
+  find,
+  fullName,
+  hasUniqueName,
+  isActive,
+} from "./seed-data";
+
+// An employee with no reports whose manager is an active person with a
+// unique name (the manager at the snapshot is the current one).
+const employee = find(
+  employees,
+  (e) =>
+    isActive(e) &&
+    hasUniqueName(e) &&
+    directReports(e).length === 0 &&
+    e.managerId !== null &&
+    byId.has(e.managerId) &&
+    isActive(byId.get(e.managerId)!) &&
+    hasUniqueName(byId.get(e.managerId)!),
+  "person with no reports and a manager with a unique name",
+);
+const manager = byId.get(employee.managerId!)!;
+const employeeName = fullName(employee);
+const managerName = fullName(manager);
+const department = employee.department;
 
 /** Uses the header "Actuar como" selector. */
 async function actAs(page: Page, person: string | null, role: string) {
@@ -14,11 +43,20 @@ async function actAs(page: Page, person: string | null, role: string) {
   );
 }
 
-/** Launches a year-end cycle and moves it to collecting; returns its URL. */
+/** HR moves the open cycle page to the next phase. */
+async function moveTo(page: Page, phase: string, transitions: number) {
+  await page.getByRole("button", { name: `Pasar a ${phase}` }).click();
+  await page.getByRole("button", { name: "Confirmar" }).click();
+  await expect(
+    page.getByRole("table", { name: "Historial de estados" }).getByRole("row"),
+  ).toHaveCount(transitions);
+}
+
+/** Launches a year-end cycle with calibration and moves it to collecting. */
 async function collectingCycle(page: Page, name: string) {
   await page.goto("/es/cycles/new");
   await expect(page.getByText("Paso 1 de 4")).toBeVisible();
-  await page.getByLabel("Fecha de snapshot organizacional").fill("2022-06-01");
+  await page.getByLabel("Fecha de snapshot organizacional").fill(company.asOf);
   await expect(page.getByText(/\d+ personas coinciden/)).toBeVisible();
   await page.getByRole("button", { name: "Siguiente" }).click();
   await page
@@ -31,15 +69,12 @@ async function collectingCycle(page: Page, name: string) {
   await page.getByRole("button", { name: "Siguiente" }).click();
   await page.getByRole("button", { name: "Crear y lanzar" }).click();
   await expect(page).toHaveURL(/\/es\/cycles\/[0-9a-f-]{36}$/);
-  await page.getByRole("button", { name: "Pasar a Recolección" }).click();
-  await page.getByRole("button", { name: "Confirmar" }).click();
-  await expect(
-    page.getByRole("table", { name: "Historial de estados" }).getByRole("row"),
-  ).toHaveCount(3);
-  return page.url();
+  const url = page.url();
+  await moveTo(page, "Recolección", 3);
+  return url;
 }
 
-/** Answers every question of the open manager form (overall rating: lowest) and submits. */
+/** Answers the manager form: other ratings 2, the overall rating 1; submits. */
 async function fillAndSubmit(page: Page) {
   const boxes = page.getByRole("textbox", { name: /\?|\./ });
   await expect(boxes.first()).toBeVisible();
@@ -48,15 +83,14 @@ async function fillAndSubmit(page: Page) {
     await boxes.nth(i).blur();
   }
   const groups = page.getByRole("radiogroup");
-  const n = await groups.count();
-  for (let i = 0; i < n; i++) {
-    // Other ratings: 2; the overall rating (last): 1.
-    await groups
-      .nth(i)
-      .getByRole("radio")
-      .nth(i === n - 1 ? 0 : 1)
-      .check();
+  for (let i = 0; i < (await groups.count()); i++) {
+    await groups.nth(i).getByRole("radio").nth(1).check();
   }
+  await page
+    .getByRole("radiogroup", { name: /Calificación general de desempeño/ })
+    .getByRole("radio")
+    .first()
+    .check();
   await expect(page.getByText("Borrador guardado")).toBeVisible();
   await page.getByRole("button", { name: "Enviar" }).click();
   await page.getByRole("button", { name: "Confirmar envío" }).click();
@@ -66,38 +100,27 @@ async function fillAndSubmit(page: Page) {
 test("HR calibrates by department, publishes, and the employee sees only the final rating", async ({
   page,
 }) => {
-  const name = `Calibración e2e ${Date.now()}`;
   test.setTimeout(120_000);
+  const name = `Calibración e2e ${Date.now()}`;
   const cycleUrl = await collectingCycle(page, name);
-  const department = (
-    await page
-      .getByRole("row")
-      .filter({ hasText: "Bruno Pérez" })
-      .first()
-      .getByRole("cell")
-      .nth(2)
-      .innerText()
-  ).trim();
 
-  // Carla submits her review of Bruno (overall rating: 1).
-  await actAs(page, "Carla Romero", "Manager");
+  // The manager submits the review (overall rating: 1).
+  await actAs(page, managerName, "Manager");
   await page.goto("/es/team");
   await page
     .getByRole("table", { name: "Reportes directos" })
     .getByRole("row")
     .filter({ hasText: name })
-    .filter({ hasText: "Bruno Pérez" })
+    .filter({ hasText: employeeName })
     .getByRole("link", { name: "Evaluar" })
     .click();
   await fillAndSubmit(page);
 
-  // HR shares every submitted review and opens calibration.
+  // HR moves to calibration and opens it.
   await actAs(page, null, "People (RR. HH.)");
   await page.goto(cycleUrl);
-  await page
-    .getByRole("button", { name: "Compartir todas las evaluaciones enviadas" })
-    .click();
-  await expect(page.getByText(/Se comparti/)).toBeVisible();
+  await moveTo(page, "Revisión del manager", 4);
+  await moveTo(page, "Calibración", 5);
   await page.getByRole("link", { name: "Calibración" }).click();
   await expect(page).toHaveURL(/\/calibration$/);
 
@@ -106,14 +129,15 @@ test("HR calibrates by department, publishes, and the employee sees only the fin
   await page.getByLabel("Tipo").selectOption({ label: "Por área" });
   await page.getByLabel("Criterio").selectOption({ label: department });
   await page.getByRole("button", { name: "Crear grupo" }).click();
-  const row = page.getByRole("row").filter({ hasText: "Bruno Pérez" });
+  const row = page.getByRole("row").filter({ hasText: employeeName });
   await expect(row).toContainText("Necesita desarrollo");
 
-  // Histogram before the change: Bruno counted at 1.
+  // Histogram of the department: the employee counted at 1 before.
   const chart = page.getByRole("region", { name: "Distribución de ratings" });
-  await expect(
-    chart.getByRole("img", { name: new RegExp(`Necesita desarrollo 1`) }),
-  ).toBeVisible();
+  const deptChart = chart.getByRole("img", {
+    name: new RegExp(`^${department}:`),
+  });
+  await expect(deptChart).toHaveAccessibleName(/Necesita desarrollo [1-9]/);
 
   // Propose 3 with a reason.
   await row.getByRole("combobox").selectOption({ value: "3" });
@@ -122,18 +146,24 @@ test("HR calibrates by department, publishes, and the employee sees only the fin
     .fill("Impacto subestimado");
   await row.getByRole("button", { name: "Guardar cambio" }).click();
   await expect(row).toContainText("Impacto subestimado");
-  await expect(
-    chart.getByRole("img", { name: /Supera a menudo 1/ }),
-  ).toBeVisible();
+  await expect(deptChart).toHaveAccessibleName(/Supera a menudo [1-9]/);
 
   // Publish.
   await page.getByRole("button", { name: "Publicar calibración" }).click();
   await page.getByRole("button", { name: "Publicar", exact: true }).click();
   await expect(page.getByText(/publicad/i).first()).toBeVisible();
 
-  // Bruno sees only the final value.
+  // Sharing phase: HR shares every submitted review.
+  await page.goto(cycleUrl);
+  await moveTo(page, "Compartir resultados", 6);
+  await page
+    .getByRole("button", { name: "Compartir todas las evaluaciones enviadas" })
+    .click();
+  await expect(page.getByText(/Se comparti/)).toBeVisible();
+
+  // The employee sees only the final value.
   await page.goto("/es/me");
-  await actAs(page, "Bruno Pérez", "Empleado");
+  await actAs(page, employeeName, "Empleado");
   await page.goto(`${cycleUrl}/result`);
   await expect(page.getByTestId("final-rating")).toContainText(
     "3 · Supera a menudo",
