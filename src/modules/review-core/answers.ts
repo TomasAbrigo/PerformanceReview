@@ -9,6 +9,7 @@ import {
   type ReviewRequest,
 } from "@/db/schema";
 import type { ActorContext } from "@/modules/actor/types";
+import { goalsQuestionsOptional, isGoalsQuestion } from "./goal-snapshot";
 import { loadRequest } from "./requests";
 import { ReviewError } from "./review-errors";
 import { canRead, canWrite } from "./visibility";
@@ -81,9 +82,13 @@ export async function getReview(
     throw error;
   }
   const { request, cycle, visibility } = row;
-  const questions = (
-    await questionsFor(db, cycle.id, request.relationship)
-  ).filter((q) => canRead(actor, { ...visibility, questionRevision: q }));
+  // Without goals to rate, the goals rating and its comment are optional.
+  const goalsOptional = await goalsQuestionsOptional(db, request);
+  const questions = (await questionsFor(db, cycle.id, request.relationship))
+    .filter((q) => canRead(actor, { ...visibility, questionRevision: q }))
+    .map((q) =>
+      goalsOptional && isGoalsQuestion(q) ? { ...q, required: false } : q,
+    );
   const rows = await db
     .select()
     .from(answer)
@@ -219,7 +224,13 @@ export async function submit(
           .where(eq(answer.requestId, requestId))
       ).map((r) => r.q),
     );
-    const missing = questions.filter((q) => q.required && !answered.has(q.id));
+    const goalsOptional = await goalsQuestionsOptional(tx, request);
+    const missing = questions.filter(
+      (q) =>
+        q.required &&
+        !(goalsOptional && isGoalsQuestion(q)) &&
+        !answered.has(q.id),
+    );
     if (missing.length) {
       throw new ReviewError(
         "missing_required",

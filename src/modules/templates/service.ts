@@ -290,6 +290,7 @@ export async function cloneTemplate(
             scaleId: q.scaleId,
             prompt: q.prompt,
             choices: q.choices,
+            role: q.role,
           })),
         );
       }

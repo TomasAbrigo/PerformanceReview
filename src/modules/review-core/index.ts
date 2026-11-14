@@ -67,3 +67,16 @@ export {
   type WriteScope,
   writablePhases,
 } from "./visibility";
+export {
+  countsTowardOverall,
+  getReviewGoals,
+  goalOverlapsPeriod,
+  isGoalsQuestion,
+  linkGoalToCycle,
+  refreshGoalProgress,
+  snapshotGoalsForParticipant,
+  snapshotGoalsForParticipants,
+  type GoalsBlockData,
+  type GoalSnapshotView,
+  type GoalWindow,
+} from "./goal-snapshot";
