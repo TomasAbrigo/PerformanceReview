@@ -190,6 +190,9 @@ describe("GET /api/v1/cycles/{id}/requests", () => {
       reviewer_visible: true,
       reviewer_missing: false,
       reviewer_mismatch: false,
+      additional: false,
+      assigned_by_hr: false,
+      submitted_on_behalf: false,
       declined_at: null,
       answer_count: 3,
     });
@@ -374,6 +377,52 @@ describe("GET /api/v1/cycles/{id}/requests", () => {
       { Authorization: "Bearer s3cret" },
     );
     expect(allowed.status).toBe(200);
+  });
+});
+
+describe("alternate and additional assessors (#17)", () => {
+  it("tells the primary, superseded, additional and on-behalf manager requests apart", async () => {
+    const cycle = await insertReviewCycle({ name: "Assessors" });
+    const participant = await insertParticipant({
+      cycleId: cycle,
+      personId: dora,
+      snapManagerPersonId: bruno,
+    });
+    const superseded = await insertRequest({
+      cycleId: cycle,
+      participantId: participant,
+      reviewerPersonId: bruno,
+      relationship: "manager",
+      status: "superseded",
+    });
+    const additional = await insertRequest({
+      cycleId: cycle,
+      participantId: participant,
+      reviewerPersonId: ana,
+      relationship: "manager",
+      additional: true,
+      assignedByHr: true,
+      submittedOnBehalf: true,
+    });
+    const res = await requestsOf(cycle, "?relationship=manager");
+    expect(res.body.data).toHaveLength(2);
+    const byId = new Map(res.body.data.map((r: Json) => [r.id, r]));
+    expect(byId.get(superseded)).toMatchObject({
+      status: "superseded",
+      additional: false,
+      assigned_by_hr: false,
+      submitted_on_behalf: false,
+      reviewer: { id: bruno },
+    });
+    expect(byId.get(additional)).toMatchObject({
+      status: "submitted",
+      additional: true,
+      assigned_by_hr: true,
+      submitted_on_behalf: true,
+      reviewer: { id: ana },
+    });
+    const history = await requestsOf(cycle, "?status=superseded");
+    expect(history.body.data.map((r: Json) => r.id)).toEqual([superseded]);
   });
 });
 

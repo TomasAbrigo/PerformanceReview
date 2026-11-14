@@ -1255,7 +1255,10 @@
       "answer_value": "answer_value",
       "answer_label": "answer_label",
       "normalized": "normalized",
-      "answer_text": "answer_text"
+      "answer_text": "answer_text",
+      "additional": "additional",
+      "assigned_by_hr": "assigned_by_hr",
+      "submitted_on_behalf": "submitted_on_behalf"
     }
   },
   "ImportHistory": {

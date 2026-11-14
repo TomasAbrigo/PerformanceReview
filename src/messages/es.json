@@ -1255,7 +1255,10 @@
       "answer_value": "valor",
       "answer_label": "etiqueta",
       "normalized": "normalizado",
-      "answer_text": "texto"
+      "answer_text": "texto",
+      "additional": "adicional",
+      "assigned_by_hr": "asignado por RR. HH.",
+      "submitted_on_behalf": "enviado en nombre del evaluador"
     }
   },
   "ImportHistory": {

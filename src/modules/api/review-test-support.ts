@@ -113,6 +113,9 @@ export type NewRequest = {
   deleted?: boolean;
   reviewerMissing?: boolean;
   reviewerMismatch?: boolean;
+  additional?: boolean;
+  assignedByHr?: boolean;
+  submittedOnBehalf?: boolean;
 };
 
 const requestValues = (r: NewRequest) => ({
@@ -122,7 +125,9 @@ const requestValues = (r: NewRequest) => ({
   relationship: r.relationship,
   status: r.status ?? "submitted",
   submittedAt:
-    (r.status ?? "submitted") === "submitted"
+    r.status === undefined ||
+    r.status === "submitted" ||
+    r.status === "superseded"
       ? new Date("2025-06-20T12:00:00.000Z")
       : null,
   declinedAt:
@@ -130,6 +135,9 @@ const requestValues = (r: NewRequest) => ({
   sharedAt: r.sharedAt ?? null,
   reviewerMissing: r.reviewerMissing ?? false,
   reviewerMismatch: r.reviewerMismatch ?? false,
+  additional: r.additional ?? false,
+  assignedByHr: r.assignedByHr ?? false,
+  submittedOnBehalf: r.submittedOnBehalf ?? false,
   deletedAt: r.deleted ? new Date() : null,
 });
 
