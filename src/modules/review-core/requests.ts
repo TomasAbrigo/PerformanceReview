@@ -189,17 +189,27 @@ async function visibilityContext(
     return ctx;
   }
   if (row.request.relationship === "self") {
-    const [managerRequest] = await db
-      .select({ status: reviewRequest.status })
+    // A participant may have several manager requests (#17: additional
+    // assessors; superseded ones are history, not the current double-blind
+    // gate): the actor's own wins, else the primary one.
+    const managerRequests = await db
+      .select({
+        status: reviewRequest.status,
+        reviewer: reviewRequest.reviewerPersonId,
+      })
       .from(reviewRequest)
       .where(
         and(
           eq(reviewRequest.participantId, row.participant.id),
           eq(reviewRequest.relationship, "manager"),
           isNull(reviewRequest.deletedAt),
+          ne(reviewRequest.status, "superseded"),
         ),
-      );
-    ctx.managerRequest = managerRequest ?? null;
+      )
+      .orderBy(asc(reviewRequest.additional), asc(reviewRequest.requestedAt));
+    const own = managerRequests.find((r) => r.reviewer === actor.personId);
+    ctx.assessor = !!own;
+    ctx.managerRequest = own ?? managerRequests[0] ?? null;
   }
   ctx.skipLevel = await isSkipLevel(db, actor, row.participant);
   return ctx;

@@ -28,8 +28,16 @@ export type VisibilityContext = {
     status: CycleStatus;
     components?: Pick<CycleComponents, "doubleBlind">;
   };
-  /** Self rows: the participant's manager request (double blind). */
+  /**
+   * Self rows: the manager request that gates the double blind: the actor's
+   * own when they are an assessor, else the participant's current one.
+   */
   managerRequest?: { status: RequestStatus } | null;
+  /**
+   * The actor writes a manager review of this participant (an alternate or
+   * additional assessor, #17): reads the self review like the manager does.
+   */
+  assessor?: boolean;
   /** The actor manages the participant's snapshot manager (see isSkipLevel). */
   skipLevel?: boolean;
   /** Reading one answer: its question's per-question rules. */
@@ -51,8 +59,9 @@ const isReviewee = (actor: ActorContext, ctx: VisibilityContext) =>
  * The single place that decides whether `actor` may read a review request
  * (and, with `questionRevision`, one of its answers). HR (People) reads
  * everything; the author reads their own request. Then:
- * - self: the snapshot manager reads it once submitted; under double blind
- *   only after submitting their own manager review;
+ * - self: the snapshot manager (or an assigned assessor) reads it once
+ *   submitted; under double blind only after submitting their own manager
+ *   review;
  * - manager: the snapshot manager reads it; the reviewee only once shared
  *   and only the questions visible to the reviewee;
  * - skip-level managers read submitted self/manager reviews (read-only);
@@ -67,7 +76,7 @@ export function canRead(actor: ActorContext, ctx: VisibilityContext): boolean {
     case "self":
       if (!submitted || actor.personId === null) return false;
       if (ctx.skipLevel) return true;
-      if (!isManagerOf(actor, ctx)) return false;
+      if (!isManagerOf(actor, ctx) && !ctx.assessor) return false;
       return (
         !isDoubleBlind(ctx.cycle?.components ?? {}) ||
         ctx.managerRequest?.status === "submitted"

@@ -1,4 +1,4 @@
-import { and, asc, eq, isNull, notInArray } from "drizzle-orm";
+import { and, asc, eq, isNull, ne, notInArray, or, sql } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 import type { DbOrTx } from "@/db/client";
 import { isUuid } from "@/lib/uuid";
@@ -44,7 +44,9 @@ export async function findManagerRequestId(
   participantId: string,
 ): Promise<string | null> {
   if (!isUuid(participantId)) return null;
-  const [row] = await db
+  // A participant may have several manager requests (additional assessors,
+  // #17; superseded ones are history): the actor's own first, else the primary.
+  const rows = await db
     .select({
       id: reviewRequest.id,
       reviewer: reviewRequest.reviewerPersonId,
@@ -60,8 +62,13 @@ export async function findManagerRequestId(
         eq(reviewRequest.participantId, participantId),
         eq(reviewRequest.relationship, "manager"),
         isNull(reviewRequest.deletedAt),
+        ne(reviewRequest.status, "superseded"),
       ),
-    );
+    )
+    .orderBy(asc(reviewRequest.additional), asc(reviewRequest.requestedAt));
+  const row =
+    rows.find((r) => actor.personId && r.reviewer === actor.personId) ??
+    rows[0];
   if (!row) return null;
   const allowed =
     actor.role === "hr" ||
@@ -85,7 +92,8 @@ export type TeamRow = {
 
 /**
  * The actor's direct reports (as of each cycle's snapshot) in active cycles,
- * with the status of their self and manager reviews.
+ * plus the people whose manager review they were assigned (#17), with the
+ * status of their self and manager reviews.
  */
 export async function listTeam(
   db: DbOrTx,
@@ -120,15 +128,30 @@ export async function listTeam(
     )
     .leftJoin(
       manager,
-      and(
-        eq(manager.participantId, cycleParticipant.id),
-        eq(manager.relationship, "manager"),
-        isNull(manager.deletedAt),
+      // One manager request per row (#17: additional assessors, superseded
+      // history): the actor's own, else the primary one.
+      eq(
+        manager.id,
+        sql`(select rr.id from review_request rr
+          where rr.participant_id = ${cycleParticipant.id}
+            and rr.relationship = 'manager' and rr.deleted_at is null
+            and rr.status <> 'superseded'
+          order by coalesce(rr.reviewer_person_id = ${actor.personId}, false) desc,
+            rr.additional, rr.requested_at
+          limit 1)`,
       ),
     )
     .where(
       and(
-        eq(cycleParticipant.snapManagerPersonId, actor.personId),
+        or(
+          eq(cycleParticipant.snapManagerPersonId, actor.personId),
+          // Alternate/additional assessors (#17) see who they review.
+          sql`exists (select 1 from review_request rr
+            where rr.participant_id = ${cycleParticipant.id}
+              and rr.relationship = 'manager' and rr.deleted_at is null
+              and rr.status <> 'superseded'
+              and rr.reviewer_person_id = ${actor.personId})`,
+        ),
         isNull(cycleParticipant.removedAt),
         isNull(reviewCycle.deletedAt),
         notInArray(reviewCycle.status, ["draft", "closed"]),
