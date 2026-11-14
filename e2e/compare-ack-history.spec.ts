@@ -1,4 +1,38 @@
 import { expect as baseExpect, type Page, test } from "@playwright/test";
+import {
+  byId,
+  company,
+  directReports,
+  employees,
+  find,
+  fullName,
+  hasUniqueName,
+  isActive,
+  jobRowsOf,
+} from "./seed-data";
+
+// An employee with no reports (so no other row mentions them), whose manager
+// is a person too: the manager at the snapshot is the current one.
+const employee = find(
+  employees,
+  (e) =>
+    isActive(e) &&
+    hasUniqueName(e) &&
+    directReports(e).length === 0 &&
+    e.managerId !== null &&
+    byId.has(e.managerId) &&
+    isActive(byId.get(e.managerId)!) &&
+    hasUniqueName(byId.get(e.managerId)!),
+  "person with no reports and a manager with a unique name",
+);
+const manager = byId.get(employee.managerId!)!;
+const employeeName = fullName(employee);
+const managerName = fullName(manager);
+/** Their job on the snapshot date (the last row not after it). */
+const snapshotJob = jobRowsOf(employee)
+  .filter((row) => row.date <= company.asOf)
+  .sort((a, b) => a.date.localeCompare(b.date))
+  .at(-1)!;
 
 /**
  * First visits compile each route (and server action) in `next dev`, which
@@ -58,7 +92,7 @@ async function collectingCycle(
 ): Promise<string> {
   await page.goto("/es/cycles/new");
   await expect(page.getByText("Paso 1 de 4")).toBeVisible();
-  await page.getByLabel("Fecha de snapshot organizacional").fill("2022-06-01");
+  await page.getByLabel("Fecha de snapshot organizacional").fill(company.asOf);
   await expect(page.getByText(/\d+ personas coinciden/)).toBeVisible();
   await page.getByRole("button", { name: "Siguiente" }).click();
   await page.getByLabel("Plantilla").selectOption({ label: template });
@@ -114,8 +148,8 @@ test("compare, follow-up note, acknowledgement and history of a shared review", 
   await templateWithHiddenQuestion(page, template);
   const cycleUrl = await collectingCycle(page, name, template);
 
-  // Bruno submits his self assessment.
-  await actAs(page, "Bruno Pérez", "Empleado");
+  // The employee submits their self assessment.
+  await actAs(page, employeeName, "Empleado");
   await page.goto("/es/me");
   await page
     .getByRole("listitem")
@@ -124,24 +158,24 @@ test("compare, follow-up note, acknowledgement and history of a shared review", 
     .click();
   await fillAndSubmit(page);
 
-  // Carla (his manager at the snapshot) submits hers and shares it.
-  await actAs(page, "Carla Romero", "Manager");
+  // Their manager (at the snapshot) submits hers and shares it.
+  await actAs(page, managerName, "Manager");
   await page.goto("/es/team");
   const teamRow = page
     .getByRole("table", { name: "Reportes directos" })
     .getByRole("row")
     .filter({ hasText: name })
-    .filter({ hasText: "Bruno Pérez" });
+    .filter({ hasText: employeeName });
   await teamRow.getByRole("link", { name: "Evaluar" }).click();
   await fillAndSubmit(page);
   const managerUrl = page.url();
 
-  // HR moves the cycle to sharing; Carla shares with Bruno.
+  // HR moves the cycle to sharing; the manager shares with the employee.
   await actAs(page, null, "People (RR. HH.)");
   await page.goto(cycleUrl);
   await moveTo(page, "Revisión del manager", 4);
   await moveTo(page, "Compartir resultados", 5);
-  await actAs(page, "Carla Romero", "Manager");
+  await actAs(page, managerName, "Manager");
   await page.goto(managerUrl);
   await page.getByRole("button", { name: "Compartir con el empleado" }).click();
   await expect(page.getByText(/Compartida el/)).toBeVisible();
@@ -150,7 +184,10 @@ test("compare, follow-up note, acknowledgement and history of a shared review", 
   await page.getByRole("link", { name: "Comparar" }).click();
   await expect(page).toHaveURL(/\/compare\/[0-9a-f-]{36}$/);
   await expect(
-    page.getByRole("heading", { level: 1, name: "Comparación: Bruno Pérez" }),
+    page.getByRole("heading", {
+      level: 1,
+      name: `Comparación: ${employeeName}`,
+    }),
   ).toBeVisible();
   const hiddenRow = page.getByRole("row").filter({ hasText: HIDDEN });
   await expect(hiddenRow).toBeVisible();
@@ -180,8 +217,8 @@ test("compare, follow-up note, acknowledgement and history of a shared review", 
     page.getByRole("listitem").filter({ hasText: FOLLOW_UP }),
   ).toBeVisible();
 
-  // Bruno sees the note and acknowledges with a note.
-  await actAs(page, "Bruno Pérez", "Empleado");
+  // The employee sees the note and acknowledges with a note.
+  await actAs(page, employeeName, "Empleado");
   await page.goto("/es/me");
   await page
     .getByRole("listitem")
@@ -217,16 +254,18 @@ test("compare, follow-up note, acknowledgement and history of a shared review", 
   await expect(
     page.getByRole("heading", {
       level: 1,
-      name: "Evaluaciones de Bruno Pérez",
+      name: `Evaluaciones de ${employeeName}`,
     }),
   ).toBeVisible();
   const card = page.getByRole("article", { name });
   await expect(card).toBeVisible();
   await expect(
-    card.getByText("Manager en ese momento: Carla Romero"),
+    card.getByText(`Manager en ese momento: ${managerName}`),
   ).toBeVisible();
   await expect(
-    card.getByText("Puesto y área en ese momento: Developer, Ingeniería"),
+    card.getByText(
+      `Puesto y área en ese momento: ${snapshotJob.jobTitle}, ${snapshotJob.department}`,
+    ),
   ).toBeVisible();
   await expect(card.getByText(/Acuse de recibo el/)).toBeVisible();
   await card.getByText("Ver respuestas").click();
@@ -234,7 +273,7 @@ test("compare, follow-up note, acknowledgement and history of a shared review", 
   await expect(card.getByText(HIDDEN)).toHaveCount(0);
 
   // The manager sees the acknowledgement and its note.
-  await actAs(page, "Carla Romero", "Manager");
+  await actAs(page, managerName, "Manager");
   await page.goto("/es/team");
   await teamRow.getByRole("link", { name: "Comparar" }).click();
   await expect(page.getByText(/El empleado acusó recibo el/)).toBeVisible();
@@ -242,13 +281,13 @@ test("compare, follow-up note, acknowledgement and history of a shared review", 
 
   // People reach the history from the person detail.
   await actAs(page, null, "People (RR. HH.)");
-  await page.goto("/es/people");
-  await page.getByRole("link", { name: "Bruno Pérez" }).click();
+  await page.goto(`/es/people?q=${encodeURIComponent(employeeName)}`);
+  await page.getByRole("link", { name: employeeName, exact: true }).click();
   await page.getByRole("link", { name: "Evaluaciones" }).click();
   await expect(
     page.getByRole("heading", {
       level: 1,
-      name: "Evaluaciones de Bruno Pérez",
+      name: `Evaluaciones de ${employeeName}`,
     }),
   ).toBeVisible();
   await expect(page.getByRole("article", { name })).toBeVisible();
