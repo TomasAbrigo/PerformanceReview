@@ -12,6 +12,7 @@ import {
   ingestRun,
   person,
   reviewCycle,
+  reviewRequest,
   sourceIdentity,
   type IdentityIssueStatus,
   type IngestCounts,
@@ -262,5 +263,25 @@ export async function insertParticipant(p: {
       removedAt: p.removed ? new Date() : null,
     })
     .returning({ id: cycleParticipant.id });
+  return row.id;
+}
+
+export async function insertReviewRequest(r: {
+  cycleId: string;
+  participantId: string;
+  reviewerPersonId: string;
+  relationship: "self" | "manager" | "peer" | "upward";
+  deleted?: boolean;
+}): Promise<string> {
+  const [row] = await db
+    .insert(reviewRequest)
+    .values({
+      cycleId: r.cycleId,
+      participantId: r.participantId,
+      reviewerPersonId: r.reviewerPersonId,
+      relationship: r.relationship,
+      deletedAt: r.deleted ? new Date() : null,
+    })
+    .returning({ id: reviewRequest.id });
   return row.id;
 }

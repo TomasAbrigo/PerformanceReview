@@ -628,7 +628,9 @@
       "started": "Started",
       "entity": "Entity",
       "source": "Source",
-      "error": "Error"
+      "error": "Error",
+      "reviewer": "Reviewer",
+      "snapshotManager": "Snapshot manager"
     },
     "indicators": {
       "identity_open": {

@@ -427,29 +427,49 @@ export async function failedIngestRuns(
 // --------------------------------------------------------------- requests
 
 export type ReviewerMismatchItem = {
-  /** review request id. */
+  /** review_request id. */
   id: string;
   cycleId: string;
   cycleName: string;
+  /** The reviewee. */
   personId: string;
   displayName: string;
+  reviewerPersonId: string;
+  reviewerName: string;
+  /** Manager of the participant's snapshot, who should have written it. */
+  snapManagerId: string | null;
+  snapManagerName: string | null;
 };
 
 /**
- * TODO(#35): the review_request table (and its reviewer_mismatch flag) is not
- * on main yet. Flip this when it lands; `reviewerMismatch` then returns the
- * requests whose reviewer is not the manager of the snapshot.
+ * Manager reviews (not deleted, participant not removed) whose reviewer is
+ * not the manager frozen in the participant's snapshot. There is no stored
+ * flag: the mismatch is derived from the request and the snapshot.
  */
-export const hasReviewRequests = (): boolean => false;
-
-/** Requests whose reviewer does not match the snapshot manager; null until review requests exist. */
 export async function reviewerMismatch(
   db: DbOrTx,
-): Promise<Indicator<"reviewer_mismatch", ReviewerMismatchItem> | null> {
-  void db;
-  if (!hasReviewRequests()) return null;
-  // TODO(#35): select the review_request rows flagged reviewer_mismatch.
-  return null;
+): Promise<Indicator<"reviewer_mismatch", ReviewerMismatchItem>> {
+  const rows = rowsOf<ReviewerMismatchItem>(
+    await db.execute(sql`
+      select rr.id, rr.cycle_id as "cycleId", c.name as "cycleName",
+        cp.reviewee_person_id as "personId", p.display_name as "displayName",
+        rr.reviewer_person_id as "reviewerPersonId",
+        reviewer.display_name as "reviewerName",
+        cp.snap_manager_person_id as "snapManagerId",
+        manager.display_name as "snapManagerName"
+      from review_request rr
+      join cycle_participant cp on cp.id = rr.participant_id
+      join review_cycle c on c.id = rr.cycle_id and c.deleted_at is null
+      join person p on p.id = cp.reviewee_person_id
+      join person reviewer on reviewer.id = rr.reviewer_person_id
+      left join person manager on manager.id = cp.snap_manager_person_id
+      where rr.relationship = 'manager' and rr.deleted_at is null
+        and cp.removed_at is null
+        and rr.reviewer_person_id is distinct from cp.snap_manager_person_id
+      order by c.name, c.id, p.display_name, rr.id
+    `),
+  );
+  return indicator("reviewer_mismatch", rows);
 }
 
 // ----------------------------------------------------------------- report
@@ -471,7 +491,7 @@ type Options = { now?: Date };
 
 const QUERIES: Record<
   DataQualityKey,
-  (db: DbOrTx, options: Options) => Promise<DataQualityIndicator | null>
+  (db: DbOrTx, options: Options) => Promise<DataQualityIndicator>
 > = {
   identity_open: (db) => openIdentityIssues(db),
   no_manager: (db) => peopleWithoutManager(db),
@@ -487,18 +507,15 @@ const QUERIES: Record<
   reviewer_mismatch: (db) => reviewerMismatch(db),
 };
 
-/** Every available indicator, in panel order (the ones not built yet are left out). */
+/** Every indicator, in panel order. */
 export async function getDataQuality(
   db: DbOrTx,
   options: Options = {},
 ): Promise<DataQualityIndicator[]> {
-  const results = await Promise.all(
-    DATA_QUALITY_KEYS.map((key) => QUERIES[key](db, options)),
-  );
-  return results.filter((r): r is DataQualityIndicator => r !== null);
+  return Promise.all(DATA_QUALITY_KEYS.map((key) => QUERIES[key](db, options)));
 }
 
-/** One indicator with its items; null for an unknown key or one not available yet. */
+/** One indicator with its items; null for an unknown key. */
 export async function getIndicator(
   db: DbOrTx,
   key: string,

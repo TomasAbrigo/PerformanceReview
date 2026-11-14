@@ -39,7 +39,7 @@ function renderIn(locale: "es" | "en", ui: ReactNode) {
 
 /** An indicator of every key, all empty. */
 const emptyIndicators = (): DataQualityIndicator[] =>
-  DATA_QUALITY_KEYS.filter((k) => k !== "reviewer_mismatch").map(
+  DATA_QUALITY_KEYS.map(
     (key) => ({ key, count: 0, items: [] }) as DataQualityIndicator,
   );
 
@@ -281,6 +281,44 @@ describe("IndicatorDetail", () => {
     );
     expect(within(row).getByText("goal")).toBeInTheDocument();
     expect(within(row).getByText("boom")).toBeInTheDocument();
+  });
+
+  it("shows the reviewer next to the snapshot manager of each mismatch", () => {
+    renderIn(
+      "en",
+      <IndicatorDetail
+        indicator={{
+          key: "reviewer_mismatch",
+          count: 1,
+          items: [
+            {
+              id: "q1",
+              cycleId: "c1",
+              cycleName: "Cycle A",
+              personId: "p1",
+              displayName: "Carla Romero",
+              reviewerPersonId: "p2",
+              reviewerName: "Bruno Pérez",
+              snapManagerId: "p3",
+              snapManagerName: "Ana García",
+            },
+          ],
+        }}
+      />,
+    );
+    const row = screen.getAllByRole("row")[1];
+    expect(
+      within(row).getByRole("link", { name: "Carla Romero" }),
+    ).toHaveAttribute("href", "/people/p1");
+    expect(
+      within(row).getByRole("link", { name: "Bruno Pérez" }),
+    ).toHaveAttribute("href", "/people/p2");
+    expect(
+      within(row).getByRole("link", { name: "Ana García" }),
+    ).toHaveAttribute("href", "/people/p3");
+    expect(
+      screen.getByRole("columnheader", { name: "Snapshot manager" }),
+    ).toBeInTheDocument();
   });
 
   it("links goals to their owner", () => {

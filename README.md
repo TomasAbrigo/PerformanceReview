@@ -220,19 +220,19 @@ for await (const { rows } of lake.readBatches(
 
 `/es/data-quality` (enlace en el inicio) muestra un conteo por indicador y un enlace a la lista de casos (`/es/data-quality/<indicador>`; las identidades sin resolver enlazan a la cola `/es/imports/identity`). Cada indicador es una consulta con nombre en `src/modules/analytics/data-quality.ts` que devuelve `{ key, count, items[] }`; el conteo es `items.length`, así que el número del panel y su lista no pueden diferir. "Activo" y "hoy" siguen la definición del resto de la app (`activeEmploymentCte`, `current_date`).
 
-| Indicador (`key`)                  | Qué cuenta                                                                                                                      |
-| ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
-| `identity_open`                    | Casos abiertos de la cola de identidad.                                                                                         |
-| `no_manager`                       | Activos con puesto vigente sin manager (el tope de la organización, con reportes, va con la insignia "Tope").                   |
-| `participants_no_manager`          | Participantes de ciclos (no removidos) sin manager en el snapshot, agrupados por ciclo.                                         |
-| `participants_incomplete_snapshot` | Participantes cuyo snapshot no tiene área o puesto.                                                                             |
-| `job_history_overlap_gap`          | Filas del historial de puesto que se superponen o dejan un hueco dentro de un mismo empleo (el hueco de un reingreso no).       |
-| `job_history_open_after_exit`      | Personas que ya no están activas pero tienen una fila de puesto abierta (`valid_to` nulo).                                      |
-| `active_without_job_history`       | Activos sin ninguna fila de historial de puesto.                                                                                |
-| `goals_without_employment`         | Goals (no borrados) cuyo dueño no tiene ningún empleo vigente.                                                                  |
-| `duplicate_names`                  | Activos que comparten nombre (sin importar tildes, mayúsculas ni orden de palabras).                                            |
-| `failed_runs`                      | Corridas de importación con error en los últimos 7 días.                                                                        |
-| `reviewer_mismatch`                | Pedidos de evaluación con evaluador distinto del manager del snapshot. **Pendiente**: espera a la tabla `review_request` (#35). |
+| Indicador (`key`)                  | Qué cuenta                                                                                                                                                                                |
+| ---------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `identity_open`                    | Casos abiertos de la cola de identidad.                                                                                                                                                   |
+| `no_manager`                       | Activos con puesto vigente sin manager (el tope de la organización, con reportes, va con la insignia "Tope").                                                                             |
+| `participants_no_manager`          | Participantes de ciclos (no removidos) sin manager en el snapshot, agrupados por ciclo.                                                                                                   |
+| `participants_incomplete_snapshot` | Participantes cuyo snapshot no tiene área o puesto.                                                                                                                                       |
+| `job_history_overlap_gap`          | Filas del historial de puesto que se superponen o dejan un hueco dentro de un mismo empleo (el hueco de un reingreso no).                                                                 |
+| `job_history_open_after_exit`      | Personas que ya no están activas pero tienen una fila de puesto abierta (`valid_to` nulo).                                                                                                |
+| `active_without_job_history`       | Activos sin ninguna fila de historial de puesto.                                                                                                                                          |
+| `goals_without_employment`         | Goals (no borrados) cuyo dueño no tiene ningún empleo vigente.                                                                                                                            |
+| `duplicate_names`                  | Activos que comparten nombre (sin importar tildes, mayúsculas ni orden de palabras).                                                                                                      |
+| `failed_runs`                      | Corridas de importación con error en los últimos 7 días.                                                                                                                                  |
+| `reviewer_mismatch`                | Pedidos de evaluación de tipo manager (no borrados, participante no removido) cuyo evaluador no es el manager del snapshot. No hay un flag guardado: se deriva del pedido y del snapshot. |
 
 ### API JSON de solo lectura (`/api/v1`)
 
@@ -252,7 +252,7 @@ Handlers en `src/modules/api/handlers.ts`, rutas en `src/app/api/v1/**`. Todos l
 - **Paginación:** `?limit=` (1-200, por defecto 50) y `?cursor=`. Las listas responden `{ data, next_cursor }`; `next_cursor` es `null` en la última página. Es keyset (no offset) sobre una clave inmutable: `(created_at, id)`, `(started_at desc, id desc)` para corridas e `id` para el org. Una fila nueva nunca corre ni repite las páginas ya leídas. Un cursor ajeno es un 400.
 - **Errores:** `application/problem+json` (RFC 9457). 400 para parámetros inválidos (con `errors: [{ path, message }]`), 404 para ids desconocidos o mal formados, 401 sin token válido.
 - **Auth:** sin sesión en v1. Si la variable `API_TOKEN` está definida, hace falta `Authorization: Bearer <API_TOKEN>` (comparación en tiempo constante); si está vacía o sin definir la API queda abierta (desarrollo local). Los botones "Exportar CSV" son enlaces del navegador y no pueden mandar el header: con `API_TOKEN` definido bajá los CSV con `curl -H "Authorization: Bearer $API_TOKEN"` hasta que exista la sesión.
-- Los datos de revisión (pedidos, respuestas, ratings) todavía no están: cuando lleguen (#35/#12) pasarán por `canRead` del actor.
+- Todavía no expone datos de revisión (pedidos, respuestas, ratings): van a pasar por `canRead` del actor y quedan para cuando estén cerradas las reglas de visibilidad de la revisión del manager (#12).
 
 ### Exports CSV
 
@@ -266,7 +266,7 @@ Handlers en `src/modules/api/handlers.ts`, rutas en `src/app/api/v1/**`. Todos l
 | `ingest-runs.csv`        | corrida                          | `source`, `entity`, `status`        |
 | `cycle-participants.csv` | participante de ciclo            | `cycle_id`                          |
 
-Cada fila trae los ids internos (uuid) y los de Bamboo (`bamboo_id`, `legajo`, y el del manager o del manager del snapshot), más área, división, puesto y ubicación. Falta el export de respuestas (una fila por evaluador × pregunta): depende de las respuestas (#12).
+Cada fila trae los ids internos (uuid) y los de Bamboo (`bamboo_id`, `legajo`, y el del manager o del manager del snapshot), más área, división, puesto y ubicación. Falta el export de respuestas (una fila por evaluador × pregunta), que también depende de las reglas de visibilidad (#12).
 
 ## Puertos (Supabase local)
 

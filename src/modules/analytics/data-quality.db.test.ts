@@ -27,6 +27,7 @@ import {
   insertJob,
   insertParticipant,
   insertPerson,
+  insertReviewRequest,
   insertRun,
   resetAll,
 } from "./test-support";
@@ -59,6 +60,7 @@ let partNoManager: string;
 let partIncomplete: string;
 let goalOfInes: string;
 let failedRecent: string;
+let mismatchRequest: string;
 
 beforeAll(async () => {
   await resetAll();
@@ -88,6 +90,7 @@ describe("on the clean fixture company", () => {
       await goalsWithoutLiveEmployment(db),
       await duplicateDisplayNames(db),
       await failedIngestRuns(db, { now: NOW }),
+      await reviewerMismatch(db),
     ]) {
       expect([indicator.key, indicator.count, indicator.items]).toEqual([
         indicator.key,
@@ -248,12 +251,12 @@ describe("on a crafted dataset", () => {
       cycleId: cycleA,
       personId: bruno,
     });
-    await insertParticipant({
+    const partOk = await insertParticipant({
       cycleId: cycleA,
       personId: carla,
       snapManagerPersonId: ana,
     });
-    await insertParticipant({
+    const partRemoved = await insertParticipant({
       cycleId: cycleB,
       personId: eli,
       removed: true, // removed participants do not count
@@ -264,6 +267,33 @@ describe("on a crafted dataset", () => {
       snapManagerPersonId: ana,
       snapDepartment: null,
     });
+
+    // Review requests: only a manager review written by somebody other than
+    // the snapshot manager is a mismatch.
+    const request = (
+      participantId: string,
+      reviewerPersonId: string,
+      relationship: "self" | "manager" | "peer" | "upward",
+      deleted = false,
+    ) =>
+      insertReviewRequest({
+        cycleId: cycleA,
+        participantId,
+        reviewerPersonId,
+        relationship,
+        deleted,
+      });
+    mismatchRequest = await request(partOk, bruno, "manager"); // Carla's snapshot manager is Ana
+    await request(partOk, ana, "manager"); // the snapshot manager wrote it
+    await request(partOk, carla, "self"); // about the reviewee, not the manager
+    await request(partOk, bruno, "peer");
+    await request(partOk, dora, "manager", true); // deleted
+    await insertReviewRequest({
+      cycleId: cycleB,
+      participantId: partRemoved,
+      reviewerPersonId: bruno,
+      relationship: "manager",
+    }); // removed participant
   });
 
   it("people without a current manager: active, current row, no manager", async () => {
@@ -359,15 +389,24 @@ describe("on a crafted dataset", () => {
     expect(result.count).toBe(1);
   });
 
-  it("the reviewer-mismatch indicator waits for review requests", async () => {
-    expect(await reviewerMismatch(db)).toBeNull();
+  it("manager reviews whose reviewer is not the snapshot manager", async () => {
+    const result = await reviewerMismatch(db);
+    expect(result.key).toBe("reviewer_mismatch");
+    expect(
+      result.items.map((i) => [
+        i.id,
+        i.cycleId,
+        i.personId,
+        i.reviewerPersonId,
+        i.snapManagerId,
+      ]),
+    ).toEqual([[mismatchRequest, cycleA, carla, bruno, ana]]);
+    expect(result.count).toBe(1);
   });
 
   it("the report lists every available indicator, each count matching its items", async () => {
     const report = await getDataQuality(db, { now: NOW });
-    expect(report.map((i) => i.key)).toEqual(
-      DATA_QUALITY_KEYS.filter((k) => k !== "reviewer_mismatch"),
-    );
+    expect(report.map((i) => i.key)).toEqual([...DATA_QUALITY_KEYS]);
     for (const indicator of report) {
       expect(indicator.count).toBe(indicator.items.length);
       const detail = await getIndicator(db, indicator.key, { now: NOW });
@@ -384,12 +423,12 @@ describe("on a crafted dataset", () => {
       ["goals_without_employment", 1],
       ["duplicate_names", 2],
       ["failed_runs", 1],
+      ["reviewer_mismatch", 1],
     ]);
   });
 
   it("an unknown indicator key has no detail", async () => {
     expect(await getIndicator(db, "nope")).toBeNull();
-    expect(await getIndicator(db, "reviewer_mismatch")).toBeNull();
   });
 });
 

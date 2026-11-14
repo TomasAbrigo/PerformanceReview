@@ -63,10 +63,10 @@ function CaseTable({
 /** Participants grouped by cycle (items come ordered by cycle), one table each. */
 function ByCycle<T extends ParticipantItem>({
   items,
-  extra,
+  extras = [],
 }: {
   items: T[];
-  extra?: { column: Column; cell: (item: T) => ReactNode };
+  extras?: { column: Column; cell: (item: T) => ReactNode }[];
 }) {
   const t = useTranslations("DataQuality");
   const groups = new Map<string, { name: string; items: T[] }>();
@@ -88,7 +88,7 @@ function ByCycle<T extends ParticipantItem>({
             </span>
           </h2>
           <CaseTable
-            columns={["person", ...(extra ? [extra.column] : [])]}
+            columns={["person", ...extras.map((e) => e.column)]}
             rows={group.items.map((item) => ({
               key: item.id,
               cells: [
@@ -97,7 +97,7 @@ function ByCycle<T extends ParticipantItem>({
                   id={item.personId}
                   name={item.displayName}
                 />,
-                ...(extra ? [extra.cell(item)] : []),
+                ...extras.map((e) => e.cell(item)),
               ],
             }))}
           />
@@ -160,11 +160,13 @@ function Cases({ indicator }: { indicator: DataQualityIndicator }) {
       return (
         <ByCycle<IncompleteSnapshotItem>
           items={indicator.items}
-          extra={{
-            column: "missing",
-            cell: (item) =>
-              item.missing.map((m) => t(`missing.${m}`)).join(", "),
-          }}
+          extras={[
+            {
+              column: "missing",
+              cell: (item) =>
+                item.missing.map((m) => t(`missing.${m}`)).join(", "),
+            },
+          ]}
         />
       );
     case "job_history_overlap_gap":
@@ -258,7 +260,34 @@ function Cases({ indicator }: { indicator: DataQualityIndicator }) {
         />
       );
     case "reviewer_mismatch":
-      return <ByCycle items={indicator.items} />;
+      return (
+        <ByCycle
+          items={indicator.items}
+          extras={[
+            {
+              column: "reviewer",
+              cell: (item) => (
+                <PersonLink
+                  key="r"
+                  id={item.reviewerPersonId}
+                  name={item.reviewerName}
+                />
+              ),
+            },
+            {
+              column: "snapshotManager",
+              cell: (item) =>
+                item.snapManagerId && item.snapManagerName ? (
+                  <PersonLink
+                    key="m"
+                    id={item.snapManagerId}
+                    name={item.snapManagerName}
+                  />
+                ) : null,
+            },
+          ]}
+        />
+      );
   }
 }
 
