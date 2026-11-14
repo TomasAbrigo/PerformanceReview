@@ -1233,7 +1233,24 @@
       "snapshot_manager_bamboo_id": "snapshot_manager_bamboo_id",
       "snapshot_manager": "snapshot_manager",
       "added_at": "added_at",
-      "removed_at": "removed_at"
+      "removed_at": "removed_at",
+      "relationship": "relationship",
+      "total": "total",
+      "submitted": "submitted",
+      "draft": "draft",
+      "declined": "declined",
+      "group": "group",
+      "bin_from": "from",
+      "bin_to": "to",
+      "count": "count",
+      "n": "people",
+      "mean_normalized": "mean_normalized",
+      "goals": "goals",
+      "completed": "completed",
+      "avg_progress": "avg_progress",
+      "normalized": "normalized",
+      "gap": "gap",
+      "answers": "answers"
     }
   },
   "ImportHistory": {

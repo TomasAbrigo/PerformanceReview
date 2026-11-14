@@ -112,6 +112,14 @@ test("dashboards: progress, distribution, team as-of/current, trajectory and lea
       name: /^Evaluación del manager: [1-9]\d* de \d+ enviadas$/,
     }),
   ).toBeVisible();
+  const exportLink = progress.getByRole("link", { name: "Exportar CSV" });
+  await expect(exportLink).toHaveAttribute(
+    "href",
+    new RegExp(`/api/v1/export/dashboard-progress\\.csv\\?cycle=${cycleId}`),
+  );
+  const csv = await page.request.get((await exportLink.getAttribute("href"))!);
+  expect(csv.ok()).toBe(true);
+  expect(await csv.text()).toContain("manager");
   const dist = page.getByRole("region", { name: "Distribución de ratings" });
   await expect(dist.getByTestId("histogram").first()).toBeVisible();
 

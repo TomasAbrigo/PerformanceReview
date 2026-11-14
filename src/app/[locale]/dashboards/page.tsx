@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { connection } from "next/server";
 import { Suspense } from "react";
 import { FiltersForm, Toggle } from "@/components/dashboards/controls";
+import { ExportCsvLink } from "@/components/data-quality/export-csv-link";
 import { GapChart } from "@/components/dashboards/gap-chart";
 import { GoalsScatter } from "@/components/dashboards/goals-scatter";
 import { Panel } from "@/components/dashboards/parts";
@@ -70,6 +71,26 @@ async function Dashboards({
     cycleId ? selfManagerGap(db, actor, f) : null,
   ]);
   const here = "/dashboards";
+  // CSV exports go through the API (HR visibility): offered to HR only.
+  const csv = (
+    file: string,
+    enabled: boolean,
+    extra: Record<string, string> = {},
+  ) =>
+    actor.role === "hr" && enabled ? (
+      <ExportCsvLink
+        file={file}
+        params={{
+          cycle: cycleId,
+          hierarchy: p.hierarchy,
+          department: p.department,
+          manager: p.manager,
+          location: p.location,
+          jobTitle: p.jobTitle,
+          ...extra,
+        }}
+      />
+    ) : undefined;
   const pickCycle = (
     <p className="text-sm text-muted-foreground">{t("pickCycle")}</p>
   );
@@ -113,6 +134,7 @@ async function Dashboards({
         id="progress"
         title={t("progress.title")}
         hint={progress ? t("phase", { phase: progress.status }) : undefined}
+        actions={csv("dashboard-progress", !!cycleId)}
       >
         {progress ? <ProgressChart data={progress} /> : pickCycle}
       </Panel>
@@ -120,6 +142,10 @@ async function Dashboards({
         id="distribution"
         title={t("distribution.title")}
         hint={t("distribution.hint")}
+        actions={csv("dashboard-distribution", true, {
+          groupBy: p.groupBy,
+          stage: p.stage,
+        })}
       >
         <div className="flex flex-wrap gap-4">
           <Toggle
@@ -139,10 +165,19 @@ async function Dashboards({
         </div>
         <RatingHistogram data={dist} />
       </Panel>
-      <Panel id="goals" title={t("goals.title")}>
+      <Panel
+        id="goals"
+        title={t("goals.title")}
+        actions={csv("dashboard-goals-vs-rating", !!cycleId)}
+      >
         {goals ? <GoalsScatter rows={goals.rows} /> : pickCycle}
       </Panel>
-      <Panel id="gap" title={t("gap.title")} hint={t("gap.hint")}>
+      <Panel
+        id="gap"
+        title={t("gap.title")}
+        hint={t("gap.hint")}
+        actions={csv("dashboard-self-manager-gap", !!cycleId)}
+      >
         {gap ? <GapChart data={gap} /> : pickCycle}
       </Panel>
     </div>

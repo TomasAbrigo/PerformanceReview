@@ -6,6 +6,7 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { closeDb, db } from "@/db/client";
 import { cycleParticipant, participantGoalSnapshot, person } from "@/db/schema";
 import type { ActorContext } from "@/modules/actor/types";
+import { exportCsv } from "@/modules/exports/entities";
 import { FixtureAdapter, runIngest } from "@/modules/ingest";
 import {
   createCycle,
@@ -588,6 +589,50 @@ describe("executiveSummary", () => {
     await expect(
       executiveSummary(db, as(ana, "manager"), { cycleId: cycle.id }),
     ).rejects.toMatchObject({ code: "forbidden" });
+  });
+});
+
+describe("CSV exports", () => {
+  const csv = async (file: string, query: string) => {
+    const res = await exportCsv(
+      db,
+      file,
+      new Request(`http://x/api/v1/export/${file}?${query}`),
+    );
+    return (await res.text()).replace(/^﻿/, "").trim().split(/\r?\n/);
+  };
+
+  it("exports progress, distribution, goals and gap of a cycle", async () => {
+    const { cycle } = await h1();
+    expect(await csv("dashboard-progress.csv", `cycle=${cycle.id}`)).toEqual([
+      "tipo,área,manager_id,manager,total,enviadas,pendientes,rechazadas",
+      `self,Ingeniería,${ana},Ana García,1,0,1,0`,
+      `self,Ingeniería,${carla},Carla Romero,1,1,0,0`,
+      `manager,Ingeniería,${ana},Ana García,1,1,0,0`,
+      `manager,Ingeniería,${carla},Carla Romero,1,1,0,0`,
+    ]);
+    const dist = await csv(
+      "dashboard-distribution.csv",
+      `cycle=${cycle.id}&aggregateOnly=true&groupBy=manager&locale=en`,
+    );
+    expect(dist[0]).toBe("group,from,to,count,people,mean_normalized");
+    expect(dist.slice(1).map((l) => l.split(",")[3])).toEqual([
+      "0",
+      "0",
+      "0",
+      "1",
+      "1",
+    ]);
+    const goals = await csv(
+      "dashboard-goals-vs-rating.csv",
+      `cycle=${cycle.id}`,
+    );
+    expect(goals).toHaveLength(3);
+    const gap = await csv(
+      "dashboard-self-manager-gap.csv",
+      `cycle=${cycle.id}`,
+    );
+    expect(gap[1]).toContain("Bruno Pérez,1,-0.25");
   });
 });
 
