@@ -247,6 +247,9 @@ export async function upsertAssessment(
       rejects.push(...saved.invalid);
     }
   }
+  // TODO(#16): Bamboo has no overall rating; when a profile maps a custom
+  // overall-rating column (e.g. `overall_rating`), write it here as the
+  // manager-stage final_rating of the participant once #16 adds that table.
 
   const result: HandlerOutcome["result"] = issue
     ? "ignoredIssueId" in issue
