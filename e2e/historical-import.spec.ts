@@ -1,23 +1,37 @@
 import path from "node:path";
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test } from "@playwright/test";
+import { company, employees, fullName, hasUniqueName } from "./seed-data";
 
 const REPORTS = path.resolve("fixtures/bamboo-reports/small");
 
-// Both tests import into the same cycles: one at a time.
-test.describe.configure({ mode: "serial" });
-const CYCLES = [
-  "Evaluación de desempeño 2023",
-  "Evaluación de desempeño 2024",
-  "Evaluación de desempeño 2025",
-];
+const renamed = new Set(company.identity.renames.map((r) => r.employeeId));
+const misspelled = new Set(
+  company.identity.misspellings.map((m) => `${m.employeeId}:${m.cycle}`),
+);
+const seeded = new Map(employees.map((e) => [e.id, e]));
 
-/** Uploads a report with its built-in profile in domain mode (the default). */
-async function importHistory(
-  page: Page,
-  file: string | { name: string; mimeType: string; buffer: Buffer },
-) {
+/** Someone whose 2023 assessment is in the report under their seeded name. */
+const assessed2023 = company.assessments
+  .filter(
+    (a) =>
+      a.cycle === 0 &&
+      a.employeeId !== null &&
+      a.selfStatus === "Submitted" &&
+      a.managerStatus === "Submitted" &&
+      !renamed.has(a.employeeId) &&
+      !misspelled.has(`${a.employeeId}:0`),
+  )
+  .map((a) => seeded.get(a.employeeId!))
+  .find((e) => e !== undefined && hasUniqueName(e))!;
+
+test("importing the employee performance report creates the historical cycles and their participants", async ({
+  page,
+}) => {
+  test.setTimeout(240_000);
   await page.goto("/es/imports/upload");
-  await page.getByLabel("Archivo", { exact: true }).setInputFiles(file);
+  await page
+    .getByLabel("Archivo", { exact: true })
+    .setInputFiles(path.join(REPORTS, "employee-performance.csv"));
   await page.getByRole("button", { name: "Previsualizar" }).click();
   await expect(page.getByLabel("Perfil de fuente")).toHaveValue(
     "bamboo-employee-performance",
@@ -29,63 +43,29 @@ async function importHistory(
   await expect(page).toHaveURL(/\/es\/imports\/history\/[0-9a-f-]{36}$/, {
     timeout: 150_000,
   });
-  await expect(
-    page.getByRole("heading", { level: 1, name: "Importación histórica" }),
-  ).toBeVisible();
-  return page.getByRole("table", { name: "Ciclos detectados" });
-}
 
-test("importing the employee performance report creates the 3 historical cycles", async ({
-  page,
-}) => {
-  test.setTimeout(240_000);
-  const cycles = await importHistory(
-    page,
-    path.join(REPORTS, "employee-performance.csv"),
-  );
-
-  // One row per detected cycle (plus the header).
-  await expect(cycles.getByRole("row")).toHaveCount(1 + CYCLES.length);
-  for (const name of CYCLES) {
-    await expect(cycles.getByRole("link", { name })).toBeVisible();
+  const cycles = page.getByRole("table", { name: "Ciclos detectados" });
+  await expect(cycles.getByRole("row")).toHaveCount(1 + company.cycles.length);
+  for (const cycle of company.cycles) {
+    await expect(cycles.getByRole("link", { name: cycle.name })).toBeVisible();
   }
 
-  // People the HRIS does not know wait in the identity queue.
-  await page.getByRole("link", { name: "Ver la cola de identidad" }).click();
-  await expect(page).toHaveURL(/\/es\/imports\/identity$/);
-  for (const outsider of [
-    "Bruno Salvatierra",
-    "Eliana Corvalán",
-    "Ulises Mansilla",
-  ]) {
-    await expect(
-      page.getByRole("link", { name: outsider }).first(),
-    ).toBeVisible();
-  }
-});
-
-test("an imported assessment shows its participant in the historical cycle", async ({
-  page,
-}) => {
-  test.setTimeout(240_000);
-  // Bruno Pérez is in the seeded HRIS (src/modules/bamboo-client/__fixtures__).
-  const csv = [
-    "Employee Name,Manager,Department,Review Cycle,Assessment Date,Employee Q3: What are some things I do well?,Manager Q3: What are some things [Employee] does well?",
-    "Bruno Pérez,Ana García,Ingeniería,Evaluación de desempeño 2023,2023-12-05,Cumplo con lo que prometo.,Es confiable.",
-  ].join("\n");
-  const cycles = await importHistory(page, {
-    name: "employee-performance.csv",
-    mimeType: "text/csv",
-    buffer: Buffer.from(`${csv}\n`),
-  });
-
-  await cycles
-    .getByRole("link", { name: "Evaluación de desempeño 2023" })
-    .click();
+  // The 2023 cycle lists a person assessed in it, with their as-of snapshot.
+  await cycles.getByRole("link", { name: company.cycles[0].name }).click();
   await expect(page).toHaveURL(/\/es\/cycles\/[0-9a-f-]{36}$/);
   await expect(
     page
       .getByRole("table", { name: "Participantes" })
-      .getByRole("row", { name: /Bruno Pérez/ }),
+      .getByRole("row", { name: new RegExp(fullName(assessed2023)) }),
   ).toBeVisible();
+
+  // People the HRIS does not know wait in the identity queue.
+  await page.goto("/es/imports/identity");
+  for (const outsider of company.identity.outsiders.filter(
+    (o) => o.report === "employee-performance",
+  )) {
+    await expect(
+      page.getByRole("link", { name: outsider.name }).first(),
+    ).toBeVisible();
+  }
 });

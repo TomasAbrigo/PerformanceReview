@@ -61,7 +61,7 @@ async function refreshCycle(
     asOf,
   );
   for (const [i, p] of participants.entries()) {
-    const { cycleId: _c, revieweePersonId: _r, ...snap } = fresh[i];
+    const snap = fresh[i];
     const same = (Object.keys(snap) as (keyof typeof snap)[]).every(
       (k) => p[k] === snap[k],
     );
