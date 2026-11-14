@@ -2,11 +2,13 @@ import { eq } from "drizzle-orm";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { closeDb, db } from "@/db/client";
 import { cycleParticipant, reviewRequest } from "@/db/schema";
+import type { ActorContext } from "@/modules/actor/types";
 import {
+  ACK_NOTE_MAX_LENGTH,
   acknowledge,
   AckError,
   getAcknowledgement,
-  listMyAcknowledgements,
+  listMyTasks,
   removeParticipant,
   shareReview,
   unshare,
@@ -185,13 +187,59 @@ describe("acknowledge", () => {
     expect(state.deadline).toEqual(new Date("2099-01-01T23:59:59.999Z"));
   });
 
-  it("an acknowledge due date already past closes the window", async () => {
+  it("a review shared after the acknowledge due date still gets the default window", async () => {
+    const { participantId, requestId } = await sharedCycle(templateId, {
+      dueDates: { self: "2022-07-15", acknowledge: "2022-08-01" },
+    });
+    const { managerShared } = await sharedAt(requestId);
+    const before = await getAcknowledgement(db, bruno(), participantId);
+    expect(before.status).toBe("open");
+    expect(before.deadline).toEqual(
+      new Date(managerShared.getTime() + 7 * DAY),
+    );
+    expect((await listMyTasks(db, bruno())).acknowledgements).toHaveLength(1);
+    const state = await acknowledge(
+      db,
+      bruno(),
+      participantId,
+      "Tarde pero a tiempo",
+    );
+    expect(state.status).toBe("acknowledged");
+  });
+
+  it("the participant's own acknowledge date (#21) is used before the cycle's", async () => {
     const { participantId } = await sharedCycle(templateId, {
       dueDates: { self: "2022-07-15", acknowledge: "2022-08-01" },
     });
-    await expect(acknowledge(db, bruno(), participantId)).rejects.toMatchObject(
-      { code: "window_closed" },
-    );
+    await db
+      .update(cycleParticipant)
+      .set({ dueDates: { acknowledge: "2099-01-01" } })
+      .where(eq(cycleParticipant.id, participantId));
+    const state = await getAcknowledgement(db, bruno(), participantId);
+    expect(state.deadline).toEqual(new Date("2099-01-01T23:59:59.999Z"));
+    const [task] = (await listMyTasks(db, bruno())).acknowledgements;
+    expect(task.deadline).toEqual(new Date("2099-01-01T23:59:59.999Z"));
+  });
+
+  it("checks the state before validating the note", async () => {
+    const tooLong = "x".repeat(ACK_NOTE_MAX_LENGTH + 1);
+    const cycle = await collectingCycle(templateId);
+    await submitSelf(cycle.id);
+    const { participantId, requestId } = await submitManager(cycle.id);
+    await expect(
+      acknowledge(db, bruno(), participantId, tooLong),
+    ).rejects.toMatchObject({ code: "not_shared" });
+    await toSharing(cycle.id);
+    await shareReview(db, as(people.carla), requestId);
+    const { managerShared } = await sharedAt(requestId);
+    await expect(
+      acknowledge(db, bruno(), participantId, tooLong, {
+        now: new Date(managerShared.getTime() + 8 * DAY),
+      }),
+    ).rejects.toMatchObject({ code: "window_closed" });
+    await expect(
+      acknowledge(db, bruno(), participantId, tooLong),
+    ).rejects.toMatchObject({ code: "validation" });
   });
 
   it("a removed participant cannot acknowledge", async () => {
@@ -200,7 +248,7 @@ describe("acknowledge", () => {
     await expect(acknowledge(db, bruno(), participantId)).rejects.toMatchObject(
       { code: "forbidden" },
     );
-    expect(await listMyAcknowledgements(db, bruno())).toEqual([]);
+    expect(await ackTasks(bruno())).toEqual([]);
     expect((await stored(participantId)).acknowledgedAt).toBeNull();
   });
 
@@ -276,16 +324,20 @@ describe("getAcknowledgement", () => {
   });
 });
 
-describe("listMyAcknowledgements (the /me task)", () => {
+/** The /me "Acusar recibo" tasks. */
+const ackTasks = async (actor: ActorContext, options?: { now?: Date }) =>
+  (await listMyTasks(db, actor, options)).acknowledgements;
+
+describe("the /me acknowledge tasks (listMyTasks)", () => {
   it("lists shared reviews still to acknowledge, until acknowledged or expired", async () => {
     const cycle = await collectingCycle(templateId);
     await submitSelf(cycle.id);
     const { participantId, requestId } = await submitManager(cycle.id);
-    expect(await listMyAcknowledgements(db, bruno())).toEqual([]);
+    expect(await ackTasks(bruno())).toEqual([]);
 
     await toSharing(cycle.id);
     await shareReview(db, as(people.carla), requestId);
-    const tasks = await listMyAcknowledgements(db, bruno());
+    const tasks = await ackTasks(bruno());
     expect(tasks).toHaveLength(1);
     expect(tasks[0]).toMatchObject({
       participantId,
@@ -295,16 +347,16 @@ describe("listMyAcknowledgements (the /me task)", () => {
     expect(tasks[0].deadline.getTime()).toBeGreaterThan(Date.now());
 
     // Nobody else has this task.
-    expect(await listMyAcknowledgements(db, as(people.carla))).toEqual([]);
-    expect(await listMyAcknowledgements(db, hr)).toEqual([]);
+    expect(await ackTasks(as(people.carla))).toEqual([]);
+    expect(await ackTasks(hr)).toEqual([]);
 
     expect(
-      await listMyAcknowledgements(db, bruno(), {
+      await ackTasks(bruno(), {
         now: new Date(Date.now() + 8 * DAY),
       }),
     ).toEqual([]);
 
     await acknowledge(db, bruno(), participantId);
-    expect(await listMyAcknowledgements(db, bruno())).toEqual([]);
+    expect(await ackTasks(bruno())).toEqual([]);
   });
 });

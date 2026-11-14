@@ -6,6 +6,9 @@ import {
   addFollowUpNote,
   canAddFollowUp,
   listFollowUpNotes,
+  loadParticipantScope,
+  mayAddFollowUp,
+  mayListFollowUp,
   removeParticipant,
   shareReview,
   unshare,
@@ -191,5 +194,36 @@ describe("removed participants", () => {
     await expect(
       addFollowUpNote(db, hr, participantId, "People"),
     ).rejects.toMatchObject({ code: "forbidden" });
+  });
+});
+
+describe("who may list and add, on a participant's loaded scope", () => {
+  it("lists for HR, the manager and (once shared) the employee; adds for HR and the manager", async () => {
+    const cycle = await collectingCycle(templateId);
+    await submitSelf(cycle.id);
+    const { participantId, requestId } = await submitManager(cycle.id);
+    const scope = () => loadParticipantScope(db, participantId);
+    const bruno = as(people.bruno);
+    const ana = as(people.ana, "manager");
+
+    // Submitted but not shared: the manager and HR; not the employee.
+    const before = await scope();
+    expect(mayListFollowUp(carla(), before)).toBe(true);
+    expect(mayListFollowUp(hr, before)).toBe(true);
+    expect(mayListFollowUp(bruno, before)).toBe(false);
+    expect(mayListFollowUp(ana, before)).toBe(false);
+    expect(mayListFollowUp(outsider(), before)).toBe(false);
+    expect(mayAddFollowUp(carla(), before)).toBe(true);
+    expect(mayAddFollowUp(hr, before)).toBe(true);
+    expect(mayAddFollowUp(bruno, before)).toBe(false);
+
+    await toSharing(cycle.id);
+    await shareReview(db, carla(), requestId);
+    const after = await scope();
+    expect(mayListFollowUp(bruno, after)).toBe(true);
+    expect(mayAddFollowUp(bruno, after)).toBe(false);
+    // The scope can be handed to the readers: no second load.
+    expect(await listFollowUpNotes(db, bruno, after)).toEqual([]);
+    expect(await canAddFollowUp(db, carla(), after)).toBe(true);
   });
 });

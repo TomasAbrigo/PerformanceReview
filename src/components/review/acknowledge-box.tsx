@@ -1,11 +1,19 @@
 "use client";
 
 import { useFormatter, useTranslations } from "next-intl";
-import { useState, useTransition } from "react";
-import type { ActionResult } from "@/components/templates/shared";
+import { useState } from "react";
+import {
+  type ActionResult,
+  useAction,
+  useErrorText,
+} from "@/components/templates/shared";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Link } from "@/i18n/navigation";
-import type { AckStatus } from "@/modules/review-core/acknowledge-window";
+import type {
+  AckStatus,
+  AckTask,
+} from "@/modules/review-core/acknowledge-window";
+import { ACK_NOTE_MAX_LENGTH } from "@/modules/review-core/limits";
 
 export type AckViewState = {
   participantId: string;
@@ -34,35 +42,27 @@ export function AcknowledgeBox({
 }) {
   const t = useTranslations("Compare.ack");
   const format = useFormatter();
+  const text = useErrorText();
   const [note, setNote] = useState("");
-  const [error, setError] = useState<string | null>(null);
-  const [pending, startTransition] = useTransition();
+  const { pending, error, run } = useAction();
   // UTC: the deadline is computed in UTC and server/client must agree.
   const day = (d: Date) =>
     format.dateTime(d, { dateStyle: "medium", timeZone: "UTC" });
   const mine = viewer === "employee";
 
+  // This feature's messages first, the shared ones (unknown, not_found...) after.
+  const errorText = (code: string, issues: { message: string }[]) => {
+    const key = code === "validation" ? (issues[0]?.message ?? code) : code;
+    return t.has(`errors.${key}` as "errors.forbidden")
+      ? t(`errors.${key}` as "errors.forbidden")
+      : text.code(code);
+  };
+
   function submit() {
     if (!acknowledge) return;
-    startTransition(async () => {
-      const result = await acknowledge(
-        state.participantId,
-        note.trim() === "" ? null : note.trim(),
-      );
-      if (result.ok) {
-        setError(null);
-      } else {
-        const key =
-          result.code === "validation"
-            ? (result.issues[0]?.message ?? "validation")
-            : result.code;
-        setError(
-          t.has(`errors.${key}` as "errors.unknown")
-            ? t(`errors.${key}` as "errors.unknown")
-            : t("errors.unknown"),
-        );
-      }
-    });
+    run(() =>
+      acknowledge(state.participantId, note.trim() === "" ? null : note.trim()),
+    );
   }
 
   let body;
@@ -101,6 +101,7 @@ export function AcknowledgeBox({
           id="ack-note"
           className="min-h-20 w-full rounded-md border bg-transparent p-2 text-sm"
           value={note}
+          maxLength={ACK_NOTE_MAX_LENGTH}
           onChange={(e) => setNote(e.target.value)}
         />
         <div className="flex items-center gap-4">
@@ -109,7 +110,7 @@ export function AcknowledgeBox({
           </Button>
           {error ? (
             <p role="alert" className="text-sm text-destructive">
-              {error}
+              {errorText(error.code, error.issues)}
             </p>
           ) : null}
         </div>
@@ -133,12 +134,10 @@ export function AcknowledgeBox({
   );
 }
 
-export type AckTaskView = {
-  participantId: string;
-  cycleId: string;
-  cycleName: string;
-  deadline: Date;
-};
+export type AckTaskView = Pick<
+  AckTask,
+  "participantId" | "cycleId" | "cycleName" | "deadline"
+>;
 
 /** The "Acusar recibo" tasks of /me: each links to where the review is read. */
 export function AcknowledgeTasks({ tasks }: { tasks: AckTaskView[] }) {

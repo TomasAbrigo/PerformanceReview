@@ -10,7 +10,12 @@ import {
 } from "@/db/schema";
 import { isUuid } from "@/lib/uuid";
 import type { ActorContext } from "@/modules/actor/types";
-import { isSkipLevel } from "./manager";
+import {
+  type AckTask,
+  acknowledgeDeadline,
+  DEFAULT_ACK_WINDOW_DAYS,
+} from "./acknowledge-window";
+import { isCurrentManager, isSkipLevel } from "./manager";
 import type { RequestStatus } from "./request-status";
 import { ReviewError } from "./review-errors";
 import type { CycleStatus } from "./status";
@@ -206,8 +211,9 @@ type LoadedRow = {
 
 /**
  * What canRead needs beyond the row: the participant's manager request
- * (double blind) and whether the actor is skip-level. Only queried when the
- * actor is neither HR nor the reviewer.
+ * (double blind, its reviewer, shared) and whether the actor is skip-level or
+ * the reviewee's current manager. Only queried when the actor is neither HR
+ * nor the reviewer.
  */
 async function visibilityContext(
   db: DbOrTx,
@@ -224,7 +230,11 @@ async function visibilityContext(
   }
   if (row.request.relationship === "self") {
     const [managerRequest] = await db
-      .select({ status: reviewRequest.status })
+      .select({
+        status: reviewRequest.status,
+        reviewerPersonId: reviewRequest.reviewerPersonId,
+        sharedAt: reviewRequest.sharedAt,
+      })
       .from(reviewRequest)
       .where(
         and(
@@ -239,7 +249,14 @@ async function visibilityContext(
   const decided =
     actor.personId === row.participant.snapManagerPersonId ||
     actor.personId === row.participant.revieweePersonId;
-  if (!decided) ctx.skipLevel = await isSkipLevel(db, actor, row.participant);
+  if (!decided) {
+    ctx.skipLevel = await isSkipLevel(db, actor, row.participant);
+    ctx.currentManager = await isCurrentManager(
+      db,
+      actor,
+      row.participant.revieweePersonId,
+    );
+  }
   return ctx;
 }
 
@@ -351,13 +368,17 @@ export type MyTasks = {
   nominations: never[];
   /** #14: feedback to give to peers / managers. */
   feedback: never[];
-  /** #15: shared reviews to acknowledge. */
-  acknowledgements: never[];
+  /** Shared reviews still to acknowledge ("Acusar recibo"), window open. */
+  acknowledgements: AckTask[];
 };
 
 export async function listMyTasks(
   db: DbOrTx,
   actor: ActorContext,
+  {
+    now = new Date(),
+    ackWindowDays = DEFAULT_ACK_WINDOW_DAYS,
+  }: { now?: Date; ackWindowDays?: number } = {},
 ): Promise<MyTasks> {
   const empty: MyTasks = {
     selfAssessments: [],
@@ -400,12 +421,17 @@ export async function listMyTasks(
       ),
       asc(reviewCycle.name),
     );
-  const shared = await db
+  const sharedRows = await db
     .select({
       requestId: reviewRequest.id,
       cycleId: reviewCycle.id,
       cycleName: reviewCycle.name,
       sharedAt: reviewRequest.sharedAt,
+      participantId: cycleParticipant.id,
+      acknowledgedAt: cycleParticipant.acknowledgedAt,
+      ackDueDate: sql<
+        string | null
+      >`coalesce(${cycleParticipant.dueDates}->>'acknowledge', ${reviewCycle.dueDates}->>'acknowledge')`,
     })
     .from(reviewRequest)
     .innerJoin(reviewCycle, eq(reviewCycle.id, reviewRequest.cycleId))
@@ -425,7 +451,33 @@ export async function listMyTasks(
       ),
     )
     .orderBy(asc(reviewRequest.sharedAt));
-  return { ...empty, selfAssessments: rows, sharedReviews: shared };
+  const sharedReviews = sharedRows.map((r) => ({
+    requestId: r.requestId,
+    cycleId: r.cycleId,
+    cycleName: r.cycleName,
+    sharedAt: r.sharedAt,
+  }));
+  // The shared reviews not acknowledged yet, while their window is open.
+  const acknowledgements = sharedRows.flatMap((r) => {
+    if (r.acknowledgedAt || !r.sharedAt) return [];
+    const deadline = acknowledgeDeadline({
+      sharedAt: r.sharedAt,
+      dueDate: r.ackDueDate,
+      windowDays: ackWindowDays,
+    });
+    return now.getTime() <= deadline.getTime()
+      ? [
+          {
+            participantId: r.participantId,
+            cycleId: r.cycleId,
+            cycleName: r.cycleName,
+            sharedAt: r.sharedAt,
+            deadline,
+          },
+        ]
+      : [];
+  });
+  return { ...empty, selfAssessments: rows, sharedReviews, acknowledgements };
 }
 
 /** Id of the actor's manager review in a cycle, once shared with them. */

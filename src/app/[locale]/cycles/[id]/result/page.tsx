@@ -12,10 +12,13 @@ import { Link } from "@/i18n/navigation";
 import { routing } from "@/i18n/routing";
 import { getActor } from "@/modules/actor/server";
 import {
+  bothSubmitted,
   findMySharedReviewId,
   getAcknowledgement,
   getReview,
   listFollowUpNotes,
+  loadParticipantScope,
+  mayListFollowUp,
 } from "@/modules/review-core";
 import { acknowledgeAction } from "../compare/[participantId]/actions";
 
@@ -29,11 +32,17 @@ async function Result({ params }: PageProps<"/[locale]/cycles/[id]/result">) {
   // getReview applies canRead: only shared, only visible questions.
   const review = requestId ? await getReview(db, actor, requestId) : null;
   const t = await getTranslations("Compare");
-  const participantId = review?.request.participantId;
-  const [ack, notes] = participantId
+  // The participant is loaded once; the notes, the acknowledgement and the
+  // comparison link all decide on it.
+  const scope = review
+    ? await loadParticipantScope(db, review.request.participantId)
+    : null;
+  const [ack, notes] = scope
     ? await Promise.all([
-        getAcknowledgement(db, actor, participantId),
-        listFollowUpNotes(db, actor, participantId),
+        getAcknowledgement(db, actor, scope),
+        mayListFollowUp(actor, scope)
+          ? listFollowUpNotes(db, actor, scope)
+          : [],
       ])
     : [null, []];
   return (
@@ -41,16 +50,19 @@ async function Result({ params }: PageProps<"/[locale]/cycles/[id]/result">) {
       <ManagerResultView
         review={review ? { ...toReviewData(review), dueDate: null } : null}
       />
-      {participantId && ack ? (
+      {scope && ack ? (
         <>
-          <Link
-            href={`/cycles/${id}/compare/${participantId}`}
-            className="underline"
-          >
-            {t("openMine")}
-          </Link>
+          {/* The comparison needs both reviews submitted (the manager's is). */}
+          {bothSubmitted(scope) ? (
+            <Link
+              href={`/cycles/${id}/compare/${scope.participant.id}`}
+              className="underline"
+            >
+              {t("openMine")}
+            </Link>
+          ) : null}
           <FollowUpNotes
-            participantId={participantId}
+            participantId={scope.participant.id}
             notes={notes}
             canAdd={false}
           />

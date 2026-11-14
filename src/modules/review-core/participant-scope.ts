@@ -11,7 +11,7 @@ import {
 } from "@/db/schema";
 import { isUuid } from "@/lib/uuid";
 import type { ActorContext } from "@/modules/actor/types";
-import { isSkipLevel } from "./manager";
+import { isCurrentManager, isSkipLevel } from "./manager";
 import { ReviewError } from "./review-errors";
 import { isActiveParticipant } from "./visibility";
 
@@ -62,6 +62,22 @@ export async function loadParticipantScope(
   };
 }
 
+/** A participant id, or their scope when the caller already loaded it. */
+export type ParticipantRef = string | ParticipantScope;
+
+export const scopeOf = (
+  db: DbOrTx,
+  ref: ParticipantRef,
+): Promise<ParticipantScope> =>
+  typeof ref === "string"
+    ? loadParticipantScope(db, ref)
+    : Promise.resolve(ref);
+
+/** Both the self assessment and the manager review are submitted. */
+export const bothSubmitted = (s: ParticipantScope) =>
+  s.selfRequest?.status === "submitted" &&
+  s.managerRequest?.status === "submitted";
+
 /** The participant is still in the cycle (removed ones are for HR only). */
 export const isActive = (s: ParticipantScope) =>
   isActiveParticipant(s.participant);
@@ -86,3 +102,10 @@ export const isSkipLevelOf = (
   actor: ActorContext,
   s: ParticipantScope,
 ) => isSkipLevel(db, actor, s.participant);
+
+/** The reviewee's manager today (see isCurrentManager). */
+export const isCurrentManagerOfScope = (
+  db: DbOrTx,
+  actor: ActorContext,
+  s: ParticipantScope,
+) => isCurrentManager(db, actor, s.participant.revieweePersonId);

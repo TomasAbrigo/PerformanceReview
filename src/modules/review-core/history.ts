@@ -1,19 +1,17 @@
-import { aliasedTable, and, desc, eq, isNull, ne } from "drizzle-orm";
+import { aliasedTable, and, desc, eq, inArray, isNull, ne } from "drizzle-orm";
 import type { DbOrTx } from "@/db/client";
 import {
   cycleParticipant,
   person,
-  questionRevision,
-  answer,
   reviewCycle,
   reviewRequest,
 } from "@/db/schema";
 import type { LocalizedText } from "@/db/schema/rating-scales";
 import { isUuid } from "@/lib/uuid";
 import type { ActorContext } from "@/modules/actor/types";
-import { managerAsOf } from "@/modules/org-history/queries";
 import { getReview, type Review } from "./answers";
 import { countsTowardOverall, overallRatingQuestion } from "./goal-snapshot";
+import { isCurrentManager } from "./manager";
 import { ReviewError } from "./review-errors";
 import type { CycleStatus } from "./status";
 
@@ -48,69 +46,54 @@ export type HistoryItem = {
 };
 
 /**
- * The person's current rating for a participant.
+ * The current rating, read from the manager review AS THE ACTOR MAY READ IT
+ * (so it is never more than canRead allows: an unshared review gives the
+ * current manager nothing, and the employee only gets a rating on a question
+ * visible to them).
  *
  * TODO(#16): replace with `currentRatingFor(participantId)` (calibration's
- * v_current_rating: override > calibrated > manager). Until then it is the
- * manager's overall rating (the question with the overall_rating role, else
- * the last rating question) of a submitted manager review; the employee only
- * gets it when that question is visible to them (`forReviewee`).
+ * v_current_rating: override > calibrated > manager), keeping the gate on the
+ * manager review being readable. Until then it is the answer to the question
+ * marked overall_rating (#13's role); a template without one has no rating
+ * here (a guess among the visible questions could show the wrong one).
  */
-async function fallbackCurrentRating(
-  db: DbOrTx,
-  requestId: string,
-  cycleId: string,
-  forReviewee: boolean,
-): Promise<HistoryRating | null> {
-  const revisions = await db
-    .select()
-    .from(questionRevision)
-    .where(eq(questionRevision.cycleId, cycleId))
-    .orderBy(desc(questionRevision.sort));
-  const ratings = revisions.filter(
-    (q) =>
-      q.kind === "rating" &&
-      q.appliesTo.includes("manager") &&
-      countsTowardOverall(q),
+function ratingOf(manager: Review | null): HistoryRating | null {
+  if (!manager) return null;
+  const overall = overallRatingQuestion(
+    manager.questions.filter((q) => q.kind === "rating"),
   );
-  // The question marked overall_rating; without roles, the last rating one.
-  const overall = overallRatingQuestion(ratings) ?? ratings[0];
-  if (!overall || (forReviewee && !overall.visibleToReviewee)) return null;
-  const [row] = await db
-    .select({ value: answer.optionValue, normalized: answer.normalized })
-    .from(answer)
-    .where(
-      and(
-        eq(answer.requestId, requestId),
-        eq(answer.questionRevisionId, overall.id),
-      ),
-    );
-  if (row?.value == null || row.normalized == null) return null;
-  const option = overall.scale?.options.find((o) => o.value === row.value);
+  if (!overall || !countsTowardOverall(overall)) return null;
+  const value = manager.answers[overall.id];
+  const option =
+    value === null || value === undefined
+      ? undefined
+      : overall.scale?.options.find((o) => o.value === Number(value));
   return option
-    ? { value: row.value, label: option.label, normalized: row.normalized }
+    ? {
+        value: option.value,
+        label: option.label,
+        normalized: option.normalized,
+      }
     : null;
 }
-
-const isoDay = (d: Date) => d.toISOString().slice(0, 10);
 
 /**
  * A person's history of finalized (closed) or shared cycles, newest first:
  * snapshot manager, job title and department of that moment, current
  * rating, and the reviews the actor may read.
  *
- * Who reads what: the person themselves only the cycles whose manager
- * review was shared with them (and only the questions visible to them); HR
- * everything; the person's current manager every cycle (even those they did
- * not manage, to know the trajectory), reading answers as canRead allows;
- * a former snapshot manager only the cycles they managed. Anyone else:
- * forbidden.
+ * Who lists what: the person themselves only the cycles whose manager review
+ * was shared with them; HR everything; the person's current manager every
+ * cycle (even those they did not manage, to know the trajectory); a former
+ * snapshot manager only the cycles they managed. Anyone else: forbidden.
+ * What they read inside a listed cycle (answers, rating) is whatever canRead
+ * allows them, so a current manager reads a cycle's reviews only once they
+ * were shared with the employee.
  */
 export async function reviewHistory(
   db: DbOrTx,
   actor: ActorContext,
   personId: string,
-  { today = new Date() }: { today?: Date } = {},
 ): Promise<HistoryItem[]> {
   if (!isUuid(personId)) throw new ReviewError("not_found");
   const [exists] = await db
@@ -153,28 +136,46 @@ export async function reviewHistory(
 
   const isHr = actor.role === "hr";
   const isSelf = !isHr && actor.personId === personId;
-  const isCurrentManager =
-    !isHr &&
-    actor.personId !== null &&
-    (await managerAsOf(db, personId, isoDay(today))) === actor.personId;
+  const currentManager =
+    !isHr && !isSelf && (await isCurrentManager(db, actor, personId));
   const managedByActor = (r: (typeof rows)[number]) =>
     actor.personId !== null &&
     actor.personId === r.participant.snapManagerPersonId;
-  if (!isHr && !isSelf && !isCurrentManager && !rows.some(managedByActor)) {
+  if (!isHr && !isSelf && !currentManager && !rows.some(managedByActor)) {
     throw new ReviewError("forbidden");
   }
 
   const mine = rows.filter((r) => {
     const sharedAt = r.managerRequest?.sharedAt ?? null;
     const finalized = r.cycle.status === "closed" || sharedAt !== null;
-    if (isHr || isCurrentManager || managedByActor(r)) return finalized;
+    if (isHr || currentManager || managedByActor(r)) return finalized;
     // The employee: only what was shared with them.
     return (
       isSelf && sharedAt !== null && r.managerRequest?.status === "submitted"
     );
   });
+  if (mine.length === 0) return [];
 
-  const readSubmitted = async (requestId: string | null) => {
+  // One query for the self requests of every listed cycle.
+  const selfRequests = await db
+    .select({
+      id: reviewRequest.id,
+      participantId: reviewRequest.participantId,
+    })
+    .from(reviewRequest)
+    .where(
+      and(
+        inArray(
+          reviewRequest.participantId,
+          mine.map((r) => r.participant.id),
+        ),
+        eq(reviewRequest.relationship, "self"),
+        isNull(reviewRequest.deletedAt),
+      ),
+    );
+  const selfOf = new Map(selfRequests.map((r) => [r.participantId, r.id]));
+
+  const readSubmitted = async (requestId: string | undefined) => {
     if (!requestId) return null;
     const review = await getReview(db, actor, requestId);
     return review?.request.status === "submitted" ? review : null;
@@ -182,19 +183,9 @@ export async function reviewHistory(
 
   return Promise.all(
     mine.map(async ({ participant, cycle, managerName, managerRequest }) => {
-      const [selfRequest] = await db
-        .select({ id: reviewRequest.id })
-        .from(reviewRequest)
-        .where(
-          and(
-            eq(reviewRequest.participantId, participant.id),
-            eq(reviewRequest.relationship, "self"),
-            isNull(reviewRequest.deletedAt),
-          ),
-        );
       const [self, manager] = await Promise.all([
-        readSubmitted(selfRequest?.id ?? null),
-        readSubmitted(managerRequest?.id ?? null),
+        readSubmitted(selfOf.get(participant.id)),
+        readSubmitted(managerRequest?.id),
       ]);
       return {
         participantId: participant.id,
@@ -209,15 +200,7 @@ export async function reviewHistory(
         department: participant.snapDepartment,
         sharedAt: managerRequest?.sharedAt ?? null,
         acknowledgedAt: participant.acknowledgedAt,
-        rating:
-          managerRequest?.status === "submitted"
-            ? await fallbackCurrentRating(
-                db,
-                managerRequest.id,
-                cycle.id,
-                isSelf,
-              )
-            : null,
+        rating: ratingOf(manager),
         self,
         manager,
         canCompare: self !== null && manager !== null,

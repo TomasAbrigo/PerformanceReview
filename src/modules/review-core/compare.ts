@@ -3,12 +3,15 @@ import type { QuestionRevision } from "@/db/schema";
 import type { ActorContext } from "@/modules/actor/types";
 import { type AnswerValue, getReview } from "./answers";
 import {
+  bothSubmitted,
   isActive,
+  isCurrentManagerOfScope,
   isManagerSideOf,
   isRevieweeOf,
   isShared,
   isSkipLevelOf,
-  loadParticipantScope,
+  type ParticipantRef,
+  scopeOf,
 } from "./participant-scope";
 import { ReviewError } from "./review-errors";
 
@@ -92,10 +95,10 @@ function side(
 export async function compareReviews(
   db: DbOrTx,
   actor: ActorContext,
-  participantId: string,
+  participant: ParticipantRef,
   options: { employeeView?: boolean } = {},
 ): Promise<Comparison> {
-  const scope = await loadParticipantScope(db, participantId);
+  const scope = await scopeOf(db, participant);
   const { selfRequest, managerRequest } = scope;
   if (!selfRequest || !managerRequest) throw new ReviewError("not_found");
 
@@ -108,18 +111,14 @@ export async function compareReviews(
     (isActive(scope) &&
       (isRevieweeOf(actor, scope) ||
         isManagerSideOf(actor, scope) ||
-        (await isSkipLevelOf(db, actor, scope))));
+        (await isSkipLevelOf(db, actor, scope)) ||
+        (await isCurrentManagerOfScope(db, actor, scope))));
   if (!involved) throw new ReviewError("forbidden");
   // The employee never learns about a manager review that is not shared.
   if (reviewee && !isShared(scope)) {
     throw new ReviewError("forbidden");
   }
-  if (
-    selfRequest.status !== "submitted" ||
-    managerRequest.status !== "submitted"
-  ) {
-    throw new ReviewError("not_submitted");
-  }
+  if (!bothSubmitted(scope)) throw new ReviewError("not_submitted");
 
   const [self, manager] = await Promise.all([
     getReview(db, actor, selfRequest.id),
@@ -168,7 +167,7 @@ export async function compareReviews(
     });
 
   return {
-    participantId,
+    participantId: scope.participant.id,
     cycleId: scope.cycle.id,
     cycleName: scope.cycle.name,
     revieweePersonId: scope.participant.revieweePersonId,

@@ -8,17 +8,19 @@ import { getActor } from "@/modules/actor/server";
 import * as review from "@/modules/review-core";
 
 const id = z.uuid();
-const text = z.string().max(20_000);
-const note = z.string().max(20_000).nullable();
+// The same limits the domain enforces (one constant each): an over-long note
+// is refused here with the same "too_long" the form shows.
+const body = z.string().max(review.FOLLOW_UP_MAX_LENGTH);
+const note = z.string().max(review.ACK_NOTE_MAX_LENGTH).nullable();
 
 /** The manager (or HR) adds a follow-up note about the participant. */
-export async function addFollowUpAction(participantId: string, body: string) {
+export async function addFollowUpAction(participantId: string, text: string) {
   return actionResult(async () => {
     await review.addFollowUpNote(
       db,
       await getActor(),
       parse(id, participantId, review.ReviewError),
-      parse(text, body, review.ReviewError),
+      parse(body, text, review.ReviewError),
     );
   });
 }

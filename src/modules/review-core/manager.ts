@@ -16,7 +16,7 @@ import {
   type NotificationErrorCode,
 } from "@/modules/notifications/errors";
 import { remind } from "@/modules/notifications/reminders";
-import { jobAsOf } from "@/modules/org-history/queries";
+import { jobAsOf, managerAsOf } from "@/modules/org-history/queries";
 import type { RequestStatus } from "./request-status";
 import { ReviewError, type ReviewErrorCode } from "./review-errors";
 import type { CycleStatus } from "./status";
@@ -37,6 +37,24 @@ export async function isSkipLevel(
     participant.snapshotAsOf,
   );
   return job?.managerPersonId === actor.personId;
+}
+
+/**
+ * Whether the actor is the person's manager today (as of `today`, the
+ * org-history job row valid now): the manager who follows their trajectory,
+ * including cycles in which someone else managed them.
+ */
+export async function isCurrentManager(
+  db: DbOrTx,
+  actor: ActorContext,
+  personId: string,
+  today: Date = new Date(),
+): Promise<boolean> {
+  if (!actor.personId) return false;
+  return (
+    (await managerAsOf(db, personId, today.toISOString().slice(0, 10))) ===
+    actor.personId
+  );
 }
 
 /**

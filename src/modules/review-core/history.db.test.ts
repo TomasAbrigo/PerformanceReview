@@ -1,7 +1,7 @@
 import { eq } from "drizzle-orm";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { closeDb, db } from "@/db/client";
-import { questionRevision } from "@/db/schema";
+import { employeeJobHistory, questionRevision } from "@/db/schema";
 import { acknowledge, reviewHistory, transition } from ".";
 import {
   as,
@@ -14,6 +14,8 @@ import {
   resetDb,
   revisions,
   sharedCycle,
+  submitManager,
+  submitSelf,
   systemTemplateId,
 } from "./compare-ack.fixtures";
 
@@ -194,6 +196,51 @@ describe("reviewHistory", () => {
     expect(names(items)).toEqual(["H1 2024", "H1 2022"]);
     expect(items[1].managerName).toBe("Carla Romero");
     expect(items[1].rating).not.toBeNull();
+  });
+
+  describe("the current manager who did not manage the cycle", () => {
+    // Carla reports to nobody, so Ana (Bruno's manager today) is neither the
+    // snapshot manager nor a skip-level manager of the 2022 cycles.
+    beforeEach(async () => {
+      await db
+        .update(employeeJobHistory)
+        .set({ managerPersonId: null })
+        .where(eq(employeeJobHistory.personId, people.carla));
+    });
+    const ana = () => as(people.ana, "manager");
+
+    it("reads neither the rating nor the answers of a review that was never shared", async () => {
+      const cycle = await collectingCycle(templateId);
+      await submitSelf(cycle.id);
+      await submitManager(cycle.id);
+      for (const to of ["manager_review", "sharing", "closed"] as const) {
+        await transition(db, cycle.id, to, null);
+      }
+      const [seenByAna] = await reviewHistory(db, ana(), people.bruno);
+      expect(seenByAna).toMatchObject({
+        cycleName: "H1 2022",
+        cycleStatus: "closed",
+        managerName: "Carla Romero",
+        sharedAt: null,
+        rating: null,
+        self: null,
+        manager: null,
+        canCompare: false,
+      });
+      // People still read it all.
+      const [seenByHr] = await reviewHistory(db, hr, people.bruno);
+      expect(seenByHr.rating).not.toBeNull();
+      expect(seenByHr.manager).not.toBeNull();
+    });
+
+    it("reads the rating and the answers once the review was shared", async () => {
+      await sharedCycle(templateId);
+      const [item] = await reviewHistory(db, ana(), people.bruno);
+      expect(item.rating).not.toBeNull();
+      expect(item.manager?.request.status).toBe("submitted");
+      expect(item.self?.request.status).toBe("submitted");
+      expect(item.canCompare).toBe(true);
+    });
   });
 
   it("refuses people with no relation and unknown people", async () => {

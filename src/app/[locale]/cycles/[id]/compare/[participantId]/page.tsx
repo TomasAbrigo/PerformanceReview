@@ -7,29 +7,22 @@ import { AcknowledgeBox } from "@/components/review/acknowledge-box";
 import { CompareView } from "@/components/review/compare-view";
 import { FollowUpNotes } from "@/components/review/follow-up-notes";
 import { db } from "@/db/client";
-import { DomainError } from "@/lib/domain-error";
 import { Link } from "@/i18n/navigation";
 import { routing } from "@/i18n/routing";
 import { getActor } from "@/modules/actor/server";
 import {
-  canAddFollowUp,
   compareReviews,
   getAcknowledgement,
   listFollowUpNotes,
+  loadParticipantScope,
+  mayAddFollowUp,
+  mayListFollowUp,
+  mayViewAcknowledgement,
   ReviewError,
   type Comparison,
+  type ParticipantScope,
 } from "@/modules/review-core";
 import { acknowledgeAction, addFollowUpAction } from "./actions";
-
-/** The value, or `fallback` when the domain refuses the actor. */
-async function orElse<T>(read: Promise<T>, fallback: T): Promise<T> {
-  try {
-    return await read;
-  } catch (error) {
-    if (error instanceof DomainError) return fallback;
-    throw error;
-  }
-}
 
 async function Compare({
   params,
@@ -41,16 +34,19 @@ async function Compare({
   const t = await getTranslations("Compare");
   const actor = await getActor();
 
+  // The participant is loaded once: everything below decides on that scope.
+  let scope: ParticipantScope | null = null;
   let comparison: Comparison | null = null;
   let code = "not_found";
   try {
-    comparison = await compareReviews(db, actor, participantId);
-    if (comparison.cycleId !== id) comparison = null;
+    scope = await loadParticipantScope(db, participantId);
+    if (scope.cycle.id !== id) throw new ReviewError("not_found");
+    comparison = await compareReviews(db, actor, scope);
   } catch (error) {
     if (!(error instanceof ReviewError)) throw error;
     code = error.code;
   }
-  if (!comparison) {
+  if (!scope || !comparison) {
     return (
       <div className="flex flex-col gap-4">
         <p role="alert">
@@ -67,11 +63,13 @@ async function Compare({
 
   const employee =
     actor.role !== "hr" && actor.personId === comparison.revieweePersonId;
-  const [notes, ack, canAdd] = await Promise.all([
-    orElse(listFollowUpNotes(db, actor, participantId), []),
-    orElse(getAcknowledgement(db, actor, participantId), null),
-    canAddFollowUp(db, actor, participantId),
-  ]);
+  // What the actor may not see is left out, not shown as empty.
+  const notes = mayListFollowUp(actor, scope)
+    ? await listFollowUpNotes(db, actor, scope)
+    : null;
+  const ack = mayViewAcknowledgement(actor, scope)
+    ? await getAcknowledgement(db, actor, scope)
+    : null;
 
   return (
     <div className="flex flex-col gap-4">
@@ -86,12 +84,14 @@ async function Compare({
         {t("backToReview")}
       </Link>
       <CompareView comparison={comparison}>
-        <FollowUpNotes
-          participantId={participantId}
-          notes={notes}
-          canAdd={canAdd}
-          add={addFollowUpAction}
-        />
+        {notes ? (
+          <FollowUpNotes
+            participantId={participantId}
+            notes={notes}
+            canAdd={mayAddFollowUp(actor, scope)}
+            add={addFollowUpAction}
+          />
+        ) : null}
         {ack ? (
           <AcknowledgeBox
             state={ack}

@@ -1,6 +1,6 @@
-import { and, asc, eq, isNotNull, isNull } from "drizzle-orm";
+import { and, eq, isNull } from "drizzle-orm";
 import type { DbOrTx } from "@/db/client";
-import { cycleParticipant, reviewCycle, reviewRequest } from "@/db/schema";
+import { cycleParticipant } from "@/db/schema";
 import { DomainError } from "@/lib/domain-error";
 import type { ActorContext } from "@/modules/actor/types";
 import {
@@ -9,14 +9,19 @@ import {
   acknowledgeDeadline,
   DEFAULT_ACK_WINDOW_DAYS,
 } from "./acknowledge-window";
+import { ACK_NOTE_MAX_LENGTH } from "./limits";
 import {
   isActive,
   isManagerSideOf,
   isRevieweeOf,
   isShared,
   loadParticipantScope,
+  type ParticipantRef,
   type ParticipantScope,
+  scopeOf,
 } from "./participant-scope";
+
+export { ACK_NOTE_MAX_LENGTH };
 
 export type AckErrorCode =
   | "not_found"
@@ -29,12 +34,10 @@ export type AckErrorCode =
 /** Errors of acknowledging a shared review. */
 export class AckError extends DomainError<AckErrorCode> {}
 
-export const ACK_NOTE_MAX_LENGTH = 2000;
-
 export type AckOptions = {
   /** Override "now" (tests). */
   now?: Date;
-  /** Days after sharing when the cycle has no acknowledge due date. */
+  /** Days after sharing the employee has at least. */
   windowDays?: number;
 };
 
@@ -59,7 +62,9 @@ function stateOf(
   const deadline = sharedAt
     ? acknowledgeDeadline({
         sharedAt,
-        dueDate: cycle.dueDates.acknowledge,
+        // The participant's own date (#21), else the cycle's.
+        dueDate:
+          participant.dueDates?.acknowledge ?? cycle.dueDates.acknowledge,
         windowDays,
       })
     : null;
@@ -80,35 +85,38 @@ function stateOf(
   };
 }
 
+/** Who may see the acknowledgement state: the employee, their manager side, HR. */
+export const mayViewAcknowledgement = (
+  actor: ActorContext,
+  scope: ParticipantScope,
+) =>
+  actor.role === "hr" ||
+  (isActive(scope) &&
+    (isRevieweeOf(actor, scope) || isManagerSideOf(actor, scope)));
+
 /**
  * The acknowledgement state of a participant's shared review: for the
- * employee, their manager (snapshot manager or reviewer) and HR.
+ * employee, their manager (snapshot manager or reviewer) and HR. Takes the
+ * participant's scope when the caller already loaded it.
  */
 export async function getAcknowledgement(
   db: DbOrTx,
   actor: ActorContext,
-  participantId: string,
+  participant: ParticipantRef,
   options: AckOptions = {},
 ): Promise<AckState> {
-  const scope = await loadParticipantScope(db, participantId);
-  if (
-    actor.role !== "hr" &&
-    !(
-      isActive(scope) &&
-      (isRevieweeOf(actor, scope) || isManagerSideOf(actor, scope))
-    )
-  ) {
-    throw new AckError("forbidden");
-  }
+  const scope = await scopeOf(db, participant);
+  if (!mayViewAcknowledgement(actor, scope)) throw new AckError("forbidden");
   return stateOf(scope, options);
 }
 
 /**
  * The employee acknowledges their shared manager review, with an optional
  * note. Only the reviewee (not HR on their behalf), only once the review is
- * shared, only once and within the window: the cycle's acknowledge due date
- * or, without one, 7 days after sharing. Immutable afterwards (the row is
- * locked and only updated while acknowledged_at is still null).
+ * shared, only once and within the window: until the later of the
+ * acknowledge due date and 7 days after sharing. Immutable afterwards (the
+ * row is locked and only updated while acknowledged_at is still null). The
+ * state (not shared, window closed) is checked before the note is validated.
  */
 export async function acknowledge(
   db: DbOrTx,
@@ -122,9 +130,6 @@ export async function acknowledge(
     throw new AckError("forbidden");
   }
   const text = note?.trim() || null;
-  if (text !== null && text.length > ACK_NOTE_MAX_LENGTH) {
-    throw new AckError("validation", [{ path: "note", message: "too_long" }]);
-  }
   const now = options.now ?? new Date();
   return db.transaction(async (tx) => {
     // Serialises concurrent attempts: the loser sees acknowledged_at set.
@@ -140,6 +145,9 @@ export async function acknowledge(
     const state = stateOf(scope, { ...options, now });
     if (state.status === "not_shared") throw new AckError("not_shared");
     if (state.status === "expired") throw new AckError("window_closed");
+    if (text !== null && text.length > ACK_NOTE_MAX_LENGTH) {
+      throw new AckError("validation", [{ path: "note", message: "too_long" }]);
+    }
     const [updated] = await tx
       .update(cycleParticipant)
       .set({ acknowledgedAt: now, acknowledgementNote: text })
@@ -153,64 +161,4 @@ export async function acknowledge(
     if (!updated) throw new AckError("already_acknowledged");
     return stateOf({ ...scope, participant: updated }, { ...options, now });
   });
-}
-
-export type AckTask = {
-  participantId: string;
-  cycleId: string;
-  cycleName: string;
-  sharedAt: Date;
-  deadline: Date;
-};
-
-/**
- * The actor's shared manager reviews still to acknowledge (the "Acusar
- * recibo" tasks of /me): shared, not acknowledged and with the window open.
- */
-export async function listMyAcknowledgements(
-  db: DbOrTx,
-  actor: ActorContext,
-  { now = new Date(), windowDays = DEFAULT_ACK_WINDOW_DAYS }: AckOptions = {},
-): Promise<AckTask[]> {
-  if (!actor.personId) return [];
-  const rows = await db
-    .select({
-      participantId: cycleParticipant.id,
-      cycleId: reviewCycle.id,
-      cycleName: reviewCycle.name,
-      dueDates: reviewCycle.dueDates,
-      sharedAt: reviewRequest.sharedAt,
-    })
-    .from(reviewRequest)
-    .innerJoin(
-      cycleParticipant,
-      eq(cycleParticipant.id, reviewRequest.participantId),
-    )
-    .innerJoin(reviewCycle, eq(reviewCycle.id, reviewRequest.cycleId))
-    .where(
-      and(
-        eq(cycleParticipant.revieweePersonId, actor.personId),
-        eq(reviewRequest.relationship, "manager"),
-        eq(reviewRequest.status, "submitted"),
-        isNotNull(reviewRequest.sharedAt),
-        isNull(reviewRequest.deletedAt),
-        isNull(cycleParticipant.acknowledgedAt),
-        isNull(cycleParticipant.removedAt),
-        isNull(reviewCycle.deletedAt),
-      ),
-    )
-    .orderBy(asc(reviewRequest.sharedAt));
-  return rows
-    .map((r) => ({
-      participantId: r.participantId,
-      cycleId: r.cycleId,
-      cycleName: r.cycleName,
-      sharedAt: r.sharedAt!,
-      deadline: acknowledgeDeadline({
-        sharedAt: r.sharedAt!,
-        dueDate: r.dueDates.acknowledge,
-        windowDays,
-      }),
-    }))
-    .filter((task) => now.getTime() <= task.deadline.getTime());
 }

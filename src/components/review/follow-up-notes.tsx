@@ -1,9 +1,14 @@
 "use client";
 
 import { useFormatter, useTranslations } from "next-intl";
-import { useState, useTransition } from "react";
-import type { ActionResult } from "@/components/templates/shared";
+import { useState } from "react";
+import {
+  type ActionResult,
+  useAction,
+  useErrorText,
+} from "@/components/templates/shared";
 import { Button } from "@/components/ui/button";
+import { FOLLOW_UP_MAX_LENGTH } from "@/modules/review-core/limits";
 
 export type FollowUpNoteView = {
   id: string;
@@ -30,32 +35,28 @@ export function FollowUpNotes({
 }) {
   const t = useTranslations("Compare.followUp");
   const format = useFormatter();
+  const text = useErrorText();
   const [body, setBody] = useState("");
-  const [error, setError] = useState<string | null>(null);
-  const [pending, startTransition] = useTransition();
+  const [missing, setMissing] = useState(false);
+  const { pending, error, run } = useAction();
 
+  // This feature's messages first, the shared ones (unknown, not_found...) after.
   const errorText = (code: string, issues: { message: string }[]) => {
     const key = code === "validation" ? (issues[0]?.message ?? code) : code;
-    return t.has(`errors.${key}` as "errors.unknown")
-      ? t(`errors.${key}` as "errors.unknown")
-      : t("errors.unknown");
+    return t.has(`errors.${key}` as "errors.required")
+      ? t(`errors.${key}` as "errors.required")
+      : text.code(code);
   };
 
   function submit() {
     if (!add) return;
-    if (body.trim() === "") {
-      setError(t("errors.required"));
-      return;
-    }
-    startTransition(async () => {
-      const result = await add(participantId, body);
-      if (result.ok) {
-        setBody("");
-        setError(null);
-      } else {
-        setError(errorText(result.code, result.issues));
-      }
-    });
+    const empty = body.trim() === "";
+    setMissing(empty);
+    if (empty) return;
+    run(
+      () => add(participantId, body),
+      () => setBody(""),
+    );
   }
 
   return (
@@ -100,16 +101,19 @@ export function FollowUpNotes({
             id="follow-up-body"
             className="min-h-20 w-full rounded-md border bg-transparent p-2 text-sm"
             value={body}
-            aria-invalid={error ? true : undefined}
+            maxLength={FOLLOW_UP_MAX_LENGTH}
+            aria-invalid={error || missing ? true : undefined}
             onChange={(e) => setBody(e.target.value)}
           />
           <div className="flex items-center gap-4">
             <Button onClick={submit} disabled={pending}>
               {t("add")}
             </Button>
-            {error ? (
+            {missing || error ? (
               <p role="alert" className="text-sm text-destructive">
-                {error}
+                {missing
+                  ? t("errors.required")
+                  : errorText(error!.code, error!.issues)}
               </p>
             ) : null}
           </div>

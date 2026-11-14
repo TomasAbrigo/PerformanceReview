@@ -415,7 +415,9 @@
       "closed": "Cerrado"
     },
     "extras": {
-      "steps": { "groups": "Grupos" },
+      "steps": {
+        "groups": "Grupos"
+      },
       "duplicate": {
         "button": "Duplicar ciclo",
         "pending": "Duplicando…",
@@ -480,7 +482,10 @@
         "inScope": "{count, plural, one {# persona dentro del alcance; se incorpora al cumplir el hito} other {# personas dentro del alcance; se incorporan al cumplir el hito}}",
         "summary": "Hito: {milestone} · ventana de {window}"
       },
-      "detail": { "group": "Grupo", "due": "Vence" }
+      "detail": {
+        "group": "Grupo",
+        "due": "Vence"
+      }
     },
     "wizard": {
       "title": "Nuevo ciclo",
@@ -851,10 +856,7 @@
         "required": "Escribí la nota.",
         "too_long": "La nota es demasiado larga.",
         "forbidden": "No podés agregar notas para esta persona.",
-        "not_submitted": "Primero hay que enviar la evaluación del manager.",
-        "not_found": "No se encontró a la persona.",
-        "validation": "La nota no es válida.",
-        "unknown": "Ocurrió un error inesperado."
+        "not_submitted": "Primero hay que enviar la evaluación del manager."
       }
     },
     "ack": {
@@ -878,10 +880,7 @@
         "already_acknowledged": "Ya acusaste recibo de esta evaluación.",
         "window_closed": "El plazo para acusar recibo venció.",
         "forbidden": "Solo la persona evaluada puede acusar recibo.",
-        "not_found": "No se encontró la evaluación.",
-        "too_long": "La nota es demasiado larga.",
-        "validation": "La nota no es válida.",
-        "unknown": "Ocurrió un error inesperado."
+        "too_long": "La nota es demasiado larga."
       },
       "me": {
         "section": "Acusar recibo",

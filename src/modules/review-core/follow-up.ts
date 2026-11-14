@@ -2,18 +2,21 @@ import { desc, eq } from "drizzle-orm";
 import type { DbOrTx } from "@/db/client";
 import { followUpNote, person } from "@/db/schema";
 import type { ActorContext } from "@/modules/actor/types";
+import { FOLLOW_UP_MAX_LENGTH } from "./limits";
 import {
   isActive,
   isManagerSideOf,
   isRevieweeOf,
   isShared,
   loadParticipantScope,
+  type ParticipantRef,
   type ParticipantScope,
+  scopeOf,
 } from "./participant-scope";
 import { ReviewError } from "./review-errors";
 import { canShare } from "./visibility";
 
-export const FOLLOW_UP_MAX_LENGTH = 4000;
+export { FOLLOW_UP_MAX_LENGTH };
 
 export type FollowUpNote = {
   id: string;
@@ -24,6 +27,45 @@ export type FollowUpNote = {
   body: string;
   createdAt: Date;
 };
+
+/**
+ * HR, the manager review's reviewer or the snapshot manager (active
+ * participant) may write notes: canShare's rule.
+ */
+const mayWrite = (actor: ActorContext, scope: ParticipantScope) =>
+  scope.managerRequest !== null &&
+  canShare(actor, {
+    request: scope.managerRequest,
+    participant: scope.participant,
+  });
+
+/** Whether the actor may add follow-up notes now (to show the form). */
+export const mayAddFollowUp = (actor: ActorContext, scope: ParticipantScope) =>
+  mayWrite(actor, scope) && scope.managerRequest?.status === "submitted";
+
+/**
+ * Who reads the notes: HR, the snapshot manager (or reviewer) and, like
+ * Bamboo, the employee, but only while their manager review is shared.
+ */
+export const mayListFollowUp = (actor: ActorContext, scope: ParticipantScope) =>
+  actor.role === "hr" ||
+  (isActive(scope) &&
+    (isManagerSideOf(actor, scope) ||
+      (isRevieweeOf(actor, scope) && isShared(scope))));
+
+/** `mayAddFollowUp` for a participant id (false when it does not exist). */
+export async function canAddFollowUp(
+  db: DbOrTx,
+  actor: ActorContext,
+  participant: ParticipantRef,
+): Promise<boolean> {
+  try {
+    return mayAddFollowUp(actor, await scopeOf(db, participant));
+  } catch (error) {
+    if (error instanceof ReviewError) return false;
+    throw error;
+  }
+}
 
 /**
  * Adds a follow-up note about a participant (agreements after the review
@@ -61,17 +103,6 @@ export async function addFollowUpNote(
   return { ...row, authorName: await authorName(db, row.authorPersonId) };
 }
 
-/** HR, the manager review's reviewer or the snapshot manager (active participant): canShare. */
-function mayWrite(actor: ActorContext, scope: ParticipantScope) {
-  return (
-    scope.managerRequest !== null &&
-    canShare(actor, {
-      request: scope.managerRequest,
-      participant: scope.participant,
-    })
-  );
-}
-
 async function authorName(db: DbOrTx, personId: string | null) {
   if (!personId) return null;
   const [row] = await db
@@ -82,22 +113,17 @@ async function authorName(db: DbOrTx, personId: string | null) {
 }
 
 /**
- * The participant's follow-up notes, newest first. Visible to HR, the
- * snapshot manager (or reviewer) and, like Bamboo, to the employee, but only
- * while their manager review is shared with them.
+ * The participant's follow-up notes, newest first (see mayListFollowUp for
+ * who reads them); forbidden otherwise. Takes the participant's scope when
+ * the caller already loaded it.
  */
 export async function listFollowUpNotes(
   db: DbOrTx,
   actor: ActorContext,
-  participantId: string,
+  participant: ParticipantRef,
 ): Promise<FollowUpNote[]> {
-  const scope = await loadParticipantScope(db, participantId);
-  const allowed =
-    actor.role === "hr" ||
-    (isActive(scope) &&
-      (isManagerSideOf(actor, scope) ||
-        (isRevieweeOf(actor, scope) && isShared(scope))));
-  if (!allowed) throw new ReviewError("forbidden");
+  const scope = await scopeOf(db, participant);
+  if (!mayListFollowUp(actor, scope)) throw new ReviewError("forbidden");
   return db
     .select({
       id: followUpNote.id,
@@ -109,23 +135,6 @@ export async function listFollowUpNotes(
     })
     .from(followUpNote)
     .leftJoin(person, eq(person.id, followUpNote.authorPersonId))
-    .where(eq(followUpNote.participantId, participantId))
+    .where(eq(followUpNote.participantId, scope.participant.id))
     .orderBy(desc(followUpNote.createdAt));
-}
-
-/** Whether the actor may add follow-up notes now (for showing the form). */
-export async function canAddFollowUp(
-  db: DbOrTx,
-  actor: ActorContext,
-  participantId: string,
-): Promise<boolean> {
-  try {
-    const scope = await loadParticipantScope(db, participantId);
-    return (
-      mayWrite(actor, scope) && scope.managerRequest?.status === "submitted"
-    );
-  } catch (error) {
-    if (error instanceof ReviewError) return false;
-    throw error;
-  }
 }

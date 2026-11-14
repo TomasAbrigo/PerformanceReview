@@ -6,6 +6,10 @@ import { describe, expect, it, vi } from "vitest";
 import en from "@/messages/en.json";
 import es from "@/messages/es.json";
 import type { CompareRow, Comparison } from "@/modules/review-core/compare";
+import {
+  ACK_NOTE_MAX_LENGTH,
+  FOLLOW_UP_MAX_LENGTH,
+} from "@/modules/review-core/limits";
 import { AcknowledgeBox, type AckViewState } from "./acknowledge-box";
 import { CompareView } from "./compare-view";
 import { FollowUpNotes, type FollowUpNoteView } from "./follow-up-notes";
@@ -345,6 +349,28 @@ describe("FollowUpNotes", () => {
       "Escribí la nota.",
     );
   });
+
+  it("falls back to the shared messages for unexpected errors, and caps the text", async () => {
+    const user = userEvent.setup();
+    const add = vi.fn(async () => ({
+      ok: false as const,
+      code: "unknown",
+      issues: [],
+    }));
+    renderIn(
+      "es",
+      <FollowUpNotes participantId={PART} notes={[]} canAdd add={add} />,
+    );
+    const box = screen.getByRole("textbox", {
+      name: "Nueva nota de seguimiento",
+    });
+    expect(box).toHaveAttribute("maxlength", String(FOLLOW_UP_MAX_LENGTH));
+    await user.type(box, "algo");
+    await user.click(screen.getByRole("button", { name: "Agregar nota" }));
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "Ocurrió un error inesperado.",
+    );
+  });
 });
 
 const ackState = (overrides: Partial<AckViewState> = {}): AckViewState => ({
@@ -411,6 +437,31 @@ describe("AcknowledgeBox", () => {
     await user.click(screen.getByRole("button", { name: "Acusar recibo" }));
     expect(await screen.findByRole("alert")).toHaveTextContent(
       "El plazo para acusar recibo venció.",
+    );
+  });
+
+  it("falls back to the shared messages for unexpected errors, and caps the note", async () => {
+    const user = userEvent.setup();
+    const acknowledge = vi.fn(async () => ({
+      ok: false as const,
+      code: "unknown",
+      issues: [],
+    }));
+    renderIn(
+      "es",
+      <AcknowledgeBox
+        state={ackState()}
+        viewer="employee"
+        acknowledge={acknowledge}
+      />,
+    );
+    expect(screen.getByLabelText("Nota (opcional)")).toHaveAttribute(
+      "maxlength",
+      String(ACK_NOTE_MAX_LENGTH),
+    );
+    await user.click(screen.getByRole("button", { name: "Acusar recibo" }));
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "Ocurrió un error inesperado.",
     );
   });
 

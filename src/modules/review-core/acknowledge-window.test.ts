@@ -22,10 +22,27 @@ describe("acknowledgeDeadline", () => {
     );
   });
 
-  it("uses the cycle's acknowledge due date (to the end of that day) when set", () => {
+  it("uses the acknowledge due date (to the end of that day) when it is later", () => {
     expect(
       acknowledgeDeadline({ sharedAt: shared, dueDate: "2026-04-01" }),
     ).toEqual(new Date("2026-04-01T23:59:59.999Z"));
+  });
+
+  it("never closes before the window: a review shared after the due date still gets it", () => {
+    expect(
+      acknowledgeDeadline({ sharedAt: shared, dueDate: "2026-03-01" }),
+    ).toEqual(new Date(shared.getTime() + 7 * DAY));
+    // Shared the very day of the due date: the window wins.
+    expect(
+      acknowledgeDeadline({ sharedAt: shared, dueDate: "2026-03-10" }),
+    ).toEqual(new Date(shared.getTime() + 7 * DAY));
+    expect(
+      acknowledgeDeadline({
+        sharedAt: shared,
+        dueDate: "2026-03-01",
+        windowDays: 2,
+      }),
+    ).toEqual(new Date(shared.getTime() + 2 * DAY));
   });
 });
 

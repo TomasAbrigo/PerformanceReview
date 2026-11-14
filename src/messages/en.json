@@ -415,7 +415,9 @@
       "closed": "Closed"
     },
     "extras": {
-      "steps": { "groups": "Groups" },
+      "steps": {
+        "groups": "Groups"
+      },
       "duplicate": {
         "button": "Duplicate cycle",
         "pending": "Duplicating…",
@@ -480,7 +482,10 @@
         "inScope": "{count, plural, one {# person in scope; joins on reaching the milestone} other {# people in scope; they join on reaching the milestone}}",
         "summary": "Milestone: {milestone} · {window} window"
       },
-      "detail": { "group": "Group", "due": "Due" }
+      "detail": {
+        "group": "Group",
+        "due": "Due"
+      }
     },
     "wizard": {
       "title": "New cycle",
@@ -851,10 +856,7 @@
         "required": "Write the note.",
         "too_long": "The note is too long.",
         "forbidden": "You cannot add notes for this person.",
-        "not_submitted": "The manager review has to be submitted first.",
-        "not_found": "The person was not found.",
-        "validation": "The note is not valid.",
-        "unknown": "An unexpected error occurred."
+        "not_submitted": "The manager review has to be submitted first."
       }
     },
     "ack": {
@@ -878,10 +880,7 @@
         "already_acknowledged": "You already acknowledged this review.",
         "window_closed": "The time to acknowledge has ended.",
         "forbidden": "Only the reviewed person can acknowledge.",
-        "not_found": "The review was not found.",
-        "too_long": "The note is too long.",
-        "validation": "The note is not valid.",
-        "unknown": "An unexpected error occurred."
+        "too_long": "The note is too long."
       },
       "me": {
         "section": "Acknowledge receipt",

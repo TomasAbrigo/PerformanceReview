@@ -1,12 +1,24 @@
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { closeDb, db } from "@/db/client";
-import { questionRevision } from "@/db/schema";
-import { compareReviews, removeParticipant, shareReview } from ".";
+import {
+  employeeJobHistory,
+  questionRevision,
+  reviewRequest,
+} from "@/db/schema";
+import {
+  bothSubmitted,
+  compareReviews,
+  getReview,
+  loadParticipantScope,
+  removeParticipant,
+  shareReview,
+} from ".";
 import {
   as,
   askBoth,
   collectingCycle,
+  fillAndSubmit,
   hr,
   loadPeople,
   outsider,
@@ -233,6 +245,81 @@ describe("compareReviews", () => {
       ).rejects.toMatchObject({ code: "forbidden" });
     }
     await expect(compareReviews(db, hr, participantId)).resolves.toBeDefined();
+  });
+
+  describe("with Carla reporting to nobody (Ana only manages Bruno today)", () => {
+    beforeEach(async () => {
+      await db
+        .update(employeeJobHistory)
+        .set({ managerPersonId: null })
+        .where(eq(employeeJobHistory.personId, people.carla));
+    });
+    const ana = () => as(people.ana, "manager");
+
+    it("an alternate reviewer of the manager request compares under the same double blind", async () => {
+      const cycle = await collectingCycle(templateId);
+      const p = await participantOf(cycle.id, people.bruno);
+      // The manager review was reassigned from Carla to Ana.
+      await db
+        .update(reviewRequest)
+        .set({ reviewerPersonId: people.ana })
+        .where(
+          and(
+            eq(reviewRequest.participantId, p.id),
+            eq(reviewRequest.relationship, "manager"),
+          ),
+        );
+      const selfId = await submitSelf(cycle.id);
+      // Double blind: no self review, nor a comparison, before hers.
+      expect(await getReview(db, ana(), selfId)).toBeNull();
+      await expect(compareReviews(db, ana(), p.id)).rejects.toMatchObject({
+        code: "not_submitted",
+      });
+      const [manager] = await db
+        .select()
+        .from(reviewRequest)
+        .where(
+          and(
+            eq(reviewRequest.participantId, p.id),
+            eq(reviewRequest.relationship, "manager"),
+          ),
+        );
+      await fillAndSubmit(ana(), manager.id);
+      expect(await getReview(db, ana(), selfId)).not.toBeNull();
+      await expect(compareReviews(db, ana(), p.id)).resolves.toBeDefined();
+      // The snapshot manager (no longer the reviewer) still compares too.
+      await expect(
+        compareReviews(db, as(people.carla, "manager"), p.id),
+      ).resolves.toBeDefined();
+    });
+
+    it("the current manager compares only once the manager review was shared", async () => {
+      const cycle = await collectingCycle(templateId);
+      await submitSelf(cycle.id);
+      const { participantId, requestId } = await submitManager(cycle.id);
+      await expect(
+        compareReviews(db, ana(), participantId),
+      ).rejects.toMatchObject({ code: "forbidden" });
+      await toSharing(cycle.id);
+      await shareReview(db, as(people.carla), requestId);
+      await expect(
+        compareReviews(db, ana(), participantId),
+      ).resolves.toBeDefined();
+    });
+  });
+
+  it("is not available to the employee while their own self assessment is a draft", async () => {
+    // The manager review is shared without a self assessment: no comparison
+    // (and bothSubmitted, which the result page gates its link on, says so).
+    const cycle = await collectingCycle(templateId);
+    const { participantId, requestId } = await submitManager(cycle.id);
+    await toSharing(cycle.id);
+    await shareReview(db, as(people.carla), requestId);
+    const scope = await loadParticipantScope(db, participantId);
+    expect(bothSubmitted(scope)).toBe(false);
+    await expect(
+      compareReviews(db, as(people.bruno), scope),
+    ).rejects.toMatchObject({ code: "not_submitted" });
   });
 
   it("not_found for an unknown or malformed participant", async () => {

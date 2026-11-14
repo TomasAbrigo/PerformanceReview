@@ -114,23 +114,31 @@ export {
   canAddFollowUp,
   FOLLOW_UP_MAX_LENGTH,
   listFollowUpNotes,
+  mayAddFollowUp,
+  mayListFollowUp,
   type FollowUpNote,
 } from "./follow-up";
+export {
+  bothSubmitted,
+  loadParticipantScope,
+  type ParticipantRef,
+  type ParticipantScope,
+} from "./participant-scope";
 export {
   ACK_NOTE_MAX_LENGTH,
   acknowledge,
   AckError,
   getAcknowledgement,
-  listMyAcknowledgements,
+  mayViewAcknowledgement,
   type AckErrorCode,
   type AckOptions,
   type AckState,
-  type AckTask,
 } from "./acknowledge";
 export {
   ackStatus,
   acknowledgeDeadline,
   DEFAULT_ACK_WINDOW_DAYS,
   type AckStatus,
+  type AckTask,
 } from "./acknowledge-window";
 export { reviewHistory, type HistoryItem, type HistoryRating } from "./history";
