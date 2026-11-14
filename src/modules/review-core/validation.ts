@@ -8,6 +8,7 @@ import {
   hireWindowWeeks,
   scheduleKinds,
 } from "./status";
+import { peerApprovals } from "./peer-settings";
 
 const isoDate = z.iso.date("invalid_date");
 const uuid = z.uuid("invalid");
@@ -66,6 +67,13 @@ const cycleFields = z.object({
     upward: z.boolean(),
     calibration: z.boolean(),
     doubleBlind: z.boolean().optional(),
+    peerSettings: z
+      .object({
+        maxNominations: z.number().int().min(1).max(10).optional(),
+        approval: z.enum(peerApprovals).optional(),
+        loadWarningAt: z.number().int().min(1).optional(),
+      })
+      .optional(),
   }),
   anonymity: z.object({
     peer: z.enum(anonymityModes),

@@ -2,6 +2,7 @@ import type { ActorContext } from "@/modules/actor/types";
 import type { Relationship } from "@/modules/templates/constants";
 import type { RequestStatus } from "./request-status";
 import {
+  type CycleAnonymity,
   type CycleComponents,
   type CycleStatus,
   isDoubleBlind,
@@ -29,7 +30,16 @@ export type VisibilityContext = {
   cycle?: {
     status: CycleStatus;
     components?: Pick<CycleComponents, "doubleBlind">;
+    /** Peer/upward anonymity modes (#14). */
+    anonymity?: CycleAnonymity;
   };
+  /**
+   * Peer/upward rows: whether the feedback is released to the reviewee
+   * (see peerFeedbackShared: sharing/closed phase and, with manager
+   * reviews, their manager review shared). Before that the reviewee never
+   * reads peer/upward feedback.
+   */
+  revieweeShared?: boolean;
   /**
    * Self rows: the manager request that gates the double blind: the actor's
    * own when they are an assessor, else the participant's current one.
@@ -58,17 +68,21 @@ export const isActiveParticipant = (p: { removedAt?: Date | null }) =>
 /** Phases in which reviews count as shared even without shared_at. */
 const SHARED_PHASES: readonly CycleStatus[] = ["sharing", "closed"];
 
-const isReviewer = (actor: ActorContext, r: VisibilityRequest) =>
-  actor.personId !== null && actor.personId === r.reviewerPersonId;
+/** The actor is that person (never true for a person-less actor). */
+export const isActorPerson = (
+  actor: ActorContext,
+  personId: string | null | undefined,
+) => actor.personId !== null && actor.personId === personId;
+
+export const isReviewer = (actor: ActorContext, r: VisibilityRequest) =>
+  isActorPerson(actor, r.reviewerPersonId);
 
 const isManagerOf = (actor: ActorContext, ctx: VisibilityContext) =>
-  actor.personId !== null &&
-  actor.personId === ctx.participant.snapManagerPersonId &&
+  isActorPerson(actor, ctx.participant.snapManagerPersonId) &&
   !ctx.snapManagerReplaced;
 
 const isReviewee = (actor: ActorContext, ctx: VisibilityContext) =>
-  actor.personId !== null &&
-  actor.personId === ctx.participant.revieweePersonId;
+  isActorPerson(actor, ctx.participant.revieweePersonId);
 
 /**
  * The single place that decides whether `actor` may read a review request
@@ -83,7 +97,9 @@ const isReviewee = (actor: ActorContext, ctx: VisibilityContext) =>
  *   reviews once shared (shared_at, or the cycle is sharing/closed), so
  *   they never see a pre-calibration rating;
  * - nobody but HR and the author reads requests of a removed participant;
- * - peer/upward: #14 (aggregated/anonymized views).
+ * - peer/upward: the snapshot manager (and HR) read them once submitted;
+ *   the reviewee only once shared (see revieweeShared), and only the
+ *   questions visible to them. Who wrote it: reviewerVisible.
  */
 export function canRead(actor: ActorContext, ctx: VisibilityContext): boolean {
   if (actor.role === "hr") return true;
@@ -118,8 +134,36 @@ export function canRead(actor: ActorContext, ctx: VisibilityContext): boolean {
       );
     case "peer":
     case "upward":
-      return false; // #14: aggregated/anonymized views.
+      if (!submitted) return false;
+      if (isManagerOf(actor, ctx)) return true;
+      if (isReviewee(actor, ctx)) {
+        return (
+          !!ctx.revieweeShared &&
+          ctx.questionRevision?.visibleToReviewee !== false
+        );
+      }
+      return false;
   }
+}
+
+/**
+ * Whether `actor` may see who wrote a readable request. Peer/upward follow
+ * the cycle's anonymity mode: transparent shows names to everyone who reads;
+ * anonymous_to_employee hides them from the reviewee ("Par"); fully
+ * anonymous hides them from everyone but the author (HR included; the
+ * reviewer stays stored in the DB).
+ */
+export function reviewerVisible(
+  actor: ActorContext,
+  ctx: VisibilityContext,
+): boolean {
+  const { relationship } = ctx.request;
+  if (relationship !== "peer" && relationship !== "upward") return true;
+  if (isReviewer(actor, ctx.request)) return true;
+  const mode = ctx.cycle?.anonymity?.[relationship] ?? "fully_anonymous";
+  if (mode === "transparent") return true;
+  if (mode === "fully_anonymous") return false;
+  return !isReviewee(actor, ctx);
 }
 
 /** Where a request lives: the cycle phase and whether the reviewee is still in. */

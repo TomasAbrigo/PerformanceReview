@@ -11,4 +11,5 @@ export * from "./org-history";
 export * from "./review-cycles";
 export * from "./review-requests";
 export * from "./admin-audit";
+export * from "./peer-nominations";
 export * from "./notifications";

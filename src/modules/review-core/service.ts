@@ -41,6 +41,7 @@ import {
   type IsoDate,
 } from "@/modules/org-history/queries";
 import { CyclesError } from "./errors";
+import { closeNominations } from "./peers";
 import {
   snapshotGoalsForParticipant,
   snapshotGoalsForParticipants,
@@ -447,6 +448,7 @@ export async function transition(
         note: note || null,
       })
       .returning({ id: cycleTransition.id });
+    if (cycle.status === "nominations") await closeNominations(tx, updated);
     await ensureSelfRequests(tx, id);
     await notifyPhaseChanged(tx, id, cycle.status, to, logged.id);
     return updated;
