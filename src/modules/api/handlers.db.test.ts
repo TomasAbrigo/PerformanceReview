@@ -1,4 +1,13 @@
-import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from "vitest";
+import {
+  afterAll,
+  afterEach,
+  beforeAll,
+  describe,
+  expect,
+  it,
+  vi,
+} from "vitest";
+import { eq } from "drizzle-orm";
 import { closeDb, db } from "@/db/client";
 import { goalMilestone, goalShare, person } from "@/db/schema";
 import {
@@ -33,7 +42,12 @@ type Route = (
   context?: { params: Promise<{ id: string }> },
 ) => Promise<Response>;
 
-async function call(route: Route, path: string, id?: string, headers?: HeadersInit) {
+async function call(
+  route: Route,
+  path: string,
+  id?: string,
+  headers?: HeadersInit,
+) {
   const response = await route(
     new Request(`http://localhost${path}`, { headers }),
     id === undefined ? undefined : { params: Promise.resolve({ id }) },
@@ -60,10 +74,15 @@ let issueOpen: string;
 let issueResolved: string;
 
 /** Walks a list endpoint page by page, returning every id in order. */
-async function walk(route: Route, path: string, limit: number) {
+async function walk(
+  route: Route,
+  path: string,
+  limit: number,
+  from: string | null = null,
+) {
   const sep = path.includes("?") ? "&" : "?";
   const ids: string[] = [];
-  let cursor: string | null = null;
+  let cursor: string | null = from;
   for (let guard = 0; guard < 50; guard++) {
     const res = await call(
       route,
@@ -94,7 +113,11 @@ beforeAll(async () => {
     .returning({ id: person.id });
   extras = rows.map((r) => r.id);
 
-  const dora = await insertPerson({ displayName: "Dora Díaz", bambooId: "201", employeeNumber: "0201" });
+  const dora = await insertPerson({
+    displayName: "Dora Díaz",
+    bambooId: "201",
+    employeeNumber: "0201",
+  });
   await insertJob({
     personId: dora,
     validFrom: "2024-02-01",
@@ -102,7 +125,9 @@ beforeAll(async () => {
     employmentId: await employmentIdOf(dora),
   });
 
-  brunoGoal = await insertGoal(bruno, "Meta de Bruno", { dueDate: "2026-12-31" });
+  brunoGoal = await insertGoal(bruno, "Meta de Bruno", {
+    dueDate: "2026-12-31",
+  });
   await insertGoal(ana, "Meta de Ana");
   await insertGoal(carla, "Meta borrada", { deleted: true });
   await db.insert(goalMilestone).values({
@@ -115,13 +140,25 @@ beforeAll(async () => {
   await db.insert(goalShare).values({ goalId: brunoGoal, personId: ana });
 
   cycleId = await insertCycle("Ciclo 2025");
-  await insertParticipant({ cycleId, personId: bruno, snapManagerPersonId: ana });
+  await insertParticipant({
+    cycleId,
+    personId: bruno,
+    snapManagerPersonId: ana,
+  });
   await insertParticipant({ cycleId, personId: ana });
-  await insertParticipant({ cycleId, personId: carla, snapManagerPersonId: ana, removed: true });
+  await insertParticipant({
+    cycleId,
+    personId: carla,
+    snapManagerPersonId: ana,
+    removed: true,
+  });
 
-  const base = new Date("2026-11-01T10:00:00.000Z").getTime();
+  // Far in the future: newer than the runs the fixture ingest just left.
+  const base = new Date("2035-11-01T10:00:00.000Z").getTime();
   runIds = [];
-  for (const [i, status] of (["succeeded", "error", "succeeded", "error"] as const).entries()) {
+  for (const [i, status] of (
+    ["succeeded", "error", "succeeded", "error"] as const
+  ).entries()) {
     runIds.push(
       await insertRun({
         status,
@@ -137,8 +174,16 @@ beforeAll(async () => {
     counts: { read: 3, inserted: 2, rejected: 1 },
     rejects: [{ sourceId: "77", reason: "unknown employee" }],
   });
-  issueOpen = await insertIdentityIssue({ runId: rejectRun, sourceId: "900", displayName: "Sin Resolver" });
-  issueResolved = await insertIdentityIssue({ runId: rejectRun, sourceId: "901", status: "resolved" });
+  issueOpen = await insertIdentityIssue({
+    runId: rejectRun,
+    sourceId: "900",
+    displayName: "Sin Resolver",
+  });
+  issueResolved = await insertIdentityIssue({
+    runId: rejectRun,
+    sourceId: "901",
+    status: "resolved",
+  });
 });
 
 afterEach(() => {
@@ -196,9 +241,15 @@ describe("GET /api/v1/people", () => {
   });
 
   it("filters by active status", async () => {
-    const inactive = await call(listPeopleRoute, "/api/v1/people?active=false&q=carla");
+    const inactive = await call(
+      listPeopleRoute,
+      "/api/v1/people?active=false&q=carla",
+    );
     expect(inactive.body.data.map((p: Json) => p.id)).toEqual([carla]);
-    const active = await call(listPeopleRoute, "/api/v1/people?active=true&limit=200");
+    const active = await call(
+      listPeopleRoute,
+      "/api/v1/people?active=true&limit=200",
+    );
     const ids = active.body.data.map((p: Json) => p.id);
     expect(ids).toEqual(expect.arrayContaining([ana, bruno]));
     expect(ids).not.toContain(carla);
@@ -218,7 +269,9 @@ describe("GET /api/v1/people", () => {
     expect(expected).toHaveLength(9);
     expect(new Set(expected).size).toBe(9);
     for (const limit of [1, 2, 4, 9]) {
-      expect(await walk(listPeopleRoute, "/api/v1/people", limit)).toEqual(expected);
+      expect(await walk(listPeopleRoute, "/api/v1/people", limit)).toEqual(
+        expected,
+      );
     }
   });
 
@@ -238,15 +291,16 @@ describe("GET /api/v1/people", () => {
     try {
       const rest = await walk(
         listPeopleRoute,
-        `/api/v1/people?cursor=${first.body.next_cursor}`,
+        "/api/v1/people",
         3,
+        first.body.next_cursor,
       );
       const seen = [...first.body.data.map((p: Json) => p.id), ...rest];
       expect(new Set(seen).size).toBe(seen.length);
       expect(seen).toContain(late.id);
       expect(seen.slice(0, 4)).toEqual(first.body.data.map((p: Json) => p.id));
     } finally {
-      await db.delete(person).where((await import("drizzle-orm")).eq(person.id, late.id));
+      await db.delete(person).where(eq(person.id, late.id));
     }
   });
 
@@ -325,7 +379,10 @@ describe("GET /api/v1/people/{id}", () => {
 
 describe("GET /api/v1/org/as-of", () => {
   it("returns the org valid on the date, with managers as of then", async () => {
-    const res = await call(orgAsOfRoute, "/api/v1/org/as-of?date=2022-06-01&limit=200");
+    const res = await call(
+      orgAsOfRoute,
+      "/api/v1/org/as-of?date=2022-06-01&limit=200",
+    );
     expect(res.status).toBe(200);
     expect(res.body.as_of).toBe("2022-06-01");
     const byPerson = new Map<string, Json>(
@@ -345,7 +402,10 @@ describe("GET /api/v1/org/as-of", () => {
   });
 
   it("drops people who left and shows later managers on a later date", async () => {
-    const res = await call(orgAsOfRoute, "/api/v1/org/as-of?date=2025-01-01&limit=200");
+    const res = await call(
+      orgAsOfRoute,
+      "/api/v1/org/as-of?date=2025-01-01&limit=200",
+    );
     const byPerson = new Map<string, Json>(
       res.body.data.map((r: Json) => [r.person.id, r]),
     );
@@ -354,7 +414,10 @@ describe("GET /api/v1/org/as-of", () => {
   });
 
   it("pages stably", async () => {
-    const whole = await call(orgAsOfRoute, "/api/v1/org/as-of?date=2025-01-01&limit=200");
+    const whole = await call(
+      orgAsOfRoute,
+      "/api/v1/org/as-of?date=2025-01-01&limit=200",
+    );
     const expected = whole.body.data.map((r: Json) => r.id);
     expect(
       await walk(orgAsOfRoute, "/api/v1/org/as-of?date=2025-01-01", 1),
@@ -384,14 +447,21 @@ describe("goals", () => {
     const g = res.body.data.find((x: Json) => x.id === brunoGoal);
     expect(g).toMatchObject({
       source: { system: "bamboo_api", id: "goal-Meta de Bruno" },
-      person: { id: bruno, source: { system: "bamboo_api", id: "102" }, display_name: "Bruno Pérez" },
+      person: {
+        id: bruno,
+        source: { system: "bamboo_api", id: "102" },
+        display_name: "Bruno Pérez",
+      },
       title: "Meta de Bruno",
       percent_complete: 0,
       status: "in_progress",
       due_date: "2026-12-31",
     });
     expect(g.milestones).toEqual([
-      expect.objectContaining({ title: "Hito 1", source: { system: "bamboo_api", id: "m1" } }),
+      expect.objectContaining({
+        title: "Hito 1",
+        source: { system: "bamboo_api", id: "m1" },
+      }),
     ]);
     expect(g.shared_with.map((s: Json) => s.id)).toEqual([ana]);
     expect(g.created_at).toMatch(ISO);
@@ -409,7 +479,11 @@ describe("goals", () => {
   });
 
   it("serves a person's goals under /people/{id}/goals", async () => {
-    const res = await call(personGoalsRoute, `/api/v1/people/${bruno}/goals`, bruno);
+    const res = await call(
+      personGoalsRoute,
+      `/api/v1/people/${bruno}/goals`,
+      bruno,
+    );
     expect(res.status).toBe(200);
     expect(res.body.data.map((g: Json) => g.id)).toEqual([brunoGoal]);
     const unknown = await call(
@@ -420,11 +494,14 @@ describe("goals", () => {
     expect(unknown.status).toBe(404);
   });
 
-  it.each(["person_id=garbage", "status=bogus"])("answers 400 for %s", async (q) => {
-    const res = await call(listGoalsRoute, `/api/v1/goals?${q}`);
-    expect(res.status).toBe(400);
-    expect(res.type).toBe("application/problem+json");
-  });
+  it.each(["person_id=garbage", "status=bogus"])(
+    "answers 400 for %s",
+    async (q) => {
+      const res = await call(listGoalsRoute, `/api/v1/goals?${q}`);
+      expect(res.status).toBe(400);
+      expect(res.type).toBe("application/problem+json");
+    },
+  );
 });
 
 describe("cycles", () => {
@@ -490,10 +567,19 @@ describe("ingest runs", () => {
     });
     expect(res.body.data[0].started_at).toMatch(ISO);
 
-    const failed = await call(listRunsRoute, "/api/v1/ingest-runs?status=error");
-    expect(failed.body.data.map((r: Json) => r.id)).toEqual([runIds[3], runIds[1]]);
+    const failed = await call(
+      listRunsRoute,
+      "/api/v1/ingest-runs?status=error",
+    );
+    expect(failed.body.data.map((r: Json) => r.id)).toEqual([
+      runIds[3],
+      runIds[1],
+    ]);
     const goals = await call(listRunsRoute, "/api/v1/ingest-runs?entity=goal");
-    expect(goals.body.data.map((r: Json) => r.id)).toEqual([runIds[3], runIds[2]]);
+    expect(goals.body.data.map((r: Json) => r.id)).toEqual([
+      runIds[3],
+      runIds[2],
+    ]);
 
     expect(await walk(listRunsRoute, "/api/v1/ingest-runs", 2)).toEqual(ids);
     expect(
@@ -502,7 +588,11 @@ describe("ingest runs", () => {
   });
 
   it("returns a run with params, rejects and raw record count", async () => {
-    const res = await call(getRunRoute, `/api/v1/ingest-runs/${rejectRun}`, rejectRun);
+    const res = await call(
+      getRunRoute,
+      `/api/v1/ingest-runs/${rejectRun}`,
+      rejectRun,
+    );
     expect(res.status).toBe(200);
     expect(res.body.data).toMatchObject({
       id: rejectRun,
@@ -510,7 +600,9 @@ describe("ingest runs", () => {
       rejects: [{ sourceId: "77", reason: "unknown employee" }],
       raw_record_count: 0,
     });
-    expect((await call(getRunRoute, "/api/v1/ingest-runs/nope", "nope")).status).toBe(404);
+    expect(
+      (await call(getRunRoute, "/api/v1/ingest-runs/nope", "nope")).status,
+    ).toBe(404);
     expect(
       (
         await call(
@@ -525,7 +617,10 @@ describe("ingest runs", () => {
 
 describe("identity issues", () => {
   it("lists issues with source ids, filtered by status", async () => {
-    const open = await call(listIdentityIssuesRoute, "/api/v1/identity-issues?status=open");
+    const open = await call(
+      listIdentityIssuesRoute,
+      "/api/v1/identity-issues?status=open",
+    );
     expect(open.body.data.map((i: Json) => i.id)).toEqual([issueOpen]);
     expect(open.body.data[0]).toMatchObject({
       source: { system: "bamboo_api", id: "900" },
@@ -545,7 +640,8 @@ describe("identity issues", () => {
       await walk(listIdentityIssuesRoute, "/api/v1/identity-issues", 1),
     ).toEqual(all.body.data.map((i: Json) => i.id));
     expect(
-      (await call(listIdentityIssuesRoute, "/api/v1/identity-issues?status=x")).status,
+      (await call(listIdentityIssuesRoute, "/api/v1/identity-issues?status=x"))
+        .status,
     ).toBe(400);
   });
 });
@@ -553,7 +649,9 @@ describe("identity issues", () => {
 describe("API_TOKEN gate", () => {
   it("is open when API_TOKEN is unset", async () => {
     vi.stubEnv("API_TOKEN", "");
-    expect((await call(listPeopleRoute, "/api/v1/people?limit=1")).status).toBe(200);
+    expect((await call(listPeopleRoute, "/api/v1/people?limit=1")).status).toBe(
+      200,
+    );
   });
 
   it("requires the bearer token on every endpoint when set", async () => {

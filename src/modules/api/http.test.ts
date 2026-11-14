@@ -113,7 +113,9 @@ describe("apiRoute", () => {
     const route = apiRoute<{ id: string }>(async (_request, params) =>
       ok({ id: params.id }),
     );
-    const response = await route(req(), { params: Promise.resolve({ id: "7" }) });
+    const response = await route(req(), {
+      params: Promise.resolve({ id: "7" }),
+    });
     expect(await response.json()).toEqual({ id: "7" });
   });
 

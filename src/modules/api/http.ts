@@ -68,7 +68,7 @@ export function parseQuery<T>(request: Request, schema: ZodType<T>): T {
  * Wraps a route handler: token gate, then the handler, with every failure
  * answered as problem+json (unexpected ones as a bare 500, logged).
  */
-export function apiRoute<P = Record<string, never>>(
+export function apiRoute<P = Record<string, string>>(
   handler: (request: Request, params: P) => Promise<Response>,
 ): (request: Request, context?: { params: Promise<P> }) => Promise<Response> {
   return async (request, context) => {
