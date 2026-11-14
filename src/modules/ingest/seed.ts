@@ -27,6 +27,8 @@ export const RESET_TABLES = [
   "review_audit",
   "review_request",
   "peer_nomination",
+  "participant_goal_snapshot",
+  "cycle_goal_link",
   "goal_share",
   "goal_comment",
   "goal_milestone",

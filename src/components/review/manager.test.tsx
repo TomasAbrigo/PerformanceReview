@@ -11,6 +11,7 @@ import {
   type ManagerReviewData,
   ManagerReviewForm,
 } from "./manager-review-form";
+import type { GoalsBlockData } from "@/modules/review-core/goal-snapshot";
 import type { SelfReviewData } from "./self-review-form";
 import { TeamView, type TeamViewRow } from "./team-view";
 
@@ -107,6 +108,24 @@ const selfReview: SelfReviewData = {
   answers: { s1: "Lancé el producto" },
 };
 
+const goalsData: GoalsBlockData = {
+  participantId: PART,
+  goals: [
+    {
+      id: "g1",
+      title: "Reducir el tiempo de respuesta",
+      status: "in_progress",
+      percentComplete: 55,
+      dueDate: "2026-12-15",
+      noLongerApplicable: false,
+    },
+  ],
+  asOf: "2026-07-01",
+  canRefresh: true,
+  canLink: false,
+  linkable: [],
+};
+
 const ok = async () => ({ ok: true as const });
 const actions = { save: vi.fn(ok), submit: vi.fn(ok), share: vi.fn(ok) };
 
@@ -117,17 +136,17 @@ describe("ManagerReviewForm", () => {
       "Evaluación de Bruno Pérez",
       "El empleado verá",
       "El empleado no verá",
-      "Objetivos",
+      "Objetivos del período",
     ],
     [
       "en",
       "Review of Bruno Pérez",
       "The employee will see this",
       "The employee will not see this",
-      "Goals",
+      "Goals for the period",
     ],
   ] as const)(
-    "renders a draft with visibility marks and the goals placeholder in %s",
+    "renders a draft with visibility marks and the goals block in %s",
     (locale, title, visible, hidden, goals) => {
       renderIn(
         locale,
@@ -135,6 +154,7 @@ describe("ManagerReviewForm", () => {
           review={managerReview()}
           self={null}
           actions={actions}
+          goals={{ data: goalsData }}
         />,
       );
       expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent(
@@ -151,6 +171,44 @@ describe("ManagerReviewForm", () => {
       ).toBeNull();
     },
   );
+
+  it("shows the goals above the questions and refreshes their progress", async () => {
+    const refresh = vi.fn(ok);
+    renderIn(
+      "es",
+      <ManagerReviewForm
+        review={managerReview()}
+        self={null}
+        actions={actions}
+        goals={{ data: goalsData, actions: { refresh, link: vi.fn(ok) } }}
+      />,
+    );
+    const goals = screen.getByText("Reducir el tiempo de respuesta");
+    const question = screen.getByText("Calificación general");
+    expect(
+      goals.compareDocumentPosition(question) &
+        Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
+    expect(screen.getByText("Progreso al 1 jul 2026")).toBeVisible();
+    await userEvent.click(
+      screen.getByRole("button", { name: "Actualizar progreso" }),
+    );
+    await waitFor(() => expect(refresh).toHaveBeenCalledWith(PART));
+  });
+
+  it("renders no goals block when none is given", () => {
+    renderIn(
+      "es",
+      <ManagerReviewForm
+        review={managerReview()}
+        self={null}
+        actions={actions}
+      />,
+    );
+    expect(
+      screen.queryByRole("heading", { name: "Objetivos del período" }),
+    ).toBeNull();
+  });
 
   it("autosaves a rating", async () => {
     renderIn(

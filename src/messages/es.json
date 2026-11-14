@@ -46,7 +46,8 @@
     "not_found": "El elemento ya no existe.",
     "system_readonly": "Los elementos del sistema no se pueden modificar ni borrar; clonalos.",
     "in_use": "La escala está en uso por alguna pregunta.",
-    "unknown": "Ocurrió un error inesperado."
+    "unknown": "Ocurrió un error inesperado.",
+    "duplicateRole": "Este template ya tiene una pregunta con esa función."
   },
   "Scales": {
     "title": "Escalas de rating",
@@ -118,7 +119,14 @@
     "choiceEn": "Opción {n} (inglés)",
     "addChoice": "Agregar opción",
     "hiddenFromReviewee": "Oculta para la persona evaluada",
-    "chooseScale": "Elegí una escala"
+    "chooseScale": "Elegí una escala",
+    "role": "Función especial",
+    "roles": {
+      "none": "Ninguna",
+      "goals_rating": "Calificación de objetivos",
+      "goals_comment": "Comentario de objetivos",
+      "overall_rating": "Calificación general de desempeño"
+    }
   },
   "People": {
     "title": "Personas",
@@ -722,8 +730,6 @@
     "notFound": "No tenés una evaluación de manager para esta persona.",
     "visible": "El empleado verá",
     "hidden": "El empleado no verá",
-    "goalsTitle": "Objetivos",
-    "goalsPlaceholder": "Los objetivos del período se mostrarán aquí.",
     "selfTitle": "Autoevaluación",
     "selfHidden": "La autoevaluación se mostrará cuando ambos hayan enviado su evaluación.",
     "share": "Compartir con el empleado",
@@ -804,5 +810,20 @@
       "fully_anonymous": "Tu feedback es totalmente anónimo: nadie verá tu nombre."
     },
     "nominationsIntroNone": "Elegí colegas que te den feedback. Las nominaciones no necesitan aprobación: se les pide feedback al nominarlos."
+  },
+  "GoalsInCycle": {
+    "title": "Objetivos del período",
+    "legend": "Progreso al {date}",
+    "empty": "No hay objetivos en este período. La calificación y el comentario sobre objetivos son opcionales.",
+    "dueDate": "Vence {date}",
+    "noDueDate": "Sin fecha límite",
+    "progress": "Progreso",
+    "noLongerApplicable": "Ya no aplica",
+    "refresh": "Actualizar progreso",
+    "refreshing": "Actualizando…",
+    "refreshHint": "Actualiza las cifras de los objetivos listados; no agrega objetivos nuevos.",
+    "linkLabel": "Objetivo a vincular",
+    "linkPlaceholder": "Elegí un objetivo",
+    "link": "Vincular objetivo"
   }
 }

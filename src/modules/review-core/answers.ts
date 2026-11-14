@@ -9,22 +9,28 @@ import {
   type ReviewRequest,
 } from "@/db/schema";
 import type { ActorContext } from "@/modules/actor/types";
+import {
+  goalsQuestionsOptional,
+  type GoalsScope,
+  isGoalsQuestion,
+} from "./goal-snapshot";
 import { loadRequest } from "./requests";
 import { ReviewError } from "./review-errors";
-import type { CycleAnonymity } from "./status";
+import type { CycleAnonymity, CycleStatus } from "./status";
 import { canRead, canWrite, isReviewer, reviewerVisible } from "./visibility";
 
 /** Value of an answer as the form handles it (rating: the scale value). */
 export type AnswerValue = string | number | null;
 export type AnswerInput = { questionRevisionId: string; value: AnswerValue };
 
-export type SelfReview = {
+export type SelfReview = GoalsScope & {
   request: ReviewRequest;
   cycle: {
     id: string;
     name: string;
     dueDate: string | null;
     anonymity: CycleAnonymity;
+    status: CycleStatus;
   };
   questions: QuestionRevision[];
   /** Current answers by question revision id. */
@@ -97,9 +103,13 @@ export async function getReview(
     throw error;
   }
   const { request, cycle, visibility } = row;
-  const questions = (
-    await questionsFor(db, cycle.id, request.relationship)
-  ).filter((q) => canRead(actor, { ...visibility, questionRevision: q }));
+  // Without goals to rate, the goals rating and its comment are optional.
+  const goalsOptional = await goalsQuestionsOptional(db, request);
+  const questions = (await questionsFor(db, cycle.id, request.relationship))
+    .filter((q) => canRead(actor, { ...visibility, questionRevision: q }))
+    .map((q) =>
+      goalsOptional && isGoalsQuestion(q) ? { ...q, required: false } : q,
+    );
   const rows = await db
     .select()
     .from(answer)
@@ -116,11 +126,18 @@ export async function getReview(
     request: showReviewer ? request : { ...request, reviewerPersonId: null },
     reviewerVisible: showReviewer,
     isAuthor: isReviewer(actor, request),
+    participant: {
+      id: row.participant.id,
+      revieweePersonId: row.participant.revieweePersonId,
+      snapManagerPersonId: row.participant.snapManagerPersonId,
+      removedAt: row.participant.removedAt,
+    },
     cycle: {
       id: cycle.id,
       name: cycle.name,
       dueDate: cycle.dueDates[duePhase] ?? null,
       anonymity: cycle.anonymity,
+      status: cycle.status,
     },
     questions,
     answers: Object.fromEntries(
@@ -244,7 +261,13 @@ export async function submit(
           .where(eq(answer.requestId, requestId))
       ).map((r) => r.q),
     );
-    const missing = questions.filter((q) => q.required && !answered.has(q.id));
+    const goalsOptional = await goalsQuestionsOptional(tx, request);
+    const missing = questions.filter(
+      (q) =>
+        q.required &&
+        !(goalsOptional && isGoalsQuestion(q)) &&
+        !answered.has(q.id),
+    );
     if (missing.length) {
       throw new ReviewError(
         "missing_required",

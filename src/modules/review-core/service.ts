@@ -39,6 +39,10 @@ import {
 } from "@/modules/org-history/queries";
 import { CyclesError } from "./errors";
 import { closeNominations } from "./peers";
+import {
+  snapshotGoalsForParticipant,
+  snapshotGoalsForParticipants,
+} from "./goal-snapshot";
 import { ensureSelfRequests } from "./requests";
 import { allowedTransitions, type CycleStatus, launchStatus } from "./status";
 import {
@@ -296,6 +300,7 @@ async function copyQuestions(db: DbOrTx, cycleId: string, templateId: string) {
       visibleToReviewee: q.visibleToReviewee,
       required: q.required,
       choices: q.choices,
+      role: q.role,
       scale: q.scaleId
         ? {
             options: options
@@ -333,13 +338,20 @@ export async function launchCycle(
     );
     if (people.length === 0) throw new CyclesError("no_participants");
 
-    await tx.insert(cycleParticipant).values(
-      await snapshots(
-        tx,
-        id,
-        people.map((p) => p.personId),
-        cycle.snapshotDate,
-      ),
+    const participants = await tx
+      .insert(cycleParticipant)
+      .values(
+        await snapshots(
+          tx,
+          id,
+          people.map((p) => p.personId),
+          cycle.snapshotDate,
+        ),
+      )
+      .returning({ id: cycleParticipant.id });
+    await snapshotGoalsForParticipants(
+      tx,
+      participants.map((p) => p.id),
     );
     await copyQuestions(tx, id, cycle.templateId);
 
@@ -433,6 +445,7 @@ export async function addParticipant(
           .where(eq(cycleParticipant.id, existing.id))
           .returning()
       : await tx.insert(cycleParticipant).values(values).returning();
+    await snapshotGoalsForParticipant(tx, row.id);
     await ensureSelfRequests(tx, cycleId, row.id);
     return row;
   });

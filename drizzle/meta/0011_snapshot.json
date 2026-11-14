@@ -1,9 +1,238 @@
 {
-  "id": "203f207f-956a-4499-9dba-71c154d63737",
+  "id": "04edba5b-619d-4a0b-940d-4878bdf7c93c",
   "prevId": "32c595f1-be31-4d6c-b394-0e4e49f95a36",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
+    "public.cycle_goal_link": {
+      "name": "cycle_goal_link",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "cycle_id": {
+          "name": "cycle_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "goal_id": {
+          "name": "goal_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "linked_by": {
+          "name": "linked_by",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "cycle_goal_link_cycle_id_review_cycle_id_fk": {
+          "name": "cycle_goal_link_cycle_id_review_cycle_id_fk",
+          "tableFrom": "cycle_goal_link",
+          "tableTo": "review_cycle",
+          "columnsFrom": [
+            "cycle_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "cycle_goal_link_goal_id_goal_id_fk": {
+          "name": "cycle_goal_link_goal_id_goal_id_fk",
+          "tableFrom": "cycle_goal_link",
+          "tableTo": "goal",
+          "columnsFrom": [
+            "goal_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "cycle_goal_link_linked_by_person_id_fk": {
+          "name": "cycle_goal_link_linked_by_person_id_fk",
+          "tableFrom": "cycle_goal_link",
+          "tableTo": "person",
+          "columnsFrom": [
+            "linked_by"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "cycle_goal_link_cycle_goal_uq": {
+          "name": "cycle_goal_link_cycle_goal_uq",
+          "nullsNotDistinct": false,
+          "columns": [
+            "cycle_id",
+            "goal_id"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.participant_goal_snapshot": {
+      "name": "participant_goal_snapshot",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "participant_id": {
+          "name": "participant_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "goal_id": {
+          "name": "goal_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "goal_source_key": {
+          "name": "goal_source_key",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "title": {
+          "name": "title",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "status": {
+          "name": "status",
+          "type": "goal_status",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "percent_complete": {
+          "name": "percent_complete",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "due_date": {
+          "name": "due_date",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "captured_at": {
+          "name": "captured_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "refreshed_at": {
+          "name": "refreshed_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "no_longer_applicable": {
+          "name": "no_longer_applicable",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        }
+      },
+      "indexes": {
+        "participant_goal_snapshot_goal_idx": {
+          "name": "participant_goal_snapshot_goal_idx",
+          "columns": [
+            {
+              "expression": "goal_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "participant_goal_snapshot_participant_id_cycle_participant_id_fk": {
+          "name": "participant_goal_snapshot_participant_id_cycle_participant_id_fk",
+          "tableFrom": "participant_goal_snapshot",
+          "tableTo": "cycle_participant",
+          "columnsFrom": [
+            "participant_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "participant_goal_snapshot_goal_id_goal_id_fk": {
+          "name": "participant_goal_snapshot_goal_id_goal_id_fk",
+          "tableFrom": "participant_goal_snapshot",
+          "tableTo": "goal",
+          "columnsFrom": [
+            "goal_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "participant_goal_snapshot_participant_goal_uq": {
+          "name": "participant_goal_snapshot_participant_goal_uq",
+          "nullsNotDistinct": false,
+          "columns": [
+            "participant_id",
+            "goal_source_key"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
     "public.goal": {
       "name": "goal",
       "schema": "",
@@ -1491,6 +1720,12 @@
           "type": "jsonb",
           "primaryKey": false,
           "notNull": false
+        },
+        "role": {
+          "name": "role",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
         }
       },
       "indexes": {},
@@ -2457,6 +2692,12 @@
           "primaryKey": false,
           "notNull": true
         },
+        "role": {
+          "name": "role",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
         "created_at": {
           "name": "created_at",
           "type": "timestamp with time zone",
@@ -3215,174 +3456,6 @@
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
-    },
-    "public.peer_nomination": {
-      "name": "peer_nomination",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true,
-          "default": "gen_random_uuid()"
-        },
-        "cycle_id": {
-          "name": "cycle_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "participant_id": {
-          "name": "participant_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "nominee_person_id": {
-          "name": "nominee_person_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "nominated_by_person_id": {
-          "name": "nominated_by_person_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "status": {
-          "name": "status",
-          "type": "peer_nomination_status",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'pending'"
-        },
-        "decided_by": {
-          "name": "decided_by",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "decided_at": {
-          "name": "decided_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        }
-      },
-      "indexes": {
-        "peer_nomination_cycle_idx": {
-          "name": "peer_nomination_cycle_idx",
-          "columns": [
-            {
-              "expression": "cycle_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "status",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
-      "foreignKeys": {
-        "peer_nomination_cycle_id_review_cycle_id_fk": {
-          "name": "peer_nomination_cycle_id_review_cycle_id_fk",
-          "tableFrom": "peer_nomination",
-          "tableTo": "review_cycle",
-          "columnsFrom": [
-            "cycle_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "peer_nomination_participant_id_cycle_participant_id_fk": {
-          "name": "peer_nomination_participant_id_cycle_participant_id_fk",
-          "tableFrom": "peer_nomination",
-          "tableTo": "cycle_participant",
-          "columnsFrom": [
-            "participant_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "peer_nomination_nominee_person_id_person_id_fk": {
-          "name": "peer_nomination_nominee_person_id_person_id_fk",
-          "tableFrom": "peer_nomination",
-          "tableTo": "person",
-          "columnsFrom": [
-            "nominee_person_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        },
-        "peer_nomination_nominated_by_person_id_person_id_fk": {
-          "name": "peer_nomination_nominated_by_person_id_person_id_fk",
-          "tableFrom": "peer_nomination",
-          "tableTo": "person",
-          "columnsFrom": [
-            "nominated_by_person_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        },
-        "peer_nomination_decided_by_person_id_fk": {
-          "name": "peer_nomination_decided_by_person_id_fk",
-          "tableFrom": "peer_nomination",
-          "tableTo": "person",
-          "columnsFrom": [
-            "decided_by"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {
-        "peer_nomination_participant_nominee_uq": {
-          "name": "peer_nomination_participant_nominee_uq",
-          "nullsNotDistinct": false,
-          "columns": [
-            "participant_id",
-            "nominee_person_id"
-          ]
-        }
-      },
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
     }
   },
   "enums": {
@@ -3481,16 +3554,6 @@
         "draft",
         "submitted",
         "declined"
-      ]
-    },
-    "public.peer_nomination_status": {
-      "name": "peer_nomination_status",
-      "schema": "public",
-      "values": [
-        "pending",
-        "approved",
-        "declined",
-        "removed"
       ]
     }
   },
