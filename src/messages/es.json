@@ -1078,7 +1078,30 @@
       "snapshot_manager_bamboo_id": "snapshot_manager_bamboo_id",
       "snapshot_manager": "snapshot_manager",
       "added_at": "agregado",
-      "removed_at": "removido"
+      "removed_at": "removido",
+      "request_id": "request_id",
+      "relationship": "relación",
+      "reviewer_id": "reviewer_id",
+      "reviewer_bamboo_id": "reviewer_bamboo_id",
+      "reviewer": "evaluador",
+      "reviewer_visible": "evaluador visible",
+      "reviewer_missing": "sin evaluador",
+      "reviewer_mismatch": "evaluador distinto del manager",
+      "participant_removed_at": "participante removido",
+      "requested_at": "solicitado",
+      "submitted_at": "enviado",
+      "declined_at": "rechazado",
+      "shared_at": "compartido",
+      "answer_count": "respuestas",
+      "question_revision_id": "question_revision_id",
+      "question_role": "rol de la pregunta",
+      "question_kind": "tipo de pregunta",
+      "question_prompt_es": "pregunta (es)",
+      "question_prompt_en": "pregunta (en)",
+      "answer_value": "valor",
+      "answer_label": "etiqueta",
+      "normalized": "normalizado",
+      "answer_text": "texto"
     }
   }
 }

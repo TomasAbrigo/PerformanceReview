@@ -1078,7 +1078,30 @@
       "snapshot_manager_bamboo_id": "snapshot_manager_bamboo_id",
       "snapshot_manager": "snapshot_manager",
       "added_at": "added_at",
-      "removed_at": "removed_at"
+      "removed_at": "removed_at",
+      "request_id": "request_id",
+      "relationship": "relationship",
+      "reviewer_id": "reviewer_id",
+      "reviewer_bamboo_id": "reviewer_bamboo_id",
+      "reviewer": "reviewer",
+      "reviewer_visible": "reviewer_visible",
+      "reviewer_missing": "reviewer_missing",
+      "reviewer_mismatch": "reviewer_mismatch",
+      "participant_removed_at": "participant_removed_at",
+      "requested_at": "requested_at",
+      "submitted_at": "submitted_at",
+      "declined_at": "declined_at",
+      "shared_at": "shared_at",
+      "answer_count": "answer_count",
+      "question_revision_id": "question_revision_id",
+      "question_role": "question_role",
+      "question_kind": "question_kind",
+      "question_prompt_es": "question_prompt_es",
+      "question_prompt_en": "question_prompt_en",
+      "answer_value": "answer_value",
+      "answer_label": "answer_label",
+      "normalized": "normalized",
+      "answer_text": "answer_text"
     }
   }
 }

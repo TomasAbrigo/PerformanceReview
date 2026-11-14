@@ -7,7 +7,7 @@ import en from "@/messages/en.json";
 import es from "@/messages/es.json";
 import { notFound } from "@/modules/api/errors";
 import { parseQuery } from "@/modules/api/http";
-import { allPages } from "@/modules/api/pagination";
+import { allPages, type Page } from "@/modules/api/pagination";
 import { bool, isoDate, uuid } from "@/modules/api/params";
 import {
   listParticipantRows,
@@ -20,9 +20,18 @@ import {
 } from "@/modules/api/queries/goals";
 import { listOrgAsOf, type OrgRow } from "@/modules/api/queries/org";
 import { listPeopleRows, type PersonRow } from "@/modules/api/queries/people";
+import {
+  answersByRequest,
+  listRequestRows,
+  type AnswerRow,
+  type RequestRow,
+} from "@/modules/api/queries/reviews";
 import { listRunRows, type RunRow } from "@/modules/api/queries/runs";
+import { checkScope, scopeActor, scopeFields } from "@/modules/api/scope";
 import { RUN_STATUSES } from "@/modules/ingest/run-status";
 import { todayLocal } from "@/modules/org-history/dates";
+import { requestStatuses } from "@/modules/review-core/request-status";
+import { relationships } from "@/modules/templates/constants";
 import { csvResponse, type CsvColumn } from "./csv";
 
 /**
@@ -254,12 +263,176 @@ const participantsExport = defineExport({
   ],
 });
 
+// ------------------------------------------------ review requests, answers
+
+/**
+ * Same filters and same reading scope as the JSON endpoints (HR by default,
+ * `as_person` to read as a person): see modules/api/scope.ts. Anonymity is
+ * applied by the queries, so a fully anonymous reviewer is blank here too.
+ */
+const reviewExportQuery = z
+  .object({
+    cycle_id: uuid.optional(),
+    relationship: z.enum(relationships).optional(),
+    status: z.enum(requestStatuses).optional(),
+    ...scopeFields,
+  })
+  .superRefine(checkScope);
+
+type ReviewExportQuery = z.output<typeof reviewExportQuery>;
+
+/** Requests per round trip of the answers export (each brings its answers). */
+const ANSWER_REQUESTS_PAGE_SIZE = 200;
+
+/** Cells every review export starts with: the cycle, the reviewee and their snapshot, the reviewer. */
+function requestColumns<R>(
+  h: Header,
+  of: (row: R) => RequestRow,
+): CsvColumn<R>[] {
+  return [
+    { header: h("cycle_id"), value: (r) => of(r).cycleId },
+    { header: h("cycle_source_id"), value: (r) => of(r).cycleSourceId },
+    { header: h("cycle_name"), value: (r) => of(r).cycleName },
+    { header: h("participant_id"), value: (r) => of(r).participantId },
+    { header: h("request_id"), value: (r) => of(r).id },
+    { header: h("person_id"), value: (r) => of(r).reviewee.id },
+    { header: h("bamboo_id"), value: (r) => of(r).reviewee.sourceId },
+    {
+      header: h("employee_number"),
+      value: (r) => of(r).revieweeEmployeeNumber,
+    },
+    { header: h("name"), value: (r) => of(r).reviewee.displayName },
+    { header: h("snapshot_as_of"), value: (r) => of(r).snapshotAsOf },
+    { header: h("snapshot_manager_id"), value: (r) => of(r).snapManager?.id },
+    {
+      header: h("snapshot_manager_bamboo_id"),
+      value: (r) => of(r).snapManager?.sourceId,
+    },
+    {
+      header: h("snapshot_manager"),
+      value: (r) => of(r).snapManager?.displayName,
+    },
+    { header: h("department"), value: (r) => of(r).snapDepartment },
+    { header: h("division"), value: (r) => of(r).snapDivision },
+    { header: h("job_title"), value: (r) => of(r).snapJobTitle },
+    { header: h("location"), value: (r) => of(r).snapLocation },
+    { header: h("relationship"), value: (r) => of(r).relationship },
+    { header: h("status"), value: (r) => of(r).status },
+    { header: h("reviewer_id"), value: (r) => of(r).reviewer?.id },
+    {
+      header: h("reviewer_bamboo_id"),
+      value: (r) => of(r).reviewer?.sourceId,
+    },
+    { header: h("reviewer"), value: (r) => of(r).reviewer?.displayName },
+    { header: h("reviewer_visible"), value: (r) => of(r).reviewerVisible },
+  ];
+}
+
+const requestsExport = defineExport({
+  file: () => "requests",
+  query: reviewExportQuery,
+  rows: async function* (
+    db,
+    { cycle_id, relationship, status, ...scope }: ReviewExportQuery,
+  ) {
+    const actor = await scopeActor(db, scope);
+    yield* allPages((cursor) =>
+      listRequestRows(db, {
+        limit: PAGE_SIZE,
+        cursor,
+        cycleId: cycle_id,
+        relationship,
+        status,
+        actor,
+      }),
+    );
+  },
+  columns: (h) => [
+    ...requestColumns<RequestRow>(h, (r) => r),
+    {
+      header: h("participant_removed_at"),
+      value: (r: RequestRow) => r.participantRemovedAt,
+    },
+    { header: h("reviewer_missing"), value: (r) => r.reviewerMissing },
+    { header: h("reviewer_mismatch"), value: (r) => r.reviewerMismatch },
+    { header: h("requested_at"), value: (r) => r.requestedAt },
+    { header: h("submitted_at"), value: (r) => r.submittedAt },
+    { header: h("declined_at"), value: (r) => r.declinedAt },
+    { header: h("shared_at"), value: (r) => r.sharedAt },
+    { header: h("answer_count"), value: (r) => r.answerCount },
+  ],
+});
+
+type AnswerExportRow = { request: RequestRow; answer: AnswerRow };
+
+/**
+ * One row per reviewer x question: the requests page by page, each page's
+ * answers in one query (a request without answers has no row).
+ */
+const answersExport = defineExport({
+  file: () => "answers",
+  query: reviewExportQuery,
+  rows: async function* (
+    db,
+    { cycle_id, relationship, status, ...scope }: ReviewExportQuery,
+  ) {
+    const actor = await scopeActor(db, scope);
+    let cursor: string | null = null;
+    do {
+      const page: Page<RequestRow> = await listRequestRows(db, {
+        limit: ANSWER_REQUESTS_PAGE_SIZE,
+        cursor,
+        cycleId: cycle_id,
+        relationship,
+        status,
+        actor,
+      });
+      const answers = await answersByRequest(
+        db,
+        page.items.map((r) => r.id),
+        actor,
+      );
+      for (const request of page.items) {
+        for (const answer of answers.get(request.id) ?? []) {
+          yield { request, answer };
+        }
+      }
+      cursor = page.nextCursor;
+    } while (cursor);
+  },
+  columns: (h) => [
+    ...requestColumns<AnswerExportRow>(h, (r) => r.request),
+    {
+      header: h("question_revision_id"),
+      value: (r: AnswerExportRow) => r.answer.question.id,
+    },
+    { header: h("question_role"), value: (r) => r.answer.question.role },
+    { header: h("question_kind"), value: (r) => r.answer.question.kind },
+    {
+      header: h("question_prompt_es"),
+      value: (r) => r.answer.question.prompt.es,
+    },
+    {
+      header: h("question_prompt_en"),
+      value: (r) => r.answer.question.prompt.en,
+    },
+    { header: h("answer_value"), value: (r) => r.answer.optionValue },
+    { header: h("answer_label"), value: (r) => r.answer.optionLabel },
+    { header: h("normalized"), value: (r) => r.answer.normalized },
+    { header: h("answer_text"), value: (r) => r.answer.text },
+    { header: h("submitted_at"), value: (r) => r.request.submittedAt },
+    { header: h("shared_at"), value: (r) => r.request.sharedAt },
+  ],
+});
+
 const EXPORTS = {
   people: peopleExport,
   org: orgExport,
   goals: goalsExport,
   "ingest-runs": runsExport,
   "cycle-participants": participantsExport,
+  requests: requestsExport,
+  answers: answersExport,
 } as const;
 
 export type ExportEntity = keyof typeof EXPORTS;
