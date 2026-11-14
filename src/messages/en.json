@@ -870,5 +870,36 @@
     "linkLabel": "Goal to link",
     "linkPlaceholder": "Choose a goal",
     "link": "Link goal"
+  },
+  "Notifications": {
+    "nav": "Notifications",
+    "title": "Notifications",
+    "empty": "You have no notifications.",
+    "noPerson": "Pick a person in 'Act as' to see their notifications.",
+    "unreadHeading": "Unread",
+    "readHeading": "Read",
+    "open": "Open",
+    "markRead": "Mark as read",
+    "markAllRead": "Mark all as read",
+    "older": "Show older",
+    "backToStart": "Back to the start",
+    "error": "The inbox could not be updated.",
+    "peopleTeam": "The People team",
+    "badge": {
+      "label": "{count, plural, =0 {Notifications: none unread} one {Notifications: # unread} other {Notifications: # unread}}",
+      "capped": "99+"
+    },
+    "me": {
+      "title": "New notifications",
+      "viewAll": "View all ({count})"
+    },
+    "messages": {
+      "reminder_due": "{relationship, select, self {Your self assessment for {cycle}} manager {Your review of {participant} for {cycle}} peer {Your feedback for {participant} in {cycle}} upward {Your feedback for {participant} in {cycle}} other {A task in {cycle}}} {daysLeft, plural, =0 {is due today} =1 {is due tomorrow} other {is due in # days}}{hasDueDate, select, yes { ({dueDate})} other {}}.",
+      "manual_reminder": "{sender} reminds you to complete {relationship, select, self {your self assessment} manager {your review of {participant}} peer {your feedback for {participant}} upward {your feedback for {participant}} other {a pending task}} for {cycle}{hasDueDate, select, yes { (due {dueDate})} other {}}.",
+      "review_shared": "Your review for {cycle} was shared with you{hasSender, select, yes { by {sender}} other {}}.",
+      "feedback_received": "You received new feedback in {cycle}.",
+      "calibration_published": "The calibration of {cycle} was published.",
+      "cycle_phase_changed": "{launched, select, yes {The cycle {cycle} was launched and is in the {to} phase.} other {The cycle {cycle} moved from the {from} phase to the {to} phase.}}"
+    }
   }
 }

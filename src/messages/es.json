@@ -870,5 +870,36 @@
     "linkLabel": "Objetivo a vincular",
     "linkPlaceholder": "Elegí un objetivo",
     "link": "Vincular objetivo"
+  },
+  "Notifications": {
+    "nav": "Notificaciones",
+    "title": "Notificaciones",
+    "empty": "No tenés notificaciones.",
+    "noPerson": "Elegí una persona en 'Actuar como' para ver sus notificaciones.",
+    "unreadHeading": "No leídas",
+    "readHeading": "Leídas",
+    "open": "Abrir",
+    "markRead": "Marcar como leída",
+    "markAllRead": "Marcar todas como leídas",
+    "older": "Ver más antiguas",
+    "backToStart": "Volver al inicio",
+    "error": "No se pudo actualizar la bandeja.",
+    "peopleTeam": "El equipo de People",
+    "badge": {
+      "label": "{count, plural, =0 {Notificaciones: ninguna sin leer} one {Notificaciones: # sin leer} other {Notificaciones: # sin leer}}",
+      "capped": "99+"
+    },
+    "me": {
+      "title": "Notificaciones nuevas",
+      "viewAll": "Ver todas ({count})"
+    },
+    "messages": {
+      "reminder_due": "{relationship, select, self {Tu autoevaluación del ciclo {cycle}} manager {Tu evaluación de {participant} en el ciclo {cycle}} peer {Tu feedback para {participant} en el ciclo {cycle}} upward {Tu feedback para {participant} en el ciclo {cycle}} other {Una tarea del ciclo {cycle}}} {daysLeft, plural, =0 {vence hoy} =1 {vence mañana} other {vence en # días}}{hasDueDate, select, yes { ({dueDate})} other {}}.",
+      "manual_reminder": "{sender} te recuerda completar {relationship, select, self {tu autoevaluación} manager {tu evaluación de {participant}} peer {tu feedback para {participant}} upward {tu feedback para {participant}} other {una tarea pendiente}} del ciclo {cycle}{hasDueDate, select, yes { (vence el {dueDate})} other {}}.",
+      "review_shared": "Tu evaluación del ciclo {cycle} fue compartida con vos{hasSender, select, yes { por {sender}} other {}}.",
+      "feedback_received": "Recibiste feedback nuevo en el ciclo {cycle}.",
+      "calibration_published": "Se publicó la calibración del ciclo {cycle}.",
+      "cycle_phase_changed": "{launched, select, yes {El ciclo {cycle} se lanzó y está en la fase {to}.} other {El ciclo {cycle} pasó de la fase {from} a la fase {to}.}}"
+    }
   }
 }

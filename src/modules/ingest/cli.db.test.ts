@@ -3,9 +3,13 @@ import { mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { desc, eq, sql } from "drizzle-orm";
-import { afterAll, beforeEach, describe, expect, it } from "vitest";
+import { afterAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { closeDb, db } from "@/db/client";
 import { ingestRun, person, syncState } from "@/db/schema";
+
+// Every test spawns node (pnpm exec tsx ...), which takes seconds when the
+// machine is busy: the default 5 s is not enough.
+vi.setConfig({ testTimeout: 30_000, hookTimeout: 30_000 });
 
 type Result = { code: number; stdout: string; stderr: string };
 
