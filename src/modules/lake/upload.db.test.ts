@@ -436,6 +436,10 @@ describe("importUpload of a Bamboo performance report (domain mode)", () => {
       sql`select name from review_cycle where source_system = 'bamboo_export'`,
     );
     expect(cycles).toHaveLength(3);
+    // A file is not an incremental source: no watermark is kept for it.
+    expect(
+      await db.execute(sql`select 1 from sync_state where adapter = 'file'`),
+    ).toHaveLength(0);
     await db.execute(sql`TRUNCATE review_cycle, identity_match_issue CASCADE`);
   }, 60_000);
 });

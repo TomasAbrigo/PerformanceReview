@@ -194,7 +194,8 @@
         "issues": "En cola",
         "ignored": "Ignorados",
         "log": "Entradas del log",
-        "duration": "Duración"
+        "duration": "Duración",
+        "mismatches": "Evaluador distinto"
       },
       "status": {
         "running": "En curso",
@@ -382,6 +383,11 @@
       "label": "Páginas",
       "older": "Casos anteriores",
       "newest": "Volver a los más recientes"
+    },
+    "roles": {
+      "employee": "empleado",
+      "manager": "manager",
+      "reviewer": "evaluador"
     }
   },
   "Cycles": {

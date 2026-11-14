@@ -227,6 +227,7 @@ export async function importUpload({
       adapter: new FileSourceAdapter(profile, lake, table, { source }),
       entity: profile.entity,
       landing: !domain,
+      syncState: false,
       db,
       extract: { signal },
       params: {

@@ -2,9 +2,9 @@ import { z } from "zod";
 import type { DbOrTx } from "@/db/client";
 import type { HandlerContext, HandlerOutcome } from "@/modules/ingest/handlers";
 import { atNoon, emptyTally, recordRow, resolveRow } from "./assessment";
+import { parseReportDate } from "./dates";
 import {
   ensureParticipant,
-  isoDate,
   upsertImportedCycle,
   upsertRequest,
 } from "./cycles";
@@ -17,15 +17,24 @@ const name = (label: string) =>
     .pipe(z.string().min(1, `${label} is empty`));
 
 /** A row of Bamboo's Feedback Status report (profile `bamboo-feedback-status`). */
-export const stagedFeedbackSchema = z.object({
-  fields: z.object({
-    employee_name: name("Employee Name"),
-    reviewer_name: name("Receiving Feedback From"),
-    review_cycle: name("Review Cycle"),
-    completed_on: z.unknown().transform(isoDate),
-    due_date: z.unknown().transform(isoDate),
-  }),
-});
+export const stagedFeedbackSchema = z
+  .object({
+    fields: z.object({
+      employee_name: name("Employee Name"),
+      reviewer_name: name("Receiving Feedback From"),
+      review_cycle: name("Review Cycle"),
+      completed_on: z.unknown(),
+      due_date: z.unknown(),
+    }),
+    dateFormat: z.enum(["mdy", "dmy"]).optional(),
+  })
+  .transform(({ fields, dateFormat }) => ({
+    fields: {
+      ...fields,
+      completed_on: parseReportDate(fields.completed_on, dateFormat),
+      due_date: parseReportDate(fields.due_date, dateFormat),
+    },
+  }));
 export type StagedFeedback = z.infer<typeof stagedFeedbackSchema>;
 
 /**
@@ -51,6 +60,7 @@ export async function upsertFeedback(
     tx,
     { name: fields.review_cycle, date, runId: ctx.runId, widen: false },
     { peer: true },
+    ctx.cache,
   );
   const tally = emptyTally();
   const { revieweeId, reviewerId, issue } = await resolveRow(
@@ -80,7 +90,7 @@ export async function upsertFeedback(
     });
     if (request.result === "inserted") tally.requestsCreated++;
     if (request.result === "unchanged") tally.requestsUnchanged++;
-    result = request.result;
+    result = request.result === "superseded" ? "unchanged" : request.result;
   } else {
     result = issue && "ignoredIssueId" in issue ? "ignored" : "issues";
   }

@@ -10,19 +10,12 @@ import {
   reviewRequest,
   type ReviewCycle,
 } from "@/db/schema";
-import { jobsAsOf } from "@/modules/org-history/queries";
+import { snapshots } from "@/modules/review-core/service";
 import type { Relationship } from "@/modules/templates/constants";
 import { answerColumns, type QuestionColumn } from "./questions";
 
 /** Imported cycles come from Bamboo's report exports, keyed by cycle name. */
 export const SOURCE = "bamboo_export" as const;
-
-/** An ISO date out of a report cell ("2023-12-01", or a timestamp). */
-export function isoDate(value: unknown): string | null {
-  if (value === null || value === undefined) return null;
-  const text = String(value).trim().slice(0, 10);
-  return /^\d{4}-\d{2}-\d{2}$/.test(text) ? text : null;
-}
 
 /**
  * The imported cycle named `name`, created closed on first sight. `date`
@@ -33,16 +26,34 @@ export async function upsertImportedCycle(
   tx: DbOrTx,
   input: { name: string; date: string; runId: string; widen: boolean },
   extra: { peer?: boolean } = {},
+  /** Per-run cache (HandlerContext.cache): one lookup per cycle per run. */
+  cache: Map<string, unknown> = new Map(),
 ): Promise<ReviewCycle> {
-  const [found] = await tx
-    .select()
-    .from(reviewCycle)
-    .where(
-      and(
-        eq(reviewCycle.sourceSystem, SOURCE),
-        eq(reviewCycle.sourceId, input.name),
-      ),
-    );
+  const key = `cycle:${input.name}`;
+  const cycle = await findOrCreateCycle(tx, input, extra, cache.get(key));
+  cache.set(key, cycle);
+  return cycle;
+}
+
+async function findOrCreateCycle(
+  tx: DbOrTx,
+  input: { name: string; date: string; runId: string; widen: boolean },
+  extra: { peer?: boolean },
+  cached: unknown,
+): Promise<ReviewCycle> {
+  const found =
+    (cached as ReviewCycle | undefined) ??
+    (
+      await tx
+        .select()
+        .from(reviewCycle)
+        .where(
+          and(
+            eq(reviewCycle.sourceSystem, SOURCE),
+            eq(reviewCycle.sourceId, input.name),
+          ),
+        )
+    )[0];
   if (!found) {
     const [created] = await tx
       .insert(reviewCycle)
@@ -97,12 +108,18 @@ export async function ensureQuestions(
   tx: DbOrTx,
   cycleId: string,
   columns: QuestionColumn[],
+  cache: Map<string, unknown> = new Map(),
 ): Promise<Map<string, string>> {
-  const known = await tx
-    .select()
-    .from(importedQuestion)
-    .where(eq(importedQuestion.cycleId, cycleId));
-  const ids = new Map(known.map((k) => [k.columnKey, k.questionRevisionId]));
+  const key = `questions:${cycleId}`;
+  let ids = cache.get(key) as Map<string, string> | undefined;
+  if (!ids) {
+    const known = await tx
+      .select()
+      .from(importedQuestion)
+      .where(eq(importedQuestion.cycleId, cycleId));
+    ids = new Map(known.map((k) => [k.columnKey, k.questionRevisionId]));
+    cache.set(key, ids);
+  }
   for (const column of columns) {
     if (ids.has(column.key)) continue;
     const [revision] = await tx
@@ -151,22 +168,16 @@ export async function ensureParticipant(
       ),
     );
   if (found) return { ...found, created: false };
-  const job = (await jobsAsOf(tx, [personId], cycle.snapshotDate)).get(
-    personId,
+  // Same snapshot as a launched cycle (review-core), as of the period end.
+  const [values] = await snapshots(
+    tx,
+    cycle.id,
+    [personId],
+    cycle.snapshotDate,
   );
   const [created] = await tx
     .insert(cycleParticipant)
-    .values({
-      cycleId: cycle.id,
-      revieweePersonId: personId,
-      snapshotAsOf: cycle.snapshotDate,
-      snapManagerPersonId: job?.managerPersonId ?? null,
-      snapDepartment: job?.department ?? null,
-      snapDivision: job?.division ?? null,
-      snapJobTitle: job?.jobTitle ?? null,
-      snapLocation: job?.location ?? null,
-      snapJobHistoryId: job?.id ?? null,
-    })
+    .values(values)
     .returning();
   return { ...created, created: true };
 }
@@ -188,11 +199,21 @@ export type RequestInput = {
 /**
  * Upserts an imported request by its source id. `unchanged` when the source
  * record (its hash) is the same as last time: nothing is written.
+ *
+ * A cycle has one request per (participant, relationship, reviewer), as in a
+ * native cycle. When a report has two assessments of one person in one cycle
+ * (two Assessment Dates), the LATEST one is that request: an older row finds
+ * the newer one in place and is `superseded` (nothing written), a newer row
+ * takes the request over (its source id and answers). The outcome depends on
+ * the dates only, so re-imports are stable whatever the row order.
  */
 export async function upsertRequest(
   tx: DbOrTx,
   input: RequestInput,
-): Promise<{ id: string; result: "inserted" | "updated" | "unchanged" }> {
+): Promise<{
+  id: string;
+  result: "inserted" | "updated" | "unchanged" | "superseded";
+}> {
   const [found] = await tx
     .select({ id: reviewRequest.id, hash: reviewRequest.payloadHash })
     .from(reviewRequest)
@@ -220,6 +241,7 @@ export async function upsertRequest(
     reviewerMismatch: input.reviewerMismatch,
   };
   let id: string;
+  let result: "inserted" | "updated" = found ? "updated" : "inserted";
   if (found) {
     await tx
       .update(reviewRequest)
@@ -227,20 +249,37 @@ export async function upsertRequest(
       .where(eq(reviewRequest.id, found.id));
     id = found.id;
   } else {
-    // The same review under another source id (a row re-keyed): take it over.
-    const [row] = await tx
-      .insert(reviewRequest)
-      .values({ ...values, requestedAt: input.submittedAt ?? undefined })
-      .onConflictDoUpdate({
-        target: [
-          reviewRequest.participantId,
-          reviewRequest.relationship,
-          reviewRequest.reviewerPersonId,
-        ],
-        set: values,
+    const [same] = await tx
+      .select({
+        id: reviewRequest.id,
+        submittedAt: reviewRequest.submittedAt,
+        declinedAt: reviewRequest.declinedAt,
       })
-      .returning({ id: reviewRequest.id });
-    id = row.id;
+      .from(reviewRequest)
+      .where(
+        and(
+          eq(reviewRequest.participantId, input.participantId),
+          eq(reviewRequest.relationship, input.relationship),
+          eq(reviewRequest.reviewerPersonId, input.reviewerPersonId),
+        ),
+      );
+    if (same) {
+      const theirs = (same.submittedAt ?? same.declinedAt)?.getTime() ?? 0;
+      const ours = (input.submittedAt ?? input.declinedAt)?.getTime() ?? 0;
+      if (theirs >= ours) return { id: same.id, result: "superseded" };
+      await tx
+        .update(reviewRequest)
+        .set(values)
+        .where(eq(reviewRequest.id, same.id));
+      id = same.id;
+      result = "updated";
+    } else {
+      const [row] = await tx
+        .insert(reviewRequest)
+        .values({ ...values, requestedAt: input.submittedAt ?? undefined })
+        .returning({ id: reviewRequest.id });
+      id = row.id;
+    }
   }
   await tx
     .insert(importedRequest)
@@ -256,7 +295,7 @@ export async function upsertRequest(
         reviewerMismatch: input.reviewerMismatch,
       },
     });
-  return { id, result: found ? "updated" : "inserted" };
+  return { id, result };
 }
 
 /**

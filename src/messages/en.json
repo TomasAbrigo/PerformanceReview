@@ -194,7 +194,8 @@
         "issues": "In queue",
         "ignored": "Ignored",
         "log": "Log entries",
-        "duration": "Duration"
+        "duration": "Duration",
+        "mismatches": "Reviewer mismatches"
       },
       "status": {
         "running": "Running",
@@ -382,6 +383,11 @@
       "label": "Pages",
       "older": "Older cases",
       "newest": "Back to the newest"
+    },
+    "roles": {
+      "employee": "employee",
+      "manager": "manager",
+      "reviewer": "reviewer"
     }
   },
   "Cycles": {

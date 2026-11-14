@@ -101,6 +101,11 @@ export function IdentityQueue({
                   >
                     {issue.summary.displayName ?? t("unnamed")}
                   </Link>
+                  {issue.summary.role ? (
+                    <span className="ml-2 text-sm text-muted-foreground">
+                      ({t(`roles.${issue.summary.role as "employee"}`)})
+                    </span>
+                  ) : null}
                 </TableCell>
                 <TableCell className="font-mono">{issue.sourceId}</TableCell>
                 <TableCell>

@@ -36,6 +36,11 @@ export type RunIngestInput<E extends IngestEntity = Entity> = {
    */
   landing?: boolean;
   params?: Record<string, unknown>;
+  /**
+   * Whether a successful run advances `sync_state` (default true; landing
+   * runs never do). Uploads pass false: a file is not an incremental source.
+   */
+  syncState?: boolean;
   /** Passed to the adapter (e.g. `since` for an incremental extraction). */
   extract?: ExtractContext;
   /**
@@ -80,6 +85,7 @@ export async function runIngest<E extends IngestEntity = Entity>({
   entity,
   db,
   landing = false,
+  syncState = true,
   params = {},
   extract = {},
   unmatched,
@@ -191,7 +197,7 @@ export async function runIngest<E extends IngestEntity = Entity>({
         .update(ingestRun)
         .set({ status: "succeeded", finishedAt: new Date(), counts, rejects })
         .where(eq(ingestRun.id, run.id));
-      if (!landing) {
+      if (!landing && syncState) {
         await advanceSyncState(tx, {
           sourceSystem: source,
           adapter: adapter.name,

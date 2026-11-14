@@ -26,12 +26,12 @@ describe("detectQuestionColumns", () => {
       "self:q2",
       "self:q3",
       "self:q4",
-      "self:custom:mis objetivos del período están claros.",
+      "self:custom:1:mis objetivos del período están claros.",
       "manager:q1",
       "manager:q2",
       "manager:q3",
       "manager:q4",
-      "manager:custom:los objetivos de [employee] para el período están claros.",
+      "manager:custom:1:los objetivos de [employee] para el período están claros.",
     ]);
     expect(columns.map((c) => c.sort)).toEqual([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
   });
@@ -58,7 +58,7 @@ describe("detectQuestionColumns", () => {
 
   it("custom questions are 1-5 ratings with a normalized scale", () => {
     const custom = byKey.get(
-      "manager:custom:los objetivos de [employee] para el período están claros.",
+      "manager:custom:1:los objetivos de [employee] para el período están claros.",
     )!;
     expect(custom.kind).toBe("rating");
     expect(custom.scale?.options.map((o) => [o.value, o.normalized])).toEqual([
@@ -97,5 +97,18 @@ describe("answerColumns", () => {
     });
     expect(answerColumns(q3, null)).toBeNull();
     expect(answerColumns(q3, "  ")).toBeNull();
+  });
+});
+
+describe("custom question keys", () => {
+  it("include the question number, so two custom questions with the same text do not collide", () => {
+    const keys = detectQuestionColumns([
+      "Employee Custom Q1: Claridad.",
+      "Employee Custom Q2: Claridad.",
+    ]).map((c) => c.key);
+    expect(keys).toEqual([
+      "self:custom:1:claridad.",
+      "self:custom:2:claridad.",
+    ]);
   });
 });

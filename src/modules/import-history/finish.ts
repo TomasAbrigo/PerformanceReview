@@ -9,7 +9,7 @@ import {
   reviewRequest,
   type IngestReject,
 } from "@/db/schema";
-import { jobsAsOf } from "@/modules/org-history/queries";
+import { snapshots } from "@/modules/review-core/service";
 
 /**
  * After a run, for each cycle it touched: rows are processed one by one and
@@ -53,22 +53,15 @@ async function refreshCycle(
     .select()
     .from(cycleParticipant)
     .where(eq(cycleParticipant.cycleId, cycleId));
-  const jobs = await jobsAsOf(
+  // The same snapshot a launched cycle takes (review-core), as of period end.
+  const fresh = await snapshots(
     tx,
+    cycleId,
     participants.map((p) => p.revieweePersonId),
     asOf,
   );
-  for (const p of participants) {
-    const job = jobs.get(p.revieweePersonId);
-    const snap = {
-      snapshotAsOf: asOf,
-      snapManagerPersonId: job?.managerPersonId ?? null,
-      snapDepartment: job?.department ?? null,
-      snapDivision: job?.division ?? null,
-      snapJobTitle: job?.jobTitle ?? null,
-      snapLocation: job?.location ?? null,
-      snapJobHistoryId: job?.id ?? null,
-    };
+  for (const [i, p] of participants.entries()) {
+    const { cycleId: _c, revieweePersonId: _r, ...snap } = fresh[i];
     const same = (Object.keys(snap) as (keyof typeof snap)[]).every(
       (k) => p[k] === snap[k],
     );
@@ -91,6 +84,7 @@ async function refreshCycle(
       flagged: importedRequest.reviewerMismatch,
       csvName: importedRequest.csvReviewerName,
       asOfName: asOfManager.displayName,
+      writtenNow: reviewRequest.ingestRunId,
     })
     .from(reviewRequest)
     .innerJoin(
@@ -122,7 +116,11 @@ async function refreshCycle(
         .set({ reviewerMismatch: mismatch })
         .where(eq(reviewRequest.id, r.requestId));
     }
-    if (!mismatch) continue;
+    // Count and log what this run wrote (or newly flagged), not the cycle's
+    // whole history on every run.
+    if (!mismatch || (r.writtenNow !== runId && mismatch === r.flagged)) {
+      continue;
+    }
     mismatches++;
     reject({
       sourceId: r.sourceId?.replace(/#manager$/, "") ?? null,

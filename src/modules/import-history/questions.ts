@@ -80,7 +80,7 @@ export type Side = "self" | "manager";
 
 /** One question column of the report, as the revision it becomes. */
 export type QuestionColumn = {
-  /** Stable per cycle: "self:q1", "manager:custom:<lowercased text>". */
+  /** Stable per cycle: "self:q1", "manager:custom:<n>:<lowercased text>". */
   key: string;
   /** The exact header (the key into the row). */
   header: string;
@@ -117,7 +117,7 @@ export function detectQuestionColumns(headers: string[]): QuestionColumn[] {
     if (custom) {
       found.push({
         ...base,
-        key: `${side}:custom:${text.toLowerCase()}`,
+        key: `${side}:custom:${number}:${text.toLowerCase()}`,
         kind: "rating",
         visibleToReviewee: true,
         choices: null,

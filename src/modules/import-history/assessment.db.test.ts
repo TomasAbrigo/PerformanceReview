@@ -11,6 +11,9 @@ import {
   reviewCycle,
   reviewRequest,
 } from "@/db/schema";
+import { resolveIssue } from "@/modules/identity/service";
+import { IdentityError } from "@/modules/identity/errors";
+import { identityMatchIssue } from "@/db/schema";
 import { importReport, resetDb, writeCsv } from "./test-support";
 
 const HEADER = [
@@ -251,5 +254,112 @@ describe("assessment import: one row", () => {
       "2023-12-09",
       "2023-12-09",
     ]);
+  });
+});
+
+describe("assessment import: review findings", () => {
+  it("an issue raised for a report row is resolved by linking the failed name, and stays resolved on re-import", async () => {
+    const ana = await addPerson("Ana García");
+    const zoe = await addPerson("Zoé Nadal");
+    await job(zoe, "2020-01-01", ana);
+    const file = await writeCsv([
+      HEADER,
+      "Zoe Nadie,Ana García,Ingeniería,Ciclo 2023,2023-12-01,B,Cumplo,A,Ok,4,5",
+    ]);
+    await importReport(file);
+    const [issue] = await db.select().from(identityMatchIssue);
+    expect(issue.payload).toMatchObject({
+      failedRole: "employee",
+      failedName: "Zoe Nadie",
+    });
+    await expect(
+      resolveIssue(db, issue.id, { action: "create" }),
+    ).rejects.toBeInstanceOf(IdentityError);
+
+    await resolveIssue(db, issue.id, { action: "link", personId: zoe });
+
+    const [participant] = await db.select().from(cycleParticipant);
+    expect(participant.revieweePersonId).toBe(zoe);
+    expect(await db.$count(reviewRequest)).toBe(2);
+    expect(await db.$count(answer)).toBe(6);
+
+    const { counts } = await importReport(file);
+    expect(counts).toMatchObject({ issues: 0, unchanged: 1 });
+    expect(
+      await db.$count(
+        identityMatchIssue,
+        eq(identityMatchIssue.status, "open"),
+      ),
+    ).toBe(0);
+  });
+
+  it("a manager that matches nobody is the failed role of the issue", async () => {
+    const bruno = await addPerson("Bruno Pérez");
+    const ana = await addPerson("Ana García");
+    await job(bruno, "2020-01-01", ana);
+    const file = await writeCsv([
+      HEADER,
+      "Bruno Pérez,Zoe Nadie,Ingeniería,Ciclo 2023,2023-12-01,B,Cumplo,A,Ok,4,5",
+    ]);
+    await importReport(file);
+    const [issue] = await db.select().from(identityMatchIssue);
+    expect(issue.payload).toMatchObject({
+      failedRole: "manager",
+      failedName: "Zoe Nadie",
+    });
+    await resolveIssue(db, issue.id, { action: "link", personId: ana });
+    const [manager] = await db
+      .select()
+      .from(reviewRequest)
+      .where(eq(reviewRequest.relationship, "manager"));
+    expect(manager.reviewerPersonId).toBe(ana);
+  });
+
+  it("a second run only counts and logs the mismatches of what it wrote", async () => {
+    const ana = await addPerson("Ana García");
+    const carla = await addPerson("Carla Romero");
+    const bruno = await addPerson("Bruno Pérez");
+    await job(bruno, "2020-01-01", ana);
+    const file = await writeCsv([
+      HEADER,
+      "Bruno Pérez,Carla Romero,Ingeniería,Ciclo 2023,2023-12-01,B,Cumplo,A,Ok,4,5",
+    ]);
+    const first = await importReport(file);
+    expect(first.counts.mismatches).toBe(1);
+    expect(carla).toBeTruthy();
+
+    const second = await importReport(file);
+
+    expect(second.counts.mismatches).toBe(0);
+    const { getRun } = await import("@/modules/ingest/runs-queries");
+    expect((await getRun(db, second.runId))?.rejects).toEqual([]);
+  });
+
+  it("two assessments of one person in one cycle keep the latest, stably", async () => {
+    const ana = await addPerson("Ana García");
+    const bruno = await addPerson("Bruno Pérez");
+    await job(bruno, "2020-01-01", ana);
+    const file = await writeCsv([
+      HEADER,
+      "Bruno Pérez,Ana García,Ingeniería,Ciclo 2023,2023-06-01,B,Antes,A,Antes,4,5",
+      "Bruno Pérez,Ana García,Ingeniería,Ciclo 2023,2023-12-01,B,Despues,A,Despues,4,5",
+    ]);
+    await importReport(file);
+    const latest = async () =>
+      db
+        .select({ text: answer.textValue })
+        .from(answer)
+        .where(eq(answer.textValue, "Despues"));
+    expect(await latest()).toHaveLength(2);
+    expect(await db.$count(reviewRequest)).toBe(2);
+
+    const again = await importReport(file);
+
+    expect(again.counts).toMatchObject({ inserted: 0, updated: 0 });
+    expect(await latest()).toHaveLength(2);
+    const requests = await db.select().from(reviewRequest);
+    expect(requests.every((r) => r.sourceId?.includes("2023-12-01"))).toBe(
+      true,
+    );
   });
 });

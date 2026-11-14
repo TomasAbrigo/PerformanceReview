@@ -25,6 +25,8 @@ export type PayloadSummary = {
   hireDate: string | null;
   terminationDate: string | null;
   status: string | null;
+  /** Report rows: which name of the row failed (employee, manager, reviewer). */
+  role?: string | null;
 };
 
 export function summarizePayload(payload: unknown): PayloadSummary {
@@ -40,12 +42,16 @@ export function summarizePayload(payload: unknown): PayloadSummary {
       status: e.status,
     };
   }
-  // Report rows (historical import): only a name, under the profile's field.
-  const fields = (payload as { fields?: Record<string, unknown> } | null)
-    ?.fields;
-  const name = fields?.employee_name;
+  // Report rows (historical import): the name that failed, and its role.
+  const row = payload as {
+    fields?: Record<string, unknown>;
+    failedName?: unknown;
+    failedRole?: unknown;
+  } | null;
+  const name = row?.failedName ?? row?.fields?.employee_name;
   return {
     displayName: typeof name === "string" ? name : null,
+    role: typeof row?.failedRole === "string" ? row.failedRole : null,
     employeeNumber: null,
     workEmail: null,
     hireDate: null,
@@ -318,6 +324,26 @@ export async function resolveIssue(
 
     if (input.action === "ignore") return settle(resolution);
     if (issue.reason === "conflict") throw new IdentityError("invalid_action");
+
+    // Report rows (historical import) name people, they never create them.
+    const report = await import("@/modules/import-history/reprocess");
+    if (report.isReportEntity(issue.entity)) {
+      if (input.action !== "link") throw new IdentityError("invalid_action");
+      if (!input.personId) throw new IdentityError("person_required");
+      if (!isUuid(input.personId)) throw new IdentityError("not_found");
+      const [target] = await tx
+        .select({ id: person.id })
+        .from(person)
+        .where(eq(person.id, input.personId));
+      if (!target) throw new IdentityError("not_found");
+      // Settled first: the re-run reads the link, and a name of the row that
+      // still fails becomes a new issue.
+      const settled = await settle(resolution);
+      if (!(await report.reprocessReportRow(tx, settled))) {
+        throw new IdentityError("invalid_payload");
+      }
+      return settled;
+    }
 
     let decision: Decision = { action: "create" };
     if (input.action === "link") {

@@ -38,6 +38,7 @@ export const INGEST_COUNT_KEYS = [
   "rejected",
   "issues",
   "ignored",
+  "mismatches",
 ] as const satisfies readonly (keyof IngestCounts)[];
 
 export type IngestReject = {

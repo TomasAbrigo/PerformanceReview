@@ -1,19 +1,29 @@
 import { z } from "zod";
 import type { DbOrTx } from "@/db/client";
-import { historyImportRow } from "@/db/schema";
-import { closeOpenIssue, raiseIssue } from "@/modules/identity/raise";
+import { and, eq } from "drizzle-orm";
+import { historyImportRow, identityMatchIssue } from "@/db/schema";
+import {
+  closeOpenIssue,
+  openIssueSourceIds,
+  raiseIssue,
+} from "@/modules/identity/raise";
 import type { HandlerContext, HandlerOutcome } from "@/modules/ingest/handlers";
 import {
   answeredCells,
   ensureParticipant,
   ensureQuestions,
-  isoDate,
   saveAnswers,
   SOURCE,
   upsertImportedCycle,
   upsertRequest,
 } from "./cycles";
-import { loadNameIndex, matchName, type NameIndex } from "./names";
+import { parseReportDate } from "./dates";
+import {
+  loadNameIndex,
+  matchName,
+  type NameIndex,
+  type NameMatch,
+} from "./names";
 import { detectQuestionColumns, type QuestionColumn } from "./questions";
 
 const cell = z
@@ -30,23 +40,28 @@ const cell = z
  * over (profile `bamboo-employee-performance`): mapped fields, plus the row
  * under its original headers (the question columns).
  */
-export const stagedAssessmentSchema = z.object({
-  fields: z.object({
-    employee_name: cell.pipe(z.string({ message: "Employee Name is empty" })),
-    manager_name: cell,
-    review_cycle: cell.pipe(z.string({ message: "Review Cycle is empty" })),
-    assessment_date: z
-      .unknown()
-      .transform(isoDate)
-      .pipe(
-        z.string({
-          message:
-            "Assessment Date is missing or not a date (only Employee Performance rows can be imported as assessments)",
-        }),
-      ),
-  }),
-  raw: z.record(z.string(), z.unknown()),
-});
+export const stagedAssessmentSchema = z
+  .object({
+    fields: z.object({
+      employee_name: cell.pipe(z.string({ message: "Employee Name is empty" })),
+      manager_name: cell,
+      review_cycle: cell.pipe(z.string({ message: "Review Cycle is empty" })),
+      assessment_date: z.unknown(),
+    }),
+    raw: z.record(z.string(), z.unknown()),
+    dateFormat: z.enum(["mdy", "dmy"]).optional(),
+  })
+  .transform((row, ctx) => {
+    const date = parseReportDate(row.fields.assessment_date, row.dateFormat);
+    if (!date) {
+      ctx.addIssue({
+        code: "custom",
+        message: `Assessment Date "${String(row.fields.assessment_date ?? "")}" is missing or not a date (ISO, or day/month with the profile's dateFormat; only Employee Performance rows can be imported as assessments)`,
+      });
+      return z.NEVER;
+    }
+    return { ...row, fields: { ...row.fields, assessment_date: date } };
+  });
 export type StagedAssessment = z.infer<typeof stagedAssessmentSchema>;
 
 /** What one report row did, for the result screen. */
@@ -104,10 +119,61 @@ export async function recordRow(
     .onConflictDoNothing();
 }
 
+/** Which name of a row a person was looked up for. */
+export type RowRole = "employee" | "manager" | "reviewer";
+
+/** What an identity issue of a report row keeps besides the row. */
+export type ReportIssuePayload = {
+  failedRole: RowRole;
+  failedName: string;
+};
+
+/**
+ * Names a reviewer resolved by hand (identity queue, `link`), per row and
+ * role: they win over the name index on every later import of the row.
+ */
+async function resolvedLinks(
+  tx: DbOrTx,
+  cache: Map<string, unknown>,
+  entity: "assessment" | "feedback",
+): Promise<Map<string, Partial<Record<RowRole, string>>>> {
+  const key = `resolvedLinks:${entity}`;
+  let links = cache.get(key) as
+    Map<string, Partial<Record<RowRole, string>>> | undefined;
+  if (links) return links;
+  const rows = await tx
+    .select({
+      sourceId: identityMatchIssue.sourceId,
+      payload: identityMatchIssue.payload,
+      resolution: identityMatchIssue.resolution,
+    })
+    .from(identityMatchIssue)
+    .where(
+      and(
+        eq(identityMatchIssue.sourceSystem, SOURCE),
+        eq(identityMatchIssue.entity, entity),
+        eq(identityMatchIssue.status, "resolved"),
+      ),
+    );
+  links = new Map();
+  for (const row of rows) {
+    const role = (row.payload as Partial<ReportIssuePayload> | null)
+      ?.failedRole;
+    const personId = row.resolution?.personId;
+    if (!role || !personId || row.resolution?.action !== "link") continue;
+    links.set(row.sourceId, {
+      ...links.get(row.sourceId),
+      [role]: personId,
+    });
+  }
+  cache.set(key, links);
+  return links;
+}
+
 /**
  * Who a row is about and who wrote it, by name. Names that do not resolve to
- * exactly one person send the row to the identity queue (it is never
- * dropped): the result says what could not be resolved.
+ * exactly one person (and that nobody linked by hand) send the row to the
+ * identity queue, never dropped: the issue says which name and role failed.
  */
 export async function resolveRow(
   tx: DbOrTx,
@@ -117,35 +183,55 @@ export async function resolveRow(
   names: { reviewee: string; reviewer: string | null },
 ) {
   const index = await nameIndexOf(tx, ctx.cache);
-  const reviewee = matchName(index, names.reviewee);
-  const reviewer = names.reviewer ? matchName(index, names.reviewer) : null;
-  const failed = !("personId" in reviewee)
-    ? reviewee
+  const linked = (await resolvedLinks(tx, ctx.cache, entity)).get(sourceId);
+  const reviewerRole: RowRole =
+    entity === "assessment" ? "manager" : "reviewer";
+  const lookup = (role: RowRole, name: string): NameMatch =>
+    linked?.[role] ? { personId: linked[role] } : matchName(index, name);
+  const reviewee = lookup("employee", names.reviewee);
+  const reviewer = names.reviewer ? lookup(reviewerRole, names.reviewer) : null;
+  const failed: (NameMatch & ReportIssuePayload) | null = !(
+    "personId" in reviewee
+  )
+    ? { ...reviewee, failedRole: "employee", failedName: names.reviewee }
     : reviewer && !("personId" in reviewer)
-      ? reviewer
+      ? { ...reviewer, failedRole: reviewerRole, failedName: names.reviewer! }
       : null;
   let issue: { issueId: string } | { ignoredIssueId: string } | null = null;
-  if (failed) {
+  if (failed && !("personId" in failed)) {
     issue = await raiseIssue(tx, {
       source: SOURCE,
       entity,
       sourceId,
       runId: ctx.runId,
-      payload: ctx.payload,
+      payload: {
+        ...(ctx.payload as Record<string, unknown>),
+        failedRole: failed.failedRole,
+        failedName: failed.failedName,
+      },
       hash: ctx.hash,
       reason: failed.reason,
       candidates: failed.candidates,
     });
   } else {
-    await closeOpenIssue(
-      tx,
-      { source: SOURCE, entity, sourceId },
-      {
-        action: "link",
-        auto: true,
-        personId: (reviewee as { personId: string }).personId,
-      },
-    );
+    // Only rows that had an issue have one to close (one lookup per run).
+    let open = ctx.cache.get(`openIssues:${entity}`) as Set<string> | undefined;
+    if (!open) {
+      open = await openIssueSourceIds(tx, SOURCE, entity);
+      ctx.cache.set(`openIssues:${entity}`, open);
+    }
+    if (open.has(sourceId)) {
+      await closeOpenIssue(
+        tx,
+        { source: SOURCE, entity, sourceId },
+        {
+          action: "link",
+          auto: true,
+          personId: (reviewee as { personId: string }).personId,
+        },
+      );
+      open.delete(sourceId);
+    }
   }
   return {
     revieweeId: "personId" in reviewee ? reviewee.personId : null,
@@ -183,14 +269,19 @@ export async function upsertAssessment(
   const { fields, raw } = staged;
   const { sourceId } = ctx;
   const date = fields.assessment_date;
-  const cycle = await upsertImportedCycle(tx, {
-    name: fields.review_cycle,
-    date,
-    runId: ctx.runId,
-    widen: true,
-  });
+  const cycle = await upsertImportedCycle(
+    tx,
+    {
+      name: fields.review_cycle,
+      date,
+      runId: ctx.runId,
+      widen: true,
+    },
+    {},
+    ctx.cache,
+  );
   const columns = columnsOf(ctx.cache, Object.keys(raw));
-  const revisions = await ensureQuestions(tx, cycle.id, columns);
+  const revisions = await ensureQuestions(tx, cycle.id, columns, ctx.cache);
 
   const tally = emptyTally();
   const rejects: string[] = [];
@@ -202,7 +293,7 @@ export async function upsertAssessment(
     { reviewee: fields.employee_name, reviewer: fields.manager_name },
   );
 
-  const results: ("inserted" | "updated" | "unchanged")[] = [];
+  const results: ("inserted" | "updated" | "unchanged" | "superseded")[] = [];
   if (revieweeId) {
     const participant = await ensureParticipant(tx, cycle, revieweeId);
     if (participant.created) tally.participantsCreated++;
@@ -229,6 +320,12 @@ export async function upsertAssessment(
           side === "manager" && reviewer !== participant.snapManagerPersonId,
       });
       results.push(request.result);
+      if (request.result === "superseded") {
+        rejects.push(
+          `A later assessment of ${fields.employee_name} in "${fields.review_cycle}" replaces this ${side} review (one per cycle)`,
+        );
+        continue;
+      }
       if (request.result === "unchanged") {
         tally.requestsUnchanged++;
         tally.answersUnchanged += answeredCells(sideColumns, raw);

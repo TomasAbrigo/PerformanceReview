@@ -241,8 +241,11 @@ export async function participantFilterOptions(db: DbOrTx): Promise<{
   };
 }
 
-/** Org snapshots of reviewees as of `date`, via one org-history jobsAsOf query. */
-async function snapshots(
+/**
+ * Org snapshots of reviewees as of `date`, via one org-history jobsAsOf query.
+ * Also used by the historical import (src/modules/import-history).
+ */
+export async function snapshots(
   db: DbOrTx,
   cycleId: string,
   personIds: string[],
