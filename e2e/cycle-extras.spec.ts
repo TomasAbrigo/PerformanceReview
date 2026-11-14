@@ -5,6 +5,7 @@ import {
   byId,
   company,
   employees,
+  escapeRegExp,
   find,
   fullName,
   hasUniqueName,
@@ -50,6 +51,19 @@ async function createAndLaunch(page: Page) {
 const participantsTable = (page: Page) =>
   page.getByRole("table", { name: "Participantes" });
 
+/**
+ * The row OF a person (by the name in its first cell): filtering rows by text
+ * would also match the rows of the people who report to them.
+ */
+const rowOf = (page: Page, name: string) =>
+  participantsTable(page)
+    .getByRole("row")
+    .filter({
+      has: page.locator("td:first-child", {
+        hasText: new RegExp(`^\\s*${escapeRegExp(name)}\\s*$`),
+      }),
+    });
+
 test("duplicates a launched cycle into a draft that can be launched on its own", async ({
   page,
 }) => {
@@ -90,9 +104,7 @@ test("duplicates a launched cycle into a draft that can be launched on its own",
       hasUniqueName(byId.get(e.managerId)!),
     "person with a manager",
   );
-  const row = participantsTable(page)
-    .getByRole("row")
-    .filter({ hasText: fullName(member) });
+  const row = rowOf(page, fullName(member));
   await expect(
     row.getByText(fullName(byId.get(member.managerId!)!)),
   ).toBeVisible();
@@ -148,13 +160,9 @@ test("creates a cycle with template groups and shows who got which group", async
     groups.getByRole("row").filter({ hasText: groupName }),
   ).toBeVisible();
   await expect(groups.getByText(/Plantilla del ciclo:/)).toBeVisible();
-  const inGroup = participantsTable(page)
-    .getByRole("row")
-    .filter({ hasText: fullName(member) });
+  const inGroup = rowOf(page, fullName(member));
   await expect(inGroup.getByText(groupName)).toBeVisible();
-  const outside = participantsTable(page)
-    .getByRole("row")
-    .filter({ hasText: fullName(other) });
+  const outside = rowOf(page, fullName(other));
   await expect(outside.getByText("Sin grupo")).toBeVisible();
 });
 
@@ -212,9 +220,7 @@ test("a hire-date cycle enrolls people through the cycles:enroll CLI", async ({
   expect(again).toContain("0 enrolled");
 
   await page.reload();
-  const row = participantsTable(page)
-    .getByRole("row")
-    .filter({ hasText: fullName(hired) });
+  const row = rowOf(page, fullName(hired));
   // Own deadline: milestone + 1 week.
   await expect(row.getByText(addDays(milestone, 7))).toBeVisible();
 });
