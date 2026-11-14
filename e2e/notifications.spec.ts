@@ -25,12 +25,16 @@ async function actAs(page: Page, person: string | null, role: string) {
 /** Launches a cycle with everyone active (self due in 7 days) and moves it to collecting. */
 async function collectingCycle(page: Page, name: string, selfDue: string) {
   await page.goto("/es/cycles/new");
-  await expect(page.getByText("Paso 1 de 4")).toBeVisible();
-  await page.getByLabel("Fecha de snapshot organizacional").fill("2022-06-01");
+  const snapshot = page.getByLabel("Fecha de snapshot organizacional");
+  await expect(snapshot).toBeVisible();
+  await snapshot.fill("2022-06-01");
   await expect(page.getByText(/\d+ personas coinciden/)).toBeVisible();
-  await page.getByRole("button", { name: "Siguiente" }).click();
-  await page.getByRole("button", { name: "Siguiente" }).click();
-  await page.getByLabel("Nombre del ciclo").fill(name);
+  // Next until the dates step (the wizard may gain optional steps before it).
+  const nameField = page.getByLabel("Nombre del ciclo");
+  for (let i = 0; i < 4 && !(await nameField.isVisible()); i++) {
+    await page.getByRole("button", { name: "Siguiente" }).click();
+  }
+  await nameField.fill(name);
   await page.getByLabel("Inicio del período").fill("2022-01-01");
   await page.getByLabel("Fin del período").fill("2022-06-30");
   await page.getByLabel("Autoevaluación").fill(selfDue);
