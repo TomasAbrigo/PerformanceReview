@@ -1,6 +1,9 @@
 import { sql } from "drizzle-orm";
 import type { Database } from "@/db/client";
 
+/** The advisory lock key of an entity's runs: the CLI and the seed take the same one. */
+export const ingestLockKey = (entity: string) => `ingest:${entity}`;
+
 /**
  * Runs `fn` while holding a Postgres advisory lock named `key`, waiting if
  * another process holds it. Two overlapping runs of the same entity (a slow
