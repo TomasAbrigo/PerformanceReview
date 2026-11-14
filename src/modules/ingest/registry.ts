@@ -5,7 +5,11 @@ import { BambooApiAdapter } from "./bamboo-api-adapter";
 import { FixtureAdapter } from "./fixture-adapter";
 import { entityHandlers } from "./handlers";
 import { runIngest, type RunIngestResult } from "./run-ingest";
-import type { Entity, SourceAdapter } from "./types";
+import type { Entity, IngestEntity, SourceAdapter } from "./types";
+
+/** Report-only entities (assessment, feedback) come from files, never the CLI. */
+const isCliEntity = (entity: IngestEntity): entity is Entity =>
+  entity !== "assessment" && entity !== "feedback";
 
 /** Where the saved Bamboo API responses used by the `fixture` source live. */
 export const DEFAULT_FIXTURES_DIR = "src/modules/bamboo-client/__fixtures__";
@@ -85,9 +89,9 @@ const viaRunIngest = (entity: Entity): EntityEntry => ({
  *   run ends in error, as `runGoalIngest` does.
  */
 export const REGISTRY = new Map<string, EntityEntry>([
-  ...(Object.keys(entityHandlers) as Entity[]).map(
-    (entity) => [entity, viaRunIngest(entity)] as const,
-  ),
+  ...(Object.keys(entityHandlers) as IngestEntity[])
+    .filter(isCliEntity)
+    .map((entity) => [entity, viaRunIngest(entity)] as const),
   [
     "goal",
     {

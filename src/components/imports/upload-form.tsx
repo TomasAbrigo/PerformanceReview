@@ -13,6 +13,7 @@ import {
   type SourceProfile,
 } from "@/modules/lake/profiles";
 import {
+  HISTORY_PROFILES,
   UPLOAD_EXTENSIONS,
   UPLOAD_MAX_BYTES,
   type ImportResult,
@@ -37,6 +38,8 @@ export type UploadActions = {
     uploadId: string;
     fileName: string;
     profile: ProfileChoice;
+    /** History profiles only: land the rows instead of creating cycles. */
+    landing?: boolean;
   }) => Promise<ImportResult>;
 };
 
@@ -134,13 +137,14 @@ export function UploadForm({
           setError(null);
           setPhase({ step: "choose" });
         }}
-        onImport={(choice, created) => {
+        onImport={(choice, created, landing) => {
           setError(null);
           startImport(async () => {
             const result = await actions.importFile({
               uploadId: phase.file.uploadId,
               fileName: phase.file.fileName,
               profile: choice,
+              ...(landing === undefined ? {} : { landing }),
             });
             if (!result.ok) {
               setError(result.code);
@@ -158,7 +162,11 @@ export function UploadForm({
             setPhase({ step: "done", result });
             // The run's page has the full detail; the result below stays
             // as the fallback while it loads.
-            router.push(`/imports/runs/${result.runId}`);
+            router.push(
+              result.mode === "domain"
+                ? `/imports/history/${result.runId}`
+                : `/imports/runs/${result.runId}`,
+            );
           });
         }}
       />
@@ -220,11 +228,20 @@ function Preview({
   pending: boolean;
   error: string | null;
   onBack: () => void;
-  /** `created`: the new profile the import will save, if it is one. */
-  onImport: (choice: ProfileChoice, created: SourceProfile | null) => void;
+  /**
+   * `created`: the new profile the import will save, if it is one.
+   * `landing`: for history profiles, whether to only land the rows.
+   */
+  onImport: (
+    choice: ProfileChoice,
+    created: SourceProfile | null,
+    landing?: boolean,
+  ) => void;
 }) {
   const t = useTranslations("Upload");
   const selectId = useId();
+  const landingId = useId();
+  const [landingOnly, setLandingOnly] = useState(false);
   const issuesOf = (profile: SourceProfile) =>
     validateAgainstSchema(profile, file.columns);
 
@@ -319,6 +336,28 @@ function Preview({
         />
       ) : null}
 
+      {choice &&
+      "builtin" in choice &&
+      HISTORY_PROFILES.includes(choice.builtin) ? (
+        <div className="flex max-w-xl flex-col gap-1">
+          <div className="flex items-center gap-2">
+            <input
+              id={landingId}
+              type="checkbox"
+              className="size-4"
+              checked={landingOnly}
+              onChange={(e) => setLandingOnly(e.target.checked)}
+            />
+            <label htmlFor={landingId} className="text-sm font-medium">
+              {t("preview.landingOnly")}
+            </label>
+          </div>
+          <p className="text-sm text-muted-foreground">
+            {landingOnly ? t("preview.landingHint") : t("preview.historyHint")}
+          </p>
+        </div>
+      ) : null}
+
       <IssueList issues={issues} />
 
       {isNew ? null : (
@@ -348,7 +387,16 @@ function Preview({
       <div className="flex flex-wrap gap-2">
         <Button
           disabled={!canImport}
-          onClick={() => choice && onImport(choice, isNew ? profile : null)}
+          onClick={() =>
+            choice &&
+            onImport(
+              choice,
+              isNew ? profile : null,
+              "builtin" in choice && HISTORY_PROFILES.includes(choice.builtin)
+                ? landingOnly
+                : undefined,
+            )
+          }
         >
           {pending ? t("preview.importing") : t("preview.import")}
         </Button>

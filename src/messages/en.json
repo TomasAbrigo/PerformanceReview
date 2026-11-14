@@ -203,7 +203,8 @@
         "issues": "In queue",
         "ignored": "Ignored",
         "log": "Log entries",
-        "duration": "Duration"
+        "duration": "Duration",
+        "mismatches": "Reviewer mismatches"
       },
       "status": {
         "running": "Running",
@@ -354,7 +355,8 @@
         "bamboo_id": "Bamboo ID",
         "employee_number": "Employee number",
         "work_email": "Email",
-        "name_hire_date": "Name and hire date"
+        "name_hire_date": "Name and hire date",
+        "name": "Name"
       },
       "score": "{score}% match",
       "employments": "Employment",
@@ -390,6 +392,11 @@
       "label": "Pages",
       "older": "Older cases",
       "newest": "Back to the newest"
+    },
+    "roles": {
+      "employee": "employee",
+      "manager": "manager",
+      "reviewer": "reviewer"
     }
   },
   "Cycles": {
@@ -415,7 +422,9 @@
       "closed": "Closed"
     },
     "extras": {
-      "steps": { "groups": "Groups" },
+      "steps": {
+        "groups": "Groups"
+      },
       "duplicate": {
         "button": "Duplicate cycle",
         "pending": "Duplicating…",
@@ -480,7 +489,10 @@
         "inScope": "{count, plural, one {# person in scope; joins on reaching the milestone} other {# people in scope; they join on reaching the milestone}}",
         "summary": "Milestone: {milestone} · {window} window"
       },
-      "detail": { "group": "Group", "due": "Due" }
+      "detail": {
+        "group": "Group",
+        "due": "Due"
+      }
     },
     "wizard": {
       "title": "New cycle",
@@ -697,7 +709,10 @@
       "import": "Import",
       "importing": "Importing…",
       "another": "Choose another file",
-      "blocked": "Fix the profile problems to be able to import."
+      "blocked": "Fix the profile problems to be able to import.",
+      "landingOnly": "Only land the rows",
+      "historyHint": "The rows become historical review cycles, with their participants, requests and answers.",
+      "landingHint": "The rows are kept as they are (raw), without creating cycles."
     },
     "roles": {
       "key": "Key",
@@ -809,7 +824,9 @@
     "sharedCount": "{count, plural, =0 {There were no reviews to share.} one {# review was shared.} other {# reviews were shared.}}",
     "resultTitle": "Your manager's review: {cycle}",
     "notSharedYet": "Your review has not been shared yet.",
-    "backToTasks": "Back to my tasks"
+    "backToTasks": "Back to my tasks",
+    "goalsTitle": "Goals",
+    "goalsPlaceholder": "The period's goals will be shown here."
   },
   "Ops": {
     "actions": {
@@ -1217,5 +1234,28 @@
       "added_at": "added_at",
       "removed_at": "removed_at"
     }
+  },
+  "ImportHistory": {
+    "title": "Historical import",
+    "back": "← Import runs",
+    "summary": "{count, plural, one {# cycle detected in the file} other {# cycles detected in the file}}",
+    "cycles": "Detected cycles",
+    "columns": {
+      "cycle": "Cycle",
+      "period": "Period",
+      "rows": "Rows",
+      "participants": "New participants",
+      "requests": "Requests",
+      "answers": "Answers",
+      "issues": "Identity cases",
+      "mismatches": "Different reviewer"
+    },
+    "period": "{start} – {end}",
+    "createdUnchanged": "{created} new · {unchanged} unchanged",
+    "mismatchHint": "Different reviewer: the file's manager is not the one in force at the end of the period (the participant keeps the one in force).",
+    "viewRun": "View the run",
+    "viewQueue": "View the identity queue",
+    "viewResult": "View imported cycles",
+    "notFound": "This run imported no historical cycles."
   }
 }
