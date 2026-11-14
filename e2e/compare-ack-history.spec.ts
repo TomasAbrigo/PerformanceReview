@@ -1,4 +1,10 @@
-import { expect, type Page, test } from "@playwright/test";
+import { expect as baseExpect, type Page, test } from "@playwright/test";
+
+/**
+ * First visits compile each route (and server action) in `next dev`, which
+ * can take long on a busy machine: give every assertion of this long flow room.
+ */
+const expect = baseExpect.configure({ timeout: 30_000 });
 
 /** Uses the header "Actuar como" selector. */
 async function actAs(page: Page, person: string | null, role: string) {
@@ -135,12 +141,13 @@ test("compare, follow-up note, acknowledgement and history of a shared review", 
   // "Employee view" hides what the employee cannot see (screen sharing).
   const toggle = page.getByRole("checkbox", { name: "Vista del empleado" });
   await toggle.check();
-  await expect(page.getByText(HIDDEN)).toHaveCount(0);
+  // (Role queries: Next keeps the previous page, the form, mounted but hidden.)
+  await expect(hiddenRow).toHaveCount(0);
   await expect(
     page.getByText("Mostrando solo lo que verá el empleado."),
   ).toBeVisible();
   await toggle.uncheck();
-  await expect(page.getByText(HIDDEN)).toBeVisible();
+  await expect(hiddenRow).toBeVisible();
 
   // Follow-up note after the conversation; the acknowledgement is pending.
   await expect(
