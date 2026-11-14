@@ -118,3 +118,27 @@ describe("reviewerVisible", () => {
     expect(reviewerVisible(actors.reviewee, c)).toBe(true);
   });
 });
+
+describe("reviewerVisible hideFromAuthor", () => {
+  // The author reads who wrote their own request, unless the caller says
+  // they are no different from anyone else (the API never tells).
+  it("keeps the author shortcut by default and drops it on request", () => {
+    for (const mode of modes) {
+      const c = ctx(mode);
+      expect(reviewerVisible(actors.peer, c)).toBe(true);
+      expect(reviewerVisible(actors.peer, c, { hideFromAuthor: true })).toBe(
+        mode !== "fully_anonymous",
+      );
+    }
+  });
+
+  it("changes nothing for anybody else", () => {
+    for (const mode of modes) {
+      for (const actor of ["hr", "reviewee", "manager", "other"] as const) {
+        expect(
+          reviewerVisible(actors[actor], ctx(mode), { hideFromAuthor: true }),
+        ).toBe(reviewerVisible(actors[actor], ctx(mode)));
+      }
+    }
+  });
+});

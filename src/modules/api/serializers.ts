@@ -8,6 +8,11 @@ import type {
   PersonDetail,
   PersonRow,
 } from "./queries/people";
+import type {
+  AnswerRow,
+  QuestionRevisionRow,
+  RequestRow,
+} from "./queries/reviews";
 import type { RunDetail, RunRow } from "./queries/runs";
 import { sourceOf, type PersonRef } from "./queries/shared";
 
@@ -212,4 +217,103 @@ export const serializeIssue = (i: IssueRow) => ({
   resolution: i.resolution,
   created_at: i.createdAt,
   resolved_at: i.resolvedAt,
+});
+
+// ------------------------------------------------------- review requests
+
+/**
+ * A review request. `reviewer` is null when the request has none or when
+ * anonymity hides them (`reviewer_visible: false`, see queries/reviews.ts).
+ */
+export const serializeRequest = (r: RequestRow) => ({
+  id: r.id,
+  source: sourceOf(r.sourceSystem, r.sourceId),
+  cycle_id: r.cycleId,
+  relationship: r.relationship,
+  status: r.status,
+  participant: {
+    id: r.participantId,
+    removed_at: r.participantRemovedAt,
+    current_rating: r.currentRating
+      ? {
+          stage: r.currentRating.stage,
+          option_value: r.currentRating.optionValue,
+          option_label: r.currentRating.optionLabel,
+          normalized: r.currentRating.normalized,
+          created_at: r.currentRating.createdAt,
+        }
+      : null,
+    snapshot: {
+      as_of: r.snapshotAsOf,
+      manager: ref(r.snapManager),
+      department: r.snapDepartment,
+      division: r.snapDivision,
+      job_title: r.snapJobTitle,
+      location: r.snapLocation,
+      job_history_id: r.snapJobHistoryId,
+    },
+  },
+  reviewee: serializePersonRef(r.reviewee),
+  reviewer: ref(r.reviewer),
+  reviewer_visible: r.reviewerVisible,
+  reviewer_missing: r.reviewerMissing,
+  reviewer_mismatch: r.reviewerMismatch,
+  additional: r.additional,
+  assigned_by_hr: r.assignedByHr,
+  submitted_on_behalf: r.submittedOnBehalf,
+  requested_at: r.requestedAt,
+  submitted_at: r.submittedAt,
+  declined_at: r.declinedAt,
+  unlocked_at: r.unlockedAt,
+  shared_at: r.sharedAt,
+  answer_count: r.answerCount,
+  created_at: r.createdAt,
+  updated_at: r.updatedAt,
+});
+
+export const serializeRequestDetail = (r: RequestRow) => ({
+  ...serializeRequest(r),
+  cycle: {
+    id: r.cycleId,
+    source: sourceOf(r.cycleSourceSystem, r.cycleSourceId),
+    name: r.cycleName,
+    status: r.cycleStatus,
+    anonymity: r.cycleAnonymity,
+  },
+});
+
+export const serializeAnswer = (a: AnswerRow) => ({
+  id: a.id,
+  request_id: a.requestId,
+  question: {
+    id: a.question.id,
+    prompt: a.question.prompt,
+    kind: a.question.kind,
+    role: a.question.role,
+    visible_to_reviewee: a.question.visibleToReviewee,
+    sort: a.question.sort,
+  },
+  option_value: a.optionValue,
+  option_label: a.optionLabel,
+  normalized: a.normalized,
+  text: a.text,
+  updated_at: a.updatedAt,
+});
+
+export const serializeQuestionRevision = (q: QuestionRevisionRow) => ({
+  id: q.id,
+  cycle_id: q.cycleId,
+  question_id: q.questionId,
+  group_id: q.groupId,
+  section_title: q.sectionTitle,
+  prompt: q.prompt,
+  kind: q.kind,
+  role: q.role,
+  applies_to: q.appliesTo,
+  visible_to_reviewee: q.visibleToReviewee,
+  required: q.required,
+  scale: q.scale,
+  choices: q.choices,
+  sort: q.sort,
+  created_at: q.createdAt,
 });

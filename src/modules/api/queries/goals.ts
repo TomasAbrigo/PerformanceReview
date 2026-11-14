@@ -11,6 +11,7 @@ import {
   identityCtes,
   iso,
   personRef,
+  uuidList,
   type PersonRef,
 } from "./shared";
 
@@ -75,12 +76,6 @@ type Raw = Omit<GoalRow, "person" | "manager" | "milestones" | "sharedWith"> & {
   managerBambooId: string | null;
   managerName: string | null;
 };
-
-const uuidList = (ids: string[]) =>
-  sql.join(
-    ids.map((id) => sql`${id}::uuid`),
-    sql`, `,
-  );
 
 /** Goals (never the deleted ones), oldest first by (created_at, id), with milestones and sharing. */
 export async function listGoalRows(

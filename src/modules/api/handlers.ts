@@ -3,11 +3,13 @@ import { db } from "@/db/client";
 import { identityIssueStatuses } from "@/db/schema";
 import { exportCsv } from "@/modules/exports/entities";
 import { RUN_STATUSES } from "@/modules/ingest/run-status";
+import { requestStatuses } from "@/modules/review-core/request-status";
+import { relationships } from "@/modules/templates/constants";
 import { todayLocal } from "@/modules/org-history/dates";
 import { notFound } from "./errors";
 import { apiRoute, ok, parseQuery } from "./http";
 import { bool, isoDate, uuid } from "./params";
-import { pageParams, type Page } from "./pagination";
+import { decodeCursor, pageParams, type Page } from "./pagination";
 import { getCycleDetail, listCycleRows } from "./queries/cycles";
 import { goalStatuses, listGoalRows } from "./queries/goals";
 import { listIssueRows } from "./queries/issues";
@@ -17,8 +19,17 @@ import {
   listPeopleRows,
   personExists,
 } from "./queries/people";
-import { getRunDetail, listRunRows } from "./queries/runs";
 import {
+  cycleExists,
+  getRequestRow,
+  listAnswerRows,
+  listQuestionRevisionRows,
+  listRequestRows,
+} from "./queries/reviews";
+import { getRunDetail, listRunRows } from "./queries/runs";
+import { checkScope, scopeActor, scopeFields, scopeQuery } from "./scope";
+import {
+  serializeAnswer,
   serializeCycle,
   serializeCycleDetail,
   serializeGoal,
@@ -26,6 +37,9 @@ import {
   serializeOrgRow,
   serializePerson,
   serializePersonDetail,
+  serializeQuestionRevision,
+  serializeRequest,
+  serializeRequestDetail,
   serializeRun,
   serializeRunDetail,
 } from "./serializers";
@@ -156,6 +170,83 @@ export const listIdentityIssuesRoute = apiRoute(async (request) => {
   const query = parseQuery(request, issuesQuery);
   return ok(envelope(await listIssueRows(db, query), serializeIssue));
 });
+
+// ------------------------------------------------- review requests, answers
+
+/**
+ * Review data is read as HR by default (the API is an integration surface:
+ * see scope.ts) and, with `?as_person=&role=`, as a person (canRead).
+ * Peer/upward reviewers under `fully_anonymous` are never exposed.
+ */
+export const requestsQuery = pageParams
+  .extend({
+    relationship: z.enum(relationships).optional(),
+    status: z.enum(requestStatuses).optional(),
+    participant_id: uuid.optional(),
+    ...scopeFields,
+  })
+  .superRefine(checkScope);
+
+export const listCycleRequestsRoute = apiRoute<{ id: string }>(
+  async (request, { id }) => {
+    const { participant_id, scope, as_person, role, ...query } = parseQuery(
+      request,
+      requestsQuery,
+    );
+    // The cursor first: a bad one is a 400 whatever else is wrong.
+    decodeCursor(query.cursor, "ts_id");
+    const [exists, actor] = await Promise.all([
+      cycleExists(db, id),
+      scopeActor(db, { scope, as_person, role }),
+    ]);
+    if (!exists) throw notFound("Cycle");
+    const page = await listRequestRows(db, {
+      ...query,
+      cycleId: id,
+      participantId: participant_id,
+      actor,
+    });
+    return ok(envelope(page, serializeRequest));
+  },
+);
+
+export const getRequestRoute = apiRoute<{ id: string }>(
+  async (request, { id }) => {
+    const scope = parseQuery(request, scopeQuery);
+    const actor = await scopeActor(db, scope);
+    const row = await detailOr404("Request", () =>
+      getRequestRow(db, id, actor),
+    );
+    return ok({ data: serializeRequestDetail(row) });
+  },
+);
+
+const answersQuery = pageParams.extend(scopeFields).superRefine(checkScope);
+
+export const listRequestAnswersRoute = apiRoute<{ id: string }>(
+  async (request, { id }) => {
+    const { scope, as_person, role, ...query } = parseQuery(
+      request,
+      answersQuery,
+    );
+    decodeCursor(query.cursor, "n_id");
+    const actor = await scopeActor(db, { scope, as_person, role });
+    const page = await detailOr404("Request", () =>
+      listAnswerRows(db, id, { ...query, actor }),
+    );
+    return ok(envelope(page, serializeAnswer));
+  },
+);
+
+export const listQuestionRevisionsRoute = apiRoute<{ id: string }>(
+  async (request, { id }) => {
+    const query = parseQuery(request, pageParams);
+    const page = await detailOr404("Cycle", () =>
+      listQuestionRevisionRows(db, id, query),
+    );
+    return ok(envelope(page, serializeQuestionRevision));
+  },
+);
 
 // --------------------------------------------------------------- exports
 
