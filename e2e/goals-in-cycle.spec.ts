@@ -59,7 +59,7 @@ async function actAs(page: Page, person: string | null, role: string) {
  */
 async function collectingCycle(page: Page, name: string) {
   await page.goto("/es/cycles/new");
-  await expect(page.getByText("Paso 1 de 4")).toBeVisible();
+  await expect(page.getByText("Paso 1 de 5")).toBeVisible();
   // Filling the date again until the form took it keeps a slow hydration from
   // eating it: the preview then matches whoever had a job that day.
   await expect(async () => {
@@ -75,6 +75,8 @@ async function collectingCycle(page: Page, name: string) {
     .getByLabel("Plantilla")
     .selectOption({ label: "Evaluación de fin de año" });
   await page.getByLabel("Calibración", { exact: true }).uncheck();
+  await page.getByRole("button", { name: "Siguiente" }).click();
+  // Template groups are optional: skip the step.
   await page.getByRole("button", { name: "Siguiente" }).click();
   await page.getByLabel("Nombre del ciclo").fill(name);
   await page.getByLabel("Inicio del período").fill("2000-01-01");

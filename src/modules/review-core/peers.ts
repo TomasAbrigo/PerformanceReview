@@ -1,6 +1,5 @@
 import {
   and,
-  arrayOverlaps,
   asc,
   count,
   eq,
@@ -22,7 +21,6 @@ import {
   peerNomination,
   type PeerNomination,
   person,
-  questionRevision,
   reviewCycle,
   type ReviewCycle,
   reviewRequest,
@@ -31,7 +29,7 @@ import {
 import { isUuid } from "@/lib/uuid";
 import type { ActorContext } from "@/modules/actor/types";
 import type { Relationship } from "@/modules/templates/constants";
-import { answerValueOf, type Review } from "./answers";
+import { answerValueOf, questionsFor, type Review } from "./answers";
 import {
   type NominationStatus,
   type PeerApproval,
@@ -716,16 +714,13 @@ export async function listPeerFeedback(
     : false;
   const readable = rows.filter((r) => canRead(actor, { ...r, revieweeShared }));
   if (readable.length === 0) return [];
-  const questions = await db
-    .select()
-    .from(questionRevision)
-    .where(
-      and(
-        eq(questionRevision.cycleId, cycle.id),
-        arrayOverlaps(questionRevision.appliesTo, ["peer", "upward"]),
-      ),
-    )
-    .orderBy(asc(questionRevision.sort));
+  // The participant's question set (template group); filtered per
+  // relationship below.
+  const questions = await questionsFor(
+    db,
+    cycle.id,
+    participant.templateGroupId,
+  );
   const answers = await db
     .select()
     .from(answer)

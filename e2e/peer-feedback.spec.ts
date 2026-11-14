@@ -51,7 +51,7 @@ async function actAs(page: Page, person: string | null, role: string) {
 /** Launches a cycle with peers on (default anonymity: anonymous to employee). */
 async function nominationsCycle(page: Page, name: string) {
   await page.goto("/es/cycles/new");
-  await expect(page.getByText("Paso 1 de 4")).toBeVisible();
+  await expect(page.getByText("Paso 1 de 5")).toBeVisible();
   await page.getByLabel("Fecha de snapshot organizacional").fill(company.asOf);
   await expect(page.getByText(/\d+ personas coinciden/)).toBeVisible();
   await page.getByRole("button", { name: "Siguiente" }).click();
@@ -60,6 +60,8 @@ async function nominationsCycle(page: Page, name: string) {
   );
   // Without calibration, sharing needs no published calibration (#16).
   await page.getByLabel("Calibración", { exact: true }).uncheck();
+  await page.getByRole("button", { name: "Siguiente" }).click();
+  // Template groups are optional: skip the step.
   await page.getByRole("button", { name: "Siguiente" }).click();
   await page.getByLabel("Nombre del ciclo").fill(name);
   await page.getByLabel("Inicio del período").fill("2022-01-01");
