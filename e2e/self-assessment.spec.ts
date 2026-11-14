@@ -1,4 +1,22 @@
 import { expect, type Page, test } from "@playwright/test";
+import {
+  company,
+  directReports,
+  employees,
+  find,
+  fullName,
+  hasUniqueName,
+  isActive,
+} from "./seed-data";
+
+// Someone in the org on the snapshot day with no reports (so no other
+// participant row mentions their name) and a name the selectors can pick.
+const employee = find(
+  employees,
+  (e) => isActive(e) && hasUniqueName(e) && directReports(e).length === 0,
+  "person with no reports and a unique name",
+);
+const employeeName = fullName(employee);
 
 /** Uses the header "Actuar como" selector. */
 async function actAs(page: Page, person: string | null, role: string) {
@@ -18,7 +36,7 @@ async function actAs(page: Page, person: string | null, role: string) {
 async function collectingCycle(page: Page, name: string): Promise<string> {
   await page.goto("/es/cycles/new");
   await expect(page.getByText("Paso 1 de 5")).toBeVisible();
-  await page.getByLabel("Fecha de snapshot organizacional").fill("2022-06-01");
+  await page.getByLabel("Fecha de snapshot organizacional").fill(company.asOf);
   await expect(page.getByText(/\d+ personas coinciden/)).toBeVisible();
   await page.getByRole("button", { name: "Siguiente" }).click();
   await page.getByRole("button", { name: "Siguiente" }).click();
@@ -46,8 +64,8 @@ test("an employee fills and submits their self assessment; HR unlocks it", async
   const name = `Autoevaluación e2e ${Date.now()}`;
   const cycleUrl = await collectingCycle(page, name);
 
-  // Act as Bruno (employee): the task shows in the inbox.
-  await actAs(page, "Bruno Pérez", "Empleado");
+  // Act as the employee: the task shows in the inbox.
+  await actAs(page, employeeName, "Empleado");
   await page.goto("/es/me");
   await expect(
     page.getByRole("heading", { level: 1, name: "Mis tareas" }),
@@ -92,15 +110,15 @@ test("an employee fills and submits their self assessment; HR unlocks it", async
   const row = page
     .getByRole("table", { name: "Participantes" })
     .getByRole("row")
-    .filter({ hasText: "Bruno Pérez" });
+    .filter({ hasText: employeeName });
   await expect(row.getByText("Enviada")).toBeVisible();
   await row.getByRole("button", { name: "Desbloquear" }).click();
   await row.getByLabel("Motivo del desbloqueo").fill("Agregar un ejemplo");
   await row.getByRole("button", { name: "Confirmar desbloqueo" }).click();
   await expect(row.getByText("Borrador")).toBeVisible();
 
-  // Bruno sees an editable draft again, with his answers.
-  await actAs(page, "Bruno Pérez", "Empleado");
+  // The employee sees an editable draft again, with their answers.
+  await actAs(page, employeeName, "Empleado");
   await page.goto(cycleUrl + "/self");
   await expect(
     page.getByRole("heading", { level: 1, name: `Autoevaluación: ${name}` }),

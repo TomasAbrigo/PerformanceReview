@@ -21,6 +21,7 @@
     "db:studio": "drizzle-kit studio",
     "db:reset": "supabase db reset",
     "cycles:enroll": "tsx scripts/cycles-enroll.ts",
+    "db:seed": "tsx scripts/db-seed.ts",
     "ingest": "tsx scripts/ingest.ts",
     "ingest:employees": "tsx scripts/ingest-employees.ts",
     "ingest:goals": "tsx scripts/ingest-employees.ts --entity goal",

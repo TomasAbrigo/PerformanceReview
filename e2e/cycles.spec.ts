@@ -1,4 +1,23 @@
 import { expect, test } from "@playwright/test";
+import {
+  byId,
+  company,
+  directReports,
+  employedOn,
+  employees,
+  find,
+  fullName,
+  hasUniqueName,
+  isActive,
+} from "./seed-data";
+
+// Participants are resolved (and frozen) as of the fictional "today" of the
+// generated company: the managers of the current job rows are resolved there
+// (older rows only carry the manager's name).
+const snapshot = company.asOf;
+const inOrg = employedOn(snapshot);
+const personasCoinciden = (n: number) =>
+  `${n} ${n === 1 ? "persona coincide" : "personas coinciden"}`;
 
 test("creates and launches a cycle with a frozen org snapshot", async ({
   page,
@@ -11,10 +30,8 @@ test("creates and launches a cycle with a frozen org snapshot", async ({
 
   // Step 1: everyone in the org on the snapshot date.
   await expect(page.getByText("Paso 1 de 5")).toBeVisible();
-  // Participants are resolved (and frozen) as of 2022-06-01, when Bruno
-  // still reported to Carla.
-  await page.getByLabel("Fecha de snapshot organizacional").fill("2022-06-01");
-  await expect(page.getByText(/\d+ personas coinciden/)).toBeVisible();
+  await page.getByLabel("Fecha de snapshot organizacional").fill(snapshot);
+  await expect(page.getByText(personasCoinciden(inOrg.length))).toBeVisible();
   await page.getByRole("button", { name: "Siguiente" }).click();
 
   // Step 2: defaults.
@@ -36,7 +53,7 @@ test("creates and launches a cycle with a frozen org snapshot", async ({
   // Step 5: review and launch.
   await expect(page.getByText("Paso 5 de 5")).toBeVisible();
   await expect(
-    page.getByText(/Se lanzará con \d+ participantes/),
+    page.getByText(`Se lanzará con ${inOrg.length} participantes`),
   ).toBeVisible();
   await page.getByRole("button", { name: "Crear y lanzar" }).click();
 
@@ -45,13 +62,30 @@ test("creates and launches a cycle with a frozen org snapshot", async ({
   await expect(page.getByText("Nominaciones").first()).toBeVisible();
 
   const participants = page.getByRole("table", { name: "Participantes" });
-  const bruno = participants
+  // Someone with no reports (so no other row mentions them) and a manager
+  // who was in the org that day: the row freezes the manager and the job.
+  const member = find(
+    employees,
+    (e) =>
+      isActive(e) &&
+      hasUniqueName(e) &&
+      directReports(e).length === 0 &&
+      e.managerId !== null &&
+      // A manager that is not a person (a rehire still in the queue) has no name to show.
+      byId.has(e.managerId) &&
+      hasUniqueName(byId.get(e.managerId)!),
+    "person with a manager and no reports",
+  );
+  const row = participants
     .getByRole("row")
-    .filter({ hasText: "Bruno Pérez" });
-  await expect(bruno.getByText("Carla Romero")).toBeVisible();
-  await expect(bruno.getByText("Developer", { exact: true })).toBeVisible();
-  const ana = participants.getByRole("row").filter({ hasText: "Ana García" });
-  await expect(ana.getByText("Sin manager")).toBeVisible();
+    .filter({ hasText: fullName(member) });
+  await expect(
+    row.getByText(fullName(byId.get(member.managerId!)!)),
+  ).toBeVisible();
+  await expect(row.getByText(member.jobTitle, { exact: true })).toBeVisible();
+  const ceo = find(employees, (e) => e.managerId === null, "CEO");
+  const top = participants.getByRole("row").filter({ hasText: fullName(ceo) });
+  await expect(top.getByText("Sin manager")).toBeVisible();
 
   const log = page.getByRole("table", { name: "Historial de estados" });
   await expect(log.getByText("Borrador")).toBeVisible();
