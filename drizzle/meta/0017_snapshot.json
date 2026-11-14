@@ -1,6 +1,6 @@
 {
-  "id": "9421fa09-1ca3-40c1-a581-9c16e6ca5188",
-  "prevId": "f6650edb-0044-4ba8-b201-e074d791fb24",
+  "id": "62fd9777-e43d-4edc-bf34-d44e1418c900",
+  "prevId": "15177a13-51cd-4eb4-9126-06f220fec0a4",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -2777,6 +2777,18 @@
           "primaryKey": false,
           "notNull": false
         },
+        "template_group_id": {
+          "name": "template_group_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "due_dates": {
+          "name": "due_dates",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
         "added_at": {
           "name": "added_at",
           "type": "timestamp with time zone",
@@ -2844,6 +2856,19 @@
           ],
           "onDelete": "set null",
           "onUpdate": "no action"
+        },
+        "cycle_participant_template_group_id_cycle_template_group_id_fk": {
+          "name": "cycle_participant_template_group_id_cycle_template_group_id_fk",
+          "tableFrom": "cycle_participant",
+          "tableTo": "cycle_template_group",
+          "columnsFrom": [
+            "template_group_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
         }
       },
       "compositePrimaryKeys": {},
@@ -2854,6 +2879,99 @@
           "columns": [
             "cycle_id",
             "reviewee_person_id"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.cycle_template_group": {
+      "name": "cycle_template_group",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "cycle_id": {
+          "name": "cycle_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "template_id": {
+          "name": "template_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "filter": {
+          "name": "filter",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "sort": {
+          "name": "sort",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "cycle_template_group_cycle_id_review_cycle_id_fk": {
+          "name": "cycle_template_group_cycle_id_review_cycle_id_fk",
+          "tableFrom": "cycle_template_group",
+          "tableTo": "review_cycle",
+          "columnsFrom": [
+            "cycle_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "cycle_template_group_template_id_review_template_id_fk": {
+          "name": "cycle_template_group_template_id_review_template_id_fk",
+          "tableFrom": "cycle_template_group",
+          "tableTo": "review_template",
+          "columnsFrom": [
+            "template_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "cycle_template_group_cycle_sort_uq": {
+          "name": "cycle_template_group_cycle_sort_uq",
+          "nullsNotDistinct": false,
+          "columns": [
+            "cycle_id",
+            "sort"
           ]
         }
       },
@@ -2986,6 +3104,12 @@
           "primaryKey": false,
           "notNull": true
         },
+        "group_id": {
+          "name": "group_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
         "question_id": {
           "name": "question_id",
           "type": "uuid",
@@ -3090,6 +3214,19 @@
           "tableTo": "review_cycle",
           "columnsFrom": [
             "cycle_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "question_revision_group_id_cycle_template_group_id_fk": {
+          "name": "question_revision_group_id_cycle_template_group_id_fk",
+          "tableFrom": "question_revision",
+          "tableTo": "cycle_template_group",
+          "columnsFrom": [
+            "group_id"
           ],
           "columnsTo": [
             "id"

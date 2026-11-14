@@ -16,6 +16,7 @@ import {
   type CycleComponents,
   type CycleDueDates,
   cycleStatuses,
+  type HireDateSchedule,
   scheduleKinds,
 } from "../../modules/review-core/status";
 import { employeeJobHistory } from "./org-history";
@@ -46,8 +47,7 @@ export type ParticipantFilter =
     }
   | { kind: "people"; personIds: string[] };
 
-/** hire_date schedules (stored, not implemented yet): days after hire. */
-export type HireDateSchedule = { offsetsDays: number[] };
+export type { HireDateSchedule };
 
 export const reviewCycle = pgTable(
   "review_cycle",
@@ -85,6 +85,31 @@ export const reviewCycle = pgTable(
   (t) => [unique().on(t.sourceSystem, t.sourceId)],
 );
 
+/**
+ * A set of participants of a cycle that answers a different template. A
+ * participant goes to the first group (by `sort`) whose `filter` matches them,
+ * else to the cycle's default template.
+ */
+export const cycleTemplateGroup = pgTable(
+  "cycle_template_group",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    cycleId: uuid("cycle_id")
+      .notNull()
+      .references(() => reviewCycle.id, { onDelete: "cascade" }),
+    name: text("name").notNull(),
+    templateId: uuid("template_id")
+      .notNull()
+      .references(() => reviewTemplate.id, { onDelete: "restrict" }),
+    filter: jsonb("filter").$type<ParticipantFilter>().notNull(),
+    sort: integer("sort").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [unique("cycle_template_group_cycle_sort_uq").on(t.cycleId, t.sort)],
+);
+
 /** A reviewee of a cycle, with their org data frozen at the snapshot date. */
 export const cycleParticipant = pgTable(
   "cycle_participant",
@@ -110,6 +135,16 @@ export const cycleParticipant = pgTable(
       () => employeeJobHistory.id,
       { onDelete: "set null" },
     ),
+    /** Group whose template this person answers; null = the cycle's default. */
+    templateGroupId: uuid("template_group_id").references(
+      () => cycleTemplateGroup.id,
+      { onDelete: "set null" },
+    ),
+    /**
+     * Own deadlines (hire-date cycles: milestone + window, per person).
+     * Null = the cycle's due_dates apply.
+     */
+    dueDates: jsonb("due_dates").$type<CycleDueDates>(),
     addedAt: timestamp("added_at", { withTimezone: true })
       .notNull()
       .defaultNow(),
@@ -135,6 +170,10 @@ export const questionRevision = pgTable(
     cycleId: uuid("cycle_id")
       .notNull()
       .references(() => reviewCycle.id, { onDelete: "cascade" }),
+    /** Group whose template it was copied from; null = the default template. */
+    groupId: uuid("group_id").references(() => cycleTemplateGroup.id, {
+      onDelete: "cascade",
+    }),
     /** Template question it was copied from (kept even if that is deleted). */
     questionId: uuid("question_id").references(() => question.id, {
       onDelete: "set null",
@@ -183,6 +222,7 @@ export const cycleTransition = pgTable(
 );
 
 export type ReviewCycle = typeof reviewCycle.$inferSelect;
+export type CycleTemplateGroup = typeof cycleTemplateGroup.$inferSelect;
 export type CycleParticipant = typeof cycleParticipant.$inferSelect;
 export type QuestionRevision = typeof questionRevision.$inferSelect;
 export type CycleTransition = typeof cycleTransition.$inferSelect;

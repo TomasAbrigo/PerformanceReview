@@ -38,6 +38,7 @@ export const RESET_TABLES = [
   "goal_milestone",
   "goal",
   "cycle_participant",
+  "cycle_template_group",
   "cycle_transition",
   "question_revision",
   "review_cycle",

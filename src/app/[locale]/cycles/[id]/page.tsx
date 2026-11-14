@@ -11,10 +11,15 @@ import { routing } from "@/i18n/routing";
 import { getActor } from "@/modules/actor/server";
 import {
   getCycle,
+  listCycleGroups,
   listSelfRequests,
   shareableNow,
 } from "@/modules/review-core";
-import { launchCycleAction, transitionCycleAction } from "../actions";
+import {
+  duplicateCycleAction,
+  launchCycleAction,
+  transitionCycleAction,
+} from "../actions";
 import { shareAllAction } from "./manager/[participantId]/actions";
 import { unlockAction } from "./self/actions";
 
@@ -26,7 +31,10 @@ async function Detail({ params }: PageProps<"/[locale]/cycles/[id]">) {
   const cycle = await getCycle(db, id);
   if (!cycle) notFound();
   const actor = await getActor();
-  const selfRequests = await listSelfRequests(db, actor, id);
+  const [groups, selfRequests] = await Promise.all([
+    listCycleGroups(db, cycle.id),
+    listSelfRequests(db, actor, id),
+  ]);
   const canShareAll =
     actor.role === "hr" && cycle.components.manager && shareableNow(cycle);
   const canCalibrate =
@@ -46,6 +54,17 @@ async function Detail({ params }: PageProps<"/[locale]/cycles/[id]">) {
           questionCount: cycle.questionCount,
           stats: cycle.stats,
           allowedTransitions: cycle.allowedTransitions,
+          scheduleKind: cycle.scheduleKind,
+          hireDateSchedule: cycle.hireDateSchedule,
+          defaultTemplateName: cycle.defaultTemplateName,
+          groups: groups.map((g) => ({
+            id: g.id,
+            name: g.name,
+            templateName: g.templateName,
+            filter: g.filter,
+            participantCount: g.participantCount,
+            questionCount: g.questionCount,
+          })),
           participants: cycle.participants.map((p) => ({
             id: p.id,
             displayName: p.displayName,
@@ -54,12 +73,15 @@ async function Detail({ params }: PageProps<"/[locale]/cycles/[id]">) {
             snapJobTitle: p.snapJobTitle,
             withoutManager: p.withoutManager,
             removedAt: p.removedAt,
+            templateGroupId: p.templateGroupId,
+            dueDates: p.dueDates,
           })),
           transitions: cycle.transitions,
         }}
         actions={{
           transition: transitionCycleAction,
           launch: launchCycleAction,
+          duplicate: duplicateCycleAction,
         }}
         selfReview={
           selfRequests.length

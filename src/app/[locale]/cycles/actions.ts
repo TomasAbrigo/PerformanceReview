@@ -30,9 +30,58 @@ export async function previewParticipantsAction(
   );
 }
 
-export async function createCycleAction(input: cycles.CycleInput) {
+export async function previewGroupsAction(
+  filter: cycles.ParticipantFilterInput,
+  groups: { filter: cycles.ParticipantFilterInput }[],
+  asOf: string,
+) {
   return actionResult(
-    async () => ({ id: (await cycles.createCycle(db, input)).id }),
+    () =>
+      cycles.previewGroups(
+        db,
+        filter,
+        groups,
+        parse(isoDate, asOf, cycles.CyclesError),
+      ),
+    undefined,
+    { refreshPage: false },
+  );
+}
+
+/** Creates the draft and its template groups together (or neither). */
+export async function createCycleAction(
+  input: cycles.CycleInput,
+  groups: cycles.CycleGroupInput[] = [],
+) {
+  return actionResult(
+    async () => ({
+      id: (
+        await db.transaction(async (tx) => {
+          const cycle = await cycles.createCycle(tx, input);
+          if (groups.length > 0) {
+            await cycles.setCycleGroups(tx, cycle.id, groups);
+          }
+          return cycle;
+        })
+      ).id,
+    }),
+    undefined,
+    { refreshPage: false },
+  );
+}
+
+export async function duplicateCycleAction(id: string, suffix: string) {
+  return actionResult(
+    async () => {
+      // The suffix is the UI's translated word: the server only requires one.
+      const { cycle, warnings } = await cycles.duplicateCycle(
+        db,
+        ACTOR,
+        parse(cycleId, id, cycles.CyclesError),
+        { suffix },
+      );
+      return { id: cycle.id, warnings };
+    },
     undefined,
     { refreshPage: false },
   );
