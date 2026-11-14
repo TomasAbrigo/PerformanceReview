@@ -14,6 +14,7 @@ import {
   type CycleParticipant,
   cycleParticipant,
   person,
+  reviewAudit,
   reviewCycle,
   type ReviewCycle,
   reviewRequest,
@@ -115,16 +116,16 @@ const requestStates = async (db: DbOrTx, participantId: string) =>
   ).map((r): AuditSnapshot => r);
 
 /**
- * reviewer_mismatch of a participant's manager requests: the reviewer
- * differs from the snapshot manager (nothing to differ from without one, and
- * a missing reviewer is flagged by reviewer_missing instead).
+ * reviewer_mismatch of a participant's manager requests: there is a reviewer
+ * and it is not the snapshot manager (also when the snapshot has none; a
+ * missing reviewer is flagged by reviewer_missing instead). ensureManager-
+ * Requests relies on it to leave a deliberate assignment alone.
  */
 async function syncReviewerMismatch(db: DbOrTx, participantId: string) {
   await db.execute(sql`
     update review_request rr
-    set reviewer_mismatch = (cp.snap_manager_person_id is not null
-        and rr.reviewer_person_id is not null
-        and rr.reviewer_person_id <> cp.snap_manager_person_id),
+    set reviewer_mismatch = (rr.reviewer_person_id is not null
+        and rr.reviewer_person_id is distinct from cp.snap_manager_person_id),
       updated_at = now()
     from cycle_participant cp
     where cp.id = rr.participant_id and rr.participant_id = ${participantId}
@@ -560,6 +561,16 @@ export async function assignAlternateAssessor(
         })
         .returning();
       await supersede(primary);
+    }
+    if (mode === "replace") {
+      // Same request-level trail as ensureManagerRequests' reassignment
+      // (note: who had the review).
+      await tx.insert(reviewAudit).values({
+        requestId: result.id,
+        action: "reviewer_reassigned",
+        actorPersonId: actor.personId,
+        note: primary.reviewerPersonId,
+      });
     }
     await syncReviewerMismatch(tx, participant.id);
     const [fresh] = await tx

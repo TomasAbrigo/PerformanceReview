@@ -20,6 +20,7 @@ import { todayLocal } from "@/modules/org-history/dates";
 import { listTemplates, seedSystemTemplates } from "@/modules/templates";
 import {
   createCycle,
+  ensureManagerRequests,
   findManagerRequestId,
   findMySelfRequestId,
   getReview,
@@ -27,7 +28,6 @@ import {
   listMyTasks,
   listTeam,
   saveDraft,
-  shareReview,
   submit,
   transition,
   type CycleInput,
@@ -401,7 +401,11 @@ describe("unlockRequestOp", () => {
     const cycle = await collectingCycle();
     const selfId = await submitSelf(cycle.id);
     const managerId = await submitManagerReview(cycle.id);
-    await shareReview(db, as(carla), managerId);
+    // Shared (sharing itself only opens in the sharing phase: mark it here).
+    await db
+      .update(reviewRequest)
+      .set({ sharedAt: new Date(), sharedBy: carla })
+      .where(eq(reviewRequest.id, managerId));
     // Both submitted: Carla reads the self review, Bruno the shared review.
     expect(await getReview(db, as(carla), selfId)).not.toBeNull();
     expect(await getReview(db, as(bruno), managerId)).not.toBeNull();
@@ -602,6 +606,27 @@ describe("assignAlternateAssessor", () => {
     expect((await getReview(db, as(ana), before.id))!.canWrite).toBe(true);
     expect((await getReview(db, as(carla), before.id))!.canWrite).toBe(false);
     expect(await findManagerRequestId(db, as(ana), p.id)).toBe(before.id);
+    // The request-level trail records the reassignment (note: who had it).
+    const trail = await db
+      .select()
+      .from(reviewAudit)
+      .where(eq(reviewAudit.requestId, before.id));
+    expect(trail.map((a) => [a.action, a.note])).toEqual([
+      ["reviewer_reassigned", carla],
+    ]);
+
+    // Re-running the manager-request sync keeps the deliberate assignment.
+    await ensureManagerRequests(db, cycle.id);
+    expect((await requestsOf(p.id, "manager"))[0]).toMatchObject({
+      reviewerPersonId: ana,
+      reviewerMismatch: true,
+    });
+    expect(
+      await db
+        .select()
+        .from(reviewAudit)
+        .where(eq(reviewAudit.requestId, before.id)),
+    ).toHaveLength(1);
 
     const rows = await auditRows(cycle.id);
     expect(rows).toHaveLength(1);
@@ -648,6 +673,15 @@ describe("assignAlternateAssessor", () => {
       await db.select().from(answer).where(eq(answer.requestId, fresh.id)),
     ).toHaveLength(0);
     expect(await findManagerRequestId(db, as(ana), p.id)).toBe(fresh.id);
+    // The new request carries the reassignment (note: the reviewer replaced).
+    expect(
+      (
+        await db
+          .select()
+          .from(reviewAudit)
+          .where(eq(reviewAudit.requestId, fresh.id))
+      ).map((a) => [a.action, a.note]),
+    ).toEqual([["reviewer_reassigned", carla]]);
 
     const [row] = await auditRows(cycle.id);
     expect(await auditRows(cycle.id)).toHaveLength(1);
@@ -711,6 +745,12 @@ describe("assignAlternateAssessor", () => {
       mode: "additional",
       requestId: extra.id,
     });
+    // The manager-request sync leaves both alone (no reassignment trail).
+    await ensureManagerRequests(db, cycle.id);
+    expect(
+      (await requestsOf(p.id, "manager")).map((r) => r.reviewerPersonId),
+    ).toEqual([carla, ana]);
+    expect(await db.select().from(reviewAudit)).toHaveLength(0);
     // The same person twice is refused.
     await expect(
       assignAlternateAssessor(db, hr, p.id, ana, "additional"),
@@ -741,10 +781,16 @@ describe("assignAlternateAssessor", () => {
       id: missing.id,
       reviewerPersonId: carla,
       reviewerMissing: false,
-      // No snapshot manager to differ from: not a mismatch.
-      reviewerMismatch: false,
+      // The reviewer is not the (absent) snapshot manager: flagged, which
+      // also keeps the manager-request sync from reverting the assignment.
+      reviewerMismatch: true,
     });
     expect(await auditRows(cycle.id)).toHaveLength(1);
+    await ensureManagerRequests(db, cycle.id);
+    expect((await requestsOf(p.id, "manager"))[0]).toMatchObject({
+      reviewerPersonId: carla,
+      reviewerMissing: false,
+    });
 
     // The assessor finds the person in their team view.
     const team = await listTeam(db, as(carla, "manager"));

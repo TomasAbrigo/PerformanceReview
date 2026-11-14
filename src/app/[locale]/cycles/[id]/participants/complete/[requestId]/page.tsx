@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { connection } from "next/server";
 import { Suspense } from "react";
 import { OpsCompleteOnBehalf } from "@/components/cycles/ops-complete-on-behalf";
+import { toReviewData } from "@/components/review/review-data";
 import { db } from "@/db/client";
 import { routing } from "@/i18n/routing";
 import { getActor } from "@/modules/actor/server";
@@ -30,25 +31,11 @@ async function Complete({
     <OpsCompleteOnBehalf
       key={`${review.request.id}-${review.request.status}`}
       view={{
-        requestId: review.request.id,
+        ...toReviewData(review),
         cycleId: review.cycle.id,
-        cycleName: review.cycle.name,
         revieweeName: view.revieweeName,
         reviewerName: view.reviewerName,
-        dueDate: review.cycle.dueDate,
-        status: review.request.status,
-        submittedAt: review.request.submittedAt,
         canComplete: view.canComplete,
-        questions: review.questions.map((q) => ({
-          id: q.id,
-          sectionTitle: q.sectionTitle,
-          prompt: q.prompt,
-          kind: q.kind,
-          required: q.required,
-          scale: q.scale,
-          choices: q.choices,
-        })),
-        answers: review.answers,
       }}
       complete={completeOnBehalfAction}
     />

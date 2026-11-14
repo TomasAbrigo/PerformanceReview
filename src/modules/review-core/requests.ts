@@ -127,7 +127,10 @@ export async function ensureManagerRequests(
   if (participants.length === 0) return;
   // A participant keeps a single manager request. When the snapshot
   // manager changed (e.g. re-added after a manager change), a draft is
-  // reassigned (audited); a submitted one is kept and flagged.
+  // reassigned (audited); a submitted one is kept and flagged. Only the
+  // primary request counts: additional assessors and superseded history
+  // (#17) are left alone, and so is a draft HR assigned to another reviewer
+  // on purpose (reviewer_mismatch already set, see assignAlternateAssessor).
   const existing = new Map(
     (
       await db
@@ -142,6 +145,8 @@ export async function ensureManagerRequests(
         .where(
           and(
             eq(reviewRequest.relationship, "manager"),
+            eq(reviewRequest.additional, false),
+            ne(reviewRequest.status, "superseded"),
             isNull(reviewRequest.deletedAt),
             inArray(
               reviewRequest.participantId,
@@ -155,6 +160,7 @@ export async function ensureManagerRequests(
     const request = existing.get(p.id);
     if (!request || request.reviewer === p.managerId) continue;
     if (request.status === "draft") {
+      if (request.mismatch) continue; // assigned on purpose (#17)
       await db
         .update(reviewRequest)
         .set({
