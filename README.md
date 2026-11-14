@@ -164,6 +164,7 @@ pnpm cycles:enroll --cycle <id> --as-of 2026-03-10 # un ciclo, a una fecha dada
 Solo se incorpora a quien sigue empleado a esa fecha (sin baja anterior), aunque su historial de puestos aún no se haya cerrado. Quien cumple el hito pero todavía no tiene historial de puestos (la ingesta no lo trajo) no se puede incorporar: el comando lo lista como `skipped ... no_job_history` y cada corrida lo reintenta mientras dure su ventana. Para recuperar a quien ya se pasó de la ventana (por ejemplo después de una caída del cron), `--lookback-days N` (0 a 365) amplía el rango N días hacia atrás; la fecha límite sigue siendo hito + ventana.
 
 Código de salida `0` si todo salió bien, `1` si algún ciclo falló y `2` si los argumentos son inválidos.
+
 ## Notificaciones
 
 Las notificaciones de v1 son **internas**: se guardan en la tabla `notification` y se ven en la bandeja `/es/inbox` (campana con el contador de no leídas en el header y las 3 últimas no leídas en `/es/me`). **No se envían emails** (fuera de alcance del PRD en v1).
