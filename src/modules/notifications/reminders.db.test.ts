@@ -7,14 +7,13 @@ import {
   reviewCycle,
   reviewRequest,
 } from "@/db/schema";
-import { todayLocal } from "@/modules/org-history/dates";
+import { addDays, todayLocal } from "@/modules/org-history/dates";
 import {
   findMySelfRequestId,
   listMyTasks,
   removeParticipant,
   transition,
 } from "@/modules/review-core";
-import { addDays } from "./dates";
 import { generateDueReminders, NotificationError, remind } from ".";
 import {
   as,
@@ -195,16 +194,20 @@ describe("generateDueReminders", () => {
     expect(
       (await generateDueReminders(db, { asOf: "2022-07-08" })).created,
     ).toBe(0);
+  });
 
-    // Self assessments cannot be written once the cycle left collecting.
-    await db
-      .update(reviewCycle)
-      .set({ deletedAt: null })
-      .where(eq(reviewCycle.id, closed.id));
-    await transition(db, closed.id, "manager_review", null);
-    expect(
-      (await generateDueReminders(db, { asOf: "2022-07-08" })).created,
-    ).toBe(0);
+  it("the 7 and 1 day reminders only need a live cycle; the due-day one needs the review to be writable", async () => {
+    const cycle = await trio();
+    // Self assessments cannot be written once the cycle left collecting...
+    await transition(db, cycle.id, "manager_review", null);
+    const created = async (asOf: string) =>
+      (await generateDueReminders(db, { asOf })).created;
+    // ...but the people who have not submitted are still reminded ahead of
+    // the deadline (the phase may come back, or HR may unlock them),
+    expect(await created("2022-07-08")).toBe(3);
+    expect(await created("2022-07-14")).toBe(3);
+    // while nobody is told "due today" about something they cannot write.
+    expect(await created("2022-07-15")).toBe(0);
   });
 
   it("skips cycles with no due date for the phase", async () => {
@@ -232,7 +235,6 @@ describe("generateDueReminders", () => {
     await db
       .update(reviewCycle)
       .set({
-        status: "manager_review",
         dueDates: {
           self: "2022-07-15",
           manager: "2022-08-01",
@@ -249,43 +251,51 @@ describe("generateDueReminders", () => {
           eq(cycleParticipant.revieweePersonId, seed.carla),
         ),
       );
-    // Ana reviews her report Carla (manager); Bruno gives peer feedback to Carla.
-    await db.insert(reviewRequest).values([
-      {
-        cycleId: cycle.id,
-        participantId: carlaPart.id,
-        reviewerPersonId: seed.ana,
-        relationship: "manager",
-      },
-      {
-        cycleId: cycle.id,
-        participantId: carlaPart.id,
-        reviewerPersonId: seed.bruno,
-        relationship: "peer",
-      },
-    ]);
-
-    // 7 days before the manager due date: only the manager request is due.
-    // (The peer request is not writable in manager_review.)
-    expect(
-      (await generateDueReminders(db, { asOf: "2022-07-25" })).created,
-    ).toBe(1);
-    const [manager] = await reminders();
-    expect(manager).toMatchObject({
-      recipientPersonId: seed.ana,
-      payload: {
-        relationship: "manager",
-        dueDate: "2022-08-01",
-        participantName: "Carla Romero",
-        daysLeft: 7,
-      },
+    // Bruno gives peer feedback to Carla. The manager requests (Carla reviews
+    // Bruno, Ana reviews Carla, Ana has no manager) came with collecting.
+    await db.insert(reviewRequest).values({
+      cycleId: cycle.id,
+      participantId: carlaPart.id,
+      reviewerPersonId: seed.bruno,
+      relationship: "peer",
     });
 
-    // Back in collecting, the peer request follows the peer due date.
-    await db
-      .update(reviewCycle)
-      .set({ status: "collecting" })
-      .where(eq(reviewCycle.id, cycle.id));
+    // 7 days before the manager due date: only the manager requests are due,
+    // and the one without a reviewer is skipped.
+    expect(
+      (await generateDueReminders(db, { asOf: "2022-07-25" })).created,
+    ).toBe(2);
+    const managers = await reminders();
+    expect(
+      managers
+        .map((r) => [r.recipientPersonId, r.payload])
+        .sort((a, b) => String(a[0]).localeCompare(String(b[0]))),
+    ).toEqual(
+      [
+        [
+          seed.carla,
+          {
+            cycleName: "H1 2022",
+            relationship: "manager",
+            dueDate: "2022-08-01",
+            participantName: "Bruno Pérez",
+            daysLeft: 7,
+          },
+        ],
+        [
+          seed.ana,
+          {
+            cycleName: "H1 2022",
+            relationship: "manager",
+            dueDate: "2022-08-01",
+            participantName: "Carla Romero",
+            daysLeft: 7,
+          },
+        ],
+      ].sort((a, b) => String(a[0]).localeCompare(String(b[0]))),
+    );
+
+    // The peer request follows the peer due date (7 days before 07-22).
     expect(
       (await generateDueReminders(db, { asOf: "2022-07-15" })).created,
     ).toBe(4); // 3 self assessments due today + the peer one
@@ -396,6 +406,27 @@ describe("remind (manual reminder)", () => {
       code: "not_pending",
     });
     expect(await manualReminders()).toHaveLength(0);
+  });
+
+  it("reminds in any live phase, not only while the review is writable", async () => {
+    const cycle = await trio();
+    const requestId = await brunoRequest(cycle.id);
+    await transition(db, cycle.id, "manager_review", null);
+    expect(await remind(db, hr, requestId, { asOf: "2022-07-08" })).toEqual({
+      created: true,
+    });
+  });
+
+  it("does not remind in a closed cycle", async () => {
+    const cycle = await trio();
+    const requestId = await brunoRequest(cycle.id);
+    await db
+      .update(reviewCycle)
+      .set({ status: "closed" })
+      .where(eq(reviewCycle.id, cycle.id));
+    await expect(remind(db, hr, requestId)).rejects.toMatchObject({
+      code: "not_pending",
+    });
   });
 
   it("sends one per sender and request each day", async () => {

@@ -1,4 +1,4 @@
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { closeDb, db } from "@/db/client";
 import { notification } from "@/db/schema";
@@ -90,6 +90,11 @@ describe("unreadCount", () => {
     expect(await unreadCount(db, as(seed.carla))).toBe(0);
   });
 
+  it("only needs to know who", async () => {
+    await insertAt("a", 1);
+    expect(await unreadCount(db, { personId: seed.bruno })).toBe(1);
+  });
+
   it("is 0 for the People team acting without a person", async () => {
     await insertAt("a", 1);
     expect(await unreadCount(db, hr)).toBe(0);
@@ -178,13 +183,69 @@ describe("listNotifications", () => {
     expect(new Set(seen).size).toBe(6);
   });
 
-  it("clamps the limit and ignores a malformed cursor", async () => {
-    await insertAt("a", 1);
-    const page = await listNotifications(db, as(seed.bruno), {
-      limit: 0,
-      cursor: "not-a-uuid",
+  it("keeps paging through the unread rows when the row the cursor points at is marked read in between", async () => {
+    const a = await insertAt("a", 5);
+    const b = await insertAt("b", 4);
+    const c = await insertAt("c", 3);
+    const d = await insertAt("d", 2);
+    const e = await insertAt("e", 9, { read: true });
+    const first = await listNotifications(db, as(seed.bruno), { limit: 2 });
+    expect(first.items.map((i) => i.id)).toEqual([a.id, b.id]);
+    // The reader marks the last row of the page read before asking for more.
+    await markRead(db, as(seed.bruno), [b.id]);
+    const second = await listNotifications(db, as(seed.bruno), {
+      limit: 3,
+      cursor: first.nextCursor!,
     });
-    expect(page.items).toHaveLength(1);
+    // c and d are still unread and still come next; no unread row is skipped.
+    expect(second.items.map((i) => i.id)).toEqual([c.id, d.id, e.id]);
+  });
+
+  it("pages by the exact timestamp, not by milliseconds", async () => {
+    // Three rows less than a millisecond apart (JS dates would truncate them).
+    const ids: string[] = [];
+    for (const [key, micros] of [
+      ["x", "123900"],
+      ["y", "123500"],
+      ["z", "123100"],
+    ]) {
+      const [row] = await db
+        .insert(notification)
+        .values({
+          ...base(key),
+          createdAt: sql`('2026-07-01 12:00:00.' || ${micros})::timestamptz`,
+        })
+        .returning({ id: notification.id });
+      ids.push(row.id);
+    }
+    const seen: string[] = [];
+    let cursor: string | undefined;
+    do {
+      const page = await listNotifications(db, as(seed.bruno), {
+        limit: 1,
+        cursor,
+      });
+      seen.push(...page.items.map((i) => i.id));
+      cursor = page.nextCursor ?? undefined;
+    } while (cursor && seen.length < 10);
+    expect(seen).toEqual(ids);
+  });
+
+  it("clamps the limit and ignores a malformed or forged cursor", async () => {
+    await insertAt("a", 1);
+    for (const cursor of [
+      "not-a-cursor",
+      "00000000-0000-4000-8000-000000000000",
+      Buffer.from(
+        JSON.stringify({ r: 0, t: "x'; drop table", i: "y" }),
+      ).toString("base64url"),
+    ]) {
+      const page = await listNotifications(db, as(seed.bruno), {
+        limit: 0,
+        cursor,
+      });
+      expect(page.items).toHaveLength(1);
+    }
   });
 });
 

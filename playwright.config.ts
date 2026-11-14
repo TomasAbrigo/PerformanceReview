@@ -24,8 +24,10 @@ export default defineConfig({
       testIgnore: /(identity|notifications)\.spec\.ts/,
     },
     // Phase changes notify every participant, so counting a person's unread
-    // notifications needs a quiet system: this spec runs once the specs that
-    // launch cycles are done.
+    // notifications needs a quiet system: this spec runs alone, once the
+    // specs that launch cycles are done and before the identity chain (the
+    // projects form one line: chromium, notifications, identity-setup,
+    // identity).
     {
       name: "notifications",
       use: { ...devices["Desktop Chrome"] },
@@ -37,7 +39,7 @@ export default defineConfig({
     {
       name: "identity-setup",
       testMatch: /identity\.setup\.ts/,
-      dependencies: ["chromium"],
+      dependencies: ["notifications"],
     },
     {
       name: "identity",

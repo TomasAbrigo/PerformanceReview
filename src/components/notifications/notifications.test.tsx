@@ -318,6 +318,26 @@ describe("NotificationBadge", () => {
     expect(screen.getByText("3")).toBeVisible();
   });
 
+  it("takes the capped label from the messages, not from the code", () => {
+    render(
+      <NextIntlClientProvider
+        locale="es"
+        timeZone="UTC"
+        messages={{
+          ...es,
+          Notifications: {
+            ...es.Notifications,
+            badge: { ...es.Notifications.badge, capped: "mucho" },
+          },
+        }}
+      >
+        <NotificationBadge count={250} />
+      </NextIntlClientProvider>,
+    );
+    expect(screen.getByText("mucho")).toBeVisible();
+    expect(screen.queryByText("99+")).toBeNull();
+  });
+
   it("caps the number at 99+", () => {
     renderIn("es", <NotificationBadge count={250} />);
     expect(screen.getByText("99+")).toBeVisible();

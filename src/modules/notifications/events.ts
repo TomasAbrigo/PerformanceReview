@@ -1,8 +1,15 @@
-import { and, count, eq, isNull } from "drizzle-orm";
+import { and, eq, inArray, isNotNull, isNull } from "drizzle-orm";
 import type { DbOrTx } from "@/db/client";
-import { cycleParticipant, cycleTransition, reviewCycle } from "@/db/schema";
+import {
+  cycleParticipant,
+  person,
+  reviewCycle,
+  reviewRequest,
+} from "@/db/schema";
 import { isUuid } from "@/lib/uuid";
 import type { CycleStatus } from "@/modules/review-core/status";
+import { writablePhases } from "@/modules/review-core/visibility";
+import { relationships } from "@/modules/templates/constants";
 import {
   createNotification,
   createNotifications,
@@ -21,25 +28,41 @@ async function cycleNameOf(
   return cycle?.name ?? null;
 }
 
+/** Display name of the person who sent something; null (People team) if none. */
+async function senderNameOf(
+  db: DbOrTx,
+  personId: string | null | undefined,
+): Promise<string | null> {
+  if (!personId || !isUuid(personId)) return null;
+  const [row] = await db
+    .select({ name: person.displayName })
+    .from(person)
+    .where(eq(person.id, personId));
+  return row?.name ?? null;
+}
+
 /**
- * Tells every active participant of the cycle that it moved `from` -> `to`.
- * Called by review-core's `launchCycle` and `transition` right after they log
- * the change, inside their transaction: the log's row count numbers the
- * change, so the same change is notified once, while going back to a phase
- * and forward again is a new one.
+ * Tells everyone the cycle's move `from` -> `to` concerns: its active
+ * participants, and the reviewers whose work the new phase opens (a draft
+ * request, of an active participant, that is writable in `to`), who need not
+ * be participants themselves (a manager is not reviewed in the cycle they
+ * review). Each person once.
+ *
+ * Called by review-core's `launchCycle` and `transition` right after they
+ * log the change (and create the requests the phase needs), inside their
+ * transaction; `transitionId` is the id of that `cycle_transition` row, so
+ * the same change is notified once while going back to a phase and forward
+ * again is a new one.
  */
 export async function notifyPhaseChanged(
   db: DbOrTx,
   cycleId: string,
   from: CycleStatus,
   to: CycleStatus,
+  transitionId: string,
 ): Promise<number> {
   const cycleName = await cycleNameOf(db, cycleId);
   if (cycleName === null) return 0;
-  const [{ n }] = await db
-    .select({ n: count() })
-    .from(cycleTransition)
-    .where(eq(cycleTransition.cycleId, cycleId));
   const participants = await db
     .select({ personId: cycleParticipant.revieweePersonId })
     .from(cycleParticipant)
@@ -49,14 +72,39 @@ export async function notifyPhaseChanged(
         isNull(cycleParticipant.removedAt),
       ),
     );
+  const opened = relationships.filter((r) => writablePhases[r].includes(to));
+  const reviewers =
+    opened.length === 0
+      ? []
+      : await db
+          .selectDistinct({ personId: reviewRequest.reviewerPersonId })
+          .from(reviewRequest)
+          .innerJoin(
+            cycleParticipant,
+            eq(cycleParticipant.id, reviewRequest.participantId),
+          )
+          .where(
+            and(
+              eq(reviewRequest.cycleId, cycleId),
+              eq(reviewRequest.status, "draft"),
+              isNull(reviewRequest.deletedAt),
+              isNull(cycleParticipant.removedAt),
+              isNotNull(reviewRequest.reviewerPersonId),
+              inArray(reviewRequest.relationship, opened),
+            ),
+          );
+  const recipients = new Set<string>();
+  for (const { personId } of [...participants, ...reviewers]) {
+    if (personId) recipients.add(personId);
+  }
   return createNotifications(
     db,
-    participants.map((p): NotificationInput => ({
-      recipientPersonId: p.personId,
+    [...recipients].map((recipientPersonId): NotificationInput => ({
+      recipientPersonId,
       kind: "cycle_phase_changed",
       cycleId,
       payload: { cycleName, fromStatus: from, toStatus: to },
-      dedupeKey: `cycle_phase_changed:${cycleId}:${n}:${p.personId}`,
+      dedupeKey: `cycle_phase_changed:${transitionId}:${recipientPersonId}`,
     })),
   );
 }
@@ -66,31 +114,56 @@ export async function notifyPhaseChanged(
 // Each one is idempotent: calling it again for the same event creates nothing.
 
 /**
- * A review was shared with its reviewee (`requestId`: the shared request).
- * `senderName`: who shared it (omit to show the People team).
- * Returns whether it was created.
+ * Reviews were shared with their reviewees: `items` are the shared requests
+ * and who they were about. `senderPersonId`: who shared them (omit for the
+ * People team). `dedupeSuffix` tells apart a second share of the same request
+ * (e.g. its `shared_at`; default: none). Returns how many were created.
  */
+export async function notifyReviewsShared(
+  db: DbOrTx,
+  input: {
+    cycleId: string;
+    items: { requestId: string; recipientPersonId: string }[];
+    senderPersonId?: string | null;
+    dedupeSuffix?: string;
+  },
+): Promise<number> {
+  if (input.items.length === 0) return 0;
+  const cycleName = await cycleNameOf(db, input.cycleId);
+  if (cycleName === null) return 0;
+  const senderName = await senderNameOf(db, input.senderPersonId);
+  const suffix = input.dedupeSuffix ? `:${input.dedupeSuffix}` : "";
+  return createNotifications(
+    db,
+    input.items.map(({ requestId, recipientPersonId }): NotificationInput => ({
+      recipientPersonId,
+      kind: "review_shared",
+      cycleId: input.cycleId,
+      requestId,
+      payload: { cycleName, senderName },
+      dedupeKey: `review_shared:${requestId}${suffix}`,
+    })),
+  );
+}
+
+/** One review shared with its reviewee (see notifyReviewsShared). Returns whether it was created. */
 export async function notifyReviewShared(
   db: DbOrTx,
   input: {
     cycleId: string;
     requestId: string;
     recipientPersonId: string;
-    senderName?: string | null;
-    /** Distinguishes a second share of the same request (default: none). */
+    senderPersonId?: string | null;
     dedupeSuffix?: string;
   },
 ): Promise<boolean> {
-  const cycleName = await cycleNameOf(db, input.cycleId);
-  if (cycleName === null) return false;
-  return createNotification(db, {
-    recipientPersonId: input.recipientPersonId,
-    kind: "review_shared",
-    cycleId: input.cycleId,
-    requestId: input.requestId,
-    payload: { cycleName, senderName: input.senderName ?? null },
-    dedupeKey: `review_shared:${input.requestId}${input.dedupeSuffix ? `:${input.dedupeSuffix}` : ""}`,
-  });
+  const { requestId, recipientPersonId, ...rest } = input;
+  return (
+    (await notifyReviewsShared(db, {
+      ...rest,
+      items: [{ requestId, recipientPersonId }],
+    })) === 1
+  );
 }
 
 /**

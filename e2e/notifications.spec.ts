@@ -1,7 +1,6 @@
 import { execFileSync } from "node:child_process";
 import { expect, type Page, test } from "@playwright/test";
-import { addDays } from "../src/modules/notifications/dates";
-import { todayLocal } from "../src/modules/org-history/dates";
+import { addDays, todayLocal } from "../src/modules/org-history/dates";
 
 // Phase changes notify every participant, and other specs launch cycles with
 // everyone in them, so this spec runs on its own after them (see the

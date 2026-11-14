@@ -8,7 +8,8 @@ import { MyTasksView } from "@/components/review/my-tasks";
 import { db } from "@/db/client";
 import { routing } from "@/i18n/routing";
 import { getActor } from "@/modules/actor/server";
-import { listNotifications, unreadCount } from "@/modules/notifications";
+import { listNotifications } from "@/modules/notifications";
+import { getUnreadCount } from "@/modules/notifications/server";
 import { listMyTasks } from "@/modules/review-core";
 
 async function Tasks({ params }: PageProps<"/[locale]/me">) {
@@ -20,7 +21,7 @@ async function Tasks({ params }: PageProps<"/[locale]/me">) {
   const [tasks, latest, unread] = await Promise.all([
     listMyTasks(db, actor),
     listNotifications(db, actor, { unreadOnly: true, limit: 3 }),
-    unreadCount(db, actor),
+    getUnreadCount(actor.personId),
   ]);
   return (
     <div className="flex flex-col gap-6">

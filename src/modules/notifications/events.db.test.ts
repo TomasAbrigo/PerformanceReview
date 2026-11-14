@@ -1,7 +1,12 @@
-import { and, eq } from "drizzle-orm";
+import { and, desc, eq } from "drizzle-orm";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { closeDb, db } from "@/db/client";
-import { notification, reviewCycle } from "@/db/schema";
+import {
+  cycleTransition,
+  notification,
+  reviewCycle,
+  reviewRequest,
+} from "@/db/schema";
 import {
   addParticipant,
   createCycle,
@@ -84,22 +89,94 @@ describe("phase changes (hooked into launch and transition)", () => {
     await transition(db, cycle.id, "collecting", null);
     await transition(db, cycle.id, "manager_review", null);
     const toManagerReview = (await byKind("cycle_phase_changed")).filter(
-      (r) => r.payload.toStatus === "manager_review",
+      (r) =>
+        r.payload.toStatus === "manager_review" &&
+        r.recipientPersonId === seed.bruno,
     );
     expect(toManagerReview).toHaveLength(2);
   });
 
-  it("leaves out participants who were removed", async () => {
+  it("leaves out participants who were removed, and the reviewers of their requests", async () => {
     const cycle = await createCycle(
       db,
       cycleInput(seed, [seed.ana, seed.bruno]),
     );
     await launchCycle(db, cycle.id, null);
-    await removeParticipant(db, cycle.id, seed.ana);
+    await removeParticipant(db, cycle.id, seed.bruno);
+    await db.delete(notification);
+    // Bruno's manager Carla would be a reviewer, but there is no request.
+    await transition(db, cycle.id, "collecting", null);
+    const rows = await byKind("cycle_phase_changed");
+    expect(rows.map((r) => r.recipientPersonId)).toEqual([seed.ana]);
+  });
+
+  it("also tells the reviewers whose work the new phase opens, even if they are not participants", async () => {
+    // Bruno reports to Carla at the snapshot date; only Bruno is in the cycle.
+    const cycle = await createCycle(db, cycleInput(seed, [seed.bruno]));
+    await launchCycle(db, cycle.id, null);
+    expect(
+      (await byKind("cycle_phase_changed")).map((r) => r.recipientPersonId),
+    ).toEqual([seed.bruno]); // nominations: nothing to write yet
     await db.delete(notification);
     await transition(db, cycle.id, "collecting", null);
     const rows = await byKind("cycle_phase_changed");
-    expect(rows.map((r) => r.recipientPersonId)).toEqual([seed.bruno]);
+    expect(rows.map((r) => r.recipientPersonId).sort()).toEqual(
+      [seed.bruno, seed.carla].sort(),
+    );
+    const carla = rows.find((r) => r.recipientPersonId === seed.carla)!;
+    expect(carla).toMatchObject({
+      cycleId: cycle.id,
+      payload: {
+        cycleName: "H1 2022",
+        fromStatus: "nominations",
+        toStatus: "collecting",
+      },
+    });
+  });
+
+  it("tells somebody who is both a participant and a reviewer only once", async () => {
+    // Carla is a participant and also reviews Bruno; Ana reviews Carla.
+    const cycle = await createCycle(
+      db,
+      cycleInput(seed, [seed.bruno, seed.carla]),
+    );
+    await launchCycle(db, cycle.id, null);
+    await db.delete(notification);
+    await transition(db, cycle.id, "collecting", null);
+    const rows = await byKind("cycle_phase_changed");
+    expect(rows.map((r) => r.recipientPersonId).sort()).toEqual(
+      [seed.ana, seed.bruno, seed.carla].sort(),
+    );
+  });
+
+  it("does not tell a reviewer about a phase that opens nothing for them, or whose request is done", async () => {
+    const cycle = await collectingCycle(seed, [seed.bruno]);
+    // Carla (Bruno's manager) submitted her review: nothing left to write.
+    await db
+      .update(reviewRequest)
+      .set({ status: "submitted", submittedAt: new Date() })
+      .where(
+        and(
+          eq(reviewRequest.cycleId, cycle.id),
+          eq(reviewRequest.relationship, "manager"),
+        ),
+      );
+    await db.delete(notification);
+    await transition(db, cycle.id, "manager_review", null);
+    expect(
+      (await byKind("cycle_phase_changed")).map((r) => r.recipientPersonId),
+    ).toEqual([seed.bruno]);
+
+    // Back to a draft manager review, but the sharing phase writes nothing.
+    await db
+      .update(reviewRequest)
+      .set({ status: "draft", submittedAt: null })
+      .where(eq(reviewRequest.cycleId, cycle.id));
+    await db.delete(notification);
+    await transition(db, cycle.id, "sharing", null);
+    expect(
+      (await byKind("cycle_phase_changed")).map((r) => r.recipientPersonId),
+    ).toEqual([seed.bruno]);
   });
 
   it("a rejected transition notifies nobody", async () => {
@@ -112,9 +189,18 @@ describe("phase changes (hooked into launch and transition)", () => {
   it("is idempotent for the same transition", async () => {
     const cycle = await collectingCycle(seed, [seed.bruno]);
     await db.delete(notification);
-    await notifyPhaseChanged(db, cycle.id, "nominations", "collecting");
-    await notifyPhaseChanged(db, cycle.id, "nominations", "collecting");
-    expect(await byKind("cycle_phase_changed")).toHaveLength(1);
+    const [logged] = await db
+      .select({ id: cycleTransition.id })
+      .from(cycleTransition)
+      .where(eq(cycleTransition.cycleId, cycle.id))
+      .orderBy(desc(cycleTransition.createdAt))
+      .limit(1);
+    const again = () =>
+      notifyPhaseChanged(db, cycle.id, "nominations", "collecting", logged.id);
+    // Bruno, and Carla who reviews him.
+    expect(await again()).toBe(2);
+    expect(await again()).toBe(0);
+    expect(await byKind("cycle_phase_changed")).toHaveLength(2);
   });
 
   it("includes people added mid-cycle", async () => {
@@ -123,8 +209,9 @@ describe("phase changes (hooked into launch and transition)", () => {
     await db.delete(notification);
     await transition(db, cycle.id, "manager_review", null);
     const rows = await byKind("cycle_phase_changed");
+    // Bruno and Carla are in; Ana reviews Carla, Carla reviews Bruno.
     expect(rows.map((r) => r.recipientPersonId).sort()).toEqual(
-      [seed.bruno, seed.carla].sort(),
+      [seed.ana, seed.bruno, seed.carla].sort(),
     );
   });
 });
@@ -142,7 +229,7 @@ describe("event notifications for the sharing, feedback and calibration slices",
       cycleId: cycle.id,
       requestId,
       recipientPersonId: seed.bruno,
-      senderName: "Carla Romero",
+      senderPersonId: seed.carla,
     };
     expect(await notifyReviewShared(db, input)).toBe(true);
     expect(await notifyReviewShared(db, input)).toBe(false);

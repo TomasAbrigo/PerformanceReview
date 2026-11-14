@@ -742,7 +742,6 @@
     "noPerson": "Pick a person in 'Act as' to see their notifications.",
     "unreadHeading": "Unread",
     "readHeading": "Read",
-    "unreadMark": "Unread",
     "open": "Open",
     "markRead": "Mark as read",
     "markAllRead": "Mark all as read",
@@ -751,7 +750,8 @@
     "error": "The inbox could not be updated.",
     "peopleTeam": "The People team",
     "badge": {
-      "label": "{count, plural, =0 {Notifications: none unread} one {Notifications: # unread} other {Notifications: # unread}}"
+      "label": "{count, plural, =0 {Notifications: none unread} one {Notifications: # unread} other {Notifications: # unread}}",
+      "capped": "99+"
     },
     "me": {
       "title": "New notifications",

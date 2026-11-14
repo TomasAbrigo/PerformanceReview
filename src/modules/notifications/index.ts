@@ -22,4 +22,5 @@ export {
   notifyFeedbackReceived,
   notifyPhaseChanged,
   notifyReviewShared,
+  notifyReviewsShared,
 } from "./events";

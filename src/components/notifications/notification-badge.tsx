@@ -17,7 +17,7 @@ export function NotificationBadge({ count }: { count: number }) {
           aria-hidden="true"
           className="absolute -top-0.5 -right-0.5 min-w-4 rounded-full bg-primary px-1 text-center text-[10px] leading-4 font-semibold text-primary-foreground"
         >
-          {count > 99 ? "99+" : count}
+          {count > 99 ? t("badge.capped") : count}
         </span>
       ) : null}
     </Link>

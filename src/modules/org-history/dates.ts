@@ -28,3 +28,17 @@ export function todayLocal(
     day: "2-digit",
   }).format(now);
 }
+
+const DAY_MS = 86_400_000;
+
+const utcMillis = (iso: string): number => Date.parse(`${iso}T00:00:00Z`);
+
+/** `iso` (YYYY-MM-DD) plus `days` calendar days; no time zone involved. */
+export function addDays(iso: string, days: number): string {
+  return new Date(utcMillis(iso) + days * DAY_MS).toISOString().slice(0, 10);
+}
+
+/** Whole calendar days from `from` to `to` (negative when `to` is earlier). */
+export function daysBetween(from: string, to: string): number {
+  return Math.round((utcMillis(to) - utcMillis(from)) / DAY_MS);
+}
