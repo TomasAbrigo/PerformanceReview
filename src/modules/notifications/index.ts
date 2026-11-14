@@ -11,3 +11,15 @@ export {
 } from "./service";
 export { NotificationError, type NotificationErrorCode } from "./errors";
 export * from "./kinds";
+export {
+  DEFAULT_REMINDER_OFFSETS,
+  generateDueReminders,
+  remind,
+  type DueRemindersResult,
+} from "./reminders";
+export {
+  notifyCalibrationPublished,
+  notifyFeedbackReceived,
+  notifyPhaseChanged,
+  notifyReviewShared,
+} from "./events";

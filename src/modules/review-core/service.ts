@@ -31,6 +31,7 @@ import {
   type ParticipantFilter,
 } from "@/db/schema";
 import { isUuid } from "@/lib/uuid";
+import { notifyPhaseChanged } from "@/modules/notifications/events";
 import { todayLocal } from "@/modules/org-history/dates";
 import {
   jobsAsOf,
@@ -355,6 +356,7 @@ export async function launchCycle(
       actorPersonId,
     });
     await ensureSelfRequests(tx, id);
+    await notifyPhaseChanged(tx, id, "draft", to);
     return updated;
   });
 }
@@ -387,6 +389,7 @@ export async function transition(
       note: note || null,
     });
     await ensureSelfRequests(tx, id);
+    await notifyPhaseChanged(tx, id, cycle.status, to);
     return updated;
   });
 }
