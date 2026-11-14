@@ -1,4 +1,4 @@
-import { and, asc, eq, inArray, isNull, sql } from "drizzle-orm";
+import { and, asc, eq, inArray, isNull, ne, sql } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 import type { DbOrTx } from "@/db/client";
 import {
@@ -589,6 +589,23 @@ export async function distribution(
   cycleId: string,
   opts: { groupBy: "department" | "manager"; stage: "manager" | "current" },
 ): Promise<Distribution> {
+  return (await distributions(db, actor, cycleId))[opts.groupBy][opts.stage];
+}
+
+export type Distributions = Record<
+  "department" | "manager",
+  Record<"manager" | "current", Distribution>
+>;
+
+/**
+ * Every grouping × stage of `distribution` from one read of the
+ * participants and their ratings (the calibration page shows all four).
+ */
+export async function distributions(
+  db: DbOrTx,
+  actor: ActorContext,
+  cycleId: string,
+): Promise<Distributions> {
   if (!isUuid(cycleId)) throw new ReviewError("not_found");
   let scope;
   if (!isHr(actor)) {
@@ -623,51 +640,62 @@ export async function distribution(
       ),
     );
   const ids = people.map((p) => p.participantId);
-  const values = new Map<
-    string,
-    { optionValue: number; normalized: number | null }
-  >();
+  type Value = { optionValue: number; normalized: number | null };
+  const current = new Map<string, Value>();
+  const original = new Map<string, Value>();
   if (ids.length) {
-    if (opts.stage === "current") {
-      for (const r of await db
-        .select()
-        .from(vCurrentRating)
-        .where(inArray(vCurrentRating.participantId, ids))) {
-        values.set(r.participantId, r);
-      }
-    } else {
-      for (const r of await db
-        .select()
-        .from(finalRating)
-        .where(
-          and(
-            inArray(finalRating.participantId, ids),
-            eq(finalRating.stage, "manager"),
-          ),
-        )
-        .orderBy(asc(finalRating.createdAt))) {
-        values.set(r.participantId, r);
-      }
+    for (const r of await db
+      .select()
+      .from(vCurrentRating)
+      .where(inArray(vCurrentRating.participantId, ids))) {
+      current.set(r.participantId, r);
+    }
+    for (const r of await db
+      .select()
+      .from(finalRating)
+      .where(
+        and(
+          inArray(finalRating.participantId, ids),
+          eq(finalRating.stage, "manager"),
+        ),
+      )
+      .orderBy(asc(finalRating.createdAt))) {
+      original.set(r.participantId, r);
     }
   }
-  const series = new Map<string, Distribution["series"][number]>();
-  for (const p of people) {
-    const v = values.get(p.participantId);
-    const i = v ? optionIndexFor(options, v) : -1;
-    if (i < 0) continue;
-    const key = opts.groupBy === "department" ? p.department : p.managerId;
-    const label = opts.groupBy === "department" ? p.department : p.managerName;
-    const id = key ?? "";
-    if (!series.has(id)) {
-      series.set(id, { key, label, counts: options.map(() => 0) });
+  const group = (
+    groupBy: "department" | "manager",
+    values: Map<string, Value>,
+  ): Distribution => {
+    const series = new Map<string, Distribution["series"][number]>();
+    for (const p of people) {
+      const v = values.get(p.participantId);
+      const i = v ? optionIndexFor(options, v) : -1;
+      if (i < 0) continue;
+      const key = groupBy === "department" ? p.department : p.managerId;
+      const label = groupBy === "department" ? p.department : p.managerName;
+      const id = key ?? "";
+      if (!series.has(id)) {
+        series.set(id, { key, label, counts: options.map(() => 0) });
+      }
+      series.get(id)!.counts[i] += 1;
     }
-    series.get(id)!.counts[i] += 1;
-  }
+    return {
+      options,
+      series: [...series.values()].sort((a, b) =>
+        (a.label ?? "").localeCompare(b.label ?? ""),
+      ),
+    };
+  };
   return {
-    options,
-    series: [...series.values()].sort((a, b) =>
-      (a.label ?? "").localeCompare(b.label ?? ""),
-    ),
+    department: {
+      manager: group("department", original),
+      current: group("department", current),
+    },
+    manager: {
+      manager: group("manager", original),
+      current: group("manager", current),
+    },
   };
 }
 
@@ -696,7 +724,7 @@ export async function publishCalibration(
       )
       .returning({ id: reviewCycle.id });
     if (!cycle) return [];
-    const requests = await tx
+    const all = await tx
       .select({
         id: reviewRequest.id,
         participantId: reviewRequest.participantId,
@@ -712,9 +740,17 @@ export async function publishCalibration(
           eq(reviewRequest.cycleId, cycleId),
           eq(reviewRequest.relationship, "manager"),
           isNull(reviewRequest.deletedAt),
+          ne(reviewRequest.status, "superseded"),
           isNull(cycleParticipant.removedAt),
         ),
-      );
+      )
+      // The primary request first (additional assessors after it).
+      .orderBy(asc(reviewRequest.additional), asc(reviewRequest.requestedAt));
+    // One audit row per participant.
+    const seen = new Set<string>();
+    const requests = all.filter(
+      (r) => !seen.has(r.participantId) && !!seen.add(r.participantId),
+    );
     if (requests.length) {
       await tx.insert(reviewAudit).values(
         requests.map((r) => ({
@@ -771,8 +807,12 @@ export async function myPublishedRating(
   if (!row) return null;
   const current = await currentRatingFor(db, row.participantId);
   if (!current) return null;
-  const option = (await finalScale(db, cycleId)).find(
-    (o) => o.value === current.optionValue,
-  );
-  return { value: current.optionValue, label: option?.label ?? null };
+  // Nearest normalized option: a manager-stage row may come from a question
+  // scale that differs from the final scale (see optionIndexFor).
+  const scale = await finalScale(db, cycleId);
+  const option = scale[optionIndexFor(scale, current)];
+  return {
+    value: option?.value ?? current.optionValue,
+    label: option?.label ?? null,
+  };
 }

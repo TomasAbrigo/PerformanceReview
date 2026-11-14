@@ -11,7 +11,37 @@ import type {
 } from "@/modules/review-core/calibration";
 import { CalibrationTableView } from "./calibration-table";
 import { DistributionChart, type DistributionData } from "./distribution-chart";
+import { GroupsPanel } from "./groups-panel";
 import { PublishCalibration } from "./publish-calibration";
+
+describe("GroupsPanel", () => {
+  it.each([
+    ["forbidden", "No podés hacer este cambio."],
+    ["validation", "Valor inválido."],
+    ["weird", "Algo salió mal. Intentá de nuevo."],
+  ])("maps error code %s to its message", async (code, text) => {
+    const create = vi.fn(async () => ({
+      ok: false as const,
+      code,
+      issues: [],
+    }));
+    renderIn(
+      "es",
+      <GroupsPanel
+        cycleId="c"
+        groups={[]}
+        selectedId={null}
+        canCreate
+        departments={["Ventas"]}
+        managers={[]}
+        create={create}
+      />,
+    );
+    await userEvent.type(screen.getByLabelText("Nombre"), "G");
+    await userEvent.click(screen.getByRole("button", { name: "Crear grupo" }));
+    expect(await screen.findByText(text)).toBeInTheDocument();
+  });
+});
 
 vi.mock("@/i18n/navigation", () => ({
   Link: ({ href, children }: { href: string; children: ReactNode }) => (

@@ -24,6 +24,9 @@
   --color-chart-2: var(--chart-2);
   --color-chart-1: var(--chart-1);
   --color-chart-seq: var(--chart-seq);
+  --color-chart-div-pos: var(--chart-div-pos);
+  --color-chart-div-neg: var(--chart-div-neg);
+  --color-chart-div-mid: var(--chart-div-mid);
   --color-ring: var(--ring);
   --color-input: var(--input);
   --color-border: var(--border);
@@ -52,6 +55,10 @@
 :root {
   /* Calibration histogram (dataviz skill: sequential blue, validated). */
   --chart-seq: #2a78d6;
+  /* Dashboards diverging pair (blue <-> red, gray midpoint; validated). */
+  --chart-div-pos: #2a78d6;
+  --chart-div-neg: #e34948;
+  --chart-div-mid: #f0efec;
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
@@ -88,6 +95,9 @@
 
 .dark {
   --chart-seq: #3987e5;
+  --chart-div-pos: #3987e5;
+  --chart-div-neg: #e66767;
+  --chart-div-mid: #383835;
   --background: oklch(0.145 0 0);
   --foreground: oklch(0.985 0 0);
   --card: oklch(0.205 0 0);
