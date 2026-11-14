@@ -13,6 +13,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  type SelfReviewColumn,
+  SelfStatusCell,
+} from "@/components/review/self-status-cell";
 import type { ParticipantFilter } from "@/db/schema";
 import type { LocalizedText } from "@/db/schema/rating-scales";
 import { Link } from "@/i18n/navigation";
@@ -88,11 +92,15 @@ export type CycleDetailActions = {
 export function CycleDetailView({
   cycle,
   actions,
+  selfReview,
 }: {
   cycle: CycleDetailData;
   actions: CycleDetailActions;
+  /** Self review status per participant (HR view, #11). */
+  selfReview?: SelfReviewColumn;
 }) {
   const t = useTranslations("Cycles");
+  const tReview = useTranslations("Review");
   const td = useTranslations("Cycles.detail");
   const tx = useTranslations("Cycles.extras");
   const tg = useTranslations("Cycles.extras.groups");
@@ -313,6 +321,9 @@ export function CycleDetailView({
                   {byHireDate ? (
                     <TableHead>{tx("detail.due")}</TableHead>
                   ) : null}
+                  {selfReview ? (
+                    <TableHead>{tReview("selfColumn")}</TableHead>
+                  ) : null}
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -346,6 +357,15 @@ export function CycleDetailView({
                     {byHireDate ? (
                       <TableCell>
                         {p.dueDates?.self ?? p.dueDates?.manager ?? "—"}
+                      </TableCell>
+                    ) : null}
+                    {selfReview ? (
+                      <TableCell>
+                        <SelfStatusCell
+                          request={selfReview.byParticipant[p.id]}
+                          canUnlock={selfReview.canUnlock}
+                          unlock={selfReview.unlock}
+                        />
                       </TableCell>
                     ) : null}
                   </TableRow>

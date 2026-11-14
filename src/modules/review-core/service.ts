@@ -40,6 +40,7 @@ import {
 import { CyclesError } from "./errors";
 import { assignCycleGroups, freezeGroups } from "./groups";
 import { enrollDueParticipants } from "./hire-date";
+import { ensureSelfRequests } from "./requests";
 import { allowedTransitions, type CycleStatus, launchStatus } from "./status";
 import {
   cycleInput,
@@ -374,6 +375,7 @@ export async function launchCycle(
       toStatus: to,
       actorPersonId,
     });
+    await ensureSelfRequests(tx, id);
     if (byHireDate) await enrollDueParticipants(tx, id, todayLocal());
     return updated;
   });
@@ -406,6 +408,7 @@ export async function transition(
       actorPersonId,
       note: note || null,
     });
+    await ensureSelfRequests(tx, id);
     return updated;
   });
 }
@@ -427,32 +430,34 @@ export async function addParticipant(
   personId: string,
   asOf: IsoDate = todayLocal(),
 ): Promise<CycleParticipant> {
-  await activeCycle(db, cycleId);
-  const [existing] = await db
-    .select()
-    .from(cycleParticipant)
-    .where(
-      and(
-        eq(cycleParticipant.cycleId, cycleId),
-        eq(cycleParticipant.revieweePersonId, personId),
-      ),
-    );
-  if (existing && !existing.removedAt) {
-    throw new CyclesError("already_participant");
-  }
-  const [snap] = await snapshots(db, cycleId, [personId], asOf);
-  const groupOf = await assignCycleGroups(db, cycleId, [personId], asOf);
-  const values = { ...snap, templateGroupId: groupOf.get(personId) ?? null };
-  if (existing) {
-    const [row] = await db
-      .update(cycleParticipant)
-      .set({ ...values, addedAt: new Date(), removedAt: null })
-      .where(eq(cycleParticipant.id, existing.id))
-      .returning();
+  // Participant and its self request are created together (or not at all).
+  return db.transaction(async (tx) => {
+    await activeCycle(tx, cycleId);
+    const [existing] = await tx
+      .select()
+      .from(cycleParticipant)
+      .where(
+        and(
+          eq(cycleParticipant.cycleId, cycleId),
+          eq(cycleParticipant.revieweePersonId, personId),
+        ),
+      );
+    if (existing && !existing.removedAt) {
+      throw new CyclesError("already_participant");
+    }
+    const [snap] = await snapshots(tx, cycleId, [personId], asOf);
+    const groupOf = await assignCycleGroups(tx, cycleId, [personId], asOf);
+    const values = { ...snap, templateGroupId: groupOf.get(personId) ?? null };
+    const [row] = existing
+      ? await tx
+          .update(cycleParticipant)
+          .set({ ...values, addedAt: new Date(), removedAt: null })
+          .where(eq(cycleParticipant.id, existing.id))
+          .returning()
+      : await tx.insert(cycleParticipant).values(values).returning();
+    await ensureSelfRequests(tx, cycleId, row.id);
     return row;
-  }
-  const [row] = await db.insert(cycleParticipant).values(values).returning();
-  return row;
+  });
 }
 
 /** Removes a reviewee from a launched cycle; the row (and its history) stays. */

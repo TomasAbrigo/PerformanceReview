@@ -580,5 +580,69 @@
       "invalid": "Valor inválido.",
       "unknown": "Ocurrió un error inesperado."
     }
+  },
+  "Actor": {
+    "label": "Actuar como",
+    "current": "Actuando como: {name}",
+    "hrName": "People (RR. HH.)",
+    "search": "Buscar persona",
+    "person": "Persona",
+    "noPerson": "Sin persona",
+    "role": "Rol",
+    "roles": {
+      "hr": "People (RR. HH.)",
+      "manager": "Manager",
+      "employee": "Empleado",
+      "peer": "Par",
+      "calibrator": "Calibrador"
+    },
+    "apply": "Aplicar",
+    "myTasks": "Mis tareas",
+    "error": "No se pudo cambiar el actor."
+  },
+  "Me": {
+    "title": "Mis tareas",
+    "empty": "No tenés tareas pendientes.",
+    "noPerson": "Elegí una persona en 'Actuar como' para ver sus tareas.",
+    "selfAssessments": "Autoevaluaciones",
+    "selfTask": "Autoevaluación: {cycle}",
+    "due": "Vence el {date}",
+    "noDue": "Sin fecha límite",
+    "open": "Completar"
+  },
+  "Review": {
+    "selfTitle": "Autoevaluación",
+    "back": "Volver a mis tareas",
+    "due": "Vence el {date}",
+    "required": "Obligatoria",
+    "saving": "Guardando…",
+    "saved": "Borrador guardado",
+    "submit": "Enviar",
+    "confirmTitle": "¿Enviar la autoevaluación?",
+    "confirmBody": "Una vez enviada no podrás modificarla.",
+    "confirm": "Confirmar envío",
+    "cancel": "Cancelar",
+    "submittedOn": "Enviado el {date}",
+    "missingRequired": "Completá las preguntas obligatorias.",
+    "requiredError": "Esta pregunta es obligatoria.",
+    "noAnswer": "Sin respuesta",
+    "notFound": "No tenés una autoevaluación en este ciclo.",
+    "selfColumn": "Autoevaluación",
+    "status": {
+      "draft": "Borrador",
+      "submitted": "Enviada",
+      "declined": "Rechazada",
+      "none": "—"
+    },
+    "unlock": "Desbloquear",
+    "unlockNote": "Motivo del desbloqueo",
+    "unlockConfirm": "Confirmar desbloqueo",
+    "errors": {
+      "not_found": "No se encontró la evaluación.",
+      "forbidden": "No tenés permiso para esta acción.",
+      "validation": "Hay respuestas inválidas.",
+      "not_submitted": "La evaluación no está enviada.",
+      "unknown": "Ocurrió un error inesperado."
+    }
   }
 }

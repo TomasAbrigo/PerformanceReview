@@ -21,6 +21,7 @@ import {
   enrollmentHireDateRange,
   hireDateTimeline,
 } from "./hire-date-schedule";
+import { ensureSelfRequests } from "./requests";
 import { findCycle, matchParticipants, snapshots } from "./service";
 import type { CycleDueDates } from "./status";
 import { hireDateScheduleInput } from "./validation";
@@ -137,6 +138,8 @@ export async function enrollDueParticipants(
     .onConflictDoNothing()
     .returning({ personId: cycleParticipant.revieweePersonId });
   const added = new Set(inserted.map((r) => r.personId));
+  // Collecting cycles get the newcomers' self requests right away.
+  if (added.size > 0) await ensureSelfRequests(db, cycleId);
 
   return {
     cycleId,

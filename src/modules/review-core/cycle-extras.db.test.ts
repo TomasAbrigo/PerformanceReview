@@ -31,20 +31,25 @@ import {
   duplicateCycle,
   enrollAllDueParticipants,
   enrollDueParticipants,
+  findMySelfRequestId,
   getCycle,
+  getSelfReview,
   launchCycle,
   listCycleGroups,
   listCycles,
+  listMyTasks,
   listParticipantQuestions,
   previewGroups,
   recentHires,
   removeParticipant,
+  saveDraft,
   setCycleGroups,
   transition,
   updateCycle,
   type CycleGroupInput,
   type CycleInput,
 } from ".";
+import type { ActorContext } from "@/modules/actor/types";
 import { enrollCli } from "./enroll-cli";
 import { addDays } from "./hire-date-schedule";
 
@@ -185,6 +190,11 @@ function input(overrides: Partial<CycleInput> = {}): CycleInput {
     ...overrides,
   };
 }
+
+const as = (personId: string): ActorContext => ({
+  personId,
+  role: "employee",
+});
 
 const promptsOf = (rows: { prompt: { es: string } }[]) =>
   rows.map((r) => r.prompt.es);
@@ -487,6 +497,44 @@ describe("template groups", () => {
     expect(
       promptsOf(await listParticipantQuestions(db, cycle.id, bruno)),
     ).toContain("Pregunta de Ingeniería");
+  });
+
+  it("serves the self form the questions of the participant's group", async () => {
+    const cycle = await createCycle(db, input());
+    await setCycleGroups(db, cycle.id, [engGroup]);
+    await launchCycle(db, cycle.id, null);
+    await transition(db, cycle.id, "collecting", null);
+
+    const review = async (personId: string) => {
+      const requestId = await findMySelfRequestId(db, as(personId), cycle.id);
+      return getSelfReview(db, as(personId), requestId!);
+    };
+    const brunoReview = await review(bruno);
+    const anaReview = await review(ana);
+    expect(promptsOf(brunoReview!.questions)).toContain(
+      "Pregunta de Ingeniería",
+    );
+    expect(promptsOf(anaReview!.questions)).not.toContain(
+      "Pregunta de Ingeniería",
+    );
+    expect(brunoReview!.questions).toHaveLength(
+      (await listParticipantQuestions(db, cycle.id, bruno, "self")).length,
+    );
+
+    // Bruno cannot answer a question of the default template.
+    const defaultQuestion = anaReview!.questions.find(
+      (q) => q.kind === "text",
+    )!;
+    await expect(
+      saveDraft(db, as(bruno), brunoReview!.request.id, [
+        { questionRevisionId: defaultQuestion.id, value: "hola" },
+      ]),
+    ).rejects.toMatchObject({ code: "validation" });
+    const own = brunoReview!.questions.find((q) => q.kind === "text")!;
+    await saveDraft(db, as(bruno), brunoReview!.request.id, [
+      { questionRevisionId: own.id, value: "hola" },
+    ]);
+    expect((await review(bruno))!.answers[own.id]).toBe("hola");
   });
 
   it("assigns the group of someone added mid-cycle", async () => {
@@ -840,6 +888,22 @@ describe("enrollDueParticipants", () => {
     await expect(
       enrollDueParticipants(db, "00000000-0000-4000-8000-000000000000", AS_OF),
     ).rejects.toMatchObject({ code: "not_found" });
+  });
+
+  it("gives the people it enrolls their self request and own deadline", async () => {
+    const cycle = await launched();
+    await transition(db, cycle.id, "collecting", null);
+    await enrollDueParticipants(db, cycle.id, AS_OF);
+
+    const requestId = await findMySelfRequestId(db, as(people.dana), cycle.id);
+    expect(requestId).toBeTruthy();
+    const review = await getSelfReview(db, as(people.dana), requestId!);
+    // Hired 2026-01-31: milestone 2026-03-02, two weeks to complete it.
+    expect(review!.cycle.dueDate).toBe("2026-03-16");
+    const tasks = await listMyTasks(db, as(people.dana));
+    expect(tasks.selfAssessments.map((t) => t.dueDate)).toEqual(["2026-03-16"]);
+    // Whoever is not due yet has no request.
+    expect(await findMySelfRequestId(db, as(people.hana), cycle.id)).toBeNull();
   });
 
   it("enrolls whoever is due today when the cycle launches", async () => {

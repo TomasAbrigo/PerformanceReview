@@ -6,13 +6,19 @@ import { Suspense } from "react";
 import { CycleDetailView } from "@/components/cycles/cycle-detail";
 import { db } from "@/db/client";
 import { routing } from "@/i18n/routing";
-import { getCycle, listCycleGroups } from "@/modules/review-core";
+import { getActor } from "@/modules/actor/server";
+import {
+  getCycle,
+  listCycleGroups,
+  listSelfRequests,
+} from "@/modules/review-core";
 import { listTemplates } from "@/modules/templates";
 import {
   duplicateCycleAction,
   launchCycleAction,
   transitionCycleAction,
 } from "../actions";
+import { unlockAction } from "./self/actions";
 
 async function Detail({ params }: PageProps<"/[locale]/cycles/[id]">) {
   const { locale, id } = await params;
@@ -21,9 +27,11 @@ async function Detail({ params }: PageProps<"/[locale]/cycles/[id]">) {
   await connection();
   const cycle = await getCycle(db, id);
   if (!cycle) notFound();
-  const [groups, templates] = await Promise.all([
+  const actor = await getActor();
+  const [groups, templates, selfRequests] = await Promise.all([
     listCycleGroups(db, cycle.id),
     listTemplates(db),
+    listSelfRequests(db, actor, id),
   ]);
   return (
     <CycleDetailView
@@ -67,6 +75,20 @@ async function Detail({ params }: PageProps<"/[locale]/cycles/[id]">) {
         launch: launchCycleAction,
         duplicate: duplicateCycleAction,
       }}
+      selfReview={
+        selfRequests.length
+          ? {
+              byParticipant: Object.fromEntries(
+                selfRequests.map((r) => [
+                  r.participantId,
+                  { requestId: r.requestId, status: r.status },
+                ]),
+              ),
+              canUnlock: actor.role === "hr",
+              unlock: unlockAction,
+            }
+          : undefined
+      }
     />
   );
 }
