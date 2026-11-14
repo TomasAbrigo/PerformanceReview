@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
 import type { ActorContext } from "@/modules/actor/types";
-import { canRead, canWrite, type VisibilityContext } from "./visibility";
+import {
+  canRead,
+  canShare,
+  canWrite,
+  type VisibilityContext,
+} from "./visibility";
 
 // #17: an alternate/additional assessor (Dora) writes the manager review of
 // Bruno, whose snapshot manager is Carla.
@@ -73,5 +78,69 @@ describe("assessor visibility", () => {
     expect(canWrite(dora, { ...mine, reviewerPersonId: "carla" }, scope)).toBe(
       false,
     );
+  });
+});
+
+describe("a replaced snapshot manager", () => {
+  const carla: ActorContext = { personId: "carla", role: "manager" };
+  const managerOf = (
+    over: Partial<VisibilityContext> = {},
+    status: "draft" | "submitted" = "submitted",
+  ): VisibilityContext => ({
+    request: {
+      relationship: "manager",
+      reviewerPersonId: "dora",
+      status,
+    },
+    participant: { revieweePersonId: "bruno", snapManagerPersonId: "carla" },
+    cycle: { status: "collecting", components: { doubleBlind: true } },
+    ...over,
+  });
+
+  it("reads the manager review of the participant until HR replaces them", () => {
+    expect(canRead(carla, managerOf({}, "draft"))).toBe(true);
+    expect(canRead(carla, managerOf({ snapManagerReplaced: false }))).toBe(
+      true,
+    );
+    expect(
+      canRead(carla, managerOf({ snapManagerReplaced: true }, "draft")),
+    ).toBe(false);
+    expect(canRead(carla, managerOf({ snapManagerReplaced: true }))).toBe(
+      false,
+    );
+  });
+
+  it("no longer reads the self review as the manager", () => {
+    const self = selfOf({ managerRequest: { status: "submitted" } });
+    expect(canRead(carla, self)).toBe(true);
+    expect(canRead(carla, { ...self, snapManagerReplaced: true })).toBe(false);
+    // ...unless they also write an additional review (assessor).
+    expect(
+      canRead(carla, { ...self, snapManagerReplaced: true, assessor: true }),
+    ).toBe(true);
+  });
+
+  it("still reads what they wrote themselves", () => {
+    const own = managerOf({ snapManagerReplaced: true });
+    own.request.reviewerPersonId = "carla";
+    expect(canRead(carla, own)).toBe(true);
+  });
+
+  it("cannot share, while HR, the reviewer and the snapshot manager can", () => {
+    const participant = { snapManagerPersonId: "carla", removedAt: null };
+    const request = {
+      relationship: "manager" as const,
+      reviewerPersonId: "dora",
+    };
+    expect(canShare(carla, { request, participant })).toBe(true);
+    expect(
+      canShare(carla, { request, participant, snapManagerReplaced: true }),
+    ).toBe(false);
+    expect(
+      canShare(dora, { request, participant, snapManagerReplaced: true }),
+    ).toBe(true);
+    expect(
+      canShare({ personId: null, role: "hr" }, { request, participant }),
+    ).toBe(true);
   });
 });

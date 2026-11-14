@@ -10,7 +10,7 @@ import {
 } from "@/db/schema";
 import { isUuid } from "@/lib/uuid";
 import type { ActorContext } from "@/modules/actor/types";
-import { isSkipLevel } from "./manager";
+import { isManagerReplaced, isSkipLevel } from "./manager";
 import type { RequestStatus } from "./request-status";
 import { ReviewError } from "./review-errors";
 import type { CycleStatus } from "./status";
@@ -130,7 +130,8 @@ export async function ensureManagerRequests(
   // reassigned (audited); a submitted one is kept and flagged. Only the
   // primary request counts: additional assessors and superseded history
   // (#17) are left alone, and so is a draft HR assigned to another reviewer
-  // on purpose (reviewer_mismatch already set, see assignAlternateAssessor).
+  // on purpose (assigned_by_hr, see assignAlternateAssessor). A stale
+  // mismatch (e.g. a flagged review HR unlocked) does follow the snapshot.
   const existing = new Map(
     (
       await db
@@ -140,6 +141,7 @@ export async function ensureManagerRequests(
           reviewer: reviewRequest.reviewerPersonId,
           status: reviewRequest.status,
           mismatch: reviewRequest.reviewerMismatch,
+          assignedByHr: reviewRequest.assignedByHr,
         })
         .from(reviewRequest)
         .where(
@@ -160,7 +162,7 @@ export async function ensureManagerRequests(
     const request = existing.get(p.id);
     if (!request || request.reviewer === p.managerId) continue;
     if (request.status === "draft") {
-      if (request.mismatch) continue; // assigned on purpose (#17)
+      if (request.assignedByHr) continue; // assigned on purpose (#17)
       await db
         .update(reviewRequest)
         .set({
@@ -250,6 +252,10 @@ async function visibilityContext(
     const own = managerRequests.find((r) => r.reviewer === actor.personId);
     ctx.assessor = !!own;
     ctx.managerRequest = own ?? managerRequests[0] ?? null;
+  }
+  // A snapshot manager HR replaced as reviewer loses manager-side access.
+  if (actor.personId === row.participant.snapManagerPersonId) {
+    ctx.snapManagerReplaced = await isManagerReplaced(db, row.participant);
   }
   // The snapshot manager and the reviewee are decided without skip-level.
   const decided =

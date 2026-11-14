@@ -59,6 +59,12 @@ export const reviewRequest = pgTable(
     unlockedBy: uuid("unlocked_by").references(() => person.id),
     /** A second manager request next to the primary one (#17 "additional"). */
     additional: boolean("additional").notNull().default(false),
+    /**
+     * HR picked this reviewer on purpose (assignAlternateAssessor, #17). The
+     * sync with the snapshot manager leaves such a request alone, and a
+     * snapshot manager who was replaced loses manager-side access.
+     */
+    assignedByHr: boolean("assigned_by_hr").notNull().default(false),
     /** HR completed this review in the reviewer's name (#17). */
     submittedOnBehalf: boolean("submitted_on_behalf").notNull().default(false),
     /** Who completed it (null: HR acting as People without a person). */

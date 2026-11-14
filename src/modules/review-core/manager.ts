@@ -37,8 +37,38 @@ export async function isSkipLevel(
 }
 
 /**
+ * Whether HR replaced the participant's snapshot manager as the reviewer of
+ * their (primary) manager review (#17 assignAlternateAssessor, mode replace):
+ * the request goes to someone else on purpose. The replaced manager no longer
+ * reads or shares that participant's reviews or sees them in their team; an
+ * additional assessor, or a reassignment back to them, changes nothing.
+ */
+export async function isManagerReplaced(
+  db: DbOrTx,
+  participant: Pick<CycleParticipant, "id" | "snapManagerPersonId">,
+): Promise<boolean> {
+  if (!participant.snapManagerPersonId) return false;
+  const [row] = await db
+    .select({ id: reviewRequest.id })
+    .from(reviewRequest)
+    .where(
+      and(
+        eq(reviewRequest.participantId, participant.id),
+        eq(reviewRequest.relationship, "manager"),
+        eq(reviewRequest.additional, false),
+        eq(reviewRequest.assignedByHr, true),
+        ne(reviewRequest.status, "superseded"),
+        isNull(reviewRequest.deletedAt),
+        ne(reviewRequest.reviewerPersonId, participant.snapManagerPersonId),
+      ),
+    )
+    .limit(1);
+  return !!row;
+}
+
+/**
  * Id of the manager request of a participant, when the actor may open it
- * (its reviewer, the snapshot manager or HR).
+ * (its reviewer, the snapshot manager unless replaced, or HR).
  */
 export async function findManagerRequestId(
   db: DbOrTx,
@@ -72,11 +102,17 @@ export async function findManagerRequestId(
     rows.find((r) => actor.personId && r.reviewer === actor.personId) ??
     rows[0];
   if (!row) return null;
-  const allowed =
-    actor.role === "hr" ||
-    (actor.personId !== null &&
-      (actor.personId === row.reviewer || actor.personId === row.manager));
-  return allowed ? row.id : null;
+  if (actor.role === "hr") return row.id;
+  if (actor.personId === null) return null;
+  if (actor.personId === row.reviewer) return row.id;
+  const isManager = actor.personId === row.manager;
+  const replaced =
+    isManager &&
+    (await isManagerReplaced(db, {
+      id: participantId,
+      snapManagerPersonId: row.manager,
+    }));
+  return isManager && !replaced ? row.id : null;
 }
 
 export type TeamRow = {
@@ -146,7 +182,16 @@ export async function listTeam(
     .where(
       and(
         or(
-          eq(cycleParticipant.snapManagerPersonId, actor.personId),
+          and(
+            eq(cycleParticipant.snapManagerPersonId, actor.personId),
+            // ...unless HR replaced them as reviewer (see isManagerReplaced).
+            sql`not exists (select 1 from review_request rr
+              where rr.participant_id = ${cycleParticipant.id}
+                and rr.relationship = 'manager' and not rr.additional
+                and rr.assigned_by_hr and rr.status <> 'superseded'
+                and rr.deleted_at is null
+                and rr.reviewer_person_id <> ${cycleParticipant.snapManagerPersonId})`,
+          ),
           // Alternate/additional assessors (#17) see who they review.
           sql`exists (select 1 from review_request rr
             where rr.participant_id = ${cycleParticipant.id}
@@ -176,6 +221,7 @@ export async function sendReminder(
   const [row] = isUuid(requestId)
     ? await db
         .select({
+          participantId: cycleParticipant.id,
           manager: cycleParticipant.snapManagerPersonId,
           removedAt: cycleParticipant.removedAt,
           status: reviewRequest.status,
@@ -193,7 +239,14 @@ export async function sendReminder(
         )
     : [];
   if (!row || row.cycleDeletedAt) throw new ReviewError("not_found");
-  const isManager = actor.personId !== null && actor.personId === row.manager;
+  const isManager =
+    actor.personId !== null &&
+    actor.personId === row.manager &&
+    // A snapshot manager HR replaced as reviewer no longer manages the review.
+    !(await isManagerReplaced(db, {
+      id: row.participantId,
+      snapManagerPersonId: row.manager,
+    }));
   if (actor.role !== "hr" && !isManager) throw new ReviewError("forbidden");
   if (
     row.status !== "draft" ||

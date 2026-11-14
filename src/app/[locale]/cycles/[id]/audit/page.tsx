@@ -7,8 +7,8 @@ import { OpsAuditLog } from "@/components/cycles/ops-audit-log";
 import { db } from "@/db/client";
 import { routing } from "@/i18n/routing";
 import { getActor } from "@/modules/actor/server";
-import { getCycle } from "@/modules/review-core";
 import { listAuditLog } from "@/modules/review-core/admin-audit";
+import { getCycleRef } from "@/modules/review-core/ops";
 import {
   type AdminAction,
   adminActions,
@@ -27,7 +27,7 @@ async function Audit({
     const t = await getTranslations("Ops.audit");
     return <p role="alert">{t("forbidden")}</p>;
   }
-  const cycle = await getCycle(db, id);
+  const cycle = await getCycleRef(db, id);
   if (!cycle) notFound();
   const { action: raw } = await searchParams;
   const action = adminActions.find((a) => a === raw) as AdminAction | undefined;

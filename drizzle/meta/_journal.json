@@ -85,6 +85,13 @@
       "when": 1794644477996,
       "tag": "0011_goal_snapshots",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1794647443969,
+      "tag": "0012_cycle_ops",
+      "breakpoints": true
     }
   ]
 }

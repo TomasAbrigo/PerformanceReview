@@ -26,13 +26,19 @@ export async function shareReview(
   requestId: string,
 ): Promise<ReviewRequest> {
   return db.transaction(async (tx) => {
-    const { request, participant, cycle } = await loadRequest(
+    const { request, participant, cycle, visibility } = await loadRequest(
       tx,
       actor,
       requestId,
       { forUpdate: true },
     );
-    if (!canShare(actor, { request, participant })) {
+    if (
+      !canShare(actor, {
+        request,
+        participant,
+        snapManagerReplaced: visibility.snapManagerReplaced,
+      })
+    ) {
       throw new ReviewError("forbidden");
     }
     if (request.status !== "submitted") throw new ReviewError("not_submitted");

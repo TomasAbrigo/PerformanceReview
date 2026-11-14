@@ -28,6 +28,8 @@ import {
   listMyTasks,
   listTeam,
   saveDraft,
+  sendReminder,
+  shareReview,
   submit,
   transition,
   type CycleInput,
@@ -600,11 +602,12 @@ describe("assignAlternateAssessor", () => {
       reviewerMismatch: true,
       reviewerMissing: false,
       additional: false,
+      assignedByHr: true,
       status: "draft",
     });
-    // Ana writes it; the old manager no longer does.
+    // Ana writes it; the replaced manager neither writes nor reads it.
     expect((await getReview(db, as(ana), before.id))!.canWrite).toBe(true);
-    expect((await getReview(db, as(carla), before.id))!.canWrite).toBe(false);
+    expect(await getReview(db, as(carla), before.id)).toBeNull();
     expect(await findManagerRequestId(db, as(ana), p.id)).toBe(before.id);
     // The request-level trail records the reassignment (note: who had it).
     const trail = await db
@@ -710,6 +713,158 @@ describe("assignAlternateAssessor", () => {
     expect(await auditRows(cycle.id)).toHaveLength(2);
   });
 
+  it("a revived request is not shared again by itself", async () => {
+    const cycle = await collectingCycle();
+    const p = await participantOf(cycle.id, bruno);
+    const oldId = await submitManagerReview(cycle.id);
+    await db
+      .update(reviewRequest)
+      .set({ sharedAt: new Date(), sharedBy: carla })
+      .where(eq(reviewRequest.id, oldId));
+    await assignAlternateAssessor(db, hr, p.id, ana, "replace");
+    const back = await assignAlternateAssessor(db, hr, p.id, carla, "replace");
+    expect(back).toMatchObject({
+      id: oldId,
+      status: "submitted",
+      sharedAt: null,
+      sharedBy: null,
+    });
+    // Neither does it reach the employee until it is shared on purpose.
+    expect(await getReview(db, as(bruno), oldId)).toBeNull();
+  });
+
+  it("an additional request that comes back is not shared either", async () => {
+    const cycle = await collectingCycle();
+    const p = await participantOf(cycle.id, bruno);
+    const oldId = await submitManagerReview(cycle.id);
+    await db
+      .update(reviewRequest)
+      .set({ sharedAt: new Date(), sharedBy: carla })
+      .where(eq(reviewRequest.id, oldId));
+    await assignAlternateAssessor(db, hr, p.id, ana, "replace");
+    const extra = await assignAlternateAssessor(
+      db,
+      hr,
+      p.id,
+      carla,
+      "additional",
+    );
+    expect(extra).toMatchObject({
+      id: oldId,
+      additional: true,
+      sharedAt: null,
+      sharedBy: null,
+    });
+  });
+
+  it("a declined request that comes back starts over as a clean draft", async () => {
+    const cycle = await collectingCycle();
+    const p = await participantOf(cycle.id, bruno);
+    const [primary] = await requestsOf(p.id, "manager");
+    await db
+      .update(reviewRequest)
+      .set({
+        status: "declined",
+        declinedAt: new Date(),
+        declineReason: "Sin información",
+      })
+      .where(eq(reviewRequest.id, primary.id));
+    await assignAlternateAssessor(db, hr, p.id, ana, "replace");
+    const back = await assignAlternateAssessor(db, hr, p.id, carla, "replace");
+    expect(back).toMatchObject({
+      id: primary.id,
+      status: "draft",
+      declinedAt: null,
+      declineReason: null,
+    });
+  });
+
+  it("replacing the snapshot manager takes their manager-side access away", async () => {
+    const cycle = await collectingCycle();
+    const p = await participantOf(cycle.id, bruno);
+    const selfId = await submitSelf(cycle.id);
+    const requestId = (await findManagerRequestId(db, as(carla), p.id))!;
+    await assignAlternateAssessor(db, hr, p.id, ana, "replace");
+
+    const carlaAsManager = as(carla, "manager");
+    expect(await findManagerRequestId(db, carlaAsManager, p.id)).toBeNull();
+    expect(await getReview(db, carlaAsManager, requestId)).toBeNull();
+    expect(await getReview(db, carlaAsManager, selfId)).toBeNull();
+    expect(
+      (await listTeam(db, carlaAsManager)).map((t) => t.revieweeName),
+    ).toEqual([]);
+    await expect(
+      sendReminder(db, carlaAsManager, selfId),
+    ).rejects.toMatchObject({ code: "forbidden" });
+
+    // Even once the alternate submitted, the replaced manager cannot read or
+    // share it.
+    const review = (await getReview(db, as(ana), requestId))!;
+    await saveDraft(db, as(ana), requestId, fillAll(review));
+    await submit(db, as(ana), requestId);
+    expect(await getReview(db, carlaAsManager, requestId)).toBeNull();
+    await expect(
+      shareReview(db, carlaAsManager, requestId),
+    ).rejects.toMatchObject({ code: "forbidden" });
+
+    // Back to the snapshot manager: access returns.
+    const back = await assignAlternateAssessor(db, hr, p.id, carla, "replace");
+    expect(await findManagerRequestId(db, carlaAsManager, p.id)).toBe(back.id);
+    expect(
+      (await listTeam(db, carlaAsManager)).map((t) => t.revieweeName),
+    ).toEqual(["Bruno Pérez"]);
+  });
+
+  it("an additional assessor leaves the snapshot manager's access alone", async () => {
+    const cycle = await collectingCycle();
+    const p = await participantOf(cycle.id, bruno);
+    const selfId = await submitSelf(cycle.id);
+    await assignAlternateAssessor(db, hr, p.id, ana, "additional");
+    const carlaAsManager = as(carla, "manager");
+    expect(await findManagerRequestId(db, carlaAsManager, p.id)).not.toBeNull();
+    // Carla still sees the team and, once she wrote hers, the self review.
+    expect(
+      (await listTeam(db, carlaAsManager)).map((t) => t.revieweeName),
+    ).toEqual(["Bruno Pérez"]);
+    await submitManagerReview(cycle.id);
+    expect(await getReview(db, carlaAsManager, selfId)).not.toBeNull();
+  });
+
+  it("the manager-request sync reassigns a stale draft but not an HR assignment", async () => {
+    const cycle = await collectingCycle();
+    const p = await participantOf(cycle.id, bruno);
+    const managerId = await submitManagerReview(cycle.id);
+    // Bruno leaves and comes back after his manager changed: Carla's
+    // submitted review is kept and flagged.
+    await removeParticipantOp(db, hr, cycle.id, bruno);
+    await addParticipantOp(db, hr, cycle.id, bruno);
+    const [flagged] = await requestsOf(p.id, "manager");
+    expect(flagged).toMatchObject({
+      id: managerId,
+      reviewerPersonId: carla,
+      reviewerMismatch: true,
+      assignedByHr: false,
+    });
+    // HR unlocks it: a stale draft that should follow the new snapshot manager.
+    await unlockRequestOp(db, hr, managerId, null);
+    await ensureManagerRequests(db, cycle.id);
+    const [followed] = await requestsOf(p.id, "manager");
+    expect(followed).toMatchObject({
+      id: managerId,
+      reviewerPersonId: ana,
+      reviewerMismatch: false,
+    });
+    const trail = await db
+      .select()
+      .from(reviewAudit)
+      .where(eq(reviewAudit.requestId, managerId));
+    expect(
+      trail
+        .filter((a) => a.action === "reviewer_reassigned")
+        .map((a) => a.note),
+    ).toEqual([carla]);
+  });
+
   it("additional adds a second manager request and keeps the first", async () => {
     const cycle = await collectingCycle();
     const p = await participantOf(cycle.id, bruno);
@@ -730,10 +885,13 @@ describe("assignAlternateAssessor", () => {
       reviewerMismatch: false,
       status: "draft",
     });
+    // The mismatch flag is about the primary reviewer: an additional
+    // assessor is never "the wrong person".
     expect(rows.find((r) => r.id === extra.id)).toMatchObject({
       reviewerPersonId: ana,
       additional: true,
-      reviewerMismatch: true,
+      assignedByHr: true,
+      reviewerMismatch: false,
       status: "draft",
     });
     // Each reviewer opens their own request.
@@ -892,6 +1050,21 @@ describe("detectManagerChanges", () => {
     });
   });
 
+  it("suggests moving the review when the primary request was declined", async () => {
+    const cycle = await collectingCycle();
+    const p = await participantOf(cycle.id, bruno);
+    await db
+      .update(reviewRequest)
+      .set({ status: "declined", declinedAt: new Date() })
+      .where(eq(reviewRequest.participantId, p.id));
+    const [change] = await detectManagerChanges(db, cycle.id, "2024-06-01");
+    // Nothing to add to: the declined review goes to the current manager.
+    expect(change).toMatchObject({
+      requestStatus: "declined",
+      suggestedAction: "reassign",
+    });
+  });
+
   it("flags the mismatch when the reviewer is not the snapshot manager", async () => {
     const cycle = await collectingCycle();
     const p = await participantOf(cycle.id, bruno);
@@ -997,7 +1170,7 @@ describe("getCycleOps", () => {
     ]);
     expect(b.requests[2]).toMatchObject({
       additional: true,
-      reviewerMismatch: true,
+      reviewerMismatch: false,
       canComplete: true,
     });
     expect(b.change).toMatchObject({ currentManagerName: "Ana García" });

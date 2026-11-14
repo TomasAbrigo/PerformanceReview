@@ -40,11 +40,16 @@ import {
   type AuditSnapshot,
 } from "./ops-constants";
 import { OpsError } from "./ops-errors";
-import { ensureManagerRequests, loadRequest, unlock } from "./requests";
-import { ReviewError } from "./review-errors";
 import {
+  ensureManagerRequests,
+  loadRequest,
+  personName,
+  unlock,
+} from "./requests";
+import {
+  activeCycle,
   addParticipant,
-  participantFilterOptions,
+  listEligiblePeople,
   removeParticipant,
   updateCycle,
 } from "./service";
@@ -64,27 +69,6 @@ function requireHr(actor: ActorContext): void {
 }
 
 const notFound = () => new OpsError("not_found");
-
-async function nameOf(db: DbOrTx, personId: string | null) {
-  if (!personId) return null;
-  const [row] = await db
-    .select({ name: person.displayName })
-    .from(person)
-    .where(eq(person.id, personId));
-  return row?.name ?? null;
-}
-
-/** A launched, not closed cycle (the ones operations apply to). */
-async function activeCycle(db: DbOrTx, cycleId: string): Promise<ReviewCycle> {
-  const [cycle] = isUuid(cycleId)
-    ? await db.select().from(reviewCycle).where(eq(reviewCycle.id, cycleId))
-    : [];
-  if (!cycle || cycle.deletedAt) throw new CyclesError("not_found");
-  if (cycle.status === "draft" || cycle.status === "closed") {
-    throw new CyclesError("not_active");
-  }
-  return cycle;
-}
 
 // ------------------------------------------------------------ participants
 
@@ -116,15 +100,17 @@ const requestStates = async (db: DbOrTx, participantId: string) =>
   ).map((r): AuditSnapshot => r);
 
 /**
- * reviewer_mismatch of a participant's manager requests: there is a reviewer
- * and it is not the snapshot manager (also when the snapshot has none; a
- * missing reviewer is flagged by reviewer_missing instead). ensureManager-
- * Requests relies on it to leave a deliberate assignment alone.
+ * reviewer_mismatch of a participant's manager requests: the primary
+ * request has a reviewer and it is not the snapshot manager (also when the
+ * snapshot has none; a missing reviewer is flagged by reviewer_missing
+ * instead). It is about the primary only: an additional assessor is, by
+ * definition, someone else.
  */
 async function syncReviewerMismatch(db: DbOrTx, participantId: string) {
   await db.execute(sql`
     update review_request rr
-    set reviewer_mismatch = (rr.reviewer_person_id is not null
+    set reviewer_mismatch = (not rr.additional
+        and rr.reviewer_person_id is not null
         and rr.reviewer_person_id is distinct from cp.snap_manager_person_id),
       updated_at = now()
     from cycle_participant cp
@@ -163,7 +149,8 @@ export async function addParticipantOp(
 ): Promise<CycleParticipant> {
   requireHr(actor);
   return db.transaction(async (tx) => {
-    if (!isUuid(personId) || !(await nameOf(tx, personId))) throw notFound();
+    if (!isUuid(personId) || !(await personName(tx, personId)))
+      throw notFound();
     const existing = await findParticipant(tx, cycleId, personId);
     const added = await addParticipant(tx, cycleId, personId, opts.asOf);
     await syncReviewerMismatch(tx, added.id);
@@ -176,7 +163,7 @@ export async function addParticipantOp(
       before: existing ? participantState(existing) : null,
       after: {
         ...participantState(added),
-        personName: await nameOf(tx, personId),
+        personName: await personName(tx, personId),
         requests: await requestStates(tx, added.id),
       },
       note: opts.note,
@@ -216,7 +203,7 @@ export async function removeParticipantOp(
       cycleId,
       before: {
         ...participantState(before),
-        personName: await nameOf(tx, personId),
+        personName: await personName(tx, personId),
         openRequests,
       },
       after: { ...participantState(after), openRequests },
@@ -364,21 +351,19 @@ export async function getOnBehalfReview(
   requestId: string,
 ): Promise<OnBehalfReview | null> {
   requireHr(actor);
-  let loaded;
-  try {
-    loaded = await loadRequest(db, actor, requestId);
-  } catch (error) {
-    if (error instanceof ReviewError) return null;
-    throw error;
-  }
+  // One load: the review already carries the request, participant and phase.
   const review = await getReview(db, actor, requestId);
   if (!review) return null;
-  const { request, participant } = loaded;
+  const { request, participant } = review;
+  const [revieweeName, reviewerName] = await Promise.all([
+    personName(db, participant.revieweePersonId),
+    personName(db, request.reviewerPersonId),
+  ]);
   return {
     review,
-    revieweeName: await nameOf(db, participant.revieweePersonId),
-    reviewerName: await nameOf(db, request.reviewerPersonId),
-    canComplete: canCompleteOnBehalf(request, loaded),
+    revieweeName,
+    reviewerName,
+    canComplete: canCompleteOnBehalf(request, review),
   };
 }
 
@@ -425,7 +410,7 @@ export async function completeOnBehalf(
       before: {
         status: request.status,
         reviewerPersonId: request.reviewerPersonId,
-        reviewerName: await nameOf(tx, request.reviewerPersonId),
+        reviewerName: await personName(tx, request.reviewerPersonId),
         answers: answersBefore,
       },
       after: {
@@ -478,7 +463,11 @@ export async function assignAlternateAssessor(
             ),
           )
       : [];
-    if (!participant || !isUuid(personId) || !(await nameOf(tx, personId))) {
+    if (
+      !participant ||
+      !isUuid(personId) ||
+      !(await personName(tx, personId))
+    ) {
       throw notFound();
     }
     await activeCycle(tx, participant.cycleId);
@@ -510,13 +499,21 @@ export async function assignAlternateAssessor(
     const before = await assessorState(tx, primary, active);
     let result: ReviewRequest;
     let supersededRequestId: string | null = null;
+    // Bringing a superseded request back restores what its reviewer wrote
+    // (submitted, or a draft), but not what happened around it: it is not
+    // shared with the employee again by itself, and a decline is forgotten.
     const revive = (r: ReviewRequest, additional: boolean) =>
       tx
         .update(reviewRequest)
         .set({
           status: r.submittedAt ? "submitted" : "draft",
           additional,
+          assignedByHr: true,
           reviewerMissing: false,
+          sharedAt: null,
+          sharedBy: null,
+          declinedAt: null,
+          declineReason: null,
         })
         .where(eq(reviewRequest.id, r.id))
         .returning();
@@ -539,6 +536,7 @@ export async function assignAlternateAssessor(
               reviewerPersonId: personId,
               relationship: "manager",
               additional: true,
+              assignedByHr: true,
             })
             .returning();
     } else if (target) {
@@ -547,7 +545,11 @@ export async function assignAlternateAssessor(
     } else if (primary.status === "draft") {
       [result] = await tx
         .update(reviewRequest)
-        .set({ reviewerPersonId: personId, reviewerMissing: false })
+        .set({
+          reviewerPersonId: personId,
+          reviewerMissing: false,
+          assignedByHr: true,
+        })
         .where(eq(reviewRequest.id, primary.id))
         .returning();
     } else {
@@ -558,6 +560,7 @@ export async function assignAlternateAssessor(
           participantId: participant.id,
           reviewerPersonId: personId,
           relationship: "manager",
+          assignedByHr: true,
         })
         .returning();
       await supersede(primary);
@@ -617,7 +620,7 @@ async function assessorState(
     requestId: request.id,
     status: request.status,
     reviewerPersonId: request.reviewerPersonId,
-    reviewerName: await nameOf(db, request.reviewerPersonId),
+    reviewerName: await personName(db, request.reviewerPersonId),
     reviewerMissing: request.reviewerMissing,
     assessorIds: active.map((r) => r.reviewerPersonId),
   };
@@ -626,7 +629,7 @@ async function assessorState(
 // ----------------------------------------------------------- manager changes
 
 export type ManagerChangeAction =
-  /** Move the (draft) manager review to the current manager. */
+  /** Move the manager review (a draft, or a declined one) to the current manager. */
   | "reassign"
   /** Keep the submitted review and add the current manager as assessor. */
   | "add_assessor"
@@ -733,9 +736,9 @@ export async function detectManagerChanges(
     const suggestedAction: ManagerChangeAction =
       !primary || !currentId || handled
         ? "none"
-        : primary.status === "draft"
-          ? "reassign"
-          : "add_assessor";
+        : primary.status === "submitted"
+          ? "add_assessor"
+          : "reassign";
     return {
       participantId: p.id,
       revieweePersonId: p.revieweePersonId,
@@ -795,6 +798,19 @@ export type CycleOps = {
   people: { id: string; displayName: string }[];
 };
 
+/** Id and name of a cycle, for pages that only need its header (null: unknown). */
+export async function getCycleRef(
+  db: DbOrTx,
+  cycleId: string,
+): Promise<{ id: string; name: string } | null> {
+  if (!isUuid(cycleId)) return null;
+  const [cycle] = await db
+    .select({ id: reviewCycle.id, name: reviewCycle.name })
+    .from(reviewCycle)
+    .where(and(eq(reviewCycle.id, cycleId), isNull(reviewCycle.deletedAt)));
+  return cycle ?? null;
+}
+
 /** Everything the participants page needs (HR only); null for an unknown cycle. */
 export async function getCycleOps(
   db: DbOrTx,
@@ -837,7 +853,7 @@ export async function getCycleOps(
   const changes = new Map(
     (await detectManagerChanges(db, cycleId)).map((c) => [c.participantId, c]),
   );
-  const options = await participantFilterOptions(db);
+  const people = await listEligiblePeople(db);
   const active = new Set(
     rows
       .filter((r) => !r.participant.removedAt)
@@ -873,7 +889,7 @@ export async function getCycleOps(
           canComplete: canCompleteOnBehalf(request, { cycle, participant: p }),
         })),
     })),
-    candidates: options.people.filter((p) => !active.has(p.id)),
-    people: options.people,
+    candidates: people.filter((p) => !active.has(p.id)),
+    people,
   };
 }
