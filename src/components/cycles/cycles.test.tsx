@@ -109,6 +109,9 @@ beforeEach(() => {
         },
       ],
     })),
+    previewGroups: vi
+      .fn()
+      .mockResolvedValue({ ok: true, total: 2, groups: [], remainder: 2 }),
     create: vi.fn().mockResolvedValue({ ok: true, id: "new-cycle" }),
     launch: vi.fn().mockResolvedValue({ ok: true }),
   };
@@ -131,7 +134,7 @@ describe("CycleWizard", () => {
         defaultSnapshotDate="2026-06-01"
       />,
     );
-    expect(screen.getByText("Paso 1 de 4")).toBeVisible();
+    expect(screen.getByText("Paso 1 de 5")).toBeVisible();
     expect(await screen.findByText("2 personas coinciden")).toBeVisible();
 
     await user.click(screen.getByLabelText("Por filtro"));
@@ -194,6 +197,7 @@ describe("CycleWizard", () => {
     );
     await user.click(screen.getByRole("button", { name: "Next" }));
     await user.click(screen.getByRole("button", { name: "Next" }));
+    await user.click(screen.getByRole("button", { name: "Next" }));
     await fillDates(user);
     await user.click(screen.getByRole("button", { name: "Next" }));
     await screen.findByText("Will launch with 2 participants");
@@ -216,6 +220,7 @@ describe("CycleWizard", () => {
     );
     await user.click(screen.getByRole("button", { name: "Next" }));
     await user.click(screen.getByRole("button", { name: "Next" }));
+    await user.click(screen.getByRole("button", { name: "Next" }));
     await fillDates(user);
     await user.click(screen.getByRole("button", { name: "Next" }));
     await screen.findByText("Will launch with 2 participants");
@@ -236,7 +241,7 @@ describe("CycleWizard", () => {
       />,
     );
     await user.click(screen.getByRole("button", { name: "Next" }));
-    expect(screen.getByText("Step 2 of 4")).toBeVisible();
+    expect(screen.getByText("Step 2 of 5")).toBeVisible();
     expect(screen.getByLabelText("Peer anonymity")).toBeVisible();
     await user.click(screen.getByRole("checkbox", { name: "Peer review" }));
     expect(screen.queryByLabelText("Peer anonymity")).not.toBeInTheDocument();
@@ -254,12 +259,13 @@ describe("CycleWizard", () => {
     );
     await user.click(screen.getByRole("button", { name: "Next" }));
     await user.click(screen.getByRole("button", { name: "Next" }));
+    await user.click(screen.getByRole("button", { name: "Next" }));
     await fillDates(user);
     await user.type(screen.getByLabelText("Self review"), "2026-07-15");
     await user.type(screen.getByLabelText("Manager"), "2026-07-01");
     await user.click(screen.getByRole("button", { name: "Next" }));
     expect(screen.getByText("Dates must be in order.")).toBeVisible();
-    expect(screen.getByText("Step 3 of 4")).toBeVisible();
+    expect(screen.getByText("Step 4 of 5")).toBeVisible();
   });
 
   it("creates and launches the cycle from the review step (en)", async () => {
@@ -274,11 +280,12 @@ describe("CycleWizard", () => {
     );
     await user.click(screen.getByRole("button", { name: "Next" }));
     await user.click(screen.getByRole("button", { name: "Next" }));
+    await user.click(screen.getByRole("button", { name: "Next" }));
     await fillDates(user);
     await user.type(screen.getByLabelText("Self review"), "2026-07-01");
     await user.click(screen.getByRole("button", { name: "Next" }));
 
-    expect(screen.getByText("Step 4 of 4")).toBeVisible();
+    expect(screen.getByText("Step 5 of 5")).toBeVisible();
     expect(
       await screen.findByText("Will launch with 2 participants"),
     ).toBeVisible();
@@ -295,6 +302,7 @@ describe("CycleWizard", () => {
         dueDates: { self: "2026-07-01" },
         participantFilter: { kind: "all" },
       }),
+      [],
     );
     expect(actions.launch).toHaveBeenCalledWith("new-cycle");
   });
@@ -312,6 +320,10 @@ const detail: CycleDetailData = {
   questionCount: 5,
   stats: { active: 2, removed: 0, withoutManager: 1 },
   allowedTransitions: ["collecting"],
+  scheduleKind: "fixed",
+  hireDateSchedule: null,
+  defaultTemplateName: null,
+  groups: [],
   participants: [
     {
       id: "p1",
@@ -321,6 +333,8 @@ const detail: CycleDetailData = {
       snapJobTitle: "CEO",
       withoutManager: true,
       removedAt: null,
+      templateGroupId: null,
+      dueDates: null,
     },
     {
       id: "p2",
@@ -330,6 +344,8 @@ const detail: CycleDetailData = {
       snapJobTitle: "Developer",
       withoutManager: false,
       removedAt: null,
+      templateGroupId: null,
+      dueDates: null,
     },
   ],
   transitions: [
@@ -355,7 +371,11 @@ describe("CycleDetailView", () => {
         locale,
         <CycleDetailView
           cycle={detail}
-          actions={{ transition: vi.fn(), launch: vi.fn() }}
+          actions={{
+            transition: vi.fn(),
+            launch: vi.fn(),
+            duplicate: vi.fn(),
+          }}
         />,
       );
       expect(
@@ -379,7 +399,7 @@ describe("CycleDetailView", () => {
       "en",
       <CycleDetailView
         cycle={detail}
-        actions={{ transition, launch: vi.fn() }}
+        actions={{ transition, launch: vi.fn(), duplicate: vi.fn() }}
       />,
     );
     await user.click(
@@ -410,7 +430,11 @@ describe("CycleDetailView", () => {
           allowedTransitions: [],
           stats: { active: 0, removed: 0, withoutManager: 0 },
         }}
-        actions={{ transition: vi.fn(), launch: vi.fn() }}
+        actions={{
+          transition: vi.fn(),
+          launch: vi.fn(),
+          duplicate: vi.fn(),
+        }}
       />,
     );
     expect(screen.getByText(e)).toBeVisible();

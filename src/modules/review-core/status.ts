@@ -1,3 +1,5 @@
+import type { PeerSettings } from "./peer-settings";
+
 /**
  * Cycle status machine (docs/research/06): the phases of a cycle depend on
  * its components (no nominations without peers, no calibration phase when
@@ -34,6 +36,8 @@ export type CycleComponents = {
    * are submitted (manager) / it is shared (employee). Missing = on.
    */
   doubleBlind?: boolean;
+  /** #14: nominations cap, approval and load warning (defaults apply). */
+  peerSettings?: Partial<PeerSettings>;
 };
 
 export const isDoubleBlind = (c: Pick<CycleComponents, "doubleBlind">) =>
@@ -56,6 +60,29 @@ export type CycleDueDates = Partial<Record<DueDatePhase, string>>;
 
 export const scheduleKinds = ["fixed", "hire_date"] as const;
 export type ScheduleKind = (typeof scheduleKinds)[number];
+
+/** Prefix of the status-log note that links a duplicated cycle to its source. */
+export const DUPLICATE_NOTE_PREFIX = "duplicate_of:";
+
+/** Something a duplicate could not carry over from the source cycle. */
+export type DuplicateWarning =
+  { kind: "template" } | { kind: "group"; name: string };
+
+/** Hire-date milestones, in days after hire (6 months = 180, 1 year = 365). */
+export const hireMilestoneDays = [30, 60, 90, 180, 365] as const;
+export type HireMilestoneDays = (typeof hireMilestoneDays)[number];
+/** Length of the window (weeks) that opens at the milestone. */
+export const hireWindowWeeks = [1, 2, 3, 4] as const;
+export type HireWindowWeeks = (typeof hireWindowWeeks)[number];
+
+/**
+ * Cadence of a `hire_date` cycle: each person joins when hire date +
+ * `milestoneDays` is reached and has `windowWeeks` weeks to complete it.
+ */
+export type HireDateSchedule = {
+  milestoneDays: HireMilestoneDays;
+  windowWeeks: HireWindowWeeks;
+};
 
 export function phasesFor(components: CycleComponents): CycleStatus[] {
   return cycleStatuses.filter(

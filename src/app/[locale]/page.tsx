@@ -27,6 +27,7 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
   const tCycles = await getTranslations("Cycles");
   const tTeam = await getTranslations("Team");
   const tGoals = await getTranslations("Goals");
+  const tDataQuality = await getTranslations("DataQuality");
   const tNotifications = await getTranslations("Notifications");
   const tUpload = await getTranslations("Upload");
 
@@ -68,6 +69,9 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
             </Link>
             <Link href="/imports/identity" className="underline">
               {tIdentity("nav")}
+            </Link>
+            <Link href="/data-quality" className="underline">
+              {tDataQuality("nav")}
             </Link>
             <Link href="/settings/templates" className="underline">
               {tSettings("templates")}

@@ -33,7 +33,7 @@ import type { NotificationInput } from "./service";
 export const DEFAULT_REMINDER_OFFSETS: readonly number[] = [7, 1, 0];
 
 /**
- * The cycle due date each kind of review answers to (cycle.due_dates).
+ * The due date phase each kind of review answers to (participant.due_dates, else cycle.due_dates).
  * Upward feedback has no window of its own: it is collected with peers.
  */
 const dueDatePhase: Record<Relationship, DueDatePhase> = {
@@ -67,11 +67,14 @@ const writableNow = or(
 );
 
 // Built from the constants above, never from input.
-const dueDateOfRequest = sql<
-  string | null
->`${reviewCycle.dueDates} ->> (case ${reviewRequest.relationship}::text ${sql.raw(
+const duePhaseOfRequest = sql`(case ${reviewRequest.relationship}::text ${sql.raw(
   relationships.map((r) => `when '${r}' then '${dueDatePhase[r]}'`).join(" "),
 )} end)`;
+
+/** The participant's own deadline (hire-date cycles) before the cycle's. */
+const dueDateOfRequest = sql<
+  string | null
+>`coalesce(${cycleParticipant.dueDates} ->> ${duePhaseOfRequest}, ${reviewCycle.dueDates} ->> ${duePhaseOfRequest})`;
 
 export type DueRemindersResult = {
   asOf: string;
