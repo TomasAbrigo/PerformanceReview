@@ -13,6 +13,7 @@ import { isUuid } from "@/lib/uuid";
 import type { ActorContext } from "@/modules/actor/types";
 import { managerAsOf } from "@/modules/org-history/queries";
 import { getReview, type Review } from "./answers";
+import { countsTowardOverall, overallRatingQuestion } from "./goal-snapshot";
 import { ReviewError } from "./review-errors";
 import type { CycleStatus } from "./status";
 
@@ -51,9 +52,9 @@ export type HistoryItem = {
  *
  * TODO(#16): replace with `currentRatingFor(participantId)` (calibration's
  * v_current_rating: override > calibrated > manager). Until then it is the
- * manager's overall rating: the last rating question of the manager review
- * of a submitted review; the employee only gets it when that question is
- * visible to them (`forReviewee`).
+ * manager's overall rating (the question with the overall_rating role, else
+ * the last rating question) of a submitted manager review; the employee only
+ * gets it when that question is visible to them (`forReviewee`).
  */
 async function fallbackCurrentRating(
   db: DbOrTx,
@@ -66,9 +67,14 @@ async function fallbackCurrentRating(
     .from(questionRevision)
     .where(eq(questionRevision.cycleId, cycleId))
     .orderBy(desc(questionRevision.sort));
-  const overall = revisions.find(
-    (q) => q.kind === "rating" && q.appliesTo.includes("manager"),
+  const ratings = revisions.filter(
+    (q) =>
+      q.kind === "rating" &&
+      q.appliesTo.includes("manager") &&
+      countsTowardOverall(q),
   );
+  // The question marked overall_rating; without roles, the last rating one.
+  const overall = overallRatingQuestion(ratings) ?? ratings[0];
   if (!overall || (forReviewee && !overall.visibleToReviewee)) return null;
   const [row] = await db
     .select({ value: answer.optionValue, normalized: answer.normalized })

@@ -3,13 +3,19 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { connection } from "next/server";
 import { Suspense } from "react";
+import { GoalsBlock } from "@/components/review/goals-block";
 import { toReviewData } from "@/components/review/review-data";
 import { SelfReviewForm } from "@/components/review/self-review-form";
 import { db } from "@/db/client";
 import { Link } from "@/i18n/navigation";
 import { routing } from "@/i18n/routing";
 import { getActor } from "@/modules/actor/server";
-import { findMySelfRequestId, getReview } from "@/modules/review-core";
+import {
+  findMySelfRequestId,
+  getReview,
+  getReviewGoals,
+} from "@/modules/review-core";
+import { linkGoalAction, refreshGoalsAction } from "../goals/actions";
 import { saveDraftAction, submitAction } from "./actions";
 
 async function SelfReview({ params }: PageProps<"/[locale]/cycles/[id]/self">) {
@@ -32,9 +38,21 @@ async function SelfReview({ params }: PageProps<"/[locale]/cycles/[id]/self">) {
       </div>
     );
   }
+  const goals = await getReviewGoals(db, actor, review);
   return (
     <SelfReviewForm
       key={`${review.request.id}-${review.request.status}`}
+      intro={
+        goals ? (
+          <GoalsBlock
+            data={goals}
+            actions={{
+              refresh: refreshGoalsAction,
+              link: linkGoalAction.bind(null, id),
+            }}
+          />
+        ) : null
+      }
       review={toReviewData(review)}
       actions={{ save: saveDraftAction, submit: submitAction }}
     />

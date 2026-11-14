@@ -69,6 +69,21 @@ export {
   writablePhases,
 } from "./visibility";
 export {
+  countsTowardOverall,
+  getReviewGoals,
+  goalOverlapsPeriod,
+  isGoalsQuestion,
+  linkGoalToCycle,
+  overallRatingQuestion,
+  refreshGoalProgress,
+  snapshotGoalsForParticipant,
+  snapshotGoalsForParticipants,
+  type GoalsBlockData,
+  type GoalSnapshotView,
+  type GoalsScope,
+  type GoalWindow,
+} from "./goal-snapshot";
+export {
   compareReviews,
   type CompareQuestion,
   type CompareRow,

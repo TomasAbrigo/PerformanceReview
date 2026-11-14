@@ -292,3 +292,151 @@ describe("templates module", () => {
     await deleteTemplate(db, clone.id);
   });
 });
+
+describe("question roles", () => {
+  beforeAll(async () => {
+    await seedSystemTemplates(db);
+  });
+
+  afterAll(async () => {
+    await closeDb();
+  });
+
+  const rolesOf = async (templateId: string) =>
+    Object.fromEntries(
+      (await getTemplate(db, templateId))!.sections
+        .flatMap((sec) => sec.questions)
+        .filter((q) => q.role)
+        .map((q) => [q.prompt.en, q.role]),
+    );
+
+  it("marks the goals rating, its comment and the overall rating of the year-end template", async () => {
+    expect(await rolesOf((await systemTemplate("year_end")).id)).toEqual({
+      "How would you rate their progress on goals?": "goals_rating",
+      "Comment on their progress on goals.": "goals_comment",
+      "Overall performance rating": "overall_rating",
+    });
+  });
+
+  it("keeps the roles when cloning", async () => {
+    const source = await systemTemplate("year_end");
+    const clone = await cloneTemplate(db, source.id);
+    expect(await rolesOf(clone.id)).toEqual(await rolesOf(source.id));
+    await deleteTemplate(db, clone.id);
+  });
+
+  it("sets, keeps and clears the role from the editor", async () => {
+    const { template, section } = await customTemplateWithSection();
+    const scale = (await listScales(db)).find((x) => x.isSystem)!;
+    const base = {
+      appliesTo: ["manager" as const],
+      prompt: t("Calificación", "Rating"),
+      kind: "rating" as const,
+      scaleId: scale.id,
+    };
+    const created = await addQuestion(db, section.id, {
+      ...base,
+      role: "overall_rating",
+    });
+    expect(created.role).toBe("overall_rating");
+    // Not sending a role leaves it alone.
+    expect((await updateQuestion(db, created.id, base)).role).toBe(
+      "overall_rating",
+    );
+    expect(
+      (await updateQuestion(db, created.id, { ...base, role: null })).role,
+    ).toBeNull();
+    await deleteTemplate(db, template.id);
+  });
+
+  it("only allows rating roles on rating questions and the comment on text", async () => {
+    const { template, section } = await customTemplateWithSection();
+    const base = { appliesTo: ["manager" as const], prompt: t("P", "P") };
+    for (const role of ["goals_rating", "overall_rating"] as const) {
+      await expect(
+        addQuestion(db, section.id, { ...base, kind: "text", role }),
+      ).rejects.toMatchObject({
+        issues: [{ path: "role", message: "only_for_rating" }],
+      });
+    }
+    const scale = (await listScales(db)).find((x) => x.isSystem)!;
+    await expect(
+      addQuestion(db, section.id, {
+        ...base,
+        kind: "rating",
+        scaleId: scale.id,
+        role: "goals_comment",
+      }),
+    ).rejects.toMatchObject({
+      issues: [{ path: "role", message: "only_for_text" }],
+    });
+    await expect(
+      addQuestion(db, section.id, {
+        ...base,
+        kind: "text",
+        role: "bogus" as never,
+      }),
+    ).rejects.toBeInstanceOf(TemplatesError);
+    await deleteTemplate(db, template.id);
+  });
+
+  it("rejects changing the kind of a question that keeps a rating role", async () => {
+    const { template, section } = await customTemplateWithSection();
+    const scale = (await listScales(db)).find((x) => x.isSystem)!;
+    const base = { appliesTo: ["manager" as const], prompt: t("P", "P") };
+    const q = await addQuestion(db, section.id, {
+      ...base,
+      kind: "rating",
+      scaleId: scale.id,
+      role: "goals_rating",
+    });
+    await expect(
+      updateQuestion(db, q.id, { ...base, kind: "text" }),
+    ).rejects.toMatchObject({
+      issues: [{ path: "role", message: "only_for_rating" }],
+    });
+    await deleteTemplate(db, template.id);
+  });
+
+  it("allows one overall rating and one goals rating per template", async () => {
+    const { template, section } = await customTemplateWithSection();
+    const other = await addSection(db, template.id, {
+      title: t("Otra", "Other"),
+    });
+    const scale = (await listScales(db)).find((x) => x.isSystem)!;
+    const rating = {
+      appliesTo: ["manager" as const],
+      prompt: t("R", "R"),
+      kind: "rating" as const,
+      scaleId: scale.id,
+    };
+    for (const role of ["overall_rating", "goals_rating"] as const) {
+      const first = await addQuestion(db, section.id, { ...rating, role });
+      // Another section of the same template counts too.
+      await expect(
+        addQuestion(db, other.id, { ...rating, role }),
+      ).rejects.toMatchObject({
+        issues: [{ path: "role", message: "duplicate_role" }],
+      });
+      // Editing the one that has it is fine; so is moving the role on.
+      await updateQuestion(db, first.id, { ...rating, role });
+      const second = await addQuestion(db, other.id, rating);
+      await expect(
+        updateQuestion(db, second.id, { ...rating, role }),
+      ).rejects.toMatchObject({
+        issues: [{ path: "role", message: "duplicate_role" }],
+      });
+    }
+    // Other templates are not affected.
+    const { template: elsewhere, section: elsewhereSection } =
+      await customTemplateWithSection();
+    await expect(
+      addQuestion(db, elsewhereSection.id, {
+        ...rating,
+        role: "overall_rating",
+      }),
+    ).resolves.toMatchObject({ role: "overall_rating" });
+    await deleteTemplate(db, template.id);
+    await deleteTemplate(db, elsewhere.id);
+  });
+});
