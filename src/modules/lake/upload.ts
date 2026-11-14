@@ -24,6 +24,7 @@ import {
   type UploadStore,
 } from "./upload-store";
 import {
+  HISTORY_PROFILES,
   PREVIEW_ROWS,
   type ImportUploadResult,
   type ProfileChoice,
@@ -143,6 +144,8 @@ export type ImportUploadInput = {
   store?: UploadStore;
   /** Aborted when the worker is told to stop: the run ends in error. */
   signal?: AbortSignal;
+  /** History profiles: only land the rows (no historical cycles). */
+  landing?: boolean;
 };
 
 /** The profile a choice means, and whether it is new (saved after the import). */
@@ -182,8 +185,11 @@ async function chosenProfile(
 }
 
 /**
- * Land an uploaded file in raw_record with a source profile (landing only:
- * the domain mapping of its entity is a later step). The file is checked
+ * Import an uploaded file with a source profile. Bamboo's Employee
+ * Performance and Feedback Status reports (built-in profiles) are mapped to
+ * historical review cycles (src/modules/import-history) unless `landing`;
+ * every other file is landed in raw_record only (its domain mapping is a
+ * later step). The file is checked
  * against the profile first: if it lacks a column the profile needs, nothing
  * is written. A new custom profile is saved only after the import succeeded.
  * Importing the same content again creates no new raw_records.
@@ -195,8 +201,13 @@ export async function importUpload({
   db,
   store = {},
   signal,
+  landing = false,
 }: ImportUploadInput): Promise<ImportUploadResult> {
   const { profile, source, isNew } = await chosenProfile(choice, store);
+  // Bamboo's performance reports become historical cycles (import-history);
+  // anything else, or when asked, is only landed in raw_record.
+  const domain =
+    "builtin" in choice && HISTORY_PROFILES.includes(profile.name) && !landing;
   const upload = await resolveUpload(uploadId, store);
 
   const result = await withUploadLake(upload, async (lake, table) => {
@@ -215,7 +226,7 @@ export async function importUpload({
     return runIngest({
       adapter: new FileSourceAdapter(profile, lake, table, { source }),
       entity: profile.entity,
-      landing: true,
+      landing: !domain,
       db,
       extract: { signal },
       params: {
@@ -234,5 +245,9 @@ export async function importUpload({
     .select({ rejects: ingestRun.rejects })
     .from(ingestRun)
     .where(eq(ingestRun.id, result.runId));
-  return { ...result, rejects: (run?.rejects ?? []).slice(0, RESULT_REJECTS) };
+  return {
+    ...result,
+    rejects: (run?.rejects ?? []).slice(0, RESULT_REJECTS),
+    mode: domain ? "domain" : "landing",
+  };
 }

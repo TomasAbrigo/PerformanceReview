@@ -615,7 +615,10 @@
       "import": "Importar",
       "importing": "Importando…",
       "another": "Elegir otro archivo",
-      "blocked": "Corregí los problemas del perfil para poder importar."
+      "blocked": "Corregí los problemas del perfil para poder importar.",
+      "landingOnly": "Solo aterrizar",
+      "historyHint": "Las filas se importan como ciclos de evaluación históricos, con sus participantes, solicitudes y respuestas.",
+      "landingHint": "Las filas se guardan tal cual (crudas), sin crear ciclos."
     },
     "roles": {
       "key": "Clave",

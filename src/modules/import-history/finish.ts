@@ -1,4 +1,4 @@
-import { aliasedTable, and, eq, inArray, sql } from "drizzle-orm";
+import { aliasedTable, and, eq } from "drizzle-orm";
 import type { DbOrTx } from "@/db/client";
 import {
   cycleParticipant,
@@ -10,15 +10,14 @@ import {
   type IngestReject,
 } from "@/db/schema";
 import { jobsAsOf } from "@/modules/org-history/queries";
-import { SOURCE } from "./cycles";
 
 /**
- * After a run: the cycles it touched get their final period (min/max of the
- * imported assessment dates, snapshot = period end), every participant's
- * snapshot is (re)computed as of that date, and manager requests whose
- * reviewer (the CSV Manager, i.e. the manager at export time) is not the one
- * in force at period end are flagged `reviewer_mismatch` and logged.
- * Rows are processed one by one, so only now is the period known for sure.
+ * After a run, for each cycle it touched: rows are processed one by one and
+ * each widens the cycle's period (min/max of the assessment dates, snapshot =
+ * period end), so only now is the period final. Every participant's snapshot
+ * is (re)computed as of it, and manager requests whose reviewer (the CSV
+ * Manager, i.e. the manager at export time) is not the one in force at period
+ * end are flagged `reviewer_mismatch` and logged on the run.
  */
 export async function finishHistoryImport(
   db: DbOrTx,
@@ -48,35 +47,7 @@ async function refreshCycle(
     .select()
     .from(reviewCycle)
     .where(eq(reviewCycle.id, cycleId));
-  const [range] = await tx
-    .select({
-      from: sql<string | null>`min(${reviewRequest.submittedAt})::date::text`,
-      to: sql<string | null>`max(${reviewRequest.submittedAt})::date::text`,
-    })
-    .from(reviewRequest)
-    .where(
-      and(
-        eq(reviewRequest.cycleId, cycleId),
-        eq(reviewRequest.sourceSystem, SOURCE),
-        inArray(reviewRequest.relationship, ["self", "manager"]),
-      ),
-    );
-  let asOf = cycle.snapshotDate;
-  if (
-    range?.from &&
-    range.to &&
-    (range.from !== cycle.periodStart || range.to !== cycle.periodEnd)
-  ) {
-    await tx
-      .update(reviewCycle)
-      .set({
-        periodStart: range.from,
-        periodEnd: range.to,
-        snapshotDate: range.to,
-      })
-      .where(eq(reviewCycle.id, cycleId));
-    asOf = range.to;
-  }
+  const asOf = cycle.snapshotDate;
 
   const participants = await tx
     .select()

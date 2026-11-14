@@ -615,7 +615,10 @@
       "import": "Import",
       "importing": "Importing…",
       "another": "Choose another file",
-      "blocked": "Fix the profile problems to be able to import."
+      "blocked": "Fix the profile problems to be able to import.",
+      "landingOnly": "Only land the rows",
+      "historyHint": "The rows become historical review cycles, with their participants, requests and answers.",
+      "landingHint": "The rows are kept as they are (raw), without creating cycles."
     },
     "roles": {
       "key": "Key",

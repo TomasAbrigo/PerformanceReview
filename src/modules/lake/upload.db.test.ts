@@ -72,6 +72,7 @@ describe("importUpload", () => {
       uploadId: stored.id,
       fileName: "Employee Performance.csv",
       profile: builtin("bamboo-employee-performance"),
+      landing: true,
       db,
       store,
     });
@@ -105,6 +106,7 @@ describe("importUpload", () => {
       uploadId: first.id,
       fileName: "a.csv",
       profile: builtin("bamboo-employee-performance"),
+      landing: true,
       db,
       store,
     });
@@ -114,6 +116,7 @@ describe("importUpload", () => {
       uploadId: again.id,
       fileName: "copia.csv",
       profile: builtin("bamboo-employee-performance"),
+      landing: true,
       db,
       store,
     });
@@ -133,6 +136,7 @@ describe("importUpload", () => {
         uploadId: stored.id,
         fileName: "Mis metas.csv",
         profile: builtin("bamboo-employee-performance"),
+        landing: true,
         db,
         store,
       }),
@@ -411,4 +415,27 @@ describe("markUploadRunsFailed", () => {
     expect((await statusOf(otherUpload)).status).toBe("running");
     expect((await statusOf(done)).status).toBe("succeeded");
   });
+});
+
+describe("importUpload of a Bamboo performance report (domain mode)", () => {
+  it("imports it as historical cycles unless asked to only land it", async () => {
+    await db.execute(sql`TRUNCATE review_cycle, identity_match_issue CASCADE`);
+    const stored = await upload("employee-performance.csv");
+
+    const result = await importUpload({
+      uploadId: stored.id,
+      fileName: "employee-performance.csv",
+      profile: builtin("bamboo-employee-performance"),
+      db,
+      store,
+    });
+
+    expect(result.mode).toBe("domain");
+    expect(result.counts).toMatchObject({ read: 69, rejected: 0 });
+    const cycles = await db.execute(
+      sql`select name from review_cycle where source_system = 'bamboo_export'`,
+    );
+    expect(cycles).toHaveLength(3);
+    await db.execute(sql`TRUNCATE review_cycle, identity_match_issue CASCADE`);
+  }, 60_000);
 });
