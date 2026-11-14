@@ -20,14 +20,17 @@ export function encodeCursor(key: string[]): string {
   return Buffer.from(JSON.stringify(key)).toString("base64url");
 }
 
+/** A sort position (question order): a plain non-negative integer that fits an int4. */
+const SORT_KEY = /^\d{1,9}$/;
+
 /**
  * Keyset position of a cursor: `ts_id` = (instant with microseconds, uuid),
- * `id` = (uuid). Null for the first page; anything else that does not decode
- * is a 400, never silently the first page.
+ * `n_id` = (sort position, uuid), `id` = (uuid). Null for the first page;
+ * anything else that does not decode is a 400, never silently the first page.
  */
 export function decodeCursor(
   cursor: string | null | undefined,
-  shape: "ts_id",
+  shape: "ts_id" | "n_id",
 ): [string, string] | null;
 export function decodeCursor(
   cursor: string | null | undefined,
@@ -35,7 +38,7 @@ export function decodeCursor(
 ): [string] | null;
 export function decodeCursor(
   cursor: string | null | undefined,
-  shape: "ts_id" | "id",
+  shape: "ts_id" | "n_id" | "id",
 ): [string, string] | [string] | null {
   if (!cursor) return null;
   try {
@@ -48,7 +51,7 @@ export function decodeCursor(
       (shape === "id"
         ? parsed.length === 1 && isUuid(parsed[0])
         : parsed.length === 2 &&
-          ISO_INSTANT.test(parsed[0]) &&
+          (shape === "ts_id" ? ISO_INSTANT : SORT_KEY).test(parsed[0]) &&
           isUuid(parsed[1]))
     ) {
       return parsed as [string, string] | [string];

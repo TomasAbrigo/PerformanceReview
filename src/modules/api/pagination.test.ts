@@ -19,8 +19,22 @@ describe("cursors", () => {
     expect(decodeCursor(encodeCursor([ID]), "id")).toEqual([ID]);
   });
 
+  it("round-trips a (sort position, id) key", () => {
+    expect(decodeCursor(encodeCursor(["12", ID]), "n_id")).toEqual(["12", ID]);
+    expect(() => decodeCursor(encodeCursor(["-1", ID]), "n_id")).toThrowError(
+      ApiError,
+    );
+    expect(() => decodeCursor(encodeCursor([TS, ID]), "n_id")).toThrowError(
+      ApiError,
+    );
+    expect(() => decodeCursor(encodeCursor(["12", ID]), "ts_id")).toThrowError(
+      ApiError,
+    );
+  });
+
   it("treats a missing cursor as the first page", () => {
     expect(decodeCursor(null, "ts_id")).toBeNull();
+    expect(decodeCursor(null, "n_id")).toBeNull();
     expect(decodeCursor(undefined, "id")).toBeNull();
   });
 

@@ -18,3 +18,6 @@ export const badRequest = (detail: string, errors?: ApiFieldError[]) =>
 
 export const notFound = (what: string) =>
   new ApiError(404, "Not Found", `${what} not found`);
+
+export const forbidden = (detail: string) =>
+  new ApiError(403, "Forbidden", detail);
