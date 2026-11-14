@@ -1,10 +1,11 @@
-import { and, arrayContains, asc, eq, inArray } from "drizzle-orm";
+import { and, arrayContains, asc, eq, inArray, isNull } from "drizzle-orm";
 import type { DbOrTx } from "@/db/client";
 import {
   answer,
   type Answer,
   type QuestionRevision,
   questionRevision,
+  type Relationship,
   reviewRequest,
   type ReviewRequest,
 } from "@/db/schema";
@@ -15,9 +16,10 @@ import {
   isGoalsQuestion,
 } from "./goal-snapshot";
 import { loadRequest } from "./requests";
+import { notifyFeedbackReceived } from "@/modules/notifications";
 import { ReviewError } from "./review-errors";
-import type { CycleStatus } from "./status";
-import { canRead, canWrite } from "./visibility";
+import type { CycleAnonymity, CycleStatus } from "./status";
+import { canRead, canWrite, isReviewer, reviewerVisible } from "./visibility";
 
 /** Value of an answer as the form handles it (rating: the scale value). */
 export type AnswerValue = string | number | null;
@@ -29,18 +31,34 @@ export type SelfReview = GoalsScope & {
     id: string;
     name: string;
     dueDate: string | null;
+    anonymity: CycleAnonymity;
     status: CycleStatus;
   };
   questions: QuestionRevision[];
   /** Current answers by question revision id. */
   answers: Record<string, AnswerValue>;
   canWrite: boolean;
+  /**
+   * Whether the actor may know who wrote it (peer/upward anonymity); when
+   * not, request.reviewerPersonId is null.
+   */
+  reviewerVisible: boolean;
+  /** The actor wrote it (from the raw request, before any anonymizing). */
+  isAuthor: boolean;
 };
 
-const questionsFor = (
+/**
+ * The frozen questions a participant answers: those of their template group
+ * (`templateGroupId` of the participant row) or, without a group, those of
+ * the cycle's default template. `relationship` keeps the ones that apply to
+ * it. The single reader of question revisions for every form (self, manager,
+ * peer...): a form must never list a cycle's revisions without it.
+ */
+export const questionsFor = (
   db: DbOrTx,
   cycleId: string,
-  relationship: ReviewRequest["relationship"],
+  templateGroupId: string | null,
+  relationship?: Relationship,
 ) =>
   db
     .select()
@@ -48,12 +66,20 @@ const questionsFor = (
     .where(
       and(
         eq(questionRevision.cycleId, cycleId),
-        arrayContains(questionRevision.appliesTo, [relationship]),
+        templateGroupId
+          ? eq(questionRevision.groupId, templateGroupId)
+          : isNull(questionRevision.groupId),
+        relationship
+          ? arrayContains(questionRevision.appliesTo, [relationship])
+          : undefined,
       ),
     )
     .orderBy(asc(questionRevision.sort));
 
-function valueOf(q: QuestionRevision | undefined, a: Answer): AnswerValue {
+export function answerValueOf(
+  q: QuestionRevision | undefined,
+  a: Answer,
+): AnswerValue {
   if (q?.kind === "rating") return a.optionValue;
   if (q?.kind === "single_choice") return a.optionLabel;
   return a.textValue;
@@ -91,10 +117,17 @@ export async function getReview(
     if (error instanceof ReviewError) return null;
     throw error;
   }
-  const { request, cycle, visibility } = row;
+  const { request, cycle, visibility, participant } = row;
   // Without goals to rate, the goals rating and its comment are optional.
   const goalsOptional = await goalsQuestionsOptional(db, request);
-  const questions = (await questionsFor(db, cycle.id, request.relationship))
+  const questions = (
+    await questionsFor(
+      db,
+      cycle.id,
+      participant.templateGroupId,
+      request.relationship,
+    )
+  )
     .filter((q) => canRead(actor, { ...visibility, questionRevision: q }))
     .map((q) =>
       goalsOptional && isGoalsQuestion(q) ? { ...q, required: false } : q,
@@ -104,9 +137,17 @@ export async function getReview(
     .from(answer)
     .where(eq(answer.requestId, request.id));
   const byId = new Map(questions.map((q) => [q.id, q]));
-  const duePhase = request.relationship === "manager" ? "manager" : "self";
+  const duePhase =
+    request.relationship === "manager"
+      ? "manager"
+      : request.relationship === "self"
+        ? "self"
+        : "peer";
+  const showReviewer = reviewerVisible(actor, visibility);
   return {
-    request,
+    request: showReviewer ? request : { ...request, reviewerPersonId: null },
+    reviewerVisible: showReviewer,
+    isAuthor: isReviewer(actor, request),
     participant: {
       id: row.participant.id,
       revieweePersonId: row.participant.revieweePersonId,
@@ -116,7 +157,10 @@ export async function getReview(
     cycle: {
       id: cycle.id,
       name: cycle.name,
-      dueDate: cycle.dueDates[duePhase] ?? null,
+      // Hire-date cycles: the participant's own deadline first.
+      dueDate:
+        participant.dueDates?.[duePhase] ?? cycle.dueDates[duePhase] ?? null,
+      anonymity: cycle.anonymity,
       status: cycle.status,
     },
     questions,
@@ -125,7 +169,7 @@ export async function getReview(
         .filter((a) => byId.has(a.questionRevisionId))
         .map((a) => [
           a.questionRevisionId,
-          valueOf(byId.get(a.questionRevisionId), a),
+          answerValueOf(byId.get(a.questionRevisionId), a),
         ]),
     ),
     canWrite: canWrite(actor, request, row),
@@ -178,12 +222,20 @@ export async function saveDraft(
   answers: AnswerInput[],
 ): Promise<void> {
   await db.transaction(async (tx) => {
-    const { request, cycle } = await writable(tx, actor, requestId);
+    const { request, cycle, participant } = await writable(
+      tx,
+      actor,
+      requestId,
+    );
     const questions = new Map(
-      (await questionsFor(tx, cycle.id, request.relationship)).map((q) => [
-        q.id,
-        q,
-      ]),
+      (
+        await questionsFor(
+          tx,
+          cycle.id,
+          participant.templateGroupId,
+          request.relationship,
+        )
+      ).map((q) => [q.id, q]),
     );
     const clear: string[] = [];
     const upserts = [];
@@ -231,8 +283,17 @@ export async function submit(
   requestId: string,
 ): Promise<ReviewRequest> {
   return db.transaction(async (tx) => {
-    const { request, cycle } = await writable(tx, actor, requestId);
-    const questions = await questionsFor(tx, cycle.id, request.relationship);
+    const { request, cycle, participant } = await writable(
+      tx,
+      actor,
+      requestId,
+    );
+    const questions = await questionsFor(
+      tx,
+      cycle.id,
+      participant.templateGroupId,
+      request.relationship,
+    );
     const answered = new Set(
       (
         await tx
@@ -259,6 +320,15 @@ export async function submit(
       .set({ status: "submitted", submittedAt: new Date() })
       .where(eq(reviewRequest.id, requestId))
       .returning();
+    // Peer/upward feedback: tell the reviewee it arrived (never who wrote it;
+    // reading it still waits for the share, see canRead).
+    if (request.relationship === "peer" || request.relationship === "upward") {
+      await notifyFeedbackReceived(tx, {
+        cycleId: cycle.id,
+        requestId,
+        recipientPersonId: participant.revieweePersonId,
+      });
+    }
     return updated;
   });
 }

@@ -87,10 +87,38 @@
       "breakpoints": true
     },
     {
+      "idx": 12,
+      "version": "7",
+      "when": 1794647033131,
+      "tag": "0012_notifications",
+      "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1794648076303,
+      "tag": "0013_cycle_extras",
+      "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1794648661794,
+      "tag": "0014_peer_feedback",
+      "breakpoints": true
+    },
+    {
       "idx": 15,
       "version": "7",
-      "when": 1794647742298,
-      "tag": "0015_historical_import",
+      "when": 1794649416373,
+      "tag": "0015_cycle_ops",
+      "breakpoints": true
+    },
+    {
+      "idx": 16,
+      "version": "7",
+      "when": 1794649931865,
+      "tag": "0016_historical_import",
       "breakpoints": true
     }
   ]

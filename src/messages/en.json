@@ -33,7 +33,8 @@
     "edit": "Edit",
     "clone": "Clone",
     "actions": "Actions",
-    "loading": "Loading…"
+    "loading": "Loading…",
+    "exportCsv": "Export CSV"
   },
   "Errors": {
     "missingEs": "The Spanish text is missing.",
@@ -420,6 +421,79 @@
       "sharing": "Sharing",
       "closed": "Closed"
     },
+    "extras": {
+      "steps": {
+        "groups": "Groups"
+      },
+      "duplicate": {
+        "button": "Duplicate cycle",
+        "pending": "Duplicating…",
+        "suffix": "Copy",
+        "from": "Duplicated from another cycle",
+        "warnTemplate": "The cycle's template is no longer available: the copy has no template.",
+        "warnGroup": "The group “{name}” was left out: its template is no longer available.",
+        "openCopy": "Open the copy"
+      },
+      "groups": {
+        "title": "Templates per group",
+        "intro": "Optional. Each person uses the template of the first group that includes them; whoever fits no group uses the cycle's template.",
+        "empty": "There are no groups yet: everyone uses the cycle's template.",
+        "add": "Add group",
+        "remove": "Remove group",
+        "moveUp": "Move up",
+        "moveDown": "Move down",
+        "groupN": "Group {n}",
+        "name": "Group name",
+        "template": "Group template",
+        "pickTemplate": "Choose a template",
+        "criteria": "Who is in",
+        "noCriteria": "No criteria: everyone who is not in an earlier group is in.",
+        "count": "{count, plural, =0 {No one} one {# person} other {# people}}",
+        "counting": "Counting…",
+        "previewError": "We could not count the people of each group.",
+        "remainder": "{count, plural, =0 {Everyone is in a group} one {# person without a group uses the cycle's template} other {# people without a group use the cycle's template}}",
+        "duplicateName": "There is already a group with that name.",
+        "defaultTemplate": "Cycle template: {name}",
+        "withoutGroup": "{count, plural, one {# person without a group} other {# people without a group}}",
+        "columns": {
+          "group": "Group",
+          "template": "Template",
+          "criteria": "Criteria",
+          "people": "People",
+          "questions": "Questions"
+        },
+        "criteriaAll": "Everyone",
+        "criteriaPeople": "{count, plural, one {# chosen person} other {# chosen people}}",
+        "none": "No group"
+      },
+      "schedule": {
+        "legend": "Schedule",
+        "fixed": "Fixed dates",
+        "hireDate": "By hire date",
+        "hireDateHint": "Each person joins the cycle when they reach the milestone and has their own deadline: no per-phase dates are set.",
+        "milestone": "Milestone",
+        "window": "Window",
+        "milestones": {
+          "30": "30 days",
+          "60": "60 days",
+          "90": "90 days",
+          "180": "6 months (180 days)",
+          "365": "1 year (365 days)"
+        },
+        "weeks": "{count, plural, one {# week} other {# weeks}}",
+        "previewTitle": "Preview with a recent hire",
+        "sample": "{name}, hired on {hireDate}",
+        "milestoneDate": "Reaches the milestone on {date}",
+        "dueDate": "Self and manager review due on {date}",
+        "noSample": "There are no hires to show as an example.",
+        "inScope": "{count, plural, one {# person in scope; joins on reaching the milestone} other {# people in scope; they join on reaching the milestone}}",
+        "summary": "Milestone: {milestone} · {window} window"
+      },
+      "detail": {
+        "group": "Group",
+        "due": "Due"
+      }
+    },
     "wizard": {
       "title": "New cycle",
       "stepsLabel": "Steps",
@@ -586,6 +660,7 @@
       "draft": "Draft",
       "submitted": "Submitted",
       "declined": "Declined",
+      "superseded": "Superseded",
       "none": "—"
     },
     "unlock": "Unlock",
@@ -753,6 +828,212 @@
     "goalsTitle": "Goals",
     "goalsPlaceholder": "The period's goals will be shown here."
   },
+  "Ops": {
+    "actions": {
+      "title": "Cycle operations",
+      "participants": "Participants and assessors",
+      "audit": "Audit log",
+      "extend": "Extend a due date",
+      "extendTitle": "Extend a due date",
+      "phase": "Phase",
+      "phaseOption": "{phase} (due {date})",
+      "newDate": "New due date",
+      "note": "Reason (optional)",
+      "confirm": "Extend",
+      "cancel": "Cancel",
+      "extended": "Due date extended."
+    },
+    "participants": {
+      "title": "Participants and assessors: {cycle}",
+      "back": "Back to the cycle",
+      "forbidden": "Only People can manage the participants of a cycle.",
+      "addTitle": "Add a participant",
+      "addHint": "Their organizational snapshot is taken today and their pending reviews are created.",
+      "person": "Person",
+      "choosePerson": "Choose a person",
+      "noCandidates": "Everyone eligible already takes part.",
+      "add": "Add participant",
+      "note": "Reason (optional)",
+      "tableLabel": "Participants",
+      "empty": "This cycle has no participants.",
+      "columns": {
+        "person": "Person",
+        "snapshotManager": "Snapshot manager",
+        "self": "Self assessment",
+        "manager": "Manager review",
+        "change": "Manager change",
+        "actions": "Actions"
+      },
+      "removed": "Removed",
+      "noManager": "No manager",
+      "noAssessor": "No assessor",
+      "mismatch": "Reviewer differs from the snapshot",
+      "additional": "Additional",
+      "onBehalf": "Completed on behalf",
+      "noRequest": "—",
+      "changed": "Now reports to {current} (snapshot: {snapshot})",
+      "noSnapshotManager": "no manager",
+      "noCurrentManager": "nobody",
+      "suggest": {
+        "reassign": "Suggested: move the review to {name}",
+        "add_assessor": "Suggested: add {name} as an additional assessor",
+        "none": "Already handled"
+      },
+      "assign": "Assign assessor",
+      "remove": "Remove",
+      "removeTitle": "Remove {name} from the cycle?",
+      "removeBody": "Their reviews and answers are kept as history; they can no longer be written.",
+      "removeConfirm": "Remove participant",
+      "unlock": "Unlock",
+      "unlockTitle": "Unlock this review?",
+      "unlockConfirm": "Unlock",
+      "complete": "Complete on behalf",
+      "cancel": "Cancel",
+      "assessorTitle": "Assign an assessor to {name}",
+      "assessor": "Assessor",
+      "mode": "How should they take part?",
+      "modeReplace": "Replace the manager's review",
+      "modeAdditional": "Add an additional assessor",
+      "replaceRequired": "{name} has no manager: the assessor takes over the manager review.",
+      "assessorConfirm": "Assign",
+      "done": "Done."
+    },
+    "complete": {
+      "title": "Complete on behalf: {reviewer}'s review of {reviewee}",
+      "back": "Back to participants",
+      "notice": "You are completing this review in the name of {reviewer}. Answers are kept on this page until you confirm; the action is audited.",
+      "note": "Reason (optional)",
+      "saving": "Noting…",
+      "saved": "Noted (not stored yet)",
+      "confirmTitle": "Complete this review on behalf of {reviewer}?",
+      "notAvailable": "This review cannot be completed on behalf right now.",
+      "notFound": "The review was not found.",
+      "forbidden": "Only People can complete a review on behalf of someone."
+    },
+    "audit": {
+      "title": "Audit log: {cycle}",
+      "back": "Back to the cycle",
+      "forbidden": "Only People can read the audit log.",
+      "empty": "No administrative actions have been recorded.",
+      "tableLabel": "Administrative actions",
+      "filterLabel": "Filter the log",
+      "filter": "Action",
+      "allActions": "All actions",
+      "apply": "Filter",
+      "columns": {
+        "when": "When",
+        "actor": "Who",
+        "action": "Action",
+        "target": "About",
+        "note": "Reason",
+        "details": "Details"
+      },
+      "system": "People",
+      "cycleTarget": "The cycle",
+      "details": "View changes",
+      "changes": "Changes",
+      "field": "Field",
+      "before": "Before",
+      "after": "After",
+      "noChanges": "No field changed.",
+      "actions": {
+        "participant_added": "Participant added",
+        "participant_removed": "Participant removed",
+        "due_date_extended": "Due date extended",
+        "request_unlocked": "Review unlocked",
+        "completed_on_behalf": "Completed on behalf",
+        "assessor_assigned": "Assessor assigned"
+      }
+    },
+    "errors": {
+      "forbidden": "You are not allowed to do this.",
+      "not_found": "It was not found; reload the page.",
+      "validation": "Some data is not valid (phase dates must stay in order).",
+      "not_active": "The cycle is not active.",
+      "already_participant": "That person already takes part in the cycle.",
+      "not_submitted": "The review is not submitted.",
+      "missing_required": "Answer the required questions.",
+      "date_not_forward": "The new date must be after the current due date.",
+      "no_manager_request": "The manager reviews do not exist yet: wait until the cycle is collecting.",
+      "same_reviewer": "That person already writes the manager review.",
+      "already_assigned": "That person is already an assessor of this participant.",
+      "replace_required": "This participant has no manager: the assessor must replace the missing one.",
+      "reviewer_missing": "The review has no reviewer: assign an assessor first.",
+      "not_draft": "The review is already submitted: unlock it first.",
+      "not_writable": "The review cannot be written now (phase or removed participant).",
+      "unknown": "An unexpected error occurred."
+    }
+  },
+  "Peers": {
+    "maxNominations": "Maximum peer nominations",
+    "approval": "Nomination approval",
+    "approvalModes": {
+      "manager": "Manager approves",
+      "none": "No approval"
+    },
+    "nominationsTitle": "Nominate peers: {cycle}",
+    "nominationsIntro": "Choose colleagues to give you feedback. Your manager approves the nominations.",
+    "count": "{count} of {max} nominations",
+    "empty": "You have not nominated anyone yet.",
+    "capReached": "You reached the maximum of nominations.",
+    "closed": "The nominations phase is closed.",
+    "candidate": "Colleague to nominate",
+    "choose": "Choose a person",
+    "nominate": "Nominate",
+    "remove": "Remove",
+    "load": "{count, plural, =0 {No open requests} one {# open request} other {# open requests}}",
+    "overloaded": "High load",
+    "status": {
+      "pending": "Pending",
+      "approved": "Approved",
+      "declined": "Declined",
+      "removed": "Removed"
+    },
+    "notParticipant": "You are not part of this cycle's peer nominations.",
+    "approvalsTitle": "Nominations to approve",
+    "approvalsEmpty": "No pending nominations.",
+    "nominee": "Nominee",
+    "reviewee": "Reviewee",
+    "approve": "Approve",
+    "decline": "Decline",
+    "approveSelected": "Approve selected",
+    "select": "Select {name} for {reviewee}",
+    "formTitle": "Feedback for {name}",
+    "upwardTitle": "Feedback for your manager {name}",
+    "declineTitle": "Decline the request",
+    "declineReason": "Reason",
+    "declineConfirm": "Decline",
+    "declined": "You declined this request.",
+    "feedbackTitle": "Peer feedback",
+    "feedbackEmpty": "There is no peer feedback to show.",
+    "peerLabel": "Peer",
+    "upwardLabel": "Direct report",
+    "myNominations": "Nominate peers",
+    "nominationTask": "Nominate peers in {cycle} ({count} of {max})",
+    "myFeedback": "Feedback to give",
+    "feedbackTask": "Feedback for {name} ({cycle})",
+    "open": "Open",
+    "viewMyFeedback": "View peer feedback ({cycle})",
+    "teamFeedback": "My team's peer feedback",
+    "teamFeedbackLink": "{name} ({cycle})",
+    "back": "Back to my tasks",
+    "errors": {
+      "nominations_full": "You reached the maximum of nominations.",
+      "invalid_nominee": "You cannot nominate that person.",
+      "already_nominated": "That person is already nominated.",
+      "wrong_phase": "The cycle phase does not allow it.",
+      "forbidden": "You are not allowed.",
+      "validation": "Fill in the reason.",
+      "not_found": "Not found.",
+      "unknown": "Something went wrong."
+    },
+    "anonymityNote": {
+      "transparent": "Your name will be visible to the reviewee, their manager and People.",
+      "anonymous_to_employee": "The reviewee will see your feedback as \"Peer\", without your name; their manager and People do see your name.",
+      "fully_anonymous": "Your feedback is fully anonymous: nobody will see your name."
+    },
+    "nominationsIntroNone": "Choose colleagues to give you feedback. Nominations need no approval: they are asked for feedback when nominated."
+  },
   "GoalsInCycle": {
     "title": "Goals for the period",
     "legend": "Progress as of {date}",
@@ -767,6 +1048,192 @@
     "linkLabel": "Goal to link",
     "linkPlaceholder": "Choose a goal",
     "link": "Link goal"
+  },
+  "Notifications": {
+    "nav": "Notifications",
+    "title": "Notifications",
+    "empty": "You have no notifications.",
+    "noPerson": "Pick a person in 'Act as' to see their notifications.",
+    "unreadHeading": "Unread",
+    "readHeading": "Read",
+    "open": "Open",
+    "markRead": "Mark as read",
+    "markAllRead": "Mark all as read",
+    "older": "Show older",
+    "backToStart": "Back to the start",
+    "error": "The inbox could not be updated.",
+    "peopleTeam": "The People team",
+    "badge": {
+      "label": "{count, plural, =0 {Notifications: none unread} one {Notifications: # unread} other {Notifications: # unread}}",
+      "capped": "99+"
+    },
+    "me": {
+      "title": "New notifications",
+      "viewAll": "View all ({count})"
+    },
+    "messages": {
+      "reminder_due": "{relationship, select, self {Your self assessment for {cycle}} manager {Your review of {participant} for {cycle}} peer {Your feedback for {participant} in {cycle}} upward {Your feedback for {participant} in {cycle}} other {A task in {cycle}}} {daysLeft, plural, =0 {is due today} =1 {is due tomorrow} other {is due in # days}}{hasDueDate, select, yes { ({dueDate})} other {}}.",
+      "manual_reminder": "{sender} reminds you to complete {relationship, select, self {your self assessment} manager {your review of {participant}} peer {your feedback for {participant}} upward {your feedback for {participant}} other {a pending task}} for {cycle}{hasDueDate, select, yes { (due {dueDate})} other {}}.",
+      "review_shared": "Your review for {cycle} was shared with you{hasSender, select, yes { by {sender}} other {}}.",
+      "feedback_received": "You received new feedback in {cycle}.",
+      "calibration_published": "The calibration of {cycle} was published.",
+      "cycle_phase_changed": "{launched, select, yes {The cycle {cycle} was launched and is in the {to} phase.} other {The cycle {cycle} moved from the {from} phase to the {to} phase.}}"
+    }
+  },
+  "DataQuality": {
+    "nav": "Data quality",
+    "title": "Data quality",
+    "description": "Cases worth fixing before analyzing or reporting. Each number matches the list of cases it links to.",
+    "allClear": "All clear: no indicator has cases.",
+    "count": "{count, plural, =0 {No cases} =1 {1 case} other {# cases}}",
+    "viewCases": "View cases",
+    "viewCasesOf": "View cases: {title}",
+    "back": "← Back to the panel",
+    "empty": "No cases.",
+    "unnamed": "Unnamed",
+    "noEnd": "No end",
+    "participantsCount": "{count, plural, =1 {1 participant} other {# participants}}",
+    "duplicatesCount": "{count} people",
+    "badges": {
+      "top": "Top"
+    },
+    "topHelp": "Has direct reports: not having a manager is expected.",
+    "kinds": {
+      "overlap": "Overlap",
+      "gap": "Gap"
+    },
+    "missing": {
+      "department": "Area",
+      "job_title": "Job title"
+    },
+    "columns": {
+      "name": "Name",
+      "email": "Email",
+      "sourceId": "Bamboo ID",
+      "reason": "Reason",
+      "detected": "Detected",
+      "managerRaw": "Manager in Bamboo (unresolved)",
+      "person": "Person",
+      "missing": "Missing",
+      "kind": "Type",
+      "from": "From",
+      "to": "To",
+      "openSince": "Job open since",
+      "terminationDate": "Termination",
+      "goal": "Goal",
+      "owner": "Owner",
+      "duplicates": "Share a name",
+      "started": "Started",
+      "entity": "Entity",
+      "source": "Source",
+      "error": "Error",
+      "reviewer": "Reviewer",
+      "snapshotManager": "Snapshot manager"
+    },
+    "indicators": {
+      "identity_open": {
+        "title": "Unresolved identities",
+        "description": "Bamboo records the import could not assign to a person."
+      },
+      "no_manager": {
+        "title": "People without a manager",
+        "description": "Active people whose current job has no manager. The top of the organization is expected."
+      },
+      "participants_no_manager": {
+        "title": "Participants without a manager in the snapshot",
+        "description": "Cycle participants with no manager in the snapshot: nobody could write their manager review."
+      },
+      "participants_incomplete_snapshot": {
+        "title": "Incomplete snapshots",
+        "description": "Participants whose snapshot lacks the area or the job title."
+      },
+      "job_history_overlap_gap": {
+        "title": "Job history with overlaps or gaps",
+        "description": "Job history periods of one person that overlap or leave days uncovered (the gap between two employments does not count)."
+      },
+      "job_history_open_after_exit": {
+        "title": "Job history left open after leaving",
+        "description": "People who are no longer active but still have an open current job."
+      },
+      "active_without_job_history": {
+        "title": "Active people without job history",
+        "description": "Active people with no job history row at all."
+      },
+      "goals_without_employment": {
+        "title": "Goals of people without live employment",
+        "description": "Goals whose owner has no live employment."
+      },
+      "duplicate_names": {
+        "title": "Duplicate names among active people",
+        "description": "Active people who share a name: a risk when linking identities."
+      },
+      "failed_runs": {
+        "title": "Import runs in error (7 days)",
+        "description": "Import runs that ended in error in the last 7 days."
+      },
+      "reviewer_mismatch": {
+        "title": "Reviewer different from the snapshot manager",
+        "description": "Review requests whose reviewer does not match the snapshot manager."
+      }
+    }
+  },
+  "Exports": {
+    "columns": {
+      "person_id": "person_id",
+      "bamboo_id": "bamboo_id",
+      "employee_number": "employee_number",
+      "email": "email",
+      "name": "name",
+      "status": "status",
+      "manager_id": "manager_id",
+      "manager_bamboo_id": "manager_bamboo_id",
+      "manager": "manager",
+      "department": "department",
+      "division": "division",
+      "job_title": "job_title",
+      "location": "location",
+      "hire_date": "hire_date",
+      "termination_date": "termination_date",
+      "as_of": "as_of",
+      "job_history_id": "job_history_id",
+      "valid_from": "valid_from",
+      "valid_to": "valid_to",
+      "goal_id": "goal_id",
+      "goal_bamboo_id": "goal_bamboo_id",
+      "title": "title",
+      "percent_complete": "percent_complete",
+      "due_date": "due_date",
+      "completion_date": "completion_date",
+      "last_changed_at": "last_changed_at",
+      "milestones": "milestones",
+      "comments": "comments",
+      "run_id": "run_id",
+      "source": "source",
+      "adapter": "adapter",
+      "entity": "entity",
+      "started_at": "started_at",
+      "finished_at": "finished_at",
+      "read": "read",
+      "inserted": "inserted",
+      "updated": "updated",
+      "unchanged": "unchanged",
+      "deleted": "deleted",
+      "rejected": "rejected",
+      "issues": "queued",
+      "ignored": "ignored",
+      "log_entries": "log_entries",
+      "error": "error",
+      "cycle_id": "cycle_id",
+      "cycle_source_id": "cycle_source_id",
+      "cycle_name": "cycle_name",
+      "snapshot_as_of": "snapshot_as_of",
+      "participant_id": "participant_id",
+      "snapshot_manager_id": "snapshot_manager_id",
+      "snapshot_manager_bamboo_id": "snapshot_manager_bamboo_id",
+      "snapshot_manager": "snapshot_manager",
+      "added_at": "added_at",
+      "removed_at": "removed_at"
+    }
   },
   "ImportHistory": {
     "title": "Historical import",

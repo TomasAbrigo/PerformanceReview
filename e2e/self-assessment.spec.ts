@@ -35,10 +35,12 @@ async function actAs(page: Page, person: string | null, role: string) {
 /** Launches a cycle with everyone active and moves it to collecting. */
 async function collectingCycle(page: Page, name: string): Promise<string> {
   await page.goto("/es/cycles/new");
-  await expect(page.getByText("Paso 1 de 4")).toBeVisible();
+  await expect(page.getByText("Paso 1 de 5")).toBeVisible();
   await page.getByLabel("Fecha de snapshot organizacional").fill(company.asOf);
   await expect(page.getByText(/\d+ personas coinciden/)).toBeVisible();
   await page.getByRole("button", { name: "Siguiente" }).click();
+  await page.getByRole("button", { name: "Siguiente" }).click();
+  // Step 3 (template groups) is optional: skip it.
   await page.getByRole("button", { name: "Siguiente" }).click();
   await page.getByLabel("Nombre del ciclo").fill(name);
   await page.getByLabel("Inicio del período").fill("2022-01-01");
@@ -99,7 +101,8 @@ test("an employee fills and submits their self assessment; HR unlocks it", async
     page.getByRole("heading", { level: 1, name: "Mis tareas" }),
   ).toBeVisible();
   await expect(
-    page.getByRole("listitem").filter({ hasText: name }),
+    // Only tasks: the cycle's phase-change notifications also name it.
+    page.getByRole("listitem").filter({ hasText: `Autoevaluación: ${name}` }),
   ).toHaveCount(0);
 
   // HR unlocks it from the cycle page.

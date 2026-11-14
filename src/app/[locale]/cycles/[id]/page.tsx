@@ -4,17 +4,24 @@ import { notFound } from "next/navigation";
 import { connection } from "next/server";
 import { Suspense } from "react";
 import { CycleDetailView } from "@/components/cycles/cycle-detail";
+import { OpsCycleActions } from "@/components/cycles/ops-cycle-actions";
 import { ManagerShareAll } from "@/components/review/manager-share-all";
 import { db } from "@/db/client";
 import { routing } from "@/i18n/routing";
 import { getActor } from "@/modules/actor/server";
 import {
   getCycle,
+  listCycleGroups,
   listSelfRequests,
   shareableNow,
 } from "@/modules/review-core";
-import { launchCycleAction, transitionCycleAction } from "../actions";
+import {
+  duplicateCycleAction,
+  launchCycleAction,
+  transitionCycleAction,
+} from "../actions";
 import { shareAllAction } from "./manager/[participantId]/actions";
+import { extendDueDateAction } from "./participants/actions";
 import { unlockAction } from "./self/actions";
 
 async function Detail({ params }: PageProps<"/[locale]/cycles/[id]">) {
@@ -25,7 +32,10 @@ async function Detail({ params }: PageProps<"/[locale]/cycles/[id]">) {
   const cycle = await getCycle(db, id);
   if (!cycle) notFound();
   const actor = await getActor();
-  const selfRequests = await listSelfRequests(db, actor, id);
+  const [groups, selfRequests] = await Promise.all([
+    listCycleGroups(db, cycle.id),
+    listSelfRequests(db, actor, id),
+  ]);
   const canShareAll =
     actor.role === "hr" && cycle.components.manager && shareableNow(cycle);
   return (
@@ -41,6 +51,17 @@ async function Detail({ params }: PageProps<"/[locale]/cycles/[id]">) {
           questionCount: cycle.questionCount,
           stats: cycle.stats,
           allowedTransitions: cycle.allowedTransitions,
+          scheduleKind: cycle.scheduleKind,
+          hireDateSchedule: cycle.hireDateSchedule,
+          defaultTemplateName: cycle.defaultTemplateName,
+          groups: groups.map((g) => ({
+            id: g.id,
+            name: g.name,
+            templateName: g.templateName,
+            filter: g.filter,
+            participantCount: g.participantCount,
+            questionCount: g.questionCount,
+          })),
           participants: cycle.participants.map((p) => ({
             id: p.id,
             displayName: p.displayName,
@@ -49,12 +70,15 @@ async function Detail({ params }: PageProps<"/[locale]/cycles/[id]">) {
             snapJobTitle: p.snapJobTitle,
             withoutManager: p.withoutManager,
             removedAt: p.removedAt,
+            templateGroupId: p.templateGroupId,
+            dueDates: p.dueDates,
           })),
           transitions: cycle.transitions,
         }}
         actions={{
           transition: transitionCycleAction,
           launch: launchCycleAction,
+          duplicate: duplicateCycleAction,
         }}
         selfReview={
           selfRequests.length
@@ -73,6 +97,14 @@ async function Detail({ params }: PageProps<"/[locale]/cycles/[id]">) {
       />
       {canShareAll ? (
         <ManagerShareAll cycleId={cycle.id} shareAll={shareAllAction} />
+      ) : null}
+      {actor.role === "hr" && cycle.status !== "draft" ? (
+        <OpsCycleActions
+          cycleId={cycle.id}
+          status={cycle.status}
+          dueDates={cycle.dueDates}
+          extendDueDate={extendDueDateAction}
+        />
       ) : null}
     </>
   );

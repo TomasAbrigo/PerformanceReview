@@ -23,12 +23,15 @@ export const seedFixturesDir = (size: SeedSize) =>
  * list or the other.
  */
 export const RESET_TABLES = [
+  "notification",
   "history_import_row",
   "imported_request",
   "imported_question",
   "answer",
+  "admin_audit_log",
   "review_audit",
   "review_request",
+  "peer_nomination",
   "participant_goal_snapshot",
   "cycle_goal_link",
   "goal_share",
@@ -36,6 +39,7 @@ export const RESET_TABLES = [
   "goal_milestone",
   "goal",
   "cycle_participant",
+  "cycle_template_group",
   "cycle_transition",
   "question_revision",
   "review_cycle",

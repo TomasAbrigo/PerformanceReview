@@ -6,6 +6,7 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { closeDb, db } from "@/db/client";
 import {
   cycleParticipant,
+  notification,
   person,
   questionRevision,
   reviewAudit,
@@ -324,6 +325,36 @@ describe("sharing", () => {
       .where(eq(reviewAudit.requestId, id));
     expect(audit.map((a) => a.action)).toEqual(["shared"]);
     expect(audit[0].actorPersonId).toBe(carla);
+
+    // The reviewee is told once, by name of who shared it.
+    await shareReview(db, as(carla, "manager"), id); // no-op
+    const told = await db
+      .select()
+      .from(notification)
+      .where(eq(notification.kind, "review_shared"));
+    expect(told).toHaveLength(1);
+    expect(told[0]).toMatchObject({
+      recipientPersonId: bruno,
+      cycleId: cycle.id,
+      requestId: id,
+      payload: { cycleName: "H1 2022", senderName: "Carla Romero" },
+    });
+  });
+
+  it("tells the reviewee again when a review is shared again after HR unshared it", async () => {
+    const cycle = await collectingCycle();
+    const id = await submitManagerReview(cycle.id);
+    await toSharing(cycle.id);
+    await shareReview(db, hr, id);
+    await unshare(db, hr, id);
+    await shareReview(db, hr, id);
+    const told = await db
+      .select()
+      .from(notification)
+      .where(eq(notification.kind, "review_shared"));
+    expect(told).toHaveLength(2);
+    // HR acting without a person: shown as the People team.
+    expect(told.every((n) => n.payload.senderName === null)).toBe(true);
   });
 
   it("refuses sharing a draft or by someone who is not the manager/HR", async () => {
@@ -412,6 +443,13 @@ describe("sharing", () => {
     });
     expect(await shareAll(db, hr, cycle.id)).toBe(1);
     expect(await shareAll(db, hr, cycle.id)).toBe(0); // already shared
+    const told = await db
+      .select()
+      .from(notification)
+      .where(eq(notification.kind, "review_shared"));
+    expect(told.map((n) => [n.recipientPersonId, n.requestId])).toEqual([
+      [bruno, id],
+    ]);
     const rows = await managerRequests(cycle.id);
     expect(rows.filter((r) => r.sharedAt).map((r) => r.id)).toEqual([id]);
     const audit = await db.select().from(reviewAudit);
@@ -517,15 +555,21 @@ describe("team view and reminders", () => {
     expect(after.sharedAt).not.toBeNull();
   });
 
-  it("records a reminder for a direct report's self review", async () => {
+  it("sends a reminder to a direct report about their self review", async () => {
     const cycle = await collectingCycle();
     const [row] = await listTeam(db, as(carla));
     await sendReminder(db, as(carla), row.selfRequestId!);
-    const audit = await db
+    const sent = await db
       .select()
-      .from(reviewAudit)
-      .where(eq(reviewAudit.requestId, row.selfRequestId!));
-    expect(audit.map((a) => a.action)).toEqual(["reminder_sent"]);
+      .from(notification)
+      .where(eq(notification.kind, "manual_reminder"));
+    expect(sent).toHaveLength(1);
+    expect(sent[0]).toMatchObject({
+      recipientPersonId: bruno,
+      requestId: row.selfRequestId,
+      cycleId: cycle.id,
+      payload: { relationship: "self", senderName: "Carla Romero" },
+    });
     const anaSelf = (await findMySelfRequestId(db, as(ana), cycle.id))!;
     await expect(sendReminder(db, as(carla), anaSelf)).rejects.toMatchObject({
       code: "forbidden",

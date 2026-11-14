@@ -1,4 +1,4 @@
-import { and, asc, eq, isNull, notInArray } from "drizzle-orm";
+import { and, asc, eq, isNull, ne, notInArray, or, sql } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 import type { DbOrTx } from "@/db/client";
 import { isUuid } from "@/lib/uuid";
@@ -7,16 +7,20 @@ import {
   type ReviewCycle,
   cycleParticipant,
   person,
-  reviewAudit,
   reviewCycle,
   reviewRequest,
 } from "@/db/schema";
 import type { ActorContext } from "@/modules/actor/types";
+import {
+  NotificationError,
+  type NotificationErrorCode,
+} from "@/modules/notifications/errors";
+import { remind } from "@/modules/notifications/reminders";
 import { jobAsOf } from "@/modules/org-history/queries";
+import { isManagerReplaced } from "./manager-replaced";
 import type { RequestStatus } from "./request-status";
-import { ReviewError } from "./review-errors";
+import { ReviewError, type ReviewErrorCode } from "./review-errors";
 import type { CycleStatus } from "./status";
-import { isActiveParticipant } from "./visibility";
 
 /**
  * Whether the actor is the participant's skip-level manager: the manager of
@@ -38,7 +42,7 @@ export async function isSkipLevel(
 
 /**
  * Id of the manager request of a participant, when the actor may open it
- * (its reviewer, the snapshot manager or HR).
+ * (its reviewer, the snapshot manager unless replaced, or HR).
  */
 export async function findManagerRequestId(
   db: DbOrTx,
@@ -46,7 +50,9 @@ export async function findManagerRequestId(
   participantId: string,
 ): Promise<string | null> {
   if (!isUuid(participantId)) return null;
-  const [row] = await db
+  // A participant may have several manager requests (additional assessors,
+  // #17; superseded ones are history): the actor's own first, else the primary.
+  const rows = await db
     .select({
       id: reviewRequest.id,
       reviewer: reviewRequest.reviewerPersonId,
@@ -62,14 +68,25 @@ export async function findManagerRequestId(
         eq(reviewRequest.participantId, participantId),
         eq(reviewRequest.relationship, "manager"),
         isNull(reviewRequest.deletedAt),
+        ne(reviewRequest.status, "superseded"),
       ),
-    );
+    )
+    .orderBy(asc(reviewRequest.additional), asc(reviewRequest.requestedAt));
+  const row =
+    rows.find((r) => actor.personId && r.reviewer === actor.personId) ??
+    rows[0];
   if (!row) return null;
-  const allowed =
-    actor.role === "hr" ||
-    (actor.personId !== null &&
-      (actor.personId === row.reviewer || actor.personId === row.manager));
-  return allowed ? row.id : null;
+  if (actor.role === "hr") return row.id;
+  if (actor.personId === null) return null;
+  if (actor.personId === row.reviewer) return row.id;
+  const isManager = actor.personId === row.manager;
+  const replaced =
+    isManager &&
+    (await isManagerReplaced(db, {
+      id: participantId,
+      snapManagerPersonId: row.manager,
+    }));
+  return isManager && !replaced ? row.id : null;
 }
 
 export type TeamRow = {
@@ -87,7 +104,8 @@ export type TeamRow = {
 
 /**
  * The actor's direct reports (as of each cycle's snapshot) in active cycles,
- * with the status of their self and manager reviews.
+ * plus the people whose manager review they were assigned (#17), with the
+ * status of their self and manager reviews.
  */
 export async function listTeam(
   db: DbOrTx,
@@ -122,15 +140,39 @@ export async function listTeam(
     )
     .leftJoin(
       manager,
-      and(
-        eq(manager.participantId, cycleParticipant.id),
-        eq(manager.relationship, "manager"),
-        isNull(manager.deletedAt),
+      // One manager request per row (#17: additional assessors, superseded
+      // history): the actor's own, else the primary one.
+      eq(
+        manager.id,
+        sql`(select rr.id from review_request rr
+          where rr.participant_id = ${cycleParticipant.id}
+            and rr.relationship = 'manager' and rr.deleted_at is null
+            and rr.status <> 'superseded'
+          order by coalesce(rr.reviewer_person_id = ${actor.personId}, false) desc,
+            rr.additional, rr.requested_at
+          limit 1)`,
       ),
     )
     .where(
       and(
-        eq(cycleParticipant.snapManagerPersonId, actor.personId),
+        or(
+          and(
+            eq(cycleParticipant.snapManagerPersonId, actor.personId),
+            // ...unless HR replaced them as reviewer (see isManagerReplaced).
+            sql`not exists (select 1 from review_request rr
+              where rr.participant_id = ${cycleParticipant.id}
+                and rr.relationship = 'manager' and not rr.additional
+                and rr.assigned_by_hr and rr.status <> 'superseded'
+                and rr.deleted_at is null
+                and rr.reviewer_person_id <> ${cycleParticipant.snapManagerPersonId})`,
+          ),
+          // Alternate/additional assessors (#17) see who they review.
+          sql`exists (select 1 from review_request rr
+            where rr.participant_id = ${cycleParticipant.id}
+              and rr.relationship = 'manager' and rr.deleted_at is null
+              and rr.status <> 'superseded'
+              and rr.reviewer_person_id = ${actor.personId})`,
+        ),
         isNull(cycleParticipant.removedAt),
         isNull(reviewCycle.deletedAt),
         notInArray(reviewCycle.status, ["draft", "closed"]),
@@ -140,52 +182,33 @@ export async function listTeam(
 }
 
 /**
- * Records a manual reminder to a direct report (only their manager or HR).
- * #18 replaces this with the internal inbox; for now it is an audit row.
+ * Sends a manual reminder ("Recordar") about a request to its reviewer (only
+ * the participant's manager or HR): a `manual_reminder` notification in their
+ * inbox, at most one per sender and request per day (see notifications
+ * `remind`). Not loadRequest: the manager may remind about a self review they
+ * cannot read yet (double blind).
  */
 export async function sendReminder(
   db: DbOrTx,
   actor: ActorContext,
   requestId: string,
 ): Promise<void> {
-  // Not loadRequest: the manager may remind about a self review they cannot
-  // read yet (double blind).
-  const [row] = isUuid(requestId)
-    ? await db
-        .select({
-          manager: cycleParticipant.snapManagerPersonId,
-          removedAt: cycleParticipant.removedAt,
-          status: reviewRequest.status,
-          cycleStatus: reviewCycle.status,
-          cycleDeletedAt: reviewCycle.deletedAt,
-        })
-        .from(reviewRequest)
-        .innerJoin(
-          cycleParticipant,
-          eq(cycleParticipant.id, reviewRequest.participantId),
-        )
-        .innerJoin(reviewCycle, eq(reviewCycle.id, reviewRequest.cycleId))
-        .where(
-          and(eq(reviewRequest.id, requestId), isNull(reviewRequest.deletedAt)),
-        )
-    : [];
-  if (!row || row.cycleDeletedAt) throw new ReviewError("not_found");
-  const isManager = actor.personId !== null && actor.personId === row.manager;
-  if (actor.role !== "hr" && !isManager) throw new ReviewError("forbidden");
-  if (
-    row.status !== "draft" ||
-    !isActiveParticipant(row) ||
-    row.cycleStatus === "draft" ||
-    row.cycleStatus === "closed"
-  ) {
-    throw new ReviewError("not_remindable");
+  try {
+    await remind(db, actor, requestId);
+  } catch (error) {
+    if (error instanceof NotificationError) {
+      throw new ReviewError(REMIND_ERRORS[error.code], error.issues);
+    }
+    throw error;
   }
-  await db.insert(reviewAudit).values({
-    requestId,
-    action: "reminder_sent",
-    actorPersonId: actor.personId,
-  });
 }
+
+const REMIND_ERRORS: Record<NotificationErrorCode, ReviewErrorCode> = {
+  not_found: "not_found",
+  forbidden: "forbidden",
+  not_pending: "not_remindable",
+  validation: "validation",
+};
 
 export type ParticipantRefs = {
   revieweeName: string;

@@ -1,4 +1,5 @@
 import { useTranslations } from "next-intl";
+import { ExportCsvLink } from "@/components/data-quality/export-csv-link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -24,7 +25,10 @@ export function PeopleList({
 
   return (
     <div className="flex flex-col gap-4">
-      <h1 className="text-2xl font-semibold">{t("title")}</h1>
+      <div className="flex items-center justify-between gap-4">
+        <h1 className="text-2xl font-semibold">{t("title")}</h1>
+        <ExportCsvLink file="people" params={{ q: query }} />
+      </div>
       <form role="search" method="get" className="flex max-w-md gap-2">
         <Input
           type="search"
