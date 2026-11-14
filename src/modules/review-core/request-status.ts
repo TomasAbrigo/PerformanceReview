@@ -8,5 +8,6 @@ export const reviewActions = [
   "shared",
   "unshared",
   "reminder_sent",
+  "calibration_published",
 ] as const;
 export type ReviewAction = (typeof reviewActions)[number];

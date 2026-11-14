@@ -581,7 +581,8 @@
       "forbidden": "No tenés permiso para esta acción.",
       "validation": "Hay respuestas inválidas.",
       "not_submitted": "La evaluación no está enviada.",
-      "unknown": "Ocurrió un error inesperado."
+      "unknown": "Ocurrió un error inesperado.",
+      "shared": "La evaluación está compartida; des-compartila antes de editar."
     }
   },
   "Team": {
@@ -621,5 +622,64 @@
     "resultTitle": "Evaluación de tu manager: {cycle}",
     "notSharedYet": "Tu evaluación todavía no fue compartida.",
     "backToTasks": "Volver a mis tareas"
+  },
+  "Calibration": {
+    "title": "Calibración · {cycle}",
+    "link": "Calibración",
+    "back": "Volver al ciclo",
+    "groups": "Grupos",
+    "noGroups": "Todavía no hay grupos de calibración.",
+    "groupName": "Nombre",
+    "groupKind": "Tipo",
+    "criterion": "Criterio",
+    "createGroup": "Crear grupo",
+    "kinds": {
+      "by_department": "Por área",
+      "by_manager": "Por manager",
+      "manual": "Manual (todos los participantes)"
+    },
+    "readOnly": "Solo lectura",
+    "emptyGroup": "Este grupo no tiene participantes.",
+    "employee": "Empleado",
+    "manager": "Manager (snapshot)",
+    "original": "Rating del manager",
+    "current": "Rating vigente",
+    "history": "Cambios y motivos",
+    "proposed": "Proponer",
+    "flag": "Discutir",
+    "flagged": "Para discutir",
+    "reason": "Motivo",
+    "reasonPlaceholder": "Motivo del cambio (obligatorio)",
+    "propose": "Guardar cambio",
+    "none": "—",
+    "distribution": "Distribución de ratings",
+    "groupBy": "Agrupar por",
+    "by": {
+      "department": "Área",
+      "manager": "Manager"
+    },
+    "stage": "Ratings",
+    "stages": {
+      "manager": "Antes (manager)",
+      "current": "Después (vigente)"
+    },
+    "noRatings": "Todavía no hay ratings.",
+    "tableView": "Ver como tabla",
+    "publish": "Publicar calibración",
+    "publishConfirmTitle": "¿Publicar la calibración?",
+    "publishConfirmBody": "Los ratings vigentes pasan a ser finales; los empleados con la evaluación compartida verán solo su rating final.",
+    "publishConfirm": "Publicar",
+    "cancel": "Cancelar",
+    "publishedCount": "{count, plural, one {# participante publicado} other {# participantes publicados}}",
+    "publishedAt": "Publicada el {date}",
+    "selectGroup": "Elegí un grupo para ver su tabla.",
+    "finalRating": "Rating final",
+    "errors": {
+      "reason_required": "El motivo es obligatorio.",
+      "forbidden": "No podés hacer este cambio.",
+      "validation": "Valor inválido.",
+      "not_found": "No encontrado.",
+      "unknown": "Algo salió mal. Intentá de nuevo."
+    }
   }
 }
