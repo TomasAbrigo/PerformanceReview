@@ -10,6 +10,7 @@ export type ReviewErrorCode =
   | "invalid_nominee"
   | "already_nominated"
   | "wrong_phase"
+  | "no_approval"
   | "not_shareable"
   | "not_remindable";
 

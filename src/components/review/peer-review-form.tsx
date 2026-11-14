@@ -3,6 +3,7 @@
 import { useTranslations } from "next-intl";
 import { useId, useState, useTransition } from "react";
 import type { ActionResult } from "@/components/templates/shared";
+import type { AnonymityMode } from "@/modules/review-core/status";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { usePeerError } from "./nominations-picker";
@@ -24,13 +25,14 @@ export function PeerReviewForm({
   review,
   revieweeName,
   relationship,
-  anonymous,
+  anonymity,
   actions,
 }: {
   review: SelfReviewData;
   revieweeName: string;
   relationship: "peer" | "upward";
-  anonymous: boolean;
+  /** The cycle's mode for this relationship: who will see the name. */
+  anonymity: AnonymityMode;
   actions: PeerReviewActions;
 }) {
   const t = useTranslations("Peers");
@@ -52,9 +54,9 @@ export function PeerReviewForm({
           back: t("back"),
         }}
       >
-        {anonymous ? (
-          <p className="text-sm text-muted-foreground">{t("anonymousNote")}</p>
-        ) : null}
+        <p className="text-sm text-muted-foreground">
+          {t(`anonymityNote.${anonymity}`)}
+        </p>
       </SelfReviewForm>
       {review.status === "declined" ? (
         <p className="text-muted-foreground">{t("declined")}</p>

@@ -771,7 +771,6 @@
     "select": "Seleccionar a {name} para {reviewee}",
     "formTitle": "Feedback para {name}",
     "upwardTitle": "Feedback para tu manager {name}",
-    "anonymousNote": "Tu feedback se comparte sin tu nombre.",
     "declineTitle": "Declinar la solicitud",
     "declineReason": "Motivo",
     "declineConfirm": "Declinar",
@@ -798,6 +797,12 @@
       "validation": "Completá el motivo.",
       "not_found": "No encontrado.",
       "unknown": "Ocurrió un error."
-    }
+    },
+    "anonymityNote": {
+      "transparent": "Tu nombre será visible para la persona evaluada, su manager y People.",
+      "anonymous_to_employee": "La persona evaluada verá tu feedback como \"Par\", sin tu nombre; su manager y People sí ven tu nombre.",
+      "fully_anonymous": "Tu feedback es totalmente anónimo: nadie verá tu nombre."
+    },
+    "nominationsIntroNone": "Elegí colegas que te den feedback. Las nominaciones no necesitan aprobación: se les pide feedback al nominarlos."
   }
 }

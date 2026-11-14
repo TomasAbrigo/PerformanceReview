@@ -6,7 +6,10 @@ import type { ActionResult } from "@/components/templates/shared";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import type { NominationStatus } from "@/modules/review-core/peer-settings";
+import type {
+  NominationStatus,
+  PeerApproval,
+} from "@/modules/review-core/peer-settings";
 
 export type NominationRow = {
   id: string;
@@ -22,6 +25,8 @@ export type NominationsPickerData = {
   cycleName: string;
   canEdit: boolean;
   max: number;
+  /** 'none': nominations need no approval. */
+  approval?: PeerApproval;
   nominations: NominationRow[];
   candidates: {
     personId: string;
@@ -95,7 +100,13 @@ export function NominationsPicker({
       <h1 className="text-2xl font-semibold">
         {t("nominationsTitle", { cycle: data.cycleName })}
       </h1>
-      <p className="text-muted-foreground">{t("nominationsIntro")}</p>
+      <p className="text-muted-foreground">
+        {t(
+          data.approval === "none"
+            ? "nominationsIntroNone"
+            : "nominationsIntro",
+        )}
+      </p>
       <p className="font-medium">
         {t("count", { count: live.length, max: data.max })}
       </p>

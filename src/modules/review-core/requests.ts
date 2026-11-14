@@ -35,7 +35,7 @@ export async function ensureSelfRequests(
 ): Promise<void> {
   await ensureOnlySelfRequests(db, cycleId, participantId);
   await ensureManagerRequests(db, cycleId, participantId);
-  await ensureUpwardRequests(db, cycleId);
+  await ensureUpwardRequests(db, cycleId, participantId);
 }
 
 /**

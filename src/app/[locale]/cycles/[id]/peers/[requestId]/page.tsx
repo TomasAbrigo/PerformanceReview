@@ -22,8 +22,8 @@ async function PeerReview({
   const actor = await getActor();
   const review = await getReview(db, actor, requestId);
   const rel = review?.request.relationship;
-  const isAuthor =
-    !!review && review.request.reviewerPersonId === actor.personId;
+  // From the raw request (getReview may anonymize reviewerPersonId).
+  const isAuthor = !!review?.isAuthor;
   const refs = review
     ? await participantRefs(db, review.request.participantId)
     : null;
@@ -49,7 +49,7 @@ async function PeerReview({
       key={`${review.request.id}-${review.request.status}`}
       revieweeName={refs.revieweeName}
       relationship={rel}
-      anonymous={review.request.anonymous}
+      anonymity={review.cycle.anonymity[rel]}
       review={{
         requestId: review.request.id,
         cycleName: review.cycle.name,

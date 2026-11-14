@@ -771,7 +771,6 @@
     "select": "Select {name} for {reviewee}",
     "formTitle": "Feedback for {name}",
     "upwardTitle": "Feedback for your manager {name}",
-    "anonymousNote": "Your feedback is shared without your name.",
     "declineTitle": "Decline the request",
     "declineReason": "Reason",
     "declineConfirm": "Decline",
@@ -798,6 +797,12 @@
       "validation": "Fill in the reason.",
       "not_found": "Not found.",
       "unknown": "Something went wrong."
-    }
+    },
+    "anonymityNote": {
+      "transparent": "Your name will be visible to the reviewee, their manager and People.",
+      "anonymous_to_employee": "The reviewee will see your feedback as \"Peer\", without your name; their manager and People do see your name.",
+      "fully_anonymous": "Your feedback is fully anonymous: nobody will see your name."
+    },
+    "nominationsIntroNone": "Choose colleagues to give you feedback. Nominations need no approval: they are asked for feedback when nominated."
   }
 }

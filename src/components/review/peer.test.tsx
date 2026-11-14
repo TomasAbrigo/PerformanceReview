@@ -72,7 +72,10 @@ describe("NominationsPicker", () => {
     );
     expect(screen.getByText("Todavía no nominaste a nadie.")).toBeTruthy();
     expect(screen.getByText("0 de 2 nominaciones")).toBeTruthy();
-    await userEvent.selectOptions(screen.getByLabelText("Colega a nominar"), "d");
+    await userEvent.selectOptions(
+      screen.getByLabelText("Colega a nominar"),
+      "d",
+    );
     await userEvent.click(screen.getByRole("button", { name: "Nominar" }));
     await waitFor(() => expect(nominate).toHaveBeenCalledWith("p1", "d"));
   });
@@ -99,6 +102,17 @@ describe("NominationsPicker", () => {
     expect(screen.getByText("High load")).toBeTruthy();
     expect(screen.getByText("6 open requests")).toBeTruthy();
     expect(screen.getByText("Pending")).toBeTruthy();
+  });
+
+  it("adapts the intro when no approval is needed (en)", () => {
+    renderIn(
+      "en",
+      <NominationsPicker
+        data={picker({ approval: "none" })}
+        actions={{ nominate: vi.fn(ok), remove: vi.fn(ok) }}
+      />,
+    );
+    expect(screen.getByText(/Nominations need no approval/)).toBeTruthy();
   });
 
   it("disables nominating at the cap (es)", () => {
@@ -208,13 +222,15 @@ describe("PeerReviewForm", () => {
         review={review}
         revieweeName="Bruno"
         relationship="peer"
-        anonymous
+        anonymity="anonymous_to_employee"
         actions={{ save: vi.fn(ok), submit: vi.fn(ok), decline }}
       />,
     );
     expect(screen.getByText("Feedback para Bruno")).toBeTruthy();
     expect(
-      screen.getByText("Tu feedback se comparte sin tu nombre."),
+      screen.getByText(
+        /verá tu feedback como "Par", sin tu nombre; su manager y People sí ven tu nombre/,
+      ),
     ).toBeTruthy();
     await userEvent.type(
       screen.getByLabelText("Motivo"),
@@ -233,11 +249,16 @@ describe("PeerReviewForm", () => {
         review={review}
         revieweeName="Carla"
         relationship="upward"
-        anonymous={false}
+        anonymity="transparent"
         actions={{ save: vi.fn(ok), submit: vi.fn(ok), decline: vi.fn(ok) }}
       />,
     );
     expect(screen.getByText("Feedback for your manager Carla")).toBeTruthy();
+    expect(
+      screen.getByText(
+        "Your name will be visible to the reviewee, their manager and People.",
+      ),
+    ).toBeTruthy();
   });
 });
 

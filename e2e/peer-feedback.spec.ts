@@ -24,6 +24,8 @@ async function nominationsCycle(page: Page, name: string) {
   await expect(page.getByLabel("Máximo de nominaciones de pares")).toHaveValue(
     "5",
   );
+  // Without calibration, sharing needs no published calibration (#16).
+  await page.getByLabel("Calibración", { exact: true }).uncheck();
   await page.getByRole("button", { name: "Siguiente" }).click();
   await page.getByLabel("Nombre del ciclo").fill(name);
   await page.getByLabel("Inicio del período").fill("2022-01-01");
@@ -81,7 +83,9 @@ test("nominate, approve, answer: the manager sees the name, the employee a 'Par'
     .selectOption({ label: "Ana García" });
   await page.getByRole("button", { name: "Nominar" }).click();
   await expect(page.getByText("1 de 5 nominaciones")).toBeVisible();
-  await expect(page.getByText("Pendiente")).toBeVisible();
+  await expect(
+    page.getByRole("listitem").filter({ hasText: "Ana García" }),
+  ).toContainText("Pendiente");
 
   // Carla approves it from her team page.
   await actAs(page, "Carla Romero", "Manager");
@@ -112,8 +116,19 @@ test("nominate, approve, answer: the manager sees the name, the employee a 'Par'
   await page.goto("/es/me");
   await openTask(page, `Feedback para Bruno Pérez (${name})`);
   await expect(
-    page.getByText("Tu feedback se comparte sin tu nombre."),
+    page.getByText(/verá tu feedback como "Par", sin tu nombre/),
   ).toBeVisible();
+  await fillAndSubmit(page);
+
+  // Bruno submits his self assessment.
+  await actAs(page, "Bruno Pérez", "Empleado");
+  await page.goto("/es/me");
+  await page
+    .getByRole("listitem")
+    .filter({ hasText: `Autoevaluación: ${name}` })
+    .getByRole("link", { name: "Completar" })
+    .click();
+  await expect(page).toHaveURL(/\/self$/);
   await fillAndSubmit(page);
 
   // Carla reads it with Ana's name, then reviews and shares.
@@ -132,6 +147,25 @@ test("nominate, approve, answer: the manager sees the name, the employee a 'Par'
     .getByRole("link", { name: "Evaluar" })
     .click();
   await fillAndSubmit(page);
+  const managerUrl = page.url();
+
+  // People moves the cycle to sharing; Carla shares.
+  await actAs(page, null, "People (RR. HH.)");
+  await page.goto(cycleUrl);
+  for (const [phase, rows] of [
+    ["Revisión del manager", 4],
+    ["Compartir resultados", 5],
+  ] as const) {
+    await page.getByRole("button", { name: `Pasar a ${phase}` }).click();
+    await page.getByRole("button", { name: "Confirmar" }).click();
+    await expect(
+      page
+        .getByRole("table", { name: "Historial de estados" })
+        .getByRole("row"),
+    ).toHaveCount(rows);
+  }
+  await actAs(page, "Carla Romero", "Manager");
+  await page.goto(managerUrl);
   await page.getByRole("button", { name: "Compartir con el empleado" }).click();
   await expect(page.getByText(/Compartida el/)).toBeVisible();
 

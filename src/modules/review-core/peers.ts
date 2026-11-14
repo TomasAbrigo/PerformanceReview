@@ -1,5 +1,6 @@
 import {
   and,
+  arrayOverlaps,
   asc,
   count,
   eq,
@@ -7,17 +8,21 @@ import {
   isNull,
   notInArray,
   or,
+  type SQL,
   sql,
 } from "drizzle-orm";
+import type { AnyPgColumn } from "drizzle-orm/pg-core";
 import { alias } from "drizzle-orm/pg-core";
 import type { DbOrTx } from "@/db/client";
 import {
+  answer,
   cycleParticipant,
   type CycleParticipant,
   employment,
   peerNomination,
   type PeerNomination,
   person,
+  questionRevision,
   reviewCycle,
   type ReviewCycle,
   reviewRequest,
@@ -26,11 +31,21 @@ import {
 import { isUuid } from "@/lib/uuid";
 import type { ActorContext } from "@/modules/actor/types";
 import type { Relationship } from "@/modules/templates/constants";
-import { getReview, type Review } from "./answers";
-import { type NominationStatus, peerSettingsOf } from "./peer-settings";
-import { loadRequest } from "./requests";
+import { answerValueOf, type Review } from "./answers";
+import {
+  type NominationStatus,
+  type PeerApproval,
+  peerSettingsOf,
+} from "./peer-settings";
+import { loadRequest, peerFeedbackShared } from "./requests";
 import { ReviewError } from "./review-errors";
 import type { CycleStatus } from "./status";
+import {
+  canRead,
+  isActorPerson,
+  reviewerVisible,
+  writablePhases,
+} from "./visibility";
 
 /** Phases in which upward reviews exist (same as manager reviews). */
 const UPWARD_PHASES: CycleStatus[] = [
@@ -44,9 +59,9 @@ const LIVE: NominationStatus[] = ["pending", "approved"];
 
 const isHr = (actor: ActorContext) => actor.role === "hr";
 const isManagerOf = (actor: ActorContext, p: CycleParticipant) =>
-  actor.personId !== null && actor.personId === p.snapManagerPersonId;
+  isActorPerson(actor, p.snapManagerPersonId);
 const isRevieweeOf = (actor: ActorContext, p: CycleParticipant) =>
-  actor.personId !== null && actor.personId === p.revieweePersonId;
+  isActorPerson(actor, p.revieweePersonId);
 
 async function participantWithCycle(
   db: DbOrTx,
@@ -68,16 +83,22 @@ async function participantWithCycle(
   return row;
 }
 
-/** A person is active when their latest live employment is not Inactive. */
+/**
+ * A person is active when they have a live employment and the latest one is
+ * not Inactive. Single definition, used as a SQL condition.
+ */
+const isActivePersonSql = (personId: AnyPgColumn): SQL =>
+  sql`coalesce((select lower(coalesce(e.status, '')) from ${employment} e
+    where e.person_id = ${personId} and e.deleted_at is null
+    order by e.hire_date desc nulls last limit 1), 'inactive') <> 'inactive'`;
+
 async function isActivePerson(db: DbOrTx, personId: string) {
   if (!isUuid(personId)) return false;
   const [row] = await db
-    .select({ status: employment.status })
-    .from(employment)
-    .where(and(eq(employment.personId, personId), isNull(employment.deletedAt)))
-    .orderBy(sql`${employment.hireDate} desc nulls last`)
-    .limit(1);
-  return !!row && row.status?.toLowerCase() !== "inactive";
+    .select({ id: person.id })
+    .from(person)
+    .where(and(eq(person.id, personId), isActivePersonSql(person.id)));
+  return !!row;
 }
 
 const anonymousFor = (cycle: ReviewCycle, rel: "peer" | "upward") =>
@@ -149,30 +170,31 @@ export async function nominatePeer(
     if (live >= peerSettingsOf(cycle.components).maxNominations) {
       throw new ReviewError("nominations_full");
     }
+    // Without approval a nomination is approved (and requested) at once.
+    const auto = peerSettingsOf(cycle.components).approval === "none";
     const values = {
-      status: "pending" as const,
+      status: auto ? ("approved" as const) : ("pending" as const),
       nominatedByPersonId: actor.personId,
       decidedBy: null,
-      decidedAt: null,
+      decidedAt: auto ? new Date() : null,
     };
-    if (existing) {
-      const [updated] = await tx
-        .update(peerNomination)
-        .set(values)
-        .where(eq(peerNomination.id, existing.id))
-        .returning();
-      return updated;
-    }
-    const [created] = await tx
-      .insert(peerNomination)
-      .values({
-        ...values,
-        cycleId: cycle.id,
-        participantId,
-        nomineePersonId,
-      })
-      .returning();
-    return created;
+    const [saved] = existing
+      ? await tx
+          .update(peerNomination)
+          .set(values)
+          .where(eq(peerNomination.id, existing.id))
+          .returning()
+      : await tx
+          .insert(peerNomination)
+          .values({
+            ...values,
+            cycleId: cycle.id,
+            participantId,
+            nomineePersonId,
+          })
+          .returning();
+    if (auto) await ensurePeerRequest(tx, cycle, saved);
+    return saved;
   });
 }
 
@@ -208,7 +230,8 @@ export async function removeNomination(
 /**
  * The snapshot manager (or HR) approves or declines pending nominations,
  * one or many. Approving creates the peer request. Nominations already
- * decided are left as they are (idempotent).
+ * decided are left as they are (idempotent). Cycles without approval
+ * (approval 'none') reject it: their nominations are approved on creation.
  */
 export async function decideNominations(
   db: DbOrTx,
@@ -216,7 +239,7 @@ export async function decideNominations(
   nominationIds: string[],
   decision: "approved" | "declined",
 ): Promise<number> {
-  const ids = nominationIds.filter(isUuid);
+  const ids = [...new Set(nominationIds.filter(isUuid))];
   if (ids.length === 0) return 0;
   return db.transaction(async (tx) => {
     const rows = await tx
@@ -233,12 +256,20 @@ export async function decideNominations(
       .innerJoin(reviewCycle, eq(reviewCycle.id, peerNomination.cycleId))
       .where(inArray(peerNomination.id, ids))
       .for("update", { of: peerNomination });
-    if (rows.length !== ids.length) throw new ReviewError("not_found");
+    if (
+      rows.length !== ids.length ||
+      rows.some((r) => r.cycle.deletedAt || r.participant.removedAt)
+    ) {
+      throw new ReviewError("not_found");
+    }
     for (const { participant, cycle } of rows) {
       if (!isHr(actor) && !isManagerOf(actor, participant)) {
         throw new ReviewError("forbidden");
       }
       if (cycle.status !== "nominations") throw new ReviewError("wrong_phase");
+      if (peerSettingsOf(cycle.components).approval === "none") {
+        throw new ReviewError("no_approval");
+      }
     }
     let changed = 0;
     for (const { n, cycle } of rows) {
@@ -289,12 +320,14 @@ export async function closeNominations(
  * Upward requests: each active participant writes one about their snapshot
  * manager when the manager is also a participant of the cycle (participant =
  * the manager, reviewer = the report). Created from collecting on, with the
- * upward component on. Idempotent. Aggregation and a minimum number of
- * respondents are v2.
+ * upward component on. Idempotent; with `participantId`, only the pairs
+ * that participant is part of (as manager or as report). Aggregation and a
+ * minimum number of respondents are v2.
  */
 export async function ensureUpwardRequests(
   db: DbOrTx,
   cycleId: string,
+  participantId?: string,
 ): Promise<void> {
   const [cycle] = await db
     .select()
@@ -326,6 +359,12 @@ export async function ensureUpwardRequests(
       and(
         eq(cycleParticipant.cycleId, cycleId),
         isNull(cycleParticipant.removedAt),
+        participantId
+          ? or(
+              eq(cycleParticipant.id, participantId),
+              eq(report.id, participantId),
+            )
+          : undefined,
       ),
     );
   if (pairs.length === 0) return;
@@ -383,9 +422,18 @@ export async function declineRequest(
   });
 }
 
+/** Phases in which a draft still counts as open work for its reviewer. */
+const OPEN_PHASES = {
+  // Peer requests approved during nominations are written in collecting.
+  peer: ["nominations", ...writablePhases.peer],
+  upward: [...writablePhases.upward],
+} satisfies Record<"peer" | "upward", CycleStatus[]>;
+
 /**
- * Open (draft) peer/upward requests per reviewer across active cycles: the
- * load counter shown when nominating and approving.
+ * Open (draft) peer/upward requests per reviewer across cycles, counting
+ * only drafts their reviewer can still write (writablePhases; peer drafts
+ * also while nominations are open): the load counter shown when
+ * nominating and approving.
  */
 export async function openRequestsCount(
   db: DbOrTx,
@@ -401,11 +449,19 @@ export async function openRequestsCount(
     .where(
       and(
         inArray(reviewRequest.reviewerPersonId, ids),
-        inArray(reviewRequest.relationship, ["peer", "upward"]),
+        or(
+          and(
+            eq(reviewRequest.relationship, "peer"),
+            inArray(reviewCycle.status, OPEN_PHASES.peer),
+          ),
+          and(
+            eq(reviewRequest.relationship, "upward"),
+            inArray(reviewCycle.status, OPEN_PHASES.upward),
+          ),
+        ),
         eq(reviewRequest.status, "draft"),
         isNull(reviewRequest.deletedAt),
         isNull(reviewCycle.deletedAt),
-        notInArray(reviewCycle.status, ["draft", "closed"]),
       ),
     )
     .groupBy(reviewRequest.reviewerPersonId);
@@ -517,14 +573,16 @@ export async function listPendingApprovals(
     db,
     rows.map((r) => r.nomineePersonId),
   );
-  return rows.map(({ components, nomineePersonId, ...r }) => {
-    const openRequests = load.get(nomineePersonId) ?? 0;
-    return {
-      ...r,
-      openRequests,
-      overloaded: openRequests >= peerSettingsOf(components).loadWarningAt,
-    };
-  });
+  return rows
+    .filter((r) => peerSettingsOf(r.components).approval !== "none")
+    .map(({ components, nomineePersonId, ...r }) => {
+      const openRequests = load.get(nomineePersonId) ?? 0;
+      return {
+        ...r,
+        openRequests,
+        overloaded: openRequests >= peerSettingsOf(components).loadWarningAt,
+      };
+    });
 }
 
 export type NominationCandidate = { personId: string; displayName: string };
@@ -534,6 +592,8 @@ export type NominationPicker = {
   cycleName: string;
   canEdit: boolean;
   max: number;
+  /** 'none': nominations need no approval (the intro says so). */
+  approval: PeerApproval;
   loadWarningAt: number;
   nominations: NominationItem[];
   candidates: (NominationCandidate & {
@@ -570,21 +630,18 @@ export async function nominationPicker(
       .filter((n) => n.status !== "removed")
       .map((n) => n.nomineePersonId),
   );
-  const people = await db
+  const excluded = [
+    participant.revieweePersonId,
+    ...(participant.snapManagerPersonId
+      ? [participant.snapManagerPersonId]
+      : []),
+    ...taken,
+  ];
+  const candidates = await db
     .select({ personId: person.id, displayName: person.displayName })
     .from(person)
-    .where(
-      sql`(select lower(coalesce(e.status, '')) from ${employment} e
-        where e.person_id = ${person.id} and e.deleted_at is null
-        order by e.hire_date desc nulls last limit 1) <> 'inactive'`,
-    )
+    .where(and(notInArray(person.id, excluded), isActivePersonSql(person.id)))
     .orderBy(asc(person.displayName));
-  const candidates = people.filter(
-    (p) =>
-      p.personId !== participant.revieweePersonId &&
-      p.personId !== participant.snapManagerPersonId &&
-      !taken.has(p.personId),
-  );
   const load = await openRequestsCount(
     db,
     candidates.map((c) => c.personId),
@@ -594,6 +651,7 @@ export async function nominationPicker(
     cycleName: cycle.name,
     canEdit: cycle.status === "nominations",
     max: settings.maxNominations,
+    approval: settings.approval,
     loadWarningAt: settings.loadWarningAt,
     nominations,
     candidates: candidates.map((c) => {
@@ -628,39 +686,84 @@ export async function listPeerFeedback(
 ): Promise<PeerFeedbackItem[]> {
   if (!isUuid(participantId)) return [];
   const rows = await db
-    .select({ id: reviewRequest.id })
+    .select({
+      request: reviewRequest,
+      participant: cycleParticipant,
+      cycle: reviewCycle,
+      reviewerName: person.displayName,
+    })
     .from(reviewRequest)
+    .innerJoin(
+      cycleParticipant,
+      eq(cycleParticipant.id, reviewRequest.participantId),
+    )
+    .innerJoin(reviewCycle, eq(reviewCycle.id, reviewRequest.cycleId))
+    .leftJoin(person, eq(person.id, reviewRequest.reviewerPersonId))
     .where(
       and(
         eq(reviewRequest.participantId, participantId),
         inArray(reviewRequest.relationship, ["peer", "upward"]),
         eq(reviewRequest.status, "submitted"),
         isNull(reviewRequest.deletedAt),
+        isNull(reviewCycle.deletedAt),
       ),
     )
     .orderBy(asc(reviewRequest.submittedAt));
-  const items: PeerFeedbackItem[] = [];
-  for (const { id } of rows) {
-    const review = await getReview(db, actor, id);
-    if (!review) continue;
-    const reviewerId = review.request.reviewerPersonId;
-    const [named] =
-      review.reviewerVisible && reviewerId
-        ? await db
-            .select({ name: person.displayName })
-            .from(person)
-            .where(eq(person.id, reviewerId))
-        : [];
-    items.push({
-      requestId: id,
-      relationship: review.request.relationship as "peer" | "upward",
-      reviewerName: named?.name ?? null,
-      reviewerVisible: review.reviewerVisible,
-      questions: review.questions,
-      answers: review.answers,
-    });
-  }
-  return items;
+  if (rows.length === 0) return [];
+  const { participant, cycle } = rows[0];
+  const revieweeShared = isRevieweeOf(actor, participant)
+    ? await peerFeedbackShared(db, rows[0])
+    : false;
+  const readable = rows.filter((r) => canRead(actor, { ...r, revieweeShared }));
+  if (readable.length === 0) return [];
+  const questions = await db
+    .select()
+    .from(questionRevision)
+    .where(
+      and(
+        eq(questionRevision.cycleId, cycle.id),
+        arrayOverlaps(questionRevision.appliesTo, ["peer", "upward"]),
+      ),
+    )
+    .orderBy(asc(questionRevision.sort));
+  const answers = await db
+    .select()
+    .from(answer)
+    .where(
+      inArray(
+        answer.requestId,
+        readable.map((r) => r.request.id),
+      ),
+    );
+  return readable.map((r) => {
+    const ctx = { ...r, revieweeShared };
+    const rel = r.request.relationship as "peer" | "upward";
+    const qs = questions.filter(
+      (q) =>
+        q.appliesTo.includes(rel) &&
+        canRead(actor, { ...ctx, questionRevision: q }),
+    );
+    const byId = new Map(qs.map((q) => [q.id, q]));
+    const visible = reviewerVisible(actor, ctx);
+    return {
+      requestId: r.request.id,
+      relationship: rel,
+      reviewerName: visible ? r.reviewerName : null,
+      reviewerVisible: visible,
+      questions: qs,
+      answers: Object.fromEntries(
+        answers
+          .filter(
+            (a) =>
+              a.requestId === r.request.id && byId.has(a.questionRevisionId),
+          )
+          .map((a) => [
+            a.questionRevisionId,
+            answerValueOf(byId.get(a.questionRevisionId), a),
+          ]),
+      ),
+    };
+  });
 }
 
 /** The actor's participant id in a cycle (to read their own feedback). */
@@ -700,7 +803,10 @@ export type FeedbackTask = {
   dueDate: string | null;
 };
 
-/** Cycles in nominations where the actor still has slots to fill. */
+/**
+ * Cycles in nominations where the actor is a participant: always listed
+ * (also at the cap) so the nomination page stays reachable.
+ */
 export async function nominationTasks(
   db: DbOrTx,
   personId: string,
@@ -732,8 +838,7 @@ export async function nominationTasks(
     .map(({ components, ...r }) => ({
       ...r,
       max: peerSettingsOf(components).maxNominations,
-    }))
-    .filter((r) => r.nominated < r.max);
+    }));
 }
 
 /** Draft peer/upward requests the actor has to write. */

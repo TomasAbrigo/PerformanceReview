@@ -34,9 +34,10 @@ export type VisibilityContext = {
     anonymity?: CycleAnonymity;
   };
   /**
-   * Peer/upward rows: whether the participant's review was shared with the
-   * reviewee (their manager request has shared_at). Before that the
-   * reviewee never reads peer/upward feedback.
+   * Peer/upward rows: whether the feedback is released to the reviewee
+   * (see peerFeedbackShared: sharing/closed phase and, with manager
+   * reviews, their manager review shared). Before that the reviewee never
+   * reads peer/upward feedback.
    */
   revieweeShared?: boolean;
   /** Self rows: the participant's manager request (double blind). */
@@ -54,16 +55,20 @@ export const isActiveParticipant = (p: { removedAt?: Date | null }) =>
 /** Phases in which reviews count as shared even without shared_at. */
 const SHARED_PHASES: readonly CycleStatus[] = ["sharing", "closed"];
 
-const isReviewer = (actor: ActorContext, r: VisibilityRequest) =>
-  actor.personId !== null && actor.personId === r.reviewerPersonId;
+/** The actor is that person (never true for a person-less actor). */
+export const isActorPerson = (
+  actor: ActorContext,
+  personId: string | null | undefined,
+) => actor.personId !== null && actor.personId === personId;
+
+export const isReviewer = (actor: ActorContext, r: VisibilityRequest) =>
+  isActorPerson(actor, r.reviewerPersonId);
 
 const isManagerOf = (actor: ActorContext, ctx: VisibilityContext) =>
-  actor.personId !== null &&
-  actor.personId === ctx.participant.snapManagerPersonId;
+  isActorPerson(actor, ctx.participant.snapManagerPersonId);
 
 const isReviewee = (actor: ActorContext, ctx: VisibilityContext) =>
-  actor.personId !== null &&
-  actor.personId === ctx.participant.revieweePersonId;
+  isActorPerson(actor, ctx.participant.revieweePersonId);
 
 /**
  * The single place that decides whether `actor` may read a review request

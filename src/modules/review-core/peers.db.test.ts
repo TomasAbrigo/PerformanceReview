@@ -28,6 +28,7 @@ import {
   listPendingApprovals,
   nominatePeer,
   openRequestsCount,
+  removeParticipant,
   removeNomination,
   ReviewError,
   saveDraft,
@@ -302,7 +303,7 @@ describe("nominations", () => {
     expect(await peerRequests(cycle.id)).toHaveLength(0);
   });
 
-  it("auto-approves pending nominations when approval is 'none'", async () => {
+  it("approval 'none': nominations are approved at once, nothing to decide", async () => {
     const cycle = await nominationsCycle({
       components: {
         ...input().components,
@@ -310,9 +311,32 @@ describe("nominations", () => {
       },
     });
     const p = await participantOf(cycle.id, bruno);
-    await nominatePeer(db, as(bruno), p.id, peers[0]);
+    const n = await nominatePeer(db, as(bruno), p.id, peers[0]);
+    expect(n.status).toBe("approved");
+    expect(await peerRequests(cycle.id)).toHaveLength(1);
+    expect(await listPendingApprovals(db, as(carla))).toHaveLength(0);
+    expect(await listPendingApprovals(db, hr)).toHaveLength(0);
+    await expectCode(
+      decideNominations(db, as(carla), [n.id], "declined"),
+      "no_approval",
+    );
     await transition(db, cycle.id, "collecting", null);
     expect(await peerRequests(cycle.id)).toHaveLength(1);
+  });
+
+  it("dedupes ids and rejects removed participants", async () => {
+    const cycle = await nominationsCycle();
+    const p = await participantOf(cycle.id, bruno);
+    const n = await nominatePeer(db, as(bruno), p.id, peers[0]);
+    expect(
+      await decideNominations(db, as(carla), [n.id, n.id], "approved"),
+    ).toBe(1);
+    const n2 = await nominatePeer(db, as(bruno), p.id, peers[1]);
+    await removeParticipant(db, cycle.id, bruno);
+    await expectCode(
+      decideNominations(db, hr, [n2.id], "approved"),
+      "not_found",
+    );
   });
 });
 
@@ -366,12 +390,19 @@ describe("peer feedback", () => {
     await submit(db, as(peers[0]), requestId);
   }
 
-  async function shareManager(cycleId: string, participantId: string) {
+  /** Carla submits her review, the cycle reaches sharing, she shares. */
+  async function shareManager(
+    cycleId: string,
+    participantId: string,
+    { share = true } = {},
+  ) {
     const id = (await findManagerRequestId(db, as(carla), participantId))!;
     const review = (await getReview(db, as(carla), id))!;
     await saveDraft(db, as(carla), id, fillAll(review));
     await submit(db, as(carla), id);
-    await shareReview(db, as(carla), id);
+    await transition(db, cycleId, "manager_review", null);
+    await transition(db, cycleId, "sharing", null);
+    if (share) await shareReview(db, as(carla), id);
     return cycleId;
   }
 
@@ -385,7 +416,14 @@ describe("peer feedback", () => {
     const forManager = await listPeerFeedback(db, as(carla), p.id);
     expect(forManager).toHaveLength(1);
     expect(forManager[0].reviewerName).toBe("Dani");
-    await shareManager(cycle.id, p.id);
+    // Sharing phase alone is not enough while the manager review is unshared.
+    await shareManager(cycle.id, p.id, { share: false });
+    expect(await listPeerFeedback(db, as(bruno), p.id)).toHaveLength(0);
+    await shareReview(
+      db,
+      as(carla),
+      (await findManagerRequestId(db, as(carla), p.id))!,
+    );
     const forReviewee = await listPeerFeedback(db, as(bruno), p.id);
     expect(forReviewee).toHaveLength(1);
     expect(forReviewee[0].reviewerName).toBeNull();
@@ -400,6 +438,25 @@ describe("peer feedback", () => {
     await shareManager(cycle.id, p.id);
     const [item] = await listPeerFeedback(db, as(bruno), p.id);
     expect(item.reviewerName).toBe("Dani");
+  });
+
+  it("without manager reviews, the sharing phase releases it", async () => {
+    const cycle = await nominationsCycle({
+      components: { ...input().components, manager: false },
+    });
+    const p = await participantOf(cycle.id, bruno);
+    const n = await nominatePeer(db, as(bruno), p.id, peers[0]);
+    await decideNominations(db, hr, [n.id], "approved");
+    await transition(db, cycle.id, "collecting", null);
+    const [req] = await peerRequests(cycle.id);
+    await answer(req.id);
+    expect(await listPeerFeedback(db, as(bruno), p.id)).toHaveLength(0);
+    await transition(db, cycle.id, "sharing", null);
+    const [item] = await listPeerFeedback(db, as(bruno), p.id);
+    expect(item.reviewerName).toBeNull();
+    expect((await getReview(db, as(bruno), req.id))?.isAuthor).toBe(false);
+    expect((await getReview(db, hr, req.id))?.isAuthor).toBe(false);
+    expect((await getReview(db, as(peers[0]), req.id))?.isAuthor).toBe(true);
   });
 
   it("fully anonymous hides names from manager and HR too", async () => {
@@ -445,6 +502,21 @@ describe("peer feedback", () => {
         max: 5,
       }),
     ]);
+    // The task stays (with the link) even when the cap is reached.
+    const full = await nominationsCycle({
+      name: "Full",
+      components: {
+        ...input().components,
+        peerSettings: { maxNominations: 1 },
+      },
+    });
+    const fp = await participantOf(full.id, bruno);
+    await nominatePeer(db, as(bruno), fp.id, peers[1]);
+    tasks = await listMyTasks(db, as(bruno));
+    expect(tasks.nominations).toContainEqual(
+      expect.objectContaining({ cycleId: full.id, nominated: 1, max: 1 }),
+    );
+    await transition(db, full.id, "collecting", null);
     const n = await nominatePeer(db, as(bruno), p.id, peers[0]);
     await decideNominations(db, as(carla), [n.id], "approved");
     await transition(db, cycle.id, "collecting", null);
@@ -481,6 +553,11 @@ describe("load counter", () => {
     const pending = await nominatePeer(db, as(bruno), b.id, peers[1]);
     const [approval] = await listPendingApprovals(db, as(carla));
     expect(approval).toMatchObject({ id: pending.id, overloaded: false });
+    // Once peers can no longer write them, drafts stop counting.
+    await transition(db, cycle.id, "collecting", null);
+    expect((await openRequestsCount(db, [peers[0]])).get(peers[0])).toBe(2);
+    await transition(db, cycle.id, "manager_review", null);
+    expect((await openRequestsCount(db, [peers[0]])).get(peers[0])).toBe(0);
   });
 });
 

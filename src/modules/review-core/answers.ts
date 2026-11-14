@@ -11,7 +11,8 @@ import {
 import type { ActorContext } from "@/modules/actor/types";
 import { loadRequest } from "./requests";
 import { ReviewError } from "./review-errors";
-import { canRead, canWrite, reviewerVisible } from "./visibility";
+import type { CycleAnonymity } from "./status";
+import { canRead, canWrite, isReviewer, reviewerVisible } from "./visibility";
 
 /** Value of an answer as the form handles it (rating: the scale value). */
 export type AnswerValue = string | number | null;
@@ -19,7 +20,12 @@ export type AnswerInput = { questionRevisionId: string; value: AnswerValue };
 
 export type SelfReview = {
   request: ReviewRequest;
-  cycle: { id: string; name: string; dueDate: string | null };
+  cycle: {
+    id: string;
+    name: string;
+    dueDate: string | null;
+    anonymity: CycleAnonymity;
+  };
   questions: QuestionRevision[];
   /** Current answers by question revision id. */
   answers: Record<string, AnswerValue>;
@@ -29,6 +35,8 @@ export type SelfReview = {
    * not, request.reviewerPersonId is null.
    */
   reviewerVisible: boolean;
+  /** The actor wrote it (from the raw request, before any anonymizing). */
+  isAuthor: boolean;
 };
 
 const questionsFor = (
@@ -47,7 +55,10 @@ const questionsFor = (
     )
     .orderBy(asc(questionRevision.sort));
 
-function valueOf(q: QuestionRevision | undefined, a: Answer): AnswerValue {
+export function answerValueOf(
+  q: QuestionRevision | undefined,
+  a: Answer,
+): AnswerValue {
   if (q?.kind === "rating") return a.optionValue;
   if (q?.kind === "single_choice") return a.optionLabel;
   return a.textValue;
@@ -104,10 +115,12 @@ export async function getReview(
   return {
     request: showReviewer ? request : { ...request, reviewerPersonId: null },
     reviewerVisible: showReviewer,
+    isAuthor: isReviewer(actor, request),
     cycle: {
       id: cycle.id,
       name: cycle.name,
       dueDate: cycle.dueDates[duePhase] ?? null,
+      anonymity: cycle.anonymity,
     },
     questions,
     answers: Object.fromEntries(
@@ -115,7 +128,7 @@ export async function getReview(
         .filter((a) => byId.has(a.questionRevisionId))
         .map((a) => [
           a.questionRevisionId,
-          valueOf(byId.get(a.questionRevisionId), a),
+          answerValueOf(byId.get(a.questionRevisionId), a),
         ]),
     ),
     canWrite: canWrite(actor, request, row),
