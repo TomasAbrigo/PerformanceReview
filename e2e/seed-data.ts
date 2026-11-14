@@ -10,6 +10,7 @@
  * here are the ones that did make it into the database.
  */
 import { generateCompany } from "../src/fixtures/company";
+import { orderedName } from "../src/modules/identity/normalize";
 import type { FixtureEmployee, FixtureGoal } from "../src/fixtures/company";
 import { FIXTURE_SEEDS } from "../src/fixtures/write";
 
@@ -43,14 +44,18 @@ export const employees = records.filter((e) => !queued.has(e.id));
 export const fullName = (e: Pick<FixtureEmployee, "firstName" | "lastName">) =>
   `${e.firstName} ${e.lastName}`;
 
+// The ingest tells people apart by their name in normalized form (case,
+// accents and spacing do not count): two "unique" names here must not be
+// the same name to it, or a manager link / org assertion could be ambiguous.
 const nameCount = new Map<string, number>();
 for (const e of employees) {
-  nameCount.set(fullName(e), (nameCount.get(fullName(e)) ?? 0) + 1);
+  const key = orderedName(fullName(e));
+  nameCount.set(key, (nameCount.get(key) ?? 0) + 1);
 }
 
 /** Two persons with the same name cannot be told apart by a link: pick unique ones. */
 export const hasUniqueName = (e: FixtureEmployee) =>
-  nameCount.get(fullName(e)) === 1;
+  nameCount.get(orderedName(fullName(e))) === 1;
 
 export const isActive = (e: FixtureEmployee) => e.status === "Active";
 

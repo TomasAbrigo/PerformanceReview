@@ -6,6 +6,7 @@ import { afterAll, afterEach, beforeEach, describe, expect, it } from "vitest";
 import { closeDb, db } from "@/db/client";
 import { person } from "@/db/schema";
 import { FixtureAdapter, runIngest } from "@/modules/ingest";
+import { writeAsLastFirst } from "@/modules/ingest/test-helpers";
 import {
   getJobHistory,
   jobAsOf,
@@ -133,6 +134,36 @@ describe("orgTreeAsOf", () => {
       ["Bruno Pérez", 1, ana],
     ]);
     expect(await orgTreeAsOf(db, "2000-01-01")).toEqual([]);
+  });
+
+  it("shows the old hierarchy at a past date when Bamboo writes reportsTo as 'Last, First'", async () => {
+    // Bamboo's jobInfo has "Romero, Carla", the person is "Carla Romero".
+    const p = path.join(dir, "tables-jobInfo.json");
+    const rows = JSON.parse(await readFile(p, "utf8")) as {
+      reportsTo: string | null;
+    }[];
+    writeAsLastFirst(rows);
+    await writeFile(p, JSON.stringify(rows));
+    await ingestAll();
+
+    // Before Bruno's manager change he reports to Carla (a past row: it has
+    // only the name); after it, to Ana.
+    expect(await managerAsOf(db, bruno, "2022-06-01")).toBe(carla);
+    expect(shape(await orgTreeAsOf(db, "2022-06-01"))).toEqual([
+      ["Ana García", 0, null],
+      ["Carla Romero", 1, ana],
+      ["Bruno Pérez", 2, carla],
+    ]);
+    expect(shape(await orgTreeAsOf(db, "2023-01-01"))).toEqual([
+      ["Ana García", 0, null],
+      ["Bruno Pérez", 1, ana],
+      ["Carla Romero", 1, ana],
+    ]);
+    const [oldRow] = (await getJobHistory(db, bruno)).slice(-1);
+    expect(oldRow).toMatchObject({
+      managerName: "Carla Romero",
+      managerRaw: "Romero, Carla",
+    });
   });
 
   it("keeps reports to a terminated manager as they were", async () => {

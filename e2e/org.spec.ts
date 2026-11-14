@@ -1,5 +1,7 @@
 import { expect, test } from "@playwright/test";
+import { addDays } from "../src/modules/org-history/build";
 import {
+  byId,
   company,
   employedOn,
   employees,
@@ -73,6 +75,65 @@ test("the date picker travels back to who was in the org then", async ({
   await expect(
     page.getByText("No hay nadie en la organización en esa fecha."),
   ).toBeVisible();
+});
+
+/**
+ * Someone who changed manager, and the two managers around the change. Bamboo
+ * only has the manager's NAME ("Last, First") in the past rows, so the old
+ * hierarchy shows only when the ingest matches it to the "First Last" person:
+ * everyone here has a name of their own, or the match is (rightly) refused.
+ */
+function managerChange() {
+  for (const person of employees.filter(hasUniqueName)) {
+    const rows = jobRowsOf(person).sort((a, b) => a.date.localeCompare(b.date));
+    for (const [i, row] of rows.entries()) {
+      const previous = rows[i - 1];
+      if (!previous?.managerId || !row.managerId) continue;
+      if (previous.managerId === row.managerId) continue;
+      if (previous.date >= row.date) continue;
+      const oldManager = byId.get(previous.managerId);
+      const newManager = byId.get(row.managerId);
+      if (!oldManager || !newManager) continue;
+      if (!hasUniqueName(oldManager) || !hasUniqueName(newManager)) continue;
+      const before = addDays(row.date, -1);
+      const employedBefore = employedOn(before);
+      const employedThen = employedOn(row.date);
+      if (
+        employedBefore.includes(person) &&
+        employedBefore.includes(oldManager) &&
+        employedThen.includes(person) &&
+        employedThen.includes(newManager)
+      ) {
+        return { person, oldManager, newManager, before, changedOn: row.date };
+      }
+    }
+  }
+  throw new Error("the small fixture has no usable manager change");
+}
+
+test("the org chart at a past date shows the old hierarchy of someone who changed manager", async ({
+  page,
+}) => {
+  const { person, oldManager, newManager, before, changedOn } = managerChange();
+  // The nearest enclosing tree item of `name`: who they report to in the chart.
+  const reportsTo = (name: string) =>
+    page
+      .getByRole("treeitem", { name, exact: true })
+      .locator("xpath=ancestor::li[@role='treeitem'][1]");
+
+  // The day before the change: under the old manager.
+  await page.goto(`/es/org?date=${before}`);
+  await expect(reportsTo(fullName(person))).toHaveAttribute(
+    "aria-label",
+    fullName(oldManager),
+  );
+
+  // The day of the change: under the new one.
+  await page.goto(`/es/org?date=${changedOn}`);
+  await expect(reportsTo(fullName(person))).toHaveAttribute(
+    "aria-label",
+    fullName(newManager),
+  );
 });
 
 test("person detail shows the job history", async ({ page }) => {
