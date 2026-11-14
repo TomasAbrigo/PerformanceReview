@@ -1,3 +1,5 @@
+import { readFileSync } from "node:fs";
+import path from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import page1 from "./__fixtures__/employees-page-1.json";
 import page2 from "./__fixtures__/employees-page-2.json";
@@ -252,6 +254,36 @@ describe("createBambooClient", () => {
     for await (const e of client.listEmployeesRaw({ fields: [] })) raw.push(e);
 
     expect(raw).toEqual([...page1.data, ...page2.data]);
+  });
+
+  it("reads list items keyed by employeeId (the real API) as id", async () => {
+    const generated = (n: number) =>
+      JSON.parse(
+        readFileSync(
+          path.resolve(`fixtures/bamboo/small/employees/list/page-00${n}.json`),
+          "utf8",
+        ),
+      );
+    const pages = [generated(1), generated(2), generated(3)];
+    const { fetch } = fakeFetch((url) => {
+      const after = url.searchParams.get("page[after]");
+      const next = pages.findIndex((p) => p.meta.page.nextCursor === after);
+      return json(after === null ? pages[0] : pages[next + 1]);
+    });
+    const client = createBambooClient({ ...config, fetch });
+
+    const ids: string[] = [];
+    for await (const e of client.listEmployees({ fields: [] })) ids.push(e.id);
+    const raw = [];
+    for await (const e of client.listEmployeesRaw({ fields: [] })) raw.push(e);
+
+    const listed = pages.flatMap((p) =>
+      p.data.map((e: { employeeId: string }) => e.employeeId),
+    );
+    expect(listed).toHaveLength(40);
+    expect(ids).toEqual(listed);
+    // Raw stays what Bamboo sent, plus the normalized id.
+    expect(raw[0]).toMatchObject({ employeeId: listed[0], id: listed[0] });
   });
 });
 
