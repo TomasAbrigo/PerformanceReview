@@ -13,6 +13,7 @@ import {
 import { resolvePerson } from "./employee";
 import { FixtureAdapter } from "./fixture-adapter";
 import { runIngest } from "./run-ingest";
+import { writeAsLastFirst } from "./test-helpers";
 
 const FIXTURES = path.resolve("src/modules/bamboo-client/__fixtures__");
 
@@ -40,15 +41,6 @@ async function personId(name: string) {
     .from(person)
     .where(eq(person.displayName, name));
   return p.id;
-}
-
-/** Bamboo renders reportsTo as "Last, First": rewrites the fixture's "First Last". */
-function writeAsLastFirst(rows: { reportsTo: string | null }[]) {
-  for (const r of rows) {
-    if (!r.reportsTo) continue;
-    const [first, ...rest] = r.reportsTo.split(" ");
-    r.reportsTo = `${rest.join(" ")}, ${first}`;
-  }
 }
 
 const historyOf = async (id: string) =>
@@ -190,6 +182,7 @@ describe("runIngest job_history (jobInfo + employmentStatus fixtures)", () => {
   });
 
   it("keeps manager_raw and leaves the manager null when the name is ambiguous", async () => {
+    // Both Carla Romero were employed when Bruno's first row started.
     type Page = { data: Record<string, unknown>[] };
     await editJson<Page>("employees-page-2.json", (page) => {
       page.data.push({
@@ -198,7 +191,7 @@ describe("runIngest job_history (jobInfo + employmentStatus fixtures)", () => {
         displayName: "Carla Romero",
         workEmail: "carla.romero2@example.com",
         status: "Active",
-        hireDate: "2022-02-01",
+        hireDate: "2019-02-01",
         supervisorEId: 101,
       });
     });
@@ -252,7 +245,7 @@ describe("runIngest job_history (jobInfo + employmentStatus fixtures)", () => {
         displayName: "Carla Romero",
         workEmail: "carla.romero2@example.com",
         status: "Active",
-        hireDate: "2022-02-01",
+        hireDate: "2019-02-01",
         supervisorEId: 101,
       });
     });
@@ -272,6 +265,80 @@ describe("runIngest job_history (jobInfo + employmentStatus fixtures)", () => {
       managerRaw: "Romero, Carla",
     });
     expect(b[1].managerPersonId).toBe(await personId("Ana García"));
+  });
+
+  it("picks the namesake who was employed on the row's date (a leaver and a later hire)", async () => {
+    type Page = { data: Record<string, unknown>[] };
+    // The first Carla Romero left on 2024-06-30; another one is hired later.
+    await editJson<Page>("employees-page-2.json", (page) => {
+      page.data.push({
+        id: 104,
+        employeeNumber: "0004",
+        displayName: "Carla Romero",
+        workEmail: "carla.romero2@example.com",
+        status: "Active",
+        hireDate: "2025-02-01",
+        supervisorEId: 101,
+      });
+    });
+    await editJson<Record<string, unknown>[]>("tables-jobInfo.json", (rows) => {
+      const row = (id: string, date: string, reportsTo: string) => ({
+        id,
+        employeeId: "102",
+        date,
+        location: "Rosario",
+        department: "Ingeniería",
+        division: "Corporativo",
+        jobTitle: "Senior Developer",
+        reportsTo,
+      });
+      rows.push(
+        row("7", "2025-03-01", "Carla Romero"),
+        row("8", "2025-09-01", "Ana García"),
+      );
+      writeAsLastFirst(rows as { reportsTo: string | null }[]);
+    });
+    await ingest("employee");
+    const { counts } = await ingest("job_history");
+
+    expect(counts.managerUnresolved).toBe(0);
+    const bambooId = (id: string) =>
+      resolvePerson(db, "bamboo_api", { bambooId: id });
+    const [oldCarla, newCarla, ana, bruno] = await Promise.all([
+      bambooId("103"),
+      bambooId("104"),
+      bambooId("101"),
+      bambooId("102"),
+    ]);
+    const b = await historyOf(bruno!);
+    expect(b.map((r) => [r.validFrom, r.managerPersonId])).toEqual([
+      ["2021-07-15", oldCarla],
+      ["2023-01-01", ana],
+      ["2025-03-01", newCarla],
+      ["2025-09-01", ana],
+    ]);
+  });
+
+  it("counts the managers matched only by the words of the name, in any order", async () => {
+    await editJson<{ id: unknown; reportsTo: string | null }[]>(
+      "tables-jobInfo.json",
+      (rows) => {
+        // Not how Bamboo writes it ("Last, First"): a fuzzy match.
+        rows.find((r) => String(r.id) === "3")!.reportsTo = "Romero Carla";
+      },
+    );
+    await ingest("employee");
+    const { counts } = await ingest("job_history");
+
+    expect(counts).toMatchObject({
+      managerUnresolved: 0,
+      managerResolvedFuzzy: 1,
+    });
+    const b = await historyOf(await personId("Bruno Pérez"));
+    expect(b[0]).toMatchObject({
+      managerPersonId: await personId("Carla Romero"),
+      managerRaw: "Romero Carla",
+    });
   });
 
   it("keeps resolving the current row by supervisorEId when its reportsTo name became ambiguous", async () => {

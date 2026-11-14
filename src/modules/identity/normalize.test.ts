@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { normalizeName } from "./normalize";
+import { nameWords, normalizeName, orderedName } from "./normalize";
 
 describe("normalizeName", () => {
   it("ignores case, accents, punctuation and extra whitespace", () => {
@@ -27,5 +27,25 @@ describe("normalizeName", () => {
 
   it("keeps different names apart", () => {
     expect(normalizeName("Ana García")).not.toBe(normalizeName("Ana Garza"));
+  });
+});
+
+describe("nameWords / orderedName", () => {
+  it("keep the order of the words, folding accents, case and punctuation", () => {
+    expect(nameWords("  María   JOSÉ López")).toEqual([
+      "maria",
+      "jose",
+      "lopez",
+    ]);
+    expect(orderedName("O'Brien, José")).toBe("o brien jose");
+  });
+
+  it("tell apart names that only differ in the order of their words", () => {
+    expect(orderedName("María José López")).not.toBe(
+      orderedName("José María López"),
+    );
+    expect(normalizeName("María José López")).toBe(
+      normalizeName("José María López"),
+    );
   });
 });

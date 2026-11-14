@@ -1,6 +1,7 @@
 import { expect, test } from "@playwright/test";
 import { addDays } from "../src/modules/org-history/build";
 import {
+  byId,
   company,
   employedOn,
   employees,
@@ -87,18 +88,21 @@ function managerChange() {
     const rows = jobRowsOf(person).sort((a, b) => a.date.localeCompare(b.date));
     for (const [i, row] of rows.entries()) {
       const previous = rows[i - 1];
-      if (!previous || previous.managerId === row.managerId) continue;
+      if (!previous?.managerId || !row.managerId) continue;
+      if (previous.managerId === row.managerId) continue;
       if (previous.date >= row.date) continue;
-      const oldManager = employees.find((e) => e.id === previous.managerId);
-      const newManager = employees.find((e) => e.id === row.managerId);
+      const oldManager = byId.get(previous.managerId);
+      const newManager = byId.get(row.managerId);
       if (!oldManager || !newManager) continue;
       if (!hasUniqueName(oldManager) || !hasUniqueName(newManager)) continue;
       const before = addDays(row.date, -1);
+      const employedBefore = employedOn(before);
+      const employedThen = employedOn(row.date);
       if (
-        employedOn(before).includes(oldManager) &&
-        employedOn(before).includes(person) &&
-        employedOn(row.date).includes(newManager) &&
-        employedOn(row.date).includes(person)
+        employedBefore.includes(person) &&
+        employedBefore.includes(oldManager) &&
+        employedThen.includes(person) &&
+        employedThen.includes(newManager)
       ) {
         return { person, oldManager, newManager, before, changedOn: row.date };
       }

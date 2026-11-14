@@ -6,7 +6,8 @@ import { openIssueSourceIds } from "@/modules/identity/raise";
 import { upsertEmployee } from "./employee";
 import {
   stagedJobHistorySchema,
-  uniqueNameIndex,
+  loadNameIndex,
+  type NameIndex,
   upsertJobHistory,
 } from "./job-history";
 import { stagedEmployeeSchema } from "./staging";
@@ -117,12 +118,12 @@ export const entityHandlers: Partial<Record<Entity, EntityHandler<unknown>>> = {
   }),
   job_history: defineHandler({
     schema: stagedJobHistorySchema,
-    counts: { managerUnresolved: 0 },
+    counts: { managerUnresolved: 0, managerResolvedFuzzy: 0 },
     async upsert(tx, staged, { source, hash, runId, cache }) {
-      let names = cache.get("uniqueNames") as Map<string, string> | undefined;
+      let names = cache.get("nameIndex") as NameIndex | undefined;
       if (!names) {
-        names = await uniqueNameIndex(tx);
-        cache.set("uniqueNames", names);
+        names = await loadNameIndex(tx);
+        cache.set("nameIndex", names);
       }
       const outcome = await upsertJobHistory(
         tx,
@@ -135,7 +136,10 @@ export const entityHandlers: Partial<Record<Entity, EntityHandler<unknown>>> = {
       return {
         result: outcome.result,
         rejects: outcome.reason ? [outcome.reason] : [],
-        counts: { managerUnresolved: outcome.managerUnresolved },
+        counts: {
+          managerUnresolved: outcome.managerUnresolved,
+          managerResolvedFuzzy: outcome.managerResolvedFuzzy,
+        },
       };
     },
   }),

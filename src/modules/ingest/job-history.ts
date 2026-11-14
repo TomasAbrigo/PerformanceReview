@@ -10,7 +10,11 @@ import {
 } from "@/db/schema";
 import { bambooId } from "@/modules/bamboo-client/schemas";
 // Direct file import (not the identity barrel): see ./employee.ts.
-import { normalizeName } from "@/modules/identity/normalize";
+import {
+  nameWords,
+  normalizeName,
+  orderedName,
+} from "@/modules/identity/normalize";
 import {
   buildJobHistory,
   buildStatusHistory,
@@ -70,46 +74,141 @@ export type JobHistoryOutcome = {
   result: "inserted" | "updated" | "unchanged" | "rejected";
   reason?: string;
   managerUnresolved: number;
+  /** Managers resolved only by the words of the name (any order): less sure. */
+  managerResolvedFuzzy: number;
 };
 
-/** Name key (see `normalizeName`) → person id, only for names that exactly one person has. */
-export type NameIndex = Map<string, string>;
+/** Dates a person was employed (ISO, both ends included); null = open end. */
+export type EmployedPeriod = { from: string | null; to: string | null };
+
+export type NamedPerson = {
+  id: string;
+  displayName: string;
+  /** Without periods (unknown) the person is never "employed on a date". */
+  employed?: readonly EmployedPeriod[];
+};
+
+type Candidate = { id: string; employed: readonly EmployedPeriod[] };
 
 /**
- * Index of the people whose name is theirs alone. The key is the normalized
- * name (case, accents, punctuation and word order do not matter), so
- * Bamboo's "Páez, Martín" in jobInfo.reportsTo finds the display name
- * "Martin Paez". Namesakes (the same key for two people) are left out: a
- * name that cannot tell them apart must not pick one.
+ * People by name, for resolving the NAME Bamboo gives as a manager. Every
+ * person is indexed twice: by the words in the order of the display name
+ * ("María José López"), and by the same words in any order. All the people
+ * with a name are kept (not only the unique ones): which of them a historical
+ * row means depends on its date.
  */
-export function buildNameIndex(
-  people: readonly { id: string; displayName: string }[],
-): NameIndex {
-  const holders = new Map<string, string | null>();
-  for (const { id, displayName } of people) {
-    const key = normalizeName(displayName);
-    if (key) holders.set(key, holders.has(key) ? null : id);
-  }
-  const unique: NameIndex = new Map();
-  for (const [key, id] of holders) if (id) unique.set(key, id);
-  return unique;
+export type NameIndex = {
+  exact: Map<string, Candidate[]>;
+  loose: Map<string, Candidate[]>;
+};
+
+export type ManagerMatch = {
+  personId: string;
+  /** Matched by the words in any order only (the exact order did not match). */
+  fuzzy: boolean;
+};
+
+function addCandidate(
+  into: Map<string, Candidate[]>,
+  key: string,
+  candidate: Candidate,
+) {
+  if (!key) return;
+  const list = into.get(key);
+  if (list) list.push(candidate);
+  else into.set(key, [candidate]);
 }
 
-/** The one person called `raw` (any "Last, First" / "First Last" spelling), or null. */
+export function buildNameIndex(people: readonly NamedPerson[]): NameIndex {
+  const index: NameIndex = { exact: new Map(), loose: new Map() };
+  for (const p of people) {
+    const candidate = { id: p.id, employed: p.employed ?? [] };
+    addCandidate(index.exact, orderedName(p.displayName), candidate);
+    addCandidate(index.loose, normalizeName(p.displayName), candidate);
+  }
+  return index;
+}
+
+/** "López, José María" as "First Last" words: "jose maria lopez". */
+function reportsToKey(raw: string): string {
+  const comma = raw.indexOf(",");
+  if (comma < 0) return orderedName(raw);
+  return nameWords(`${raw.slice(comma + 1)} ${raw.slice(0, comma)}`).join(" ");
+}
+
+const employedOn = (c: Candidate, date: string) =>
+  c.employed.some(
+    (p) =>
+      (p.from === null || p.from <= date) && (p.to === null || p.to >= date),
+  );
+
+/**
+ * The one person the name can be: its only holder, or else the only holder
+ * employed on `date`. Namesakes that were both employed then stay ambiguous.
+ */
+function pickCandidate(
+  candidates: readonly Candidate[] | undefined,
+  date: string,
+): string | null {
+  if (!candidates) return null;
+  if (candidates.length === 1) return candidates[0].id;
+  const live = candidates.filter((c) => employedOn(c, date));
+  return live.length === 1 ? live[0].id : null;
+}
+
+/**
+ * The person Bamboo's `reportsTo` ("Last, First", or plain "First Last")
+ * names in a job row that started on `onDate`, or null when it cannot be
+ * told. The words must match in the order of the display name ("First Last"),
+ * so "María José López" and "José María López" are not mixed up; only when no
+ * person has the name in that order are the words tried in any order, and
+ * that match is flagged `fuzzy`. A name with several holders that is not
+ * settled by `onDate` is never guessed.
+ */
 export function resolveManagerName(
   index: NameIndex,
   raw: string,
-): string | null {
-  const key = normalizeName(raw);
-  return key ? (index.get(key) ?? null) : null;
+  onDate: string,
+): ManagerMatch | null {
+  const key = reportsToKey(raw);
+  if (!key) return null;
+  const exact = index.exact.get(key);
+  if (exact) {
+    const personId = pickCandidate(exact, onDate);
+    return personId ? { personId, fuzzy: false } : null;
+  }
+  const personId = pickCandidate(index.loose.get(normalizeName(raw)), onDate);
+  return personId ? { personId, fuzzy: true } : null;
 }
 
-export async function uniqueNameIndex(tx: DbOrTx): Promise<NameIndex> {
-  return buildNameIndex(
-    await tx
-      .select({ id: person.id, displayName: person.displayName })
-      .from(person),
-  );
+/** Every person with the periods they were employed (see `NameIndex`). */
+export async function loadNameIndex(tx: DbOrTx): Promise<NameIndex> {
+  const rows = await tx
+    .select({
+      id: person.id,
+      displayName: person.displayName,
+      employmentId: employment.id,
+      from: employment.hireDate,
+      to: employment.terminationDate,
+    })
+    .from(person)
+    .leftJoin(
+      employment,
+      and(eq(employment.personId, person.id), isNull(employment.deletedAt)),
+    );
+  const people = new Map<
+    string,
+    NamedPerson & { employed: EmployedPeriod[] }
+  >();
+  for (const r of rows) {
+    let p = people.get(r.id);
+    if (!p) {
+      p = { id: r.id, displayName: r.displayName, employed: [] };
+      people.set(r.id, p);
+    }
+    if (r.employmentId) p.employed.push({ from: r.from, to: r.to });
+  }
+  return buildNameIndex([...people.values()]);
 }
 
 type JobValues = {
@@ -141,9 +240,10 @@ const jobKeys = [
  * Rebuilds the SCD2 history of one employee from all its Bamboo table rows.
  * The manager of the current row comes from the employee's supervisorEId;
  * older rows only have the reportsTo NAME ("Last, First"), matched against
- * the people's display names ("First Last") once both are normalized, and
- * resolved only when exactly one person has it (otherwise null, keeping
- * manager_raw, and counted in managerUnresolved).
+ * the people's display names ("First Last", see `resolveManagerName`): the
+ * one person with that name (among the namesakes, the one employed when the
+ * row started); otherwise null, keeping manager_raw and counted in
+ * managerUnresolved. Names matched only loosely count in managerResolvedFuzzy.
  */
 export async function upsertJobHistory(
   tx: DbOrTx,
@@ -161,6 +261,7 @@ export async function upsertJobHistory(
       result: "rejected",
       reason: `unknown employee ${staged.employeeId}: ingest employees first`,
       managerUnresolved: 0,
+      managerResolvedFuzzy: 0,
     };
   }
 
@@ -190,7 +291,7 @@ export async function upsertJobHistory(
       .map((s) => s.date!),
   ];
   const built = buildJobHistory(staged.jobInfo, terminations);
-  const nameIndex = names ?? (await uniqueNameIndex(tx));
+  const nameIndex = names ?? (await loadNameIndex(tx));
 
   const employmentFor = (from: string) =>
     (
@@ -199,6 +300,7 @@ export async function upsertJobHistory(
     )?.id ?? null;
 
   let managerUnresolved = 0;
+  let managerResolvedFuzzy = 0;
   const desired: JobValues[] = [];
   for (const [i, r] of built.entries()) {
     let managerPersonId: string | null = null;
@@ -209,8 +311,12 @@ export async function upsertJobHistory(
         managerPersonId = await resolvePerson(tx, source, { bambooId: sup });
     }
     if (!managerPersonId && r.managerRaw) {
-      managerPersonId = resolveManagerName(nameIndex, r.managerRaw);
-      if (!managerPersonId) managerUnresolved++;
+      const match = resolveManagerName(nameIndex, r.managerRaw, r.validFrom);
+      if (!match) managerUnresolved++;
+      else {
+        managerPersonId = match.personId;
+        if (match.fuzzy) managerResolvedFuzzy++;
+      }
     }
     desired.push({
       validFrom: r.validFrom,
@@ -256,7 +362,7 @@ export async function upsertJobHistory(
   );
 
   if (unchanged && statusUnchanged) {
-    return { result: "unchanged", managerUnresolved };
+    return { result: "unchanged", managerUnresolved, managerResolvedFuzzy };
   }
 
   const now = new Date();
@@ -286,6 +392,7 @@ export async function upsertJobHistory(
   return {
     result: existing.length ? "updated" : "inserted",
     managerUnresolved,
+    managerResolvedFuzzy,
   };
 }
 

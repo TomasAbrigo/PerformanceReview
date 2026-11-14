@@ -6,6 +6,7 @@ import { afterAll, afterEach, beforeEach, describe, expect, it } from "vitest";
 import { closeDb, db } from "@/db/client";
 import { person } from "@/db/schema";
 import { FixtureAdapter, runIngest } from "@/modules/ingest";
+import { writeAsLastFirst } from "@/modules/ingest/test-helpers";
 import {
   getJobHistory,
   jobAsOf,
@@ -141,13 +142,7 @@ describe("orgTreeAsOf", () => {
     const rows = JSON.parse(await readFile(p, "utf8")) as {
       reportsTo: string | null;
     }[];
-    const lastFirst: Record<string, string> = {
-      "Ana García": "García, Ana",
-      "Carla Romero": "Romero, Carla",
-    };
-    for (const r of rows) {
-      if (r.reportsTo) r.reportsTo = lastFirst[r.reportsTo];
-    }
+    writeAsLastFirst(rows);
     await writeFile(p, JSON.stringify(rows));
     await ingestAll();
 

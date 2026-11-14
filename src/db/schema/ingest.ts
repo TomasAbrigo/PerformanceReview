@@ -20,6 +20,8 @@ export type IngestCounts = {
   deleted: number;
   /** job_history: rows whose reportsTo could not be resolved to one person. */
   managerUnresolved?: number;
+  /** job_history: managers matched only by the words of the name, in any order. */
+  managerResolvedFuzzy?: number;
   /** employee: records held (or flagged) in the identity queue instead of applied. */
   issues?: number;
   /** employee: records a reviewer already decided to ignore, resent unchanged. */
