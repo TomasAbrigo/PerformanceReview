@@ -9,6 +9,8 @@ import {
   cycleTemplateGroup,
   employeeJobHistory,
   employment,
+  goal,
+  participantGoalSnapshot,
   person,
   questionRevision,
   type Relationship,
@@ -1147,6 +1149,31 @@ describe("enrollDueParticipants", () => {
     expect(
       (await addParticipant(db, fixed.id, bruno, AS_OF)).dueDates,
     ).toBeNull();
+  });
+
+  it("snapshots the goals of the people it enrolls, as at launch", async () => {
+    // The cycle's period is 2022-01-01..2022-06-30: a goal due inside it counts.
+    await db.insert(goal).values({
+      sourceSystem: "bamboo_api",
+      sourceId: "g-dana",
+      personId: people.dana,
+      title: "Meta de Dana",
+      status: "in_progress",
+      percentComplete: 40,
+      dueDate: "2022-03-01",
+    });
+    const cycle = await launched();
+    await enrollDueParticipants(db, cycle.id, AS_OF);
+    const [participant] = (await getCycle(db, cycle.id))!.participants.filter(
+      (p) => p.revieweePersonId === people.dana,
+    );
+    const rows = await db
+      .select()
+      .from(participantGoalSnapshot)
+      .where(eq(participantGoalSnapshot.participantId, participant.id));
+    expect(rows.map((r) => [r.title, r.percentComplete])).toEqual([
+      ["Meta de Dana", 40],
+    ]);
   });
 
   it("gives the people it enrolls their self request and own deadline", async () => {

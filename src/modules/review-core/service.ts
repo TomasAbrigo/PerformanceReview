@@ -40,6 +40,10 @@ import {
   type IsoDate,
 } from "@/modules/org-history/queries";
 import { CyclesError } from "./errors";
+import {
+  snapshotGoalsForParticipant,
+  snapshotGoalsForParticipants,
+} from "./goal-snapshot";
 import { assignCycleGroups, freezeGroups } from "./groups";
 import { enrollDueParticipants, hireDueDatesFor } from "./hire-date";
 import { ensureSelfRequests } from "./requests";
@@ -317,6 +321,7 @@ export async function copyQuestions(
       visibleToReviewee: q.visibleToReviewee,
       required: q.required,
       choices: q.choices,
+      role: q.role,
       scale: q.scaleId
         ? {
             options: options
@@ -364,11 +369,18 @@ export async function launchCycle(
     const groupOf = await freezeGroups(tx, id, personIds, cycle.snapshotDate);
     if (personIds.length > 0) {
       const rows = await snapshots(tx, id, personIds, cycle.snapshotDate);
-      await tx.insert(cycleParticipant).values(
-        rows.map((r) => ({
-          ...r,
-          templateGroupId: groupOf.get(r.revieweePersonId) ?? null,
-        })),
+      const participants = await tx
+        .insert(cycleParticipant)
+        .values(
+          rows.map((r) => ({
+            ...r,
+            templateGroupId: groupOf.get(r.revieweePersonId) ?? null,
+          })),
+        )
+        .returning({ id: cycleParticipant.id });
+      await snapshotGoalsForParticipants(
+        tx,
+        participants.map((p) => p.id),
       );
     }
     await copyQuestions(tx, id, cycle.templateId);
@@ -471,6 +483,7 @@ export async function addParticipant(
           .where(eq(cycleParticipant.id, existing.id))
           .returning()
       : await tx.insert(cycleParticipant).values(values).returning();
+    await snapshotGoalsForParticipant(tx, row.id);
     await ensureSelfRequests(tx, cycleId, row.id);
     return row;
   });

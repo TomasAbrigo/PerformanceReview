@@ -25,6 +25,7 @@ import { parse } from "@/lib/domain-error";
 import { parseIsoDate, todayLocal } from "@/modules/org-history/dates";
 import { type IsoDate, jobsAsOf } from "@/modules/org-history/queries";
 import { CyclesError } from "./errors";
+import { snapshotGoalsForParticipants } from "./goal-snapshot";
 import { assignCycleGroups } from "./groups";
 import {
   addDays,
@@ -188,9 +189,17 @@ export async function enrollDueParticipants(
     )
     // Two concurrent runs: the loser simply adds no one.
     .onConflictDoNothing()
-    .returning({ personId: cycleParticipant.revieweePersonId });
+    .returning({
+      id: cycleParticipant.id,
+      personId: cycleParticipant.revieweePersonId,
+    });
   const added = new Set(inserted.map((r) => r.personId));
-  // Collecting cycles get the newcomers' self requests right away.
+  // Like any participant: their goals as of today, then (in a collecting
+  // cycle) their requests right away.
+  await snapshotGoalsForParticipants(
+    db,
+    inserted.map((r) => r.id),
+  );
   if (added.size > 0) await ensureSelfRequests(db, cycleId);
 
   return {
