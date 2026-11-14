@@ -28,6 +28,20 @@ import {
 } from "@/modules/api/queries/reviews";
 import { listRunRows, type RunRow } from "@/modules/api/queries/runs";
 import { checkScope, scopeActor, scopeFields } from "@/modules/api/scope";
+import { DEFAULT_ACTOR } from "@/modules/actor/types";
+import {
+  cycleProgress,
+  type CycleProgress,
+  type DashboardFilters,
+  type GapByPerson,
+  goalsVsRating,
+  type GoalsVsRatingRow,
+  groupBys,
+  hierarchies,
+  ratingDistribution,
+  ratingStages,
+  selfManagerGap,
+} from "@/modules/analytics/dashboards";
 import { RUN_STATUSES } from "@/modules/ingest/run-status";
 import { todayLocal } from "@/modules/org-history/dates";
 import { requestStatuses } from "@/modules/review-core/request-status";
@@ -438,6 +452,138 @@ const answersExport = defineExport({
   ],
 });
 
+// ---------------------------------------------------------------- dashboards
+// The API has no actor (it is the HR / system surface, like every export
+// here): dashboards export with HR visibility; aggregateOnly is honored.
+
+const dashboardQuery = z.object({
+  cycle: uuid.optional(),
+  hierarchy: z.enum(hierarchies).default("asOf"),
+  department: z.string().optional(),
+  manager: uuid.optional(),
+  location: z.string().optional(),
+  jobTitle: z.string().optional(),
+  aggregateOnly: bool.optional(),
+});
+type DashboardQuery = z.infer<typeof dashboardQuery>;
+const withCycle = dashboardQuery.extend({ cycle: uuid });
+
+const filtersOf = (q: DashboardQuery): DashboardFilters => ({
+  cycleId: q.cycle,
+  hierarchy: q.hierarchy,
+  department: q.department,
+  managerId: q.manager,
+  location: q.location,
+  jobTitle: q.jobTitle,
+  aggregateOnly: q.aggregateOnly,
+});
+
+async function* each<R>(rows: Promise<R[]>): AsyncIterable<R> {
+  yield* await rows;
+}
+
+const progressExport = defineExport({
+  file: ({ cycle }) => `dashboard-progress-${cycle}`,
+  query: withCycle,
+  rows: (db, q) =>
+    each(cycleProgress(db, DEFAULT_ACTOR, filtersOf(q)).then((r) => r.rows)),
+  columns: (h) => [
+    {
+      header: h("relationship"),
+      value: (r: CycleProgress["rows"][number]) => r.relationship,
+    },
+    { header: h("department"), value: (r) => r.department },
+    { header: h("manager_id"), value: (r) => r.managerId },
+    { header: h("manager"), value: (r) => r.managerName },
+    { header: h("total"), value: (r) => r.total },
+    { header: h("submitted"), value: (r) => r.submitted },
+    { header: h("draft"), value: (r) => r.draft },
+    { header: h("declined"), value: (r) => r.declined },
+  ],
+});
+
+type DistributionRow = {
+  group: string | null;
+  from: number;
+  to: number;
+  count: number;
+  n: number;
+  mean: number | null;
+};
+const distributionExport = defineExport({
+  file: ({ cycle, stage }) =>
+    `dashboard-distribution-${cycle ?? "all"}-${stage}`,
+  query: dashboardQuery.extend({
+    groupBy: z.enum(groupBys).default("department"),
+    stage: z.enum(ratingStages).default("current"),
+  }),
+  rows: (db, q) =>
+    each(
+      ratingDistribution(db, DEFAULT_ACTOR, {
+        ...filtersOf(q),
+        groupBy: q.groupBy,
+        stage: q.stage,
+      }).then((d) =>
+        d.series.flatMap((s) =>
+          s.counts.map((count, i): DistributionRow => ({
+            group: s.label,
+            from: d.bins[i].from,
+            to: d.bins[i].to,
+            count,
+            n: s.n,
+            mean: s.mean,
+          })),
+        ),
+      ),
+    ),
+  columns: (h) => [
+    { header: h("group"), value: (r: DistributionRow) => r.group },
+    { header: h("bin_from"), value: (r) => r.from },
+    { header: h("bin_to"), value: (r) => r.to },
+    { header: h("count"), value: (r) => r.count },
+    { header: h("n"), value: (r) => r.n },
+    { header: h("mean_normalized"), value: (r) => r.mean },
+  ],
+});
+
+const goalsVsRatingExport = defineExport({
+  file: ({ cycle }) => `dashboard-goals-vs-rating-${cycle}`,
+  query: withCycle,
+  rows: (db, q) =>
+    each(goalsVsRating(db, DEFAULT_ACTOR, filtersOf(q)).then((r) => r.rows)),
+  columns: (h) => [
+    {
+      header: h("participant_id"),
+      value: (r: GoalsVsRatingRow) => r.participantId,
+    },
+    { header: h("person_id"), value: (r) => r.personId },
+    { header: h("name"), value: (r) => r.name },
+    { header: h("goals"), value: (r) => r.goals },
+    { header: h("completed"), value: (r) => r.completed },
+    { header: h("avg_progress"), value: (r) => r.avgProgress },
+    { header: h("normalized"), value: (r) => r.normalized },
+  ],
+});
+
+const gapExport = defineExport({
+  file: ({ cycle }) => `dashboard-self-manager-gap-${cycle}`,
+  query: withCycle,
+  rows: (db, q) =>
+    each(
+      selfManagerGap(db, DEFAULT_ACTOR, filtersOf(q)).then((r) => r.byPerson),
+    ),
+  columns: (h) => [
+    {
+      header: h("participant_id"),
+      value: (r: GapByPerson) => r.participantId,
+    },
+    { header: h("person_id"), value: (r) => r.personId },
+    { header: h("name"), value: (r) => r.name },
+    { header: h("answers"), value: (r) => r.n },
+    { header: h("gap"), value: (r) => r.meanGap },
+  ],
+});
+
 const EXPORTS = {
   people: peopleExport,
   org: orgExport,
@@ -446,6 +592,10 @@ const EXPORTS = {
   "cycle-participants": participantsExport,
   requests: requestsExport,
   answers: answersExport,
+  "dashboard-progress": progressExport,
+  "dashboard-distribution": distributionExport,
+  "dashboard-goals-vs-rating": goalsVsRatingExport,
+  "dashboard-self-manager-gap": gapExport,
 } as const;
 
 export type ExportEntity = keyof typeof EXPORTS;

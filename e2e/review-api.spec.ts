@@ -206,7 +206,7 @@ test("a submitted self review shows up in the review endpoints and the answers e
     expect(cell(row, "person_id")).toBe(mine.reviewee.id);
     expect(cell(row, "bamboo_id")).toBe(employee.id);
     expect(cell(row, "nombre")).toBe(employeeName);
-    expect(cell(row, "relación")).toBe("self");
+    expect(cell(row, "tipo")).toBe("self");
     expect(cell(row, "estado")).toBe("submitted");
     expect(cell(row, "evaluador")).toBe(employeeName);
     expect(cell(row, "evaluador visible")).toBe("true");

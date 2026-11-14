@@ -77,7 +77,13 @@ export function GroupsPanel({
               if (result.ok) {
                 setName("");
                 setError(null);
-              } else setError(t("errors.unknown"));
+              } else {
+                setError(
+                  t.has(`errors.${result.code}` as "errors.unknown")
+                    ? t(`errors.${result.code}` as "errors.unknown")
+                    : t("errors.unknown"),
+                );
+              }
             });
           }}
         >

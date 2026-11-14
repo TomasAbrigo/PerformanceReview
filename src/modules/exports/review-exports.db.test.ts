@@ -61,7 +61,7 @@ const ANSWER_HEADERS_ES = [
   "división",
   "puesto",
   "ubicación",
-  "relación",
+  "tipo",
   "estado",
   "reviewer_id",
   "reviewer_bamboo_id",
@@ -77,7 +77,7 @@ const ANSWER_HEADERS_ES = [
   "pregunta (en)",
   "valor",
   "etiqueta",
-  "normalizado",
+  "rating normalizado",
   "texto",
   "enviado",
   "compartido",
@@ -196,7 +196,7 @@ describe("answers.csv", () => {
       snapshot_manager: "Bruno Pérez",
       área: "Producto",
       puesto: "Designer",
-      relación: "manager",
+      tipo: "manager",
       estado: "submitted",
       reviewer_id: s.bruno,
       reviewer_bamboo_id: "102",
@@ -211,20 +211,20 @@ describe("answers.csv", () => {
       texto: "",
       compartido: "2025-07-01T09:30:00.123000Z",
     });
-    expect(Number(rating.normalizado)).toBeCloseTo(2 / 3, 10);
+    expect(Number(rating["rating normalizado"])).toBeCloseTo(2 / 3, 10);
     expect(rating.enviado).toMatch(ISO);
 
     const text = rows.find(
       (r) => r.request_id === s.selfDora && r.question_revision_id === s.q1,
     )!;
     expect(text).toMatchObject({
-      relación: "self",
+      tipo: "self",
       reviewer_id: s.dora,
       "rol de la pregunta": "",
       "pregunta (es)": "¿Cómo te fue?",
       valor: "",
       etiqueta: "",
-      normalizado: "",
+      "rating normalizado": "",
       texto: "Un buen año",
       compartido: "",
     });
@@ -292,7 +292,7 @@ describe("answers.csv", () => {
       "answers.csv",
       `?cycle_id=${s.cycleId}&relationship=peer`,
     );
-    expect(peers.rows.map((r) => r.relación)).toEqual(["peer", "peer"]);
+    expect(peers.rows.map((r) => r.tipo)).toEqual(["peer", "peer"]);
     const drafts = await table("answers.csv", "?status=draft");
     expect(drafts.rows).toHaveLength(0);
     const submitted = await table(
@@ -366,7 +366,7 @@ describe("answers.csv", () => {
         );
         expect(rows, scope).toHaveLength(1);
         expect(rows[0], scope).toMatchObject({
-          relación: "upward",
+          tipo: "upward",
           person_id: s.bruno,
           reviewer_id: "",
           reviewer_bamboo_id: "",
@@ -552,7 +552,7 @@ describe("requests.csv", () => {
     const en = await table("requests.csv", "?locale=en");
     expect(en.header).toEqual(REQUEST_HEADERS_EN);
     expect(es.header).toHaveLength(en.header.length);
-    expect(es.header).toContain("relación");
+    expect(es.header).toContain("tipo");
     expect(es.header).toContain("participante removido");
     expect(es.rows).toHaveLength(en.rows.length);
     const cycleRows = (
