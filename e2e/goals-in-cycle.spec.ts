@@ -23,8 +23,16 @@ async function actAs(page: Page, person: string | null, role: string) {
 async function collectingCycle(page: Page, name: string) {
   await page.goto("/es/cycles/new");
   await expect(page.getByText("Paso 1 de 4")).toBeVisible();
-  await page.getByLabel("Fecha de snapshot organizacional").fill("2022-06-01");
-  await expect(page.getByText(/\d+ personas coinciden/)).toBeVisible();
+  // Ana, Bruno and Carla had a job on that day (today only two do): filling
+  // it again until the form took it keeps a slow hydration from eating it.
+  await expect(async () => {
+    await page
+      .getByLabel("Fecha de snapshot organizacional")
+      .fill("2022-06-01");
+    await expect(page.getByText("3 personas coinciden")).toBeVisible({
+      timeout: 3_000,
+    });
+  }).toPass();
   await page.getByRole("button", { name: "Siguiente" }).click();
   await page
     .getByLabel("Plantilla")
