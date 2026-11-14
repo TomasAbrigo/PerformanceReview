@@ -10,7 +10,7 @@ test("creates and launches a cycle with a frozen org snapshot", async ({
   await page.getByRole("link", { name: "Nuevo ciclo" }).click();
 
   // Step 1: everyone in the org on the snapshot date.
-  await expect(page.getByText("Paso 1 de 4")).toBeVisible();
+  await expect(page.getByText("Paso 1 de 5")).toBeVisible();
   // Participants are resolved (and frozen) as of 2022-06-01, when Bruno
   // still reported to Carla.
   await page.getByLabel("Fecha de snapshot organizacional").fill("2022-06-01");
@@ -18,10 +18,14 @@ test("creates and launches a cycle with a frozen org snapshot", async ({
   await page.getByRole("button", { name: "Siguiente" }).click();
 
   // Step 2: defaults.
-  await expect(page.getByText("Paso 2 de 4")).toBeVisible();
+  await expect(page.getByText("Paso 2 de 5")).toBeVisible();
   await page.getByRole("button", { name: "Siguiente" }).click();
 
-  // Step 3: name, period and due dates.
+  // Step 3: no template groups.
+  await expect(page.getByText("Paso 3 de 5")).toBeVisible();
+  await page.getByRole("button", { name: "Siguiente" }).click();
+
+  // Step 4: name, period and due dates.
   const name = `Ciclo e2e ${Date.now()}`;
   await page.getByLabel("Nombre del ciclo").fill(name);
   await page.getByLabel("Inicio del período").fill("2022-01-01");
@@ -29,8 +33,8 @@ test("creates and launches a cycle with a frozen org snapshot", async ({
   await page.getByLabel("Autoevaluación").fill("2022-07-15");
   await page.getByRole("button", { name: "Siguiente" }).click();
 
-  // Step 4: review and launch.
-  await expect(page.getByText("Paso 4 de 4")).toBeVisible();
+  // Step 5: review and launch.
+  await expect(page.getByText("Paso 5 de 5")).toBeVisible();
   await expect(
     page.getByText(/Se lanzará con \d+ participantes/),
   ).toBeVisible();
