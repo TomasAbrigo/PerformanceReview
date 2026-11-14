@@ -6,12 +6,16 @@
  *   echo '{"uploadId":"<sha256>.csv"}' | pnpm exec tsx scripts/ingest-upload.ts inspect
  *   echo '{"uploadId":"...","fileName":"a.csv","profile":{...}}' | pnpm exec tsx scripts/ingest-upload.ts import
  *
- * Uploads live in var/uploads (UPLOADS_DIR), custom profiles in var/profiles
- * (PROFILES_DIR). `import` needs DATABASE_URL.
+ * `profile` is `{ builtin: name }`, `{ saved: name }` or `{ custom: {...} }`
+ * (see ProfileChoice). Uploads live in var/uploads (UPLOADS_DIR), custom
+ * profiles in var/profiles (PROFILES_DIR). `import` needs DATABASE_URL.
+ *
+ * On SIGTERM (the app gives up on a worker that takes too long) the run in
+ * progress is stopped and marked as failed before the process exits.
  */
 import { z } from "zod";
 import { closeDb, db } from "../src/db/client";
-import { sourceProfileSchema } from "../src/modules/lake/profiles";
+import { importInputSchema } from "../src/modules/lake/upload-shared";
 import {
   importUpload,
   inspectUpload,
@@ -25,11 +29,12 @@ try {
 }
 
 const inspectInput = z.object({ uploadId: z.string() });
-const importInput = z.object({
-  uploadId: z.string(),
-  fileName: z.string().max(255),
-  profile: sourceProfileSchema,
-});
+
+/** Aborted on SIGTERM: the ingest sees it at the next row. */
+const stop = new AbortController();
+process.once("SIGTERM", () =>
+  stop.abort(new Error("The upload worker was terminated: it took too long")),
+);
 
 async function readStdin(): Promise<unknown> {
   const chunks: Buffer[] = [];
@@ -43,8 +48,14 @@ async function run(command: string | undefined, input: unknown) {
     return inspectUpload(uploadId);
   }
   if (command === "import") {
-    const { uploadId, fileName, profile } = importInput.parse(input);
-    return importUpload({ uploadId, fileName, profile, db });
+    const { uploadId, fileName, profile } = importInputSchema.parse(input);
+    return importUpload({
+      uploadId,
+      fileName,
+      profile,
+      db,
+      signal: stop.signal,
+    });
   }
   throw new Error(`Unknown command "${command}": use inspect or import`);
 }
@@ -60,6 +71,14 @@ async function main() {
         code: error.code,
         message: error.message,
         issues: error.issues,
+      };
+    } else if (stop.signal.aborted) {
+      // The run was stopped (and marked as failed) by the ingest itself.
+      response = {
+        ok: false,
+        code: "timeout",
+        message: error instanceof Error ? error.message : String(error),
+        issues: [],
       };
     } else {
       // Unexpected: say so on stderr too, so the app's logs have the stack.

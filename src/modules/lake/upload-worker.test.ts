@@ -3,7 +3,6 @@ import { mkdtemp, readFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { getBuiltinProfile } from "./profiles";
 import { storeUpload, type UploadInspection, type UploadStore } from "./upload";
 import { runUploadWorker } from "./upload-worker";
 
@@ -70,7 +69,7 @@ describe("runUploadWorker", () => {
       {
         uploadId: stored.id,
         fileName: "x.csv",
-        profile: getBuiltinProfile("bamboo-goal-status"),
+        profile: { builtin: "bamboo-goal-status" },
       },
       { env: env() },
     );
@@ -91,14 +90,46 @@ describe("runUploadWorker", () => {
     expect(response).toMatchObject({ ok: false, code: "unknown" });
   }, 30_000);
 
-  it("stops a worker that takes too long", async () => {
-    const response = await runUploadWorker(
-      "inspect",
-      { uploadId: `${"b".repeat(64)}.csv` },
-      { env: env(), timeoutMs: 1 },
-    );
+  it("keeps multi-byte characters that arrive split across chunks (a >64 KiB answer)", async () => {
+    const response = await runUploadWorker<{ text: string }>("inspect", null, {
+      script: fixture("echo-utf8.mjs"),
+    });
 
-    expect(response).toMatchObject({ ok: false, code: "unknown" });
-    if (!response.ok) expect(response.message).toMatch(/timed out/i);
+    expect(response.ok).toBe(true);
+    if (!response.ok) return;
+    expect(response.text).toBe(`${"é".repeat(40_000)}ñ€`);
   }, 30_000);
+
+  describe("a worker that takes too long", () => {
+    it("is told to stop (SIGTERM) first, so it can mark its run as failed", async () => {
+      const marker = join(root, "marker");
+
+      const response = await runUploadWorker("inspect", null, {
+        script: fixture("stop-on-sigterm.mjs"),
+        env: { WORKER_MARKER: marker },
+        timeoutMs: 1000,
+        graceMs: 20_000,
+      });
+
+      expect(response).toMatchObject({ ok: false, code: "timeout" });
+      expect(await readFile(marker, "utf8")).toBe("sigterm");
+    }, 30_000);
+
+    it("is killed if it ignores SIGTERM for longer than the grace period", async () => {
+      const started = Date.now();
+
+      const response = await runUploadWorker("inspect", null, {
+        script: fixture("ignore-sigterm.mjs"),
+        timeoutMs: 500,
+        graceMs: 500,
+      });
+
+      expect(response).toMatchObject({ ok: false, code: "timeout" });
+      expect(Date.now() - started).toBeLessThan(15_000);
+    }, 30_000);
+  });
 });
+
+/** A stand-in for scripts/ingest-upload.ts. */
+const fixture = (name: string) =>
+  join("src/modules/lake/__fixtures__/worker", name);

@@ -3,10 +3,11 @@ import { eq, sql } from "drizzle-orm";
 import { afterAll, beforeEach, describe, expect, it } from "vitest";
 import { closeDb, db } from "@/db/client";
 import { ingestRun, person, rawRecord } from "@/db/schema";
-import { runIngest } from "@/modules/ingest/run-ingest";
+import { IngestRunError, runIngest } from "@/modules/ingest/run-ingest";
 import { DuckDbFileLake } from "./duckdb-file-lake";
-import { FileSourceAdapter } from "./file-source-adapter";
+import { builtinSourceSystem, FileSourceAdapter } from "./file-source-adapter";
 import { getBuiltinProfile } from "./profiles";
+import type { LakeAdapter } from "./types";
 
 const REPORTS = resolve("fixtures/bamboo-reports/small");
 
@@ -16,7 +17,9 @@ async function landReport(name: string) {
   const lake = await DuckDbFileLake.open(REPORTS);
   try {
     return await runIngest({
-      adapter: new FileSourceAdapter(profile, lake),
+      adapter: new FileSourceAdapter(profile, lake, undefined, {
+        source: builtinSourceSystem(profile),
+      }),
       entity: profile.entity,
       landing: true,
       db,
@@ -101,12 +104,67 @@ describe("landing a file through FileSourceAdapter", () => {
     expect(run.status).toBe("succeeded");
     expect(run.rejects).toHaveLength(2);
     expect(run.rejects?.[0].reason).toContain('key column "Goal" is empty');
+    // Stored structured too, for UIs that word it themselves.
+    expect(run.rejects?.[0]).toMatchObject({
+      code: "empty_key",
+      column: "Goal",
+    });
+  });
+
+  it("a run stopped midway ends in error, keeps what it landed, and says why", async () => {
+    const profile = getBuiltinProfile("bamboo-employee-performance")!;
+    const lake = await DuckDbFileLake.open(REPORTS);
+    const controller = new AbortController();
+    // The worker is told to terminate after the first batch of rows.
+    const stopAfterFirstBatch: LakeAdapter = {
+      listTables: () => lake.listTables(),
+      describeTable: (table) => lake.describeTable(table),
+      close: () => lake.close(),
+      async *readBatches(table, opts) {
+        for await (const batch of lake.readBatches(table, opts)) {
+          yield batch;
+          controller.abort(new Error("The upload worker was terminated"));
+        }
+      },
+    };
+    try {
+      const error = await runIngest({
+        adapter: new FileSourceAdapter(
+          profile,
+          stopAfterFirstBatch,
+          undefined,
+          {
+            batchSize: 7,
+          },
+        ),
+        entity: profile.entity,
+        landing: true,
+        db,
+        extract: { signal: controller.signal },
+      }).catch((e: unknown) => e);
+
+      expect(error).toBeInstanceOf(IngestRunError);
+      const [run] = await db
+        .select()
+        .from(ingestRun)
+        .where(eq(ingestRun.id, (error as IngestRunError).runId));
+      expect(run.status).toBe("error");
+      expect(run.error).toContain("terminated");
+      expect(run.finishedAt).toBeInstanceOf(Date);
+      expect(run.counts).toMatchObject({ read: 7, inserted: 7 });
+      expect(await db.select().from(rawRecord)).toHaveLength(7);
+    } finally {
+      await lake.close();
+    }
   });
 
   it("is landing only: no domain row is written", async () => {
+    // (Other specs may have left people in the shared DB: compare, not count.)
+    const peopleBefore = await db.select().from(person);
+
     await landReport("bamboo-feedback-status");
 
-    expect(await db.select().from(person)).toHaveLength(0);
+    expect(await db.select().from(person)).toEqual(peopleBefore);
     expect(await db.select().from(rawRecord)).toHaveLength(220);
   });
 

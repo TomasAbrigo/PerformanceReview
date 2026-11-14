@@ -585,8 +585,11 @@
       "errors": {
         "name": "Use lowercase letters, digits, hyphens and underscores (up to 64 characters).",
         "key": "Choose at least one key column.",
-        "duplicateField": "Two columns have the same canonical field."
-      }
+        "duplicateField": "Two columns have the same canonical field.",
+        "builtinName": "That name belongs to a built-in profile: choose another.",
+        "savedName": "A saved profile already has that name: choose another or replace it."
+      },
+      "replace": "Replace the saved profile “{name}”"
     },
     "entities": {
       "employee": "Employees",
@@ -604,7 +607,11 @@
       "noNew": "No new records were created: this file had already been imported.",
       "rejects": "Rejected rows",
       "viewRun": "View the run",
-      "another": "Upload another file"
+      "another": "Upload another file",
+      "rejectReasons": {
+        "empty_key": "The key column “{column}” has no value ({row}).",
+        "other": "A row could not be imported."
+      }
     },
     "errors": {
       "no_file": "Choose a file.",
@@ -615,8 +622,10 @@
       "unreadable_file": "The file could not be read. Check that it is not corrupted.",
       "invalid_profile": "The file does not have what the profile needs.",
       "invalid_profile_definition": "The profile is not valid: check the name and the key columns.",
-      "profile_exists": "A built-in profile already has that name: choose another.",
-      "unknown": "An unexpected error occurred."
+      "profile_exists": "A profile with that name already exists: choose another.",
+      "unknown": "An unexpected error occurred.",
+      "unknown_profile": "The chosen profile no longer exists.",
+      "timeout": "The import took too long and was cancelled. Try again."
     }
   }
 }

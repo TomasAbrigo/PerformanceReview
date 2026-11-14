@@ -585,8 +585,11 @@
       "errors": {
         "name": "Usá minúsculas, números, guiones y guion bajo (hasta 64 caracteres).",
         "key": "Elegí al menos una columna clave.",
-        "duplicateField": "Dos columnas tienen el mismo campo canónico."
-      }
+        "duplicateField": "Dos columnas tienen el mismo campo canónico.",
+        "builtinName": "Ese nombre es de un perfil incluido: elegí otro.",
+        "savedName": "Ya hay un perfil guardado con ese nombre: elegí otro o reemplazalo."
+      },
+      "replace": "Reemplazar el perfil guardado «{name}»"
     },
     "entities": {
       "employee": "Empleados",
@@ -604,7 +607,11 @@
       "noNew": "No se crearon registros nuevos: este archivo ya estaba importado.",
       "rejects": "Filas rechazadas",
       "viewRun": "Ver la corrida",
-      "another": "Subir otro archivo"
+      "another": "Subir otro archivo",
+      "rejectReasons": {
+        "empty_key": "Falta el valor de la columna clave «{column}» ({row}).",
+        "other": "No se pudo importar una fila."
+      }
     },
     "errors": {
       "no_file": "Elegí un archivo.",
@@ -615,8 +622,10 @@
       "unreadable_file": "No se pudo leer el archivo. Revisá que no esté dañado.",
       "invalid_profile": "El archivo no tiene lo que pide el perfil.",
       "invalid_profile_definition": "El perfil no es válido: revisá el nombre y las columnas clave.",
-      "profile_exists": "Ya existe un perfil incluido con ese nombre: elegí otro.",
-      "unknown": "Ocurrió un error inesperado."
+      "profile_exists": "Ya existe un perfil con ese nombre: elegí otro.",
+      "unknown": "Ocurrió un error inesperado.",
+      "unknown_profile": "El perfil elegido ya no existe.",
+      "timeout": "La importación tardó demasiado y se canceló. Probá de nuevo."
     }
   }
 }

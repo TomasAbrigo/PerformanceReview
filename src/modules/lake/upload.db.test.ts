@@ -5,14 +5,17 @@ import { eq, sql } from "drizzle-orm";
 import { afterAll, afterEach, beforeEach, describe, expect, it } from "vitest";
 import { closeDb, db } from "@/db/client";
 import { ingestRun, rawRecord } from "@/db/schema";
-import { getBuiltinProfile, type SourceProfile } from "./profiles";
+import { type SourceProfile } from "./profiles";
 import {
   importUpload,
   listProfiles,
+  markUploadRunsFailed,
+  saveProfile,
   storeUpload,
   UploadError,
   type UploadStore,
 } from "./upload";
+import type { ProfileChoice } from "./upload-shared";
 
 const REPORTS = resolve("fixtures/bamboo-reports/small");
 
@@ -42,7 +45,24 @@ async function upload(file: string, name = file) {
   );
 }
 
-const profileNamed = (name: string) => getBuiltinProfile(name)!;
+const builtin = (name: string): ProfileChoice => ({ builtin: name });
+
+/** The error an import fails with, or undefined if it succeeds. */
+async function failure(promise: Promise<unknown>) {
+  const error = await promise.then(
+    () => undefined,
+    (e: unknown) => e,
+  );
+  return error instanceof UploadError ? error : undefined;
+}
+
+const feedbackProfile: SourceProfile = {
+  name: "mi-feedback",
+  table: "mi-feedback",
+  keyColumns: ["Employee Name", "Receiving Feedback From", "Review Cycle"],
+  entity: "feedback",
+  columnMap: { "Employee Name": "employee_name" },
+};
 
 describe("importUpload", () => {
   it("lands the employee performance report with its built-in profile and records the upload on the run", async () => {
@@ -51,7 +71,7 @@ describe("importUpload", () => {
     const { runId, counts, rejects } = await importUpload({
       uploadId: stored.id,
       fileName: "Employee Performance.csv",
-      profile: profileNamed("bamboo-employee-performance"),
+      profile: builtin("bamboo-employee-performance"),
       db,
       store,
     });
@@ -61,6 +81,8 @@ describe("importUpload", () => {
     const records = await db.select().from(rawRecord);
     expect(records).toHaveLength(69);
     expect(records.every((r) => r.payloadHash.length === 64)).toBe(true);
+    // A Bamboo report export, not a lake table.
+    expect(records[0].sourceSystem).toBe("bamboo_export");
     const [run] = await db
       .select()
       .from(ingestRun)
@@ -82,7 +104,7 @@ describe("importUpload", () => {
     await importUpload({
       uploadId: first.id,
       fileName: "a.csv",
-      profile: profileNamed("bamboo-employee-performance"),
+      profile: builtin("bamboo-employee-performance"),
       db,
       store,
     });
@@ -91,7 +113,7 @@ describe("importUpload", () => {
     const { counts } = await importUpload({
       uploadId: again.id,
       fileName: "copia.csv",
-      profile: profileNamed("bamboo-employee-performance"),
+      profile: builtin("bamboo-employee-performance"),
       db,
       store,
     });
@@ -106,20 +128,23 @@ describe("importUpload", () => {
     // A goal status report is not an employee performance report.
     const stored = await upload("goal-status.csv");
 
-    const error = await importUpload({
-      uploadId: stored.id,
-      fileName: "goal-status.csv",
-      profile: profileNamed("bamboo-employee-performance"),
-      db,
-      store,
-    }).catch((e: unknown) => e);
+    const failed = await failure(
+      importUpload({
+        uploadId: stored.id,
+        fileName: "Mis metas.csv",
+        profile: builtin("bamboo-employee-performance"),
+        db,
+        store,
+      }),
+    );
 
-    expect(error).toBeInstanceOf(UploadError);
-    const failure = error as UploadError;
-    expect(failure.code).toBe("invalid_profile");
-    expect(failure.message).toContain("bamboo-employee-performance");
-    expect(failure.message).toContain('Column "Review Cycle"');
-    expect(failure.issues.map((i) => i.kind)).toContain("missing_column");
+    expect(failed?.code).toBe("invalid_profile");
+    expect(failed?.message).toContain("bamboo-employee-performance");
+    expect(failed?.message).toContain('Column "Review Cycle"');
+    // It names the file the user uploaded, not the profile's own table.
+    expect(failed?.message).toContain('"Mis metas.csv"');
+    expect(failed?.message).not.toContain('table "employee-performance"');
+    expect(failed?.issues.map((i) => i.kind)).toContain("missing_column");
     expect(await db.select().from(rawRecord)).toHaveLength(0);
     expect(await db.select().from(ingestRun)).toHaveLength(0);
   });
@@ -130,7 +155,7 @@ describe("importUpload", () => {
     const { counts, rejects } = await importUpload({
       uploadId: stored.id,
       fileName: "goal-status.csv",
-      profile: profileNamed("bamboo-goal-status"),
+      profile: builtin("bamboo-goal-status"),
       db,
       store,
     });
@@ -138,22 +163,49 @@ describe("importUpload", () => {
     expect(counts).toMatchObject({ read: 119, inserted: 117, rejected: 2 });
     expect(rejects).toHaveLength(2);
     expect(rejects[0].reason).toContain('key column "Goal" is empty');
+    expect(rejects[0]).toMatchObject({ code: "empty_key", column: "Goal" });
   });
 
-  it("saves a custom profile once the file matches it, and lists it afterwards", async () => {
+  it("an unknown built-in profile is refused", async () => {
+    const stored = await upload("goal-status.csv");
+
+    const failed = await failure(
+      importUpload({
+        uploadId: stored.id,
+        fileName: "x.csv",
+        profile: builtin("no-existe"),
+        db,
+        store,
+      }),
+    );
+
+    expect(failed?.code).toBe("unknown_profile");
+    expect(await db.select().from(ingestRun)).toHaveLength(0);
+  });
+
+  it("refuses an upload id that was never stored", async () => {
+    const failed = await failure(
+      importUpload({
+        uploadId: `${"a".repeat(64)}.csv`,
+        fileName: "x.csv",
+        profile: builtin("bamboo-goal-status"),
+        db,
+        store,
+      }),
+    );
+
+    expect(failed?.code).toBe("unknown_upload");
+  });
+});
+
+describe("importUpload with a custom profile", () => {
+  it("saves it once the import succeeded, lists it, and lands the rows as a lake source", async () => {
     const stored = await upload("feedback-status.csv");
-    const custom: SourceProfile = {
-      name: "mi-feedback",
-      table: "mi-feedback",
-      keyColumns: ["Employee Name", "Receiving Feedback From", "Review Cycle"],
-      entity: "feedback",
-      columnMap: { "Employee Name": "employee_name" },
-    };
 
     const { counts } = await importUpload({
       uploadId: stored.id,
       fileName: "feedback-status.csv",
-      profile: custom,
+      profile: { custom: feedbackProfile },
       db,
       store,
     });
@@ -161,62 +213,202 @@ describe("importUpload", () => {
     expect(counts).toMatchObject({ read: 220, inserted: 220 });
     expect(
       (await listProfiles(store)).find((p) => p.name === "mi-feedback"),
-    ).toEqual(custom);
+    ).toEqual(feedbackProfile);
     const [row] = await db.select().from(rawRecord).limit(1);
     expect(row).toMatchObject({ entity: "feedback", sourceSystem: "lake" });
   });
 
-  it("does not save a custom profile the file does not match", async () => {
+  it("is a lake source even when it is named like a Bamboo report", async () => {
     const stored = await upload("feedback-status.csv");
 
-    const error = await importUpload({
+    await importUpload({
       uploadId: stored.id,
       fileName: "feedback-status.csv",
-      profile: {
-        name: "mal-perfil",
-        table: "mal-perfil",
-        keyColumns: ["No Existe"],
-        entity: "feedback",
-        columnMap: {},
-      },
+      profile: { custom: { ...feedbackProfile, name: "bamboo-mio" } },
       db,
       store,
-    }).catch((e: unknown) => e);
+    });
 
-    expect((error as UploadError).code).toBe("invalid_profile");
+    const [row] = await db.select().from(rawRecord).limit(1);
+    expect(row.sourceSystem).toBe("lake");
+  });
+
+  it("does not save a profile the file does not match", async () => {
+    const stored = await upload("feedback-status.csv");
+
+    const failed = await failure(
+      importUpload({
+        uploadId: stored.id,
+        fileName: "feedback-status.csv",
+        profile: {
+          custom: {
+            name: "mal-perfil",
+            table: "mal-perfil",
+            keyColumns: ["No Existe"],
+            entity: "feedback",
+            columnMap: {},
+          },
+        },
+        db,
+        store,
+      }),
+    );
+
+    expect(failed?.code).toBe("invalid_profile");
     expect(
       (await listProfiles(store)).some((p) => p.name === "mal-perfil"),
     ).toBe(false);
   });
 
-  it("uses the built-in definition when the request only names a built-in profile", async () => {
-    const stored = await upload("assessment-progress.csv");
-    const forged = {
-      ...profileNamed("bamboo-assessment-progress"),
-      keyColumns: ["Manager"],
-    };
+  it("does not save a profile whose import failed", async () => {
+    const stored = await upload("feedback-status.csv");
+
+    const error = await importUpload({
+      uploadId: stored.id,
+      fileName: "feedback-status.csv",
+      profile: { custom: feedbackProfile },
+      db,
+      store,
+      // The worker is told to stop as soon as it starts.
+      signal: AbortSignal.abort(new Error("terminated")),
+    }).catch((e: unknown) => e);
+
+    expect((error as Error).message).toContain("terminated");
+    expect(
+      (await listProfiles(store)).some((p) => p.name === "mi-feedback"),
+    ).toBe(false);
+    const [run] = await db.select().from(ingestRun);
+    expect(run.status).toBe("error");
+  });
+
+  it("never replaces a built-in profile: a custom one cannot take its name", async () => {
+    const stored = await upload("goal-status.csv");
+
+    const failed = await failure(
+      importUpload({
+        uploadId: stored.id,
+        fileName: "goal-status.csv",
+        profile: {
+          custom: {
+            name: "bamboo-goal-status",
+            table: "x",
+            keyColumns: ["Goal"],
+            entity: "goal",
+            columnMap: {},
+          },
+        },
+        db,
+        store,
+      }),
+    );
+
+    expect(failed?.code).toBe("profile_exists");
+    expect(await db.select().from(ingestRun)).toHaveLength(0);
+    expect(await listProfiles(store)).toHaveLength(9);
+  });
+
+  it("does not overwrite a saved profile unless asked to", async () => {
+    await saveProfile(feedbackProfile, store);
+    const stored = await upload("feedback-status.csv");
+    const changed = { ...feedbackProfile, columnMap: { Manager: "manager" } };
+
+    const failed = await failure(
+      importUpload({
+        uploadId: stored.id,
+        fileName: "feedback-status.csv",
+        profile: { custom: { ...changed, columnMap: {} } },
+        db,
+        store,
+      }),
+    );
+    expect(failed?.code).toBe("profile_exists");
+    expect(await db.select().from(ingestRun)).toHaveLength(0);
+
+    await importUpload({
+      uploadId: stored.id,
+      fileName: "feedback-status.csv",
+      profile: { custom: { ...feedbackProfile, columnMap: {} }, replace: true },
+      db,
+      store,
+    });
+    const saved = (await listProfiles(store)).filter(
+      (p) => p.name === "mi-feedback",
+    );
+    expect(saved).toEqual([{ ...feedbackProfile, columnMap: {} }]);
+  });
+
+  it("imports with a saved profile as the server has it, whatever the client says", async () => {
+    await saveProfile(feedbackProfile, store);
+    const stored = await upload("feedback-status.csv");
 
     const { counts } = await importUpload({
       uploadId: stored.id,
-      fileName: "assessment-progress.csv",
-      profile: forged,
+      fileName: "feedback-status.csv",
+      profile: { saved: "mi-feedback" },
       db,
       store,
     });
 
-    // Keyed by the built-in's (name, cycle, department): 80 distinct rows.
-    expect(counts).toMatchObject({ read: 80, inserted: 80 });
+    expect(counts).toMatchObject({ read: 220, inserted: 220 });
+    const failed = await failure(
+      importUpload({
+        uploadId: stored.id,
+        fileName: "feedback-status.csv",
+        profile: { saved: "nunca-guardado" },
+        db,
+        store,
+      }),
+    );
+    expect(failed?.code).toBe("unknown_profile");
   });
+});
 
-  it("refuses an upload id that was never stored", async () => {
-    const error = await importUpload({
-      uploadId: `${"a".repeat(64)}.csv`,
-      fileName: "x.csv",
-      profile: profileNamed("bamboo-goal-status"),
-      db,
-      store,
-    }).catch((e: unknown) => e);
+describe("markUploadRunsFailed", () => {
+  const sha = "c".repeat(64);
+  const longAgo = new Date(Date.now() - 3_600_000);
 
-    expect((error as UploadError).code).toBe("unknown_upload");
+  async function fakeRun(
+    values: Partial<typeof ingestRun.$inferInsert> = {},
+  ): Promise<string> {
+    const [run] = await db
+      .insert(ingestRun)
+      .values({
+        sourceSystem: "lake",
+        adapter: "file",
+        entity: "goal",
+        params: { sha256: sha },
+        status: "running",
+        ...values,
+      })
+      .returning({ id: ingestRun.id });
+    return run.id;
+  }
+  const statusOf = async (id: string) =>
+    (await db.select().from(ingestRun).where(eq(ingestRun.id, id)))[0];
+
+  it("fails the runs of that upload that were left running, and only those", async () => {
+    const stuck = await fakeRun();
+    const otherUpload = await fakeRun({ params: { sha256: "d".repeat(64) } });
+    const done = await fakeRun({ status: "succeeded" });
+    const older = await fakeRun({ startedAt: longAgo });
+    const notAFile = await fakeRun({ adapter: "fixture" });
+
+    const marked = await markUploadRunsFailed(db, {
+      sha256: sha,
+      since: new Date(Date.now() - 60_000),
+      message: "The import took too long and was stopped",
+    });
+
+    expect(marked).toBe(1);
+    expect(await statusOf(stuck)).toMatchObject({
+      status: "error",
+      error: "The import took too long and was stopped",
+    });
+    expect((await statusOf(stuck)).finishedAt).toBeInstanceOf(Date);
+    for (const untouched of [otherUpload, done, older, notAFile]) {
+      expect((await statusOf(untouched)).error).toBeNull();
+    }
+    expect((await statusOf(otherUpload)).status).toBe("running");
+    expect((await statusOf(done)).status).toBe("succeeded");
   });
 });

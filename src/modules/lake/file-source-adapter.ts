@@ -9,18 +9,21 @@ import { applyProfile, readOptionsFor, type SourceProfile } from "./profiles";
 import type { LakeAdapter, LakeRow } from "./types";
 
 /**
- * Where a profile's rows come from: the Bamboo report exports (profiles named
- * `bamboo-*`) are `bamboo_export`; Fivetran, Airbyte and custom tables are
- * `lake`. Part of raw_record's identity, so the same file always lands in the
- * same place.
+ * The source system of a BUILT-IN profile: the Bamboo report exports
+ * (`bamboo-*`) are `bamboo_export`; Fivetran and Airbyte tables are `lake`.
+ * Only for built-in profiles, so the caller has to know the profile is one:
+ * a custom profile is a `lake` source whatever it is called. Part of
+ * raw_record's identity, so the same file always lands in the same place.
  */
-export function sourceSystemFor(profile: SourceProfile): SourceSystem {
+export function builtinSourceSystem(profile: SourceProfile): SourceSystem {
   return profile.name.startsWith("bamboo-") ? "bamboo_export" : "lake";
 }
 
 export type FileSourceAdapterOptions = {
   /** Rows per lake batch (default: the lake's). */
   batchSize?: number;
+  /** Where the rows come from (default `lake`; see {@link builtinSourceSystem}). */
+  source?: SourceSystem;
 };
 
 /**
@@ -48,7 +51,7 @@ export class FileSourceAdapter implements SourceAdapter<IngestEntity> {
     private readonly table: string = profile.table,
     private readonly options: FileSourceAdapterOptions = {},
   ) {
-    this.source = sourceSystemFor(profile);
+    this.source = options.source ?? "lake";
     this.entities = [profile.entity];
   }
 
@@ -73,17 +76,29 @@ export class FileSourceAdapter implements SourceAdapter<IngestEntity> {
     });
     for await (const { rows } of this.lake.readBatches(this.table, options)) {
       for (const row of rows) {
-        let record: ReturnType<typeof applyProfile>;
-        try {
-          record = applyProfile(profile, row);
-        } catch (error) {
-          if (!ctx.onReject) throw error;
+        // A stopped run (the worker was told to terminate) ends at the next row.
+        ctx.signal?.throwIfAborted();
+        const empty = profile.keyColumns.find((c) => isEmpty(row[c]));
+        if (empty !== undefined) {
+          const reason =
+            `Profile "${profile.name}": key column "${empty}" is empty in the row ` +
+            `(${describeKey(profile, row)})`;
+          if (!ctx.onReject) throw new Error(reason);
           ctx.onReject({
             sourceId: null,
-            reason: `${(error as Error).message} (${describeKey(profile, row)})`,
+            reason,
+            code: "empty_key",
+            column: empty,
+            values: Object.fromEntries(
+              profile.keyColumns.map((c) => [
+                c,
+                isEmpty(row[c]) ? null : String(row[c]),
+              ]),
+            ),
           });
           continue;
         }
+        const record = applyProfile(profile, row);
         yield {
           sourceId: record.sourceId,
           payload: {
@@ -100,12 +115,15 @@ export class FileSourceAdapter implements SourceAdapter<IngestEntity> {
   }
 }
 
+const isEmpty = (value: LakeRow[string] | undefined) =>
+  value === null || value === undefined;
+
 /** `Employee Name="Ana", Goal=∅`: tells which row a reject was about. */
 function describeKey(profile: SourceProfile, row: LakeRow): string {
   return profile.keyColumns
     .map((column) => {
       const value = row[column];
-      return `${column}=${value === null || value === undefined ? "∅" : JSON.stringify(String(value))}`;
+      return `${column}=${isEmpty(value) ? "∅" : JSON.stringify(String(value))}`;
     })
     .join(", ");
 }

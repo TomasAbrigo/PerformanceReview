@@ -50,10 +50,12 @@ export type UploadStore = {
   maxBytes?: number;
 };
 
+// Always absolute: a relative UPLOADS_DIR (the usual way to write it) would
+// otherwise leave the symlinks of upload.ts pointing nowhere.
 const uploadsDirOf = (store: UploadStore) =>
-  store.uploadsDir ?? process.env.UPLOADS_DIR ?? resolve("var/uploads");
+  resolve(store.uploadsDir ?? process.env.UPLOADS_DIR ?? "var/uploads");
 const profilesDirOf = (store: UploadStore) =>
-  store.profilesDir ?? process.env.PROFILES_DIR ?? resolve("var/profiles");
+  resolve(store.profilesDir ?? process.env.PROFILES_DIR ?? "var/profiles");
 
 export type StoredUpload = {
   /** `<sha256><ext>`: the file name in the uploads folder, and the id the UI keeps. */
@@ -181,19 +183,66 @@ export function parseCustomProfile(input: unknown): SourceProfile {
   return profile;
 }
 
-/** Save a custom profile (replacing one with the same name) under `var/profiles/`. */
+/**
+ * Save a custom profile under `var/profiles/`. A saved profile with the same
+ * name is never overwritten silently: it is `profile_exists` unless `replace`.
+ */
 export async function saveProfile(
   input: SourceProfile,
   store: UploadStore = {},
+  { replace = false }: { replace?: boolean } = {},
 ): Promise<SourceProfile> {
   const profile = parseCustomProfile(input);
   const dir = profilesDirOf(store);
   await mkdir(dir, { recursive: true });
-  await writeFile(
-    join(dir, `${profile.name}.json`),
-    `${JSON.stringify(profile, null, 2)}\n`,
-  );
+  try {
+    await writeFile(
+      join(dir, `${profile.name}.json`),
+      `${JSON.stringify(profile, null, 2)}\n`,
+      // "wx" fails if the file exists: the check and the write are one step.
+      { flag: replace ? "w" : "wx" },
+    );
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === "EEXIST") {
+      throw new UploadError(
+        "profile_exists",
+        `A saved profile named "${profile.name}" already exists`,
+      );
+    }
+    throw error;
+  }
   return profile;
+}
+
+/** Whether a custom profile of that name has been saved. */
+export async function profileExists(
+  name: string,
+  store: UploadStore = {},
+): Promise<boolean> {
+  return (await loadSavedProfile(name, store)) !== null;
+}
+
+/** A saved custom profile by name (null if there is none, or the name is not one). */
+export async function loadSavedProfile(
+  name: string,
+  store: UploadStore = {},
+): Promise<SourceProfile | null> {
+  if (!PROFILE_NAME.test(name) || getBuiltinProfile(name)) return null;
+  try {
+    const raw: unknown = JSON.parse(
+      await readFile(
+        /*turbopackIgnore: true*/ join(
+          /*turbopackIgnore: true*/ profilesDirOf(store),
+          `${name}.json`,
+        ),
+        "utf8",
+      ),
+    );
+    const profile = parseCustomProfile(raw);
+    return profile.name === name ? profile : null;
+  } catch {
+    return null;
+  }
 }
 
 /** Built-in profiles followed by the custom ones saved so far. */

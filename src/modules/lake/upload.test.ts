@@ -9,13 +9,14 @@ import {
   writeFile,
 } from "node:fs/promises";
 import { tmpdir } from "node:os";
-import { join, resolve } from "node:path";
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { isAbsolute, join, relative, resolve } from "node:path";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { csvDirToParquet } from "./fixtures";
 import { getBuiltinProfile, type SourceProfile } from "./profiles";
 import {
   inspectUpload,
   listProfiles,
+  loadSavedProfile,
   resolveUpload,
   saveProfile,
   storeUpload,
@@ -40,7 +41,10 @@ beforeEach(async () => {
     profilesDir: join(root, "profiles"),
   };
 });
-afterEach(() => rm(root, { recursive: true, force: true }));
+afterEach(async () => {
+  vi.unstubAllEnvs();
+  await rm(root, { recursive: true, force: true });
+});
 
 const text = (content: string) => new TextEncoder().encode(content);
 const sha256 = (bytes: Uint8Array) =>
@@ -241,6 +245,21 @@ describe("inspectUpload", () => {
     expect(fromParquet.columns.map((c) => c.name)).toEqual(["id", "name"]);
   });
 
+  it("reads uploads from a folder given relative to the working directory", async () => {
+    // UPLOADS_DIR=var/uploads is the usual way to set it: a relative path.
+    const relativeUploads = relative(process.cwd(), join(root, "rel-uploads"));
+    vi.stubEnv("UPLOADS_DIR", relativeUploads);
+    const onlyProfiles = { profilesDir: store.profilesDir };
+    const stored = await storeUpload(
+      { name: "r.csv", bytes: text("id,name\n1,Ana\n") },
+      onlyProfiles,
+    );
+
+    expect(isAbsolute(stored.path)).toBe(true);
+    const inspection = await inspectUpload(stored.id, onlyProfiles);
+    expect(inspection.rows).toEqual([{ id: "1", name: "Ana" }]);
+  });
+
   it("explains a file that cannot be read, and leaves no temporary folder", async () => {
     const bad = await storeUpload(
       { name: "bad.parquet", bytes: text("this is not parquet") },
@@ -291,15 +310,42 @@ describe("profiles", () => {
     expect(profiles).toHaveLength(10);
   });
 
-  it("overwrites a custom profile with the same name", async () => {
+  it("does not silently overwrite a saved profile", async () => {
     await saveProfile(custom, store);
-    await saveProfile({ ...custom, keyColumns: ["id", "title"] }, store);
+
+    expect(
+      await codeOf(
+        saveProfile({ ...custom, keyColumns: ["id", "title"] }, store),
+      ),
+    ).toBe("profile_exists");
+    expect(
+      (await listProfiles(store)).find((p) => p.name === "mis-ventas")
+        ?.keyColumns,
+    ).toEqual(["id"]);
+  });
+
+  it("overwrites a saved profile when asked to", async () => {
+    await saveProfile(custom, store);
+
+    await saveProfile({ ...custom, keyColumns: ["id", "title"] }, store, {
+      replace: true,
+    });
 
     const saved = (await listProfiles(store)).filter(
       (p) => p.name === "mis-ventas",
     );
     expect(saved).toHaveLength(1);
     expect(saved[0].keyColumns).toEqual(["id", "title"]);
+  });
+
+  it("loads a saved profile by name, and nothing else", async () => {
+    await saveProfile(custom, store);
+
+    expect(await loadSavedProfile("mis-ventas", store)).toEqual(custom);
+    expect(await loadSavedProfile("nunca-guardado", store)).toBeNull();
+    // Not a way to read other files, nor a built-in.
+    expect(await loadSavedProfile("../profiles/mis-ventas", store)).toBeNull();
+    expect(await loadSavedProfile("bamboo-goal-status", store)).toBeNull();
   });
 
   it("does not shadow a built-in profile", async () => {

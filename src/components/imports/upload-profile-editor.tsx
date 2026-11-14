@@ -36,6 +36,8 @@ export type ProfileDraft = {
   watermark: string;
   /** Column -> canonical field ("" = leave it in `extra`). */
   fields: Record<string, string>;
+  /** Overwrite the saved profile that has this name (asked for explicitly). */
+  replace: boolean;
 };
 
 export const emptyDraft: ProfileDraft = {
@@ -44,12 +46,23 @@ export const emptyDraft: ProfileDraft = {
   keys: [],
   watermark: "",
   fields: {},
+  replace: false,
 };
 
 export type DraftErrors = {
   name: boolean;
   key: boolean;
   duplicateField: boolean;
+  /** The name is a built-in profile's: never allowed. */
+  builtinName: boolean;
+  /** The name is a saved profile's and replacing it was not asked for. */
+  savedName: boolean;
+};
+
+/** The profile names a new one would collide with. */
+export type TakenNames = {
+  builtin: ReadonlySet<string>;
+  saved: ReadonlySet<string>;
 };
 
 /**
@@ -59,6 +72,7 @@ export type DraftErrors = {
 export function buildProfile(
   draft: ProfileDraft,
   columns: LakeColumn[],
+  taken: TakenNames,
 ): { profile: SourceProfile | null; errors: DraftErrors } {
   const columnMap: Record<string, string> = {};
   for (const { name } of columns) {
@@ -70,6 +84,8 @@ export function buildProfile(
     key: draft.keys.length === 0,
     duplicateField:
       new Set(Object.values(columnMap)).size !== Object.keys(columnMap).length,
+    builtinName: taken.builtin.has(draft.name),
+    savedName: taken.saved.has(draft.name) && !draft.replace,
   };
   const parsed = sourceProfileSchema.safeParse({
     name: draft.name,
@@ -81,8 +97,7 @@ export function buildProfile(
     ...(draft.watermark ? { watermarkColumn: draft.watermark } : {}),
     columnMap,
   });
-  const valid =
-    parsed.success && !errors.name && !errors.key && !errors.duplicateField;
+  const valid = parsed.success && !Object.values(errors).some((wrong) => wrong);
   return { profile: valid ? parsed.data : null, errors };
 }
 
@@ -96,37 +111,57 @@ export function ProfileEditor({
   draft,
   onChange,
   errors,
+  taken,
 }: {
   columns: LakeColumn[];
   draft: ProfileDraft;
   onChange: (draft: ProfileDraft) => void;
   errors: DraftErrors;
+  taken: TakenNames;
 }) {
   const t = useTranslations("Upload");
   const id = useId();
   const patch = (changes: Partial<ProfileDraft>) =>
     onChange({ ...draft, ...changes });
+  const nameError =
+    draft.name === ""
+      ? null
+      : errors.builtinName
+        ? t("custom.errors.builtinName")
+        : errors.savedName
+          ? t("custom.errors.savedName")
+          : errors.name
+            ? t("custom.errors.name")
+            : null;
 
   return (
     <fieldset className="flex flex-col gap-4 rounded-lg border p-4">
       <legend className="px-1 text-sm font-medium">{t("custom.title")}</legend>
       <div className="grid gap-4 sm:grid-cols-2">
-        <Field
-          data-invalid={draft.name !== "" && errors.name ? true : undefined}
-        >
+        <Field data-invalid={nameError ? true : undefined}>
           <FieldLabel htmlFor={`${id}-name`}>{t("custom.name")}</FieldLabel>
           <Input
             id={`${id}-name`}
             value={draft.name}
             autoComplete="off"
-            aria-invalid={draft.name !== "" && errors.name ? true : undefined}
-            onChange={(e) => patch({ name: e.target.value })}
+            aria-invalid={nameError ? true : undefined}
+            onChange={(e) => patch({ name: e.target.value, replace: false })}
           />
-          {draft.name !== "" && errors.name ? (
-            <FieldError>{t("custom.errors.name")}</FieldError>
+          {nameError ? (
+            <FieldError>{nameError}</FieldError>
           ) : (
             <FieldDescription>{t("custom.nameHint")}</FieldDescription>
           )}
+          {taken.saved.has(draft.name) ? (
+            <label className="flex items-center gap-2 text-sm">
+              <input
+                type="checkbox"
+                checked={draft.replace}
+                onChange={(e) => patch({ replace: e.target.checked })}
+              />
+              {t("custom.replace", { name: draft.name })}
+            </label>
+          ) : null}
         </Field>
         <Field>
           <FieldLabel htmlFor={`${id}-entity`}>{t("custom.entity")}</FieldLabel>

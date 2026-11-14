@@ -9,14 +9,24 @@ import {
 import { payloadHash } from "./canonical";
 import { handlerFor } from "./handlers";
 import { advanceSyncState } from "./sync-state";
-import type { ExtractContext, IngestEntity, SourceAdapter } from "./types";
+import type {
+  Entity,
+  ExtractContext,
+  IngestEntity,
+  SourceAdapter,
+} from "./types";
 
 export { canonical, payloadHash } from "./canonical";
 export { resolvePerson } from "./employee";
 
-export type RunIngestInput = {
-  adapter: SourceAdapter<IngestEntity>;
-  entity: IngestEntity;
+/**
+ * `E` ties the adapter to the entity: an adapter can only be run for the
+ * entities it reads (`SourceAdapter<E>.entities`), so a Bamboo API adapter
+ * cannot be run for `assessment`, not even in landing mode.
+ */
+export type RunIngestInput<E extends IngestEntity = Entity> = {
+  adapter: SourceAdapter<E>;
+  entity: NoInfer<E>;
   db: DbOrTx;
   /**
    * Landing mode: only write raw_record and the run (counts: new records or
@@ -65,7 +75,7 @@ export class IngestRunError extends Error {
  * watermark untouched; re-running is safe (idempotent). An incremental run
  * (`extract.since`) never runs the handler's `finish` (e.g. soft-deletes).
  */
-export async function runIngest({
+export async function runIngest<E extends IngestEntity = Entity>({
   adapter,
   entity,
   db,
@@ -73,7 +83,7 @@ export async function runIngest({
   params = {},
   extract = {},
   unmatched,
-}: RunIngestInput): Promise<RunIngestResult> {
+}: RunIngestInput<E>): Promise<RunIngestResult> {
   const handler = handlerFor(entity, landing);
   const source = adapter.source;
   const [run] = await db

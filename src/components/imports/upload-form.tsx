@@ -7,6 +7,7 @@ import { Field, FieldDescription, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { useRouter } from "@/i18n/navigation";
 import {
+  builtinProfiles,
   validateAgainstSchema,
   type ProfileEntity,
   type SourceProfile,
@@ -16,6 +17,7 @@ import {
   UPLOAD_MAX_BYTES,
   type ImportResult,
   type InspectResult,
+  type ProfileChoice,
   type UploadErrorCode,
 } from "@/modules/lake/upload-shared";
 import { NativeSelect } from "./native-select";
@@ -34,7 +36,7 @@ export type UploadActions = {
   importFile: (input: {
     uploadId: string;
     fileName: string;
-    profile: SourceProfile;
+    profile: ProfileChoice;
   }) => Promise<ImportResult>;
 };
 
@@ -47,6 +49,9 @@ type Phase =
   | { step: "done"; result: Imported };
 
 const NEW_PROFILE = "__new__";
+const BUILTIN_NAMES: ReadonlySet<string> = new Set(
+  builtinProfiles.map((p) => p.name),
+);
 const MAX_MB = UPLOAD_MAX_BYTES / (1024 * 1024);
 
 function formatSize(bytes: number): string {
@@ -71,7 +76,10 @@ export function UploadForm({
   const [phase, setPhase] = useState<Phase>({ step: "choose" });
   const [profiles, setProfiles] = useState(initialProfiles);
   const [error, setError] = useState<UploadErrorCode | "unknown" | null>(null);
-  const [pending, startTransition] = useTransition();
+  // Separate: the preview must not look busy because the preview itself was
+  // still settling (a transition stays pending until its action has resolved).
+  const [inspecting, startInspect] = useTransition();
+  const [importing, startImport] = useTransition();
   const fileId = useId();
   const router = useRouter();
 
@@ -96,7 +104,7 @@ export function UploadForm({
     setError(null);
     const formData = new FormData();
     formData.set("file", file);
-    startTransition(async () => {
+    startInspect(async () => {
       const result = await actions.inspect(formData);
       if (result.ok) setPhase({ step: "preview", file: result });
       else setError(result.code);
@@ -120,25 +128,33 @@ export function UploadForm({
       <Preview
         file={phase.file}
         profiles={profiles}
-        pending={pending}
+        pending={importing}
         error={error ? errorText(error) : null}
         onBack={() => {
           setError(null);
           setPhase({ step: "choose" });
         }}
-        onImport={(profile, isNew) => {
+        onImport={(choice, created) => {
           setError(null);
-          startTransition(async () => {
+          startImport(async () => {
             const result = await actions.importFile({
               uploadId: phase.file.uploadId,
               fileName: phase.file.fileName,
-              profile,
+              profile: choice,
             });
             if (!result.ok) {
               setError(result.code);
               return;
             }
-            if (isNew) setProfiles((all) => [...all, profile]);
+            // The import saved the new profile: list it (in place if it
+            // replaced a saved one, never twice).
+            if (created) {
+              setProfiles((all) =>
+                all.some((p) => p.name === created.name)
+                  ? all.map((p) => (p.name === created.name ? created : p))
+                  : [...all, created],
+              );
+            }
             setPhase({ step: "done", result });
             // The run's page has the full detail; the result below stays
             // as the fallback while it loads.
@@ -175,8 +191,8 @@ export function UploadForm({
           </FieldDescription>
         </Field>
         <div>
-          <Button type="submit" disabled={pending}>
-            {pending ? t("choose.reading") : t("choose.submit")}
+          <Button type="submit" disabled={inspecting}>
+            {inspecting ? t("choose.reading") : t("choose.submit")}
           </Button>
         </div>
       </form>
@@ -204,7 +220,8 @@ function Preview({
   pending: boolean;
   error: string | null;
   onBack: () => void;
-  onImport: (profile: SourceProfile, isNew: boolean) => void;
+  /** `created`: the new profile the import will save, if it is one. */
+  onImport: (choice: ProfileChoice, created: SourceProfile | null) => void;
 }) {
   const t = useTranslations("Upload");
   const selectId = useId();
@@ -218,15 +235,37 @@ function Preview({
   const [draft, setDraft] = useState<ProfileDraft>(emptyDraft);
 
   const isNew = selected === NEW_PROFILE;
+  const taken = useMemo(
+    () => ({
+      builtin: BUILTIN_NAMES,
+      saved: new Set(
+        profiles.map((p) => p.name).filter((n) => !BUILTIN_NAMES.has(n)),
+      ),
+    }),
+    [profiles],
+  );
   const built = useMemo(
-    () => buildProfile(draft, file.columns),
-    [draft, file.columns],
+    () => buildProfile(draft, file.columns, taken),
+    [draft, file.columns, taken],
   );
   const profile = isNew
     ? built.profile
     : (profiles.find((p) => p.name === selected) ?? null);
   const issues = profile ? issuesOf(profile) : [];
   const canImport = profile !== null && issues.length === 0 && !pending;
+  // How the server is told which profile: built-in and saved ones by name.
+  const choice: ProfileChoice | null = !profile
+    ? null
+    : isNew
+      ? {
+          custom: profile,
+          ...(draft.replace && taken.saved.has(profile.name)
+            ? { replace: true }
+            : {}),
+        }
+      : BUILTIN_NAMES.has(profile.name)
+        ? { builtin: profile.name }
+        : { saved: profile.name };
 
   return (
     <section aria-labelledby="upload-preview" className="flex flex-col gap-6">
@@ -276,6 +315,7 @@ function Preview({
           draft={draft}
           onChange={setDraft}
           errors={built.errors}
+          taken={taken}
         />
       ) : null}
 
@@ -308,7 +348,7 @@ function Preview({
       <div className="flex flex-wrap gap-2">
         <Button
           disabled={!canImport}
-          onClick={() => profile && onImport(profile, isNew)}
+          onClick={() => choice && onImport(choice, isNew ? profile : null)}
         >
           {pending ? t("preview.importing") : t("preview.import")}
         </Button>

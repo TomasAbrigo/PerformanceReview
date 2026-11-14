@@ -1,9 +1,10 @@
 "use server";
 
-import { z } from "zod";
-import { sourceProfileSchema } from "@/modules/lake/profiles";
+import { db } from "@/db/client";
 import { storeUpload, UploadError } from "@/modules/lake/upload-store";
+import type { z } from "zod";
 import {
+  importInputSchema,
   UPLOAD_MAX_BYTES,
   type ImportResult,
   type ImportUploadResult,
@@ -11,6 +12,7 @@ import {
   type UploadFailure,
   type UploadInspection,
 } from "@/modules/lake/upload-shared";
+import { markUploadRunsFailed } from "@/modules/lake/upload-runs";
 import { runUploadWorker } from "@/modules/lake/upload-worker";
 
 /**
@@ -65,29 +67,35 @@ export async function inspectUploadAction(
   };
 }
 
-const importInput = z.object({
-  uploadId: z.string(),
-  fileName: z.string().max(255),
-  profile: sourceProfileSchema,
-});
-
 /** Land an uploaded file's rows in raw_record with a profile (landing only). */
-export async function importUploadAction(input: {
-  uploadId: string;
-  fileName: string;
-  profile: z.input<typeof sourceProfileSchema>;
-}): Promise<ImportResult> {
-  const parsed = importInput.safeParse(input);
+export async function importUploadAction(
+  input: z.input<typeof importInputSchema>,
+): Promise<ImportResult> {
+  const parsed = importInputSchema.safeParse(input);
   if (!parsed.success) {
     return fail(
       "invalid_profile_definition",
       parsed.error.issues.map((i) => i.message).join("; "),
     );
   }
+  // (A little before: the database and this process may not agree to the ms.)
+  const startedAt = new Date(Date.now() - 2000);
   const response = await runUploadWorker<ImportUploadResult>(
     "import",
     parsed.data,
   );
+  if (!response.ok && response.code === "timeout") {
+    // The worker marks its own run as failed when it is told to stop; if it
+    // had to be killed instead, nobody did.
+    const sha256 = /^[0-9a-f]{64}/.exec(parsed.data.uploadId)?.[0];
+    if (sha256) {
+      await markUploadRunsFailed(db, {
+        sha256,
+        since: startedAt,
+        message: response.message,
+      }).catch((error: unknown) => console.error(error));
+    }
+  }
   if (!response.ok) return response;
   return {
     ok: true,

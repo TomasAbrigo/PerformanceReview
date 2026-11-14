@@ -5,7 +5,7 @@ import type { ReactNode } from "react";
 import { describe, expect, it, vi } from "vitest";
 import en from "@/messages/en.json";
 import es from "@/messages/es.json";
-import { builtinProfiles, getBuiltinProfile } from "@/modules/lake/profiles";
+import { builtinProfiles, type SourceProfile } from "@/modules/lake/profiles";
 import type { ImportResult, InspectResult } from "@/modules/lake/upload-shared";
 import { UploadForm, type UploadActions } from "./upload-form";
 
@@ -100,16 +100,31 @@ function setup(
       runId: "run-1",
       counts,
       rejects: [
-        { sourceId: null, reason: 'key column "Goal" is empty in the row' },
+        {
+          sourceId: null,
+          reason: 'Profile "bamboo-goal-status": key column "Goal" is empty',
+          code: "empty_key",
+          column: "Goal",
+          values: { "Employee Name": "Ana López", Goal: null },
+        },
       ],
     },
-  }: { inspect?: InspectResult; importResult?: ImportResult } = {},
+    saved = [],
+  }: {
+    inspect?: InspectResult;
+    importResult?: ImportResult;
+    /** Custom profiles saved before, listed after the built-in ones. */
+    saved?: SourceProfile[];
+  } = {},
 ) {
   const actions = {
     inspect: vi.fn<UploadActions["inspect"]>(async () => inspect),
     importFile: vi.fn<UploadActions["importFile"]>(async () => importResult),
   };
-  renderIn(locale, <UploadForm profiles={builtinProfiles} actions={actions} />);
+  renderIn(
+    locale,
+    <UploadForm profiles={[...builtinProfiles, ...saved]} actions={actions} />,
+  );
   return actions;
 }
 
@@ -356,7 +371,7 @@ describe.each(["es", "en"] as const)("UploadForm (%s)", (locale) => {
       expect(actions.importFile).toHaveBeenCalledWith({
         uploadId: `${"a".repeat(64)}.csv`,
         fileName: "goal-status.csv",
-        profile: getBuiltinProfile("bamboo-goal-status"),
+        profile: { builtin: "bamboo-goal-status" },
       });
       const read = screen.getByText(t.result.read).closest("div");
       expect(read).toHaveTextContent("119");
@@ -366,9 +381,15 @@ describe.each(["es", "en"] as const)("UploadForm (%s)", (locale) => {
       expect(
         screen.getByText(t.result.rejected).closest("div"),
       ).toHaveTextContent("2");
+      // The reject is worded by the UI, in its language, from structured data.
       expect(
-        screen.getByText(/key column "Goal" is empty/),
+        screen.getByText(
+          t.result.rejectReasons.empty_key
+            .replace("{column}", "Goal")
+            .replace("{row}", 'Employee Name="Ana López", Goal=∅'),
+        ),
       ).toBeInTheDocument();
+      expect(screen.queryByText(/Profile "bamboo-goal-status"/)).toBeNull();
       expect(
         screen.getByRole("link", { name: t.result.viewRun }),
       ).toHaveAttribute("href", "/imports/runs/run-1");
@@ -466,6 +487,105 @@ describe.each(["es", "en"] as const)("UploadForm (%s)", (locale) => {
     });
   });
 
+  describe("saved profiles", () => {
+    const saved: SourceProfile = {
+      name: "mis-metas",
+      table: "mis-metas",
+      keyColumns: ["Employee Name", "Goal"],
+      entity: "goal",
+      columnMap: { Goal: "title" },
+    };
+
+    it("imports with a saved profile by name: the server has its definition", async () => {
+      const actions = await previewFile(locale, csv(), { saved: [saved] });
+      await userEvent.selectOptions(
+        screen.getByLabelText(t.preview.profile),
+        "mis-metas",
+      );
+
+      await userEvent.click(
+        screen.getByRole("button", { name: t.preview.import }),
+      );
+
+      await waitFor(() => expect(actions.importFile).toHaveBeenCalledOnce());
+      expect(actions.importFile.mock.calls[0][0].profile).toEqual({
+        saved: "mis-metas",
+      });
+    });
+
+    async function defineNew(name: string) {
+      await userEvent.selectOptions(
+        screen.getByLabelText(t.preview.profile),
+        t.preview.newProfile,
+      );
+      await userEvent.type(screen.getByLabelText(t.custom.name), name);
+      await userEvent.click(
+        screen.getByLabelText(t.custom.keyLabel.replace("{column}", "Goal")),
+      );
+    }
+
+    it("a new profile cannot take the name of a built-in one", async () => {
+      await previewFile(locale);
+
+      await defineNew("bamboo-goal-status");
+
+      expect(screen.getByText(t.custom.errors.builtinName)).toBeInTheDocument();
+      expect(
+        screen.getByRole("button", { name: t.preview.import }),
+      ).toBeDisabled();
+    });
+
+    it("replacing a saved profile has to be asked for, and is sent as such", async () => {
+      const actions = await previewFile(locale, csv(), { saved: [saved] });
+      await defineNew("mis-metas");
+      const importButton = screen.getByRole("button", {
+        name: t.preview.import,
+      });
+
+      expect(screen.getByText(t.custom.errors.savedName)).toBeInTheDocument();
+      expect(importButton).toBeDisabled();
+
+      await userEvent.click(
+        screen.getByLabelText(t.custom.replace.replace("{name}", "mis-metas")),
+      );
+      expect(importButton).toBeEnabled();
+      await userEvent.click(importButton);
+
+      await waitFor(() => expect(actions.importFile).toHaveBeenCalledOnce());
+      expect(actions.importFile.mock.calls[0][0].profile).toMatchObject({
+        custom: { name: "mis-metas", keyColumns: ["Goal"] },
+        replace: true,
+      });
+    });
+
+    it("a profile saved by an import shows up once in the list, and a replaced one is not duplicated", async () => {
+      await previewFile(locale, csv(), { saved: [saved] });
+      await defineNew("mis-metas");
+      await userEvent.click(
+        screen.getByLabelText(t.custom.replace.replace("{name}", "mis-metas")),
+      );
+      await userEvent.click(
+        screen.getByRole("button", { name: t.preview.import }),
+      );
+      await screen.findByRole("heading", { name: t.result.title });
+
+      // Another file, same list.
+      await userEvent.click(
+        screen.getByRole("button", { name: t.result.another }),
+      );
+      await userEvent.upload(screen.getByLabelText(t.choose.fileLabel), csv());
+      await userEvent.click(
+        screen.getByRole("button", { name: t.choose.submit }),
+      );
+      await screen.findByRole("heading", { name: t.preview.title });
+
+      const options = within(screen.getByLabelText(t.preview.profile))
+        .getAllByRole("option")
+        .filter((o) => (o as HTMLOptionElement).value === "mis-metas");
+      expect(options).toHaveLength(1);
+    });
+  });
+
   describe("custom profile", () => {
     it("defines a profile from the detected columns and imports with it", async () => {
       const actions = await previewFile(locale);
@@ -509,12 +629,14 @@ describe.each(["es", "en"] as const)("UploadForm (%s)", (locale) => {
         uploadId: `${"a".repeat(64)}.csv`,
         fileName: "goal-status.csv",
         profile: {
-          name: "mis-metas",
-          table: "mis-metas",
-          entity: "goal",
-          keyColumns: ["Employee Name", "Goal"],
-          watermarkColumn: "Due Date",
-          columnMap: { Goal: "title" },
+          custom: {
+            name: "mis-metas",
+            table: "mis-metas",
+            entity: "goal",
+            keyColumns: ["Employee Name", "Goal"],
+            watermarkColumn: "Due Date",
+            columnMap: { Goal: "title" },
+          },
         },
       });
     });

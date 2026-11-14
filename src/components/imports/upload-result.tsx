@@ -2,6 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import { Button, buttonVariants } from "@/components/ui/button";
+import type { IngestReject } from "@/db/schema";
 import { Link } from "@/i18n/navigation";
 import type { ImportResult } from "@/modules/lake/upload-shared";
 
@@ -20,6 +21,14 @@ export function UploadResult({
 }) {
   const t = useTranslations("Upload.result");
   const { counts, rejects, runId } = result;
+  // The reason on the run is English, for logs: the UI words the cause itself.
+  const rejectText = (reject: IngestReject) =>
+    reject.code === "empty_key" && reject.column
+      ? t("rejectReasons.empty_key", {
+          column: reject.column,
+          row: describeValues(reject.values ?? {}),
+        })
+      : t("rejectReasons.other");
   const figures = [
     ["read", t("read"), counts.read],
     ["inserted", t("inserted"), counts.inserted],
@@ -52,7 +61,7 @@ export function UploadResult({
           <h3 className="text-sm font-medium">{t("rejects")}</h3>
           <ul className="list-disc pl-5 text-sm text-muted-foreground">
             {rejects.map((reject, index) => (
-              <li key={index}>{reject.reason}</li>
+              <li key={index}>{rejectText(reject)}</li>
             ))}
           </ul>
         </div>
@@ -70,4 +79,14 @@ export function UploadResult({
       </div>
     </section>
   );
+}
+
+/** `Employee Name="Ana", Goal=∅`: the key values of a row, empty ones marked. */
+function describeValues(values: Record<string, string | null>): string {
+  return Object.entries(values)
+    .map(
+      ([column, value]) =>
+        `${column}=${value === null ? "∅" : JSON.stringify(value)}`,
+    )
+    .join(", ");
 }

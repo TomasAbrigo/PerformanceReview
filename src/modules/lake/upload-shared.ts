@@ -1,5 +1,10 @@
+import { z } from "zod";
 import type { IngestCounts, IngestReject } from "@/db/schema";
-import type { ProfileIssue } from "./profiles";
+import {
+  sourceProfileSchema,
+  type ProfileIssue,
+  type SourceProfile,
+} from "./profiles";
 import type { LakeColumn, LakeRow } from "./types";
 
 /**
@@ -23,7 +28,11 @@ export type UploadErrorCode =
   | "file_too_large"
   | "unsupported_type"
   | "unknown_upload"
+  /** No built-in or saved profile has that name. */
+  | "unknown_profile"
   | "unreadable_file"
+  /** The worker took too long and was stopped. */
+  | "timeout"
   /** The file lacks columns the profile needs, or their type drifted. */
   | "invalid_profile"
   /** The profile itself is malformed (name, keys...). */
@@ -37,6 +46,29 @@ export type UploadFailure = {
   message: string;
   issues: ProfileIssue[];
 };
+
+/**
+ * The profile an import uses, by how it was chosen: a built-in or a saved one
+ * by name (the server has its definition), or a new definition, which is saved
+ * once the import succeeded. A new one can neither take a built-in's name nor
+ * a saved one's, unless `replace` says to overwrite the saved one.
+ */
+export const profileChoiceSchema = z.union([
+  z.object({ builtin: z.string() }),
+  z.object({ saved: z.string() }),
+  z.object({ custom: sourceProfileSchema, replace: z.boolean().optional() }),
+]);
+export type ProfileChoice =
+  | { builtin: string }
+  | { saved: string }
+  | { custom: SourceProfile; replace?: boolean };
+
+/** What the import action and the upload worker take. */
+export const importInputSchema = z.object({
+  uploadId: z.string(),
+  fileName: z.string().max(255),
+  profile: profileChoiceSchema,
+});
 
 /** What is inside an upload: detected columns (with types) and a few rows. */
 export type UploadInspection = {
