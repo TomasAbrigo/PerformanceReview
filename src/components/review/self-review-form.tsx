@@ -65,6 +65,7 @@ export function SelfReviewForm({
   actions,
   labels = {},
   questionExtra,
+  intro,
   children,
 }: {
   review: SelfReviewData;
@@ -72,6 +73,8 @@ export function SelfReviewForm({
   labels?: ReviewFormLabels;
   /** Rendered under each question's label (e.g. visibility marks). */
   questionExtra?: (q: SelfReviewQuestion) => ReactNode;
+  /** Rendered between the header and the questions (e.g. the goals block). */
+  intro?: ReactNode;
   /** Rendered after the questions, before the submit controls. */
   children?: ReactNode;
 }) {
@@ -247,6 +250,8 @@ export function SelfReviewForm({
           </p>
         ) : null}
       </header>
+
+      {intro}
 
       {sections.map((section, i) => (
         <section key={i} className="flex flex-col gap-4">

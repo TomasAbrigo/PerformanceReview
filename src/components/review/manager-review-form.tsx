@@ -5,6 +5,8 @@ import { useState, useTransition } from "react";
 import { type ActionResult, useLocalized } from "@/components/templates/shared";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import type { GoalsBlockData } from "@/modules/review-core/goal-snapshot";
+import { GoalsBlock, type GoalsBlockActions } from "./goals-block";
 import {
   type SelfReviewActions,
   type SelfReviewData,
@@ -61,17 +63,21 @@ export function ReadOnlyAnswers({ review }: { review: SelfReviewData }) {
 /**
  * The manager's review of a direct report: the template's manager questions
  * (overall rating in the cycle's scale), each marked as visible or not to
- * the employee, a goals placeholder (#13), sharing, and the self review
+ * the employee, the participant's goals (read-only, above the questions, with
+ * the goals rating among them), sharing, and the self review
  * side by side once the double blind allows it (`self` null otherwise).
  */
 export function ManagerReviewForm({
   review,
   self,
   actions,
+  goals,
 }: {
   review: ManagerReviewData;
   self: SelfReviewData | null;
   actions: ManagerReviewActions;
+  /** The participant's goal snapshot (omit to render no goals block). */
+  goals?: { data: GoalsBlockData; actions?: GoalsBlockActions };
 }) {
   const t = useTranslations("ManagerReview");
   const tErr = useTranslations("Review.errors");
@@ -104,6 +110,11 @@ export function ManagerReviewForm({
           backHref: "/team",
           confirmTitle: t("confirmTitle"),
         }}
+        intro={
+          goals ? (
+            <GoalsBlock data={goals.data} actions={goals.actions} />
+          ) : null
+        }
         questionExtra={(q) =>
           q.visibleToReviewee === undefined ? null : (
             <Badge
@@ -115,14 +126,6 @@ export function ManagerReviewForm({
           )
         }
       >
-        <section aria-labelledby="goals" className="flex flex-col gap-2">
-          <h2 id="goals" className="text-lg font-medium">
-            {t("goalsTitle")}
-          </h2>
-          <p className="text-sm text-muted-foreground">
-            {t("goalsPlaceholder")}
-          </p>
-        </section>
         {review.status === "submitted" ? (
           <div className="flex flex-wrap items-center gap-4">
             <p className="text-sm">

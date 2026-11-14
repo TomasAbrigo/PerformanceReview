@@ -486,7 +486,7 @@ describe("getReviewGoals", () => {
       "C runs past the period",
     ]);
     expect(block.participantId).toBe(p.id);
-    expect(block.asOf).toBeInstanceOf(Date);
+    expect(block.asOf).toMatch(/^\d{4}-\d{2}-\d{2}$/);
     expect(block.canRefresh).toBe(true);
     expect(block.canLink).toBe(false);
 
@@ -513,17 +513,12 @@ describe("getReviewGoals", () => {
     const p = await participantOf(cycle.id, bruno);
     await db
       .update(participantGoalSnapshot)
-      .set({ capturedAt: new Date("2022-01-10T00:00:00Z") })
+      .set({ capturedAt: new Date("2022-01-10T12:00:00Z") })
       .where(eq(participantGoalSnapshot.participantId, p.id));
     const requestId = (await findManagerRequestId(db, hr, p.id))!;
-    expect((await getReviewGoals(db, hr, requestId))!.asOf).toEqual(
-      new Date("2022-01-10T00:00:00Z"),
-    );
-    await refreshGoalProgress(db, hr, p.id);
-    const after = (await getReviewGoals(db, hr, requestId))!;
-    expect(after.asOf!.getTime()).toBeGreaterThan(
-      new Date("2022-01-10T00:00:00Z").getTime(),
-    );
+    expect((await getReviewGoals(db, hr, requestId))!.asOf).toBe("2022-01-10");
+    await refreshGoalProgress(db, hr, p.id, new Date("2022-03-05T12:00:00Z"));
+    expect((await getReviewGoals(db, hr, requestId))!.asOf).toBe("2022-03-05");
   });
 
   it("is null for someone who cannot read the review", async () => {

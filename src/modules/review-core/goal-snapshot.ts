@@ -12,6 +12,7 @@ import {
 } from "@/db/schema";
 import { isUuid } from "@/lib/uuid";
 import type { ActorContext } from "@/modules/actor/types";
+import { todayLocal } from "@/modules/org-history/dates";
 import { loadRequest } from "./requests";
 import { ReviewError } from "./review-errors";
 import type { CycleStatus } from "./status";
@@ -322,8 +323,11 @@ export type GoalSnapshotView = {
 export type GoalsBlockData = {
   participantId: string;
   goals: GoalSnapshotView[];
-  /** The legend date ("progress as of"): latest refresh, else the capture. */
-  asOf: Date | null;
+  /**
+   * The legend date ("progress as of", yyyy-mm-dd in the company's time
+   * zone): the latest refresh, else the capture; null without goals.
+   */
+  asOf: string | null;
   canRefresh: boolean;
   canLink: boolean;
   /** Owner's live goals that are not in the snapshot (HR can link them). */
@@ -386,7 +390,7 @@ export async function getReviewGoals(
       dueDate: r.dueDate,
       noLongerApplicable: r.noLongerApplicable,
     })),
-    asOf: dates.length ? new Date(Math.max(...dates)) : null,
+    asOf: dates.length ? todayLocal(new Date(Math.max(...dates))) : null,
     canRefresh: rows.length > 0 && mayRefresh(actor, scope) && isLive(scope),
     canLink,
     linkable,
