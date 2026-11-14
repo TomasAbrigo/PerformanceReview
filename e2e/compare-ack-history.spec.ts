@@ -50,14 +50,19 @@ async function templateWithHiddenQuestion(page: Page, name: string) {
   await expect(page.getByText(HIDDEN)).toBeVisible();
 }
 
-/** Launches a cycle with that template and moves it to collecting. */
-async function collectingCycle(page: Page, name: string, template: string) {
+/** Launches a cycle (no calibration) with that template, moves it to collecting. */
+async function collectingCycle(
+  page: Page,
+  name: string,
+  template: string,
+): Promise<string> {
   await page.goto("/es/cycles/new");
   await expect(page.getByText("Paso 1 de 4")).toBeVisible();
   await page.getByLabel("Fecha de snapshot organizacional").fill("2022-06-01");
   await expect(page.getByText(/\d+ personas coinciden/)).toBeVisible();
   await page.getByRole("button", { name: "Siguiente" }).click();
   await page.getByLabel("Plantilla").selectOption({ label: template });
+  await page.getByLabel("Calibración", { exact: true }).uncheck();
   await page.getByRole("button", { name: "Siguiente" }).click();
   await page.getByLabel("Nombre del ciclo").fill(name);
   await page.getByLabel("Inicio del período").fill("2022-01-01");
@@ -65,11 +70,18 @@ async function collectingCycle(page: Page, name: string, template: string) {
   await page.getByRole("button", { name: "Siguiente" }).click();
   await page.getByRole("button", { name: "Crear y lanzar" }).click();
   await expect(page).toHaveURL(/\/es\/cycles\/[0-9a-f-]{36}$/);
-  await page.getByRole("button", { name: "Pasar a Recolección" }).click();
+  const url = page.url();
+  await moveTo(page, "Recolección", 3);
+  return url;
+}
+
+/** HR moves the open cycle page to the next phase. */
+async function moveTo(page: Page, phase: string, transitions: number) {
+  await page.getByRole("button", { name: `Pasar a ${phase}` }).click();
   await page.getByRole("button", { name: "Confirmar" }).click();
   await expect(
     page.getByRole("table", { name: "Historial de estados" }).getByRole("row"),
-  ).toHaveCount(3);
+  ).toHaveCount(transitions);
 }
 
 /** Answers every text and rating question of the open form and submits. */
@@ -100,7 +112,7 @@ test("compare, follow-up note, acknowledgement and history of a shared review", 
   const template = `Comparación e2e ${stamp}`;
   const name = `Comparación ${stamp}`;
   await templateWithHiddenQuestion(page, template);
-  await collectingCycle(page, name, template);
+  const cycleUrl = await collectingCycle(page, name, template);
 
   // Bruno submits his self assessment.
   await actAs(page, "Bruno Pérez", "Empleado");
@@ -122,6 +134,15 @@ test("compare, follow-up note, acknowledgement and history of a shared review", 
     .filter({ hasText: "Bruno Pérez" });
   await teamRow.getByRole("link", { name: "Evaluar" }).click();
   await fillAndSubmit(page);
+  const managerUrl = page.url();
+
+  // HR moves the cycle to sharing; Carla shares with Bruno.
+  await actAs(page, null, "People (RR. HH.)");
+  await page.goto(cycleUrl);
+  await moveTo(page, "Revisión del manager", 4);
+  await moveTo(page, "Compartir resultados", 5);
+  await actAs(page, "Carla Romero", "Manager");
+  await page.goto(managerUrl);
   await page.getByRole("button", { name: "Compartir con el empleado" }).click();
   await expect(page.getByText(/Compartida el/)).toBeVisible();
 

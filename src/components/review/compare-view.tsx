@@ -17,26 +17,9 @@ import type {
   CompareSide,
   Comparison,
 } from "@/modules/review-core/compare";
+import { ReadOnlyAnswer } from "./self-review-form";
 
 const sign = (n: number) => (n > 0 ? "+" : n < 0 ? "-" : "");
-
-/** The text of one side of a row (option label, choice label or text). */
-function useSideText() {
-  const localized = useLocalized();
-  return (row: CompareRow, side: CompareSide) => {
-    const value = side.value;
-    if (value === null || value === "") return null;
-    const { question } = row;
-    const options =
-      question.kind === "rating"
-        ? (question.scale?.options ?? [])
-        : question.kind === "single_choice"
-          ? (question.choices ?? [])
-          : [];
-    const option = options.find((o) => String(o.value) === String(value));
-    return option ? localized(option.label as Localized) : String(value);
-  };
-}
 
 /**
  * Self assessment and manager review side by side, per question, with the
@@ -55,7 +38,6 @@ export function CompareView({
   const t = useTranslations("Compare");
   const format = useFormatter();
   const localized = useLocalized();
-  const sideText = useSideText();
   const [employeeView, setEmployeeView] = useState(false);
   const locked = comparison.employeeView;
   const limited = locked || employeeView;
@@ -84,12 +66,7 @@ export function CompareView({
     if (!side) {
       return <span className="text-muted-foreground">{t("notAsked")}</span>;
     }
-    const text = sideText(row, side);
-    return text === null ? (
-      <span className="text-muted-foreground">{t("noAnswer")}</span>
-    ) : (
-      <span className="whitespace-pre-wrap">{text}</span>
-    );
+    return <ReadOnlyAnswer question={row.question} value={side.value} />;
   }
 
   function deltaCell(row: CompareRow) {

@@ -3,6 +3,7 @@ import type { QuestionRevision } from "@/db/schema";
 import type { ActorContext } from "@/modules/actor/types";
 import { type AnswerValue, getReview } from "./answers";
 import {
+  isActive,
   isManagerSideOf,
   isRevieweeOf,
   isShared,
@@ -104,9 +105,10 @@ export async function compareReviews(
   const employeeView = options.employeeView === true || reviewee;
   const involved =
     actor.role === "hr" ||
-    isRevieweeOf(actor, scope) ||
-    isManagerSideOf(actor, scope) ||
-    (await isSkipLevelOf(db, actor, scope));
+    (isActive(scope) &&
+      (isRevieweeOf(actor, scope) ||
+        isManagerSideOf(actor, scope) ||
+        (await isSkipLevelOf(db, actor, scope))));
   if (!involved) throw new ReviewError("forbidden");
   // The employee never learns about a manager review that is not shared.
   if (reviewee && !isShared(scope)) {

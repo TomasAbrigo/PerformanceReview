@@ -7,6 +7,7 @@ import {
   AckError,
   getAcknowledgement,
   listMyAcknowledgements,
+  removeParticipant,
   shareReview,
   unshare,
 } from ".";
@@ -22,6 +23,7 @@ import {
   submitManager,
   submitSelf,
   systemTemplateId,
+  toSharing,
 } from "./compare-ack.fixtures";
 
 let templateId: string;
@@ -192,6 +194,16 @@ describe("acknowledge", () => {
     );
   });
 
+  it("a removed participant cannot acknowledge", async () => {
+    const { cycle, participantId } = await sharedCycle(templateId);
+    await removeParticipant(db, cycle.id, people.bruno);
+    await expect(acknowledge(db, bruno(), participantId)).rejects.toMatchObject(
+      { code: "forbidden" },
+    );
+    expect(await listMyAcknowledgements(db, bruno())).toEqual([]);
+    expect((await stored(participantId)).acknowledgedAt).toBeNull();
+  });
+
   it("not_found for an unknown participant", async () => {
     await expect(
       acknowledge(db, bruno(), "00000000-0000-4000-8000-000000000001"),
@@ -231,6 +243,7 @@ describe("getAcknowledgement", () => {
         "not_shared",
       );
     }
+    await toSharing(cycle.id);
     await shareReview(db, as(people.carla), requestId);
     const open = await getAcknowledgement(db, bruno(), participantId);
     expect(open.status).toBe("open");
@@ -270,6 +283,7 @@ describe("listMyAcknowledgements (the /me task)", () => {
     const { participantId, requestId } = await submitManager(cycle.id);
     expect(await listMyAcknowledgements(db, bruno())).toEqual([]);
 
+    await toSharing(cycle.id);
     await shareReview(db, as(people.carla), requestId);
     const tasks = await listMyAcknowledgements(db, bruno());
     expect(tasks).toHaveLength(1);

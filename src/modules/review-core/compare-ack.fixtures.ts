@@ -200,6 +200,15 @@ export async function submitManager(
   return { requestId: id, participantId: p.id };
 }
 
+/**
+ * Moves a collecting cycle (no calibration) to the sharing phase: a manager
+ * review can only be shared there.
+ */
+export async function toSharing(cycleId: string) {
+  await transition(db, cycleId, "manager_review", null);
+  await transition(db, cycleId, "sharing", null);
+}
+
 /** Both reviews submitted and the manager review shared with Bruno. */
 export async function sharedCycle(
   templateId: string,
@@ -212,6 +221,7 @@ export async function sharedCycle(
   const cycle = await collectingCycle(templateId, overrides);
   await submitSelf(cycle.id, pick?.self);
   const manager = await submitManager(cycle.id, pick?.manager);
+  await toSharing(cycle.id);
   await shareReview(db, as(people.carla, "manager"), manager.requestId);
   return { cycle, ...manager };
 }

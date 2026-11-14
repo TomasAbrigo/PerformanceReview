@@ -3,12 +3,15 @@ import type { DbOrTx } from "@/db/client";
 import { followUpNote, person } from "@/db/schema";
 import type { ActorContext } from "@/modules/actor/types";
 import {
+  isActive,
   isManagerSideOf,
   isRevieweeOf,
   isShared,
   loadParticipantScope,
+  type ParticipantScope,
 } from "./participant-scope";
 import { ReviewError } from "./review-errors";
+import { canShare } from "./visibility";
 
 export const FOLLOW_UP_MAX_LENGTH = 4000;
 
@@ -35,10 +38,9 @@ export async function addFollowUpNote(
   body: string,
 ): Promise<FollowUpNote> {
   const scope = await loadParticipantScope(db, participantId);
-  if (actor.role !== "hr" && !isManagerSideOf(actor, scope)) {
-    throw new ReviewError("forbidden");
-  }
-  if (scope.managerRequest?.status !== "submitted") {
+  if (!scope.managerRequest) throw new ReviewError("not_found");
+  if (!mayWrite(actor, scope)) throw new ReviewError("forbidden");
+  if (scope.managerRequest.status !== "submitted") {
     throw new ReviewError("not_submitted");
   }
   const text = body.trim();
@@ -57,6 +59,17 @@ export async function addFollowUpNote(
     .values({ participantId, authorPersonId: actor.personId, body: text })
     .returning();
   return { ...row, authorName: await authorName(db, row.authorPersonId) };
+}
+
+/** HR, the manager review's reviewer or the snapshot manager (active participant): canShare. */
+function mayWrite(actor: ActorContext, scope: ParticipantScope) {
+  return (
+    scope.managerRequest !== null &&
+    canShare(actor, {
+      request: scope.managerRequest,
+      participant: scope.participant,
+    })
+  );
 }
 
 async function authorName(db: DbOrTx, personId: string | null) {
@@ -81,8 +94,9 @@ export async function listFollowUpNotes(
   const scope = await loadParticipantScope(db, participantId);
   const allowed =
     actor.role === "hr" ||
-    isManagerSideOf(actor, scope) ||
-    (isRevieweeOf(actor, scope) && isShared(scope));
+    (isActive(scope) &&
+      (isManagerSideOf(actor, scope) ||
+        (isRevieweeOf(actor, scope) && isShared(scope))));
   if (!allowed) throw new ReviewError("forbidden");
   return db
     .select({
@@ -108,8 +122,7 @@ export async function canAddFollowUp(
   try {
     const scope = await loadParticipantScope(db, participantId);
     return (
-      (actor.role === "hr" || isManagerSideOf(actor, scope)) &&
-      scope.managerRequest?.status === "submitted"
+      mayWrite(actor, scope) && scope.managerRequest?.status === "submitted"
     );
   } catch (error) {
     if (error instanceof ReviewError) return false;

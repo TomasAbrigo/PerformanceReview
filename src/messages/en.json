@@ -748,7 +748,6 @@
     "manager": "Manager review",
     "delta": "Difference",
     "notAsked": "Not asked",
-    "noAnswer": "No answer",
     "noRows": "There are no questions to compare.",
     "employeeView": "Employee view",
     "employeeViewHint": "Hides what the employee cannot see; useful when screen sharing.",

@@ -10,6 +10,7 @@ import {
   DEFAULT_ACK_WINDOW_DAYS,
 } from "./acknowledge-window";
 import {
+  isActive,
   isManagerSideOf,
   isRevieweeOf,
   isShared,
@@ -92,8 +93,10 @@ export async function getAcknowledgement(
   const scope = await loadParticipantScope(db, participantId);
   if (
     actor.role !== "hr" &&
-    !isRevieweeOf(actor, scope) &&
-    !isManagerSideOf(actor, scope)
+    !(
+      isActive(scope) &&
+      (isRevieweeOf(actor, scope) || isManagerSideOf(actor, scope))
+    )
   ) {
     throw new AckError("forbidden");
   }
@@ -115,7 +118,9 @@ export async function acknowledge(
   options: AckOptions = {},
 ): Promise<AckState> {
   const first = await loadParticipantScope(db, participantId);
-  if (!isRevieweeOf(actor, first)) throw new AckError("forbidden");
+  if (!isRevieweeOf(actor, first) || !isActive(first)) {
+    throw new AckError("forbidden");
+  }
   const text = note?.trim() || null;
   if (text !== null && text.length > ACK_NOTE_MAX_LENGTH) {
     throw new AckError("validation", [{ path: "note", message: "too_long" }]);

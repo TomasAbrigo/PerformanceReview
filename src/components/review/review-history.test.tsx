@@ -228,7 +228,11 @@ describe("MyTasksView acknowledgements", () => {
       <MyTasksView
         hasPerson
         personId="person-1"
-        tasks={{ selfAssessments: [], acknowledgements: [ack] }}
+        tasks={{
+          selfAssessments: [],
+          sharedReviews: [],
+          acknowledgements: [ack],
+        }}
       />,
     );
     expect(screen.queryByText("No tenés tareas pendientes.")).toBeNull();
@@ -244,7 +248,7 @@ describe("MyTasksView acknowledgements", () => {
       <MyTasksView
         hasPerson
         personId="person-1"
-        tasks={{ selfAssessments: [] }}
+        tasks={{ selfAssessments: [], sharedReviews: [] }}
       />,
     );
     expect(screen.getByText("You have no pending tasks.")).toBeVisible();
@@ -259,7 +263,7 @@ describe("MyTasksView acknowledgements", () => {
       <MyTasksView
         hasPerson={false}
         personId={null}
-        tasks={{ selfAssessments: [] }}
+        tasks={{ selfAssessments: [], sharedReviews: [] }}
       />,
     );
     expect(screen.queryByRole("link")).not.toBeInTheDocument();

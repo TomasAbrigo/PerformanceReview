@@ -2,7 +2,7 @@ import { eq } from "drizzle-orm";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { closeDb, db } from "@/db/client";
 import { questionRevision } from "@/db/schema";
-import { compareReviews, shareReview } from ".";
+import { compareReviews, removeParticipant, shareReview } from ".";
 import {
   as,
   askBoth,
@@ -17,6 +17,7 @@ import {
   submitManager,
   submitSelf,
   systemTemplateId,
+  toSharing,
 } from "./compare-ack.fixtures";
 
 let templateId: string;
@@ -187,6 +188,7 @@ describe("compareReviews", () => {
     await expect(
       compareReviews(db, as(people.bruno), participantId),
     ).rejects.toMatchObject({ code: "forbidden" });
+    await toSharing(cycle.id);
     await shareReview(db, as(people.carla), requestId);
     await expect(
       compareReviews(db, as(people.bruno), participantId),
@@ -220,6 +222,17 @@ describe("compareReviews", () => {
     await expect(
       compareReviews(db, outsider(), participantId),
     ).rejects.toMatchObject({ code: "forbidden" });
+  });
+
+  it("a removed participant is compared by HR only", async () => {
+    const { cycle, participantId } = await sharedCycle(templateId);
+    await removeParticipant(db, cycle.id, people.bruno);
+    for (const actor of [as(people.carla, "manager"), as(people.bruno)]) {
+      await expect(
+        compareReviews(db, actor, participantId),
+      ).rejects.toMatchObject({ code: "forbidden" });
+    }
+    await expect(compareReviews(db, hr, participantId)).resolves.toBeDefined();
   });
 
   it("not_found for an unknown or malformed participant", async () => {

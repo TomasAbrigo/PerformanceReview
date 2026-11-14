@@ -13,6 +13,7 @@ import { isUuid } from "@/lib/uuid";
 import type { ActorContext } from "@/modules/actor/types";
 import { isSkipLevel } from "./manager";
 import { ReviewError } from "./review-errors";
+import { isActiveParticipant } from "./visibility";
 
 /**
  * A participant with the pieces the #15 features (compare, follow-up notes,
@@ -60,6 +61,10 @@ export async function loadParticipantScope(
     managerRequest: requests.find((r) => r.relationship === "manager") ?? null,
   };
 }
+
+/** The participant is still in the cycle (removed ones are for HR only). */
+export const isActive = (s: ParticipantScope) =>
+  isActiveParticipant(s.participant);
 
 /** The actor is the reviewee (acting as that person). */
 export const isRevieweeOf = (actor: ActorContext, s: ParticipantScope) =>

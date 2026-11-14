@@ -6,6 +6,7 @@ import {
   addFollowUpNote,
   canAddFollowUp,
   listFollowUpNotes,
+  removeParticipant,
   shareReview,
   unshare,
 } from ".";
@@ -22,6 +23,7 @@ import {
   submitManager,
   submitSelf,
   systemTemplateId,
+  toSharing,
 } from "./compare-ack.fixtures";
 
 let templateId: string;
@@ -104,6 +106,7 @@ describe("follow-up notes", () => {
     await expect(
       addFollowUpNote(db, carla(), p.id, "ok"),
     ).resolves.toBeDefined();
+    await toSharing(cycle.id);
     await shareReview(db, carla(), requestId);
   });
 
@@ -165,5 +168,28 @@ describe("canAddFollowUp", () => {
     expect(await canAddFollowUp(db, as(people.bruno), p.id)).toBe(false);
     expect(await canAddFollowUp(db, outsider(), p.id)).toBe(false);
     expect(await canAddFollowUp(db, hr, "nope")).toBe(false);
+  });
+});
+
+describe("removed participants", () => {
+  it("nobody writes notes once the participant was removed; only HR reads them", async () => {
+    const { cycle, participantId } = await sharedCycle(templateId);
+    await addFollowUpNote(db, carla(), participantId, "Antes");
+    await removeParticipant(db, cycle.id, people.bruno);
+    await expect(
+      addFollowUpNote(db, carla(), participantId, "Después"),
+    ).rejects.toMatchObject({ code: "forbidden" });
+    await expect(
+      listFollowUpNotes(db, carla(), participantId),
+    ).rejects.toMatchObject({ code: "forbidden" });
+    await expect(
+      listFollowUpNotes(db, as(people.bruno), participantId),
+    ).rejects.toMatchObject({ code: "forbidden" });
+    expect(await canAddFollowUp(db, carla(), participantId)).toBe(false);
+    expect(await listFollowUpNotes(db, hr, participantId)).toHaveLength(1);
+    expect(await canAddFollowUp(db, hr, participantId)).toBe(false);
+    await expect(
+      addFollowUpNote(db, hr, participantId, "People"),
+    ).rejects.toMatchObject({ code: "forbidden" });
   });
 });
