@@ -1,6 +1,24 @@
 import { execFileSync } from "node:child_process";
 import { expect, type Page, test } from "@playwright/test";
 import { addDays, todayLocal } from "../src/modules/org-history/dates";
+import {
+  company,
+  directReports,
+  employees,
+  find,
+  fullName,
+  hasUniqueName,
+  isActive,
+} from "./seed-data";
+
+// Someone in the org on the snapshot day with no reports (so no other
+// participant row mentions their name) and a name the selectors can pick.
+const employee = find(
+  employees,
+  (e) => isActive(e) && hasUniqueName(e) && directReports(e).length === 0,
+  "person with no reports and a unique name",
+);
+const employeeName = fullName(employee);
 
 // Phase changes notify every participant, and other specs launch cycles with
 // everyone in them, so this spec runs on its own after them (see the
@@ -26,7 +44,7 @@ async function collectingCycle(page: Page, name: string, selfDue: string) {
   await page.goto("/es/cycles/new");
   const snapshot = page.getByLabel("Fecha de snapshot organizacional");
   await expect(snapshot).toBeVisible();
-  await snapshot.fill("2022-06-01");
+  await snapshot.fill(company.asOf);
   await expect(page.getByText(/\d+ personas coinciden/)).toBeVisible();
   // Next until the dates step (the wizard may gain optional steps before it).
   const nameField = page.getByLabel("Nombre del ciclo");
@@ -65,8 +83,8 @@ test("the reminder generator fills the inbox of the people with a pending task",
   const name = `Notificaciones e2e ${Date.now()}`;
   await collectingCycle(page, name, addDays(todayLocal(), 7));
 
-  // Launching and moving the cycle told Bruno twice; start from a clean inbox.
-  await actAs(page, "Bruno Pérez", "Empleado");
+  // Launching and moving the cycle told the employee twice; start from a clean inbox.
+  await actAs(page, employeeName, "Empleado");
   await page.goto("/es/inbox");
   await expect(
     page.getByRole("heading", { level: 1, name: "Notificaciones" }),
@@ -90,7 +108,7 @@ test("the reminder generator fills the inbox of the people with a pending task",
   expect(runGenerator()).toMatch(/created=[1-9]/);
   expect(runGenerator()).toMatch(/created=0/);
 
-  // Bruno has exactly one new notification: the reminder.
+  // The employee has exactly one new notification: the reminder.
   await page.goto("/es/me");
   await expect(badge(page, "Notificaciones: 1 sin leer")).toBeVisible();
   const reminder = `Tu autoevaluación del ciclo ${name} vence en 7 días`;
