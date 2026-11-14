@@ -48,8 +48,17 @@ const assessorName = fullName(assessor);
  */
 async function collectingCycle(page: Page, name: string, people: string[]) {
   await page.goto("/es/cycles/new");
-  await expect(page.getByText("Paso 1 de 4")).toBeVisible();
-  await page.getByLabel("Fecha de snapshot organizacional").fill(company.asOf);
+  await expect(page.getByText("Paso 1 de 5")).toBeVisible();
+  // Filling the date again until the form took it keeps a slow hydration from
+  // eating it.
+  await expect(async () => {
+    await page
+      .getByLabel("Fecha de snapshot organizacional")
+      .fill(company.asOf);
+    await expect(page.getByText(/\d+ personas? coinciden?/)).toBeVisible({
+      timeout: 3_000,
+    });
+  }).toPass();
   await page.getByLabel("Personas individuales").check();
   for (const person of people) {
     await page.getByLabel(person, { exact: true }).check();
@@ -59,6 +68,8 @@ async function collectingCycle(page: Page, name: string, people: string[]) {
   await page.getByLabel("Plantilla").selectOption({
     label: "Evaluación de fin de año",
   });
+  await page.getByRole("button", { name: "Siguiente" }).click();
+  // Template groups are optional: skip the step.
   await page.getByRole("button", { name: "Siguiente" }).click();
   await page.getByLabel("Nombre del ciclo").fill(name);
   await page.getByLabel("Inicio del período").fill("2022-01-01");
