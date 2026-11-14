@@ -26,7 +26,7 @@ import {
   ratingStages,
   selfManagerGap,
 } from "@/modules/analytics/dashboards";
-import { listCycles } from "@/modules/review-core";
+import { type CycleStatus, listCycles } from "@/modules/review-core";
 
 async function Dashboards({
   params,
@@ -38,6 +38,7 @@ async function Dashboards({
   await connection();
   const actor = await getActor();
   const t = await getTranslations("Dashboards");
+  const tStatus = await getTranslations("Cycles.status");
   if (actor.role !== "hr" && actor.role !== "manager") {
     if (actor.personId) {
       redirect({ href: `/dashboards/people/${actor.personId}`, locale });
@@ -133,7 +134,13 @@ async function Dashboards({
       <Panel
         id="progress"
         title={t("progress.title")}
-        hint={progress ? t("phase", { phase: progress.status }) : undefined}
+        hint={
+          progress
+            ? t("phase", {
+                phase: tStatus(progress.status as CycleStatus),
+              })
+            : undefined
+        }
         actions={csv("dashboard-progress", !!cycleId)}
       >
         {progress ? <ProgressChart data={progress} /> : pickCycle}

@@ -33,14 +33,17 @@ export function TeamView({ data }: { data: ManagerTeam }) {
             <td className="p-1">
               {m.normalized === null ? (
                 <span className="text-muted-foreground">
-                  {m.participantId ? "—" : t("team.notInCycle")}
+                  {m.participantId ? t("team.noRating") : t("team.notInCycle")}
                 </span>
               ) : (
                 <span className="flex items-center gap-2">
                   <Meter
                     width={100}
                     value={m.normalized}
-                    label={`${m.name}: ${pct(m.normalized)} %`}
+                    label={t("team.ratingLabel", {
+                      name: m.name,
+                      value: pct(m.normalized)!,
+                    })}
                   />
                   <span className="tabular-nums">{pct(m.normalized)} %</span>
                 </span>

@@ -13,7 +13,38 @@ import {
   type RatingDistribution,
   type SelfManagerGap,
 } from "@/modules/analytics/dashboards/types";
+import { FiltersForm } from "./controls";
 import { ExecutiveView } from "./executive-view";
+import { parseParams } from "./url-state";
+
+describe("FiltersForm / parseParams", () => {
+  it("offers a single 'all cycles' option and blank means all", () => {
+    renderIn(
+      "en",
+      <FiltersForm
+        params={parseParams({})}
+        cycles={[
+          { id: "all", name: "All cycles" },
+          { id: "c1", name: "H1" },
+        ]}
+        options={{
+          departments: [],
+          managers: [],
+          locations: [],
+          jobTitles: [],
+        }}
+      />,
+    );
+    const cycle = screen.getByLabelText("Cycle");
+    expect(
+      within(cycle)
+        .getAllByRole("option")
+        .map((o) => o.textContent),
+    ).toEqual(["All cycles", "H1"]);
+    expect(parseParams({ cycle: "" }).cycle).toBe("all");
+    expect(parseParams({}).cycle).toBeUndefined();
+  });
+});
 import { GapChart } from "./gap-chart";
 import { GoalsScatter } from "./goals-scatter";
 import { ProgressChart } from "./progress-chart";

@@ -37,11 +37,13 @@ import {
   createGroup,
   currentRatingFor,
   distribution,
+  distributions,
   listGroups,
   myPublishedRating,
   proposeRating,
   publishCalibration,
 } from "./calibration";
+import { assignAlternateAssessor } from "./ops";
 
 const FIXTURES = path.resolve("src/modules/bamboo-client/__fixtures__");
 
@@ -558,6 +560,50 @@ describe("review findings", () => {
     expect(d.series.find((s) => s.key === carla)!.counts).toEqual([
       0, 1, 0, 0, 0,
     ]);
+  });
+
+  it("the employee's published rating maps a 4-point answer to the 5-point final scale by normalized value", async () => {
+    const [five] = await db
+      .select({ id: ratingScale.id })
+      .from(ratingScale)
+      .where(eq(ratingScale.systemKey, "five_point_agreement"));
+    // Ana rated Carla 3 on the 4-point scale (normalized 2/3).
+    const { cycle } = await ratedCycle({ finalScaleId: five.id });
+    await publishAndShare(cycle.id);
+    // Nearest 5-point option: 0.75 (value 4), not the option with value 3.
+    expect(await myPublishedRating(db, as(carla), cycle.id)).toEqual({
+      value: 4,
+      label: { es: "De acuerdo", en: "Agree" },
+    });
+  });
+
+  it("distributions returns the four groupings × stages in one call", async () => {
+    const { cycle, b } = await ratedCycle();
+    await proposeRating(db, hr, b.participantId, { value: 4, reason: "x" });
+    const all = await distributions(db, hr, cycle.id);
+    for (const groupBy of ["department", "manager"] as const) {
+      for (const stage of ["manager", "current"] as const) {
+        expect(all[groupBy][stage]).toEqual(
+          await distribution(db, hr, cycle.id, { groupBy, stage }),
+        );
+      }
+    }
+    expect(all.department.manager.series[0].counts).toEqual([0, 1, 1, 0]);
+    expect(all.department.current.series[0].counts).toEqual([0, 0, 1, 1]);
+  });
+
+  it("publishing audits once per participant, ignoring superseded requests", async () => {
+    const { cycle, b, c } = await ratedCycle();
+    // Ana replaces Carla on Bruno's review: Carla's becomes superseded.
+    await assignAlternateAssessor(db, hr, b.participantId, ana, "replace");
+    await publishCalibration(db, hr, cycle.id);
+    const audit = await db
+      .select({ requestId: reviewAudit.requestId })
+      .from(reviewAudit)
+      .where(eq(reviewAudit.action, "calibration_published"));
+    expect(audit).toHaveLength(2);
+    expect(audit.map((a) => a.requestId)).not.toContain(b.requestId);
+    expect(audit.map((a) => a.requestId)).toContain(c.requestId);
   });
 
   it("v_current_rating exists with the expected columns", async () => {

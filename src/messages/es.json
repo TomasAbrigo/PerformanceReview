@@ -1422,6 +1422,8 @@
       "depth": "Nivel",
       "rating": "Rating",
       "notInCycle": "No participa",
+      "noRating": "Sin rating",
+      "ratingLabel": "{name}: {value} %",
       "pickManager": "Elegí un manager en los filtros."
     },
     "goals": {

@@ -72,6 +72,7 @@ export async function cycleProgress(
            count(*) filter (where r.status = 'draft')::int as draft,
            count(*) filter (where r.status = 'declined')::int as declined
     from review_request r join scoped s on s.participant_id = r.participant_id
+    where r.deleted_at is null and r.status <> 'superseded'
     group by 1, 2, 3, 4
     order by 1, 2 nulls last, 4 nulls last`);
   const totals = new Map<Relationship, CycleProgress["totals"][number]>();
@@ -163,8 +164,8 @@ export async function ratingDistribution(
  * One person's trajectory across cycles: normalized current rating, with
  * the manager, title and area frozen at each cycle's snapshot. HR: all;
  * managers: cycles where the person was in their team then or is now;
- * the person themself: every cycle, rating only once calibration is
- * published. Anyone else: forbidden.
+ * the person themself: every cycle, rating only once their manager review is
+ * shared and calibration published (the result page's gate), never the stage.
  */
 export async function personTrajectory(
   db: DbOrTx,
@@ -206,7 +207,10 @@ export async function personTrajectory(
            v.normalized::float8 as normalized, v.option_label, v.stage::text as stage,
            m.display_name as manager_name, cp.snap_job_title as job_title,
            cp.snap_department as department,
-           c.calibration_published_at is not null as published
+           (c.calibration_published_at is not null and exists (
+             select 1 from review_request r where r.participant_id = cp.id
+               and r.relationship = 'manager' and r.status = 'submitted'
+               and r.deleted_at is null and r.shared_at is not null)) as published
     from cycle_participant cp
     join review_cycle c on c.id = cp.cycle_id
     left join person m on m.id = cp.snap_manager_person_id
@@ -226,7 +230,8 @@ export async function personTrajectory(
         periodEnd: r.period_end,
         normalized: visible ? r.normalized : null,
         optionLabel: visible ? r.option_label : null,
-        stage: visible ? r.stage : null,
+        // The stage (manager / calibrated / override) is internal.
+        stage: hide ? null : r.stage,
         managerName: r.manager_name,
         jobTitle: r.job_title,
         department: r.department,
@@ -367,10 +372,10 @@ export async function selfManagerGap(
              sa.normalized::float8 as self, ma.normalized::float8 as manager
       from scoped s
       join review_request sr on sr.participant_id = s.participant_id
-        and sr.relationship = 'self' and sr.status = 'submitted'
+        and sr.relationship = 'self' and sr.status = 'submitted' and sr.deleted_at is null
       join answer sa on sa.request_id = sr.id and sa.normalized is not null
       join review_request mr on mr.participant_id = s.participant_id
-        and mr.relationship = 'manager' and mr.status = 'submitted'
+        and mr.relationship = 'manager' and mr.status = 'submitted' and mr.deleted_at is null
       join answer ma on ma.request_id = mr.id
         and ma.question_revision_id = sa.question_revision_id
         and ma.normalized is not null

@@ -99,8 +99,8 @@ export function GoalsScatter({ rows }: { rows: GoalsVsRatingRow[] }) {
           r.name,
           r.goals,
           r.completed,
-          r.avgProgress === null ? "—" : `${r.avgProgress} %`,
-          r.normalized === null ? "—" : `${pct(r.normalized)} %`,
+          r.avgProgress === null ? t("team.noRating") : `${r.avgProgress} %`,
+          r.normalized === null ? t("team.noRating") : `${pct(r.normalized)} %`,
         ])}
       />
     </div>

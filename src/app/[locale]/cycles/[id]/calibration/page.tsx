@@ -13,7 +13,7 @@ import { routing } from "@/i18n/routing";
 import { getActor } from "@/modules/actor/server";
 import {
   calibrationTable,
-  distribution,
+  distributions,
   getCycle,
   listGroups,
   ReviewError,
@@ -48,20 +48,7 @@ async function Calibration({
     }
   }
   // Scoped by the domain: HR the whole cycle, calibrators their groups.
-  const dist = (
-    groupBy: "department" | "manager",
-    stage: "manager" | "current",
-  ) => distribution(db, actor, id, { groupBy, stage });
-  const [deptPre, deptPost, mgrPre, mgrPost] = await Promise.all([
-    dist("department", "manager"),
-    dist("department", "current"),
-    dist("manager", "manager"),
-    dist("manager", "current"),
-  ]);
-  const data = {
-    department: { manager: deptPre, current: deptPost },
-    manager: { manager: mgrPre, current: mgrPost },
-  };
+  const data = await distributions(db, actor, id);
   const active = cycle.participants.filter((p) => !p.removedAt);
   const departments = [
     ...new Set(active.map((p) => p.snapDepartment).filter((d) => d !== null)),

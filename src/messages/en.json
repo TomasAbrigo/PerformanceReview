@@ -1422,6 +1422,8 @@
       "depth": "Level",
       "rating": "Rating",
       "notInCycle": "Not in cycle",
+      "noRating": "No rating",
+      "ratingLabel": "{name}: {value} %",
       "pickManager": "Pick a manager in the filters."
     },
     "goals": {

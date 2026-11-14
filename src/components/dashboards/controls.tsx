@@ -53,7 +53,7 @@ export function FiltersForm({
     name: keyof DashboardParams,
     label: string,
     values: { value: string; label: string }[],
-    anyLabel = t("filters.any"),
+    anyLabel: string | null = t("filters.any"),
   ) => (
     <label className="flex flex-col gap-1 text-sm">
       {label}
@@ -62,7 +62,7 @@ export function FiltersForm({
         defaultValue={params[name] ?? ""}
         className="rounded-md border bg-background px-2 py-1"
       >
-        <option value="">{anyLabel}</option>
+        {anyLabel === null ? null : <option value="">{anyLabel}</option>}
         {values.map((v) => (
           <option key={v.value} value={v.value}>
             {v.label}
@@ -85,7 +85,7 @@ export function FiltersForm({
         "cycle",
         t("filters.cycle"),
         cycles.map((c) => ({ value: c.id, label: c.name })),
-        t("filters.allCycles"),
+        null,
       )}
       {select(
         "department",

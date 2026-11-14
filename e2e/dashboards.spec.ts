@@ -106,7 +106,7 @@ test("dashboards: progress, distribution, team as-of/current, trajectory and lea
   await actAs(page, null, "People (RR. HH.)");
   await page.goto(`/es/dashboards?cycle=${cycleId}`);
   const progress = page.getByRole("region", { name: "Avance del ciclo" });
-  await expect(progress.getByText("Fase del ciclo: collecting")).toBeVisible();
+  await expect(progress.getByText("Fase del ciclo: Recolección")).toBeVisible();
   await expect(
     progress.getByRole("img", {
       name: /^Evaluación del manager: [1-9]\d* de \d+ enviadas$/,

@@ -30,7 +30,8 @@ const pick = <T extends string>(
 
 export function parseParams(sp: Raw): DashboardParams {
   return {
-    cycle: one(sp.cycle),
+    // Blank (an emptied select) means every cycle, like "all".
+    cycle: sp.cycle === "" ? "all" : one(sp.cycle),
     hierarchy: pick(one(sp.hierarchy), hierarchies, "asOf"),
     groupBy: pick(one(sp.groupBy), groupBys, "department"),
     stage: pick(one(sp.stage), ratingStages, "current"),

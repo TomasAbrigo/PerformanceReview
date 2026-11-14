@@ -7,6 +7,7 @@ import { closeDb, db } from "@/db/client";
 import { cycleParticipant, participantGoalSnapshot, person } from "@/db/schema";
 import type { ActorContext } from "@/modules/actor/types";
 import { exportCsv } from "@/modules/exports/entities";
+import { assignAlternateAssessor } from "@/modules/review-core/ops";
 import { FixtureAdapter, runIngest } from "@/modules/ingest";
 import {
   createCycle,
@@ -14,7 +15,9 @@ import {
   findMySelfRequestId,
   launchCycle,
   proposeRating,
+  publishCalibration,
   saveDraft,
+  shareAll,
   submit,
   transition,
   type CycleInput,
@@ -456,6 +459,20 @@ describe("personTrajectory", () => {
   });
 });
 
+describe("personTrajectory (own view)", () => {
+  it("shows the own rating only once published AND shared, never the stage", async () => {
+    const { cycle } = await h1();
+    await publishCalibration(db, hr, cycle.id);
+    let own = await personTrajectory(db, as(bruno), bruno);
+    expect(own.points[0].normalized).toBeNull();
+    await transition(db, cycle.id, "sharing", null);
+    await shareAll(db, hr, cycle.id);
+    own = await personTrajectory(db, as(bruno), bruno);
+    expect(close(own.points[0].normalized)).toBe(close(2 / 3));
+    expect(own.points[0].stage).toBeNull();
+  });
+});
+
 describe("managerTeam", () => {
   it("as-of vs current changes the subtree (recursive)", async () => {
     const { cycle } = await h1();
@@ -589,6 +606,35 @@ describe("executiveSummary", () => {
     await expect(
       executiveSummary(db, as(ana, "manager"), { cycleId: cycle.id }),
     ).rejects.toMatchObject({ code: "forbidden" });
+  });
+});
+
+describe("reassigned manager review", () => {
+  it("superseded requests are neither counted nor paired", async () => {
+    const { cycle, pb } = await h1();
+    // Ana replaces Carla: Carla's submitted review becomes superseded and
+    // Ana gets a fresh draft.
+    await assignAlternateAssessor(db, hr, pb, ana, "replace");
+    const r = await cycleProgress(db, hr, {
+      cycleId: cycle.id,
+      hierarchy: "asOf",
+    });
+    expect(r.totals).toEqual([
+      { relationship: "self", total: 2, submitted: 1, draft: 1, declined: 0 },
+      {
+        relationship: "manager",
+        total: 2,
+        submitted: 1,
+        draft: 1,
+        declined: 0,
+      },
+    ]);
+    const gap = await selfManagerGap(db, hr, {
+      cycleId: cycle.id,
+      hierarchy: "asOf",
+    });
+    expect(gap.byQuestion).toEqual([]);
+    expect(gap.byPerson).toEqual([]);
   });
 });
 
