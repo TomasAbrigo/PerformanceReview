@@ -19,6 +19,8 @@ export type TeamViewRow = {
   cycleId: string;
   cycleName: string;
   participantId: string;
+  /** For the link to their review history. */
+  revieweePersonId?: string;
   revieweeName: string;
   selfRequestId: string | null;
   selfStatus: RequestStatus | null;
@@ -40,6 +42,8 @@ export function TeamView({
   const t = useTranslations("Team");
   const tStatus = useTranslations("Review.status");
   const tErr = useTranslations("Review.errors");
+  const tCompare = useTranslations("Compare");
+  const tHistory = useTranslations("History");
   const [pending, startTransition] = useTransition();
   const [message, setMessage] = useState<string | null>(null);
   const status = (s: RequestStatus | null) => tStatus(s ?? "none");
@@ -93,6 +97,29 @@ export function TeamView({
                       className={buttonVariants({ size: "sm" })}
                     >
                       {t("open")}
+                    </Link>
+                  ) : null}
+                  {row.selfStatus === "submitted" &&
+                  row.managerStatus === "submitted" ? (
+                    <Link
+                      href={`/cycles/${row.cycleId}/compare/${row.participantId}`}
+                      className={buttonVariants({
+                        size: "sm",
+                        variant: "outline",
+                      })}
+                    >
+                      {tCompare("open")}
+                    </Link>
+                  ) : null}
+                  {row.revieweePersonId ? (
+                    <Link
+                      href={`/people/${row.revieweePersonId}/reviews`}
+                      className={buttonVariants({
+                        size: "sm",
+                        variant: "outline",
+                      })}
+                    >
+                      {tHistory("link")}
                     </Link>
                   ) : null}
                   {row.selfRequestId && row.selfStatus === "draft" ? (

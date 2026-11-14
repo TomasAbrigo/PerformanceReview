@@ -1040,8 +1040,9 @@ function counting() {
 describe("queries per page", () => {
   // A page costs a fixed handful of queries (the rows, then the extras
   // canRead needs, each once per page), never a few per request: the rows
-  // plus at most four extras (double blind, replaced manager, shared, skip-level).
-  const BUDGET = 5;
+  // plus at most five extras (double blind, replaced manager, shared, skip-level,
+  // current manager).
+  const BUDGET = 6;
   let many: string;
   let reviewers: string[];
 

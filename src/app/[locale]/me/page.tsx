@@ -29,9 +29,11 @@ async function Tasks({ params }: PageProps<"/[locale]/me">) {
       <NotificationsPreview items={latest.items} unread={unread} />
       <MyTasksView
         hasPerson={actor.personId !== null}
+        personId={actor.personId}
         tasks={{
           selfAssessments: tasks.selfAssessments,
           sharedReviews: tasks.sharedReviews,
+          acknowledgements: tasks.acknowledgements,
         }}
       />
       <PeerTasks
