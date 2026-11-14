@@ -23,6 +23,7 @@
     "cycles:enroll": "tsx scripts/cycles-enroll.ts",
     "db:seed": "tsx scripts/db-seed.ts",
     "ingest": "tsx scripts/ingest.ts",
+    "notifications:run": "tsx scripts/notifications-run.ts",
     "ingest:employees": "tsx scripts/ingest-employees.ts",
     "ingest:goals": "tsx scripts/ingest-employees.ts --entity goal",
     "fixtures:build": "tsx src/fixtures/build.ts",

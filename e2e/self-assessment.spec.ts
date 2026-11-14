@@ -101,7 +101,8 @@ test("an employee fills and submits their self assessment; HR unlocks it", async
     page.getByRole("heading", { level: 1, name: "Mis tareas" }),
   ).toBeVisible();
   await expect(
-    page.getByRole("listitem").filter({ hasText: name }),
+    // Only tasks: the cycle's phase-change notifications also name it.
+    page.getByRole("listitem").filter({ hasText: `Autoevaluación: ${name}` }),
   ).toHaveCount(0);
 
   // HR unlocks it from the cycle page.

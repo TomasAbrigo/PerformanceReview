@@ -33,6 +33,7 @@ import {
   type ParticipantFilter,
 } from "@/db/schema";
 import { isUuid } from "@/lib/uuid";
+import { notifyPhaseChanged } from "@/modules/notifications/events";
 import { todayLocal } from "@/modules/org-history/dates";
 import {
   jobsAsOf,
@@ -391,13 +392,17 @@ export async function launchCycle(
       .set({ status: to, launchedAt: new Date() })
       .where(eq(reviewCycle.id, id))
       .returning();
-    await tx.insert(cycleTransition).values({
-      cycleId: id,
-      fromStatus: "draft",
-      toStatus: to,
-      actorPersonId,
-    });
+    const [logged] = await tx
+      .insert(cycleTransition)
+      .values({
+        cycleId: id,
+        fromStatus: "draft",
+        toStatus: to,
+        actorPersonId,
+      })
+      .returning({ id: cycleTransition.id });
     await ensureSelfRequests(tx, id);
+    await notifyPhaseChanged(tx, id, "draft", to, logged.id);
     if (byHireDate) await enrollDueParticipants(tx, id, todayLocal());
     return updated;
   });
@@ -423,14 +428,18 @@ export async function transition(
       .where(and(eq(reviewCycle.id, id), eq(reviewCycle.status, cycle.status)))
       .returning();
     if (!updated) throw new CyclesError("invalid_transition");
-    await tx.insert(cycleTransition).values({
-      cycleId: id,
-      fromStatus: cycle.status,
-      toStatus: to,
-      actorPersonId,
-      note: note || null,
-    });
+    const [logged] = await tx
+      .insert(cycleTransition)
+      .values({
+        cycleId: id,
+        fromStatus: cycle.status,
+        toStatus: to,
+        actorPersonId,
+        note: note || null,
+      })
+      .returning({ id: cycleTransition.id });
     await ensureSelfRequests(tx, id);
+    await notifyPhaseChanged(tx, id, cycle.status, to, logged.id);
     return updated;
   });
 }

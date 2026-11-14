@@ -10,6 +10,7 @@ import {
   employeeJobHistory,
   employment,
   goal,
+  notification,
   participantGoalSnapshot,
   person,
   questionRevision,
@@ -18,6 +19,7 @@ import {
   reviewTemplate,
 } from "@/db/schema";
 import { FixtureAdapter, runIngest } from "@/modules/ingest";
+import { generateDueReminders } from "@/modules/notifications";
 import { todayLocal } from "@/modules/org-history/dates";
 import {
   addQuestion,
@@ -1149,6 +1151,26 @@ describe("enrollDueParticipants", () => {
     expect(
       (await addParticipant(db, fixed.id, bruno, AS_OF)).dueDates,
     ).toBeNull();
+  });
+
+  it("reminds each person about their own deadline", async () => {
+    const cycle = await launched();
+    await transition(db, cycle.id, "collecting", null);
+    await enrollDueParticipants(db, cycle.id, AS_OF);
+
+    // Dana is due on 2026-03-16 (cycle.dueDates is empty): a week before.
+    const lead = await generateDueReminders(db, {
+      asOf: "2026-03-09",
+      offsets: [7],
+    });
+    expect(lead.candidates).toBeGreaterThan(0);
+    const reminded = await db
+      .select({ recipient: notification.recipientPersonId })
+      .from(notification)
+      .where(eq(notification.cycleId, cycle.id));
+    expect(reminded.map((n) => n.recipient)).toContain(people.dana);
+    // Eli is due a day later, so he is not in this one.
+    expect(reminded.map((n) => n.recipient)).not.toContain(people.eli);
   });
 
   it("snapshots the goals of the people it enrolls, as at launch", async () => {
