@@ -63,6 +63,31 @@ function optionsOf(q: SelfReviewQuestion) {
   return [];
 }
 
+/** Read-only rendering of one answer (also used next to other forms). */
+export function ReadOnlyAnswer({
+  question,
+  value,
+}: {
+  question: SelfReviewQuestion;
+  value: AnswerValue | undefined;
+}) {
+  const t = useTranslations("Review");
+  const localized = useLocalized();
+  const option = optionsOf(question).find(
+    (o) => String(o.value) === String(value),
+  );
+  const text = option
+    ? localized(option.label)
+    : value === null || value === undefined || value === ""
+      ? null
+      : String(value);
+  return (
+    <p className="whitespace-pre-wrap">
+      {text ?? <span className="text-muted-foreground">{t("noAnswer")}</span>}
+    </p>
+  );
+}
+
 export function SelfReviewForm({
   review,
   actions,
@@ -161,23 +186,7 @@ export function SelfReviewForm({
 
   function renderAnswer(q: SelfReviewQuestion) {
     const value = values[q.id];
-    if (readOnly) {
-      const option = optionsOf(q).find(
-        (o) => String(o.value) === String(value),
-      );
-      const text = option
-        ? localized(option.label)
-        : value === null || value === undefined || value === ""
-          ? null
-          : String(value);
-      return (
-        <p className="whitespace-pre-wrap">
-          {text ?? (
-            <span className="text-muted-foreground">{t("noAnswer")}</span>
-          )}
-        </p>
-      );
-    }
+    if (readOnly) return <ReadOnlyAnswer question={q} value={value} />;
     if (q.kind === "text") {
       return (
         <textarea

@@ -94,7 +94,7 @@ for (const doubleBlind of [true, false]) {
           actor: "reviewee",
           expected: submitted && shared && visible !== false,
         });
-        cases.push({ ...base, actor: "skip", expected: submitted });
+        cases.push({ ...base, actor: "skip", expected: submitted && shared });
         cases.push({ ...base, actor: "other", expected: false });
       }
     }

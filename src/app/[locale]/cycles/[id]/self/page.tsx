@@ -3,12 +3,13 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { connection } from "next/server";
 import { Suspense } from "react";
+import { toReviewData } from "@/components/review/review-data";
 import { SelfReviewForm } from "@/components/review/self-review-form";
 import { db } from "@/db/client";
 import { Link } from "@/i18n/navigation";
 import { routing } from "@/i18n/routing";
 import { getActor } from "@/modules/actor/server";
-import { findMySelfRequestId, getSelfReview } from "@/modules/review-core";
+import { findMySelfRequestId, getReview } from "@/modules/review-core";
 import { saveDraftAction, submitAction } from "./actions";
 
 async function SelfReview({ params }: PageProps<"/[locale]/cycles/[id]/self">) {
@@ -18,7 +19,7 @@ async function SelfReview({ params }: PageProps<"/[locale]/cycles/[id]/self">) {
   await connection();
   const actor = await getActor();
   const requestId = await findMySelfRequestId(db, actor, id);
-  const review = requestId ? await getSelfReview(db, actor, requestId) : null;
+  const review = requestId ? await getReview(db, actor, requestId) : null;
   if (!review) {
     const t = await getTranslations("Review");
     return (
@@ -34,24 +35,7 @@ async function SelfReview({ params }: PageProps<"/[locale]/cycles/[id]/self">) {
   return (
     <SelfReviewForm
       key={`${review.request.id}-${review.request.status}`}
-      review={{
-        requestId: review.request.id,
-        cycleName: review.cycle.name,
-        dueDate: review.cycle.dueDate,
-        status: review.request.status,
-        submittedAt: review.request.submittedAt,
-        canWrite: review.canWrite,
-        questions: review.questions.map((q) => ({
-          id: q.id,
-          sectionTitle: q.sectionTitle,
-          prompt: q.prompt,
-          kind: q.kind,
-          required: q.required,
-          scale: q.scale,
-          choices: q.choices,
-        })),
-        answers: review.answers,
-      }}
+      review={toReviewData(review)}
       actions={{ save: saveDraftAction, submit: submitAction }}
     />
   );

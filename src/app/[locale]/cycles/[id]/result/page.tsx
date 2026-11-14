@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { connection } from "next/server";
 import { Suspense } from "react";
 import { ManagerResultView } from "@/components/review/manager-result";
+import { toReviewData } from "@/components/review/review-data";
 import { db } from "@/db/client";
 import { routing } from "@/i18n/routing";
 import { getActor } from "@/modules/actor/server";
@@ -20,28 +21,7 @@ async function Result({ params }: PageProps<"/[locale]/cycles/[id]/result">) {
   const review = requestId ? await getReview(db, actor, requestId) : null;
   return (
     <ManagerResultView
-      review={
-        review
-          ? {
-              requestId: review.request.id,
-              cycleName: review.cycle.name,
-              dueDate: null,
-              status: review.request.status,
-              submittedAt: review.request.submittedAt,
-              canWrite: false,
-              questions: review.questions.map((q) => ({
-                id: q.id,
-                sectionTitle: q.sectionTitle,
-                prompt: q.prompt,
-                kind: q.kind,
-                required: q.required,
-                scale: q.scale,
-                choices: q.choices,
-              })),
-              answers: review.answers,
-            }
-          : null
-      }
+      review={review ? { ...toReviewData(review), dueDate: null } : null}
     />
   );
 }

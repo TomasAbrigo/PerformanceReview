@@ -7,17 +7,34 @@ import {
   type IngestReject,
 } from "@/db/schema";
 import { payloadHash } from "./canonical";
-import { entityHandlers } from "./handlers";
+import { handlerFor } from "./handlers";
 import { advanceSyncState } from "./sync-state";
-import type { Entity, ExtractContext, SourceAdapter } from "./types";
+import type {
+  Entity,
+  ExtractContext,
+  IngestEntity,
+  SourceAdapter,
+} from "./types";
 
 export { canonical, payloadHash } from "./canonical";
 export { resolvePerson } from "./employee";
 
-export type RunIngestInput = {
-  adapter: SourceAdapter;
-  entity: Entity;
+/**
+ * `E` ties the adapter to the entity: an adapter can only be run for the
+ * entities it reads (`SourceAdapter<E>.entities`), so a Bamboo API adapter
+ * cannot be run for `assessment`, not even in landing mode.
+ */
+export type RunIngestInput<E extends IngestEntity = Entity> = {
+  adapter: SourceAdapter<E>;
+  entity: NoInfer<E>;
   db: DbOrTx;
+  /**
+   * Landing mode: only write raw_record and the run (counts: new records or
+   * same hash = unchanged), with no staging, domain upsert or soft-delete, and
+   * no `sync_state`: a file upload is not an incremental source. The only way
+   * to run an entity that has no domain handler.
+   */
+  landing?: boolean;
   params?: Record<string, unknown>;
   /** Passed to the adapter (e.g. `since` for an incremental extraction). */
   extract?: ExtractContext;
@@ -49,7 +66,7 @@ export class IngestRunError extends Error {
 /**
  * raw → staged (zod) → domain upsert, recorded as one ingest_run. What each
  * entity does lives in `entityHandlers` (handlers.ts). Throws before opening a
- * run for an entity without a handler.
+ * run for an entity without a handler (unless `landing`).
  *
  * Every record commits on its own, so the watermark in `sync_state` (per
  * source, adapter and entity) only advances once the whole run is done, in the
@@ -58,16 +75,16 @@ export class IngestRunError extends Error {
  * watermark untouched; re-running is safe (idempotent). An incremental run
  * (`extract.since`) never runs the handler's `finish` (e.g. soft-deletes).
  */
-export async function runIngest({
+export async function runIngest<E extends IngestEntity = Entity>({
   adapter,
   entity,
   db,
+  landing = false,
   params = {},
   extract = {},
   unmatched,
-}: RunIngestInput): Promise<RunIngestResult> {
-  const handler = entityHandlers[entity];
-  if (!handler) throw new Error(`Unsupported entity ${entity}`);
+}: RunIngestInput<E>): Promise<RunIngestResult> {
+  const handler = handlerFor(entity, landing);
   const source = adapter.source;
   const [run] = await db
     .insert(ingestRun)
@@ -91,18 +108,26 @@ export async function runIngest({
     unchanged: 0,
     rejected: 0,
     deleted: 0,
-    ...handler.counts,
+    ...("landing" in handler ? {} : handler.counts),
   };
   const rejects: IngestReject[] = [];
   const seen = new Set<string>();
   const cache = new Map<string, unknown>();
 
   try {
-    for await (const record of adapter.extract(extract, entity)) {
+    const context: ExtractContext = {
+      ...extract,
+      onReject(reject) {
+        counts.read++;
+        counts.rejected++;
+        rejects.push(reject);
+      },
+    };
+    for await (const record of adapter.extract(context, entity)) {
       counts.read++;
       seen.add(record.sourceId);
       const hash = payloadHash(record.payload);
-      await db
+      const landed = await db
         .insert(rawRecord)
         .values({
           runId: run.id,
@@ -113,7 +138,13 @@ export async function runIngest({
           payloadHash: hash,
           extractedAt: record.extractedAt,
         })
-        .onConflictDoNothing();
+        .onConflictDoNothing()
+        .returning({ id: rawRecord.id });
+
+      if ("landing" in handler) {
+        counts[landed.length ? "inserted" : "unchanged"]++;
+        continue;
+      }
 
       const staged = handler.schema.safeParse(record.payload);
       if (!staged.success) {
@@ -142,7 +173,7 @@ export async function runIngest({
     }
 
     // Incremental extractions (since) never see everything: skip finish.
-    if (handler.finish && !extract.since) {
+    if (!("landing" in handler) && handler.finish && !extract.since) {
       addCounts(
         counts,
         await handler.finish(db, { source, runId: run.id, seen }),
@@ -154,14 +185,16 @@ export async function runIngest({
         .update(ingestRun)
         .set({ status: "succeeded", finishedAt: new Date(), counts, rejects })
         .where(eq(ingestRun.id, run.id));
-      await advanceSyncState(tx, {
-        sourceSystem: source,
-        adapter: adapter.name,
-        entity,
-        // Start of the extraction: changes made while it ran are re-read next time.
-        watermark: run.startedAt.toISOString(),
-        runId: run.id,
-      });
+      if (!landing) {
+        await advanceSyncState(tx, {
+          sourceSystem: source,
+          adapter: adapter.name,
+          entity,
+          // Start of the extraction: changes made while it ran are re-read next time.
+          watermark: run.startedAt.toISOString(),
+          runId: run.id,
+        });
+      }
     });
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);

@@ -6,10 +6,10 @@ import { type ActionResult, useLocalized } from "@/components/templates/shared";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
+  ReadOnlyAnswer,
   type SelfReviewActions,
   type SelfReviewData,
   SelfReviewForm,
-  type SelfReviewQuestion,
 } from "./self-review-form";
 
 export type ManagerReviewData = SelfReviewData & {
@@ -26,31 +26,14 @@ export type ManagerReviewActions = SelfReviewActions & {
 
 /** Read-only answers of a review (the self review next to the form). */
 export function ReadOnlyAnswers({ review }: { review: SelfReviewData }) {
-  const t = useTranslations("Review");
   const localized = useLocalized();
-  const text = (q: SelfReviewQuestion) => {
-    const value = review.answers[q.id];
-    const options =
-      q.kind === "rating"
-        ? (q.scale?.options ?? [])
-        : q.kind === "single_choice"
-          ? (q.choices ?? [])
-          : [];
-    const option = options.find((o) => String(o.value) === String(value));
-    if (option) return localized(option.label);
-    return value === null || value === undefined || value === ""
-      ? null
-      : String(value);
-  };
   return (
     <dl className="flex flex-col gap-3">
       {review.questions.map((q) => (
         <div key={q.id} className="flex flex-col gap-1">
           <dt className="font-medium">{localized(q.prompt)}</dt>
-          <dd className="whitespace-pre-wrap">
-            {text(q) ?? (
-              <span className="text-muted-foreground">{t("noAnswer")}</span>
-            )}
+          <dd>
+            <ReadOnlyAnswer question={q} value={review.answers[q.id]} />
           </dd>
         </div>
       ))}
