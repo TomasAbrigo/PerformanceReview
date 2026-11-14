@@ -24,6 +24,7 @@ export const seedFixturesDir = (size: SeedSize) =>
  */
 export const RESET_TABLES = [
   "answer",
+  "admin_audit_log",
   "review_audit",
   "review_request",
   "goal_share",
