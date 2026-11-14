@@ -58,6 +58,7 @@ const cycleFields = z.object({
     peer: z.boolean(),
     upward: z.boolean(),
     calibration: z.boolean(),
+    doubleBlind: z.boolean().optional(),
   }),
   anonymity: z.object({
     peer: z.enum(anonymityModes),

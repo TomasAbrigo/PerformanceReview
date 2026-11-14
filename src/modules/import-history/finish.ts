@@ -116,6 +116,11 @@ async function refreshCycle(
         .update(importedRequest)
         .set({ reviewerMismatch: mismatch })
         .where(eq(importedRequest.requestId, r.requestId));
+      // review_request carries the flag too (#12), for the manager review UI.
+      await tx
+        .update(reviewRequest)
+        .set({ reviewerMismatch: mismatch })
+        .where(eq(reviewRequest.id, r.requestId));
     }
     if (!mismatch) continue;
     mismatches++;

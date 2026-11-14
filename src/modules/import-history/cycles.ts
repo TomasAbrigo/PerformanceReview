@@ -217,6 +217,7 @@ export async function upsertRequest(
     sourceId: input.sourceId,
     payloadHash: input.hash,
     ingestRunId: input.runId,
+    reviewerMismatch: input.reviewerMismatch,
   };
   let id: string;
   if (found) {
