@@ -183,9 +183,14 @@ test("compare, follow-up note, acknowledgement and history of a shared review", 
     page.getByRole("heading", { level: 1, name: "Mis tareas" }),
   ).toBeVisible();
   await expect(page.getByText(`Acusar recibo: ${name}`)).toHaveCount(0);
-  await page.getByRole("link", { name: "Mi historial de evaluaciones" }).click();
+  await page
+    .getByRole("link", { name: "Mi historial de evaluaciones" })
+    .click();
   await expect(
-    page.getByRole("heading", { level: 1, name: "Evaluaciones de Bruno Pérez" }),
+    page.getByRole("heading", {
+      level: 1,
+      name: "Evaluaciones de Bruno Pérez",
+    }),
   ).toBeVisible();
   const card = page.getByRole("article", { name });
   await expect(card).toBeVisible();
@@ -205,9 +210,7 @@ test("compare, follow-up note, acknowledgement and history of a shared review", 
   await page.goto("/es/team");
   await teamRow.getByRole("link", { name: "Comparar" }).click();
   await expect(page.getByText(/El empleado acusó recibo el/)).toBeVisible();
-  await expect(
-    page.getByText(`Nota del empleado: ${ACK_NOTE}`),
-  ).toBeVisible();
+  await expect(page.getByText(`Nota del empleado: ${ACK_NOTE}`)).toBeVisible();
 
   // People reach the history from the person detail.
   await actAs(page, null, "People (RR. HH.)");
@@ -215,7 +218,10 @@ test("compare, follow-up note, acknowledgement and history of a shared review", 
   await page.getByRole("link", { name: "Bruno Pérez" }).click();
   await page.getByRole("link", { name: "Evaluaciones" }).click();
   await expect(
-    page.getByRole("heading", { level: 1, name: "Evaluaciones de Bruno Pérez" }),
+    page.getByRole("heading", {
+      level: 1,
+      name: "Evaluaciones de Bruno Pérez",
+    }),
   ).toBeVisible();
   await expect(page.getByRole("article", { name })).toBeVisible();
 });
