@@ -8,6 +8,26 @@ Herramienta interna de evaluaciones de desempeño que reemplaza el módulo de pe
 
 > Solo desarrollo local. No hay deploy configurado.
 
+## Estado del proyecto
+
+Alcance y decisiones: [`docs/prd.md`](docs/prd.md) (issue [#1](https://github.com/TomasAbrigo/PerformanceReview/issues/1)); la investigación de respaldo está en `docs/research/`. El trabajo se sigue en los [issues del repo](https://github.com/TomasAbrigo/PerformanceReview/issues).
+
+**v1, hecho (solo local, con datos sintéticos):**
+
+- Datos: ingesta desde Bamboo (empleados, historial de puesto y manager, goals) con identidad "golden" y cola de conflictos, organigrama a una fecha, importación por archivo con perfiles de fuente, adaptador de lake sobre archivos, log de corridas, seed y fixtures.
+- Proceso de evaluación completo: escalas y templates, ciclos (asistente, snapshot, grupos, cadencia por fecha de ingreso, duplicar), autoevaluación, evaluación del manager con double-blind, pares, goals en el ciclo, comparación con acuse de recibo e historial, calibración, operación del ciclo e importación histórica de assessments desde CSV de Bamboo.
+- Análisis: notificaciones internas, dashboards, panel de calidad de datos, API JSON de solo lectura y exports CSV.
+
+**Pendiente o fuera de v1:**
+
+- **Acceso real a Bamboo y decisiones de negocio** ([#23](https://github.com/TomasAbrigo/PerformanceReview/issues/23), tarea para una persona): conseguir una API key y grabar respuestas reales para compararlas con los fixtures, verificar el catálogo de datasets y los exports de Performance, y definir con People la clave confiable de empleado, las escalas históricas, la calibración actual, los años de histórico, el anonimato de pares y el sistema de registro tras Bamboo. Hasta entonces todo corre con fixtures (las columnas de los reportes de Bamboo siguen sin verificarse contra un export real).
+- **Sin login:** modo administrador con el selector "Actuar como". Supabase Auth, roles reales y RLS son v2 (las variables `NEXT_PUBLIC_SUPABASE_*` están reservadas para eso).
+- **Sin envío de emails:** las notificaciones son internas (bandeja `/inbox`); ver "Email (fuera de alcance)" en Notificaciones.
+- **Conectores reales al lake** (BigQuery, Snowflake, Databricks, Redshift, Postgres) en v2: hoy solo existe `DuckDbFileLake` sobre archivos, con la suite de contrato lista para los reales.
+- **API de datos de revisión** (pedidos, respuestas, export de respuestas): parte 2 de [#20](https://github.com/TomasAbrigo/PerformanceReview/issues/20), en curso en el PR [#51](https://github.com/TomasAbrigo/PerformanceReview/pull/51).
+- **Otros v2 del PRD** (sección "Out of Scope"): upward agregado, autoevaluación con rating, goals nativos editables, 9-box, paquetes PDF, API pública y webhooks salientes.
+- **Sin deploy:** todo corre contra el Supabase local en Docker.
+
 ## Requisitos
 
 - Node 24 y pnpm
@@ -18,7 +38,7 @@ Herramienta interna de evaluaciones de desempeño que reemplaza el módulo de pe
 
 ```bash
 pnpm install
-cp .env.example .env.local   # completar la anon key con la salida de `supabase status`
+cp .env.example .env.local   # los valores locales por defecto sirven tal cual (ver "Variables de entorno")
 supabase start               # levanta Postgres, Auth, Studio, etc. en Docker
 pnpm db:migrate              # aplica las migraciones de Drizzle (carpeta drizzle/)
 pnpm dev                     # http://localhost:3000 -> redirige a /es
@@ -26,12 +46,150 @@ pnpm dev                     # http://localhost:3000 -> redirige a /es
 
 Para apagar la base: `supabase stop`. Para recrearla desde cero: `pnpm db:reset` y luego `pnpm db:migrate`.
 
+## Cómo probar la demo en 5 minutos
+
+Con Docker corriendo (la primera vez `supabase start` descarga las imágenes y tarda):
+
+```bash
+pnpm install
+cp .env.example .env.local
+supabase start
+pnpm db:migrate
+pnpm db:seed --size demo   # 400 registros de Bamboo: 392 personas, 8 casos en la cola de identidad, 1399 goals
+pnpm dev                   # http://localhost:3000 -> redirige a /es
+```
+
+Las escalas y los templates del sistema se crean solos cuando arranca el servidor. No hay login: empezás actuando como **People** (sin persona), que ve y puede todo; el selector **"Actuar como"** (arriba) cambia el rol y la persona. Después:
+
+1. **Mirar los datos.** `/es/people` (ficha con identificadores de origen e historial de puesto), `/es/org` (organigrama con selector de fecha), `/es/imports/runs` (las corridas del seed), `/es/imports/identity` (los 8 reingresos esperando resolución) y `/es/data-quality`.
+2. **Crear y lanzar un ciclo.** `/es/cycles/new`: para que sea manejable, elegí "Por filtro" con un área; dejá los componentes (autoevaluación, manager, pares y calibración), el template "Evaluación de fin de año", la escala final "4 puntos descriptiva" y las fechas, y pulsá "Crear y lanzar". El ciclo arranca en **Nominaciones** y el detalle lista a cada participante con su manager del snapshot.
+3. **Nominar pares (actuar como un empleado).** Rol Empleado + una persona participante, y en `/es/me` entrá a "Nominar pares".
+4. **Aprobar (actuar como su manager).** Rol Manager + el manager del snapshot de esa persona: aprobá las nominaciones en `/es/cycles/<id>/peers`. Como People, pasá el ciclo a **Recolección** con el botón "Pasar a …" del detalle.
+5. **Recolección.** El empleado completa y envía su autoevaluación desde `/es/me`; cada par nominado (rol Par) responde en "Feedback para dar".
+6. **Revisión del manager.** People pasa el ciclo a **Revisión del manager**; el manager abre `/es/team` y pulsa "Evaluar" (califica los goals, completa las preguntas y el rating general) y envía. "Comparar" muestra su evaluación contra la autoevaluación.
+7. **Calibración.** People pasa a **Calibración** (`/es/cycles/<id>/calibration`): creá un grupo (por área), proponé un cambio de rating con su motivo, mirá el histograma antes/después y "Publicar calibración".
+8. **Compartir y acusar recibo.** People pasa a **Compartir resultados**; el manager comparte la evaluación (o "Compartir todas"), y el empleado la lee en `/es/me` y acusa recibo.
+9. **Dashboards.** Como People, `/es/dashboards`: avance del ciclo, distribución de ratings pre y post calibración, goals vs rating y brecha self vs manager; "Trayectoria" por persona, "Ver equipo" (jerarquía "al momento de la review" o "actual"), la vista de dirección y los botones "Exportar CSV". De yapa, `/api/v1/people` devuelve las mismas personas en JSON.
+
+Opcional, para tener historia en los dashboards: subí `fixtures/bamboo-reports/demo/employee-performance.csv` en `/es/imports/upload` (ver "Importación histórica"); crea los ciclos 2023 a 2025 ya cerrados. Corre en un proceso aparte y con el tamaño demo puede tardar.
+
+## Variables de entorno
+
+Viven en `.env.local` (ignorado por git); `.env.example` es la plantilla. Con la base local de Supabase, `DATABASE_URL` alcanza para casi todo.
+
+| Variable                                                     | Para qué                                                                                                                                                                        | Por defecto                                                                    |
+| ------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------ |
+| `DATABASE_URL`                                               | Postgres que usan la app, las migraciones, el seed y los tests de DB.                                                                                                           | `postgresql://postgres:postgres@127.0.0.1:55322/postgres`                      |
+| `NEXT_PUBLIC_SUPABASE_URL` / `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Reservadas para Supabase Auth (v2): **no se usan aún** (v1 no tiene login). Se dejan en `.env.example` para no tener que sumarlas después; no hace falta completar la anon key. | `http://127.0.0.1:55321` / un valor de relleno                                 |
+| `E2E_DATABASE_URL`                                           | Base propia de `pnpm test:e2e`, que la vacía y la resiembra en cada corrida (solo en un host local).                                                                            | `<DATABASE_URL>_e2e`: `DATABASE_URL` con `_e2e` al final del nombre de la base |
+| `E2E_PORT`                                                   | Puerto del `next dev` que levanta Playwright.                                                                                                                                   | `3100`                                                                         |
+| `BAMBOO_COMPANY_DOMAIN` / `BAMBOO_API_KEY`                   | Solo para `pnpm ingest <entidad> --source bamboo`.                                                                                                                              | sin definir                                                                    |
+| `API_TOKEN`                                                  | Si está definido, `/api/v1` y los CSV piden `Authorization: Bearer <API_TOKEN>`.                                                                                                | vacío: API abierta (desarrollo local)                                          |
+| `UPLOADS_DIR` / `PROFILES_DIR`                               | Carpetas de los archivos subidos en `/imports/upload` y de los perfiles guardados.                                                                                              | `var/uploads` / `var/profiles`                                                 |
+
+## Funcionalidades
+
+Qué hay en la app, dónde está en la UI y las reglas que conviene conocer. Las rutas van bajo `/es` (o `/en`); el inicio (`/es`) enlaza a las pantallas principales. Los detalles de ingesta, seed, lake, notificaciones y API están en las secciones siguientes.
+
+### Personas, organigrama y goals
+
+- **Dónde:** `/people` (búsqueda por nombre o email; la ficha muestra identificadores de origen, períodos de empleo, historial de puesto y manager, y los goals de la persona), `/org` (organigrama a una fecha elegida), `/team/goals` (goals de los reportes directos de un manager) y la cola de identidad `/imports/identity`.
+- **Reglas:** los cruces usan el UUID interno y se conservan los IDs de Bamboo. Una persona dada de baja y reingresada es una sola persona con dos períodos de empleo y su reingreso siempre pasa por la cola de identidad. El manager y el área "de entonces" salen del historial de puesto con vigencias, no del dato actual.
+
+### Escalas y templates (`/settings`)
+
+- **Dónde:** `/settings/scales` (escalas de rating) y `/settings/templates` (lista y editor `/settings/templates/<id>`).
+- **Escalas:** cada opción tiene un valor numérico, una etiqueta en español e inglés y un valor normalizado de 0 a 1, para comparar ratings aunque cambie la escala. Las del sistema (no se pueden borrar): "4 puntos descriptiva" (Necesita desarrollo, Cumple expectativas, Supera a menudo, Marca un nuevo estándar), "5 puntos" (de totalmente en desacuerdo a totalmente de acuerdo) y "Nunca…Siempre".
+- **Templates:** secciones y preguntas (texto, calificación con escala u opción única) con texto en es/en. Cada pregunta define a quién aplica (autoevaluación, manager, par o upward), si la persona evaluada la ve, si es obligatoria y, opcionalmente, una función especial (`goals_rating`, `goals_comment`, `overall_rating`; ver "Goals en el ciclo"). Los templates del sistema se crean al arrancar el servidor: "Evaluación de fin de año", "Ciclo de desarrollo de mitad de año" (sin ratings), "Feedback de pares" y "Upward" (apagado en v1). No se editan ni se borran: se clonan.
+- **Versionado:** al lanzar un ciclo, sus preguntas y escalas se congelan en revisiones inmutables; editar un template después no cambia el significado de lo ya respondido.
+
+### Ciclos (`/cycles`)
+
+- **Dónde:** la lista y el detalle (`/cycles`, `/cycles/<id>`) y el asistente `/cycles/new`, de 5 pasos: **Personas** (todas las activas, por filtro de área, división, ubicación, puesto o estado, o individuales; más la fecha de snapshot organizacional), **Componentes y anonimato** (autoevaluación, manager, pares, upward y calibración; modo de anonimato de pares y de upward; template y escala final), **Grupos** (opcional), **Fechas por fase** y **Revisar y lanzar** (también se puede guardar como borrador).
+- **Estados:** borrador, nominaciones (solo con pares), recolección, revisión del manager, calibración (solo si está activada), compartir resultados y cerrado. Desde una fase activa se avanza o se retrocede una, y cada cambio queda registrado con quién, cuándo y una nota. Cerrado es terminal.
+- **Snapshot organizacional:** al lanzar se congela, por participante, el manager, el área, la división, el puesto y la ubicación a la fecha de snapshot (a partir del historial de puesto), y se crean sus solicitudes pendientes. Los análisis usan ese manager y esa área, no los actuales; si la persona cambia de manager después, el sistema lo marca (ver "Operación del ciclo"). Tras el lanzamiento solo se editan el nombre y las fechas límite.
+- **Extras** (detalle en [Ciclos: duplicar, plantillas por grupo y cadencia por fecha de ingreso](#ciclos-duplicar-plantillas-por-grupo-y-cadencia-por-fecha-de-ingreso)): **grupos de templates** (cada persona usa el template del primer grupo cuyo filtro la incluye), **cadencia por fecha de ingreso** (hitos de 30, 60, 90, 180 o 365 días con una ventana de 1 a 4 semanas; cada persona entra al ciclo con su propia fecha límite y el comando `pnpm cycles:enroll` hace la incorporación diaria) y **duplicar** un ciclo como borrador.
+
+### Autoevaluación y bandeja de tareas (`/me`)
+
+- **Selector "Actuar como":** como v1 no tiene login, la barra superior permite elegir un rol (People, Manager, Empleado, Par o Calibrador) y una persona; queda en la cookie `pr_actor`. Por defecto se actúa como "People (RR. HH.)", sin persona, que ve y puede todo. Toda lectura y escritura de evaluaciones recibe ese actor, de modo que Supabase Auth pueda enchufarse después sin tocar el modelo.
+- **Bandeja de tareas `/me`** ("Mis tareas", de la persona elegida): autoevaluaciones pendientes con su fecha límite, nominaciones de pares, feedback para dar, evaluaciones ya compartidas y las últimas notificaciones sin leer.
+- **Autoevaluación `/cycles/<id>/self`:** las preguntas del template para la relación `self` y el bloque de goals del período en solo lectura. El borrador se guarda al salir de cada campo; las preguntas obligatorias se validan al enviar. Solo se escribe en la fase de recolección. Una vez enviada no se edita: solo People la puede desbloquear, con un motivo.
+
+### Evaluación del manager (`/team`)
+
+- **Dónde:** `/team` ("Mi equipo") lista a los reportes directos en ciclos activos con el estado de su autoevaluación y de la evaluación del manager, si ya está compartida, y los botones "Evaluar" y "Recordar". El formulario es `/cycles/<id>/manager/<participante>`: goals en solo lectura con su calificación y comentario, las preguntas del template y la calificación general en la escala final.
+- **Double-blind** (activo por defecto, se puede apagar por ciclo): el manager no ve la autoevaluación hasta haber enviado su evaluación, y el empleado no ve la del manager hasta que se comparte.
+- **Compartir:** una evaluación enviada se comparte en la fase "Compartir resultados" (y, con calibración activada, recién después de publicarla). La comparten el manager o People, de a una o con "Compartir todas las evaluaciones enviadas"; se puede des-compartir, y una evaluación compartida no se edita sin des-compartirla antes. El empleado la lee en `/cycles/<id>/result` y solo ve las preguntas marcadas como visibles para la persona evaluada.
+- **Visibilidad:** una única función, `canRead` (`src/modules/review-core/visibility.ts`), decide quién lee cada evaluación y cada respuesta.
+
+### Pares y upward
+
+- **Nominaciones** (`/cycles/<id>/peers`): en la fase de nominaciones cada empleado nomina hasta N pares (5 por defecto) y su manager aprueba o rechaza, de a una o en bloque; el ciclo también puede configurarse sin aprobación. El máximo de nominaciones, la aprobación y el umbral de carga se fijan en el asistente y se bloquean al lanzar. Cada nominación aprobada genera la solicitud de feedback; se avisa ("Mucha carga") cuando alguien acumula solicitudes abiertas por encima del umbral (5 por defecto).
+- **Feedback:** en recolección el par responde las preguntas `peer` del template, con borrador, o declina la solicitud con un motivo. Antes de escribir ve cómo se mostrará su nombre. Lo recibido se ve en `/cycles/<id>/peers/feedback/<participante>` (el manager lo ve para su equipo).
+- **Anonimato** (por ciclo, se fija al lanzar): _transparente_ (el nombre lo ven la persona evaluada, su manager y People), _anónimo para la persona evaluada_ (ve "Par"; el manager y People sí ven el nombre) o _totalmente anónimo_ (nadie ve el nombre, tampoco People). La persona evaluada lee el feedback solo cuando se comparte, y solo las preguntas marcadas como visibles para ella (la pregunta "solo para su manager" del template de sistema queda fuera).
+- **Upward:** el componente existe (los reportes directos de un participante que también participen del ciclo reciben una solicitud de feedback sobre él, con su propio modo de anonimato), pero el template de sistema "Upward" viene apagado y la vista agregada con mínimo de respuestas es v2.
+
+### Goals en el ciclo
+
+- **Snapshot:** al lanzar el ciclo (o al agregar a un participante) se copian los goals de cada persona a `participant_goal_snapshot`, con título, estado, progreso y fecha límite a ese momento; los que se crean después no aparecen. Un goal pertenece al ciclo por solapamiento con el período o por un vínculo explícito ("Vincular objetivo"); "Actualizar progreso" refresca las cifras de los goals listados y marca como "Ya no aplica" a los que se borraron.
+- **Dónde:** el bloque de solo lectura se muestra en la autoevaluación y en la evaluación del manager.
+- **Rating de goals:** una sola calificación para todos los goals, con su comentario, son preguntas del template del manager con función especial (`goals_rating`, `goals_comment`). La calificación general es la pregunta `overall_rating`. El rating de goals nunca alimenta el rating final ni la calibración.
+
+### Comparación, notas, acuse e historial
+
+- **Comparación** `/cycles/<id>/compare/<participante>`: autoevaluación y evaluación del manager lado a lado, pregunta por pregunta, con la diferencia resaltada en las de rating. Está disponible cuando ambas están enviadas; "Vista del empleado" oculta lo que el empleado no va a ver (útil al compartir pantalla).
+- **Notas de seguimiento:** el manager (o People) registra acuerdos después de la conversación; el empleado las ve cuando la evaluación está compartida.
+- **Acuse de recibo:** el empleado acusa recibo, con una nota opcional, hasta 7 días después de que se compartió (o hasta la fecha límite de "Acuse de recibo" del ciclo, si es posterior). Pasado el plazo ya no puede; el manager ve en qué estado está.
+- **Historial** `/people/<id>/reviews`: los ciclos con evaluaciones finalizadas o compartidas de una persona, con el manager, el puesto y el área de ese momento, el rating vigente y el estado de compartida y acuse. Lo ven People, la propia persona (solo los ciclos cuya evaluación se le compartió, y sin el rating original), su manager actual (todos los ciclos, aun los que no gestionó) y quien fue su manager en cada ciclo.
+
+### Calibración (`/cycles/<id>/calibration`)
+
+- **Grupos:** People crea grupos de calibración (por área, por manager o manual) e invita calibradores, de solo lectura o con permiso de proponer cambios.
+- **Tabla por grupo:** empleado, manager del snapshot, rating del manager, rating vigente, un cambio propuesto con **motivo obligatorio** y la marca "Discutir". El valor propuesto tiene que ser una opción de la escala final del ciclo.
+- **Distribución:** histograma de ratings antes (manager) y después (vigente) por área o por manager, con vista de tabla; sin curva forzada.
+- **`final_rating` append-only:** cada rating queda en un registro que nunca se edita (quién, cuándo, valor y motivo) con una etapa (`computed`, `manager`, `calibrated`, `override`). La vista `v_current_rating` toma la de mayor precedencia y, dentro de ella, la más reciente.
+- **Publicar:** "Publicar calibración" deja la calibración como definitiva, la audita y avisa a los managers. Los cambios posteriores se guardan como `override`, también auditados. El empleado ve solo el rating final, y solo cuando su evaluación está compartida y la calibración publicada: nunca el rating original, la etapa ni los motivos.
+
+### Operación del ciclo (`/cycles/<id>/participants`, `/cycles/<id>/audit`)
+
+- **Dónde:** solo People. `/cycles/<id>/participants` ("Participantes y evaluadores") y `/cycles/<id>/audit` (registro de auditoría); la fecha límite se extiende desde el detalle del ciclo.
+- **Qué se puede hacer:** agregar un participante (se toma su snapshot hoy y se crean sus evaluaciones pendientes), quitarlo (sus evaluaciones y respuestas se conservan como historial pero ya no se escriben), extender la fecha límite de una fase, desbloquear una evaluación enviada y completar una evaluación en nombre de otro (queda marcada).
+- **Evaluadores alternos:** se puede asignar otro evaluador a una persona, que _reemplaza_ a la evaluación del manager (p. ej. manager con licencia, o el CEO sin manager) o es _adicional_. Cuando una persona cambia de manager durante el ciclo, la tabla lo marca ("Ahora reporta a X (snapshot: Y)") y sugiere reasignar o sumar un evaluador; el pedido que no coincide con el manager del snapshot queda marcado como `reviewer_mismatch` y se cuenta en `/data-quality`.
+- **Auditoría:** cada acción administrativa escribe una fila en `admin_audit_log` con quién, cuándo, el estado anterior y el nuevo y una nota opcional.
+
+### Notificaciones (`/inbox`)
+
+- **Dónde:** la campana del header (con el contador de no leídas), la bandeja `/inbox` y las últimas no leídas en `/me`. Son internas: **no se envían emails** en v1.
+- **Qué avisa:** cambio de fase del ciclo, evaluación compartida, feedback recibido, calibración publicada, recordatorios de fecha límite y recordatorios manuales ("Recordar") de un manager o de People.
+- **Recordatorios automáticos:** `pnpm notifications:run`, una vez por día (cron); ver [Notificaciones](#notificaciones) más abajo.
+
+### Dashboards (`/dashboards`)
+
+- **Dónde:** `/dashboards` (filtros por ciclo, área, manager, ubicación y puesto), `/dashboards/team` (el equipo de un manager), `/dashboards/people/<id>` (trayectoria de una persona) y `/dashboards/executive` (vista de dirección).
+- **Qué muestra:** avance del ciclo por tipo de evaluación; distribución de ratings normalizados (0 a 100 %) antes y después de calibrar, agrupada por área, manager, ubicación o puesto; goals del período contra el rating final; brecha entre autoevaluación y manager por pregunta y por persona; y la trayectoria de una persona con el rating, el manager y el puesto de cada ciclo.
+- **Jerarquía:** el equipo de un manager se elige explícitamente "al momento de la review" (el snapshot del ciclo) o "actual".
+- **Quién ve qué:** People ve todo; un manager, su equipo; el resto es redirigido a su propia trayectoria, con solo lo publicado. La vista de dirección es solo de People: agregados sin nombres ni ids, y las áreas con menos de 3 personas no se desglosan.
+- **CSV:** los botones "Exportar CSV" bajan avance, distribución, goals vs rating y brecha self vs manager (`dashboard-*.csv`, ver "Exports CSV").
+
+### Calidad de datos y API (`/data-quality`, `/api/v1`)
+
+- **Panel `/data-quality`:** un conteo por indicador (identidades sin resolver, personas o participantes sin manager, snapshots incompletos, historial de puesto con huecos o abierto tras la baja, `reviewer_mismatch`, corridas fallidas, etc.) con enlace a la lista de casos.
+- **API JSON `/api/v1` y exports CSV:** de solo lectura, con los IDs internos y de Bamboo en cada objeto, paginación estable por cursor y errores `application/problem+json`. Si `API_TOKEN` está definido, hace falta `Authorization: Bearer <API_TOKEN>`; vacío, queda abierta (desarrollo local).
+- Los indicadores, los endpoints y los CSV están en [Calidad de datos, API JSON y exports CSV](#calidad-de-datos-api-json-y-exports-csv).
+
+### Importación histórica
+
+- **Dónde:** `/imports/upload` (elegir un archivo, previsualizar, elegir el perfil e importar; ver "Subir un archivo") y `/imports/history/<corrida>` (los ciclos que creó una corrida).
+- **Perfiles de Bamboo:** subir el reporte _Employee Performance_ (perfil `bamboo-employee-performance`) crea un ciclo histórico **cerrado** por cada nombre de ciclo del archivo, con su período (de las fechas de assessment), los participantes, sus solicitudes y las respuestas. _Feedback Status_ (`bamboo-feedback-status`) suma el feedback de pares. Los otros perfiles (`bamboo-goal-status`, `bamboo-assessment-progress` y los de Fivetran o Airbyte) solo aterrizan en `raw_record`, igual que cuando se tilda "Solo aterrizar".
+- **Reglas:** los reportes identifican a las personas solo por nombre; quien no se puede cruzar con nadie va a la cola de identidad. El snapshot de cada participante se calcula a la fecha de fin del período, y la solicitud del manager cuyo evaluador del archivo (el manager al exportar) no es el vigente en esa fecha queda marcada como `reviewer_mismatch`. Volver a subir el mismo archivo no crea nada nuevo. Las columnas de los reportes siguen sin verificarse contra un export real de Bamboo (ver [Estado del proyecto](#estado-del-proyecto)).
+
 ## Tests y calidad
 
 ```bash
 pnpm test:unit   # Vitest (jsdom) — *.test.ts(x)
 pnpm test:db     # Vitest (node) contra DATABASE_URL — *.db.test.ts (requiere supabase start)
-pnpm test:e2e    # Playwright (levanta next dev en :3100); la primera vez: pnpm exec playwright install chromium
+pnpm test:e2e    # Playwright (levanta next dev en E2E_PORT, 3100 por defecto)
 pnpm test        # unit + db
 pnpm check       # typecheck + lint + format:check + test:unit (como el job `checks` de CI)
 pnpm typecheck
@@ -39,7 +197,9 @@ pnpm lint
 pnpm format      # Prettier
 ```
 
-`pnpm test:e2e` no toca tu base de desarrollo: corre contra una base propia, `E2E_DATABASE_URL` o, por defecto, `DATABASE_URL` con `_e2e` al final del nombre (por ejemplo `postgres_e2e`). El global setup la crea si no existe (solo en un host local), le aplica las migraciones y la siembra con `pnpm db:seed --size small --reset`; el servidor de Next del e2e usa esa misma base.
+Playwright baja su propio navegador, que se instala aparte: en local `pnpm exec playwright install chromium` (la primera vez); en CI, además de las librerías del sistema, `pnpm exec playwright install --with-deps chromium`.
+
+`pnpm test:e2e` no toca tu base de desarrollo: corre contra una base propia, `E2E_DATABASE_URL` o, por defecto, `<DATABASE_URL>_e2e`, es decir `DATABASE_URL` con `_e2e` al final del nombre de la base (con la URL local de abajo, `postgres_e2e`). El global setup la crea si no existe (solo en un host local), le aplica las migraciones y la siembra con `pnpm db:seed --size small --reset`. El servidor de Next del e2e escucha en `E2E_PORT` (por defecto **3100**, para no chocar con `pnpm dev` en :3000) y usa esa misma base. Las dos variables son opcionales (ver "Variables de entorno").
 
 ## Fixtures
 
@@ -108,12 +268,12 @@ pnpm db:seed --size demo           # 400 personas
 - **Historial de puesto:** el manager de la fila vigente de cada persona sale de `supervisorEId`; el de las filas anteriores viene solo como nombre ("Apellido, Nombre") y se resuelve con `resolveManagerName` (`src/modules/ingest/job-history.ts`): (1) se pasa a "Nombre Apellido" y se compara con el nombre de las personas respetando el orden de las palabras, sin contar mayúsculas, acentos ni espacios (`orderedName`, `src/modules/identity/normalize.ts`: "Páez, Martín" es "Martin Paez", pero "López, María José" no es "José María López"); (2) si hay homónimos, gana el único que tenía un empleo vigente en la fecha de la fila (alguien que se fue y otro que entró después con el mismo nombre no se pisan); si siguen siendo varios, queda sin resolver; (3) solo si nadie tiene el nombre en ese orden se prueba con las mismas palabras en cualquier orden (`normalizeName`), exigiendo lo mismo, y esa coincidencia se cuenta aparte como `managerResolvedFuzzy`. Lo que no se resuelve queda con `manager_person_id` null y `manager_raw` intacto (se ve como "(sin resolver)") y se cuenta en `managerUnresolved` de la corrida de `job_history`. Con el seed `small` se resuelven todas las filas históricas (29 de 29; antes 0), con `demo` 163 de 163.
 - **Desde código:** `seedFromFixtures({ size, db, lock? })` (`src/modules/ingest/seed.ts`) corre las pipelines y devuelve el resultado de cada una (con su `status`); `resetDomainTables(db)` vacía. Los usa `pnpm db:seed` y los tests. `e2e/global-setup.ts` llama a `pnpm db:seed --size small --reset` (y de nuevo sin `--reset`, para tener una corrida de `employee` sin cambios; `e2e/seed-data.ts` calcula lo que los specs esperan a partir del mismo generador). El caso de un reingreso que llega en una corrida posterior contra una base ya poblada lo cubren `e2e/identity.setup.ts` y `identity-later.spec.ts`.
 - **`FixtureAdapter`** lee ese layout (`employees/list/page-NNN.json`, `employees/get/<id>.json`, `employees/tables/<tabla>/all.json`, `performance/goals/<id>.json`) y también el plano escrito a mano de `src/modules/bamboo-client/__fixtures__` (casos borde de los tests). Para ingestar el generado con la CLI genérica: `pnpm ingest --all --source fixture --dir fixtures/bamboo/small`.
-- Los CSV de `fixtures/bamboo-reports/<size>` todavía no se siembran (llegan con #22).
+- Los CSV de `fixtures/bamboo-reports/<size>` no los siembra `db:seed`: se importan a mano en `/es/imports/upload` (ver [Importación histórica](#importación-histórica)).
 
 ## Base de datos
 
 - Esquema de Drizzle: `src/db/schema/*.ts`. Migraciones generadas en `drizzle/` (`pnpm db:generate`, `pnpm db:migrate`).
-- `supabase/migrations/` queda reservado para SQL específico de Supabase (RLS, extensiones, funciones).
+- `supabase/migrations/` no existe hoy: la carpeta `supabase/` solo tiene `config.toml`. Se crearía únicamente si hiciera falta SQL específico de Supabase (RLS, extensiones, funciones); nunca para tablas, que son de Drizzle.
 - Vistas SQL (p. ej. `v_current_rating`): drizzle-kit no las genera; se mantienen a mano. El `CREATE VIEW` se agrega al final de la migración generada, la copia de referencia vive en `src/db/sql/` y la declaración para consultarla en `src/db/views.ts` (fuera de `src/db/schema/`). Ver `drizzle/custom/README.md`; un test de DB verifica la vista y sus columnas.
 - `pnpm db:studio` abre Drizzle Studio.
 
@@ -134,7 +294,7 @@ pnpm ingest --help
 - **Salida:** una tabla resumen (leídos, insertados, actualizados, sin cambios, eliminados, rechazados, duración e id de corrida). Código de salida `0` si todo salió bien, `1` si alguna corrida falló y `2` si los argumentos o la configuración son inválidos (falta `BAMBOO_*` o `DATABASE_URL`, `--since` mal formado): en ese caso no se intenta ninguna corrida.
 - Dos corridas de la misma entidad nunca se pisan: la segunda espera a la primera (`pg_advisory_xact_lock` por entidad, tomado en una transacción que queda abierta durante la corrida, así que sirve también detrás de un pooler en modo transacción; si el servidor define `idle_in_transaction_session_timeout`, debe superar la corrida más larga).
 - **`--unmatched create|queue`** (solo `employee`, por defecto `create`) decide qué pasa con un registro que no coincide con nadie ni se parece a nadie: crear la persona o dejarlo en la cola de identidad (`/es/imports/identity`). Un registro con legajo o email conocidos bajo un id nuevo (un reingreso) o con un identificador que ya tiene otra persona siempre va a la cola, y el conteo `issues` de la corrida lo refleja (`ignored`: casos que alguien ya decidió ignorar y Bamboo reenvía igual).
-- `pnpm ingest:employees [--entity employee|job_history] [--since <iso>]` queda como alias de `pnpm ingest <entidad>` (con `--source fixture` por defecto).
+- `pnpm ingest:employees [--entity employee|job_history|goal] [--since <iso>]` queda como alias de `pnpm ingest <entidad>` (con `--entity employee` y `--source fixture` por defecto). `pnpm ingest:goals` es el mismo alias con `--entity goal`.
 
 Ejemplo de cron (crontab del servidor): cada 15 minutos lo incremental barato (`employee` completo y `job_history` solo lo cambiado) y de noche una corrida completa de todo, incluidos los goals (un pedido por empleado) y la baja de quien ya no está en Bamboo:
 
@@ -148,7 +308,7 @@ El código de salida distinto de cero permite alertar desde el propio cron (por 
 ## Ciclos: duplicar, plantillas por grupo y cadencia por fecha de ingreso
 
 - **Duplicar:** el botón "Duplicar ciclo" del detalle (en cualquier estado) crea un borrador "<nombre> (Copia)" con componentes, anonimato, plantilla, escala final, filtro de participantes, programación, fechas límite (tal cual: hay que editarlas) y grupos. No copia participantes ni preguntas congeladas, y la copia no comparte nada con el original. Una plantilla que ya no está disponible (borrada o apagada) no se copia: la copia queda sin plantilla (o sin ese grupo) y el botón lo avisa antes de abrirla.
-- **Plantillas por grupo:** el paso opcional "Grupos" del asistente define grupos (nombre, filtro y plantilla). Cada persona usa la plantilla del **primer** grupo (por orden) cuyo filtro la incluya, evaluado a la fecha de snapshot; quien no entra en ninguno usa la plantilla del ciclo. Al lanzar, las preguntas de cada grupo se congelan con su `group_id` y cada participante guarda su `template_group_id`; los formularios (autoevaluación; el de manager de #12 debe hacer lo mismo) leen las preguntas con `questionsFor(db, cycleId, participant.templateGroupId, relationship)`, el único lector de revisiones.
+- **Plantillas por grupo:** el paso opcional "Grupos" del asistente define grupos (nombre, filtro y plantilla). Cada persona usa la plantilla del **primer** grupo (por orden) cuyo filtro la incluya, evaluado a la fecha de snapshot; quien no entra en ninguno usa la plantilla del ciclo. Al lanzar, las preguntas de cada grupo se congelan con su `group_id` y cada participante guarda su `template_group_id`; los formularios (autoevaluación, manager y pares) leen las preguntas con `questionsFor(db, cycleId, participant.templateGroupId, relationship)`, el único lector de revisiones.
 - **Cadencia por fecha de ingreso:** en el paso "Fechas" se elige "Por fecha de ingreso", un hito (30, 60, 90, 180 o 365 días) y una ventana (1 a 4 semanas). Al lanzar el ciclo no tiene participantes: cada persona entra cuando `fecha de ingreso + hito` cae dentro de la ventana (`[hoy - ventana, hoy]`), con su snapshot a esa fecha y su propia fecha límite (`ingreso + hito + ventana`, para autoevaluación y manager, en `cycle_participant.due_dates`). Quien fue quitado del ciclo no vuelve a entrar.
 
 La incorporación la hace un comando idempotente que conviene correr **una vez por día** (la ventana más corta es de una semana: si el cron falla varios días seguidos puede perderse a alguien; se puede recuperar con `--as-of`):
@@ -201,7 +361,7 @@ Todo está en `@/modules/notifications`:
 | `remind(db, actor, requestId, { asOf? })`                                      | Recordatorio manual ("Recordar") de un request pendiente: lo puede enviar el manager del snapshot del participante o HR (`NotificationError`: `not_found`, `forbidden`, `not_pending`). Máximo uno por remitente, request y día: devuelve `{ created: false }` en la repetición. |
 | `createNotification(db, input)` / `createNotifications(db, inputs)`            | Punto de escritura estable: idempotente por `dedupeKey`; devuelve si se creó (o cuántas).                                                                                                                                                                                        |
 | `notifyPhaseChanged(db, cycleId, from, to)`                                    | Avisa a los participantes activos del cambio de fase. Lo llaman `launchCycle` y `transition` de review-core dentro de su transacción.                                                                                                                                            |
-| `notifyReviewShared` / `notifyFeedbackReceived` / `notifyCalibrationPublished` | Eventos para que los llamen los slices de compartir (#12), feedback (#14) y calibración (#16). Idempotentes. El de feedback nunca incluye al autor (puede ser anónimo).                                                                                                          |
+| `notifyReviewShared` / `notifyFeedbackReceived` / `notifyCalibrationPublished` | Eventos que llaman compartir, el envío de feedback y la publicación de la calibración. Idempotentes. El de feedback nunca incluye al autor (puede ser anónimo).                                                                                                                  |
 | `listNotifications(db, actor, { unreadOnly?, limit?, cursor? })`               | Bandeja del actor: no leídas primero, luego leídas, más nuevas primero; paginado por cursor (`nextCursor`).                                                                                                                                                                      |
 | `markRead(db, actor, ids)` / `markAllRead(db, actor)` / `unreadCount`          | Solo tocan las notificaciones propias; los ids ajenos se ignoran. Sin persona (People actuando como equipo) no hay bandeja.                                                                                                                                                      |
 
@@ -299,7 +459,7 @@ La pantalla `/[locale]/imports/upload` importa un archivo CSV, XLSX, Parquet o N
 
 1. **Elegir y previsualizar.** Se guarda el archivo como `var/uploads/<sha256>.<ext>` (ignorado por git; el mismo contenido se guarda una sola vez, con el nombre que tenga) y se muestran las columnas detectadas (con su tipo) y las primeras 20 filas (ordenadas por la primera columna).
 2. **Perfil.** Se elige un perfil incluido o uno guardado, o se define uno nuevo sobre las columnas detectadas (nombre, entidad, columnas clave, watermark y campo canónico de cada columna que se quiera mapear). El cliente indica el perfil como `{ builtin: nombre }`, `{ saved: nombre }` (el servidor lee su definición) o `{ custom: perfil, replace? }`. Un perfil nuevo se guarda como `var/profiles/<nombre>.json` (ignorado por git) solo cuando la importación terminó bien; no puede llamarse como uno incluido (`profile_exists`) ni pisar uno guardado salvo que se pida (`replace`). Si falta una columna del perfil o su tipo no encaja (`validateAgainstSchema`), se marca en la vista previa y no se puede importar; el servidor lo vuelve a comprobar y no escribe nada.
-3. **Importar.** `FileSourceAdapter(profile, lake, table)` lee el archivo con `readOptionsFor` y `applyProfile` y `runIngest` lo aterriza en `raw_record` en **modo `landing`**: solo se escriben `raw_record` e `ingest_run`, sin mapeo a dominio (el de evaluaciones y feedback es el issue #22; el de empleados, historial y metas desde archivo, el #29). El `payload` de cada fila es `{ fields, extra, deleted, watermark, raw }`. El `source_system` es `bamboo_export` solo para los perfiles incluidos `bamboo-*` y `lake` para el resto (el adaptador lo recibe como opción, no lo deduce del nombre). Las filas que el perfil no puede mapear (por ejemplo las de `No Goals Set` de `bamboo-goal-status`, con `Goal` vacío) cuentan como rechazadas, no frenan la corrida; cada rechazo guarda el motivo en inglés (`reason`) y datos estructurados (`code`, `column`, `values`) con los que la pantalla lo redacta en su idioma. La corrida guarda `params = { entity, fileName, profile, size, sha256 }`.
+3. **Importar.** `FileSourceAdapter(profile, lake, table)` lee el archivo con `readOptionsFor` y `applyProfile` y `runIngest` lo aterriza en `raw_record` en **modo `landing`**: solo se escriben `raw_record` e `ingest_run`, sin mapeo a dominio, salvo los perfiles `bamboo-employee-performance` y `bamboo-feedback-status`, que crean ciclos históricos (ver [Importación histórica](#importación-histórica); la casilla "Solo aterrizar" fuerza el modo `landing`). El `payload` de cada fila es `{ fields, extra, deleted, watermark, raw }`. El `source_system` es `bamboo_export` solo para los perfiles incluidos `bamboo-*` y `lake` para el resto (el adaptador lo recibe como opción, no lo deduce del nombre). Las filas que el perfil no puede mapear (por ejemplo las de `No Goals Set` de `bamboo-goal-status`, con `Goal` vacío) cuentan como rechazadas, no frenan la corrida; cada rechazo guarda el motivo en inglés (`reason`) y datos estructurados (`code`, `column`, `values`) con los que la pantalla lo redacta en su idioma. La corrida guarda `params = { entity, fileName, profile, size, sha256 }`.
 4. **Resultado.** Al terminar se abre la corrida (`/imports/runs/<id>`: conteos, rechazos y parámetros); mientras carga, la pantalla muestra las filas leídas, nuevas, sin cambios y rechazadas. Las corridas de archivo no avanzan `sync_state` (un archivo no es una fuente incremental). Volver a subir el mismo archivo da 0 registros nuevos (el hash del payload de cada fila no cambia).
 
 Lo pesado no corre dentro de un request: las Server Actions solo guardan el archivo y lanzan `scripts/ingest-upload.ts` en un proceso aparte (`node --import tsx`, vía `runUploadWorker` en `src/modules/lake/upload-worker.ts`), que lee el archivo con DuckDB y hace la ingesta. Si tarda más del tiempo máximo se le manda SIGTERM: el worker corta en la fila siguiente y deja la corrida en `error` (si hubo que matarlo, la acción marca como `error` las corridas de ese archivo que quedaron en `running`). También se puede correr a mano (`echo '{"uploadId":"<sha256>.csv"}' | pnpm exec tsx scripts/ingest-upload.ts inspect`). Las carpetas se pueden cambiar con `UPLOADS_DIR` y `PROFILES_DIR`. Los límites de cuerpo de Server Actions y del proxy están subidos a 52 MB en `next.config.ts`.
@@ -368,17 +528,17 @@ Cada fila trae los ids internos (uuid) y los de Bamboo (`bamboo_id`, `legajo`, y
 
 Se usan puertos propios para no chocar con otros proyectos locales.
 
-| Servicio         | Puerto |
-| ---------------- | ------ |
-| API              | 55321  |
-| Postgres         | 55322  |
-| Studio           | 55323  |
-| Inbucket         | 55324  |
-| Shadow DB        | 55320  |
-| Analytics        | 55327  |
-| Pooler (apagado) | 55329  |
-| Next.js (dev)    | 3000   |
-| Next.js (e2e)    | 3100   |
+| Servicio         | Puerto            |
+| ---------------- | ----------------- |
+| API              | 55321             |
+| Postgres         | 55322             |
+| Studio           | 55323             |
+| Inbucket         | 55324             |
+| Shadow DB        | 55320             |
+| Analytics        | 55327             |
+| Pooler (apagado) | 55329             |
+| Next.js (dev)    | 3000              |
+| Next.js (e2e)    | 3100 (`E2E_PORT`) |
 
 Conexión local: `postgresql://postgres:postgres@127.0.0.1:55322/postgres`.
 
