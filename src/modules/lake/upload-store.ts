@@ -53,9 +53,17 @@ export type UploadStore = {
 // Always absolute: a relative UPLOADS_DIR (the usual way to write it) would
 // otherwise leave the symlinks of upload.ts pointing nowhere.
 const uploadsDirOf = (store: UploadStore) =>
-  resolve(store.uploadsDir ?? process.env.UPLOADS_DIR ?? "var/uploads");
+  resolve(
+    /*turbopackIgnore: true*/ store.uploadsDir ??
+      process.env.UPLOADS_DIR ??
+      "var/uploads",
+  );
 const profilesDirOf = (store: UploadStore) =>
-  resolve(store.profilesDir ?? process.env.PROFILES_DIR ?? "var/profiles");
+  resolve(
+    /*turbopackIgnore: true*/ store.profilesDir ??
+      process.env.PROFILES_DIR ??
+      "var/profiles",
+  );
 
 export type StoredUpload = {
   /** `<sha256><ext>`: the file name in the uploads folder, and the id the UI keeps. */
