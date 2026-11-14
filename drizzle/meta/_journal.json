@@ -78,13 +78,6 @@
       "when": 1794605585606,
       "tag": "0010_manager_review",
       "breakpoints": true
-    },
-    {
-      "idx": 11,
-      "version": "7",
-      "when": 1794619532885,
-      "tag": "0011_cycle_ops",
-      "breakpoints": true
     }
   ]
 }

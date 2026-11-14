@@ -55,11 +55,6 @@ export const reviewRequest = pgTable(
     declineReason: text("decline_reason"),
     unlockedAt: timestamp("unlocked_at", { withTimezone: true }),
     unlockedBy: uuid("unlocked_by").references(() => person.id),
-    /**
-     * The reviewer differs from the participant's snapshot manager (set when
-     * an alternate assessor is assigned after a manager change, #17).
-     */
-    reviewerMismatch: boolean("reviewer_mismatch").notNull().default(false),
     /** A second manager request next to the primary one (#17 "additional"). */
     additional: boolean("additional").notNull().default(false),
     /** HR completed this review in the reviewer's name (#17). */
