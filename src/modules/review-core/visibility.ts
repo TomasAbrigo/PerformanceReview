@@ -1,23 +1,111 @@
 import type { ActorContext } from "@/modules/actor/types";
 import type { Relationship } from "@/modules/templates/constants";
 import type { RequestStatus } from "./request-status";
-import type { CycleStatus } from "./status";
+import {
+  type CycleComponents,
+  type CycleStatus,
+  isDoubleBlind,
+} from "./status";
 
 /** The request fields visibility depends on. */
 export type VisibilityRequest = {
   relationship: Relationship;
-  reviewerPersonId: string;
+  /** Null when the reviewer is missing (no manager at the snapshot). */
+  reviewerPersonId: string | null;
   status: RequestStatus;
+  /** Manager review shared with the reviewee. */
+  sharedAt?: Date | null;
 };
 
 export type VisibilityContext = {
   request: VisibilityRequest;
-  participant: { revieweePersonId: string };
-  /** Cycle settings (anonymity, sharing) used by the manager/peer rules. */
-  cycle?: { status: CycleStatus };
-  /** Per-question rules (visible_to_reviewee) come with #12. */
+  participant: {
+    revieweePersonId: string;
+    snapManagerPersonId?: string | null;
+    /** Removed reviewees read nothing of their cycle (see isActiveParticipant). */
+    removedAt?: Date | null;
+  };
+  /** Cycle settings (double blind, anonymity) used by the reading rules. */
+  cycle?: {
+    status: CycleStatus;
+    components?: Pick<CycleComponents, "doubleBlind">;
+  };
+  /** Self rows: the participant's manager request (double blind). */
+  managerRequest?: { status: RequestStatus } | null;
+  /** The actor manages the participant's snapshot manager (see isSkipLevel). */
+  skipLevel?: boolean;
+  /** Reading one answer: its question's per-question rules. */
   questionRevision?: { visibleToReviewee: boolean };
 };
+
+/** A participant still in the cycle (not removed mid-cycle). */
+export const isActiveParticipant = (p: { removedAt?: Date | null }) =>
+  !p.removedAt;
+
+/** Phases in which reviews count as shared even without shared_at. */
+const SHARED_PHASES: readonly CycleStatus[] = ["sharing", "closed"];
+
+const isReviewer = (actor: ActorContext, r: VisibilityRequest) =>
+  actor.personId !== null && actor.personId === r.reviewerPersonId;
+
+const isManagerOf = (actor: ActorContext, ctx: VisibilityContext) =>
+  actor.personId !== null &&
+  actor.personId === ctx.participant.snapManagerPersonId;
+
+const isReviewee = (actor: ActorContext, ctx: VisibilityContext) =>
+  actor.personId !== null &&
+  actor.personId === ctx.participant.revieweePersonId;
+
+/**
+ * The single place that decides whether `actor` may read a review request
+ * (and, with `questionRevision`, one of its answers). HR (People) reads
+ * everything; the author reads their own request. Then:
+ * - self: the snapshot manager reads it once submitted; under double blind
+ *   only after submitting their own manager review;
+ * - manager: the snapshot manager reads it; the reviewee only once shared
+ *   and only the questions visible to the reviewee;
+ * - skip-level managers read submitted self reviews, and submitted manager
+ *   reviews once shared (shared_at, or the cycle is sharing/closed), so
+ *   they never see a pre-calibration rating;
+ * - nobody but HR and the author reads requests of a removed participant;
+ * - peer/upward: #14 (aggregated/anonymized views).
+ */
+export function canRead(actor: ActorContext, ctx: VisibilityContext): boolean {
+  if (actor.role === "hr") return true;
+  const { request } = ctx;
+  if (isReviewer(actor, request)) return true;
+  if (actor.personId === null || !isActiveParticipant(ctx.participant)) {
+    return false;
+  }
+  const submitted = request.status === "submitted";
+  switch (request.relationship) {
+    case "self":
+      if (!submitted) return false;
+      if (ctx.skipLevel) return true;
+      if (!isManagerOf(actor, ctx)) return false;
+      return (
+        !isDoubleBlind(ctx.cycle?.components ?? {}) ||
+        ctx.managerRequest?.status === "submitted"
+      );
+    case "manager":
+      if (isManagerOf(actor, ctx)) return true;
+      if (!submitted) return false;
+      if (isReviewee(actor, ctx)) {
+        return (
+          !!request.sharedAt &&
+          ctx.questionRevision?.visibleToReviewee !== false
+        );
+      }
+      return (
+        !!ctx.skipLevel &&
+        (!!request.sharedAt ||
+          SHARED_PHASES.includes(ctx.cycle?.status ?? "draft"))
+      );
+    case "peer":
+    case "upward":
+      return false; // #14: aggregated/anonymized views.
+  }
+}
 
 /** Where a request lives: the cycle phase and whether the reviewee is still in. */
 export type WriteScope = {
@@ -25,28 +113,16 @@ export type WriteScope = {
   participant: { removedAt: Date | null };
 };
 
-/** Cycle phases in which each kind of review can be written. */
+/**
+ * Cycle phases in which each kind of review can be written. Managers write
+ * from collecting (PRD): double blind controls reading, not writing.
+ */
 export const writablePhases: Record<Relationship, readonly CycleStatus[]> = {
   self: ["collecting"],
   peer: ["collecting"],
   upward: ["collecting"],
-  manager: ["manager_review"],
+  manager: ["collecting", "manager_review"],
 };
-
-const isReviewer = (actor: ActorContext, r: VisibilityRequest) =>
-  actor.personId !== null && actor.personId === r.reviewerPersonId;
-
-/**
- * The single place that decides whether `actor` may read a review request
- * (and its answers): HR (People) reads everything, the author reads their
- * own request, nobody else reads anything yet.
- * TODO(#12): manager reads the report's self review once the double blind
- * lifts; the reviewee reads the manager review once shared.
- * TODO(#14): aggregated/anonymized peer and upward views.
- */
-export function canRead(actor: ActorContext, ctx: VisibilityContext): boolean {
-  return actor.role === "hr" || isReviewer(actor, ctx.request);
-}
 
 /**
  * Only the reviewer writes, only while the request is a draft, the cycle is
@@ -63,5 +139,45 @@ export function canWrite(
     request.status === "draft" &&
     writablePhases[request.relationship].includes(scope.cycle.status) &&
     scope.participant.removedAt === null
+  );
+}
+
+/**
+ * Who may share a manager review with the reviewee: HR, its reviewer or the
+ * participant's snapshot manager, while the participant is active. Whether
+ * the cycle allows it right now is shareableNow.
+ */
+export function canShare(
+  actor: ActorContext,
+  ctx: {
+    request: Pick<VisibilityRequest, "relationship" | "reviewerPersonId">;
+    participant: {
+      snapManagerPersonId: string | null;
+      removedAt: Date | null;
+    };
+  },
+): boolean {
+  if (ctx.request.relationship !== "manager") return false;
+  if (!isActiveParticipant(ctx.participant)) return false;
+  if (actor.role === "hr") return true;
+  return (
+    actor.personId !== null &&
+    (actor.personId === ctx.request.reviewerPersonId ||
+      actor.personId === ctx.participant.snapManagerPersonId)
+  );
+}
+
+/**
+ * Manager reviews are shared only in the `sharing` phase and, with
+ * calibration on, only once calibration was published (#16 sets it).
+ */
+export function shareableNow(cycle: {
+  status: CycleStatus;
+  components: Pick<CycleComponents, "calibration">;
+  calibrationPublishedAt: Date | null;
+}): boolean {
+  return (
+    cycle.status === "sharing" &&
+    (!cycle.components.calibration || cycle.calibrationPublishedAt !== null)
   );
 }
