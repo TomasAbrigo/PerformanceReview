@@ -54,11 +54,49 @@ describe("DuplicateButton", () => {
     "duplicates with the %s suffix and opens the new draft",
     async (locale, label, suffix) => {
       const user = userEvent.setup();
-      const duplicate = vi.fn().mockResolvedValue({ ok: true, id: "copy-1" });
+      const duplicate = vi
+        .fn()
+        .mockResolvedValue({ ok: true, id: "copy-1", warnings: [] });
       renderIn(locale, <DuplicateButton cycleId="c1" duplicate={duplicate} />);
       await user.click(screen.getByRole("button", { name: label }));
       await waitFor(() => expect(push).toHaveBeenCalledWith("/cycles/copy-1"));
       expect(duplicate).toHaveBeenCalledWith("c1", suffix);
+    },
+  );
+
+  it.each([
+    [
+      "es",
+      "Duplicar ciclo",
+      "La plantilla del ciclo ya no está disponible: la copia quedó sin plantilla.",
+      "El grupo “Ventas” se omitió: su plantilla ya no está disponible.",
+      "Abrir la copia",
+    ],
+    [
+      "en",
+      "Duplicate cycle",
+      "The cycle's template is no longer available: the copy has no template.",
+      "The group “Ventas” was left out: its template is no longer available.",
+      "Open the copy",
+    ],
+  ] as const)(
+    "stops to tell what could not be copied before opening the draft (%s)",
+    async (locale, label, template, group, open) => {
+      const user = userEvent.setup();
+      const duplicate = vi.fn().mockResolvedValue({
+        ok: true,
+        id: "copy-2",
+        warnings: [{ kind: "template" }, { kind: "group", name: "Ventas" }],
+      });
+      renderIn(locale, <DuplicateButton cycleId="c1" duplicate={duplicate} />);
+      await user.click(screen.getByRole("button", { name: label }));
+      expect(await screen.findByText(template)).toBeVisible();
+      expect(screen.getByText(group)).toBeVisible();
+      expect(push).not.toHaveBeenCalled();
+      expect(screen.getByRole("link", { name: open })).toHaveAttribute(
+        "href",
+        "/cycles/copy-2",
+      );
     },
   );
 
@@ -545,6 +583,33 @@ describe("CycleWizard groups step", () => {
     ).toBeVisible();
   });
 
+  it.each([
+    ["the request fails", () => Promise.reject(new Error("boom"))],
+    [
+      "the server answers with an error",
+      () => Promise.resolve({ ok: false, code: "validation", issues: [] }),
+    ],
+  ])(
+    "says the counts could not be computed when %s, instead of counting forever",
+    async (_case, answer) => {
+      const user = userEvent.setup();
+      actions.previewGroups = vi.fn().mockImplementation(answer);
+      renderWizard();
+      await goTo(user, 3);
+      await user.click(screen.getByRole("button", { name: "Add group" }));
+      expect(
+        await screen.findByText("We could not count the people of each group."),
+      ).toBeVisible();
+      expect(screen.queryByText("Counting…")).not.toBeInTheDocument();
+      // The step still works: the user can fix the group and move on.
+      const group = within(screen.getByRole("group"));
+      await user.type(group.getByLabelText("Group name"), "Sales");
+      await user.selectOptions(group.getByLabelText("Group template"), SALES);
+      await user.click(screen.getByRole("button", { name: "Next" }));
+      expect(screen.getByText("Step 4 of 5")).toBeVisible();
+    },
+  );
+
   it("asks for a name and a template before moving on", async () => {
     const user = userEvent.setup();
     renderWizard();
@@ -750,7 +815,9 @@ const detail: CycleDetailData = {
 const detailActions = () => ({
   transition: vi.fn(),
   launch: vi.fn(),
-  duplicate: vi.fn().mockResolvedValue({ ok: true, id: "copy-1" }),
+  duplicate: vi
+    .fn()
+    .mockResolvedValue({ ok: true, id: "copy-1", warnings: [] }),
 });
 
 describe("CycleDetailView extras", () => {

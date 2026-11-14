@@ -8,18 +8,22 @@ import {
   type EnrollResult,
 } from "./hire-date";
 
-export const ENROLL_USAGE = `Usage: pnpm cycles:enroll [--cycle <id>] [--as-of YYYY-MM-DD]
+export const ENROLL_USAGE = `Usage: pnpm cycles:enroll [--cycle <id>] [--as-of YYYY-MM-DD] [--lookback-days N]
 
 Enrolls into launched hire-date cycles everyone whose hire date + milestone
 falls within the cycle's window ending on --as-of (default: today in the
 company time zone). Without --cycle it runs on every active hire-date cycle.
 Safe to run any number of times (idempotent): run it once a day.
+People due but without job history yet are listed as skipped and retried on
+the next runs; --lookback-days N (0-365) also looks N days further back than
+the window (catching up after an outage).
 Exit status: 0 ok, 1 a cycle failed, 2 wrong arguments.`;
 
 export type EnrollArgs = {
   help: boolean;
   cycleId?: string;
   asOf?: string;
+  lookbackDays?: number;
 };
 
 export class UsageError extends Error {}
@@ -32,6 +36,7 @@ export function parseEnrollArgs(argv: string[]): EnrollArgs {
       options: {
         cycle: { type: "string" },
         "as-of": { type: "string" },
+        "lookback-days": { type: "string" },
         help: { type: "boolean", short: "h" },
       },
       strict: true,
@@ -47,10 +52,20 @@ export function parseEnrollArgs(argv: string[]): EnrollArgs {
   if (values["as-of"] !== undefined && !parseIsoDate(values["as-of"])) {
     throw new UsageError("--as-of must be a real date as YYYY-MM-DD");
   }
+  const lookback = values["lookback-days"];
+  if (
+    lookback !== undefined &&
+    !(/^\d+$/.test(lookback) && Number(lookback) <= 365)
+  ) {
+    throw new UsageError(
+      "--lookback-days must be a whole number from 0 to 365",
+    );
+  }
   return {
     help: values.help ?? false,
     ...(values.cycle !== undefined && { cycleId: values.cycle }),
     ...(values["as-of"] !== undefined && { asOf: values["as-of"] }),
+    ...(lookback !== undefined && { lookbackDays: Number(lookback) }),
   };
 }
 
@@ -62,6 +77,9 @@ function report(result: EnrollResult, out: (line: string) => void) {
     out(
       `  ${e.displayName}: hired ${e.hireDate}, milestone ${e.milestoneDate}, due ${e.dueDates.self}`,
     );
+  }
+  for (const p of result.skipped) {
+    out(`  skipped ${p.displayName} (hired ${p.hireDate}): ${p.reason}`);
   }
   if (result.error) out(`  error: ${result.error}`);
 }
@@ -86,22 +104,24 @@ export async function enrollCli(
   }
 
   const asOf = args.asOf ?? todayLocal();
+  const opts = { lookbackDays: args.lookbackDays };
   let results: EnrollResult[];
   if (args.cycleId) {
     try {
-      results = [await enrollDueParticipants(io.db, args.cycleId, asOf)];
+      results = [await enrollDueParticipants(io.db, args.cycleId, asOf, opts)];
     } catch (error) {
       results = [
         {
           cycleId: args.cycleId,
           asOf,
           enrolled: [],
+          skipped: [],
           error: error instanceof Error ? error.message : String(error),
         },
       ];
     }
   } else {
-    results = await enrollAllDueParticipants(io.db, asOf);
+    results = await enrollAllDueParticipants(io.db, asOf, opts);
     if (results.length === 0) out(`no active hire-date cycles as of ${asOf}`);
   }
   for (const result of results) report(result, out);

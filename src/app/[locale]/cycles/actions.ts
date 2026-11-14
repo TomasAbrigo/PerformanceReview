@@ -72,16 +72,16 @@ export async function createCycleAction(
 
 export async function duplicateCycleAction(id: string, suffix: string) {
   return actionResult(
-    async () => ({
-      id: (
-        await cycles.duplicateCycle(
-          db,
-          ACTOR,
-          parse(cycleId, id, cycles.CyclesError),
-          { suffix: parse(z.string().max(40), suffix, cycles.CyclesError) },
-        )
-      ).id,
-    }),
+    async () => {
+      // The suffix is the UI's translated word: the server only requires one.
+      const { cycle, warnings } = await cycles.duplicateCycle(
+        db,
+        ACTOR,
+        parse(cycleId, id, cycles.CyclesError),
+        { suffix },
+      );
+      return { id: cycle.id, warnings };
+    },
     undefined,
     { refreshPage: false },
   );

@@ -411,7 +411,10 @@
         "button": "Duplicate cycle",
         "pending": "Duplicating…",
         "suffix": "Copy",
-        "from": "Duplicated from another cycle"
+        "from": "Duplicated from another cycle",
+        "warnTemplate": "The cycle's template is no longer available: the copy has no template.",
+        "warnGroup": "The group “{name}” was left out: its template is no longer available.",
+        "openCopy": "Open the copy"
       },
       "groups": {
         "title": "Templates per group",
@@ -429,6 +432,7 @@
         "noCriteria": "No criteria: everyone who is not in an earlier group is in.",
         "count": "{count, plural, =0 {No one} one {# person} other {# people}}",
         "counting": "Counting…",
+        "previewError": "We could not count the people of each group.",
         "remainder": "{count, plural, =0 {Everyone is in a group} one {# person without a group uses the cycle's template} other {# people without a group use the cycle's template}}",
         "duplicateName": "There is already a group with that name.",
         "defaultTemplate": "Cycle template: {name}",

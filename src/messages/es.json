@@ -411,7 +411,10 @@
         "button": "Duplicar ciclo",
         "pending": "Duplicando…",
         "suffix": "Copia",
-        "from": "Duplicado desde otro ciclo"
+        "from": "Duplicado desde otro ciclo",
+        "warnTemplate": "La plantilla del ciclo ya no está disponible: la copia quedó sin plantilla.",
+        "warnGroup": "El grupo “{name}” se omitió: su plantilla ya no está disponible.",
+        "openCopy": "Abrir la copia"
       },
       "groups": {
         "title": "Plantillas por grupo",
@@ -429,6 +432,7 @@
         "noCriteria": "Sin criterios: entran todas las personas que no pertenezcan a un grupo anterior.",
         "count": "{count, plural, =0 {Ninguna persona} one {# persona} other {# personas}}",
         "counting": "Contando…",
+        "previewError": "No pudimos calcular las personas de cada grupo.",
         "remainder": "{count, plural, =0 {Todas las personas entran en algún grupo} one {# persona sin grupo usa la plantilla del ciclo} other {# personas sin grupo usan la plantilla del ciclo}}",
         "duplicateName": "Ya hay un grupo con ese nombre.",
         "defaultTemplate": "Plantilla del ciclo: {name}",

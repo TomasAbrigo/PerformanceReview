@@ -26,6 +26,19 @@ describe("parseEnrollArgs", () => {
     expect(() => parseEnrollArgs(["--as-of", "hoy"])).toThrow(/--as-of/);
   });
 
+  it("takes how many extra days to look back", () => {
+    expect(parseEnrollArgs(["--lookback-days", "7"])).toEqual({
+      help: false,
+      lookbackDays: 7,
+    });
+    expect(parseEnrollArgs(["--lookback-days", "0"]).lookbackDays).toBe(0);
+    for (const bad of ["abc", "-1", "1.5", "366", ""]) {
+      expect(() => parseEnrollArgs(["--lookback-days", bad])).toThrow(
+        /--lookback-days/,
+      );
+    }
+  });
+
   it("rejects ids that are not uuids and unknown options", () => {
     expect(() => parseEnrollArgs(["--cycle", "abc"])).toThrow(/--cycle/);
     expect(() => parseEnrollArgs(["--nope"])).toThrow();

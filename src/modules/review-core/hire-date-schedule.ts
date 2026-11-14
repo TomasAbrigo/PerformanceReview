@@ -1,4 +1,4 @@
-import type { HireDateSchedule } from "./status";
+import type { CycleDueDates, HireDateSchedule } from "./status";
 
 /**
  * Pure date math of hire-date cycles (no DB, safe to import from client
@@ -37,6 +37,15 @@ export function hireDateTimeline(
     windowStart: milestoneDate,
     dueDate: addDays(milestoneDate, windowDays(schedule)),
   };
+}
+
+/** Own deadlines of someone hired on `hireDate`: self and manager share the window's end. */
+export function hireDueDates(
+  hireDate: string,
+  schedule: HireDateSchedule,
+): CycleDueDates {
+  const { dueDate } = hireDateTimeline(hireDate, schedule);
+  return { self: dueDate, manager: dueDate };
 }
 
 /**

@@ -12,7 +12,6 @@ import {
   listCycleGroups,
   listSelfRequests,
 } from "@/modules/review-core";
-import { listTemplates } from "@/modules/templates";
 import {
   duplicateCycleAction,
   launchCycleAction,
@@ -28,9 +27,8 @@ async function Detail({ params }: PageProps<"/[locale]/cycles/[id]">) {
   const cycle = await getCycle(db, id);
   if (!cycle) notFound();
   const actor = await getActor();
-  const [groups, templates, selfRequests] = await Promise.all([
+  const [groups, selfRequests] = await Promise.all([
     listCycleGroups(db, cycle.id),
-    listTemplates(db),
     listSelfRequests(db, actor, id),
   ]);
   return (
@@ -47,8 +45,7 @@ async function Detail({ params }: PageProps<"/[locale]/cycles/[id]">) {
         allowedTransitions: cycle.allowedTransitions,
         scheduleKind: cycle.scheduleKind,
         hireDateSchedule: cycle.hireDateSchedule,
-        defaultTemplateName:
-          templates.find((t) => t.id === cycle.templateId)?.name ?? null,
+        defaultTemplateName: cycle.defaultTemplateName,
         groups: groups.map((g) => ({
           id: g.id,
           name: g.name,

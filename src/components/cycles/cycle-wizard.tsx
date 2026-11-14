@@ -143,6 +143,10 @@ export function CycleWizard({
   const [groupsPreview, setGroupsPreview] = useState<
     (GroupsPreviewData & { key: string }) | null
   >(null);
+  // Key of the group preview that failed (request error or server error).
+  const [groupsPreviewFailed, setGroupsPreviewFailed] = useState<string | null>(
+    null,
+  );
   const [scheduleKind, setScheduleKind] = useState<ScheduleKind>("fixed");
   const [schedule, setSchedule] = useState<HireDateSchedule>({
     milestoneDays: 90,
@@ -209,13 +213,19 @@ export function CycleWizard({
         asOf,
       )
       .then((result) => {
-        if (current && result.ok) {
+        if (!current) return;
+        if (result.ok) {
           setGroupsPreview({
             key: previewKey,
             groups: result.groups,
             remainder: result.remainder,
           });
+        } else {
+          setGroupsPreviewFailed(previewKey);
         }
+      })
+      .catch(() => {
+        if (current) setGroupsPreviewFailed(previewKey);
       });
     return () => {
       current = false;
@@ -555,6 +565,7 @@ export function CycleWizard({
               templates: options.templates,
             }}
             preview={groupsPreview?.key === previewKey ? groupsPreview : null}
+            previewFailed={groupsPreviewFailed === previewKey}
             issues={groupIssues}
           />
         ) : null}

@@ -1,13 +1,13 @@
-import { and, arrayContains, asc, eq, inArray, sql } from "drizzle-orm";
+import { and, arrayContains, asc, eq, inArray, isNull } from "drizzle-orm";
 import type { DbOrTx } from "@/db/client";
 import {
   answer,
   type Answer,
-  cycleParticipant,
   type QuestionRevision,
   questionRevision,
   reviewRequest,
   type ReviewRequest,
+  type Relationship,
 } from "@/db/schema";
 import type { ActorContext } from "@/modules/actor/types";
 import { loadRequest } from "./requests";
@@ -27,12 +27,18 @@ export type SelfReview = {
   canWrite: boolean;
 };
 
-/** Questions of a request: those of the participant's template group (or the cycle's default). */
-const questionsFor = (
+/**
+ * The frozen questions a participant answers: those of their template group
+ * (`templateGroupId` of the participant row) or, without a group, those of
+ * the cycle's default template. `relationship` keeps the ones that apply to
+ * it. The single reader of question revisions for every form (self, manager,
+ * peer...): a form must never list a cycle's revisions without it.
+ */
+export const questionsFor = (
   db: DbOrTx,
   cycleId: string,
-  participantId: string,
-  relationship: ReviewRequest["relationship"],
+  templateGroupId: string | null,
+  relationship?: Relationship,
 ) =>
   db
     .select()
@@ -40,10 +46,12 @@ const questionsFor = (
     .where(
       and(
         eq(questionRevision.cycleId, cycleId),
-        sql`${questionRevision.groupId} is not distinct from (
-          select ${cycleParticipant.templateGroupId} from ${cycleParticipant}
-          where ${cycleParticipant.id} = ${participantId})`,
-        arrayContains(questionRevision.appliesTo, [relationship]),
+        templateGroupId
+          ? eq(questionRevision.groupId, templateGroupId)
+          : isNull(questionRevision.groupId),
+        relationship
+          ? arrayContains(questionRevision.appliesTo, [relationship])
+          : undefined,
       ),
     )
     .orderBy(asc(questionRevision.sort));
@@ -70,11 +78,11 @@ export async function getSelfReview(
     if (error instanceof ReviewError) return null;
     throw error;
   }
-  const { request, cycle } = row;
+  const { request, cycle, participant } = row;
   const questions = await questionsFor(
     db,
     cycle.id,
-    request.participantId,
+    participant.templateGroupId,
     request.relationship,
   );
   const rows = await db
@@ -87,7 +95,7 @@ export async function getSelfReview(
     cycle: {
       id: cycle.id,
       name: cycle.name,
-      dueDate: row.participant.dueDates?.self ?? cycle.dueDates.self ?? null,
+      dueDate: participant.dueDates?.self ?? cycle.dueDates.self ?? null,
     },
     questions,
     answers: Object.fromEntries(
@@ -146,13 +154,17 @@ export async function saveDraft(
   answers: AnswerInput[],
 ): Promise<void> {
   await db.transaction(async (tx) => {
-    const { request, cycle } = await writable(tx, actor, requestId);
+    const { request, cycle, participant } = await writable(
+      tx,
+      actor,
+      requestId,
+    );
     const questions = new Map(
       (
         await questionsFor(
           tx,
           cycle.id,
-          request.participantId,
+          participant.templateGroupId,
           request.relationship,
         )
       ).map((q) => [q.id, q]),
@@ -203,11 +215,15 @@ export async function submit(
   requestId: string,
 ): Promise<ReviewRequest> {
   return db.transaction(async (tx) => {
-    const { request, cycle } = await writable(tx, actor, requestId);
+    const { request, cycle, participant } = await writable(
+      tx,
+      actor,
+      requestId,
+    );
     const questions = await questionsFor(
       tx,
       cycle.id,
-      request.participantId,
+      participant.templateGroupId,
       request.relationship,
     );
     const answered = new Set(

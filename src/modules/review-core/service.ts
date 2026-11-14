@@ -15,6 +15,7 @@ import type { AnyPgColumn } from "drizzle-orm/pg-core";
 import type { ZodType } from "zod";
 import { parse as parseOr } from "@/lib/domain-error";
 import type { DbOrTx } from "@/db/client";
+import type { LocalizedText } from "@/db/schema/rating-scales";
 import {
   cycleParticipant,
   type CycleParticipant,
@@ -27,6 +28,7 @@ import {
   ratingScaleOption,
   reviewCycle,
   type ReviewCycle,
+  reviewTemplate,
   templateSection,
   type ParticipantFilter,
 } from "@/db/schema";
@@ -39,7 +41,7 @@ import {
 } from "@/modules/org-history/queries";
 import { CyclesError } from "./errors";
 import { assignCycleGroups, freezeGroups } from "./groups";
-import { enrollDueParticipants } from "./hire-date";
+import { enrollDueParticipants, hireDueDatesFor } from "./hire-date";
 import { ensureSelfRequests } from "./requests";
 import { allowedTransitions, type CycleStatus, launchStatus } from "./status";
 import {
@@ -278,6 +280,14 @@ export async function copyQuestions(
   templateId: string,
   groupId: string | null = null,
 ) {
+  // A deleted template would freeze no questions at all: refuse instead.
+  const [template] = await db
+    .select({ id: reviewTemplate.id })
+    .from(reviewTemplate)
+    .where(
+      and(eq(reviewTemplate.id, templateId), isNull(reviewTemplate.deletedAt)),
+    );
+  if (!template) throw new CyclesError("no_template");
   const rows = await db
     .select({ section: templateSection, question })
     .from(question)
@@ -432,7 +442,7 @@ export async function addParticipant(
 ): Promise<CycleParticipant> {
   // Participant and its self request are created together (or not at all).
   return db.transaction(async (tx) => {
-    await activeCycle(tx, cycleId);
+    const cycle = await activeCycle(tx, cycleId);
     const [existing] = await tx
       .select()
       .from(cycleParticipant)
@@ -447,7 +457,13 @@ export async function addParticipant(
     }
     const [snap] = await snapshots(tx, cycleId, [personId], asOf);
     const groupOf = await assignCycleGroups(tx, cycleId, [personId], asOf);
-    const values = { ...snap, templateGroupId: groupOf.get(personId) ?? null };
+    const dueDates = await hireDueDatesFor(tx, cycle, [personId]);
+    const values = {
+      ...snap,
+      templateGroupId: groupOf.get(personId) ?? null,
+      // Hire-date cycles: their own deadlines, like the ones enrolled by cron.
+      dueDates: dueDates.get(personId) ?? null,
+    };
     const [row] = existing
       ? await tx
           .update(cycleParticipant)
@@ -514,6 +530,8 @@ export type CycleTransitionItem = {
 };
 
 export type CycleDetail = ReviewCycle & {
+  /** Name of the cycle's default template (null without one). */
+  defaultTemplateName: LocalizedText | null;
   participants: CycleParticipantItem[];
   transitions: CycleTransitionItem[];
   questionCount: number;
@@ -527,8 +545,12 @@ export async function getCycle(
 ): Promise<CycleDetail | null> {
   if (!isUuid(id)) return null;
   const [cycle] = await db
-    .select()
+    .select({
+      ...getTableColumns(reviewCycle),
+      defaultTemplateName: reviewTemplate.name,
+    })
     .from(reviewCycle)
+    .leftJoin(reviewTemplate, eq(reviewTemplate.id, reviewCycle.templateId))
     .where(and(eq(reviewCycle.id, id), isNull(reviewCycle.deletedAt)));
   if (!cycle) return null;
   const reviewee = aliasedTable(person, "reviewee");

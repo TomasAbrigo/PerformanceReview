@@ -52,6 +52,10 @@ export type ScheduleKind = (typeof scheduleKinds)[number];
 /** Prefix of the status-log note that links a duplicated cycle to its source. */
 export const DUPLICATE_NOTE_PREFIX = "duplicate_of:";
 
+/** Something a duplicate could not carry over from the source cycle. */
+export type DuplicateWarning =
+  { kind: "template" } | { kind: "group"; name: string };
+
 /** Hire-date milestones, in days after hire (6 months = 180, 1 year = 365). */
 export const hireMilestoneDays = [30, 60, 90, 180, 365] as const;
 export type HireMilestoneDays = (typeof hireMilestoneDays)[number];

@@ -14,8 +14,6 @@ import {
   cycleTemplateGroup,
   type CycleTemplateGroup,
   questionRevision,
-  type QuestionRevision,
-  type Relationship,
   reviewTemplate,
 } from "@/db/schema";
 import type { LocalizedText } from "@/db/schema/rating-scales";
@@ -28,6 +26,7 @@ import {
   type CycleGroupInput,
   cycleGroupsInput,
   type ParticipantFilterInput,
+  previewGroupsInput,
 } from "./validation";
 
 /**
@@ -147,14 +146,16 @@ async function assignToGroups<K extends string | number>(
   asOf: IsoDate,
 ): Promise<Map<string, K | null>> {
   const assigned = new Map<string, K | null>(personIds.map((id) => [id, null]));
-  const pending = new Set(personIds);
-  for (const group of groups) {
-    if (pending.size === 0) break;
-    const matched = await matchParticipants(db, group.filter, asOf);
-    for (const { personId } of matched) {
-      if (pending.delete(personId)) assigned.set(personId, group.key);
+  if (groups.length === 0 || personIds.length === 0) return assigned;
+  // Who each group matches, all at once; the order only decides ties below.
+  const matches = await Promise.all(
+    groups.map((g) => matchParticipants(db, g.filter, asOf)),
+  );
+  groups.forEach((group, i) => {
+    for (const { personId } of matches[i]) {
+      if (assigned.get(personId) === null) assigned.set(personId, group.key);
     }
-  }
+  });
   return assigned;
 }
 
@@ -209,9 +210,10 @@ export type GroupsPreview = {
 export async function previewGroups(
   db: DbOrTx,
   participantFilter: ParticipantFilterInput,
-  groups: { filter: ParticipantFilterInput }[],
+  groupsInput: { filter: ParticipantFilterInput }[],
   asOf: IsoDate = todayLocal(),
 ): Promise<GroupsPreview> {
+  const groups = parse(previewGroupsInput, groupsInput);
   const people = await matchParticipants(db, participantFilter, asOf);
   const assigned = await assignToGroups(
     db,
@@ -226,42 +228,4 @@ export async function previewGroups(
     else counts[key]++;
   }
   return { total: people.length, groups: counts, remainder };
-}
-
-/**
- * The frozen questions of a participant: those of their group's template, or
- * of the cycle's default template when they have no group. `relationship`
- * keeps only the questions that apply to it (self form, manager form...).
- */
-export async function listParticipantQuestions(
-  db: DbOrTx,
-  cycleId: string,
-  revieweePersonId: string,
-  relationship?: Relationship,
-): Promise<QuestionRevision[]> {
-  const [participant] = await db
-    .select({ groupId: cycleParticipant.templateGroupId })
-    .from(cycleParticipant)
-    .where(
-      and(
-        eq(cycleParticipant.cycleId, cycleId),
-        eq(cycleParticipant.revieweePersonId, revieweePersonId),
-      ),
-    );
-  if (!participant) throw new CyclesError("not_found");
-  const rows = await db
-    .select()
-    .from(questionRevision)
-    .where(
-      and(
-        eq(questionRevision.cycleId, cycleId),
-        participant.groupId
-          ? eq(questionRevision.groupId, participant.groupId)
-          : isNull(questionRevision.groupId),
-      ),
-    )
-    .orderBy(asc(questionRevision.sort));
-  return relationship
-    ? rows.filter((r) => r.appliesTo.includes(relationship))
-    : rows;
 }

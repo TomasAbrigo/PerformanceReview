@@ -1,7 +1,7 @@
 import { cp, mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
-import { eq, sql } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { closeDb, db } from "@/db/client";
 import {
@@ -11,7 +11,9 @@ import {
   employment,
   person,
   questionRevision,
+  type Relationship,
   reviewCycle,
+  reviewTemplate,
 } from "@/db/schema";
 import { FixtureAdapter, runIngest } from "@/modules/ingest";
 import { todayLocal } from "@/modules/org-history/dates";
@@ -29,6 +31,7 @@ import {
   createCycle,
   CyclesError,
   duplicateCycle,
+  questionsFor,
   enrollAllDueParticipants,
   enrollDueParticipants,
   findMySelfRequestId,
@@ -38,7 +41,6 @@ import {
   listCycleGroups,
   listCycles,
   listMyTasks,
-  listParticipantQuestions,
   previewGroups,
   recentHires,
   removeParticipant,
@@ -77,6 +79,31 @@ const idOf = async (name: string) =>
       .where(eq(person.displayName, name))
   )[0].id;
 
+/** The copy of a cycle (the suffix comes from the caller's language). */
+const dup = async (
+  actor: string | null,
+  cycleId: string,
+  opts: { suffix: string } = { suffix: "Copia" },
+) => (await duplicateCycle(db, actor, cycleId, opts)).cycle;
+
+/** The questions a participant answers, as the forms read them. */
+async function participantQuestions(
+  cycleId: string,
+  personId: string,
+  relationship?: Relationship,
+) {
+  const [participant] = await db
+    .select({ groupId: cycleParticipant.templateGroupId })
+    .from(cycleParticipant)
+    .where(
+      and(
+        eq(cycleParticipant.cycleId, cycleId),
+        eq(cycleParticipant.revieweePersonId, personId),
+      ),
+    );
+  return questionsFor(db, cycleId, participant.groupId, relationship);
+}
+
 /** Template that adds one distinguishing question to the system template. */
 async function templateWith(prompt: string): Promise<string> {
   const template = await cloneTemplate(db, defaultTemplate);
@@ -92,6 +119,10 @@ async function templateWith(prompt: string): Promise<string> {
 type Hire = {
   department?: string;
   terminatedOn?: string;
+  /** Leave the job row open after the termination (an ingest that lags). */
+  keepJobOpen?: boolean;
+  /** No job history at all (it has not been ingested yet). */
+  noJob?: boolean;
   /** Manager from the hire date until `managerChange`, then `newManager`. */
   manager?: string;
   managerChange?: { on: string; manager: string };
@@ -120,10 +151,12 @@ async function hire(
     department: opts.department ?? "Ingeniería",
     sourceSystem: "native" as const,
   };
+  const closedAt = opts.keepJobOpen ? null : (opts.terminatedOn ?? null);
+  if (opts.noJob) return p.id;
   await db.insert(employeeJobHistory).values({
     ...job,
     validFrom: hireDate,
-    validTo: opts.managerChange?.on ?? opts.terminatedOn ?? null,
+    validTo: opts.managerChange?.on ?? closedAt,
     managerPersonId: opts.manager ?? null,
     sourceId: `${name}-1`,
   });
@@ -132,7 +165,7 @@ async function hire(
       ...job,
       validFrom: opts.managerChange.on,
       // A terminated person has no job row after the termination date.
-      validTo: opts.terminatedOn ?? null,
+      validTo: closedAt,
       managerPersonId: opts.managerChange.manager,
       sourceId: `${name}-2`,
     });
@@ -213,7 +246,7 @@ describe("duplicateCycle", () => {
     ]);
     await launchCycle(db, original.id, null);
 
-    const copy = await duplicateCycle(db, ana, original.id);
+    const copy = await dup(ana, original.id);
 
     expect(copy.id).not.toBe(original.id);
     expect(copy).toMatchObject({
@@ -255,7 +288,7 @@ describe("duplicateCycle", () => {
 
   it("logs who duplicated it and from which cycle", async () => {
     const original = await createCycle(db, input());
-    const copy = await duplicateCycle(db, ana, original.id);
+    const copy = await dup(ana, original.id);
     const detail = await getCycle(db, copy.id);
     expect(detail!.transitions).toMatchObject([
       {
@@ -269,11 +302,11 @@ describe("duplicateCycle", () => {
 
   it("uses the given suffix and can be repeated", async () => {
     const original = await createCycle(db, input());
-    const copy = await duplicateCycle(db, null, original.id, {
+    const copy = await dup(null, original.id, {
       suffix: "Copy",
     });
     expect(copy.name).toBe("H1 2022 (Copy)");
-    const again = await duplicateCycle(db, null, original.id);
+    const again = await dup(null, original.id);
     expect(again.name).toBe("H1 2022 (Copia)");
     expect(await listCycles(db)).toHaveLength(3);
   });
@@ -287,7 +320,7 @@ describe("duplicateCycle", () => {
         filter: { kind: "filter", departments: ["Ingeniería"] },
       },
     ]);
-    const copy = await duplicateCycle(db, null, original.id);
+    const copy = await dup(null, original.id);
 
     await updateCycle(db, copy.id, {
       name: "H2 2022",
@@ -323,7 +356,7 @@ describe("duplicateCycle", () => {
 
   it("editing the original never touches the copy", async () => {
     const original = await createCycle(db, input());
-    const copy = await duplicateCycle(db, null, original.id);
+    const copy = await dup(null, original.id);
     await updateCycle(db, original.id, {
       name: "Otro",
       dueDates: { self: "2022-09-09" },
@@ -346,7 +379,7 @@ describe("duplicateCycle", () => {
         participantFilter: { kind: "all" },
       }),
     );
-    const copy = await duplicateCycle(db, null, original.id);
+    const copy = await dup(null, original.id);
     expect(copy).toMatchObject({
       scheduleKind: "hire_date",
       hireDateSchedule: { milestoneDays: 90, windowWeeks: 3 },
@@ -365,19 +398,88 @@ describe("duplicateCycle", () => {
     ] as const) {
       await transition(db, original.id, to, null);
     }
-    expect((await duplicateCycle(db, null, original.id)).status).toBe("draft");
+    expect((await dup(null, original.id)).status).toBe("draft");
     await expect(
-      duplicateCycle(db, null, "00000000-0000-4000-8000-000000000000"),
+      dup(null, "00000000-0000-4000-8000-000000000000"),
     ).rejects.toMatchObject({ code: "not_found" });
-    await expect(duplicateCycle(db, null, "nope")).rejects.toMatchObject({
+    await expect(dup(null, "nope")).rejects.toMatchObject({
       code: "not_found",
     });
+  });
+
+  it("needs the suffix from the caller: it is a translated word", async () => {
+    const original = await createCycle(db, input());
+    for (const suffix of ["", "   "]) {
+      await expect(
+        duplicateCycle(db, null, original.id, { suffix }),
+      ).rejects.toMatchObject({
+        code: "validation",
+        issues: [{ path: "suffix", message: "required" }],
+      });
+    }
+    // A very long suffix is cut, not stored as is.
+    const copy = await dup(null, original.id, { suffix: "x".repeat(60) });
+    expect(copy.name).toBe(`H1 2022 (${"x".repeat(40)})`);
+    expect(await listCycles(db)).toHaveLength(2);
+  });
+
+  it("does not copy templates that are deleted or disabled, and says so", async () => {
+    const base = await templateWith("Base");
+    const keep = await templateWith("Se queda");
+    const deleted = await templateWith("Borrada");
+    const disabled = await templateWith("Apagada");
+    const original = await createCycle(db, input({ templateId: base }));
+    await setCycleGroups(db, original.id, [
+      { name: "Borrado", templateId: deleted, filter: { kind: "all" } },
+      { name: "Se queda", templateId: keep, filter: { kind: "all" } },
+      { name: "Apagado", templateId: disabled, filter: { kind: "all" } },
+    ]);
+    await db
+      .update(reviewTemplate)
+      .set({ deletedAt: new Date() })
+      .where(eq(reviewTemplate.id, deleted));
+    await db
+      .update(reviewTemplate)
+      .set({ enabled: false })
+      .where(eq(reviewTemplate.id, disabled));
+    await db
+      .update(reviewTemplate)
+      .set({ deletedAt: new Date() })
+      .where(eq(reviewTemplate.id, base));
+
+    const { cycle, warnings } = await duplicateCycle(db, null, original.id, {
+      suffix: "Copia",
+    });
+
+    expect(cycle.templateId).toBeNull();
+    expect(warnings).toEqual([
+      { kind: "template" },
+      { kind: "group", name: "Borrado" },
+      { kind: "group", name: "Apagado" },
+    ]);
+    const groups = await listCycleGroups(db, cycle.id);
+    expect(groups.map((g) => [g.name, g.sort, g.templateId])).toEqual([
+      ["Se queda", 0, keep],
+    ]);
+    // The original keeps its configuration untouched.
+    expect((await listCycleGroups(db, original.id)).map((g) => g.name)).toEqual(
+      ["Borrado", "Se queda", "Apagado"],
+    );
+  });
+
+  it("has no warnings when everything it references is available", async () => {
+    const original = await createCycle(db, input());
+    const result = await duplicateCycle(db, null, original.id, {
+      suffix: "Copia",
+    });
+    expect(result.warnings).toEqual([]);
+    expect(result.cycle.templateId).toBe(defaultTemplate);
   });
 
   it("launches the copy without affecting the original's participants", async () => {
     const original = await createCycle(db, input());
     await launchCycle(db, original.id, null);
-    const copy = await duplicateCycle(db, null, original.id);
+    const copy = await dup(null, original.id);
     await removeParticipant(db, original.id, bruno);
     await launchCycle(db, copy.id, null);
     const [o, c] = await Promise.all([
@@ -415,8 +517,8 @@ describe("template groups", () => {
     expect(byPerson.get(bruno)).toBe(group.id);
     expect(byPerson.get(ana)).toBeNull();
 
-    const brunoQuestions = await listParticipantQuestions(db, cycle.id, bruno);
-    const anaQuestions = await listParticipantQuestions(db, cycle.id, ana);
+    const brunoQuestions = await participantQuestions(cycle.id, bruno);
+    const anaQuestions = await participantQuestions(cycle.id, ana);
     expect(promptsOf(brunoQuestions)).toContain("Pregunta de Ingeniería");
     expect(promptsOf(anaQuestions)).not.toContain("Pregunta de Ingeniería");
     // Same base questions, one extra for the group.
@@ -431,8 +533,8 @@ describe("template groups", () => {
     const cycle = await createCycle(db, input());
     await setCycleGroups(db, cycle.id, [engGroup]);
     await launchCycle(db, cycle.id, null);
-    const self = await listParticipantQuestions(db, cycle.id, bruno, "self");
-    const peer = await listParticipantQuestions(db, cycle.id, bruno, "peer");
+    const self = await participantQuestions(cycle.id, bruno, "self");
+    const peer = await participantQuestions(cycle.id, bruno, "peer");
     expect(self.every((q) => q.appliesTo.includes("self"))).toBe(true);
     expect(promptsOf(self)).toContain("Pregunta de Ingeniería");
     expect(promptsOf(peer)).not.toContain("Pregunta de Ingeniería");
@@ -449,8 +551,8 @@ describe("template groups", () => {
       },
     ]);
     await launchCycle(db, cycle.id, null);
-    const eng = promptsOf(await listParticipantQuestions(db, cycle.id, bruno));
-    const dir = promptsOf(await listParticipantQuestions(db, cycle.id, ana));
+    const eng = promptsOf(await participantQuestions(cycle.id, bruno));
+    const dir = promptsOf(await participantQuestions(cycle.id, ana));
     expect(eng).toContain("Pregunta de Ingeniería");
     expect(eng).not.toContain("Pregunta de Ventas");
     expect(dir).toContain("Pregunta de Ventas");
@@ -467,16 +569,14 @@ describe("template groups", () => {
     const first = await createCycle(db, input());
     await setCycleGroups(db, first.id, [engGroup, byLocation]);
     await launchCycle(db, first.id, null);
-    expect(
-      promptsOf(await listParticipantQuestions(db, first.id, bruno)),
-    ).toContain("Pregunta de Ingeniería");
+    expect(promptsOf(await participantQuestions(first.id, bruno))).toContain(
+      "Pregunta de Ingeniería",
+    );
 
     const second = await createCycle(db, input());
     await setCycleGroups(db, second.id, [byLocation, engGroup]);
     await launchCycle(db, second.id, null);
-    const prompts = promptsOf(
-      await listParticipantQuestions(db, second.id, bruno),
-    );
+    const prompts = promptsOf(await participantQuestions(second.id, bruno));
     expect(prompts).toContain("Pregunta de Ventas");
     expect(prompts).not.toContain("Pregunta de Ingeniería");
   });
@@ -494,9 +594,61 @@ describe("template groups", () => {
       appliesTo: ["self"],
       prompt: { es: "Editada", en: "Edited" },
     });
-    expect(
-      promptsOf(await listParticipantQuestions(db, cycle.id, bruno)),
-    ).toContain("Pregunta de Ingeniería");
+    expect(promptsOf(await participantQuestions(cycle.id, bruno))).toContain(
+      "Pregunta de Ingeniería",
+    );
+  });
+
+  it("refuses to launch with a deleted template instead of freezing no questions", async () => {
+    const template = await templateWith("Pronto borrada");
+    const cycle = await createCycle(db, input({ templateId: template }));
+    await db
+      .update(reviewTemplate)
+      .set({ deletedAt: new Date() })
+      .where(eq(reviewTemplate.id, template));
+    await expect(launchCycle(db, cycle.id, null)).rejects.toMatchObject({
+      code: "no_template",
+    });
+
+    // Same for a group's template; the launch is all or nothing.
+    const other = await createCycle(db, input());
+    await setCycleGroups(db, other.id, [engGroup]);
+    await db
+      .update(reviewTemplate)
+      .set({ deletedAt: new Date() })
+      .where(eq(reviewTemplate.id, engTemplate));
+    await expect(launchCycle(db, other.id, null)).rejects.toMatchObject({
+      code: "no_template",
+    });
+    const detail = await getCycle(db, other.id);
+    expect(detail!.status).toBe("draft");
+    expect(detail!.participants).toEqual([]);
+  });
+
+  it("gives the detail the name of the cycle's template", async () => {
+    const cycle = await createCycle(db, input());
+    const detail = await getCycle(db, cycle.id);
+    expect(detail!.defaultTemplateName).toEqual(
+      (await getTemplate(db, defaultTemplate))!.name,
+    );
+    const none = await createCycle(db, input({ templateId: null }));
+    expect((await getCycle(db, none.id))!.defaultTemplateName).toBeNull();
+  });
+
+  it("limits how many groups a preview computes", async () => {
+    const filter = { kind: "all" } as const;
+    const many = (n: number) =>
+      Array.from({ length: n }, () => ({
+        filter: { kind: "all" } as const,
+      }));
+    await expect(
+      previewGroups(db, filter, many(21), "2022-06-01"),
+    ).rejects.toMatchObject({ code: "validation" });
+    const ok = await previewGroups(db, filter, many(20), "2022-06-01");
+    expect(ok.groups).toHaveLength(20);
+    // The first group takes everyone; the rest get nobody.
+    expect(ok.groups[0]).toBe(3);
+    expect(ok.remainder).toBe(0);
   });
 
   it("serves the self form the questions of the participant's group", async () => {
@@ -518,7 +670,7 @@ describe("template groups", () => {
       "Pregunta de Ingeniería",
     );
     expect(brunoReview!.questions).toHaveLength(
-      (await listParticipantQuestions(db, cycle.id, bruno, "self")).length,
+      (await participantQuestions(cycle.id, bruno, "self")).length,
     );
 
     // Bruno cannot answer a question of the default template.
@@ -547,9 +699,9 @@ describe("template groups", () => {
     const added = await addParticipant(db, cycle.id, bruno, "2022-07-01");
     const [group] = await listCycleGroups(db, cycle.id);
     expect(added.templateGroupId).toBe(group.id);
-    expect(
-      promptsOf(await listParticipantQuestions(db, cycle.id, bruno)),
-    ).toContain("Pregunta de Ingeniería");
+    expect(promptsOf(await participantQuestions(cycle.id, bruno))).toContain(
+      "Pregunta de Ingeniería",
+    );
     expect(group.participantCount).toBe(1);
   });
 
@@ -852,11 +1004,11 @@ describe("enrollDueParticipants", () => {
     ]);
     await launchCycle(db, cycle.id, null);
     await enrollDueParticipants(db, cycle.id, AS_OF);
+    expect(promptsOf(await participantQuestions(cycle.id, sales))).toContain(
+      "Pregunta de Ventas",
+    );
     expect(
-      promptsOf(await listParticipantQuestions(db, cycle.id, sales)),
-    ).toContain("Pregunta de Ventas");
-    expect(
-      promptsOf(await listParticipantQuestions(db, cycle.id, people.dana)),
+      promptsOf(await participantQuestions(cycle.id, people.dana)),
     ).not.toContain("Pregunta de Ventas");
   });
 
@@ -888,6 +1040,113 @@ describe("enrollDueParticipants", () => {
     await expect(
       enrollDueParticipants(db, "00000000-0000-4000-8000-000000000000", AS_OF),
     ).rejects.toMatchObject({ code: "not_found" });
+  });
+
+  it("leaves out people who had already left on that date, even if their job row is still open", async () => {
+    // The ingest lags: the job row of both is open, but only Zoe has left.
+    await hire("Zoe", "2026-02-02", {
+      terminatedOn: "2026-03-05",
+      keepJobOpen: true,
+    });
+    await hire("Lu", "2026-02-03", {
+      terminatedOn: "2026-03-20",
+      keepJobOpen: true,
+    });
+    const cycle = await launched();
+    const result = await enrollDueParticipants(db, cycle.id, AS_OF);
+    const names = result.enrolled.map((e) => e.displayName);
+    expect(names).not.toContain("Zoe");
+    // Lu is still employed on the enrollment date.
+    expect(names).toContain("Lu");
+  });
+
+  it("reports people due who have no job history yet instead of dropping them", async () => {
+    const sin = await hire("Sin", "2026-02-01", { noJob: true });
+    const cycle = await launched();
+
+    const first = await enrollDueParticipants(db, cycle.id, AS_OF);
+    expect(first.enrolled.map((e) => e.displayName)).not.toContain("Sin");
+    expect(first.skipped).toEqual([
+      {
+        personId: sin,
+        displayName: "Sin",
+        hireDate: "2026-02-01",
+        reason: "no_job_history",
+      },
+    ]);
+
+    // Once the history arrives, the next run enrolls them.
+    await db.insert(employeeJobHistory).values({
+      personId: sin,
+      validFrom: "2026-02-01",
+      department: "Ingeniería",
+      sourceSystem: "native",
+      sourceId: "Sin-job",
+    });
+    const next = await enrollDueParticipants(db, cycle.id, "2026-03-11");
+    expect(next.enrolled.map((e) => e.displayName)).toContain("Sin");
+    expect(next.skipped).toEqual([]);
+  });
+
+  it("does not report people the cycle's filter leaves out", async () => {
+    await hire("Sol", "2026-02-01", { department: "Ventas" });
+    const cycle = await launched({
+      participantFilter: { kind: "filter", departments: ["Ventas"] },
+    });
+    const result = await enrollDueParticipants(db, cycle.id, AS_OF);
+    expect(result.enrolled.map((e) => e.displayName)).toEqual(["Sol"]);
+    expect(result.skipped).toEqual([]);
+  });
+
+  it("can look further back than the window to catch up after an outage", async () => {
+    // Milestone 2026-02-19: five days before the window [02-24, 03-10].
+    const tarde = await hire("Tarde", "2026-01-20");
+    const cycle = await launched();
+    const without = await enrollDueParticipants(db, cycle.id, AS_OF);
+    expect(without.enrolled.map((e) => e.personId)).not.toContain(tarde);
+    const short = await enrollDueParticipants(db, cycle.id, AS_OF, {
+      lookbackDays: 4,
+    });
+    expect(short.enrolled.map((e) => e.personId)).not.toContain(tarde);
+
+    const caught = await enrollDueParticipants(db, cycle.id, AS_OF, {
+      lookbackDays: 5,
+    });
+    expect(caught.enrolled).toEqual([
+      expect.objectContaining({
+        personId: tarde,
+        milestoneDate: "2026-02-19",
+        // The deadline is still milestone + window.
+        dueDates: { self: "2026-03-05", manager: "2026-03-05" },
+      }),
+    ]);
+    for (const lookbackDays of [-1, 1.5, 366]) {
+      await expect(
+        enrollDueParticipants(db, cycle.id, AS_OF, { lookbackDays }),
+      ).rejects.toMatchObject({ code: "validation" });
+    }
+  });
+
+  it("gives someone added by hand their own deadline too", async () => {
+    const cycle = await launched();
+    // Bruno: hired 2021-07-15, 30 days + 2 weeks = 2021-08-28.
+    const row = await addParticipant(db, cycle.id, bruno, AS_OF);
+    expect(row.dueDates).toEqual({ self: "2021-08-28", manager: "2021-08-28" });
+    // Removing and adding back recomputes them.
+    await removeParticipant(db, cycle.id, bruno);
+    const again = await addParticipant(db, cycle.id, bruno, AS_OF);
+    expect(again.dueDates).toEqual({
+      self: "2021-08-28",
+      manager: "2021-08-28",
+    });
+
+    // Fixed-date cycles keep using the cycle's due dates.
+    const fixed = await createCycle(db, input());
+    await launchCycle(db, fixed.id, null);
+    await removeParticipant(db, fixed.id, bruno);
+    expect(
+      (await addParticipant(db, fixed.id, bruno, AS_OF)).dueDates,
+    ).toBeNull();
   });
 
   it("gives the people it enrolls their self request and own deadline", async () => {
@@ -1006,6 +1265,26 @@ describe("enrollCli", () => {
     expect(text).toContain(b.id);
     expect(await enrolledNames(a.id)).toEqual(["Dana"]);
     expect(await enrolledNames(b.id)).toEqual(["Dana"]);
+  });
+
+  it("lists who was skipped for lack of job history and takes --lookback-days", async () => {
+    await hire("Sin", "2026-02-01", { noJob: true });
+    await hire("Tarde", "2026-01-20");
+    const cycle = await launched();
+    const first = await run(["--cycle", cycle.id, "--as-of", AS_OF]);
+    expect(first.code).toBe(0);
+    expect(first.text).toMatch(/skipped Sin.*no_job_history/);
+    expect(first.text).not.toContain("Tarde");
+
+    const later = await run([
+      "--cycle",
+      cycle.id,
+      "--as-of",
+      AS_OF,
+      "--lookback-days",
+      "5",
+    ]);
+    expect(later.text).toContain("Tarde");
   });
 
   it("exits 1 when a cycle cannot be enrolled", async () => {

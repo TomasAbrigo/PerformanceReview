@@ -129,6 +129,19 @@ export const cycleGroupsInput = z
     });
   });
 
+/** Groups to preview in the wizard: the same cap as a saved cycle. */
+export const previewGroupsInput = z
+  .array(z.object({ filter: participantFilterInput }))
+  .max(20);
+
+/** Extra days the hire-date enrollment looks back past the window (catching up). */
+export const lookbackDaysInput = z.number().int().min(0).max(365);
+
+/** The word a duplicate adds to the name; it comes from the caller's language. */
+export const duplicateInput = z.object({
+  suffix: z.string().trim().min(1, "required"),
+});
+
 export type CycleGroupInput = z.input<typeof cycleGroupInput>;
 export type CycleInput = z.input<typeof cycleInput>;
 export type CycleUpdateInput = z.input<typeof cycleUpdateInput>;

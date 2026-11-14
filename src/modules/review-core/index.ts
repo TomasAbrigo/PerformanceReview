@@ -20,7 +20,6 @@ export { duplicateCycle } from "./duplicate";
 export {
   assignCycleGroups,
   listCycleGroups,
-  listParticipantQuestions,
   previewGroups,
   setCycleGroups,
   type CycleGroupItem,
@@ -54,6 +53,7 @@ export {
 } from "./requests";
 export {
   getSelfReview,
+  questionsFor,
   saveDraft,
   submit,
   type AnswerInput,

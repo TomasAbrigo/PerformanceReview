@@ -63,6 +63,7 @@ export function GroupTemplates({
   onChange,
   options,
   preview,
+  previewFailed = false,
   issues,
 }: {
   groups: GroupDraft[];
@@ -70,6 +71,8 @@ export function GroupTemplates({
   options: GroupTemplatesOptions;
   /** Null while it is being computed. */
   preview: GroupsPreviewData | null;
+  /** The counts could not be computed (instead of waiting for them forever). */
+  previewFailed?: boolean;
   /** Validation problems by path ("0.name", "1.templateId") -> error code. */
   issues: Record<string, string>;
 }) {
@@ -187,9 +190,11 @@ export function GroupTemplates({
                 </p>
               ) : null}
             </div>
-            <p aria-live="polite" className="font-medium">
-              {count === undefined ? t("counting") : t("count", { count })}
-            </p>
+            {previewFailed ? null : (
+              <p aria-live="polite" className="font-medium">
+                {count === undefined ? t("counting") : t("count", { count })}
+              </p>
+            )}
             <div className="flex flex-wrap gap-2">
               <Button
                 variant="outline"
@@ -226,7 +231,12 @@ export function GroupTemplates({
           {t("add")}
         </Button>
       </div>
-      {groups.length > 0 && preview ? (
+      {groups.length > 0 && previewFailed ? (
+        <p role="alert" className="text-sm text-destructive">
+          {t("previewError")}
+        </p>
+      ) : null}
+      {groups.length > 0 && preview && !previewFailed ? (
         <p aria-live="polite" className="text-sm text-muted-foreground">
           {t("remainder", { count: preview.remainder })}
         </p>
