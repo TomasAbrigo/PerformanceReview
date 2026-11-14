@@ -3,17 +3,26 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { connection } from "next/server";
 import { Suspense } from "react";
+import { AcknowledgeBox } from "@/components/review/acknowledge-box";
+import { FollowUpNotes } from "@/components/review/follow-up-notes";
 import { ManagerResultView } from "@/components/review/manager-result";
 import { toReviewData } from "@/components/review/review-data";
 import { db } from "@/db/client";
+import { Link } from "@/i18n/navigation";
 import { routing } from "@/i18n/routing";
 import { getActor } from "@/modules/actor/server";
 import {
+  bothSubmitted,
   findMySharedReviewId,
+  getAcknowledgement,
   getReview,
+  listFollowUpNotes,
+  loadParticipantScope,
+  mayListFollowUp,
   myPublishedRating,
   overallRatingQuestion,
 } from "@/modules/review-core";
+import { acknowledgeAction } from "../compare/[participantId]/actions";
 
 async function Result({ params }: PageProps<"/[locale]/cycles/[id]/result">) {
   const { locale, id } = await params;
@@ -32,10 +41,24 @@ async function Result({ params }: PageProps<"/[locale]/cycles/[id]/result">) {
   // Only the current rating, after share + publish (never original/notes).
   const finalRating = await myPublishedRating(db, actor, id);
   const t = await getTranslations("Calibration");
+  const tCompare = await getTranslations("Compare");
+  // The participant is loaded once; the notes, the acknowledgement and the
+  // comparison link all decide on it.
+  const scope = review
+    ? await loadParticipantScope(db, review.request.participantId)
+    : null;
+  const [ack, notes] = scope
+    ? await Promise.all([
+        getAcknowledgement(db, actor, scope),
+        mayListFollowUp(actor, scope)
+          ? listFollowUpNotes(db, actor, scope)
+          : [],
+      ])
+    : [null, []];
   return (
-    <>
+    <div className="flex flex-col gap-8">
       {finalRating ? (
-        <p className="mb-4 text-lg" data-testid="final-rating">
+        <p className="text-lg" data-testid="final-rating">
           {t("finalRating")}:{" "}
           <span className="font-semibold">
             {finalRating.value}
@@ -56,7 +79,30 @@ async function Result({ params }: PageProps<"/[locale]/cycles/[id]/result">) {
             : null
         }
       />
-    </>
+      {scope && ack ? (
+        <>
+          {/* The comparison needs both reviews submitted (the manager's is). */}
+          {bothSubmitted(scope) ? (
+            <Link
+              href={`/cycles/${id}/compare/${scope.participant.id}`}
+              className="underline"
+            >
+              {tCompare("openMine")}
+            </Link>
+          ) : null}
+          <FollowUpNotes
+            participantId={scope.participant.id}
+            notes={notes}
+            canAdd={false}
+          />
+          <AcknowledgeBox
+            state={ack}
+            viewer="employee"
+            acknowledge={acknowledgeAction}
+          />
+        </>
+      ) : null}
+    </div>
   );
 }
 

@@ -42,9 +42,11 @@ export type VisibilityContext = {
   revieweeShared?: boolean;
   /**
    * Self rows: the manager request that gates the double blind: the actor's
-   * own when they are an assessor, else the participant's current one.
+   * own when they are an assessor, else the participant's current one. Its
+   * shared_at tells whether the manager review reached the employee (the
+   * current manager reads the self review from then).
    */
-  managerRequest?: { status: RequestStatus } | null;
+  managerRequest?: { status: RequestStatus; sharedAt?: Date | null } | null;
   /**
    * The actor writes a manager review of this participant (an alternate or
    * additional assessor, #17): reads the self review like the manager does.
@@ -57,6 +59,11 @@ export type VisibilityContext = {
   snapManagerReplaced?: boolean;
   /** The actor manages the participant's snapshot manager (see isSkipLevel). */
   skipLevel?: boolean;
+  /**
+   * The actor is the reviewee's manager today (see isCurrentManager), who
+   * follows their trajectory even in cycles someone else managed.
+   */
+  currentManager?: boolean;
   /** Reading one answer: its question's per-question rules. */
   questionRevision?: { visibleToReviewee: boolean };
 };
@@ -88,14 +95,16 @@ const isReviewee = (actor: ActorContext, ctx: VisibilityContext) =>
  * The single place that decides whether `actor` may read a review request
  * (and, with `questionRevision`, one of its answers). HR (People) reads
  * everything; the author reads their own request. Then:
- * - self: the snapshot manager (or an assigned assessor) reads it once
- *   submitted; under double blind only after submitting their own manager
- *   review;
+ * - self: the snapshot manager (unless HR replaced them) or an assigned
+ *   assessor (an alternate reviewer of a manager request, #17) reads it once
+ *   submitted; under double blind only after the manager review is submitted;
  * - manager: the snapshot manager reads it; the reviewee only once shared
  *   and only the questions visible to the reviewee;
  * - skip-level managers read submitted self reviews, and submitted manager
  *   reviews once shared (shared_at, or the cycle is sharing/closed), so
  *   they never see a pre-calibration rating;
+ * - the reviewee's current manager reads what was shared with the employee
+ *   (a shared manager review; the self review once that one is shared);
  * - nobody but HR and the author reads requests of a removed participant;
  * - peer/upward: the snapshot manager (and HR) read them once submitted;
  *   the reviewee only once shared (see revieweeShared), and only the
@@ -113,6 +122,7 @@ export function canRead(actor: ActorContext, ctx: VisibilityContext): boolean {
     case "self":
       if (!submitted) return false;
       if (ctx.skipLevel) return true;
+      if (ctx.currentManager && ctx.managerRequest?.sharedAt) return true;
       if (!isManagerOf(actor, ctx) && !ctx.assessor) return false;
       return (
         !isDoubleBlind(ctx.cycle?.components ?? {}) ||
@@ -128,9 +138,10 @@ export function canRead(actor: ActorContext, ctx: VisibilityContext): boolean {
         );
       }
       return (
-        !!ctx.skipLevel &&
-        (!!request.sharedAt ||
-          SHARED_PHASES.includes(ctx.cycle?.status ?? "draft"))
+        (!!ctx.skipLevel &&
+          (!!request.sharedAt ||
+            SHARED_PHASES.includes(ctx.cycle?.status ?? "draft"))) ||
+        (!!ctx.currentManager && !!request.sharedAt)
       );
     case "peer":
     case "upward":

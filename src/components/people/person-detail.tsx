@@ -13,6 +13,7 @@ import { StatusBadge } from "./status-badge";
 
 export function PersonDetail({ person }: { person: PersonDetailData }) {
   const t = useTranslations("People");
+  const tHistory = useTranslations("History");
   const format = useFormatter();
   const fmt = (d: Date | null) =>
     d ? format.dateTime(d, { dateStyle: "medium", timeZone: "UTC" }) : "—";
@@ -25,6 +26,12 @@ export function PersonDetail({ person }: { person: PersonDetailData }) {
       <div>
         <h1 className="text-2xl font-semibold">{person.displayName}</h1>
         <p className="text-muted-foreground">{person.workEmail ?? "—"}</p>
+        <Link
+          href={`/people/${person.id}/reviews`}
+          className="text-sm hover:underline"
+        >
+          {tHistory("link")}
+        </Link>
       </div>
 
       <section className="flex flex-col gap-2">

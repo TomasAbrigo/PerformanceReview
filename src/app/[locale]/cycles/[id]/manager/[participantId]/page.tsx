@@ -67,6 +67,11 @@ async function ManagerReview({
         cycleId: id,
         revieweeName: refs.revieweeName,
         sharedAt: review.request.sharedAt,
+        compareHref:
+          review.request.status === "submitted" &&
+          self?.request.status === "submitted"
+            ? `/cycles/${id}/compare/${participantId}`
+            : undefined,
         canShare:
           canShare(actor, {
             request: review.request,
