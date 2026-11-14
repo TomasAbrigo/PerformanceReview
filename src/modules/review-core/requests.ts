@@ -11,6 +11,13 @@ import {
 import { isUuid } from "@/lib/uuid";
 import type { ActorContext } from "@/modules/actor/types";
 import { isSkipLevel } from "./manager";
+import {
+  ensureUpwardRequests,
+  type FeedbackTask,
+  feedbackTasks,
+  type NominationTask,
+  nominationTasks,
+} from "./peers";
 import type { RequestStatus } from "./request-status";
 import { ReviewError } from "./review-errors";
 import type { CycleStatus } from "./status";
@@ -28,6 +35,7 @@ export async function ensureSelfRequests(
 ): Promise<void> {
   await ensureOnlySelfRequests(db, cycleId, participantId);
   await ensureManagerRequests(db, cycleId, participantId);
+  await ensureUpwardRequests(db, cycleId, participantId);
 }
 
 /**
@@ -235,12 +243,47 @@ async function visibilityContext(
       );
     ctx.managerRequest = managerRequest ?? null;
   }
+  if (
+    (row.request.relationship === "peer" ||
+      row.request.relationship === "upward") &&
+    actor.personId === row.participant.revieweePersonId
+  ) {
+    ctx.revieweeShared = await peerFeedbackShared(db, row);
+  }
   // The snapshot manager and the reviewee are decided without skip-level.
   const decided =
     actor.personId === row.participant.snapManagerPersonId ||
     actor.personId === row.participant.revieweePersonId;
   if (!decided) ctx.skipLevel = await isSkipLevel(db, actor, row.participant);
   return ctx;
+}
+
+/**
+ * Whether peer/upward feedback is released to the reviewee: the cycle is in
+ * sharing (or closed) and, when the cycle has manager reviews, the
+ * participant's manager review was shared; without managers, the phase
+ * alone releases it.
+ */
+export async function peerFeedbackShared(
+  db: DbOrTx,
+  row: Pick<LoadedRow, "participant" | "cycle">,
+): Promise<boolean> {
+  if (row.cycle.status !== "sharing" && row.cycle.status !== "closed") {
+    return false;
+  }
+  if (!row.cycle.components.manager) return true;
+  const [shared] = await db
+    .select({ id: reviewRequest.id })
+    .from(reviewRequest)
+    .where(
+      and(
+        eq(reviewRequest.participantId, row.participant.id),
+        eq(reviewRequest.relationship, "manager"),
+        isNotNull(reviewRequest.sharedAt),
+        isNull(reviewRequest.deletedAt),
+      ),
+    );
+  return !!shared;
 }
 
 /** A request with what visibility needs; throws not_found / forbidden. */
@@ -347,10 +390,10 @@ export type MyTasks = {
   selfAssessments: SelfAssessmentTask[];
   /** Manager reviews shared with the actor ("Evaluación compartida"). */
   sharedReviews: SharedReviewTask[];
-  /** #13: peers to nominate / approve. */
-  nominations: never[];
-  /** #14: feedback to give to peers / managers. */
-  feedback: never[];
+  /** Cycles where the actor still nominates peers. */
+  nominations: NominationTask[];
+  /** Peer/upward feedback the actor has to write. */
+  feedback: FeedbackTask[];
   /** #15: shared reviews to acknowledge. */
   acknowledgements: never[];
 };
@@ -425,7 +468,13 @@ export async function listMyTasks(
       ),
     )
     .orderBy(asc(reviewRequest.sharedAt));
-  return { ...empty, selfAssessments: rows, sharedReviews: shared };
+  return {
+    ...empty,
+    selfAssessments: rows,
+    sharedReviews: shared,
+    nominations: await nominationTasks(db, actor.personId),
+    feedback: await feedbackTasks(db, actor.personId),
+  };
 }
 
 /** Id of the actor's manager review in a cycle, once shared with them. */
