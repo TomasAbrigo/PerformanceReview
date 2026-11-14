@@ -36,4 +36,14 @@ describe("notificationHref", () => {
       notificationHref({ kind: "review_shared", cycleId: null, payload: {} }),
     ).toBe("/me");
   });
+
+  it("opens the shared result of the cycle", () => {
+    expect(
+      notificationHref({
+        kind: "review_shared",
+        cycleId: CYCLE,
+        payload: {},
+      }),
+    ).toBe(`/cycles/${CYCLE}/result`);
+  });
 });
