@@ -23,6 +23,8 @@ export type VisibilityContext = {
   participant: {
     revieweePersonId: string;
     snapManagerPersonId?: string | null;
+    /** Removed reviewees read nothing of their cycle (see isActiveParticipant). */
+    removedAt?: Date | null;
   };
   /** Cycle settings (double blind, anonymity) used by the reading rules. */
   cycle?: {
@@ -45,6 +47,13 @@ export type VisibilityContext = {
   questionRevision?: { visibleToReviewee: boolean };
 };
 
+/** A participant still in the cycle (not removed mid-cycle). */
+export const isActiveParticipant = (p: { removedAt?: Date | null }) =>
+  !p.removedAt;
+
+/** Phases in which reviews count as shared even without shared_at. */
+const SHARED_PHASES: readonly CycleStatus[] = ["sharing", "closed"];
+
 const isReviewer = (actor: ActorContext, r: VisibilityRequest) =>
   actor.personId !== null && actor.personId === r.reviewerPersonId;
 
@@ -64,19 +73,25 @@ const isReviewee = (actor: ActorContext, ctx: VisibilityContext) =>
  *   only after submitting their own manager review;
  * - manager: the snapshot manager reads it; the reviewee only once shared
  *   and only the questions visible to the reviewee;
- * - skip-level managers read submitted self/manager reviews (read-only);
+ * - skip-level managers read submitted self reviews, and submitted manager
+ *   reviews once shared (shared_at, or the cycle is sharing/closed), so
+ *   they never see a pre-calibration rating;
+ * - nobody but HR and the author reads requests of a removed participant;
  * - peer/upward: the snapshot manager (and HR) read them once submitted;
- *   the reviewee only after their review is shared, and only the questions
- *   visible to them. Who wrote it is a separate rule: reviewerVisible.
+ *   the reviewee only once shared (see revieweeShared), and only the
+ *   questions visible to them. Who wrote it: reviewerVisible.
  */
 export function canRead(actor: ActorContext, ctx: VisibilityContext): boolean {
   if (actor.role === "hr") return true;
   const { request } = ctx;
   if (isReviewer(actor, request)) return true;
+  if (actor.personId === null || !isActiveParticipant(ctx.participant)) {
+    return false;
+  }
   const submitted = request.status === "submitted";
   switch (request.relationship) {
     case "self":
-      if (!submitted || actor.personId === null) return false;
+      if (!submitted) return false;
       if (ctx.skipLevel) return true;
       if (!isManagerOf(actor, ctx)) return false;
       return (
@@ -85,15 +100,18 @@ export function canRead(actor: ActorContext, ctx: VisibilityContext): boolean {
       );
     case "manager":
       if (isManagerOf(actor, ctx)) return true;
-      if (submitted && ctx.skipLevel && actor.personId !== null) return true;
+      if (!submitted) return false;
       if (isReviewee(actor, ctx)) {
         return (
-          submitted &&
           !!request.sharedAt &&
           ctx.questionRevision?.visibleToReviewee !== false
         );
       }
-      return false;
+      return (
+        !!ctx.skipLevel &&
+        (!!request.sharedAt ||
+          SHARED_PHASES.includes(ctx.cycle?.status ?? "draft"))
+      );
     case "peer":
     case "upward":
       if (!submitted) return false;
@@ -160,5 +178,45 @@ export function canWrite(
     request.status === "draft" &&
     writablePhases[request.relationship].includes(scope.cycle.status) &&
     scope.participant.removedAt === null
+  );
+}
+
+/**
+ * Who may share a manager review with the reviewee: HR, its reviewer or the
+ * participant's snapshot manager, while the participant is active. Whether
+ * the cycle allows it right now is shareableNow.
+ */
+export function canShare(
+  actor: ActorContext,
+  ctx: {
+    request: Pick<VisibilityRequest, "relationship" | "reviewerPersonId">;
+    participant: {
+      snapManagerPersonId: string | null;
+      removedAt: Date | null;
+    };
+  },
+): boolean {
+  if (ctx.request.relationship !== "manager") return false;
+  if (!isActiveParticipant(ctx.participant)) return false;
+  if (actor.role === "hr") return true;
+  return (
+    actor.personId !== null &&
+    (actor.personId === ctx.request.reviewerPersonId ||
+      actor.personId === ctx.participant.snapManagerPersonId)
+  );
+}
+
+/**
+ * Manager reviews are shared only in the `sharing` phase and, with
+ * calibration on, only once calibration was published (#16 sets it).
+ */
+export function shareableNow(cycle: {
+  status: CycleStatus;
+  components: Pick<CycleComponents, "calibration">;
+  calibrationPublishedAt: Date | null;
+}): boolean {
+  return (
+    cycle.status === "sharing" &&
+    (!cycle.components.calibration || cycle.calibrationPublishedAt !== null)
   );
 }

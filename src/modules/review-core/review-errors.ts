@@ -9,7 +9,9 @@ export type ReviewErrorCode =
   | "nominations_full"
   | "invalid_nominee"
   | "already_nominated"
-  | "wrong_phase";
+  | "wrong_phase"
+  | "not_shareable"
+  | "not_remindable";
 
 /** Errors of review requests and answers (issues: per-question paths). */
 export class ReviewError extends DomainError<ReviewErrorCode> {}

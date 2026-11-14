@@ -649,6 +649,17 @@ describe("profiles against a drifted or damaged lake", () => {
         'Column "Review Cycle" (key column of profile "bamboo-employee-performance") is missing from table "employee-performance"; did you mean "review cycle"?',
       );
       expect(issues.map((i) => i.column)).toContain("Assessment Date");
+
+      // The message names the table or file actually read, when told.
+      const named = validateAgainstSchema(
+        profile,
+        await lake.describeTable(profile.table),
+        "Reporte de evaluaciones.csv",
+      );
+      expect(named[0].message).toContain(
+        'is missing from table "Reporte de evaluaciones.csv"',
+      );
+      expect(named[0].message).not.toContain('table "employee-performance"');
       await lake.close();
     } finally {
       await rm(dir, { recursive: true, force: true });

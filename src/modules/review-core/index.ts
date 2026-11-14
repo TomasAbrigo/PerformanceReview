@@ -47,6 +47,7 @@ export {
   type TeamRow,
 } from "./manager";
 export { shareAll, shareReview, unshare } from "./share";
+export { canShare, isActiveParticipant, shareableNow } from "./visibility";
 export {
   getReview,
   type Review,
