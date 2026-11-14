@@ -24,6 +24,8 @@ export type IngestCounts = {
   issues?: number;
   /** employee: records a reviewer already decided to ignore, resent unchanged. */
   ignored?: number;
+  /** assessment: imported manager reviews whose CSV manager is not the one in force. */
+  mismatches?: number;
 };
 
 /** The counters every run shows (the optional ones are entity-specific extras). */

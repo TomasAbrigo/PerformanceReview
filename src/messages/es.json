@@ -345,7 +345,8 @@
         "bamboo_id": "ID Bamboo",
         "employee_number": "Legajo",
         "work_email": "Email",
-        "name_hire_date": "Nombre e ingreso"
+        "name_hire_date": "Nombre e ingreso",
+        "name": "Nombre"
       },
       "score": "{score}% de coincidencia",
       "employments": "Empleos",

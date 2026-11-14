@@ -160,6 +160,7 @@ export async function runIngest<E extends IngestEntity = Entity>({
           source,
           hash,
           runId: run.id,
+          sourceId: record.sourceId,
           payload: record.payload,
           unmatched,
           cache,
@@ -176,7 +177,12 @@ export async function runIngest<E extends IngestEntity = Entity>({
     if (!("landing" in handler) && handler.finish && !extract.since) {
       addCounts(
         counts,
-        await handler.finish(db, { source, runId: run.id, seen }),
+        await handler.finish(db, {
+          source,
+          runId: run.id,
+          seen,
+          reject: (reject) => rejects.push(reject),
+        }),
       );
     }
 

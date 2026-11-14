@@ -345,7 +345,8 @@
         "bamboo_id": "Bamboo ID",
         "employee_number": "Employee number",
         "work_email": "Email",
-        "name_hire_date": "Name and hire date"
+        "name_hire_date": "Name and hire date",
+        "name": "Name"
       },
       "score": "{score}% match",
       "employments": "Employment",
