@@ -545,7 +545,10 @@
     "selfTask": "Self assessment: {cycle}",
     "due": "Due {date}",
     "noDue": "No due date",
-    "open": "Fill in"
+    "open": "Fill in",
+    "sharedReviews": "Shared reviews",
+    "sharedTask": "Shared review: {cycle}",
+    "view": "View"
   },
   "Review": {
     "selfTitle": "Self assessment",
@@ -579,7 +582,9 @@
       "forbidden": "You are not allowed to do this.",
       "validation": "Some answers are invalid.",
       "not_submitted": "The review is not submitted.",
-      "unknown": "An unexpected error occurred."
+      "unknown": "An unexpected error occurred.",
+      "not_shareable": "The review cannot be shared in this phase yet.",
+      "not_remindable": "A reminder cannot be sent for this review."
     }
   },
   "Upload": {
@@ -692,6 +697,44 @@
       "unknown_profile": "The chosen profile no longer exists.",
       "timeout": "The import took too long and was cancelled. Try again."
     }
+  },
+  "Team": {
+    "nav": "My team",
+    "title": "My team",
+    "noPerson": "Pick a person in 'Act as' to see their team.",
+    "empty": "You have no direct reports in active cycles.",
+    "tableLabel": "Direct reports",
+    "person": "Person",
+    "cycle": "Cycle",
+    "self": "Self assessment",
+    "manager": "Manager review",
+    "shared": "Shared",
+    "yes": "Yes",
+    "no": "No",
+    "actions": "Actions",
+    "open": "Review",
+    "remind": "Remind",
+    "reminded": "Reminder recorded for {name}."
+  },
+  "ManagerReview": {
+    "title": "Review of {name}",
+    "back": "Back to my team",
+    "confirmTitle": "Submit the review?",
+    "notFound": "You have no manager review for this person.",
+    "visible": "The employee will see this",
+    "hidden": "The employee will not see this",
+    "goalsTitle": "Goals",
+    "goalsPlaceholder": "The period's goals will be shown here.",
+    "selfTitle": "Self assessment",
+    "selfHidden": "The self assessment will be shown once both reviews are submitted.",
+    "share": "Share with the employee",
+    "sharedOn": "Shared on {date}",
+    "notShared": "Not shared with the employee yet.",
+    "shareAll": "Share all submitted reviews",
+    "sharedCount": "{count, plural, =0 {There were no reviews to share.} one {# review was shared.} other {# reviews were shared.}}",
+    "resultTitle": "Your manager's review: {cycle}",
+    "notSharedYet": "Your review has not been shared yet.",
+    "backToTasks": "Back to my tasks"
   },
   "DataQuality": {
     "nav": "Data quality",
