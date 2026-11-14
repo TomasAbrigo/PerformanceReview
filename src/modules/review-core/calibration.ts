@@ -20,6 +20,7 @@ import {
 import { vCurrentRating } from "@/db/views";
 import { isUuid } from "@/lib/uuid";
 import type { ActorContext } from "@/modules/actor/types";
+import { notifyCalibrationPublished } from "@/modules/notifications";
 import type {
   CalibrationGroupKind,
   FinalRatingStage,
@@ -67,16 +68,6 @@ export async function currentRatingFor(
     .from(vCurrentRating)
     .where(eq(vCurrentRating.participantId, participantId));
   return row ?? null;
-}
-
-/**
- * Hook for #18 (internal inbox): called after publishing with the
- * participants whose rating became final. No-op for now.
- */
-export async function onCalibrationPublished(
-  participantIds: string[],
-): Promise<void> {
-  void participantIds;
 }
 
 const isHr = (actor: ActorContext) => actor.role === "hr";
@@ -683,7 +674,7 @@ export async function distribution(
 /**
  * HR publishes the calibration of a cycle: sets calibration_published_at,
  * audits `calibration_published` once per participant (on their manager
- * request) and calls onCalibrationPublished. Returns the participants
+ * request) and notifies each snapshot manager (internal inbox). Returns the participants
  * audited (0 when already published).
  */
 export async function publishCalibration(
@@ -709,6 +700,7 @@ export async function publishCalibration(
       .select({
         id: reviewRequest.id,
         participantId: reviewRequest.participantId,
+        managerId: cycleParticipant.snapManagerPersonId,
       })
       .from(reviewRequest)
       .innerJoin(
@@ -732,9 +724,15 @@ export async function publishCalibration(
         })),
       );
     }
+    // Internal inbox: each snapshot manager once.
+    await notifyCalibrationPublished(tx, {
+      cycleId,
+      recipientPersonIds: requests
+        .map((r) => r.managerId)
+        .filter((id): id is string => id !== null),
+    });
     return requests.map((r) => r.participantId);
   });
-  if (participantIds.length) await onCalibrationPublished(participantIds);
   return participantIds.length;
 }
 

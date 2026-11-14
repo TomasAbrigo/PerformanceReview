@@ -23,6 +23,7 @@ export const seedFixturesDir = (size: SeedSize) =>
  * list or the other.
  */
 export const RESET_TABLES = [
+  "notification",
   "answer",
   "review_audit",
   "review_request",
@@ -30,8 +31,8 @@ export const RESET_TABLES = [
   "calibration_group_calibrator",
   "calibration_group_member",
   "calibration_group",
-  "cycle_goal_link",
   "participant_goal_snapshot",
+  "cycle_goal_link",
   "goal_share",
   "goal_comment",
   "goal_milestone",

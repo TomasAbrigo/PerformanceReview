@@ -77,7 +77,6 @@ export {
   finalScale,
   listGroups,
   myPublishedRating,
-  onCalibrationPublished,
   proposeRating,
   publishCalibration,
   type CalibrationRow,

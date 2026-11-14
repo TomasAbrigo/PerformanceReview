@@ -1,363 +1,9 @@
 {
-  "id": "38d5d23f-187a-4883-9d7e-305e38dbf791",
+  "id": "f6650edb-0044-4ba8-b201-e074d791fb24",
   "prevId": "04edba5b-619d-4a0b-940d-4878bdf7c93c",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
-    "public.calibration_group": {
-      "name": "calibration_group",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true,
-          "default": "gen_random_uuid()"
-        },
-        "cycle_id": {
-          "name": "cycle_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "name": {
-          "name": "name",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "kind": {
-          "name": "kind",
-          "type": "calibration_group_kind",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "criteria": {
-          "name": "criteria",
-          "type": "jsonb",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "created_by": {
-          "name": "created_by",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        }
-      },
-      "indexes": {
-        "calibration_group_cycle_idx": {
-          "name": "calibration_group_cycle_idx",
-          "columns": [
-            {
-              "expression": "cycle_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
-      "foreignKeys": {
-        "calibration_group_cycle_id_review_cycle_id_fk": {
-          "name": "calibration_group_cycle_id_review_cycle_id_fk",
-          "tableFrom": "calibration_group",
-          "tableTo": "review_cycle",
-          "columnsFrom": [
-            "cycle_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "calibration_group_created_by_person_id_fk": {
-          "name": "calibration_group_created_by_person_id_fk",
-          "tableFrom": "calibration_group",
-          "tableTo": "person",
-          "columnsFrom": [
-            "created_by"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public.calibration_group_calibrator": {
-      "name": "calibration_group_calibrator",
-      "schema": "",
-      "columns": {
-        "group_id": {
-          "name": "group_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "person_id": {
-          "name": "person_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "read_only": {
-          "name": "read_only",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": true,
-          "default": true
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "calibration_group_calibrator_group_id_calibration_group_id_fk": {
-          "name": "calibration_group_calibrator_group_id_calibration_group_id_fk",
-          "tableFrom": "calibration_group_calibrator",
-          "tableTo": "calibration_group",
-          "columnsFrom": [
-            "group_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "calibration_group_calibrator_person_id_person_id_fk": {
-          "name": "calibration_group_calibrator_person_id_person_id_fk",
-          "tableFrom": "calibration_group_calibrator",
-          "tableTo": "person",
-          "columnsFrom": [
-            "person_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {
-        "calibration_group_calibrator_group_id_person_id_pk": {
-          "name": "calibration_group_calibrator_group_id_person_id_pk",
-          "columns": [
-            "group_id",
-            "person_id"
-          ]
-        }
-      },
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public.calibration_group_member": {
-      "name": "calibration_group_member",
-      "schema": "",
-      "columns": {
-        "group_id": {
-          "name": "group_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "participant_id": {
-          "name": "participant_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "calibration_group_member_group_id_calibration_group_id_fk": {
-          "name": "calibration_group_member_group_id_calibration_group_id_fk",
-          "tableFrom": "calibration_group_member",
-          "tableTo": "calibration_group",
-          "columnsFrom": [
-            "group_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "calibration_group_member_participant_id_cycle_participant_id_fk": {
-          "name": "calibration_group_member_participant_id_cycle_participant_id_fk",
-          "tableFrom": "calibration_group_member",
-          "tableTo": "cycle_participant",
-          "columnsFrom": [
-            "participant_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {
-        "calibration_group_member_group_id_participant_id_pk": {
-          "name": "calibration_group_member_group_id_participant_id_pk",
-          "columns": [
-            "group_id",
-            "participant_id"
-          ]
-        }
-      },
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public.final_rating": {
-      "name": "final_rating",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true,
-          "default": "gen_random_uuid()"
-        },
-        "participant_id": {
-          "name": "participant_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "stage": {
-          "name": "stage",
-          "type": "final_rating_stage",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "option_value": {
-          "name": "option_value",
-          "type": "numeric",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "option_label": {
-          "name": "option_label",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "normalized": {
-          "name": "normalized",
-          "type": "numeric",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "actor_person_id": {
-          "name": "actor_person_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "reason": {
-          "name": "reason",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "flagged": {
-          "name": "flagged",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": true,
-          "default": false
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        }
-      },
-      "indexes": {
-        "final_rating_participant_idx": {
-          "name": "final_rating_participant_idx",
-          "columns": [
-            {
-              "expression": "participant_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "created_at",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
-      "foreignKeys": {
-        "final_rating_participant_id_cycle_participant_id_fk": {
-          "name": "final_rating_participant_id_cycle_participant_id_fk",
-          "tableFrom": "final_rating",
-          "tableTo": "cycle_participant",
-          "columnsFrom": [
-            "participant_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "final_rating_actor_person_id_person_id_fk": {
-          "name": "final_rating_actor_person_id_person_id_fk",
-          "tableFrom": "final_rating",
-          "tableTo": "person",
-          "columnsFrom": [
-            "actor_person_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
     "public.cycle_goal_link": {
       "name": "cycle_goal_link",
       "schema": "",
@@ -3810,28 +3456,162 @@
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
+    },
+    "public.notification": {
+      "name": "notification",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "recipient_person_id": {
+          "name": "recipient_person_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "kind": {
+          "name": "kind",
+          "type": "notification_kind",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "cycle_id": {
+          "name": "cycle_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "request_id": {
+          "name": "request_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "payload": {
+          "name": "payload",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'{}'::jsonb"
+        },
+        "dedupe_key": {
+          "name": "dedupe_key",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "read_at": {
+          "name": "read_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {
+        "notification_inbox_idx": {
+          "name": "notification_inbox_idx",
+          "columns": [
+            {
+              "expression": "recipient_person_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "(\"read_at\" is not null)",
+              "asc": true,
+              "isExpression": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "created_at",
+              "isExpression": false,
+              "asc": false,
+              "nulls": "first"
+            },
+            {
+              "expression": "id",
+              "isExpression": false,
+              "asc": false,
+              "nulls": "first"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "notification_recipient_person_id_person_id_fk": {
+          "name": "notification_recipient_person_id_person_id_fk",
+          "tableFrom": "notification",
+          "tableTo": "person",
+          "columnsFrom": [
+            "recipient_person_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "notification_cycle_id_review_cycle_id_fk": {
+          "name": "notification_cycle_id_review_cycle_id_fk",
+          "tableFrom": "notification",
+          "tableTo": "review_cycle",
+          "columnsFrom": [
+            "cycle_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "notification_request_id_review_request_id_fk": {
+          "name": "notification_request_id_review_request_id_fk",
+          "tableFrom": "notification",
+          "tableTo": "review_request",
+          "columnsFrom": [
+            "request_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "notification_dedupe_key_unique": {
+          "name": "notification_dedupe_key_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "dedupe_key"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
     }
   },
   "enums": {
-    "public.calibration_group_kind": {
-      "name": "calibration_group_kind",
-      "schema": "public",
-      "values": [
-        "by_department",
-        "by_manager",
-        "manual"
-      ]
-    },
-    "public.final_rating_stage": {
-      "name": "final_rating_stage",
-      "schema": "public",
-      "values": [
-        "computed",
-        "manager",
-        "calibrated",
-        "override"
-      ]
-    },
     "public.goal_status": {
       "name": "goal_status",
       "schema": "public",
@@ -3907,9 +3687,7 @@
         "shared",
         "unshared",
         "reminder_sent",
-        "reviewer_reassigned",
-        "calibration_published",
-        "rating_override"
+        "reviewer_reassigned"
       ]
     },
     "public.review_relationship": {
@@ -3929,6 +3707,18 @@
         "draft",
         "submitted",
         "declined"
+      ]
+    },
+    "public.notification_kind": {
+      "name": "notification_kind",
+      "schema": "public",
+      "values": [
+        "reminder_due",
+        "manual_reminder",
+        "review_shared",
+        "feedback_received",
+        "calibration_published",
+        "cycle_phase_changed"
       ]
     }
   },

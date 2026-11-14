@@ -7,6 +7,7 @@ import { closeDb, db } from "@/db/client";
 import {
   cycleParticipant,
   ratingScale,
+  notification,
   questionRevision,
   finalRating,
   person,
@@ -627,5 +628,19 @@ describe("overall rating question (role)", () => {
     await saveDraft(db, as(carla), id, fillAll(review, 3));
     await submit(db, as(carla), id);
     expect(await rows(p.id)).toHaveLength(0);
+  });
+});
+
+describe("publish notifications", () => {
+  it("notifies each snapshot manager once in the internal inbox", async () => {
+    const { cycle } = await ratedCycle();
+    await publishCalibration(db, hr, cycle.id);
+    const rows = await db
+      .select()
+      .from(notification)
+      .where(eq(notification.kind, "calibration_published"));
+    expect(rows.map((r) => r.recipientPersonId).sort()).toEqual(
+      [ana, carla].sort(),
+    );
   });
 });
