@@ -5,6 +5,7 @@ import {
   question,
   ratingScale,
   reviewTemplate,
+  type QuestionRole,
   type Relationship,
   templateSection,
 } from "@/db/schema";
@@ -73,6 +74,7 @@ type SeedQuestion = {
   scale?: ScaleKey;
   required?: boolean;
   visibleToReviewee?: boolean;
+  role?: QuestionRole;
 };
 type SeedTemplate = {
   key: string;
@@ -87,12 +89,18 @@ const self = (es: string, en: string): SeedQuestion => ({
   appliesTo: ["self"],
   required: true,
 });
-const manager = (es: string, en: string, scale?: ScaleKey): SeedQuestion => ({
+const manager = (
+  es: string,
+  en: string,
+  scale?: ScaleKey,
+  role?: QuestionRole,
+): SeedQuestion => ({
   prompt: { es, en },
   appliesTo: ["manager"],
   kind: scale ? "rating" : "text",
   scale,
   required: true,
+  role,
 });
 const peer = (es: string, en: string): SeedQuestion => ({
   prompt: { es, en },
@@ -152,10 +160,13 @@ const templates: SeedTemplate[] = [
             "¿Cómo calificarías el avance en sus objetivos?",
             "How would you rate their progress on goals?",
             "four_point_descriptive",
+            "goals_rating",
           ),
           manager(
             "Comenta el avance en sus objetivos.",
             "Comment on their progress on goals.",
+            undefined,
+            "goals_comment",
           ),
           manager(
             "¿Cuáles fueron hasta tres de sus mayores logros?",
@@ -173,6 +184,7 @@ const templates: SeedTemplate[] = [
             "Calificación general de desempeño",
             "Overall performance rating",
             "four_point_descriptive",
+            "overall_rating",
           ),
         ],
       },
@@ -349,6 +361,7 @@ export async function seedSystemTemplates(db: DbOrTx): Promise<void> {
             visibleToReviewee: q.visibleToReviewee ?? true,
             scaleId: q.scale ? scaleIds[q.scale] : null,
             prompt: q.prompt,
+            role: q.role ?? null,
           })),
         );
       }
