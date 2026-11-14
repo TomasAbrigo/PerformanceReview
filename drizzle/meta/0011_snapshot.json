@@ -1,9 +1,238 @@
 {
-  "id": "f6774bdd-2679-43ad-bcbf-aa0dc2144055",
+  "id": "04edba5b-619d-4a0b-940d-4878bdf7c93c",
   "prevId": "32c595f1-be31-4d6c-b394-0e4e49f95a36",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
+    "public.cycle_goal_link": {
+      "name": "cycle_goal_link",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "cycle_id": {
+          "name": "cycle_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "goal_id": {
+          "name": "goal_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "linked_by": {
+          "name": "linked_by",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "cycle_goal_link_cycle_id_review_cycle_id_fk": {
+          "name": "cycle_goal_link_cycle_id_review_cycle_id_fk",
+          "tableFrom": "cycle_goal_link",
+          "tableTo": "review_cycle",
+          "columnsFrom": [
+            "cycle_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "cycle_goal_link_goal_id_goal_id_fk": {
+          "name": "cycle_goal_link_goal_id_goal_id_fk",
+          "tableFrom": "cycle_goal_link",
+          "tableTo": "goal",
+          "columnsFrom": [
+            "goal_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "cycle_goal_link_linked_by_person_id_fk": {
+          "name": "cycle_goal_link_linked_by_person_id_fk",
+          "tableFrom": "cycle_goal_link",
+          "tableTo": "person",
+          "columnsFrom": [
+            "linked_by"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "cycle_goal_link_cycle_goal_uq": {
+          "name": "cycle_goal_link_cycle_goal_uq",
+          "nullsNotDistinct": false,
+          "columns": [
+            "cycle_id",
+            "goal_id"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.participant_goal_snapshot": {
+      "name": "participant_goal_snapshot",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "participant_id": {
+          "name": "participant_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "goal_id": {
+          "name": "goal_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "goal_source_key": {
+          "name": "goal_source_key",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "title": {
+          "name": "title",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "status": {
+          "name": "status",
+          "type": "goal_status",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "percent_complete": {
+          "name": "percent_complete",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "due_date": {
+          "name": "due_date",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "captured_at": {
+          "name": "captured_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "refreshed_at": {
+          "name": "refreshed_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "no_longer_applicable": {
+          "name": "no_longer_applicable",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        }
+      },
+      "indexes": {
+        "participant_goal_snapshot_goal_idx": {
+          "name": "participant_goal_snapshot_goal_idx",
+          "columns": [
+            {
+              "expression": "goal_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "participant_goal_snapshot_participant_id_cycle_participant_id_fk": {
+          "name": "participant_goal_snapshot_participant_id_cycle_participant_id_fk",
+          "tableFrom": "participant_goal_snapshot",
+          "tableTo": "cycle_participant",
+          "columnsFrom": [
+            "participant_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "participant_goal_snapshot_goal_id_goal_id_fk": {
+          "name": "participant_goal_snapshot_goal_id_goal_id_fk",
+          "tableFrom": "participant_goal_snapshot",
+          "tableTo": "goal",
+          "columnsFrom": [
+            "goal_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "participant_goal_snapshot_participant_goal_uq": {
+          "name": "participant_goal_snapshot_participant_goal_uq",
+          "nullsNotDistinct": false,
+          "columns": [
+            "participant_id",
+            "goal_source_key"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
     "public.goal": {
       "name": "goal",
       "schema": "",
@@ -1491,6 +1720,12 @@
           "type": "jsonb",
           "primaryKey": false,
           "notNull": false
+        },
+        "role": {
+          "name": "role",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
         }
       },
       "indexes": {},
@@ -2457,6 +2692,12 @@
           "primaryKey": false,
           "notNull": true
         },
+        "role": {
+          "name": "role",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
         "created_at": {
           "name": "created_at",
           "type": "timestamp with time zone",
@@ -3215,159 +3456,6 @@
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
-    },
-    "public.notification": {
-      "name": "notification",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true,
-          "default": "gen_random_uuid()"
-        },
-        "recipient_person_id": {
-          "name": "recipient_person_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "kind": {
-          "name": "kind",
-          "type": "notification_kind",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "cycle_id": {
-          "name": "cycle_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "request_id": {
-          "name": "request_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "payload": {
-          "name": "payload",
-          "type": "jsonb",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'{}'::jsonb"
-        },
-        "dedupe_key": {
-          "name": "dedupe_key",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        },
-        "read_at": {
-          "name": "read_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": false
-        }
-      },
-      "indexes": {
-        "notification_inbox_idx": {
-          "name": "notification_inbox_idx",
-          "columns": [
-            {
-              "expression": "recipient_person_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "(\"read_at\" is not null)",
-              "asc": true,
-              "isExpression": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "created_at",
-              "isExpression": false,
-              "asc": false,
-              "nulls": "first"
-            },
-            {
-              "expression": "id",
-              "isExpression": false,
-              "asc": false,
-              "nulls": "first"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
-      "foreignKeys": {
-        "notification_recipient_person_id_person_id_fk": {
-          "name": "notification_recipient_person_id_person_id_fk",
-          "tableFrom": "notification",
-          "tableTo": "person",
-          "columnsFrom": [
-            "recipient_person_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "notification_cycle_id_review_cycle_id_fk": {
-          "name": "notification_cycle_id_review_cycle_id_fk",
-          "tableFrom": "notification",
-          "tableTo": "review_cycle",
-          "columnsFrom": [
-            "cycle_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "notification_request_id_review_request_id_fk": {
-          "name": "notification_request_id_review_request_id_fk",
-          "tableFrom": "notification",
-          "tableTo": "review_request",
-          "columnsFrom": [
-            "request_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {
-        "notification_dedupe_key_unique": {
-          "name": "notification_dedupe_key_unique",
-          "nullsNotDistinct": false,
-          "columns": [
-            "dedupe_key"
-          ]
-        }
-      },
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
     }
   },
   "enums": {
@@ -3466,18 +3554,6 @@
         "draft",
         "submitted",
         "declined"
-      ]
-    },
-    "public.notification_kind": {
-      "name": "notification_kind",
-      "schema": "public",
-      "values": [
-        "reminder_due",
-        "manual_reminder",
-        "review_shared",
-        "feedback_received",
-        "calibration_published",
-        "cycle_phase_changed"
       ]
     }
   },

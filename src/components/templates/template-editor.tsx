@@ -17,6 +17,7 @@ import { useRouter } from "@/i18n/navigation";
 import {
   type QuestionKind,
   questionKinds as KINDS,
+  type QuestionRole,
   type Relationship,
   relationships as RELATIONSHIPS,
 } from "@/modules/templates/constants";
@@ -41,6 +42,8 @@ export type EditorQuestion = {
   scaleId: string | null;
   prompt: Localized;
   choices: { value: string; label: Localized }[] | null;
+  /** Special meaning (goals rating, overall rating...), if any. */
+  role: QuestionRole | null;
 };
 export type EditorTemplate = {
   id: string;
@@ -446,6 +449,9 @@ function QuestionSummary({
         {question.visibleToReviewee ? null : (
           <Badge variant="outline">{t("hiddenFromReviewee")}</Badge>
         )}
+        {question.role ? (
+          <Badge variant="default">{t(`roles.${question.role}`)}</Badge>
+        ) : null}
       </div>
       {question.choices?.length ? (
         <ul className="list-disc pl-5 text-sm text-muted-foreground">
@@ -466,6 +472,14 @@ const blankQuestion: QuestionPayload = {
   scaleId: null,
   prompt: emptyText,
   choices: null,
+  role: null,
+};
+
+/** The special roles a question of each type can have. */
+const ROLES_BY_KIND: Record<QuestionKind, QuestionRole[]> = {
+  text: ["goals_comment"],
+  rating: ["goals_rating", "overall_rating"],
+  single_choice: [],
 };
 
 const selectClass =
@@ -499,6 +513,7 @@ function QuestionForm({
   const appliesIssue = issueAt("appliesTo");
   const scaleIssue = issueAt("scaleId");
   const choicesIssue = issueAt("choices");
+  const roleIssue = issueAt("role");
 
   return (
     <form
@@ -536,7 +551,17 @@ function QuestionForm({
             id={`${id}-kind`}
             className={selectClass}
             value={value.kind}
-            onChange={(e) => set({ kind: e.target.value as Kind })}
+            onChange={(e) => {
+              const kind = e.target.value as Kind;
+              set({
+                kind,
+                // A role that does not fit the new type is dropped.
+                role:
+                  value.role && ROLES_BY_KIND[kind].includes(value.role)
+                    ? value.role
+                    : null,
+              });
+            }}
           >
             {KINDS.map((k) => (
               <option key={k} value={k}>
@@ -568,6 +593,26 @@ function QuestionForm({
           </Field>
         ) : null}
       </div>
+      <Field data-invalid={roleIssue ? true : undefined}>
+        <FieldLabel htmlFor={`${id}-role`}>{t("role")}</FieldLabel>
+        <select
+          id={`${id}-role`}
+          className={selectClass}
+          value={value.role ?? ""}
+          aria-invalid={roleIssue ? true : undefined}
+          onChange={(e) =>
+            set({ role: (e.target.value || null) as QuestionRole | null })
+          }
+        >
+          <option value="">{t("roles.none")}</option>
+          {ROLES_BY_KIND[value.kind].map((r) => (
+            <option key={r} value={r}>
+              {t(`roles.${r}`)}
+            </option>
+          ))}
+        </select>
+        {roleIssue ? <FieldError>{text.issue(roleIssue)}</FieldError> : null}
+      </Field>
       {value.kind === "single_choice" ? (
         <fieldset className="flex flex-col gap-2">
           <legend className="text-sm font-medium">{t("choices")}</legend>

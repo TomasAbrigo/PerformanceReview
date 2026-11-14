@@ -36,6 +36,7 @@ function template(overrides: Partial<EditorTemplate> = {}): EditorTemplate {
             scaleId: "s1",
             prompt: { es: "Calificación general", en: "Overall rating" },
             choices: null,
+            role: null,
           },
         ],
       },
@@ -168,6 +169,102 @@ describe("TemplateEditor", () => {
     expect(await screen.findByRole("alert")).toHaveTextContent(
       "The item no longer exists.",
     );
+  });
+
+  it("sends the special role chosen for a question", async () => {
+    const addQuestion = vi.fn().mockResolvedValue({ ok: true });
+    renderIn("en", { actions: actions({ addQuestion }) });
+    const user = userEvent.setup();
+    const form = screen.getByRole("form", { name: "New question" });
+    await user.type(within(form).getByLabelText("Text (Spanish)"), "Metas");
+    await user.type(within(form).getByLabelText("Text (English)"), "Goals");
+    await user.selectOptions(within(form).getByLabelText("Type"), "rating");
+    await user.selectOptions(within(form).getByLabelText("Scale"), "4-point");
+    await user.selectOptions(
+      within(form).getByLabelText("Special role"),
+      "Goals rating",
+    );
+    await user.click(within(form).getByLabelText("Manager"));
+    await user.click(
+      within(form).getByRole("button", { name: "Add question" }),
+    );
+    expect(addQuestion).toHaveBeenCalledWith(
+      "sec1",
+      expect.objectContaining({ kind: "rating", role: "goals_rating" }),
+    );
+  });
+
+  it("offers only the roles that fit the question type", async () => {
+    renderIn("es");
+    const user = userEvent.setup();
+    const form = screen.getByRole("form", { name: "Nueva pregunta" });
+    const roles = () =>
+      within(within(form).getByLabelText("Función especial"))
+        .getAllByRole("option")
+        .map((o) => o.textContent);
+    expect(roles()).toEqual(["Ninguna", "Comentario de objetivos"]);
+    await user.selectOptions(within(form).getByLabelText("Tipo"), "rating");
+    expect(roles()).toEqual([
+      "Ninguna",
+      "Calificación de objetivos",
+      "Calificación general de desempeño",
+    ]);
+    await user.selectOptions(
+      within(form).getByLabelText("Función especial"),
+      "Calificación de objetivos",
+    );
+    // Changing the type drops a role that no longer fits.
+    await user.selectOptions(within(form).getByLabelText("Tipo"), "text");
+    expect(within(form).getByLabelText("Función especial")).toHaveValue("");
+    await user.selectOptions(
+      within(form).getByLabelText("Tipo"),
+      "single_choice",
+    );
+    expect(roles()).toEqual(["Ninguna"]);
+  });
+
+  it("shows the role of a question and lets it be cleared", async () => {
+    const updateQuestion = vi.fn().mockResolvedValue({ ok: true });
+    const marked = template();
+    marked.sections[0].questions[0].role = "overall_rating";
+    renderIn("es", { template: marked, actions: actions({ updateQuestion }) });
+    const user = userEvent.setup();
+    expect(screen.getByText("Calificación general de desempeño")).toBeVisible();
+    await user.click(screen.getByRole("button", { name: "Editar pregunta" }));
+    const form = screen.getByRole("form", { name: "Editar pregunta" });
+    expect(within(form).getByLabelText("Función especial")).toHaveValue(
+      "overall_rating",
+    );
+    await user.selectOptions(
+      within(form).getByLabelText("Función especial"),
+      "Ninguna",
+    );
+    await user.click(
+      within(form).getByRole("button", { name: "Guardar pregunta" }),
+    );
+    expect(updateQuestion).toHaveBeenCalledWith(
+      "q1",
+      expect.objectContaining({ role: null }),
+    );
+  });
+
+  it("explains that a template already has that role", async () => {
+    const addQuestion = vi.fn().mockResolvedValue({
+      ok: false,
+      code: "validation",
+      issues: [{ path: "role", message: "duplicate_role" }],
+    });
+    renderIn("es", { actions: actions({ addQuestion }) });
+    const user = userEvent.setup();
+    const form = screen.getByRole("form", { name: "Nueva pregunta" });
+    await user.click(
+      within(form).getByRole("button", { name: "Agregar pregunta" }),
+    );
+    expect(
+      await within(form).findByText(
+        "Este template ya tiene una pregunta con esa función.",
+      ),
+    ).toBeVisible();
   });
 
   it("renders system templates read-only with a clone button", () => {
