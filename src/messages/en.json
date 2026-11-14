@@ -46,7 +46,8 @@
     "not_found": "The item no longer exists.",
     "system_readonly": "System items cannot be changed or deleted; clone them instead.",
     "in_use": "The scale is used by a question.",
-    "unknown": "Something went wrong."
+    "unknown": "Something went wrong.",
+    "duplicateRole": "This template already has a question with that role."
   },
   "Scales": {
     "title": "Rating scales",
@@ -118,7 +119,14 @@
     "choiceEn": "Option {n} (English)",
     "addChoice": "Add option",
     "hiddenFromReviewee": "Hidden from the reviewee",
-    "chooseScale": "Choose a scale"
+    "chooseScale": "Choose a scale",
+    "role": "Special role",
+    "roles": {
+      "none": "None",
+      "goals_rating": "Goals rating",
+      "goals_comment": "Goals comment",
+      "overall_rating": "Overall performance rating"
+    }
   },
   "People": {
     "title": "People",

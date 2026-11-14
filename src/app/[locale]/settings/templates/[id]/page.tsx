@@ -75,6 +75,7 @@ async function Editor({ params }: { params: Params }) {
               scaleId: q.scaleId,
               prompt: q.prompt,
               choices: q.choices,
+              role: q.role,
             })),
           })),
         }}

@@ -31,6 +31,7 @@ export function useErrorText() {
       }
       if (issue.message === "min_options") return t("minOptions");
       if (issue.message === "duplicate_values") return t("duplicateValues");
+      if (issue.message === "duplicate_role") return t("duplicateRole");
       return t("invalid");
     },
   };

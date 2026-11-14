@@ -184,6 +184,7 @@ const templates: SeedTemplate[] = [
             "Calificación general de desempeño",
             "Overall performance rating",
             "four_point_descriptive",
+            "overall_rating",
           ),
         ],
       },

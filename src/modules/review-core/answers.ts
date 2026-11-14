@@ -9,18 +9,28 @@ import {
   type ReviewRequest,
 } from "@/db/schema";
 import type { ActorContext } from "@/modules/actor/types";
-import { goalsQuestionsOptional, isGoalsQuestion } from "./goal-snapshot";
+import {
+  goalsQuestionsOptional,
+  type GoalsScope,
+  isGoalsQuestion,
+} from "./goal-snapshot";
 import { loadRequest } from "./requests";
 import { ReviewError } from "./review-errors";
+import type { CycleStatus } from "./status";
 import { canRead, canWrite } from "./visibility";
 
 /** Value of an answer as the form handles it (rating: the scale value). */
 export type AnswerValue = string | number | null;
 export type AnswerInput = { questionRevisionId: string; value: AnswerValue };
 
-export type SelfReview = {
+export type SelfReview = GoalsScope & {
   request: ReviewRequest;
-  cycle: { id: string; name: string; dueDate: string | null };
+  cycle: {
+    id: string;
+    name: string;
+    dueDate: string | null;
+    status: CycleStatus;
+  };
   questions: QuestionRevision[];
   /** Current answers by question revision id. */
   answers: Record<string, AnswerValue>;
@@ -97,10 +107,17 @@ export async function getReview(
   const duePhase = request.relationship === "manager" ? "manager" : "self";
   return {
     request,
+    participant: {
+      id: row.participant.id,
+      revieweePersonId: row.participant.revieweePersonId,
+      snapManagerPersonId: row.participant.snapManagerPersonId,
+      removedAt: row.participant.removedAt,
+    },
     cycle: {
       id: cycle.id,
       name: cycle.name,
       dueDate: cycle.dueDates[duePhase] ?? null,
+      status: cycle.status,
     },
     questions,
     answers: Object.fromEntries(

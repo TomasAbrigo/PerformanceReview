@@ -46,7 +46,8 @@
     "not_found": "El elemento ya no existe.",
     "system_readonly": "Los elementos del sistema no se pueden modificar ni borrar; clonalos.",
     "in_use": "La escala está en uso por alguna pregunta.",
-    "unknown": "Ocurrió un error inesperado."
+    "unknown": "Ocurrió un error inesperado.",
+    "duplicateRole": "Este template ya tiene una pregunta con esa función."
   },
   "Scales": {
     "title": "Escalas de rating",
@@ -118,7 +119,14 @@
     "choiceEn": "Opción {n} (inglés)",
     "addChoice": "Agregar opción",
     "hiddenFromReviewee": "Oculta para la persona evaluada",
-    "chooseScale": "Elegí una escala"
+    "chooseScale": "Elegí una escala",
+    "role": "Función especial",
+    "roles": {
+      "none": "Ninguna",
+      "goals_rating": "Calificación de objetivos",
+      "goals_comment": "Comentario de objetivos",
+      "overall_rating": "Calificación general de desempeño"
+    }
   },
   "People": {
     "title": "Personas",

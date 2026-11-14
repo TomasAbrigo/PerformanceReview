@@ -1,5 +1,5 @@
 {
-  "id": "76d23d14-606c-4339-a79b-f7a803e551c7",
+  "id": "c5021db4-5841-4ac1-9ebf-c5a4779c32f2",
   "prevId": "2f46b668-927f-44f1-a527-f5c1740a7aaf",
   "version": "7",
   "dialect": "postgresql",
@@ -121,8 +121,8 @@
           "primaryKey": false,
           "notNull": false
         },
-        "goal_source_id": {
-          "name": "goal_source_id",
+        "goal_source_key": {
+          "name": "goal_source_key",
           "type": "text",
           "primaryKey": false,
           "notNull": true
@@ -225,7 +225,7 @@
           "nullsNotDistinct": false,
           "columns": [
             "participant_id",
-            "goal_source_id"
+            "goal_source_key"
           ]
         }
       },

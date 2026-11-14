@@ -1,9 +1,10 @@
-import { and, asc, eq, inArray, isNull, sql } from "drizzle-orm";
+import { and, asc, eq, inArray, isNull, notExists, sql } from "drizzle-orm";
 import type { DbOrTx } from "@/db/client";
 import {
   cycleGoalLink,
   cycleParticipant,
   goal,
+  type CycleParticipant,
   type Goal,
   type GoalStatus,
   participantGoalSnapshot,
@@ -72,6 +73,16 @@ export function goalOverlapsPeriod(
 }
 
 /**
+ * The manager's overall performance rating among the question revisions of a
+ * cycle (the one marked `overall_rating`), if the template has it. The final
+ * rating and the calibration start from this question, never from the goals
+ * rating.
+ */
+export const overallRatingQuestion = <T extends { role: QuestionRole | null }>(
+  revisions: readonly T[],
+): T | undefined => revisions.find((q) => q.role === "overall_rating");
+
+/**
  * Whether a question's answer may count toward the overall rating (and so the
  * final rating and calibration). The goals rating and its comment never do.
  */
@@ -85,13 +96,12 @@ export const isGoalsQuestion = (q: { role: QuestionRole | null }) =>
 
 // --------------------------------------------------------------- snapshot
 
-const isoDay = (d: Date) => d.toISOString().slice(0, 10);
-
 const windowOf = (g: Goal): GoalWindow => ({
   status: g.status,
   dueDate: g.dueDate,
   completionDate: g.completionDate,
-  startDate: g.sourceSystem === "native" ? isoDay(g.createdAt) : null,
+  // The creation day as the company counts it (not the UTC one).
+  startDate: g.sourceSystem === "native" ? todayLocal(g.createdAt) : null,
 });
 
 /** The snapshot row of a goal as of `capturedAt`. */
@@ -99,7 +109,7 @@ function snapshotRow(participantId: string, g: Goal, capturedAt: Date) {
   return {
     participantId,
     goalId: g.id,
-    goalSourceId: g.sourceId ?? g.id,
+    goalSourceKey: `${g.sourceSystem}:${g.sourceId ?? g.id}`,
     title: g.title,
     status: g.status,
     percentComplete: g.percentComplete,
@@ -182,23 +192,75 @@ export const snapshotGoalsForParticipant = (
 
 // ---------------------------------------------------------------- refresh
 
-type Scope = {
-  participant: { snapManagerPersonId: string | null; removedAt: Date | null };
+/** Where a snapshot lives: its participant and the cycle's phase. */
+export type GoalsScope = {
+  participant: Pick<
+    CycleParticipant,
+    "id" | "revieweePersonId" | "snapManagerPersonId" | "removedAt"
+  >;
   cycle: { status: CycleStatus };
 };
 
 /** Phases in which the snapshot may still be refreshed or extended. */
-const isLive = ({ participant, cycle }: Scope) =>
+const isLive = ({ participant, cycle }: GoalsScope) =>
   participant.removedAt === null &&
   cycle.status !== "draft" &&
   cycle.status !== "closed";
 
 /** People (HR) and the participant's snapshot manager refresh the progress. */
-const mayRefresh = (actor: ActorContext, { participant }: Scope) =>
+const mayRefresh = (actor: ActorContext, { participant }: GoalsScope) =>
   actor.role === "hr" ||
   (actor.role === "manager" &&
     actor.personId !== null &&
     actor.personId === participant.snapManagerPersonId);
+
+/**
+ * Brings the figures of every snapshot row of a participant up to date with
+ * the goals as they are now (two statements, whatever the number of goals):
+ * live goals update status and progress; goals that are gone (soft or hard
+ * deleted) are flagged and keep the figures they had.
+ */
+async function refreshSnapshotRows(
+  db: DbOrTx,
+  participantId: string,
+  now: Date,
+): Promise<void> {
+  await db
+    .update(participantGoalSnapshot)
+    .set({
+      status: sql`${goal.status}`,
+      percentComplete: sql`${goal.percentComplete}`,
+      noLongerApplicable: false,
+      refreshedAt: now,
+    })
+    .from(goal)
+    .where(
+      and(
+        eq(participantGoalSnapshot.participantId, participantId),
+        eq(goal.id, participantGoalSnapshot.goalId),
+        isNull(goal.deletedAt),
+      ),
+    );
+  await db
+    .update(participantGoalSnapshot)
+    .set({ noLongerApplicable: true, refreshedAt: now })
+    .where(
+      and(
+        eq(participantGoalSnapshot.participantId, participantId),
+        notExists(
+          db
+            .select({ one: sql`1` })
+            .from(goal)
+            .where(
+              and(
+                eq(goal.id, participantGoalSnapshot.goalId),
+                isNull(goal.deletedAt),
+              ),
+            ),
+        ),
+      ),
+    );
+}
 
 /**
  * "Update progress": refreshes status and progress of the participant's
@@ -222,40 +284,17 @@ export async function refreshGoalProgress(
       })
       .from(cycleParticipant)
       .innerJoin(reviewCycle, eq(reviewCycle.id, cycleParticipant.cycleId))
-      .where(eq(cycleParticipant.id, participantId));
+      .where(
+        and(
+          eq(cycleParticipant.id, participantId),
+          isNull(reviewCycle.deletedAt),
+        ),
+      );
     if (!scope) throw new ReviewError("not_found");
     if (!mayRefresh(actor, scope) || !isLive(scope)) {
       throw new ReviewError("forbidden");
     }
-    const rows = await tx
-      .select()
-      .from(participantGoalSnapshot)
-      .where(eq(participantGoalSnapshot.participantId, participantId))
-      .for("update");
-    const goalIds = rows.flatMap((r) => (r.goalId ? [r.goalId] : []));
-    const live = new Map(
-      (goalIds.length
-        ? await tx.select().from(goal).where(inArray(goal.id, goalIds))
-        : []
-      ).map((g) => [g.id, g]),
-    );
-    for (const row of rows) {
-      const current = row.goalId ? live.get(row.goalId) : undefined;
-      const gone = !current || current.deletedAt !== null;
-      await tx
-        .update(participantGoalSnapshot)
-        .set(
-          gone
-            ? { noLongerApplicable: true, refreshedAt: now }
-            : {
-                status: current.status,
-                percentComplete: current.percentComplete,
-                noLongerApplicable: false,
-                refreshedAt: now,
-              },
-        )
-        .where(eq(participantGoalSnapshot.id, row.id));
-    }
+    await refreshSnapshotRows(tx, participantId, now);
   });
 }
 
@@ -264,14 +303,16 @@ export async function refreshGoalProgress(
 /**
  * People attaches a goal to a cycle explicitly (one the period overlap did
  * not pick up). It is remembered (so a participant added later gets it) and,
- * if the goal's owner is already a participant, added to their snapshot with
- * the goal's current figures. HR only, before the cycle closes. Idempotent.
+ * if the goal's owner is already a participant, added to their snapshot and
+ * the whole snapshot is refreshed, so that every goal (and the legend) is as
+ * of the same moment. HR only, before the cycle closes. Idempotent.
  */
 export async function linkGoalToCycle(
   db: DbOrTx,
   actor: ActorContext,
   cycleId: string,
   goalId: string,
+  now: Date = new Date(),
 ): Promise<void> {
   if (actor.role !== "hr") throw new ReviewError("forbidden");
   if (!isUuid(cycleId) || !isUuid(goalId)) throw new ReviewError("not_found");
@@ -303,8 +344,9 @@ export async function linkGoalToCycle(
     if (!owner) return; // not a participant (yet): the link waits
     await tx
       .insert(participantGoalSnapshot)
-      .values(snapshotRow(owner.id, target, new Date()))
+      .values(snapshotRow(owner.id, target, now))
       .onConflictDoNothing();
+    await refreshSnapshotRows(tx, owner.id, now);
   });
 }
 
@@ -338,20 +380,28 @@ export type GoalsBlockData = {
  * The goals block of a review the actor can read (the request's participant's
  * snapshot): null when the request is not visible. Goals are never filtered
  * out: the reviewee sees the same list as their manager.
+ *
+ * `source` is the request id, or the review the caller already loaded with
+ * getReview (which checked that the actor may read it): then it is not loaded
+ * (nor its visibility computed) a second time.
  */
 export async function getReviewGoals(
   db: DbOrTx,
   actor: ActorContext,
-  requestId: string,
+  source: string | GoalsScope,
 ): Promise<GoalsBlockData | null> {
-  let loaded;
-  try {
-    loaded = await loadRequest(db, actor, requestId);
-  } catch (error) {
-    if (error instanceof ReviewError) return null;
-    throw error;
+  let scope: GoalsScope;
+  if (typeof source === "string") {
+    try {
+      scope = await loadRequest(db, actor, source);
+    } catch (error) {
+      if (error instanceof ReviewError) return null;
+      throw error;
+    }
+  } else {
+    scope = source;
   }
-  const { participant, cycle } = loaded;
+  const { participant, cycle } = scope;
   const rows = await db
     .select()
     .from(participantGoalSnapshot)
@@ -361,7 +411,6 @@ export async function getReviewGoals(
       asc(participantGoalSnapshot.title),
       asc(participantGoalSnapshot.id),
     );
-  const scope = { participant, cycle };
   const canLink =
     actor.role === "hr" && cycle.status !== "closed" && !participant.removedAt;
   const inSnapshot = new Set(rows.flatMap((r) => (r.goalId ? [r.goalId] : [])));

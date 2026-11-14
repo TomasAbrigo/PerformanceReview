@@ -1,4 +1,4 @@
-import { asc, eq, inArray, sql } from "drizzle-orm";
+import { and, asc, eq, inArray, ne, sql } from "drizzle-orm";
 import type { ZodType } from "zod";
 import { parse as parseOr } from "@/lib/domain-error";
 import type { DbOrTx } from "@/db/client";
@@ -18,6 +18,7 @@ import { TemplatesError } from "./errors";
 import {
   type QuestionInput,
   questionInput,
+  roleKindIssues,
   type ScaleInput,
   scaleInput,
   type SectionInput,
@@ -364,7 +365,58 @@ function questionValues(data: ReturnType<typeof questionInput.parse>) {
     prompt: data.prompt,
     scaleId: data.kind === "rating" ? (data.scaleId ?? null) : null,
     choices: data.kind === "single_choice" ? (data.choices ?? null) : null,
+    // Undefined leaves the stored role alone; null clears it.
+    ...(data.role !== undefined && { role: data.role }),
   };
+}
+
+/** Roles a template may have on a single question (they are single answers). */
+const SINGLE_ROLES = ["goals_rating", "overall_rating"] as const;
+
+/**
+ * A question's role must fit its kind, and the goals rating and the overall
+ * rating exist at most once per template (the final rating starts from one
+ * question, the goals rating is one rating for all goals). `current` is the
+ * question being edited (its stored role counts when none is sent).
+ */
+async function assertRoleFits(
+  db: DbOrTx,
+  sectionId: string,
+  data: ReturnType<typeof questionInput.parse>,
+  current?: Question,
+): Promise<void> {
+  const role = data.role === undefined ? (current?.role ?? null) : data.role;
+  const issues = roleKindIssues(data.kind, role);
+  if (issues.length) {
+    throw new TemplatesError(
+      "validation",
+      issues.map(({ path, message }) => ({ path: path.join("."), message })),
+    );
+  }
+  if (role === null || !SINGLE_ROLES.some((r) => r === role)) return;
+  const [taken] = await db
+    .select({ id: question.id })
+    .from(question)
+    .innerJoin(templateSection, eq(templateSection.id, question.sectionId))
+    .where(
+      and(
+        eq(
+          templateSection.templateId,
+          db
+            .select({ id: templateSection.templateId })
+            .from(templateSection)
+            .where(eq(templateSection.id, sectionId)),
+        ),
+        eq(question.role, role),
+        current ? ne(question.id, current.id) : undefined,
+      ),
+    )
+    .limit(1);
+  if (taken) {
+    throw new TemplatesError("validation", [
+      { path: "role", message: "duplicate_role" },
+    ]);
+  }
 }
 
 export async function addQuestion(
@@ -374,6 +426,7 @@ export async function addQuestion(
 ): Promise<Question> {
   const data = parse(questionInput, input);
   await editableSection(db, sectionId);
+  await assertRoleFits(db, sectionId, data);
   const sort = await nextSort(db, "section", sectionId);
   const [created] = await db
     .insert(question)
@@ -388,7 +441,8 @@ export async function updateQuestion(
   input: QuestionInput,
 ): Promise<Question> {
   const data = parse(questionInput, input);
-  await editableQuestion(db, questionId);
+  const current = await editableQuestion(db, questionId);
+  await assertRoleFits(db, current.sectionId, data, current);
   const [updated] = await db
     .update(question)
     .set(questionValues(data))

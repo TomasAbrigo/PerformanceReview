@@ -9,8 +9,13 @@ export type Relationship = (typeof relationships)[number];
 /**
  * Special meaning of a question, besides its kind. `goals_rating` is the
  * single rating for all of the participant's goals and `goals_comment` its
- * comment. Analytics use it to tell the goals rating apart from the overall
- * rating, and neither ever feeds the final rating or the calibration.
+ * comment; `overall_rating` is the manager's overall performance rating, the
+ * one the final rating starts from. Analytics use the roles to tell them
+ * apart; the goals ones never feed the final rating or the calibration.
  */
-export const questionRoles = ["goals_rating", "goals_comment"] as const;
+export const questionRoles = [
+  "goals_rating",
+  "goals_comment",
+  "overall_rating",
+] as const;
 export type QuestionRole = (typeof questionRoles)[number];

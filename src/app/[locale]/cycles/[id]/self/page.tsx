@@ -37,7 +37,7 @@ async function SelfReview({ params }: PageProps<"/[locale]/cycles/[id]/self">) {
       </div>
     );
   }
-  const goals = await getReviewGoals(db, actor, review.request.id);
+  const goals = await getReviewGoals(db, actor, review);
   return (
     <SelfReviewForm
       key={`${review.request.id}-${review.request.status}`}

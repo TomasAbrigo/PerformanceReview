@@ -11,7 +11,7 @@ CREATE TABLE "participant_goal_snapshot" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"participant_id" uuid NOT NULL,
 	"goal_id" uuid,
-	"goal_source_id" text NOT NULL,
+	"goal_source_key" text NOT NULL,
 	"title" text NOT NULL,
 	"status" "goal_status" NOT NULL,
 	"percent_complete" integer NOT NULL,
@@ -19,7 +19,7 @@ CREATE TABLE "participant_goal_snapshot" (
 	"captured_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"refreshed_at" timestamp with time zone,
 	"no_longer_applicable" boolean DEFAULT false NOT NULL,
-	CONSTRAINT "participant_goal_snapshot_participant_goal_uq" UNIQUE("participant_id","goal_source_id")
+	CONSTRAINT "participant_goal_snapshot_participant_goal_uq" UNIQUE("participant_id","goal_source_key")
 );
 --> statement-breakpoint
 ALTER TABLE "question" ADD COLUMN "role" text;--> statement-breakpoint
@@ -30,6 +30,11 @@ ALTER TABLE "cycle_goal_link" ADD CONSTRAINT "cycle_goal_link_linked_by_person_i
 ALTER TABLE "participant_goal_snapshot" ADD CONSTRAINT "participant_goal_snapshot_participant_id_cycle_participant_id_fk" FOREIGN KEY ("participant_id") REFERENCES "public"."cycle_participant"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "participant_goal_snapshot" ADD CONSTRAINT "participant_goal_snapshot_goal_id_goal_id_fk" FOREIGN KEY ("goal_id") REFERENCES "public"."goal"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
 CREATE INDEX "participant_goal_snapshot_goal_idx" ON "participant_goal_snapshot" USING btree ("goal_id");--> statement-breakpoint
--- Backfill: mark the goals rating and its comment in templates created before roles existed (the system year-end template and its clones).
+-- Backfill: mark the goals rating, its comment and the overall rating in templates created before roles existed (the system year-end template and its clones), then in the revisions of the cycles already launched (by their template question, else by their own prompt).
 UPDATE "question" SET "role" = 'goals_rating' WHERE "kind" = 'rating' AND "applies_to" = ARRAY['manager']::text[] AND "prompt"->>'es' = '¿Cómo calificarías el avance en sus objetivos?';--> statement-breakpoint
-UPDATE "question" SET "role" = 'goals_comment' WHERE "kind" = 'text' AND "applies_to" = ARRAY['manager']::text[] AND "prompt"->>'es' = 'Comenta el avance en sus objetivos.';
+UPDATE "question" SET "role" = 'goals_comment' WHERE "kind" = 'text' AND "applies_to" = ARRAY['manager']::text[] AND "prompt"->>'es' = 'Comenta el avance en sus objetivos.';--> statement-breakpoint
+UPDATE "question" SET "role" = 'overall_rating' WHERE "kind" = 'rating' AND "applies_to" = ARRAY['manager']::text[] AND "prompt"->>'es' = 'Calificación general de desempeño';--> statement-breakpoint
+UPDATE "question_revision" r SET "role" = q."role" FROM "question" q WHERE r."question_id" = q."id" AND r."role" IS NULL AND q."role" IS NOT NULL;--> statement-breakpoint
+UPDATE "question_revision" SET "role" = 'goals_rating' WHERE "role" IS NULL AND "kind" = 'rating' AND "applies_to" = ARRAY['manager']::text[] AND "prompt"->>'es' = '¿Cómo calificarías el avance en sus objetivos?';--> statement-breakpoint
+UPDATE "question_revision" SET "role" = 'goals_comment' WHERE "role" IS NULL AND "kind" = 'text' AND "applies_to" = ARRAY['manager']::text[] AND "prompt"->>'es' = 'Comenta el avance en sus objetivos.';--> statement-breakpoint
+UPDATE "question_revision" SET "role" = 'overall_rating' WHERE "role" IS NULL AND "kind" = 'rating' AND "applies_to" = ARRAY['manager']::text[] AND "prompt"->>'es' = 'Calificación general de desempeño';

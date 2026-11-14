@@ -1,4 +1,4 @@
-import { cp, mkdtemp, rm } from "node:fs/promises";
+import { cp, mkdtemp, readFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { and, asc, eq, sql } from "drizzle-orm";
@@ -10,7 +10,9 @@ import {
   goal,
   participantGoalSnapshot,
   person,
+  question,
   questionRevision,
+  reviewCycle,
 } from "@/db/schema";
 import type { ActorContext } from "@/modules/actor/types";
 import { FixtureAdapter, runIngest } from "@/modules/ingest";
@@ -34,7 +36,9 @@ import {
 } from ".";
 import {
   getReviewGoals,
+  isGoalsQuestion,
   linkGoalToCycle,
+  overallRatingQuestion,
   refreshGoalProgress,
   snapshotGoalsForParticipant,
 } from "./goal-snapshot";
@@ -224,7 +228,7 @@ describe("snapshot at launch", () => {
       refreshedAt: null,
     });
     expect(forBruno[0].capturedAt).toBeInstanceOf(Date);
-    expect(forBruno[0].goalSourceId).toMatch(/^g\d+$/);
+    expect(forBruno[0].goalSourceKey).toMatch(/^bamboo_api:g\d+$/);
     expect(forBruno[0].goalId).not.toBeNull();
 
     const forAna = await snapshotOf((await participantOf(cycle.id, ana)).id);
@@ -243,7 +247,7 @@ describe("snapshot at launch", () => {
     const cycle = await createCycle(db, input());
     await launchCycle(db, cycle.id, null);
     const [row] = await snapshotOf((await participantOf(cycle.id, bruno)).id);
-    expect(row.goalSourceId).toBe(native.id);
+    expect(row.goalSourceKey).toBe(`native:${native.id}`);
   });
 
   it("leaves out a native goal created after the period ended", async () => {
@@ -314,6 +318,47 @@ describe("snapshot at launch", () => {
     expect(titles(await snapshotOf(first.id))).toEqual([
       "C runs past the period",
     ]);
+  });
+
+  it("keeps two goals that share a source id across source systems", async () => {
+    await addGoal({
+      personId: bruno,
+      title: "From the API",
+      dueDate: "2022-03-01",
+      sourceSystem: "bamboo_api",
+      sourceId: "9001",
+    });
+    await addGoal({
+      personId: bruno,
+      title: "From the export",
+      dueDate: "2022-04-01",
+      sourceSystem: "bamboo_export",
+      sourceId: "9001",
+    });
+    const cycle = await createCycle(db, input());
+    await launchCycle(db, cycle.id, null);
+    const rows = await snapshotOf((await participantOf(cycle.id, bruno)).id);
+    expect(rows.map((r) => r.goalSourceKey).sort()).toEqual([
+      "bamboo_api:9001",
+      "bamboo_export:9001",
+    ]);
+  });
+
+  it("dates a native goal's start in the company's time zone", async () => {
+    // 22:30 on 2022-06-30 in Buenos Aires is already 2022-07-01 in UTC.
+    await addGoal({
+      personId: bruno,
+      title: "Native, last evening",
+      dueDate: "2022-12-31",
+      sourceSystem: "native",
+      sourceId: null,
+      createdAt: new Date("2022-07-01T01:30:00Z"),
+    });
+    const cycle = await createCycle(db, input());
+    await launchCycle(db, cycle.id, null);
+    expect(
+      titles(await snapshotOf((await participantOf(cycle.id, bruno)).id)),
+    ).toEqual(["Native, last evening"]);
   });
 
   it("snapshotGoalsForParticipant takes the capture date it is given", async () => {
@@ -406,6 +451,19 @@ describe("refreshGoalProgress", () => {
     ).rejects.toBeInstanceOf(ReviewError);
   });
 
+  it("does not find the participant of a deleted cycle", async () => {
+    await seedGoals();
+    const cycle = await collectingCycle();
+    const p = await participantOf(cycle.id, bruno);
+    await db
+      .update(reviewCycle)
+      .set({ deletedAt: new Date() })
+      .where(eq(reviewCycle.id, cycle.id));
+    await expect(refreshGoalProgress(db, hr, p.id)).rejects.toMatchObject({
+      code: "not_found",
+    });
+  });
+
   it("is not allowed once the cycle is closed", async () => {
     await seedGoals();
     const cycle = await collectingCycle();
@@ -443,6 +501,45 @@ describe("explicit goal link", () => {
         .from(cycleGoalLink)
         .where(eq(cycleGoalLink.cycleId, cycle.id)),
     ).toHaveLength(1);
+  });
+
+  it("refreshes the whole snapshot, so the legend moves to the link date", async () => {
+    await seedGoals();
+    const outside = await addGoal({
+      personId: bruno,
+      title: "Outside",
+      dueDate: "2023-01-01",
+    });
+    const cycle = await collectingCycle();
+    const p = await participantOf(cycle.id, bruno);
+    await db
+      .update(participantGoalSnapshot)
+      .set({ capturedAt: new Date("2022-01-10T12:00:00Z") })
+      .where(eq(participantGoalSnapshot.participantId, p.id));
+    await db
+      .update(goal)
+      .set({ percentComplete: 77 })
+      .where(eq(goal.title, "A due inside"));
+
+    await linkGoalToCycle(
+      db,
+      hr,
+      cycle.id,
+      outside.id,
+      new Date("2022-03-05T12:00:00Z"),
+    );
+
+    const rows = await snapshotOf(p.id);
+    expect(titles(rows)).toContain("Outside");
+    // Every goal is as of the same moment, with its current figures.
+    expect(
+      new Set(rows.map((r) => (r.refreshedAt ?? r.capturedAt).toISOString())),
+    ).toEqual(new Set(["2022-03-05T12:00:00.000Z"]));
+    expect(rows.find((r) => r.title === "A due inside")?.percentComplete).toBe(
+      77,
+    );
+    const requestId = (await findManagerRequestId(db, hr, p.id))!;
+    expect((await getReviewGoals(db, hr, requestId))!.asOf).toBe("2022-03-05");
   });
 
   it("feeds the snapshot of a participant added afterwards", async () => {
@@ -493,6 +590,18 @@ describe("getReviewGoals", () => {
     const asHr = (await getReviewGoals(db, hr, requestId))!;
     expect(asHr.canLink).toBe(true);
     expect(asHr.linkable).toHaveLength(2); // B and D: outside the period
+  });
+
+  it("takes the review that is already loaded instead of loading it again", async () => {
+    await seedGoals();
+    const cycle = await collectingCycle();
+    const p = await participantOf(cycle.id, bruno);
+    const actor = as(carla, "manager");
+    const requestId = (await findManagerRequestId(db, actor, p.id))!;
+    const review = (await getReview(db, actor, requestId))!;
+    expect(await getReviewGoals(db, actor, review)).toEqual(
+      await getReviewGoals(db, actor, requestId),
+    );
   });
 
   it("offers the owner's goals that are not in the snapshot to HR", async () => {
@@ -562,10 +671,17 @@ describe("goals rating", () => {
     const overall = revisions.find(
       (r) => r.prompt.en === "Overall performance rating",
     )!;
-    expect(overall.role).toBeNull();
+    expect(overall.role).toBe("overall_rating");
+    expect(overallRatingQuestion(revisions)?.id).toBe(overall.id);
     expect(revisions.filter((r) => r.role === null).length).toBe(
-      revisions.length - 2,
+      revisions.length - 3,
     );
+  });
+
+  it("has no overall rating question when no revision carries the role", () => {
+    expect(
+      overallRatingQuestion([{ role: null }, { role: "goals_rating" }]),
+    ).toBeUndefined();
   });
 
   it("keeps the roles when a template is cloned", async () => {
@@ -582,7 +698,7 @@ describe("goals rating", () => {
   /** Fills every question of a review but the goals ones. */
   const fillExceptGoals = (review: Review) =>
     review.questions
-      .filter((q) => q.role === null)
+      .filter((q) => !isGoalsQuestion(q))
       .map((q) => ({
         questionRevisionId: q.id,
         value:
@@ -605,11 +721,13 @@ describe("goals rating", () => {
     const requestId = await managerRequest(cycle.id, bruno, carla);
     const actor = as(carla, "manager");
     const review = (await getReview(db, actor, requestId))!;
-    const goalsQuestions = review.questions.filter((q) => q.role !== null);
+    const goalsQuestions = review.questions.filter(isGoalsQuestion);
     expect(goalsQuestions).toHaveLength(2);
     expect(goalsQuestions.every((q) => !q.required)).toBe(true);
     expect(
-      review.questions.filter((q) => q.role === null).every((q) => q.required),
+      review.questions
+        .filter((q) => !isGoalsQuestion(q))
+        .every((q) => q.required),
     ).toBe(true);
 
     await saveDraft(db, actor, requestId, fillExceptGoals(review));
@@ -640,16 +758,14 @@ describe("goals rating", () => {
     const actor = as(carla, "manager");
     const review = (await getReview(db, actor, requestId))!;
     expect(
-      review.questions.filter((q) => q.role !== null).every((q) => q.required),
+      review.questions.filter(isGoalsQuestion).every((q) => q.required),
     ).toBe(true);
 
     await saveDraft(db, actor, requestId, fillExceptGoals(review));
     const error = await submit(db, actor, requestId).catch((e: unknown) => e);
     expect(error).toBeInstanceOf(ReviewError);
     const issues = (error as ReviewError).issues.map((i) => i.path);
-    const goalsIds = review.questions
-      .filter((q) => q.role !== null)
-      .map((q) => q.id);
+    const goalsIds = review.questions.filter(isGoalsQuestion).map((q) => q.id);
     expect(issues.sort()).toEqual(goalsIds.sort());
   });
 
@@ -659,5 +775,70 @@ describe("goals rating", () => {
       r.appliesTo.includes("self"),
     );
     expect(selfRevisions.every((r) => r.role === null)).toBe(true);
+  });
+});
+
+describe("role backfill (migration)", () => {
+  /** The backfill statements of the migration, as written in the file. */
+  async function runBackfill() {
+    const file = await readFile("drizzle/0011_goal_snapshots.sql", "utf8");
+    const statements = file
+      .slice(file.indexOf("-- Backfill"))
+      .split("--> statement-breakpoint")
+      .map((st) =>
+        st
+          .split("\n")
+          .filter((line) => !line.startsWith("--"))
+          .join("\n")
+          .trim(),
+      )
+      .filter(Boolean);
+    expect(statements.length).toBeGreaterThan(0);
+    for (const statement of statements) await db.execute(sql.raw(statement));
+  }
+
+  it("marks the roles on a cycle launched before roles existed", async () => {
+    const cycle = await createCycle(db, input());
+    await launchCycle(db, cycle.id, null);
+    const revisions = () =>
+      db
+        .select()
+        .from(questionRevision)
+        .where(eq(questionRevision.cycleId, cycle.id));
+    const before = await revisions();
+    const rolesByPrompt = Object.fromEntries(
+      before.filter((r) => r.role).map((r) => [r.id, r.role]),
+    );
+    expect(Object.keys(rolesByPrompt)).toHaveLength(3);
+
+    // As it was before the roles: none on questions nor on revisions, and the
+    // goals rating's template question is gone (its revision is orphaned).
+    await db.update(question).set({ role: null });
+    await db.update(questionRevision).set({ role: null });
+    const goalsRating = before.find((r) => r.role === "goals_rating")!;
+    await db
+      .update(questionRevision)
+      .set({ questionId: null })
+      .where(eq(questionRevision.id, goalsRating.id));
+
+    await runBackfill();
+
+    const after = await revisions();
+    expect(
+      Object.fromEntries(
+        after.filter((r) => r.role).map((r) => [r.id, r.role]),
+      ),
+    ).toEqual(rolesByPrompt);
+    // Templates are marked again too, so a new cycle gets them.
+    const next = await createCycle(db, input({ name: "H1 again" }));
+    await launchCycle(db, next.id, null);
+    expect(
+      (
+        await db
+          .select()
+          .from(questionRevision)
+          .where(eq(questionRevision.cycleId, next.id))
+      ).filter((r) => r.role),
+    ).toHaveLength(3);
   });
 });

@@ -33,8 +33,11 @@ export const participantGoalSnapshot = pgTable(
     goalId: uuid("goal_id").references(() => goal.id, {
       onDelete: "set null",
     }),
-    /** The goal's source id (Bamboo's), or its own id for native goals. */
-    goalSourceId: text("goal_source_id").notNull(),
+    /**
+     * `source_system:source_id` of the goal (`native:<goal id>` for native
+     * goals): the same source id may exist in two source systems.
+     */
+    goalSourceKey: text("goal_source_key").notNull(),
     title: text("title").notNull(),
     status: goalStatus("status").notNull(),
     percentComplete: integer("percent_complete").notNull(),
@@ -52,7 +55,7 @@ export const participantGoalSnapshot = pgTable(
   (t) => [
     unique("participant_goal_snapshot_participant_goal_uq").on(
       t.participantId,
-      t.goalSourceId,
+      t.goalSourceKey,
     ),
     index("participant_goal_snapshot_goal_idx").on(t.goalId),
   ],

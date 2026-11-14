@@ -67,7 +67,7 @@ async function ManagerReview({
   const self = refs.selfRequestId
     ? await getReview(db, actor, refs.selfRequestId)
     : null;
-  const goals = await getReviewGoals(db, actor, review.request.id);
+  const goals = await getReviewGoals(db, actor, review);
   return (
     <ManagerReviewForm
       goals={
