@@ -695,5 +695,28 @@
       "unknown_profile": "El perfil elegido ya no existe.",
       "timeout": "La importación tardó demasiado y se canceló. Probá de nuevo."
     }
+  },
+  "ImportHistory": {
+    "title": "Importación histórica",
+    "back": "← Corridas de importación",
+    "summary": "{count, plural, one {# ciclo detectado en el archivo} other {# ciclos detectados en el archivo}}",
+    "cycles": "Ciclos detectados",
+    "columns": {
+      "cycle": "Ciclo",
+      "period": "Período",
+      "rows": "Filas",
+      "participants": "Participantes nuevos",
+      "requests": "Solicitudes",
+      "answers": "Respuestas",
+      "issues": "Casos de identidad",
+      "mismatches": "Evaluador distinto"
+    },
+    "period": "{start} – {end}",
+    "createdUnchanged": "{created} nuevas · {unchanged} sin cambios",
+    "mismatchHint": "Evaluador distinto: el manager del archivo no es el vigente al cierre del período (el participante conserva el vigente).",
+    "viewRun": "Ver la corrida",
+    "viewQueue": "Ver la cola de identidad",
+    "viewResult": "Ver ciclos importados",
+    "notFound": "Esta corrida no importó ciclos históricos."
   }
 }

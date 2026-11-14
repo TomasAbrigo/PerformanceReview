@@ -22,7 +22,7 @@ import {
   upsertJobHistory,
 } from "./job-history";
 import { stagedEmployeeSchema } from "./staging";
-import type { Entity, IngestEntity } from "./types";
+import type { IngestEntity } from "./types";
 
 export type HandlerContext = {
   source: SourceSystem;

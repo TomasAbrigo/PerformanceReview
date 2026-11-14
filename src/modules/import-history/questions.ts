@@ -144,7 +144,11 @@ export function detectQuestionColumns(headers: string[]): QuestionColumn[] {
   }
   return found
     .sort((a, b) => a.order - b.order)
-    .map(({ order: _order, ...column }, sort) => ({ ...column, sort }));
+    .map((entry, sort) => {
+      const column: QuestionColumn & { order?: number } = { ...entry, sort };
+      delete column.order;
+      return column;
+    });
 }
 
 export type AnswerColumns = {

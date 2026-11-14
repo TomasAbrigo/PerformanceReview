@@ -695,5 +695,28 @@
       "unknown_profile": "The chosen profile no longer exists.",
       "timeout": "The import took too long and was cancelled. Try again."
     }
+  },
+  "ImportHistory": {
+    "title": "Historical import",
+    "back": "← Import runs",
+    "summary": "{count, plural, one {# cycle detected in the file} other {# cycles detected in the file}}",
+    "cycles": "Detected cycles",
+    "columns": {
+      "cycle": "Cycle",
+      "period": "Period",
+      "rows": "Rows",
+      "participants": "New participants",
+      "requests": "Requests",
+      "answers": "Answers",
+      "issues": "Identity cases",
+      "mismatches": "Different reviewer"
+    },
+    "period": "{start} – {end}",
+    "createdUnchanged": "{created} new · {unchanged} unchanged",
+    "mismatchHint": "Different reviewer: the file's manager is not the one in force at the end of the period (the participant keeps the one in force).",
+    "viewRun": "View the run",
+    "viewQueue": "View the identity queue",
+    "viewResult": "View imported cycles",
+    "notFound": "This run imported no historical cycles."
   }
 }

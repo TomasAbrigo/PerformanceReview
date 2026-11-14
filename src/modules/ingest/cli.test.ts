@@ -222,8 +222,11 @@ describe("parseIngestArgs", () => {
 
 describe("REGISTRY", () => {
   it("has the handler entities and goal, dependencies first", () => {
+    // Report-only entities (assessment, feedback) are imported from files.
     expect([...REGISTRY.keys()]).toEqual([
-      ...Object.keys(entityHandlers),
+      ...Object.keys(entityHandlers).filter(
+        (e) => e !== "assessment" && e !== "feedback",
+      ),
       "goal",
     ]);
     // job_history and goal resolve people through employee ingestion.

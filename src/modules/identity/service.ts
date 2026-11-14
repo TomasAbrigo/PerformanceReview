@@ -40,8 +40,12 @@ export function summarizePayload(payload: unknown): PayloadSummary {
       status: e.status,
     };
   }
+  // Report rows (historical import): only a name, under the profile's field.
+  const fields = (payload as { fields?: Record<string, unknown> } | null)
+    ?.fields;
+  const name = fields?.employee_name;
   return {
-    displayName: null,
+    displayName: typeof name === "string" ? name : null,
     employeeNumber: null,
     workEmail: null,
     hireDate: null,

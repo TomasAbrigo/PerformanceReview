@@ -1,4 +1,4 @@
-import { and, asc, eq, sql } from "drizzle-orm";
+import { and, type AnyColumn, asc, eq, sql } from "drizzle-orm";
 import type { DbOrTx } from "@/db/client";
 import {
   historyImportRow,
@@ -34,7 +34,7 @@ export type HistoryImportResult = {
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
-const sum = (column: typeof historyImportRow.participantsCreated) =>
+const sum = (column: AnyColumn) =>
   sql<number>`coalesce(sum(${column}), 0)::int`;
 
 /** What a historical import run did, per detected cycle; null if it imported none. */
