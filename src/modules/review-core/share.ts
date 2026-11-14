@@ -1,15 +1,23 @@
-import { and, eq, isNull } from "drizzle-orm";
+import { and, eq, inArray, isNull } from "drizzle-orm";
 import type { DbOrTx } from "@/db/client";
+import {
+  cycleParticipant,
+  reviewAudit,
+  reviewCycle,
+  reviewRequest,
+  type ReviewRequest,
+} from "@/db/schema";
 import { isUuid } from "@/lib/uuid";
-import { reviewAudit, reviewRequest, type ReviewRequest } from "@/db/schema";
 import type { ActorContext } from "@/modules/actor/types";
 import { loadRequest } from "./requests";
 import { ReviewError } from "./review-errors";
+import { canShare, shareableNow } from "./visibility";
 
 /**
  * Shares a submitted manager review with the reviewee (sets shared_at,
- * audited). Allowed to the participant's snapshot manager, the review's
- * reviewer, and HR. Sharing an already shared review is a no-op. Entering
+ * audited). Who: canShare (HR, the reviewer, the snapshot manager; active
+ * participant). When: shareableNow (the `sharing` phase, after calibration
+ * is published when calibration is on). Sharing twice is a no-op; entering
  * the `sharing` phase does not share anything by itself.
  */
 export async function shareReview(
@@ -18,18 +26,18 @@ export async function shareReview(
   requestId: string,
 ): Promise<ReviewRequest> {
   return db.transaction(async (tx) => {
-    const { request, participant } = await loadRequest(tx, actor, requestId, {
-      forUpdate: true,
-    });
-    const own =
-      actor.personId !== null &&
-      (actor.personId === participant.snapManagerPersonId ||
-        actor.personId === request.reviewerPersonId);
-    if (request.relationship !== "manager" || (actor.role !== "hr" && !own)) {
+    const { request, participant, cycle } = await loadRequest(
+      tx,
+      actor,
+      requestId,
+      { forUpdate: true },
+    );
+    if (!canShare(actor, { request, participant })) {
       throw new ReviewError("forbidden");
     }
     if (request.status !== "submitted") throw new ReviewError("not_submitted");
     if (request.sharedAt) return request;
+    if (!shareableNow(cycle)) throw new ReviewError("not_shareable");
     const [updated] = await tx
       .update(reviewRequest)
       .set({ sharedAt: new Date(), sharedBy: actor.personId })
@@ -44,7 +52,10 @@ export async function shareReview(
   });
 }
 
-/** HR shares every submitted, unshared manager review of a cycle. */
+/**
+ * HR shares every submitted, unshared manager review of the active
+ * participants of a cycle (same phase rule as shareReview).
+ */
 export async function shareAll(
   db: DbOrTx,
   actor: ActorContext,
@@ -53,6 +64,22 @@ export async function shareAll(
   if (actor.role !== "hr") throw new ReviewError("forbidden");
   if (!isUuid(cycleId)) throw new ReviewError("not_found");
   return db.transaction(async (tx) => {
+    const [cycle] = await tx
+      .select()
+      .from(reviewCycle)
+      .where(and(eq(reviewCycle.id, cycleId), isNull(reviewCycle.deletedAt)))
+      .for("update");
+    if (!cycle) throw new ReviewError("not_found");
+    if (!shareableNow(cycle)) throw new ReviewError("not_shareable");
+    const active = tx
+      .select({ id: cycleParticipant.id })
+      .from(cycleParticipant)
+      .where(
+        and(
+          eq(cycleParticipant.cycleId, cycleId),
+          isNull(cycleParticipant.removedAt),
+        ),
+      );
     const shared = await tx
       .update(reviewRequest)
       .set({ sharedAt: new Date(), sharedBy: actor.personId })
@@ -63,6 +90,7 @@ export async function shareAll(
           eq(reviewRequest.status, "submitted"),
           isNull(reviewRequest.sharedAt),
           isNull(reviewRequest.deletedAt),
+          inArray(reviewRequest.participantId, active),
         ),
       )
       .returning({ id: reviewRequest.id });

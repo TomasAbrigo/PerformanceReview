@@ -18,7 +18,7 @@ import {
   addParticipant,
   createCycle,
   findMySelfRequestId,
-  getSelfReview,
+  getReview,
   launchCycle,
   listMyTasks,
   listSelfRequests,
@@ -125,7 +125,7 @@ async function collectingCycle(overrides: Partial<CycleInput> = {}) {
 
 async function brunoRequest(cycleId: string) {
   const id = await findMySelfRequestId(db, as(bruno), cycleId);
-  return (await getSelfReview(db, as(bruno), id!))!;
+  return (await getReview(db, as(bruno), id!))!;
 }
 
 /** Text answers for every question of the review. */
@@ -329,11 +329,11 @@ describe("visibility", () => {
     const cycle = await collectingCycle();
     const review = await brunoRequest(cycle.id);
     const id = review.request.id;
-    expect(await getSelfReview(db, as(bruno), id)).not.toBeNull();
-    expect(await getSelfReview(db, hr, id)).not.toBeNull();
-    expect(await getSelfReview(db, as(ana), id)).toBeNull();
+    expect(await getReview(db, as(bruno), id)).not.toBeNull();
+    expect(await getReview(db, hr, id)).not.toBeNull();
+    expect(await getReview(db, as(ana), id)).toBeNull();
     expect(
-      await getSelfReview(db, { personId: null, role: "employee" }, id),
+      await getReview(db, { personId: null, role: "employee" }, id),
     ).toBeNull();
   });
 
