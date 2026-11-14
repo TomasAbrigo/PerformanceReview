@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { connection } from "next/server";
 import { Suspense } from "react";
 import { CycleDetailView } from "@/components/cycles/cycle-detail";
+import { OpsCycleActions } from "@/components/cycles/ops-cycle-actions";
 import { ManagerShareAll } from "@/components/review/manager-share-all";
 import { db } from "@/db/client";
 import { Link } from "@/i18n/navigation";
@@ -21,6 +22,7 @@ import {
   transitionCycleAction,
 } from "../actions";
 import { shareAllAction } from "./manager/[participantId]/actions";
+import { extendDueDateAction } from "./participants/actions";
 import { unlockAction } from "./self/actions";
 
 async function Detail({ params }: PageProps<"/[locale]/cycles/[id]">) {
@@ -105,6 +107,14 @@ async function Detail({ params }: PageProps<"/[locale]/cycles/[id]">) {
         <Link href={`/cycles/${cycle.id}/calibration`} className="underline">
           {tCal("link")}
         </Link>
+      ) : null}
+      {actor.role === "hr" && cycle.status !== "draft" ? (
+        <OpsCycleActions
+          cycleId={cycle.id}
+          status={cycle.status}
+          dueDates={cycle.dueDates}
+          extendDueDate={extendDueDateAction}
+        />
       ) : null}
     </>
   );

@@ -41,6 +41,7 @@ import {
   type IsoDate,
 } from "@/modules/org-history/queries";
 import { CyclesError } from "./errors";
+import { closeNominations } from "./peers";
 import {
   snapshotGoalsForParticipant,
   snapshotGoalsForParticipants,
@@ -197,6 +198,15 @@ export async function previewParticipants(
   return { count: people.length, sample: people.slice(0, sampleSize) };
 }
 
+/** People who can take part today (live employment, a job row valid on `asOf`), by name. */
+export async function listEligiblePeople(
+  db: DbOrTx,
+  asOf: IsoDate = todayLocal(),
+): Promise<{ id: string; displayName: string }[]> {
+  const people = await matchParticipants(db, { kind: "all" }, asOf);
+  return people.map((p) => ({ id: p.personId, displayName: p.displayName }));
+}
+
 /** Distinct values offered by the wizard's filter step. */
 export async function participantFilterOptions(db: DbOrTx): Promise<{
   departments: string[];
@@ -238,7 +248,7 @@ export async function participantFilterOptions(db: DbOrTx): Promise<{
         .from(employment)
         .where(isNull(employment.deletedAt))
         .orderBy(asc(employment.status)),
-      matchParticipants(db, { kind: "all" }, todayLocal()),
+      listEligiblePeople(db),
     ]);
   return {
     departments,
@@ -246,11 +256,14 @@ export async function participantFilterOptions(db: DbOrTx): Promise<{
     locations,
     jobTitles,
     statuses: statusRows.map((r) => r.v).filter((v): v is string => !!v),
-    people: people.map((p) => ({ id: p.personId, displayName: p.displayName })),
+    people,
   };
 }
 
-/** Org snapshots of reviewees as of `date`, via one org-history jobsAsOf query. */
+/**
+ * Org snapshots of reviewees as of `date`, via one org-history jobsAsOf query.
+ * Also used by the historical import (src/modules/import-history).
+ */
 export async function snapshots(
   db: DbOrTx,
   cycleId: string,
@@ -438,6 +451,7 @@ export async function transition(
         note: note || null,
       })
       .returning({ id: cycleTransition.id });
+    if (cycle.status === "nominations") await closeNominations(tx, updated);
     await ensureSelfRequests(tx, id);
     await notifyPhaseChanged(tx, id, cycle.status, to, logged.id);
     return updated;
@@ -446,7 +460,11 @@ export async function transition(
 
 // ------------------------------------------------- mid-cycle participants
 
-async function activeCycle(db: DbOrTx, id: string): Promise<ReviewCycle> {
+/** A launched, not closed cycle (the ones participants and operations apply to). */
+export async function activeCycle(
+  db: DbOrTx,
+  id: string,
+): Promise<ReviewCycle> {
   const cycle = await findCycle(db, id);
   if (cycle.status === "draft" || cycle.status === "closed") {
     throw new CyclesError("not_active");

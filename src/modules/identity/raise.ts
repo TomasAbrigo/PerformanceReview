@@ -8,11 +8,11 @@ import {
   type IdentityResolution,
   type SourceSystem,
 } from "@/db/schema";
-import type { Entity } from "@/modules/ingest/types";
+import type { IngestEntity } from "@/modules/ingest/types";
 
 export type RaiseInput = {
   source: SourceSystem;
-  entity: Entity;
+  entity: IngestEntity;
   sourceId: string;
   runId: string;
   /** The raw record as extracted. */
@@ -93,7 +93,7 @@ export async function raiseIssue(
 /** Closes the open issue of a record that applied cleanly after all. */
 export async function closeOpenIssue(
   tx: DbOrTx,
-  where: { source: SourceSystem; entity: Entity; sourceId: string },
+  where: { source: SourceSystem; entity: IngestEntity; sourceId: string },
   resolution: IdentityResolution,
 ) {
   await tx
@@ -113,7 +113,7 @@ export async function closeOpenIssue(
 export async function openIssueSourceIds(
   tx: DbOrTx,
   source: SourceSystem,
-  entity: Entity,
+  entity: IngestEntity,
 ): Promise<Set<string>> {
   const rows = await tx
     .select({ sourceId: identityMatchIssue.sourceId })
@@ -132,7 +132,7 @@ export async function openIssueSourceIds(
 export async function hasOpenIssue(
   tx: DbOrTx,
   source: SourceSystem,
-  entity: Entity,
+  entity: IngestEntity,
   sourceId: string,
 ): Promise<boolean> {
   const [row] = await tx

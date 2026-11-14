@@ -35,6 +35,8 @@ async function importEmployeePerformance(page: Page) {
   await page
     .getByLabel("Source profile")
     .selectOption("bamboo-employee-performance");
+  // Only land the rows (historical-import.spec.ts covers the cycles).
+  await page.getByRole("checkbox", { name: "Only land the rows" }).check();
   await page.getByRole("button", { name: "Import" }).click();
   await expect(page).toHaveURL(/\/en\/imports\/runs\/[0-9a-f-]{36}$/);
   return page.getByRole("table", { name: "Counts" });
@@ -76,6 +78,7 @@ test("uploads the employee performance report, previews it and imports it", asyn
   const rows = page.getByRole("table", { name: "Primeras filas" });
   await expect(rows.getByRole("row")).toHaveCount(1 + 20);
 
+  await page.getByRole("checkbox", { name: "Solo aterrizar" }).check();
   await page.getByRole("button", { name: "Importar" }).click();
 
   // The run's page: the rows read are all the rows of the file.

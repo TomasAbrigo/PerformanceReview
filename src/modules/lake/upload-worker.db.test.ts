@@ -47,6 +47,7 @@ describe("runUploadWorker (import)", () => {
         uploadId: stored.id,
         fileName: "employee-performance.csv",
         profile: { builtin: "bamboo-employee-performance" },
+        landing: true,
       },
       { env: { UPLOADS_DIR: store.uploadsDir } },
     );
