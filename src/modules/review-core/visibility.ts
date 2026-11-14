@@ -2,6 +2,7 @@ import type { ActorContext } from "@/modules/actor/types";
 import type { Relationship } from "@/modules/templates/constants";
 import type { RequestStatus } from "./request-status";
 import {
+  type CycleAnonymity,
   type CycleComponents,
   type CycleStatus,
   isDoubleBlind,
@@ -29,17 +30,33 @@ export type VisibilityContext = {
   cycle?: {
     status: CycleStatus;
     components?: Pick<CycleComponents, "doubleBlind">;
+    /** Peer/upward anonymity modes (#14). */
+    anonymity?: CycleAnonymity;
   };
   /**
-   * Self rows: the participant's manager request: its status (double blind),
-   * its reviewer (an alternate reads the self review like the snapshot
-   * manager) and whether it was shared (current manager).
+   * Peer/upward rows: whether the feedback is released to the reviewee
+   * (see peerFeedbackShared: sharing/closed phase and, with manager
+   * reviews, their manager review shared). Before that the reviewee never
+   * reads peer/upward feedback.
    */
-  managerRequest?: {
-    status: RequestStatus;
-    reviewerPersonId?: string | null;
-    sharedAt?: Date | null;
-  } | null;
+  revieweeShared?: boolean;
+  /**
+   * Self rows: the manager request that gates the double blind: the actor's
+   * own when they are an assessor, else the participant's current one. Its
+   * shared_at tells whether the manager review reached the employee (the
+   * current manager reads the self review from then).
+   */
+  managerRequest?: { status: RequestStatus; sharedAt?: Date | null } | null;
+  /**
+   * The actor writes a manager review of this participant (an alternate or
+   * additional assessor, #17): reads the self review like the manager does.
+   */
+  assessor?: boolean;
+  /**
+   * HR replaced the snapshot manager as the reviewer of this participant's
+   * manager review (#17): they lose manager-side access (see isManagerReplaced).
+   */
+  snapManagerReplaced?: boolean;
   /** The actor manages the participant's snapshot manager (see isSkipLevel). */
   skipLevel?: boolean;
   /**
@@ -58,29 +75,29 @@ export const isActiveParticipant = (p: { removedAt?: Date | null }) =>
 /** Phases in which reviews count as shared even without shared_at. */
 const SHARED_PHASES: readonly CycleStatus[] = ["sharing", "closed"];
 
-const isReviewer = (actor: ActorContext, r: VisibilityRequest) =>
-  actor.personId !== null && actor.personId === r.reviewerPersonId;
+/** The actor is that person (never true for a person-less actor). */
+export const isActorPerson = (
+  actor: ActorContext,
+  personId: string | null | undefined,
+) => actor.personId !== null && actor.personId === personId;
+
+export const isReviewer = (actor: ActorContext, r: VisibilityRequest) =>
+  isActorPerson(actor, r.reviewerPersonId);
 
 const isManagerOf = (actor: ActorContext, ctx: VisibilityContext) =>
-  actor.personId !== null &&
-  actor.personId === ctx.participant.snapManagerPersonId;
-
-/** Self rows: the reviewer of the participant's manager request (an alternate). */
-const isManagerReviewer = (actor: ActorContext, ctx: VisibilityContext) =>
-  actor.personId !== null &&
-  actor.personId === ctx.managerRequest?.reviewerPersonId;
+  isActorPerson(actor, ctx.participant.snapManagerPersonId) &&
+  !ctx.snapManagerReplaced;
 
 const isReviewee = (actor: ActorContext, ctx: VisibilityContext) =>
-  actor.personId !== null &&
-  actor.personId === ctx.participant.revieweePersonId;
+  isActorPerson(actor, ctx.participant.revieweePersonId);
 
 /**
  * The single place that decides whether `actor` may read a review request
  * (and, with `questionRevision`, one of its answers). HR (People) reads
  * everything; the author reads their own request. Then:
- * - self: the snapshot manager, or the reviewer of the participant's manager
- *   request (an alternate), reads it once submitted; under double blind only
- *   after the manager review is submitted;
+ * - self: the snapshot manager (unless HR replaced them) or an assigned
+ *   assessor (an alternate reviewer of a manager request, #17) reads it once
+ *   submitted; under double blind only after the manager review is submitted;
  * - manager: the snapshot manager reads it; the reviewee only once shared
  *   and only the questions visible to the reviewee;
  * - skip-level managers read submitted self reviews, and submitted manager
@@ -89,7 +106,9 @@ const isReviewee = (actor: ActorContext, ctx: VisibilityContext) =>
  * - the reviewee's current manager reads what was shared with the employee
  *   (a shared manager review; the self review once that one is shared);
  * - nobody but HR and the author reads requests of a removed participant;
- * - peer/upward: #14 (aggregated/anonymized views).
+ * - peer/upward: the snapshot manager (and HR) read them once submitted;
+ *   the reviewee only once shared (see revieweeShared), and only the
+ *   questions visible to them. Who wrote it: reviewerVisible.
  */
 export function canRead(actor: ActorContext, ctx: VisibilityContext): boolean {
   if (actor.role === "hr") return true;
@@ -104,9 +123,7 @@ export function canRead(actor: ActorContext, ctx: VisibilityContext): boolean {
       if (!submitted) return false;
       if (ctx.skipLevel) return true;
       if (ctx.currentManager && ctx.managerRequest?.sharedAt) return true;
-      if (!isManagerOf(actor, ctx) && !isManagerReviewer(actor, ctx)) {
-        return false;
-      }
+      if (!isManagerOf(actor, ctx) && !ctx.assessor) return false;
       return (
         !isDoubleBlind(ctx.cycle?.components ?? {}) ||
         ctx.managerRequest?.status === "submitted"
@@ -128,8 +145,36 @@ export function canRead(actor: ActorContext, ctx: VisibilityContext): boolean {
       );
     case "peer":
     case "upward":
-      return false; // #14: aggregated/anonymized views.
+      if (!submitted) return false;
+      if (isManagerOf(actor, ctx)) return true;
+      if (isReviewee(actor, ctx)) {
+        return (
+          !!ctx.revieweeShared &&
+          ctx.questionRevision?.visibleToReviewee !== false
+        );
+      }
+      return false;
   }
+}
+
+/**
+ * Whether `actor` may see who wrote a readable request. Peer/upward follow
+ * the cycle's anonymity mode: transparent shows names to everyone who reads;
+ * anonymous_to_employee hides them from the reviewee ("Par"); fully
+ * anonymous hides them from everyone but the author (HR included; the
+ * reviewer stays stored in the DB).
+ */
+export function reviewerVisible(
+  actor: ActorContext,
+  ctx: VisibilityContext,
+): boolean {
+  const { relationship } = ctx.request;
+  if (relationship !== "peer" && relationship !== "upward") return true;
+  if (isReviewer(actor, ctx.request)) return true;
+  const mode = ctx.cycle?.anonymity?.[relationship] ?? "fully_anonymous";
+  if (mode === "transparent") return true;
+  if (mode === "fully_anonymous") return false;
+  return !isReviewee(actor, ctx);
 }
 
 /** Where a request lives: the cycle phase and whether the reviewee is still in. */
@@ -169,8 +214,9 @@ export function canWrite(
 
 /**
  * Who may share a manager review with the reviewee: HR, its reviewer or the
- * participant's snapshot manager, while the participant is active. Whether
- * the cycle allows it right now is shareableNow.
+ * participant's snapshot manager (unless HR replaced them as reviewer,
+ * #17), while the participant is active. Whether the cycle allows it right
+ * now is shareableNow.
  */
 export function canShare(
   actor: ActorContext,
@@ -180,6 +226,7 @@ export function canShare(
       snapManagerPersonId: string | null;
       removedAt: Date | null;
     };
+    snapManagerReplaced?: boolean;
   },
 ): boolean {
   if (ctx.request.relationship !== "manager") return false;
@@ -188,7 +235,8 @@ export function canShare(
   return (
     actor.personId !== null &&
     (actor.personId === ctx.request.reviewerPersonId ||
-      actor.personId === ctx.participant.snapManagerPersonId)
+      (actor.personId === ctx.participant.snapManagerPersonId &&
+        !ctx.snapManagerReplaced))
   );
 }
 

@@ -16,6 +16,14 @@ import {
   DEFAULT_ACK_WINDOW_DAYS,
 } from "./acknowledge-window";
 import { isCurrentManager, isSkipLevel } from "./manager";
+import { isManagerReplaced } from "./manager-replaced";
+import {
+  ensureUpwardRequests,
+  type FeedbackTask,
+  feedbackTasks,
+  type NominationTask,
+  nominationTasks,
+} from "./peers";
 import type { RequestStatus } from "./request-status";
 import { ReviewError } from "./review-errors";
 import type { CycleStatus } from "./status";
@@ -33,6 +41,7 @@ export async function ensureSelfRequests(
 ): Promise<void> {
   await ensureOnlySelfRequests(db, cycleId, participantId);
   await ensureManagerRequests(db, cycleId, participantId);
+  await ensureUpwardRequests(db, cycleId, participantId);
 }
 
 /**
@@ -132,7 +141,11 @@ export async function ensureManagerRequests(
   if (participants.length === 0) return;
   // A participant keeps a single manager request. When the snapshot
   // manager changed (e.g. re-added after a manager change), a draft is
-  // reassigned (audited); a submitted one is kept and flagged.
+  // reassigned (audited); a submitted one is kept and flagged. Only the
+  // primary request counts: additional assessors and superseded history
+  // (#17) are left alone, and so is a draft HR assigned to another reviewer
+  // on purpose (assigned_by_hr, see assignAlternateAssessor). A stale
+  // mismatch (e.g. a flagged review HR unlocked) does follow the snapshot.
   const existing = new Map(
     (
       await db
@@ -142,11 +155,14 @@ export async function ensureManagerRequests(
           reviewer: reviewRequest.reviewerPersonId,
           status: reviewRequest.status,
           mismatch: reviewRequest.reviewerMismatch,
+          assignedByHr: reviewRequest.assignedByHr,
         })
         .from(reviewRequest)
         .where(
           and(
             eq(reviewRequest.relationship, "manager"),
+            eq(reviewRequest.additional, false),
+            ne(reviewRequest.status, "superseded"),
             isNull(reviewRequest.deletedAt),
             inArray(
               reviewRequest.participantId,
@@ -160,6 +176,7 @@ export async function ensureManagerRequests(
     const request = existing.get(p.id);
     if (!request || request.reviewer === p.managerId) continue;
     if (request.status === "draft") {
+      if (request.assignedByHr) continue; // assigned on purpose (#17)
       await db
         .update(reviewRequest)
         .set({
@@ -229,10 +246,13 @@ async function visibilityContext(
     return ctx;
   }
   if (row.request.relationship === "self") {
-    const [managerRequest] = await db
+    // A participant may have several manager requests (#17: additional
+    // assessors; superseded ones are history, not the current double-blind
+    // gate): the actor's own wins, else the primary one.
+    const managerRequests = await db
       .select({
         status: reviewRequest.status,
-        reviewerPersonId: reviewRequest.reviewerPersonId,
+        reviewer: reviewRequest.reviewerPersonId,
         sharedAt: reviewRequest.sharedAt,
       })
       .from(reviewRequest)
@@ -241,9 +261,24 @@ async function visibilityContext(
           eq(reviewRequest.participantId, row.participant.id),
           eq(reviewRequest.relationship, "manager"),
           isNull(reviewRequest.deletedAt),
+          ne(reviewRequest.status, "superseded"),
         ),
-      );
-    ctx.managerRequest = managerRequest ?? null;
+      )
+      .orderBy(asc(reviewRequest.additional), asc(reviewRequest.requestedAt));
+    const own = managerRequests.find((r) => r.reviewer === actor.personId);
+    ctx.assessor = !!own;
+    ctx.managerRequest = own ?? managerRequests[0] ?? null;
+  }
+  // A snapshot manager HR replaced as reviewer loses manager-side access.
+  if (actor.personId === row.participant.snapManagerPersonId) {
+    ctx.snapManagerReplaced = await isManagerReplaced(db, row.participant);
+  }
+  if (
+    (row.request.relationship === "peer" ||
+      row.request.relationship === "upward") &&
+    actor.personId === row.participant.revieweePersonId
+  ) {
+    ctx.revieweeShared = await peerFeedbackShared(db, row);
   }
   // The snapshot manager and the reviewee are decided without skip-level.
   const decided =
@@ -258,6 +293,34 @@ async function visibilityContext(
     );
   }
   return ctx;
+}
+
+/**
+ * Whether peer/upward feedback is released to the reviewee: the cycle is in
+ * sharing (or closed) and, when the cycle has manager reviews, the
+ * participant's manager review was shared; without managers, the phase
+ * alone releases it.
+ */
+export async function peerFeedbackShared(
+  db: DbOrTx,
+  row: Pick<LoadedRow, "participant" | "cycle">,
+): Promise<boolean> {
+  if (row.cycle.status !== "sharing" && row.cycle.status !== "closed") {
+    return false;
+  }
+  if (!row.cycle.components.manager) return true;
+  const [shared] = await db
+    .select({ id: reviewRequest.id })
+    .from(reviewRequest)
+    .where(
+      and(
+        eq(reviewRequest.participantId, row.participant.id),
+        eq(reviewRequest.relationship, "manager"),
+        isNotNull(reviewRequest.sharedAt),
+        isNull(reviewRequest.deletedAt),
+      ),
+    );
+  return !!shared;
 }
 
 /** A request with what visibility needs; throws not_found / forbidden. */
@@ -364,10 +427,10 @@ export type MyTasks = {
   selfAssessments: SelfAssessmentTask[];
   /** Manager reviews shared with the actor ("Evaluación compartida"). */
   sharedReviews: SharedReviewTask[];
-  /** #13: peers to nominate / approve. */
-  nominations: never[];
-  /** #14: feedback to give to peers / managers. */
-  feedback: never[];
+  /** Cycles where the actor still nominates peers. */
+  nominations: NominationTask[];
+  /** Peer/upward feedback the actor has to write. */
+  feedback: FeedbackTask[];
   /** Shared reviews still to acknowledge ("Acusar recibo"), window open. */
   acknowledgements: AckTask[];
 };
@@ -477,7 +540,14 @@ export async function listMyTasks(
         ]
       : [];
   });
-  return { ...empty, selfAssessments: rows, sharedReviews, acknowledgements };
+  return {
+    ...empty,
+    selfAssessments: rows,
+    sharedReviews,
+    acknowledgements,
+    nominations: await nominationTasks(db, actor.personId),
+    feedback: await feedbackTasks(db, actor.personId),
+  };
 }
 
 /** Id of the actor's manager review in a cycle, once shared with them. */

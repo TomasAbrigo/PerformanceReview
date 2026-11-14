@@ -3,6 +3,7 @@ import type { DbOrTx } from "@/db/client";
 import {
   cycleParticipant,
   person,
+  type ReviewCycle,
   reviewCycle,
   reviewRequest,
 } from "@/db/schema";
@@ -10,7 +11,8 @@ import type { LocalizedText } from "@/db/schema/rating-scales";
 import { isUuid } from "@/lib/uuid";
 import type { ActorContext } from "@/modules/actor/types";
 import { getReview, type Review } from "./answers";
-import { countsTowardOverall, overallRatingQuestion } from "./goal-snapshot";
+import { currentRatingFor, finalScale } from "./calibration";
+import { overallRatingQuestion } from "./goal-snapshot";
 import { isCurrentManager } from "./manager";
 import { ReviewError } from "./review-errors";
 import type { CycleStatus } from "./status";
@@ -46,35 +48,52 @@ export type HistoryItem = {
 };
 
 /**
- * The current rating, read from the manager review AS THE ACTOR MAY READ IT
- * (so it is never more than canRead allows: an unshared review gives the
- * current manager nothing, and the employee only gets a rating on a question
- * visible to them).
- *
- * TODO(#16): replace with `currentRatingFor(participantId)` (calibration's
- * v_current_rating: override > calibrated > manager), keeping the gate on the
- * manager review being readable. Until then it is the answer to the question
- * marked overall_rating (#13's role); a template without one has no rating
- * here (a guess among the visible questions could show the wrong one).
+ * The participant's current rating (calibration's `currentRatingFor`:
+ * override > calibrated > manager), labelled in the cycle's final scale, for
+ * an actor who may see it: HR always; anyone else only if they can read the
+ * manager review (so an unshared review gives the current manager nothing)
+ * AND the calibration, when the cycle has one, is published (a pre-publish
+ * calibrated rating is not shown to managers nor employees).
  */
-function ratingOf(manager: Review | null): HistoryRating | null {
-  if (!manager) return null;
-  const overall = overallRatingQuestion(
-    manager.questions.filter((q) => q.kind === "rating"),
+async function ratingOf(
+  db: DbOrTx,
+  actor: ActorContext,
+  participantId: string,
+  cycle: Pick<ReviewCycle, "id" | "components" | "calibrationPublishedAt">,
+  manager: Review | null,
+): Promise<HistoryRating | null> {
+  if (actor.role !== "hr") {
+    const published =
+      !cycle.components.calibration || cycle.calibrationPublishedAt !== null;
+    if (!manager || !published) return null;
+  }
+  const current = await currentRatingFor(db, participantId);
+  if (!current || current.normalized === null) return null;
+  const option = (await finalScale(db, cycle.id)).find(
+    (o) => o.value === current.optionValue,
   );
-  if (!overall || !countsTowardOverall(overall)) return null;
-  const value = manager.answers[overall.id];
-  const option =
-    value === null || value === undefined
-      ? undefined
-      : overall.scale?.options.find((o) => o.value === Number(value));
-  return option
-    ? {
-        value: option.value,
-        label: option.label,
-        normalized: option.normalized,
-      }
-    : null;
+  const fallback = current.optionLabel ?? String(current.optionValue);
+  return {
+    value: current.optionValue,
+    label: option?.label ?? { es: fallback, en: fallback },
+    normalized: current.normalized,
+  };
+}
+
+/**
+ * The manager review as the reviewee sees it: without the overall rating
+ * question (they only see the final rating, never the original: PRD 66).
+ */
+function withoutOverall(review: Review): Review {
+  const overall = overallRatingQuestion(review.questions);
+  if (!overall) return review;
+  return {
+    ...review,
+    questions: review.questions.filter((q) => q.id !== overall.id),
+    answers: Object.fromEntries(
+      Object.entries(review.answers).filter(([id]) => id !== overall.id),
+    ),
+  };
 }
 
 /**
@@ -183,10 +202,13 @@ export async function reviewHistory(
 
   return Promise.all(
     mine.map(async ({ participant, cycle, managerName, managerRequest }) => {
-      const [self, manager] = await Promise.all([
+      const [self, readable] = await Promise.all([
         readSubmitted(selfOf.get(participant.id)),
         readSubmitted(managerRequest?.id),
       ]);
+      const rating = await ratingOf(db, actor, participant.id, cycle, readable);
+      // The employee reads the manager review without the original rating.
+      const manager = readable && isSelf ? withoutOverall(readable) : readable;
       return {
         participantId: participant.id,
         cycleId: cycle.id,
@@ -200,7 +222,7 @@ export async function reviewHistory(
         department: participant.snapDepartment,
         sharedAt: managerRequest?.sharedAt ?? null,
         acknowledgedAt: participant.acknowledgedAt,
-        rating: ratingOf(manager),
+        rating,
         self,
         manager,
         canCompare: self !== null && manager !== null,

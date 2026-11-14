@@ -1,7 +1,7 @@
 import { eq } from "drizzle-orm";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { closeDb, db } from "@/db/client";
-import { employeeJobHistory, questionRevision } from "@/db/schema";
+import { employeeJobHistory, questionRevision, reviewCycle } from "@/db/schema";
 import { acknowledge, reviewHistory, transition } from ".";
 import {
   as,
@@ -148,21 +148,48 @@ describe("reviewHistory", () => {
     expect(Object.keys(forHr.manager!.answers)).toContain(hiddenIds[0]);
   });
 
-  it("hides a rating the employee is not allowed to see", async () => {
+  it("the employee reads the manager review without the original overall rating", async () => {
     const { first } = await story();
-    const rating = (await revisions(first.cycle.id))
-      .filter((q) => q.kind === "rating" && q.appliesTo.includes("manager"))
-      .at(-1)!;
-    await db
-      .update(questionRevision)
-      .set({ visibleToReviewee: false })
-      .where(eq(questionRevision.id, rating.id));
+    const overall = (await revisions(first.cycle.id)).find(
+      (q) => q.role === "overall_rating",
+    )!;
     const [mine] = await reviewHistory(db, as(people.bruno), people.bruno);
-    expect(mine.rating).toBeNull();
+    expect(mine.rating).not.toBeNull(); // the final rating
+    expect(mine.manager!.questions.map((q) => q.id)).not.toContain(overall.id);
+    expect(Object.keys(mine.manager!.answers)).not.toContain(overall.id);
+    // People read the whole review.
     const [forHr] = (await reviewHistory(db, hr, people.bruno)).filter(
       (i) => i.cycleId === first.cycle.id,
     );
-    expect(forHr.rating).not.toBeNull();
+    expect(forHr.manager!.questions.map((q) => q.id)).toContain(overall.id);
+  });
+
+  it("a rating of a calibrated cycle shows to non-HR only once it is published", async () => {
+    const { first } = await story();
+    const [cycle] = await db
+      .select()
+      .from(reviewCycle)
+      .where(eq(reviewCycle.id, first.cycle.id));
+    await db
+      .update(reviewCycle)
+      .set({
+        components: { ...cycle.components, calibration: true },
+        calibrationPublishedAt: null,
+      })
+      .where(eq(reviewCycle.id, cycle.id));
+    const ofCycle = async (actor: ReturnType<typeof as>) =>
+      (await reviewHistory(db, actor, people.bruno)).find(
+        (i) => i.cycleId === cycle.id,
+      )!;
+    expect((await ofCycle(hr)).rating).not.toBeNull();
+    expect((await ofCycle(as(people.bruno))).rating).toBeNull();
+    expect((await ofCycle(as(people.carla, "manager"))).rating).toBeNull();
+    await db
+      .update(reviewCycle)
+      .set({ calibrationPublishedAt: new Date() })
+      .where(eq(reviewCycle.id, cycle.id));
+    expect((await ofCycle(as(people.bruno))).rating).not.toBeNull();
+    expect((await ofCycle(as(people.carla, "manager"))).rating).not.toBeNull();
   });
 
   it("shows the acknowledgement", async () => {

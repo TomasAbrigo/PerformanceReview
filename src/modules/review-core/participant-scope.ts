@@ -12,6 +12,7 @@ import {
 import { isUuid } from "@/lib/uuid";
 import type { ActorContext } from "@/modules/actor/types";
 import { isCurrentManager, isSkipLevel } from "./manager";
+import { isManagerReplaced } from "./manager-replaced";
 import { ReviewError } from "./review-errors";
 import { isActiveParticipant } from "./visibility";
 
@@ -26,7 +27,10 @@ export type ParticipantScope = {
   cycle: ReviewCycle;
   revieweeName: string;
   selfRequest: ReviewRequest | null;
+  /** The primary manager request (not superseded, not an additional one). */
   managerRequest: ReviewRequest | null;
+  /** HR replaced the snapshot manager as its reviewer (#17): no manager-side access. */
+  snapManagerReplaced: boolean;
 };
 
 /** The participant's scope; throws not_found (also for a deleted cycle). */
@@ -55,10 +59,17 @@ export async function loadParticipantScope(
         isNull(reviewRequest.deletedAt),
       ),
     );
+  // A participant may have several manager requests (#17): the primary one
+  // is the current manager review; superseded ones are history.
+  const managerRequests = requests.filter(
+    (r) => r.relationship === "manager" && r.status !== "superseded",
+  );
   return {
     ...row,
     selfRequest: requests.find((r) => r.relationship === "self") ?? null,
-    managerRequest: requests.find((r) => r.relationship === "manager") ?? null,
+    managerRequest:
+      managerRequests.find((r) => !r.additional) ?? managerRequests[0] ?? null,
+    snapManagerReplaced: await isManagerReplaced(db, row.participant),
   };
 }
 
@@ -86,10 +97,14 @@ export const isActive = (s: ParticipantScope) =>
 export const isRevieweeOf = (actor: ActorContext, s: ParticipantScope) =>
   actor.personId !== null && actor.personId === s.participant.revieweePersonId;
 
-/** The actor is the participant's snapshot manager or their manager reviewer. */
+/**
+ * The actor is the participant's snapshot manager (unless HR replaced them as
+ * reviewer, #17) or the reviewer of their manager review.
+ */
 export const isManagerSideOf = (actor: ActorContext, s: ParticipantScope) =>
   actor.personId !== null &&
-  (actor.personId === s.participant.snapManagerPersonId ||
+  ((actor.personId === s.participant.snapManagerPersonId &&
+    !s.snapManagerReplaced) ||
     actor.personId === s.managerRequest?.reviewerPersonId);
 
 /** The reviewee may read what their manager shared once it is shared. */
@@ -103,9 +118,15 @@ export const isSkipLevelOf = (
   s: ParticipantScope,
 ) => isSkipLevel(db, actor, s.participant);
 
-/** The reviewee's manager today (see isCurrentManager). */
-export const isCurrentManagerOfScope = (
+/**
+ * The reviewee's manager today (see isCurrentManager). The snapshot manager is
+ * decided by manager-side access instead (a replaced one gets nothing back
+ * for being the current manager too).
+ */
+export const isCurrentManagerOfScope = async (
   db: DbOrTx,
   actor: ActorContext,
   s: ParticipantScope,
-) => isCurrentManager(db, actor, s.participant.revieweePersonId);
+) =>
+  actor.personId !== s.participant.snapManagerPersonId &&
+  (await isCurrentManager(db, actor, s.participant.revieweePersonId));

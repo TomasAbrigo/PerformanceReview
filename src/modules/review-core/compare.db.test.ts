@@ -11,6 +11,9 @@ import {
   compareReviews,
   getReview,
   loadParticipantScope,
+  mayAddFollowUp,
+  mayListFollowUp,
+  mayViewAcknowledgement,
   removeParticipant,
   shareReview,
 } from ".";
@@ -155,7 +158,14 @@ describe("compareReviews", () => {
     expect(employeeView.rows.some((r) => r.question.id === hidden.id)).toBe(
       false,
     );
-    expect(employeeView.rows.length).toBe(full.rows.length - 1);
+    // Also out: the original overall rating (the employee sees the final one).
+    expect(full.rows.some((r) => r.question.role === "overall_rating")).toBe(
+      true,
+    );
+    expect(
+      employeeView.rows.some((r) => r.question.role === "overall_rating"),
+    ).toBe(false);
+    expect(employeeView.rows.length).toBe(full.rows.length - 2);
     expect(employeeView.rows.every((r) => r.question.visibleToReviewee)).toBe(
       true,
     );
@@ -255,6 +265,43 @@ describe("compareReviews", () => {
         .where(eq(employeeJobHistory.personId, people.carla));
     });
     const ana = () => as(people.ana, "manager");
+
+    it("a snapshot manager HR replaced as the reviewer (#17) loses the comparison, the notes and the acknowledgement", async () => {
+      const cycle = await collectingCycle(templateId);
+      const p = await participantOf(cycle.id, people.bruno);
+      await db
+        .update(reviewRequest)
+        .set({ reviewerPersonId: people.ana, assignedByHr: true })
+        .where(
+          and(
+            eq(reviewRequest.participantId, p.id),
+            eq(reviewRequest.relationship, "manager"),
+          ),
+        );
+      await submitSelf(cycle.id);
+      const [manager] = await db
+        .select()
+        .from(reviewRequest)
+        .where(
+          and(
+            eq(reviewRequest.participantId, p.id),
+            eq(reviewRequest.relationship, "manager"),
+          ),
+        );
+      await fillAndSubmit(ana(), manager.id);
+      const carla = as(people.carla, "manager");
+      await expect(compareReviews(db, ana(), p.id)).resolves.toBeDefined();
+      await expect(compareReviews(db, carla, p.id)).rejects.toMatchObject({
+        code: "forbidden",
+      });
+      const scope = await loadParticipantScope(db, p.id);
+      expect(scope.snapManagerReplaced).toBe(true);
+      expect(mayListFollowUp(carla, scope)).toBe(false);
+      expect(mayAddFollowUp(carla, scope)).toBe(false);
+      expect(mayViewAcknowledgement(carla, scope)).toBe(false);
+      expect(mayAddFollowUp(ana(), scope)).toBe(true);
+      expect(mayViewAcknowledgement(ana(), scope)).toBe(true);
+    });
 
     it("an alternate reviewer of the manager request compares under the same double blind", async () => {
       const cycle = await collectingCycle(templateId);

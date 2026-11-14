@@ -21,6 +21,8 @@ const WEIGHTS: Record<IdentityMatchKind, number> = {
   employee_number: 0.8,
   work_email: 0.7,
   name_hire_date: 0.4,
+  // Report exports: a name alone (src/modules/import-history/names.ts).
+  name: 0.3,
 };
 const ORDER: IdentityMatchKind[] = [
   "bamboo_id",

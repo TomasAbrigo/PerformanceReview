@@ -37,9 +37,12 @@ export const identityIssueStatus = pgEnum(
   identityIssueStatuses,
 );
 
-/** What made a person a candidate; `name_hire_date` only ever proposes. */
+/**
+ * What made a person a candidate; `name_hire_date` only ever proposes.
+ * `name`: the normalized name alone (report exports carry nothing else).
+ */
 export type IdentityMatchKind =
-  "bamboo_id" | "employee_number" | "work_email" | "name_hire_date";
+  "bamboo_id" | "employee_number" | "work_email" | "name_hire_date" | "name";
 
 export type IdentityCandidate = {
   personId: string;

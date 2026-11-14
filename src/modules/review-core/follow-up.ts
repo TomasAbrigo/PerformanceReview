@@ -37,6 +37,7 @@ const mayWrite = (actor: ActorContext, scope: ParticipantScope) =>
   canShare(actor, {
     request: scope.managerRequest,
     participant: scope.participant,
+    snapManagerReplaced: scope.snapManagerReplaced,
   });
 
 /** Whether the actor may add follow-up notes now (to show the form). */

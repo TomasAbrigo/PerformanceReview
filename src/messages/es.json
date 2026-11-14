@@ -203,7 +203,8 @@
         "issues": "En cola",
         "ignored": "Ignorados",
         "log": "Entradas del log",
-        "duration": "Duración"
+        "duration": "Duración",
+        "mismatches": "Evaluador distinto"
       },
       "status": {
         "running": "En curso",
@@ -354,7 +355,8 @@
         "bamboo_id": "ID Bamboo",
         "employee_number": "Legajo",
         "work_email": "Email",
-        "name_hire_date": "Nombre e ingreso"
+        "name_hire_date": "Nombre e ingreso",
+        "name": "Nombre"
       },
       "score": "{score}% de coincidencia",
       "employments": "Empleos",
@@ -390,6 +392,11 @@
       "label": "Páginas",
       "older": "Casos anteriores",
       "newest": "Volver a los más recientes"
+    },
+    "roles": {
+      "employee": "empleado",
+      "manager": "manager",
+      "reviewer": "evaluador"
     }
   },
   "Cycles": {
@@ -653,6 +660,7 @@
       "draft": "Borrador",
       "submitted": "Enviada",
       "declined": "Rechazada",
+      "superseded": "Reemplazada",
       "none": "—"
     },
     "unlock": "Desbloquear",
@@ -665,7 +673,8 @@
       "not_submitted": "La evaluación no está enviada.",
       "unknown": "Ocurrió un error inesperado.",
       "not_shareable": "La evaluación todavía no se puede compartir en esta fase.",
-      "not_remindable": "No se puede enviar un recordatorio para esta evaluación."
+      "not_remindable": "No se puede enviar un recordatorio para esta evaluación.",
+      "shared": "La evaluación está compartida; des-compartila antes de editar."
     }
   },
   "Upload": {
@@ -701,7 +710,10 @@
       "import": "Importar",
       "importing": "Importando…",
       "another": "Elegir otro archivo",
-      "blocked": "Corregí los problemas del perfil para poder importar."
+      "blocked": "Corregí los problemas del perfil para poder importar.",
+      "landingOnly": "Solo aterrizar",
+      "historyHint": "Las filas se importan como ciclos de evaluación históricos, con sus participantes, solicitudes y respuestas.",
+      "landingHint": "Las filas se guardan tal cual (crudas), sin crear ciclos."
     },
     "roles": {
       "key": "Clave",
@@ -813,7 +825,215 @@
     "sharedCount": "{count, plural, =0 {No había evaluaciones para compartir.} one {Se compartió # evaluación.} other {Se compartieron # evaluaciones.}}",
     "resultTitle": "Evaluación de tu manager: {cycle}",
     "notSharedYet": "Tu evaluación todavía no fue compartida.",
-    "backToTasks": "Volver a mis tareas"
+    "backToTasks": "Volver a mis tareas",
+    "goalsTitle": "Objetivos",
+    "goalsPlaceholder": "Los objetivos del período se mostrarán aquí."
+  },
+  "Ops": {
+    "actions": {
+      "title": "Operaciones del ciclo",
+      "participants": "Participantes y evaluadores",
+      "audit": "Registro de auditoría",
+      "extend": "Extender una fecha límite",
+      "extendTitle": "Extender una fecha límite",
+      "phase": "Fase",
+      "phaseOption": "{phase} (vence {date})",
+      "newDate": "Nueva fecha límite",
+      "note": "Motivo (opcional)",
+      "confirm": "Extender",
+      "cancel": "Cancelar",
+      "extended": "Fecha límite extendida."
+    },
+    "participants": {
+      "title": "Participantes y evaluadores: {cycle}",
+      "back": "Volver al ciclo",
+      "forbidden": "Solo People puede gestionar los participantes de un ciclo.",
+      "addTitle": "Agregar un participante",
+      "addHint": "Se toma su snapshot organizacional hoy y se crean sus evaluaciones pendientes.",
+      "person": "Persona",
+      "choosePerson": "Elegí una persona",
+      "noCandidates": "Todas las personas elegibles ya participan.",
+      "add": "Agregar participante",
+      "note": "Motivo (opcional)",
+      "tableLabel": "Participantes",
+      "empty": "Este ciclo no tiene participantes.",
+      "columns": {
+        "person": "Persona",
+        "snapshotManager": "Manager del snapshot",
+        "self": "Autoevaluación",
+        "manager": "Evaluación del manager",
+        "change": "Cambio de manager",
+        "actions": "Acciones"
+      },
+      "removed": "Quitado",
+      "noManager": "Sin manager",
+      "noAssessor": "Sin evaluador",
+      "mismatch": "El evaluador difiere del snapshot",
+      "additional": "Adicional",
+      "onBehalf": "Completada en nombre de otro",
+      "noRequest": "—",
+      "changed": "Ahora reporta a {current} (snapshot: {snapshot})",
+      "noSnapshotManager": "sin manager",
+      "noCurrentManager": "nadie",
+      "suggest": {
+        "reassign": "Sugerido: pasar la evaluación a {name}",
+        "add_assessor": "Sugerido: agregar a {name} como evaluador adicional",
+        "none": "Ya resuelto"
+      },
+      "assign": "Asignar evaluador",
+      "remove": "Quitar",
+      "removeTitle": "¿Quitar a {name} del ciclo?",
+      "removeBody": "Sus evaluaciones y respuestas se conservan como historial; ya no se podrán escribir.",
+      "removeConfirm": "Quitar participante",
+      "unlock": "Desbloquear",
+      "unlockTitle": "¿Desbloquear esta evaluación?",
+      "unlockConfirm": "Desbloquear",
+      "complete": "Completar en nombre de",
+      "cancel": "Cancelar",
+      "assessorTitle": "Asignar un evaluador a {name}",
+      "assessor": "Evaluador",
+      "mode": "¿Cómo participa?",
+      "modeReplace": "Reemplaza la evaluación del manager",
+      "modeAdditional": "Es un evaluador adicional",
+      "replaceRequired": "{name} no tiene manager: el evaluador toma a cargo la evaluación del manager.",
+      "assessorConfirm": "Asignar",
+      "done": "Listo."
+    },
+    "complete": {
+      "title": "Completar en nombre de otro: evaluación de {reviewee} por {reviewer}",
+      "back": "Volver a los participantes",
+      "notice": "Estás completando esta evaluación en nombre de {reviewer}. Las respuestas quedan en esta página hasta que confirmes; la acción queda auditada.",
+      "note": "Motivo (opcional)",
+      "saving": "Anotando…",
+      "saved": "Anotado (todavía no guardado)",
+      "confirmTitle": "¿Completar esta evaluación en nombre de {reviewer}?",
+      "notAvailable": "Esta evaluación no se puede completar en nombre de otro ahora.",
+      "notFound": "No se encontró la evaluación.",
+      "forbidden": "Solo People puede completar una evaluación en nombre de otro."
+    },
+    "audit": {
+      "title": "Registro de auditoría: {cycle}",
+      "back": "Volver al ciclo",
+      "forbidden": "Solo People puede leer el registro de auditoría.",
+      "empty": "No se registraron acciones administrativas.",
+      "tableLabel": "Acciones administrativas",
+      "filterLabel": "Filtrar el registro",
+      "filter": "Acción",
+      "allActions": "Todas las acciones",
+      "apply": "Filtrar",
+      "columns": {
+        "when": "Cuándo",
+        "actor": "Quién",
+        "action": "Acción",
+        "target": "Sobre",
+        "note": "Motivo",
+        "details": "Detalle"
+      },
+      "system": "People",
+      "cycleTarget": "El ciclo",
+      "details": "Ver cambios",
+      "changes": "Cambios",
+      "field": "Campo",
+      "before": "Antes",
+      "after": "Después",
+      "noChanges": "No cambió ningún campo.",
+      "actions": {
+        "participant_added": "Participante agregado",
+        "participant_removed": "Participante quitado",
+        "due_date_extended": "Fecha límite extendida",
+        "request_unlocked": "Evaluación desbloqueada",
+        "completed_on_behalf": "Completada en nombre de otro",
+        "assessor_assigned": "Evaluador asignado"
+      }
+    },
+    "errors": {
+      "forbidden": "No tenés permiso para hacer esto.",
+      "not_found": "No se encontró; recargá la página.",
+      "validation": "Hay datos inválidos (las fechas de las fases deben mantener el orden).",
+      "not_active": "El ciclo no está activo.",
+      "already_participant": "Esa persona ya participa del ciclo.",
+      "not_submitted": "La evaluación no está enviada.",
+      "missing_required": "Respondé las preguntas obligatorias.",
+      "date_not_forward": "La nueva fecha debe ser posterior a la fecha límite actual.",
+      "no_manager_request": "Todavía no existen las evaluaciones del manager: esperá a que el ciclo esté en recolección.",
+      "same_reviewer": "Esa persona ya escribe la evaluación del manager.",
+      "already_assigned": "Esa persona ya es evaluadora de este participante.",
+      "replace_required": "Este participante no tiene manager: el evaluador debe reemplazar al faltante.",
+      "reviewer_missing": "La evaluación no tiene evaluador: asigná uno primero.",
+      "not_draft": "La evaluación ya fue enviada: desbloqueala primero.",
+      "not_writable": "La evaluación no se puede escribir ahora (fase o participante quitado).",
+      "unknown": "Ocurrió un error inesperado."
+    }
+  },
+  "Peers": {
+    "maxNominations": "Máximo de nominaciones de pares",
+    "approval": "Aprobación de nominaciones",
+    "approvalModes": {
+      "manager": "El manager aprueba",
+      "none": "Sin aprobación"
+    },
+    "nominationsTitle": "Nominar pares: {cycle}",
+    "nominationsIntro": "Elegí colegas que te den feedback. Tu manager aprueba las nominaciones.",
+    "count": "{count} de {max} nominaciones",
+    "empty": "Todavía no nominaste a nadie.",
+    "capReached": "Llegaste al máximo de nominaciones.",
+    "closed": "La etapa de nominaciones está cerrada.",
+    "candidate": "Colega a nominar",
+    "choose": "Elegí una persona",
+    "nominate": "Nominar",
+    "remove": "Quitar",
+    "load": "{count, plural, =0 {Sin solicitudes abiertas} one {# solicitud abierta} other {# solicitudes abiertas}}",
+    "overloaded": "Mucha carga",
+    "status": {
+      "pending": "Pendiente",
+      "approved": "Aprobada",
+      "declined": "Rechazada",
+      "removed": "Quitada"
+    },
+    "notParticipant": "No participás de este ciclo con nominación de pares.",
+    "approvalsTitle": "Nominaciones para aprobar",
+    "approvalsEmpty": "No hay nominaciones pendientes.",
+    "nominee": "Nominado",
+    "reviewee": "Evaluado",
+    "approve": "Aprobar",
+    "decline": "Rechazar",
+    "approveSelected": "Aprobar seleccionadas",
+    "select": "Seleccionar a {name} para {reviewee}",
+    "formTitle": "Feedback para {name}",
+    "upwardTitle": "Feedback para tu manager {name}",
+    "declineTitle": "Declinar la solicitud",
+    "declineReason": "Motivo",
+    "declineConfirm": "Declinar",
+    "declined": "Declinaste esta solicitud.",
+    "feedbackTitle": "Feedback de pares",
+    "feedbackEmpty": "No hay feedback de pares para mostrar.",
+    "peerLabel": "Par",
+    "upwardLabel": "Colaborador",
+    "myNominations": "Nominar pares",
+    "nominationTask": "Nominar pares en {cycle} ({count} de {max})",
+    "myFeedback": "Feedback para dar",
+    "feedbackTask": "Feedback para {name} ({cycle})",
+    "open": "Abrir",
+    "viewMyFeedback": "Ver feedback de pares ({cycle})",
+    "teamFeedback": "Feedback de pares de mi equipo",
+    "teamFeedbackLink": "{name} ({cycle})",
+    "back": "Volver a mis tareas",
+    "errors": {
+      "nominations_full": "Llegaste al máximo de nominaciones.",
+      "invalid_nominee": "No podés nominar a esa persona.",
+      "already_nominated": "Esa persona ya está nominada.",
+      "wrong_phase": "La etapa del ciclo no lo permite.",
+      "forbidden": "No tenés permiso.",
+      "validation": "Completá el motivo.",
+      "not_found": "No encontrado.",
+      "unknown": "Ocurrió un error."
+    },
+    "anonymityNote": {
+      "transparent": "Tu nombre será visible para la persona evaluada, su manager y People.",
+      "anonymous_to_employee": "La persona evaluada verá tu feedback como \"Par\", sin tu nombre; su manager y People sí ven tu nombre.",
+      "fully_anonymous": "Tu feedback es totalmente anónimo: nadie verá tu nombre."
+    },
+    "nominationsIntroNone": "Elegí colegas que te den feedback. Las nominaciones no necesitan aprobación: se les pide feedback al nominarlos."
   },
   "Compare": {
     "title": "Comparación: {name}",
@@ -1124,5 +1344,90 @@
       "added_at": "agregado",
       "removed_at": "removido"
     }
+  },
+  "ImportHistory": {
+    "title": "Importación histórica",
+    "back": "← Corridas de importación",
+    "summary": "{count, plural, one {# ciclo detectado en el archivo} other {# ciclos detectados en el archivo}}",
+    "cycles": "Ciclos detectados",
+    "columns": {
+      "cycle": "Ciclo",
+      "period": "Período",
+      "rows": "Filas",
+      "participants": "Participantes nuevos",
+      "requests": "Solicitudes",
+      "answers": "Respuestas",
+      "issues": "Casos de identidad",
+      "mismatches": "Evaluador distinto"
+    },
+    "period": "{start} – {end}",
+    "createdUnchanged": "{created} nuevas · {unchanged} sin cambios",
+    "mismatchHint": "Evaluador distinto: el manager del archivo no es el vigente al cierre del período (el participante conserva el vigente).",
+    "viewRun": "Ver la corrida",
+    "viewQueue": "Ver la cola de identidad",
+    "viewResult": "Ver ciclos importados",
+    "notFound": "Esta corrida no importó ciclos históricos."
+  },
+  "Calibration": {
+    "title": "Calibración · {cycle}",
+    "link": "Calibración",
+    "back": "Volver al ciclo",
+    "groups": "Grupos",
+    "noGroups": "Todavía no hay grupos de calibración.",
+    "groupName": "Nombre",
+    "groupKind": "Tipo",
+    "criterion": "Criterio",
+    "createGroup": "Crear grupo",
+    "kinds": {
+      "by_department": "Por área",
+      "by_manager": "Por manager",
+      "manual": "Manual (todos los participantes)"
+    },
+    "readOnly": "Solo lectura",
+    "emptyGroup": "Este grupo no tiene participantes.",
+    "employee": "Empleado",
+    "manager": "Manager (snapshot)",
+    "original": "Rating del manager",
+    "current": "Rating vigente",
+    "history": "Cambios y motivos",
+    "proposed": "Proponer",
+    "flag": "Discutir",
+    "flagged": "Para discutir",
+    "reason": "Motivo",
+    "reasonPlaceholder": "Motivo del cambio (obligatorio)",
+    "propose": "Guardar cambio",
+    "none": "—",
+    "distribution": "Distribución de ratings",
+    "groupBy": "Agrupar por",
+    "by": {
+      "department": "Área",
+      "manager": "Manager"
+    },
+    "stage": "Ratings",
+    "stages": {
+      "manager": "Antes (manager)",
+      "current": "Después (vigente)"
+    },
+    "noRatings": "Todavía no hay ratings.",
+    "tableView": "Ver como tabla",
+    "publish": "Publicar calibración",
+    "publishConfirmTitle": "¿Publicar la calibración?",
+    "publishConfirmBody": "Los ratings vigentes pasan a ser finales; los empleados con la evaluación compartida verán solo su rating final.",
+    "publishConfirm": "Publicar",
+    "cancel": "Cancelar",
+    "publishedCount": "{count, plural, one {# participante publicado} other {# participantes publicados}}",
+    "publishedAt": "Publicada el {date}",
+    "selectGroup": "Elegí un grupo para ver su tabla.",
+    "finalRating": "Rating final",
+    "errors": {
+      "reason_required": "El motivo es obligatorio.",
+      "forbidden": "No podés hacer este cambio.",
+      "validation": "Valor inválido.",
+      "not_found": "No encontrado.",
+      "unknown": "Algo salió mal. Intentá de nuevo."
+    },
+    "override": "Registrar override",
+    "overrideBadge": "override",
+    "publishedNote": "Calibración publicada: cada cambio se registra como override (auditado) y el empleado ve el nuevo valor."
   }
 }

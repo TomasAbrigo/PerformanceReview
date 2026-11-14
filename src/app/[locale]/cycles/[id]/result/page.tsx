@@ -19,6 +19,8 @@ import {
   listFollowUpNotes,
   loadParticipantScope,
   mayListFollowUp,
+  myPublishedRating,
+  overallRatingQuestion,
 } from "@/modules/review-core";
 import { acknowledgeAction } from "../compare/[participantId]/actions";
 
@@ -31,7 +33,15 @@ async function Result({ params }: PageProps<"/[locale]/cycles/[id]/result">) {
   const requestId = await findMySharedReviewId(db, actor, id);
   // getReview applies canRead: only shared, only visible questions.
   const review = requestId ? await getReview(db, actor, requestId) : null;
-  const t = await getTranslations("Compare");
+  // The overall manager rating (role overall_rating) feeds final_rating:
+  // the employee sees only the final rating below, never the original.
+  const overallId = review
+    ? overallRatingQuestion(review.questions)?.id
+    : undefined;
+  // Only the current rating, after share + publish (never original/notes).
+  const finalRating = await myPublishedRating(db, actor, id);
+  const t = await getTranslations("Calibration");
+  const tCompare = await getTranslations("Compare");
   // The participant is loaded once; the notes, the acknowledgement and the
   // comparison link all decide on it.
   const scope = review
@@ -47,8 +57,27 @@ async function Result({ params }: PageProps<"/[locale]/cycles/[id]/result">) {
     : [null, []];
   return (
     <div className="flex flex-col gap-8">
+      {finalRating ? (
+        <p className="text-lg" data-testid="final-rating">
+          {t("finalRating")}:{" "}
+          <span className="font-semibold">
+            {finalRating.value}
+            {finalRating.label ? ` · ${finalRating.label[locale]}` : null}
+          </span>
+        </p>
+      ) : null}
       <ManagerResultView
-        review={review ? { ...toReviewData(review), dueDate: null } : null}
+        review={
+          review
+            ? {
+                ...toReviewData(review),
+                dueDate: null,
+                questions: toReviewData(review).questions.filter(
+                  (q) => q.id !== overallId,
+                ),
+              }
+            : null
+        }
       />
       {scope && ack ? (
         <>
@@ -58,7 +87,7 @@ async function Result({ params }: PageProps<"/[locale]/cycles/[id]/result">) {
               href={`/cycles/${id}/compare/${scope.participant.id}`}
               className="underline"
             >
-              {t("openMine")}
+              {tCompare("openMine")}
             </Link>
           ) : null}
           <FollowUpNotes

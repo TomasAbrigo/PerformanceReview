@@ -60,6 +60,7 @@ function row(
       choices: null,
       visibleToReviewee: true,
       required: true,
+      role: null,
       sort: 0,
       ...question,
     },
@@ -99,6 +100,15 @@ function comparison(overrides: Partial<Comparison> = {}): Comparison {
         self: { value: 3, normalized: 1 },
         manager: { value: 1, normalized: 0 },
         delta: { numeric: -2, normalized: -1 },
+      }),
+      row("overall", {
+        question: {
+          ...ratingQuestion,
+          prompt: { es: "Calificación general", en: "Overall rating" },
+          role: "overall_rating",
+        },
+        self: null,
+        manager: { value: 3, normalized: 1 },
       }),
       row("rating-same", {
         question: {
@@ -219,8 +229,16 @@ describe("CompareView", () => {
     expect(toggle).not.toBeChecked();
     expect(screen.getByText("Solo para People")).toBeInTheDocument();
 
+    // The original overall rating is marked as not seen by the employee.
+    expect(
+      within(rowFor("Calificación general")).getByText(
+        "El empleado no verá esto",
+      ),
+    ).toBeInTheDocument();
+
     await user.click(toggle);
     expect(toggle).toBeChecked();
+    expect(screen.queryByText("Calificación general")).not.toBeInTheDocument();
     expect(screen.queryByText("Nota privada")).not.toBeInTheDocument();
     expect(screen.queryByText("Solo para People")).not.toBeInTheDocument();
     expect(

@@ -80,6 +80,28 @@ export {
 export { ReviewError, type ReviewErrorCode } from "./review-errors";
 export * from "./request-status";
 export {
+  declineRequest,
+  decideNominations,
+  ensureUpwardRequests,
+  findMyParticipantId,
+  listNominations,
+  listPeerFeedback,
+  listPendingApprovals,
+  nominatePeer,
+  nominationPicker,
+  openRequestsCount,
+  removeNomination,
+  type FeedbackTask,
+  type NominationCandidate,
+  type NominationItem,
+  type NominationPicker,
+  type NominationTask,
+  type PeerFeedbackItem,
+  type PendingApproval,
+} from "./peers";
+export * from "./peer-settings";
+export {
+  reviewerVisible,
   canRead,
   canWrite,
   type VisibilityContext,
@@ -87,6 +109,27 @@ export {
   type WriteScope,
   writablePhases,
 } from "./visibility";
+export {
+  addCalibrator,
+  calibrationTable,
+  createGroup,
+  currentRatingFor,
+  distribution,
+  finalScale,
+  listGroups,
+  myPublishedRating,
+  proposeRating,
+  publishCalibration,
+  type CalibrationRow,
+  type CalibrationTable,
+  type CurrentRating,
+  type Distribution,
+  type GroupInput,
+  type GroupItem,
+  type RatingCell,
+  type ScaleOption,
+} from "./calibration";
+export * from "./calibration-constants";
 export {
   countsTowardOverall,
   getReviewGoals,

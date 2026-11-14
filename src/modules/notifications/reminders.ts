@@ -18,6 +18,7 @@ import {
 import { isUuid } from "@/lib/uuid";
 import type { ActorContext } from "@/modules/actor/types";
 import { addDays, daysBetween, todayLocal } from "@/modules/org-history/dates";
+import { isManagerReplaced } from "@/modules/review-core/manager-replaced";
 import type { DueDatePhase } from "@/modules/review-core/status";
 import { writablePhases } from "@/modules/review-core/visibility";
 import {
@@ -196,6 +197,7 @@ export async function remind(
       dueDate: dueDateOfRequest,
       relationship: reviewRequest.relationship,
       reviewerPersonId: reviewRequest.reviewerPersonId,
+      participantId: cycleParticipant.id,
       snapManagerPersonId: cycleParticipant.snapManagerPersonId,
       participantName: person.displayName,
       outstanding: sql<boolean>`coalesce(${outstandingRequest}, false)`,
@@ -217,7 +219,13 @@ export async function remind(
   if (!row) throw new NotificationError("not_found");
 
   const isManager =
-    actor.personId !== null && actor.personId === row.snapManagerPersonId;
+    actor.personId !== null &&
+    actor.personId === row.snapManagerPersonId &&
+    // A snapshot manager HR replaced as reviewer no longer manages the review.
+    !(await isManagerReplaced(db, {
+      id: row.participantId,
+      snapManagerPersonId: row.snapManagerPersonId,
+    }));
   if (actor.role !== "hr" && !isManager) {
     throw new NotificationError("forbidden");
   }

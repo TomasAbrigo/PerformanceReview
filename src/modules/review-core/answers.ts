@@ -10,15 +10,17 @@ import {
   type ReviewRequest,
 } from "@/db/schema";
 import type { ActorContext } from "@/modules/actor/types";
+import { recordManagerRating } from "./calibration";
 import {
   goalsQuestionsOptional,
   type GoalsScope,
   isGoalsQuestion,
 } from "./goal-snapshot";
 import { loadRequest } from "./requests";
+import { notifyFeedbackReceived } from "@/modules/notifications";
 import { ReviewError } from "./review-errors";
-import type { CycleStatus } from "./status";
-import { canRead, canWrite } from "./visibility";
+import type { CycleAnonymity, CycleStatus } from "./status";
+import { canRead, canWrite, isReviewer, reviewerVisible } from "./visibility";
 
 /** Value of an answer as the form handles it (rating: the scale value). */
 export type AnswerValue = string | number | null;
@@ -30,12 +32,20 @@ export type SelfReview = GoalsScope & {
     id: string;
     name: string;
     dueDate: string | null;
+    anonymity: CycleAnonymity;
     status: CycleStatus;
   };
   questions: QuestionRevision[];
   /** Current answers by question revision id. */
   answers: Record<string, AnswerValue>;
   canWrite: boolean;
+  /**
+   * Whether the actor may know who wrote it (peer/upward anonymity); when
+   * not, request.reviewerPersonId is null.
+   */
+  reviewerVisible: boolean;
+  /** The actor wrote it (from the raw request, before any anonymizing). */
+  isAuthor: boolean;
 };
 
 /**
@@ -67,7 +77,10 @@ export const questionsFor = (
     )
     .orderBy(asc(questionRevision.sort));
 
-function valueOf(q: QuestionRevision | undefined, a: Answer): AnswerValue {
+export function answerValueOf(
+  q: QuestionRevision | undefined,
+  a: Answer,
+): AnswerValue {
   if (q?.kind === "rating") return a.optionValue;
   if (q?.kind === "single_choice") return a.optionLabel;
   return a.textValue;
@@ -125,9 +138,17 @@ export async function getReview(
     .from(answer)
     .where(eq(answer.requestId, request.id));
   const byId = new Map(questions.map((q) => [q.id, q]));
-  const duePhase = request.relationship === "manager" ? "manager" : "self";
+  const duePhase =
+    request.relationship === "manager"
+      ? "manager"
+      : request.relationship === "self"
+        ? "self"
+        : "peer";
+  const showReviewer = reviewerVisible(actor, visibility);
   return {
-    request,
+    request: showReviewer ? request : { ...request, reviewerPersonId: null },
+    reviewerVisible: showReviewer,
+    isAuthor: isReviewer(actor, request),
     participant: {
       id: row.participant.id,
       revieweePersonId: row.participant.revieweePersonId,
@@ -140,6 +161,7 @@ export async function getReview(
       // Hire-date cycles: the participant's own deadline first.
       dueDate:
         participant.dueDates?.[duePhase] ?? cycle.dueDates[duePhase] ?? null,
+      anonymity: cycle.anonymity,
       status: cycle.status,
     },
     questions,
@@ -148,7 +170,7 @@ export async function getReview(
         .filter((a) => byId.has(a.questionRevisionId))
         .map((a) => [
           a.questionRevisionId,
-          valueOf(byId.get(a.questionRevisionId), a),
+          answerValueOf(byId.get(a.questionRevisionId), a),
         ]),
     ),
     canWrite: canWrite(actor, request, row),
@@ -187,6 +209,10 @@ function columns(q: QuestionRevision, value: AnswerValue) {
 async function writable(db: DbOrTx, actor: ActorContext, requestId: string) {
   const row = await loadRequest(db, actor, requestId, { forUpdate: true });
   if (!canWrite(actor, row.request, row)) throw new ReviewError("forbidden");
+  // A shared manager review must be unshared before it is edited again.
+  if (row.request.relationship === "manager" && row.request.sharedAt) {
+    throw new ReviewError("shared");
+  }
   return row;
 }
 
@@ -299,6 +325,16 @@ export async function submit(
       .set({ status: "submitted", submittedAt: new Date() })
       .where(eq(reviewRequest.id, requestId))
       .returning();
+    await recordManagerRating(tx, updated);
+    // Peer/upward feedback: tell the reviewee it arrived (never who wrote it;
+    // reading it still waits for the share, see canRead).
+    if (request.relationship === "peer" || request.relationship === "upward") {
+      await notifyFeedbackReceived(tx, {
+        cycleId: cycle.id,
+        requestId,
+        recipientPersonId: participant.revieweePersonId,
+      });
+    }
     return updated;
   });
 }

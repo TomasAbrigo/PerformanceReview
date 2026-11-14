@@ -32,6 +32,7 @@ export type CompareQuestion = Pick<
   | "choices"
   | "visibleToReviewee"
   | "required"
+  | "role"
   | "sort"
 >;
 
@@ -135,7 +136,11 @@ export async function compareReviews(
 
   const rows = [...questions.values()]
     .sort((a, b) => a.sort - b.sort)
-    .filter((q) => !employeeView || q.visibleToReviewee)
+    // The employee never sees the original overall rating, only the final one.
+    .filter(
+      (q) =>
+        !employeeView || (q.visibleToReviewee && q.role !== "overall_rating"),
+    )
     .map((q): CompareRow => {
       const selfSide = side(q, selfAsked, self.answers);
       const managerSide = side(q, managerAsked, manager.answers);
@@ -153,6 +158,7 @@ export async function compareReviews(
           choices: q.choices,
           visibleToReviewee: q.visibleToReviewee,
           required: q.required,
+          role: q.role,
           sort: q.sort,
         },
         self: selfSide,

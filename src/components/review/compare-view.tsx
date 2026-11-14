@@ -13,6 +13,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import type {
+  CompareQuestion,
   CompareRow,
   CompareSide,
   Comparison,
@@ -20,6 +21,14 @@ import type {
 import { ReadOnlyAnswer } from "./self-review-form";
 
 const sign = (n: number) => (n > 0 ? "+" : n < 0 ? "-" : "");
+
+/**
+ * What the employee does not see: questions hidden from them, and the
+ * original overall rating (they only see the final rating, never the
+ * original).
+ */
+const hiddenFromEmployee = (q: CompareQuestion) =>
+  !q.visibleToReviewee || q.role === "overall_rating";
 
 /**
  * Self assessment and manager review side by side, per question, with the
@@ -42,7 +51,7 @@ export function CompareView({
   const locked = comparison.employeeView;
   const limited = locked || employeeView;
   const rows = limited
-    ? comparison.rows.filter((r) => r.question.visibleToReviewee)
+    ? comparison.rows.filter((r) => !hiddenFromEmployee(r.question))
     : comparison.rows;
 
   const sections: { title: Localized; rows: CompareRow[] }[] = [];
@@ -150,7 +159,7 @@ export function CompareView({
                         <span className="font-medium">
                           {localized(row.question.prompt)}
                         </span>
-                        {!row.question.visibleToReviewee ? (
+                        {hiddenFromEmployee(row.question) ? (
                           <Badge variant="outline" className="self-start">
                             {t("hiddenFromEmployee")}
                           </Badge>
