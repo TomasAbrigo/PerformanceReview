@@ -75,6 +75,7 @@ export type TeamRow = {
   cycleName: string;
   cycleStatus: CycleStatus;
   participantId: string;
+  revieweePersonId: string;
   revieweeName: string;
   selfRequestId: string | null;
   selfStatus: RequestStatus | null;
@@ -100,6 +101,7 @@ export async function listTeam(
       cycleName: reviewCycle.name,
       cycleStatus: reviewCycle.status,
       participantId: cycleParticipant.id,
+      revieweePersonId: cycleParticipant.revieweePersonId,
       revieweeName: person.displayName,
       selfRequestId: self.id,
       selfStatus: self.status,

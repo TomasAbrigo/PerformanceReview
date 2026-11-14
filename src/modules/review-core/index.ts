@@ -76,6 +76,7 @@ export {
 } from "./compare";
 export {
   addFollowUpNote,
+  canAddFollowUp,
   FOLLOW_UP_MAX_LENGTH,
   listFollowUpNotes,
   type FollowUpNote,
@@ -97,8 +98,4 @@ export {
   DEFAULT_ACK_WINDOW_DAYS,
   type AckStatus,
 } from "./acknowledge-window";
-export {
-  reviewHistory,
-  type HistoryItem,
-  type HistoryRating,
-} from "./history";
+export { reviewHistory, type HistoryItem, type HistoryRating } from "./history";

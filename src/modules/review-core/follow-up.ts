@@ -98,3 +98,21 @@ export async function listFollowUpNotes(
     .where(eq(followUpNote.participantId, participantId))
     .orderBy(desc(followUpNote.createdAt));
 }
+
+/** Whether the actor may add follow-up notes now (for showing the form). */
+export async function canAddFollowUp(
+  db: DbOrTx,
+  actor: ActorContext,
+  participantId: string,
+): Promise<boolean> {
+  try {
+    const scope = await loadParticipantScope(db, participantId);
+    return (
+      (actor.role === "hr" || isManagerSideOf(actor, scope)) &&
+      scope.managerRequest?.status === "submitted"
+    );
+  } catch (error) {
+    if (error instanceof ReviewError) return false;
+    throw error;
+  }
+}

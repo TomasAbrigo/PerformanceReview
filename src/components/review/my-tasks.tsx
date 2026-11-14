@@ -3,6 +3,7 @@
 import { useFormatter, useTranslations } from "next-intl";
 import { buttonVariants } from "@/components/ui/button";
 import { Link } from "@/i18n/navigation";
+import { AcknowledgeTasks, type AckTaskView } from "./acknowledge-box";
 import type {
   SelfAssessmentTask,
   SharedReviewTask,
@@ -11,6 +12,8 @@ import type {
 export type MyTasksData = {
   selfAssessments: SelfAssessmentTask[];
   sharedReviews?: SharedReviewTask[];
+  /** #15: shared reviews the employee still has to acknowledge. */
+  acknowledgements?: AckTaskView[];
 };
 
 /** Formats an ISO date (YYYY-MM-DD) without shifting it by the time zone. */
@@ -26,14 +29,22 @@ export function useIsoDate() {
 export function MyTasksView({
   tasks,
   hasPerson,
+  personId,
 }: {
   tasks: MyTasksData;
   hasPerson: boolean;
+  /** The acting person, for the link to their review history. */
+  personId?: string | null;
 }) {
   const t = useTranslations("Me");
+  const tAck = useTranslations("Compare.ack.me");
   const isoDate = useIsoDate();
   const shared = tasks.sharedReviews ?? [];
-  const empty = tasks.selfAssessments.length === 0 && shared.length === 0;
+  const acknowledgements = tasks.acknowledgements ?? [];
+  const empty =
+    tasks.selfAssessments.length === 0 &&
+    shared.length === 0 &&
+    acknowledgements.length === 0;
 
   return (
     <div className="flex flex-col gap-6">
@@ -72,6 +83,7 @@ export function MyTasksView({
               </ul>
             </section>
           ) : null}
+          <AcknowledgeTasks tasks={acknowledgements} />
           {tasks.selfAssessments.length ? (
             <section
               aria-labelledby="self-tasks"
@@ -109,6 +121,11 @@ export function MyTasksView({
           ) : null}
         </>
       )}
+      {hasPerson && personId ? (
+        <Link href={`/people/${personId}/reviews`} className="underline">
+          {tAck("history")}
+        </Link>
+      ) : null}
     </div>
   );
 }

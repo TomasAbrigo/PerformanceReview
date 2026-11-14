@@ -621,5 +621,121 @@
     "resultTitle": "Evaluación de tu manager: {cycle}",
     "notSharedYet": "Tu evaluación todavía no fue compartida.",
     "backToTasks": "Volver a mis tareas"
+  },
+  "Compare": {
+    "title": "Comparación: {name}",
+    "cycle": "Ciclo: {cycle}",
+    "back": "Volver a mi equipo",
+    "backToReview": "Volver a la evaluación",
+    "open": "Comparar",
+    "openMine": "Comparar con mi autoevaluación",
+    "tableLabel": "Autoevaluación y evaluación del manager: {section}",
+    "question": "Pregunta",
+    "self": "Autoevaluación",
+    "manager": "Evaluación del manager",
+    "delta": "Diferencia",
+    "notAsked": "No se pregunta",
+    "noAnswer": "Sin respuesta",
+    "noRows": "No hay preguntas para comparar.",
+    "employeeView": "Vista del empleado",
+    "employeeViewHint": "Oculta lo que el empleado no ve; útil al compartir pantalla.",
+    "employeeViewOn": "Mostrando solo lo que verá el empleado.",
+    "employeeViewAlways": "Estás viendo solo las preguntas visibles para vos.",
+    "hiddenFromEmployee": "El empleado no verá esto",
+    "noDelta": "—",
+    "deltaSame": "Sin diferencia",
+    "deltaHigher": "El manager calificó más alto: {numeric} ({percent})",
+    "deltaLower": "El manager calificó más bajo: {numeric} ({percent})",
+    "unavailable": {
+      "not_found": "No hay una comparación para esta persona.",
+      "forbidden": "No tenés acceso a esta comparación.",
+      "not_submitted": "La comparación estará disponible cuando se envíen la autoevaluación y la evaluación del manager.",
+      "unknown": "Ocurrió un error inesperado."
+    },
+    "followUp": {
+      "title": "Notas de seguimiento",
+      "hint": "Acuerdos posteriores a la conversación. El empleado las ve una vez compartida la evaluación.",
+      "empty": "Todavía no hay notas de seguimiento.",
+      "label": "Nueva nota de seguimiento",
+      "add": "Agregar nota",
+      "by": "{name} · {date}",
+      "byPeople": "People · {date}",
+      "errors": {
+        "required": "Escribí la nota.",
+        "too_long": "La nota es demasiado larga.",
+        "forbidden": "No podés agregar notas para esta persona.",
+        "not_submitted": "Primero hay que enviar la evaluación del manager.",
+        "not_found": "No se encontró a la persona.",
+        "validation": "La nota no es válida.",
+        "unknown": "Ocurrió un error inesperado."
+      }
+    },
+    "ack": {
+      "title": "Acuse de recibo",
+      "notShared": "Podrás acusar recibo cuando tu manager comparta la evaluación.",
+      "open": "Podés acusar recibo hasta el {date}.",
+      "noteLabel": "Nota (opcional)",
+      "submit": "Acusar recibo",
+      "done": "Acusaste recibo el {date}.",
+      "yourNote": "Tu nota: {note}",
+      "expired": "El plazo para acusar recibo venció el {date}.",
+      "manager": {
+        "notShared": "La evaluación todavía no se compartió con el empleado.",
+        "open": "El empleado puede acusar recibo hasta el {date}.",
+        "expired": "El empleado no acusó recibo y el plazo venció el {date}.",
+        "done": "El empleado acusó recibo el {date}.",
+        "theirNote": "Nota del empleado: {note}"
+      },
+      "errors": {
+        "not_shared": "La evaluación todavía no fue compartida.",
+        "already_acknowledged": "Ya acusaste recibo de esta evaluación.",
+        "window_closed": "El plazo para acusar recibo venció.",
+        "forbidden": "Solo la persona evaluada puede acusar recibo.",
+        "not_found": "No se encontró la evaluación.",
+        "too_long": "La nota es demasiado larga.",
+        "validation": "La nota no es válida.",
+        "unknown": "Ocurrió un error inesperado."
+      },
+      "me": {
+        "section": "Acusar recibo",
+        "task": "Acusar recibo: {cycle}",
+        "until": "Hasta el {date}",
+        "action": "Acusar recibo",
+        "history": "Mi historial de evaluaciones"
+      }
+    }
+  },
+  "History": {
+    "title": "Evaluaciones de {name}",
+    "link": "Evaluaciones",
+    "back": "Volver a la persona",
+    "empty": "Todavía no hay evaluaciones finalizadas ni compartidas.",
+    "forbidden": "No tenés acceso a las evaluaciones de esta persona.",
+    "notFound": "Persona no encontrada.",
+    "period": "{start} a {end}",
+    "manager": "Manager en ese momento: {name}",
+    "noManager": "Sin manager en ese momento",
+    "job": "Puesto y área en ese momento: {title}, {department}",
+    "rating": "Rating vigente",
+    "noRating": "Sin rating",
+    "ratingValue": "{label} ({percent})",
+    "shared": "Compartida el {date}",
+    "notShared": "No compartida",
+    "acknowledged": "Acuse de recibo el {date}",
+    "notAcknowledged": "Sin acuse de recibo",
+    "status": {
+      "closed": "Ciclo cerrado",
+      "sharing": "En compartición",
+      "calibration": "En calibración",
+      "manager_review": "En evaluación del manager",
+      "collecting": "En recolección",
+      "nominations": "En nominaciones",
+      "draft": "Borrador"
+    },
+    "showAnswers": "Ver respuestas",
+    "selfAnswers": "Autoevaluación",
+    "managerAnswers": "Evaluación del manager",
+    "noAnswers": "No tenés acceso a las respuestas de este ciclo.",
+    "compare": "Comparar autoevaluación y evaluación"
   }
 }

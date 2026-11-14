@@ -2,7 +2,13 @@ import { eq } from "drizzle-orm";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { closeDb, db } from "@/db/client";
 import { followUpNote } from "@/db/schema";
-import { addFollowUpNote, listFollowUpNotes, shareReview, unshare } from ".";
+import {
+  addFollowUpNote,
+  canAddFollowUp,
+  listFollowUpNotes,
+  shareReview,
+  unshare,
+} from ".";
 import {
   as,
   collectingCycle,
@@ -145,5 +151,19 @@ describe("follow-up notes", () => {
     await expect(
       listFollowUpNotes(db, hr, "00000000-0000-4000-8000-000000000001"),
     ).rejects.toMatchObject({ code: "not_found" });
+  });
+});
+
+describe("canAddFollowUp", () => {
+  it("is true for the manager and HR once the review is submitted", async () => {
+    const cycle = await collectingCycle(templateId);
+    const p = await participantOf(cycle.id, people.bruno);
+    expect(await canAddFollowUp(db, carla(), p.id)).toBe(false); // draft
+    await submitManager(cycle.id);
+    expect(await canAddFollowUp(db, carla(), p.id)).toBe(true);
+    expect(await canAddFollowUp(db, hr, p.id)).toBe(true);
+    expect(await canAddFollowUp(db, as(people.bruno), p.id)).toBe(false);
+    expect(await canAddFollowUp(db, outsider(), p.id)).toBe(false);
+    expect(await canAddFollowUp(db, hr, "nope")).toBe(false);
   });
 });

@@ -621,5 +621,121 @@
     "resultTitle": "Your manager's review: {cycle}",
     "notSharedYet": "Your review has not been shared yet.",
     "backToTasks": "Back to my tasks"
+  },
+  "Compare": {
+    "title": "Comparison: {name}",
+    "cycle": "Cycle: {cycle}",
+    "back": "Back to my team",
+    "backToReview": "Back to the review",
+    "open": "Compare",
+    "openMine": "Compare with my self assessment",
+    "tableLabel": "Self assessment and manager review: {section}",
+    "question": "Question",
+    "self": "Self assessment",
+    "manager": "Manager review",
+    "delta": "Difference",
+    "notAsked": "Not asked",
+    "noAnswer": "No answer",
+    "noRows": "There are no questions to compare.",
+    "employeeView": "Employee view",
+    "employeeViewHint": "Hides what the employee cannot see; useful when screen sharing.",
+    "employeeViewOn": "Showing only what the employee will see.",
+    "employeeViewAlways": "You are only seeing the questions visible to you.",
+    "hiddenFromEmployee": "The employee will not see this",
+    "noDelta": "—",
+    "deltaSame": "No difference",
+    "deltaHigher": "The manager rated higher: {numeric} ({percent})",
+    "deltaLower": "The manager rated lower: {numeric} ({percent})",
+    "unavailable": {
+      "not_found": "There is no comparison for this person.",
+      "forbidden": "You do not have access to this comparison.",
+      "not_submitted": "The comparison will be available once the self assessment and the manager review are submitted.",
+      "unknown": "An unexpected error occurred."
+    },
+    "followUp": {
+      "title": "Follow-up notes",
+      "hint": "Agreements after the conversation. The employee sees them once the review is shared.",
+      "empty": "There are no follow-up notes yet.",
+      "label": "New follow-up note",
+      "add": "Add note",
+      "by": "{name} · {date}",
+      "byPeople": "People · {date}",
+      "errors": {
+        "required": "Write the note.",
+        "too_long": "The note is too long.",
+        "forbidden": "You cannot add notes for this person.",
+        "not_submitted": "The manager review has to be submitted first.",
+        "not_found": "The person was not found.",
+        "validation": "The note is not valid.",
+        "unknown": "An unexpected error occurred."
+      }
+    },
+    "ack": {
+      "title": "Acknowledgement",
+      "notShared": "You will be able to acknowledge once your manager shares the review.",
+      "open": "You can acknowledge until {date}.",
+      "noteLabel": "Note (optional)",
+      "submit": "Acknowledge receipt",
+      "done": "You acknowledged receipt on {date}.",
+      "yourNote": "Your note: {note}",
+      "expired": "The time to acknowledge ended on {date}.",
+      "manager": {
+        "notShared": "The review has not been shared with the employee yet.",
+        "open": "The employee can acknowledge until {date}.",
+        "expired": "The employee did not acknowledge and the time ended on {date}.",
+        "done": "The employee acknowledged receipt on {date}.",
+        "theirNote": "Employee note: {note}"
+      },
+      "errors": {
+        "not_shared": "The review has not been shared yet.",
+        "already_acknowledged": "You already acknowledged this review.",
+        "window_closed": "The time to acknowledge has ended.",
+        "forbidden": "Only the reviewed person can acknowledge.",
+        "not_found": "The review was not found.",
+        "too_long": "The note is too long.",
+        "validation": "The note is not valid.",
+        "unknown": "An unexpected error occurred."
+      },
+      "me": {
+        "section": "Acknowledge receipt",
+        "task": "Acknowledge: {cycle}",
+        "until": "Until {date}",
+        "action": "Acknowledge receipt",
+        "history": "My review history"
+      }
+    }
+  },
+  "History": {
+    "title": "Reviews of {name}",
+    "link": "Reviews",
+    "back": "Back to the person",
+    "empty": "There are no finalized or shared reviews yet.",
+    "forbidden": "You do not have access to this person's reviews.",
+    "notFound": "Person not found.",
+    "period": "{start} to {end}",
+    "manager": "Manager at the time: {name}",
+    "noManager": "No manager at the time",
+    "job": "Job and department at the time: {title}, {department}",
+    "rating": "Current rating",
+    "noRating": "No rating",
+    "ratingValue": "{label} ({percent})",
+    "shared": "Shared on {date}",
+    "notShared": "Not shared",
+    "acknowledged": "Acknowledged on {date}",
+    "notAcknowledged": "Not acknowledged",
+    "status": {
+      "closed": "Closed cycle",
+      "sharing": "Sharing",
+      "calibration": "In calibration",
+      "manager_review": "In manager review",
+      "collecting": "Collecting",
+      "nominations": "In nominations",
+      "draft": "Draft"
+    },
+    "showAnswers": "Show answers",
+    "selfAnswers": "Self assessment",
+    "managerAnswers": "Manager review",
+    "noAnswers": "You do not have access to this cycle's answers.",
+    "compare": "Compare self assessment and review"
   }
 }

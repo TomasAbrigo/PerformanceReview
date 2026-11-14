@@ -5,6 +5,7 @@ import { useState, useTransition } from "react";
 import { type ActionResult, useLocalized } from "@/components/templates/shared";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Link } from "@/i18n/navigation";
 import {
   type SelfReviewActions,
   type SelfReviewData,
@@ -18,6 +19,8 @@ export type ManagerReviewData = SelfReviewData & {
   sharedAt: Date | null;
   /** The actor may share it (snapshot manager or HR). */
   canShare: boolean;
+  /** Link to the side-by-side comparison, once both reviews are submitted. */
+  compareHref?: string;
 };
 
 export type ManagerReviewActions = SelfReviewActions & {
@@ -75,6 +78,7 @@ export function ManagerReviewForm({
 }) {
   const t = useTranslations("ManagerReview");
   const tErr = useTranslations("Review.errors");
+  const tCompare = useTranslations("Compare");
   const format = useFormatter();
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
@@ -134,6 +138,11 @@ export function ManagerReviewForm({
                   })
                 : t("notShared")}
             </p>
+            {review.compareHref ? (
+              <Link href={review.compareHref} className="text-sm underline">
+                {tCompare("open")}
+              </Link>
+            ) : null}
             {review.canShare && !review.sharedAt ? (
               <Button onClick={share} disabled={pending}>
                 {t("share")}

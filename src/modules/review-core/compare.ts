@@ -48,6 +48,7 @@ export type Comparison = {
   participantId: string;
   cycleId: string;
   cycleName: string;
+  revieweePersonId: string;
   revieweeName: string;
   sharedAt: Date | null;
   /** Rows were limited to the questions visible to the employee. */
@@ -168,6 +169,7 @@ export async function compareReviews(
     participantId,
     cycleId: scope.cycle.id,
     cycleName: scope.cycle.name,
+    revieweePersonId: scope.participant.revieweePersonId,
     revieweeName: scope.revieweeName,
     sharedAt: managerRequest.sharedAt,
     employeeView,
