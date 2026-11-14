@@ -1,5 +1,7 @@
+import { sql } from "drizzle-orm";
 import {
   boolean,
+  check,
   date,
   index,
   integer,
@@ -109,11 +111,21 @@ export const cycleParticipant = pgTable(
       .notNull()
       .defaultNow(),
     removedAt: timestamp("removed_at", { withTimezone: true }),
+    /**
+     * The reviewee acknowledged the shared manager review (#15). Set once and
+     * never changed: the domain only updates rows where it is still null.
+     */
+    acknowledgedAt: timestamp("acknowledged_at", { withTimezone: true }),
+    acknowledgementNote: text("acknowledgement_note"),
   },
   (t) => [
     unique("cycle_participant_cycle_reviewee_uq").on(
       t.cycleId,
       t.revieweePersonId,
+    ),
+    check(
+      "cycle_participant_ack_note_ck",
+      sql`${t.acknowledgementNote} IS NULL OR ${t.acknowledgedAt} IS NOT NULL`,
     ),
   ],
 );
