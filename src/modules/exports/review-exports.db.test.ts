@@ -536,6 +536,10 @@ describe("requests.csv", () => {
     "participant_removed_at",
     "reviewer_missing",
     "reviewer_mismatch",
+    "rating_stage",
+    "rating_value",
+    "rating_label",
+    "rating_normalized",
     "requested_at",
     "submitted_at",
     "declined_at",
@@ -599,6 +603,10 @@ describe("requests.csv", () => {
       participant_removed_at: "",
       reviewer_missing: "false",
       reviewer_mismatch: "false",
+      rating_stage: "calibrated",
+      rating_value: "4",
+      rating_label: "Máximo",
+      rating_normalized: "1",
       additional: "false",
       assigned_by_hr: "false",
       submitted_on_behalf: "false",
@@ -649,6 +657,11 @@ describe("requests.csv", () => {
       `?as_person=${s.dora}&locale=en`,
     );
     expect(asDora.rows.length).toBeGreaterThan(0);
+    // The rating is for HR only.
+    for (const row of asDora.rows) {
+      expect(row.rating_stage).toBe("");
+      expect(row.rating_value).toBe("");
+    }
     vi.stubEnv("API_TOKEN", "s3cret");
     expect((await download("requests.csv")).status).toBe(401);
   });

@@ -234,6 +234,15 @@ export const serializeRequest = (r: RequestRow) => ({
   participant: {
     id: r.participantId,
     removed_at: r.participantRemovedAt,
+    current_rating: r.currentRating
+      ? {
+          stage: r.currentRating.stage,
+          option_value: r.currentRating.optionValue,
+          option_label: r.currentRating.optionLabel,
+          normalized: r.currentRating.normalized,
+          created_at: r.currentRating.createdAt,
+        }
+      : null,
     snapshot: {
       as_of: r.snapshotAsOf,
       manager: ref(r.snapManager),

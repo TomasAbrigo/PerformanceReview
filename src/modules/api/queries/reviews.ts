@@ -4,6 +4,7 @@ import type { LocalizedText, ScaleSnapshot } from "@/db/schema";
 import { rowsOf } from "@/lib/sql";
 import { isUuid } from "@/lib/uuid";
 import { DEFAULT_ACTOR, type ActorContext } from "@/modules/actor/types";
+import type { FinalRatingStage } from "@/modules/review-core/calibration-constants";
 import type { RequestStatus } from "@/modules/review-core/request-status";
 import { loadRequest } from "@/modules/review-core/requests";
 import { ReviewError } from "@/modules/review-core/review-errors";
@@ -38,9 +39,10 @@ import {
  * it: with peer/upward `fully_anonymous` the reviewer is never returned,
  * whoever reads (HR, and even the author, included).
  *
- * TODO(#16/#41): the current (calibrated) rating of a participant, once the
- * calibration `v_current_rating` view lands on main; until then the overall
- * rating is the `overall_rating` answer of the manager request.
+ * The participant's current rating (`v_current_rating`: override >
+ * calibrated > manager > computed) rides along on every request, but only HR
+ * reads it: a rating before calibration is published is not for the reviewee,
+ * the manager or the peers (the screens decide that with myPublishedRating).
  */
 
 /** HR, no person: the default scope of the API. */
@@ -105,6 +107,15 @@ async function readablePage<T>(input: {
 
 // -------------------------------------------------------------- requests
 
+/** A participant's current final rating (the v_current_rating row). */
+export type CurrentRatingRow = {
+  stage: FinalRatingStage;
+  optionValue: number;
+  optionLabel: string | null;
+  normalized: number | null;
+  createdAt: string;
+};
+
 export type RequestRow = {
   id: string;
   sourceSystem: string;
@@ -117,6 +128,8 @@ export type RequestRow = {
   cycleAnonymity: CycleAnonymity;
   participantId: string;
   participantRemovedAt: string | null;
+  /** The participant's current rating; null when there is none or the actor is not HR. */
+  currentRating: CurrentRatingRow | null;
   /** The person reviewed. */
   reviewee: PersonRef;
   revieweeEmployeeNumber: string | null;
@@ -155,8 +168,13 @@ export type RequestRow = {
 
 type RawRequest = Omit<
   RequestRow,
-  "reviewee" | "snapManager" | "reviewer" | "reviewerVisible"
+  "reviewee" | "snapManager" | "reviewer" | "reviewerVisible" | "currentRating"
 > & {
+  ratingStage: FinalRatingStage | null;
+  ratingValue: number | null;
+  ratingLabel: string | null;
+  ratingNormalized: number | null;
+  ratingAt: string | null;
   revieweeId: string;
   revieweeSystem: string | null;
   revieweeBambooId: string | null;
@@ -221,11 +239,26 @@ function toRequestRow(raw: RawRequest, actor: ActorContext): RequestRow {
     reviewerSystem,
     reviewerBambooId,
     reviewerName,
+    ratingStage,
+    ratingValue,
+    ratingLabel,
+    ratingNormalized,
+    ratingAt,
     ...row
   } = raw;
   const shown = reviewerShown(actor, raw);
   return {
     ...row,
+    currentRating:
+      actor.role === "hr" && ratingStage && ratingValue !== null && ratingAt
+        ? {
+            stage: ratingStage,
+            optionValue: ratingValue,
+            optionLabel: ratingLabel,
+            normalized: ratingNormalized,
+            createdAt: ratingAt,
+          }
+        : null,
     reviewee: personRef(
       revieweeId,
       revieweeSystem,
@@ -281,6 +314,9 @@ async function selectRequests(
         ${iso("r.declined_at")} as "declinedAt",
         ${iso("r.unlocked_at")} as "unlockedAt",
         ${iso("r.shared_at")} as "sharedAt",
+        cr.stage::text as "ratingStage", cr.option_value::float8 as "ratingValue",
+        cr.option_label as "ratingLabel", cr.normalized::float8 as "ratingNormalized",
+        ${iso("cr.created_at")} as "ratingAt",
         (select count(*)::int from answer a where a.request_id = r.id) as "answerCount",
         ${iso("r.created_at")} as "createdAt", ${iso("r.updated_at")} as "updatedAt"
       from review_request r
@@ -291,6 +327,7 @@ async function selectRequests(
       left join employee_number en on en.person_id = cp.reviewee_person_id
       left join person mp on mp.id = cp.snap_manager_person_id
       left join bamboo_identity mbi on mbi.person_id = cp.snap_manager_person_id
+      left join v_current_rating cr on cr.participant_id = r.participant_id
       left join person rp on rp.id = r.reviewer_person_id
       left join bamboo_identity rbi on rbi.person_id = r.reviewer_person_id
       where r.deleted_at is null and ${where}

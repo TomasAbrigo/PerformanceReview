@@ -1259,7 +1259,11 @@
       "answer_text": "texto",
       "additional": "adicional",
       "assigned_by_hr": "asignado por RR. HH.",
-      "submitted_on_behalf": "enviado en nombre del evaluador"
+      "submitted_on_behalf": "enviado en nombre del evaluador",
+      "rating_stage": "etapa del rating",
+      "rating_value": "rating vigente",
+      "rating_label": "etiqueta del rating",
+      "rating_normalized": "rating normalizado"
     }
   },
   "ImportHistory": {

@@ -13,6 +13,7 @@ import { eq } from "drizzle-orm";
 import { insertParticipant, resetAll } from "@/modules/analytics/test-support";
 import type { ActorContext } from "@/modules/actor/types";
 import { getReview } from "@/modules/review-core";
+import { currentRatingFor } from "@/modules/review-core/calibration";
 import type { CycleAnonymity } from "@/modules/review-core/status";
 import {
   getRequestRoute,
@@ -377,6 +378,46 @@ describe("GET /api/v1/cycles/{id}/requests", () => {
       { Authorization: "Bearer s3cret" },
     );
     expect(allowed.status).toBe(200);
+  });
+});
+
+describe("current rating", () => {
+  it("rides on the participant of every request, as the calibration module reads it (hr scope)", async () => {
+    const expected = await currentRatingFor(db, pDora);
+    expect(expected).toMatchObject({ stage: "calibrated", optionValue: 4 });
+    const res = await requestsOf(cycleId, `?participant_id=${pDora}&limit=200`);
+    expect(res.body.data.length).toBeGreaterThan(1);
+    for (const row of res.body.data) {
+      expect(row.participant.current_rating).toMatchObject({
+        stage: "calibrated",
+        option_value: 4,
+        option_label: "Máximo",
+        normalized: 1,
+      });
+      expect(row.participant.current_rating.created_at).toMatch(ISO);
+    }
+    const detail = await requestOf(mgrDora);
+    expect(detail.body.data.participant.current_rating.option_value).toBe(
+      expected!.optionValue,
+    );
+  });
+
+  it("is null when the participant has no rating", async () => {
+    const res = await requestOf(upwardBruno);
+    expect(res.body.data.participant.current_rating).toBeNull();
+  });
+
+  it("is withheld from everybody but HR: not the reviewee, not the manager", async () => {
+    for (const as of [
+      `as_person=${dora}&role=employee`,
+      `as_person=${bruno}&role=manager`,
+    ]) {
+      const res = await requestOf(mgrDora, `?${as}`);
+      expect(res.status, as).toBe(200);
+      expect(res.body.data.participant.current_rating, as).toBeNull();
+    }
+    const asHr = await requestOf(mgrDora, `?as_person=${ana}&role=hr`);
+    expect(asHr.body.data.participant.current_rating).not.toBeNull();
   });
 });
 

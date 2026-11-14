@@ -9,6 +9,7 @@ import {
 } from "@/modules/analytics/test-support";
 import {
   answer,
+  finalRating,
   questionRevision,
   reviewCycle,
   reviewRequest,
@@ -359,6 +360,25 @@ export async function seedReviewScenario() {
     { requestId: upwardBruno, questionRevisionId: q1, textValue: "Escucha" },
     { requestId: selfCarla, questionRevisionId: q1, textValue: "Me voy" },
     { requestId: deletedPeer, questionRevisionId: q1, textValue: "borrada" },
+  ]);
+
+  // Dora's rating: the manager said 3, calibration moved it to 4 (the current one).
+  await db.insert(finalRating).values([
+    {
+      participantId: pDora,
+      stage: "manager",
+      optionValue: 3,
+      optionLabel: "Alto",
+      normalized: 2 / 3,
+    },
+    {
+      participantId: pDora,
+      stage: "calibrated",
+      optionValue: 4,
+      optionLabel: "Máximo",
+      normalized: 1,
+      reason: "calibración",
+    },
   ]);
 
   return {

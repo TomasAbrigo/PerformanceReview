@@ -361,6 +361,13 @@ const requestsExport = defineExport({
     },
     { header: h("reviewer_missing"), value: (r) => r.reviewerMissing },
     { header: h("reviewer_mismatch"), value: (r) => r.reviewerMismatch },
+    { header: h("rating_stage"), value: (r) => r.currentRating?.stage },
+    { header: h("rating_value"), value: (r) => r.currentRating?.optionValue },
+    { header: h("rating_label"), value: (r) => r.currentRating?.optionLabel },
+    {
+      header: h("rating_normalized"),
+      value: (r) => r.currentRating?.normalized,
+    },
     { header: h("requested_at"), value: (r) => r.requestedAt },
     { header: h("submitted_at"), value: (r) => r.submittedAt },
     { header: h("declined_at"), value: (r) => r.declinedAt },

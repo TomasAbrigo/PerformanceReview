@@ -1259,7 +1259,11 @@
       "answer_text": "answer_text",
       "additional": "additional",
       "assigned_by_hr": "assigned_by_hr",
-      "submitted_on_behalf": "submitted_on_behalf"
+      "submitted_on_behalf": "submitted_on_behalf",
+      "rating_stage": "rating_stage",
+      "rating_value": "rating_value",
+      "rating_label": "rating_label",
+      "rating_normalized": "rating_normalized"
     }
   },
   "ImportHistory": {
