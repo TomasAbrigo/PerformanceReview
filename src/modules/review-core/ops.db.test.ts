@@ -40,6 +40,8 @@ import {
   completeOnBehalf,
   detectManagerChanges,
   extendDueDate,
+  getCycleOps,
+  getOnBehalfReview,
   removeParticipantOp,
   unlockRequestOp,
 } from "./ops";
@@ -924,6 +926,82 @@ describe("listAuditLog", () => {
     expect(only[0].after).toMatchObject({ personId: carla });
     await expect(
       listAuditLog(db, as(ana, "manager"), cycle.id),
+    ).rejects.toMatchObject({ code: "forbidden" });
+  });
+});
+
+describe("getCycleOps", () => {
+  it("lists participants with their requests, flags and manager changes (HR only)", async () => {
+    const cycle = await collectingCycle();
+    const brunos = await participantOf(cycle.id, bruno);
+    await assignAlternateAssessor(db, hr, brunos.id, ana, "additional");
+
+    const ops = (await getCycleOps(db, hr, cycle.id))!;
+    expect(ops.cycle).toMatchObject({ id: cycle.id, status: "collecting" });
+    expect(ops.participants.map((p) => p.displayName)).toEqual([
+      "Ana García",
+      "Bruno Pérez",
+    ]);
+    const b = ops.participants[1];
+    expect(b.snapManagerName).toBe("Carla Romero");
+    expect(b.requests.map((r) => [r.relationship, r.reviewerName])).toEqual([
+      ["self", "Bruno Pérez"],
+      ["manager", "Carla Romero"],
+      ["manager", "Ana García"],
+    ]);
+    expect(b.requests[2]).toMatchObject({
+      additional: true,
+      reviewerMismatch: true,
+      canComplete: true,
+    });
+    expect(b.change).toMatchObject({ currentManagerName: "Ana García" });
+    // Ana is the CEO: her manager request has no reviewer and cannot be
+    // completed until an assessor is assigned.
+    const a = ops.participants[0];
+    const missing = a.requests.find((r) => r.relationship === "manager")!;
+    expect(missing).toMatchObject({
+      reviewerMissing: true,
+      reviewerName: null,
+      canComplete: false,
+    });
+    expect(a.change).toBeNull();
+    // Carla left in 2024: not offered as a candidate or assessor today.
+    expect(ops.candidates.map((c) => c.displayName)).toEqual([]);
+    expect(await getCycleOps(db, hr, "nope")).toBeNull();
+    await expect(
+      getCycleOps(db, as(ana, "manager"), cycle.id),
+    ).rejects.toMatchObject({ code: "forbidden" });
+  });
+
+  it("offers people not in the cycle as candidates", async () => {
+    const cycle = await collectingCycle({
+      participantFilter: { kind: "people", personIds: [ana] },
+    });
+    const ops = (await getCycleOps(db, hr, cycle.id))!;
+    expect(ops.candidates.map((c) => c.displayName)).toEqual(["Bruno Pérez"]);
+    expect(ops.people.map((c) => c.displayName).sort()).toEqual([
+      "Ana García",
+      "Bruno Pérez",
+    ]);
+  });
+});
+
+describe("getOnBehalfReview", () => {
+  it("gives HR the review to complete with who is being replaced", async () => {
+    const cycle = await collectingCycle();
+    const selfId = (await findMySelfRequestId(db, as(bruno), cycle.id))!;
+    const view = (await getOnBehalfReview(db, hr, selfId))!;
+    expect(view).toMatchObject({
+      revieweeName: "Bruno Pérez",
+      reviewerName: "Bruno Pérez",
+      canComplete: true,
+    });
+    expect(view.review.questions.length).toBeGreaterThan(0);
+    await completeOnBehalf(db, hr, selfId, fillAll(view.review));
+    expect((await getOnBehalfReview(db, hr, selfId))!.canComplete).toBe(false);
+    expect(await getOnBehalfReview(db, hr, "nope")).toBeNull();
+    await expect(
+      getOnBehalfReview(db, as(carla, "manager"), selfId),
     ).rejects.toMatchObject({ code: "forbidden" });
   });
 });

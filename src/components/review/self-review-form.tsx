@@ -35,6 +35,9 @@ export type ReviewFormLabels = {
   back?: string;
   backHref?: string;
   confirmTitle?: string;
+  /** Autosave status texts (completing on behalf keeps answers locally). */
+  saving?: string;
+  saved?: string;
 };
 
 export type SelfReviewData = {
@@ -296,9 +299,9 @@ export function SelfReviewForm({
             </Button>
             <span aria-live="polite" className="text-sm text-muted-foreground">
               {saveState === "saving"
-                ? t("saving")
+                ? (labels.saving ?? t("saving"))
                 : saveState === "saved"
-                  ? t("saved")
+                  ? (labels.saved ?? t("saved"))
                   : ""}
             </span>
           </div>

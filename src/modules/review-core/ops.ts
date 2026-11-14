@@ -24,7 +24,13 @@ import { isUuid } from "@/lib/uuid";
 import type { ActorContext } from "@/modules/actor/types";
 import { todayLocal } from "@/modules/org-history/dates";
 import { type IsoDate, jobsAsOf } from "@/modules/org-history/queries";
-import { type AnswerInput, getReview, saveDraft, submit } from "./answers";
+import {
+  type AnswerInput,
+  getReview,
+  type Review,
+  saveDraft,
+  submit,
+} from "./answers";
 import { audit } from "./admin-audit";
 import { CyclesError } from "./errors";
 import {
@@ -34,6 +40,7 @@ import {
 } from "./ops-constants";
 import { OpsError } from "./ops-errors";
 import { ensureManagerRequests, loadRequest, unlock } from "./requests";
+import { ReviewError } from "./review-errors";
 import {
   addParticipant,
   participantFilterOptions,
@@ -330,6 +337,50 @@ const reviewerActor = (request: ReviewRequest): ActorContext => ({
   role: request.relationship === "self" ? "employee" : "manager",
 });
 
+/** HR may complete it now: a draft its reviewer could write in this phase. */
+const canCompleteOnBehalf = (
+  request: ReviewRequest,
+  scope: Parameters<typeof canWrite>[2],
+) =>
+  request.reviewerPersonId !== null &&
+  canWrite(reviewerActor(request), request, scope);
+
+export type OnBehalfReview = {
+  review: Review;
+  revieweeName: string | null;
+  reviewerName: string | null;
+  canComplete: boolean;
+};
+
+/**
+ * What HR needs to complete a review on behalf of its reviewer (HR only):
+ * the review as HR reads it (questions and current answers), who is who and
+ * whether it can be completed now. Null when the request is not found.
+ */
+export async function getOnBehalfReview(
+  db: DbOrTx,
+  actor: ActorContext,
+  requestId: string,
+): Promise<OnBehalfReview | null> {
+  requireHr(actor);
+  let loaded;
+  try {
+    loaded = await loadRequest(db, actor, requestId);
+  } catch (error) {
+    if (error instanceof ReviewError) return null;
+    throw error;
+  }
+  const review = await getReview(db, actor, requestId);
+  if (!review) return null;
+  const { request, participant } = loaded;
+  return {
+    review,
+    revieweeName: await nameOf(db, participant.revieweePersonId),
+    reviewerName: await nameOf(db, request.reviewerPersonId),
+    canComplete: canCompleteOnBehalf(request, loaded),
+  };
+}
+
 /**
  * HR saves `answers` and submits a draft as its reviewer (marking it
  * submitted_on_behalf), to unblock a review; audited with the answers before
@@ -351,10 +402,10 @@ export async function completeOnBehalf(
     const { request } = loaded;
     if (!request.reviewerPersonId) throw new OpsError("reviewer_missing");
     if (request.status !== "draft") throw new OpsError("not_draft");
-    const asReviewer = reviewerActor(request);
-    if (!canWrite(asReviewer, request, loaded)) {
+    if (!canCompleteOnBehalf(request, loaded)) {
       throw new OpsError("not_writable");
     }
+    const asReviewer = reviewerActor(request);
     const answersBefore = (await getReview(tx, actor, requestId))!.answers;
     await saveDraft(tx, asReviewer, requestId, answers);
     await submit(tx, asReviewer, requestId);
@@ -808,13 +859,7 @@ export async function getCycleOps(
           reviewerMismatch: request.reviewerMismatch,
           additional: request.additional,
           submittedOnBehalf: request.submittedOnBehalf,
-          canComplete:
-            request.status === "draft" &&
-            request.reviewerPersonId !== null &&
-            canWrite(reviewerActor(request), request, {
-              cycle,
-              participant: p,
-            }),
+          canComplete: canCompleteOnBehalf(request, { cycle, participant: p }),
         })),
     })),
     candidates: options.people.filter((p) => !active.has(p.id)),
