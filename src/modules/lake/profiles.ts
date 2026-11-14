@@ -167,10 +167,14 @@ const looseName = (column: string) =>
  * that are missing, and columns whose type no longer fits (the watermark must
  * be orderable; `columnTypes` pins families to detect drift). Columns the
  * profile does not mention, such as newly added ones, are not issues.
+ *
+ * `table` only words the messages: the table or file the columns came from
+ * (default: the profile's own table; an uploaded file has another name).
  */
 export function validateAgainstSchema(
   profile: SourceProfile,
   columns: LakeColumn[],
+  table: string = profile.table,
 ): ProfileIssue[] {
   const byName = new Map(columns.map((c) => [c.name, c]));
 
@@ -197,7 +201,7 @@ export function validateAgainstSchema(
         suggestion,
         message:
           `Column "${column}" (${role.replace("_", "-")} column of profile "${profile.name}") ` +
-          `is missing from table "${profile.table}"` +
+          `is missing from table "${table}"` +
           (suggestion ? `; did you mean "${suggestion}"?` : ""),
       });
       continue;

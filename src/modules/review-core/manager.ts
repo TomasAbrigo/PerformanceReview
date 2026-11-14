@@ -4,6 +4,7 @@ import type { DbOrTx } from "@/db/client";
 import { isUuid } from "@/lib/uuid";
 import {
   type CycleParticipant,
+  type ReviewCycle,
   cycleParticipant,
   person,
   reviewAudit,
@@ -15,6 +16,7 @@ import { jobAsOf } from "@/modules/org-history/queries";
 import type { RequestStatus } from "./request-status";
 import { ReviewError } from "./review-errors";
 import type { CycleStatus } from "./status";
+import { isActiveParticipant } from "./visibility";
 
 /**
  * Whether the actor is the participant's skip-level manager: the manager of
@@ -152,19 +154,34 @@ export async function sendReminder(
   // read yet (double blind).
   const [row] = isUuid(requestId)
     ? await db
-        .select({ manager: cycleParticipant.snapManagerPersonId })
+        .select({
+          manager: cycleParticipant.snapManagerPersonId,
+          removedAt: cycleParticipant.removedAt,
+          status: reviewRequest.status,
+          cycleStatus: reviewCycle.status,
+          cycleDeletedAt: reviewCycle.deletedAt,
+        })
         .from(reviewRequest)
         .innerJoin(
           cycleParticipant,
           eq(cycleParticipant.id, reviewRequest.participantId),
         )
+        .innerJoin(reviewCycle, eq(reviewCycle.id, reviewRequest.cycleId))
         .where(
           and(eq(reviewRequest.id, requestId), isNull(reviewRequest.deletedAt)),
         )
     : [];
-  if (!row) throw new ReviewError("not_found");
+  if (!row || row.cycleDeletedAt) throw new ReviewError("not_found");
   const isManager = actor.personId !== null && actor.personId === row.manager;
   if (actor.role !== "hr" && !isManager) throw new ReviewError("forbidden");
+  if (
+    row.status !== "draft" ||
+    !isActiveParticipant(row) ||
+    row.cycleStatus === "draft" ||
+    row.cycleStatus === "closed"
+  ) {
+    throw new ReviewError("not_remindable");
+  }
   await db.insert(reviewAudit).values({
     requestId,
     action: "reminder_sent",
@@ -172,22 +189,43 @@ export async function sendReminder(
   });
 }
 
+export type ParticipantRefs = {
+  revieweeName: string;
+  selfRequestId: string | null;
+  participant: { snapManagerPersonId: string | null; removedAt: Date | null };
+  cycle: {
+    status: CycleStatus;
+    components: ReviewCycle["components"];
+    calibrationPublishedAt: Date | null;
+  };
+};
+
 /**
- * Reviewee name and self request id of a participant, for the manager form.
- * Only ids: reading the self review still goes through getReview/canRead.
+ * Reviewee name, self request id, and what canShare/shareableNow need, for
+ * the manager form. Only ids: reading still goes through getReview/canRead.
  */
 export async function participantRefs(
   db: DbOrTx,
   participantId: string,
-): Promise<{ revieweeName: string; selfRequestId: string | null } | null> {
+): Promise<ParticipantRefs | null> {
   if (!isUuid(participantId)) return null;
   const [row] = await db
     .select({
       revieweeName: person.displayName,
       selfRequestId: reviewRequest.id,
+      participant: {
+        snapManagerPersonId: cycleParticipant.snapManagerPersonId,
+        removedAt: cycleParticipant.removedAt,
+      },
+      cycle: {
+        status: reviewCycle.status,
+        components: reviewCycle.components,
+        calibrationPublishedAt: reviewCycle.calibrationPublishedAt,
+      },
     })
     .from(cycleParticipant)
     .innerJoin(person, eq(person.id, cycleParticipant.revieweePersonId))
+    .innerJoin(reviewCycle, eq(reviewCycle.id, cycleParticipant.cycleId))
     .leftJoin(
       reviewRequest,
       and(

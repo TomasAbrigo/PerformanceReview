@@ -11,7 +11,7 @@ import type {
 
 export type MyTasksData = {
   selfAssessments: SelfAssessmentTask[];
-  sharedReviews?: SharedReviewTask[];
+  sharedReviews: SharedReviewTask[];
   /** #15: shared reviews the employee still has to acknowledge. */
   acknowledgements?: AckTaskView[];
 };
@@ -39,7 +39,7 @@ export function MyTasksView({
   const t = useTranslations("Me");
   const tAck = useTranslations("Compare.ack.me");
   const isoDate = useIsoDate();
-  const shared = tasks.sharedReviews ?? [];
+  const shared = tasks.sharedReviews;
   const acknowledgements = tasks.acknowledgements ?? [];
   const empty =
     tasks.selfAssessments.length === 0 &&

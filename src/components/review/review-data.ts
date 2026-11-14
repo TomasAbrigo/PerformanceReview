@@ -1,7 +1,7 @@
 import type { Review } from "@/modules/review-core/answers";
 import type { SelfReviewData } from "./self-review-form";
 
-/** A domain review as the read-only answer views take it. */
+/** Maps a domain review to the props of SelfReviewForm and its wrappers. */
 export function toReviewData(review: Review): SelfReviewData {
   return {
     requestId: review.request.id,

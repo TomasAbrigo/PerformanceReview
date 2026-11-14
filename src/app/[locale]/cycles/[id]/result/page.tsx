@@ -6,6 +6,7 @@ import { Suspense } from "react";
 import { AcknowledgeBox } from "@/components/review/acknowledge-box";
 import { FollowUpNotes } from "@/components/review/follow-up-notes";
 import { ManagerResultView } from "@/components/review/manager-result";
+import { toReviewData } from "@/components/review/review-data";
 import { db } from "@/db/client";
 import { Link } from "@/i18n/navigation";
 import { routing } from "@/i18n/routing";
@@ -38,28 +39,7 @@ async function Result({ params }: PageProps<"/[locale]/cycles/[id]/result">) {
   return (
     <div className="flex flex-col gap-8">
       <ManagerResultView
-        review={
-          review
-            ? {
-                requestId: review.request.id,
-                cycleName: review.cycle.name,
-                dueDate: null,
-                status: review.request.status,
-                submittedAt: review.request.submittedAt,
-                canWrite: false,
-                questions: review.questions.map((q) => ({
-                  id: q.id,
-                  sectionTitle: q.sectionTitle,
-                  prompt: q.prompt,
-                  kind: q.kind,
-                  required: q.required,
-                  scale: q.scale,
-                  choices: q.choices,
-                })),
-                answers: review.answers,
-              }
-            : null
-        }
+        review={review ? { ...toReviewData(review), dueDate: null } : null}
       />
       {participantId && ack ? (
         <>

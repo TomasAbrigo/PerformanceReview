@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { connection } from "next/server";
 import { Suspense } from "react";
 import { ManagerReviewForm } from "@/components/review/manager-review-form";
-import type { SelfReviewData } from "@/components/review/self-review-form";
+import { toReviewData } from "@/components/review/review-data";
 import { db } from "@/db/client";
 import { Link } from "@/i18n/navigation";
 import { routing } from "@/i18n/routing";
@@ -12,33 +12,12 @@ import { getActor } from "@/modules/actor/server";
 import {
   findManagerRequestId,
   getReview,
+  canShare,
   participantRefs,
-  type Review,
+  shareableNow,
 } from "@/modules/review-core";
 import { saveDraftAction, submitAction } from "../../self/actions";
 import { shareAction } from "./actions";
-
-function toData(review: Review): SelfReviewData {
-  return {
-    requestId: review.request.id,
-    cycleName: review.cycle.name,
-    dueDate: review.cycle.dueDate,
-    status: review.request.status,
-    submittedAt: review.request.submittedAt,
-    canWrite: review.canWrite,
-    questions: review.questions.map((q) => ({
-      id: q.id,
-      sectionTitle: q.sectionTitle,
-      prompt: q.prompt,
-      kind: q.kind,
-      required: q.required,
-      scale: q.scale,
-      choices: q.choices,
-      visibleToReviewee: q.visibleToReviewee,
-    })),
-    answers: review.answers,
-  };
-}
 
 async function ManagerReview({
   params,
@@ -48,9 +27,14 @@ async function ManagerReview({
   setRequestLocale(locale);
   await connection();
   const actor = await getActor();
-  const requestId = await findManagerRequestId(db, actor, participantId);
-  const review = requestId ? await getReview(db, actor, requestId) : null;
-  const refs = await participantRefs(db, participantId);
+  const [requestId, refs] = await Promise.all([
+    findManagerRequestId(db, actor, participantId),
+    participantRefs(db, participantId),
+  ]);
+  const [review, self] = await Promise.all([
+    requestId ? getReview(db, actor, requestId) : null,
+    refs?.selfRequestId ? getReview(db, actor, refs.selfRequestId) : null,
+  ]);
   if (!review || !refs || review.cycle.id !== id) {
     const t = await getTranslations("ManagerReview");
     return (
@@ -62,13 +46,10 @@ async function ManagerReview({
       </div>
     );
   }
-  const self = refs.selfRequestId
-    ? await getReview(db, actor, refs.selfRequestId)
-    : null;
   return (
     <ManagerReviewForm
       review={{
-        ...toData(review),
+        ...toReviewData(review),
         cycleId: id,
         revieweeName: refs.revieweeName,
         sharedAt: review.request.sharedAt,
@@ -78,11 +59,14 @@ async function ManagerReview({
             ? `/cycles/${id}/compare/${participantId}`
             : undefined,
         canShare:
-          actor.role === "hr" ||
-          (actor.personId !== null &&
-            actor.personId === review.request.reviewerPersonId),
+          canShare(actor, {
+            request: review.request,
+            participant: refs.participant,
+          }) && shareableNow(refs.cycle),
       }}
-      self={self && self.request.status === "submitted" ? toData(self) : null}
+      self={
+        self && self.request.status === "submitted" ? toReviewData(self) : null
+      }
       actions={{
         save: saveDraftAction,
         submit: submitAction,
