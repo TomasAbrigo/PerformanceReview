@@ -144,6 +144,49 @@ Ejemplo de cron (crontab del servidor): cada 15 minutos lo incremental barato (`
 
 El código de salida distinto de cero permite alertar desde el propio cron (por ejemplo con `MAILTO` o un wrapper que avise a un canal).
 
+## Notificaciones
+
+Las notificaciones de v1 son **internas**: se guardan en la tabla `notification` y se ven en la bandeja `/es/inbox` (campana con el contador de no leídas en el header y las 3 últimas no leídas en `/es/me`). **No se envían emails** (fuera de alcance del PRD en v1).
+
+Cada notificación guarda `kind`, el destinatario, el ciclo y el request (si aplica) y un `payload` con las variables del texto (`cycleName`, `dueDate`, `daysLeft`, `senderName`, ...). El texto nunca se guarda: se arma al mostrarla, en el idioma de quien la lee, con las claves `Notifications.messages.<kind>` de `src/messages/{es,en}.json` (y el destino del botón "Abrir" sale de `notificationHref`, `src/modules/notifications/href.ts`). Para sumar un tipo: agregarlo a `src/modules/notifications/kinds.ts`, generar la migración del enum, escribir su mensaje en es/en y, si tiene página propia, su destino en `href.ts`.
+
+**Idempotencia:** `dedupe_key` es único y toda creación pasa por `createNotification`/`createNotifications` (`ON CONFLICT DO NOTHING`), así que repetir un evento, o correr dos procesos a la vez, no duplica nada.
+
+### Recordatorios automáticos
+
+```bash
+pnpm notifications:run                        # recordatorios de hoy (zona horaria de la empresa)
+pnpm notifications:run --as-of 2026-07-08     # como si hoy fuera esa fecha
+pnpm notifications:run --offsets 7,3,1,0      # otros días de anticipación
+pnpm notifications:run --help
+```
+
+Crea un `reminder_due` para cada tarea **pendiente** (request en borrador, participante todavía en el ciclo, ciclo no cerrado ni borrado y en una fase en la que ese tipo de evaluación se puede escribir) cuya fecha límite (`due_dates` del ciclo) sea exactamente `--as-of` + 7, + 1 o + 0 días (por defecto `7,1,0`, las cadencias de `docs/research/06`). La fecha límite de cada tipo sale de su fase: `self` → `self`, `manager` → `manager`, `peer` y `upward` → `peer`. Quien ya envió, rechazó o salió del ciclo no recibe nada, y un día en que el comando no corre no se recupera (no hay recordatorios atrasados). La clave de deduplicación es `reminder_due:<requestId>:<díasAntes>:<fechaLímite>`: correr el comando varias veces el mismo día no duplica, y si People mueve la fecha límite, el nuevo día de aviso genera un recordatorio nuevo. `--as-of` por defecto es `todayLocal()` (America/Argentina/Buenos_Aires), no la zona del servidor. Código de salida `0` (ok) o `2` (argumentos o `DATABASE_URL` inválidos).
+
+Ejemplo de cron (una vez por día, a las 7 AM hora de Buenos Aires como los emails de Bamboo; el servidor está en UTC, de ahí las 10):
+
+```cron
+0 10 * * * cd /srv/performance-review && pnpm notifications:run >> /var/log/pr-notifications.log 2>&1
+```
+
+### Desde el código
+
+Todo está en `@/modules/notifications`:
+
+| Función                                                                        | Para qué                                                                                                                                                                                                                                                                         |
+| ------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `generateDueReminders(db, { asOf?, offsets? })`                                | Lo que corre el CLI. Devuelve `{ asOf, offsets, candidates, created }`.                                                                                                                                                                                                          |
+| `remind(db, actor, requestId, { asOf? })`                                      | Recordatorio manual ("Recordar") de un request pendiente: lo puede enviar el manager del snapshot del participante o HR (`NotificationError`: `not_found`, `forbidden`, `not_pending`). Máximo uno por remitente, request y día: devuelve `{ created: false }` en la repetición. |
+| `createNotification(db, input)` / `createNotifications(db, inputs)`            | Punto de escritura estable: idempotente por `dedupeKey`; devuelve si se creó (o cuántas).                                                                                                                                                                                        |
+| `notifyPhaseChanged(db, cycleId, from, to)`                                    | Avisa a los participantes activos del cambio de fase. Lo llaman `launchCycle` y `transition` de review-core dentro de su transacción.                                                                                                                                            |
+| `notifyReviewShared` / `notifyFeedbackReceived` / `notifyCalibrationPublished` | Eventos para que los llamen los slices de compartir (#12), feedback (#14) y calibración (#16). Idempotentes. El de feedback nunca incluye al autor (puede ser anónimo).                                                                                                          |
+| `listNotifications(db, actor, { unreadOnly?, limit?, cursor? })`               | Bandeja del actor: no leídas primero, luego leídas, más nuevas primero; paginado por cursor (`nextCursor`).                                                                                                                                                                      |
+| `markRead(db, actor, ids)` / `markAllRead(db, actor)` / `unreadCount`          | Solo tocan las notificaciones propias; los ids ajenos se ignoran. Sin persona (People actuando como equipo) no hay bandeja.                                                                                                                                                      |
+
+### Email (fuera de alcance)
+
+Hoy `createNotifications` (`src/modules/notifications/service.ts`) es el único punto por el que se crea una notificación. Un adaptador de email se enchufaría ahí: devolver las filas nuevas (`RETURNING`) y pasarlas a un canal que arme el texto con las mismas claves de i18n en el idioma del destinatario; o un worker aparte que lea las notificaciones sin marca de envío. Nada de eso existe todavía.
+
 ## Lake adapter
 
 `src/modules/lake/` lee tablas de un data lake (o de una carpeta de archivos que hace de lake) detrás de una interfaz única, `LakeAdapter` (`listTables`, `describeTable`, `readBatches`, `close`). Hoy hay una implementación, `DuckDbFileLake`; los conectores reales (BigQuery, Snowflake, Databricks, Redshift, Postgres) tendrán que pasar la misma suite de contrato.
