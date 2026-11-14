@@ -214,6 +214,60 @@ for await (const { rows } of lake.readBatches(
 - `duckdb-file-lake.test.ts` corre la suite sobre CSV y `parquet.test.ts` sobre la variante Parquet, generada al vuelo con DuckDB `COPY`. Para obtener los archivos Parquet: `pnpm fixtures:parquet [carpetaDeSalida]` (por defecto `build/lake-parquet/<escenario>/`, ignorado por git).
 - No pongas exports reales en los fixtures (contienen datos personales).
 
+## Calidad de datos, API JSON y exports CSV
+
+### Panel de calidad de datos
+
+`/es/data-quality` (enlace en el inicio) muestra un conteo por indicador y un enlace a la lista de casos (`/es/data-quality/<indicador>`; las identidades sin resolver enlazan a la cola `/es/imports/identity`). Cada indicador es una consulta con nombre en `src/modules/analytics/data-quality.ts` que devuelve `{ key, count, items[] }`; el conteo es `items.length`, así que el número del panel y su lista no pueden diferir. "Activo" y "hoy" siguen la definición del resto de la app (`activeEmploymentCte`, `current_date`).
+
+| Indicador (`key`)                  | Qué cuenta                                                                                                                      |
+| ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| `identity_open`                    | Casos abiertos de la cola de identidad.                                                                                         |
+| `no_manager`                       | Activos con puesto vigente sin manager (el tope de la organización, con reportes, va con la insignia "Tope").                   |
+| `participants_no_manager`          | Participantes de ciclos (no removidos) sin manager en el snapshot, agrupados por ciclo.                                         |
+| `participants_incomplete_snapshot` | Participantes cuyo snapshot no tiene área o puesto.                                                                             |
+| `job_history_overlap_gap`          | Filas del historial de puesto que se superponen o dejan un hueco dentro de un mismo empleo (el hueco de un reingreso no).       |
+| `job_history_open_after_exit`      | Personas que ya no están activas pero tienen una fila de puesto abierta (`valid_to` nulo).                                      |
+| `active_without_job_history`       | Activos sin ninguna fila de historial de puesto.                                                                                |
+| `goals_without_employment`         | Goals (no borrados) cuyo dueño no tiene ningún empleo vigente.                                                                  |
+| `duplicate_names`                  | Activos que comparten nombre (sin importar tildes, mayúsculas ni orden de palabras).                                            |
+| `failed_runs`                      | Corridas de importación con error en los últimos 7 días.                                                                        |
+| `reviewer_mismatch`                | Pedidos de evaluación con evaluador distinto del manager del snapshot. **Pendiente**: espera a la tabla `review_request` (#35). |
+
+### API JSON de solo lectura (`/api/v1`)
+
+Handlers en `src/modules/api/handlers.ts`, rutas en `src/app/api/v1/**`. Todos los objetos llevan `id` (uuid interno) y, cuando vienen de una fuente, `source: { system, id }` (`null` para filas creadas en la app; en las personas es su ID de Bamboo vigente). Fechas `YYYY-MM-DD`, instantes ISO 8601 UTC con microsegundos, claves en `snake_case`.
+
+| Endpoint                                                       | Respuesta                                                                                    |
+| -------------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
+| `GET /api/v1/people?q=&active=true\|false`                     | Personas con legajo, estado, puesto y manager vigentes.                                      |
+| `GET /api/v1/people/{id}`                                      | Persona con `source_identities`, `employments` y `job_history` (más nueva primero).          |
+| `GET /api/v1/people/{id}/goals?status=`                        | Goals de una persona.                                                                        |
+| `GET /api/v1/org/as-of?date=YYYY-MM-DD`                        | Quién tenía puesto vigente esa fecha y con qué manager (hoy si falta `date`).                |
+| `GET /api/v1/goals?person_id=&manager_id=&status=`             | Goals con dueño, hitos y a quién se compartieron.                                            |
+| `GET /api/v1/cycles` · `GET /api/v1/cycles/{id}`               | Ciclos; el detalle trae los participantes (removidos incluidos) con su snapshot de org.      |
+| `GET /api/v1/ingest-runs?source=&entity=&status=` · `.../{id}` | Corridas, de la más nueva a la más vieja; el detalle trae `params`, `rejects` y raw records. |
+| `GET /api/v1/identity-issues?status=open\|resolved\|ignored`   | Casos de la cola de identidad con candidatos y payload.                                      |
+
+- **Paginación:** `?limit=` (1-200, por defecto 50) y `?cursor=`. Las listas responden `{ data, next_cursor }`; `next_cursor` es `null` en la última página. Es keyset (no offset) sobre una clave inmutable: `(created_at, id)`, `(started_at desc, id desc)` para corridas e `id` para el org. Una fila nueva nunca corre ni repite las páginas ya leídas. Un cursor ajeno es un 400.
+- **Errores:** `application/problem+json` (RFC 9457). 400 para parámetros inválidos (con `errors: [{ path, message }]`), 404 para ids desconocidos o mal formados, 401 sin token válido.
+- **Auth:** sin sesión en v1. Si la variable `API_TOKEN` está definida, hace falta `Authorization: Bearer <API_TOKEN>` (comparación en tiempo constante); si está vacía o sin definir la API queda abierta (desarrollo local). Los botones "Exportar CSV" son enlaces del navegador y no pueden mandar el header: con `API_TOKEN` definido bajá los CSV con `curl -H "Authorization: Bearer $API_TOKEN"` hasta que exista la sesión.
+- Los datos de revisión (pedidos, respuestas, ratings) todavía no están: cuando lleguen (#35/#12) pasarán por `canRead` del actor.
+
+### Exports CSV
+
+`GET /api/v1/export/<entidad>.csv` (mismo token y mismos filtros que la API), con "Exportar CSV" en las listas de personas, organigrama, goals, corridas y ciclos. Archivos UTF-8 con BOM (Excel), líneas `CRLF`, comillas RFC 4180 y un apóstrofe delante del texto que una planilla evaluaría como fórmula (`=`, `+`, `-`, `@`). Se arman página por página (streaming).
+
+| Archivo                  | Una fila por…                    | Filtros                             |
+| ------------------------ | -------------------------------- | ----------------------------------- |
+| `people.csv`             | persona                          | `q`, `active`                       |
+| `org.csv`                | fila de puesto vigente en `date` | `date`                              |
+| `goals.csv`              | goal                             | `person_id`, `manager_id`, `status` |
+| `ingest-runs.csv`        | corrida                          | `source`, `entity`, `status`        |
+| `cycle-participants.csv` | participante de ciclo            | `cycle_id`                          |
+
+Cada fila trae los ids internos (uuid) y los de Bamboo (`bamboo_id`, `legajo`, y el del manager o del manager del snapshot), más área, división, puesto y ubicación. Falta el export de respuestas (una fila por evaluador × pregunta): depende de las respuestas (#12).
+
 ## Puertos (Supabase local)
 
 Se usan puertos propios para no chocar con otros proyectos locales.
