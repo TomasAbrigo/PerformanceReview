@@ -65,22 +65,54 @@ export async function* csvStream<R>(
   for await (const row of rows) yield rowLine(row, columns);
 }
 
-/** A `text/csv` attachment that streams `rows` as they are produced. */
-export function csvResponse<R>(
+/**
+ * Last line of a file whose rows stopped coming (a query failed after the
+ * response had started): a comment no CSV parser mistakes for data, so a
+ * consumer can tell the file is incomplete.
+ */
+export const CSV_INTERRUPTED =
+  "# EXPORT INTERRUPTED: the file is incomplete, download it again\r\n";
+
+/**
+ * A `text/csv` attachment that streams `rows` as they are produced. The
+ * first row is read before answering: a failure there is still an ordinary
+ * error (the caller turns it into a 500), not a 200 with a broken file. A
+ * failure on a later page is logged and ends the file with `CSV_INTERRUPTED`.
+ */
+export async function csvResponse<R>(
   filename: string,
   rows: AsyncIterable<R> | Iterable<R>,
   columns: CsvColumn<R>[],
-): Response {
+): Promise<Response> {
   const encoder = new TextEncoder();
   const chunks = csvStream(rows, columns);
+  // The header, then the first row (the first query).
+  const queue: string[] = [];
+  let finished = false;
+  for (let i = 0; i < 2 && !finished; i++) {
+    const next = await chunks.next();
+    if (next.done) finished = true;
+    else queue.push(next.value);
+  }
   const body = new ReadableStream<Uint8Array>({
     async pull(controller) {
+      const queued = queue.shift();
+      if (queued !== undefined) {
+        controller.enqueue(encoder.encode(queued));
+        return;
+      }
+      if (finished) {
+        controller.close();
+        return;
+      }
       try {
         const next = await chunks.next();
         if (next.done) controller.close();
         else controller.enqueue(encoder.encode(next.value));
       } catch (error) {
-        controller.error(error);
+        console.error("CSV export failed after it had started", error);
+        controller.enqueue(encoder.encode(CSV_INTERRUPTED));
+        controller.close();
       }
     },
     async cancel() {

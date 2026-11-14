@@ -1,6 +1,7 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import {
   CSV_BOM,
+  CSV_INTERRUPTED,
   csvField,
   csvResponse,
   csvStream,
@@ -114,7 +115,7 @@ describe("csvStream / csvResponse", () => {
   });
 
   it("builds a text/csv attachment response that streams the file", async () => {
-    const response = csvResponse("people.csv", source(), columns);
+    const response = await csvResponse("people.csv", source(), columns);
     expect(response.headers.get("content-type")).toBe(
       "text/csv; charset=utf-8",
     );
@@ -128,5 +129,42 @@ describe("csvStream / csvResponse", () => {
     expect(new TextDecoder("utf-8", { ignoreBOM: true }).decode(bytes)).toBe(
       `${CSV_BOM}id,nombre,n\r\nu1,Ana,\r\nu2,Bruno,\r\n`,
     );
+  });
+
+  async function* failingAt(after: number): AsyncGenerator<Row> {
+    for (let i = 0; i < after; i++) yield { id: `u${i}`, name: "Ana" };
+    throw new Error("boom: connection lost");
+  }
+
+  it("fails like any request when the first rows cannot be read (nothing was sent yet)", async () => {
+    await expect(
+      csvResponse("people.csv", failingAt(0), columns),
+    ).rejects.toThrow("boom: connection lost");
+  });
+
+  it("ends a file whose later rows fail with a sentinel comment line, and logs it", async () => {
+    const log = vi.spyOn(console, "error").mockImplementation(() => {});
+    try {
+      const response = await csvResponse("people.csv", failingAt(2), columns);
+      const text = new TextDecoder("utf-8", { ignoreBOM: true }).decode(
+        await response.arrayBuffer(),
+      );
+      expect(text).toBe(
+        `${CSV_BOM}id,nombre,n\r\nu0,Ana,\r\nu1,Ana,\r\n${CSV_INTERRUPTED}`,
+      );
+      expect(CSV_INTERRUPTED.startsWith("#")).toBe(true);
+      expect(CSV_INTERRUPTED.endsWith("\r\n")).toBe(true);
+      expect(log).toHaveBeenCalledWith(
+        expect.stringContaining("CSV export"),
+        expect.objectContaining({ message: "boom: connection lost" }),
+      );
+    } finally {
+      log.mockRestore();
+    }
+  });
+
+  it("still sends a file with only the header when there are no rows", async () => {
+    const response = await csvResponse("empty.csv", [], columns);
+    expect(await response.text()).toBe("id,nombre,n\r\n");
   });
 });
