@@ -9,6 +9,8 @@ import {
   type SourceSystem,
 } from "@/db/schema";
 import { bambooId } from "@/modules/bamboo-client/schemas";
+// Direct file import (not the identity barrel): see ./employee.ts.
+import { normalizeName } from "@/modules/identity/normalize";
 import {
   buildJobHistory,
   buildStatusHistory,
@@ -70,19 +72,44 @@ export type JobHistoryOutcome = {
   managerUnresolved: number;
 };
 
-/** Display name → person id, for names that exactly one person has. */
-export async function uniqueNameIndex(
-  tx: DbOrTx,
-): Promise<Map<string, string>> {
-  const rows = await tx
-    .select({
-      name: person.displayName,
-      id: sql<string>`min(${person.id}::text)`,
-    })
-    .from(person)
-    .groupBy(person.displayName)
-    .having(sql`count(*) = 1`);
-  return new Map(rows.map((r) => [r.name, r.id]));
+/** Name key (see `normalizeName`) → person id, only for names that exactly one person has. */
+export type NameIndex = Map<string, string>;
+
+/**
+ * Index of the people whose name is theirs alone. The key is the normalized
+ * name (case, accents, punctuation and word order do not matter), so
+ * Bamboo's "Páez, Martín" in jobInfo.reportsTo finds the display name
+ * "Martin Paez". Namesakes (the same key for two people) are left out: a
+ * name that cannot tell them apart must not pick one.
+ */
+export function buildNameIndex(
+  people: readonly { id: string; displayName: string }[],
+): NameIndex {
+  const holders = new Map<string, string | null>();
+  for (const { id, displayName } of people) {
+    const key = normalizeName(displayName);
+    if (key) holders.set(key, holders.has(key) ? null : id);
+  }
+  const unique: NameIndex = new Map();
+  for (const [key, id] of holders) if (id) unique.set(key, id);
+  return unique;
+}
+
+/** The one person called `raw` (any "Last, First" / "First Last" spelling), or null. */
+export function resolveManagerName(
+  index: NameIndex,
+  raw: string,
+): string | null {
+  const key = normalizeName(raw);
+  return key ? (index.get(key) ?? null) : null;
+}
+
+export async function uniqueNameIndex(tx: DbOrTx): Promise<NameIndex> {
+  return buildNameIndex(
+    await tx
+      .select({ id: person.id, displayName: person.displayName })
+      .from(person),
+  );
 }
 
 type JobValues = {
@@ -113,8 +140,10 @@ const jobKeys = [
 /**
  * Rebuilds the SCD2 history of one employee from all its Bamboo table rows.
  * The manager of the current row comes from the employee's supervisorEId;
- * older rows only have the reportsTo NAME, resolved only when exactly one
- * person has it (otherwise null, keeping manager_raw).
+ * older rows only have the reportsTo NAME ("Last, First"), matched against
+ * the people's display names ("First Last") once both are normalized, and
+ * resolved only when exactly one person has it (otherwise null, keeping
+ * manager_raw, and counted in managerUnresolved).
  */
 export async function upsertJobHistory(
   tx: DbOrTx,
@@ -122,7 +151,7 @@ export async function upsertJobHistory(
   staged: StagedJobHistory,
   hash: string,
   runId: string,
-  names?: Map<string, string>,
+  names?: NameIndex,
 ): Promise<JobHistoryOutcome> {
   const personId = await resolvePerson(tx, source, {
     bambooId: staged.employeeId,
@@ -180,7 +209,7 @@ export async function upsertJobHistory(
         managerPersonId = await resolvePerson(tx, source, { bambooId: sup });
     }
     if (!managerPersonId && r.managerRaw) {
-      managerPersonId = nameIndex.get(r.managerRaw) ?? null;
+      managerPersonId = resolveManagerName(nameIndex, r.managerRaw);
       if (!managerPersonId) managerUnresolved++;
     }
     desired.push({

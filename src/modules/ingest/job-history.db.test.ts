@@ -10,6 +10,7 @@ import {
   ingestRun,
   person,
 } from "@/db/schema";
+import { resolvePerson } from "./employee";
 import { FixtureAdapter } from "./fixture-adapter";
 import { runIngest } from "./run-ingest";
 
@@ -39,6 +40,15 @@ async function personId(name: string) {
     .from(person)
     .where(eq(person.displayName, name));
   return p.id;
+}
+
+/** Bamboo renders reportsTo as "Last, First": rewrites the fixture's "First Last". */
+function writeAsLastFirst(rows: { reportsTo: string | null }[]) {
+  for (const r of rows) {
+    if (!r.reportsTo) continue;
+    const [first, ...rest] = r.reportsTo.split(" ");
+    r.reportsTo = `${rest.join(" ")}, ${first}`;
+  }
 }
 
 const historyOf = async (id: string) =>
@@ -206,6 +216,94 @@ describe("runIngest job_history (jobInfo + employmentStatus fixtures)", () => {
       .from(ingestRun)
       .where(eq(ingestRun.id, runId));
     expect(run.counts).toMatchObject({ managerUnresolved: 1 });
+  });
+
+  it("resolves managers from Bamboo's 'Last, First' reportsTo to the 'First Last' people", async () => {
+    await editJson<{ reportsTo: string | null }[]>(
+      "tables-jobInfo.json",
+      writeAsLastFirst,
+    );
+    await ingest("employee");
+    const { counts } = await ingest("job_history");
+
+    expect(counts).toMatchObject({ rejected: 0, managerUnresolved: 0 });
+    const [ana, carla] = await Promise.all([
+      personId("Ana García"),
+      personId("Carla Romero"),
+    ]);
+    const b = await historyOf(await personId("Bruno Pérez"));
+    // The first row has only the NAME: it resolves by matching it.
+    expect(b.map((r) => [r.managerPersonId, r.managerRaw])).toEqual([
+      [carla, "Romero, Carla"],
+      [ana, "García, Ana"],
+    ]);
+    const c = await historyOf(carla);
+    expect(c.map((r) => [r.managerPersonId, r.managerRaw])).toEqual([
+      [ana, "García, Ana"],
+    ]);
+  });
+
+  it("leaves namesakes unresolved and counted when reportsTo is 'Last, First'", async () => {
+    type Page = { data: Record<string, unknown>[] };
+    await editJson<Page>("employees-page-2.json", (page) => {
+      page.data.push({
+        id: 104,
+        employeeNumber: "0004",
+        displayName: "Carla Romero",
+        workEmail: "carla.romero2@example.com",
+        status: "Active",
+        hireDate: "2022-02-01",
+        supervisorEId: 101,
+      });
+    });
+    await editJson<{ reportsTo: string | null }[]>(
+      "tables-jobInfo.json",
+      writeAsLastFirst,
+    );
+    await ingest("employee");
+    const { counts } = await ingest("job_history");
+
+    // Only Bruno's first row (Carla): Ana is unique, and the current rows
+    // come from supervisorEId.
+    expect(counts.managerUnresolved).toBe(1);
+    const b = await historyOf(await personId("Bruno Pérez"));
+    expect(b[0]).toMatchObject({
+      managerPersonId: null,
+      managerRaw: "Romero, Carla",
+    });
+    expect(b[1].managerPersonId).toBe(await personId("Ana García"));
+  });
+
+  it("keeps resolving the current row by supervisorEId when its reportsTo name became ambiguous", async () => {
+    type Page = { data: Record<string, unknown>[] };
+    await editJson<Page>("employees-page-2.json", (page) => {
+      page.data.push({
+        id: 104,
+        employeeNumber: "0004",
+        displayName: "Ana García",
+        workEmail: "ana.garcia2@example.com",
+        status: "Active",
+        hireDate: "2022-02-01",
+        supervisorEId: 101,
+      });
+    });
+    await editJson<{ reportsTo: string | null }[]>(
+      "tables-jobInfo.json",
+      writeAsLastFirst,
+    );
+    await ingest("employee");
+    await ingest("job_history");
+
+    // Two people are called Ana García now: the name cannot tell them apart,
+    // but Bruno's current row has the supervisor's id.
+    const supervisor = await resolvePerson(db, "bamboo_api", {
+      bambooId: "101",
+    });
+    const b = await historyOf(await personId("Bruno Pérez"));
+    expect(b.at(-1)).toMatchObject({
+      managerPersonId: supervisor,
+      managerRaw: "García, Ana",
+    });
   });
 
   it("uses the supervisor of the latest employee ingest, even after a revert", async () => {
