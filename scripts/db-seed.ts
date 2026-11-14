@@ -2,15 +2,19 @@
  * pnpm db:seed [--size small|demo] [--reset]
  *
  * Fills the local database from the generated Bamboo fixtures
- * (fixtures/bamboo/<size>) through the registered ingest pipelines, and prints
- * what each one did. Idempotent: running it again reports everything
- * unchanged. --reset empties the domain tables first (local database only).
+ * (fixtures/bamboo/<size>) through the registered ingest pipelines, the same
+ * ones (and the same summary table) as `pnpm ingest --all --source fixture`.
+ * Idempotent: running it again reports everything unchanged. --reset empties
+ * the domain tables first (local database only, refused while a run is in
+ * progress). Exit code: 0 all runs succeeded, 1 a run (or the reset) failed,
+ * 2 bad arguments or configuration.
  */
 import { sql } from "drizzle-orm";
 import { closeDb, db } from "../src/db/client";
+import { assertLocalDatabase } from "../src/db/local";
+import { formatSummary } from "../src/modules/ingest/cli";
+import { withAdvisoryLock } from "../src/modules/ingest/lock";
 import {
-  assertLocalDatabase,
-  formatSeedSummary,
   parseSeedArgs,
   resetDomainTables,
   seedFixturesDir,
@@ -52,23 +56,40 @@ async function main(): Promise<number> {
       console.error((err as Error).message);
       return 2;
     }
-    await resetDomainTables(db);
+    try {
+      await resetDomainTables(db);
+    } catch (err) {
+      console.error(err instanceof Error ? err.message : err);
+      return 1;
+    }
     console.log("Domain tables emptied.");
   }
 
   console.log(`Seeding from ${seedFixturesDir(args.size)}`);
-  const runs = await seedFromFixtures({ size: args.size, db });
-  console.log(formatSeedSummary(runs));
+  const outcomes = await seedFromFixtures({
+    size: args.size,
+    db,
+    lock: (key, fn) => withAdvisoryLock(db, key, fn),
+  });
+  console.log(formatSummary(outcomes));
+  for (const o of outcomes) {
+    if (o.status === "error") {
+      console.error(
+        `${o.entity}: ${o.error}${o.runId ? ` (run ${o.runId})` : ""}`,
+      );
+    }
+  }
+
   console.log(
     `\nperson: ${await count("person")}, job history rows: ${await count("employee_job_history")}, goals: ${await count("goal")}`,
   );
-  const waiting = runs.find((r) => r.entity === "employee")?.issues ?? 0;
-  if (waiting > 0) {
+  const waiting = outcomes.find((o) => o.entity === "employee")?.counts?.issues;
+  if (waiting) {
     console.log(
       `${waiting} records wait for a person in the identity queue (rehires): /es/imports/identity`,
     );
   }
-  return 0;
+  return outcomes.some((o) => o.status === "error") ? 1 : 0;
 }
 
 main()

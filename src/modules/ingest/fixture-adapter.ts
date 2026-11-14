@@ -174,7 +174,15 @@ export class FixtureAdapter implements SourceAdapter {
         // → id); one that has no id at all is skipped.
         for (const raw of body.data) {
           const item = listEmployeeSchema.safeParse(raw);
-          if (item.success) fromPages.set(String(item.data.id), item.data);
+          // An item nobody can identify cannot be ingested or rejected by id;
+          // skipping it would also leave that employee out of `seen`, and a
+          // full run would soft-delete them. Fail the extraction instead.
+          if (!item.success) {
+            throw new Error(
+              `${file}: employee list item has no id (neither id nor employeeId)`,
+            );
+          }
+          fromPages.set(String(item.data.id), item.data);
         }
       } else if (isObject(body) && body.id != null && !("employees" in body)) {
         singles.set(String(body.id), body);

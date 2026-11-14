@@ -27,7 +27,7 @@ In-house performance review tool replacing BambooHR's performance module. Data i
 | `pnpm test`                        | All Vitest projects (unit + db)                                                                     |
 | `pnpm test:unit`                   | jsdom unit/component tests (`src/**/*.test.{ts,tsx}`)                                               |
 | `pnpm test:db`                     | Node tests against `DATABASE_URL` (`src/**/*.db.test.ts`); applies pending Drizzle migrations first |
-| `pnpm test:e2e`                    | Playwright (starts `next dev` on :3100). First time: `pnpm exec playwright install chromium`        |
+| `pnpm test:e2e`                    | Playwright on its own `<db>_e2e` DB, `next dev` on :3100; 1st time: `pnpm exec playwright install`  |
 | `pnpm db:generate`                 | Generate a Drizzle migration into `drizzle/` from `src/db/schema/*.ts`                              |
 | `pnpm db:migrate`                  | Apply Drizzle migrations to `DATABASE_URL`                                                          |
 | `pnpm db:studio`                   | Drizzle Studio                                                                                      |

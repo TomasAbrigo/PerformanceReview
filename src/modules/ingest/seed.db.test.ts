@@ -1,7 +1,7 @@
 import { and, count, eq, isNull, sql } from "drizzle-orm";
 import type { PgTable } from "drizzle-orm/pg-core";
-import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import { closeDb, db } from "@/db/client";
+import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
+import { closeDb, db, type Database } from "@/db/client";
 import {
   employeeJobHistory,
   employment,
@@ -15,14 +15,19 @@ import {
 import { generateCompany, type CompanyFixture } from "@/fixtures/company";
 import { FIXTURE_SEEDS } from "@/fixtures/write";
 import { seedSystemTemplates } from "@/modules/templates";
+import type { Outcome } from "./cli";
+import { withAdvisoryLock } from "./lock";
 import { REGISTRY } from "./registry";
+import { IngestRunError } from "./run-ingest";
 import {
   KEPT_TABLES,
   RESET_TABLES,
   resetDomainTables,
   seedFromFixtures,
-  type SeedRun,
 } from "./seed";
+
+// These seed a whole company: leave room on a slow or busy machine.
+vi.setConfig({ testTimeout: 60_000, hookTimeout: 60_000 });
 
 /**
  * What the pipelines should leave for a company, from the generator's ground
@@ -58,14 +63,21 @@ async function total(table: PgTable): Promise<number> {
   return n;
 }
 
+/** The counts of a run that succeeded. */
+function counts(outcome: Outcome) {
+  expect(outcome.error).toBeUndefined();
+  expect(outcome.status).toBe("succeeded");
+  return outcome.counts!;
+}
+
 /** What a run did, to compare a second run against the first. */
 function pipelineChecks(
   want: ReturnType<typeof expected>,
-  first: SeedRun[],
-  second: SeedRun[],
+  first: Outcome[],
+  second: Outcome[],
 ) {
-  const [employee, jobHistory, goals] = first;
-  expect(employee.counts).toMatchObject({
+  const [employee, jobHistory, goals] = first.map(counts);
+  expect(employee).toMatchObject({
     read: want.records,
     inserted: want.persons,
     unchanged: 0,
@@ -73,12 +85,12 @@ function pipelineChecks(
     issues: want.queued.size,
   });
   // job_history of a queued id has no person to attach to yet.
-  expect(jobHistory.counts).toMatchObject({
+  expect(jobHistory).toMatchObject({
     read: want.records,
     inserted: want.persons,
     rejected: want.queued.size,
   });
-  expect(goals.counts).toMatchObject({
+  expect(goals).toMatchObject({
     read: want.goals.length,
     inserted: want.goals.length,
     rejected: 0,
@@ -86,22 +98,22 @@ function pipelineChecks(
   for (const [i, run] of second.entries()) {
     // Nothing is inserted or updated again: what was applied is unchanged and
     // what waited still waits.
-    expect(run.counts).toMatchObject({
-      read: first[i].counts.read,
+    expect(counts(run)).toMatchObject({
+      read: counts(first[i]).read,
       inserted: 0,
       updated: 0,
-      unchanged: first[i].counts.inserted,
-      rejected: first[i].counts.rejected,
+      unchanged: counts(first[i]).inserted,
+      rejected: counts(first[i]).rejected,
     });
-    expect(run.issues).toBe(first[i].issues);
+    expect(counts(run).issues ?? 0).toBe(counts(first[i]).issues ?? 0);
   }
 }
 
 describe("seedFromFixtures (small)", () => {
   const company = generateCompany({ size: "small", seed: FIXTURE_SEEDS.small });
   const want = expected(company);
-  let first: SeedRun[];
-  let second: SeedRun[];
+  let first: Outcome[];
+  let second: Outcome[];
 
   beforeAll(async () => {
     await resetDomainTables(db);
@@ -224,7 +236,7 @@ describe("seedFromFixtures (demo)", () => {
     expect(await total(employeeJobHistory)).toBe(want.jobRows.length);
     expect(await total(goal)).toBe(want.goals.length);
     pipelineChecks(want, first, second);
-  }, 120_000);
+  }, 240_000);
 });
 
 describe("resetDomainTables", () => {
@@ -266,8 +278,90 @@ describe("resetDomainTables", () => {
     });
     await resetDomainTables(db);
     const [employees] = await seedFromFixtures({ size: "small", db });
-    expect(employees.counts.inserted).toBe(company.identity.persons.length);
+    expect(counts(employees).inserted).toBe(company.identity.persons.length);
     expect(await total(person)).toBe(company.identity.persons.length);
     await resetDomainTables(db);
+  });
+});
+
+describe("seedFromFixtures with failures and locks", () => {
+  afterAll(async () => {
+    await resetDomainTables(db);
+    await closeDb();
+  });
+
+  it("takes the CLI's lock of each entity, in order", async () => {
+    await resetDomainTables(db);
+    const keys: string[] = [];
+
+    await seedFromFixtures({
+      size: "small",
+      db,
+      lock: (key, fn) => {
+        keys.push(key);
+        return fn();
+      },
+    });
+
+    expect(keys).toEqual([
+      "ingest:employee",
+      "ingest:job_history",
+      "ingest:goal",
+    ]);
+  });
+
+  it("a pipeline that fails does not stop the next one, and its run id is reported", async () => {
+    await resetDomainTables(db);
+    const failing = {
+      ...REGISTRY.get("job_history")!,
+      run: async () => {
+        throw new IngestRunError(
+          "boom",
+          "11111111-1111-4111-8111-111111111111",
+          {
+            read: 1,
+            inserted: 0,
+            updated: 0,
+            unchanged: 0,
+            rejected: 0,
+            deleted: 0,
+          },
+        );
+      },
+    };
+    const registry = new Map([
+      ["employee", REGISTRY.get("employee")!],
+      ["job_history", failing],
+      ["goal", REGISTRY.get("goal")!],
+    ]);
+
+    const outcomes = await seedFromFixtures({ size: "small", db, registry });
+
+    expect(outcomes.map((o) => [o.entity, o.status])).toEqual([
+      ["employee", "succeeded"],
+      ["job_history", "error"],
+      ["goal", "succeeded"],
+    ]);
+    expect(outcomes[1]).toMatchObject({
+      error: "boom",
+      runId: "11111111-1111-4111-8111-111111111111",
+    });
+    expect(await total(person)).toBeGreaterThan(0);
+  });
+
+  it("refuses to reset while an ingest run holds its lock, and empties nothing", async () => {
+    await resetDomainTables(db);
+    await seedFromFixtures({ size: "small", db });
+    const before = await total(person);
+
+    await withAdvisoryLock(db as Database, "ingest:goal", async () => {
+      await expect(resetDomainTables(db)).rejects.toThrow(
+        /ingest run of "goal" is in progress/,
+      );
+    });
+
+    expect(await total(person)).toBe(before);
+    await resetDomainTables(db);
+    expect(await total(person)).toBe(0);
   });
 });

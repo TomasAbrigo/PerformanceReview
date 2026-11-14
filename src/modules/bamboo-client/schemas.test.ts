@@ -149,6 +149,51 @@ describe("goals aggregate schema", () => {
     expect(parsed.persons).toEqual([]);
     expect(parsed.comments).toEqual([]);
   });
+
+  it("one odd value in a field nobody needs does not drop the employee's goals", () => {
+    const parsed = goalsAggregateSchema.parse({
+      canAlign: "yes",
+      canCreateGoals: 1,
+      filters: "all",
+      selectedFilter: { id: 1 },
+      goals: [
+        { id: "1", title: "A", actions: 5 },
+        { id: "2", title: "B", actions: { canEdit: "maybe" } },
+      ],
+      persons: [{ employeeId: 7, firstName: 3, preferredName: [] }],
+      comments: [{ goalId: 1, commentCount: 2 }],
+    });
+
+    expect(parsed.goals.map((g) => g.id)).toEqual(["1", "2"]);
+    expect(parsed.persons[0].employeeId).toBe("7");
+    expect(parsed.comments).toEqual([{ goalId: "1", commentCount: 2 }]);
+  });
+});
+
+describe("content fields are not validated at parse time", () => {
+  const odd = { nested: true };
+
+  it("an off-type field in a list item keeps the item, raw", () => {
+    const item = { employeeId: "9", firstName: odd, hireDate: 5, status: [] };
+
+    const { data } = listEmployeesPageSchema.parse({
+      data: [item],
+      meta: { total: odd },
+      _links: odd,
+    });
+
+    expect(data[0]).toEqual({ ...item, id: "9" });
+  });
+
+  it("an off-type field in an employee or a table row does not fail the parse", () => {
+    expect(
+      employeeSchema.parse({ id: "1", hireDate: odd, supervisorId: [] }).id,
+    ).toBe("1");
+    expect(
+      jobInfoRowSchema.parse({ id: 1, employeeId: 2, date: odd, reportsTo: 3 })
+        .employeeId,
+    ).toBe("2");
+  });
 });
 
 describe("one module for the Bamboo schemas", () => {

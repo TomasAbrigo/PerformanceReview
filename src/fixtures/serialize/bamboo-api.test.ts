@@ -299,6 +299,18 @@ describe("cross-file consistency", () => {
 const INTEGER_PATH =
   /\.(persons\[\d+\]\.employeeId|alignsWithOptionId|milestones\[\d+\]\.(id|employeeGoalId|lastUpdateUserId))$/;
 const ID_KEY = /^id$|Id$/;
+/** The schemas do not check values; the generator must still only emit valid ones. */
+const ENUM_PATHS: [RegExp, RegExp][] = [
+  [/^employees\/(list|get)\/.*\.status$/, /^(Active|Inactive)$/],
+  [
+    /^performance\/goals\/.*\.goals\[\d+\]\.status$/,
+    /^(in_progress|completed|closed)$/,
+  ],
+  [
+    /^employees\/changed\.json\.employees\.\d+\.action$/,
+    /^(Inserted|Updated|Deleted)$/,
+  ],
+];
 
 /** Paths of the values that break the wire conventions of the fixtures. */
 function wireProblems(value: unknown, at: string): string[] {
@@ -311,6 +323,12 @@ function wireProblems(value: unknown, at: string): string[] {
     if (key === "filters") return []; // ids like "status-all"
     if (key === "sharedWithEmployeeIds") {
       return (v as unknown[]).every(Number.isInteger) ? [] : [where];
+    }
+    const enumRule = ENUM_PATHS.find(([path]) => path.test(where));
+    if (enumRule)
+      return typeof v === "string" && enumRule[1].test(v) ? [] : [where];
+    if (/\.percentComplete$/.test(where)) {
+      return typeof v === "number" && v >= 0 && v <= 100 ? [] : [where];
     }
     if (v === null) return [];
     if (INTEGER_PATH.test(where)) return Number.isInteger(v) ? [] : [where];
@@ -327,6 +345,38 @@ function wireProblems(value: unknown, at: string): string[] {
 }
 
 describe("wire conventions", () => {
+  it("notices a value outside the conventions", () => {
+    expect(
+      wireProblems(
+        {
+          data: [
+            { employeeId: "1", status: "Retired", hireDate: "01/02/2013" },
+          ],
+        },
+        "employees/list/page-001.json",
+      ),
+    ).toEqual([
+      "employees/list/page-001.json.data[0].status",
+      "employees/list/page-001.json.data[0].hireDate",
+    ]);
+    expect(
+      wireProblems(
+        { goals: [{ id: 5, status: "done", percentComplete: 101 }] },
+        "performance/goals/1.json",
+      ),
+    ).toEqual([
+      "performance/goals/1.json.goals[0].id",
+      "performance/goals/1.json.goals[0].status",
+      "performance/goals/1.json.goals[0].percentComplete",
+    ]);
+    expect(
+      wireProblems(
+        { employees: { "11": { id: "11", action: "Moved" } } },
+        "employees/changed.json",
+      ),
+    ).toEqual(["employees/changed.json.employees.11.action"]);
+  });
+
   it.each([
     ["small", smallFiles],
     ["demo", demoFiles],

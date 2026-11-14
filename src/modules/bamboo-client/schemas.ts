@@ -24,11 +24,17 @@ export const nullableBambooId = bambooId.nullable().optional();
 /** An id exactly as Bamboo sent it, for items that must stay raw. */
 const rawId = z.union([z.string(), z.number()]);
 
-/** A content field: text or number (Bamboo is not consistent), null or absent. */
-const text = z.union([z.string(), z.number()]).nullish();
+/**
+ * A field that is described (it types the wire shape and documents the
+ * response) but not checked: whatever Bamboo sends passes, as it came. Only
+ * what the client or ingest cannot work without is validated (ids, cursors,
+ * the fields staging reads, and the old goal fields); one odd value in
+ * anything else must not make a whole page or an employee's goals unreadable.
+ */
+const loose = <T>() => z.custom<T>().optional();
 
-/** Pagination links are plain URL paths; `{ href }` objects are tolerated. */
-const link = z.union([z.string(), z.looseObject({ href: z.string() })]);
+/** A content field: text or number (Bamboo is not consistent), null or absent. */
+const text = loose<string | number | null>();
 
 // --- GET /api/v1/employees (cursor-paginated list) -----------------------
 
@@ -51,7 +57,7 @@ export const listEmployeeSchema = z
     workEmail: text,
     employeeNumber: text,
     /** Internal id of the manager (not the legajo, not a name). */
-    reportsToId: rawId.nullish(),
+    reportsToId: loose<string | number | null>(),
     hireDate: text,
     department: text,
     division: text,
@@ -73,23 +79,23 @@ export const listEmployeesPageSchema = z.looseObject({
   data: z.array(listEmployeeSchema),
   meta: z
     .looseObject({
-      total: z.number().nullish(),
+      total: loose<number>(),
       page: z
         .looseObject({
-          limit: z.number().nullish(),
+          limit: loose<number>(),
+          // The cursor is what the client pages with.
           nextCursor: z.string().nullish(),
-          prevCursor: z.string().nullish(),
+          prevCursor: loose<string | null>(),
         })
         .optional(),
     })
     .optional(),
-  _links: z
-    .looseObject({
-      self: link.nullish(),
-      next: link.nullish(),
-      prev: link.nullish(),
-    })
-    .optional(),
+  /** Pagination links: plain URL paths, or `{ href }` objects. */
+  _links: loose<{
+    self?: string | { href: string } | null;
+    next?: string | { href: string } | null;
+    prev?: string | { href: string } | null;
+  }>(),
 });
 
 // --- GET /api/v1/employees/{id} -------------------------------------------
@@ -201,7 +207,7 @@ export const goalSchema = z
     // not make the whole aggregate unreadable.
     status: z.string().nullish(),
     milestones: z.array(milestoneSchema).nullish(),
-    actions: z.record(z.string(), z.boolean()).nullish(),
+    actions: loose<Record<string, boolean> | null>(),
   })
   .transform((g) => ({
     ...g,
@@ -213,12 +219,10 @@ export const goalSchema = z
 /** GET /api/v1_2/performance/employees/{id}/goals/aggregate */
 export const goalsAggregateSchema = z
   .looseObject({
-    canAlign: z.boolean().nullish(),
-    canCreateGoals: z.boolean().nullish(),
-    filters: z
-      .array(z.looseObject({ id: z.string(), name: z.string() }))
-      .nullish(),
-    selectedFilter: z.string().nullish(),
+    canAlign: loose<boolean | null>(),
+    canCreateGoals: loose<boolean | null>(),
+    filters: loose<{ id: string; name: string }[] | null>(),
+    selectedFilter: loose<string | null>(),
     goals: z.array(goalSchema).nullish(),
     // Users and employees are different id spaces: persons maps one to the other.
     persons: z

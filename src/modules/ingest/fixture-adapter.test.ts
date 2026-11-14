@@ -1,4 +1,4 @@
-import { cp, mkdtemp, rm } from "node:fs/promises";
+import { cp, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
@@ -55,6 +55,43 @@ describe("FixtureAdapter on the generated layout (fixtures/bamboo/<size>)", () =
         employeeId: "11",
         id: "11",
       });
+    } finally {
+      await rm(dir, { recursive: true, force: true });
+    }
+  });
+
+  it("employees: an off-type field in a list item does not drop the employee", async () => {
+    const dir = await mkdtemp(path.join(tmpdir(), "fixture-adapter-"));
+    try {
+      await cp(SMALL, dir, { recursive: true });
+      const file = path.join(dir, "employees/list/page-001.json");
+      const page = JSON.parse(await readFile(file, "utf8"));
+      page.data[0].firstName = { nested: true };
+      await writeFile(file, JSON.stringify(page));
+
+      const out = await extract(new FixtureAdapter(dir), "employee");
+
+      expect(out.map((r) => r.sourceId)).toContain(page.data[0].employeeId);
+      expect(out).toHaveLength(company.employees.length);
+    } finally {
+      await rm(dir, { recursive: true, force: true });
+    }
+  });
+
+  it("employees: a list item with no id fails the extraction instead of vanishing", async () => {
+    const dir = await mkdtemp(path.join(tmpdir(), "fixture-adapter-"));
+    try {
+      await cp(SMALL, dir, { recursive: true });
+      const file = path.join(dir, "employees/list/page-001.json");
+      const page = JSON.parse(await readFile(file, "utf8"));
+      // No id here and no get-employee file to say who it is.
+      await rm(path.join(dir, `employees/get/${page.data[1].employeeId}.json`));
+      delete page.data[1].employeeId;
+      await writeFile(file, JSON.stringify(page));
+
+      await expect(
+        extract(new FixtureAdapter(dir), "employee"),
+      ).rejects.toThrow(/page-001\.json.*no id/);
     } finally {
       await rm(dir, { recursive: true, force: true });
     }

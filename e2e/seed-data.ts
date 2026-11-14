@@ -89,3 +89,26 @@ export function find<T>(
   if (!found) throw new Error(`the small fixture has no ${what}`);
   return found;
 }
+
+/** Escapes text for a RegExp (names can have punctuation). */
+export const escapeRegExp = (text: string) =>
+  text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+/**
+ * A rehire that arrives in a LATER run, against a database that already has
+ * everything (identity.setup.ts): someone who left and is not one of the
+ * seeded rehires comes back under this new Bamboo id, same legajo and email.
+ */
+export const LATER_REHIRE_ID = "9001";
+
+export function laterRehire() {
+  const earlier = find(
+    employees,
+    (e) =>
+      e.terminationDate !== null &&
+      hasUniqueName(e) &&
+      !rehires.some((r) => r.earlier === e.id),
+    "person who left and is not a seeded rehire",
+  );
+  return { earlier, later: { ...earlier, id: LATER_REHIRE_ID } };
+}

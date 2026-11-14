@@ -1,5 +1,6 @@
 import { expect, test } from "@playwright/test";
 import {
+  escapeRegExp,
   find,
   fullName,
   hasUniqueName,
@@ -24,7 +25,7 @@ const rehire = find(
   "rehire with the same legajo and email, and a unique name",
 );
 const name = fullName(rehire.later);
-const queueRow = new RegExp(`${name}.*\\b${rehire.later.id}\\b`);
+const queueRow = new RegExp(`${escapeRegExp(name)}.*\\b${rehire.later.id}\\b`);
 
 test("the queue holds the ambiguous row and suggests the person", async ({
   page,

@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import type { FixtureGoal } from "../src/fixtures/company";
 import {
   byId,
   directReports,
@@ -13,6 +14,10 @@ import {
 // Only the goals of people who are still employed are ingested (#6), and the
 // specs navigate by name, so they pick active people with a unique name.
 const candidates = employees.filter((e) => isActive(e) && hasUniqueName(e));
+
+// One sharee, and one that is a person (a rehire still in the queue is not).
+const sharedWithOnePerson = (g: FixtureGoal) =>
+  g.sharedWithEmployeeIds.length === 1 && byId.has(g.sharedWithEmployeeIds[0]);
 
 const STATUS_ES = {
   in_progress: "En curso",
@@ -102,16 +107,12 @@ test("closed and shared goals show up on the owner's page", async ({
     candidates,
     (e) =>
       goalsOf(e).some((g) => g.status === "closed") &&
-      goalsOf(e).some((g) => g.sharedWithEmployeeIds.length === 1),
+      goalsOf(e).some(sharedWithOnePerson),
     "person with a closed goal and a goal shared with one person",
   );
   const goals = goalsOf(owner);
   const closed = find(goals, (g) => g.status === "closed", "closed goal");
-  const shared = find(
-    goals,
-    (g) => g.sharedWithEmployeeIds.length === 1,
-    "shared goal",
-  );
+  const shared = find(goals, sharedWithOnePerson, "shared goal");
   const sharee = byId.get(shared.sharedWithEmployeeIds[0])!;
 
   await page.goto("/en/people");

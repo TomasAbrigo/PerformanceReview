@@ -2,6 +2,7 @@ import { execFileSync } from "node:child_process";
 import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
+import { e2eDatabaseUrl, ensureDatabase } from "./database";
 
 const UUID = "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}";
 
@@ -31,17 +32,27 @@ function run(script: string, args: string[]) {
 const ingest = (args: string[]) => run("ingest", args);
 
 /**
- * Seeds the DB once, before any spec (specs only read): `pnpm db:seed --size
- * small --reset` (the small generated company, 40 people: e2e/seed-data.ts
- * has its ground truth), then the same again without --reset, so the second
- * run of each entity is a pure re-run (everything unchanged). Then one run
- * that fails, for the runs log. Idempotent: it starts from empty tables every
- * time, so the specs always see the same data.
+ * Prepares the e2e database and seeds it once, before any spec (specs only
+ * read): `pnpm db:seed --size small --reset` (the small generated company:
+ * e2e/seed-data.ts has its ground truth), then the same again without --reset,
+ * so the second run of each entity is a pure re-run (nothing inserted or
+ * updated). Then one run that fails, for the runs log. Idempotent: it starts
+ * from empty tables every time, so the specs always see the same data.
  *
  * The ids of the runs the specs look at are handed over in E2E_RUN_OK (the
  * employee re-run) and E2E_RUN_FAILED (the failed one).
  */
-export default function globalSetup() {
+export default async function globalSetup() {
+  // Its own database (see e2e/database.ts): created and migrated here, and the
+  // one the dev server, the seed and the specs' own CLI runs all talk to.
+  const databaseUrl = e2eDatabaseUrl();
+  await ensureDatabase(databaseUrl);
+  process.env.DATABASE_URL = databaseUrl;
+  const migrated = run("db:migrate", []);
+  if (migrated.status !== 0) {
+    throw new Error(`migrating the e2e database failed:\n${migrated.stdout}`);
+  }
+
   const seed = run("db:seed", ["--size", "small", "--reset"]);
   if (seed.status !== 0) throw new Error(`seeding failed:\n${seed.stdout}`);
   const rerun = run("db:seed", ["--size", "small"]);

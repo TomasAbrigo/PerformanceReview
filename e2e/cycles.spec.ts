@@ -67,6 +67,8 @@ test("creates and launches a cycle with a frozen org snapshot", async ({
       hasUniqueName(e) &&
       directReports(e).length === 0 &&
       e.managerId !== null &&
+      // A manager that is not a person (a rehire still in the queue) has no name to show.
+      byId.has(e.managerId) &&
       hasUniqueName(byId.get(e.managerId)!),
     "person with a manager and no reports",
   );
