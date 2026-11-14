@@ -5,6 +5,7 @@ import {
   type IdentityIssueReason,
   type SourceSystem,
 } from "@/db/schema";
+import { jobValidOn, rowsOf } from "@/lib/sql";
 import { listIssues } from "@/modules/identity";
 import { normalizeName } from "@/modules/identity/normalize";
 import { activeEmploymentCte } from "@/modules/people/employment";
@@ -52,14 +53,6 @@ export const isDataQualityKey = (key: string): key is DataQualityKey =>
 
 /** How far back "recent" failed ingest runs go. */
 export const FAILED_RUN_DAYS = 7;
-
-/** A job row valid today (intervals are [valid_from, valid_to)). */
-const currentJob = (alias: string) =>
-  sql.raw(
-    `${alias}.deleted_at is null and ${alias}.valid_from <= current_date and (${alias}.valid_to is null or ${alias}.valid_to > current_date)`,
-  );
-
-const rowsOf = <T>(result: unknown): T[] => [...(result as T[])];
 
 // ---------------------------------------------------------------- identity
 
@@ -120,14 +113,14 @@ export async function peopleWithoutManager(
         j.manager_raw as "managerRaw",
         exists (
           select 1 from employee_job_history r
-          where r.manager_person_id = p.id and ${currentJob("r")}
+          where r.manager_person_id = p.id and ${jobValidOn("r")}
         ) as "isTop"
       from active_employment a
       join person p on p.id = a.person_id
       join lateral (
         select h.manager_person_id, h.manager_raw
         from employee_job_history h
-        where h.person_id = p.id and ${currentJob("h")}
+        where h.person_id = p.id and ${jobValidOn("h")}
         order by h.valid_from desc, h.id
         limit 1
       ) j on true

@@ -14,6 +14,8 @@ import {
   reviewCycle,
   sourceIdentity,
   type IdentityIssueStatus,
+  type IngestCounts,
+  type IngestReject,
   type IngestRunStatus,
 } from "@/db/schema";
 import { FixtureAdapter, runIngest } from "@/modules/ingest";
@@ -175,6 +177,8 @@ export async function insertRun(r: {
   startedAt: Date;
   entity?: string;
   error?: string;
+  counts?: Partial<IngestCounts>;
+  rejects?: IngestReject[];
 }): Promise<string> {
   const [row] = await db
     .insert(ingestRun)
@@ -186,6 +190,9 @@ export async function insertRun(r: {
       startedAt: r.startedAt,
       finishedAt: r.status === "running" ? null : r.startedAt,
       error: r.error ?? null,
+      params: { entity: r.entity ?? "employee" },
+      counts: r.counts ?? null,
+      rejects: r.rejects ?? null,
     })
     .returning({ id: ingestRun.id });
   return row.id;
