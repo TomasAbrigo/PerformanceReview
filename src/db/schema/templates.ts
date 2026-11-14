@@ -13,12 +13,15 @@ import { sourceColumns } from "./source";
 
 import type {
   QuestionKind,
+  QuestionRole,
   Relationship,
 } from "../../modules/templates/constants";
 
 export {
   type QuestionKind,
   questionKinds,
+  type QuestionRole,
+  questionRoles,
   type Relationship,
   relationships,
 } from "../../modules/templates/constants";
@@ -69,6 +72,8 @@ export const question = pgTable("question", {
   }),
   prompt: jsonb("prompt").$type<LocalizedText>().notNull(),
   choices: jsonb("choices").$type<Choice[]>(),
+  /** Special meaning (e.g. the goals rating); null for ordinary questions. */
+  role: text("role").$type<QuestionRole>(),
 });
 
 export type ReviewTemplate = typeof reviewTemplate.$inferSelect;
