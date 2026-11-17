@@ -1,4 +1,4 @@
-import { and, desc, isNull, ne, sql, type SQL } from "drizzle-orm";
+import { and, desc, isNull, ne, sql } from "drizzle-orm";
 import type { DbOrTx } from "@/db/client";
 import { reviewCycle } from "@/db/schema";
 import { isUuid } from "@/lib/uuid";
@@ -9,12 +9,11 @@ import {
   scopedCtes,
 } from "@/modules/analytics/dashboards/scope";
 import type { DashboardFilters } from "@/modules/analytics/dashboards/types";
-import { foldSmallGroups } from "@/modules/insights/aggregation";
 import { insightsScope } from "@/modules/insights/authz";
 import { ReviewError } from "@/modules/review-core/review-errors";
 import { getSetting } from "@/modules/settings/service";
+import { missingOf, type SideRow, summarize } from "./derive";
 import {
-  type CompletionCounts,
   type CompletionCycle,
   type CompletionDelta,
   type CompletionDeltaRow,
@@ -27,7 +26,6 @@ import {
   type MissingPerson,
   type MissingStatus,
   type SideStatus,
-  withRates,
 } from "./types";
 
 export type CompletionFilters = {
@@ -57,21 +55,26 @@ async function requireCycle(
 
 /**
  * Where one side of a participant's assessment stands according to their
- * review requests: submitted if one is; otherwise in progress if a live
- * request already has answers, not started if it has none (or was declined),
- * and not applicable when there is no live request of that relationship.
- * Superseded and deleted requests do not count.
+ * review requests: submitted if one is; otherwise in progress if a draft has
+ * answers, not started if there are only drafts without answers or declined
+ * requests (a declined request is not started even with answers), and not
+ * applicable when there is no live request of that relationship. Superseded
+ * and deleted requests do not count. Only runs for participants without an
+ * `assessment_progress` row (`ap.id is null`: a one-time filter).
  */
 const requestStatus = (relationship: "self" | "manager") => sql`
   select case
            when bool_or(r.status = 'submitted') then 'submitted'
            when count(*) = 0 then 'not_applicable'
-           when bool_or(exists (select 1 from answer a where a.request_id = r.id))
-             then 'in_progress'
+           when bool_or(
+                  r.status = 'draft'
+                  and exists (select 1 from answer a where a.request_id = r.id)
+                ) then 'in_progress'
            else 'not_started'
          end as status
   from review_request r
-  where r.participant_id = s.participant_id
+  where ap.id is null
+    and r.participant_id = s.participant_id
     and r.relationship = ${relationship}
     and r.deleted_at is null and r.status <> 'superseded'`;
 
@@ -79,9 +82,7 @@ const requestStatus = (relationship: "self" | "manager") => sql`
  * CTE `sides` (over `scoped`): the standing of each participant's self and
  * manager assessment. The source is chosen per participant: their
  * `assessment_progress` row (Bamboo's Assessment Progress report) when there
- * is one, else what their review requests say. Columns: participant_id,
- * person_id, name, department, manager_id, manager_name, source,
- * self_status, manager_status, has_notes.
+ * is one, else what their review requests say.
  */
 const sidesCte = sql`
   sides as (
@@ -93,55 +94,116 @@ const sidesCte = sql`
            coalesce(btrim(ap.follow_up_notes), '') <> '' as has_notes
     from scoped s
     left join assessment_progress ap on ap.participant_id = s.participant_id
-    left join lateral (${requestStatus("self")}) rs on ap.id is null
-    left join lateral (${requestStatus("manager")}) rm on ap.id is null
+    left join lateral (${requestStatus("self")}) rs on true
+    left join lateral (${requestStatus("manager")}) rm on true
   )`;
+
+/**
+ * The participants in scope of `actor` with the standing of both sides of
+ * their assessment, by manager (named ones first) and name. Authorization is
+ * the caller's: `actor` is who `scopedCtes` restricts to.
+ */
+async function loadSides(
+  db: DbOrTx,
+  actor: ActorContext,
+  filters: DashboardFilters,
+  { email }: { email: boolean },
+): Promise<SideRow[]> {
+  const rows = await db.execute<{
+    person_id: string;
+    participant_id: string;
+    name: string;
+    department: string | null;
+    manager_id: string | null;
+    manager_name: string | null;
+    self_status: SideStatus;
+    manager_status: SideStatus;
+    has_notes: boolean;
+    source: CompletionSource;
+    email: string | null;
+  }>(sql`
+    with recursive ${scopedCtes(actor, filters)}, ${sidesCte}
+    select sides.person_id, sides.participant_id, sides.name, sides.department,
+           sides.manager_id, sides.manager_name, sides.self_status,
+           sides.manager_status, sides.has_notes, sides.source,
+           ${email ? sql`pe.work_email` : sql`null::text`} as email
+    from sides
+    ${email ? sql`join person pe on pe.id = sides.person_id` : sql``}
+    order by sides.manager_name nulls last, sides.name, sides.person_id`);
+  return rows.map((r) => ({
+    participantId: r.participant_id,
+    personId: r.person_id,
+    name: r.name,
+    department: r.department,
+    managerId: r.manager_id,
+    managerName: r.manager_name,
+    source: r.source,
+    selfStatus: r.self_status,
+    managerStatus: r.manager_status,
+    hasNotes: r.has_notes,
+    ...(email ? { email: r.email } : {}),
+  }));
+}
+
+/** A request, authorized and with its cycle looked up. */
+type Resolved = {
+  cycle: { id: string; name: string };
+  /** Direction: aggregates only. */
+  masked: boolean;
+  minGroupSize: number | null;
+  groupBy: CompletionGroupBy;
+  hierarchy: Hierarchy;
+  filters: DashboardFilters;
+};
 
 /** Direction's minimum group size: the override, else the setting. */
 const minGroupSizeFor = async (db: DbOrTx, override?: number) =>
   override ?? (await getSetting(db, "aggregation.minGroupSize"));
 
-const NONE: CompletionCounts = {
-  participants: 0,
-  selfSubmitted: 0,
-  selfApplicable: 0,
-  managerSubmitted: 0,
-  managerApplicable: 0,
-};
+/**
+ * Who may read what: everybody in scope (People, a manager's direct reports)
+ * or only aggregates (direction: no managers, no filters). Anybody else is
+ * forbidden. Then the cycle must exist.
+ */
+async function resolve(
+  db: DbOrTx,
+  actor: ActorContext,
+  f: CompletionFilters,
+): Promise<Resolved> {
+  const scope = insightsScope(
+    actor,
+    actor.role === "direction"
+      ? await minGroupSizeFor(db, f.minGroupSize)
+      : undefined,
+  );
+  if (scope.kind === "none") throw new ReviewError("forbidden");
+  const cycle = await requireCycle(db, f.cycleId);
+  const masked = scope.kind === "aggregatesOnly";
+  const hierarchy = f.hierarchy ?? "asOf";
+  // Direction reads aggregates by department only: a manager is a person.
+  const requested = f.groupBy ?? "department";
+  return {
+    cycle,
+    masked,
+    minGroupSize: scope.kind === "aggregatesOnly" ? scope.minGroupSize : null,
+    groupBy: masked && requested === "manager" ? "none" : requested,
+    hierarchy,
+    filters: {
+      cycleId: cycle.id,
+      hierarchy,
+      ...(masked ? {} : { department: f.department, managerId: f.managerId }),
+    },
+  };
+}
 
-const add = (a: CompletionCounts, b: CompletionCounts): CompletionCounts => ({
-  participants: a.participants + b.participants,
-  selfSubmitted: a.selfSubmitted + b.selfSubmitted,
-  selfApplicable: a.selfApplicable + b.selfApplicable,
-  managerSubmitted: a.managerSubmitted + b.managerSubmitted,
-  managerApplicable: a.managerApplicable + b.managerApplicable,
-});
-
-/** The counts a folded group carries as the bins of a GroupCell. */
-const toBins = (c: CompletionCounts) => [
-  c.selfSubmitted,
-  c.selfApplicable,
-  c.managerSubmitted,
-  c.managerApplicable,
-];
-const fromBins = (n: number, bins: number[]): CompletionCounts => ({
-  participants: n,
-  selfSubmitted: bins[0],
-  selfApplicable: bins[1],
-  managerSubmitted: bins[2],
-  managerApplicable: bins[3],
-});
-
-type GroupRow = {
-  key: string | null;
-  label: string | null;
-  participants: number;
-  self_submitted: number;
-  self_applicable: number;
-  manager_submitted: number;
-  manager_applicable: number;
-  from_progress: number;
-};
+function summaryOf(r: Resolved, rows: SideRow[]): CompletionSummary {
+  return {
+    cycleId: r.cycle.id,
+    cycleName: r.cycle.name,
+    hierarchy: r.hierarchy,
+    ...summarize(rows, { groupBy: r.groupBy, minGroupSize: r.minGroupSize }),
+  };
+}
 
 /**
  * Completion of a cycle: how many participants submitted their self and their
@@ -162,126 +224,14 @@ export async function completionSummary(
   actor: ActorContext,
   f: CompletionFilters,
 ): Promise<CompletionSummary> {
-  const scope = insightsScope(
-    actor,
-    actor.role === "direction"
-      ? await minGroupSizeFor(db, f.minGroupSize)
-      : undefined,
-  );
-  if (scope.kind === "none") throw new ReviewError("forbidden");
-  const cycle = await requireCycle(db, f.cycleId);
-  const masked = scope.kind === "aggregatesOnly";
-  const hierarchy = f.hierarchy ?? "asOf";
-  // Direction reads aggregates by department only: a manager is a person.
-  const requested = f.groupBy ?? "department";
-  const groupBy: CompletionGroupBy =
-    masked && requested === "manager" ? "none" : requested;
-  const filters: DashboardFilters = {
-    cycleId: cycle.id,
-    hierarchy,
-    ...(masked ? {} : { department: f.department, managerId: f.managerId }),
-  };
-  const column = {
-    none: { key: sql`null::text`, label: sql`null::text` },
-    department: { key: sql`department`, label: sql`department` },
-    manager: { key: sql`manager_id::text`, label: sql`manager_name` },
-  }[groupBy];
+  const r = await resolve(db, actor, f);
   // Authorized above: a masked actor's numbers are computed over everybody
   // and masked afterwards, as the executive summary does.
-  const rows = await db.execute<GroupRow>(sql`
-    with recursive ${scopedCtes(masked ? ALL_PEOPLE : actor, filters)}, ${sidesCte}
-    select ${column.key} as key, ${column.label} as label,
-           count(*)::int as participants,
-           count(*) filter (where self_status = 'submitted')::int as self_submitted,
-           count(*) filter (where self_status <> 'not_applicable')::int as self_applicable,
-           count(*) filter (where manager_status = 'submitted')::int as manager_submitted,
-           count(*) filter (where manager_status <> 'not_applicable')::int as manager_applicable,
-           count(*) filter (where source = 'progress')::int as from_progress
-    from sides
-    group by 1, 2
-    order by 2 nulls last, 1 nulls last`);
-  const counts = (r: GroupRow): CompletionCounts => ({
-    participants: r.participants,
-    selfSubmitted: r.self_submitted,
-    selfApplicable: r.self_applicable,
-    managerSubmitted: r.manager_submitted,
-    managerApplicable: r.manager_applicable,
+  const rows = await loadSides(db, r.masked ? ALL_PEOPLE : actor, r.filters, {
+    email: false,
   });
-  const all = rows.reduce((sum, r) => add(sum, counts(r)), NONE);
-  const fromProgress = rows.reduce((sum, r) => sum + r.from_progress, 0);
-  const base = {
-    cycleId: cycle.id,
-    cycleName: cycle.name,
-    groupBy,
-    hierarchy,
-    participants: all.participants,
-  };
-  const sources: Record<CompletionSource, number> = {
-    progress: fromProgress,
-    requests: all.participants - fromProgress,
-  };
-
-  if (!masked) {
-    return {
-      ...base,
-      minGroupSize: null,
-      total: withRates(null, null, all),
-      groups:
-        groupBy === "none"
-          ? []
-          : rows.map((r) => withRates(r.key, r.label, counts(r))),
-      others: null,
-      suppressed: 0,
-      sources,
-    };
-  }
-
-  const min = scope.minGroupSize;
-  if (all.participants < min) {
-    return {
-      ...base,
-      minGroupSize: min,
-      total: null,
-      groups: [],
-      others: null,
-      suppressed: all.participants,
-      sources: { progress: 0, requests: 0 },
-    };
-  }
-  const folded =
-    groupBy === "none"
-      ? { shown: [], others: null, suppressed: 0 }
-      : foldSmallGroups(
-          rows.map((r) => ({
-            key: r.key,
-            label: r.label,
-            n: r.participants,
-            mean: null,
-            counts: toBins(counts(r)),
-          })),
-          min,
-        );
-  return {
-    ...base,
-    minGroupSize: min,
-    total: withRates(null, null, all),
-    groups: folded.shown.map((g) =>
-      withRates(g.key, g.label, fromBins(g.n, g.counts)),
-    ),
-    others: folded.others
-      ? withRates(null, null, fromBins(folded.others.n, folded.others.counts))
-      : null,
-    suppressed: folded.suppressed,
-    sources,
-  };
+  return summaryOf(r, rows);
 }
-
-const MISSING: Record<MissingStatus, SQL> = {
-  any: sql`(self_status in ('not_started', 'in_progress')
-            or manager_status in ('not_started', 'in_progress'))`,
-  self_missing: sql`self_status in ('not_started', 'in_progress')`,
-  manager_missing: sql`manager_status in ('not_started', 'in_progress')`,
-};
 
 export type MissingFilters = {
   cycleId: string;
@@ -294,6 +244,21 @@ export type MissingFilters = {
   /** Adds each person's work email; People only, ignored for anybody else. */
   includeEmail?: boolean;
 };
+
+const personOf = (cycleName: string, r: SideRow): MissingPerson => ({
+  cycleName,
+  personId: r.personId,
+  participantId: r.participantId,
+  name: r.name,
+  department: r.department,
+  managerId: r.managerId,
+  managerName: r.managerName,
+  selfStatus: r.selfStatus,
+  managerStatus: r.managerStatus,
+  hasFollowUpNotes: r.hasNotes,
+  source: r.source,
+  ...(r.email !== undefined ? { email: r.email } : {}),
+});
 
 /**
  * Who has not submitted a side of their assessment in a cycle (a side that
@@ -308,50 +273,25 @@ export async function missingAssessments(
 ): Promise<MissingPerson[]> {
   requirePeopleScope(actor);
   const cycle = await requireCycle(db, f.cycleId);
-  const email = !!f.includeEmail && canSeeEmail(actor.role);
-  const rows = await db.execute<{
-    person_id: string;
-    participant_id: string;
-    name: string;
-    department: string | null;
-    manager_id: string | null;
-    manager_name: string | null;
-    self_status: SideStatus;
-    manager_status: SideStatus;
-    has_notes: boolean;
-    source: CompletionSource;
-    email: string | null;
-  }>(sql`
-    with recursive ${scopedCtes(actor, {
+  const rows = await loadSides(
+    db,
+    actor,
+    {
       cycleId: cycle.id,
       hierarchy: f.hierarchy ?? "asOf",
       department: f.department,
       managerId: f.managerId,
-    })}, ${sidesCte}
-    select sides.person_id, sides.participant_id, sides.name, sides.department,
-           sides.manager_id, sides.manager_name, sides.self_status,
-           sides.manager_status, sides.has_notes, sides.source,
-           ${email ? sql`pe.work_email` : sql`null::text`} as email
-    from sides
-    ${email ? sql`join person pe on pe.id = sides.person_id` : sql``}
-    where ${MISSING[f.status ?? "any"]}
-    order by sides.manager_name nulls last, sides.name, sides.person_id`);
-  return rows.map((r) => ({
-    personId: r.person_id,
-    participantId: r.participant_id,
-    name: r.name,
-    department: r.department,
-    managerId: r.manager_id,
-    managerName: r.manager_name,
-    selfStatus: r.self_status,
-    managerStatus: r.manager_status,
-    hasFollowUpNotes: r.has_notes,
-    source: r.source,
-    ...(email ? { email: r.email } : {}),
-  }));
+    },
+    { email: !!f.includeEmail && canSeeEmail(actor.role) },
+  );
+  return missingOf(rows, f.status).map((r) => personOf(cycle.name, r));
 }
 
-/** The cycle before `cycleId` by period start (not deleted, not a draft). */
+/**
+ * The cycle before `cycleId` in the order of `completionCycles` (period
+ * start, period end, creation, id), so cycles of the same period are each
+ * other's predecessors; not deleted, not a draft.
+ */
 async function previousCycleId(
   db: DbOrTx,
   cycleId: string,
@@ -359,10 +299,12 @@ async function previousCycleId(
   const [row] = await db.execute<{ id: string }>(sql`
     select p.id
     from review_cycle c
-    join review_cycle p on p.period_start < c.period_start
+    join review_cycle p
+      on (p.period_start, p.period_end, p.created_at, p.id)
+       < (c.period_start, c.period_end, c.created_at, c.id)
       and p.deleted_at is null and p.status <> 'draft'
     where c.id = ${cycleId}::uuid
-    order by p.period_start desc, p.period_end desc, p.name
+    order by p.period_start desc, p.period_end desc, p.created_at desc, p.id desc
     limit 1`);
   return row?.id ?? null;
 }
@@ -377,31 +319,10 @@ const deltaRow = (
   managerDelta: deltaPoints(current.managerRate, previous?.managerRate ?? null),
 });
 
-/**
- * The summary of a cycle next to the one of the previous semester cycle (the
- * launched, not deleted cycle with the latest earlier period start), with the
- * difference in percentage points per group (one decimal). A group has no
- * delta when the other cycle has no such group (for direction: no group that
- * reaches the minimum) or no rate to compare. Same authorization as
- * `completionSummary`.
- */
-export async function completionDelta(
-  db: DbOrTx,
-  actor: ActorContext,
-  f: CompletionFilters,
-): Promise<CompletionDelta> {
-  const minGroupSize =
-    f.minGroupSize ??
-    (actor.role === "direction" ? await minGroupSizeFor(db) : undefined);
-  const current = await completionSummary(db, actor, { ...f, minGroupSize });
-  const previousId = await previousCycleId(db, current.cycleId);
-  const previous = previousId
-    ? await completionSummary(db, actor, {
-        ...f,
-        cycleId: previousId,
-        minGroupSize,
-      })
-    : null;
+function deltaOf(
+  current: CompletionSummary,
+  previous: CompletionSummary | null,
+): CompletionDelta {
   const before = new Map((previous?.groups ?? []).map((g) => [g.key ?? "", g]));
   return {
     current,
@@ -427,7 +348,68 @@ export async function completionDelta(
   };
 }
 
-/** The cycles the completion views can be opened on, latest period first. */
+/** The current cycle's rows, read once, and the delta against the cycle before. */
+async function overview(db: DbOrTx, actor: ActorContext, f: CompletionFilters) {
+  const minGroupSize =
+    f.minGroupSize ??
+    (actor.role === "direction" ? await minGroupSizeFor(db) : undefined);
+  const r = await resolve(db, actor, { ...f, minGroupSize });
+  const rows = await loadSides(db, r.masked ? ALL_PEOPLE : actor, r.filters, {
+    email: false,
+  });
+  const current = summaryOf(r, rows);
+  const previousId = await previousCycleId(db, r.cycle.id);
+  const previous = previousId
+    ? await completionSummary(db, actor, {
+        ...f,
+        cycleId: previousId,
+        minGroupSize,
+      })
+    : null;
+  return { r, rows, delta: deltaOf(current, previous) };
+}
+
+/**
+ * The summary of a cycle next to the one of the previous semester cycle (see
+ * `previousCycleId`), with the difference in percentage points per group (one
+ * decimal). A group has no delta when the other cycle has no such group (for
+ * direction: no group that reaches the minimum) or no rate to compare. Same
+ * authorization as `completionSummary`.
+ */
+export async function completionDelta(
+  db: DbOrTx,
+  actor: ActorContext,
+  f: CompletionFilters,
+): Promise<CompletionDelta> {
+  return (await overview(db, actor, f)).delta;
+}
+
+/**
+ * What the completion page shows: the delta and, for whoever may name people,
+ * the "quién falta" list, both read off the same rows of the current cycle
+ * (loaded once). `missing` is null for direction, who reads aggregates only.
+ */
+export async function completionOverview(
+  db: DbOrTx,
+  actor: ActorContext,
+  f: CompletionFilters & { missingStatus?: MissingStatus },
+): Promise<{ delta: CompletionDelta; missing: MissingPerson[] | null }> {
+  const { r, rows, delta } = await overview(db, actor, f);
+  return {
+    delta,
+    missing: r.masked
+      ? null
+      : missingOf(rows, f.missingStatus).map((row) =>
+          personOf(r.cycle.name, row),
+        ),
+  };
+}
+
+/**
+ * The cycles the completion views can be opened on, latest first, in the
+ * total order `previousCycleId` follows: period start, period end, creation
+ * and id.
+ */
 export async function completionCycles(db: DbOrTx): Promise<CompletionCycle[]> {
   return db
     .select({
@@ -442,6 +424,7 @@ export async function completionCycles(db: DbOrTx): Promise<CompletionCycle[]> {
     .orderBy(
       desc(reviewCycle.periodStart),
       desc(reviewCycle.periodEnd),
-      reviewCycle.name,
+      desc(reviewCycle.createdAt),
+      desc(reviewCycle.id),
     );
 }

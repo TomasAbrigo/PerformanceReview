@@ -267,6 +267,34 @@ describe.each(locales)("CompletionSummaryView (%s)", (locale) => {
     expect(screen.queryAllByTestId("completion-group")).toHaveLength(0);
   });
 
+  it("an empty cycle says there is nobody, even to direction (before the minimum)", () => {
+    renderIn(
+      locale,
+      <CompletionSummaryView
+        data={{
+          current: summary({
+            minGroupSize: 5,
+            participants: 0,
+            total: null,
+            groups: [],
+          }),
+          previous: null,
+          total: null,
+          groups: [],
+          others: null,
+        }}
+      />,
+    );
+    expect(
+      screen.getByText(
+        locale === "es"
+          ? "No hay participantes con estos filtros."
+          : "There are no participants for these filters.",
+      ),
+    ).toBeInTheDocument();
+    expect(screen.queryByRole("status")).not.toBeInTheDocument();
+  });
+
   it("says where the statuses came from, and when there is nobody", () => {
     const { unmount } = renderIn(
       locale,
@@ -319,6 +347,7 @@ describe("Delta", () => {
 });
 
 const person = (over: Partial<MissingPerson> = {}): MissingPerson => ({
+  cycleName: "2025-H1",
   personId: "p1",
   participantId: "cp1",
   name: "Beto Benítez",

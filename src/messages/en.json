@@ -1388,7 +1388,6 @@
       "belowMinimum": "There are fewer than {min} participants: only the head count is shown ({n}).",
       "suppressed": "{n, plural, one {# person is} other {# people are}} left out of the breakdown: their group has fewer than {min}.",
       "sources": "Status taken from Assessment Progress for {progress, plural, one {# participant} other {# participants}} and from the review requests for {requests, plural, one {# participant} other {# participants}}.",
-      "tableView": "View as table",
       "columns": {
         "group": "Group",
         "participants": "Participants",

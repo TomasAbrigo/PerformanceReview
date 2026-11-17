@@ -34,7 +34,7 @@ import {
 //   dani              Ventas:     self not_started,   manager not_applicable
 // Also: a draft cycle and a deleted one, never the "previous" of C1, and
 // 2026-H1 (C2) with requests only: ana submitted both, beto a draft self
-// request without answers and a declined manager one.
+// request without answers and a declined manager one that has answers.
 export async function resetCompletionData() {
   await db.execute(
     sql`TRUNCATE review_cycle, employee_job_history, employee_status_history, source_identity, employment, person, raw_record, ingest_run, app_setting, admin_audit_log CASCADE`,
@@ -235,7 +235,8 @@ export async function buildCompletionScenario() {
   await request(c2, a2, ana, "self", "submitted");
   await request(c2, a2, marta, "manager", "submitted");
   await request(c2, b2, beto, "self", "draft");
-  await request(c2, b2, marta, "manager", "declined");
+  // Declined, even with answers it is not started.
+  await request(c2, b2, marta, "manager", "declined", { answered: true });
   return {
     marta,
     nico,

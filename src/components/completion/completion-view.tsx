@@ -138,6 +138,11 @@ export function CompletionSummaryView({ data }: { data: CompletionDelta }) {
   const t = useTranslations("Completion");
   const { current, previous } = data;
   const hasPrevious = previous !== null;
+  if (current.participants === 0) {
+    return (
+      <p className="text-sm text-muted-foreground">{t("summary.empty")}</p>
+    );
+  }
   if (current.total === null) {
     return (
       <p role="status" className="text-sm">
@@ -146,11 +151,6 @@ export function CompletionSummaryView({ data }: { data: CompletionDelta }) {
           n: current.participants,
         })}
       </p>
-    );
-  }
-  if (current.participants === 0) {
-    return (
-      <p className="text-sm text-muted-foreground">{t("summary.empty")}</p>
     );
   }
   const rows = [

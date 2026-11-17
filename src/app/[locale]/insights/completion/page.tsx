@@ -14,12 +14,13 @@ import { ExportCsvLink } from "@/components/data-quality/export-csv-link";
 import { Panel } from "@/components/dashboards/parts";
 import { db } from "@/db/client";
 import { routing } from "@/i18n/routing";
+import { isHr } from "@/modules/actor/access";
 import { getActor } from "@/modules/actor/server";
+import { canSeeEmail } from "@/modules/actor/types";
 import {
   type CompletionGroupBy,
   completionCycles,
-  completionDelta,
-  missingAssessments,
+  completionOverview,
 } from "@/modules/analytics/completion";
 import { dashboardFilterOptions } from "@/modules/analytics/dashboards";
 import { insightsScope } from "@/modules/insights";
@@ -68,21 +69,13 @@ async function Completion({
     managerId: p.manager,
     minGroupSize,
   };
-  const [delta, options, missing] = await Promise.all([
-    completionDelta(db, actor, filters),
+  // The summary and the list of who is missing are read off the same rows.
+  const [{ delta, missing }, options] = await Promise.all([
+    completionOverview(db, actor, { ...filters, missingStatus: p.status }),
     masked
       ? null
       : dashboardFilterOptions(db, actor, {
           cycleId: cycle.id,
-          hierarchy: p.hierarchy,
-        }),
-    masked
-      ? null
-      : missingAssessments(db, actor, {
-          cycleId: cycle.id,
-          department: p.department,
-          managerId: p.manager,
-          status: p.status,
           hierarchy: p.hierarchy,
         }),
   ]);
@@ -93,7 +86,7 @@ async function Completion({
     department: p.department,
     manager: p.manager,
   };
-  const hr = actor.role === "hr";
+  const hr = isHr(actor);
   const hint = masked
     ? t("hint.aggregates", { min: minGroupSize ?? 0 })
     : scope.kind === "directReports"
@@ -138,11 +131,17 @@ async function Completion({
                 params={{ ...csvParams, status: p.status }}
                 label={t("export.csv")}
               />
-              <ExportCsvLink
-                file="insights-missing"
-                params={{ ...csvParams, status: p.status, include_email: "1" }}
-                label={t("export.csvEmail")}
-              />
+              {canSeeEmail(actor.role) ? (
+                <ExportCsvLink
+                  file="insights-missing"
+                  params={{
+                    ...csvParams,
+                    status: p.status,
+                    include_email: "1",
+                  }}
+                  label={t("export.csvEmail")}
+                />
+              ) : null}
             </span>
           ) : undefined
         }

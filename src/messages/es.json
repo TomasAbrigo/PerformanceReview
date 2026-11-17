@@ -1388,7 +1388,6 @@
       "belowMinimum": "Hay menos de {min} participantes: solo se muestra la cantidad ({n}).",
       "suppressed": "{n, plural, one {# persona queda} other {# personas quedan}} fuera del desglose: su grupo tiene menos de {min}.",
       "sources": "Estado tomado de Assessment Progress para {progress, plural, one {# participante} other {# participantes}} y de los pedidos de evaluación para {requests, plural, one {# participante} other {# participantes}}.",
-      "tableView": "Ver como tabla",
       "columns": {
         "group": "Grupo",
         "participants": "Participantes",

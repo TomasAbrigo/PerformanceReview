@@ -1,7 +1,8 @@
 import { useTranslations } from "next-intl";
-import type {
-  MissingPerson,
-  SideStatus,
+import {
+  isMissing,
+  type MissingPerson,
+  type SideStatus,
 } from "@/modules/analytics/completion/types";
 
 const GLYPH: Record<SideStatus, string> = {
@@ -14,7 +15,7 @@ const GLYPH: Record<SideStatus, string> = {
 /** A status as a chip: a glyph and the word, never color alone. */
 export function StatusChip({ status }: { status: SideStatus }) {
   const t = useTranslations("Completion.missing.statuses");
-  const missing = status === "not_started" || status === "in_progress";
+  const missing = isMissing(status);
   return (
     <span
       data-status={status}

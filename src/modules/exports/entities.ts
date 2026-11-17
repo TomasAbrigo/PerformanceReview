@@ -55,13 +55,13 @@ import {
 } from "@/modules/qualitative-analysis";
 import {
   type CompletionGroup,
-  completionCycles,
   completionDelta,
   completionGroupBys,
   type CompletionDeltaRow,
   type MissingPerson,
   missingAssessments,
   missingStatuses,
+  roundedPoints,
 } from "@/modules/analytics/completion";
 import { RUN_STATUSES } from "@/modules/ingest/run-status";
 import { todayLocal } from "@/modules/org-history/dates";
@@ -106,7 +106,7 @@ type Export<Q, R> = {
   /** File name without extension, from the validated parameters. */
   file: (query: Q) => string;
   query: ZodType<Q>;
-  rows: (db: DbOrTx, query: Q) => AsyncIterable<R>;
+  rows: (db: DbOrTx, query: Q, locale: Locale) => AsyncIterable<R>;
   columns: (header: Header, query: Q) => CsvColumn<R>[];
 };
 
@@ -114,11 +114,20 @@ function defineExport<Q, R>(def: Export<Q, R>) {
   return async (db: DbOrTx, request: Request): Promise<Response> => {
     const { locale } = parseQuery(request, localeQuery);
     const query = parseQuery(request, def.query);
-    return csvResponse(
-      `${def.file(query)}.csv`,
-      def.rows(db, query),
-      def.columns(headerIn(locale), query),
-    );
+    try {
+      return await csvResponse(
+        `${def.file(query)}.csv`,
+        def.rows(db, query, locale),
+        def.columns(headerIn(locale), query),
+      );
+    } catch (error) {
+      // The first row is read before answering: a cycle (or anything else the
+      // query was asked about) that does not exist is a 404, not a 500.
+      if (error instanceof ReviewError && error.code === "not_found") {
+        throw notFound("Resource");
+      }
+      throw error;
+    }
   };
 }
 
@@ -735,26 +744,12 @@ const insightsSentimentExport = defineExport({
 // The insights completion views (/insights/completion), read as People (like
 // the dashboards above): a cycle (required) and the same filters as the page.
 
-/** A missing or not found cycle is a 404 here, not a 500. */
-async function* cycleOr404<R>(rows: Promise<R[]>): AsyncIterable<R> {
-  try {
-    yield* await rows;
-  } catch (error) {
-    if (error instanceof ReviewError && error.code === "not_found") {
-      throw notFound("Cycle");
-    }
-    throw error;
-  }
-}
-
-/** A 0-1 rate as a percentage with one decimal. */
-const percent = (rate: number | null) =>
-  rate === null ? null : Math.round(rate * 1000) / 10;
-
+/** A group of the completion file, named in the language of the file. */
 type CompletionRow = {
   cycle: string;
   previous: string | null;
   group: CompletionGroup;
+  label: string | null;
   delta: Pick<CompletionDeltaRow, "selfDelta" | "managerDelta"> | null;
 };
 
@@ -767,8 +762,8 @@ const completionExport = defineExport({
     department: z.string().optional(),
     manager: uuid.optional(),
   }),
-  rows: (db, q) =>
-    cycleOr404(
+  rows: (db, q, locale) =>
+    each(
       completionDelta(db, DEFAULT_ACTOR, {
         cycleId: q.cycle,
         groupBy: q.groupBy,
@@ -776,27 +771,39 @@ const completionExport = defineExport({
         department: q.department,
         managerId: q.manager,
       }).then((d): CompletionRow[] => {
+        const t = createTranslator({
+          locale,
+          messages: MESSAGES[locale],
+          namespace: "Completion.summary",
+        });
         const base = {
           cycle: d.current.cycleName,
           previous: d.previous?.cycleName ?? null,
         };
-        if (q.groupBy === "none") {
-          return d.current.total
-            ? [{ ...base, group: d.current.total, delta: d.total }]
-            : [];
-        }
-        return d.current.groups.map((group, i) => ({
-          ...base,
-          group,
-          delta: d.groups[i],
-        }));
+        const row = (
+          group: CompletionGroup,
+          label: string,
+          delta: CompletionRow["delta"],
+        ): CompletionRow => ({ ...base, group, label, delta });
+        // The whole cycle first, then each group and the folded ones.
+        return [
+          ...(d.current.total
+            ? [row(d.current.total, t("total"), d.total)]
+            : []),
+          ...d.current.groups.map((g, i) =>
+            row(g, g.label ?? t("unassigned"), d.groups[i]),
+          ),
+          ...(d.current.others
+            ? [row(d.current.others, t("others"), d.others)]
+            : []),
+        ];
       }),
     ),
   columns: (h) => [
     { header: h("cycle_name"), value: (r: CompletionRow) => r.cycle },
     { header: h("previous_cycle"), value: (r) => r.previous },
     { header: h("group_id"), value: (r) => r.group.key },
-    { header: h("group"), value: (r) => r.group.label },
+    { header: h("group"), value: (r) => r.label },
     { header: h("participants"), value: (r) => r.group.participants },
     { header: h("self_submitted"), value: (r) => r.group.selfSubmitted },
     { header: h("self_applicable"), value: (r) => r.group.selfApplicable },
@@ -812,7 +819,10 @@ const completionExport = defineExport({
   ],
 });
 
-type MissingRow = MissingPerson & { cycleName: string | null };
+/** A 0-1 rate as a percentage with one decimal (the rounding of the deltas). */
+function percent(rate: number | null) {
+  return rate === null ? null : roundedPoints(rate);
+}
 
 const missingExport = defineExport({
   file: () => "insights-missing",
@@ -826,28 +836,22 @@ const missingExport = defineExport({
     include_email: flag,
   }),
   rows: (db, q) =>
-    cycleOr404(
-      (async (): Promise<MissingRow[]> => {
-        const people = await missingAssessments(db, DEFAULT_ACTOR, {
-          cycleId: q.cycle,
-          department: q.department,
-          managerId: q.manager,
-          status: q.status,
-          hierarchy: q.hierarchy,
-          includeEmail: q.include_email,
-        });
-        const cycleName =
-          (await completionCycles(db)).find((c) => c.id === q.cycle)?.name ??
-          null;
-        return people.map((p) => ({ ...p, cycleName }));
-      })(),
+    each(
+      missingAssessments(db, DEFAULT_ACTOR, {
+        cycleId: q.cycle,
+        department: q.department,
+        managerId: q.manager,
+        status: q.status,
+        hierarchy: q.hierarchy,
+        includeEmail: q.include_email,
+      }),
     ),
   columns: (h, { include_email }) => [
-    { header: h("cycle_name"), value: (r: MissingRow) => r.cycleName },
+    { header: h("cycle_name"), value: (r: MissingPerson) => r.cycleName },
     { header: h("person_id"), value: (r) => r.personId },
     { header: h("name"), value: (r) => r.name },
     ...(include_email
-      ? [{ header: h("email"), value: (r: MissingRow) => r.email }]
+      ? [{ header: h("email"), value: (r: MissingPerson) => r.email }]
       : []),
     { header: h("department"), value: (r) => r.department },
     { header: h("manager_id"), value: (r) => r.managerId },

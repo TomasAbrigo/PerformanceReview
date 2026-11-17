@@ -115,6 +115,7 @@ export type CompletionDelta = {
 };
 
 export type MissingPerson = {
+  cycleName: string;
   personId: string;
   participantId: string;
   name: string;
@@ -138,8 +139,12 @@ export type CompletionCycle = {
   status: string;
 };
 
+/** A fraction (a rate, or a difference of rates) as percentage points, one decimal. */
+export const roundedPoints = (fraction: number) =>
+  Math.round(fraction * 1000) / 10;
+
 /** Percentage points between two rates (0-1), one decimal. */
 export const deltaPoints = (current: number | null, previous: number | null) =>
   current === null || previous === null
     ? null
-    : Math.round((current - previous) * 1000) / 10;
+    : roundedPoints(current - previous);

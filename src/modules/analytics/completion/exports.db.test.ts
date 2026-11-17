@@ -18,7 +18,7 @@ afterAll(async () => {
 });
 
 describe("insights-completion.csv", () => {
-  it("one row per group with counts, percentages and the delta vs the previous cycle", async () => {
+  it("the whole cycle first, then one row per group, with counts, percentages and the delta vs the previous cycle", async () => {
     const { header, rows } = await table(
       "insights-completion.csv",
       `?cycle=${c1}&groupBy=department&locale=en`,
@@ -38,8 +38,25 @@ describe("insights-completion.csv", () => {
       "self_delta_pp",
       "manager_delta_pp",
     ]);
-    expect(rows.map((r) => r.group)).toEqual(["Tecnología", "Ventas", ""]);
+    expect(rows.map((r) => r.group)).toEqual([
+      "Whole cycle",
+      "Tecnología",
+      "Ventas",
+      "Unassigned",
+    ]);
     expect(rows[0]).toMatchObject({
+      group_id: "",
+      participants: "7",
+      self_submitted: "4",
+      self_applicable: "6",
+      self_pct: "66.7",
+      manager_submitted: "2",
+      manager_applicable: "5",
+      manager_pct: "40",
+      self_delta_pp: "-8.3",
+      manager_delta_pp: "-26.7",
+    });
+    expect(rows[1]).toMatchObject({
       cycle_name: "2025-H1",
       "previous cycle": "2024-H2",
       group_id: "Tecnología",
@@ -54,7 +71,7 @@ describe("insights-completion.csv", () => {
       manager_delta_pp: "-33.3",
     });
     // Ventas: the manager side applies to one person and none before.
-    expect(rows[1]).toMatchObject({
+    expect(rows[2]).toMatchObject({
       self_pct: "100",
       manager_pct: "0",
       self_delta_pp: "100",
@@ -69,7 +86,7 @@ describe("insights-completion.csv", () => {
     );
     expect(all.rows).toHaveLength(1);
     expect(all.rows[0]).toMatchObject({
-      group: "",
+      group: "Whole cycle",
       participants: "7",
       self_pct: "66.7",
       manager_pct: "40",
@@ -79,13 +96,14 @@ describe("insights-completion.csv", () => {
       `?cycle=${c1}&groupBy=manager&locale=en`,
     );
     expect(byManager.rows.map((r) => [r.group_id, r.group])).toEqual([
+      ["", "Whole cycle"],
       [marta, "Marta Gómez"],
       [nico, "Nico Ruiz"],
     ]);
   });
 
-  it("the headers come in the language of the request", async () => {
-    const { header } = await table(
+  it("the headers and the names of the whole cycle come in the language of the request", async () => {
+    const { header, rows } = await table(
       "insights-completion.csv",
       `?cycle=${c1}&groupBy=none`,
     );
@@ -104,6 +122,7 @@ describe("insights-completion.csv", () => {
       "autoevaluación vs ciclo anterior (pp)",
       "evaluación del manager vs ciclo anterior (pp)",
     ]);
+    expect(rows[0].grupo).toBe("Total del ciclo");
   });
 
   it("the first cycle has no previous one: empty delta cells", async () => {
@@ -128,6 +147,19 @@ describe("insights-completion.csv", () => {
         )
       ).status,
     ).toBe(404);
+  });
+});
+
+describe("a cycle that does not exist", () => {
+  it("is a 404 for every export that asks for one", async () => {
+    const none = "00000000-0000-4000-8000-000000000000";
+    for (const file of [
+      "dashboard-progress.csv",
+      "insights-completion.csv",
+      "insights-missing.csv",
+    ]) {
+      expect((await download(file, `?cycle=${none}`)).status, file).toBe(404);
+    }
   });
 });
 

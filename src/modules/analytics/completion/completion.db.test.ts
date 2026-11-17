@@ -1,10 +1,13 @@
+import { eq } from "drizzle-orm";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { closeDb, db } from "@/db/client";
+import { reviewCycle } from "@/db/schema";
 import type { ActorContext } from "@/modules/actor/types";
 import { setSetting } from "@/modules/settings";
 import {
   completionCycles,
   completionDelta,
+  completionOverview,
   completionSummary,
   missingAssessments,
 } from ".";
@@ -338,6 +341,27 @@ describe("missingAssessments", () => {
     expect(list.every((r) => r.email === undefined)).toBe(true);
   });
 
+  it("a declined request is not started, even with answers; a draft with answers is in progress", async () => {
+    // Beto of 2026-H1 (requests only): a draft self request without answers
+    // and a declined manager request that has answers.
+    const [beto2] = await missingAssessments(db, hr, {
+      cycleId: c2,
+      managerId: marta,
+    });
+    expect(beto2).toMatchObject({
+      name: "Beto Benítez",
+      cycleName: "2026-H1",
+      selfStatus: "not_started",
+      managerStatus: "not_started",
+      source: "requests",
+    });
+    // Emi of 2025-H1: a draft manager request with an answer.
+    const list = await missingAssessments(db, hr, { cycleId: c1 });
+    expect(list.find((p) => p.name === "Emi Estévez")?.managerStatus).toBe(
+      "in_progress",
+    );
+  });
+
   it("filters by the side that is missing", async () => {
     expect(
       rows(
@@ -535,5 +559,80 @@ describe("a cycle without participants", () => {
     expect(counts(s.total!)).toEqual([0, 0, 0, 0, 0]);
     expect(s.total!.selfRate).toBeNull();
     expect(s.groups).toEqual([]);
+  });
+});
+
+describe("completionOverview", () => {
+  it("gives the delta and who is missing from the same rows", async () => {
+    const o = await completionOverview(db, hr, {
+      cycleId: c1,
+      groupBy: "department",
+      missingStatus: "manager_missing",
+    });
+    expect(o.delta.previous?.cycleName).toBe("2024-H2");
+    expect(o.delta.total).toEqual({ selfDelta: -8.3, managerDelta: -26.7 });
+    expect(o.missing?.map((p) => p.name)).toEqual([
+      "Beto Benítez",
+      "Carla Cabrera",
+      "Emi Estévez",
+    ]);
+    // The same as the two queries on their own.
+    expect(o.delta.current).toEqual(
+      await completionSummary(db, hr, {
+        cycleId: c1,
+        groupBy: "department",
+        hierarchy: "asOf",
+      }),
+    );
+    expect(o.missing).toEqual(
+      await missingAssessments(db, hr, {
+        cycleId: c1,
+        status: "manager_missing",
+      }),
+    );
+  });
+
+  it("a manager gets their reports only; direction gets no list of people", async () => {
+    const asManager = await completionOverview(db, as(marta, "manager"), {
+      cycleId: c1,
+    });
+    expect(asManager.missing?.map((p) => p.name)).toEqual([
+      "Beto Benítez",
+      "Gaby Giménez",
+    ]);
+    expect(asManager.delta.current.participants).toBe(3);
+    const asDirection = await completionOverview(db, direction, {
+      cycleId: c1,
+      minGroupSize: 3,
+    });
+    expect(asDirection.missing).toBeNull();
+    expect(asDirection.delta.current.minGroupSize).toBe(3);
+  });
+
+  it("is forbidden to employees", async () => {
+    await expect(
+      completionOverview(db, as(ana, "employee"), { cycleId: c1 }),
+    ).rejects.toMatchObject({ code: "forbidden" });
+  });
+});
+
+describe("cycles of the same period", () => {
+  it("are each other's predecessors, in the order completionCycles lists them", async () => {
+    // Same period as 2025-H1, created after it (a re-import into a new cycle).
+    const again = await closedCycle("2025-H1 bis", "2025-01-01", "2025-06-30");
+    try {
+      const names = (await completionCycles(db)).map((c) => c.name);
+      expect(names.indexOf("2025-H1 bis")).toBeLessThan(
+        names.indexOf("2025-H1"),
+      );
+      const d = await completionDelta(db, hr, { cycleId: again });
+      expect(d.previous?.cycleName).toBe("2025-H1");
+      // And the original one still looks back to 2024-H2.
+      expect(
+        (await completionDelta(db, hr, { cycleId: c1 })).previous?.cycleName,
+      ).toBe("2024-H2");
+    } finally {
+      await db.delete(reviewCycle).where(eq(reviewCycle.id, again));
+    }
   });
 });
