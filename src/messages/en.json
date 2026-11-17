@@ -491,8 +491,11 @@
         "name": "Person",
         "manager": "Manager (snapshot)",
         "department": "Department",
-        "jobTitle": "Job title"
-      }
+        "jobTitle": "Job title",
+        "assessment": "Assessment"
+      },
+      "viewAssessment": "View assessment",
+      "viewAssessmentOf": "View {name}'s assessment"
     }
   },
   "Actor": {
@@ -878,7 +881,18 @@
       "dimension": "dimension",
       "positive": "positive",
       "constructive": "constructive",
-      "negative": "negative"
+      "negative": "negative",
+      "group_id": "group_id",
+      "people": "people",
+      "in_progress": "in_progress",
+      "closed": "closed",
+      "overdue": "overdue",
+      "completed_pct": "completed_pct",
+      "in_progress_pct": "in_progress_pct",
+      "overdue_pct": "overdue_pct",
+      "outlier_kind": "kind",
+      "retention": "retention",
+      "engagement": "engagement"
     }
   },
   "ImportHistory": {
@@ -1138,6 +1152,163 @@
       "no_file": "Choose a file.",
       "unknown": "Something went wrong.",
       "not_labeled": "This comment has no label yet."
+    }
+  },
+  "GoalsInsights": {
+    "nav": "Goals and assessments",
+    "title": "Goals and assessments",
+    "heading": "Goals and assessments · {cycle}",
+    "forbidden": "You do not have access to this view.",
+    "noCycles": "There are no launched cycles yet.",
+    "tableView": "View as table",
+    "empty": "There is no data for these filters.",
+    "personLink": "View {name}'s assessment",
+    "scope": {
+      "directReports": "You only see your direct reports at the time of each cycle.",
+      "aggregatesOnly": "Aggregates only: groups of fewer than {min} people are folded into Others or hidden."
+    },
+    "filters": {
+      "label": "Filters",
+      "cycle": "Cycle",
+      "department": "Area",
+      "manager": "Manager",
+      "any": "All",
+      "apply": "Apply"
+    },
+    "groupBy": {
+      "label": "Group by",
+      "person": "Person",
+      "manager": "Manager",
+      "department": "Area"
+    },
+    "hierarchy": {
+      "label": "Hierarchy",
+      "asOf": "At review time",
+      "current": "Current"
+    },
+    "indicator": {
+      "label": "Indicator",
+      "retention": "Retention",
+      "engagement": "Engagement"
+    },
+    "kpis": {
+      "title": "Goal indicators",
+      "hint": "Each person's goals of the period (the cycle's snapshot). Overdue: in progress and due before the period ended; a closed goal never is.",
+      "columns": {
+        "group": "Group",
+        "people": "People",
+        "goals": "Goals",
+        "completed": "Completed",
+        "inProgress": "In progress",
+        "overdue": "Overdue",
+        "avgProgress": "Average progress"
+      },
+      "others": "Others",
+      "total": "Total",
+      "none": "No goals",
+      "share": "{count} ({pct} %)",
+      "meter": "{group}: {pct} % of goals completed",
+      "suppressed": "{n, plural, one {# person in small groups is not shown} other {# people in small groups are not shown}}",
+      "totalHidden": "The total is hidden so it does not reveal the small groups.",
+      "unassigned": "Unassigned"
+    },
+    "scatter": {
+      "title": "Goals completion vs {indicator}",
+      "hint": "One person per dot: horizontal, % of goals completed; vertical, the value the manager gave (1 to 5). Only people with goals and that answer appear.",
+      "xAxis": "Goals completed (%)",
+      "yAxis": "{indicator} (1 to 5)",
+      "point": "{name}: {completed} % of goals completed, {indicator} {value}",
+      "missing": "{n, plural, one {# person does not appear} other {# people do not appear}} for lack of goals or that answer."
+    },
+    "buckets": {
+      "title": "Indicators by goals completion",
+      "hint": "Mean retention and engagement of the people, by the % of goals they completed.",
+      "bucket": "{from}–{to} %",
+      "people": "{n, plural, one {# person} other {# people}}",
+      "positive": "Positive comments",
+      "hidden": "Hidden: fewer than {min} people",
+      "noData": "No data",
+      "bar": "{bucket}, {indicator}: {value}",
+      "withoutGoals": "{n, plural, one {# person without goals is} other {# people without goals are}} not in this chart.",
+      "suppressed": "{n, plural, one {# person in small buckets is not shown} other {# people in small buckets are not shown}}.",
+      "columns": {
+        "bucket": "Goals completed",
+        "people": "People",
+        "retention": "Retention (mean)",
+        "engagement": "Engagement (mean)",
+        "positive": "Positive comments"
+      }
+    },
+    "people": {
+      "title": "People",
+      "columns": {
+        "name": "Person",
+        "manager": "Manager",
+        "goals": "Goals",
+        "completed": "Completed",
+        "avgProgress": "Average progress",
+        "retention": "Retention",
+        "engagement": "Engagement",
+        "positive": "Positive comments"
+      },
+      "noValue": "–"
+    },
+    "outliers": {
+      "title": "Cases that do not add up",
+      "count": "{n, plural, =0 {Nobody} one {# person} other {# people}}",
+      "hidden": "There are fewer than {min} people: the number is not shown.",
+      "none": "Nobody.",
+      "doneButLow": {
+        "title": "Goals done, low indicators",
+        "description": "They completed {goals} % or more of their goals, but retention or engagement is {risk} or less."
+      },
+      "behindButHigh": {
+        "title": "Goals behind, high indicators",
+        "description": "They completed {goals} % or less of their goals, but retention and engagement are {high} or more."
+      },
+      "columns": {
+        "person": "Person",
+        "manager": "Manager",
+        "completed": "Goals completed",
+        "retention": "Retention",
+        "engagement": "Engagement"
+      },
+      "completed": "{completed} of {goals} ({pct} %)"
+    }
+  },
+  "ParticipantDetail": {
+    "title": "{name} · {cycle}",
+    "back": "Back to the cycle",
+    "forbidden": "You do not have access to this assessment.",
+    "period": "Period {start} → {end}",
+    "manager": "Manager at the snapshot: {name}",
+    "noManager": "No manager at the snapshot",
+    "job": "{title} · {department}",
+    "removed": "Removed from the cycle",
+    "answers": {
+      "title": "Assessment answers",
+      "self": "Self assessment",
+      "manager": "Manager assessment",
+      "reviewer": "Written by: {name}",
+      "mismatch": "The author was not the manager at the snapshot",
+      "empty": "There are no submitted assessments of this person.",
+      "noQuestions": "There are no answers visible to you."
+    },
+    "goals": {
+      "title": "Goals of the period",
+      "asOf": "Status as of {date}",
+      "summary": "{completed} of {total, plural, one {# goal completed} other {# goals completed}}",
+      "empty": "There are no goals in this period.",
+      "progress": "Progress",
+      "dueDate": "Due {date}",
+      "noDueDate": "No due date",
+      "overdue": "Overdue",
+      "noLongerApplicable": "No longer applies",
+      "status": {
+        "in_progress": "In progress",
+        "completed": "Completed",
+        "closed": "Closed"
+      }
     }
   }
 }

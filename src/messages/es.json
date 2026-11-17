@@ -491,8 +491,11 @@
         "name": "Persona",
         "manager": "Manager (snapshot)",
         "department": "Área",
-        "jobTitle": "Puesto"
-      }
+        "jobTitle": "Puesto",
+        "assessment": "Assessment"
+      },
+      "viewAssessment": "Ver assessment",
+      "viewAssessmentOf": "Ver el assessment de {name}"
     }
   },
   "Actor": {
@@ -878,7 +881,18 @@
       "dimension": "dimensión",
       "positive": "positivo",
       "constructive": "constructivo",
-      "negative": "negativo"
+      "negative": "negativo",
+      "group_id": "grupo_id",
+      "people": "personas",
+      "in_progress": "en curso",
+      "closed": "cerrados",
+      "overdue": "vencidos",
+      "completed_pct": "% completados",
+      "in_progress_pct": "% en curso",
+      "overdue_pct": "% vencidos",
+      "outlier_kind": "tipo",
+      "retention": "retención",
+      "engagement": "compromiso"
     }
   },
   "ImportHistory": {
@@ -1138,6 +1152,163 @@
       "no_file": "Elegí un archivo.",
       "unknown": "Algo salió mal.",
       "not_labeled": "Este comentario todavía no tiene etiqueta."
+    }
+  },
+  "GoalsInsights": {
+    "nav": "Goals y assessments",
+    "title": "Goals y assessments",
+    "heading": "Goals y assessments · {cycle}",
+    "forbidden": "No tenés acceso a esta vista.",
+    "noCycles": "Todavía no hay ciclos lanzados.",
+    "tableView": "Ver como tabla",
+    "empty": "No hay datos para estos filtros.",
+    "personLink": "Ver assessment de {name}",
+    "scope": {
+      "directReports": "Ves solo a tus reportes directos al momento de cada ciclo.",
+      "aggregatesOnly": "Solo agregados: los grupos de menos de {min} personas se agrupan en Otros o se ocultan."
+    },
+    "filters": {
+      "label": "Filtros",
+      "cycle": "Ciclo",
+      "department": "Área",
+      "manager": "Manager",
+      "any": "Todos",
+      "apply": "Aplicar"
+    },
+    "groupBy": {
+      "label": "Agrupar por",
+      "person": "Persona",
+      "manager": "Manager",
+      "department": "Área"
+    },
+    "hierarchy": {
+      "label": "Jerarquía",
+      "asOf": "Al momento de la review",
+      "current": "Actual"
+    },
+    "indicator": {
+      "label": "Indicador",
+      "retention": "Retención",
+      "engagement": "Compromiso"
+    },
+    "kpis": {
+      "title": "Indicadores de objetivos",
+      "hint": "Objetivos del período de cada persona (snapshot del ciclo). Vencido: en curso y con fecha anterior al fin del período; un objetivo cerrado nunca lo es.",
+      "columns": {
+        "group": "Grupo",
+        "people": "Personas",
+        "goals": "Objetivos",
+        "completed": "Completados",
+        "inProgress": "En curso",
+        "overdue": "Vencidos",
+        "avgProgress": "Avance promedio"
+      },
+      "others": "Otros",
+      "total": "Total",
+      "none": "Sin objetivos",
+      "share": "{count} ({pct} %)",
+      "meter": "{group}: {pct} % de objetivos completados",
+      "suppressed": "{n, plural, one {# persona en grupos chicos no se muestra} other {# personas en grupos chicos no se muestran}}",
+      "totalHidden": "El total se oculta para no revelar los grupos chicos.",
+      "unassigned": "Sin asignar"
+    },
+    "scatter": {
+      "title": "Cumplimiento de objetivos vs {indicator}",
+      "hint": "Una persona por punto: horizontal, % de objetivos completados; vertical, el valor que dio el manager (1 a 5). Solo aparecen quienes tienen objetivos y esa respuesta.",
+      "xAxis": "Objetivos completados (%)",
+      "yAxis": "{indicator} (1 a 5)",
+      "point": "{name}: {completed} % de objetivos completados, {indicator} {value}",
+      "missing": "{n, plural, one {# persona no aparece} other {# personas no aparecen}} por no tener objetivos o esa respuesta."
+    },
+    "buckets": {
+      "title": "Indicadores según el cumplimiento de objetivos",
+      "hint": "Promedio de retención y compromiso de las personas, según el % de objetivos que completaron.",
+      "bucket": "{from}–{to} %",
+      "people": "{n, plural, one {# persona} other {# personas}}",
+      "positive": "Comentarios positivos",
+      "hidden": "Oculto: menos de {min} personas",
+      "noData": "Sin datos",
+      "bar": "{bucket}, {indicator}: {value}",
+      "withoutGoals": "{n, plural, one {# persona sin objetivos no entra} other {# personas sin objetivos no entran}} en este gráfico.",
+      "suppressed": "{n, plural, one {# persona en tramos chicos no se muestra} other {# personas en tramos chicos no se muestran}}.",
+      "columns": {
+        "bucket": "Objetivos completados",
+        "people": "Personas",
+        "retention": "Retención (promedio)",
+        "engagement": "Compromiso (promedio)",
+        "positive": "Comentarios positivos"
+      }
+    },
+    "people": {
+      "title": "Personas",
+      "columns": {
+        "name": "Persona",
+        "manager": "Manager",
+        "goals": "Objetivos",
+        "completed": "Completados",
+        "avgProgress": "Avance promedio",
+        "retention": "Retención",
+        "engagement": "Compromiso",
+        "positive": "Comentarios positivos"
+      },
+      "noValue": "–"
+    },
+    "outliers": {
+      "title": "Casos que no cuadran",
+      "count": "{n, plural, =0 {Ninguna persona} one {# persona} other {# personas}}",
+      "hidden": "Hay menos de {min} personas: no se muestra el número.",
+      "none": "Ninguna persona.",
+      "doneButLow": {
+        "title": "Objetivos cumplidos, indicadores bajos",
+        "description": "Completaron {goals} % o más de sus objetivos, pero retención o compromiso están en {risk} o menos."
+      },
+      "behindButHigh": {
+        "title": "Objetivos atrasados, indicadores altos",
+        "description": "Completaron {goals} % o menos de sus objetivos, pero retención y compromiso están en {high} o más."
+      },
+      "columns": {
+        "person": "Persona",
+        "manager": "Manager",
+        "completed": "Objetivos completados",
+        "retention": "Retención",
+        "engagement": "Compromiso"
+      },
+      "completed": "{completed} de {goals} ({pct} %)"
+    }
+  },
+  "ParticipantDetail": {
+    "title": "{name} · {cycle}",
+    "back": "Volver al ciclo",
+    "forbidden": "No tenés acceso a este assessment.",
+    "period": "Período {start} → {end}",
+    "manager": "Manager del snapshot: {name}",
+    "noManager": "Sin manager en el snapshot",
+    "job": "{title} · {department}",
+    "removed": "Quitado del ciclo",
+    "answers": {
+      "title": "Respuestas del assessment",
+      "self": "Autoevaluación",
+      "manager": "Evaluación del manager",
+      "reviewer": "Evaluó: {name}",
+      "mismatch": "Quien evaluó no es el manager del snapshot",
+      "empty": "No hay evaluaciones enviadas de esta persona.",
+      "noQuestions": "No hay respuestas visibles para vos."
+    },
+    "goals": {
+      "title": "Objetivos del período",
+      "asOf": "Estado al {date}",
+      "summary": "{completed} de {total, plural, one {# objetivo completado} other {# objetivos completados}}",
+      "empty": "No hay objetivos en este período.",
+      "progress": "Progreso",
+      "dueDate": "Vence {date}",
+      "noDueDate": "Sin fecha límite",
+      "overdue": "Vencido",
+      "noLongerApplicable": "Ya no aplica",
+      "status": {
+        "in_progress": "En curso",
+        "completed": "Completado",
+        "closed": "Cerrado"
+      }
     }
   }
 }
