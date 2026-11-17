@@ -13,4 +13,4 @@ src/components/ui
 /fixtures
 
 # real exports and private data (ignored by git too)
-/data/private
+/data

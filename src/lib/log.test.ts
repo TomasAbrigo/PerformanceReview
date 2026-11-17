@@ -17,9 +17,32 @@ describe("redactEmails", () => {
     );
   });
 
-  it("also hides the credentials of a connection URL", () => {
-    expect(redactEmails("postgresql://u:secret@db.internal.example/x")).toBe(
-      "postgresql://u:[email]/x",
+  it.each([
+    [
+      "postgresql://postgres:x@127.0.0.1:55322/db",
+      "postgresql://[credentials]@127.0.0.1:55322/db",
+    ],
+    [
+      "postgresql://u:secret@db.internal.example/x",
+      "postgresql://[credentials]@db.internal.example/x",
+    ],
+    [
+      "postgres://localhost-user:pw@localhost:5432/db failed",
+      "postgres://[credentials]@localhost:5432/db failed",
+    ],
+    // A password with an @ in it.
+    [
+      "redis://u:p@ss@cache.internal/0",
+      "redis://[credentials]@cache.internal/0",
+    ],
+  ])("hides the credentials of a connection URL: %s", (input, expected) => {
+    expect(redactEmails(input)).toBe(expected);
+  });
+
+  it("redacts an address next to a URL in the same JSON line", () => {
+    const line = `{"url":"postgres://a:b@h/db","owner":"${address}"}`;
+    expect(redactEmails(line)).toBe(
+      '{"url":"postgres://[credentials]@h/db","owner":"[email]"}',
     );
   });
 });
@@ -51,6 +74,37 @@ describe("describeError", () => {
     expect(text).toContain("Caused by:");
     expect(text).toContain("duplicate key value ([email])");
     expect(text).toContain("Key (work_email)=([email]) already exists.");
+  });
+
+  it("keeps the PostgreSQL error fields, redacted", () => {
+    const pg = Object.assign(new Error("duplicate key"), {
+      code: "23505",
+      constraint_name: "person_work_email_unique",
+      schema_name: "public",
+      table_name: "person",
+      column_name: "work_email",
+      hint: `try ${address}`,
+      where: `row (${address})`,
+      severity: "ERROR",
+    });
+    const text = describeError(new Error("Failed query", { cause: pg }));
+    // The fields belong to the cause, after its own "Caused by:" header.
+    expect(text.indexOf("Caused by:")).toBeLessThan(text.indexOf("code=23505"));
+    expect(text).toContain("code=23505");
+    expect(text).toContain("constraint_name=person_work_email_unique");
+    expect(text).toContain("schema_name=public");
+    expect(text).toContain("table_name=person");
+    expect(text).toContain("column_name=work_email");
+    expect(text).toContain("hint=try [email]");
+    expect(text).toContain("where=row ([email])");
+    expect(text).not.toContain(address);
+  });
+
+  it("does not print a cause that is null or undefined", () => {
+    const nulled = new Error("outer", { cause: null });
+    expect(describeError(nulled)).not.toContain("Caused by");
+    expect(describeError(nulled)).not.toContain("null");
+    expect(describeError(new Error("plain"))).not.toContain("Caused by");
   });
 
   it("describes a non-Error value", () => {

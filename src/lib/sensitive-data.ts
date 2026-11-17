@@ -42,8 +42,13 @@ const ALLOWED_DOMAINS = [
 /** Reserved TLDs (RFC 2606 / 6761): nothing under them is a real mailbox. */
 const RESERVED_TLDS = ["test", "example", "invalid", "localhost"];
 
-/** Addresses that are fine as they are. */
-const ALLOWED_ADDRESSES = ["noreply@github.com"];
+/** Not mailboxes of anyone: bot senders and the `git@` user of SSH remotes. */
+const ALLOWED_ADDRESSES = [
+  "noreply@github.com",
+  "git@github.com",
+  "git@gitlab.com",
+  "git@bitbucket.org",
+];
 
 /** Generated or vendored: not worth scanning (and slow to). */
 const SKIPPED = [
@@ -77,12 +82,22 @@ export type SensitiveIssue =
 
 const EMAIL =
   /[A-Za-z0-9._%+-]+@([A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)*\.[A-Za-z]{2,})/g;
-/** `scheme://user:password@host`: credentials of a URL, not an address. */
-const URL_CREDENTIALS = /\b[a-z][a-z0-9+.-]*:\/\/[^\s/@]*@/gi;
+/**
+ * `scheme://user:password@`: the credentials of a URL, not an address (the
+ * password may hold an `@`; quotes and brackets end it, so a JSON line with
+ * a URL and an address keeps the address).
+ */
+const URL_CREDENTIALS = /\b([a-z][a-z0-9+.-]*:\/\/)[^\s/"'`<>]*@/gi;
 
-/** `text` with every email address (and URL credentials) replaced by `[email]`. */
+/**
+ * `text` with every email address replaced by `[email]` and the credentials
+ * of every URL (`postgresql://user:password@127.0.0.1/db`, any host, IPs and
+ * localhost included) by `[credentials]`.
+ */
 export const redactEmails = (text: string): string =>
-  text.replace(new RegExp(EMAIL.source, "g"), "[email]");
+  text
+    .replace(URL_CREDENTIALS, "$1[credentials]@")
+    .replace(new RegExp(EMAIL.source, "g"), "[email]");
 
 const isSkipped = (path: string) => SKIPPED.some((re) => re.test(path));
 
@@ -97,7 +112,7 @@ function isAllowedDomain(domain: string): boolean {
 /** Domains of the addresses in `line` that are not allowed (one entry per address). */
 function foreignDomains(line: string): string[] {
   const found: string[] = [];
-  for (const m of line.replace(URL_CREDENTIALS, "").matchAll(EMAIL)) {
+  for (const m of line.replace(URL_CREDENTIALS, "$1").matchAll(EMAIL)) {
     const address = m[0].toLowerCase();
     const domain = m[1].toLowerCase();
     if (ALLOWED_ADDRESSES.includes(address) || isAllowedDomain(domain)) {

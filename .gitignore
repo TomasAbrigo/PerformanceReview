@@ -58,4 +58,4 @@ next-env.d.ts
 /var/
 
 # real Bamboo exports and other private data (never commit; see README "Datos sensibles")
-/data/private/
+/data/

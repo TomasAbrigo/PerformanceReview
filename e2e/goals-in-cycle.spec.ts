@@ -11,6 +11,7 @@ import {
   hasUniqueName,
   isActive,
 } from "./seed-data";
+import { actAs } from "./act-as";
 
 /** An active person with a unique name whose manager (today = at the snapshot) is one too. */
 const hasManagerPerson = (e: (typeof employees)[number]) =>
@@ -36,20 +37,6 @@ const withoutGoals = find(
 const nameOf = (e: (typeof employees)[number]) => fullName(e);
 const managerOf = (e: (typeof employees)[number]) =>
   nameOf(byId.get(e.managerId!)!);
-
-/** Uses the header "Actuar como" selector. */
-async function actAs(page: Page, person: string | null, role: string) {
-  const bar = page.getByRole("form", { name: "Actuar como" });
-  if (person) await bar.getByLabel("Buscar persona").fill(person);
-  await bar
-    .getByLabel("Persona", { exact: true })
-    .selectOption({ label: person ?? "Sin persona" });
-  await bar.getByLabel("Rol").selectOption({ label: role });
-  await bar.getByRole("button", { name: "Aplicar" }).click();
-  await expect(bar.getByText(/Actuando como:/)).toContainText(
-    person ?? "People",
-  );
-}
 
 /**
  * Launches a cycle whose period covers every date of the generated goals (so

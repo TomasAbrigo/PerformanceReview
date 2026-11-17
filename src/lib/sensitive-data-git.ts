@@ -13,9 +13,15 @@ const splitZ = (out: Buffer): string[] =>
     .split("\0")
     .filter((p) => p !== "");
 
-/** Files git tracks (what CI and clones get). */
-export function trackedPaths(cwd = process.cwd(), env = process.env): string[] {
-  return splitZ(git(["ls-files", "-z"], cwd, env));
+/** Files git tracks (what CI and clones get), optionally only under `pathspecs`. */
+export function trackedPaths(
+  cwd = process.cwd(),
+  env = process.env,
+  pathspecs: string[] = [],
+): string[] {
+  const args = ["ls-files", "-z"];
+  if (pathspecs.length > 0) args.push("--", ...pathspecs);
+  return splitZ(git(args, cwd, env));
 }
 
 /** Files added, copied, modified or renamed in the index (what a commit would add). */

@@ -83,6 +83,8 @@ const peopleQuery = pageParams
 
 export const listPeopleRoute = apiRoute(async (request) => {
   const { scope, as_person, role, ...query } = parseQuery(request, peopleQuery);
+  // The cursor first: a bad one is a 400 whatever else is wrong.
+  decodeCursor(query.cursor, "ts_id");
   const actor = await scopeActor(db, { scope, as_person, role });
   const page = await listPeopleRows(db, query);
   const withEmail = canSeeEmail(actor.role);

@@ -16,9 +16,12 @@ import {
 const foreign = ["someone", ["gmail", "com"].join(".")].join("@");
 
 let repo: string;
-// Inside a git hook GIT_DIR / GIT_INDEX_FILE point at the real repository.
+// Inside a git hook GIT_DIR / GIT_INDEX_FILE point at the real repository, and
+// the machine's git config (signing, hooks, templates) must not leak in either.
 const env = { ...process.env };
 for (const key of Object.keys(env)) if (key.startsWith("GIT_")) delete env[key];
+env.GIT_CONFIG_GLOBAL = "/dev/null";
+env.GIT_CONFIG_NOSYSTEM = "1";
 const git = (...args: string[]) =>
   execFileSync("git", args, { cwd: repo, env, stdio: "pipe" });
 const write = (path: string, content: string | Buffer) => {
@@ -77,6 +80,8 @@ describe("staged files", () => {
     git("add", "old.csv");
     git(
       "-c",
+      "commit.gpgsign=false",
+      "-c",
       "user.name=t",
       "-c",
       "user.email=t@example.com",
@@ -91,6 +96,18 @@ describe("staged files", () => {
 });
 
 describe("tracked files", () => {
+  it("can be limited to some folders", () => {
+    write("src/a.ts", "a\n");
+    write("scripts/b.ts", "b\n");
+    write("docs/c.md", "c\n");
+    git("add", "-A");
+    expect(trackedPaths(repo, env, ["src", "scripts"]).sort()).toEqual([
+      "scripts/b.ts",
+      "src/a.ts",
+    ]);
+    expect(trackedPaths(repo, env)).toHaveLength(3);
+  });
+
   it("reads the working tree and tolerates a tracked file that is gone", () => {
     write("a.txt", "hello\n");
     write("b.txt", "bye\n");

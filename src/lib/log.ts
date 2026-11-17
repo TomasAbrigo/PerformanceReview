@@ -12,21 +12,39 @@ export function errorMessage(error: unknown): string {
   return redactEmails(error instanceof Error ? error.message : String(error));
 }
 
-/** An error with its stack, causes and a driver's `detail`, redacted. */
+/** What a PostgreSQL error says about where it happened (no row values: `detail` is separate). */
+const PG_FIELDS = [
+  "code",
+  "severity",
+  "constraint_name",
+  "schema_name",
+  "table_name",
+  "column_name",
+  "hint",
+  "where",
+] as const;
+
+/** An error with its stack, causes and the PostgreSQL fields, redacted. */
 export function describeError(error: unknown): string {
-  const parts: string[] = [];
+  // One block per error of the cause chain.
+  const blocks: string[] = [];
   let current: unknown = error;
-  for (let depth = 0; current !== undefined && depth < 8; depth++) {
+  for (let depth = 0; current != null && depth < 8; depth++) {
     if (!(current instanceof Error)) {
-      parts.push(String(current));
+      blocks.push(String(current));
       break;
     }
-    parts.push(current.stack ?? `${current.name}: ${current.message}`);
-    const { detail } = current as { detail?: unknown };
-    if (typeof detail === "string") parts.push(`detail: ${detail}`);
+    const lines = [current.stack ?? `${current.name}: ${current.message}`];
+    const pg = current as unknown as Record<string, unknown>;
+    const fields = PG_FIELDS.filter((key) => typeof pg[key] === "string").map(
+      (key) => `${key}=${pg[key]}`,
+    );
+    if (fields.length > 0) lines.push(`fields: ${fields.join(" ")}`);
+    if (typeof pg.detail === "string") lines.push(`detail: ${pg.detail}`);
+    blocks.push(lines.join("\n"));
     current = current.cause;
   }
-  return redactEmails(parts.join("\nCaused by: "));
+  return redactEmails(blocks.join("\nCaused by: "));
 }
 
 /** `console.error` for unexpected errors, with no email in it. */

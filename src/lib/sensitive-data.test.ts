@@ -95,6 +95,9 @@ describe("findSensitiveFiles: emails", () => {
     "ana@example.test",
     "ana@corp.invalid",
     "noreply@github.com",
+    "git@github.com",
+    "git@gitlab.com",
+    "git@bitbucket.org",
   ])("allows %s", (address) => {
     expect(
       findSensitiveFiles([{ path: "a.txt", content: `mail ${address}.` }]),
@@ -107,6 +110,21 @@ describe("findSensitiveFiles: emails", () => {
     expect(issues.map((i) => i.kind === "email" && i.domain)).toEqual([
       "notexample.com",
       "example.com.evil.io",
+    ]);
+  });
+
+  it("allows SSH remotes", () => {
+    const content = [
+      "git clone git@github.com:TomasAbrigo/PerformanceReview.git",
+      "url = git@gitlab.com:group/repo.git",
+    ].join("\n");
+    expect(findSensitiveFiles([{ path: "docs/a.md", content }])).toEqual([]);
+  });
+
+  it("still finds an address on a line that also holds a connection URL", () => {
+    const content = `{"url":"postgres://a:b@host.internal/db","owner":"${realish("jane.roe")}"}`;
+    expect(findSensitiveFiles([{ path: "a.json", content }])).toEqual([
+      { kind: "email", path: "a.json", line: 1, domain: "gmail.com", count: 1 },
     ]);
   });
 

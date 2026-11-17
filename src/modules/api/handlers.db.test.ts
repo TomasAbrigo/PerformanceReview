@@ -442,6 +442,15 @@ describe("people API: email only for People (hr)", () => {
     );
     expect(unknown.status).toBe(404);
   });
+
+  it("answers a bad cursor with 400 before any 404 for an unknown as_person", async () => {
+    const res = await call(
+      listPeopleRoute,
+      `/api/v1/people?cursor=garbage&as_person=${crypto.randomUUID()}&role=employee`,
+    );
+    expect(res.status).toBe(400);
+    expect(res.body.errors.map((e: Json) => e.path)).toContain("cursor");
+  });
 });
 
 describe("GET /api/v1/people/{id}", () => {

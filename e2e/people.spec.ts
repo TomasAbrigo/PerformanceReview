@@ -1,4 +1,4 @@
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test } from "@playwright/test";
 import {
   employees,
   find,
@@ -7,6 +7,7 @@ import {
   queuedRecords,
   records,
 } from "./seed-data";
+import { actAs } from "./act-as";
 
 test.describe.configure({ mode: "serial" });
 
@@ -62,18 +63,6 @@ test("people list shows no email and does not search by it", async ({
   await expect(page.getByText(personas(0), { exact: true })).toBeVisible();
   await expect(page.getByText("No hay personas para mostrar.")).toBeVisible();
 });
-
-/** Uses the header "Actuar como" selector. */
-async function actAs(page: Page, person: string, role: string) {
-  const bar = page.getByRole("form", { name: "Actuar como" });
-  await bar.getByLabel("Buscar persona").fill(person);
-  await bar
-    .getByLabel("Persona", { exact: true })
-    .selectOption({ label: person });
-  await bar.getByLabel("Rol").selectOption({ label: role });
-  await bar.getByRole("button", { name: "Aplicar" }).click();
-  await expect(bar.getByText(/Actuando como:/)).toContainText(person);
-}
 
 test("person detail shows the email to People only", async ({ page }) => {
   const ceo = find(
