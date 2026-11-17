@@ -1,0 +1,88 @@
+import { hasLocale } from "next-intl";
+import { getTranslations, setRequestLocale } from "next-intl/server";
+import { notFound } from "next/navigation";
+import { connection } from "next/server";
+import { Suspense } from "react";
+import { ExecutiveView } from "@/components/dashboards/executive-view";
+import { CycleForm } from "@/components/insights/cycle-form";
+import {
+  ExecutiveReportView,
+  ModeToggle,
+} from "@/components/insights/executive-report-view";
+import { db } from "@/db/client";
+import { routing } from "@/i18n/routing";
+import { getActor } from "@/modules/actor/server";
+import { executiveSummary } from "@/modules/analytics/dashboards";
+import { canSeeExecutiveView } from "@/modules/insights";
+import {
+  executiveModes,
+  executiveReport,
+  type ExecutiveMode,
+} from "@/modules/insights/executive";
+import { listCycles } from "@/modules/review-core";
+import { getSetting } from "@/modules/settings";
+import { dimensionLabels } from "../dimension-labels";
+
+async function Executive({
+  params,
+  searchParams,
+}: PageProps<"/[locale]/insights/executive">) {
+  const { locale } = await params;
+  if (!hasLocale(routing.locales, locale)) notFound();
+  setRequestLocale(locale);
+  await connection();
+  const actor = await getActor();
+  const t = await getTranslations("Insights");
+  if (!canSeeExecutiveView(actor)) return <p>{t("forbidden")}</p>;
+  const sp = await searchParams;
+  const mode: ExecutiveMode = executiveModes.includes(sp.mode as ExecutiveMode)
+    ? (sp.mode as ExecutiveMode)
+    : "both";
+  const cycles = (await listCycles(db)).filter((c) => c.status !== "draft");
+  const cycle = cycles.find((c) => c.id === sp.cycle) ?? cycles[0];
+  if (!cycle) return <p>{t("noCycles")}</p>;
+  const minGroupSize = await getSetting(db, "aggregation.minGroupSize");
+  const [report, summary] = await Promise.all([
+    executiveReport(db, actor, { cycleId: cycle.id, mode, minGroupSize }),
+    mode === "qualitative"
+      ? null
+      : executiveSummary(db, actor, { cycleId: cycle.id, minGroupSize }),
+  ]);
+  const dimensionLabel = await dimensionLabels(
+    report.sentiment?.map((r) => r.dimension) ?? [],
+  );
+  return (
+    <div className="flex flex-col gap-4">
+      <h1 className="text-2xl font-semibold">
+        {t("Executive.title")} · {cycle.name}
+      </h1>
+      <div className="flex flex-wrap items-end justify-between gap-4">
+        <CycleForm
+          cycles={cycles.map((c) => ({ id: c.id, name: c.name }))}
+          cycleId={cycle.id}
+          hidden={{ mode }}
+        />
+        <ModeToggle mode={mode} cycleId={cycle.id} />
+      </div>
+      <ExecutiveReportView report={report} dimensionLabel={dimensionLabel} />
+      {summary ? (
+        <section className="flex flex-col gap-2">
+          <h2 className="text-lg font-semibold">{t("Executive.ratings")}</h2>
+          <ExecutiveView data={summary} showProgress={false} />
+        </section>
+      ) : null}
+    </div>
+  );
+}
+
+export default function ExecutivePage(
+  props: PageProps<"/[locale]/insights/executive">,
+) {
+  return (
+    <main className="mx-auto w-full max-w-5xl p-8">
+      <Suspense fallback={<div aria-busy="true" className="h-40" />}>
+        <Executive {...props} />
+      </Suspense>
+    </main>
+  );
+}

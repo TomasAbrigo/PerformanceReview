@@ -649,7 +649,8 @@
       "goal": "Metas",
       "assessment": "Evaluaciones",
       "feedback": "Feedback",
-      "assessment_progress": "Progreso de evaluaciones"
+      "assessment_progress": "Progreso de evaluaciones",
+      "health_check": "Health check (CAP)"
     },
     "result": {
       "title": "Importación terminada",
@@ -935,6 +936,8 @@
       "positive": "positivo",
       "constructive": "constructivo",
       "negative": "negativo",
+      "section": "sección",
+      "metric": "métrica",
       "group_id": "group_id",
       "participants": "participantes",
       "self_submitted": "autoevaluaciones enviadas",
@@ -1117,16 +1120,16 @@
       "higher": "Manager más alto"
     },
     "executive": {
-      "title": "Vista de dirección",
       "link": "Vista de dirección",
       "hint": "Solo agregados: sin nombres ni ids. Los grupos de menos de {min} personas se agrupan en Otros o se ocultan.",
       "hintPeople": "Solo agregados: sin nombres ni ids.",
       "participants": "Participantes",
-      "completion": "Completitud",
-      "byDepartment": "Por área",
       "others": "Otros",
       "belowMinimum": "Hay menos de {min} participantes: no se muestran datos para proteger a las personas.",
-      "suppressed": "{n, plural, =0 {Ninguna persona en grupos chicos} one {# persona en áreas chicas (no se desglosa)} other {# personas en áreas chicas (no se desglosan)}}"
+      "suppressed": "{n, plural, =0 {Ninguna persona en grupos chicos} one {# persona en áreas chicas (no se desglosa)} other {# personas en áreas chicas (no se desglosan)}}",
+      "title": "Vista de dirección",
+      "completion": "Completitud",
+      "byDepartment": "Por área"
     }
   },
   "Indicators": {
@@ -1354,6 +1357,106 @@
       "no_file": "Elegí un archivo.",
       "unknown": "Algo salió mal.",
       "not_labeled": "Este comentario todavía no tiene etiqueta."
+    }
+  },
+  "Insights": {
+    "forbidden": "Sin acceso.",
+    "noCycles": "Todavía no hay ciclos.",
+    "cycle": "Ciclo",
+    "apply": "Aplicar",
+    "filters": "Filtros",
+    "empty": "Sin datos para mostrar.",
+    "maskedHint": "Solo agregados: los grupos de menos de {min} personas se agrupan en Otros o no se muestran.",
+    "fullHint": "Vista completa de People.",
+    "others": "Otros",
+    "suppressed": "{n, plural, =0 {Ninguna persona en grupos chicos} one {# persona en grupos chicos (no se desglosa)} other {# personas en grupos chicos (no se desglosan)}}",
+    "hidden": "Oculto: menos de {min} personas.",
+    "percent": "{value} %",
+    "groupBy": {
+      "label": "Agrupar por",
+      "department": "Área",
+      "manager": "Manager"
+    },
+    "completion": {
+      "title": "Completitud",
+      "table": "Completitud por grupo",
+      "group": "Grupo",
+      "n": "Personas",
+      "self": "Autoevaluación",
+      "manager": "Evaluación del manager",
+      "all": "Total",
+      "noDepartment": "Sin área",
+      "meter": "{label}: {submitted} de {total} enviadas",
+      "noManager": "Sin manager"
+    },
+    "SelfAssessment": {
+      "nav": "Reporte de autoevaluación",
+      "title": "Reporte de autoevaluación",
+      "sentimentTitle": "Sentimiento de las autoevaluaciones",
+      "sentimentChart": "Sentimiento de las autoevaluaciones por dimensión",
+      "gapTitle": "Brecha autoevaluación vs. manager",
+      "gapHint": "Promedio normalizado (0 a 1) en las preguntas que respondieron ambos; brecha = manager − autoevaluación.",
+      "gapTable": "Brecha por pregunta",
+      "question": "Pregunta",
+      "answers": "Pares",
+      "self": "Autoevaluación",
+      "manager": "Manager",
+      "gap": "Brecha",
+      "sentimentGapTitle": "Sentimiento: autoevaluación vs. manager",
+      "sentimentGapHint": "Para ciclos solo de texto: proporción de sentimiento de cada lado por dimensión.",
+      "sentimentGapChart": "Sentimiento de autoevaluación y manager por dimensión",
+      "rowSelf": "{dimension} · autoevaluación",
+      "rowManager": "{dimension} · manager"
+    },
+    "HealthCheck": {
+      "nav": "Health check (CAP)",
+      "title": "Health check (CAP)",
+      "pending": "Formato pendiente de definir",
+      "pendingHint": "Los archivos de health check se importan con el perfil cap-health-check y quedan guardados tal cual (aterrizados), sin interpretar columnas, hasta que se defina el formato.",
+      "files": "Archivos importados",
+      "runs": "Importaciones",
+      "rows": "Filas aterrizadas",
+      "lastLanded": "Última importación",
+      "never": "Nunca",
+      "upload": "Subir un archivo de health check",
+      "questionsTitle": "Preguntas abiertas",
+      "questions": {
+        "format": "Formato: ¿qué columnas trae el archivo y en qué tipo de archivo llega (CSV, Excel, export de una encuesta)?",
+        "period": "Período: ¿cada cuánto se hace y cómo se asocia a un ciclo o semestre?",
+        "personKey": "Clave de persona: ¿las respuestas son anónimas, por equipo o por persona (email, legajo)?",
+        "scale": "Escala: ¿qué escala usan las respuestas (1 a 5, semáforo, texto libre) y cómo se interpreta?"
+      },
+      "versionNote": "Cada fila se identifica por el archivo y su posición: subir el mismo archivo otra vez no cambia nada, y un archivo editado se guarda como una versión nueva (las filas anteriores no se reconcilian)."
+    },
+    "Executive": {
+      "nav": "Vista ejecutiva",
+      "title": "Vista ejecutiva",
+      "mode": "Modo",
+      "modes": {
+        "qualitative": "Cualitativo",
+        "quantitative": "Cuantitativo",
+        "both": "Ambos"
+      },
+      "completionTitle": "Completitud",
+      "participants": "Participantes",
+      "selfPct": "Autoevaluaciones enviadas",
+      "managerPct": "Evaluaciones del manager enviadas",
+      "retention": "Retención",
+      "engagement": "Compromiso",
+      "n": "{n, plural, one {# persona} other {# personas}}",
+      "distribution": "Distribución de {indicator} (1 a 5)",
+      "risk": "Cuadrante de riesgo",
+      "riskCount": "{n, plural, one {# persona} other {# personas}} con retención y compromiso bajos",
+      "riskOf": "de {total} con ambos indicadores",
+      "sentiment": "Sentimiento por dimensión",
+      "sentimentChart": "Sentimiento por dimensión del ciclo",
+      "themes": "Top 5 temas",
+      "themeCount": "{n, plural, one {# mención} other {# menciones}}",
+      "ratings": "Calificaciones",
+      "goals": "Objetivos",
+      "goalsCompleted": "Objetivos completados",
+      "goalsCount": "Objetivos del período",
+      "goalsOverdue": "Vencidos"
     }
   },
   "Arturia": {

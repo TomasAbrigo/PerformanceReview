@@ -320,6 +320,40 @@ export async function indicatorOverview(
   };
 }
 
+/**
+ * Both indicators of a cycle, all together (groupBy none), and the risk
+ * matrix, from a single read of the rows and one authorization: the
+ * executive view's tiles.
+ */
+export async function indicatorSnapshot(
+  db: DbOrTx,
+  actor: ActorContext,
+  input: Pick<Common, "config"> & { cycleId: string },
+): Promise<{
+  retention: IndicatorDistribution;
+  engagement: IndicatorDistribution;
+  matrix: RiskMatrix;
+}> {
+  const ctx = await indicatorContext(db, actor, input.config);
+  await requireCycle(db, input.cycleId);
+  const rows = await loadRows(db, ctx, {
+    cycleId: input.cycleId,
+    hierarchy: "asOf",
+  });
+  const inCycle = rows.filter((r) => r.cycleId === input.cycleId);
+  const dist = (indicator: Indicator) =>
+    buildDistribution(
+      inCycle,
+      { cycleId: input.cycleId, indicator, groupBy: "none" },
+      minOf(ctx),
+    );
+  return {
+    retention: dist("retention"),
+    engagement: dist("engagement"),
+    matrix: buildMatrix(inCycle, input.cycleId, ctx.config, reachOf(ctx)),
+  };
+}
+
 /** Values of the area / manager selects: those of the people with indicators in the cycle. */
 export async function indicatorFilterOptions(
   db: DbOrTx,
