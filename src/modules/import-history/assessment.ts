@@ -12,6 +12,7 @@ import {
   answeredCells,
   ensureParticipant,
   ensureQuestions,
+  likertOverridesOf,
   saveAnswers,
   SOURCE,
   upsertImportedCycle,
@@ -338,6 +339,11 @@ export async function upsertAssessment(
         sideColumns,
         revisions,
         raw,
+        {
+          cycleId: cycle.id,
+          runId: ctx.runId,
+          overrides: await likertOverridesOf(tx, ctx.cache),
+        },
       );
       tally.answersCreated += saved.created;
       tally.answersUnchanged += saved.updated;

@@ -141,6 +141,20 @@
       "when": 1794942574687,
       "tag": "0019_prune",
       "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "7",
+      "when": 1794944720923,
+      "tag": "0020_santex_template",
+      "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "7",
+      "when": 1794946910044,
+      "tag": "0021_qualitative_analysis",
+      "breakpoints": true
     }
   ]
 }

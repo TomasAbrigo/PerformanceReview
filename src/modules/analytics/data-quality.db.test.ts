@@ -560,6 +560,7 @@ describe("on a crafted dataset", () => {
       ["duplicate_names", 2],
       ["failed_runs", 1],
       ["reviewer_mismatch", 1],
+      ["unmapped_answers", 0],
     ]);
   });
 

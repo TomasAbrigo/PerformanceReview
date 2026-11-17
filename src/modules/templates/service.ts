@@ -292,6 +292,7 @@ export async function cloneTemplate(
             prompt: q.prompt,
             choices: q.choices,
             role: q.role,
+            dimension: q.dimension,
           })),
         );
       }
@@ -367,11 +368,17 @@ function questionValues(data: ReturnType<typeof questionInput.parse>) {
     choices: data.kind === "single_choice" ? (data.choices ?? null) : null,
     // Undefined leaves the stored role alone; null clears it.
     ...(data.role !== undefined && { role: data.role }),
+    ...(data.dimension !== undefined && { dimension: data.dimension }),
   };
 }
 
 /** Roles a template may have on a single question (they are single answers). */
-const SINGLE_ROLES = ["goals_rating", "overall_rating"] as const;
+const SINGLE_ROLES = [
+  "goals_rating",
+  "overall_rating",
+  "retention",
+  "engagement",
+] as const;
 
 /**
  * A question's role must fit its kind, and the goals rating and the overall

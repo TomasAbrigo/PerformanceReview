@@ -23,6 +23,7 @@ import { type LocalizedText, ratingScale } from "./rating-scales";
 import { sourceColumns } from "./source";
 import {
   question,
+  type QuestionDimension,
   type QuestionKind,
   type QuestionRole,
   type Relationship,
@@ -166,6 +167,8 @@ export const questionRevision = pgTable(
      * (see countsTowardOverall).
      */
     role: text("role").$type<QuestionRole>(),
+    /** Dimension copied from the template question or the import mapping. */
+    dimension: text("dimension").$type<QuestionDimension>(),
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
       .defaultNow(),
