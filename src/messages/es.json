@@ -531,7 +531,33 @@
         "builtinName": "Ese nombre es de un perfil incluido: elegí otro.",
         "savedName": "Ya hay un perfil guardado con ese nombre: elegí otro o reemplazalo."
       },
-      "replace": "Reemplazar el perfil guardado «{name}»"
+      "replace": "Reemplazar el perfil guardado «{name}»",
+      "base": "Partir de",
+      "baseNone": "Ninguno (desde cero)",
+      "baseHint": "Copia la clave, los campos y el mapeo de preguntas de un perfil incluido.",
+      "questions": {
+        "title": "Mapeo de preguntas",
+        "hint": "Qué columnas son preguntas, quién las responde y cómo. Las columnas «Employee/Manager [Custom] Qn: …» que no configures se detectan solas.",
+        "column": "Columna",
+        "kind": "Tipo",
+        "side": "Lado",
+        "dimension": "Dimensión",
+        "role": "Rol",
+        "kindLabel": "Tipo de pregunta: {column}",
+        "sideLabel": "Lado: {column}",
+        "dimensionLabel": "Dimensión: {column}",
+        "roleLabel": "Rol: {column}",
+        "kinds": {
+          "none": "No es pregunta",
+          "text": "Texto",
+          "likert": "Escala 1-5",
+          "letter_choice": "Opción por letra"
+        },
+        "sides": {
+          "self": "Autoevaluación",
+          "manager": "Manager"
+        }
+      }
     },
     "entities": {
       "employee": "Empleados",
@@ -819,7 +845,29 @@
     "viewRun": "Ver la corrida",
     "viewQueue": "Ver la cola de identidad",
     "viewResult": "Ver ciclos importados",
-    "notFound": "Esta corrida no importó ciclos históricos."
+    "notFound": "Esta corrida no importó ciclos históricos.",
+    "decision": {
+      "title": "Hay filas esperando un ciclo",
+      "rows": "{count, plural, one {# fila no se importó todavía} other {# filas no se importaron todavía}}: elegí a qué ciclo van.",
+      "reasons": {
+        "ambiguous_semester": "Su fecha está cerca del corte entre semestres, así que no se puede saber a cuál pertenecen.",
+        "unknown_cycle": "Nombran un ciclo que no existe (Assessment Progress no trae fechas para crearlo)."
+      },
+      "names": "Ciclos nombrados en el archivo: {names}",
+      "choose": "Ciclo destino",
+      "create": "Crear el ciclo {name} ({start} – {end})",
+      "existing": "{name} ({start} – {end})",
+      "submit": "Importar en ese ciclo",
+      "submitting": "Importando…",
+      "resolved": "Las filas en espera se importaron en el ciclo elegido.",
+      "errors": {
+        "not_waiting": "Esta corrida ya no espera una decisión. Recargá la página.",
+        "not_found": "La corrida no existe.",
+        "unknown_cycle": "El ciclo elegido ya no existe.",
+        "unknown_proposal": "Ese ciclo no estaba entre los propuestos.",
+        "unknown": "No se pudo reanudar la importación."
+      }
+    }
   },
   "Dashboards": {
     "nav": "Dashboards",
