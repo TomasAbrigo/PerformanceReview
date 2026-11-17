@@ -48,7 +48,9 @@
     "system_readonly": "System items cannot be changed or deleted; clone them instead.",
     "in_use": "The scale is used by a question.",
     "unknown": "Something went wrong.",
-    "duplicateRole": "This template already has a question with that role."
+    "duplicateRole": "This template already has a question with that role.",
+    "managerOnly": "Retention and engagement are answered by the manager only.",
+    "hiddenRequired": "Retention and engagement must be hidden from the reviewee."
   },
   "Scales": {
     "title": "Rating scales",
@@ -126,7 +128,18 @@
       "none": "None",
       "goals_rating": "Goals rating",
       "goals_comment": "Goals comment",
-      "overall_rating": "Overall performance rating"
+      "overall_rating": "Overall performance rating",
+      "retention": "Retention (Likert 1-5)",
+      "engagement": "Engagement (Likert 1-5)"
+    },
+    "dimension": "Dimension",
+    "dimensions": {
+      "none": "None",
+      "strengths": "Strengths",
+      "improvement": "Opportunities for improvement",
+      "custom_1": "Custom 1",
+      "custom_2": "Custom 2",
+      "custom_3": "Custom 3"
     }
   },
   "People": {
@@ -647,7 +660,11 @@
       "source": "Source",
       "error": "Error",
       "reviewer": "Reviewer",
-      "snapshotManager": "Snapshot manager"
+      "snapshotManager": "Snapshot manager",
+      "cycle": "Cycle",
+      "column": "Column",
+      "rawValue": "Raw value",
+      "answerReason": "Reason"
     },
     "indicators": {
       "identity_open": {
@@ -693,7 +710,15 @@
       "reviewer_mismatch": {
         "title": "Reviewer different from the snapshot manager",
         "description": "Review requests whose reviewer does not match the snapshot manager."
+      },
+      "unmapped_answers": {
+        "title": "Answers without Likert equivalence",
+        "description": "Imported retention or engagement answers whose option has no 1-5 equivalence (see docs/likert-mapping.md). The answer was kept with the raw value and no score."
       }
+    },
+    "answerReasons": {
+      "unmapped_option": "Option without equivalence",
+      "invalid_value": "Invalid value"
     }
   },
   "Exports": {

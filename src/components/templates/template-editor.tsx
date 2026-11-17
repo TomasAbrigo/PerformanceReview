@@ -15,6 +15,8 @@ import {
 import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 import { useRouter } from "@/i18n/navigation";
 import {
+  type QuestionDimension,
+  questionDimensions as DIMENSIONS,
   type QuestionKind,
   questionKinds as KINDS,
   type QuestionRole,
@@ -44,6 +46,8 @@ export type EditorQuestion = {
   choices: { value: string; label: Localized }[] | null;
   /** Special meaning (goals rating, overall rating...), if any. */
   role: QuestionRole | null;
+  /** What an open question is about (strengths, improvement, custom_n). */
+  dimension: QuestionDimension | null;
 };
 export type EditorTemplate = {
   id: string;
@@ -452,6 +456,11 @@ function QuestionSummary({
         {question.role ? (
           <Badge variant="default">{t(`roles.${question.role}`)}</Badge>
         ) : null}
+        {question.dimension ? (
+          <Badge variant="outline">
+            {t(`dimensions.${question.dimension}`)}
+          </Badge>
+        ) : null}
       </div>
       {question.choices?.length ? (
         <ul className="list-disc pl-5 text-sm text-muted-foreground">
@@ -473,12 +482,13 @@ const blankQuestion: QuestionPayload = {
   prompt: emptyText,
   choices: null,
   role: null,
+  dimension: null,
 };
 
 /** The special roles a question of each type can have. */
 const ROLES_BY_KIND: Record<QuestionKind, QuestionRole[]> = {
   text: ["goals_comment"],
-  rating: ["goals_rating", "overall_rating"],
+  rating: ["goals_rating", "overall_rating", "retention", "engagement"],
   single_choice: [],
 };
 
@@ -514,6 +524,7 @@ function QuestionForm({
   const scaleIssue = issueAt("scaleId");
   const choicesIssue = issueAt("choices");
   const roleIssue = issueAt("role");
+  const visibleIssue = issueAt("visibleToReviewee");
 
   return (
     <form
@@ -600,9 +611,15 @@ function QuestionForm({
           className={selectClass}
           value={value.role ?? ""}
           aria-invalid={roleIssue ? true : undefined}
-          onChange={(e) =>
-            set({ role: (e.target.value || null) as QuestionRole | null })
-          }
+          onChange={(e) => {
+            const role = (e.target.value || null) as QuestionRole | null;
+            // Retention and engagement: the manager only, never the reviewee.
+            set(
+              role === "retention" || role === "engagement"
+                ? { role, appliesTo: ["manager"], visibleToReviewee: false }
+                : { role },
+            );
+          }}
         >
           <option value="">{t("roles.none")}</option>
           {ROLES_BY_KIND[value.kind].map((r) => (
@@ -612,6 +629,26 @@ function QuestionForm({
           ))}
         </select>
         {roleIssue ? <FieldError>{text.issue(roleIssue)}</FieldError> : null}
+      </Field>
+      <Field>
+        <FieldLabel htmlFor={`${id}-dimension`}>{t("dimension")}</FieldLabel>
+        <select
+          id={`${id}-dimension`}
+          className={selectClass}
+          value={value.dimension ?? ""}
+          onChange={(e) =>
+            set({
+              dimension: (e.target.value || null) as QuestionDimension | null,
+            })
+          }
+        >
+          <option value="">{t("dimensions.none")}</option>
+          {DIMENSIONS.map((d) => (
+            <option key={d} value={d}>
+              {t(`dimensions.${d}`)}
+            </option>
+          ))}
+        </select>
       </Field>
       {value.kind === "single_choice" ? (
         <fieldset className="flex flex-col gap-2">
@@ -700,6 +737,9 @@ function QuestionForm({
           {t("visibleToReviewee")}
         </label>
       </div>
+      {visibleIssue ? (
+        <FieldError>{text.issue(visibleIssue)}</FieldError>
+      ) : null}
       <ErrorAlert error={error?.code === "validation" ? null : error} />
       <div className="flex gap-2">
         <Button type="submit" disabled={pending}>

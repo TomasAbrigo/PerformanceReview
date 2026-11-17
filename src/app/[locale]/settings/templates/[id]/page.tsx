@@ -76,6 +76,7 @@ async function Editor({ params }: { params: Params }) {
               prompt: q.prompt,
               choices: q.choices,
               role: q.role,
+              dimension: q.dimension,
             })),
           })),
         }}

@@ -1,5 +1,14 @@
 import type { LocalizedText, ScaleSnapshot } from "@/db/schema";
-import type { QuestionKind } from "@/modules/templates/constants";
+import {
+  isLikertRole,
+  type LikertOverrides,
+  mapLikert,
+} from "@/modules/likert";
+import type {
+  QuestionDimension,
+  QuestionKind,
+  QuestionRole,
+} from "@/modules/templates/constants";
 
 /**
  * The question columns of Bamboo's Employee Performance report, as question
@@ -7,6 +16,10 @@ import type { QuestionKind } from "@/modules/templates/constants";
  * question text: "Employee Q1: How well does <company> recognize my value?",
  * "Manager Custom Q2: <text>". Answers to the standard Q1/Q2 are exported as
  * letters (A = best), Q3/Q4 are free text and custom questions are rated 1-5.
+ *
+ * Roles and dimensions (issue #57): manager Q1 is `retention` and Q2
+ * `engagement` (their letters become 1-5 through the Likert mapping); Q3 is
+ * the `strengths` dimension, Q4 `improvement`, Custom Q<n> `custom_<n>`.
  */
 
 type Choice = { value: string; label: LocalizedText };
@@ -91,7 +104,20 @@ export type QuestionColumn = {
   visibleToReviewee: boolean;
   choices: Choice[] | null;
   scale: ScaleSnapshot | null;
+  /** retention / engagement for the manager's Q1 / Q2; null otherwise. */
+  role: QuestionRole | null;
+  dimension: QuestionDimension | null;
   sort: number;
+};
+
+const CUSTOM_DIMENSIONS: Record<number, QuestionDimension> = {
+  1: "custom_1",
+  2: "custom_2",
+  3: "custom_3",
+};
+const STANDARD_DIMENSIONS: Record<number, QuestionDimension> = {
+  3: "strengths",
+  4: "improvement",
 };
 
 const PATTERN = /^(Employee|Manager) (Custom )?Q(\d+):\s*(.+)$/;
@@ -122,6 +148,8 @@ export function detectQuestionColumns(headers: string[]): QuestionColumn[] {
         visibleToReviewee: true,
         choices: null,
         scale: IMPORTED_SCALE,
+        role: null,
+        dimension: CUSTOM_DIMENSIONS[number] ?? null,
         order: (side === "self" ? 0 : 1000) + 100 + number,
       });
       continue;
@@ -139,6 +167,13 @@ export function detectQuestionColumns(headers: string[]): QuestionColumn[] {
       visibleToReviewee: !(side === "manager" && number <= 2),
       choices: options,
       scale: null,
+      role:
+        side === "manager" && number === 1
+          ? "retention"
+          : side === "manager" && number === 2
+            ? "engagement"
+            : null,
+      dimension: STANDARD_DIMENSIONS[number] ?? null,
       order: (side === "self" ? 0 : 1000) + number,
     });
   }
@@ -162,11 +197,17 @@ export type AnswerColumns = {
  * The answer columns for one cell, as review-core stores native answers
  * (single choice: the letter; rating: value, label and normalized value).
  * null for an empty cell; `invalid` for a value the question cannot take.
+ * Retention and engagement keep the option as label and get the 1-5 value
+ * from the Likert mapping (`overrides`: the likert_mapping table);
+ * `unmapped` when the option has no equivalence (kept, not rejected).
  */
 export function answerColumns(
-  column: Pick<QuestionColumn, "kind" | "choices" | "scale">,
+  column: Pick<QuestionColumn, "kind" | "choices" | "scale"> & {
+    role?: QuestionRole | null;
+  },
   cell: unknown,
-): AnswerColumns | { invalid: true } | null {
+  overrides: LikertOverrides = {},
+): AnswerColumns | { invalid: true } | { unmapped: true; raw: string } | null {
   if (cell === null || cell === undefined) return null;
   const text = String(cell).trim();
   if (text === "") return null;
@@ -176,6 +217,23 @@ export function answerColumns(
     normalized: null,
     textValue: null,
   };
+  if (isLikertRole(column.role)) {
+    const mapped = mapLikert(
+      {
+        role: column.role,
+        optionCount: column.choices?.length ?? column.scale?.options.length,
+        raw: text,
+      },
+      overrides,
+    );
+    if ("unmapped" in mapped) return { unmapped: true, raw: text };
+    return {
+      ...none,
+      optionLabel: text.length === 1 ? text.toUpperCase() : text,
+      optionValue: mapped.value,
+      normalized: mapped.normalized,
+    };
+  }
   if (column.kind === "single_choice") {
     const choice = column.choices?.find((c) => c.value === text.toUpperCase());
     return choice ? { ...none, optionLabel: choice.value } : { invalid: true };
