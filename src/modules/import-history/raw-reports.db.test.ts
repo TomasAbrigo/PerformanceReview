@@ -195,6 +195,7 @@ describe("edge rows of the raw report (#83)", () => {
   const HEADER =
     "EEID,Review Period Start,Work Email,Employee - What do I do well?,Manager - What does [Employee] do well?,Self Assessment Completed Date,Manager Assessment Completed Date,Manager At Time Of Assessment";
 
+  // Every date has its day <= 12: read as text, so 01/10/2023 is January 10.
   it("drafts answered sides without a date, queues ambiguous managers, explains superseded rows", async () => {
     const [someone, other] = seeded.company.employees;
     const twin = seeded.company.identity.duplicateNames[0];
@@ -202,11 +203,11 @@ describe("edge rows of the raw report (#83)", () => {
     const file = await writeCsv([
       HEADER,
       // Answers, no completion date: a draft.
-      `${someone.id},01/25/2023,,Ok,,,,`,
+      `${someone.id},01/10/2023,,Ok,,,,`,
       // An ambiguous manager name: the identity queue, no manager review.
-      `${other.id},01/25/2023,,Ok,Bien,01/27/2023,01/28/2023,${twin.name}`,
+      `${other.id},01/10/2023,,Ok,Bien,01/08/2023,01/09/2023,${twin.name}`,
       // The same person again by email, an older self date: superseded.
-      `,01/25/2023,${other.workEmail},Viejo,,01/26/2023,,`,
+      `,01/10/2023,${other.workEmail},Viejo,,01/07/2023,,`,
     ]);
     const run = await importReport(file, "bamboo-assessments-report");
 
@@ -214,7 +215,7 @@ describe("edge rows of the raw report (#83)", () => {
       .select()
       .from(reviewRequest)
       .innerJoin(reviewCycle, eq(reviewRequest.cycleId, reviewCycle.id))
-      .where(eq(reviewCycle.periodStart, "2023-01-25"));
+      .where(eq(reviewCycle.periodStart, "2023-01-10"));
 
     const draft = requests.find(
       (r) =>

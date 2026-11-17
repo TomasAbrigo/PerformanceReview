@@ -66,6 +66,13 @@ export {
 /** Rejects kept in the result of an import (all of them stay in ingest_run). */
 const RESULT_REJECTS = 20;
 
+/**
+ * Bamboo's report exports (built-in `bamboo-*` profiles and those built on
+ * a real-report base) are read as text: dates are parsed by the importer.
+ */
+const readsAsText = (profile: SourceProfile) =>
+  profile.name.startsWith("bamboo-") || profile.format !== undefined;
+
 /** Lake table the uploaded file is exposed as, whatever the profile calls it. */
 const UPLOAD_TABLE = "upload";
 
@@ -76,6 +83,7 @@ const UPLOAD_TABLE = "upload";
 async function withUploadLake<T>(
   upload: StoredUpload,
   fn: (lake: LakeAdapter, table: string) => Promise<T>,
+  options: { allText?: boolean } = {},
 ): Promise<T> {
   const dir = await mkdtemp(join(tmpdir(), "upload-lake-"));
   try {
@@ -83,7 +91,7 @@ async function withUploadLake<T>(
     // Absolute: a relative target would be read from the link's own folder.
     const target = resolve(upload.path);
     await symlink(target, link).catch(() => copyFile(target, link));
-    const lake = await readable(() => DuckDbFileLake.open(dir));
+    const lake = await readable(() => DuckDbFileLake.open(dir, options));
     try {
       return await fn(lake, UPLOAD_TABLE);
     } finally {
@@ -115,38 +123,42 @@ async function ingestUploaded({
   signal?: AbortSignal;
   landing?: boolean;
 }) {
-  return withUploadLake(upload, async (lake, table) => {
-    const columns = await readable(() => lake.describeTable(table));
-    // The messages name the file the user uploaded, not the profile's table.
-    const issues = validateAgainstSchema(profile, columns, fileName);
-    if (issues.length > 0) {
-      throw new UploadError(
-        "invalid_profile",
-        `The file does not match profile "${profile.name}": ${issues
-          .map((issue) => issue.message)
-          .join("; ")}`,
-        issues,
-      );
-    }
-    return runIngest({
-      adapter: new FileSourceAdapter(profile, lake, table, {
-        source,
-        fileKey: upload.sha256,
-      }),
-      entity: profile.entity,
-      landing,
-      syncState: false,
-      ...(profile.questions ? { questions: profile.questions } : {}),
-      db,
-      extract: { signal },
-      params: {
-        fileName,
-        profile: profile.name,
-        size: upload.size,
-        sha256: upload.sha256,
-      },
-    });
-  });
+  return withUploadLake(
+    upload,
+    async (lake, table) => {
+      const columns = await readable(() => lake.describeTable(table));
+      // The messages name the file the user uploaded, not the profile's table.
+      const issues = validateAgainstSchema(profile, columns, fileName);
+      if (issues.length > 0) {
+        throw new UploadError(
+          "invalid_profile",
+          `The file does not match profile "${profile.name}": ${issues
+            .map((issue) => issue.message)
+            .join("; ")}`,
+          issues,
+        );
+      }
+      return runIngest({
+        adapter: new FileSourceAdapter(profile, lake, table, {
+          source,
+          fileKey: upload.sha256,
+        }),
+        entity: profile.entity,
+        landing,
+        syncState: false,
+        ...(profile.questions ? { questions: profile.questions } : {}),
+        db,
+        extract: { signal },
+        params: {
+          fileName,
+          profile: profile.name,
+          size: upload.size,
+          sha256: upload.sha256,
+        },
+      });
+    },
+    { allText: readsAsText(profile) },
+  );
 }
 
 /**
