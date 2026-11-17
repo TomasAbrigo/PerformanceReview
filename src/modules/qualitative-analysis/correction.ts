@@ -46,6 +46,8 @@ export async function correctLabel(
     left join eff on eff.answer_id = a.id
     where a.id = ${answerId}::uuid and q.kind = 'text'`);
   if (!target) throw new AnalysisError("not_found");
+  // Only a labeled comment can be corrected (it is what the readers show).
+  if (!target.sentiment) throw new AnalysisError("not_labeled");
   const themes = [...new Set(data.themes.map(normalizeTheme).filter(Boolean))];
   const [row] = await db
     .insert(analysisCorrection)

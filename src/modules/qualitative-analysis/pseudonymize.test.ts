@@ -43,4 +43,20 @@ describe("pseudonymize", () => {
       "habla con Silvana Molina y Adrián Bustos",
     );
   });
+
+  it("leaves name parts that are common words alone unless capitalised", () => {
+    const { texts } = pseudonymize(
+      [
+        "Carla hizo un trabajo muy bueno su trabajo",
+        "Bueno avisó tarde",
+        "Luz y paz",
+      ],
+      { knownNames: ["Carla Bueno", "Luz Paz"] },
+    );
+    expect(texts).toEqual([
+      "[P1] hizo un trabajo muy bueno su trabajo",
+      "[P1] avisó tarde",
+      "Luz y paz", // short common words never match alone
+    ]);
+  });
 });

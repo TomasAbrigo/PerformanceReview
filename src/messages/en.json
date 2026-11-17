@@ -1042,7 +1042,6 @@
         "ambiguous": "More than one possible comment"
       }
     },
-    "export": "Download CSV",
     "errors": {
       "forbidden": "You are not allowed to do this.",
       "not_found": "Not found.",
@@ -1052,7 +1051,8 @@
       "provider_failed": "The analysis provider failed.",
       "invalid_csv": "The CSV does not have the expected columns.",
       "no_file": "Choose a file.",
-      "unknown": "Something went wrong."
+      "unknown": "Something went wrong.",
+      "not_labeled": "This comment has no label yet."
     }
   }
 }

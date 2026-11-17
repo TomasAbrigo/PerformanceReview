@@ -15,6 +15,71 @@ const EMAIL = /[\p{L}\p{N}._%+-]+@[\p{L}\p{N}.-]+\.[\p{L}]{2,}/gu;
 const LEGAJO =
   /\b(?:legajo|leg\.|employee\s+(?:number|no\.?|#)|nro\.?\s+de\s+legajo)\s*[:#]?\s*[\p{L}]{0,3}-?\d[\d-]*/giu;
 const MIN_PART = 3;
+/**
+ * Name parts that are also common es/en words: replaced only when written
+ * capitalised and at least 4 letters long ("Bueno", not "muy bueno").
+ */
+const COMMON_WORDS = new Set([
+  "bueno",
+  "buena",
+  "mora",
+  "paz",
+  "luz",
+  "sol",
+  "rosa",
+  "cruz",
+  "rey",
+  "mar",
+  "alba",
+  "victoria",
+  "leal",
+  "blanco",
+  "blanca",
+  "rubio",
+  "campos",
+  "prado",
+  "santos",
+  "flores",
+  "vega",
+  "rico",
+  "bravo",
+  "franco",
+  "nieves",
+  "cielo",
+  "angel",
+  "rocio",
+  "pilar",
+  "dolores",
+  "amparo",
+  "esperanza",
+  "consuelo",
+  "gracia",
+  "sierra",
+  "monte",
+  "rivera",
+  "costa",
+  "rio",
+  "pino",
+  "olivo",
+  "grant",
+  "may",
+  "will",
+  "mark",
+  "hope",
+  "joy",
+  "faith",
+  "rose",
+  "young",
+  "king",
+  "white",
+  "black",
+  "brown",
+  "green",
+  "long",
+  "short",
+  "page",
+  "bell",
+]);
 const escape = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 const bounded = (body: string) =>
   new RegExp(`(?<![\\p{L}\\p{N}])(?:${body})(?![\\p{L}\\p{N}])`, "gu");
@@ -51,19 +116,25 @@ export function pseudonymize(
     .map((n) => n.trim())
     .filter(Boolean)
     .map((name, i) => ({ name, id: String(i), folded: fold(name) }));
-  const patterns: { folded: string; person: (typeof people)[number] }[] = [];
+  const patterns: {
+    folded: string;
+    person: (typeof people)[number];
+    common: boolean;
+  }[] = [];
   const seen = new Set<string>();
   for (const p of people) {
     if (!seen.has(p.folded)) {
       seen.add(p.folded);
-      patterns.push({ folded: p.folded, person: p });
+      patterns.push({ folded: p.folded, person: p, common: false });
     }
   }
   for (const p of people) {
     for (const part of p.folded.split(/\s+/)) {
       if (part.length < MIN_PART || seen.has(part)) continue;
       seen.add(part);
-      patterns.push({ folded: part, person: p });
+      const common = COMMON_WORDS.has(part);
+      if (common && part.length < 4) continue;
+      patterns.push({ folded: part, person: p, common });
     }
   }
   patterns.sort((a, b) => b.folded.length - a.folded.length);
@@ -72,7 +143,7 @@ export function pseudonymize(
         patterns.map((p) => escape(p.folded).replace(/\s+/g, "\\s+")).join("|"),
       )
     : null;
-  const personOf = new Map(patterns.map((p) => [p.folded, p.person]));
+  const byPattern = new Map(patterns.map((p) => [p.folded, p]));
   const numbers = (sources.employeeNumbers ?? []).filter(Boolean);
   const numberRe = numbers.length
     ? bounded(numbers.map((n) => escape(fold(n))).join("|"))
@@ -85,9 +156,13 @@ export function pseudonymize(
       t = replaceFolded(t, numberRe, (m) => tokenFor("N", m, m));
     }
     if (nameRe) {
-      t = replaceFolded(t, nameRe, (m) => {
-        const p = personOf.get(m.replace(/\s+/g, " "))!;
-        return tokenFor("P", p.id, p.name);
+      t = replaceFolded(t, nameRe, (m, original) => {
+        const p = byPattern.get(m.replace(/\s+/g, " "))!;
+        // A common word stands for a name only when capitalised.
+        if (p.common && original[0] === original[0].toLowerCase()) {
+          return original;
+        }
+        return tokenFor("P", p.person.id, p.person.name);
       });
     }
     return t;
@@ -99,7 +174,7 @@ export function pseudonymize(
 function replaceFolded(
   text: string,
   re: RegExp,
-  token: (foldedMatch: string) => string,
+  token: (foldedMatch: string, original: string) => string,
 ): string {
   const chars = Array.from(text);
   const folded = foldAligned(text);
@@ -112,7 +187,9 @@ function replaceFolded(
   for (const m of joined.matchAll(re)) {
     const start = Array.from(joined.slice(0, m.index)).length;
     const len = Array.from(m[0]).length;
-    result += chars.slice(last, start).join("") + token(m[0]);
+    result +=
+      chars.slice(last, start).join("") +
+      token(m[0], chars.slice(start, start + len).join(""));
     last = start + len;
   }
   return result + chars.slice(last).join("");

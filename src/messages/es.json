@@ -1042,7 +1042,6 @@
         "ambiguous": "Más de un comentario posible"
       }
     },
-    "export": "Descargar CSV",
     "errors": {
       "forbidden": "No tenés permiso para esto.",
       "not_found": "No encontrado.",
@@ -1052,7 +1051,8 @@
       "provider_failed": "El proveedor de análisis falló.",
       "invalid_csv": "El CSV no tiene las columnas esperadas.",
       "no_file": "Elegí un archivo.",
-      "unknown": "Algo salió mal."
+      "unknown": "Algo salió mal.",
+      "not_labeled": "Este comentario todavía no tiene etiqueta."
     }
   }
 }

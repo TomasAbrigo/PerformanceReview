@@ -66,6 +66,8 @@ export const qualitativeAnalysis = pgTable(
       .notNull()
       .default(sql`'{}'::text[]`),
     textHash: text("text_hash").notNull(),
+    /** md5 of answer.text_value when labeled: a different value means stale. */
+    sourceMd5: text("source_md5").notNull(),
     runId: uuid("run_id").references(() => analysisRun.id, {
       onDelete: "set null",
     }),

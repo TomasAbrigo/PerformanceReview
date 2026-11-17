@@ -27,6 +27,8 @@ type TextAnswer = {
   text: string;
   prompt: LocalizedText;
   cached_hash: string | null;
+  /** The cached label was made from exactly this text. */
+  fresh: boolean;
   corrected: boolean;
 };
 
@@ -40,9 +42,11 @@ async function textAnswers(
   return db.execute<TextAnswer>(sql`
     select a.id as answer_id, a.text_value as text, q.prompt,
            qa.text_hash as cached_hash,
+           coalesce(qa.source_md5 = md5(a.text_value), false) as fresh,
            exists (select 1 from analysis_correction c where c.answer_id = a.id) as corrected
     from answer a
     join review_request r on r.id = a.request_id
+    join cycle_participant cp on cp.id = r.participant_id and cp.removed_at is null
     join question_revision q on q.id = a.question_revision_id
     left join qualitative_analysis qa on qa.answer_id = a.id
       and qa.provider = ${provider} and qa.prompt_version = ${promptVersion}
@@ -124,7 +128,7 @@ export async function runAnalysis(
     for (const row of rows) {
       const hash = textHash(row.text);
       if (row.corrected) counts.corrected++;
-      else if (row.cached_hash === hash) counts.cached++;
+      else if (row.cached_hash === hash && row.fresh) counts.cached++;
       else todo.push({ ...row, hash, dimension: dimensionOf(row) });
     }
     if (todo.length > 0) {
@@ -143,10 +147,10 @@ export async function runAnalysis(
         }));
         const outputs = await provider.analyze(inputs, opts.signal);
         const byToken = new Map(outputs.map((o) => [o.token, o]));
-        for (const [j, t] of slice.entries()) {
+        const labels = slice.map((t, j) => {
           const out = byToken.get(inputs[j].token);
           if (!out) throw new AnalysisError("provider_failed");
-          await storeLabel(db, {
+          return {
             answerId: t.answer_id,
             provider: provider.name,
             promptVersion: provider.promptVersion,
@@ -156,9 +160,10 @@ export async function runAnalysis(
             themes: cleanThemes(out.themes, map),
             textHash: t.hash,
             runId: run.id,
-          });
-          counts.analyzed++;
-        }
+          };
+        });
+        await storeLabels(db, labels);
+        counts.analyzed += labels.length;
       }
     }
     await finishRun(db, run.id, counts, null);
@@ -187,13 +192,27 @@ function cleanThemes(themes: string[], map: PseudonymMap): string[] {
   return [...out.values()].slice(0, 3);
 }
 
-export type LabelRow = typeof qualitativeAnalysis.$inferInsert;
+export type LabelRow = Omit<
+  typeof qualitativeAnalysis.$inferInsert,
+  "sourceMd5" | "id" | "createdAt"
+>;
 
-/** Upserts the label of an answer for its provider + prompt version, and its themes. */
-export async function storeLabel(db: DbOrTx, label: LabelRow) {
+/**
+ * Upserts labels (one statement) for their provider + prompt version, with
+ * the md5 of the answer text they were made from, and their themes.
+ */
+export async function storeLabels(db: DbOrTx, labels: LabelRow[]) {
+  if (labels.length === 0) return;
+  // Last one wins when a batch labels the same answer twice.
+  const unique = [...new Map(labels.map((l) => [l.answerId, l])).values()];
   await db
     .insert(qualitativeAnalysis)
-    .values(label)
+    .values(
+      unique.map((l) => ({
+        ...l,
+        sourceMd5: sql`(select md5(text_value) from answer where id = ${l.answerId}::uuid)`,
+      })),
+    )
     .onConflictDoUpdate({
       target: [
         qualitativeAnalysis.answerId,
@@ -201,16 +220,26 @@ export async function storeLabel(db: DbOrTx, label: LabelRow) {
         qualitativeAnalysis.promptVersion,
       ],
       set: {
-        dimension: label.dimension,
-        sentiment: label.sentiment,
-        confidence: label.confidence,
-        themes: label.themes,
-        textHash: label.textHash,
-        runId: label.runId,
+        dimension: sql`excluded.dimension`,
+        sentiment: sql`excluded.sentiment`,
+        confidence: sql`excluded.confidence`,
+        themes: sql`excluded.themes`,
+        textHash: sql`excluded.text_hash`,
+        sourceMd5: sql`excluded.source_md5`,
+        runId: sql`excluded.run_id`,
         createdAt: sql`now()`,
       },
     });
-  await upsertThemes(db, label.dimension, label.themes ?? []);
+  const themes = new Map<string, { dimension: string; name: string }>();
+  for (const l of unique) {
+    for (const name of l.themes ?? []) {
+      themes.set(`${l.dimension}\u0000${name}`, {
+        dimension: l.dimension,
+        name,
+      });
+    }
+  }
+  await upsertThemeRows(db, [...themes.values()]);
 }
 
 export async function upsertThemes(
@@ -218,16 +247,20 @@ export async function upsertThemes(
   dimension: string,
   themes: string[],
 ) {
-  if (themes.length === 0) return;
+  await upsertThemeRows(
+    db,
+    themes.map((name) => ({ dimension, name })),
+  );
+}
+
+async function upsertThemeRows(
+  db: DbOrTx,
+  rows: { dimension: string; name: string }[],
+) {
+  if (rows.length === 0) return;
   await db
     .insert(theme)
-    .values(
-      themes.map((name) => ({
-        dimension,
-        name,
-        normalizedName: normalizeTheme(name),
-      })),
-    )
+    .values(rows.map((r) => ({ ...r, normalizedName: normalizeTheme(r.name) })))
     .onConflictDoNothing();
 }
 

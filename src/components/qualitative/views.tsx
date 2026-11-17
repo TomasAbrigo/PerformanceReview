@@ -7,15 +7,16 @@ import type {
 } from "@/modules/qualitative-analysis/types";
 import { SentimentBars } from "./sentiment-bars";
 
-/** Translated dimension key, or the key itself (custom dimensions). */
-export function useDimensionLabel() {
-  const t = useTranslations("Qualitative.dimensions");
-  return (d: string) => (t.has(d as "other") ? t(d as "other") : d);
-}
-
-export function ByDimension({ rows }: { rows: DimensionSentiment[] }) {
+export function ByDimension({
+  rows,
+  dimensionLabel,
+}: {
+  rows: DimensionSentiment[];
+  /** dimension key -> label (resolved once by the page). */
+  dimensionLabel: Record<string, string>;
+}) {
   const t = useTranslations("Qualitative");
-  const dim = useDimensionLabel();
+  const dim = (d: string) => dimensionLabel[d] ?? d;
   return (
     <section className="flex flex-col gap-2">
       <h2 className="text-lg font-semibold">{t("byDimension.title")}</h2>

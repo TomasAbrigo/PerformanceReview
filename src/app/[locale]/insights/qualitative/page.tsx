@@ -3,6 +3,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { connection } from "next/server";
 import { Suspense } from "react";
+import { ExportCsvLink } from "@/components/data-quality/export-csv-link";
 import { CommentsTable } from "@/components/qualitative/comments-table";
 import { QualitativeFilters } from "@/components/qualitative/filters";
 import { ImportLabelsForm } from "@/components/qualitative/import-form";
@@ -80,9 +81,6 @@ async function Qualitative({
       tDim.has(d as "other") ? tDim(d as "other") : d,
     ]),
   );
-  const exportQuery = new URLSearchParams({ locale });
-  if (cycleId) exportQuery.set("cycle", cycleId);
-  if (p.department) exportQuery.set("department", p.department);
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-wrap items-start justify-between gap-4">
@@ -98,13 +96,13 @@ async function Qualitative({
         dimensionLabel={dimensionLabel}
         showAggregate={hr}
       />
-      <a
-        className="text-sm underline"
-        href={`/api/v1/export/insights-sentiment.csv?${exportQuery}`}
-      >
-        {t("export")}
-      </a>
-      <ByDimension rows={byDimension} />
+      {hr ? (
+        <ExportCsvLink
+          file="insights-sentiment"
+          params={{ cycle: cycleId, department: p.department }}
+        />
+      ) : null}
+      <ByDimension rows={byDimension} dimensionLabel={dimensionLabel} />
       <Trend points={trend} />
       <Themes themes={themes} />
       <Indicators rows={indicators} />

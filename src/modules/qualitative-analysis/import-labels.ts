@@ -7,7 +7,12 @@ import { parseCsv } from "@/fixtures/serialize/csv";
 import { IMPORT_PROVIDER, sentiments, type Sentiment } from "./constants";
 import { dimensionOf, fold } from "./dimension";
 import { AnalysisError } from "./errors";
-import { finishRun, normalizeTheme, storeLabel } from "./service";
+import {
+  finishRun,
+  normalizeTheme,
+  storeLabels,
+  type LabelRow,
+} from "./service";
 import type { UnmatchedReason, UnmatchedRow } from "./import-labels-types";
 import { textHash } from "./text-hash";
 
@@ -89,8 +94,9 @@ export async function importLabels(
              and si.kind = 'bamboo_id' order by si.valid_from desc limit 1) as bamboo_id,
            c.name as cycle_name
     from answer a
-    join review_request r on r.id = a.request_id and r.deleted_at is null
-    join cycle_participant cp on cp.id = r.participant_id
+    join review_request r on r.id = a.request_id
+      and r.deleted_at is null and r.status = 'submitted'
+    join cycle_participant cp on cp.id = r.participant_id and cp.removed_at is null
     join person p on p.id = cp.reviewee_person_id
     join review_cycle c on c.id = r.cycle_id
     join question_revision q on q.id = a.question_revision_id
@@ -104,6 +110,7 @@ export async function importLabels(
   }));
 
   const unmatched: UnmatchedRow[] = [];
+  const labels: LabelRow[] = [];
   let matched = 0;
   for (const [i, row] of rows.entries()) {
     const employee = row.employee_name || row.bamboo_id || null;
@@ -159,7 +166,7 @@ export async function importLabels(
     }
     const confidence = row.confidence ? Number(row.confidence) : null;
     for (const hit of hits) {
-      await storeLabel(db, {
+      labels.push({
         answerId: hit.answer_id,
         provider: IMPORT_PROVIDER,
         promptVersion: IMPORT_PROMPT_VERSION,
@@ -180,6 +187,7 @@ export async function importLabels(
     }
     matched++;
   }
+  await storeLabels(db, labels);
   await finishRun(
     db,
     run.id,

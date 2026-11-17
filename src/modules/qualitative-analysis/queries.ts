@@ -28,7 +28,11 @@ const canSee = (a: ActorContext) =>
 
 /** CTEs eff + labeled: effective labels of submitted answers in scope. */
 function labeledCtes(actor: ActorContext, f: QualitativeFilters): SQL {
-  const where: SQL[] = [sql`r.deleted_at is null`, sql`cp.removed_at is null`];
+  const where: SQL[] = [
+    sql`r.deleted_at is null`,
+    sql`r.status = 'submitted'`,
+    sql`cp.removed_at is null`,
+  ];
   if (f.cycleId) {
     if (!isUuid(f.cycleId)) throw new AnalysisError("not_found");
     where.push(sql`r.cycle_id = ${f.cycleId}::uuid`);
@@ -155,12 +159,17 @@ export async function sentimentVsIndicators(
   >(sql`
     with ${labeledCtes(actor, f)},
     ind as (
-      select r.participant_id, r.cycle_id, q.role::text as role, a.option_label as option,
-             q.choices
+      -- One value per participant and indicator: the latest submitted
+      -- manager review's answer (so each comment is counted once).
+      select distinct on (r.participant_id, q.role)
+             r.participant_id, r.cycle_id, q.role::text as role,
+             a.option_label as option, q.choices
       from answer a
-      join review_request r on r.id = a.request_id and r.deleted_at is null
+      join review_request r on r.id = a.request_id
       join question_revision q on q.id = a.question_revision_id
       where q.role::text in ('retention', 'engagement') and a.option_label is not null
+        and r.relationship = 'manager' and r.status = 'submitted' and r.deleted_at is null
+      order by r.participant_id, q.role, r.submitted_at desc nulls last, r.id
     )
     select ind.role, ind.option, (array_agg(ind.choices))[1] as choices,
            ${countCols}, count(*)::int as total

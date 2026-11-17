@@ -48,7 +48,12 @@ describe.each(locales)("qualitative views (%s)", (locale) => {
     renderIn(
       locale,
       <>
-        <ByDimension rows={[{ dimension: "strengths", ...counts }]} />
+        <ByDimension
+          rows={[{ dimension: "strengths", ...counts }]}
+          dimensionLabel={{
+            strengths: locale === "es" ? "Fortalezas" : "Strengths",
+          }}
+        />
         <Trend
           points={[
             {
