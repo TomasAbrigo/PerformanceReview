@@ -1,7 +1,7 @@
 employee_name,review_cycle,dimension,text,sentiment,confidence,themes
-Adrián Bustos,Evaluación de desempeño 2023,strengths,"Documento lo que hago, para que otros puedan continuar.",positive,0.9,documentacion
-Adrián Bustos,Evaluación de desempeño 2023,improvement,Necesito mejorar la planificación de mis tiempos.,constructive,0.85,planificacion
-Bruno Campos,Evaluación de desempeño 2023,improvement,Puede anticipar más los riesgos y avisar antes.,constructive,0.8,proactividad;comunicacion
-Carolina Núñez,Evaluación de desempeño 2023,improvement,Le sugiero comunicar más hacia arriba lo que logra.,constructive,,comunicacion
-Cecilia Pereyra,Evaluación de desempeño 2023,,Puede ganar visibilidad compartiendo sus aprendizajes con el resto del equipo.,negative,0.6,comunicacion;colaboracion
-Persona Inexistente,Evaluación de desempeño 2023,strengths,Un texto que no existe en ningún ciclo.,positive,0.7,calidad
+Adrián Bustos,Evaluación semestral 2024-H1,strengths,"Documento lo que hago, para que otros puedan continuar.",positive,0.9,documentacion
+Adrián Bustos,Evaluación semestral 2024-H1,improvement,Necesito mejorar la planificación de mis tiempos.,constructive,0.85,planificacion
+Bruno Campos,Evaluación semestral 2024-H1,improvement,"Sería bueno trabajar la delegación, y a la vez el seguimiento.",constructive,0.8,proactividad;comunicacion
+Carolina Núñez,Evaluación semestral 2024-H1,improvement,Le sugiero comunicar más hacia arriba lo que logra.,constructive,,comunicacion
+Cecilia Pereyra,Evaluación semestral 2024-H1,,Debería tomar más ownership de proyectos transversales.,negative,0.6,comunicacion;colaboracion
+Persona Inexistente,Evaluación semestral 2024-H1,strengths,Un texto que no existe en ningún ciclo.,positive,0.7,calidad
