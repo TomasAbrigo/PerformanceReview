@@ -10,6 +10,11 @@ export type QualitativeFilters = {
   theme?: string;
   /** Only the answers of reviews of this relationship (self, manager...). */
   relationship?: "self" | "manager" | "peer" | "upward";
+  /**
+   * The `aggregation.minGroupSize` setting when the caller already read it
+   * (one read per request); read from the settings otherwise.
+   */
+  minGroupSize?: number;
   /** Leadership view: counts only, no comments, quotes or names. */
   aggregateOnly?: boolean;
 };

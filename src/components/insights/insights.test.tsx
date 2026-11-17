@@ -10,6 +10,7 @@ import type {
   ExecutiveReport,
 } from "@/modules/insights/executive";
 import type { SelfAssessmentReport } from "@/modules/insights/self-assessment";
+import { CompletionTable } from "./completion-table";
 import { ExecutiveReportView, ModeToggle } from "./executive-report-view";
 import { HealthCheckView } from "./health-check-view";
 import { SelfAssessmentView } from "./self-assessment-view";
@@ -296,5 +297,66 @@ describe("ExecutiveReportView", () => {
     );
     expect(screen.getByTestId("exec-risk")).toHaveTextContent("Oculto");
     expect(screen.getByText(/grupos de menos de 5 personas/)).toBeVisible();
+  });
+});
+
+describe("unavailable data and suppressed groups", () => {
+  it("People with no indicator data see the empty text, not 'Oculto'", () => {
+    renderIn(
+      "es",
+      <ExecutiveReportView
+        report={{
+          cycleId: "c1",
+          mode: "quantitative",
+          minGroupSize: null,
+          completion: { ...completion, total: null, minGroupSize: null },
+          retention: null,
+          engagement: null,
+          risk: { riskCount: null, total: null },
+        }}
+        dimensionLabel={{}}
+      />,
+    );
+    expect(screen.getByTestId("exec-retention")).toHaveTextContent(
+      "Sin datos para mostrar.",
+    );
+    expect(screen.queryByText(/Oculto/)).toBeNull();
+  });
+
+  it("all groups suppressed: says how many people are left out", () => {
+    renderIn(
+      "es",
+      <CompletionTable
+        data={{ ...completion, groups: [], total: null, suppressed: 4 }}
+      />,
+    );
+    expect(
+      screen.getByText("4 personas en grupos chicos (no se desglosan)"),
+    ).toBeVisible();
+    expect(screen.queryByText("Sin datos para mostrar.")).toBeNull();
+  });
+
+  it("names the group without a key per grouping", () => {
+    const g = {
+      key: null,
+      label: null,
+      n: 2,
+      self: { submitted: 1, total: 2 },
+      manager: { submitted: 2, total: 2 },
+    };
+    const data = {
+      ...completion,
+      groups: [g],
+      total: null,
+      minGroupSize: null,
+    };
+    const { unmount } = renderIn(
+      "es",
+      <CompletionTable data={data} groupBy="manager" />,
+    );
+    expect(screen.getByText("Sin manager")).toBeVisible();
+    unmount();
+    renderIn("en", <CompletionTable data={data} />);
+    expect(screen.getByText("No department")).toBeVisible();
   });
 });

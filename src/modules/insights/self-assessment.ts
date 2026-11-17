@@ -56,15 +56,11 @@ export async function selfAssessmentReport(
   actor: ActorContext,
   f: { cycleId: string; groupBy: CompletionGroupBy },
 ): Promise<SelfAssessmentReport> {
-  const scope = insightsScope(
-    actor,
-    actor.role === "direction"
-      ? await getSetting(db, "aggregation.minGroupSize")
-      : undefined,
-  );
+  const minGroupSize = await getSetting(db, "aggregation.minGroupSize");
+  const scope = insightsScope(actor, minGroupSize);
   if (scope.kind === "none") throw new ReviewError("forbidden");
   const min = scope.kind === "aggregatesOnly" ? scope.minGroupSize : null;
-  const q = { cycleId: f.cycleId };
+  const q = { cycleId: f.cycleId, minGroupSize };
   const [done, self, manager, themes, gap] = await Promise.all([
     completion(db, scope, f),
     sentimentByDimension(db, actor, { ...q, relationship: "self" }),
@@ -72,11 +68,16 @@ export async function selfAssessmentReport(
     topThemes(db, actor, { ...q, relationship: "self" }),
     // Direction has no people scope: the gap per question is computed over
     // everybody and only questions answered by at least the minimum show.
-    selfManagerGap(db, min === null ? actor : ALL_PEOPLE, {
-      cycleId: f.cycleId,
-      hierarchy: "asOf",
-      aggregateOnly: true,
-    }).then((g) => g.byQuestion.filter((row) => min === null || row.n >= min)),
+    selfManagerGap(
+      db,
+      min === null ? actor : ALL_PEOPLE,
+      {
+        cycleId: f.cycleId,
+        hierarchy: "asOf",
+        aggregateOnly: true,
+      },
+      { byPerson: false },
+    ).then((g) => g.byQuestion.filter((row) => min === null || row.n >= min)),
   ]);
   const strip = (d: DimensionSentiment): SentimentCounts => ({
     positive: d.positive,

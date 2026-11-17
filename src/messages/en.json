@@ -1096,13 +1096,10 @@
       "higher": "Manager higher"
     },
     "executive": {
-      "title": "Leadership view",
       "link": "Leadership view",
       "hint": "Aggregates only: no names or ids. Groups of fewer than {min} people are folded into Others or hidden.",
       "hintPeople": "Aggregates only: no names or ids.",
       "participants": "Participants",
-      "completion": "Completion",
-      "byDepartment": "By department",
       "others": "Others",
       "belowMinimum": "There are fewer than {min} participants: no data is shown to protect people.",
       "suppressed": "{n, plural, =0 {Nobody in small groups} one {# person in small departments (not broken out)} other {# people in small departments (not broken out)}}"
@@ -1362,14 +1359,14 @@
       "manager": "Manager review",
       "all": "Total",
       "noDepartment": "No department",
-      "meter": "{label}: {submitted} of {total} submitted"
+      "meter": "{label}: {submitted} of {total} submitted",
+      "noManager": "No manager"
     },
     "SelfAssessment": {
       "nav": "Self-assessment report",
       "title": "Self-assessment report",
       "sentimentTitle": "Sentiment of the self assessments",
       "sentimentChart": "Sentiment of the self assessments by dimension",
-      "themesTitle": "Themes of the self assessments",
       "gapTitle": "Self vs. manager gap",
       "gapHint": "Normalized mean (0 to 1) on the questions both answered; gap = manager − self.",
       "gapTable": "Gap by question",
@@ -1401,7 +1398,8 @@
         "period": "Period: how often is it run and how does it map to a cycle or semester?",
         "personKey": "Person key: are answers anonymous, per team or per person (email, employee number)?",
         "scale": "Scale: which scale do answers use (1 to 5, traffic light, free text) and how is it read?"
-      }
+      },
+      "versionNote": "Each row is identified by its file and position: uploading the same file again changes nothing, and an edited file is stored as a new version (earlier rows are not reconciled)."
     },
     "Executive": {
       "nav": "Executive view",
@@ -1418,7 +1416,6 @@
       "managerPct": "Manager reviews submitted",
       "retention": "Retention",
       "engagement": "Engagement",
-      "mean": "Mean {value}",
       "n": "{n, plural, one {# person} other {# people}}",
       "distribution": "{indicator} distribution (1 to 5)",
       "risk": "Risk quadrant",

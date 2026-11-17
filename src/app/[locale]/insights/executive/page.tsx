@@ -43,7 +43,7 @@ async function Executive({
   if (!cycle) return <p>{t("noCycles")}</p>;
   const minGroupSize = await getSetting(db, "aggregation.minGroupSize");
   const [report, summary] = await Promise.all([
-    executiveReport(db, actor, { cycleId: cycle.id, mode }),
+    executiveReport(db, actor, { cycleId: cycle.id, mode, minGroupSize }),
     mode === "qualitative"
       ? null
       : executiveSummary(db, actor, { cycleId: cycle.id, minGroupSize }),
@@ -68,7 +68,7 @@ async function Executive({
       {summary ? (
         <section className="flex flex-col gap-2">
           <h2 className="text-lg font-semibold">{t("Executive.ratings")}</h2>
-          <ExecutiveView data={summary} />
+          <ExecutiveView data={summary} showProgress={false} />
         </section>
       ) : null}
     </div>

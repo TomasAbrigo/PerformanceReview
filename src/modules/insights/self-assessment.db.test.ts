@@ -127,6 +127,18 @@ describe("selfAssessmentReport", () => {
       value: "1",
     });
     expect(rows).toContainEqual({
+      section: "completion",
+      group: "Total",
+      metric: "n",
+      value: "9",
+    });
+    expect(rows).toContainEqual({
+      section: "sentiment_gap",
+      group: "strengths:manager",
+      metric: "constructive",
+      value: "1",
+    });
+    expect(rows).toContainEqual({
       section: "theme",
       group: "colaboracion",
       metric: "count",

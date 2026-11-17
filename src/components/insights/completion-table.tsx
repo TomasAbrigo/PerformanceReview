@@ -3,6 +3,7 @@ import { Meter } from "@/components/dashboards/parts";
 import type {
   Completion,
   CompletionGroup,
+  CompletionGroupBy,
   Ratio,
 } from "@/modules/insights/completion";
 
@@ -10,7 +11,14 @@ export const pct = (r: Ratio) =>
   r.total ? Math.round((r.submitted / r.total) * 100) : 0;
 
 /** Completion per group (self and manager), meters in inline SVG. */
-export function CompletionTable({ data }: { data: Completion }) {
+export function CompletionTable({
+  data,
+  groupBy = "department",
+}: {
+  data: Completion;
+  /** What the groups are: words the group without a key. */
+  groupBy?: CompletionGroupBy;
+}) {
   const t = useTranslations("Insights.completion");
   const ti = useTranslations("Insights");
   const rows: (Omit<CompletionGroup, "key" | "label"> & {
@@ -20,15 +28,28 @@ export function CompletionTable({ data }: { data: Completion }) {
     ...data.groups.map((g) => ({
       ...g,
       id: g.key ?? "none",
-      label: g.label ?? t("noDepartment"),
+      label: g.label ?? t(groupBy === "manager" ? "noManager" : "noDepartment"),
     })),
     ...(data.others
       ? [{ ...data.others, id: "others", label: ti("others") }]
       : []),
     ...(data.total ? [{ ...data.total, id: "total", label: t("all") }] : []),
   ];
+  const suppressed =
+    data.minGroupSize !== null ? (
+      <p className="text-xs text-muted-foreground">
+        {ti("suppressed", { n: data.suppressed })}
+      </p>
+    ) : null;
   if (rows.length === 0) {
-    return <p className="text-sm text-muted-foreground">{ti("empty")}</p>;
+    return (
+      <div className="flex flex-col gap-2">
+        {data.suppressed > 0 ? null : (
+          <p className="text-sm text-muted-foreground">{ti("empty")}</p>
+        )}
+        {suppressed}
+      </div>
+    );
   }
   const cell = (label: string, side: string, r: Ratio) => (
     <div className="flex items-center gap-2">
@@ -66,11 +87,7 @@ export function CompletionTable({ data }: { data: Completion }) {
           ))}
         </tbody>
       </table>
-      {data.minGroupSize !== null ? (
-        <p className="text-xs text-muted-foreground">
-          {ti("suppressed", { n: data.suppressed })}
-        </p>
-      ) : null}
+      {suppressed}
     </div>
   );
 }

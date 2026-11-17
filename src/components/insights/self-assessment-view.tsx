@@ -10,8 +10,10 @@ const fmt = (n: number) => n.toFixed(2);
 export function SelfAssessmentView({
   report,
   dimensionLabel,
+  groupBy = "department",
 }: {
   report: SelfAssessmentReport;
+  groupBy?: "department" | "manager";
   /** dimension key -> label (resolved by the page). */
   dimensionLabel: Record<string, string>;
 }) {
@@ -48,7 +50,7 @@ export function SelfAssessmentView({
       </p>
       <section className="flex flex-col gap-2">
         <h2 className="text-lg font-semibold">{ti("completion.title")}</h2>
-        <CompletionTable data={report.completion} />
+        <CompletionTable data={report.completion} groupBy={groupBy} />
       </section>
       <section className="flex flex-col gap-2">
         <h2 className="text-lg font-semibold">{t("sentimentTitle")}</h2>

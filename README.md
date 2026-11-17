@@ -194,12 +194,12 @@ Hoy solo se lee el mínimo n (vista de dirección); los umbrales de alerta, los 
 
 ### Health check (CAP) (`/insights/health-check`)
 
-- **Formato pendiente de definir.** Los archivos se suben en `/imports/upload` con el perfil incorporado `cap-health-check` (entidad `health_check`), que acepta **cualquier columna**: es un perfil `syntheticKey`, así que si el archivo no trae la columna clave (`id`) la validación no falla y cada fila se identifica con `row:<sha256 de la fila>` (volver a subir las mismas filas no crea registros nuevos). Las filas quedan aterrizadas en `raw_record`, todas las columnas en `extra`.
+- **Formato pendiente de definir.** Los archivos se suben en `/imports/upload` con el perfil incorporado `cap-health-check` (entidad `health_check`), que acepta **cualquier columna**: es un perfil `syntheticKey`, así que si el archivo no trae la columna clave (`id`) la validación no falla y cada fila se identifica por el archivo y su posición (`row:<sha256(sha256 del archivo + n.º de fila)>`): las filas idénticas se conservan, volver a subir el mismo archivo no crea registros nuevos y un archivo editado se aterriza como una versión nueva (las filas anteriores no se reconcilian). Las filas quedan aterrizadas en `raw_record`, todas las columnas en `extra`.
 - La página muestra cuántos archivos, importaciones y filas se aterrizaron y las preguntas abiertas: formato, período, clave de persona y escala.
 
 ### Vista ejecutiva (`/insights/executive`)
 
-- **Qué muestra:** en una página, por ciclo: completitud (participantes, % de autoevaluaciones y de evaluaciones del manager), retención y compromiso (promedio y distribución 1 a 5), cantidad de personas en el cuadrante de riesgo, sentimiento por dimensión y top 5 temas, más la distribución de calificaciones de la vista de dirección anterior.
+- **Qué muestra:** en una página, por ciclo: completitud (participantes, % de autoevaluaciones y de evaluaciones del manager), retención y compromiso (promedio y distribución 1 a 5), cantidad de personas en el cuadrante de riesgo, sentimiento por dimensión y top 5 temas, más la distribución de calificaciones de la vista de dirección anterior (sin su bloque de avance: la completitud sale de un solo lugar).
 - **Modo:** selector "Cualitativo | Cuantitativo | Ambos" (parámetro `mode` en la URL) que muestra los bloques de sentimiento/temas o los de indicadores. Los bloques son colectores enchufables en `src/modules/insights/executive.ts` (los KPIs de objetivos se agregan cuando esté #62).
 - **Quién ve qué:** People sin enmascarar; Dirección solo agregados con n ≥ `aggregation.minGroupSize` (lo que no llega dice "Oculto"); managers y empleados, "Sin acceso". `/dashboards/executive` redirige acá.
 

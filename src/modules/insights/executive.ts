@@ -1,10 +1,7 @@
 import type { DbOrTx } from "@/db/client";
 import type { ActorContext } from "@/modules/actor/types";
-import {
-  indicatorDistribution,
-  riskMatrix,
-} from "@/modules/analytics/indicators/queries";
-import type { Indicator } from "@/modules/analytics/indicators/types";
+import { indicatorSnapshot } from "@/modules/analytics/indicators/queries";
+import type { IndicatorDistribution } from "@/modules/analytics/indicators/types";
 import {
   sentimentByDimension,
   topThemes,
@@ -54,6 +51,10 @@ type Ctx = {
   actor: ActorContext;
   scope: InsightsScope;
   cycleId: string;
+  /** The `aggregation.minGroupSize` setting, read once per request. */
+  minGroupSize: number;
+  /** Shared by the indicator blocks: one row load for all of them. */
+  indicators: () => ReturnType<typeof indicatorSnapshot>;
 };
 
 /**
@@ -74,18 +75,8 @@ const ALL = executiveModes;
 const QUAL = ["qualitative", "both"] as const;
 const QUANT = ["quantitative", "both"] as const;
 
-const indicator =
-  (which: Indicator) =>
-  async ({ db, actor, cycleId }: Ctx): Promise<IndicatorSummary> => {
-    const d = await indicatorDistribution(db, actor, {
-      cycleId,
-      indicator: which,
-      groupBy: "none",
-    });
-    return d.total
-      ? { n: d.total.n, mean: d.total.mean, counts: d.total.counts }
-      : null;
-  };
+const summary = (d: IndicatorDistribution): IndicatorSummary =>
+  d.total ? { n: d.total.n, mean: d.total.mean, counts: d.total.counts } : null;
 
 export const COLLECTORS: readonly Collector[] = [
   {
@@ -94,27 +85,39 @@ export const COLLECTORS: readonly Collector[] = [
     collect: ({ db, scope, cycleId }) =>
       completion(db, scope, { cycleId, groupBy: "none" }),
   },
-  { key: "retention", modes: QUANT, collect: indicator("retention") },
-  { key: "engagement", modes: QUANT, collect: indicator("engagement") },
+  {
+    key: "retention",
+    modes: QUANT,
+    collect: async (ctx) => summary((await ctx.indicators()).retention),
+  },
+  {
+    key: "engagement",
+    modes: QUANT,
+    collect: async (ctx) => summary((await ctx.indicators()).engagement),
+  },
   {
     key: "risk",
     modes: QUANT,
-    collect: async ({ db, actor, cycleId }) => {
-      const m = await riskMatrix(db, actor, { cycleId });
-      return { riskCount: m.riskCount, total: m.total };
+    collect: async (ctx) => {
+      const { matrix } = await ctx.indicators();
+      return { riskCount: matrix.riskCount, total: matrix.total };
     },
   },
   {
     key: "sentiment",
     modes: QUAL,
-    collect: ({ db, actor, cycleId }) =>
-      sentimentByDimension(db, actor, { cycleId, aggregateOnly: true }),
+    collect: ({ db, actor, cycleId, minGroupSize }) =>
+      sentimentByDimension(db, actor, {
+        cycleId,
+        aggregateOnly: true,
+        minGroupSize,
+      }),
   },
   {
     key: "themes",
     modes: QUAL,
-    collect: ({ db, actor, cycleId }) =>
-      topThemes(db, actor, { cycleId, aggregateOnly: true }, 5),
+    collect: ({ db, actor, cycleId, minGroupSize }) =>
+      topThemes(db, actor, { cycleId, aggregateOnly: true, minGroupSize }, 5),
   },
 ];
 
@@ -128,19 +131,29 @@ export const COLLECTORS: readonly Collector[] = [
 export async function executiveReport(
   db: DbOrTx,
   actor: ActorContext,
-  f: { cycleId: string; mode: ExecutiveMode },
+  f: { cycleId: string; mode: ExecutiveMode; minGroupSize?: number },
   collectors: readonly Collector[] = COLLECTORS,
 ): Promise<ExecutiveReport> {
-  const scope = insightsScope(
-    actor,
-    actor.role === "direction"
-      ? await getSetting(db, "aggregation.minGroupSize")
-      : undefined,
-  );
+  // Read once per request (the page passes it) and handed to every block.
+  const minGroupSize =
+    f.minGroupSize ?? (await getSetting(db, "aggregation.minGroupSize"));
+  const scope = insightsScope(actor, minGroupSize);
   if (scope.kind !== "all" && scope.kind !== "aggregatesOnly") {
     throw new ReviewError("forbidden");
   }
-  const ctx: Ctx = { db, actor, scope, cycleId: f.cycleId };
+  let snapshot: ReturnType<typeof indicatorSnapshot> | undefined;
+  const ctx: Ctx = {
+    db,
+    actor,
+    scope,
+    cycleId: f.cycleId,
+    minGroupSize,
+    indicators: () =>
+      (snapshot ??= indicatorSnapshot(db, actor, {
+        cycleId: f.cycleId,
+        config: { minGroupSize },
+      })),
+  };
   const picked = collectors.filter((c) => c.modes.includes(f.mode));
   const values = await Promise.all(picked.map((c) => c.collect(ctx)));
   const sections = Object.fromEntries(

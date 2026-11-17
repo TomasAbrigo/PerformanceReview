@@ -18,6 +18,7 @@ export function HealthCheckView({ data }: { data: HealthCheckLanding }) {
       <div role="status" className="rounded-lg border p-4">
         <p className="font-semibold">{t("pending")}</p>
         <p className="text-sm text-muted-foreground">{t("pendingHint")}</p>
+        <p className="text-sm text-muted-foreground">{t("versionNote")}</p>
       </div>
       <dl className="flex flex-wrap gap-4">
         {stats.map(([key, value]) => (

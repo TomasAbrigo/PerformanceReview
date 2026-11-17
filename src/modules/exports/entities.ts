@@ -52,7 +52,9 @@ import {
 import {
   sentimentByDimension,
   type DimensionSentiment,
+  type SentimentCounts,
 } from "@/modules/qualitative-analysis";
+import type { CompletionGroup } from "@/modules/insights/completion";
 import { selfAssessmentReport } from "@/modules/insights/self-assessment";
 import { RUN_STATUSES } from "@/modules/ingest/run-status";
 import { todayLocal } from "@/modules/org-history/dates";
@@ -722,57 +724,85 @@ const insightsSentimentExport = defineExport({
 });
 
 type SelfAssessmentRow = {
-  section: "completion" | "sentiment" | "theme" | "gap";
+  section: "completion" | "sentiment" | "sentiment_gap" | "theme" | "gap";
   group: string | null;
   metric: string;
   value: number;
 };
 
+const completionRows = (
+  group: string | null,
+  g: Omit<CompletionGroup, "key" | "label">,
+): SelfAssessmentRow[] =>
+  (
+    [
+      ["n", g.n],
+      ["self_submitted", g.self.submitted],
+      ["self_total", g.self.total],
+      ["manager_submitted", g.manager.submitted],
+      ["manager_total", g.manager.total],
+    ] as const
+  ).map(([metric, value]) => ({ section: "completion", group, metric, value }));
+
+const sentimentRows = (
+  section: "sentiment" | "sentiment_gap",
+  group: string,
+  c: SentimentCounts,
+): SelfAssessmentRow[] =>
+  (["positive", "constructive", "negative", "total"] as const).map(
+    (metric) => ({ section, group, metric, value: c[metric] }),
+  );
+
 /**
  * The self-assessment report (People's visibility) in long format: one row
- * per section × group × metric (completion per department, sentiment of the
- * self comments per dimension, theme counts, gap per question).
+ * per section × group × metric: completion per department (plus "Otros" and
+ * the total), sentiment of the self comments per dimension, self vs manager
+ * sentiment per dimension (`<dimension>:self|manager`), theme counts and the
+ * gap per question. Group labels in the file's language.
  */
 const selfAssessmentExport = defineExport({
   file: () => "insights-self-assessment",
-  query: z.object({ cycle: uuid }),
-  rows: (db, q) =>
-    each(
+  query: z.object({ cycle: uuid, locale: localeQuery.shape.locale }),
+  rows: (db, q) => {
+    const t = createTranslator({
+      locale: q.locale,
+      messages: MESSAGES[q.locale],
+      namespace: "Insights",
+    });
+    return each(
       selfAssessmentReport(db, DEFAULT_ACTOR, {
         cycleId: q.cycle,
         groupBy: "department",
       }).then((r): SelfAssessmentRow[] => [
         ...r.completion.groups.flatMap((g) =>
-          (
-            [
-              ["n", g.n],
-              ["self_submitted", g.self.submitted],
-              ["self_total", g.self.total],
-              ["manager_submitted", g.manager.submitted],
-              ["manager_total", g.manager.total],
-            ] as const
-          ).map(([metric, value]) => ({
-            section: "completion" as const,
-            group: g.label,
-            metric,
-            value,
-          })),
+          completionRows(g.label ?? t("completion.noDepartment"), g),
         ),
+        ...(r.completion.others
+          ? completionRows(t("others"), r.completion.others)
+          : []),
+        ...(r.completion.total
+          ? completionRows(t("completion.all"), r.completion.total)
+          : []),
         ...r.sentiment.flatMap((d) =>
-          (["positive", "constructive", "negative", "total"] as const).map(
-            (metric) => ({
-              section: "sentiment" as const,
-              group: d.dimension,
-              metric,
-              value: d[metric],
-            }),
-          ),
+          sentimentRows("sentiment", d.dimension, d),
         ),
-        ...r.themes.map((t) => ({
+        ...r.sentimentGap.flatMap((g) => [
+          ...(g.self
+            ? sentimentRows("sentiment_gap", `${g.dimension}:self`, g.self)
+            : []),
+          ...(g.manager
+            ? sentimentRows(
+                "sentiment_gap",
+                `${g.dimension}:manager`,
+                g.manager,
+              )
+            : []),
+        ]),
+        ...r.themes.map((th) => ({
           section: "theme" as const,
-          group: t.theme,
+          group: th.theme,
           metric: "count",
-          value: t.count,
+          value: th.count,
         })),
         ...r.gap.flatMap((g) =>
           (
@@ -784,13 +814,14 @@ const selfAssessmentExport = defineExport({
             ] as const
           ).map(([metric, value]) => ({
             section: "gap" as const,
-            group: g.prompt.es,
+            group: g.prompt[q.locale],
             metric,
             value,
           })),
         ),
       ]),
-    ),
+    );
+  },
   columns: (h) => [
     { header: h("section"), value: (r: SelfAssessmentRow) => r.section },
     { header: h("group"), value: (r) => r.group },

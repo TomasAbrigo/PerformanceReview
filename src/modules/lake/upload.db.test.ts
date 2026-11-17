@@ -448,7 +448,7 @@ describe("importUpload of a Bamboo performance report (domain mode)", () => {
 
   it("lands a CAP health check with any headers, keyed by a row hash", async () => {
     const csv =
-      "Equipo,Pregunta libre,Puntaje\nPlataforma,Todo bien,4\nDatos,Falta foco,2\n";
+      "Equipo,Pregunta libre,Puntaje\nPlataforma,Todo bien,4\nDatos,Falta foco,2\nDatos,Falta foco,2\n";
     const stored = await storeUpload(
       { name: "health-check.csv", bytes: Buffer.from(csv) },
       store,
@@ -462,16 +462,14 @@ describe("importUpload of a Bamboo performance report (domain mode)", () => {
     };
     const { counts, mode } = await importUpload(input);
     expect(mode).toBe("landing");
-    expect(counts).toMatchObject({ read: 2, inserted: 2, rejected: 0 });
+    // Two identical rows: both kept (keyed by file and ordinal).
+    expect(counts).toMatchObject({ read: 3, inserted: 3, rejected: 0 });
     const records = await db.select().from(rawRecord);
-    expect(records.map((r) => r.entity)).toEqual([
-      "health_check",
-      "health_check",
-    ]);
+    expect(records.map((r) => r.entity)).toEqual(Array(3).fill("health_check"));
     expect(records.every((r) => r.sourceId.startsWith("row:"))).toBe(true);
-    expect(new Set(records.map((r) => r.sourceId)).size).toBe(2);
+    expect(new Set(records.map((r) => r.sourceId)).size).toBe(3);
     // Landing the same rows again writes nothing new.
     const again = await importUpload(input);
-    expect(again.counts).toMatchObject({ read: 2, inserted: 0, unchanged: 2 });
+    expect(again.counts).toMatchObject({ read: 3, inserted: 0, unchanged: 3 });
   });
 });

@@ -66,8 +66,10 @@ export const sourceProfileSchema = z.object({
   keyColumns: z.array(name).min(1),
   /**
    * Accept a file with any columns: key columns missing from it are not an
-   * issue, and a row without a value in them is keyed by a hash of the whole
-   * row (`row:<sha256>`), so landing the same rows again writes nothing new.
+   * issue, and a row without a value in them is keyed by its file and
+   * ordinal (`row:<sha256(file sha256 + row index)>`): identical rows are
+   * kept, the same file lands unchanged, and an edited file lands as a new
+   * version (its old rows are not reconciled).
    * For files whose format is not defined yet (CAP's health check).
    */
   syntheticKey: z.boolean().optional(),
@@ -608,8 +610,8 @@ export const builtinProfiles: SourceProfile[] = [
     // CAP's health check: its format, period, person key and scale are still
     // open questions (see /insights/health-check), so the profile assumes no
     // columns. Rows are landed in raw_record as they come (every column in
-    // `extra`), keyed by an "id" column if the file has one, else by a hash
-    // of the row. Mapping them to people and a period is a later step.
+    // `extra`), keyed by an "id" column if the file has one, else by the
+    // file's hash and the row's ordinal. Mapping them to people and a period is a later step.
     name: "cap-health-check",
     table: "health-check",
     keyColumns: ["id"],

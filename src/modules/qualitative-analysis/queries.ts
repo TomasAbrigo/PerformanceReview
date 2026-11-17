@@ -37,7 +37,7 @@ async function resolve(
   const scope = insightsScope(
     actor,
     actor.role === "direction"
-      ? await getSetting(db, "aggregation.minGroupSize")
+      ? (f.minGroupSize ?? (await getSetting(db, "aggregation.minGroupSize")))
       : undefined,
   );
   if (scope.kind === "none") return null;

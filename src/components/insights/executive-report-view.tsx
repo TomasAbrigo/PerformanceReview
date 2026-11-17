@@ -111,7 +111,6 @@ function IndicatorTile({
   min: number | null;
 }) {
   const t = useTranslations("Insights.Executive");
-  const ti = useTranslations("Insights");
   return (
     <Tile title={t(which)} testId={`exec-${which}`}>
       {data ? (
@@ -128,9 +127,19 @@ function IndicatorTile({
           />
         </>
       ) : (
-        <p className="text-sm">{ti("hidden", { min: min ?? 0 })}</p>
+        <Unavailable min={min} />
       )}
     </Tile>
+  );
+}
+
+/** No data: hidden under the minimum (direction), or simply empty (People). */
+function Unavailable({ min }: { min: number | null }) {
+  const ti = useTranslations("Insights");
+  return (
+    <p className="text-sm text-muted-foreground">
+      {min === null ? ti("empty") : ti("hidden", { min })}
+    </p>
   );
 }
 
@@ -191,7 +200,7 @@ export function ExecutiveReportView({
               ))}
             </dl>
           ) : (
-            <p className="text-sm">{ti("hidden", { min: min ?? 0 })}</p>
+            <Unavailable min={min} />
           )}
         </Tile>
         {report.retention !== undefined ? (
@@ -207,7 +216,7 @@ export function ExecutiveReportView({
         {report.risk ? (
           <Tile title={t("risk")} testId="exec-risk">
             {report.risk.riskCount === null ? (
-              <p className="text-sm">{ti("hidden", { min: min ?? 0 })}</p>
+              <Unavailable min={min} />
             ) : (
               <>
                 <div className="text-3xl font-semibold tabular-nums">

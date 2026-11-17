@@ -1,6 +1,7 @@
 import { hasLocale } from "next-intl";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
+import { hrefWith } from "@/components/dashboards/url-state";
 import { redirect } from "@/i18n/navigation";
 import { routing } from "@/i18n/routing";
 
@@ -12,10 +13,9 @@ async function Redirect({
   if (!hasLocale(routing.locales, locale)) notFound();
   const { cycle } = await searchParams;
   redirect({
-    href:
-      typeof cycle === "string" && cycle
-        ? `/insights/executive?cycle=${encodeURIComponent(cycle)}`
-        : "/insights/executive",
+    href: hrefWith("/insights/executive", {
+      cycle: typeof cycle === "string" ? cycle : undefined,
+    }),
     locale,
   });
   return null;

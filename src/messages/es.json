@@ -933,8 +933,8 @@
       "positive": "positivo",
       "constructive": "constructivo",
       "negative": "negativo",
-      "section": "seccion",
-      "metric": "metrica"
+      "section": "sección",
+      "metric": "métrica"
     }
   },
   "ImportHistory": {
@@ -1096,13 +1096,10 @@
       "higher": "Manager más alto"
     },
     "executive": {
-      "title": "Vista de dirección",
       "link": "Vista de dirección",
       "hint": "Solo agregados: sin nombres ni ids. Los grupos de menos de {min} personas se agrupan en Otros o se ocultan.",
       "hintPeople": "Solo agregados: sin nombres ni ids.",
       "participants": "Participantes",
-      "completion": "Completitud",
-      "byDepartment": "Por área",
       "others": "Otros",
       "belowMinimum": "Hay menos de {min} participantes: no se muestran datos para proteger a las personas.",
       "suppressed": "{n, plural, =0 {Ninguna persona en grupos chicos} one {# persona en áreas chicas (no se desglosa)} other {# personas en áreas chicas (no se desglosan)}}"
@@ -1362,14 +1359,14 @@
       "manager": "Evaluación del manager",
       "all": "Total",
       "noDepartment": "Sin área",
-      "meter": "{label}: {submitted} de {total} enviadas"
+      "meter": "{label}: {submitted} de {total} enviadas",
+      "noManager": "Sin manager"
     },
     "SelfAssessment": {
       "nav": "Reporte de autoevaluación",
       "title": "Reporte de autoevaluación",
       "sentimentTitle": "Sentimiento de las autoevaluaciones",
       "sentimentChart": "Sentimiento de las autoevaluaciones por dimensión",
-      "themesTitle": "Temas de las autoevaluaciones",
       "gapTitle": "Brecha autoevaluación vs. manager",
       "gapHint": "Promedio normalizado (0 a 1) en las preguntas que respondieron ambos; brecha = manager − autoevaluación.",
       "gapTable": "Brecha por pregunta",
@@ -1401,7 +1398,8 @@
         "period": "Período: ¿cada cuánto se hace y cómo se asocia a un ciclo o semestre?",
         "personKey": "Clave de persona: ¿las respuestas son anónimas, por equipo o por persona (email, legajo)?",
         "scale": "Escala: ¿qué escala usan las respuestas (1 a 5, semáforo, texto libre) y cómo se interpreta?"
-      }
+      },
+      "versionNote": "Cada fila se identifica por el archivo y su posición: subir el mismo archivo otra vez no cambia nada, y un archivo editado se guarda como una versión nueva (las filas anteriores no se reconcilian)."
     },
     "Executive": {
       "nav": "Vista ejecutiva",
@@ -1418,7 +1416,6 @@
       "managerPct": "Evaluaciones del manager enviadas",
       "retention": "Retención",
       "engagement": "Compromiso",
-      "mean": "Promedio {value}",
       "n": "{n, plural, one {# persona} other {# personas}}",
       "distribution": "Distribución de {indicator} (1 a 5)",
       "risk": "Cuadrante de riesgo",

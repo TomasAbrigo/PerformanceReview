@@ -55,7 +55,11 @@ async function SelfAssessment({
           />
         ) : null}
       </div>
-      <SelfAssessmentView report={report} dimensionLabel={dimensionLabel} />
+      <SelfAssessmentView
+        report={report}
+        dimensionLabel={dimensionLabel}
+        groupBy={groupBy}
+      />
     </div>
   );
 }
