@@ -1,10 +1,10 @@
 import { hasLocale } from "next-intl";
 import { notFound } from "next/navigation";
+import { Suspense } from "react";
 import { redirect } from "@/i18n/navigation";
 import { routing } from "@/i18n/routing";
 
-/** The old leadership view: it moved to /insights/executive (#63). */
-export default async function ExecutivePage({
+async function Redirect({
   params,
   searchParams,
 }: PageProps<"/[locale]/dashboards/executive">) {
@@ -18,4 +18,16 @@ export default async function ExecutivePage({
         : "/insights/executive",
     locale,
   });
+  return null;
+}
+
+/** The old leadership view: it moved to /insights/executive (#63). */
+export default function ExecutivePage(
+  props: PageProps<"/[locale]/dashboards/executive">,
+) {
+  return (
+    <Suspense fallback={<div aria-busy="true" className="h-40" />}>
+      <Redirect {...props} />
+    </Suspense>
+  );
 }
