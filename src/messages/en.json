@@ -903,7 +903,21 @@
       "avg_progress": "avg_progress",
       "normalized": "normalized",
       "gap": "gap",
-      "answers": "answers"
+      "answers": "answers",
+      "previous_cycle": "previous_cycle",
+      "group_id": "group_id",
+      "participants": "participants",
+      "self_submitted": "self_submitted",
+      "self_applicable": "self_applicable",
+      "self_pct": "self_pct",
+      "manager_submitted": "manager_submitted",
+      "manager_applicable": "manager_applicable",
+      "manager_pct": "manager_pct",
+      "self_delta_pp": "self_delta_pp",
+      "manager_delta_pp": "manager_delta_pp",
+      "self_status": "self_status",
+      "manager_status": "manager_status",
+      "follow_up_notes": "follow_up_notes"
     }
   },
   "ImportHistory": {

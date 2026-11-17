@@ -42,9 +42,20 @@ import {
   ratingStages,
   selfManagerGap,
 } from "@/modules/analytics/dashboards";
+import {
+  type CompletionGroup,
+  completionCycles,
+  completionDelta,
+  completionGroupBys,
+  type CompletionDeltaRow,
+  type MissingPerson,
+  missingAssessments,
+  missingStatuses,
+} from "@/modules/analytics/completion";
 import { RUN_STATUSES } from "@/modules/ingest/run-status";
 import { todayLocal } from "@/modules/org-history/dates";
 import { requestStatuses } from "@/modules/review-core/request-status";
+import { ReviewError } from "@/modules/review-core/review-errors";
 import { relationships } from "@/modules/templates/constants";
 import { csvResponse, type CsvColumn } from "./csv";
 
@@ -577,6 +588,133 @@ const gapExport = defineExport({
   ],
 });
 
+// ------------------------------------------------------------- completion
+// The insights completion views (/insights/completion), read as People (like
+// the dashboards above): a cycle (required) and the same filters as the page.
+
+/** A missing or not found cycle is a 404 here, not a 500. */
+async function* cycleOr404<R>(rows: Promise<R[]>): AsyncIterable<R> {
+  try {
+    yield* await rows;
+  } catch (error) {
+    if (error instanceof ReviewError && error.code === "not_found") {
+      throw notFound("Cycle");
+    }
+    throw error;
+  }
+}
+
+/** A 0-1 rate as a percentage with one decimal. */
+const percent = (rate: number | null) =>
+  rate === null ? null : Math.round(rate * 1000) / 10;
+
+type CompletionRow = {
+  cycle: string;
+  previous: string | null;
+  group: CompletionGroup;
+  delta: Pick<CompletionDeltaRow, "selfDelta" | "managerDelta"> | null;
+};
+
+const completionExport = defineExport({
+  file: () => "insights-completion",
+  query: z.object({
+    cycle: uuid,
+    groupBy: z.enum(completionGroupBys).default("department"),
+    hierarchy: z.enum(hierarchies).default("asOf"),
+    department: z.string().optional(),
+    manager: uuid.optional(),
+  }),
+  rows: (db, q) =>
+    cycleOr404(
+      completionDelta(db, DEFAULT_ACTOR, {
+        cycleId: q.cycle,
+        groupBy: q.groupBy,
+        hierarchy: q.hierarchy,
+        department: q.department,
+        managerId: q.manager,
+      }).then((d): CompletionRow[] => {
+        const base = {
+          cycle: d.current.cycleName,
+          previous: d.previous?.cycleName ?? null,
+        };
+        if (q.groupBy === "none") {
+          return d.current.total
+            ? [{ ...base, group: d.current.total, delta: d.total }]
+            : [];
+        }
+        return d.current.groups.map((group, i) => ({
+          ...base,
+          group,
+          delta: d.groups[i],
+        }));
+      }),
+    ),
+  columns: (h) => [
+    { header: h("cycle_name"), value: (r: CompletionRow) => r.cycle },
+    { header: h("previous_cycle"), value: (r) => r.previous },
+    { header: h("group_id"), value: (r) => r.group.key },
+    { header: h("group"), value: (r) => r.group.label },
+    { header: h("participants"), value: (r) => r.group.participants },
+    { header: h("self_submitted"), value: (r) => r.group.selfSubmitted },
+    { header: h("self_applicable"), value: (r) => r.group.selfApplicable },
+    { header: h("self_pct"), value: (r) => percent(r.group.selfRate) },
+    { header: h("manager_submitted"), value: (r) => r.group.managerSubmitted },
+    {
+      header: h("manager_applicable"),
+      value: (r) => r.group.managerApplicable,
+    },
+    { header: h("manager_pct"), value: (r) => percent(r.group.managerRate) },
+    { header: h("self_delta_pp"), value: (r) => r.delta?.selfDelta },
+    { header: h("manager_delta_pp"), value: (r) => r.delta?.managerDelta },
+  ],
+});
+
+type MissingRow = MissingPerson & { cycleName: string | null };
+
+const missingExport = defineExport({
+  file: () => "insights-missing",
+  query: z.object({
+    cycle: uuid,
+    department: z.string().optional(),
+    manager: uuid.optional(),
+    status: z.enum(missingStatuses).default("any"),
+    hierarchy: z.enum(hierarchies).default("asOf"),
+    // The email is personal data: out of the file unless asked for.
+    include_email: flag,
+  }),
+  rows: (db, q) =>
+    cycleOr404(
+      (async (): Promise<MissingRow[]> => {
+        const people = await missingAssessments(db, DEFAULT_ACTOR, {
+          cycleId: q.cycle,
+          department: q.department,
+          managerId: q.manager,
+          status: q.status,
+          hierarchy: q.hierarchy,
+          includeEmail: q.include_email,
+        });
+        const cycleName =
+          (await completionCycles(db)).find((c) => c.id === q.cycle)?.name ??
+          null;
+        return people.map((p) => ({ ...p, cycleName }));
+      })(),
+    ),
+  columns: (h, { include_email }) => [
+    { header: h("cycle_name"), value: (r: MissingRow) => r.cycleName },
+    { header: h("person_id"), value: (r) => r.personId },
+    { header: h("name"), value: (r) => r.name },
+    ...(include_email
+      ? [{ header: h("email"), value: (r: MissingRow) => r.email }]
+      : []),
+    { header: h("department"), value: (r) => r.department },
+    { header: h("manager_id"), value: (r) => r.managerId },
+    { header: h("manager"), value: (r) => r.managerName },
+    { header: h("self_status"), value: (r) => r.selfStatus },
+    { header: h("manager_status"), value: (r) => r.managerStatus },
+    { header: h("follow_up_notes"), value: (r) => r.hasFollowUpNotes },
+  ],
+});
+
 const EXPORTS = {
   people: peopleExport,
   org: orgExport,
@@ -589,6 +727,8 @@ const EXPORTS = {
   "dashboard-distribution": distributionExport,
   "dashboard-goals-vs-rating": goalsVsRatingExport,
   "dashboard-self-manager-gap": gapExport,
+  "insights-completion": completionExport,
+  "insights-missing": missingExport,
 } as const;
 
 export type ExportEntity = keyof typeof EXPORTS;

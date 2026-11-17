@@ -903,7 +903,21 @@
       "avg_progress": "avance promedio",
       "normalized": "rating normalizado",
       "gap": "brecha",
-      "answers": "respuestas"
+      "answers": "respuestas",
+      "previous_cycle": "ciclo anterior",
+      "group_id": "group_id",
+      "participants": "participantes",
+      "self_submitted": "autoevaluaciones enviadas",
+      "self_applicable": "autoevaluaciones que aplican",
+      "self_pct": "autoevaluación (%)",
+      "manager_submitted": "evaluaciones del manager enviadas",
+      "manager_applicable": "evaluaciones del manager que aplican",
+      "manager_pct": "evaluación del manager (%)",
+      "self_delta_pp": "autoevaluación vs ciclo anterior (pp)",
+      "manager_delta_pp": "evaluación del manager vs ciclo anterior (pp)",
+      "self_status": "estado de la autoevaluación",
+      "manager_status": "estado de la evaluación del manager",
+      "follow_up_notes": "con notas de seguimiento"
     }
   },
   "ImportHistory": {
