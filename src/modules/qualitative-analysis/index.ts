@@ -25,6 +25,7 @@ export {
   type UnmatchedRow,
 } from "./import-labels";
 export {
+  dimensionPrompts,
   listComments,
   qualitativeFilterOptions,
   sentimentByDimension,

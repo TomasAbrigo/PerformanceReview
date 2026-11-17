@@ -1,11 +1,37 @@
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
+import {
+  dimensionLabels as labelsOf,
+  KNOWN_DIMENSIONS,
+} from "@/components/qualitative/dimension-labels";
+import { db } from "@/db/client";
+import type { LocalizedText } from "@/db/schema/rating-scales";
+import { dimensionPrompts } from "@/modules/qualitative-analysis";
 
-/** dimension key -> label in the request's language (unknown keys as-is). */
+/**
+ * dimension key -> label in the request's language: the message of a known
+ * key, "Pregunta personalizada n" for `custom_<n>`, else the prompt of the
+ * dimension's latest question (`prompts`, see `dimensionPrompts`), else the
+ * key as-is.
+ */
 export async function dimensionLabels(
   dimensions: string[],
+  prompts?: Record<string, LocalizedText>,
 ): Promise<Record<string, string>> {
-  const t = await getTranslations("Qualitative.dimensions");
-  return Object.fromEntries(
-    dimensions.map((d) => [d, t.has(d as "other") ? t(d as "other") : d]),
+  const t = await getTranslations("Qualitative");
+  const locale = (await getLocale()) === "en" ? "en" : "es";
+  // Only a dimension without a name of its own needs its question's prompt.
+  const unnamed = dimensions.some(
+    (d) =>
+      !(KNOWN_DIMENSIONS as readonly string[]).includes(d) &&
+      !/^custom_\d+$/.test(d),
   );
+  const resolved = prompts ?? (unnamed ? await dimensionPrompts(db) : {});
+  return labelsOf(dimensions, {
+    names: Object.fromEntries(
+      KNOWN_DIMENSIONS.map((k) => [k, t(`dimensions.${k}`)]),
+    ),
+    custom: (n) => t("customDimension", { n }),
+    prompts: resolved,
+    locale,
+  });
 }

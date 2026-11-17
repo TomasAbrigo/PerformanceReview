@@ -8,10 +8,6 @@ import { CommentsTable } from "@/components/qualitative/comments-table";
 import { QualitativeFilters } from "@/components/qualitative/filters";
 import { ImportLabelsForm } from "@/components/qualitative/import-form";
 import {
-  dimensionLabels,
-  KNOWN_DIMENSIONS,
-} from "@/components/qualitative/dimension-labels";
-import {
   parseQualitativeParams,
   withSide,
 } from "@/components/qualitative/params";
@@ -41,6 +37,7 @@ import {
 } from "@/modules/qualitative-analysis";
 import { listCycles } from "@/modules/review-core";
 import { getSetting } from "@/modules/settings/service";
+import { dimensionLabels } from "../dimension-labels";
 import {
   correctLabelAction,
   importLabelsAction,
@@ -86,13 +83,10 @@ async function Qualitative({
       sentimentVsIndicators(db, actor, f),
       listComments(db, actor, f),
     ]);
-  const tDim = await getTranslations("Qualitative.dimensions");
-  const dimensionLabel = dimensionLabels(options.dimensions, {
-    names: Object.fromEntries(KNOWN_DIMENSIONS.map((k) => [k, tDim(k)])),
-    custom: (n) => t("customDimension", { n }),
-    prompts: options.dimensionPrompts,
-    locale,
-  });
+  const dimensionLabel = await dimensionLabels(
+    options.dimensions,
+    options.dimensionPrompts,
+  );
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-wrap items-start justify-between gap-4">

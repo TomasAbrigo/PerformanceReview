@@ -1341,7 +1341,6 @@
         "peer": "PAR",
         "upward": "ASCENDENTE"
       },
-      "relationship": "Quién escribe",
       "text": "Comentario",
       "label": "Etiqueta",
       "source": "Origen",
@@ -1352,13 +1351,7 @@
       "save": "Guardar corrección",
       "themes": "Temas (separados por ;)",
       "reason": "Motivo",
-      "saved": "Corrección guardada.",
-      "relationships": {
-        "self": "Autoevaluación",
-        "manager": "Manager",
-        "peer": "Par",
-        "upward": "Ascendente"
-      }
+      "saved": "Corrección guardada."
     },
     "run": {
       "button": "Correr análisis",

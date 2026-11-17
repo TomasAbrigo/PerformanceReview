@@ -1341,7 +1341,6 @@
         "peer": "PEER",
         "upward": "UPWARD"
       },
-      "relationship": "Written by",
       "text": "Comment",
       "label": "Label",
       "source": "Source",
@@ -1352,13 +1351,7 @@
       "save": "Save correction",
       "themes": "Themes (separated by ;)",
       "reason": "Reason",
-      "saved": "Correction saved.",
-      "relationships": {
-        "self": "Self",
-        "manager": "Manager",
-        "peer": "Peer",
-        "upward": "Upward"
-      }
+      "saved": "Correction saved."
     },
     "run": {
       "button": "Run analysis",

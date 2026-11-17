@@ -307,17 +307,27 @@ export async function qualitativeFilterOptions(
   const deps = await db.execute<{ d: string }>(
     sql`select distinct snap_department as d from cycle_participant where snap_department is not null order by 1`,
   );
-  const prompts = await db.execute<{ d: string; prompt: LocalizedText }>(sql`
+  return {
+    dimensions: dims.map((r) => r.d),
+    themes: [...new Set([...INITIAL_THEMES, ...themes.map((r) => r.t)])].sort(),
+    departments: deps.map((r) => r.d),
+    dimensionPrompts: await dimensionPrompts(db),
+  };
+}
+
+/**
+ * Prompt of the latest question of each labeled dimension: the label of the
+ * dimensions that have no name of their own.
+ */
+export async function dimensionPrompts(
+  db: DbOrTx,
+): Promise<Record<string, LocalizedText>> {
+  const rows = await db.execute<{ d: string; prompt: LocalizedText }>(sql`
     select distinct on (qa.dimension) qa.dimension as d, q.prompt
     from qualitative_analysis qa
     join answer a on a.id = qa.answer_id
     join question_revision q on q.id = a.question_revision_id
     join review_cycle c on c.id = q.cycle_id
     order by qa.dimension, c.period_end desc, q.sort, q.id`);
-  return {
-    dimensions: dims.map((r) => r.d),
-    themes: [...new Set([...INITIAL_THEMES, ...themes.map((r) => r.t)])].sort(),
-    departments: deps.map((r) => r.d),
-    dimensionPrompts: Object.fromEntries(prompts.map((r) => [r.d, r.prompt])),
-  };
+  return Object.fromEntries(rows.map((r) => [r.d, r.prompt]));
 }
