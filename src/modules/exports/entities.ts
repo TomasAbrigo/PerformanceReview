@@ -53,9 +53,20 @@ import {
   sentimentByDimension,
   type DimensionSentiment,
 } from "@/modules/qualitative-analysis";
+import {
+  type CompletionGroup,
+  completionDelta,
+  completionGroupBys,
+  type CompletionDeltaRow,
+  type MissingPerson,
+  missingAssessments,
+  missingStatuses,
+  roundedPoints,
+} from "@/modules/analytics/completion";
 import { RUN_STATUSES } from "@/modules/ingest/run-status";
 import { todayLocal } from "@/modules/org-history/dates";
 import { requestStatuses } from "@/modules/review-core/request-status";
+import { ReviewError } from "@/modules/review-core/review-errors";
 import { relationships } from "@/modules/templates/constants";
 import { csvResponse, type CsvColumn } from "./csv";
 
@@ -95,7 +106,7 @@ type Export<Q, R> = {
   /** File name without extension, from the validated parameters. */
   file: (query: Q) => string;
   query: ZodType<Q>;
-  rows: (db: DbOrTx, query: Q) => AsyncIterable<R>;
+  rows: (db: DbOrTx, query: Q, locale: Locale) => AsyncIterable<R>;
   columns: (header: Header, query: Q) => CsvColumn<R>[];
 };
 
@@ -103,11 +114,20 @@ function defineExport<Q, R>(def: Export<Q, R>) {
   return async (db: DbOrTx, request: Request): Promise<Response> => {
     const { locale } = parseQuery(request, localeQuery);
     const query = parseQuery(request, def.query);
-    return csvResponse(
-      `${def.file(query)}.csv`,
-      def.rows(db, query),
-      def.columns(headerIn(locale), query),
-    );
+    try {
+      return await csvResponse(
+        `${def.file(query)}.csv`,
+        def.rows(db, query, locale),
+        def.columns(headerIn(locale), query),
+      );
+    } catch (error) {
+      // The first row is read before answering: a cycle (or anything else the
+      // query was asked about) that does not exist is a 404, not a 500.
+      if (error instanceof ReviewError && error.code === "not_found") {
+        throw notFound("Resource");
+      }
+      throw error;
+    }
   };
 }
 
@@ -720,6 +740,128 @@ const insightsSentimentExport = defineExport({
   ],
 });
 
+// ------------------------------------------------------------- completion
+// The insights completion views (/insights/completion), read as People (like
+// the dashboards above): a cycle (required) and the same filters as the page.
+
+/** A group of the completion file, named in the language of the file. */
+type CompletionRow = {
+  cycle: string;
+  previous: string | null;
+  group: CompletionGroup;
+  label: string | null;
+  delta: Pick<CompletionDeltaRow, "selfDelta" | "managerDelta"> | null;
+};
+
+const completionExport = defineExport({
+  file: () => "insights-completion",
+  query: z.object({
+    cycle: uuid,
+    groupBy: z.enum(completionGroupBys).default("department"),
+    hierarchy: z.enum(hierarchies).default("asOf"),
+    department: z.string().optional(),
+    manager: uuid.optional(),
+  }),
+  rows: (db, q, locale) =>
+    each(
+      completionDelta(db, DEFAULT_ACTOR, {
+        cycleId: q.cycle,
+        groupBy: q.groupBy,
+        hierarchy: q.hierarchy,
+        department: q.department,
+        managerId: q.manager,
+      }).then((d): CompletionRow[] => {
+        const t = createTranslator({
+          locale,
+          messages: MESSAGES[locale],
+          namespace: "Completion.summary",
+        });
+        const base = {
+          cycle: d.current.cycleName,
+          previous: d.previous?.cycleName ?? null,
+        };
+        const row = (
+          group: CompletionGroup,
+          label: string,
+          delta: CompletionRow["delta"],
+        ): CompletionRow => ({ ...base, group, label, delta });
+        // The whole cycle first, then each group and the folded ones.
+        return [
+          ...(d.current.total
+            ? [row(d.current.total, t("total"), d.total)]
+            : []),
+          ...d.current.groups.map((g, i) =>
+            row(g, g.label ?? t("unassigned"), d.groups[i]),
+          ),
+          ...(d.current.others
+            ? [row(d.current.others, t("others"), d.others)]
+            : []),
+        ];
+      }),
+    ),
+  columns: (h) => [
+    { header: h("cycle_name"), value: (r: CompletionRow) => r.cycle },
+    { header: h("previous_cycle"), value: (r) => r.previous },
+    { header: h("group_id"), value: (r) => r.group.key },
+    { header: h("group"), value: (r) => r.label },
+    { header: h("participants"), value: (r) => r.group.participants },
+    { header: h("self_submitted"), value: (r) => r.group.selfSubmitted },
+    { header: h("self_applicable"), value: (r) => r.group.selfApplicable },
+    { header: h("self_pct"), value: (r) => percent(r.group.selfRate) },
+    { header: h("manager_submitted"), value: (r) => r.group.managerSubmitted },
+    {
+      header: h("manager_applicable"),
+      value: (r) => r.group.managerApplicable,
+    },
+    { header: h("manager_pct"), value: (r) => percent(r.group.managerRate) },
+    { header: h("self_delta_pp"), value: (r) => r.delta?.selfDelta },
+    { header: h("manager_delta_pp"), value: (r) => r.delta?.managerDelta },
+  ],
+});
+
+/** A 0-1 rate as a percentage with one decimal (the rounding of the deltas). */
+function percent(rate: number | null) {
+  return rate === null ? null : roundedPoints(rate);
+}
+
+const missingExport = defineExport({
+  file: () => "insights-missing",
+  query: z.object({
+    cycle: uuid,
+    department: z.string().optional(),
+    manager: uuid.optional(),
+    status: z.enum(missingStatuses).default("any"),
+    hierarchy: z.enum(hierarchies).default("asOf"),
+    // The email is personal data: out of the file unless asked for.
+    include_email: flag,
+  }),
+  rows: (db, q) =>
+    each(
+      missingAssessments(db, DEFAULT_ACTOR, {
+        cycleId: q.cycle,
+        department: q.department,
+        managerId: q.manager,
+        status: q.status,
+        hierarchy: q.hierarchy,
+        includeEmail: q.include_email,
+      }),
+    ),
+  columns: (h, { include_email }) => [
+    { header: h("cycle_name"), value: (r: MissingPerson) => r.cycleName },
+    { header: h("person_id"), value: (r) => r.personId },
+    { header: h("name"), value: (r) => r.name },
+    ...(include_email
+      ? [{ header: h("email"), value: (r: MissingPerson) => r.email }]
+      : []),
+    { header: h("department"), value: (r) => r.department },
+    { header: h("manager_id"), value: (r) => r.managerId },
+    { header: h("manager"), value: (r) => r.managerName },
+    { header: h("self_status"), value: (r) => r.selfStatus },
+    { header: h("manager_status"), value: (r) => r.managerStatus },
+    { header: h("follow_up_notes"), value: (r) => r.hasFollowUpNotes },
+  ],
+});
+
 const EXPORTS = {
   people: peopleExport,
   org: orgExport,
@@ -732,6 +874,8 @@ const EXPORTS = {
   "dashboard-distribution": distributionExport,
   "dashboard-goals-vs-rating": goalsVsRatingExport,
   "dashboard-self-manager-gap": gapExport,
+  "insights-completion": completionExport,
+  "insights-missing": missingExport,
   "insights-indicator-distribution": indicatorDistributionExport,
   "insights-alerts": indicatorAlertsExport,
   "insights-sentiment": insightsSentimentExport,

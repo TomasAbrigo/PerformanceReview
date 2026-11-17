@@ -931,7 +931,20 @@
       "dimension": "dimension",
       "positive": "positive",
       "constructive": "constructive",
-      "negative": "negative"
+      "negative": "negative",
+      "group_id": "group_id",
+      "participants": "participants",
+      "self_submitted": "self_submitted",
+      "self_applicable": "self_applicable",
+      "self_pct": "self_pct",
+      "manager_submitted": "manager_submitted",
+      "manager_applicable": "manager_applicable",
+      "manager_pct": "manager_pct",
+      "self_delta_pp": "self_delta_pp",
+      "manager_delta_pp": "manager_delta_pp",
+      "self_status": "self_status",
+      "manager_status": "manager_status",
+      "follow_up_notes": "follow_up_notes"
     }
   },
   "ImportHistory": {
@@ -1418,6 +1431,99 @@
       "manager": "Manager",
       "peer": "Peers",
       "upward": "Upward"
+    }
+  },
+  "Completion": {
+    "nav": "Completion",
+    "title": "Assessment completion",
+    "forbidden": "You do not have access to this screen.",
+    "noCycles": "There are no cycles with assessments yet.",
+    "hint": {
+      "all": "Self and manager assessments submitted, out of the people that assessment applies to in the cycle.",
+      "directReports": "Only your direct reports. Assessments submitted out of those that apply in the cycle.",
+      "aggregates": "Aggregates only: no names or managers. Groups of fewer than {min} people are put together in Others or hidden."
+    },
+    "filters": {
+      "label": "Filters",
+      "cycle": "Cycle",
+      "department": "Department",
+      "manager": "Manager",
+      "any": "All",
+      "apply": "Apply"
+    },
+    "groupBy": {
+      "label": "Group by",
+      "none": "Ungrouped",
+      "department": "Department",
+      "manager": "Manager"
+    },
+    "hierarchy": {
+      "label": "Hierarchy",
+      "asOf": "At review time",
+      "current": "Current"
+    },
+    "summary": {
+      "title": "Progress",
+      "total": "Whole cycle",
+      "unassigned": "Unassigned",
+      "others": "Others",
+      "people": "{n, plural, one {# person} other {# people}}",
+      "self": "Self assessment",
+      "manager": "Manager assessment",
+      "meter": "{side}, {group}: {submitted} of {applicable} submitted",
+      "notApplicable": "Does not apply",
+      "empty": "There are no participants for these filters.",
+      "belowMinimum": "There are fewer than {min} participants: only the head count is shown ({n}).",
+      "suppressed": "{n, plural, one {# person is} other {# people are}} left out of the breakdown: their group has fewer than {min}.",
+      "sources": "Status taken from Assessment Progress for {progress, plural, one {# participant} other {# participants}} and from the review requests for {requests, plural, one {# participant} other {# participants}}.",
+      "columns": {
+        "group": "Group",
+        "participants": "Participants",
+        "self": "Self assessment submitted",
+        "manager": "Manager assessment submitted"
+      }
+    },
+    "delta": {
+      "title": "Compared with {cycle}",
+      "none": "There is no earlier cycle to compare with.",
+      "pp": "{value} pp",
+      "up": "Up",
+      "down": "Down",
+      "same": "No change",
+      "noData": "Nothing to compare with"
+    },
+    "missing": {
+      "title": "Who is missing",
+      "hint": "People who have not yet submitted an assessment that applies to them, ordered by manager.",
+      "count": "{n, plural, =0 {Nobody is missing} one {# person is missing} other {# people are missing}}",
+      "empty": "Nobody is missing for these filters.",
+      "directionOnly": "Direction only sees aggregates: the detail per person is for People and for each manager.",
+      "status": {
+        "label": "Missing",
+        "any": "Any",
+        "self_missing": "Self assessment",
+        "manager_missing": "Manager assessment"
+      },
+      "columns": {
+        "person": "Person",
+        "department": "Department",
+        "manager": "Manager",
+        "self": "Self assessment",
+        "managerReview": "Manager assessment",
+        "notes": "Follow-up"
+      },
+      "notes": "Has follow-up notes",
+      "none": "Unassigned",
+      "statuses": {
+        "not_started": "Not started",
+        "in_progress": "In progress",
+        "submitted": "Submitted",
+        "not_applicable": "Does not apply"
+      }
+    },
+    "export": {
+      "csv": "Export CSV",
+      "csvEmail": "Export CSV with email"
     }
   }
 }
