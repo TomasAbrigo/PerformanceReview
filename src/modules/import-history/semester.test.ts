@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 import {
   DEFAULT_SEMESTER_CONFIG,
+  periodCycleName,
+  periodEndFor,
   semesterOf,
   isSemesterLabel,
   semesterPeriod,
@@ -8,7 +10,40 @@ import {
   snapToSemester,
 } from "./semester";
 
-const cfg = DEFAULT_SEMESTER_CONFIG;
+/** Calendar halves (the examples below); the default is Bamboo's cadence. */
+const cfg = { h1Start: "01-01", h2Start: "07-01", ambiguityDays: 15 };
+
+describe("defaults and review periods (#83)", () => {
+  it("defaults to Bamboo's cadence: 29/3 and 29/9", () => {
+    expect(DEFAULT_SEMESTER_CONFIG).toMatchObject({
+      h1Start: "03-29",
+      h2Start: "09-29",
+    });
+  });
+
+  it("ends a period the day before the next cutoff after its start", () => {
+    const real = DEFAULT_SEMESTER_CONFIG;
+    expect(periodEndFor("2024-03-29", real)).toBe("2024-09-28");
+    expect(periodEndFor("2024-09-29", real)).toBe("2025-03-28");
+    // Irregular historical starts.
+    expect(periodEndFor("2023-04-17", real)).toBe("2023-09-28");
+    expect(periodEndFor("2023-10-02", real)).toBe("2024-03-28");
+    expect(periodEndFor("2024-01-10", real)).toBe("2024-03-28");
+  });
+
+  it("puts a start just before a cutoff in the semester that cutoff opens", () => {
+    const real = DEFAULT_SEMESTER_CONFIG;
+    // 4 days before 29/3 (within the 15-day margin): the H1 period.
+    expect(periodEndFor("2024-03-25", real)).toBe("2024-09-28");
+    expect(periodEndFor("2024-03-10", real)).toBe("2024-03-28");
+  });
+
+  it("names the cycle by its period", () => {
+    expect(periodCycleName("2024-03-29", "2024-09-28")).toBe(
+      "Evaluación semestral 2024-03-29 – 2024-09-28",
+    );
+  });
+});
 
 describe("semesterOf", () => {
   it("puts a date in the first or second half by the configured cutoffs", () => {

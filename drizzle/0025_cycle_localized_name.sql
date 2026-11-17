@@ -1,0 +1,1 @@
+ALTER TABLE "review_cycle" ADD COLUMN "localized_name" jsonb;

@@ -113,8 +113,12 @@ test("People import the assessment progress and read the completion of a cycle",
   ).toBeVisible();
 
   // The change since the previous semester, per group.
+  // The previous cycle by period: the legacy one, or a real-report cycle
+  // (#83) when historical-import ran first in the shared database.
   await expect(summary.getByTestId("delta-hint")).toHaveText(
-    `Comparación con ${previousName}`,
+    new RegExp(
+      `^Comparación con (${previousName}|Evaluación semestral \\d{4}-\\d{2}-\\d{2} – \\d{4}-\\d{2}-\\d{2})$`,
+    ),
   );
   expect(await summary.getByTestId("delta").count()).toBeGreaterThan(0);
 

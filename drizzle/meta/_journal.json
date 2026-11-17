@@ -176,6 +176,13 @@
       "when": 1794956655099,
       "tag": "0024_sentiment_neutral_mixed",
       "breakpoints": true
+    },
+    {
+      "idx": 25,
+      "version": "7",
+      "when": 1794958539981,
+      "tag": "0025_cycle_localized_name",
+      "breakpoints": true
     }
   ]
 }

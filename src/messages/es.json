@@ -179,7 +179,8 @@
       "goals_comment": "Comentario de objetivos",
       "overall_rating": "Calificación general de desempeño",
       "retention": "Retención (Likert 1-5)",
-      "engagement": "Compromiso (Likert 1-5)"
+      "engagement": "Compromiso (Likert 1-5)",
+      "valued": "Valoración propia (1-4)"
     },
     "dimension": "Dimensión",
     "dimensions": {
@@ -188,7 +189,9 @@
       "improvement": "Oportunidades de mejora",
       "custom_1": "Custom 1",
       "custom_2": "Custom 2",
-      "custom_3": "Custom 3"
+      "custom_3": "Custom 3",
+      "valued": "Valoración",
+      "best_work": "Qué me ayudaría"
     }
   },
   "People": {
@@ -563,7 +566,8 @@
       "blocked": "Corregí los problemas del perfil para poder importar.",
       "landingOnly": "Solo aterrizar",
       "historyHint": "Las filas se importan como ciclos de evaluación históricos, con sus participantes, solicitudes y respuestas.",
-      "landingHint": "Las filas se guardan tal cual (crudas), sin crear ciclos."
+      "landingHint": "Las filas se guardan tal cual (crudas), sin crear ciclos.",
+      "legacy": "(formato anterior)"
     },
     "roles": {
       "key": "Clave",
@@ -622,7 +626,8 @@
           "none": "No es pregunta",
           "text": "Texto",
           "likert": "Escala 1-5",
-          "letter_choice": "Opción por letra"
+          "letter_choice": "Opción por letra",
+          "label_choice": "Opción por etiqueta"
         },
         "sides": {
           "self": "Autoevaluación",
@@ -634,14 +639,17 @@
           "improvement": "A mejorar",
           "custom_1": "Custom 1",
           "custom_2": "Custom 2",
-          "custom_3": "Custom 3"
+          "custom_3": "Custom 3",
+          "valued": "Valoración",
+          "best_work": "Qué me ayudaría"
         },
         "roles": {
           "goals_rating": "Rating de goals",
           "goals_comment": "Comentario de goals",
           "overall_rating": "Rating general",
           "retention": "Retención",
-          "engagement": "Engagement"
+          "engagement": "Engagement",
+          "valued": "Valoración propia"
         }
       }
     },
@@ -1008,7 +1016,8 @@
         "unknown_proposal": "Ese ciclo no estaba entre los propuestos.",
         "unknown": "No se pudo reanudar la importación."
       }
-    }
+    },
+    "periodCycleName": "Evaluación semestral {start} – {end}"
   },
   "Dashboards": {
     "nav": "Dashboards",

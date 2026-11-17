@@ -23,7 +23,7 @@ import { type LocalizedText, ratingScale } from "./rating-scales";
 import { sourceColumns } from "./source";
 import {
   question,
-  type QuestionDimension,
+  type RevisionDimension,
   type QuestionKind,
   type QuestionRole,
   type Relationship,
@@ -37,6 +37,11 @@ export const reviewCycle = pgTable(
   {
     id: uuid("id").primaryKey().defaultRandom(),
     name: text("name").notNull(),
+    /**
+     * The name per language, when the app generated it (imported review
+     * periods, #83); `name` is then its Spanish text, for search and sorting.
+     */
+    localizedName: jsonb("localized_name").$type<LocalizedText>(),
     description: text("description"),
     periodStart: date("period_start").notNull(),
     periodEnd: date("period_end").notNull(),
@@ -168,7 +173,7 @@ export const questionRevision = pgTable(
      */
     role: text("role").$type<QuestionRole>(),
     /** Dimension copied from the template question or the import mapping. */
-    dimension: text("dimension").$type<QuestionDimension>(),
+    dimension: text("dimension").$type<RevisionDimension>(),
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
       .defaultNow(),

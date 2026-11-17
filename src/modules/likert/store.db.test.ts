@@ -15,11 +15,11 @@ afterAll(async () => {
 });
 
 describe("likert_mapping", () => {
-  it("seeds the defaults once (18 rows), idempotently", async () => {
+  it("seeds the defaults once (22 rows), idempotently", async () => {
     await seedLikertMappings(db);
     await seedLikertMappings(db);
     const rows = await db.select().from(likertMapping);
-    expect(rows).toHaveLength(18);
+    expect(rows).toHaveLength(22);
     expect(rows.every((r) => r.source === "default")).toBe(true);
     expect(
       rows.find(

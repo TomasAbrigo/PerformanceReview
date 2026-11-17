@@ -179,7 +179,8 @@
       "goals_comment": "Goals comment",
       "overall_rating": "Overall performance rating",
       "retention": "Retention (Likert 1-5)",
-      "engagement": "Engagement (Likert 1-5)"
+      "engagement": "Engagement (Likert 1-5)",
+      "valued": "Feeling valued (1-4)"
     },
     "dimension": "Dimension",
     "dimensions": {
@@ -188,7 +189,9 @@
       "improvement": "Opportunities for improvement",
       "custom_1": "Custom 1",
       "custom_2": "Custom 2",
-      "custom_3": "Custom 3"
+      "custom_3": "Custom 3",
+      "valued": "Feeling valued",
+      "best_work": "What would help"
     }
   },
   "People": {
@@ -563,7 +566,8 @@
       "blocked": "Fix the profile problems to be able to import.",
       "landingOnly": "Only land the rows",
       "historyHint": "The rows become historical review cycles, with their participants, requests and answers.",
-      "landingHint": "The rows are kept as they are (raw), without creating cycles."
+      "landingHint": "The rows are kept as they are (raw), without creating cycles.",
+      "legacy": "(legacy format)"
     },
     "roles": {
       "key": "Key",
@@ -622,7 +626,8 @@
           "none": "Not a question",
           "text": "Text",
           "likert": "1-5 scale",
-          "letter_choice": "Letter choice"
+          "letter_choice": "Letter choice",
+          "label_choice": "Label choice"
         },
         "sides": {
           "self": "Self assessment",
@@ -634,14 +639,17 @@
           "improvement": "Improvement",
           "custom_1": "Custom 1",
           "custom_2": "Custom 2",
-          "custom_3": "Custom 3"
+          "custom_3": "Custom 3",
+          "valued": "Feeling valued",
+          "best_work": "What would help"
         },
         "roles": {
           "goals_rating": "Goals rating",
           "goals_comment": "Goals comment",
           "overall_rating": "Overall rating",
           "retention": "Retention",
-          "engagement": "Engagement"
+          "engagement": "Engagement",
+          "valued": "Feeling valued"
         }
       }
     },
@@ -1008,7 +1016,8 @@
         "unknown_proposal": "That cycle was not one of the proposed ones.",
         "unknown": "The import could not be resumed."
       }
-    }
+    },
+    "periodCycleName": "Semi-annual review {start} – {end}"
   },
   "Dashboards": {
     "nav": "Dashboards",

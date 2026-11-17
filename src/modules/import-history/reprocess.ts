@@ -1,7 +1,11 @@
 import type { DbOrTx } from "@/db/client";
 import type { IdentityMatchIssue } from "@/db/schema";
-import { stagedAssessmentSchema, upsertAssessment } from "./assessment";
-import { stagedProgressSchema, upsertProgress } from "./assessment-progress";
+import {
+  stagedAnyAssessmentSchema,
+  stagedAnyProgressSchema,
+  upsertAnyAssessment,
+  upsertAnyProgress,
+} from "./report-formats";
 import { questionsOfRun } from "./run-profile";
 import { stagedFeedbackSchema, upsertFeedback } from "./feedback";
 
@@ -34,16 +38,16 @@ export async function reprocessReportRow(
     questions: await questionsOfRun(tx, issue.ingestRunId),
   };
   if (issue.entity === "assessment") {
-    const staged = stagedAssessmentSchema.safeParse(stored);
+    const staged = stagedAnyAssessmentSchema.safeParse(stored);
     if (!staged.success) return false;
-    await upsertAssessment(tx, staged.data, ctx);
+    await upsertAnyAssessment(tx, staged.data, ctx);
     return true;
   }
   if (issue.entity === "assessment_progress") {
-    const staged = stagedProgressSchema.safeParse(stored);
+    const staged = stagedAnyProgressSchema.safeParse(stored);
     if (!staged.success) return false;
     // A row still held back for its cycle stays where it is (needs_decision).
-    await upsertProgress(tx, staged.data, ctx);
+    await upsertAnyProgress(tx, staged.data, ctx);
     return true;
   }
   const staged = stagedFeedbackSchema.safeParse(stored);

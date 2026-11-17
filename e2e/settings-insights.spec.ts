@@ -18,7 +18,7 @@ test("People edit the insights settings, the server validates, and the change st
   await expect(
     page.getByText("Ingresá un día válido con formato MM-DD."),
   ).toBeVisible();
-  await page.getByLabel("Inicio del primer semestre (MM-DD)").fill("08-01");
+  await page.getByLabel("Inicio del primer semestre (MM-DD)").fill("10-01");
   await page.getByRole("button", { name: "Guardar cambios" }).click();
   await expect(
     page.getByText(
@@ -28,7 +28,7 @@ test("People edit the insights settings, the server validates, and the change st
   await expect(page.getByText("Cambios guardados.")).toHaveCount(0);
 
   // A valid change is saved and survives a reload.
-  await page.getByLabel("Inicio del primer semestre (MM-DD)").fill("01-01");
+  await page.getByLabel("Inicio del primer semestre (MM-DD)").fill("03-29");
   await min.fill(changed);
   await page.getByRole("button", { name: "Guardar cambios" }).click();
   await expect(page.getByText("Cambios guardados.")).toBeVisible();

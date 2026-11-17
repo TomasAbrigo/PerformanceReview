@@ -415,6 +415,7 @@ export async function completionCycles(db: DbOrTx): Promise<CompletionCycle[]> {
     .select({
       id: reviewCycle.id,
       name: reviewCycle.name,
+      localizedName: reviewCycle.localizedName,
       periodStart: reviewCycle.periodStart,
       periodEnd: reviewCycle.periodEnd,
       status: reviewCycle.status,

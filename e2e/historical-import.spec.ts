@@ -119,3 +119,25 @@ test("a row whose semester is ambiguous waits for a cycle, and the run finishes 
       .getByRole("link", { name: "2023-H2" }),
   ).toBeVisible();
 });
+
+test("Bamboo's real reports: the raw assessments report and the grouped Assessment Progress import idempotently (#83)", async ({
+  page,
+}) => {
+  test.setTimeout(480_000);
+  const firstPeriod = "Evaluación semestral 2024-04-15 – 2024-09-28";
+  for (const [file, profile] of [
+    ["assessments-report.csv", "bamboo-assessments-report"],
+    ["assessment-status.csv", "bamboo-assessment-status"],
+    ["assessments-report.csv", "bamboo-assessments-report"],
+  ] as const) {
+    await importFile(page, path.join(REPORTS, file), profile);
+    const cycles = page.getByRole("table", { name: "Ciclos detectados" });
+    await expect(cycles.getByRole("row")).toHaveCount(
+      1 + company.cycles.length,
+    );
+    await expect(cycles.getByRole("link", { name: firstPeriod })).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: decision.title }),
+    ).toHaveCount(0);
+  }
+});

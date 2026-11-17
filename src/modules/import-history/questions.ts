@@ -1,16 +1,21 @@
 import type { LocalizedText, ScaleSnapshot } from "@/db/schema";
 import {
+  foldText,
   isLikertRole,
   LIKERT_OPTIONS,
   type LikertOverrides,
   type LikertRole,
   mapLikert,
 } from "@/modules/likert";
-import type { QuestionMapping } from "@/modules/lake/profiles";
+import type {
+  CustomQuestionMapping,
+  QuestionMapping,
+} from "@/modules/lake/profiles";
 import type {
   QuestionDimension,
   QuestionKind,
   QuestionRole,
+  RevisionDimension,
 } from "@/modules/templates/constants";
 
 /**
@@ -104,7 +109,7 @@ export type QuestionColumn = {
   scale: ScaleSnapshot | null;
   /** retention / engagement for the manager's Q1 / Q2; null otherwise. */
   role: QuestionRole | null;
-  dimension: QuestionDimension | null;
+  dimension: RevisionDimension | null;
   sort: number;
 };
 
@@ -172,8 +177,36 @@ function fromPattern(header: string): Found | null {
   };
 }
 
+/** FNV-1a of a text, 8 hex digits (stable, no crypto: runs in the browser too). */
+export function shortHash(text: string): string {
+  let h = 0x811c9dc5;
+  for (const ch of text) {
+    h ^= ch.codePointAt(0)!;
+    h = Math.imul(h, 0x01000193) >>> 0;
+  }
+  return h.toString(16).padStart(8, "0");
+}
+
+/** "The company direction..." -> "the_company_direction" (a stable code). */
+export const slugOf = (text: string, max = 40) =>
+  foldText(text)
+    .replace(/[^a-z0-9]+/g, "_")
+    .replace(/^_+|_+$/g, "")
+    .slice(0, max)
+    .replace(/_+$/, "");
+
+/** The labels of a configured label choice, each with a stable code. */
+function labelChoices(entry: QuestionMapping): Choice[] {
+  if (isLikertRole(entry.role)) return likertChoices(entry.role);
+  return (entry.options ?? []).map((label) => ({
+    value: slugOf(label),
+    label: { es: label, en: label },
+  }));
+}
+
 /** The letters of a configured letter choice (Bamboo's own for Q1/Q2). */
 function letterChoices(entry: QuestionMapping): Choice[] {
+  if (isLikertRole(entry.role)) return likertChoices(entry.role);
   if (entry.options?.length) {
     return choices(entry.options.map((label) => [label, label]));
   }
@@ -193,27 +226,73 @@ function fromMapping(entry: QuestionMapping, index: number): Found {
   const kind: QuestionKind =
     entry.kind === "likert"
       ? "rating"
-      : entry.kind === "letter_choice"
+      : entry.kind === "letter_choice" || entry.kind === "label_choice"
         ? "single_choice"
         : "text";
+  const prompt = twin ? text : promptOf(entry.column);
   return {
     key: entry.key,
     header: entry.column,
     relationship: entry.side,
     kind,
-    prompt: { es: text, en: text },
+    prompt: { es: prompt, en: prompt },
     sectionTitle: SECTIONS[entry.side],
-    // As in Bamboo: the employee never sees the manager's letter questions.
+    // As in Bamboo: the employee never sees the manager's closed questions.
     visibleToReviewee: !(
-      entry.side === "manager" && entry.kind === "letter_choice"
+      entry.side === "manager" &&
+      (entry.kind === "letter_choice" || entry.kind === "label_choice")
     ),
-    choices: kind === "single_choice" ? letterChoices(entry) : null,
+    choices:
+      entry.kind === "label_choice"
+        ? labelChoices(entry)
+        : kind === "single_choice"
+          ? letterChoices(entry)
+          : null,
     scale: kind === "rating" ? IMPORTED_SCALE : null,
     // The configured role/dimension win; else what the pattern twin implies.
     role: entry.role ?? twin?.role ?? null,
     dimension: entry.dimension ?? twin?.dimension ?? null,
     order: twin?.order ?? (entry.side === "self" ? 0 : 1000) + 500 + index,
   };
+}
+
+/** "Employee - What do I do well?" -> "What do I do well?". */
+const promptOf = (header: string) =>
+  header.replace(/^(Employee|Manager)\s+-\s+/, "");
+
+/**
+ * The custom questions of one row of Bamboo's raw report: each pair whose
+ * question cell has text is a text question keyed by its side, number and
+ * text (`<side>:custom:<n>:<slug>`), dimension `custom_<slug>`. The answer
+ * column is the header the answer is read from.
+ */
+export function customQuestionColumns(
+  pairs: readonly CustomQuestionMapping[],
+  row: Record<string, unknown>,
+): QuestionColumn[] {
+  const columns: QuestionColumn[] = [];
+  for (const pair of pairs) {
+    const cell = row[pair.questionColumn];
+    const text = cell === null || cell === undefined ? "" : String(cell).trim();
+    if (!text) continue;
+    // Slug for reading, hash of the whole text so long texts never collide.
+    const slug = `${slugOf(text) || `q${pair.n}`}_${shortHash(foldText(text))}`;
+    columns.push({
+      key: `${pair.side}:custom:${pair.n}:${slug}`,
+      header: pair.answerColumn,
+      relationship: pair.side,
+      kind: "text",
+      prompt: { es: text, en: text },
+      sectionTitle: SECTIONS[pair.side],
+      visibleToReviewee: true,
+      choices: null,
+      scale: null,
+      role: null,
+      dimension: `custom_${slug}`,
+      sort: (pair.side === "self" ? 0 : 1000) + 100 + pair.n,
+    });
+  }
+  return columns;
 }
 
 /**
@@ -297,7 +376,9 @@ export function answerColumns(
   }
   if (column.kind === "single_choice") {
     const choice = column.choices?.find((c) => c.value === text.toUpperCase());
-    return choice ? { ...none, optionLabel: choice.value } : { invalid: true };
+    if (choice) return { ...none, optionLabel: choice.value };
+    const labelled = matchLabel(column.choices ?? [], text);
+    return labelled ? { ...none, ...labelled } : { invalid: true };
   }
   if (column.kind === "rating") {
     const option = column.scale?.options.find((o) => o.value === Number(text));
@@ -310,4 +391,35 @@ export function answerColumns(
     };
   }
   return { ...none, textValue: String(cell) };
+}
+
+/** Folded, without trailing punctuation. */
+const foldBare = (s: string) => foldText(s).replace(/[\s.!:]+$/u, "");
+
+/**
+ * A label choice (Bamboo's raw report): the option whose label the cell is
+ * or starts with. "Other" takes the text after it ("Other: ...",
+ * "Other Comentario: ...") as the answer's text.
+ */
+function matchLabel(
+  choices: readonly Choice[],
+  cell: string,
+): { optionLabel: string; textValue: string | null } | null {
+  const text = foldBare(cell);
+  for (const choice of choices) {
+    const label = foldBare(choice.label.en);
+    if (label === "other" || !label) continue;
+    if (text === label || text.startsWith(label)) {
+      return { optionLabel: choice.value, textValue: null };
+    }
+  }
+  const other = choices.find((c) => foldBare(c.label.en) === "other");
+  if (other && /^other\b/.test(text)) {
+    const rest = cell
+      .trim()
+      .replace(/^other\b\s*(comentario|comment)?\s*[:\-–]?\s*/iu, "")
+      .trim();
+    return { optionLabel: other.value, textValue: rest || null };
+  }
+  return null;
 }

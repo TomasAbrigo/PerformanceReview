@@ -26,6 +26,7 @@ import {
 } from "./names";
 import { cycleForAssessment } from "./cycle-target";
 import { detectQuestionColumns, type QuestionColumn } from "./questions";
+import { idIndexOf, matchIds, type RowIds } from "./report-identity";
 import type { QuestionMapping } from "@/modules/lake/profiles";
 
 const cell = z
@@ -138,7 +139,7 @@ export type ReportIssuePayload = {
  * Names a reviewer resolved by hand (identity queue, `link`), per row and
  * role: they win over the name index on every later import of the row.
  */
-async function resolvedLinks(
+export async function resolvedLinks(
   tx: DbOrTx,
   cache: Map<string, unknown>,
   entity: ReportEntity,
@@ -186,19 +187,61 @@ export async function resolveRow(
   ctx: HandlerContext,
   entity: ReportEntity,
   sourceId: string,
-  names: { reviewee: string; reviewer: string | null },
+  names: { reviewee: string | null; reviewer: string | null },
+  options: {
+    /**
+     * The row's ids (raw reports, #83): conclusive when one matches; the
+     * name then only proposes candidates (the row goes to the queue).
+     */
+    ids?: RowIds;
+    /**
+     * A reviewer name that matches nobody is dropped, not an issue (the
+     * caller falls back); one that matches several people still is.
+     */
+    reviewerOptional?: boolean;
+  } = {},
 ) {
   const index = await nameIndexOf(tx, ctx.cache);
   const linked = (await resolvedLinks(tx, ctx.cache, entity)).get(sourceId);
   const reviewerRole: RowRole = entity === "feedback" ? "reviewer" : "manager";
-  const lookup = (role: RowRole, name: string): NameMatch =>
-    linked?.[role] ? { personId: linked[role] } : matchName(index, name);
+  const byIds = options.ids
+    ? matchIds(await idIndexOf(tx, ctx.cache), options.ids)
+    : null;
+  const lookup = (role: RowRole, name: string | null): NameMatch => {
+    if (linked?.[role]) return { personId: linked[role] };
+    if (role === "employee" && options.ids) {
+      if (byIds) return { personId: byIds };
+      const proposal = name ? matchName(index, name) : null;
+      return {
+        reason: "no_match",
+        candidates: proposal
+          ? "personId" in proposal
+            ? [{ personId: proposal.personId, score: 0.3, matchedOn: ["name"] }]
+            : proposal.candidates
+          : [],
+      };
+    }
+    return matchName(index, name ?? "");
+  };
+  const revieweeName =
+    names.reviewee ??
+    Object.values(options.ids ?? {}).find((v) => v) ??
+    sourceId;
   const reviewee = lookup("employee", names.reviewee);
-  const reviewer = names.reviewer ? lookup(reviewerRole, names.reviewer) : null;
+  const reviewerMatch = names.reviewer
+    ? lookup(reviewerRole, names.reviewer)
+    : null;
+  const reviewer =
+    options.reviewerOptional &&
+    reviewerMatch &&
+    !("personId" in reviewerMatch) &&
+    reviewerMatch.reason === "no_match"
+      ? null
+      : reviewerMatch;
   const failed: (NameMatch & ReportIssuePayload) | null = !(
     "personId" in reviewee
   )
-    ? { ...reviewee, failedRole: "employee", failedName: names.reviewee }
+    ? { ...reviewee, failedRole: "employee", failedName: revieweeName }
     : reviewer && !("personId" in reviewer)
       ? { ...reviewer, failedRole: reviewerRole, failedName: names.reviewer! }
       : null;
@@ -241,11 +284,13 @@ export async function resolveRow(
   return {
     revieweeId: "personId" in reviewee ? reviewee.personId : null,
     reviewerId: reviewer && "personId" in reviewer ? reviewer.personId : null,
+    /** The reviewer's name is in the queue (ambiguous or unmatched). */
+    reviewerFailed: reviewer !== null && !("personId" in reviewer),
     issue,
   };
 }
 
-function columnsOf(
+export function columnsOf(
   cache: Map<string, unknown>,
   headers: string[],
   mapping: QuestionMapping[] = [],

@@ -14,7 +14,7 @@ import { snapshots } from "@/modules/review-core/service";
 import { reapplyLikertMappings } from "./likert-reapply";
 import {
   isSemesterLabel,
-  semesterConfig,
+  legacySemesterConfig,
   snapshotDateFor,
   snapToSemester,
 } from "./semester";
@@ -76,7 +76,7 @@ async function refreshCycle(
     cycle.sourceSystem === "bamboo_export" &&
     isSemesterLabel(cycle.sourceId)
   ) {
-    const snapped = snapToSemester(cycle, await semesterConfig(tx));
+    const snapped = snapToSemester(cycle, await legacySemesterConfig(tx));
     if (
       snapped &&
       (snapped.periodStart !== cycle.periodStart ||

@@ -317,6 +317,7 @@ function Preview({
                 name: p.name,
                 entity: t(`entities.${p.entity as ProfileEntity}`),
               })}
+              {p.legacy ? ` ${t("preview.legacy")}` : ""}
             </option>
           ))}
           <option value={NEW_PROFILE}>{t("preview.newProfile")}</option>

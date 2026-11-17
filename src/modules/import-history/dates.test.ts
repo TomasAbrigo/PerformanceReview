@@ -25,3 +25,14 @@ describe("parseReportDate", () => {
     expect(parseReportDate(null)).toBeNull();
   });
 });
+
+describe("parseReportPeriod", () => {
+  it("reads both ends with a hyphen or an en dash, spaced or not", async () => {
+    const { parseReportPeriod } = await import("./dates");
+    const want = { start: "2024-03-29", end: "2024-09-28" };
+    expect(parseReportPeriod("03/29/2024 - 09/28/2024", "mdy")).toEqual(want);
+    expect(parseReportPeriod("03/29/2024–09/28/2024", "mdy")).toEqual(want);
+    expect(parseReportPeriod("2024-03-29 – 2024-09-28")).toEqual(want);
+    expect(parseReportPeriod("H1 2024")).toBeNull();
+  });
+});

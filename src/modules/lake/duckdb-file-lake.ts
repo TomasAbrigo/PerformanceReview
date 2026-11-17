@@ -100,7 +100,16 @@ export class DuckDbFileLake implements LakeAdapter {
    * `.xlsx` files are converted to csv in a temporary folder, removed on
    * `close()`.
    */
-  static async open(dir: string): Promise<DuckDbFileLake> {
+  static async open(
+    dir: string,
+    /**
+     * `allText`: every column as text, no type sniffing (Bamboo's reports:
+     * DuckDB would guess a date format per column, and a column whose days
+     * are all <= 12 could be read day-first). Dates are then parsed by the
+     * importer with the profile's dateFormat.
+     */
+    options: { allText?: boolean } = {},
+  ): Promise<DuckDbFileLake> {
     const listing = new Map<string, string>(); // table -> file name
     for (const file of await readdir(dir)) {
       const ext = extname(file);
@@ -131,7 +140,7 @@ export class DuckDbFileLake implements LakeAdapter {
       for (const [table, file] of listing) {
         const path = resolve(dir, file);
         if (extname(file) !== XLSX) {
-          files.set(table, { path, textOnly: false });
+          files.set(table, { path, textOnly: options.allText === true });
           continue;
         }
         conversions ??= await mkdtemp(join(tmpdir(), "lake-xlsx-conv-"));
@@ -240,7 +249,9 @@ export class DuckDbFileLake implements LakeAdapter {
       ...keyColumns.map(known),
     ]);
     types.set(ROW_POSITION, "BIGINT");
-    const orderColumns = [...(wm ? [wm] : []), ...keyColumns, ROW_POSITION];
+    const orderColumns = opts.fileOrder
+      ? [ROW_POSITION]
+      : [...(wm ? [wm] : []), ...keyColumns, ROW_POSITION];
 
     // Qualified (`src."col"`) so ORDER BY / WHERE use the real column, never a
     // SELECT alias of the same name (the TIMESTAMPTZ -> VARCHAR casts below).

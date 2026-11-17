@@ -139,3 +139,53 @@ describe("mapLikert", () => {
     ).toEqual({ unmapped: true });
   });
 });
+
+describe("mapLikert: Bamboo raw report labels (#83)", () => {
+  const value = (role: "retention" | "engagement" | "valued", raw: string) => {
+    const r = mapLikert({ role, raw });
+    return "value" in r ? r.value : null;
+  };
+
+  it("maps the valued labels to 1-4", () => {
+    expect(value("valued", "I feel I am highly valued.")).toBe(4);
+    expect(value("valued", "I sometimes feel valued.")).toBe(3);
+    expect(value("valued", "I'm not sure others value me.")).toBe(2);
+    expect(value("valued", "I don't feel valued.")).toBe(1);
+    expect(
+      mapLikert({ role: "valued", raw: "I feel I am highly valued." }),
+    ).toEqual({ value: 4, normalized: 1 });
+    expect(mapLikert({ role: "valued", raw: "D" })).toEqual({
+      value: 1,
+      normalized: 0,
+    });
+  });
+
+  it("maps retention labels by prefix or keywords, ignoring the name", () => {
+    expect(value("retention", "I would do everything I can to keep them")).toBe(
+      5,
+    );
+    expect(
+      value(
+        "retention",
+        "I would try to convince them to stay. Lucía Gómez would be difficult to replace",
+      ),
+    ).toBe(4);
+    expect(value("retention", "I would wish them well.")).toBe(2);
+    expect(value("retention", "I would be relieved.")).toBe(1);
+  });
+
+  it("maps engagement labels", () => {
+    expect(value("engagement", "Highly engaged and a great attitude.")).toBe(5);
+    expect(value("engagement", "Engaged and a good attitude.")).toBe(4);
+    expect(value("engagement", "Medium engagement and an okay attitude.")).toBe(
+      3,
+    );
+    expect(value("engagement", "Low engagement and a poor attitude.")).toBe(2);
+  });
+
+  it("leaves unknown labels unmapped", () => {
+    expect(mapLikert({ role: "engagement", raw: "Who knows" })).toEqual({
+      unmapped: true,
+    });
+  });
+});

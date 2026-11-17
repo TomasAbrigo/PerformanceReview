@@ -1,4 +1,7 @@
 import type { DbOrTx } from "@/db/client";
+import type { LocalizedText } from "@/db/schema";
+import en from "@/messages/en.json";
+import es from "@/messages/es.json";
 import { todayLocal } from "@/modules/org-history/dates";
 import { getSettings } from "@/modules/settings";
 
@@ -20,12 +23,33 @@ export type SemesterConfig = {
 };
 
 export const DEFAULT_SEMESTER_CONFIG: SemesterConfig = {
-  h1Start: "01-01",
-  h2Start: "07-01",
+  // Bamboo's real cadence (PRD iteration 3): ~29/3 - 28/9 and ~29/9 - 28/3.
+  h1Start: "03-29",
+  h2Start: "09-29",
   ambiguityDays: 15,
 };
 
-/** The semester settings (`semester.*` in app settings, #56). */
+/**
+ * Legacy reports (rows without a cycle name, iteration 2): calendar halves,
+ * as they were imported before #83, so re-imports keep their cycles. Only
+ * the margin comes from settings.
+ */
+export const LEGACY_SEMESTER_CUTOFFS = { h1Start: "01-01", h2Start: "07-01" };
+
+export async function legacySemesterConfig(
+  db: DbOrTx,
+): Promise<SemesterConfig> {
+  const settings = await getSettings(db);
+  return {
+    ...LEGACY_SEMESTER_CUTOFFS,
+    ambiguityDays: settings["semester.ambiguityDays"],
+  };
+}
+
+/**
+ * The semester settings (`semester.*` in app settings, #56): the review
+ * periods of Bamboo's real reports (#83).
+ */
 export async function semesterConfig(db: DbOrTx): Promise<SemesterConfig> {
   const settings = await getSettings(db);
   return {
@@ -127,3 +151,41 @@ export const isSemesterLabel = (sourceId: string | null) =>
 export function snapshotDateFor(periodEnd: string, today = todayLocal()) {
   return periodEnd < today ? periodEnd : today;
 }
+
+/**
+ * The end of a review period that starts on `start` (Bamboo's raw report
+ * only gives the start): the day before the next semester cutoff after it.
+ * Irregular historical starts end on the cutoff after them as well.
+ */
+export function periodEndFor(start: string, cfg: SemesterConfig): string {
+  const year = Number(start.slice(0, 4));
+  const cutoffs = [year, year + 1, year + 2]
+    .flatMap((y) => [on(y, cfg.h1Start), on(y, cfg.h2Start)])
+    .filter((cutoff) => cutoff > start)
+    .sort();
+  // A start within the ambiguity margin before a cutoff opens the semester
+  // that starts at that cutoff (an early launch): it ends at the next one.
+  const early = toTime(cutoffs[0]) - toTime(start) <= cfg.ambiguityDays * DAY;
+  return toDate(toTime(cutoffs[early ? 1 : 0]) - DAY);
+}
+
+/**
+ * The name of a review period's cycle per language, from the message
+ * `ImportHistory.periodCycleName` ("Evaluación semestral 2024-03-29 –
+ * 2024-09-28" / "Semi-annual review ...").
+ */
+export function periodCycleNames(start: string, end: string): LocalizedText {
+  const fill = (template: string) =>
+    template.replace("{start}", start).replace("{end}", end);
+  return {
+    es: fill(es.ImportHistory.periodCycleName),
+    en: fill(en.ImportHistory.periodCycleName),
+  };
+}
+
+/** The Spanish name (`review_cycle.name`). */
+export const periodCycleName = (start: string, end: string) =>
+  periodCycleNames(start, end).es;
+
+/** Source id of the imported cycle of a review period (by its start). */
+export const periodSourceId = (start: string) => `period:${start}`;

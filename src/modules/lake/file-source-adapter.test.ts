@@ -280,3 +280,96 @@ describe("source system", () => {
     ).toBe("lake");
   });
 });
+
+describe("FileSourceAdapter: Bamboo's real report shapes (#83)", () => {
+  it("joins each period row of the grouped status export with its person row", async () => {
+    const profile = profileNamed("bamboo-assessment-status");
+    const adapter = new FileSourceAdapter(profile, await open(REPORTS));
+
+    const { records, rejected } = await collect(adapter);
+
+    expect(rejected).toEqual([]);
+    expect(records.length).toBeGreaterThan(100);
+    expect(new Set(records.map((r) => r.sourceId)).size).toBe(records.length);
+    const [first] = records;
+    const payload = first.payload as {
+      format: string;
+      fields: Record<string, unknown>;
+    };
+    expect(payload.format).toBe("assessment_status");
+    expect(payload.fields).toMatchObject({
+      employee_name: "Adrián Bustos",
+      employee_number: "10033",
+      period: "04/15/2024 - 09/28/2024",
+      self_status: "Completado",
+      manager_status: "Completed by Silvana Molina",
+    });
+    expect(JSON.parse(first.sourceId)).toEqual(["10033", "2024-04-15"]);
+  });
+
+  it("hands raw report rows over with their format and custom question pairs", async () => {
+    const profile = profileNamed("bamboo-assessments-report");
+    const adapter = new FileSourceAdapter(profile, await open(REPORTS));
+
+    const { records, rejected } = await collect(adapter);
+
+    expect(rejected).toEqual([]);
+    expect(new Set(records.map((r) => r.sourceId)).size).toBe(records.length);
+    expect(JSON.parse(records[0].sourceId)[1]).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+    const payload = records[0].payload as {
+      format: string;
+      fields: Record<string, unknown>;
+      customQuestions: unknown[];
+    };
+    expect(payload.format).toBe("assessments_report");
+    expect(payload.customQuestions).toHaveLength(6);
+    expect(Object.keys(payload.fields)).toEqual(
+      expect.arrayContaining([
+        "employee_bamboo_id",
+        "period_start",
+        "work_email",
+        "manager_name",
+      ]),
+    );
+  });
+});
+
+describe("splitGroupHeader", () => {
+  it("takes the trailing number as the employee number", async () => {
+    const { splitGroupHeader } = await import("./file-source-adapter");
+    expect(splitGroupHeader("Ana María Pérez 1042")).toEqual({
+      name: "Ana María Pérez",
+      employeeNumber: "1042",
+    });
+    expect(splitGroupHeader("Sin Número")).toEqual({
+      name: "Sin Número",
+      employeeNumber: null,
+    });
+  });
+});
+
+describe("raw report keys without an EEID (#83)", () => {
+  it("keys the row by work email, else name, instead of rejecting it", async () => {
+    const { mkdtemp, writeFile } = await import("node:fs/promises");
+    const { tmpdir } = await import("node:os");
+    const dir = await mkdtemp(resolve(tmpdir(), "raw-key-"));
+    await writeFile(
+      resolve(dir, "assessments-report.csv"),
+      [
+        "EEID,Review Period Start,Work Email,Employee Name,Self Assessment Completed Date,Manager Assessment Completed Date,Manager At Time Of Assessment",
+        ",03/29/2024,Ana@Example.invalid,,,,",
+        ",03/29/2024,,Bruno Paz,,,",
+        ",03/29/2024,,,,,",
+      ].join("\n") + "\n",
+    );
+    const profile = profileNamed("bamboo-assessments-report");
+    const { records, rejected } = await collect(
+      new FileSourceAdapter(profile, await open(dir)),
+    );
+    expect(records.map((r) => JSON.parse(r.sourceId))).toEqual([
+      ["email:ana@example.invalid", "2024-03-29"],
+      ["name:Bruno Paz", "2024-03-29"],
+    ]);
+    expect(rejected).toHaveLength(1);
+  });
+});

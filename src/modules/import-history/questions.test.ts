@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { answerColumns, detectQuestionColumns } from "./questions";
+import { getBuiltinProfile } from "@/modules/lake/profiles";
+import {
+  answerColumns,
+  customQuestionColumns,
+  detectQuestionColumns,
+} from "./questions";
 
 const HEADERS = [
   "Employee Name",
@@ -189,7 +194,6 @@ describe("custom question keys", () => {
 
 describe("configured question mapping (source profile `questions`)", () => {
   it("the built-in mapping yields exactly what the header patterns detect", async () => {
-    const { getBuiltinProfile } = await import("@/modules/lake/profiles");
     const { EMPLOYEE_PERFORMANCE_HEADER } =
       await import("@/fixtures/serialize/bamboo-reports");
     const headers = [...EMPLOYEE_PERFORMANCE_HEADER];
@@ -271,5 +275,103 @@ describe("configured question mapping (source profile `questions`)", () => {
     ]);
     expect(column.visibleToReviewee).toBe(false);
     expect(answerColumns(column, "c")).toMatchObject({ optionLabel: "C" });
+  });
+});
+
+describe("Bamboo raw report questions (#83)", () => {
+  const mapping = getBuiltinProfile("bamboo-assessments-report")!.questions!;
+  const columns = detectQuestionColumns(
+    mapping.map((m) => m.column),
+    mapping,
+  );
+  const byKey = (key: string) => columns.find((c) => c.key === key)!;
+
+  it("configures the closed questions with their roles and dimensions", () => {
+    expect(byKey("self:valued")).toMatchObject({
+      kind: "single_choice",
+      role: "valued",
+      dimension: "valued",
+      prompt: { en: "How well does [Company] recognize my value?" },
+    });
+    expect(byKey("manager:retention")).toMatchObject({
+      role: "retention",
+      visibleToReviewee: false,
+    });
+    expect(byKey("manager:engagement").role).toBe("engagement");
+    expect(byKey("self:best_work").dimension).toBe("best_work");
+  });
+
+  it("maps closed labels to their scale", () => {
+    expect(
+      answerColumns(byKey("self:valued"), "I sometimes feel valued."),
+    ).toMatchObject({
+      optionValue: 3,
+      optionLabel: "I sometimes feel valued.",
+    });
+    expect(
+      answerColumns(
+        byKey("manager:retention"),
+        "I would try to convince them to stay. Ana would be difficult to replace",
+      ),
+    ).toMatchObject({ optionValue: 4, normalized: 0.75 });
+    expect(answerColumns(byKey("manager:engagement"), "Hard to say.")).toEqual({
+      unmapped: true,
+      raw: "Hard to say.",
+    });
+  });
+
+  it("stores best work as its option, Other with its text", () => {
+    const q = byKey("self:best_work");
+    expect(answerColumns(q, "Nothing, I have all I need.")).toMatchObject({
+      optionLabel: "nothing_i_have_all_i_need",
+      textValue: null,
+    });
+    expect(
+      answerColumns(q, "Other Comentario: Más tiempo para capacitarme."),
+    ).toMatchObject({
+      optionLabel: "other",
+      textValue: "Más tiempo para capacitarme.",
+    });
+    expect(answerColumns(q, "Something else")).toEqual({ invalid: true });
+  });
+
+  it("makes one text question per custom pair with text in the row", () => {
+    const pairs = getBuiltinProfile(
+      "bamboo-assessments-report",
+    )!.customQuestions!;
+    const found = customQuestionColumns(pairs, {
+      "Employee - Custom Question 1": "¿Qué necesitás de tu líder?",
+      "Employee - Custom Answer 1": "Más feedback.",
+      "Manager - Custom Question 2": "¿Qué rol podría asumir?",
+      "Employee - Custom Question 3": "",
+    });
+    expect(found.map((c) => [c.key, c.header, c.dimension])).toEqual([
+      [
+        expect.stringMatching(
+          /^self:custom:1:que_necesitas_de_tu_lider_[0-9a-f]{8}$/,
+        ),
+        "Employee - Custom Answer 1",
+        expect.stringMatching(/^custom_que_necesitas_de_tu_lider_[0-9a-f]{8}$/),
+      ],
+      [
+        expect.stringMatching(
+          /^manager:custom:2:que_rol_podria_asumir_[0-9a-f]{8}$/,
+        ),
+        "Manager - Custom Answer 2",
+        expect.stringMatching(/^custom_que_rol_podria_asumir_[0-9a-f]{8}$/),
+      ],
+    ]);
+  });
+
+  it("tells apart long texts that share their first 40 characters", () => {
+    const pairs = getBuiltinProfile(
+      "bamboo-assessments-report",
+    )!.customQuestions!;
+    const long = "¿Qué podrías mejorar en la comunicación con tu equipo y ";
+    const keyOf = (end: string) =>
+      customQuestionColumns(pairs, {
+        "Employee - Custom Question 1": long + end,
+      })[0].key;
+    expect(keyOf("con el cliente?")).not.toBe(keyOf("con tu líder?"));
   });
 });

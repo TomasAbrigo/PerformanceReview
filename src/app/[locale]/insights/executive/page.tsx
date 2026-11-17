@@ -1,3 +1,4 @@
+import { localizeCycles } from "@/modules/review-core/cycle-name";
 import { hasLocale } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
@@ -38,7 +39,9 @@ async function Executive({
   const mode: ExecutiveMode = executiveModes.includes(sp.mode as ExecutiveMode)
     ? (sp.mode as ExecutiveMode)
     : "both";
-  const cycles = (await listCycles(db)).filter((c) => c.status !== "draft");
+  const cycles = localizeCycles(await listCycles(db), locale).filter(
+    (c) => c.status !== "draft",
+  );
   const cycle = cycles.find((c) => c.id === sp.cycle) ?? cycles[0];
   if (!cycle) return <p>{t("noCycles")}</p>;
   const minGroupSize = await getSetting(db, "aggregation.minGroupSize");

@@ -310,7 +310,7 @@ describe("importUpload with a custom profile", () => {
 
     expect(failed?.code).toBe("profile_exists");
     expect(await db.select().from(ingestRun)).toHaveLength(0);
-    expect(await listProfiles(store)).toHaveLength(10);
+    expect(await listProfiles(store)).toHaveLength(12);
   });
 
   it("does not overwrite a saved profile unless asked to", async () => {

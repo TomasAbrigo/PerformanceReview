@@ -1,3 +1,4 @@
+import { localizeCycles } from "@/modules/review-core/cycle-name";
 import { hasLocale } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
@@ -58,7 +59,9 @@ async function Dashboards({
     }
     return <p>{t("forbidden")}</p>;
   }
-  const cycles = (await listCycles(db)).filter((c) => c.status !== "draft");
+  const cycles = localizeCycles(await listCycles(db), locale).filter(
+    (c) => c.status !== "draft",
+  );
   if (!cycles.length) return <p>{t("noCycles")}</p>;
   const cycleId =
     p.cycle === "all"

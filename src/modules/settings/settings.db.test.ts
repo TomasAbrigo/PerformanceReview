@@ -45,7 +45,7 @@ describe("getSettings / getSetting", () => {
   it("returns the defaults of the code when nothing was changed", async () => {
     expect(await getSettings(db)).toEqual(DEFAULT_SETTINGS);
     expect(await getSetting(db, "aggregation.minGroupSize")).toBe(5);
-    expect(await getSetting(db, "semester.h1Start")).toBe("01-01");
+    expect(await getSetting(db, "semester.h1Start")).toBe("03-29");
     expect(await getSetting(db, "analysis.provider")).toBe("mock");
     expect(await stored()).toEqual([]);
   });
@@ -185,7 +185,7 @@ describe("setSetting", () => {
 
   it("rejects an H1 start that is not before the H2 start", async () => {
     await expect(
-      setSetting(db, hr, "semester.h1Start", "07-01"),
+      setSetting(db, hr, "semester.h1Start", "10-01"),
     ).rejects.toMatchObject({
       code: "validation",
       issues: [{ path: "semester.h2Start", message: "semester_order" }],

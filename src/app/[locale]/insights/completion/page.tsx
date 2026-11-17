@@ -1,3 +1,4 @@
+import { localizeCycles } from "@/modules/review-core/cycle-name";
 import { hasLocale } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
@@ -47,7 +48,7 @@ async function Completion({
       </section>
     );
   }
-  const cycles = await completionCycles(db);
+  const cycles = localizeCycles(await completionCycles(db), locale);
   if (!cycles.length) return <p>{t("noCycles")}</p>;
   const p = parseCompletionParams(await searchParams);
   const cycle = cycles.find((c) => c.id === p.cycle) ?? cycles[0];

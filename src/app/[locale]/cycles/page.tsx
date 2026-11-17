@@ -1,3 +1,4 @@
+import { localizeCycles } from "@/modules/review-core/cycle-name";
 import { hasLocale } from "next-intl";
 import { setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
@@ -13,7 +14,7 @@ async function CyclesData({ params }: PageProps<"/[locale]/cycles">) {
   if (!hasLocale(routing.locales, locale)) notFound();
   setRequestLocale(locale);
   await connection();
-  const cycles = await listCycles(db);
+  const cycles = localizeCycles(await listCycles(db), locale);
   return (
     <CyclesList
       cycles={cycles.map((c) => ({

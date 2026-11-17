@@ -1,3 +1,4 @@
+import { localizeCycles } from "@/modules/review-core/cycle-name";
 import { hasLocale } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
@@ -27,7 +28,9 @@ async function SelfAssessment({
   if (insightsScope(actor).kind === "none") return <p>{t("forbidden")}</p>;
   const sp = await searchParams;
   const groupBy = sp.groupBy === "manager" ? "manager" : "department";
-  const cycles = (await listCycles(db)).filter((c) => c.status !== "draft");
+  const cycles = localizeCycles(await listCycles(db), locale).filter(
+    (c) => c.status !== "draft",
+  );
   const cycle = cycles.find((c) => c.id === sp.cycle) ?? cycles[0];
   if (!cycle) return <p>{t("noCycles")}</p>;
   const report = await selfAssessmentReport(db, actor, {

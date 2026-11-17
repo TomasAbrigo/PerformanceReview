@@ -1,3 +1,4 @@
+import { cycleName } from "@/modules/review-core/cycle-name";
 import { hasLocale } from "next-intl";
 import { setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
@@ -23,6 +24,7 @@ async function Detail({ params }: PageProps<"/[locale]/cycles/[id]">) {
     <CycleDetailView
       cycle={{
         ...cycle,
+        name: cycleName(cycle, locale),
         participants: cycle.participants.map((p) => ({
           ...p,
           // The same rule as the assessment page (no link that ends in a

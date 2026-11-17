@@ -31,6 +31,11 @@ export interface ReadOptions {
   batchSize?: number;
   /** Projection. Key and watermark columns are always included. */
   columns?: string[];
+  /**
+   * Rows in the order of the file instead of by key (reports whose rows
+   * depend on the ones before them, such as a grouped export). Files only.
+   */
+  fileOrder?: boolean;
 }
 
 export interface LakeBatch {
