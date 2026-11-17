@@ -1,14 +1,17 @@
 import { eq } from "drizzle-orm";
 import type { DbOrTx } from "@/db/client";
 import {
+  type Choice,
   type LocalizedText,
   question,
   ratingScale,
   reviewTemplate,
+  type QuestionDimension,
   type QuestionRole,
   type Relationship,
   templateSection,
 } from "@/db/schema";
+import { LIKERT_OPTIONS, type LikertRole } from "@/modules/likert";
 import { createScale, createTemplate } from "./service";
 import type { ScaleInput } from "./validation";
 
@@ -17,8 +20,21 @@ export const SYSTEM_SCALES = {
   fourPoint: "four_point_descriptive",
   fivePoint: "five_point_agreement",
   frequency: "never_always",
+  retention: "retention_1_5",
+  engagement: "engagement_1_5",
 } as const;
 type ScaleKey = (typeof SYSTEM_SCALES)[keyof typeof SYSTEM_SCALES];
+
+/** A 1-5 scale from the likert module's labels (index 0 there = 5). */
+function likertScale(role: LikertRole, name: LocalizedText): ScaleInput {
+  return {
+    name,
+    options: [...LIKERT_OPTIONS[role]].reverse().map((o, i) => ({
+      value: i + 1,
+      label: { es: o.scale.es, en: o.scale.en },
+    })),
+  };
+}
 
 const scales: Record<ScaleKey, ScaleInput> = {
   four_point_descriptive: {
@@ -65,16 +81,27 @@ const scales: Record<ScaleKey, ScaleInput> = {
       { value: 5, label: { es: "Siempre", en: "Always" } },
     ],
   },
+  // Bamboo's manager Q1 and Q2 (research/07), worst to best.
+  retention_1_5: likertScale("retention", {
+    es: "Retención 1-5",
+    en: "Retention 1-5",
+  }),
+  engagement_1_5: likertScale("engagement", {
+    es: "Compromiso 1-5",
+    en: "Engagement 1-5",
+  }),
 };
 
 type SeedQuestion = {
   prompt: LocalizedText;
   appliesTo: Relationship[];
-  kind?: "text" | "rating";
+  kind?: "text" | "rating" | "single_choice";
   scale?: ScaleKey;
+  choices?: Choice[];
   required?: boolean;
   visibleToReviewee?: boolean;
   role?: QuestionRole;
+  dimension?: QuestionDimension;
 };
 type SeedTemplate = {
   key: string;
@@ -122,6 +149,112 @@ const peerQuestions: SeedQuestion[] = [
     "What are areas where this person could improve?",
   ),
 ];
+
+const open = (
+  appliesTo: Relationship[],
+  dimension: QuestionDimension,
+  es: string,
+  en: string,
+): SeedQuestion => ({
+  prompt: { es, en },
+  appliesTo,
+  required: true,
+  dimension,
+});
+const likert = (
+  role: LikertRole,
+  scale: ScaleKey,
+  es: string,
+  en: string,
+): SeedQuestion => ({
+  prompt: { es, en },
+  appliesTo: ["manager"],
+  kind: "rating",
+  scale,
+  required: true,
+  visibleToReviewee: false,
+  role,
+});
+const customPlaceholder = (n: 1 | 2 | 3): SeedQuestion => ({
+  ...open(
+    ["self", "manager"],
+    `custom_${n}`,
+    `Pregunta custom ${n} (placeholder: reemplazar por el texto real)`,
+    `Custom question ${n} (placeholder: replace with the real text)`,
+  ),
+  required: false,
+});
+
+/**
+ * Santex's semi-annual review as run in Bamboo (PRD iteration 2): Bamboo's
+ * two standard open questions for self and manager, three custom open
+ * questions (placeholders until People confirms their text) and the manager's
+ * two closed Likert 1-5 questions, hidden from the reviewee.
+ */
+const santex: SeedTemplate = {
+  key: "santex_semester",
+  name: { es: "Evaluación semestral Santex", en: "Santex semi-annual review" },
+  description: {
+    es: "Preguntas estándar de Bamboo, 3 custom y retención y compromiso del manager (Likert 1-5, ocultas para la persona evaluada).",
+    en: "Bamboo's standard questions, 3 custom ones and the manager's retention and engagement (Likert 1-5, hidden from the reviewee).",
+  },
+  sections: [
+    {
+      title: { es: "Autoevaluación", en: "Self assessment" },
+      questions: [
+        open(
+          ["self"],
+          "strengths",
+          "¿Qué hago bien?",
+          "What are some things I do well?",
+        ),
+        open(
+          ["self"],
+          "improvement",
+          "¿En qué puedo mejorar?",
+          "How could I improve?",
+        ),
+      ],
+    },
+    {
+      title: { es: "Evaluación del manager", en: "Manager assessment" },
+      questions: [
+        open(
+          ["manager"],
+          "strengths",
+          "¿Qué hace bien [Empleado]?",
+          "What are some things [Employee] does well?",
+        ),
+        open(
+          ["manager"],
+          "improvement",
+          "¿En qué podría mejorar [Empleado]?",
+          "How could [Employee] improve?",
+        ),
+        likert(
+          "retention",
+          "retention_1_5",
+          "Retención: si [Empleado] recibiera una oferta de trabajo en otro lugar, yo…",
+          "Retention: if [Employee] got a job offer elsewhere, I would…",
+        ),
+        likert(
+          "engagement",
+          "engagement_1_5",
+          "Compromiso: ¿qué tan comprometido está [Empleado] con su trabajo?",
+          "Engagement: how engaged is [Employee] at work?",
+        ),
+      ],
+    },
+    {
+      title: { es: "Preguntas custom", en: "Custom questions" },
+      questions: [
+        customPlaceholder(1),
+        customPlaceholder(2),
+        customPlaceholder(3),
+      ],
+    },
+  ],
+};
 
 const templates: SeedTemplate[] = [
   {
@@ -316,6 +449,7 @@ const templates: SeedTemplate[] = [
       },
     ],
   },
+  santex,
 ];
 
 /** Inserts the system scales and templates that are missing. Safe to run repeatedly. */
@@ -361,7 +495,9 @@ export async function seedSystemTemplates(db: DbOrTx): Promise<void> {
             visibleToReviewee: q.visibleToReviewee ?? true,
             scaleId: q.scale ? scaleIds[q.scale] : null,
             prompt: q.prompt,
+            choices: q.choices ?? null,
             role: q.role ?? null,
+            dimension: q.dimension ?? null,
           })),
         );
       }

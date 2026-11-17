@@ -94,7 +94,10 @@
     "system_readonly": "Los elementos del sistema no se pueden modificar ni borrar; clonalos.",
     "in_use": "La escala está en uso por alguna pregunta.",
     "unknown": "Ocurrió un error inesperado.",
-    "duplicateRole": "Este template ya tiene una pregunta con esa función."
+    "duplicateRole": "Este template ya tiene una pregunta con esa función.",
+    "managerOnly": "Retención y compromiso las responde solo el manager.",
+    "hiddenRequired": "Retención y compromiso deben estar ocultas para la persona evaluada.",
+    "dimensionTextOnly": "Solo las preguntas de texto llevan dimensión."
   },
   "Scales": {
     "title": "Escalas de rating",
@@ -172,7 +175,18 @@
       "none": "Ninguna",
       "goals_rating": "Calificación de objetivos",
       "goals_comment": "Comentario de objetivos",
-      "overall_rating": "Calificación general de desempeño"
+      "overall_rating": "Calificación general de desempeño",
+      "retention": "Retención (Likert 1-5)",
+      "engagement": "Compromiso (Likert 1-5)"
+    },
+    "dimension": "Dimensión",
+    "dimensions": {
+      "none": "Ninguna",
+      "strengths": "Fortalezas",
+      "improvement": "Oportunidades de mejora",
+      "custom_1": "Custom 1",
+      "custom_2": "Custom 2",
+      "custom_3": "Custom 3"
     }
   },
   "People": {
@@ -699,7 +713,11 @@
       "source": "Fuente",
       "error": "Error",
       "reviewer": "Evaluador",
-      "snapshotManager": "Manager del snapshot"
+      "snapshotManager": "Manager del snapshot",
+      "cycle": "Ciclo",
+      "column": "Columna",
+      "rawValue": "Valor original",
+      "answerReason": "Motivo"
     },
     "indicators": {
       "identity_open": {
@@ -745,8 +763,19 @@
       "reviewer_mismatch": {
         "title": "Evaluador distinto del manager del snapshot",
         "description": "Pedidos de evaluación cuyo evaluador no coincide con el manager del snapshot."
+      },
+      "unmapped_answers": {
+        "title": "Respuestas sin equivalencia Likert",
+        "description": "Respuestas importadas de retención o compromiso cuya opción no tiene equivalencia 1-5 (ver docs/likert-mapping.md). La respuesta se guardó con el valor original y sin puntaje."
       }
-    }
+    },
+    "answerReasons": {
+      "unmapped_option": "Opción sin equivalencia",
+      "invalid_value": "Valor inválido"
+    },
+    "reapply": "Reaplicar equivalencias",
+    "reapplyDone": "{count, plural, =0 {Ninguna respuesta cambió.} =1 {1 respuesta remapeada.} other {# respuestas remapeadas.}}",
+    "reapplyHelp": "Vuelve a calcular las respuestas de retención y compromiso con la tabla likert_mapping actual."
   },
   "Exports": {
     "columns": {

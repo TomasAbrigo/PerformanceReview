@@ -14,3 +14,4 @@ export * from "./final-rating";
 export * from "./admin-audit";
 export * from "./import-history";
 export * from "./app-setting";
+export * from "./likert";

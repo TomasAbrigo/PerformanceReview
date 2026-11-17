@@ -23,6 +23,7 @@ export const seedFixturesDir = (size: SeedSize) =>
  * list or the other.
  */
 export const RESET_TABLES = [
+  "answer_quality_issue",
   "history_import_row",
   "imported_request",
   "imported_question",
@@ -59,6 +60,7 @@ export const KEPT_TABLES = [
   "template_section",
   "question",
   "app_setting",
+  "likert_mapping",
 ] as const;
 
 /**
