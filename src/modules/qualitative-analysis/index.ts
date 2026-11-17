@@ -2,6 +2,7 @@ export * from "./constants";
 export * from "./types";
 export { AnalysisError } from "./errors";
 export { dimensionOf } from "./dimension";
+export { INITIAL_THEMES, initialThemeRows } from "./themes";
 export type {
   AnalysisInput,
   AnalysisOutput,
@@ -24,9 +25,11 @@ export {
   type UnmatchedRow,
 } from "./import-labels";
 export {
+  dimensionPrompts,
   listComments,
   qualitativeFilterOptions,
   sentimentByDimension,
+  sentimentTotals,
   sentimentTrend,
   sentimentVsIndicators,
   topThemes,

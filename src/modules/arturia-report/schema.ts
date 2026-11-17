@@ -4,7 +4,7 @@ import { z } from "zod";
 
 export const SCHEMA_VERSION = "arturia-report.v1";
 /** Bumped on every additive change of v1 (new optional field / section). */
-export const SCHEMA_MINOR = 1;
+export const SCHEMA_MINOR = 2;
 
 const int = z.number().int().nonnegative();
 const counts = z.array(int);
@@ -16,9 +16,15 @@ const group = z.object({
   other: z.boolean(),
 });
 
+/**
+ * Comments per sentiment. `neutral` and `mixed` came with minor 2 (before it
+ * a report had three sentiments): a report without them reads as zero.
+ */
 const sentimentCounts = z.object({
   positive: int,
   constructive: int,
+  neutral: int.default(0),
+  mixed: int.default(0),
   negative: int,
   total: int,
 });
@@ -129,10 +135,32 @@ const indicators = z.object({
   ),
 });
 
+const sentimentRow = sentimentCounts.extend({
+  dimension: z.string(),
+  other: z.boolean(),
+});
+const themeRow = z.object({
+  theme: z.string(),
+  count: int,
+  other: z.boolean(),
+  /** Sentiment of the theme's comments (minor 2; `total` = `count`). */
+  sentiment: sentimentCounts.optional(),
+  quotes: z.array(z.string()),
+});
+
+/** Sentiment and themes of the comments one side wrote (minor 2). */
+const qualitativeSide = z.object({
+  /** null when anonymized and some group was suppressed (no differencing). */
+  totals: sentimentCounts.nullable(),
+  sentimentByDimension: z.array(sentimentRow),
+  topThemes: z.array(themeRow),
+  suppressed: int,
+});
+
 const qualitative = z.object({
-  sentimentByDimension: z.array(
-    sentimentCounts.extend({ dimension: z.string(), other: z.boolean() }),
-  ),
+  /** Everything in the cycle, all sides (minor 2); null as `qualitativeSide.totals`. */
+  totals: sentimentCounts.nullable().optional(),
+  sentimentByDimension: z.array(sentimentRow),
   trend: z.array(
     sentimentCounts.extend({
       cycleId: z.string(),
@@ -140,15 +168,19 @@ const qualitative = z.object({
       periodEnd: z.string(),
     }),
   ),
-  topThemes: z.array(
-    z.object({
-      theme: z.string(),
-      count: int,
-      other: z.boolean(),
-      quotes: z.array(z.string()),
-    }),
-  ),
+  topThemes: z.array(themeRow),
   suppressed: int,
+  /**
+   * The same cut by who wrote the comments (review relationship `self` or
+   * `manager`, as People's Propios / Manager toggle); null: that side has no
+   * labeled comments. Minor 2.
+   */
+  bySide: z
+    .object({
+      self: qualitativeSide.nullable(),
+      manager: qualitativeSide.nullable(),
+    })
+    .optional(),
 });
 
 /** The goal figures of a group; `n` is its people (cycle participants). */
@@ -292,5 +324,6 @@ export type ExecutiveSection = z.infer<typeof executive>;
 export type CompletionSection = z.infer<typeof completion>;
 export type IndicatorsSection = z.infer<typeof indicators>;
 export type QualitativeSection = z.infer<typeof qualitative>;
+export type QualitativeSideSection = z.infer<typeof qualitativeSide>;
 export type GoalsSection = z.infer<typeof goals>;
 export type PersonRow = z.infer<typeof person>;

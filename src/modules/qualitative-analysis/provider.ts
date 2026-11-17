@@ -1,7 +1,16 @@
 import type { Sentiment } from "./constants";
 
-/** One text to analyze. `token` identifies it in the batch (not content). */
-export type AnalysisInput = { token: string; dimension: string; text: string };
+/**
+ * One text to analyze. `token` identifies it in the batch (not content).
+ * `closed`: the text is the label of a closed-question answer (a chosen
+ * option), not free text.
+ */
+export type AnalysisInput = {
+  token: string;
+  dimension: string;
+  text: string;
+  closed?: boolean;
+};
 export type AnalysisOutput = {
   token: string;
   sentiment: Sentiment;

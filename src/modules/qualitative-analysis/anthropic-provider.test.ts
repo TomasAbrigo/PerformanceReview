@@ -1,12 +1,14 @@
 // @vitest-environment node
 import { describe, expect, it, vi } from "vitest";
 import {
+  ANTHROPIC_PROMPT_VERSION,
   AnthropicProvider,
   createProvider,
   DEFAULT_ANALYSIS_MODEL,
   type MessagesClient,
 } from "./anthropic-provider";
 import { MockProvider } from "./mock-provider";
+import { INITIAL_THEMES } from "./themes";
 
 const reply = (results: unknown) => ({
   stop_reason: "end_turn",
@@ -87,6 +89,47 @@ describe("AnthropicProvider", () => {
     const params = create.mock.calls[0][0];
     expect(params.model).toBe(DEFAULT_ANALYSIS_MODEL);
     expect(params.output_config?.format).toMatchObject({ type: "json_schema" });
+  });
+  it("asks for the five sentiments, the initial themes and flags closed answers", async () => {
+    const create = vi.fn<MessagesClient["create"]>().mockResolvedValue(
+      reply([
+        { token: "t1", sentiment: "mixed", confidence: 0.7, themes: [] },
+        { token: "t2", sentiment: "neutral", confidence: 0.6, themes: [] },
+      ]),
+    );
+    const p = new AnthropicProvider({ create });
+    expect(p.promptVersion).toBe(ANTHROPIC_PROMPT_VERSION);
+    expect(ANTHROPIC_PROMPT_VERSION).toBe("anthropic-v2");
+    const out = await p.analyze([
+      { token: "t1", dimension: "strengths", text: "bien pero tarde" },
+      { token: "t2", dimension: "valued", text: "Somewhat", closed: true },
+    ]);
+    expect(out.map((r) => r.sentiment)).toEqual(["mixed", "neutral"]);
+    const params = create.mock.calls[0][0];
+    const format = params.output_config?.format as unknown as {
+      schema: {
+        properties: {
+          results: {
+            items: { properties: { sentiment: { enum: string[] } } };
+          };
+        };
+      };
+    };
+    expect(
+      format.schema.properties.results.items.properties.sentiment.enum,
+    ).toEqual(["positive", "constructive", "neutral", "mixed", "negative"]);
+    const system = String(params.system);
+    for (const word of ["neutral", "mixed", ...INITIAL_THEMES]) {
+      expect(system).toContain(word);
+    }
+    const sent = JSON.parse(String(params.messages[0].content)) as {
+      items: { token: string; closed?: boolean }[];
+    };
+    expect(sent.items).toEqual([
+      expect.objectContaining({ token: "t1" }),
+      expect.objectContaining({ token: "t2", closed: true }),
+    ]);
+    expect(sent.items[0]).not.toHaveProperty("closed");
   });
   it("fails on a missing token, garbage or a refusal, without content in the error", async () => {
     const bad = [

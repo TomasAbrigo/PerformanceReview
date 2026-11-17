@@ -8,6 +8,7 @@ import type {
   GoalsSection,
   IndicatorsSection,
   QualitativeSection,
+  QualitativeSideSection,
 } from "./schema";
 
 /**
@@ -86,6 +87,8 @@ export function svgBars(items: { label: string; value: number }[]): string {
 export function svgStacked(
   rows: { label: string; parts: number[] }[],
   legend: string[],
+  /** Class of the segment colors: `c0..` (categorical) or `s0..` (sentiments). */
+  prefix: "c" | "s" = "c",
 ): string {
   if (!rows.length) return `<p class="muted">${esc(L.noData)}</p>`;
   const labelW = labelWidth(rows.map((r) => r.label));
@@ -98,7 +101,7 @@ export function svgStacked(
       const rects = r.parts
         .map((p, k) => {
           const w = total ? (p / total) * span : 0;
-          const rect = `<rect x="${x.toFixed(1)}" y="${y + 5}" width="${w.toFixed(1)}" height="16" class="c${k}"><title>${esc(legend[k] ?? "")}: ${p}</title></rect>`;
+          const rect = `<rect x="${x.toFixed(1)}" y="${y + 5}" width="${w.toFixed(1)}" height="16" class="${prefix}${k}"><title>${esc(legend[k] ?? "")}: ${p}</title></rect>`;
           x += w;
           return rect;
         })
@@ -107,7 +110,10 @@ export function svgStacked(
     })
     .join("");
   const keys = legend
-    .map((l, k) => `<span class="key"><i class="c${k}"></i>${esc(l)}</span>`)
+    .map(
+      (l, k) =>
+        `<span class="key"><i class="${prefix}${k}"></i>${esc(l)}</span>`,
+    )
     .join("");
   return `<svg viewBox="0 0 ${W} ${rows.length * ROW}" role="img" class="chart">${body}</svg><div class="legend">${keys}</div>`;
 }
@@ -269,29 +275,62 @@ function indicatorsHtml(s: IndicatorsSection | null): string {
   return dist + matrix + alerts;
 }
 
+/** The five sentiments, in the order of the stacked bars and their colors. */
+const SENTIMENTS = [
+  "positive",
+  "constructive",
+  "neutral",
+  "mixed",
+  "negative",
+] as const;
+
 function qualitativeHtml(q: QualitativeSection | null): string {
   if (!q) return unavailable();
-  const S = L.qualitative.sentiments;
-  const themes = q.topThemes
-    .map(
-      (t) =>
-        `<li><b>${esc(t.theme)}</b> (${t.count})${t.quotes.length ? `<ul class="quotes">${t.quotes.map((x) => `<li>“${esc(x)}”</li>`).join("")}</ul>` : ""}</li>`,
-    )
-    .join("");
-  return `<h3>${esc(L.qualitative.byDimension)}</h3>${svgStacked(
-    q.sentimentByDimension.map((d) => ({
-      label: d.dimension,
-      parts: [d.positive, d.constructive, d.negative],
-    })),
-    [S.positive, S.constructive, S.negative],
-  )}
-<h3>${esc(L.qualitative.trend)} (${esc(S.positive)})</h3>${svgLine(
+  const Q = L.qualitative;
+  const S = Q.sentiments;
+  const legend = SENTIMENTS.map((k) => S[k]);
+  const parts = (c: Record<(typeof SENTIMENTS)[number], number>) =>
+    SENTIMENTS.map((k) => c[k]);
+  const stacked = (rows: QualitativeSideSection["sentimentByDimension"]) =>
+    svgStacked(
+      rows.map((d) => ({ label: d.dimension, parts: parts(d) })),
+      legend,
+      "s",
+    );
+  const themes = (rows: QualitativeSideSection["topThemes"]) =>
+    rows
+      .map((t) => {
+        const split = t.sentiment
+          ? ` <span class="muted">${SENTIMENTS.filter(
+              (k) => t.sentiment![k] > 0,
+            )
+              .map((k) => `${esc(S[k])} ${t.sentiment![k]}`)
+              .join(" · ")}</span>`
+          : "";
+        return `<li><b>${esc(t.theme)}</b> (${t.count})${split}${t.quotes.length ? `<ul class="quotes">${t.quotes.map((x) => `<li>“${esc(x)}”</li>`).join("")}</ul>` : ""}</li>`;
+      })
+      .join("");
+  const total = (c: QualitativeSideSection["totals"] | undefined) =>
+    c === undefined
+      ? ""
+      : c === null
+        ? hiddenTotal()
+        : `<p class="muted">${esc(Q.totals)}: <b>${c.total}</b> · ${SENTIMENTS.map((k) => `${esc(S[k])} ${c[k]}`).join(" · ")}</p>`;
+  const side = (title: string, x: QualitativeSideSection | null | undefined) =>
+    x
+      ? `<h4>${esc(title)}</h4>${total(x.totals)}${stacked(x.sentimentByDimension)}<ol>${themes(x.topThemes)}</ol>${suppressedNote(x.suppressed)}`
+      : "";
+  const sides = q.bySide
+    ? `<h3>${esc(Q.bySide)}</h3>${side(Q.own, q.bySide.self)}${side(Q.manager, q.bySide.manager)}`
+    : "";
+  return `${total(q.totals)}<h3>${esc(Q.byDimension)}</h3>${stacked(q.sentimentByDimension)}
+<h3>${esc(Q.trend)} (${esc(S.positive)})</h3>${svgLine(
     q.trend.map((t) => ({
       label: t.cycleName,
       value: t.total ? t.positive / t.total : 0,
     })),
   )}
-<h3>${esc(L.qualitative.themes)}</h3><ol>${themes}</ol>${suppressedNote(q.suppressed)}`;
+<h3>${esc(Q.themes)}</h3><ol>${themes(q.topThemes)}</ol>${suppressedNote(q.suppressed)}${sides}`;
 }
 
 function goalsHtml(g: GoalsSection | null): string {
@@ -392,8 +431,8 @@ function peopleHtml(people: ArturiaReport["sections"]["people"]): string {
 }
 
 const CSS = `
-:root{--bg:#fff;--fg:#1d2329;--muted:#66707a;--line:#d9dee3;--c0:#2f6fb3;--c1:#e0a43a;--c2:#c8553d;--c3:#6a9f58;--c4:#7d5ba6}
-@media (prefers-color-scheme:dark){:root{--bg:#15191d;--fg:#e8ecef;--muted:#9aa4ad;--line:#333b42}}
+:root{--bg:#fff;--fg:#1d2329;--muted:#66707a;--line:#d9dee3;--c0:#2f6fb3;--c1:#e0a43a;--c2:#c8553d;--c3:#6a9f58;--c4:#7d5ba6;--s0:#5d9e2f;--s1:#0b7f95;--s2:#b4b4b0;--s3:#e5a100;--s4:#d4393a}
+@media (prefers-color-scheme:dark){:root{--bg:#15191d;--fg:#e8ecef;--muted:#9aa4ad;--line:#333b42;--s2:#a8a8a4}}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif}
 main{max-width:960px;margin:0 auto;padding:16px}header{border-bottom:1px solid var(--line);margin-bottom:16px}
 h1{font-size:1.5rem;margin:.2em 0}h2{font-size:1.2rem;margin-top:2em;border-bottom:1px solid var(--line)}h3{font-size:1rem;margin-bottom:.3em}
@@ -404,6 +443,7 @@ nav.toggle button[aria-pressed=true]{background:var(--c0);color:#fff;border-colo
 .tile b{display:block;font-size:1.6rem}.tile span{color:var(--muted);font-size:.9em}
 svg.chart{width:100%;height:auto;font-size:12px;fill:var(--fg)}svg.matrix{max-width:340px}
 .c0{fill:var(--c0);background:var(--c0)}.c1{fill:var(--c1);background:var(--c1)}.c2{fill:var(--c2);background:var(--c2)}.c3{fill:var(--c3);background:var(--c3)}.c4{fill:var(--c4);background:var(--c4)}
+.s0{fill:var(--s0);background:var(--s0)}.s1{fill:var(--s1);background:var(--s1)}.s2{fill:var(--s2);background:var(--s2)}.s3{fill:var(--s3);background:var(--s3)}.s4{fill:var(--s4);background:var(--s4)}
 .line{fill:none;stroke:var(--c0);stroke-width:2}.cell{fill:var(--line)}.risk{fill:var(--c2)}
 .legend{display:flex;flex-wrap:wrap;gap:12px;font-size:.85em}.key i{display:inline-block;width:10px;height:10px;margin-right:4px;border-radius:2px}
 table{border-collapse:collapse;width:100%;font-size:.9em}th,td{border-bottom:1px solid var(--line);padding:4px 6px;text-align:left}

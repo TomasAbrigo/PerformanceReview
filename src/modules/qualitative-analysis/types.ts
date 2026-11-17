@@ -1,6 +1,6 @@
 // Drizzle- and server-free: shared by the queries and client components.
 import type { LocalizedText } from "@/db/schema/rating-scales";
-import type { Sentiment } from "./constants";
+import { sentiments, type Sentiment } from "./constants";
 
 export type QualitativeFilters = {
   cycleId?: string;
@@ -10,6 +10,11 @@ export type QualitativeFilters = {
   theme?: string;
   /** Only the answers of reviews of this relationship (self, manager...). */
   relationship?: "self" | "manager" | "peer" | "upward";
+  /**
+   * Count the labels of closed-question answers too; the
+   * `analysis.includeClosed` setting when the caller did not read it.
+   */
+  includeClosed?: boolean;
   /**
    * The `aggregation.minGroupSize` setting when the caller already read it
    * (one read per request); read from the settings otherwise.
@@ -21,6 +26,19 @@ export type QualitativeFilters = {
 
 export type SentimentCounts = Record<Sentiment, number> & { total: number };
 
+/** The counts of a row (whatever else it carries: a dimension, a theme...). */
+export function pickCounts(
+  row: Record<Sentiment, number> & { total: number },
+): SentimentCounts {
+  return {
+    ...(Object.fromEntries(sentiments.map((s) => [s, row[s]])) as Record<
+      Sentiment,
+      number
+    >),
+    total: row.total,
+  };
+}
+
 export type DimensionSentiment = SentimentCounts & { dimension: string };
 export type TrendPoint = SentimentCounts & {
   cycleId: string;
@@ -30,6 +48,8 @@ export type TrendPoint = SentimentCounts & {
 export type ThemeRank = {
   theme: string;
   count: number;
+  /** Sentiment of the comments of the theme (its total is `count`). */
+  sentiment: SentimentCounts;
   /** 2-3 example quotes with names, emails and legajos replaced. */
   quotes: string[];
 };
@@ -41,6 +61,9 @@ export type IndicatorSentiment = SentimentCounts & {
 export type CommentRow = {
   answerId: string;
   cycleName: string;
+  /** Review period of the cycle (ISO dates). */
+  periodStart: string;
+  periodEnd: string;
   personName: string;
   relationship: string;
   dimension: string;
@@ -49,4 +72,13 @@ export type CommentRow = {
   themes: string[];
   confidence: number | null;
   source: string;
+};
+
+/** What the filters offer. */
+export type QualitativeFilterOptions = {
+  dimensions: string[];
+  themes: string[];
+  departments: string[];
+  /** Prompt of the latest question of each dimension (the label of dimensions without a name of their own). */
+  dimensionPrompts: Record<string, LocalizedText>;
 };

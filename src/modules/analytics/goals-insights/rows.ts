@@ -55,6 +55,7 @@ export async function loadParticipantRows(
         join review_request r on r.id = a.request_id
         where r.status = 'submitted' and r.deleted_at is null
           and r.relationship in ('self', 'manager')
+          and e.kind = 'text' -- comments only, not the closed answers
           and r.participant_id in (select participant_id from scoped)
         group by r.participant_id
       )`

@@ -39,21 +39,29 @@ export async function insertCycle(
 export async function insertQuestion(
   cycleId: string,
   prompt: string,
-  opts: { kind?: "text" | "single_choice"; role?: string } = {},
+  opts: {
+    kind?: "text" | "single_choice";
+    role?: string;
+    /** question_revision.dimension (the import mapping sets it). */
+    dimension?: string;
+    choices?: { value: string; label: { es: string; en: string } }[];
+  } = {},
 ): Promise<string> {
   const [q] = await db.execute<{ id: string }>(sql`
-    insert into question_revision (cycle_id, section_title, prompt, kind, applies_to, visible_to_reviewee, required, sort, role, choices)
+    insert into question_revision (cycle_id, section_title, prompt, kind, applies_to, visible_to_reviewee, required, sort, role, choices, dimension)
     values (${cycleId}::uuid, ${JSON.stringify({ es: "S", en: "S" })}::jsonb,
       ${JSON.stringify({ es: prompt, en: prompt })}::jsonb, ${opts.kind ?? "text"},
       array['self','manager'], true, false, 0, ${opts.role ?? null},
       ${
         opts.kind === "single_choice"
-          ? JSON.stringify([
-              { value: "A", label: { es: "A", en: "A" } },
-              { value: "B", label: { es: "B", en: "B" } },
-            ])
+          ? JSON.stringify(
+              opts.choices ?? [
+                { value: "A", label: { es: "A", en: "A" } },
+                { value: "B", label: { es: "B", en: "B" } },
+              ],
+            )
           : null
-      }::jsonb)
+      }::jsonb, ${opts.dimension ?? null})
     returning id`);
   return q.id;
 }

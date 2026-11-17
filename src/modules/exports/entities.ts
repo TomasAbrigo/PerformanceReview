@@ -725,18 +725,24 @@ const indicatorAlertsExport = defineExport({
 
 // ---------------------------------------------------------------- insights
 
-/** Sentiment counts per dimension (HR visibility, counts only: no text, names or emails). */
+/**
+ * Sentiment counts (the five sentiments) per dimension, optionally of one
+ * side only (`relationship=self|manager`, as the page's toggle). HR
+ * visibility, counts only: no text, names or emails.
+ */
 const insightsSentimentExport = defineExport({
   file: () => "insights-sentiment",
   query: z.object({
     cycle: uuid.optional(),
     department: z.string().optional(),
+    relationship: z.enum(relationships).optional(),
   }),
   rows: (db, q) =>
     each(
       sentimentByDimension(db, DEFAULT_ACTOR, {
         cycleId: q.cycle,
         department: q.department,
+        relationship: q.relationship,
         aggregateOnly: true,
       }),
     ),
@@ -744,6 +750,8 @@ const insightsSentimentExport = defineExport({
     { header: h("dimension"), value: (r: DimensionSentiment) => r.dimension },
     { header: h("positive"), value: (r) => r.positive },
     { header: h("constructive"), value: (r) => r.constructive },
+    { header: h("neutral"), value: (r) => r.neutral },
+    { header: h("mixed"), value: (r) => r.mixed },
     { header: h("negative"), value: (r) => r.negative },
     { header: h("total"), value: (r) => r.total },
   ],
@@ -775,9 +783,16 @@ const sentimentRows = (
   group: string,
   c: SentimentCounts,
 ): SelfAssessmentRow[] =>
-  (["positive", "constructive", "negative", "total"] as const).map(
-    (metric) => ({ section, group, metric, value: c[metric] }),
-  );
+  (
+    [
+      "positive",
+      "constructive",
+      "neutral",
+      "mixed",
+      "negative",
+      "total",
+    ] as const
+  ).map((metric) => ({ section, group, metric, value: c[metric] }));
 
 /**
  * The self-assessment report (People's visibility) in long format: one row

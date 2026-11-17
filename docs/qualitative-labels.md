@@ -10,22 +10,36 @@ pnpm analysis:import-labels fixtures/qualitative-labels/small.csv
 
 CSV UTF-8 (con o sin BOM), separador coma, comillas RFC 4180, primera fila con los encabezados (sin importar mayúsculas). Una fila por comentario.
 
-| Columna         | Obligatoria                             | Qué es                                                                                                  |
-| --------------- | --------------------------------------- | ------------------------------------------------------------------------------------------------------- |
-| `employee_name` | una de las dos                          | Nombre de la persona evaluada, como en la app (sin importar tildes ni mayúsculas).                      |
-| `bamboo_id`     | una de las dos                          | Id de empleado de Bamboo; si viene, gana sobre el nombre.                                               |
-| `review_cycle`  | sí                                      | Nombre del ciclo, como en la app.                                                                       |
-| `text`          | una de `text`, `text_hash`, o dimensión | El comentario, tal cual (se compara por hash normalizado: minúsculas, sin tildes, espacios colapsados). |
-| `text_hash`     |                                         | sha256 hex del texto normalizado, en vez de `text` (para no mover el contenido).                        |
-| `dimension`     |                                         | `strengths`, `improvement`, `custom_<n>`, `other`. Se usa si el texto no cruza.                         |
-| `question`      |                                         | Texto de la pregunta, en vez de `dimension` (se deriva la dimensión).                                   |
-| `sentiment`     | sí                                      | `positive`, `constructive` o `negative`.                                                                |
-| `confidence`    | no                                      | 0 a 1.                                                                                                  |
-| `themes`        | no                                      | Temas separados por `;` (se normalizan: minúsculas, sin tildes).                                        |
+| Columna         | Obligatoria                             | Qué es                                                                                                                                           |
+| --------------- | --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `employee_name` | una de las dos                          | Nombre de la persona evaluada, como en la app (sin importar tildes ni mayúsculas).                                                               |
+| `bamboo_id`     | una de las dos                          | Id de empleado de Bamboo; si viene, gana sobre el nombre.                                                                                        |
+| `review_cycle`  | sí                                      | Nombre del ciclo, como en la app.                                                                                                                |
+| `text`          | una de `text`, `text_hash`, o dimensión | El comentario, tal cual (se compara por hash normalizado: minúsculas, sin tildes, espacios colapsados).                                          |
+| `text_hash`     |                                         | sha256 hex del texto normalizado, en vez de `text` (para no mover el contenido).                                                                 |
+| `dimension`     |                                         | Clave de la dimensión de la pregunta (`strengths`, `improvement`, `valued`, `best_work`, `custom_<n>`, `other`...). Se usa si el texto no cruza. |
+| `question`      |                                         | Texto de la pregunta, en vez de `dimension` (se deriva la dimensión).                                                                            |
+| `sentiment`     | sí                                      | Uno de los cinco: positivo, constructivo, neutral, mixto o negativo (ver abajo).                                                                 |
+| `confidence`    | no                                      | 0 a 1.                                                                                                                                           |
+| `themes`        | no                                      | Temas separados por `;` (se normalizan: minúsculas, sin tildes).                                                                                 |
+
+### Sentimientos
+
+Se aceptan en español o inglés, sin importar mayúsculas ni tildes:
+
+| Valor guardado | Se acepta como                 |
+| -------------- | ------------------------------ |
+| `positive`     | `positive`, `Positivo`         |
+| `constructive` | `constructive`, `Constructivo` |
+| `neutral`      | `neutral`, `Neutro`            |
+| `mixed`        | `mixed`, `Mixto`               |
+| `negative`     | `negative`, `Negativo`         |
+
+Cualquier otro texto deja la fila sin cruzar (`invalid_sentiment`).
 
 ## Cómo cruza
 
-1. Se buscan los comentarios abiertos sobre esa persona (como evaluada) en ese ciclo.
+1. Se buscan los comentarios sobre esa persona (como evaluada) en ese ciclo: los abiertos y las respuestas a preguntas cerradas con dimensión (su texto es la etiqueta de la opción elegida), salvo que el setting `analysis.includeClosed` esté apagado.
 2. Entre ellos, el que tiene el mismo hash de texto normalizado.
 3. Si ninguno coincide, el único comentario de esa dimensión; si hay más de uno, la fila queda **sin cruzar** (`ambiguous`): nunca se adivina.
 

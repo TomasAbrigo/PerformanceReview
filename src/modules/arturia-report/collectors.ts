@@ -36,6 +36,7 @@ import {
   topThemes,
 } from "@/modules/qualitative-analysis/queries";
 import { pseudonymSources } from "@/modules/qualitative-analysis/service";
+import { getSetting } from "@/modules/settings/service";
 import { sumBy, teamLabels } from "./anonymize";
 import type { Labels } from "./labels";
 import type {
@@ -43,7 +44,7 @@ import type {
   CompletionSection,
   GoalsSection,
   PersonRow,
-  QualitativeSection,
+  QualitativeSideSection,
 } from "./schema";
 
 export type CollectContext = {
@@ -432,8 +433,20 @@ export const collectGoals: Collector<"goals"> = async (db, ctx) => {
 
 // ----------------------------------------------------------- qualitative
 
-/** Distinct participants per dimension, theme and cycle (the group sizes). */
-async function qualitativeSizes(db: DbOrTx, cycleId: string) {
+type Side = "self" | "manager";
+
+/**
+ * Distinct participants per dimension, theme and cycle (the group sizes),
+ * counting only the comments of `side` when given, and closed-question
+ * answers only when they are in the analysis (`analysis.includeClosed`), as
+ * the queries that produce the counts do.
+ */
+async function qualitativeSizes(
+  db: DbOrTx,
+  cycleId: string,
+  includeClosed: boolean,
+  side?: Side,
+) {
   const rows = await db.execute<{ kind: string; key: string; n: number }>(sql`
     with ${effectiveCte()},
     l as (
@@ -443,6 +456,8 @@ async function qualitativeSizes(db: DbOrTx, cycleId: string) {
       join review_request r on r.id = a.request_id
       join cycle_participant cp on cp.id = r.participant_id
       where r.deleted_at is null and r.status = 'submitted' and cp.removed_at is null
+        ${includeClosed ? sql`` : sql`and eff.kind = 'text'`}
+        ${side ? sql`and r.relationship = ${side}` : sql``}
     )
     select 'dimension' as kind, dimension as key, count(distinct participant_id)::int as n
       from l where cycle_id = ${cycleId}::uuid group by dimension
@@ -463,25 +478,46 @@ const withoutN = <T extends { n: number }>(x: T): Omit<T, "n"> => {
   return rest as Omit<T, "n">;
 };
 
+type Counts = Pick<
+  QualitativeSideSection["sentimentByDimension"][number],
+  "positive" | "constructive" | "neutral" | "mixed" | "negative" | "total"
+>;
+const sumCounts = (rows: Counts[]): Counts => ({
+  positive: sumBy(rows, (x) => x.positive),
+  constructive: sumBy(rows, (x) => x.constructive),
+  neutral: sumBy(rows, (x) => x.neutral),
+  mixed: sumBy(rows, (x) => x.mixed),
+  negative: sumBy(rows, (x) => x.negative),
+  total: sumBy(rows, (x) => x.total),
+});
+
 /**
- * Sentiment per dimension, trend over cycles and top themes, computed as
- * People and folded here by distinct participants. `suppressed` counts
- * people (the dimensions, themes and trend points left out; a person in
- * several of them counts in each, so it is an upper bound).
+ * Sentiment per dimension and top themes of the comments of `side` (all of
+ * them without it), computed as People and folded here by distinct
+ * participants. `suppressed` counts people (the dimensions and themes left
+ * out; a person in several of them counts in each, so it is an upper bound).
+ * Anonymized with something suppressed, no total is published (the shown
+ * rows would add up to all but the hidden ones).
  */
-export const collectQualitative: Collector<"qualitative"> = async (db, ctx) => {
-  const f = { cycleId: ctx.cycleId };
-  const [dims, trend, themes, sizes, sources] = await Promise.all([
+async function qualitativeSlice(
+  db: DbOrTx,
+  ctx: CollectContext,
+  includeClosed: boolean,
+  side: Side | undefined,
+  sources: Awaited<ReturnType<typeof pseudonymSources>>,
+): Promise<QualitativeSideSection | null> {
+  const f = { cycleId: ctx.cycleId, relationship: side, includeClosed };
+  const [dims, themes, sizes] = await Promise.all([
     sentimentByDimension(db, DEFAULT_ACTOR, f),
-    sentimentTrend(db, DEFAULT_ACTOR, {}),
     topThemes(db, DEFAULT_ACTOR, f),
-    qualitativeSizes(db, ctx.cycleId),
-    pseudonymSources(db),
+    qualitativeSizes(db, ctx.cycleId, includeClosed, side),
   ]);
-  if (!dims.length && !trend.length) return null;
+  if (!dims.length) return null;
   const others = ctx.labels.others;
 
-  type Dim = QualitativeSection["sentimentByDimension"][number] & { n: number };
+  type Dim = QualitativeSideSection["sentimentByDimension"][number] & {
+    n: number;
+  };
   const d = foldGroups<Dim>(
     dims.map((x) => ({
       ...x,
@@ -496,20 +532,18 @@ export const collectQualitative: Collector<"qualitative"> = async (db, ctx) => {
         dimension: others,
         other: true,
         n: Math.max(...rest.map((x) => x.n)),
-        positive: sumBy(rest, (x) => x.positive),
-        constructive: sumBy(rest, (x) => x.constructive),
-        negative: sumBy(rest, (x) => x.negative),
-        total: sumBy(rest, (x) => x.total),
+        ...sumCounts(rest),
       }),
     },
   );
-  const cycleSize = (id: string) => sizes.cycle.get(id) ?? 0;
-  const keptTrend = trend.filter((t) => cycleSize(t.cycleId) >= ctx.min);
 
-  type Theme = QualitativeSection["topThemes"][number] & { n: number };
+  type Theme = QualitativeSideSection["topThemes"][number] & { n: number };
   const t = foldGroups<Theme>(
     themes.map((x) => ({
-      ...x,
+      theme: x.theme,
+      count: x.count,
+      sentiment: x.sentiment,
+      quotes: x.quotes,
       other: false,
       n: sizes.theme.get(x.theme) ?? 0,
     })),
@@ -519,31 +553,64 @@ export const collectQualitative: Collector<"qualitative"> = async (db, ctx) => {
       merge: (rest) => ({
         theme: others,
         count: sumBy(rest, (x) => x.count),
+        sentiment: sumCounts(rest.map((x) => x.sentiment as Counts)),
         other: true,
         n: Math.max(...rest.map((x) => x.n)),
         quotes: [],
       }),
     },
   );
+  const shown = [...d.shown, ...(d.others ? [d.others] : [])];
+  const suppressed = d.suppressed + t.suppressed;
   // Quotes come pseudonymized from the qualitative module; run them (and the
   // theme names) through the pseudonymizer again, belt and braces.
   return {
-    sentimentByDimension: [...d.shown, ...(d.others ? [d.others] : [])].map(
-      withoutN,
-    ),
-    trend: keptTrend,
+    totals: ctx.anonymized && suppressed > 0 ? null : sumCounts(shown),
+    sentimentByDimension: shown.map(withoutN),
     topThemes: [...t.shown, ...(t.others ? [t.others] : [])].map((x) => ({
       ...withoutN(x),
       theme: x.other ? x.theme : pseudonymize([x.theme], sources).texts[0],
       quotes: [...new Set(pseudonymize(x.quotes, sources).texts)],
     })),
+    suppressed,
+  };
+}
+
+/**
+ * The qualitative section: the whole cycle (sentiment per dimension, trend
+ * over cycles, top themes, five sentiments) and the same cut by side that
+ * wrote the comments. The trend keeps only cycles with at least the minimum
+ * of people; the people of the ones left out count in `suppressed`.
+ */
+export const collectQualitative: Collector<"qualitative"> = async (db, ctx) => {
+  const includeClosed = await getSetting(db, "analysis.includeClosed");
+  const sources = await pseudonymSources(db);
+  const [all, self, manager, trend, sizes] = await Promise.all([
+    qualitativeSlice(db, ctx, includeClosed, undefined, sources),
+    qualitativeSlice(db, ctx, includeClosed, "self", sources),
+    qualitativeSlice(db, ctx, includeClosed, "manager", sources),
+    sentimentTrend(db, DEFAULT_ACTOR, { includeClosed }),
+    qualitativeSizes(db, ctx.cycleId, includeClosed),
+  ]);
+  if (!all && !trend.length) return null;
+  const cycleSize = (id: string) => sizes.cycle.get(id) ?? 0;
+  const keptTrend = trend.filter((t) => cycleSize(t.cycleId) >= ctx.min);
+  const base = all ?? {
+    totals: null,
+    sentimentByDimension: [],
+    topThemes: [],
+    suppressed: 0,
+  };
+  return {
+    ...base,
+    trend: keptTrend,
     suppressed:
-      d.suppressed +
-      t.suppressed +
+      base.suppressed +
       sumBy(
         trend.filter((x) => !keptTrend.includes(x)),
         (x) => cycleSize(x.cycleId),
       ),
+    bySide: { self, manager },
   };
 };
 
@@ -591,6 +658,7 @@ export const collectPeople: Collector<"people"> = async (db, ctx) => {
       join answer a on a.id = eff.answer_id
       join review_request r on r.id = a.request_id
       where r.cycle_id = ${ctx.cycleId}::uuid and r.status = 'submitted' and r.deleted_at is null
+        and eff.kind = 'text' -- comments only, not the closed answers
       group by r.participant_id
     )
     select p.id as person_id, p.display_name, p.work_email as email,

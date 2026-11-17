@@ -22,6 +22,8 @@ afterAll(async () => {
 });
 
 const counts = (positive: number, constructive: number, negative: number) => ({
+  neutral: 0,
+  mixed: 0,
   positive,
   constructive,
   negative,
@@ -51,6 +53,7 @@ describe("selfAssessmentReport", () => {
     ]);
     expect(r.themes.map((t) => [t.theme, t.count])).toEqual([
       ["colaboracion", 2],
+      ["equipo", 2],
       ["calidad", 1],
     ]);
     // Retention: self 5 and 2 (normalized 1 and .25), manager 2 and 2 (.25).
