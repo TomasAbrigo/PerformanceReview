@@ -5,6 +5,7 @@
  * Idempotent; meant for a daily cron (see README). Exits 1 when a cycle
  * fails and 2 on wrong arguments. `pnpm cycles:enroll --help` for more.
  */
+import { errorMessage } from "../src/lib/log";
 import { closeDb, db } from "../src/db/client";
 import { enrollCli } from "../src/modules/review-core/enroll-cli";
 
@@ -17,7 +18,7 @@ try {
 try {
   process.exitCode = await enrollCli(process.argv.slice(2), { db });
 } catch (error) {
-  console.error(error instanceof Error ? error.message : error);
+  console.error(errorMessage(error));
   process.exitCode = 1;
 } finally {
   await closeDb();

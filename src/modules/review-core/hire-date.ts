@@ -1,3 +1,4 @@
+import { errorMessage } from "@/lib/log";
 import {
   and,
   asc,
@@ -315,7 +316,7 @@ export async function enrollAllDueParticipants(
         asOf,
         enrolled: [],
         skipped: [],
-        error: error instanceof Error ? error.message : String(error),
+        error: errorMessage(error),
       });
     }
   }

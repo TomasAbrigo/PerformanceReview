@@ -1,3 +1,4 @@
+import { errorMessage } from "@/lib/log";
 import { eq } from "drizzle-orm";
 import type { DbOrTx } from "@/db/client";
 import {
@@ -209,7 +210,7 @@ export async function runIngest<E extends IngestEntity = Entity>({
       }
     });
   } catch (err) {
-    const message = err instanceof Error ? err.message : String(err);
+    const message = errorMessage(err);
     await db
       .update(ingestRun)
       .set({

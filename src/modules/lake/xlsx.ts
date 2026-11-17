@@ -1,3 +1,4 @@
+import { errorMessage } from "@/lib/log";
 import { readSheet } from "read-excel-file/node";
 import { basename } from "node:path";
 
@@ -40,7 +41,7 @@ export async function xlsxToCsv(path: string): Promise<string> {
     const sheet = await readSheet(path, { parseNumber: (text) => text });
     rows = sheet as unknown as Cell[][];
   } catch (error) {
-    const reason = error instanceof Error ? error.message : String(error);
+    const reason = errorMessage(error);
     throw new Error(
       `Cannot read "${basename(path)}" as an xlsx workbook: ${reason}`,
       { cause: error },

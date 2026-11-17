@@ -1,3 +1,4 @@
+import { errorMessage } from "@/lib/log";
 import { parseArgs } from "node:util";
 import type { DbOrTx } from "@/db/client";
 import { isUuid } from "@/lib/uuid";
@@ -42,9 +43,7 @@ export function parseEnrollArgs(argv: string[]): EnrollArgs {
       strict: true,
     }).values;
   } catch (error) {
-    throw new UsageError(
-      error instanceof Error ? error.message : String(error),
-    );
+    throw new UsageError(errorMessage(error));
   }
   if (values.cycle !== undefined && !isUuid(values.cycle)) {
     throw new UsageError("--cycle must be a cycle id (uuid)");
@@ -116,7 +115,7 @@ export async function enrollCli(
           asOf,
           enrolled: [],
           skipped: [],
-          error: error instanceof Error ? error.message : String(error),
+          error: errorMessage(error),
         },
       ];
     }

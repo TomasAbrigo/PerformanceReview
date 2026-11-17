@@ -13,6 +13,7 @@
  * On SIGTERM (the app gives up on a worker that takes too long) the run in
  * progress is stopped and marked as failed before the process exits.
  */
+import { errorMessage, logError } from "../src/lib/log";
 import { z } from "zod";
 import { closeDb, db } from "../src/db/client";
 import { importInputSchema } from "../src/modules/lake/upload-shared";
@@ -79,16 +80,16 @@ async function main() {
       response = {
         ok: false,
         code: "timeout",
-        message: error instanceof Error ? error.message : String(error),
+        message: errorMessage(error),
         issues: [],
       };
     } else {
       // Unexpected: say so on stderr too, so the app's logs have the stack.
-      console.error(error);
+      logError(error);
       response = {
         ok: false,
         code: "unknown",
-        message: error instanceof Error ? error.message : String(error),
+        message: errorMessage(error),
         issues: [],
       };
     }
@@ -98,7 +99,7 @@ async function main() {
 
 main()
   .catch((error) => {
-    console.error(error);
+    logError(error);
     process.exitCode = 1;
   })
   .finally(() => closeDb());
