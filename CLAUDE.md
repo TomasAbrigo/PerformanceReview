@@ -39,6 +39,7 @@ In-house performance review tool replacing BambooHR's performance module. Data i
 | `pnpm db:seed --size small\|demo`    | Seed the DB from `fixtures/bamboo/<size>` (`--reset` truncates first); see README "Seed"                                                                                          |
 | `pnpm fixtures:build`                | Regenerate the synthetic Bamboo fixtures in `fixtures/` (deterministic; commit the output)                                                                                        |
 | `pnpm fixtures:parquet [outDir]`     | Convert the lake-adapter CSV fixtures to Parquet (default `build/lake-parquet/`, gitignored)                                                                                      |
+| `pnpm reports:inspect <file>`        | Headers, row count and per-column non-empty/distinct counts of a report export (csv/xlsx/…), never a cell value; see README                                                       |
 
 ## Local ports
 

@@ -125,11 +125,11 @@ const misspelled = new Set(
 const seeded = new Map(employees.map((e) => [e.id, e]));
 
 /**
- * Someone whose 2023 assessment (the first cycle of the Employee Performance
+ * Someone whose assessment in the first cycle (2024-H1) of the Employee Performance
  * report, fixtures/bamboo-reports/small) is in the report under their seeded
  * name, with both the self and the manager review submitted.
  */
-export const assessed2023 = company.assessments
+export const assessedFirstCycle = company.assessments
   .filter(
     (a) =>
       a.cycle === 0 &&
