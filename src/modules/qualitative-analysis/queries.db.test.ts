@@ -214,8 +214,13 @@ describe("qualitative queries", () => {
     const themes = await topThemes(db, direction, {});
     expect(themes.every((t) => t.quotes.length === 0)).toBe(true);
     // Two participants per cycle: below the default minimum group size.
-    expect(await sentimentByDimension(db, direction, { cycleId: c2023 })).toEqual([]);
-    const hrCounts = await sentimentByDimension(db, hr, { cycleId: c2023, aggregateOnly: true });
+    expect(
+      await sentimentByDimension(db, direction, { cycleId: c2023 }),
+    ).toEqual([]);
+    const hrCounts = await sentimentByDimension(db, hr, {
+      cycleId: c2023,
+      aggregateOnly: true,
+    });
     expect(hrCounts.length).toBeGreaterThan(0);
   });
 });
