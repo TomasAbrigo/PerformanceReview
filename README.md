@@ -10,23 +10,21 @@ Herramienta interna de evaluaciones de desempeño que reemplaza el módulo de pe
 
 ## Estado del proyecto
 
-Alcance y decisiones: [`docs/prd.md`](docs/prd.md) (issue [#1](https://github.com/TomasAbrigo/PerformanceReview/issues/1)); la investigación de respaldo está en `docs/research/`. El trabajo se sigue en los [issues del repo](https://github.com/TomasAbrigo/PerformanceReview/issues).
+Alcance y decisiones: [`docs/prd.md`](docs/prd.md) (issue [#1](https://github.com/TomasAbrigo/PerformanceReview/issues/1); la iteración 2, "Insights sobre Bamboo", es el issue [#53](https://github.com/TomasAbrigo/PerformanceReview/issues/53)); la investigación de respaldo está en `docs/research/`. El trabajo se sigue en los [issues del repo](https://github.com/TomasAbrigo/PerformanceReview/issues).
 
-**v1, hecho (solo local, con datos sintéticos):**
+**Iteración 2: insights sobre Bamboo.** Bamboo sigue siendo donde se hacen las evaluaciones; esta app ingesta sus datos y los analiza. La poda ([#54](https://github.com/TomasAbrigo/PerformanceReview/issues/54)) dejó solo lo que usa el módulo de insights (solo local, con datos sintéticos):
 
-- Datos: ingesta desde Bamboo (empleados, historial de puesto y manager, goals) con identidad "golden" y cola de conflictos, organigrama a una fecha, importación por archivo con perfiles de fuente, adaptador de lake sobre archivos, log de corridas, seed y fixtures.
-- Proceso de evaluación completo: escalas y templates, ciclos (asistente, snapshot, grupos, cadencia por fecha de ingreso, duplicar), autoevaluación, evaluación del manager con double-blind, pares, goals en el ciclo, comparación con acuse de recibo e historial, calibración, operación del ciclo e importación histórica de assessments desde CSV de Bamboo.
-- Análisis: notificaciones internas, dashboards, panel de calidad de datos, API JSON de solo lectura (incluidos los pedidos y respuestas de evaluación) y exports CSV (incluido el de respuestas).
+- Datos: ingesta desde Bamboo (empleados, historial de puesto y manager, goals) con identidad "golden" y cola de conflictos, organigrama a una fecha, importación por archivo con perfiles de fuente (incluida la importación histórica de assessments y feedback desde los CSV de Bamboo), adaptador de lake sobre archivos, log de corridas, seed y fixtures.
+- Modelo de evaluaciones como datos: escalas y templates, ciclos como contenedores de solo lectura con el snapshot organizacional y de goals de cada participante, pedidos, respuestas y preguntas congeladas, con una única regla de lectura (`canRead`).
+- Análisis: dashboards, panel de calidad de datos, API JSON de solo lectura (incluidos los pedidos y respuestas) y exports CSV.
 
-Los issues de v1 están cerrados; solo queda abierta la tarea con una persona ([#23](https://github.com/TomasAbrigo/PerformanceReview/issues/23)) más el PRD ([#1](https://github.com/TomasAbrigo/PerformanceReview/issues/1)) como referencia.
+Se quitaron los flujos para hacer evaluaciones dentro de la app: asistente y fases de ciclo, autoevaluación y evaluación del manager, pares y upward, comparación, notas, acuse de recibo, calibración, operación del ciclo, notificaciones, cadencia por fecha de ingreso, `/me` y `/team`. Sus datos (tablas de pedidos, respuestas y `final_rating`) se conservan.
 
-**Pendiente o fuera de v1:**
+**Pendiente o fuera de alcance:**
 
-- **Acceso real a Bamboo y decisiones de negocio** ([#23](https://github.com/TomasAbrigo/PerformanceReview/issues/23), tarea para una persona): conseguir una API key y grabar respuestas reales para compararlas con los fixtures, verificar el catálogo de datasets y los exports de Performance, y definir con People la clave confiable de empleado, las escalas históricas, la calibración actual, los años de histórico, el anonimato de pares y el sistema de registro tras Bamboo. Hasta entonces todo corre con fixtures (las columnas de los reportes de Bamboo siguen sin verificarse contra un export real).
-- **Sin login:** modo administrador con el selector "Actuar como". Supabase Auth, roles reales y RLS son v2 (las variables `NEXT_PUBLIC_SUPABASE_*` están reservadas para eso).
-- **Sin envío de emails:** las notificaciones son internas (bandeja `/inbox`); ver "Email (fuera de alcance)" en Notificaciones.
-- **Conectores reales al lake** (BigQuery, Snowflake, Databricks, Redshift, Postgres) en v2: hoy solo existe `DuckDbFileLake` sobre archivos, con la suite de contrato lista para los reales.
-- **Otros v2 del PRD** (sección "Out of Scope"): upward agregado, autoevaluación con rating, goals nativos editables, 9-box, paquetes PDF, API pública y webhooks salientes.
+- **Acceso real a Bamboo y decisiones de negocio** ([#23](https://github.com/TomasAbrigo/PerformanceReview/issues/23), tarea para una persona): conseguir una API key y grabar respuestas reales para compararlas con los fixtures, verificar el catálogo de datasets y los exports de Performance, y definir con People la clave confiable de empleado, las escalas históricas, los años de histórico y el anonimato de pares. Hasta entonces todo corre con fixtures (las columnas de los reportes de Bamboo siguen sin verificarse contra un export real).
+- **Sin login:** modo administrador con el selector "Actuar como". Supabase Auth, roles reales y RLS quedan para más adelante (las variables `NEXT_PUBLIC_SUPABASE_*` están reservadas para eso).
+- **Conectores reales al lake** (BigQuery, Snowflake, Databricks, Redshift, Postgres): hoy solo existe `DuckDbFileLake` sobre archivos, con la suite de contrato lista para los reales.
 - **Sin deploy:** todo corre contra el Supabase local en Docker.
 
 ## Requisitos
@@ -60,19 +58,14 @@ pnpm db:seed --size demo   # 400 registros de Bamboo: 392 personas, 8 casos en l
 pnpm dev                   # http://localhost:3000 -> redirige a /es
 ```
 
-Las escalas y los templates del sistema se crean solos cuando arranca el servidor. No hay login: empezás actuando como **People** (sin persona), que ve y puede todo; el selector **"Actuar como"** (arriba) cambia el rol y la persona. Después:
+Las escalas y los templates del sistema se crean solos cuando arranca el servidor. No hay login: empezás actuando como **People** (sin persona), que ve todo; el selector **"Actuar como"** (arriba) cambia el rol (People, Manager o Empleado) y la persona. Después:
 
-1. **Mirar los datos.** `/es/people` (ficha con identificadores de origen e historial de puesto), `/es/org` (organigrama con selector de fecha), `/es/imports/runs` (las corridas del seed), `/es/imports/identity` (los 8 reingresos esperando resolución) y `/es/data-quality`.
-2. **Crear y lanzar un ciclo.** `/es/cycles/new`: para que sea manejable, elegí "Por filtro" con un área; dejá los componentes (autoevaluación, manager, pares y calibración), el template "Evaluación de fin de año", la escala final "4 puntos descriptiva" y las fechas, y pulsá "Crear y lanzar". El ciclo arranca en **Nominaciones** y el detalle lista a cada participante con su manager del snapshot.
-3. **Nominar pares (actuar como un empleado).** Rol Empleado + una persona participante, y en `/es/me` entrá a "Nominar pares".
-4. **Aprobar (actuar como su manager).** Rol Manager + el manager del snapshot de esa persona: aprobá las nominaciones en `/es/cycles/<id>/peers`. Como People, pasá el ciclo a **Recolección** con el botón "Pasar a …" del detalle.
-5. **Recolección.** El empleado completa y envía su autoevaluación desde `/es/me`; cada par nominado (rol Par) responde en "Feedback para dar".
-6. **Revisión del manager.** People pasa el ciclo a **Revisión del manager**; el manager abre `/es/team` y pulsa "Evaluar" (califica los goals, completa las preguntas y el rating general) y envía. "Comparar" muestra su evaluación contra la autoevaluación.
-7. **Calibración.** People pasa a **Calibración** (`/es/cycles/<id>/calibration`): creá un grupo (por área), proponé un cambio de rating con su motivo, mirá el histograma antes/después y "Publicar calibración".
-8. **Compartir y acusar recibo.** People pasa a **Compartir resultados**; el manager comparte la evaluación (o "Compartir todas"), y el empleado la lee en `/es/me` y acusa recibo.
-9. **Dashboards.** Como People, `/es/dashboards`: avance del ciclo, distribución de ratings pre y post calibración, goals vs rating y brecha self vs manager; "Trayectoria" por persona, "Ver equipo" (jerarquía "al momento de la review" o "actual"), la vista de dirección y los botones "Exportar CSV". De yapa, `/api/v1/people` devuelve las mismas personas en JSON.
-
-Opcional, para tener historia en los dashboards: subí `fixtures/bamboo-reports/demo/employee-performance.csv` en `/es/imports/upload` (ver "Importación histórica"); crea los ciclos 2023 a 2025 ya cerrados. Corre en un proceso aparte y con el tamaño demo puede tardar.
+1. **Mirar los datos.** `/es/people` (ficha con identificadores de origen e historial de puesto), `/es/org` (organigrama con selector de fecha), `/es/team/goals` (goals de los reportes de un manager), `/es/imports/runs` (las corridas del seed), `/es/imports/identity` (los 8 reingresos esperando resolución) y `/es/data-quality`.
+2. **Importar la historia de evaluaciones.** En `/es/imports/upload` subí `fixtures/bamboo-reports/demo/employee-performance.csv` (perfil `bamboo-employee-performance`) e "Importar"; corre en un proceso aparte y con el tamaño demo puede tardar. El resultado (`/es/imports/history/<corrida>`) lista los ciclos 2023 a 2025, ya cerrados; quien no se pudo cruzar por nombre queda en la cola de identidad. Opcional: `feedback-status.csv` suma el feedback de pares.
+3. **Ver un ciclo.** `/es/cycles` y el detalle de un ciclo: período, cantidad de preguntas y los participantes con su manager, área y puesto a la fecha del snapshot.
+4. **Historial de una persona.** Desde su ficha, "Evaluaciones" (`/es/people/<id>/reviews`): cada ciclo con el manager y el puesto de ese momento y las respuestas que el actor puede leer.
+5. **Dashboards.** Como People, `/es/dashboards`: avance del ciclo, distribución de ratings, goals vs rating y brecha self vs manager; "Trayectoria" por persona, "Ver equipo" (jerarquía "al momento de la review" o "actual"), la vista de dirección y los botones "Exportar CSV". Actuando como un manager, solo su equipo.
+6. **API y exports.** `/api/v1/cycles`, `/api/v1/cycles/<id>/requests` y `/api/v1/export/answers.csv?cycle_id=<id>` devuelven los mismos datos en JSON y CSV.
 
 ## Variables de entorno
 
@@ -90,7 +83,7 @@ Viven en `.env.local` (ignorado por git); `.env.example` es la plantilla. Con la
 
 ## Funcionalidades
 
-Qué hay en la app, dónde está en la UI y las reglas que conviene conocer. Las rutas van bajo `/es` (o `/en`); el inicio (`/es`) enlaza a las pantallas principales. Los detalles de ingesta, seed, lake, notificaciones y API están en las secciones siguientes.
+Qué hay en la app, dónde está en la UI y las reglas que conviene conocer. Las rutas van bajo `/es` (o `/en`); el inicio (`/es`) enlaza a las pantallas principales. Los detalles de ingesta, seed, lake y API están en las secciones siguientes.
 
 ### Personas, organigrama y goals
 
@@ -101,69 +94,22 @@ Qué hay en la app, dónde está en la UI y las reglas que conviene conocer. Las
 
 - **Dónde:** `/settings/scales` (escalas de rating) y `/settings/templates` (lista y editor `/settings/templates/<id>`).
 - **Escalas:** cada opción tiene un valor numérico, una etiqueta en español e inglés y un valor normalizado de 0 a 1, para comparar ratings aunque cambie la escala. Las del sistema (no se pueden borrar): "4 puntos descriptiva" (Necesita desarrollo, Cumple expectativas, Supera a menudo, Marca un nuevo estándar), "5 puntos" (de totalmente en desacuerdo a totalmente de acuerdo) y "Nunca…Siempre".
-- **Templates:** secciones y preguntas (texto, calificación con escala u opción única) con texto en es/en. Cada pregunta define a quién aplica (autoevaluación, manager, par o upward), si la persona evaluada la ve, si es obligatoria y, opcionalmente, una función especial (`goals_rating`, `goals_comment`, `overall_rating`; ver "Goals en el ciclo"). Los templates del sistema se crean al arrancar el servidor: "Evaluación de fin de año", "Ciclo de desarrollo de mitad de año" (sin ratings), "Feedback de pares" y "Upward" (apagado en v1). No se editan ni se borran: se clonan.
-- **Versionado:** al lanzar un ciclo, sus preguntas y escalas se congelan en revisiones inmutables; editar un template después no cambia el significado de lo ya respondido.
+- **Templates:** secciones y preguntas (texto, calificación con escala u opción única) con texto en es/en. Cada pregunta define a quién aplica (autoevaluación, manager, par o upward), si la persona evaluada la ve, si es obligatoria y, opcionalmente, una función especial (`goals_rating`, `goals_comment`, `overall_rating`; ver "Ciclos"). Los templates del sistema se crean al arrancar el servidor: "Evaluación de fin de año", "Ciclo de desarrollo de mitad de año" (sin ratings), "Feedback de pares" y "Upward" (apagado en v1). No se editan ni se borran: se clonan.
+- **Versionado:** las preguntas de cada ciclo viven congeladas en revisiones inmutables (`question_revision`, con su escala copiada); editar un template no cambia el significado de lo ya respondido.
 
 ### Ciclos (`/cycles`)
 
-- **Dónde:** la lista y el detalle (`/cycles`, `/cycles/<id>`) y el asistente `/cycles/new`, de 5 pasos: **Personas** (todas las activas, por filtro de área, división, ubicación, puesto o estado, o individuales; más la fecha de snapshot organizacional), **Componentes y anonimato** (autoevaluación, manager, pares, upward y calibración; modo de anonimato de pares y de upward; template y escala final), **Grupos** (opcional), **Fechas por fase** y **Revisar y lanzar** (también se puede guardar como borrador).
-- **Estados:** borrador, nominaciones (solo con pares), recolección, revisión del manager, calibración (solo si está activada), compartir resultados y cerrado. Desde una fase activa se avanza o se retrocede una, y cada cambio queda registrado con quién, cuándo y una nota. Cerrado es terminal.
-- **Snapshot organizacional:** al lanzar se congela, por participante, el manager, el área, la división, el puesto y la ubicación a la fecha de snapshot (a partir del historial de puesto), y se crean sus solicitudes pendientes. Los análisis usan ese manager y esa área, no los actuales; si la persona cambia de manager después, el sistema lo marca (ver "Operación del ciclo"). Tras el lanzamiento solo se editan el nombre y las fechas límite.
-- **Extras** (detalle en [Ciclos: duplicar, plantillas por grupo y cadencia por fecha de ingreso](#ciclos-duplicar-plantillas-por-grupo-y-cadencia-por-fecha-de-ingreso)): **grupos de templates** (cada persona usa el template del primer grupo cuyo filtro la incluye), **cadencia por fecha de ingreso** (hitos de 30, 60, 90, 180 o 365 días con una ventana de 1 a 4 semanas; cada persona entra al ciclo con su propia fecha límite y el comando `pnpm cycles:enroll` hace la incorporación diaria) y **duplicar** un ciclo como borrador.
+- **Dónde:** la lista `/cycles` y el detalle `/cycles/<id>`, de solo lectura: período, fecha de snapshot, cantidad de preguntas y los participantes. Los ciclos llegan con la importación histórica (o el seed); la app ya no los crea ni les cambia la fase.
+- **Estados:** el enum conserva las fases del flujo anterior (borrador, nominaciones, recolección, revisión del manager, calibración, compartir resultados, cerrado) porque los datos las tienen; los ciclos importados quedan cerrados.
+- **Snapshot organizacional:** cada participante guarda el manager, el área, la división, el puesto y la ubicación a la fecha de snapshot (a partir del historial de puesto). Los análisis usan ese manager y esa área, no los actuales; un pedido del manager cuyo evaluador no coincide con el del snapshot queda marcado como `reviewer_mismatch` y se cuenta en `/data-quality`.
+- **Goals:** cada participante tiene su snapshot de goals (`participant_goal_snapshot`: título, estado, progreso y fecha límite) con los goals que se solapan con el período o que están vinculados al ciclo (`cycle_goal_link`). El rating de goals y su comentario (`goals_rating`, `goals_comment`) se guardan aparte y nunca alimentan el rating general (`overall_rating`).
+- **Rating final:** `final_rating` es un registro append-only con etapas (`computed`, `manager`, `calibrated`, `override`); la vista `v_current_rating` toma la de mayor precedencia y, dentro de ella, la más reciente. Los dashboards la leen.
 
-### Autoevaluación y bandeja de tareas (`/me`)
+### Actor y visibilidad
 
-- **Selector "Actuar como":** como v1 no tiene login, la barra superior permite elegir un rol (People, Manager, Empleado, Par o Calibrador) y una persona; queda en la cookie `pr_actor`. Por defecto se actúa como "People (RR. HH.)", sin persona, que ve y puede todo. Toda lectura y escritura de evaluaciones recibe ese actor, de modo que Supabase Auth pueda enchufarse después sin tocar el modelo.
-- **Bandeja de tareas `/me`** ("Mis tareas", de la persona elegida): autoevaluaciones pendientes con su fecha límite, nominaciones de pares, feedback para dar, evaluaciones ya compartidas y las últimas notificaciones sin leer.
-- **Autoevaluación `/cycles/<id>/self`:** las preguntas del template para la relación `self` y el bloque de goals del período en solo lectura. El borrador se guarda al salir de cada campo; las preguntas obligatorias se validan al enviar. Solo se escribe en la fase de recolección. Una vez enviada no se edita: solo People la puede desbloquear, con un motivo.
-
-### Evaluación del manager (`/team`)
-
-- **Dónde:** `/team` ("Mi equipo") lista a los reportes directos en ciclos activos con el estado de su autoevaluación y de la evaluación del manager, si ya está compartida, y los botones "Evaluar" y "Recordar". El formulario es `/cycles/<id>/manager/<participante>`: goals en solo lectura con su calificación y comentario, las preguntas del template y la calificación general en la escala final.
-- **Double-blind** (activo por defecto, se puede apagar por ciclo): el manager no ve la autoevaluación hasta haber enviado su evaluación, y el empleado no ve la del manager hasta que se comparte.
-- **Compartir:** una evaluación enviada se comparte en la fase "Compartir resultados" (y, con calibración activada, recién después de publicarla). La comparten el manager o People, de a una o con "Compartir todas las evaluaciones enviadas"; se puede des-compartir, y una evaluación compartida no se edita sin des-compartirla antes. El empleado la lee en `/cycles/<id>/result` y solo ve las preguntas marcadas como visibles para la persona evaluada.
-- **Visibilidad:** una única función, `canRead` (`src/modules/review-core/visibility.ts`), decide quién lee cada evaluación y cada respuesta.
-
-### Pares y upward
-
-- **Nominaciones** (`/cycles/<id>/peers`): en la fase de nominaciones cada empleado nomina hasta N pares (5 por defecto) y su manager aprueba o rechaza, de a una o en bloque; el ciclo también puede configurarse sin aprobación. El máximo de nominaciones, la aprobación y el umbral de carga se fijan en el asistente y se bloquean al lanzar. Cada nominación aprobada genera la solicitud de feedback; se avisa ("Mucha carga") cuando alguien acumula solicitudes abiertas por encima del umbral (5 por defecto).
-- **Feedback:** en recolección el par responde las preguntas `peer` del template, con borrador, o declina la solicitud con un motivo. Antes de escribir ve cómo se mostrará su nombre. Lo recibido se ve en `/cycles/<id>/peers/feedback/<participante>` (el manager lo ve para su equipo).
-- **Anonimato** (por ciclo, se fija al lanzar): _transparente_ (el nombre lo ven la persona evaluada, su manager y People), _anónimo para la persona evaluada_ (ve "Par"; el manager y People sí ven el nombre) o _totalmente anónimo_ (nadie ve el nombre, tampoco People). La persona evaluada lee el feedback solo cuando se comparte, y solo las preguntas marcadas como visibles para ella (la pregunta "solo para su manager" del template de sistema queda fuera).
-- **Upward:** el componente existe (los reportes directos de un participante que también participen del ciclo reciben una solicitud de feedback sobre él, con su propio modo de anonimato), pero el template de sistema "Upward" viene apagado y la vista agregada con mínimo de respuestas es v2.
-
-### Goals en el ciclo
-
-- **Snapshot:** al lanzar el ciclo (o al agregar a un participante) se copian los goals de cada persona a `participant_goal_snapshot`, con título, estado, progreso y fecha límite a ese momento; los que se crean después no aparecen. Un goal pertenece al ciclo por solapamiento con el período o por un vínculo explícito ("Vincular objetivo"); "Actualizar progreso" refresca las cifras de los goals listados y marca como "Ya no aplica" a los que se borraron.
-- **Dónde:** el bloque de solo lectura se muestra en la autoevaluación y en la evaluación del manager.
-- **Rating de goals:** una sola calificación para todos los goals, con su comentario, son preguntas del template del manager con función especial (`goals_rating`, `goals_comment`). La calificación general es la pregunta `overall_rating`. El rating de goals nunca alimenta el rating final ni la calibración.
-
-### Comparación, notas, acuse e historial
-
-- **Comparación** `/cycles/<id>/compare/<participante>`: autoevaluación y evaluación del manager lado a lado, pregunta por pregunta, con la diferencia resaltada en las de rating. Está disponible cuando ambas están enviadas; "Vista del empleado" oculta lo que el empleado no va a ver (útil al compartir pantalla).
-- **Notas de seguimiento:** el manager (o People) registra acuerdos después de la conversación; el empleado las ve cuando la evaluación está compartida.
-- **Acuse de recibo:** el empleado acusa recibo, con una nota opcional, hasta 7 días después de que se compartió (o hasta la fecha límite de "Acuse de recibo" del ciclo, si es posterior). Pasado el plazo ya no puede; el manager ve en qué estado está.
-- **Historial** `/people/<id>/reviews`: los ciclos con evaluaciones finalizadas o compartidas de una persona, con el manager, el puesto y el área de ese momento, el rating vigente y el estado de compartida y acuse. Lo ven People, la propia persona (solo los ciclos cuya evaluación se le compartió, y sin el rating original), su manager actual (todos los ciclos, aun los que no gestionó) y quien fue su manager en cada ciclo.
-
-### Calibración (`/cycles/<id>/calibration`)
-
-- **Grupos:** People crea grupos de calibración (por área, por manager o manual) e invita calibradores, de solo lectura o con permiso de proponer cambios.
-- **Tabla por grupo:** empleado, manager del snapshot, rating del manager, rating vigente, un cambio propuesto con **motivo obligatorio** y la marca "Discutir". El valor propuesto tiene que ser una opción de la escala final del ciclo.
-- **Distribución:** histograma de ratings antes (manager) y después (vigente) por área o por manager, con vista de tabla; sin curva forzada.
-- **`final_rating` append-only:** cada rating queda en un registro que nunca se edita (quién, cuándo, valor y motivo) con una etapa (`computed`, `manager`, `calibrated`, `override`). La vista `v_current_rating` toma la de mayor precedencia y, dentro de ella, la más reciente.
-- **Publicar:** "Publicar calibración" deja la calibración como definitiva, la audita y avisa a los managers. Los cambios posteriores se guardan como `override`, también auditados. El empleado ve solo el rating final, y solo cuando su evaluación está compartida y la calibración publicada: nunca el rating original, la etapa ni los motivos.
-
-### Operación del ciclo (`/cycles/<id>/participants`, `/cycles/<id>/audit`)
-
-- **Dónde:** solo People. `/cycles/<id>/participants` ("Participantes y evaluadores") y `/cycles/<id>/audit` (registro de auditoría); la fecha límite se extiende desde el detalle del ciclo.
-- **Qué se puede hacer:** agregar un participante (se toma su snapshot hoy y se crean sus evaluaciones pendientes), quitarlo (sus evaluaciones y respuestas se conservan como historial pero ya no se escriben), extender la fecha límite de una fase, desbloquear una evaluación enviada y completar una evaluación en nombre de otro (queda marcada).
-- **Evaluadores alternos:** se puede asignar otro evaluador a una persona, que _reemplaza_ a la evaluación del manager (p. ej. manager con licencia, o el CEO sin manager) o es _adicional_. Cuando una persona cambia de manager durante el ciclo, la tabla lo marca ("Ahora reporta a X (snapshot: Y)") y sugiere reasignar o sumar un evaluador; el pedido que no coincide con el manager del snapshot queda marcado como `reviewer_mismatch` y se cuenta en `/data-quality`.
-- **Auditoría:** cada acción administrativa escribe una fila en `admin_audit_log` con quién, cuándo, el estado anterior y el nuevo y una nota opcional.
-
-### Notificaciones (`/inbox`)
-
-- **Dónde:** la campana del header (con el contador de no leídas), la bandeja `/inbox` y las últimas no leídas en `/me`. Son internas: **no se envían emails** en v1.
-- **Qué avisa:** cambio de fase del ciclo, evaluación compartida, feedback recibido, calibración publicada, recordatorios de fecha límite y recordatorios manuales ("Recordar") de un manager o de People.
-- **Recordatorios automáticos:** `pnpm notifications:run`, una vez por día (cron); ver [Notificaciones](#notificaciones) más abajo.
+- **Selector "Actuar como":** como no hay login, la barra superior permite elegir un rol (People, Manager o Empleado) y una persona; queda en la cookie `pr_actor`. Por defecto se actúa como "People (RR. HH.)", sin persona, que ve todo.
+- **Visibilidad:** una única función, `canRead` (`src/modules/review-core/visibility.ts`), decide quién lee cada pedido y cada respuesta: People todo; cada persona lo que escribió; el manager del snapshot la evaluación del manager y, ya enviadas, la autoevaluación (con double-blind) y el feedback de pares; la persona evaluada la evaluación del manager una vez compartida y solo las preguntas visibles para ella; el manager del manager y el manager actual lo ya compartido. El anonimato de pares lo decide `reviewerVisible`.
+- **Historial** `/people/<id>/reviews`: los ciclos cerrados o compartidos de una persona, con el manager, el puesto y el área de ese momento, el rating vigente y las respuestas que el actor puede leer.
 
 ### Dashboards (`/dashboards`)
 
@@ -305,70 +251,6 @@ Ejemplo de cron (crontab del servidor): cada 15 minutos lo incremental barato (`
 ```
 
 El código de salida distinto de cero permite alertar desde el propio cron (por ejemplo con `MAILTO` o un wrapper que avise a un canal).
-
-## Ciclos: duplicar, plantillas por grupo y cadencia por fecha de ingreso
-
-- **Duplicar:** el botón "Duplicar ciclo" del detalle (en cualquier estado) crea un borrador "<nombre> (Copia)" con componentes, anonimato, plantilla, escala final, filtro de participantes, programación, fechas límite (tal cual: hay que editarlas) y grupos. No copia participantes ni preguntas congeladas, y la copia no comparte nada con el original. Una plantilla que ya no está disponible (borrada o apagada) no se copia: la copia queda sin plantilla (o sin ese grupo) y el botón lo avisa antes de abrirla.
-- **Plantillas por grupo:** el paso opcional "Grupos" del asistente define grupos (nombre, filtro y plantilla). Cada persona usa la plantilla del **primer** grupo (por orden) cuyo filtro la incluya, evaluado a la fecha de snapshot; quien no entra en ninguno usa la plantilla del ciclo. Al lanzar, las preguntas de cada grupo se congelan con su `group_id` y cada participante guarda su `template_group_id`; los formularios (autoevaluación, manager y pares) leen las preguntas con `questionsFor(db, cycleId, participant.templateGroupId, relationship)`, el único lector de revisiones.
-- **Cadencia por fecha de ingreso:** en el paso "Fechas" se elige "Por fecha de ingreso", un hito (30, 60, 90, 180 o 365 días) y una ventana (1 a 4 semanas). Al lanzar el ciclo no tiene participantes: cada persona entra cuando `fecha de ingreso + hito` cae dentro de la ventana (`[hoy - ventana, hoy]`), con su snapshot a esa fecha y su propia fecha límite (`ingreso + hito + ventana`, para autoevaluación y manager, en `cycle_participant.due_dates`). Quien fue quitado del ciclo no vuelve a entrar.
-
-La incorporación la hace un comando idempotente que conviene correr **una vez por día** (la ventana más corta es de una semana: si el cron falla varios días seguidos puede perderse a alguien; se puede recuperar con `--as-of`):
-
-```bash
-pnpm cycles:enroll                                 # todos los ciclos activos por fecha de ingreso, a hoy (zona horaria de la empresa)
-pnpm cycles:enroll --cycle <id> --as-of 2026-03-10 # un ciclo, a una fecha dada
-```
-
-```cron
-0 6 * * * cd /srv/performance-review && pnpm cycles:enroll >> /var/log/pr-enroll.log 2>&1
-```
-
-Solo se incorpora a quien sigue empleado a esa fecha (sin baja anterior), aunque su historial de puestos aún no se haya cerrado. Quien cumple el hito pero todavía no tiene historial de puestos (la ingesta no lo trajo) no se puede incorporar: el comando lo lista como `skipped ... no_job_history` y cada corrida lo reintenta mientras dure su ventana. Para recuperar a quien ya se pasó de la ventana (por ejemplo después de una caída del cron), `--lookback-days N` (0 a 365) amplía el rango N días hacia atrás; la fecha límite sigue siendo hito + ventana.
-
-Código de salida `0` si todo salió bien, `1` si algún ciclo falló y `2` si los argumentos son inválidos.
-
-## Notificaciones
-
-Las notificaciones de v1 son **internas**: se guardan en la tabla `notification` y se ven en la bandeja `/es/inbox` (campana con el contador de no leídas en el header y las 3 últimas no leídas en `/es/me`). **No se envían emails** (fuera de alcance del PRD en v1).
-
-Cada notificación guarda `kind`, el destinatario, el ciclo y el request (si aplica) y un `payload` con las variables del texto (`cycleName`, `dueDate`, `daysLeft`, `senderName`, ...). El texto nunca se guarda: se arma al mostrarla, en el idioma de quien la lee, con las claves `Notifications.messages.<kind>` de `src/messages/{es,en}.json` (y el destino del botón "Abrir" sale de `notificationHref`, `src/modules/notifications/href.ts`). Para sumar un tipo: agregarlo a `src/modules/notifications/kinds.ts`, generar la migración del enum, escribir su mensaje en es/en y, si tiene página propia, su destino en `href.ts`.
-
-**Idempotencia:** `dedupe_key` es único y toda creación pasa por `createNotification`/`createNotifications` (`ON CONFLICT DO NOTHING`), así que repetir un evento, o correr dos procesos a la vez, no duplica nada.
-
-### Recordatorios automáticos
-
-```bash
-pnpm notifications:run                        # recordatorios de hoy (zona horaria de la empresa)
-pnpm notifications:run --as-of 2026-07-08     # como si hoy fuera esa fecha
-pnpm notifications:run --offsets 7,3,1,0      # otros días de anticipación
-pnpm notifications:run --help
-```
-
-Crea un `reminder_due` para cada tarea **pendiente** (request en borrador, participante todavía en el ciclo, ciclo no cerrado ni borrado y en una fase en la que ese tipo de evaluación se puede escribir) cuya fecha límite (`due_dates` del ciclo) sea exactamente `--as-of` + 7, + 1 o + 0 días (por defecto `7,1,0`, las cadencias de `docs/research/06`). La fecha límite de cada tipo sale de su fase: `self` → `self`, `manager` → `manager`, `peer` y `upward` → `peer`. Quien ya envió, rechazó o salió del ciclo no recibe nada, y un día en que el comando no corre no se recupera (no hay recordatorios atrasados). La clave de deduplicación es `reminder_due:<requestId>:<díasAntes>:<fechaLímite>`: correr el comando varias veces el mismo día no duplica, y si People mueve la fecha límite, el nuevo día de aviso genera un recordatorio nuevo. `--as-of` por defecto es `todayLocal()` (America/Argentina/Buenos_Aires), no la zona del servidor. Código de salida `0` (ok) o `2` (argumentos o `DATABASE_URL` inválidos).
-
-Ejemplo de cron (una vez por día, a las 7 AM hora de Buenos Aires como los emails de Bamboo; el servidor está en UTC, de ahí las 10):
-
-```cron
-0 10 * * * cd /srv/performance-review && pnpm notifications:run >> /var/log/pr-notifications.log 2>&1
-```
-
-### Desde el código
-
-Todo está en `@/modules/notifications`:
-
-| Función                                                                        | Para qué                                                                                                                                                                                                                                                                         |
-| ------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `generateDueReminders(db, { asOf?, offsets? })`                                | Lo que corre el CLI. Devuelve `{ asOf, offsets, candidates, created }`.                                                                                                                                                                                                          |
-| `remind(db, actor, requestId, { asOf? })`                                      | Recordatorio manual ("Recordar") de un request pendiente: lo puede enviar el manager del snapshot del participante o HR (`NotificationError`: `not_found`, `forbidden`, `not_pending`). Máximo uno por remitente, request y día: devuelve `{ created: false }` en la repetición. |
-| `createNotification(db, input)` / `createNotifications(db, inputs)`            | Punto de escritura estable: idempotente por `dedupeKey`; devuelve si se creó (o cuántas).                                                                                                                                                                                        |
-| `notifyPhaseChanged(db, cycleId, from, to)`                                    | Avisa a los participantes activos del cambio de fase. Lo llaman `launchCycle` y `transition` de review-core dentro de su transacción.                                                                                                                                            |
-| `notifyReviewShared` / `notifyFeedbackReceived` / `notifyCalibrationPublished` | Eventos que llaman compartir, el envío de feedback y la publicación de la calibración. Idempotentes. El de feedback nunca incluye al autor (puede ser anónimo).                                                                                                                  |
-| `listNotifications(db, actor, { unreadOnly?, limit?, cursor? })`               | Bandeja del actor: no leídas primero, luego leídas, más nuevas primero; paginado por cursor (`nextCursor`).                                                                                                                                                                      |
-| `markRead(db, actor, ids)` / `markAllRead(db, actor)` / `unreadCount`          | Solo tocan las notificaciones propias; los ids ajenos se ignoran. Sin persona (People actuando como equipo) no hay bandeja.                                                                                                                                                      |
-
-### Email (fuera de alcance)
-
-Hoy `createNotifications` (`src/modules/notifications/service.ts`) es el único punto por el que se crea una notificación. Un adaptador de email se enchufaría ahí: devolver las filas nuevas (`RETURNING`) y pasarlas a un canal que arme el texto con las mismas claves de i18n en el idioma del destinatario; o un worker aparte que lea las notificaciones sin marca de envío. Nada de eso existe todavía.
 
 ## Lake adapter
 
@@ -513,9 +395,9 @@ Handlers en `src/modules/api/handlers.ts`, rutas en `src/app/api/v1/**`. Todos l
 - **Paginación:** `?limit=` (1-200, por defecto 50) y `?cursor=`. Las listas responden `{ data, next_cursor }`; `next_cursor` es `null` en la última página. Es keyset (no offset) sobre una clave inmutable: `(created_at, id)` (también los pedidos de evaluación), `(started_at desc, id desc)` para corridas, `id` para el org y `(sort, id)` para las respuestas y las preguntas congeladas (en el orden de las preguntas). Una fila nueva nunca corre ni repite las páginas ya leídas. Un cursor ajeno es un 400.
 - **Errores:** `application/problem+json` (RFC 9457). 400 para parámetros inválidos (con `errors: [{ path, message }]`), 404 para ids desconocidos o mal formados (también un `as_person` que no es una persona), 401 sin token válido y 403 cuando, con `as_person`, esa persona no puede leer el pedido. Un cursor ajeno es un 400 antes que cualquier 404 o 403.
 - **Auth:** sin sesión en v1. Si la variable `API_TOKEN` está definida, hace falta `Authorization: Bearer <API_TOKEN>` (comparación en tiempo constante); si está vacía o sin definir la API queda abierta (desarrollo local). Los botones "Exportar CSV" son enlaces del navegador y no pueden mandar el header: con `API_TOKEN` definido no se muestran (bajá los CSV con `curl -H "Authorization: Bearer $API_TOKEN"`) hasta que exista la sesión.
-- **Datos de revisión: con qué ojos se lee.** La API no tiene sesión ni actor: es una superficie de integración (lake, analytics), así que por defecto lee como People (`scope=hr`): todos los pedidos y respuestas, borradores incluidos, con el token si `API_TOKEN` está definido. Para depurar o comprobar paridad con lo que ve una persona, `?as_person=<id de persona>&role=employee|manager|peer|calibrator|hr` (por defecto `employee`) aplica el mismo `canRead` que las pantallas (`src/modules/review-core/visibility.ts`): las listas omiten lo que esa persona no puede leer (las páginas se llenan igual), un pedido ajeno es un 403 y en las respuestas faltan las preguntas que el evaluado no ve (`visible_to_reviewee`) y `answer_count` cuenta solo las que esa persona puede leer. `role` sin `as_person`, o `scope=hr` junto con `as_person`, es un 400; una persona desconocida, un 404. Rige también para los CSV de revisión. Es solo para depurar: resuelve `canRead` pedido por pedido.
+- **Datos de revisión: con qué ojos se lee.** La API no tiene sesión ni actor: es una superficie de integración (lake, analytics), así que por defecto lee como People (`scope=hr`): todos los pedidos y respuestas, borradores incluidos, con el token si `API_TOKEN` está definido. Para depurar o comprobar paridad con lo que ve una persona, `?as_person=<id de persona>&role=employee|manager|hr` (por defecto `employee`) aplica el mismo `canRead` que las pantallas (`src/modules/review-core/visibility.ts`): las listas omiten lo que esa persona no puede leer (las páginas se llenan igual), un pedido ajeno es un 403 y en las respuestas faltan las preguntas que el evaluado no ve (`visible_to_reviewee`) y `answer_count` cuenta solo las que esa persona puede leer. `role` sin `as_person`, o `scope=hr` junto con `as_person`, es un 400; una persona desconocida, un 404. Rige también para los CSV de revisión. Es solo para depurar: resuelve `canRead` pedido por pedido.
 - **Anonimato del evaluador, siempre.** En los pedidos par/upward de un ciclo `fully_anonymous` la API nunca dice quién escribió: `reviewer` es `null` y `reviewer_visible` `false` con cualquier alcance (HR incluido, y hasta el propio autor), y en los CSV quedan vacías las columnas del evaluador. Con `anonymous_to_employee` se nombra al evaluador salvo al evaluado (`as_person` = el evaluado). Los pedidos self y manager llevan siempre evaluador (`reviewer` es `null` solo si no tienen: `reviewer_missing`). No hay filtro por evaluador, a propósito; `decline_reason` (texto libre) no se expone.
-- Los pedidos de participantes removidos aparecen (con `participant.removed_at`); los borrados, no. Un participante puede tener varios pedidos manager (#17): `additional` marca el del evaluador adicional, `assigned_by_hr` el evaluador alternativo puesto por RR. HH., `submitted_on_behalf` el completado por RR. HH. en nombre del evaluador, y `status=superseded` el reemplazado (historial: no cuentes más de un pedido manager vigente por participante). El rating vigente del participante (`v_current_rating`: override > calibrado > manager > computado) viaja en `participant.current_rating` de cada pedido (`stage`, `option_value`, `option_label`, `normalized`, `created_at`; `null` si no hay) y como columnas `rating_*` de `requests.csv`, pero solo se lee como HR: con `as_person` de otro rol es `null`, porque un rating sin publicar no es para el evaluado, su manager ni los pares.
+- Los pedidos de participantes removidos aparecen (con `participant.removed_at`); los borrados, no. Los pedidos manager con `status=superseded` son historial de un evaluador reemplazado (no cuentes más de un pedido manager vigente por participante). El rating vigente del participante (`v_current_rating`: override > calibrado > manager > computado) viaja en `participant.current_rating` de cada pedido (`stage`, `option_value`, `option_label`, `normalized`, `created_at`; `null` si no hay) y como columnas `rating_*` de `requests.csv`, pero solo se lee como HR: con `as_person` de otro rol es `null`, porque un rating sin publicar no es para el evaluado, su manager ni los pares.
 
 ### Exports CSV
 
