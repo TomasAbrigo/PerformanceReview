@@ -792,7 +792,16 @@
       "avg_progress": "avance promedio",
       "normalized": "rating normalizado",
       "gap": "brecha",
-      "answers": "respuestas"
+      "answers": "respuestas",
+      "indicator": "indicador",
+      "value": "valor",
+      "mean": "promedio",
+      "alert_kind": "alerta",
+      "previous_cycle": "ciclo anterior",
+      "previous_value": "valor anterior",
+      "fall": "caída",
+      "retention": "retención",
+      "engagement": "compromiso"
     }
   },
   "ImportHistory": {
@@ -939,6 +948,123 @@
       "completion": "Completitud",
       "byDepartment": "Por área",
       "suppressed": "{n, plural, =0 {Ninguna persona en grupos chicos} one {# persona en áreas chicas (no se desglosa)} other {# personas en áreas chicas (no se desglosan)}}"
+    }
+  },
+  "Indicators": {
+    "nav": "Retención y compromiso",
+    "title": "Indicadores de retención y compromiso",
+    "forbidden": "No tenés acceso a estos indicadores.",
+    "noCycles": "Todavía no hay ciclos lanzados.",
+    "none": "Sin asignar",
+    "scope": {
+      "directReports": "Ves solo a tus reportes directos al momento de cada ciclo.",
+      "aggregatesOnly": "Solo agregados: se muestran grupos de al menos {min} personas."
+    },
+    "indicator": {
+      "label": "Indicador",
+      "retention": "Retención",
+      "engagement": "Compromiso"
+    },
+    "groupBy": {
+      "label": "Agrupar por",
+      "department": "Área",
+      "manager": "Manager",
+      "none": "Sin agrupar"
+    },
+    "hierarchy": {
+      "label": "Jerarquía",
+      "asOf": "Al momento del ciclo",
+      "current": "Actual"
+    },
+    "filters": {
+      "label": "Filtros",
+      "cycle": "Ciclo",
+      "department": "Área",
+      "manager": "Manager",
+      "any": "Todos",
+      "apply": "Aplicar"
+    },
+    "distribution": {
+      "title": "Distribución de {indicator}",
+      "hint": "Cuántas personas recibieron cada valor, de 1 a 5, en la evaluación del manager.",
+      "n": "{n, plural, one {# persona} other {# personas}}",
+      "mean": "Promedio {value}",
+      "all": "Todos",
+      "others": "Otros",
+      "group": "Grupo",
+      "people": "Personas",
+      "average": "Promedio",
+      "valueCount": "valor {value}: {count}",
+      "barLabel": "{group}, valor {value}: {count}",
+      "suppressed": "{n, plural, one {# persona está en un grupo de menos de {min} y no se muestra} other {# personas están en grupos de menos de {min} y no se muestran}}"
+    },
+    "matrix": {
+      "title": "Matriz de retención y compromiso",
+      "hint": "Cuántas personas hay en cada cruce de bandas; el cuadrante de riesgo es el de retención y compromiso bajos a la vez.",
+      "band": {
+        "low": "Bajo",
+        "mid": "Medio",
+        "high": "Alto"
+      },
+      "cell": "Retención {retention}, compromiso {engagement}: {count, plural, one {# persona} other {# personas}}",
+      "cellHidden": "Retención {retention}, compromiso {engagement}: menos de {min} personas",
+      "total": "{n, plural, one {# persona con ambos indicadores} other {# personas con ambos indicadores}}",
+      "totalHidden": "Total no disponible",
+      "riskCount": "En riesgo: {n}",
+      "suppressed": "Las celdas con menos de {min} personas no se muestran, y tampoco el total.",
+      "risk": {
+        "label": "Riesgo",
+        "title": "Personas en el cuadrante de riesgo",
+        "empty": "Nadie está en el cuadrante de riesgo.",
+        "person": "Persona",
+        "manager": "Manager",
+        "department": "Área"
+      }
+    },
+    "alerts": {
+      "title": "Alertas",
+      "hint": "Caída de {drop} puntos o más respecto del ciclo anterior, o retención y compromiso en {risk} o menos a la vez.",
+      "summary": "Personas con caída: {drop} · Personas en riesgo: {risk}",
+      "under": "menos de {min}",
+      "aggregateOnly": "Dirección ve solo cuántas personas tienen alertas, no quiénes.",
+      "kind": {
+        "label": "Alerta",
+        "drop": "Caída",
+        "risk": "Riesgo"
+      },
+      "person": "Persona",
+      "manager": "Manager",
+      "department": "Área",
+      "detail": "Detalle",
+      "dropDetail": "{indicator}: {previous} → {value} (−{delta}) desde {cycle}",
+      "riskDetail": "Retención {retention}, compromiso {engagement}"
+    },
+    "trend": {
+      "title": "Evolución de retención y compromiso",
+      "link": "Ver evolución",
+      "hint": "Elegí una persona, un equipo o un área; sin elegir, se muestra {scope}.",
+      "back": "Volver a los indicadores",
+      "subject": {
+        "all": "toda la organización",
+        "myTeam": "tu equipo",
+        "team": "el equipo de {name}",
+        "department": "el área {name}",
+        "person": "{name}"
+      },
+      "of": "{indicator}: {subject}",
+      "chartLabel": "{indicator} por ciclo, {subject}",
+      "point": "{cycle}: {value}",
+      "hidden": "no disponible",
+      "under": "menos de {min}",
+      "cycle": "Ciclo",
+      "pick": {
+        "label": "Elegir qué ver",
+        "person": "Persona",
+        "manager": "Equipo (manager)",
+        "department": "Área",
+        "any": "—",
+        "apply": "Ver"
+      }
     }
   }
 }
