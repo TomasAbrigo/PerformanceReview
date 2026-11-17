@@ -10,6 +10,7 @@ import {
   isActive,
   jobRowsOf,
 } from "./seed-data";
+import { actAs } from "./act-as";
 
 // An employee with no reports (so no other row mentions them), whose manager
 // is a person too: the manager at the snapshot is the current one.
@@ -39,20 +40,6 @@ const snapshotJob = jobRowsOf(employee)
  * can take long on a busy machine: give every assertion of this long flow room.
  */
 const expect = baseExpect.configure({ timeout: 30_000 });
-
-/** Uses the header "Actuar como" selector. */
-async function actAs(page: Page, person: string | null, role: string) {
-  const bar = page.getByRole("form", { name: "Actuar como" });
-  if (person) await bar.getByLabel("Buscar persona").fill(person);
-  await bar
-    .getByLabel("Persona", { exact: true })
-    .selectOption({ label: person ?? "Sin persona" });
-  await bar.getByLabel("Rol").selectOption({ label: role });
-  await bar.getByRole("button", { name: "Aplicar" }).click();
-  await expect(bar.getByText(/Actuando como:/)).toContainText(
-    person ?? "People",
-  );
-}
 
 const HIDDEN = "Nota privada para People";
 const FOLLOW_UP = "Acordamos revisar los objetivos en un mes";

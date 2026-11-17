@@ -1,3 +1,4 @@
+import { logError } from "@/lib/log";
 import { refresh } from "next/cache";
 import { DomainError, type FieldIssue } from "./domain-error";
 
@@ -43,7 +44,7 @@ export async function actionResult<
       const issues = "issues" in error ? error.issues : [];
       return { ok: false, code: error.code, issues: issues as IssuesOf<E> };
     }
-    console.error(error);
+    logError(error);
     return { ok: false, code: "unknown", issues: [] as IssuesOf<E> };
   }
 }

@@ -9,6 +9,7 @@
  * progress). Exit code: 0 all runs succeeded, 1 a run (or the reset) failed,
  * 2 bad arguments or configuration.
  */
+import { errorMessage } from "../src/lib/log";
 import { sql } from "drizzle-orm";
 import { closeDb, db } from "../src/db/client";
 import { assertLocalDatabase } from "../src/db/local";
@@ -40,7 +41,7 @@ async function main(): Promise<number> {
   try {
     args = parseSeedArgs(process.argv.slice(2));
   } catch (err) {
-    console.error(err instanceof Error ? err.message : err);
+    console.error(errorMessage(err));
     console.error(SEED_USAGE);
     return 2;
   }
@@ -53,13 +54,13 @@ async function main(): Promise<number> {
     try {
       assertLocalDatabase(process.env.DATABASE_URL);
     } catch (err) {
-      console.error((err as Error).message);
+      console.error(errorMessage(err));
       return 2;
     }
     try {
       await resetDomainTables(db);
     } catch (err) {
-      console.error(err instanceof Error ? err.message : err);
+      console.error(errorMessage(err));
       return 1;
     }
     console.log("Domain tables emptied.");
@@ -97,7 +98,7 @@ main()
     process.exitCode = code;
   })
   .catch((err) => {
-    console.error(err instanceof Error ? err.message : err);
+    console.error(errorMessage(err));
     process.exitCode = 1;
   })
   .finally(() => closeDb());

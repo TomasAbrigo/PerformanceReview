@@ -154,10 +154,10 @@ describe("csvStream / csvResponse", () => {
       );
       expect(CSV_INTERRUPTED.startsWith("#")).toBe(true);
       expect(CSV_INTERRUPTED.endsWith("\r\n")).toBe(true);
-      expect(log).toHaveBeenCalledWith(
-        expect.stringContaining("CSV export"),
-        expect.objectContaining({ message: "boom: connection lost" }),
-      );
+      expect(log).toHaveBeenCalledTimes(1);
+      const [logged] = log.mock.calls[0];
+      expect(String(logged)).toContain("CSV export failed");
+      expect(String(logged)).toContain("boom: connection lost");
     } finally {
       log.mockRestore();
     }

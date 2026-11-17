@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { SYNTHETIC_EMAIL_DOMAIN } from "../../lib/sensitive-data";
 import { SIZE_CONFIG } from "./config";
 import { addDays } from "./dates";
 import { generateCompany } from "./index";
@@ -23,7 +24,8 @@ describe("employee identity", () => {
       expect(e.employeeNumber).toMatch(/^\d{5}$/);
       expect(e.firstName.length).toBeGreaterThan(0);
       expect(e.lastName.length).toBeGreaterThan(0);
-      expect(e.workEmail).toMatch(/^[a-z0-9.]+@meridian-andina\.example$/);
+      expect(e.workEmail).toMatch(/^[a-z0-9.]+@/);
+      expect(e.workEmail.endsWith(`@${SYNTHETIC_EMAIL_DOMAIN}`)).toBe(true);
     }
     expect(new Set(c.employees.map((e) => e.id)).size).toBe(c.employees.length);
   });

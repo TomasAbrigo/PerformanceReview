@@ -302,9 +302,11 @@ describe("GET /api/v1/people", () => {
     expect(ids).not.toContain(extras[0]);
   });
 
-  it("matches the q filter on name or email, escaping wildcards", async () => {
+  it("matches the q filter on the name only (never on the email), escaping wildcards", async () => {
+    const byName = await call(listPeopleRoute, "/api/v1/people?q=EXTRA%201");
+    expect(byName.body.data.map((p: Json) => p.id)).toEqual([extras[0]]);
     const byEmail = await call(listPeopleRoute, "/api/v1/people?q=EXTRA1@");
-    expect(byEmail.body.data.map((p: Json) => p.id)).toEqual([extras[0]]);
+    expect(byEmail.body.data).toEqual([]);
     const wildcard = await call(listPeopleRoute, "/api/v1/people?q=%25");
     expect(wildcard.body.data).toEqual([]);
   });
@@ -368,6 +370,86 @@ describe("GET /api/v1/people", () => {
     expect(res.type).toBe("application/problem+json");
     expect(res.body).toMatchObject({ status: 400, title: "Bad Request" });
     expect(res.body.errors.map((e: Json) => e.path)).toContain(field);
+  });
+});
+
+describe("people API: email only for People (hr)", () => {
+  const readAs = (role: string) => `as_person=${ana}&role=${role}`;
+
+  it("includes work_email by default (the API reads as hr) and with scope=hr", async () => {
+    for (const query of ["", "&scope=hr"]) {
+      const res = await call(listPeopleRoute, `/api/v1/people?q=bruno${query}`);
+      expect(res.status).toBe(200);
+      expect(res.body.data[0].work_email).toBe("bruno.perez@example.com");
+    }
+    const detail = await call(getPersonRoute, `/api/v1/people/${bruno}`, bruno);
+    expect(detail.body.data.work_email).toBe("bruno.perez@example.com");
+    expect(
+      detail.body.data.source_identities.map((i: Json) => i.kind),
+    ).toContain("work_email");
+  });
+
+  it("includes it when reading as a person with the hr role", async () => {
+    const res = await call(
+      listPeopleRoute,
+      `/api/v1/people?q=bruno&${readAs("hr")}`,
+    );
+    expect(res.body.data[0].work_email).toBe("bruno.perez@example.com");
+  });
+
+  it.each(["manager", "employee", "peer", "calibrator"])(
+    "leaves the email out when reading as %s, in the list and in the detail",
+    async (role) => {
+      const list = await call(
+        listPeopleRoute,
+        `/api/v1/people?limit=200&${readAs(role)}`,
+      );
+      expect(list.status).toBe(200);
+      expect(list.body.data.length).toBeGreaterThan(0);
+      for (const p of list.body.data)
+        expect(p).not.toHaveProperty("work_email");
+      expect(JSON.stringify(list.body)).not.toContain("@");
+
+      const detail = await call(
+        getPersonRoute,
+        `/api/v1/people/${bruno}?${readAs(role)}`,
+        bruno,
+      );
+      expect(detail.status).toBe(200);
+      expect(detail.body.data).not.toHaveProperty("work_email");
+      expect(
+        detail.body.data.source_identities.map((i: Json) => i.kind),
+      ).toEqual(expect.arrayContaining(["bamboo_id", "employee_number"]));
+      expect(
+        detail.body.data.source_identities.map((i: Json) => i.kind),
+      ).not.toContain("work_email");
+      expect(JSON.stringify(detail.body)).not.toContain("@");
+    },
+  );
+
+  it("rejects role without as_person and scope together with as_person", async () => {
+    const role = await call(listPeopleRoute, "/api/v1/people?role=employee");
+    expect(role.status).toBe(400);
+    const both = await call(
+      getPersonRoute,
+      `/api/v1/people/${bruno}?scope=hr&as_person=${ana}`,
+      bruno,
+    );
+    expect(both.status).toBe(400);
+    const unknown = await call(
+      listPeopleRoute,
+      `/api/v1/people?as_person=${crypto.randomUUID()}&role=employee`,
+    );
+    expect(unknown.status).toBe(404);
+  });
+
+  it("answers a bad cursor with 400 before any 404 for an unknown as_person", async () => {
+    const res = await call(
+      listPeopleRoute,
+      `/api/v1/people?cursor=garbage&as_person=${crypto.randomUUID()}&role=employee`,
+    );
+    expect(res.status).toBe(400);
+    expect(res.body.errors.map((e: Json) => e.path)).toContain("cursor");
   });
 });
 

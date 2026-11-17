@@ -1,3 +1,5 @@
+import { logError } from "@/lib/log";
+
 /**
  * CSV writer (RFC 4180) for the exports: UTF-8 BOM so Excel opens accents
  * right, CRLF line ends, fields quoted only when they need it. Rows can come
@@ -110,7 +112,7 @@ export async function csvResponse<R>(
         if (next.done) controller.close();
         else controller.enqueue(encoder.encode(next.value));
       } catch (error) {
-        console.error("CSV export failed after it had started", error);
+        logError(error, "CSV export failed after it had started");
         controller.enqueue(encoder.encode(CSV_INTERRUPTED));
         controller.close();
       }

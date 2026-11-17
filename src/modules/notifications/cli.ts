@@ -1,3 +1,4 @@
+import { errorMessage, logError } from "@/lib/log";
 import { parseArgs } from "node:util";
 import { closeDb, db, type DbOrTx } from "@/db/client";
 import { parseIsoDate } from "@/modules/org-history/dates";
@@ -43,7 +44,7 @@ export function parseNotificationsArgs(argv: string[]): NotificationsCliArgs {
       },
     });
   } catch (err) {
-    throw new UsageError(err instanceof Error ? err.message : String(err));
+    throw new UsageError(errorMessage(err));
   }
   const { values, positionals } = parsed;
   if (positionals.length > 0) {
@@ -134,7 +135,7 @@ export async function cliMain(argv: string[]): Promise<void> {
       requireEnv: ["DATABASE_URL"],
     });
   } catch (error) {
-    console.error(error);
+    logError(error);
     process.exitCode = 1;
   } finally {
     await closeDb();

@@ -11,6 +11,8 @@
     "typecheck": "next typegen && tsc --noEmit",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
+    "check:sensitive": "tsx scripts/check-sensitive.ts",
+    "hooks:install": "git config core.hooksPath .githooks",
     "check": "pnpm typecheck && pnpm lint && pnpm format:check && pnpm test:unit",
     "test": "vitest run",
     "test:unit": "vitest run --project unit",

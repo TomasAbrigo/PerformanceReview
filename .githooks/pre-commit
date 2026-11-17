@@ -1,0 +1,9 @@
+#!/bin/sh
+# Blocks commits that carry personal data (CSV/XLSX outside fixtures/, emails
+# outside the synthetic domain). Enable with `pnpm hooks:install`.
+if ! command -v pnpm >/dev/null 2>&1; then
+  echo "pre-commit: pnpm is not on PATH, so the sensitive-data check cannot run." >&2
+  echo "Install pnpm (see README, Requisitos) or, knowing the risk, commit with --no-verify." >&2
+  exit 1
+fi
+exec pnpm --silent check:sensitive

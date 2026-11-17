@@ -9,6 +9,7 @@ import {
   hasUniqueName,
   isActive,
 } from "./seed-data";
+import { actAs } from "./act-as";
 
 // An employee with no reports (so no other row mentions them), whose manager
 // is a person too: the manager at the snapshot is the current one.
@@ -27,20 +28,6 @@ const employee = find(
 const manager = byId.get(employee.managerId!)!;
 const employeeName = fullName(employee);
 const managerName = fullName(manager);
-
-/** Uses the header "Actuar como" selector. */
-async function actAs(page: Page, person: string | null, role: string) {
-  const bar = page.getByRole("form", { name: "Actuar como" });
-  if (person) await bar.getByLabel("Buscar persona").fill(person);
-  await bar
-    .getByLabel("Persona", { exact: true })
-    .selectOption({ label: person ?? "Sin persona" });
-  await bar.getByLabel("Rol").selectOption({ label: role });
-  await bar.getByRole("button", { name: "Aplicar" }).click();
-  await expect(bar.getByText(/Actuando como:/)).toContainText(
-    person ?? "People",
-  );
-}
 
 const HIDDEN = "Nota privada para People";
 

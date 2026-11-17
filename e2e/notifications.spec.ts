@@ -10,6 +10,7 @@ import {
   hasUniqueName,
   isActive,
 } from "./seed-data";
+import { actAs } from "./act-as";
 
 // Someone in the org on the snapshot day with no reports (so no other
 // participant row mentions their name) and a name the selectors can pick.
@@ -24,20 +25,6 @@ const employeeName = fullName(employee);
 // everyone in them, so this spec runs on its own after them (see the
 // `notifications` project of playwright.config.ts): the counts below would
 // not be deterministic otherwise.
-
-/** Uses the header "Actuar como" selector. */
-async function actAs(page: Page, person: string | null, role: string) {
-  const bar = page.getByRole("form", { name: "Actuar como" });
-  if (person) await bar.getByLabel("Buscar persona").fill(person);
-  await bar
-    .getByLabel("Persona", { exact: true })
-    .selectOption({ label: person ?? "Sin persona" });
-  await bar.getByLabel("Rol").selectOption({ label: role });
-  await bar.getByRole("button", { name: "Aplicar" }).click();
-  await expect(bar.getByText(/Actuando como:/)).toContainText(
-    person ?? "People",
-  );
-}
 
 /** Launches a cycle with everyone active (self due in 7 days) and moves it to collecting. */
 async function collectingCycle(page: Page, name: string, selfDue: string) {
