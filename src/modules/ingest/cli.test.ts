@@ -225,7 +225,8 @@ describe("REGISTRY", () => {
     // Report-only entities (assessment, feedback) are imported from files.
     expect([...REGISTRY.keys()]).toEqual([
       ...Object.keys(entityHandlers).filter(
-        (e) => e !== "assessment" && e !== "feedback",
+        (e) =>
+          e !== "assessment" && e !== "assessment_progress" && e !== "feedback",
       ),
       "goal",
     ]);

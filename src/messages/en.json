@@ -203,12 +203,14 @@
         "ignored": "Ignored",
         "log": "Log entries",
         "duration": "Duration",
-        "mismatches": "Reviewer mismatches"
+        "mismatches": "Reviewer mismatches",
+        "deferred": "Deferred"
       },
       "status": {
         "running": "Running",
         "succeeded": "Succeeded",
-        "error": "Failed"
+        "error": "Failed",
+        "needs_decision": "Needs decision"
       },
       "pagination": {
         "label": "Pagination",
@@ -536,7 +538,8 @@
       "job_history": "Job history",
       "goal": "Goals",
       "assessment": "Assessments",
-      "feedback": "Feedback"
+      "feedback": "Feedback",
+      "assessment_progress": "Assessment progress"
     },
     "result": {
       "title": "Import finished",

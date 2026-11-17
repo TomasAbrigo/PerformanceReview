@@ -22,17 +22,42 @@
   "selectedFilter": "status-all",
   "goals": [
     {
-      "id": "5664",
-      "title": "Mejorar el NPS interno del equipo",
-      "description": "Pedido por el equipo directivo en la planificación.",
+      "id": "5617",
+      "title": "Aumentar la cobertura de pruebas al 80%",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
       "percentComplete": 100,
-      "alignsWithOptionId": null,
-      "sharedWithEmployeeIds": [],
-      "dueDate": "2025-06-17",
-      "completionDate": "2025-01-15",
-      "lastChangedDateTime": "2025-01-15T19:47:17Z",
+      "alignsWithOptionId": 9001,
+      "sharedWithEmployeeIds": [
+        33
+      ],
+      "dueDate": "2023-02-26",
+      "completionDate": "2023-03-08",
+      "lastChangedDateTime": "2023-03-08T17:31:43Z",
       "status": "completed",
-      "milestones": null,
+      "milestones": [
+        {
+          "id": 919,
+          "employeeGoalId": 5617,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2023-02-02T17:10:16Z",
+          "lastUpdateDateTime": "2023-02-02T17:10:16Z",
+          "lastUpdateUserId": 155
+        },
+        {
+          "id": 920,
+          "employeeGoalId": 5617,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2023-01-25T16:48:34Z",
+          "lastUpdateDateTime": "2023-01-25T16:48:34Z",
+          "lastUpdateUserId": 155
+        }
+      ],
       "actions": {
         "canEdit": true,
         "canUpdateProgress": false,
@@ -43,62 +68,17 @@
       }
     },
     {
-      "id": "5667",
-      "title": "Documentar los procesos críticos",
+      "id": "5619",
+      "title": "Reducir el tiempo de primera respuesta un 20%",
       "description": "Meta compartida con otra área; coordinar avances mensuales.",
       "percentComplete": 100,
       "alignsWithOptionId": null,
       "sharedWithEmployeeIds": [],
-      "dueDate": "2025-02-02",
-      "completionDate": "2024-11-19",
-      "lastChangedDateTime": "2024-11-19T09:25:50Z",
+      "dueDate": "2023-08-07",
+      "completionDate": "2023-02-24",
+      "lastChangedDateTime": "2023-02-24T17:21:17Z",
       "status": "completed",
-      "milestones": [
-        {
-          "id": 983,
-          "employeeGoalId": 5667,
-          "title": "Hito 1",
-          "startValue": 0,
-          "endValue": 1,
-          "currentValue": 1,
-          "completedDateTime": "2024-10-18T14:03:03Z",
-          "lastUpdateDateTime": "2024-10-18T14:03:03Z",
-          "lastUpdateUserId": 155
-        },
-        {
-          "id": 984,
-          "employeeGoalId": 5667,
-          "title": "Hito 2",
-          "startValue": 0,
-          "endValue": 1,
-          "currentValue": 1,
-          "completedDateTime": "2024-10-24T15:46:58Z",
-          "lastUpdateDateTime": "2024-10-24T15:46:58Z",
-          "lastUpdateUserId": 155
-        },
-        {
-          "id": 985,
-          "employeeGoalId": 5667,
-          "title": "Hito 3",
-          "startValue": 0,
-          "endValue": 1,
-          "currentValue": 1,
-          "completedDateTime": "2024-10-29T09:59:21Z",
-          "lastUpdateDateTime": "2024-10-29T09:59:21Z",
-          "lastUpdateUserId": 155
-        },
-        {
-          "id": 986,
-          "employeeGoalId": 5667,
-          "title": "Hito 4",
-          "startValue": 0,
-          "endValue": 1,
-          "currentValue": 1,
-          "completedDateTime": "2024-10-23T13:16:44Z",
-          "lastUpdateDateTime": "2024-10-23T13:16:44Z",
-          "lastUpdateUserId": 155
-        }
-      ],
+      "milestones": null,
       "actions": {
         "canEdit": true,
         "canUpdateProgress": false,
@@ -115,7 +95,18 @@
       "firstName": "Florencia",
       "lastName": "Fernández",
       "preferredName": "Flor"
+    },
+    {
+      "employeeId": 33,
+      "firstName": "Brenda",
+      "lastName": "Romero",
+      "preferredName": null
     }
   ],
-  "comments": []
+  "comments": [
+    {
+      "goalId": "5619",
+      "commentCount": 1
+    }
+  ]
 }

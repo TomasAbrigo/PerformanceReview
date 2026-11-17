@@ -9,7 +9,9 @@ import {
   reviewRequest,
   type IngestReject,
 } from "@/db/schema";
+import { snapshotGoalsForParticipants } from "@/modules/review-core/goal-snapshot";
 import { snapshots } from "@/modules/review-core/service";
+import { semesterConfig, snapToSemester } from "./semester";
 
 /**
  * After a run, for each cycle it touched: rows are processed one by one and
@@ -18,6 +20,11 @@ import { snapshots } from "@/modules/review-core/service";
  * is (re)computed as of it, and manager requests whose reviewer (the CSV
  * Manager, i.e. the manager at export time) is not the one in force at period
  * end are flagged `reviewer_mismatch` and logged on the run.
+ *
+ * An imported cycle whose dates all fall in one semester gets that semester
+ * as its period and snapshot date (#58), and every
+ * participant gets the goal snapshot a launched cycle takes: their goals that
+ * overlap the period, captured as of its end.
  */
 export async function finishHistoryImport(
   db: DbOrTx,
@@ -47,30 +54,26 @@ async function refreshCycle(
     .select()
     .from(reviewCycle)
     .where(eq(reviewCycle.id, cycleId));
-  const asOf = cycle.snapshotDate;
-
-  const participants = await tx
-    .select()
-    .from(cycleParticipant)
-    .where(eq(cycleParticipant.cycleId, cycleId));
-  // The same snapshot a launched cycle takes (review-core), as of period end.
-  const fresh = await snapshots(
-    tx,
-    cycleId,
-    participants.map((p) => p.revieweePersonId),
-    asOf,
-  );
-  for (const [i, p] of participants.entries()) {
-    const snap = fresh[i];
-    const same = (Object.keys(snap) as (keyof typeof snap)[]).every(
-      (k) => p[k] === snap[k],
-    );
-    if (!same) {
+  if (cycle.sourceSystem === "bamboo_export") {
+    const snapped = snapToSemester(cycle, await semesterConfig(tx));
+    if (
+      snapped &&
+      (snapped.periodStart !== cycle.periodStart ||
+        snapped.periodEnd !== cycle.periodEnd)
+    ) {
+      const period = { ...snapped, snapshotDate: snapped.periodEnd };
       await tx
-        .update(cycleParticipant)
-        .set(snap)
-        .where(eq(cycleParticipant.id, p.id));
+        .update(reviewCycle)
+        .set(period)
+        .where(eq(reviewCycle.id, cycle.id));
+      Object.assign(cycle, period);
     }
+  }
+  const asOf = cycle.snapshotDate;
+  // A cycle of this app someone chose for held-back rows keeps the snapshots
+  // it took at launch: only imported cycles are (re)computed here.
+  if (cycle.sourceSystem === "bamboo_export") {
+    await refreshParticipants(tx, cycle);
   }
 
   // Manager requests vs the manager in force at period end.
@@ -133,4 +136,42 @@ async function refreshCycle(
     });
   }
   return mismatches;
+}
+
+/**
+ * Every participant's snapshot as of the cycle's snapshot date (the same one
+ * a launched cycle takes, review-core), and their goal snapshot: the goals
+ * that overlap the period, captured as of its end.
+ */
+async function refreshParticipants(
+  tx: DbOrTx,
+  cycle: { id: string; snapshotDate: string; periodEnd: string },
+) {
+  const participants = await tx
+    .select()
+    .from(cycleParticipant)
+    .where(eq(cycleParticipant.cycleId, cycle.id));
+  const fresh = await snapshots(
+    tx,
+    cycle.id,
+    participants.map((p) => p.revieweePersonId),
+    cycle.snapshotDate,
+  );
+  for (const [i, p] of participants.entries()) {
+    const snap = fresh[i];
+    const same = (Object.keys(snap) as (keyof typeof snap)[]).every(
+      (k) => p[k] === snap[k],
+    );
+    if (!same) {
+      await tx
+        .update(cycleParticipant)
+        .set(snap)
+        .where(eq(cycleParticipant.id, p.id));
+    }
+  }
+  await snapshotGoalsForParticipants(
+    tx,
+    participants.map((p) => p.id),
+    new Date(`${cycle.periodEnd}T12:00:00Z`),
+  );
 }

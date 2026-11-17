@@ -22,51 +22,17 @@
   "selectedFilter": "status-all",
   "goals": [
     {
-      "id": "7698",
-      "title": "Cerrar el plan de capacitación anual",
-      "description": "Alineado con el plan del área para el año.",
-      "percentComplete": 33,
-      "alignsWithOptionId": 9004,
+      "id": "7679",
+      "title": "Completar la certificación del área",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "percentComplete": 50,
+      "alignsWithOptionId": null,
       "sharedWithEmployeeIds": [],
-      "dueDate": "2026-04-04",
+      "dueDate": "2025-11-18",
       "completionDate": null,
-      "lastChangedDateTime": "2026-08-16T18:40:51Z",
+      "lastChangedDateTime": "2026-10-26T15:30:49Z",
       "status": "in_progress",
-      "milestones": [
-        {
-          "id": 1950,
-          "employeeGoalId": 7698,
-          "title": "Hito 1",
-          "startValue": 0,
-          "endValue": 1,
-          "currentValue": 1,
-          "completedDateTime": "2026-07-19T15:43:29Z",
-          "lastUpdateDateTime": "2026-07-19T15:43:29Z",
-          "lastUpdateUserId": 679
-        },
-        {
-          "id": 1951,
-          "employeeGoalId": 7698,
-          "title": "Hito 2",
-          "startValue": 0,
-          "endValue": 1,
-          "currentValue": 0,
-          "completedDateTime": null,
-          "lastUpdateDateTime": "2026-01-06T14:09:42Z",
-          "lastUpdateUserId": 679
-        },
-        {
-          "id": 1952,
-          "employeeGoalId": 7698,
-          "title": "Hito 3",
-          "startValue": 0,
-          "endValue": 1,
-          "currentValue": 0,
-          "completedDateTime": null,
-          "lastUpdateDateTime": "2026-01-06T09:39:07Z",
-          "lastUpdateUserId": 679
-        }
-      ],
+      "milestones": null,
       "actions": {
         "canEdit": true,
         "canUpdateProgress": true,
@@ -77,15 +43,15 @@
       }
     },
     {
-      "id": "7700",
-      "title": "Renovar las cuentas clave del trimestre",
-      "description": "Alineado con el plan del área para el año.",
+      "id": "7682",
+      "title": "Reducir el tiempo de primera respuesta un 20%",
+      "description": "Pedido por el equipo directivo en la planificación.",
       "percentComplete": 100,
       "alignsWithOptionId": null,
       "sharedWithEmployeeIds": [],
-      "dueDate": "2026-06-09",
-      "completionDate": "2026-05-03",
-      "lastChangedDateTime": "2026-05-03T08:48:51Z",
+      "dueDate": "2026-02-24",
+      "completionDate": "2026-01-22",
+      "lastChangedDateTime": "2026-01-22T10:51:55Z",
       "status": "completed",
       "milestones": null,
       "actions": {
@@ -106,10 +72,5 @@
       "preferredName": null
     }
   ],
-  "comments": [
-    {
-      "goalId": "7700",
-      "commentCount": 3
-    }
-  ]
+  "comments": []
 }

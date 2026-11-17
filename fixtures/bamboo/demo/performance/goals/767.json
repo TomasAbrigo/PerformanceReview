@@ -22,17 +22,74 @@
   "selectedFilter": "status-all",
   "goals": [
     {
-      "id": "7871",
-      "title": "Completar la certificación del área",
+      "id": "7854",
+      "title": "Cerrar el plan de capacitación anual",
       "description": "Alineado con el plan del área para el año.",
-      "percentComplete": 100,
+      "percentComplete": 35,
       "alignsWithOptionId": null,
       "sharedWithEmployeeIds": [],
-      "dueDate": "2025-10-01",
-      "completionDate": "2025-09-01",
-      "lastChangedDateTime": "2025-09-01T18:21:36Z",
-      "status": "completed",
+      "dueDate": "2025-11-24",
+      "completionDate": null,
+      "lastChangedDateTime": "2025-12-28T11:53:07Z",
+      "status": "closed",
       "milestones": null,
+      "actions": {
+        "canEdit": false,
+        "canUpdateProgress": false,
+        "canClose": false,
+        "canReopen": true,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "7856",
+      "title": "Reducir los incidentes recurrentes a la mitad",
+      "description": "Sirve de base para el próximo ciclo de evaluación.",
+      "percentComplete": 100,
+      "alignsWithOptionId": 9003,
+      "sharedWithEmployeeIds": [
+        159
+      ],
+      "dueDate": "2025-11-18",
+      "completionDate": "2025-10-29",
+      "lastChangedDateTime": "2025-10-29T11:11:38Z",
+      "status": "completed",
+      "milestones": [
+        {
+          "id": 1928,
+          "employeeGoalId": 7856,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-09-16T19:05:41Z",
+          "lastUpdateDateTime": "2025-09-16T19:05:41Z",
+          "lastUpdateUserId": 767
+        },
+        {
+          "id": 1929,
+          "employeeGoalId": 7856,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-08-22T17:12:27Z",
+          "lastUpdateDateTime": "2025-08-22T17:12:27Z",
+          "lastUpdateUserId": 767
+        },
+        {
+          "id": 1930,
+          "employeeGoalId": 7856,
+          "title": "Hito 3",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-10-02T10:18:20Z",
+          "lastUpdateDateTime": "2025-10-02T10:18:20Z",
+          "lastUpdateUserId": 767
+        }
+      ],
       "actions": {
         "canEdit": true,
         "canUpdateProgress": false,
@@ -43,15 +100,17 @@
       }
     },
     {
-      "id": "7874",
-      "title": "Mentorear a dos personas nuevas",
-      "description": "Alineado con el plan del área para el año.",
+      "id": "7857",
+      "title": "Cerrar el plan de capacitación anual",
+      "description": "Pedido por el equipo directivo en la planificación.",
       "percentComplete": 100,
       "alignsWithOptionId": null,
-      "sharedWithEmployeeIds": [],
-      "dueDate": "2026-07-18",
-      "completionDate": "2026-03-03",
-      "lastChangedDateTime": "2026-03-03T16:44:26Z",
+      "sharedWithEmployeeIds": [
+        159
+      ],
+      "dueDate": "2026-08-13",
+      "completionDate": "2026-07-08",
+      "lastChangedDateTime": "2026-07-08T14:12:01Z",
       "status": "completed",
       "milestones": null,
       "actions": {
@@ -70,7 +129,18 @@
       "firstName": "Franco",
       "lastName": "Urquiza",
       "preferredName": null
+    },
+    {
+      "employeeId": 159,
+      "firstName": "Marcela",
+      "lastName": "Ríos",
+      "preferredName": null
     }
   ],
-  "comments": []
+  "comments": [
+    {
+      "goalId": "7857",
+      "commentCount": 2
+    }
+  ]
 }

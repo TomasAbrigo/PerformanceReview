@@ -54,9 +54,9 @@ describe("runUploadWorker (import)", () => {
 
     expect(response.ok).toBe(true);
     if (!response.ok) return;
-    expect(response.counts).toMatchObject({ read: 69, inserted: 69 });
+    expect(response.counts).toMatchObject({ read: 119, inserted: 119 });
     expect(response.runId).toMatch(/^[0-9a-f-]{36}$/);
-    expect(await db.select().from(rawRecord)).toHaveLength(69);
+    expect(await db.select().from(rawRecord)).toHaveLength(119);
   }, 60_000);
 
   it("a worker told to stop marks its run as failed, exits, and saves no profile", async () => {

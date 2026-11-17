@@ -7,6 +7,7 @@ export const PROFILE_ENTITIES = [
   "job_history",
   "goal",
   "assessment",
+  "assessment_progress",
   "feedback",
 ] as const;
 export type ProfileEntity = (typeof PROFILE_ENTITIES)[number];
@@ -22,6 +23,29 @@ export const TYPE_FAMILIES = [
 export type TypeFamily = (typeof TYPE_FAMILIES)[number];
 
 const name = z.string().min(1);
+
+/** How a question column of a report is answered. */
+export const QUESTION_KINDS = ["text", "likert", "letter_choice"] as const;
+export type QuestionMappingKind = (typeof QUESTION_KINDS)[number];
+
+/**
+ * One question column of a performance report, configured instead of
+ * detected from its header: which side answers it, how (free text, a 1-5
+ * likert rating, a letter among `options`), the stable key its question
+ * revision is found by on every import, and what it measures (`dimension`,
+ * `role`: e.g. Bamboo's manager Q1 is `retention`, Q2 `engagement`).
+ */
+export const questionMappingSchema = z.object({
+  column: name,
+  side: z.enum(["self", "manager"]),
+  kind: z.enum(QUESTION_KINDS),
+  key: name,
+  dimension: name.optional(),
+  role: name.optional(),
+  /** letter_choice: the label of A, B, C... in order. */
+  options: z.array(name).optional(),
+});
+export type QuestionMapping = z.infer<typeof questionMappingSchema>;
 
 /**
  * How one lake table (or uploaded file) maps onto a canonical entity.
@@ -49,6 +73,19 @@ export const sourceProfileSchema = z.object({
    * 12, never need it; without it an ambiguous date rejects the row.
    */
   dateFormat: z.enum(["mdy", "dmy"]).optional(),
+  /**
+   * Performance reports: the question columns, by exact header. Columns not
+   * listed are still detected by Bamboo's header pattern ("Employee Q1: ...").
+   */
+  questions: z.array(questionMappingSchema).optional(),
+  /**
+   * The column naming the review cycle (canonical field `review_cycle`). It
+   * may be empty even as part of the key: the row's date then decides its
+   * semester (import-history).
+   */
+  cycleColumn: name.optional(),
+  /** The column with the assessment date (canonical field `assessment_date`). */
+  dateColumn: name.optional(),
 });
 export type SourceProfile = z.infer<typeof sourceProfileSchema>;
 
@@ -87,6 +124,12 @@ export function applyProfile(
 ): CanonicalRecord {
   const keyValues = profile.keyColumns.map((column) => {
     const value = row[column];
+    if (
+      (value === null || value === undefined) &&
+      column === profile.cycleColumn
+    ) {
+      return "";
+    }
     if (value === null || value === undefined) {
       throw new Error(
         `Profile "${profile.name}": key column "${column}" is empty in the row`,
@@ -101,6 +144,11 @@ export function applyProfile(
     const canonical = profile.columnMap[column];
     if (canonical) fields[canonical] = value;
     else extra[column] = value;
+  }
+  if (profile.cycleColumn)
+    fields.review_cycle = row[profile.cycleColumn] ?? null;
+  if (profile.dateColumn) {
+    fields.assessment_date = row[profile.dateColumn] ?? null;
   }
 
   const watermark = profile.watermarkColumn
@@ -191,6 +239,8 @@ export function validateAgainstSchema(
   profile.keyColumns.forEach((column) => need(column, "key"));
   need(profile.watermarkColumn, "watermark");
   need(profile.softDeleteColumn, "soft_delete");
+  need(profile.cycleColumn, "mapped");
+  need(profile.dateColumn, "mapped");
   Object.keys(profile.columnMap).forEach((column) => need(column, "mapped"));
 
   const issues: ProfileIssue[] = [];
@@ -272,6 +322,88 @@ const fivetran = {
   watermarkColumn: "_fivetran_synced",
   softDeleteColumn: "_fivetran_deleted",
 } as const;
+
+/** Bamboo's standard questions and the fixtures' custom ones (docs/research/07). */
+const BAMBOO_PERFORMANCE_QUESTIONS: QuestionMapping[] = [
+  [
+    "self",
+    "Employee",
+    "q1",
+    "letter_choice",
+    "How well does Meridian Andina recognize my value?",
+  ],
+  [
+    "self",
+    "Employee",
+    "q2",
+    "letter_choice",
+    "What would have the greatest impact on my ability to do my best work more often?",
+  ],
+  ["self", "Employee", "q3", "text", "What are some things I do well?"],
+  ["self", "Employee", "q4", "text", "How could I improve?"],
+  [
+    "manager",
+    "Manager",
+    "q1",
+    "letter_choice",
+    "If [Employee] got a job offer elsewhere, I would...",
+  ],
+  [
+    "manager",
+    "Manager",
+    "q2",
+    "letter_choice",
+    "How engaged is [Employee] at work?",
+  ],
+  [
+    "manager",
+    "Manager",
+    "q3",
+    "text",
+    "What are some things [Employee] does well?",
+  ],
+  ["manager", "Manager", "q4", "text", "How could [Employee] improve?"],
+  [
+    "self",
+    "Employee",
+    "custom:1",
+    "likert",
+    "Mis objetivos del período están claros.",
+  ],
+  [
+    "manager",
+    "Manager",
+    "custom:1",
+    "likert",
+    "Los objetivos de [Employee] para el período están claros.",
+  ],
+  [
+    "self",
+    "Employee",
+    "custom:2",
+    "likert",
+    "Tengo las herramientas para hacer bien mi trabajo.",
+  ],
+  [
+    "manager",
+    "Manager",
+    "custom:2",
+    "likert",
+    "[Employee] entrega resultados con la calidad esperada.",
+  ],
+].map(([side, who, q, kind, text]) => {
+  const custom = q.startsWith("custom:");
+  const n = q.replace(/\D/g, "");
+  return {
+    column: `${who} ${custom ? "Custom " : ""}Q${n}: ${text}`,
+    side: side as QuestionMapping["side"],
+    kind: kind as QuestionMappingKind,
+    key: custom ? `${side}:${q}:${text.toLowerCase()}` : `${side}:${q}`,
+    // What the standard manager letters measure (#57 maps them to 1-5).
+    ...(side === "manager" && q === "q1" ? { role: "retention" } : {}),
+    ...(side === "manager" && q === "q2" ? { role: "engagement" } : {}),
+  };
+});
 
 export const builtinProfiles: SourceProfile[] = [
   {
@@ -366,11 +498,17 @@ export const builtinProfiles: SourceProfile[] = [
     // Assessment Date keeps two employees with the same name apart in a cycle.
     keyColumns: ["Employee Name", "Review Cycle", "Assessment Date"],
     entity: "assessment",
-    // The question columns are deliberately not mapped: their headers embed
-    // the question text ("Employee Q1: How well does <company> recognize my
+    // The question columns are not in columnMap: their headers embed the
+    // question text ("Employee Q1: How well does <company> recognize my
     // value?") and the company's custom questions, so they vary per account.
-    // They stay in `extra`, keyed by header ("Employee Q1: ...",
-    // "Manager Custom Q2: ...").
+    // They stay in `extra`, keyed by header. `questions` configures the ones
+    // of the synthetic fixtures (People edit it per account in the upload
+    // screen); any other "Employee|Manager [Custom] Qn: ..." header is still
+    // detected by its pattern.
+    questions: BAMBOO_PERFORMANCE_QUESTIONS,
+    // A row without a cycle name goes to the semester of its date.
+    cycleColumn: "Review Cycle",
+    dateColumn: "Assessment Date",
     columnMap: {
       "Employee Name": "employee_name",
       Manager: "manager_name",
@@ -418,7 +556,7 @@ export const builtinProfiles: SourceProfile[] = [
     // Department keeps namesakes apart (Manager can be empty, so it cannot be
     // part of a key).
     keyColumns: ["Employee Name", "Review Cycle", "Department"],
-    entity: "assessment",
+    entity: "assessment_progress",
     columnMap: {
       "Employee Name": "employee_name",
       Manager: "manager_name",

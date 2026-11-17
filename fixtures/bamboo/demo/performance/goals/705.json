@@ -22,15 +22,36 @@
   "selectedFilter": "status-all",
   "goals": [
     {
-      "id": "7732",
+      "id": "7736",
       "title": "Reducir los incidentes recurrentes a la mitad",
       "description": "Meta compartida con otra área; coordinar avances mensuales.",
       "percentComplete": 100,
       "alignsWithOptionId": null,
       "sharedWithEmployeeIds": [],
-      "dueDate": "2026-09-17",
-      "completionDate": "2026-06-15",
-      "lastChangedDateTime": "2026-06-15T09:08:03Z",
+      "dueDate": "2025-09-10",
+      "completionDate": "2025-09-08",
+      "lastChangedDateTime": "2025-09-08T18:52:38Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "7737",
+      "title": "Reducir el tiempo de primera respuesta un 20%",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "percentComplete": 100,
+      "alignsWithOptionId": 9002,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2025-10-11",
+      "completionDate": "2025-07-30",
+      "lastChangedDateTime": "2025-07-30T19:17:00Z",
       "status": "completed",
       "milestones": null,
       "actions": {
@@ -51,5 +72,10 @@
       "preferredName": null
     }
   ],
-  "comments": []
+  "comments": [
+    {
+      "goalId": "7737",
+      "commentCount": 3
+    }
+  ]
 }

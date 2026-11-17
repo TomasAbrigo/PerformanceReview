@@ -22,41 +22,66 @@
   "selectedFilter": "status-all",
   "goals": [
     {
-      "id": "7677",
-      "title": "Implementar el calendario editorial",
-      "description": "Meta compartida con otra área; coordinar avances mensuales.",
-      "percentComplete": 15,
+      "id": "7650",
+      "title": "Renovar las cuentas clave del trimestre",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 0,
       "alignsWithOptionId": null,
       "sharedWithEmployeeIds": [],
-      "dueDate": "2025-04-06",
+      "dueDate": "2025-02-27",
       "completionDate": null,
-      "lastChangedDateTime": "2026-02-03T10:51:35Z",
-      "status": "in_progress",
-      "milestones": null,
+      "lastChangedDateTime": "2026-03-03T14:25:34Z",
+      "status": "closed",
+      "milestones": [
+        {
+          "id": 1828,
+          "employeeGoalId": 7650,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2024-12-10T12:24:45Z",
+          "lastUpdateUserId": 663
+        },
+        {
+          "id": 1829,
+          "employeeGoalId": 7650,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2024-12-10T19:05:30Z",
+          "lastUpdateUserId": 663
+        }
+      ],
       "actions": {
-        "canEdit": true,
-        "canUpdateProgress": true,
-        "canClose": true,
-        "canReopen": false,
+        "canEdit": false,
+        "canUpdateProgress": false,
+        "canClose": false,
+        "canReopen": true,
         "canDelete": true,
         "canComment": true
       }
     },
     {
-      "id": "7679",
-      "title": "Documentar los procesos críticos",
-      "description": "Pedido por el equipo directivo en la planificación.",
-      "percentComplete": 100,
+      "id": "7651",
+      "title": "Entregar el proyecto Norte sin desvíos",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "percentComplete": 55,
       "alignsWithOptionId": null,
-      "sharedWithEmployeeIds": [],
-      "dueDate": "2026-08-28",
-      "completionDate": "2026-09-11",
-      "lastChangedDateTime": "2026-09-11T17:16:38Z",
-      "status": "completed",
+      "sharedWithEmployeeIds": [
+        63
+      ],
+      "dueDate": "2027-01-06",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-06-28T19:27:39Z",
+      "status": "in_progress",
       "milestones": null,
       "actions": {
         "canEdit": true,
-        "canUpdateProgress": false,
+        "canUpdateProgress": true,
         "canClose": true,
         "canReopen": false,
         "canDelete": true,
@@ -70,7 +95,18 @@
       "firstName": "Maximiliano",
       "lastName": "Trejo",
       "preferredName": "Maxi"
+    },
+    {
+      "employeeId": 63,
+      "firstName": "Alejandro",
+      "lastName": "Rivas",
+      "preferredName": null
     }
   ],
-  "comments": []
+  "comments": [
+    {
+      "goalId": "7651",
+      "commentCount": 4
+    }
+  ]
 }

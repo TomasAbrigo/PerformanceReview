@@ -22,36 +22,15 @@
   "selectedFilter": "status-all",
   "goals": [
     {
-      "id": "7643",
+      "id": "7616",
       "title": "Renovar las cuentas clave del trimestre",
-      "description": "Meta compartida con otra área; coordinar avances mensuales.",
-      "percentComplete": 15,
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 100,
       "alignsWithOptionId": null,
       "sharedWithEmployeeIds": [],
-      "dueDate": "2025-09-05",
-      "completionDate": null,
-      "lastChangedDateTime": "2026-10-16T15:11:45Z",
-      "status": "closed",
-      "milestones": null,
-      "actions": {
-        "canEdit": false,
-        "canUpdateProgress": false,
-        "canClose": false,
-        "canReopen": true,
-        "canDelete": true,
-        "canComment": true
-      }
-    },
-    {
-      "id": "7644",
-      "title": "Documentar los procesos críticos",
-      "description": "Alineado con el plan del área para el año.",
-      "percentComplete": 100,
-      "alignsWithOptionId": 9001,
-      "sharedWithEmployeeIds": [],
-      "dueDate": "2025-08-26",
-      "completionDate": "2025-05-24",
-      "lastChangedDateTime": "2025-05-24T16:16:03Z",
+      "dueDate": "2025-02-19",
+      "completionDate": "2024-12-25",
+      "lastChangedDateTime": "2024-12-25T12:13:09Z",
       "status": "completed",
       "milestones": null,
       "actions": {
@@ -64,64 +43,20 @@
       }
     },
     {
-      "id": "7645",
-      "title": "Migrar los reportes al nuevo tablero",
-      "description": "Alineado con el plan del área para el año.",
-      "percentComplete": 60,
+      "id": "7617",
+      "title": "Lanzar el nuevo flujo de onboarding",
+      "description": "Sirve de base para el próximo ciclo de evaluación.",
+      "percentComplete": 20,
       "alignsWithOptionId": null,
       "sharedWithEmployeeIds": [],
-      "dueDate": "2027-02-06",
+      "dueDate": "2027-01-10",
       "completionDate": null,
-      "lastChangedDateTime": "2026-10-09T12:03:58Z",
+      "lastChangedDateTime": "2026-10-20T14:39:49Z",
       "status": "in_progress",
       "milestones": null,
       "actions": {
         "canEdit": true,
         "canUpdateProgress": true,
-        "canClose": true,
-        "canReopen": false,
-        "canDelete": true,
-        "canComment": true
-      }
-    },
-    {
-      "id": "7647",
-      "title": "Lanzar el nuevo flujo de onboarding",
-      "description": "Alineado con el plan del área para el año.",
-      "percentComplete": 100,
-      "alignsWithOptionId": null,
-      "sharedWithEmployeeIds": [],
-      "dueDate": "2026-02-05",
-      "completionDate": "2025-09-27",
-      "lastChangedDateTime": "2025-09-27T18:10:29Z",
-      "status": "completed",
-      "milestones": [
-        {
-          "id": 1912,
-          "employeeGoalId": 7647,
-          "title": "Hito 1",
-          "startValue": 0,
-          "endValue": 1,
-          "currentValue": 1,
-          "completedDateTime": "2025-07-29T12:42:07Z",
-          "lastUpdateDateTime": "2025-07-29T12:42:07Z",
-          "lastUpdateUserId": 649
-        },
-        {
-          "id": 1913,
-          "employeeGoalId": 7647,
-          "title": "Hito 2",
-          "startValue": 0,
-          "endValue": 1,
-          "currentValue": 1,
-          "completedDateTime": "2025-08-13T10:21:42Z",
-          "lastUpdateDateTime": "2025-08-13T10:21:42Z",
-          "lastUpdateUserId": 649
-        }
-      ],
-      "actions": {
-        "canEdit": true,
-        "canUpdateProgress": false,
         "canClose": true,
         "canReopen": false,
         "canDelete": true,
@@ -139,11 +74,11 @@
   ],
   "comments": [
     {
-      "goalId": "7643",
-      "commentCount": 1
+      "goalId": "7616",
+      "commentCount": 3
     },
     {
-      "goalId": "7644",
+      "goalId": "7617",
       "commentCount": 4
     }
   ]

@@ -47,9 +47,9 @@ afterAll(async () => {
 });
 
 describe("importing the small Employee Performance report", () => {
-  it("creates the 3 historical cycles, closed, with participants, requests and answers", async () => {
-    expect(first.counts).toMatchObject({ read: 69, rejected: 0 });
-    expect(first.counts.inserted + (first.counts.issues ?? 0)).toBe(69);
+  it("creates the semi-annual cycles, closed, with participants, requests and answers", async () => {
+    expect(first.counts).toMatchObject({ read: 119, rejected: 0 });
+    expect(first.counts.inserted + (first.counts.issues ?? 0)).toBe(119);
 
     const cycles = await db.select().from(reviewCycle);
     expect(cycles.map((c) => c.name).sort()).toEqual(
@@ -62,8 +62,12 @@ describe("importing the small Employee Performance report", () => {
         templateId: null,
       });
       expect(cycle.periodEnd).toBe(cycle.snapshotDate);
-      // Assessment dates fall in the assessment window of that year.
-      expect(cycle.periodStart.slice(0, 4)).toBe(cycle.name.slice(-4));
+      // Its assessment dates fall in one semester: the period is that one.
+      const fixture = seeded.company.cycles.find((c) => c.name === cycle.name)!;
+      expect([cycle.periodStart, cycle.periodEnd]).toEqual([
+        fixture.periodStart,
+        fixture.periodEnd,
+      ]);
       const participants = await db.$count(
         cycleParticipant,
         eq(cycleParticipant.cycleId, cycle.id),
@@ -184,7 +188,7 @@ describe("importing the small Employee Performance report", () => {
       [
         "How engaged is [Employee] at work?",
         "If [Employee] got a job offer elsewhere, I would...",
-      ].flatMap((p) => [p, p, p]),
+      ].flatMap((p) => seeded.company.cycles.map(() => p)),
     );
   });
 
@@ -193,8 +197,8 @@ describe("importing the small Employee Performance report", () => {
 
     const again = await importReport(PERFORMANCE);
 
-    expect(again.counts).toMatchObject({ read: 69, inserted: 0, updated: 0 });
-    expect(again.counts.unchanged + (again.counts.issues ?? 0)).toBe(69);
+    expect(again.counts).toMatchObject({ read: 119, inserted: 0, updated: 0 });
+    expect(again.counts.unchanged + (again.counts.issues ?? 0)).toBe(119);
     expect(await tableCounts()).toEqual(before);
   }, 60_000);
 });
@@ -202,9 +206,9 @@ describe("importing the small Employee Performance report", () => {
 describe("importing the small Feedback Status report", () => {
   it("creates peer requests (submitted or declined) without answers", async () => {
     const { counts } = await importReport(FEEDBACK, "bamboo-feedback-status");
-    expect(counts.read).toBe(220);
+    expect(counts.read).toBe(392);
     expect(counts.inserted).toBeGreaterThan(100);
-    expect(await db.$count(reviewCycle)).toBe(3);
+    expect(await db.$count(reviewCycle)).toBe(seeded.company.cycles.length);
 
     const peers = await db
       .select()

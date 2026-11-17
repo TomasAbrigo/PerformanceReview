@@ -22,20 +22,43 @@
   "selectedFilter": "status-all",
   "goals": [
     {
-      "id": "7701",
-      "title": "Automatizar la conciliación mensual",
-      "description": "Alineado con el plan del área para el año.",
+      "id": "7695",
+      "title": "Mejorar el NPS interno del equipo",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
       "percentComplete": 100,
       "alignsWithOptionId": null,
       "sharedWithEmployeeIds": [],
-      "dueDate": "2025-09-22",
-      "completionDate": "2025-07-03",
-      "lastChangedDateTime": "2025-07-03T12:49:01Z",
+      "dueDate": "2025-05-21",
+      "completionDate": "2025-05-12",
+      "lastChangedDateTime": "2025-05-12T16:24:37Z",
       "status": "completed",
       "milestones": null,
       "actions": {
         "canEdit": true,
         "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "7698",
+      "title": "Completar la certificación del área",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 0,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [
+        93
+      ],
+      "dueDate": "2025-11-20",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-06-22T19:52:02Z",
+      "status": "in_progress",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
         "canClose": true,
         "canReopen": false,
         "canDelete": true,
@@ -49,12 +72,18 @@
       "firstName": "Tomás",
       "lastName": "Peralta",
       "preferredName": null
+    },
+    {
+      "employeeId": 93,
+      "firstName": "Rocío",
+      "lastName": "Herrera",
+      "preferredName": null
     }
   ],
   "comments": [
     {
-      "goalId": "7701",
-      "commentCount": 1
+      "goalId": "7695",
+      "commentCount": 4
     }
   ]
 }

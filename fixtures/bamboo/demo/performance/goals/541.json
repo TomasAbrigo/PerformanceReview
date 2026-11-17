@@ -22,20 +22,87 @@
   "selectedFilter": "status-all",
   "goals": [
     {
-      "id": "7288",
+      "id": "7259",
       "title": "Cerrar el plan de capacitación anual",
-      "description": "Sirve de base para el próximo ciclo de evaluación.",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
       "percentComplete": 100,
-      "alignsWithOptionId": 9004,
+      "alignsWithOptionId": null,
       "sharedWithEmployeeIds": [],
-      "dueDate": "2026-03-05",
-      "completionDate": "2025-10-23",
-      "lastChangedDateTime": "2025-10-23T17:53:04Z",
+      "dueDate": "2024-05-17",
+      "completionDate": "2024-05-11",
+      "lastChangedDateTime": "2024-05-11T18:34:16Z",
       "status": "completed",
       "milestones": null,
       "actions": {
         "canEdit": true,
         "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "7260",
+      "title": "Lanzar el nuevo flujo de onboarding",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 100,
+      "alignsWithOptionId": 9003,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2024-06-04",
+      "completionDate": "2024-05-11",
+      "lastChangedDateTime": "2024-05-11T08:42:30Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "7263",
+      "title": "Entregar el proyecto Norte sin desvíos",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 65,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [
+        59
+      ],
+      "dueDate": "2025-12-20",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-06-26T14:40:06Z",
+      "status": "closed",
+      "milestones": null,
+      "actions": {
+        "canEdit": false,
+        "canUpdateProgress": false,
+        "canClose": false,
+        "canReopen": true,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "7265",
+      "title": "Lanzar el nuevo flujo de onboarding",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 65,
+      "alignsWithOptionId": 9002,
+      "sharedWithEmployeeIds": [
+        59
+      ],
+      "dueDate": "2026-08-25",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-07-11T19:57:14Z",
+      "status": "in_progress",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
         "canClose": true,
         "canReopen": false,
         "canDelete": true,
@@ -49,7 +116,26 @@
       "firstName": "Natalia",
       "lastName": "Salas",
       "preferredName": null
+    },
+    {
+      "employeeId": 59,
+      "firstName": "Gonzalo",
+      "lastName": "Soria",
+      "preferredName": null
     }
   ],
-  "comments": []
+  "comments": [
+    {
+      "goalId": "7259",
+      "commentCount": 2
+    },
+    {
+      "goalId": "7260",
+      "commentCount": 1
+    },
+    {
+      "goalId": "7263",
+      "commentCount": 3
+    }
+  ]
 }

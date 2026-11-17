@@ -112,3 +112,90 @@ describe("custom question keys", () => {
     ]);
   });
 });
+
+describe("configured question mapping (source profile `questions`)", () => {
+  it("the built-in mapping yields exactly what the header patterns detect", async () => {
+    const { getBuiltinProfile } = await import("@/modules/lake/profiles");
+    const { EMPLOYEE_PERFORMANCE_HEADER } =
+      await import("@/fixtures/serialize/bamboo-reports");
+    const headers = [...EMPLOYEE_PERFORMANCE_HEADER];
+    const mapping = getBuiltinProfile("bamboo-employee-performance")!.questions;
+    expect(mapping).toHaveLength(12);
+    const strip = (c: ReturnType<typeof detectQuestionColumns>[number]) => {
+      const rest: Partial<typeof c> = { ...c };
+      delete rest.dimension;
+      delete rest.role;
+      return rest;
+    };
+    expect(detectQuestionColumns(headers, mapping).map(strip)).toEqual(
+      detectQuestionColumns(headers).map(strip),
+    );
+    const managerQ1 = detectQuestionColumns(headers, mapping).find(
+      (c) => c.key === "manager:q1",
+    )!;
+    expect(managerQ1.role).toBe("retention");
+  });
+
+  it("maps a column whatever its header says, and keeps the regex for the rest", () => {
+    const columns = detectQuestionColumns(
+      [
+        "Employee Name",
+        "¿Recomendarías trabajar acá?",
+        "Comentario del manager",
+        "Manager Q3: What are some things [Employee] does well?",
+      ],
+      [
+        {
+          column: "¿Recomendarías trabajar acá?",
+          side: "self",
+          kind: "likert",
+          key: "self:enps",
+          dimension: "engagement",
+        },
+        {
+          column: "Comentario del manager",
+          side: "manager",
+          kind: "text",
+          key: "manager:comment",
+        },
+        {
+          column: "Not in this file",
+          side: "self",
+          kind: "text",
+          key: "self:missing",
+        },
+      ],
+    );
+    expect(
+      columns.map((c) => [c.key, c.relationship, c.kind, c.dimension ?? null]),
+    ).toEqual([
+      ["self:enps", "self", "rating", "engagement"],
+      ["manager:q3", "manager", "text", null],
+      ["manager:comment", "manager", "text", null],
+    ]);
+    expect(columns[0].prompt.es).toBe("¿Recomendarías trabajar acá?");
+  });
+
+  it("letter choices take the configured options as their labels", () => {
+    const [column] = detectQuestionColumns(
+      ["Seniority"],
+      [
+        {
+          column: "Seniority",
+          side: "manager",
+          kind: "letter_choice",
+          key: "manager:seniority",
+          options: ["Junior", "Semi senior", "Senior"],
+        },
+      ],
+    );
+    expect(column.kind).toBe("single_choice");
+    expect(column.choices?.map((c) => [c.value, c.label.es])).toEqual([
+      ["A", "Junior"],
+      ["B", "Semi senior"],
+      ["C", "Senior"],
+    ]);
+    expect(column.visibleToReviewee).toBe(false);
+    expect(answerColumns(column, "c")).toMatchObject({ optionLabel: "C" });
+  });
+});

@@ -203,12 +203,14 @@
         "ignored": "Ignorados",
         "log": "Entradas del log",
         "duration": "Duración",
-        "mismatches": "Evaluador distinto"
+        "mismatches": "Evaluador distinto",
+        "deferred": "En espera"
       },
       "status": {
         "running": "En curso",
         "succeeded": "Exitosa",
-        "error": "Con error"
+        "error": "Con error",
+        "needs_decision": "Requiere decisión"
       },
       "pagination": {
         "label": "Paginación",
@@ -536,7 +538,8 @@
       "job_history": "Historial de puesto",
       "goal": "Metas",
       "assessment": "Evaluaciones",
-      "feedback": "Feedback"
+      "feedback": "Feedback",
+      "assessment_progress": "Progreso de evaluaciones"
     },
     "result": {
       "title": "Importación terminada",

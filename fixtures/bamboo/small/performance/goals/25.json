@@ -22,38 +22,15 @@
   "selectedFilter": "status-all",
   "goals": [
     {
-      "id": "5047",
-      "title": "Entregar el proyecto Norte sin desvíos",
-      "description": "Meta compartida con otra área; coordinar avances mensuales.",
-      "percentComplete": 100,
-      "alignsWithOptionId": 9004,
+      "id": "5077",
+      "title": "Implementar el calendario editorial",
+      "description": "Sirve de base para el próximo ciclo de evaluación.",
+      "percentComplete": 75,
+      "alignsWithOptionId": 9003,
       "sharedWithEmployeeIds": [],
-      "dueDate": "2024-07-26",
-      "completionDate": "2024-06-24",
-      "lastChangedDateTime": "2024-06-24T16:06:04Z",
-      "status": "completed",
-      "milestones": null,
-      "actions": {
-        "canEdit": true,
-        "canUpdateProgress": false,
-        "canClose": true,
-        "canReopen": false,
-        "canDelete": true,
-        "canComment": true
-      }
-    },
-    {
-      "id": "5049",
-      "title": "Lanzar el nuevo flujo de onboarding",
-      "description": "Pedido por el equipo directivo en la planificación.",
-      "percentComplete": 80,
-      "alignsWithOptionId": null,
-      "sharedWithEmployeeIds": [
-        19
-      ],
-      "dueDate": "2025-03-16",
+      "dueDate": "2023-10-21",
       "completionDate": null,
-      "lastChangedDateTime": "2025-01-22T12:59:55Z",
+      "lastChangedDateTime": "2026-09-11T11:56:22Z",
       "status": "in_progress",
       "milestones": null,
       "actions": {
@@ -66,17 +43,40 @@
       }
     },
     {
-      "id": "5050",
-      "title": "Entregar el proyecto Norte sin desvíos",
-      "description": "Sirve de base para el próximo ciclo de evaluación.",
+      "id": "5079",
+      "title": "Cerrar el plan de capacitación anual",
+      "description": "Pedido por el equipo directivo en la planificación.",
       "percentComplete": 100,
       "alignsWithOptionId": null,
       "sharedWithEmployeeIds": [],
-      "dueDate": "2026-08-23",
-      "completionDate": "2026-04-14",
-      "lastChangedDateTime": "2026-04-14T18:10:51Z",
+      "dueDate": "2023-10-19",
+      "completionDate": "2023-09-09",
+      "lastChangedDateTime": "2023-09-09T10:03:53Z",
       "status": "completed",
-      "milestones": null,
+      "milestones": [
+        {
+          "id": 737,
+          "employeeGoalId": 5079,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2023-08-15T15:52:44Z",
+          "lastUpdateDateTime": "2023-08-15T15:52:44Z",
+          "lastUpdateUserId": 25
+        },
+        {
+          "id": 738,
+          "employeeGoalId": 5079,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2023-08-07T13:14:41Z",
+          "lastUpdateDateTime": "2023-08-07T13:14:41Z",
+          "lastUpdateUserId": 25
+        }
+      ],
       "actions": {
         "canEdit": true,
         "canUpdateProgress": false,
@@ -87,54 +87,206 @@
       }
     },
     {
-      "id": "5053",
-      "title": "Cerrar el plan de capacitación anual",
-      "description": "Sirve de base para el próximo ciclo de evaluación.",
+      "id": "5082",
+      "title": "Renovar las cuentas clave del trimestre",
+      "description": "Pedido por el equipo directivo en la planificación.",
       "percentComplete": 33,
-      "alignsWithOptionId": null,
-      "sharedWithEmployeeIds": [],
-      "dueDate": "2027-03-05",
+      "alignsWithOptionId": 9004,
+      "sharedWithEmployeeIds": [
+        19
+      ],
+      "dueDate": "2024-05-29",
       "completionDate": null,
-      "lastChangedDateTime": "2026-10-10T12:23:43Z",
-      "status": "in_progress",
+      "lastChangedDateTime": "2025-05-18T09:07:04Z",
+      "status": "closed",
       "milestones": [
         {
-          "id": 715,
-          "employeeGoalId": 5053,
+          "id": 739,
+          "employeeGoalId": 5082,
           "title": "Hito 1",
           "startValue": 0,
           "endValue": 1,
           "currentValue": 1,
-          "completedDateTime": "2026-10-04T08:24:40Z",
-          "lastUpdateDateTime": "2026-10-04T08:24:40Z",
+          "completedDateTime": "2024-08-09T13:01:52Z",
+          "lastUpdateDateTime": "2024-08-09T13:01:52Z",
           "lastUpdateUserId": 25
         },
         {
-          "id": 716,
-          "employeeGoalId": 5053,
+          "id": 740,
+          "employeeGoalId": 5082,
           "title": "Hito 2",
           "startValue": 0,
           "endValue": 1,
           "currentValue": 0,
           "completedDateTime": null,
-          "lastUpdateDateTime": "2026-09-17T14:29:52Z",
+          "lastUpdateDateTime": "2024-02-05T12:22:42Z",
           "lastUpdateUserId": 25
         },
         {
-          "id": 717,
-          "employeeGoalId": 5053,
+          "id": 741,
+          "employeeGoalId": 5082,
           "title": "Hito 3",
           "startValue": 0,
           "endValue": 1,
           "currentValue": 0,
           "completedDateTime": null,
-          "lastUpdateDateTime": "2026-09-17T16:57:24Z",
+          "lastUpdateDateTime": "2024-02-05T15:42:53Z",
+          "lastUpdateUserId": 25
+        }
+      ],
+      "actions": {
+        "canEdit": false,
+        "canUpdateProgress": false,
+        "canClose": false,
+        "canReopen": true,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "5085",
+      "title": "Aumentar la cobertura de pruebas al 80%",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 0,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2024-02-02",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-02-25T10:00:50Z",
+      "status": "in_progress",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "5088",
+      "title": "Documentar los procesos críticos",
+      "description": "Sirve de base para el próximo ciclo de evaluación.",
+      "percentComplete": 25,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2024-06-17",
+      "completionDate": null,
+      "lastChangedDateTime": "2025-11-25T19:57:24Z",
+      "status": "in_progress",
+      "milestones": [
+        {
+          "id": 742,
+          "employeeGoalId": 5088,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2024-04-01T10:38:45Z",
+          "lastUpdateDateTime": "2024-04-01T10:38:45Z",
+          "lastUpdateUserId": 25
+        },
+        {
+          "id": 743,
+          "employeeGoalId": 5088,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2024-02-23T14:39:06Z",
+          "lastUpdateUserId": 25
+        },
+        {
+          "id": 744,
+          "employeeGoalId": 5088,
+          "title": "Hito 3",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2024-02-23T08:52:16Z",
+          "lastUpdateUserId": 25
+        },
+        {
+          "id": 745,
+          "employeeGoalId": 5088,
+          "title": "Hito 4",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2024-02-23T15:02:34Z",
           "lastUpdateUserId": 25
         }
       ],
       "actions": {
         "canEdit": true,
         "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "5089",
+      "title": "Cerrar el plan de capacitación anual",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "percentComplete": 15,
+      "alignsWithOptionId": 9003,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2026-11-22",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-11-01T13:32:34Z",
+      "status": "in_progress",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "5091",
+      "title": "Entregar el proyecto Norte sin desvíos",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "percentComplete": 35,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2026-09-05",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-10-05T18:54:10Z",
+      "status": "closed",
+      "milestones": null,
+      "actions": {
+        "canEdit": false,
+        "canUpdateProgress": false,
+        "canClose": false,
+        "canReopen": true,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "5094",
+      "title": "Migrar los reportes al nuevo tablero",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 100,
+      "alignsWithOptionId": 9004,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2026-03-13",
+      "completionDate": "2025-11-23",
+      "lastChangedDateTime": "2025-11-23T09:21:13Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
         "canClose": true,
         "canReopen": false,
         "canDelete": true,
@@ -158,12 +310,8 @@
   ],
   "comments": [
     {
-      "goalId": "5047",
+      "goalId": "5088",
       "commentCount": 1
-    },
-    {
-      "goalId": "5049",
-      "commentCount": 4
     }
   ]
 }

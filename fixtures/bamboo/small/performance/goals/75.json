@@ -22,17 +22,62 @@
   "selectedFilter": "status-all",
   "goals": [
     {
-      "id": "5231",
-      "title": "Implementar el calendario editorial",
+      "id": "5303",
+      "title": "Automatizar la conciliación mensual",
       "description": "Pedido por el equipo directivo en la planificación.",
-      "percentComplete": 25,
+      "percentComplete": 100,
       "alignsWithOptionId": null,
       "sharedWithEmployeeIds": [],
-      "dueDate": "2025-10-28",
-      "completionDate": null,
-      "lastChangedDateTime": "2025-06-23T17:17:35Z",
-      "status": "closed",
-      "milestones": null,
+      "dueDate": "2025-02-16",
+      "completionDate": "2024-12-19",
+      "lastChangedDateTime": "2024-12-19T13:25:29Z",
+      "status": "completed",
+      "milestones": [
+        {
+          "id": 848,
+          "employeeGoalId": 5303,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2024-12-16T19:43:20Z",
+          "lastUpdateDateTime": "2024-12-16T19:43:20Z",
+          "lastUpdateUserId": 75
+        },
+        {
+          "id": 849,
+          "employeeGoalId": 5303,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2024-12-09T19:07:27Z",
+          "lastUpdateDateTime": "2024-12-09T19:07:27Z",
+          "lastUpdateUserId": 75
+        },
+        {
+          "id": 850,
+          "employeeGoalId": 5303,
+          "title": "Hito 3",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2024-12-14T13:20:33Z",
+          "lastUpdateDateTime": "2024-12-14T13:20:33Z",
+          "lastUpdateUserId": 75
+        },
+        {
+          "id": 851,
+          "employeeGoalId": 5303,
+          "title": "Hito 4",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2024-12-15T18:22:21Z",
+          "lastUpdateDateTime": "2024-12-15T18:22:21Z",
+          "lastUpdateUserId": 75
+        }
+      ],
       "actions": {
         "canEdit": false,
         "canUpdateProgress": false,
@@ -43,16 +88,16 @@
       }
     },
     {
-      "id": "5234",
-      "title": "Migrar los reportes al nuevo tablero",
-      "description": "Alineado con el plan del área para el año.",
-      "percentComplete": 100,
-      "alignsWithOptionId": null,
+      "id": "5306",
+      "title": "Documentar los procesos críticos",
+      "description": "Sirve de base para el próximo ciclo de evaluación.",
+      "percentComplete": 25,
+      "alignsWithOptionId": 9001,
       "sharedWithEmployeeIds": [],
-      "dueDate": "2025-05-16",
-      "completionDate": "2025-04-27",
-      "lastChangedDateTime": "2025-04-27T13:41:40Z",
-      "status": "completed",
+      "dueDate": "2025-07-09",
+      "completionDate": null,
+      "lastChangedDateTime": "2025-09-14T15:56:24Z",
+      "status": "in_progress",
       "milestones": null,
       "actions": {
         "canEdit": false,
@@ -74,11 +119,7 @@
   ],
   "comments": [
     {
-      "goalId": "5231",
-      "commentCount": 4
-    },
-    {
-      "goalId": "5234",
+      "goalId": "5306",
       "commentCount": 3
     }
   ]

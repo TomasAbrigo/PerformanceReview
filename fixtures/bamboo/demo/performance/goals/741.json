@@ -22,41 +22,41 @@
   "selectedFilter": "status-all",
   "goals": [
     {
-      "id": "7821",
-      "title": "Aumentar la cobertura de pruebas al 80%",
-      "description": "Alineado con el plan del área para el año.",
-      "percentComplete": 40,
+      "id": "7810",
+      "title": "Mejorar el NPS interno del equipo",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 100,
       "alignsWithOptionId": null,
       "sharedWithEmployeeIds": [],
-      "dueDate": "2026-10-23",
-      "completionDate": null,
-      "lastChangedDateTime": "2026-10-26T19:46:19Z",
-      "status": "closed",
+      "dueDate": "2025-09-04",
+      "completionDate": "2025-08-20",
+      "lastChangedDateTime": "2025-08-20T18:48:36Z",
+      "status": "completed",
       "milestones": null,
       "actions": {
-        "canEdit": false,
+        "canEdit": true,
         "canUpdateProgress": false,
-        "canClose": false,
-        "canReopen": true,
+        "canClose": true,
+        "canReopen": false,
         "canDelete": true,
         "canComment": true
       }
     },
     {
-      "id": "7824",
-      "title": "Lanzar el nuevo flujo de onboarding",
-      "description": "Alineado con el plan del área para el año.",
-      "percentComplete": 0,
+      "id": "7812",
+      "title": "Reducir los incidentes recurrentes a la mitad",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 100,
       "alignsWithOptionId": 9004,
       "sharedWithEmployeeIds": [],
-      "dueDate": "2026-06-14",
-      "completionDate": null,
-      "lastChangedDateTime": "2026-07-03T16:42:10Z",
-      "status": "in_progress",
+      "dueDate": "2025-12-19",
+      "completionDate": "2026-01-07",
+      "lastChangedDateTime": "2026-01-07T13:27:47Z",
+      "status": "completed",
       "milestones": null,
       "actions": {
         "canEdit": true,
-        "canUpdateProgress": true,
+        "canUpdateProgress": false,
         "canClose": true,
         "canReopen": false,
         "canDelete": true,
@@ -74,7 +74,7 @@
   ],
   "comments": [
     {
-      "goalId": "7821",
+      "goalId": "7810",
       "commentCount": 3
     }
   ]

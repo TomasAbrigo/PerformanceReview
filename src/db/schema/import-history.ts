@@ -2,6 +2,7 @@ import {
   boolean,
   index,
   integer,
+  pgEnum,
   pgTable,
   primaryKey,
   text,
@@ -11,7 +12,12 @@ import {
 } from "drizzle-orm/pg-core";
 import { ingestRun } from "./ingest";
 import { identityMatchIssue } from "./identity";
-import { questionRevision, reviewCycle } from "./review-cycles";
+import {
+  cycleParticipant,
+  questionRevision,
+  reviewCycle,
+} from "./review-cycles";
+import { sourceSystem } from "./source";
 import { reviewRequest } from "./review-requests";
 
 /**
@@ -84,3 +90,58 @@ export const historyImportRow = pgTable(
 );
 
 export type HistoryImportRow = typeof historyImportRow.$inferSelect;
+
+/** One side of an assessment in Bamboo's Assessment Progress report. */
+export const progressStatuses = [
+  "not_started",
+  "in_progress",
+  "submitted",
+  "not_applicable",
+] as const;
+export type ProgressStatus = (typeof progressStatuses)[number];
+export const progressStatus = pgEnum("progress_status", progressStatuses);
+
+/**
+ * Completion of each participant of an imported cycle, as Bamboo's Assessment
+ * Progress report tells it (issue #58): where the self and manager
+ * assessments stand, whether the person counts as assessed, and the
+ * follow-up notes. One row per (cycle, participant); re-imports update it.
+ */
+export const assessmentProgress = pgTable(
+  "assessment_progress",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    cycleId: uuid("cycle_id")
+      .notNull()
+      .references(() => reviewCycle.id, { onDelete: "cascade" }),
+    participantId: uuid("participant_id")
+      .notNull()
+      .references(() => cycleParticipant.id, { onDelete: "cascade" }),
+    selfStatus: progressStatus("self_status").notNull(),
+    managerStatus: progressStatus("manager_status").notNull(),
+    /** Bamboo's "Assessed" column says Complete. */
+    assessed: boolean("assessed").notNull(),
+    followUpNotes: text("follow_up_notes"),
+    /** The Manager column as written in the report (the CURRENT manager). */
+    csvManagerName: text("csv_manager_name"),
+    /** The report's manager is not the participant's manager at snapshot. */
+    reviewerMismatch: boolean("reviewer_mismatch").notNull().default(false),
+    sourceSystem: sourceSystem("source_system").notNull(),
+    sourceId: text("source_id").notNull(),
+    payloadHash: text("payload_hash").notNull(),
+    ingestRunId: uuid("ingest_run_id").references(() => ingestRun.id, {
+      onDelete: "set null",
+    }),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [
+    unique("assessment_progress_cycle_participant_uq").on(
+      t.cycleId,
+      t.participantId,
+    ),
+  ],
+);
+
+export type AssessmentProgress = typeof assessmentProgress.$inferSelect;

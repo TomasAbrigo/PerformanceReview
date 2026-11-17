@@ -85,6 +85,8 @@ async function findOrCreateCycle(
   }
   if (input.widen && input.date > found.periodEnd) {
     changes.periodEnd = input.date;
+  }
+  if (input.widen && input.date > found.snapshotDate) {
     changes.snapshotDate = input.date;
   }
   if (extra.peer && !found.components.peer) {
@@ -95,6 +97,45 @@ async function findOrCreateCycle(
     .update(reviewCycle)
     .set({ ...changes, ingestRunId: input.runId })
     .where(eq(reviewCycle.id, found.id))
+    .returning();
+  return updated;
+}
+
+/**
+ * A closed imported cycle with a known period (a semester proposed to the
+ * person resolving a `needs_decision` run); the existing one if the name was
+ * imported already.
+ */
+export async function createImportedCycle(
+  tx: DbOrTx,
+  input: {
+    name: string;
+    periodStart: string;
+    periodEnd: string;
+    runId: string;
+  },
+): Promise<ReviewCycle> {
+  const cycle = await findOrCreateCycle(
+    tx,
+    {
+      name: input.name,
+      date: input.periodEnd,
+      runId: input.runId,
+      widen: false,
+    },
+    {},
+    undefined,
+  );
+  if (
+    cycle.ingestRunId !== input.runId ||
+    cycle.periodStart === input.periodStart
+  ) {
+    return cycle;
+  }
+  const [updated] = await tx
+    .update(reviewCycle)
+    .set({ periodStart: input.periodStart })
+    .where(eq(reviewCycle.id, cycle.id))
     .returning();
   return updated;
 }

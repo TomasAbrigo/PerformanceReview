@@ -76,7 +76,7 @@ describe("employee-performance.csv", () => {
         "How engaged is [Employee] at work?",
       );
       expect(header.some((h) => /\bid\b/i.test(h))).toBe(false);
-      expect(c.cycles).toHaveLength(3);
+      expect(c.cycles).toHaveLength(5);
     },
   );
 
@@ -84,7 +84,7 @@ describe("employee-performance.csv", () => {
     ["small", small, smallFiles],
     ["demo", demo, demoFiles],
   ])(
-    "%s covers the 3 cycles with letter-coded and 1-5 answers",
+    "%s covers the semi-annual cycles with letter-coded and 1-5 answers",
     (_, c, files) => {
       const { header, rows } = table(files, "employee-performance.csv");
       expect(new Set(rows.map((r) => r["Review Cycle"]))).toEqual(
@@ -292,7 +292,7 @@ describe("assessment-progress.csv", () => {
       }
       const ceo = c.employees.find((e) => e.managerId === null)!;
       const ceoRows = rows.filter((r) => r["Employee Name"] === fullName(ceo));
-      expect(ceoRows).toHaveLength(3);
+      expect(ceoRows).toHaveLength(c.cycles.length);
       expect(ceoRows.every((r) => r["Manager"] === "")).toBe(true);
     },
   );
@@ -387,7 +387,7 @@ describe("dirty names for the identity queue", () => {
         "employee-performance": table(files, "employee-performance.csv"),
         "feedback-status": table(files, "feedback-status.csv"),
       };
-      expect(c.identity.outsiders).toHaveLength(perCycle * 3 * 2);
+      expect(c.identity.outsiders).toHaveLength(perCycle * c.cycles.length * 2);
       for (const o of c.identity.outsiders) {
         expect(known.has(o.name)).toBe(false);
         const { rows } = reports[o.report];

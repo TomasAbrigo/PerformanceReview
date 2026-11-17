@@ -8,7 +8,7 @@ import { generateCompany, type CompanyFixture } from "@/fixtures/company";
 import { runIngest } from "@/modules/ingest/run-ingest";
 import { DuckDbFileLake } from "@/modules/lake/duckdb-file-lake";
 import { FileSourceAdapter } from "@/modules/lake/file-source-adapter";
-import { getBuiltinProfile } from "@/modules/lake/profiles";
+import { getBuiltinProfile, type SourceProfile } from "@/modules/lake/profiles";
 
 /** Shared setup of the historical import DB tests. */
 
@@ -16,7 +16,7 @@ export const REPORTS = path.resolve("fixtures/bamboo-reports/small");
 
 export async function resetDb() {
   await db.execute(
-    sql`TRUNCATE person, source_identity, employment, employee_job_history, raw_record, ingest_run, identity_match_issue, review_cycle CASCADE`,
+    sql`TRUNCATE person, source_identity, employment, employee_job_history, raw_record, ingest_run, identity_match_issue, review_cycle, goal CASCADE`,
   );
 }
 
@@ -75,12 +75,15 @@ export async function seedSmallCompany(): Promise<SeededCompany> {
   return { company, personOf };
 }
 
-/** Imports one report CSV through its built-in profile, in domain mode. */
+/** Imports one report CSV through a profile (a built-in by name), in domain mode. */
 export async function importReport(
   file: string,
-  profileName = "bamboo-employee-performance",
+  profileOrName: string | SourceProfile = "bamboo-employee-performance",
 ) {
-  const profile = getBuiltinProfile(profileName)!;
+  const profile =
+    typeof profileOrName === "string"
+      ? getBuiltinProfile(profileOrName)!
+      : profileOrName;
   const dir = await mkdtemp(path.join(tmpdir(), "history-import-"));
   try {
     await copyFile(file, path.join(dir, `${profile.table}.csv`));

@@ -45,8 +45,8 @@ describe("getHistoryImportResult", () => {
     expect(result?.cycles).toEqual([
       expect.objectContaining({
         name: "Ciclo 2023",
-        periodStart: "2023-12-01",
-        periodEnd: "2023-12-02",
+        periodStart: "2023-07-01",
+        periodEnd: "2023-12-31",
         rows: 2,
         participantsCreated: 1,
         requestsCreated: 2,

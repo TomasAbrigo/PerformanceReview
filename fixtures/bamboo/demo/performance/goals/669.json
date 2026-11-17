@@ -20,7 +20,73 @@
     }
   ],
   "selectedFilter": "status-all",
-  "goals": [],
+  "goals": [
+    {
+      "id": "7652",
+      "title": "Implementar el calendario editorial",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2025-10-27",
+      "completionDate": "2025-11-03",
+      "lastChangedDateTime": "2025-11-03T14:01:01Z",
+      "status": "completed",
+      "milestones": [
+        {
+          "id": 1830,
+          "employeeGoalId": 7652,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-07-07T13:00:25Z",
+          "lastUpdateDateTime": "2025-07-07T13:00:25Z",
+          "lastUpdateUserId": 669
+        },
+        {
+          "id": 1831,
+          "employeeGoalId": 7652,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-08-19T19:42:24Z",
+          "lastUpdateDateTime": "2025-08-19T19:42:24Z",
+          "lastUpdateUserId": 669
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "7653",
+      "title": "Mejorar el NPS interno del equipo",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2025-04-29",
+      "completionDate": "2025-04-24",
+      "lastChangedDateTime": "2025-04-24T12:19:57Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    }
+  ],
   "persons": [
     {
       "employeeId": 669,
@@ -29,5 +95,10 @@
       "preferredName": null
     }
   ],
-  "comments": []
+  "comments": [
+    {
+      "goalId": "7652",
+      "commentCount": 4
+    }
+  ]
 }

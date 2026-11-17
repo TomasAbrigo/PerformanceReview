@@ -1,11 +1,14 @@
 import type { DbOrTx } from "@/db/client";
 import type { IdentityMatchIssue } from "@/db/schema";
 import { stagedAssessmentSchema, upsertAssessment } from "./assessment";
+import { stagedProgressSchema, upsertProgress } from "./assessment-progress";
 import { stagedFeedbackSchema, upsertFeedback } from "./feedback";
 
 /** Report rows (historical import) are the entities this module resolves. */
 export const isReportEntity = (entity: string) =>
-  entity === "assessment" || entity === "feedback";
+  entity === "assessment" ||
+  entity === "assessment_progress" ||
+  entity === "feedback";
 
 /**
  * Re-processes the report row of an issue just settled with `link`: the
@@ -32,6 +35,13 @@ export async function reprocessReportRow(
     const staged = stagedAssessmentSchema.safeParse(stored);
     if (!staged.success) return false;
     await upsertAssessment(tx, staged.data, ctx);
+    return true;
+  }
+  if (issue.entity === "assessment_progress") {
+    const staged = stagedProgressSchema.safeParse(stored);
+    if (!staged.success) return false;
+    // A row still held back for its cycle stays where it is (needs_decision).
+    await upsertProgress(tx, staged.data, ctx);
     return true;
   }
   const staged = stagedFeedbackSchema.safeParse(stored);
