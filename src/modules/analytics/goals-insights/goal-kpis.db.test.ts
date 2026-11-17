@@ -2,7 +2,7 @@ import { sql } from "drizzle-orm";
 import { afterAll, afterEach, beforeAll, describe, expect, it } from "vitest";
 import { closeDb, db } from "@/db/client";
 import { setSetting } from "@/modules/settings";
-import { goalInsightsFilterOptions, goalKpis } from ".";
+import { goalInsights, goalInsightsFilterOptions, goalKpis } from ".";
 import {
   as,
   buildScenario,
@@ -349,6 +349,30 @@ describe("goalKpis (who reads)", () => {
     ]);
     expect(suppressed).toBe(0);
     expect(total).toMatchObject({ people: 9, goals: 33 });
+  });
+
+  it("a config override replaces the minimum group size setting for that call (the export's own)", async () => {
+    // The setting stays at its default 5; the override asks for 3.
+    const input = { cycleId: h1(), groupBy: "department" as const };
+    const config = { minGroupSize: 3 };
+    const kpis = await goalKpis(db, direction, { ...input, config });
+    expect(kpis.minGroupSize).toBe(3);
+    expect(kpis.groups.map((g) => [g.label, g.people])).toEqual([
+      ["Ingeniería", 6],
+      ["Producto", 3],
+    ]);
+    expect(kpis.total).toMatchObject({ people: 9 });
+    const all = await goalInsights(db, direction, { ...input, config });
+    expect(all.kpis.minGroupSize).toBe(3);
+    expect(all.vsIndicators.minGroupSize).toBe(3);
+    expect(all.outliers.minGroupSize).toBe(3);
+    // Without it, the setting still rules.
+    expect((await goalKpis(db, direction, input)).minGroupSize).toBe(5);
+    // People are not masked by it.
+    expect(
+      (await goalKpis(db, hr, { ...input, config: { minGroupSize: 40 } }))
+        .minGroupSize,
+    ).toBeNull();
   });
 
   it("direction reads today's org too: with Ana in Producto both areas reach 4", async () => {

@@ -1,5 +1,6 @@
 import type { DbOrTx } from "@/db/client";
 import type { ActorContext } from "@/modules/actor/types";
+import type { IndicatorConfig } from "@/modules/analytics/indicators/types";
 import { ReviewError } from "@/modules/review-core/review-errors";
 import {
   bucketRows,
@@ -27,6 +28,12 @@ export type GoalInsightsInput = {
   cycleId: string;
   hierarchy?: Hierarchy;
   filters?: GoalInsightsFilters;
+  /**
+   * Replaces settings for this call, as the indicators' `config` does: the
+   * minimum group size direction is masked with (the Arturía export applies
+   * its own) and the risk threshold of the outliers.
+   */
+  config?: Partial<IndicatorConfig>;
 };
 
 /** The minimum group size of direction; null for readers that see everything. */
@@ -102,7 +109,7 @@ export async function goalKpis(
   actor: ActorContext,
   input: GoalInsightsInput & { groupBy: GoalGroupBy },
 ): Promise<GoalKpis> {
-  const ctx = await goalContext(db, actor, input.cycleId);
+  const ctx = await goalContext(db, actor, input.cycleId, input.config);
   requireGroupable(ctx, input.groupBy);
   const hierarchy = input.hierarchy ?? "asOf";
   const all = await loadParticipantRows(db, ctx, {
@@ -135,7 +142,7 @@ export async function goalsVsIndicators(
   actor: ActorContext,
   input: GoalInsightsInput,
 ): Promise<GoalsVsIndicators> {
-  const ctx = await goalContext(db, actor, input.cycleId);
+  const ctx = await goalContext(db, actor, input.cycleId, input.config);
   const all = await loadParticipantRows(db, ctx, {
     hierarchy: input.hierarchy ?? "asOf",
     sentiment: true,
@@ -160,7 +167,7 @@ export async function goalOutliers(
     thresholds?: Partial<GoalOutlierThresholds>;
   },
 ): Promise<GoalOutliers> {
-  const ctx = await goalContext(db, actor, input.cycleId);
+  const ctx = await goalContext(db, actor, input.cycleId, input.config);
   const all = await loadParticipantRows(db, ctx, {
     hierarchy: input.hierarchy ?? "asOf",
     sentiment: false,
@@ -201,7 +208,7 @@ export async function goalInsights(
   outliers: GoalOutliers;
   options: GoalInsightsFilterOptions;
 }> {
-  const ctx = await goalContext(db, actor, input.cycleId);
+  const ctx = await goalContext(db, actor, input.cycleId, input.config);
   requireGroupable(ctx, input.groupBy);
   const hierarchy = input.hierarchy ?? "asOf";
   const all = await loadParticipantRows(db, ctx, {

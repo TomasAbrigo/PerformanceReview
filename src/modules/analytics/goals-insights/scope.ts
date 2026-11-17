@@ -7,6 +7,7 @@ import {
   indicatorContext,
   requireCycle,
 } from "@/modules/analytics/indicators/rows";
+import type { IndicatorConfig } from "@/modules/analytics/indicators/types";
 import type { Hierarchy } from "./types";
 
 /**
@@ -29,13 +30,18 @@ export type GoalContext = {
   cycleId: string;
 };
 
-/** Authorizes the actor (`forbidden`) and checks the cycle (`not_found`). */
+/**
+ * Authorizes the actor (`forbidden`) and checks the cycle (`not_found`).
+ * `config` replaces settings for this call (the indicators' override: the
+ * minimum group size of direction, the risk threshold).
+ */
 export async function goalContext(
   db: DbOrTx,
   actor: ActorContext,
   cycleId: string,
+  config?: Partial<IndicatorConfig>,
 ): Promise<GoalContext> {
-  const indicators = await indicatorContext(db, actor);
+  const indicators = await indicatorContext(db, actor, config);
   await requireCycle(db, cycleId);
   return { actor, reach: indicators.scope, indicators, cycleId };
 }
