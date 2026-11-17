@@ -12,6 +12,7 @@ import {
   answeredCells,
   ensureParticipant,
   ensureQuestions,
+  likertOverridesOf,
   saveAnswers,
   SOURCE,
   upsertRequest,
@@ -25,10 +26,7 @@ import {
 } from "./names";
 import { cycleForAssessment } from "./cycle-target";
 import { detectQuestionColumns, type QuestionColumn } from "./questions";
-import {
-  questionMappingSchema,
-  type QuestionMapping,
-} from "@/modules/lake/profiles";
+import type { QuestionMapping } from "@/modules/lake/profiles";
 
 const cell = z
   .union([z.string(), z.number(), z.boolean(), z.null()])
@@ -54,8 +52,6 @@ export const stagedAssessmentSchema = z
       assessment_date: z.unknown(),
     }),
     raw: z.record(z.string(), z.unknown()),
-    /** The source profile's question mapping (see detectQuestionColumns). */
-    questions: z.array(questionMappingSchema).optional(),
     dateFormat: z.enum(["mdy", "dmy"]).optional(),
   })
   .transform((row, ctx) => {
@@ -288,7 +284,7 @@ export async function upsertAssessment(
   }
   const { cycle } = target;
   const cycleName = fields.review_cycle ?? cycle.name;
-  const columns = columnsOf(ctx.cache, Object.keys(raw), staged.questions);
+  const columns = columnsOf(ctx.cache, Object.keys(raw), ctx.questions);
   const revisions = await ensureQuestions(tx, cycle.id, columns, ctx.cache);
 
   const tally = emptyTally();
@@ -346,6 +342,11 @@ export async function upsertAssessment(
         sideColumns,
         revisions,
         raw,
+        {
+          cycleId: cycle.id,
+          runId: ctx.runId,
+          overrides: await likertOverridesOf(tx, ctx.cache),
+        },
       );
       tally.answersCreated += saved.created;
       tally.answersUnchanged += saved.updated;

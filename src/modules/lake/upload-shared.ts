@@ -37,7 +37,9 @@ export type UploadErrorCode =
   | "invalid_profile"
   /** The profile itself is malformed (name, keys...). */
   | "invalid_profile_definition"
-  | "profile_exists";
+  | "profile_exists"
+  /** Only People (HR) may import. */
+  | "forbidden";
 
 /** Why an upload action failed. Codes map to UI messages; `message` is for logs. */
 export type UploadFailure = {

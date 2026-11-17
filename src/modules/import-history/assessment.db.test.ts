@@ -74,17 +74,16 @@ describe("assessment import: one row", () => {
       status: "closed",
       sourceSystem: "bamboo_export",
       sourceId: "Ciclo 2023",
-      // Its dates all fall in 2023-H2: the period is that semester (#58).
-      periodStart: "2023-07-01",
-      periodEnd: "2023-12-31",
-      snapshotDate: "2023-12-31",
+      periodStart: "2023-12-01",
+      periodEnd: "2023-12-01",
+      snapshotDate: "2023-12-01",
       templateId: null,
     });
     const [participant] = await db.select().from(cycleParticipant);
     expect(participant).toMatchObject({
       cycleId: cycle.id,
       revieweePersonId: bruno,
-      snapshotAsOf: "2023-12-31",
+      snapshotAsOf: "2023-12-01",
       snapManagerPersonId: ana,
       snapDepartment: "Ingeniería",
       snapJobTitle: "Developer",
@@ -227,7 +226,7 @@ describe("assessment import: one row", () => {
     expect(ana).toBeTruthy();
   });
 
-  it("the cycle period is the semester of its assessment dates, or spans them across semesters", async () => {
+  it("a named cycle's period spans the assessment dates seen (never snapped to a semester)", async () => {
     const ana = await addPerson("Ana García");
     const bruno = await addPerson("Bruno Pérez");
     const carla = await addPerson("Carla Romero");
@@ -246,14 +245,14 @@ describe("assessment import: one row", () => {
       .from(reviewCycle)
       .where(and(eq(reviewCycle.sourceId, "Ciclo 2023")));
     expect(cycle).toMatchObject({
-      periodStart: "2023-07-01",
-      periodEnd: "2023-12-31",
-      snapshotDate: "2023-12-31",
+      periodStart: "2023-11-28",
+      periodEnd: "2023-12-09",
+      snapshotDate: "2023-12-09",
     });
     const participants = await db.select().from(cycleParticipant);
     expect(participants.map((p) => p.snapshotAsOf)).toEqual([
-      "2023-12-31",
-      "2023-12-31",
+      "2023-12-09",
+      "2023-12-09",
     ]);
 
     // A later row in the next semester: the period spans the dates as seen.
@@ -268,7 +267,7 @@ describe("assessment import: one row", () => {
       .from(reviewCycle)
       .where(eq(reviewCycle.sourceId, "Ciclo 2023"));
     expect(wide).toMatchObject({
-      periodStart: "2023-07-01",
+      periodStart: "2023-11-28",
       periodEnd: "2024-02-10",
       snapshotDate: "2024-02-10",
     });

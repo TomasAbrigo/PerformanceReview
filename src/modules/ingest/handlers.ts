@@ -1,6 +1,7 @@
 import { and, eq, isNull, notInArray } from "drizzle-orm";
 import type { z } from "zod";
 import type { DbOrTx } from "@/db/client";
+import type { QuestionMapping } from "@/modules/lake/profiles";
 import {
   employment,
   type IngestCounts,
@@ -47,6 +48,12 @@ export type HandlerContext = {
    * deferred again; the others resolve their cycle as usual.
    */
   forcedCycleId?: string;
+  /**
+   * Report rows: the source profile's question mapping. Not part of the
+   * payload (hashes stay those of the row); re-processing a stored row gets
+   * it again from the run's profile (questionsOfRun).
+   */
+  questions?: QuestionMapping[];
 };
 
 /** A cycle a decision may create: a semester, or a cycle named in the file. */
@@ -61,7 +68,8 @@ export type Deferral = {
   reason: "ambiguous_semester" | "unknown_cycle";
   /** The cycle name the row gave, if any. */
   cycleName: string | null;
-  proposal: CycleProposal | null;
+  /** Cycles a decision may create for the row (none: pick an existing one). */
+  proposals: CycleProposal[];
 };
 
 export type HandlerOutcome = {

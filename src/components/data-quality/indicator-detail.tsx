@@ -289,6 +289,28 @@ function Cases({ indicator }: { indicator: DataQualityIndicator }) {
           ]}
         />
       );
+    case "unmapped_answers":
+      return (
+        <CaseTable
+          columns={["cycle", "column", "rawValue", "answerReason", "detected"]}
+          rows={indicator.items.map((i) => ({
+            key: i.id,
+            cells: [
+              <Link
+                key="c"
+                href={`/cycles/${i.cycleId}`}
+                className="hover:underline"
+              >
+                {i.cycleName}
+              </Link>,
+              <code key="k">{i.columnKey}</code>,
+              i.rawValue,
+              t(`answerReasons.${i.reason}`),
+              dateTime(i.createdAt),
+            ],
+          }))}
+        />
+      );
   }
 }
 

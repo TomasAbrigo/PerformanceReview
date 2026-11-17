@@ -27,6 +27,12 @@ import {
   type QuestionMappingKind,
   type SourceProfile,
 } from "@/modules/lake/profiles";
+import {
+  questionDimensions,
+  questionRoles,
+  type QuestionDimension,
+  type QuestionRole,
+} from "@/modules/templates/constants";
 import type { LakeColumn } from "@/modules/lake/types";
 import { PROFILE_NAME } from "@/modules/lake/upload-shared";
 import { NativeSelect } from "./native-select";
@@ -37,8 +43,9 @@ export type QuestionDraft = {
   side: QuestionMapping["side"];
   /** Kept from the built-in it started from; "" = derived from side and column. */
   key: string;
-  dimension: string;
-  role: string;
+  /** "" = none. */
+  dimension: QuestionDimension | "";
+  role: QuestionRole | "";
   options?: string[];
 };
 
@@ -143,8 +150,8 @@ function questionsOf(
         side: q.side,
         kind: q.kind,
         key: q.key || `${q.side}:${column.trim().toLowerCase()}`,
-        ...(q.dimension.trim() ? { dimension: q.dimension.trim() } : {}),
-        ...(q.role.trim() ? { role: q.role.trim() } : {}),
+        ...(q.dimension ? { dimension: q.dimension } : {}),
+        ...(q.role ? { role: q.role } : {}),
         ...(q.options ? { options: q.options } : {}),
       },
     ];
@@ -410,11 +417,14 @@ function QuestionTable({
   onChange: (questions: Record<string, QuestionDraft>) => void;
 }) {
   const t = useTranslations("Upload.custom.questions");
-  const set = (column: string, changes: Partial<QuestionDraft>) =>
-    onChange({
-      ...questions,
-      [column]: { ...(questions[column] ?? emptyQuestion), ...changes },
-    });
+  const set = (column: string, changes: Partial<QuestionDraft>) => {
+    const before = questions[column] ?? emptyQuestion;
+    const next = { ...before, ...changes };
+    // The key encodes the side (and the kind decides the revision): a base's
+    // key no longer fits once either changes, so it is derived again.
+    if (next.side !== before.side || next.kind !== before.kind) next.key = "";
+    onChange({ ...questions, [column]: next });
+  };
   return (
     <div className="flex flex-col gap-2">
       <p className="text-sm text-muted-foreground">{t("hint")}</p>
@@ -469,22 +479,42 @@ function QuestionTable({
                   </NativeSelect>
                 </TableCell>
                 <TableCell>
-                  <Input
+                  <NativeSelect
                     aria-label={t("dimensionLabel", { column })}
                     value={q.dimension}
                     disabled={off}
-                    autoComplete="off"
-                    onChange={(e) => set(column, { dimension: e.target.value })}
-                  />
+                    onChange={(e) =>
+                      set(column, {
+                        dimension: e.target.value as QuestionDraft["dimension"],
+                      })
+                    }
+                  >
+                    <option value="">{t("none")}</option>
+                    {questionDimensions.map((d) => (
+                      <option key={d} value={d}>
+                        {t(`dimensions.${d}`)}
+                      </option>
+                    ))}
+                  </NativeSelect>
                 </TableCell>
                 <TableCell>
-                  <Input
+                  <NativeSelect
                     aria-label={t("roleLabel", { column })}
                     value={q.role}
                     disabled={off}
-                    autoComplete="off"
-                    onChange={(e) => set(column, { role: e.target.value })}
-                  />
+                    onChange={(e) =>
+                      set(column, {
+                        role: e.target.value as QuestionDraft["role"],
+                      })
+                    }
+                  >
+                    <option value="">{t("none")}</option>
+                    {questionRoles.map((r) => (
+                      <option key={r} value={r}>
+                        {t(`roles.${r}`)}
+                      </option>
+                    ))}
+                  </NativeSelect>
                 </TableCell>
               </TableRow>
             );

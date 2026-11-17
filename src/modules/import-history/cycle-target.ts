@@ -7,6 +7,7 @@ import {
   semesterConfig,
   semesterOf,
   semesterPeriod,
+  type Semester,
   type SemesterConfig,
 } from "./semester";
 
@@ -18,6 +19,19 @@ import {
  * waits for someone to choose (`needs_decision`). Resuming the run passes the
  * chosen cycle as `ctx.forcedCycleId`, used only for those rows.
  */
+/** The semester on the other side of the cutoff nearest to `date`. */
+function neighbour(date: string, semester: Semester, cfg: SemesterConfig) {
+  const day = 86_400_000;
+  const t = Date.parse(`${date}T00:00:00Z`);
+  const toStart = t - Date.parse(`${semester.periodStart}T00:00:00Z`);
+  const toEnd = Date.parse(`${semester.periodEnd}T00:00:00Z`) - t;
+  const across =
+    toStart <= toEnd
+      ? Date.parse(`${semester.periodStart}T00:00:00Z`) - day
+      : Date.parse(`${semester.periodEnd}T00:00:00Z`) + day;
+  return semesterOf(new Date(across).toISOString().slice(0, 10), cfg);
+}
+
 export type CycleTarget = { cycle: ReviewCycle } | { deferred: Deferral };
 
 async function cachedConfig(
@@ -103,11 +117,14 @@ export async function cycleForAssessment(
       deferred: {
         reason: "ambiguous_semester",
         cycleName: null,
-        proposal: {
-          name: semester.label,
-          periodStart: semester.periodStart,
-          periodEnd: semester.periodEnd,
-        },
+        // The date's semester and the one across the nearest cutoff.
+        proposals: [semester, neighbour(row.date, semester, cfg)]
+          .sort((a, b) => a.periodStart.localeCompare(b.periodStart))
+          .map((s) => ({
+            name: s.label,
+            periodStart: s.periodStart,
+            periodEnd: s.periodEnd,
+          })),
       },
     };
   }
@@ -140,8 +157,9 @@ export async function cycleForProgress(
   name: string,
 ): Promise<CycleTarget> {
   const key = `progressCycle:${name}`;
-  let cycle = ctx.cache.get(key) as ReviewCycle | undefined;
-  if (!cycle) {
+  // null: looked up already and not found (one lookup per name per run).
+  let cycle = ctx.cache.get(key) as ReviewCycle | null | undefined;
+  if (cycle === undefined) {
     cycle = await findImportedCycle(tx, name, { partial: false });
     if (!cycle) {
       const byName = await tx
@@ -150,7 +168,7 @@ export async function cycleForProgress(
         .where(eq(reviewCycle.name, name));
       cycle = byName.length === 1 ? byName[0] : undefined;
     }
-    if (cycle) ctx.cache.set(key, cycle);
+    ctx.cache.set(key, cycle ?? null);
   }
   if (cycle) return { cycle };
   const forced = await forcedCycle(tx, ctx);
@@ -161,7 +179,7 @@ export async function cycleForProgress(
     deferred: {
       reason: "unknown_cycle",
       cycleName: name,
-      proposal: period ? { name, ...period } : null,
+      proposals: period ? [{ name, ...period }] : [],
     },
   };
 }

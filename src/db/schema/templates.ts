@@ -12,12 +12,15 @@ import { type LocalizedText, ratingScale } from "./rating-scales";
 import { sourceColumns } from "./source";
 
 import type {
+  QuestionDimension,
   QuestionKind,
   QuestionRole,
   Relationship,
 } from "../../modules/templates/constants";
 
 export {
+  type QuestionDimension,
+  questionDimensions,
   type QuestionKind,
   questionKinds,
   type QuestionRole,
@@ -74,6 +77,8 @@ export const question = pgTable("question", {
   choices: jsonb("choices").$type<Choice[]>(),
   /** Special meaning (e.g. the goals rating); null for ordinary questions. */
   role: text("role").$type<QuestionRole>(),
+  /** What an open question is about (strengths, improvement, custom_n). */
+  dimension: text("dimension").$type<QuestionDimension>(),
 });
 
 export type ReviewTemplate = typeof reviewTemplate.$inferSelect;

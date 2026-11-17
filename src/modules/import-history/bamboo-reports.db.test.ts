@@ -277,10 +277,11 @@ describe("semester cycles of Employee Performance rows without a cycle name", ()
       .from(reviewCycle)
       .orderBy(reviewCycle.periodStart);
     expect(cycles).toEqual([
+      // Named in a file: its period spans its dates, no snapping.
       {
         name: "Evaluación semestral 2025-H1",
-        start: "2025-01-01",
-        end: "2025-06-30",
+        start: "2025-04-02",
+        end: "2025-05-20",
       },
       { name: "2025-H2", start: "2025-07-01", end: "2025-12-31" },
     ]);
@@ -292,7 +293,8 @@ describe("semester cycles of Employee Performance rows without a cycle name", ()
       await writeCsv([
         PERFORMANCE,
         "Bruno Pérez,Ana García,Ingeniería,,2025-07-04,Ok,Ok",
-        "Carla Romero,Ana García,Ingeniería,,2025-03-10,Ok,Ok",
+        // Diego is not her manager: a reviewer mismatch, logged once.
+        "Carla Romero,Diego Sosa,Ingeniería,,2025-03-10,Ok,Ok",
       ]),
     );
 
@@ -301,7 +303,9 @@ describe("semester cycles of Employee Performance rows without a cycle name", ()
     expect(decision).toMatchObject({
       rows: 1,
       reasons: ["ambiguous_semester"],
+      // Both semesters around the cutoff.
       proposals: [
+        { name: "2025-H1", periodStart: "2025-01-01", periodEnd: "2025-06-30" },
         { name: "2025-H2", periodStart: "2025-07-01", periodEnd: "2025-12-31" },
       ],
     });
@@ -310,9 +314,16 @@ describe("semester cycles of Employee Performance rows without a cycle name", ()
       "2025-H1",
     ]);
 
+    expect((await runOf(runId)).counts?.mismatches).toBe(1);
+
     await resumeImportRun(db, runId, { create: "2025-H2" });
 
-    expect((await runOf(runId)).status).toBe("succeeded");
+    const done = await runOf(runId);
+    expect(done.status).toBe("succeeded");
+    expect(done.counts?.mismatches).toBe(1);
+    expect(
+      done.rejects?.filter((r) => r.code === "reviewer_mismatch"),
+    ).toHaveLength(1);
     const [h2] = await db
       .select()
       .from(reviewCycle)
@@ -365,7 +376,7 @@ describe("goals of imported participants", () => {
       })
       .from(participantGoalSnapshot);
     expect(snapshots.map((s) => s.title)).toEqual(["Migrar reportes"]);
-    expect(snapshots[0].at.toISOString().slice(0, 10)).toBe("2025-06-30");
+    expect(snapshots[0].at.toISOString().slice(0, 10)).toBe("2025-05-20");
   });
 });
 
@@ -382,7 +393,7 @@ describe("configured question mapping", () => {
           side: "self",
           kind: "likert",
           key: "self:enps",
-          dimension: "engagement",
+          dimension: "custom_3",
         },
       ],
     };

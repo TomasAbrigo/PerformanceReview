@@ -41,15 +41,23 @@ export function ActorSelector({
       p.id === personId ||
       (q !== "" && p.displayName.toLocaleLowerCase().includes(q)),
   );
-  const name = actorName ?? (actor.role === "hr" ? t("hrName") : t("noPerson"));
+  const name =
+    actorName ??
+    (actor.role === "hr"
+      ? t("hrName")
+      : actor.role === "direction"
+        ? t("roles.direction")
+        : t("noPerson"));
   const current =
     actorName && actor.role !== "employee"
       ? `${actorName} (${t(`roles.${actor.role}`)})`
       : name;
+  // Direction acts without a person: only aggregates, nobody in particular.
+  const noPerson = role === "direction";
 
   function apply() {
     startTransition(async () => {
-      const result = await setActor(personId || null, role);
+      const result = await setActor(noPerson ? null : personId || null, role);
       setError(!result.ok);
     });
   }
@@ -81,7 +89,8 @@ export function ActorSelector({
       <select
         id={`${id}-person`}
         className={selectClass}
-        value={personId}
+        value={noPerson ? "" : personId}
+        disabled={noPerson}
         onChange={(e) => setPersonId(e.target.value)}
       >
         <option value="">{t("noPerson")}</option>

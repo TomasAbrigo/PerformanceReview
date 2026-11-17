@@ -11,7 +11,13 @@ import {
 } from "@/db/schema";
 import { snapshotGoalsForParticipants } from "@/modules/review-core/goal-snapshot";
 import { snapshots } from "@/modules/review-core/service";
-import { semesterConfig, snapToSemester } from "./semester";
+import { reapplyLikertMappings } from "./likert-reapply";
+import {
+  isSemesterLabel,
+  semesterConfig,
+  snapshotDateFor,
+  snapToSemester,
+} from "./semester";
 
 /**
  * After a run, for each cycle it touched: rows are processed one by one and
@@ -21,10 +27,17 @@ import { semesterConfig, snapToSemester } from "./semester";
  * Manager, i.e. the manager at export time) is not the one in force at period
  * end are flagged `reviewer_mismatch` and logged on the run.
  *
- * An imported cycle whose dates all fall in one semester gets that semester
- * as its period and snapshot date (#58), and every
+ * A cycle created for a semester (rows without a cycle name, named like
+ * "2025-H1") whose dates all fall in it gets that semester as its period; its
+ * snapshot is as of the semester end, or today while the semester is not
+ * over (never a future date). Named cycles keep the period of their dates.
+ * Every
  * participant gets the goal snapshot a launched cycle takes: their goals that
  * overlap the period, captured as of its end.
+ *
+ * Finally the
+ * retention/engagement answers are remapped with the option count of their
+ * column (reapplyLikertMappings).
  */
 export async function finishHistoryImport(
   db: DbOrTx,
@@ -41,6 +54,9 @@ export async function finishHistoryImport(
       refreshCycle(tx, cycleId, runId, reject),
     );
   }
+  // Rows were mapped one by one assuming 5 options; now that the whole file
+  // is in, the option count of each Likert column is known (A-D vs A-E).
+  await reapplyLikertMappings(db, { cycleIds });
   return { mismatches };
 }
 
@@ -54,14 +70,22 @@ async function refreshCycle(
     .select()
     .from(reviewCycle)
     .where(eq(reviewCycle.id, cycleId));
-  if (cycle.sourceSystem === "bamboo_export") {
+  // Only cycles the import named after a semester (rows without a cycle
+  // name): a cycle the file names keeps the period of its dates.
+  if (
+    cycle.sourceSystem === "bamboo_export" &&
+    isSemesterLabel(cycle.sourceId)
+  ) {
     const snapped = snapToSemester(cycle, await semesterConfig(tx));
     if (
       snapped &&
       (snapped.periodStart !== cycle.periodStart ||
         snapped.periodEnd !== cycle.periodEnd)
     ) {
-      const period = { ...snapped, snapshotDate: snapped.periodEnd };
+      const period = {
+        ...snapped,
+        snapshotDate: snapshotDateFor(snapped.periodEnd),
+      };
       await tx
         .update(reviewCycle)
         .set(period)

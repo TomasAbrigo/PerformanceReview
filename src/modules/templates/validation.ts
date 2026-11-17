@@ -1,5 +1,10 @@
 import { z } from "zod";
-import { questionKinds, questionRoles, relationships } from "@/db/schema";
+import {
+  questionDimensions,
+  questionKinds,
+  questionRoles,
+  relationships,
+} from "@/db/schema";
 
 /** A label/prompt: both locales are required (blank counts as missing). */
 export const localizedText = z.object({
@@ -44,9 +49,34 @@ export const questionInput = z
       .nullish(),
     /** Special meaning; omitted keeps the current one, null clears it. */
     role: z.enum(questionRoles).nullish(),
+    /** What an open question is about; omitted keeps it, null clears it. */
+    dimension: z.enum(questionDimensions).nullish(),
   })
   .superRefine((q, ctx) => {
     for (const issue of roleKindIssues(q.kind, q.role)) ctx.addIssue(issue);
+    if (q.dimension && q.kind !== "text") {
+      ctx.addIssue({
+        code: "custom",
+        message: "dimension_text_only",
+        path: ["dimension"],
+      });
+    }
+    if (q.role === "retention" || q.role === "engagement") {
+      if (q.appliesTo.some((r) => r !== "manager")) {
+        ctx.addIssue({
+          code: "custom",
+          message: "manager_only",
+          path: ["appliesTo"],
+        });
+      }
+      if (q.visibleToReviewee !== false) {
+        ctx.addIssue({
+          code: "custom",
+          message: "hidden_required",
+          path: ["visibleToReviewee"],
+        });
+      }
+    }
     if (q.kind === "rating" && !q.scaleId) {
       ctx.addIssue({ code: "custom", message: "required", path: ["scaleId"] });
     }
@@ -75,7 +105,7 @@ export const questionInput = z
 
 type RoleIssue = { code: "custom"; message: string; path: string[] };
 
-/** The goals comment is text; the goals and overall ratings are ratings. */
+/** The goals comment is text; the goals, overall, retention and engagement ones are ratings. */
 export function roleKindIssues(
   kind: (typeof questionKinds)[number],
   role: (typeof questionRoles)[number] | null | undefined,
@@ -84,7 +114,10 @@ export function roleKindIssues(
     return [{ code: "custom", message: "only_for_text", path: ["role"] }];
   }
   if (
-    (role === "goals_rating" || role === "overall_rating") &&
+    (role === "goals_rating" ||
+      role === "overall_rating" ||
+      role === "retention" ||
+      role === "engagement") &&
     kind !== "rating"
   ) {
     return [{ code: "custom", message: "only_for_rating", path: ["role"] }];

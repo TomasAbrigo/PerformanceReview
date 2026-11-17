@@ -9,7 +9,9 @@ import { db } from "@/db/client";
 import { routing } from "@/i18n/routing";
 import { getActor } from "@/modules/actor/server";
 import { executiveSummary } from "@/modules/analytics/dashboards";
+import { canSeeExecutiveView } from "@/modules/insights";
 import { listCycles } from "@/modules/review-core";
+import { getSettings } from "@/modules/settings";
 
 async function Executive({
   params,
@@ -21,12 +23,17 @@ async function Executive({
   await connection();
   const actor = await getActor();
   const t = await getTranslations("Dashboards");
-  if (actor.role !== "hr") return <p>{t("forbidden")}</p>;
+  if (!canSeeExecutiveView(actor)) return <p>{t("forbidden")}</p>;
   const p = parseParams(await searchParams);
   const cycles = (await listCycles(db)).filter((c) => c.status !== "draft");
   const cycle = cycles.find((c) => c.id === p.cycle) ?? cycles[0];
   if (!cycle) return <p>{t("noCycles")}</p>;
-  const data = await executiveSummary(db, actor, { cycleId: cycle.id });
+  // The minimum group size is read once per request (it only masks direction).
+  const settings = await getSettings(db);
+  const data = await executiveSummary(db, actor, {
+    cycleId: cycle.id,
+    minGroupSize: settings["aggregation.minGroupSize"],
+  });
   return (
     <div className="flex flex-col gap-4">
       <h1 className="text-2xl font-semibold">

@@ -1,4 +1,6 @@
 import type { DbOrTx } from "@/db/client";
+import { todayLocal } from "@/modules/org-history/dates";
+import { getSettings } from "@/modules/settings";
 
 /**
  * Semi-annual review cycles (PRD iteration 2): a report row with no cycle
@@ -20,16 +22,17 @@ export type SemesterConfig = {
 export const DEFAULT_SEMESTER_CONFIG: SemesterConfig = {
   h1Start: "01-01",
   h2Start: "07-01",
-  ambiguityDays: 14,
+  ambiguityDays: 15,
 };
 
-/**
- * The semester settings. Read through here only, so the settings module
- * (#56) plugs in at one place; until it exists, the defaults.
- */
+/** The semester settings (`semester.*` in app settings, #56). */
 export async function semesterConfig(db: DbOrTx): Promise<SemesterConfig> {
-  void db;
-  return DEFAULT_SEMESTER_CONFIG;
+  const settings = await getSettings(db);
+  return {
+    h1Start: settings["semester.h1Start"],
+    h2Start: settings["semester.h2Start"],
+    ambiguityDays: settings["semester.ambiguityDays"],
+  };
 }
 
 export type Semester = {
@@ -111,4 +114,16 @@ export function snapToSemester(
   const b = semesterOf(period.periodEnd, cfg);
   if (a.label !== b.label) return null;
   return { periodStart: a.periodStart, periodEnd: a.periodEnd };
+}
+
+/** A cycle source id that is a bare semester label ("2025-H1"). */
+export const isSemesterLabel = (sourceId: string | null) =>
+  sourceId !== null && /^\d{4}-H[12]$/.test(sourceId);
+
+/**
+ * The snapshot date of a semester cycle: its end, or today while the
+ * semester is not over (a snapshot is never taken as of a future date).
+ */
+export function snapshotDateFor(periodEnd: string, today = todayLocal()) {
+  return periodEnd < today ? periodEnd : today;
 }

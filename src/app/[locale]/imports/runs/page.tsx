@@ -2,6 +2,7 @@ import { hasLocale } from "next-intl";
 import { setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
+import { HrOnly } from "@/components/access/hr-only";
 import { RunsList } from "@/components/ingest/runs-list";
 import { db } from "@/db/client";
 import { sourceSystem } from "@/db/schema";
@@ -53,7 +54,9 @@ export default function RunsPage(props: PageProps<"/[locale]/imports/runs">) {
   return (
     <main className="mx-auto w-full max-w-7xl p-8">
       <Suspense>
-        <RunsData {...props} />
+        <HrOnly>
+          <RunsData {...props} />
+        </HrOnly>
       </Suspense>
     </main>
   );

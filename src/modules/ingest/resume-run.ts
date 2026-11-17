@@ -11,6 +11,8 @@ import {
 import { errorMessage } from "@/lib/log";
 import { createImportedCycle } from "@/modules/import-history/cycles";
 import { decisionOf } from "@/modules/import-history/decision";
+import { questionsOfRun } from "@/modules/import-history/run-profile";
+import { isUuid } from "@/lib/uuid";
 import { handlerFor, type EntityHandler } from "./handlers";
 import type { IngestEntity } from "./types";
 
@@ -82,9 +84,7 @@ export async function resumeImportRun(
       }
       cycleId = (await createImportedCycle(db, { ...proposal, runId })).id;
     } else {
-      const UUID =
-        /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-      const [cycle] = UUID.test(target.cycleId)
+      const [cycle] = isUuid(target.cycleId)
         ? await db
             .select({ id: reviewCycle.id })
             .from(reviewCycle)
@@ -102,6 +102,7 @@ export async function resumeImportRun(
     ) as EntityHandler<unknown>;
     const source = run.sourceSystem as SourceSystem;
     const cache = new Map<string, unknown>();
+    const questions = await questionsOfRun(db, runId);
     counts.deferred = 0;
     for (const pending of decision.pending) {
       const [record] = await db
@@ -133,6 +134,7 @@ export async function resumeImportRun(
           payload: record.payload,
           cache,
           forcedCycleId: cycleId,
+          ...(questions ? { questions } : {}),
         }),
       );
       counts[outcome.result] = (counts[outcome.result] ?? 0) + 1;
@@ -140,6 +142,11 @@ export async function resumeImportRun(
         rejects.push({ sourceId: pending.sourceId, reason });
       }
     }
+    // finish recomputes the run's reviewer mismatches over all its rows (the
+    // first pass's too): drop what the first finish counted and logged.
+    if (counts.mismatches !== undefined) counts.mismatches = 0;
+    const kept = rejects.filter((r) => r.code !== "reviewer_mismatch");
+    rejects.splice(0, rejects.length, ...kept);
     const extra = handler.finish
       ? await handler.finish(db, {
           source,

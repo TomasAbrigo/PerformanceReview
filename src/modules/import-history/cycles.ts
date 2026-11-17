@@ -1,7 +1,8 @@
-import { and, eq, inArray } from "drizzle-orm";
+import { and, eq, inArray, isNull } from "drizzle-orm";
 import type { DbOrTx } from "@/db/client";
 import {
   answer,
+  answerQualityIssue,
   cycleParticipant,
   importedQuestion,
   importedRequest,
@@ -10,9 +11,12 @@ import {
   reviewRequest,
   type ReviewCycle,
 } from "@/db/schema";
+import type { LikertOverrides } from "@/modules/likert";
+import { loadLikertOverrides } from "@/modules/likert/store";
 import { snapshots } from "@/modules/review-core/service";
 import type { Relationship } from "@/modules/templates/constants";
 import { answerColumns, type QuestionColumn } from "./questions";
+import { snapshotDateFor } from "./semester";
 
 /** Imported cycles come from Bamboo's report exports, keyed by cycle name. */
 export const SOURCE = "bamboo_export" as const;
@@ -134,7 +138,10 @@ export async function createImportedCycle(
   }
   const [updated] = await tx
     .update(reviewCycle)
-    .set({ periodStart: input.periodStart })
+    .set({
+      periodStart: input.periodStart,
+      snapshotDate: snapshotDateFor(input.periodEnd),
+    })
     .where(eq(reviewCycle.id, cycle.id))
     .returning();
   return updated;
@@ -160,6 +167,21 @@ export async function ensureQuestions(
       .where(eq(importedQuestion.cycleId, cycleId));
     ids = new Map(known.map((k) => [k.columnKey, k.questionRevisionId]));
     cache.set(key, ids);
+    // Revisions imported before roles/dimensions existed get them now.
+    for (const column of columns) {
+      const id = ids.get(column.key);
+      if (!id || (!column.role && !column.dimension)) continue;
+      await tx
+        .update(questionRevision)
+        .set({ role: column.role, dimension: column.dimension })
+        .where(
+          and(
+            eq(questionRevision.id, id),
+            isNull(questionRevision.role),
+            isNull(questionRevision.dimension),
+          ),
+        );
+    }
   }
   for (const column of columns) {
     if (ids.has(column.key)) continue;
@@ -176,6 +198,8 @@ export async function ensureQuestions(
         required: false,
         scale: column.scale,
         choices: column.choices,
+        role: column.role,
+        dimension: column.dimension,
         sort: column.sort,
       })
       .returning({ id: questionRevision.id });
@@ -339,9 +363,25 @@ export async function upsertRequest(
   return { id, result };
 }
 
+/** The likert_mapping table as overrides, read once per run. */
+export async function likertOverridesOf(
+  tx: DbOrTx,
+  cache: Map<string, unknown>,
+): Promise<LikertOverrides> {
+  let overrides = cache.get("likertOverrides") as LikertOverrides | undefined;
+  if (!overrides) {
+    overrides = await loadLikertOverrides(tx);
+    cache.set("likertOverrides", overrides);
+  }
+  return overrides;
+}
+
 /**
  * Writes the answers of one side of a report row. Returns how many were
  * created (new) or rewritten, and the cells that the question cannot take.
+ * A Likert option without equivalence is stored (raw value as label, no
+ * value) and recorded in answer_quality_issue; a later import that maps it
+ * resolves the issue.
  */
 export async function saveAnswers(
   tx: DbOrTx,
@@ -349,6 +389,7 @@ export async function saveAnswers(
   columns: QuestionColumn[],
   revisions: Map<string, string>,
   row: Record<string, unknown>,
+  context: { cycleId: string; runId: string; overrides?: LikertOverrides },
 ): Promise<{ created: number; updated: number; invalid: string[] }> {
   const existing = await tx
     .select({ revisionId: answer.questionRevisionId })
@@ -360,28 +401,106 @@ export async function saveAnswers(
       ),
     );
   const had = new Set(existing.map((a) => a.revisionId));
+  // Revisions of this request with an open quality issue: only those can be
+  // resolved by this write (one lookup per request).
+  const open = new Set(
+    (
+      await tx
+        .select({ revisionId: answerQualityIssue.questionRevisionId })
+        .from(answerQualityIssue)
+        .where(
+          and(
+            eq(answerQualityIssue.requestId, requestId),
+            isNull(answerQualityIssue.resolvedAt),
+          ),
+        )
+    ).map((r) => r.revisionId),
+  );
+  const flag = async (
+    column: QuestionColumn,
+    revisionId: string,
+    raw: string,
+    reason: "unmapped_option" | "invalid_value",
+    answerId: string | null,
+  ) => {
+    const issue = {
+      answerId,
+      cycleId: context.cycleId,
+      columnKey: column.key,
+      rawValue: raw,
+      reason,
+      runId: context.runId,
+      resolvedAt: null,
+    };
+    await tx
+      .insert(answerQualityIssue)
+      .values({ requestId, questionRevisionId: revisionId, ...issue })
+      .onConflictDoUpdate({
+        target: [
+          answerQualityIssue.requestId,
+          answerQualityIssue.questionRevisionId,
+        ],
+        set: issue,
+      });
+  };
+  const resolved: string[] = [];
   let created = 0;
   let updated = 0;
   const invalid: string[] = [];
   for (const column of columns) {
     const revisionId = revisions.get(column.key)!;
-    const values = answerColumns(column, row[column.header]);
-    if (values === null) continue;
-    if ("invalid" in values) {
+    const cell = answerColumns(column, row[column.header], context.overrides);
+    if (cell === null) continue;
+    if ("invalid" in cell) {
+      // Rejected (the row reports it) and kept as a quality issue too.
       invalid.push(
         `Column "${column.header}": "${String(row[column.header])}" is not a valid answer`,
       );
+      await flag(
+        column,
+        revisionId,
+        String(row[column.header]).trim(),
+        "invalid_value",
+        null,
+      );
       continue;
     }
-    await tx
+    const values =
+      "unmapped" in cell
+        ? {
+            optionValue: null,
+            optionLabel: cell.raw,
+            normalized: null,
+            textValue: null,
+          }
+        : cell;
+    const [saved] = await tx
       .insert(answer)
       .values({ requestId, questionRevisionId: revisionId, ...values })
       .onConflictDoUpdate({
         target: [answer.requestId, answer.questionRevisionId],
         set: values,
-      });
+      })
+      .returning({ id: answer.id });
+    if ("unmapped" in cell) {
+      await flag(column, revisionId, cell.raw, "unmapped_option", saved.id);
+    } else if (open.has(revisionId)) {
+      resolved.push(revisionId);
+    }
     if (had.has(revisionId)) updated++;
     else created++;
+  }
+  if (resolved.length) {
+    await tx
+      .update(answerQualityIssue)
+      .set({ resolvedAt: new Date() })
+      .where(
+        and(
+          eq(answerQualityIssue.requestId, requestId),
+          inArray(answerQualityIssue.questionRevisionId, resolved),
+          isNull(answerQualityIssue.resolvedAt),
+        ),
+      );
   }
   return { created, updated, invalid };
 }
@@ -393,6 +512,7 @@ export function answeredCells(
 ): number {
   return columns.filter((c) => {
     const v = answerColumns(c, row[c.header]);
+    // An unmapped Likert option is stored too (and flagged), so it counts.
     return v !== null && !("invalid" in v);
   }).length;
 }

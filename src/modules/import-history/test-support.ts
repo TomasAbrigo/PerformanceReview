@@ -95,6 +95,7 @@ export async function importReport(
         }),
         entity: profile.entity,
         db,
+        ...(profile.questions ? { questions: profile.questions } : {}),
       });
     } finally {
       await lake.close();

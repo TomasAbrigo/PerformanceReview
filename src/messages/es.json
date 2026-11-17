@@ -18,8 +18,53 @@
     "nav": {
       "label": "Configuración",
       "home": "Inicio",
+      "insights": "Insights",
       "scales": "Escalas de rating",
       "templates": "Templates de evaluación"
+    }
+  },
+  "InsightsSettings": {
+    "title": "Configuración de insights",
+    "description": "Umbrales de alerta, tamaño mínimo de grupo, cortes de semestre y proveedor de análisis. Solo People puede cambiarlos y cada cambio queda en el registro de auditoría.",
+    "alerts": {
+      "title": "Alertas",
+      "dropThreshold": "Caída mínima entre ciclos (puntos)",
+      "dropThresholdHint": "Se alerta cuando retención o compromiso bajan al menos esta cantidad de puntos entre dos ciclos.",
+      "riskThreshold": "Umbral de riesgo",
+      "riskThresholdHint": "Riesgo: retención y compromiso a la vez iguales o menores a este valor (escala 1 a 5)."
+    },
+    "aggregation": {
+      "title": "Agregación",
+      "minGroupSize": "Tamaño mínimo de grupo (n)",
+      "minGroupSizeHint": "Dirección y los exports anonimizados no muestran grupos con menos personas que esto."
+    },
+    "semester": {
+      "title": "Semestres",
+      "h1Start": "Inicio del primer semestre (MM-DD)",
+      "h2Start": "Inicio del segundo semestre (MM-DD)",
+      "daysHint": "Día del año con formato MM-DD, por ejemplo 07-01.",
+      "ambiguityDays": "Margen de ambigüedad (días)",
+      "ambiguityDaysHint": "Un assessment a menos de estos días de un corte queda ambiguo y se pregunta a qué ciclo va."
+    },
+    "analysis": {
+      "title": "Análisis cualitativo",
+      "provider": "Proveedor",
+      "providerHint": "Anthropic además necesita la flag ANALYSIS_PROVIDER y una API key; por defecto se usa Mock.",
+      "providers": {
+        "mock": "Mock (determinista, sin costo)",
+        "anthropic": "Anthropic"
+      }
+    },
+    "save": "Guardar cambios",
+    "saved": "Cambios guardados.",
+    "errors": {
+      "invalid_number": "Ingresá un número entero.",
+      "out_of_range": "Debe estar entre {min} y {max}.",
+      "invalid_day": "Ingresá un día válido con formato MM-DD.",
+      "invalid_choice": "Elegí una opción de la lista.",
+      "semester_order": "El segundo semestre tiene que empezar después del primero.",
+      "unknown_key": "Configuración desconocida.",
+      "invalid": "Valor inválido."
     }
   },
   "Common": {
@@ -45,10 +90,14 @@
     "invalid": "Valor inválido.",
     "validation": "Revisá los campos marcados.",
     "not_found": "El elemento ya no existe.",
+    "forbidden": "Solo People (RR. HH.) puede hacer esto.",
     "system_readonly": "Los elementos del sistema no se pueden modificar ni borrar; clonalos.",
     "in_use": "La escala está en uso por alguna pregunta.",
     "unknown": "Ocurrió un error inesperado.",
-    "duplicateRole": "Este template ya tiene una pregunta con esa función."
+    "duplicateRole": "Este template ya tiene una pregunta con esa función.",
+    "managerOnly": "Retención y compromiso las responde solo el manager.",
+    "hiddenRequired": "Retención y compromiso deben estar ocultas para la persona evaluada.",
+    "dimensionTextOnly": "Solo las preguntas de texto llevan dimensión."
   },
   "Scales": {
     "title": "Escalas de rating",
@@ -126,7 +175,18 @@
       "none": "Ninguna",
       "goals_rating": "Calificación de objetivos",
       "goals_comment": "Comentario de objetivos",
-      "overall_rating": "Calificación general de desempeño"
+      "overall_rating": "Calificación general de desempeño",
+      "retention": "Retención (Likert 1-5)",
+      "engagement": "Compromiso (Likert 1-5)"
+    },
+    "dimension": "Dimensión",
+    "dimensions": {
+      "none": "Ninguna",
+      "strengths": "Fortalezas",
+      "improvement": "Oportunidades de mejora",
+      "custom_1": "Custom 1",
+      "custom_2": "Custom 2",
+      "custom_3": "Custom 3"
     }
   },
   "People": {
@@ -448,10 +508,16 @@
     "roles": {
       "hr": "People (RR. HH.)",
       "manager": "Manager",
-      "employee": "Empleado"
+      "employee": "Empleado",
+      "direction": "Dirección"
     },
     "apply": "Aplicar",
     "error": "No se pudo cambiar el actor."
+  },
+  "Access": {
+    "title": "Sin acceso",
+    "description": "Esta pantalla es solo para People (RR. HH.). Si corresponde, cambiá el rol en «Actuar como».",
+    "home": "Volver al inicio"
   },
   "Review": {
     "noAnswer": "Sin respuesta"
@@ -556,6 +622,21 @@
         "sides": {
           "self": "Autoevaluación",
           "manager": "Manager"
+        },
+        "none": "—",
+        "dimensions": {
+          "strengths": "Fortalezas",
+          "improvement": "A mejorar",
+          "custom_1": "Custom 1",
+          "custom_2": "Custom 2",
+          "custom_3": "Custom 3"
+        },
+        "roles": {
+          "goals_rating": "Rating de goals",
+          "goals_comment": "Comentario de goals",
+          "overall_rating": "Rating general",
+          "retention": "Retención",
+          "engagement": "Engagement"
         }
       }
     },
@@ -592,6 +673,7 @@
       "invalid_profile": "El archivo no tiene lo que pide el perfil.",
       "invalid_profile_definition": "El perfil no es válido: revisá el nombre y las columnas clave.",
       "profile_exists": "Ya existe un perfil con ese nombre: elegí otro.",
+      "forbidden": "Solo People (RR. HH.) puede importar archivos.",
       "unknown": "Ocurrió un error inesperado.",
       "unknown_profile": "El perfil elegido ya no existe.",
       "timeout": "La importación tardó demasiado y se canceló. Probá de nuevo."
@@ -675,7 +757,11 @@
       "source": "Fuente",
       "error": "Error",
       "reviewer": "Evaluador",
-      "snapshotManager": "Manager del snapshot"
+      "snapshotManager": "Manager del snapshot",
+      "cycle": "Ciclo",
+      "column": "Columna",
+      "rawValue": "Valor original",
+      "answerReason": "Motivo"
     },
     "indicators": {
       "identity_open": {
@@ -721,8 +807,19 @@
       "reviewer_mismatch": {
         "title": "Evaluador distinto del manager del snapshot",
         "description": "Pedidos de evaluación cuyo evaluador no coincide con el manager del snapshot."
+      },
+      "unmapped_answers": {
+        "title": "Respuestas sin equivalencia Likert",
+        "description": "Respuestas importadas de retención o compromiso cuya opción no tiene equivalencia 1-5 (ver docs/likert-mapping.md). La respuesta se guardó con el valor original y sin puntaje."
       }
-    }
+    },
+    "answerReasons": {
+      "unmapped_option": "Opción sin equivalencia",
+      "invalid_value": "Valor inválido"
+    },
+    "reapply": "Reaplicar equivalencias",
+    "reapplyDone": "{count, plural, =0 {Ninguna respuesta cambió.} =1 {1 respuesta remapeada.} other {# respuestas remapeadas.}}",
+    "reapplyHelp": "Vuelve a calcular las respuestas de retención y compromiso con la tabla likert_mapping actual."
   },
   "Exports": {
     "columns": {
@@ -985,10 +1082,13 @@
     "executive": {
       "title": "Vista de dirección",
       "link": "Vista de dirección",
-      "hint": "Solo agregados: sin nombres ni ids. Las áreas con menos de {min} personas se agrupan.",
+      "hint": "Solo agregados: sin nombres ni ids. Los grupos de menos de {min} personas se agrupan en Otros o se ocultan.",
+      "hintPeople": "Solo agregados: sin nombres ni ids.",
       "participants": "Participantes",
       "completion": "Completitud",
       "byDepartment": "Por área",
+      "others": "Otros",
+      "belowMinimum": "Hay menos de {min} participantes: no se muestran datos para proteger a las personas.",
       "suppressed": "{n, plural, =0 {Ninguna persona en grupos chicos} one {# persona en áreas chicas (no se desglosa)} other {# personas en áreas chicas (no se desglosan)}}"
     }
   }

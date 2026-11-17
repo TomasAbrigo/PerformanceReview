@@ -100,6 +100,80 @@ describe("answerColumns", () => {
   });
 });
 
+describe("roles and dimensions", () => {
+  const byKey = new Map(detectQuestionColumns(HEADERS).map((c) => [c.key, c]));
+
+  it("manager Q1 is retention and Q2 engagement, without dimension", () => {
+    expect(byKey.get("manager:q1")).toMatchObject({
+      role: "retention",
+      dimension: null,
+    });
+    expect(byKey.get("manager:q2")).toMatchObject({
+      role: "engagement",
+      dimension: null,
+    });
+    expect(byKey.get("self:q1")).toMatchObject({ role: null, dimension: null });
+  });
+
+  it("Q3 is strengths, Q4 improvement and Custom Q<n> custom_<n>, on both sides", () => {
+    for (const side of ["self", "manager"]) {
+      expect(byKey.get(`${side}:q3`)!.dimension).toBe("strengths");
+      expect(byKey.get(`${side}:q4`)!.dimension).toBe("improvement");
+    }
+    expect(
+      byKey.get("self:custom:1:mis objetivos del período están claros.")!
+        .dimension,
+    ).toBe("custom_1");
+    const [custom3] = detectQuestionColumns(["Manager Custom Q3: Algo."]);
+    expect(custom3.dimension).toBe("custom_3");
+    const [custom4] = detectQuestionColumns(["Manager Custom Q4: Algo."]);
+    expect(custom4.dimension).toBeNull();
+  });
+});
+
+describe("answerColumns for retention and engagement", () => {
+  const byKey = new Map(detectQuestionColumns(HEADERS).map((c) => [c.key, c]));
+  const retention = byKey.get("manager:q1")!;
+  const engagement = byKey.get("manager:q2")!;
+
+  it("writes the 1-5 value and normalized from the letter (A-E)", () => {
+    expect(answerColumns(retention, "A")).toEqual({
+      optionValue: 5,
+      optionLabel: "A",
+      normalized: 1,
+      textValue: null,
+    });
+    expect(answerColumns(engagement, "d")).toMatchObject({
+      optionLabel: "D",
+      optionValue: 2,
+      normalized: 0.25,
+    });
+  });
+
+  it("uses the A-D table when the question has 4 options, and numbers pass through", () => {
+    const four = { ...retention, choices: retention.choices!.slice(0, 4) };
+    expect(answerColumns(four, "C")).toMatchObject({ optionValue: 2 });
+    expect(answerColumns(retention, "3")).toMatchObject({
+      optionValue: 3,
+      normalized: 0.5,
+    });
+  });
+
+  it("applies overrides", () => {
+    expect(
+      answerColumns(retention, "C", { retention: { "5:C": 4 } }),
+    ).toMatchObject({ optionValue: 4, normalized: 0.75 });
+  });
+
+  it("an option outside the table is unmapped, keeping the raw value", () => {
+    expect(answerColumns(retention, " Z ")).toEqual({
+      unmapped: true,
+      raw: "Z",
+    });
+    expect(answerColumns(retention, "")).toBeNull();
+  });
+});
+
 describe("custom question keys", () => {
   it("include the question number, so two custom questions with the same text do not collide", () => {
     const keys = detectQuestionColumns([
@@ -150,7 +224,7 @@ describe("configured question mapping (source profile `questions`)", () => {
           side: "self",
           kind: "likert",
           key: "self:enps",
-          dimension: "engagement",
+          dimension: "custom_3",
         },
         {
           column: "Comentario del manager",
@@ -169,8 +243,8 @@ describe("configured question mapping (source profile `questions`)", () => {
     expect(
       columns.map((c) => [c.key, c.relationship, c.kind, c.dimension ?? null]),
     ).toEqual([
-      ["self:enps", "self", "rating", "engagement"],
-      ["manager:q3", "manager", "text", null],
+      ["self:enps", "self", "rating", "custom_3"],
+      ["manager:q3", "manager", "text", "strengths"],
       ["manager:comment", "manager", "text", null],
     ]);
     expect(columns[0].prompt.es).toBe("¿Recomendarías trabajar acá?");

@@ -227,6 +227,7 @@ export async function importUpload({
       entity: profile.entity,
       landing: !domain,
       syncState: false,
+      ...(profile.questions ? { questions: profile.questions } : {}),
       db,
       extract: { signal },
       params: {
