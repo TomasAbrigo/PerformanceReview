@@ -46,6 +46,8 @@ describe("executiveReport", () => {
         dimension: "strengths",
         positive: 3,
         constructive: 1,
+        neutral: 0,
+        mixed: 0,
         negative: 1,
         total: 5,
       },
@@ -53,6 +55,7 @@ describe("executiveReport", () => {
     expect(r.themes?.map((t) => [t.theme, t.count])).toEqual([
       ["calidad", 2],
       ["colaboracion", 2],
+      ["equipo", 2],
     ]);
   });
 

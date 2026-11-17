@@ -65,6 +65,14 @@ export const settingDefinitions = {
     schema: z.enum(analysisProviders, { error: "invalid_choice" }),
     default: "mock",
   },
+  /**
+   * Also label the answers to closed questions that belong to a dimension
+   * (their chosen option's label), not only the open-text comments.
+   */
+  "analysis.includeClosed": {
+    schema: z.boolean({ error: "invalid_choice" }),
+    default: true,
+  },
 } as const;
 
 export type SettingDefinitions = typeof settingDefinitions;

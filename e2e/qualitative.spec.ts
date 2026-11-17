@@ -31,7 +31,36 @@ test("People runs the Mock analysis on an imported cycle and sees sentiment and 
   const themes = page.getByRole("list", { name: "Temas más frecuentes" });
   await expect(themes.getByRole("listitem").first()).toBeVisible();
 
+  const comments = page.getByRole("table", { name: "Comentarios etiquetados" });
+  await expect(comments).toBeVisible();
+
+  // Five sentiments: the legend, the KPIs and the sentiment filter.
   await expect(
-    page.getByRole("table", { name: "Comentarios etiquetados" }),
-  ).toBeVisible();
+    page
+      .getByRole("list", { name: "Leyenda de sentimientos" })
+      .first()
+      .getByRole("listitem"),
+  ).toHaveText(["Positivo", "Constructivo", "Neutral", "Mixto", "Negativo"]);
+  await expect(
+    page.getByRole("list", { name: "Indicadores" }).getByRole("listitem"),
+  ).toHaveCount(6);
+  await expect(
+    page.getByRole("form", { name: "Filtros" }).getByLabel("Sentimiento"),
+  ).toContainText("Mixto");
+
+  // Todos / Propios / Manager applies to every block and to the CSV.
+  const side = page.getByRole("navigation", { name: "Quién escribe" });
+  await side.getByRole("link", { name: "Manager" }).click();
+  await expect(page).toHaveURL(/side=manager/);
+  await expect(comments.getByText("MANAGER").first()).toBeVisible();
+  await expect(comments.getByText("PROPIO")).toHaveCount(0);
+  await expect(
+    page.getByRole("link", { name: "Exportar CSV" }),
+  ).toHaveAttribute("href", /relationship=manager/);
+  await side.getByRole("link", { name: "Propios" }).click();
+  await expect(page).toHaveURL(/side=self/);
+  await expect(comments.getByText("PROPIO").first()).toBeVisible();
+  await expect(comments.getByText("MANAGER")).toHaveCount(0);
+  await side.getByRole("link", { name: "Todos" }).click();
+  await expect(page).not.toHaveURL(/side=/);
 });

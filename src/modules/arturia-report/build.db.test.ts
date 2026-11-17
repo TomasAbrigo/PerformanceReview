@@ -95,6 +95,28 @@ describe("buildReport over the seed small company", () => {
     expect(names.some((n) => renderJson(r).includes(n))).toBe(true);
   });
 
+  it("the qualitative section has five sentiments and the cut by side", async () => {
+    const r = await buildReport(db, { cycle: cycleId, anonymized: false });
+    const q = r.sections.qualitative!;
+    expect(r.schemaMinor).toBe(2);
+    const t = q.totals!;
+    expect(t.positive + t.constructive + t.neutral + t.mixed + t.negative).toBe(
+      t.total,
+    );
+    expect(t.total).toBe(
+      q.sentimentByDimension.reduce((n, d) => n + d.total, 0),
+    );
+    // Every comment of the seed is from a self or a manager review.
+    const { self, manager } = q.bySide!;
+    expect((self?.totals?.total ?? 0) + (manager?.totals?.total ?? 0)).toBe(
+      t.total,
+    );
+    for (const side of [self, manager]) {
+      expect(side?.totals?.total ?? 0).toBeGreaterThan(0);
+    }
+    expect(q.topThemes[0].sentiment?.total).toBe(q.topThemes[0].count);
+  });
+
   it("the anonymized report has no emails, no seed names and no group under the minimum", async () => {
     const r = await buildReport(db, {
       cycle: cycleId,
@@ -153,6 +175,22 @@ describe("buildReport over the seed small company", () => {
         expect(m.total).toBeNull();
         // riskCount is the risk cell itself, masked like any other cell
         expect(m.riskCount).toBe(m.cells.find((x) => x.risk)!.count);
+      }
+      const q = s.qualitative;
+      if (q) {
+        for (const slice of [q, q.bySide?.self, q.bySide?.manager]) {
+          if (!slice) continue;
+          if (slice.suppressed > 0) expect(slice.totals ?? null).toBeNull();
+          for (const row of slice.sentimentByDimension) {
+            expect(
+              row.positive +
+                row.constructive +
+                row.neutral +
+                row.mixed +
+                row.negative,
+            ).toBe(row.total);
+          }
+        }
       }
       const g = s.goals!;
       const hiddenGoals =

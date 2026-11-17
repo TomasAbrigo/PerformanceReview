@@ -38,7 +38,14 @@ const renderIn = (locale: "es" | "en", ui: ReactNode) =>
     </NextIntlClientProvider>,
   );
 const locales = ["es", "en"] as const;
-const counts = { positive: 3, constructive: 1, negative: 1, total: 5 };
+const counts = {
+  positive: 3,
+  constructive: 1,
+  neutral: 0,
+  mixed: 0,
+  negative: 1,
+  total: 5,
+};
 
 const group = (
   key: string | null,
@@ -79,7 +86,7 @@ describe("SelfAssessmentView", () => {
     minGroupSize: null,
     completion: { ...completion, minGroupSize: null, suppressed: 0 },
     sentiment: [{ dimension: "strengths", ...counts }],
-    themes: [{ theme: "calidad", count: 2, quotes: [] }],
+    themes: [{ theme: "calidad", count: 2, sentiment: counts, quotes: [] }],
     gap: [
       {
         questionRevisionId: "q",
@@ -94,7 +101,14 @@ describe("SelfAssessmentView", () => {
       {
         dimension: "strengths",
         self: counts,
-        manager: { positive: 1, constructive: 1, negative: 0, total: 2 },
+        manager: {
+          positive: 1,
+          constructive: 1,
+          neutral: 0,
+          mixed: 0,
+          negative: 0,
+          total: 2,
+        },
       },
     ],
   };
@@ -129,11 +143,12 @@ describe("SelfAssessmentView", () => {
         within(gap).getByText(locale === "es" ? "Retención" : "Retention"),
       ).toBeVisible();
       expect(within(gap).getByText("-0.38")).toBeVisible();
+      // The bar's label (and its row in the table twin of the chart).
       expect(
-        screen.getByText(
+        screen.getAllByText(
           locale === "es" ? "Fortalezas · autoevaluación" : "Strengths · self",
-        ),
-      ).toBeInTheDocument();
+        ).length,
+      ).toBeGreaterThan(0);
     },
   );
 
@@ -231,8 +246,8 @@ describe("ExecutiveReportView", () => {
     },
     sentiment: [{ dimension: "strengths", ...counts }],
     themes: [
-      { theme: "calidad", count: 2, quotes: [] },
-      { theme: "colaboracion", count: 2, quotes: [] },
+      { theme: "calidad", count: 2, sentiment: counts, quotes: [] },
+      { theme: "colaboracion", count: 2, sentiment: counts, quotes: [] },
     ],
   };
   const forMode = (mode: ExecutiveMode): ExecutiveReport => {

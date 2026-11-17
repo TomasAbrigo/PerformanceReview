@@ -51,6 +51,9 @@ describe("InsightsSettingsForm", () => {
       15,
     );
     expect(screen.getByLabelText("Proveedor")).toHaveValue("mock");
+    expect(
+      screen.getByLabelText("Analizar también las preguntas cerradas"),
+    ).toBeChecked();
   });
 
   it("is available in English", () => {
@@ -72,12 +75,16 @@ describe("InsightsSettingsForm", () => {
     await user.clear(h2);
     await user.type(h2, "08-15");
     await user.selectOptions(screen.getByLabelText("Proveedor"), "anthropic");
+    await user.click(
+      screen.getByLabelText("Analizar también las preguntas cerradas"),
+    );
     await user.click(screen.getByRole("button", { name: "Guardar cambios" }));
     expect(save).toHaveBeenCalledWith({
       ...DEFAULT_SETTINGS,
       "aggregation.minGroupSize": 8,
       "semester.h2Start": "08-15",
       "analysis.provider": "anthropic",
+      "analysis.includeClosed": false,
     });
     expect(await screen.findByText("Cambios guardados.")).toBeVisible();
   });

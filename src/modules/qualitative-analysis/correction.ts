@@ -44,9 +44,10 @@ export async function correctLabel(
     join review_request r on r.id = a.request_id
     join question_revision q on q.id = a.question_revision_id
     left join eff on eff.answer_id = a.id
-    where a.id = ${answerId}::uuid and q.kind = 'text'`);
+    where a.id = ${answerId}::uuid`);
   if (!target) throw new AnalysisError("not_found");
-  // Only a labeled comment can be corrected (it is what the readers show).
+  // Only a labeled answer (open comment or closed option) can be corrected:
+  // it is what the readers show.
   if (!target.sentiment) throw new AnalysisError("not_labeled");
   const themes = [...new Set(data.themes.map(normalizeTheme).filter(Boolean))];
   const [row] = await db

@@ -3,6 +3,7 @@ import { z } from "zod";
 import { sentiments } from "./constants";
 import { AnalysisError } from "./errors";
 import { MockProvider } from "./mock-provider";
+import { INITIAL_THEMES } from "./themes";
 import type {
   AnalysisInput,
   AnalysisOutput,
@@ -10,17 +11,23 @@ import type {
 } from "./provider";
 
 /** Bump when the prompt or the output schema changes: it keys the cache. */
-export const ANTHROPIC_PROMPT_VERSION = "anthropic-v1";
+export const ANTHROPIC_PROMPT_VERSION = "anthropic-v2";
 export const DEFAULT_ANALYSIS_MODEL = "claude-opus-5-5";
 export const DEFAULT_BATCH_SIZE = 20;
 
-const SYSTEM = `You label open-text comments from employee performance reviews (Spanish or English).
+const SYSTEM = `You label open-text comments, and the chosen options of closed questions, from employee performance reviews (Spanish or English).
 For each item return:
-- sentiment: "positive" (praise, strengths), "constructive" (actionable suggestions to improve, neutral tone) or "negative" (criticism, problems, frustration).
+- sentiment, exactly one of:
+  "positive" (praise, strengths, satisfaction),
+  "constructive" (actionable suggestions to improve, neutral or balanced tone),
+  "neutral" (factual or non-committal, no clear praise, criticism or suggestion; also a closed-question option that expresses neither),
+  "mixed" (clearly contains both praise and criticism),
+  "negative" (criticism, problems, frustration).
 - confidence: 0..1, how sure you are of the sentiment.
-- themes: 1 to 3 short themes, lowercase Spanish nouns without accents (e.g. "comunicacion", "planificacion", "liderazgo"), reusing the same words across items.
+- themes: 0 to 3 short themes, lowercase Spanish nouns without accents. Prefer this vocabulary when a theme fits: ${INITIAL_THEMES.join(", ")}. Use another short noun only when none of them fits, and reuse the same words across items.
 Names, emails and employee numbers were replaced by tokens like [P1], [E1], [N1]; never guess who they are and never put tokens in themes.
-The item's dimension tells which question the comment answers. Return exactly one result per input token.`;
+The item's dimension tells which question the comment answers. When an item has "closed": true, its text is the label of the option the person chose in a closed question (for example how well the company recognizes their value), not free text: judge what that answer says about the dimension.
+Return exactly one result per input token.`;
 
 const OUTPUT_SCHEMA = {
   type: "object",
@@ -105,10 +112,11 @@ export class AnthropicProvider implements AnalysisProvider {
           {
             role: "user",
             content: JSON.stringify({
-              items: batch.map(({ token, dimension, text }) => ({
+              items: batch.map(({ token, dimension, text, closed }) => ({
                 token,
                 dimension,
                 text,
+                ...(closed ? { closed: true } : {}),
               })),
             }),
           },

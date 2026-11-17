@@ -5,7 +5,43 @@ import type {
   ThemeRank,
   TrendPoint,
 } from "@/modules/qualitative-analysis/types";
-import { SentimentBars } from "./sentiment-bars";
+import {
+  sentiments,
+  type Sentiment,
+} from "@/modules/qualitative-analysis/constants";
+import type { SentimentCounts } from "@/modules/qualitative-analysis/types";
+import { MiniBar, SentimentBars } from "./sentiment-bars";
+
+/** Order of the KPI tiles: total first, then People's order of the dashboard. */
+const KPI_ORDER = [
+  "total",
+  "positive",
+  "constructive",
+  "mixed",
+  "negative",
+  "neutral",
+] as const satisfies readonly ("total" | Sentiment)[];
+
+/** Total and per-sentiment counts of what the filters select. */
+export function Kpis({ counts }: { counts: SentimentCounts | null }) {
+  const t = useTranslations("Qualitative.kpis");
+  if (!counts) return null;
+  return (
+    <ul
+      aria-label={t("title")}
+      className="grid grid-cols-3 gap-2 sm:grid-cols-6"
+    >
+      {KPI_ORDER.map((k) => (
+        <li key={k} className="rounded-md border p-2">
+          <span className="block text-xs text-muted-foreground">{t(k)}</span>
+          <span className="text-xl font-semibold tabular-nums">
+            {counts[k]}
+          </span>
+        </li>
+      ))}
+    </ul>
+  );
+}
 
 export function ByDimension({
   rows,
@@ -25,6 +61,7 @@ export function ByDimension({
       ) : (
         <SentimentBars
           label={t("byDimension.chart")}
+          firstColumn={t("byDimension.label")}
           rows={rows.map((r) => ({
             ...r,
             key: r.dimension,
@@ -46,6 +83,7 @@ export function Trend({ points }: { points: TrendPoint[] }) {
       ) : (
         <SentimentBars
           label={t("trend.chart")}
+          firstColumn={t("trend.label")}
           rows={points.map((p) => ({
             ...p,
             key: p.cycleId,
@@ -76,6 +114,10 @@ export function Themes({ themes }: { themes: ThemeRank[] }) {
                     {t("count", { n: th.count })}
                   </span>
                 </div>
+                <MiniBar
+                  counts={th.sentiment}
+                  label={t("sentiment", { theme: th.theme })}
+                />
                 {th.quotes.length > 0 ? (
                   <ul className="mt-1 flex flex-col gap-1 text-sm text-muted-foreground">
                     {th.quotes.map((q, i) => (
@@ -112,9 +154,11 @@ export function Indicators({ rows }: { rows: IndicatorSentiment[] }) {
             <tr className="text-left">
               <th className="pr-4">{t("indicator")}</th>
               <th className="pr-4">{t("answer")}</th>
-              <th className="pr-4">{ts("positive")}</th>
-              <th className="pr-4">{ts("constructive")}</th>
-              <th className="pr-4">{ts("negative")}</th>
+              {sentiments.map((s) => (
+                <th key={s} className="pr-4">
+                  {ts(s)}
+                </th>
+              ))}
             </tr>
           </thead>
           <tbody>
@@ -122,9 +166,11 @@ export function Indicators({ rows }: { rows: IndicatorSentiment[] }) {
               <tr key={`${r.role}-${r.option}`}>
                 <td className="pr-4">{role(r.role)}</td>
                 <td className="pr-4">{r.label?.[locale] ?? r.option}</td>
-                <td className="pr-4 tabular-nums">{r.positive}</td>
-                <td className="pr-4 tabular-nums">{r.constructive}</td>
-                <td className="pr-4 tabular-nums">{r.negative}</td>
+                {sentiments.map((s) => (
+                  <td key={s} className="pr-4 tabular-nums">
+                    {r[s]}
+                  </td>
+                ))}
               </tr>
             ))}
           </tbody>

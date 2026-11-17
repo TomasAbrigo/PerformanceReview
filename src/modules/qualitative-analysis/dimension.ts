@@ -15,6 +15,10 @@ export function dimensionOf(q: {
     return "strengths";
   }
   if (/\bimprove\b|\bmejorar\b/.test(text)) return "improvement";
+  if (/recogni[sz]e my value|reconoce mi valor/.test(text)) {
+    return "valued";
+  }
+  if (/\bbest work\b|\bmejor trabajo\b/.test(text)) return "best_work";
   const custom = /custom q?(\d+)/.exec(text);
   if (custom) return `custom_${custom[1]}`;
   return "other";

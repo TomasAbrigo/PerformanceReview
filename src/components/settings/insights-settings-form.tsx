@@ -35,7 +35,13 @@ const isNumeric = (key: SettingKey): key is NumericKey =>
 
 /** Numbers are kept as typed (so a field can be emptied) and coerced on save. */
 const toValue = (key: SettingKey, raw: string): unknown =>
-  isNumeric(key) ? (raw.trim() === "" ? null : Number(raw)) : raw;
+  isNumeric(key)
+    ? raw.trim() === ""
+      ? null
+      : Number(raw)
+    : key === "analysis.includeClosed"
+      ? raw === "true"
+      : raw;
 
 /** The People-only screen of thresholds, minimum n, semester cuts and provider. */
 export function InsightsSettingsForm({
@@ -189,6 +195,22 @@ export function InsightsSettingsForm({
                 </option>
               ))}
             </NativeSelect>
+          ),
+        )}
+        {field(
+          "analysis.includeClosed",
+          t("analysis.includeClosed"),
+          t("analysis.includeClosedHint"),
+          (props) => (
+            <input
+              {...props}
+              type="checkbox"
+              className="size-4"
+              checked={draft["analysis.includeClosed"] === "true"}
+              onChange={(e) =>
+                set("analysis.includeClosed", String(e.target.checked))
+              }
+            />
           ),
         )}
       </Section>

@@ -1,5 +1,5 @@
 {
-  "id": "bd7dcf48-3d47-4cfd-b85d-c7792c16c248",
+  "id": "b4bc2d1b-7b34-4bd3-a88b-7d86dd039b30",
   "prevId": "aa7f59ed-cdcb-4505-9ca3-6a4a1049ad3d",
   "version": "7",
   "dialect": "postgresql",
@@ -3543,12 +3543,6 @@
           "primaryKey": false,
           "notNull": true
         },
-        "localized_name": {
-          "name": "localized_name",
-          "type": "jsonb",
-          "primaryKey": false,
-          "notNull": false
-        },
         "description": {
           "name": "description",
           "type": "text",
@@ -4845,6 +4839,8 @@
       "values": [
         "positive",
         "constructive",
+        "neutral",
+        "mixed",
         "negative"
       ]
     }
