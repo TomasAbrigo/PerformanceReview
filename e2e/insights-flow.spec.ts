@@ -2,8 +2,10 @@ import { execFileSync } from "node:child_process";
 import { mkdtempSync, readdirSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
-import { expect, type Page, test } from "@playwright/test";
+import { expect, test } from "@playwright/test";
 import { actAs, actAsRole } from "./act-as";
+import { chooseCycle } from "./filters";
+import { importFile } from "./upload";
 import { assessedFirstCycle, company, fullName, records } from "./seed-data";
 
 // The whole insights module end to end, as People would walk it. Runs in its
@@ -13,29 +15,6 @@ test.describe.configure({ mode: "serial" });
 
 const REPORTS = path.resolve("fixtures/bamboo-reports/small");
 const cycleName = company.cycles[0].name;
-
-async function upload(page: Page, file: string, profile: string) {
-  await page.goto("/es/imports/upload");
-  await page
-    .getByLabel("Archivo", { exact: true })
-    .setInputFiles(path.join(REPORTS, file));
-  await page.getByRole("button", { name: "Previsualizar" }).click();
-  await expect(page.getByLabel("Perfil de fuente")).toHaveValue(profile);
-  await page.getByRole("button", { name: "Importar" }).click();
-  await expect(page).toHaveURL(/\/es\/imports\/history\/[0-9a-f-]{36}$/, {
-    timeout: 150_000,
-  });
-}
-
-async function chooseCycle(page: Page, route: string) {
-  await page.goto(route);
-  const filters = page.getByRole("form", { name: "Filtros" });
-  await filters
-    .locator('select[name="cycle"]')
-    .selectOption({ label: cycleName });
-  await filters.getByRole("button", { name: "Aplicar" }).click();
-  await expect(page).toHaveURL(/cycle=[0-9a-f-]{36}/);
-}
 
 /** Every file under `dir`, recursively. */
 function filesUnder(dir: string): string[] {
@@ -53,16 +32,28 @@ test("People upload the reports, read every insight and export for Arturía", as
   await page.goto("/es");
   await actAs(page, null, "People (RR. HH.)");
 
-  await upload(page, "employee-performance.csv", "bamboo-employee-performance");
-  await upload(page, "assessment-progress.csv", "bamboo-assessment-progress");
-  await expect(
-    page.getByRole("table", { name: "Ciclos detectados" }).getByRole("row"),
-  ).toHaveCount(1 + company.cycles.length);
+  // historical-import.spec.ts imported them already: nothing new.
+  for (const [file, profile] of [
+    ["employee-performance.csv", "bamboo-employee-performance"],
+    ["assessment-progress.csv", "bamboo-assessment-progress"],
+  ]) {
+    await importFile(page, path.join(REPORTS, file), profile);
+    const cycles = page.getByRole("table", { name: "Ciclos detectados" });
+    await expect(cycles.getByRole("row")).toHaveCount(
+      1 + company.cycles.length,
+    );
+    await expect(
+      cycles.getByRole("cell", { name: /^0 nuevas/ }).first(),
+    ).toBeVisible();
+    await expect(
+      cycles.getByRole("cell", { name: /^[1-9]\d* nuevas/ }),
+    ).toHaveCount(0);
+  }
 
-  await chooseCycle(page, "/es/insights/completion");
+  await chooseCycle(page, "/es/insights/completion", cycleName);
   await expect(page.getByRole("table", { name: "Quién falta" })).toBeVisible();
 
-  await chooseCycle(page, "/es/insights/indicators");
+  await chooseCycle(page, "/es/insights/indicators", cycleName);
   await expect(
     page
       .getByRole("region", { name: "Distribución de Retención" })
@@ -75,7 +66,7 @@ test("People upload the reports, read every insight and export for Arturía", as
       .getByTestId("matrix-summary"),
   ).toBeVisible();
 
-  await chooseCycle(page, "/es/insights/qualitative");
+  await chooseCycle(page, "/es/insights/qualitative", cycleName);
   await page.getByRole("button", { name: "Correr análisis" }).click();
   await expect(page.getByRole("status")).toContainText("Proveedor: mock", {
     timeout: 60_000,
@@ -89,7 +80,7 @@ test("People upload the reports, read every insight and export for Arturía", as
       .first(),
   ).toBeVisible();
 
-  await chooseCycle(page, "/es/insights/executive");
+  await chooseCycle(page, "/es/insights/executive", cycleName);
   const mode = page.getByRole("navigation", { name: "Modo" });
   await mode.getByRole("link", { name: "Cualitativo" }).click();
   await expect(page).toHaveURL(/mode=qualitative/);

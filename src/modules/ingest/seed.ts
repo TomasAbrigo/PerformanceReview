@@ -82,9 +82,11 @@ export const KEPT_TABLES = [
 export async function resetDomainTables(
   db: DbOrTx,
   registry: ReadonlyMap<string, unknown> = REGISTRY,
+  /** Entities outside the registry the seed also writes under a lock (the reports). */
+  extraLocks: readonly string[] = ["assessment", "assessment_progress"],
 ): Promise<void> {
   await db.transaction(async (tx) => {
-    for (const entity of registry.keys()) {
+    for (const entity of [...registry.keys(), ...extraLocks]) {
       const rows = await tx.execute(
         sql`select pg_try_advisory_xact_lock(hashtextextended(${ingestLockKey(entity)}, 0)) as locked`,
       );

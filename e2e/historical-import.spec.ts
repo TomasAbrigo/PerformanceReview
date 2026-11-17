@@ -2,6 +2,7 @@ import { mkdtempSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { expect, test } from "@playwright/test";
+import { importFile } from "./upload";
 import { assessedFirstCycle, company, fullName } from "./seed-data";
 
 const REPORTS = path.resolve("fixtures/bamboo-reports/small");
@@ -15,21 +16,6 @@ const decision = {
 
 // Assessment Progress needs the cycles the performance report creates.
 test.describe.configure({ mode: "serial" });
-
-async function importFile(
-  page: import("@playwright/test").Page,
-  file: string,
-  profile: string,
-) {
-  await page.goto("/es/imports/upload");
-  await page.getByLabel("Archivo", { exact: true }).setInputFiles(file);
-  await page.getByRole("button", { name: "Previsualizar" }).click();
-  await expect(page.getByLabel("Perfil de fuente")).toHaveValue(profile);
-  await page.getByRole("button", { name: "Importar" }).click();
-  await expect(page).toHaveURL(/\/es\/imports\/history\/[0-9a-f-]{36}$/, {
-    timeout: 150_000,
-  });
-}
 
 test("importing the employee performance report creates the historical cycles and their participants", async ({
   page,

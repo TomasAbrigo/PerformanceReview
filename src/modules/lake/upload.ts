@@ -1,6 +1,7 @@
-import { copyFile, mkdtemp, rm, symlink } from "node:fs/promises";
+import { createHash } from "node:crypto";
+import { copyFile, mkdtemp, readFile, rm, symlink } from "node:fs/promises";
 import { tmpdir } from "node:os";
-import { join, resolve } from "node:path";
+import { basename, extname, join, resolve } from "node:path";
 import { eq } from "drizzle-orm";
 import type { DbOrTx } from "@/db/client";
 import { ingestRun, type SourceSystem } from "@/db/schema";
@@ -91,6 +92,97 @@ async function withUploadLake<T>(
   } finally {
     await rm(dir, { recursive: true, force: true });
   }
+}
+
+/**
+ * The ingest of an import: validates the file against the profile, then runs
+ * the profile's pipeline with the params reprocess and resume read back.
+ */
+async function ingestUploaded({
+  upload,
+  fileName,
+  profile,
+  source,
+  db,
+  signal,
+  landing = false,
+}: {
+  upload: StoredUpload;
+  fileName: string;
+  profile: SourceProfile;
+  source: SourceSystem;
+  db: DbOrTx;
+  signal?: AbortSignal;
+  landing?: boolean;
+}) {
+  return withUploadLake(upload, async (lake, table) => {
+    const columns = await readable(() => lake.describeTable(table));
+    // The messages name the file the user uploaded, not the profile's table.
+    const issues = validateAgainstSchema(profile, columns, fileName);
+    if (issues.length > 0) {
+      throw new UploadError(
+        "invalid_profile",
+        `The file does not match profile "${profile.name}": ${issues
+          .map((issue) => issue.message)
+          .join("; ")}`,
+        issues,
+      );
+    }
+    return runIngest({
+      adapter: new FileSourceAdapter(profile, lake, table, {
+        source,
+        fileKey: upload.sha256,
+      }),
+      entity: profile.entity,
+      landing,
+      syncState: false,
+      ...(profile.questions ? { questions: profile.questions } : {}),
+      db,
+      extract: { signal },
+      params: {
+        fileName,
+        profile: profile.name,
+        size: upload.size,
+        sha256: upload.sha256,
+      },
+    });
+  });
+}
+
+/**
+ * Imports a file from disk in-process (seed, tests) exactly as an upload of
+ * it would be: same validation, same pipeline, same run params. A built-in
+ * history profile goes to the domain; `source` defaults to the profile's.
+ */
+export async function importReportFile(
+  db: DbOrTx,
+  {
+    path,
+    profile,
+    source,
+  }: { path: string; profile: string | SourceProfile; source?: SourceSystem },
+) {
+  const resolved =
+    typeof profile === "string" ? getBuiltinProfile(profile) : profile;
+  if (!resolved) throw new Error(`Unknown built-in profile ${String(profile)}`);
+  const content = await readFile(path);
+  const sha256 = createHash("sha256").update(content).digest("hex");
+  const ext = extname(path);
+  return ingestUploaded({
+    upload: {
+      id: `${sha256}${ext}`,
+      sha256,
+      ext,
+      size: content.length,
+      path,
+      existed: true,
+    },
+    fileName: basename(path),
+    profile: resolved,
+    source: source ?? builtinSourceSystem(resolved),
+    db,
+    landing: !isHistoryProfile(resolved),
+  });
 }
 
 /** DuckDB failures on a bad file become an error the user can read. */
@@ -209,37 +301,14 @@ export async function importUpload({
   const domain = isHistoryProfile(profile) && !landing;
   const upload = await resolveUpload(uploadId, store);
 
-  const result = await withUploadLake(upload, async (lake, table) => {
-    const columns = await readable(() => lake.describeTable(table));
-    // The messages name the file the user uploaded, not the profile's table.
-    const issues = validateAgainstSchema(profile, columns, fileName);
-    if (issues.length > 0) {
-      throw new UploadError(
-        "invalid_profile",
-        `The file does not match profile "${profile.name}": ${issues
-          .map((issue) => issue.message)
-          .join("; ")}`,
-        issues,
-      );
-    }
-    return runIngest({
-      adapter: new FileSourceAdapter(profile, lake, table, {
-        source,
-        fileKey: upload.sha256,
-      }),
-      entity: profile.entity,
-      landing: !domain,
-      syncState: false,
-      ...(profile.questions ? { questions: profile.questions } : {}),
-      db,
-      extract: { signal },
-      params: {
-        fileName,
-        profile: profile.name,
-        size: upload.size,
-        sha256: upload.sha256,
-      },
-    });
+  const result = await ingestUploaded({
+    upload,
+    fileName,
+    profile,
+    source,
+    db,
+    signal,
+    landing: !domain,
   });
 
   // Only now: a failed import leaves no profile behind.

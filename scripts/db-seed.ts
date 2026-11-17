@@ -26,7 +26,7 @@ import {
   seedFromFixtures,
   SEED_USAGE,
 } from "../src/modules/ingest/seed";
-import { seedAnalysis, seedReports } from "../src/modules/ingest/seed-reports";
+import { seedInsights } from "../src/modules/ingest/seed-reports";
 
 try {
   process.loadEnvFile(".env.local");
@@ -93,28 +93,39 @@ async function main(): Promise<number> {
   let failed = outcomes.some((o) => o.status === "error");
   if (args.reports && !failed) {
     try {
-      for (const r of await seedReports({ size: args.size, db })) {
+      const insights = await seedInsights({
+        size: args.size,
+        db,
+        analysis: args.analysis,
+        lock: (key, fn) => withAdvisoryLock(db, key, fn),
+      });
+      for (const r of insights.reports) {
         const c = r.counts;
         console.log(
-          `${r.profile}: read ${c.read}, inserted ${c.inserted}, updated ${c.updated}, unchanged ${c.unchanged}, rejected ${c.rejected} (${r.status ?? "succeeded"}, run ${r.runId})`,
+          c
+            ? `${r.profile}: ${r.status}, read ${c.read}, inserted ${c.inserted}, updated ${c.updated}, unchanged ${c.unchanged}, rejected ${c.rejected}${r.runId ? ` (run ${r.runId})` : ""}`
+            : `${r.profile}: ${r.status}${r.runId ? ` (run ${r.runId})` : ""}`,
+        );
+        if (r.status === "needs_decision") {
+          console.error(
+            `${r.profile}: rows wait for a cycle; resolve them in /es/imports/history/${r.runId}`,
+          );
+        } else if (r.status === "error") {
+          console.error(`${r.profile}: ${r.error}`);
+        }
+      }
+      if (!insights.ok) failed = true;
+      console.log(
+        `cycles: ${await count("review_cycle")}, participants: ${await count("cycle_participant")}, answers: ${await count("answer")}, completion rows: ${await count("assessment_progress")}`,
+      );
+      const a = insights.analysis;
+      if (a) {
+        console.log(
+          `analysis mock: ${a.total} texts, ${a.analyzed} analyzed, ${a.cached} cached, ${a.corrected} corrected (run ${a.runId})`,
         );
       }
     } catch (err) {
-      console.error(`reports: ${errorMessage(err)}`);
-      failed = true;
-    }
-    console.log(
-      `cycles: ${await count("review_cycle")}, participants: ${await count("cycle_participant")}, answers: ${await count("answer")}, completion rows: ${await count("assessment_progress")}`,
-    );
-  }
-  if (args.reports && args.analysis && !failed) {
-    try {
-      const a = await seedAnalysis(db);
-      console.log(
-        `analysis mock: ${a.total} texts, ${a.analyzed} analyzed, ${a.cached} cached, ${a.corrected} corrected (run ${a.runId})`,
-      );
-    } catch (err) {
-      console.error(`analysis: ${errorMessage(err)}`);
+      console.error(`reports/analysis: ${errorMessage(err)}`);
       failed = true;
     }
   }

@@ -1,6 +1,8 @@
 import path from "node:path";
 import { expect, type Page, test } from "@playwright/test";
 import { actAs, actAsRole } from "./act-as";
+import { chooseCycle } from "./filters";
+import { importFile } from "./upload";
 import { byId, company, fullName, hasUniqueName, isActive } from "./seed-data";
 
 // Runs after the historical import (project "insights" depends on
@@ -57,10 +59,7 @@ const outsider = missing.find((m) => m.managerIdAtReview !== teamId)!;
 
 /** The cycle chosen in the filters form. */
 async function openCycle(page: Page) {
-  await page.goto("/es/insights/completion");
-  const form = page.getByRole("form", { name: "Filtros" });
-  await form.getByLabel("Ciclo").selectOption({ label: cycleName });
-  await form.getByRole("button", { name: "Aplicar" }).click();
+  await chooseCycle(page, "/es/insights/completion", cycleName);
   await expect(
     page.getByRole("heading", { name: new RegExp(`· ${cycleName}$`) }),
   ).toBeVisible();
@@ -79,18 +78,11 @@ test("People import the assessment progress and read the completion of a cycle",
   page,
 }) => {
   test.setTimeout(300_000);
-  await page.goto("/es/imports/upload");
-  await page
-    .getByLabel("Archivo", { exact: true })
-    .setInputFiles(path.join(REPORTS, "assessment-progress.csv"));
-  await page.getByRole("button", { name: "Previsualizar" }).click();
-  await expect(page.getByLabel("Perfil de fuente")).toHaveValue(
+  await importFile(
+    page,
+    path.join(REPORTS, "assessment-progress.csv"),
     "bamboo-assessment-progress",
   );
-  await page.getByRole("button", { name: "Importar" }).click();
-  await expect(page).toHaveURL(/\/es\/imports\/history\/[0-9a-f-]{36}$/, {
-    timeout: 240_000,
-  });
 
   // Home links to the view, which opens on the latest cycle.
   await page.goto("/es");

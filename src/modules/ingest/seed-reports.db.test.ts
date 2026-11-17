@@ -1,15 +1,16 @@
-import { count, sql } from "drizzle-orm";
+import { count, inArray, sql } from "drizzle-orm";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
-import { closeDb, db } from "@/db/client";
+import { closeDb, db, type Database } from "@/db/client";
 import {
   assessmentProgress,
   cycleParticipant,
+  ingestRun,
   qualitativeAnalysis,
   reviewCycle,
 } from "@/db/schema";
-import { seedSystemTemplates } from "@/modules/templates";
+import { withAdvisoryLock } from "./lock";
 import { resetDomainTables, seedFromFixtures } from "./seed";
-import { seedAnalysis, seedReports } from "./seed-reports";
+import { REPORT_ENTITIES, seedInsights, SEED_REPORTS } from "./seed-reports";
 
 vi.setConfig({ testTimeout: 180_000, hookTimeout: 180_000 });
 
@@ -30,15 +31,23 @@ async function snapshot() {
   };
 }
 
+/** What `pnpm db:seed --size small` does, on the tables only (no pre-seeded templates). */
+async function seed() {
+  await seedFromFixtures({ size: "small", db });
+  return seedInsights({
+    size: "small",
+    db,
+    lock: (key, fn) => withAdvisoryLock(db as Database, key, fn),
+  });
+}
+
 describe("seed with reports and analysis (small)", () => {
   let first: Awaited<ReturnType<typeof snapshot>>;
+  let firstRun: Awaited<ReturnType<typeof seed>>;
 
   beforeAll(async () => {
-    await seedSystemTemplates(db);
     await resetDomainTables(db);
-    await seedFromFixtures({ size: "small", db });
-    await seedReports({ size: "small", db });
-    await seedAnalysis(db);
+    firstRun = await seed();
     first = await snapshot();
   });
   afterAll(async () => {
@@ -46,26 +55,61 @@ describe("seed with reports and analysis (small)", () => {
     await closeDb();
   });
 
-  it("creates the semi-annual cycles, participants, answers and completion rows", () => {
+  it("imports every report and labels the open texts", () => {
+    expect(firstRun.ok).toBe(true);
+    expect(firstRun.reports.map((r) => [r.profile, r.status])).toEqual(
+      SEED_REPORTS.map((r) => [r.profile, "succeeded"]),
+    );
+    expect(firstRun.analysis?.analyzed).toBeGreaterThan(0);
+  });
+
+  it("creates the semi-annual cycles, participants, answers, completion rows and labels", () => {
     expect(first.cycles).toBeGreaterThan(0);
     expect(first.participants).toBeGreaterThan(0);
     expect(first.answers).toBeGreaterThan(0);
     expect(first.progress).toBeGreaterThan(0);
-  });
-
-  it("labels the open-text answers with the mock provider", () => {
     expect(first.labels).toBeGreaterThan(0);
   });
 
-  it("is idempotent: a second run changes nothing", async () => {
-    await seedFromFixtures({ size: "small", db });
-    const reports = await seedReports({ size: "small", db });
-    for (const r of reports) {
-      expect(r.counts.inserted).toBe(0);
-      expect(r.counts.updated).toBe(0);
+  it("records the runs like an upload: profile, file and hash in params (reprocess and resume read them)", async () => {
+    const runs = await db
+      .select({ params: ingestRun.params })
+      .from(ingestRun)
+      .where(
+        inArray(
+          ingestRun.id,
+          firstRun.reports.map((r) => r.runId!),
+        ),
+      );
+    expect(
+      runs.map((r) => (r.params as { profile?: string }).profile).sort(),
+    ).toEqual(SEED_REPORTS.map((r) => r.profile).sort());
+    for (const r of runs) {
+      expect(r.params).toMatchObject({
+        fileName: expect.stringMatching(/\.csv$/),
+        sha256: expect.stringMatching(/^[0-9a-f]{64}$/),
+      });
     }
-    const analysis = await seedAnalysis(db);
-    expect(analysis.analyzed).toBe(0);
+  });
+
+  it("is idempotent: a second run changes nothing", async () => {
+    const again = await seed();
+    for (const r of again.reports) {
+      expect(r.counts?.inserted).toBe(0);
+      expect(r.counts?.updated).toBe(0);
+    }
+    expect(again.analysis?.analyzed).toBe(0);
+    expect(await snapshot()).toEqual(first);
+  });
+
+  it("refuses to reset while a report import holds its lock", async () => {
+    for (const entity of REPORT_ENTITIES) {
+      await withAdvisoryLock(db as Database, `ingest:${entity}`, async () => {
+        await expect(resetDomainTables(db)).rejects.toThrow(
+          new RegExp(`ingest run of "${entity}" is in progress`),
+        );
+      });
+    }
     expect(await snapshot()).toEqual(first);
   });
 });
