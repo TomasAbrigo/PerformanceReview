@@ -1,6 +1,7 @@
 import type { DbOrTx } from "@/db/client";
 import type { CycleParticipant } from "@/db/schema";
 import type { ActorContext } from "@/modules/actor/types";
+import { todayLocal } from "@/modules/org-history/dates";
 import { jobAsOf, jobsAsOf, managerAsOf } from "@/modules/org-history/queries";
 
 /**
@@ -69,11 +70,7 @@ export async function currentManagerOf(
   today: Date = new Date(),
 ): Promise<Set<string>> {
   if (!actor.personId || personIds.length === 0) return new Set();
-  const jobs = await jobsAsOf(
-    db,
-    [...new Set(personIds)],
-    today.toISOString().slice(0, 10),
-  );
+  const jobs = await jobsAsOf(db, [...new Set(personIds)], todayLocal(today));
   return new Set(
     personIds.filter((id) => jobs.get(id)?.managerPersonId === actor.personId),
   );
@@ -92,7 +89,6 @@ export async function isCurrentManager(
 ): Promise<boolean> {
   if (!actor.personId) return false;
   return (
-    (await managerAsOf(db, personId, today.toISOString().slice(0, 10))) ===
-    actor.personId
+    (await managerAsOf(db, personId, todayLocal(today))) === actor.personId
   );
 }

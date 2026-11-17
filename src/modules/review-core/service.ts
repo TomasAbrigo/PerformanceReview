@@ -9,7 +9,6 @@ import {
   sql,
 } from "drizzle-orm";
 import type { DbOrTx } from "@/db/client";
-import type { LocalizedText } from "@/db/schema/rating-scales";
 import {
   cycleParticipant,
   type CycleParticipant,
@@ -17,7 +16,6 @@ import {
   questionRevision,
   reviewCycle,
   type ReviewCycle,
-  reviewTemplate,
 } from "@/db/schema";
 import { isUuid } from "@/lib/uuid";
 import { jobsAsOf, type IsoDate } from "@/modules/org-history/queries";
@@ -73,8 +71,6 @@ export type CycleParticipantItem = CycleParticipant & {
 };
 
 export type CycleDetail = ReviewCycle & {
-  /** Name of the cycle's default template (null without one). */
-  defaultTemplateName: LocalizedText | null;
   participants: CycleParticipantItem[];
   questionCount: number;
   stats: { active: number; removed: number; withoutManager: number };
@@ -86,12 +82,8 @@ export async function getCycle(
 ): Promise<CycleDetail | null> {
   if (!isUuid(id)) return null;
   const [cycle] = await db
-    .select({
-      ...getTableColumns(reviewCycle),
-      defaultTemplateName: reviewTemplate.name,
-    })
+    .select()
     .from(reviewCycle)
-    .leftJoin(reviewTemplate, eq(reviewTemplate.id, reviewCycle.templateId))
     .where(and(eq(reviewCycle.id, id), isNull(reviewCycle.deletedAt)));
   if (!cycle) return null;
   const reviewee = aliasedTable(person, "reviewee");

@@ -41,8 +41,9 @@ export type VisibilityContext = {
    */
   revieweeShared?: boolean;
   /**
-   * Self rows: the manager request that gates the double blind: the actor's
-   * own when they are an assessor, else the participant's current one. Its
+   * Self rows: the participant's current manager request (the actor's own
+   * if they wrote one; superseded ones never count), which gates the double
+   * blind. Its
    * shared_at tells whether the manager review reached the employee (the
    * current manager reads the self review from then).
    */

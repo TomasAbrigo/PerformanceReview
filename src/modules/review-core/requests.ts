@@ -186,10 +186,9 @@ export async function loadRequest(
   db: DbOrTx,
   actor: ActorContext,
   requestId: string,
-  { forUpdate = false } = {},
 ) {
   if (!isUuid(requestId)) throw new ReviewError("not_found");
-  const query = db
+  const [row] = await db
     .select({
       request: reviewRequest,
       participant: cycleParticipant,
@@ -204,9 +203,6 @@ export async function loadRequest(
     .where(
       and(eq(reviewRequest.id, requestId), isNull(reviewRequest.deletedAt)),
     );
-  const [row] = forUpdate
-    ? await query.for("update", { of: reviewRequest })
-    : await query;
   if (!row || row.cycle.deletedAt) throw new ReviewError("not_found");
   const [visibility] = await visibilityContexts(db, actor, [row]);
   if (!canRead(actor, visibility)) throw new ReviewError("forbidden");

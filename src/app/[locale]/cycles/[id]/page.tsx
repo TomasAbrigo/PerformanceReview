@@ -15,29 +15,7 @@ async function Detail({ params }: PageProps<"/[locale]/cycles/[id]">) {
   await connection();
   const cycle = await getCycle(db, id);
   if (!cycle) notFound();
-  return (
-    <CycleDetailView
-      cycle={{
-        id: cycle.id,
-        name: cycle.name,
-        status: cycle.status,
-        periodStart: cycle.periodStart,
-        periodEnd: cycle.periodEnd,
-        snapshotDate: cycle.snapshotDate,
-        questionCount: cycle.questionCount,
-        stats: cycle.stats,
-        participants: cycle.participants.map((p) => ({
-          id: p.id,
-          displayName: p.displayName,
-          snapManagerName: p.snapManagerName,
-          snapDepartment: p.snapDepartment,
-          snapJobTitle: p.snapJobTitle,
-          withoutManager: p.withoutManager,
-          removedAt: p.removedAt,
-        })),
-      }}
-    />
-  );
+  return <CycleDetailView cycle={cycle} />;
 }
 
 export default function CyclePage(props: PageProps<"/[locale]/cycles/[id]">) {
