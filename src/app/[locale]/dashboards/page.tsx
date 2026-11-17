@@ -26,6 +26,7 @@ import {
   ratingStages,
   selfManagerGap,
 } from "@/modules/analytics/dashboards";
+import { insightsScope } from "@/modules/insights";
 import { type CycleStatus, listCycles } from "@/modules/review-core";
 
 async function Dashboards({
@@ -39,16 +40,24 @@ async function Dashboards({
   const actor = await getActor();
   const t = await getTranslations("Dashboards");
   const tStatus = await getTranslations("Cycles.status");
-  if (actor.role !== "hr" && actor.role !== "manager") {
+  const p = parseParams(await searchParams);
+  const scope = insightsScope(actor);
+  // Aggregates only (direction): its dashboard is the executive view, for the
+  // cycle that was asked for.
+  if (scope.kind === "aggregatesOnly") {
+    redirect({
+      href: hrefWith("/dashboards/executive", {
+        cycle: p.cycle === "all" ? undefined : p.cycle,
+      }),
+      locale,
+    });
+  }
+  if (scope.kind === "none") {
     if (actor.personId) {
       redirect({ href: `/dashboards/people/${actor.personId}`, locale });
     }
     return <p>{t("forbidden")}</p>;
   }
-  if (actor.role === "manager" && !actor.personId) {
-    return <p>{t("forbidden")}</p>;
-  }
-  const p = parseParams(await searchParams);
   const cycles = (await listCycles(db)).filter((c) => c.status !== "draft");
   if (!cycles.length) return <p>{t("noCycles")}</p>;
   const cycleId =

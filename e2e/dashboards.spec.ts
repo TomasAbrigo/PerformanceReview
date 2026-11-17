@@ -8,7 +8,7 @@ import {
   hasUniqueName,
   isActive,
 } from "./seed-data";
-import { actAs } from "./act-as";
+import { actAs, actAsRole } from "./act-as";
 
 // Runs after the historical import (project "insights" depends on
 // "chromium", where e2e/historical-import.spec.ts imports the Employee
@@ -89,5 +89,45 @@ test("dashboards of an imported cycle: progress, team as-of/current, trajectory 
   await team.getByRole("link", { name: employeeName }).click();
   await expect(
     page.getByRole("heading", { name: `Trayectoria de ${employeeName}` }),
+  ).toBeVisible();
+});
+
+test("direction only reads the leadership view; employees get no dashboard", async ({
+  page,
+}) => {
+  await page.goto("/es/cycles");
+  await page.getByRole("link", { name: cycleName }).click();
+  await expect(page).toHaveURL(/\/es\/cycles\/[0-9a-f-]{36}$/);
+  const cycleId = page.url().split("/").pop()!;
+
+  const bar = page.getByRole("form", { name: "Actuar como" });
+  await bar.getByLabel("Rol").selectOption({ label: "Dirección" });
+  await expect(bar.getByLabel("Persona", { exact: true })).toBeDisabled();
+  await bar.getByRole("button", { name: "Aplicar" }).click();
+  await expect(bar.getByText("Actuando como: Dirección")).toBeVisible();
+
+  // /dashboards sends direction to the aggregates; names never show up.
+  await page.goto(`/es/dashboards?cycle=${cycleId}`);
+  await expect(page).toHaveURL(
+    new RegExp(`/es/dashboards/executive\\?cycle=${cycleId}$`),
+  );
+  await expect(
+    page.getByRole("heading", { name: `Vista de dirección · ${cycleName}` }),
+  ).toBeVisible();
+  await expect(page.getByTestId("exec-participants")).toBeVisible();
+  await expect(page.getByText(employeeName)).toHaveCount(0);
+  // Individual views are closed to it.
+  await page.goto(
+    `/es/dashboards/team?cycle=${cycleId}&manager=00000000-0000-4000-8000-000000000000`,
+  );
+  await expect(
+    page.getByText("No tenés acceso a estos dashboards."),
+  ).toBeVisible();
+
+  // An employee has no dashboard (and no executive view either).
+  await actAsRole(page, "Empleado", "Sin persona");
+  await page.goto(`/es/dashboards/executive?cycle=${cycleId}`);
+  await expect(
+    page.getByText("No tenés acceso a estos dashboards."),
   ).toBeVisible();
 });

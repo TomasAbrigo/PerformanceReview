@@ -3,14 +3,16 @@ import type { DbOrTx } from "@/db/client";
 import type { LocalizedText } from "@/db/schema/rating-scales";
 import { isUuid } from "@/lib/uuid";
 import type { ActorContext } from "@/modules/actor/types";
+import { foldSmallGroups } from "@/modules/insights/aggregation";
+import { insightsScope } from "@/modules/insights/authz";
 import { ReviewError } from "@/modules/review-core/review-errors";
+import { getSetting } from "@/modules/settings/service";
 import type { Relationship } from "@/modules/templates/constants";
 import {
-  chainContains,
+  ALL_PEOPLE,
   isHr,
-  isManager,
   ratingCte,
-  requireHrOrManager,
+  requirePeopleScope,
   scopedCtes,
   subtree,
 } from "./scope";
@@ -25,7 +27,6 @@ import {
   type GroupBy,
   type Hierarchy,
   type ManagerTeam,
-  MIN_GROUP,
   type PersonTrajectory,
   type RatingDistribution,
   type RatingStage,
@@ -46,7 +47,7 @@ export async function cycleProgress(
   actor: ActorContext,
   f: DashboardFilters,
 ): Promise<CycleProgress> {
-  requireHrOrManager(actor);
+  requirePeopleScope(actor);
   const cycleId = requireCycle(f.cycleId);
   const [cycle] = await db.execute<{ status: string }>(
     sql`select status from review_cycle where id = ${cycleId}::uuid`,
@@ -125,7 +126,7 @@ export async function ratingDistribution(
   actor: ActorContext,
   f: DashboardFilters & { groupBy: GroupBy; stage: RatingStage },
 ): Promise<RatingDistribution> {
-  requireHrOrManager(actor);
+  requirePeopleScope(actor);
   const single = !!f.aggregateOnly && f.groupBy === "manager";
   const col = groupColumns[f.groupBy];
   const rows = await db.execute<{
@@ -163,9 +164,11 @@ export async function ratingDistribution(
 /**
  * One person's trajectory across cycles: normalized current rating, with
  * the manager, title and area frozen at each cycle's snapshot. HR: all;
- * managers: cycles where the person was in their team then or is now;
- * the person themself: every cycle, rating only once their manager review is
- * shared and calibration published (the result page's gate), never the stage.
+ * managers: the cycles where the person was their direct report at the
+ * snapshot, or is now (never a skip-level report); direction: nobody (it only
+ * reads aggregates); the person themself: every cycle, rating only once their
+ * manager review is shared and calibration published (the result page's
+ * gate), never the stage.
  */
 export async function personTrajectory(
   db: DbOrTx,
@@ -180,15 +183,15 @@ export async function personTrajectory(
   const own = actor.personId === personId;
   let scope = sql`true`;
   if (!isHr(actor) && !own) {
-    if (!isManager(actor)) throw new ReviewError("forbidden");
-    scope = sql`(${chainContains(sql`cp.snap_manager_person_id`, sql`c.snapshot_date`, actor.personId!)}
-      or ${chainContains(
-        sql`(select h.manager_person_id from employee_job_history h
-             where h.person_id = cp.reviewee_person_id and h.deleted_at is null
-               and h.valid_to is null order by h.valid_from desc limit 1)`,
-        sql`current_date`,
-        actor.personId!,
-      )})`;
+    const people = requirePeopleScope(actor);
+    if (people.kind === "directReports") {
+      const manager = people.managerPersonId;
+      scope = sql`(cp.snap_manager_person_id = ${manager}::uuid
+        or (select h.manager_person_id from employee_job_history h
+            where h.person_id = cp.reviewee_person_id and h.deleted_at is null
+              and h.valid_to is null order by h.valid_from desc limit 1)
+           = ${manager}::uuid)`;
+    }
   }
   const hide = !isHr(actor) && own;
   const rows = await db.execute<{
@@ -241,16 +244,17 @@ export async function personTrajectory(
 }
 
 /**
- * A manager's whole subtree (recursive CTE over job history) on the cycle
- * snapshot date (asOf) or today (current), with each member's current
- * rating in the cycle. Managers may open their own team or a sub-team.
+ * A manager's team on the cycle snapshot date (asOf) or today (current), with
+ * each member's current rating in the cycle. People read the whole subtree of
+ * any manager (recursive CTE over job history); a manager only their own
+ * direct reports.
  */
 export async function managerTeam(
   db: DbOrTx,
   actor: ActorContext,
   f: { managerId?: string; cycleId?: string; hierarchy: Hierarchy },
 ): Promise<ManagerTeam> {
-  requireHrOrManager(actor);
+  const scope = requirePeopleScope(actor);
   const managerId = f.managerId ?? actor.personId;
   if (!managerId || !isUuid(managerId)) throw new ReviewError("not_found");
   let date = sql`current_date`;
@@ -263,13 +267,10 @@ export async function managerTeam(
   } else if (f.hierarchy === "asOf") {
     throw new ReviewError("not_found");
   }
-  if (!isHr(actor) && managerId !== actor.personId) {
-    const [ok] = await db.execute<{ ok: boolean }>(
-      sql`with recursive sub as (${subtree(actor.personId!, date)})
-          select exists (select 1 from sub where person_id = ${managerId}::uuid) as ok`,
-    );
-    if (!ok?.ok) throw new ReviewError("forbidden");
+  if (scope.kind === "directReports" && managerId !== scope.managerPersonId) {
+    throw new ReviewError("forbidden");
   }
+  const maxDepth = scope.kind === "all" ? 50 : 1;
   const rows = await db.execute<{
     person_id: string;
     name: string;
@@ -279,7 +280,7 @@ export async function managerTeam(
     participant_id: string | null;
     normalized: number | null;
   }>(sql`
-    with recursive sub as (${subtree(managerId, date)}),
+    with recursive sub as (${subtree(managerId, date, maxDepth)}),
     members as (select person_id, min(depth) as depth from sub group by person_id)
     select m.person_id, p.display_name as name, m.depth::int as depth,
            h.job_title, h.department, cp.id as participant_id,
@@ -318,7 +319,7 @@ export async function goalsVsRating(
   actor: ActorContext,
   f: DashboardFilters,
 ): Promise<{ rows: GoalsVsRatingRow[] }> {
-  requireHrOrManager(actor);
+  requirePeopleScope(actor);
   requireCycle(f.cycleId);
   const rows = await db.execute<{
     participant_id: string;
@@ -364,7 +365,7 @@ export async function selfManagerGap(
   actor: ActorContext,
   f: DashboardFilters,
 ): Promise<SelfManagerGap> {
-  requireHrOrManager(actor);
+  requirePeopleScope(actor);
   requireCycle(f.cycleId);
   const pairs = sql`
     pairs as (
@@ -423,50 +424,82 @@ export async function selfManagerGap(
 }
 
 /**
- * Executive (aggregate-only) view for leadership: HR only, no names or ids.
- * Departments with fewer than MIN_GROUP rated people are not broken out.
+ * Executive (aggregate-only) view, no names or ids. People see every group
+ * unmasked (only people without a department are put together, as "Otros");
+ * direction only what reaches `minGroupSize` (the `aggregation.minGroupSize`
+ * setting unless given): departments under it are folded into "Otros", which
+ * is hidden too if it is still under it, and a cycle with fewer participants
+ * than that shows only its head count. Managers and employees are forbidden.
  */
 export async function executiveSummary(
   db: DbOrTx,
   actor: ActorContext,
-  f: { cycleId: string },
+  f: { cycleId: string; minGroupSize?: number },
 ): Promise<ExecutiveSummary> {
-  if (!isHr(actor)) throw new ReviewError("forbidden");
+  // The scope decides: People see all, direction aggregates over the minimum.
+  const scope = insightsScope(
+    actor,
+    f.minGroupSize ?? (await getSetting(db, "aggregation.minGroupSize")),
+  );
+  if (scope.kind !== "all" && scope.kind !== "aggregatesOnly") {
+    throw new ReviewError("forbidden");
+  }
+  const min = scope.kind === "aggregatesOnly" ? scope.minGroupSize : 1;
+  // Computed over everybody (the actor was authorized above) and masked here.
   const filters: DashboardFilters = {
     cycleId: f.cycleId,
     hierarchy: "asOf",
     aggregateOnly: true,
   };
-  const progress = await cycleProgress(db, actor, filters);
-  const dist = await ratingDistribution(db, actor, {
-    ...filters,
-    groupBy: "department",
-    stage: "current",
-  });
-  const [count] = await db.execute<{ n: number }>(sql`
-    with recursive ${scopedCtes(actor, filters)}
-    select count(*)::int as n from scoped`);
-  const byDepartment: ExecutiveSummary["byDepartment"] = [];
-  let suppressed = 0;
-  for (const s of dist.series) {
-    if (s.key !== null && s.n >= MIN_GROUP) {
-      byDepartment.push({
-        department: s.key,
-        n: s.n,
-        mean: s.mean,
-        counts: s.counts,
-      });
-    } else suppressed += s.n;
+  const [progress, dist, [count]] = await Promise.all([
+    cycleProgress(db, ALL_PEOPLE, filters),
+    ratingDistribution(db, ALL_PEOPLE, {
+      ...filters,
+      groupBy: "department",
+      stage: "current",
+    }),
+    db.execute<{ n: number }>(sql`
+      with recursive ${scopedCtes(ALL_PEOPLE, filters)}
+      select count(*)::int as n from scoped`),
+  ]);
+  const empty = Array<number>(BIN_COUNT).fill(0);
+  const rated = dist.total.reduce((a, b) => a + b, 0);
+  const masked = scope.kind === "aggregatesOnly";
+  if (masked && count.n < min) {
+    return {
+      minGroupSize: min,
+      participants: count.n,
+      progress: [],
+      distribution: empty,
+      byDepartment: [],
+      others: null,
+      suppressed: rated,
+    };
   }
+  const { shown, others, suppressed } = foldSmallGroups(
+    dist.series.map((s) => ({
+      key: s.key,
+      n: s.n,
+      mean: s.mean,
+      counts: s.counts,
+    })),
+    min,
+  );
   return {
+    minGroupSize: masked ? min : null,
     participants: count.n,
     progress: progress.totals.map((t) => ({
       relationship: t.relationship,
       total: t.total,
       submitted: t.submitted,
     })),
-    distribution: dist.total,
-    byDepartment,
+    distribution: masked && rated < min ? empty : dist.total,
+    byDepartment: shown.flatMap((g) =>
+      g.key === null
+        ? []
+        : [{ department: g.key, n: g.n, mean: g.mean, counts: g.counts }],
+    ),
+    others,
     suppressed,
   };
 }
@@ -484,7 +517,7 @@ export async function dashboardFilterOptions(
   actor: ActorContext,
   f: Pick<DashboardFilters, "cycleId" | "hierarchy">,
 ): Promise<FilterOptions> {
-  requireHrOrManager(actor);
+  requirePeopleScope(actor);
   const rows = await db.execute<{
     department: string | null;
     manager_id: string | null;

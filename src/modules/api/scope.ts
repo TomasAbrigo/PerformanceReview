@@ -3,6 +3,7 @@ import type { DbOrTx } from "@/db/client";
 import {
   actorRoles,
   DEFAULT_ACTOR,
+  normalizeActor,
   type ActorContext,
   type ActorRole,
 } from "@/modules/actor/types";
@@ -52,12 +53,18 @@ export function checkScope(query: ScopeQuery, ctx: z.RefinementCtx): void {
 /** The query as a standalone schema (endpoints that take no other parameter). */
 export const scopeQuery = z.object(scopeFields).superRefine(checkScope);
 
-/** The actor the request reads as: HR by default, else the person (404 if unknown). */
+/**
+ * The actor the request reads as: HR by default, else the person (404 if
+ * unknown). Direction has no person: the one given is checked, then dropped.
+ */
 export async function scopeActor(
   db: DbOrTx,
   query: ScopeQuery,
 ): Promise<ActorContext> {
   if (!query.as_person) return DEFAULT_ACTOR;
   if (!(await personExists(db, query.as_person))) throw notFound("Person");
-  return { personId: query.as_person, role: query.role ?? "employee" };
+  return normalizeActor({
+    personId: query.as_person,
+    role: query.role ?? "employee",
+  });
 }

@@ -3,6 +3,7 @@ import { setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { connection } from "next/server";
 import { Suspense } from "react";
+import { HrOnly } from "@/components/access/hr-only";
 import { DataQualityPanel } from "@/components/data-quality/data-quality-panel";
 import { db } from "@/db/client";
 import { routing } from "@/i18n/routing";
@@ -22,7 +23,9 @@ export default function DataQualityPage(
   return (
     <main className="mx-auto w-full max-w-6xl p-8">
       <Suspense>
-        <PanelData {...props} />
+        <HrOnly>
+          <PanelData {...props} />
+        </HrOnly>
       </Suspense>
     </main>
   );

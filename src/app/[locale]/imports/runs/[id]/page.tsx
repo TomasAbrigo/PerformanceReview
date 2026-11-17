@@ -3,6 +3,7 @@ import { setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { connection } from "next/server";
 import { Suspense } from "react";
+import { HrOnly } from "@/components/access/hr-only";
 import { HistoryResultLink } from "@/components/imports/history-link";
 import { RunDetailView } from "@/components/ingest/run-detail";
 import { db } from "@/db/client";
@@ -40,7 +41,9 @@ export default function RunPage(
   return (
     <main className="mx-auto w-full max-w-4xl p-8">
       <Suspense>
-        <RunData {...props} />
+        <HrOnly>
+          <RunData {...props} />
+        </HrOnly>
       </Suspense>
     </main>
   );

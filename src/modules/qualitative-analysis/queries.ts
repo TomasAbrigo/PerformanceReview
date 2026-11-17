@@ -5,6 +5,8 @@ import { isUuid } from "@/lib/uuid";
 import type { ActorContext } from "@/modules/actor/types";
 import { sentiments, type Sentiment } from "./constants";
 import { effectiveCte } from "./effective";
+import { insightsScope, type InsightsScope } from "@/modules/insights/authz";
+import { getSetting } from "@/modules/settings/service";
 import { AnalysisError } from "./errors";
 import { pseudonymize } from "./pseudonymize";
 import { pseudonymSources } from "./service";
@@ -19,15 +21,38 @@ import type {
 } from "./types";
 
 /**
- * Who sees what: HR every label; a manager the labels about their direct
- * reports at the cycle snapshot; an employee nothing (never their own labels).
- * aggregateOnly (leadership) keeps counts and drops comments and quotes.
+ * Who sees what (insightsScope): People every label; a manager the labels
+ * about their direct reports at the cycle snapshot; direction aggregates only,
+ * groups of fewer than `aggregation.minGroupSize` people left out; an employee
+ * nothing (never their own labels). aggregateOnly (also People's toggle)
+ * keeps counts and drops comments and quotes.
  */
-const canSee = (a: ActorContext) =>
-  a.role === "hr" || (a.role === "manager" && a.personId !== null);
+type Resolved = { scope: InsightsScope; f: QualitativeFilters; min: number };
+
+async function resolve(
+  db: DbOrTx,
+  actor: ActorContext,
+  f: QualitativeFilters,
+): Promise<Resolved | null> {
+  const scope = insightsScope(
+    actor,
+    actor.role === "direction"
+      ? await getSetting(db, "aggregation.minGroupSize")
+      : undefined,
+  );
+  if (scope.kind === "none") return null;
+  if (scope.kind === "aggregatesOnly") {
+    return { scope, f: { ...f, aggregateOnly: true }, min: scope.minGroupSize };
+  }
+  return { scope, f, min: 0 };
+}
+
+/** Groups with fewer distinct participants than `min` are left out. */
+const minGroup = (min: number, col = sql`participant_id`) =>
+  min > 1 ? sql`having count(distinct ${col}) >= ${min}` : sql``;
 
 /** CTEs eff + labeled: effective labels of submitted answers in scope. */
-function labeledCtes(actor: ActorContext, f: QualitativeFilters): SQL {
+function labeledCtes({ scope, f }: Resolved): SQL {
   const where: SQL[] = [
     sql`r.deleted_at is null`,
     sql`r.status = 'submitted'`,
@@ -41,8 +66,11 @@ function labeledCtes(actor: ActorContext, f: QualitativeFilters): SQL {
   if (f.dimension) where.push(sql`eff.dimension = ${f.dimension}`);
   if (f.sentiment) where.push(sql`eff.sentiment = ${f.sentiment}`);
   if (f.theme) where.push(sql`${f.theme} = any(eff.themes)`);
-  if (actor.role !== "hr") {
-    where.push(sql`cp.snap_manager_person_id = ${actor.personId}::uuid`);
+  if (scope.kind === "directReports") {
+    where.push(
+      sql`cp.snap_manager_person_id = ${scope.managerPersonId}::uuid`,
+      sql`cp.reviewee_person_id <> ${scope.managerPersonId}::uuid`,
+    );
   }
   return sql`${effectiveCte()},
     labeled as (
@@ -80,11 +108,12 @@ export async function sentimentByDimension(
   actor: ActorContext,
   f: QualitativeFilters,
 ): Promise<DimensionSentiment[]> {
-  if (!canSee(actor)) return [];
+  const r = await resolve(db, actor, f);
+  if (!r) return [];
   const rows = await db.execute<SentimentCounts & { dimension: string }>(sql`
-    with ${labeledCtes(actor, f)}
+    with ${labeledCtes(r)}
     select dimension, ${countCols}, count(*)::int as total
-    from labeled group by dimension order by dimension`);
+    from labeled group by dimension ${minGroup(r.min)} order by dimension`);
   return rows.map((r) => ({ dimension: r.dimension, ...counts(r) }));
 }
 
@@ -94,7 +123,8 @@ export async function sentimentTrend(
   actor: ActorContext,
   f: Omit<QualitativeFilters, "cycleId">,
 ): Promise<TrendPoint[]> {
-  if (!canSee(actor)) return [];
+  const r = await resolve(db, actor, { ...f, cycleId: undefined });
+  if (!r) return [];
   const rows = await db.execute<
     SentimentCounts & {
       cycle_id: string;
@@ -102,14 +132,14 @@ export async function sentimentTrend(
       period_end: string;
     }
   >(sql`
-    with ${labeledCtes(actor, { ...f, cycleId: undefined })}
+    with ${labeledCtes(r)}
     select cycle_id, cycle_name, period_end, ${countCols}, count(*)::int as total
-    from labeled group by 1, 2, 3 order by period_end, cycle_name`);
-  return rows.map((r) => ({
-    cycleId: r.cycle_id,
-    cycleName: r.cycle_name,
-    periodEnd: r.period_end,
-    ...counts(r),
+    from labeled group by 1, 2, 3 ${minGroup(r.min)} order by period_end, cycle_name`);
+  return rows.map((row) => ({
+    cycleId: row.cycle_id,
+    cycleName: row.cycle_name,
+    periodEnd: row.period_end,
+    ...counts(row),
   }));
 }
 
@@ -120,23 +150,25 @@ export async function topThemes(
   f: QualitativeFilters,
   limit = 10,
 ): Promise<ThemeRank[]> {
-  if (!canSee(actor)) return [];
+  const r = await resolve(db, actor, f);
+  if (!r) return [];
   const rows = await db.execute<{
     theme: string;
     count: number;
     quotes: string[];
   }>(sql`
-    with ${labeledCtes(actor, f)},
-    t as (select unnest(themes) as theme, text, answer_id from labeled)
+    with ${labeledCtes(r)},
+    t as (select unnest(themes) as theme, text, answer_id, participant_id from labeled)
     select theme, count(*)::int as count,
            (array_agg(text order by length(text), answer_id))[1:3] as quotes
-    from t group by theme order by count desc, theme limit ${limit}`);
-  if (f.aggregateOnly) return rows.map((r) => ({ ...r, quotes: [] }));
+    from t group by theme ${minGroup(r.min)}
+    order by count desc, theme limit ${limit}`);
+  if (r.f.aggregateOnly) return rows.map((row) => ({ ...row, quotes: [] }));
   const sources = await pseudonymSources(db);
-  return rows.map((r) => ({
-    theme: r.theme,
-    count: r.count,
-    quotes: pseudonymize(r.quotes, sources).texts,
+  return rows.map((row) => ({
+    theme: row.theme,
+    count: row.count,
+    quotes: pseudonymize(row.quotes, sources).texts,
   }));
 }
 
@@ -149,7 +181,8 @@ export async function sentimentVsIndicators(
   actor: ActorContext,
   f: QualitativeFilters,
 ): Promise<IndicatorSentiment[]> {
-  if (!canSee(actor)) return [];
+  const r = await resolve(db, actor, f);
+  if (!r) return [];
   const rows = await db.execute<
     SentimentCounts & {
       role: string;
@@ -157,7 +190,7 @@ export async function sentimentVsIndicators(
       choices: { value: string; label: LocalizedText }[] | null;
     }
   >(sql`
-    with ${labeledCtes(actor, f)},
+    with ${labeledCtes(r)},
     ind as (
       -- One value per participant and indicator: the latest submitted
       -- manager review's answer (so each comment is counted once).
@@ -175,7 +208,7 @@ export async function sentimentVsIndicators(
            ${countCols}, count(*)::int as total
     from labeled l
     join ind on ind.participant_id = l.participant_id and ind.cycle_id = l.cycle_id
-    group by 1, 2 order by 1, 2`);
+    group by 1, 2 ${minGroup(r.min, sql`l.participant_id`)} order by 1, 2`);
   return rows.map((r) => ({
     role: r.role,
     option: r.option,
@@ -191,7 +224,8 @@ export async function listComments(
   f: QualitativeFilters,
   limit = 200,
 ): Promise<CommentRow[]> {
-  if (!canSee(actor) || f.aggregateOnly) return [];
+  const r = await resolve(db, actor, f);
+  if (!r || r.f.aggregateOnly) return [];
   const rows = await db.execute<{
     answer_id: string;
     cycle_name: string;
@@ -204,7 +238,7 @@ export async function listComments(
     confidence: number | null;
     source: string;
   }>(sql`
-    with ${labeledCtes(actor, f)}
+    with ${labeledCtes(r)}
     select answer_id, cycle_name, person_name, relationship, dimension, text,
            sentiment, themes, confidence, source
     from labeled order by period_end desc, person_name, dimension, answer_id

@@ -19,6 +19,7 @@ import { db } from "@/db/client";
 import { routing } from "@/i18n/routing";
 import { isUuid } from "@/lib/uuid";
 import { getActor } from "@/modules/actor/server";
+import { canSeeIndividuals, insightsScope } from "@/modules/insights/authz";
 import {
   listComments,
   qualitativeFilterOptions,
@@ -45,12 +46,9 @@ async function Qualitative({
   await connection();
   const actor = await getActor();
   const t = await getTranslations("Qualitative");
-  if (
-    actor.role === "employee" ||
-    (actor.role === "manager" && !actor.personId)
-  ) {
-    return <p>{t("forbidden")}</p>;
-  }
+  const scope = insightsScope(actor);
+  if (scope.kind === "none") return <p>{t("forbidden")}</p>;
+  const individuals = canSeeIndividuals(actor);
   const hr = actor.role === "hr";
   const p = parseQualitativeParams(await searchParams);
   const cycles = (await listCycles(db))
@@ -106,7 +104,7 @@ async function Qualitative({
       <Trend points={trend} />
       <Themes themes={themes} />
       <Indicators rows={indicators} />
-      {!p.aggregate ? (
+      {individuals && !p.aggregate ? (
         <section className="flex flex-col gap-2">
           <h2 className="text-lg font-semibold">{t("comments.title")}</h2>
           <CommentsTable
