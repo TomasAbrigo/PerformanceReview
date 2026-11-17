@@ -102,3 +102,56 @@ describe("runInspectCli", () => {
     expect(await runInspectCli(["/nope/missing.csv"], quiet)).toBe(1);
   });
 });
+
+describe("--values (#83)", () => {
+  const RAW = path.join(REPORTS, "assessments-report.csv");
+  const STATUS = path.join(REPORTS, "assessment-status.csv");
+
+  it("parses the flag", () => {
+    expect(parseInspectArgs(["a.csv", "--values"])).toEqual({
+      file: "a.csv",
+      values: true,
+    });
+  });
+
+  it("lists distinct values with counts of the closed columns only", async () => {
+    const report = await inspectReport(RAW, { values: true });
+    const withValues = report.columns.filter((c) => c.values);
+    expect(withValues.map((c) => c.header)).toEqual([
+      "Employee - How well does [Company] recognize my value?",
+      "Manager - Does [Employee] feel valued? (Performance Score)",
+      "Employee - What would help me do my best work?",
+      "Manager - How engaged is [Employee]? (Engagement Score)",
+    ]);
+    const valued = withValues[0].values!;
+    expect(valued.map(([v]) => v)).toContain("I feel I am highly valued.");
+    expect(valued.reduce((n, [, c]) => n + c, 0)).toBe(withValues[0].nonEmpty);
+    // The name inside a retention label is never printed.
+    const retention = withValues[1].values!.map(([v]) => v);
+    expect(retention).toContain(
+      "I would try to convince them to stay. … would be difficult to replace",
+    );
+  });
+
+  it("prints statuses without who, and no other cell", async () => {
+    const lines: string[] = [];
+    const code = await runInspectCli([STATUS, "--values"], {
+      log: (l) => lines.push(l),
+      error: (l) => lines.push(l),
+    });
+    expect(code).toBe(0);
+    const output = lines.join("\n");
+    expect(output).toContain("Completed by …");
+    expect(output).toContain("Completado");
+    const { cells } = await cellsOf(STATUS);
+    for (const cell of cells) {
+      if (!cell || /^(Completado|En curso|No iniciado)$/.test(cell)) continue;
+      expect(output).not.toContain(cell);
+    }
+  });
+
+  it("prints no values without the flag", async () => {
+    const report = await inspectReport(RAW);
+    expect(report.columns.some((c) => c.values)).toBe(false);
+  });
+});

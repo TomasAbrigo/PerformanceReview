@@ -5,6 +5,7 @@ import { parseArgs } from "node:util";
 import readXlsxFile from "read-excel-file/node";
 import { errorMessage } from "@/lib/log";
 import { DuckDbFileLake } from "./duckdb-file-lake";
+import { ASSESSMENT_STATUS_COLUMNS, CLOSED_REPORT_COLUMNS } from "./profiles";
 import { UPLOAD_EXTENSIONS } from "./upload-shared";
 
 /**
@@ -15,9 +16,41 @@ import { UPLOAD_EXTENSIONS } from "./upload-shared";
  * people's names and their reviews, and this output ends up in tickets.
  */
 
-export const INSPECT_USAGE = `Usage: pnpm reports:inspect <file>
-  <file>  a report export (${UPLOAD_EXTENSIONS.join(", ")})
-Prints headers and counts per column, never a cell value.`;
+export const INSPECT_USAGE = `Usage: pnpm reports:inspect <file> [--values]
+  <file>    a report export (${UPLOAD_EXTENSIONS.join(", ")})
+  --values  also the distinct values (with counts) of the closed-question and
+            status columns only; a status keeps its word, never who
+Prints headers and counts per column, never another cell value.`;
+
+/**
+ * The only columns whose values `--values` prints: closed answers (labels)
+ * and statuses. Never names, emails, dates or free text.
+ */
+export const VALUE_COLUMNS: ReadonlySet<string> = new Set([
+  ...CLOSED_REPORT_COLUMNS,
+  ASSESSMENT_STATUS_COLUMNS.self,
+  ASSESSMENT_STATUS_COLUMNS.manager,
+]);
+
+const STATUS_COLUMNS: ReadonlySet<string> = new Set([
+  ASSESSMENT_STATUS_COLUMNS.self,
+  ASSESSMENT_STATUS_COLUMNS.manager,
+]);
+
+/**
+ * A value as `--values` shows it: a status without who ("Completed by …"),
+ * and the employee's name some retention labels carry is blanked out.
+ */
+export function safeValue(column: string, value: string): string {
+  const text = value.trim();
+  if (STATUS_COLUMNS.has(column)) {
+    return text.replace(/(\s(?:by|por)\s).+$/i, "$1…");
+  }
+  return text.replace(
+    /(convince them to stay\.\s*).+?(\s+would be difficult to replace)/i,
+    "$1…$2",
+  );
+}
 
 export class UsageError extends Error {
   constructor(message: string) {
@@ -26,12 +59,19 @@ export class UsageError extends Error {
   }
 }
 
-export function parseInspectArgs(argv: string[]): { file: string } {
+export function parseInspectArgs(argv: string[]): {
+  file: string;
+  values?: true;
+} {
   let positionals: string[];
+  let values: boolean | undefined;
   try {
-    ({ positionals } = parseArgs({
+    ({
+      positionals,
+      values: { values },
+    } = parseArgs({
       args: argv,
-      options: {},
+      options: { values: { type: "boolean" } },
       allowPositionals: true,
       strict: true,
     }));
@@ -47,7 +87,7 @@ export function parseInspectArgs(argv: string[]): { file: string } {
       `Unsupported file type "${extname(file)}" (expected ${UPLOAD_EXTENSIONS.join(", ")})`,
     );
   }
-  return { file };
+  return values ? { file, values: true } : { file };
 }
 
 export type ColumnProfile = {
@@ -56,6 +96,8 @@ export type ColumnProfile = {
   nonEmpty: number;
   /** Different non-empty values. */
   distinct: number;
+  /** `--values`, closed columns only: value -> rows, most frequent first. */
+  values?: [string, number][];
 };
 
 export type ReportInspection = {
@@ -68,7 +110,10 @@ export type ReportInspection = {
 
 const TABLE = "report";
 
-export async function inspectReport(file: string): Promise<ReportInspection> {
+export async function inspectReport(
+  file: string,
+  options: { values?: boolean } = {},
+): Promise<ReportInspection> {
   const ext = extname(file).toLowerCase();
   const sheet =
     ext === ".xlsx" ? ((await readXlsxFile(file))[0]?.sheet ?? null) : null;
@@ -82,10 +127,17 @@ export async function inspectReport(file: string): Promise<ReportInspection> {
     const lake = await DuckDbFileLake.open(dir);
     try {
       const described = await lake.describeTable(TABLE);
-      const stats = described.map(() => ({ nonEmpty: 0, values: new Set() }));
+      const stats = described.map(() => ({
+        nonEmpty: 0,
+        values: new Set(),
+        counts: new Map<string, number>(),
+      }));
+      const shown = (name: string) =>
+        options.values === true && VALUE_COLUMNS.has(name);
       let rows = 0;
       for await (const batch of lake.readBatches(TABLE, {
         keyColumns: [described[0].name],
+        fileOrder: true,
       })) {
         for (const row of batch.rows) {
           rows++;
@@ -95,6 +147,10 @@ export async function inspectReport(file: string): Promise<ReportInspection> {
             if (typeof value === "string" && value.trim() === "") return;
             stats[i].nonEmpty++;
             stats[i].values.add(JSON.stringify(value));
+            if (shown(name)) {
+              const key = safeValue(name, String(value));
+              stats[i].counts.set(key, (stats[i].counts.get(key) ?? 0) + 1);
+            }
           });
         }
       }
@@ -106,6 +162,13 @@ export async function inspectReport(file: string): Promise<ReportInspection> {
           header: name,
           nonEmpty: stats[i].nonEmpty,
           distinct: stats[i].values.size,
+          ...(shown(name)
+            ? {
+                values: [...stats[i].counts].sort(
+                  (a, b) => b[1] - a[1] || (a[0] < b[0] ? -1 : 1),
+                ),
+              }
+            : {}),
         })),
       };
     } finally {
@@ -131,6 +194,13 @@ export function formatInspection(report: ReportInspection): string {
         `${String(i + 1).padStart(3)}  ${c.header.padEnd(width)}  ${String(c.nonEmpty).padStart(9)}  ${String(c.distinct).padStart(8)}`,
     ),
   ];
+  for (const column of report.columns) {
+    if (!column.values) continue;
+    lines.push("", `Values of "${column.header}":`);
+    for (const [value, count] of column.values) {
+      lines.push(`  ${String(count).padStart(6)}  ${value}`);
+    }
+  }
   return lines.join("\n");
 }
 
@@ -150,7 +220,11 @@ export async function runInspectCli(
     return 2;
   }
   try {
-    out.log(formatInspection(await inspectReport(args.file)));
+    out.log(
+      formatInspection(
+        await inspectReport(args.file, { values: args.values === true }),
+      ),
+    );
     return 0;
   } catch (err) {
     // Errors name the file, not its content (DuckDB quotes no cells here).

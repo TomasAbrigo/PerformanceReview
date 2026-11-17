@@ -240,7 +240,9 @@ export class DuckDbFileLake implements LakeAdapter {
       ...keyColumns.map(known),
     ]);
     types.set(ROW_POSITION, "BIGINT");
-    const orderColumns = [...(wm ? [wm] : []), ...keyColumns, ROW_POSITION];
+    const orderColumns = opts.fileOrder
+      ? [ROW_POSITION]
+      : [...(wm ? [wm] : []), ...keyColumns, ROW_POSITION];
 
     // Qualified (`src."col"`) so ORDER BY / WHERE use the real column, never a
     // SELECT alias of the same name (the TIMESTAMPTZ -> VARCHAR casts below).

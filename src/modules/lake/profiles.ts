@@ -31,7 +31,14 @@ export type TypeFamily = (typeof TYPE_FAMILIES)[number];
 const name = z.string().min(1);
 
 /** How a question column of a report is answered. */
-export const QUESTION_KINDS = ["text", "likert", "letter_choice"] as const;
+export const QUESTION_KINDS = [
+  "text",
+  "likert",
+  "letter_choice",
+  // An English label among `options` (Bamboo's raw report); with a Likert
+  // role (valued, retention, engagement) the role's labels instead.
+  "label_choice",
+] as const;
 export type QuestionMappingKind = (typeof QUESTION_KINDS)[number];
 
 /**
@@ -48,10 +55,39 @@ export const questionMappingSchema = z.object({
   key: name,
   dimension: z.enum(questionDimensions).optional(),
   role: z.enum(questionRoles).optional(),
-  /** letter_choice: the label of A, B, C... in order. */
+  /**
+   * letter_choice: the label of A, B, C... in order. label_choice: the labels
+   * a cell may hold; one starting with "Other" takes free text after it.
+   */
   options: z.array(name).optional(),
 });
 export type QuestionMapping = z.infer<typeof questionMappingSchema>;
+
+/**
+ * A custom question pair of Bamboo's raw report: the question text is in the
+ * `questionColumn` cell (it changes between cycles), the answer in
+ * `answerColumn`. Each distinct (side, n, text) of a cycle is one question.
+ */
+export const customQuestionSchema = z.object({
+  side: z.enum(["self", "manager"]),
+  n: z.number().int().min(1),
+  questionColumn: name,
+  answerColumn: name,
+});
+export type CustomQuestionMapping = z.infer<typeof customQuestionSchema>;
+
+/**
+ * How the rows of a file are read (default: one record per row, the legacy
+ * Bamboo reports). `assessments_report`: Bamboo's raw assessments report
+ * (EEID, Review Period Start, labels, custom question pairs).
+ * `assessment_status`: the Assessment Progress export grouped by person (a
+ * "<name> <employee number>" row, then one row per period).
+ */
+export const PROFILE_FORMATS = [
+  "assessments_report",
+  "assessment_status",
+] as const;
+export type ProfileFormat = (typeof PROFILE_FORMATS)[number];
 
 /**
  * How one lake table (or uploaded file) maps onto a canonical entity.
@@ -101,6 +137,16 @@ export const sourceProfileSchema = z.object({
   cycleColumn: name.optional(),
   /** The column with the assessment date (canonical field `assessment_date`). */
   dateColumn: name.optional(),
+  format: z.enum(PROFILE_FORMATS).optional(),
+  /**
+   * Mapped columns a file may lack (alternative headers of one field, such
+   * as "Work Email" / "Correo electrónico del trabajo"): not an issue.
+   */
+  optionalColumns: z.array(name).optional(),
+  /** Raw report: its custom question/answer column pairs. */
+  customQuestions: z.array(customQuestionSchema).optional(),
+  /** A superseded shape kept for old exports (shown as legacy). */
+  legacy: z.boolean().optional(),
 });
 export type SourceProfile = z.infer<typeof sourceProfileSchema>;
 
@@ -167,8 +213,10 @@ export function applyProfile(
   const extra: Record<string, JsonValue> = {};
   for (const [column, value] of Object.entries(row)) {
     const canonical = profile.columnMap[column];
-    if (canonical) fields[canonical] = value;
-    else extra[column] = value;
+    // Two headers of one field (aliases): an empty one never hides the other.
+    if (canonical) {
+      if (fields[canonical] == null || value != null) fields[canonical] = value;
+    } else extra[column] = value;
   }
   if (profile.cycleColumn)
     fields.review_cycle = row[profile.cycleColumn] ?? null;
@@ -276,8 +324,10 @@ export function validateAgainstSchema(
   Object.keys(profile.columnMap).forEach((column) => need(column, "mapped"));
 
   const issues: ProfileIssue[] = [];
+  const optional = new Set(profile.optionalColumns ?? []);
   for (const [column, role] of roles) {
     const found = byName.get(column);
+    if (!found && optional.has(column)) continue;
     if (!found) {
       const suggestion = columns.find(
         (c) => looseName(c.name) === looseName(column),
@@ -334,6 +384,7 @@ export function readOptionsFor(
   if (overrides.batchSize !== undefined)
     options.batchSize = overrides.batchSize;
   if (overrides.columns !== undefined) options.columns = overrides.columns;
+  if (profile.format === "assessment_status") options.fileOrder = true;
   return options;
 }
 
@@ -442,7 +493,151 @@ const BAMBOO_PERFORMANCE_QUESTIONS: QuestionMapping[] = [
   };
 });
 
+/** The closed and open questions of Bamboo's raw assessments report (#83). */
+export const ASSESSMENTS_REPORT_QUESTIONS: QuestionMapping[] = [
+  {
+    column: "Employee - How well does [Company] recognize my value?",
+    side: "self",
+    kind: "label_choice",
+    key: "self:valued",
+    role: "valued",
+    dimension: "valued",
+  },
+  {
+    column: "Employee - What would help me do my best work?",
+    side: "self",
+    kind: "label_choice",
+    key: "self:best_work",
+    dimension: "best_work",
+    options: [
+      "Nothing, I have all I need.",
+      "The company direction or purpose was better defined.",
+      "Coworkers were more committed to doing great work.",
+      "Work that better fits my strengths.",
+      "Other",
+    ],
+  },
+  {
+    column: "Employee - What do I do well?",
+    side: "self",
+    kind: "text",
+    key: "self:strengths",
+    dimension: "strengths",
+  },
+  {
+    column: "Employee - How could I improve?",
+    side: "self",
+    kind: "text",
+    key: "self:improvement",
+    dimension: "improvement",
+  },
+  {
+    column: "Manager - Does [Employee] feel valued? (Performance Score)",
+    side: "manager",
+    kind: "label_choice",
+    key: "manager:retention",
+    role: "retention",
+  },
+  {
+    column: "Manager - How engaged is [Employee]? (Engagement Score)",
+    side: "manager",
+    kind: "label_choice",
+    key: "manager:engagement",
+    role: "engagement",
+  },
+  {
+    column: "Manager - What does [Employee] do well?",
+    side: "manager",
+    kind: "text",
+    key: "manager:strengths",
+    dimension: "strengths",
+  },
+  {
+    column: "Manager - How could [Employee] improve?",
+    side: "manager",
+    kind: "text",
+    key: "manager:improvement",
+    dimension: "improvement",
+  },
+];
+
+/** The closed columns of the raw reports (`reports:inspect --values`). */
+export const CLOSED_REPORT_COLUMNS = ASSESSMENTS_REPORT_QUESTIONS.filter(
+  (q) => q.kind === "label_choice",
+).map((q) => q.column);
+
+const ASSESSMENTS_REPORT_CUSTOM: CustomQuestionMapping[] = (
+  ["self", "manager"] as const
+).flatMap((side) =>
+  [1, 2, 3].map((n) => {
+    const who = side === "self" ? "Employee" : "Manager";
+    return {
+      side,
+      n,
+      questionColumn: `${who} - Custom Question ${n}`,
+      answerColumn: `${who} - Custom Answer ${n}`,
+    };
+  }),
+);
+
+/** Assessment Status (grouped Assessment Progress) columns. */
+export const ASSESSMENT_STATUS_COLUMNS = {
+  employee: "Empleado",
+  period: "Período",
+  self: "Autoevaluación",
+  manager: "Evaluación del manager",
+  notes: "Notas de seguimiento",
+} as const;
+
 export const builtinProfiles: SourceProfile[] = [
+  // Bamboo's raw assessments report (custom report, PRD iteration 3): one row
+  // per person and review period, people by EEID (Bamboo employee id) and
+  // work email, closed answers as English labels. The question text of the
+  // custom pairs is in the cells; the other question columns are configured
+  // in `questions` (editable per account).
+  {
+    name: "bamboo-assessments-report",
+    table: "assessments-report",
+    keyColumns: ["EEID", "Review Period Start"],
+    entity: "assessment",
+    format: "assessments_report",
+    dateFormat: "mdy",
+    columnMap: {
+      EEID: "employee_bamboo_id",
+      "Review Period Start": "period_start",
+      "Correo electrónico del trabajo": "work_email",
+      "Work Email": "work_email",
+      "Employee Name": "employee_name",
+      "Self Assessment Completed Date": "self_completed_on",
+      "Manager Assessment Completed Date": "manager_completed_on",
+      "Manager At Time Of Assessment": "manager_name",
+    },
+    optionalColumns: [
+      "Correo electrónico del trabajo",
+      "Work Email",
+      "Employee Name",
+    ],
+    questions: ASSESSMENTS_REPORT_QUESTIONS,
+    customQuestions: ASSESSMENTS_REPORT_CUSTOM,
+  },
+  // Bamboo's Assessment Progress as exported (grouped by person): parsed in
+  // FileSourceAdapter into one record per person and period.
+  {
+    name: "bamboo-assessment-status",
+    table: "assessment-status",
+    keyColumns: [ASSESSMENT_STATUS_COLUMNS.employee],
+    entity: "assessment_progress",
+    format: "assessment_status",
+    dateFormat: "mdy",
+    columnMap: {
+      [ASSESSMENT_STATUS_COLUMNS.employee]: "employee_group",
+      [ASSESSMENT_STATUS_COLUMNS.period]: "period",
+      [ASSESSMENT_STATUS_COLUMNS.self]: "self_status",
+      [ASSESSMENT_STATUS_COLUMNS.manager]: "manager_status",
+      [ASSESSMENT_STATUS_COLUMNS.notes]: "follow_up_notes",
+    },
+    optionalColumns: [ASSESSMENT_STATUS_COLUMNS.notes],
+  },
   {
     name: "fivetran-bamboohr-employee",
     table: "employee",
@@ -530,7 +725,10 @@ export const builtinProfiles: SourceProfile[] = [
   // used in a key only where nothing else tells namesakes apart. Columns the
   // profile does not map land in `extra` under their exact header.
   {
+    // Legacy: the standard report shape of iteration 2 (superseded by
+    // bamboo-assessments-report), kept for old exports.
     name: "bamboo-employee-performance",
+    legacy: true,
     table: "employee-performance",
     // Assessment Date keeps two employees with the same name apart in a cycle.
     keyColumns: ["Employee Name", "Review Cycle", "Assessment Date"],
@@ -588,7 +786,9 @@ export const builtinProfiles: SourceProfile[] = [
     },
   },
   {
+    // Legacy: flat Assessment Progress (superseded by bamboo-assessment-status).
     name: "bamboo-assessment-progress",
+    legacy: true,
     table: "assessment-progress",
     // Department keeps namesakes apart (Manager can be empty, so it cannot be
     // part of a key).

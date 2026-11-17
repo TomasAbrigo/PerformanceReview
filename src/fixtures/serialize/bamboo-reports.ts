@@ -5,6 +5,7 @@ import {
   MANAGER_QUESTIONS,
   SELF_QUESTIONS,
 } from "../company/questions";
+import { serializeRawReports } from "./bamboo-raw-reports";
 import { toCsv } from "./csv";
 import type { FixtureFile } from "./files";
 import { createReportNamer } from "./report-names";
@@ -206,5 +207,7 @@ export function serializeBambooReports(company: CompanyFixture): FixtureFile[] {
       path: "assessment-progress.csv",
       content: toCsv(ASSESSMENT_PROGRESS_HEADER, sortRows(progressRows, 3, 0)),
     },
+    // The real shapes (#83); the two above are the legacy ones.
+    ...serializeRawReports(company),
   ];
 }

@@ -1,5 +1,5 @@
 import { eq } from "drizzle-orm";
-import { afterAll, beforeEach, describe, expect, it } from "vitest";
+import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { closeDb, db } from "@/db/client";
 import {
   answer,
@@ -18,6 +18,7 @@ import {
 import { resumeImportRun, ResumeError } from "@/modules/ingest/resume-run";
 import { decisionOf } from "./decision";
 import { getBuiltinProfile, type SourceProfile } from "@/modules/lake/profiles";
+import { DEFAULT_SETTINGS, updateSettings } from "@/modules/settings";
 import { importReport, resetDb, writeCsv } from "./test-support";
 
 /** Issue #58: Assessment Progress, semesters, needs_decision, goals. */
@@ -251,6 +252,20 @@ describe("Assessment Progress import", () => {
 });
 
 describe("semester cycles of Employee Performance rows without a cycle name", () => {
+  // Calendar halves for these examples (the default is Bamboo's 29/3, 29/9).
+  const hr = { personId: null, role: "hr" } as const;
+  beforeAll(async () => {
+    await updateSettings(db, hr, {
+      "semester.h1Start": "01-01",
+      "semester.h2Start": "07-01",
+    });
+  });
+  afterAll(async () => {
+    await updateSettings(db, hr, {
+      "semester.h1Start": DEFAULT_SETTINGS["semester.h1Start"],
+      "semester.h2Start": DEFAULT_SETTINGS["semester.h2Start"],
+    });
+  });
   it("a clear date goes to its semester's cycle (an imported one that names it, if any)", async () => {
     await team();
     await importReport(

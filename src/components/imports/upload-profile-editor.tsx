@@ -136,6 +136,17 @@ export function draftFromBase(
   };
 }
 
+/** What a profile built on a real-report base keeps of it. */
+function formatOf(base: SourceProfile | undefined): Partial<SourceProfile> {
+  if (!base?.format) return {};
+  return {
+    format: base.format,
+    ...(base.dateFormat ? { dateFormat: base.dateFormat } : {}),
+    ...(base.optionalColumns ? { optionalColumns: base.optionalColumns } : {}),
+    ...(base.customQuestions ? { customQuestions: base.customQuestions } : {}),
+  };
+}
+
 /** The configured questions of a draft, in the file's column order. */
 function questionsOf(
   draft: ProfileDraft,
@@ -209,6 +220,8 @@ export function buildProfile(
     ...(draft.dateColumn ? { dateColumn: draft.dateColumn } : {}),
     columnMap,
     ...(questions.length > 0 ? { questions } : {}),
+    // A real-report base (#83) keeps how its rows are read.
+    ...formatOf(BASES.find((p) => p.name === draft.base)),
   });
   const valid = parsed.success && !Object.values(errors).some((wrong) => wrong);
   return { profile: valid ? parsed.data : null, errors };

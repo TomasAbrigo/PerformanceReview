@@ -21,6 +21,8 @@ export const questionRoles = [
   "overall_rating",
   "retention",
   "engagement",
+  // Self side, 1-4: "How well does [Company] recognize my value?" (#83).
+  "valued",
 ] as const;
 export type QuestionRole = (typeof questionRoles)[number];
 
@@ -31,8 +33,17 @@ export type QuestionRole = (typeof questionRoles)[number];
 export const questionDimensions = [
   "strengths",
   "improvement",
+  "valued",
+  "best_work",
   "custom_1",
   "custom_2",
   "custom_3",
 ] as const;
 export type QuestionDimension = (typeof questionDimensions)[number];
+
+/**
+ * The dimension of a question revision: a configured one, or for the custom
+ * questions of Bamboo's raw report `custom_<slug of the question text>` (the
+ * text changes between cycles, so it is not a fixed list).
+ */
+export type RevisionDimension = QuestionDimension | `custom_${string}`;

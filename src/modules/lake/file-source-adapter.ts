@@ -7,7 +7,7 @@ import type {
 } from "@/modules/ingest/types";
 import { payloadHash } from "@/modules/ingest/canonical";
 import { applyProfile, readOptionsFor, type SourceProfile } from "./profiles";
-import type { LakeAdapter, LakeRow } from "./types";
+import type { JsonValue, LakeAdapter, LakeRow, ReadOptions } from "./types";
 
 /**
  * The source system of a BUILT-IN profile: the Bamboo report exports
@@ -90,6 +90,10 @@ export class FileSourceAdapter implements SourceAdapter<IngestEntity> {
       const present = options.keyColumns.filter((c) => columns.includes(c));
       options.keyColumns = present.length > 0 ? present : columns;
     }
+    if (profile.format === "assessment_status") {
+      yield* groupedStatusRecords(profile, this.lake, this.table, options, ctx);
+      return;
+    }
     let ordinal = 0;
     const fileKey = this.options.fileKey ?? this.table;
     for await (const { rows } of this.lake.readBatches(this.table, options)) {
@@ -135,6 +139,10 @@ export class FileSourceAdapter implements SourceAdapter<IngestEntity> {
             watermark: record.watermark,
             raw: row,
             // Only when set: payloads (and their hashes) stay as they were.
+            ...(profile.format ? { format: profile.format } : {}),
+            ...(profile.customQuestions
+              ? { customQuestions: profile.customQuestions }
+              : {}),
             ...(profile.dateFormat ? { dateFormat: profile.dateFormat } : {}),
           },
           extractedAt,
@@ -155,4 +163,91 @@ function describeKey(profile: SourceProfile, row: LakeRow): string {
       return `${column}=${isEmpty(value) ? "∅" : JSON.stringify(String(value))}`;
     })
     .join(", ");
+}
+
+const textOf = (value: JsonValue | undefined): string | null => {
+  if (value === null || value === undefined) return null;
+  const text = String(value).trim();
+  return text === "" ? null : text;
+};
+
+/** "Ana Pérez 1042" -> name and employee number (a trailing number). */
+export function splitGroupHeader(cell: string): {
+  name: string;
+  employeeNumber: string | null;
+} {
+  const match = /^(.*\S)\s+(\d+)$/.exec(cell.trim());
+  return match
+    ? { name: match[1], employeeNumber: match[2] }
+    : { name: cell.trim(), employeeNumber: null };
+}
+
+/**
+ * Bamboo's Assessment Progress as exported: a row naming the person
+ * ("<name> <employee number>") and then one row per review period
+ * ("MM/DD/YYYY - MM/DD/YYYY", self status, manager status, notes). Read in
+ * file order; each period row becomes one record of its person, keyed by
+ * employee number (else name) and the period as written.
+ */
+async function* groupedStatusRecords(
+  profile: SourceProfile,
+  lake: LakeAdapter,
+  table: string,
+  options: ReadOptions,
+  ctx: ExtractContext,
+): AsyncGenerator<ExtractedRecord> {
+  const extractedAt = new Date();
+  const columnOf = (field: string) =>
+    Object.entries(profile.columnMap).find(([, f]) => f === field)?.[0];
+  const employeeColumn = columnOf("employee_group")!;
+  const periodColumn = columnOf("period")!;
+  let group: { name: string; employeeNumber: string | null } | null = null;
+  for await (const { rows } of lake.readBatches(table, options)) {
+    for (const row of rows) {
+      ctx.signal?.throwIfAborted();
+      const who = textOf(row[employeeColumn]);
+      if (who) group = splitGroupHeader(who);
+      const period = textOf(row[periodColumn]);
+      if (!period) continue;
+      if (!group) {
+        const reason = `Profile "${profile.name}": period row "${period}" comes before any person row`;
+        if (!ctx.onReject) throw new Error(reason);
+        ctx.onReject({
+          sourceId: null,
+          reason,
+          code: "empty_key",
+          column: employeeColumn,
+          values: { [employeeColumn]: null },
+        });
+        continue;
+      }
+      const fields: Record<string, JsonValue> = {
+        employee_name: group.name,
+        employee_number: group.employeeNumber,
+      };
+      const extra: Record<string, JsonValue> = {};
+      for (const [column, value] of Object.entries(row)) {
+        const canonical = profile.columnMap[column];
+        if (canonical === "employee_group") continue;
+        if (canonical) fields[canonical] = value;
+        else extra[column] = value;
+      }
+      yield {
+        sourceId: JSON.stringify([
+          group.employeeNumber ?? group.name,
+          period.split(/\s+-\s+/)[0],
+        ]),
+        payload: {
+          format: profile.format,
+          fields,
+          extra,
+          deleted: false,
+          watermark: null,
+          raw: row,
+          ...(profile.dateFormat ? { dateFormat: profile.dateFormat } : {}),
+        },
+        extractedAt,
+      };
+    }
+  }
 }

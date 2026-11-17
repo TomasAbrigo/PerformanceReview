@@ -12,12 +12,12 @@ import { openIssueSourceIds } from "@/modules/identity/raise";
 import {
   buildCycleDecision,
   finishHistoryImport,
-  stagedAssessmentSchema,
+  stagedAnyAssessmentSchema,
+  stagedAnyProgressSchema,
   stagedFeedbackSchema,
-  stagedProgressSchema,
-  upsertAssessment,
+  upsertAnyAssessment,
+  upsertAnyProgress,
   upsertFeedback,
-  upsertProgress,
 } from "@/modules/import-history";
 import type { DeferredRow } from "@/modules/import-history/decision";
 import { upsertEmployee } from "./employee";
@@ -209,17 +209,17 @@ export const entityHandlers: Partial<
   }),
   // Bamboo report exports (files only): historical cycles, see import-history.
   assessment: defineHandler({
-    schema: stagedAssessmentSchema,
+    schema: stagedAnyAssessmentSchema,
     counts: { issues: 0, ignored: 0, mismatches: 0 },
-    upsert: upsertAssessment,
+    upsert: upsertAnyAssessment,
     finish: async (db, { runId, reject }) =>
       finishHistoryImport(db, { runId, reject }),
     decide: buildCycleDecision,
   }),
   assessment_progress: defineHandler({
-    schema: stagedProgressSchema,
+    schema: stagedAnyProgressSchema,
     counts: { issues: 0, ignored: 0 },
-    upsert: upsertProgress,
+    upsert: upsertAnyProgress,
     finish: async (db, { runId, reject }) => {
       await finishHistoryImport(db, { runId, reject });
       return {};

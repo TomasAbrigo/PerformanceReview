@@ -52,9 +52,9 @@ export const settingDefinitions = {
     default: 5,
   },
   /** First semester starts on this day of the year ("MM-DD"). */
-  "semester.h1Start": { schema: monthDay, default: "01-01" },
+  "semester.h1Start": { schema: monthDay, default: "03-29" },
   /** Second semester starts on this day of the year ("MM-DD"). */
-  "semester.h2Start": { schema: monthDay, default: "07-01" },
+  "semester.h2Start": { schema: monthDay, default: "09-29" },
   /** An assessment this many days from a semester cut is ambiguous. */
   "semester.ambiguityDays": {
     schema: int("semester.ambiguityDays"),

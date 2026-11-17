@@ -20,6 +20,7 @@ import type {
 
 export {
   type QuestionDimension,
+  type RevisionDimension,
   questionDimensions,
   type QuestionKind,
   questionKinds,

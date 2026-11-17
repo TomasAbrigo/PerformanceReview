@@ -20,8 +20,9 @@ export type SemesterConfig = {
 };
 
 export const DEFAULT_SEMESTER_CONFIG: SemesterConfig = {
-  h1Start: "01-01",
-  h2Start: "07-01",
+  // Bamboo's real cadence (PRD iteration 3): ~29/3 - 28/9 and ~29/9 - 28/3.
+  h1Start: "03-29",
+  h2Start: "09-29",
   ambiguityDays: 15,
 };
 
@@ -127,3 +128,24 @@ export const isSemesterLabel = (sourceId: string | null) =>
 export function snapshotDateFor(periodEnd: string, today = todayLocal()) {
   return periodEnd < today ? periodEnd : today;
 }
+
+/**
+ * The end of a review period that starts on `start` (Bamboo's raw report
+ * only gives the start): the day before the next semester cutoff after it.
+ * Irregular historical starts end on the cutoff after them as well.
+ */
+export function periodEndFor(start: string, cfg: SemesterConfig): string {
+  const year = Number(start.slice(0, 4));
+  const next = [year, year + 1]
+    .flatMap((y) => [on(y, cfg.h1Start), on(y, cfg.h2Start)])
+    .filter((cutoff) => cutoff > start)
+    .sort()[0];
+  return toDate(toTime(next) - DAY);
+}
+
+/** "Evaluación semestral 2024-03-29 – 2024-09-28". */
+export const periodCycleName = (start: string, end: string) =>
+  `Evaluación semestral ${start} – ${end}`;
+
+/** Source id of the imported cycle of a review period (by its start). */
+export const periodSourceId = (start: string) => `period:${start}`;

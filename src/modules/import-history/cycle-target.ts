@@ -4,6 +4,9 @@ import { reviewCycle, type ReviewCycle } from "@/db/schema";
 import type { Deferral, HandlerContext } from "@/modules/ingest/handlers";
 import { SOURCE, upsertImportedCycle } from "./cycles";
 import {
+  periodCycleName,
+  periodEndFor,
+  periodSourceId,
   semesterConfig,
   semesterOf,
   semesterPeriod,
@@ -34,7 +37,7 @@ function neighbour(date: string, semester: Semester, cfg: SemesterConfig) {
 
 export type CycleTarget = { cycle: ReviewCycle } | { deferred: Deferral };
 
-async function cachedConfig(
+export async function cachedConfig(
   tx: DbOrTx,
   cache: Map<string, unknown>,
 ): Promise<SemesterConfig> {
@@ -182,4 +185,59 @@ export async function cycleForProgress(
       proposals: period ? [{ name, ...period }] : [],
     },
   };
+}
+
+/**
+ * Bamboo's raw reports (#83): the cycle of a review period, by its start
+ * date. Created closed on first sight with the end inferred from the
+ * semester settings (periodEndFor) and its snapshot as of the period start,
+ * so the participant's manager is the one in force when the period opened
+ * (reviewer mismatches are against it). Never widened by later rows.
+ */
+export async function cycleForPeriod(
+  tx: DbOrTx,
+  ctx: HandlerContext,
+  periodStart: string,
+): Promise<ReviewCycle> {
+  const sourceId = periodSourceId(periodStart);
+  const key = `cycle:${sourceId}`;
+  const cached = ctx.cache.get(key) as ReviewCycle | undefined;
+  if (cached) return cached;
+  let [cycle] = await tx
+    .select()
+    .from(reviewCycle)
+    .where(
+      and(
+        eq(reviewCycle.sourceSystem, SOURCE),
+        eq(reviewCycle.sourceId, sourceId),
+      ),
+    );
+  if (!cycle) {
+    const cfg = await cachedConfig(tx, ctx.cache);
+    const periodEnd = periodEndFor(periodStart, cfg);
+    [cycle] = await tx
+      .insert(reviewCycle)
+      .values({
+        name: periodCycleName(periodStart, periodEnd),
+        periodStart,
+        periodEnd,
+        snapshotDate: periodStart,
+        status: "closed",
+        components: {
+          self: true,
+          manager: true,
+          peer: false,
+          upward: false,
+          calibration: false,
+        },
+        anonymity: { peer: "transparent", upward: "transparent" },
+        templateId: null,
+        sourceSystem: SOURCE,
+        sourceId,
+        ingestRunId: ctx.runId,
+      })
+      .returning();
+  }
+  ctx.cache.set(key, cycle);
+  return cycle;
 }

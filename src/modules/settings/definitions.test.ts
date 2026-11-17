@@ -12,8 +12,8 @@ describe("DEFAULT_SETTINGS", () => {
       "alerts.dropThreshold": 2,
       "alerts.riskThreshold": 2,
       "aggregation.minGroupSize": 5,
-      "semester.h1Start": "01-01",
-      "semester.h2Start": "07-01",
+      "semester.h1Start": "03-29",
+      "semester.h2Start": "09-29",
       "semester.ambiguityDays": 15,
       "analysis.provider": "mock",
     });
@@ -106,7 +106,7 @@ describe("checkSettings (rules across keys)", () => {
   it("H1 must start before H2", () => {
     expect(checkSettings(DEFAULT_SETTINGS)).toEqual([]);
     expect(
-      checkSettings({ ...DEFAULT_SETTINGS, "semester.h1Start": "07-01" }),
+      checkSettings({ ...DEFAULT_SETTINGS, "semester.h1Start": "10-01" }),
     ).toEqual([{ path: "semester.h2Start", message: "semester_order" }]);
     expect(
       checkSettings({

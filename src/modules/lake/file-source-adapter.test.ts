@@ -280,3 +280,68 @@ describe("source system", () => {
     ).toBe("lake");
   });
 });
+
+describe("FileSourceAdapter: Bamboo's real report shapes (#83)", () => {
+  it("joins each period row of the grouped status export with its person row", async () => {
+    const profile = profileNamed("bamboo-assessment-status");
+    const adapter = new FileSourceAdapter(profile, await open(REPORTS));
+
+    const { records, rejected } = await collect(adapter);
+
+    expect(rejected).toEqual([]);
+    expect(records.length).toBeGreaterThan(100);
+    expect(new Set(records.map((r) => r.sourceId)).size).toBe(records.length);
+    const [first] = records;
+    const payload = first.payload as {
+      format: string;
+      fields: Record<string, unknown>;
+    };
+    expect(payload.format).toBe("assessment_status");
+    expect(payload.fields).toMatchObject({
+      employee_name: "Adrián Bustos",
+      employee_number: "10033",
+      period: "04/15/2024 - 09/28/2024",
+      self_status: "Completado",
+      manager_status: "Completed by Silvana Molina",
+    });
+    expect(JSON.parse(first.sourceId)).toEqual(["10033", "04/15/2024"]);
+  });
+
+  it("hands raw report rows over with their format and custom question pairs", async () => {
+    const profile = profileNamed("bamboo-assessments-report");
+    const adapter = new FileSourceAdapter(profile, await open(REPORTS));
+
+    const { records, rejected } = await collect(adapter);
+
+    expect(rejected).toEqual([]);
+    const payload = records[0].payload as {
+      format: string;
+      fields: Record<string, unknown>;
+      customQuestions: unknown[];
+    };
+    expect(payload.format).toBe("assessments_report");
+    expect(payload.customQuestions).toHaveLength(6);
+    expect(Object.keys(payload.fields)).toEqual(
+      expect.arrayContaining([
+        "employee_bamboo_id",
+        "period_start",
+        "work_email",
+        "manager_name",
+      ]),
+    );
+  });
+});
+
+describe("splitGroupHeader", () => {
+  it("takes the trailing number as the employee number", async () => {
+    const { splitGroupHeader } = await import("./file-source-adapter");
+    expect(splitGroupHeader("Ana María Pérez 1042")).toEqual({
+      name: "Ana María Pérez",
+      employeeNumber: "1042",
+    });
+    expect(splitGroupHeader("Sin Número")).toEqual({
+      name: "Sin Número",
+      employeeNumber: null,
+    });
+  });
+});

@@ -340,6 +340,8 @@ async function readAll(
 describe("built-in profiles", () => {
   it("ships Fivetran, Airbyte and Bamboo report profiles, each valid and uniquely named", () => {
     expect(builtinProfiles.map((p) => p.name)).toEqual([
+      "bamboo-assessments-report",
+      "bamboo-assessment-status",
       "fivetran-bamboohr-employee",
       "fivetran-bamboohr-goal",
       "fivetran-bamboohr-employee-goal",
@@ -552,8 +554,10 @@ describe("bamboo report profiles against the real fixtures", () => {
     p.name.startsWith("bamboo-"),
   );
 
-  it("covers the four standard reports", () => {
+  it("covers the real reports and the four legacy ones", () => {
     expect(reportProfiles.map((p) => p.table)).toEqual([
+      "assessments-report",
+      "assessment-status",
       "employee-performance",
       "feedback-status",
       "goal-status",
@@ -575,7 +579,12 @@ describe("bamboo report profiles against the real fixtures", () => {
     },
   );
 
-  it.each(reportProfiles.map((p) => [p.name, p] as const))(
+  // The grouped status export is keyed by FileSourceAdapter (its own test).
+  it.each(
+    reportProfiles
+      .filter((p) => p.format !== "assessment_status")
+      .map((p) => [p.name, p] as const),
+  )(
     "%s keys every row of the real report to a distinct source id",
     async (_name, profile) => {
       const lake = await DuckDbFileLake.open(realReports);

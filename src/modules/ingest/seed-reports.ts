@@ -19,12 +19,13 @@ export const seedReportsDir = (size: SeedSize) =>
   path.join("fixtures", "bamboo-reports", size);
 
 /**
- * The reports the seed imports, in order: the performance report creates the
- * semi-annual cycles that assessment progress then fills.
+ * The reports the seed imports, in the real shapes (#83): the raw
+ * assessments report creates the cycles of its review periods, then
+ * Assessment Progress fills their completion.
  */
 export const SEED_REPORTS = [
-  { file: "employee-performance.csv", profile: "bamboo-employee-performance" },
-  { file: "assessment-progress.csv", profile: "bamboo-assessment-progress" },
+  { file: "assessments-report.csv", profile: "bamboo-assessments-report" },
+  { file: "assessment-status.csv", profile: "bamboo-assessment-status" },
 ] as const;
 
 /** The ingest entities the reports write: the seed holds their locks, and a reset refuses while they are held. */

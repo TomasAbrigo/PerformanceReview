@@ -43,10 +43,10 @@ describe("InsightsSettingsForm", () => {
     expect(screen.getByLabelText("Tamaño mínimo de grupo (n)")).toHaveValue(5);
     expect(
       screen.getByLabelText("Inicio del primer semestre (MM-DD)"),
-    ).toHaveValue("01-01");
+    ).toHaveValue("03-29");
     expect(
       screen.getByLabelText("Inicio del segundo semestre (MM-DD)"),
-    ).toHaveValue("07-01");
+    ).toHaveValue("09-29");
     expect(screen.getByLabelText("Margen de ambigüedad (días)")).toHaveValue(
       15,
     );

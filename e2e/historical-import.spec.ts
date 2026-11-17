@@ -91,7 +91,7 @@ test("a row whose semester is ambiguous waits for a cycle, and the run finishes 
     file,
     [
       "Employee Name,Manager,Department,Review Cycle,Assessment Date,Employee Q3: What are some things I do well?",
-      `${fullName(assessedFirstCycle)},,${assessedFirstCycle.department},,2023-12-28,Ok`,
+      `${fullName(assessedFirstCycle)},,${assessedFirstCycle.department},,2024-03-25,Ok`,
     ].join("\n") + "\n",
   );
   await importFile(page, file, "bamboo-employee-performance");
@@ -103,8 +103,8 @@ test("a row whose semester is ambiguous waits for a cycle, and the run finishes 
     .getByRole("radio", {
       name: decision.create
         .replace("{name}", "2023-H2")
-        .replace("{start}", "2023-07-01")
-        .replace("{end}", "2023-12-31"),
+        .replace("{start}", "2023-09-29")
+        .replace("{end}", "2024-03-28"),
     })
     .check();
   await page.getByRole("button", { name: decision.submit }).click();
@@ -118,4 +118,26 @@ test("a row whose semester is ambiguous waits for a cycle, and the run finishes 
       .getByRole("table", { name: "Ciclos detectados" })
       .getByRole("link", { name: "2023-H2" }),
   ).toBeVisible();
+});
+
+test("Bamboo's real reports: the raw assessments report and the grouped Assessment Progress import idempotently (#83)", async ({
+  page,
+}) => {
+  test.setTimeout(480_000);
+  const firstPeriod = "Evaluación semestral 2024-04-15 – 2024-09-28";
+  for (const [file, profile] of [
+    ["assessments-report.csv", "bamboo-assessments-report"],
+    ["assessment-status.csv", "bamboo-assessment-status"],
+    ["assessments-report.csv", "bamboo-assessments-report"],
+  ] as const) {
+    await importFile(page, path.join(REPORTS, file), profile);
+    const cycles = page.getByRole("table", { name: "Ciclos detectados" });
+    await expect(cycles.getByRole("row")).toHaveCount(
+      1 + company.cycles.length,
+    );
+    await expect(cycles.getByRole("link", { name: firstPeriod })).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: decision.title }),
+    ).toHaveCount(0);
+  }
 });
