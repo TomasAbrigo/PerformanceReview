@@ -1,13 +1,13 @@
 import { expect, type Page, test } from "@playwright/test";
 import { actAs, actAsRole } from "./act-as";
 import { snapshotManagerWithIndicators } from "./indicator-data";
-import { assessed2023, company, fullName } from "./seed-data";
+import { assessedFirstCycle, company, fullName } from "./seed-data";
 
 // Runs after the historical import (project "insights" depends on
 // "chromium", where e2e/historical-import.spec.ts imports the Employee
 // Performance report): the indicators read the imported cycles.
 const cycleName = company.cycles[0].name;
-const employeeName = fullName(assessed2023);
+const employeeName = fullName(assessedFirstCycle);
 
 /** Submits the filters form (the header's "Actuar como" has its own Aplicar). */
 const applyFilters = (page: Page) =>
