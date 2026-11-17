@@ -1,38 +1,40 @@
 import { type SQL, sql } from "drizzle-orm";
 import { isUuid } from "@/lib/uuid";
+import { isHr } from "@/modules/actor/access";
 import type { ActorContext } from "@/modules/actor/types";
+import { type InsightsScope, insightsScope } from "@/modules/insights/authz";
 import { ReviewError } from "@/modules/review-core/review-errors";
-import type { DashboardFilters, Hierarchy } from "./types";
+import type { DashboardFilters } from "./types";
 
-export const isHr = (a: ActorContext) => a.role === "hr";
-export const isManager = (a: ActorContext) =>
-  a.role === "manager" && a.personId !== null;
+export { isHr };
 
-/** HR sees everything; managers their team; everyone else is forbidden. */
-export function requireHrOrManager(actor: ActorContext) {
-  if (!isHr(actor) && !isManager(actor)) throw new ReviewError("forbidden");
+/** The scope of the dashboards that name people: People or a manager. */
+export type PeopleScope = Extract<
+  InsightsScope,
+  { kind: "all" | "directReports" }
+>;
+
+/**
+ * What the actor may read of the dashboards that name people (everything but
+ * the executive view): People all, a manager their direct reports; anyone
+ * else, direction included (aggregates only), is forbidden.
+ */
+export function requirePeopleScope(actor: ActorContext): PeopleScope {
+  const scope = insightsScope(actor);
+  if (scope.kind === "all" || scope.kind === "directReports") return scope;
+  throw new ReviewError("forbidden");
 }
+
+/**
+ * The actor the aggregate queries run as inside the executive summary, after
+ * it authorized the real one: whatever the actor is allowed to see there is
+ * computed over everybody and masked afterwards (see `executiveSummary`).
+ */
+export const ALL_PEOPLE: ActorContext = { personId: null, role: "hr" };
 
 /** A job_history row (alias h) valid on `date`. */
 const validOn = (date: SQL) =>
   sql`h.deleted_at is null and h.valid_from <= ${date} and (h.valid_to is null or h.valid_to > ${date})`;
-
-/**
- * True when `actorId` appears in the management chain that starts at
- * `start` (a manager person id) and climbs job history valid on `date`.
- * Recursive CTE, correlated to the outer row; capped at 50 levels.
- */
-export const chainContains = (start: SQL, date: SQL, actorId: string) => sql`
-  exists (
-    with recursive up(pid, depth) as (
-      select ${start}, 1
-      union all
-      select h.manager_person_id, up.depth + 1
-      from up join employee_job_history h on h.person_id = up.pid and ${validOn(date)}
-      where up.pid is not null and up.depth < 50
-    )
-    select 1 from up where up.pid = ${actorId}::uuid
-  )`;
 
 /**
  * Subtree of `rootId` on `date` (recursive CTE over job history): rows
@@ -47,14 +49,11 @@ export const subtree = (rootId: string, date: SQL) => sql`
   from sub s join employee_job_history h on h.manager_person_id = s.person_id and ${validOn(date)}
   where not h.person_id = any(s.ids) and s.depth < 50`;
 
-/** Date the hierarchy is read on: the cycle's snapshot, or today. */
-export const hierarchyDate = (h: Hierarchy) =>
-  h === "asOf" ? sql`c.snapshot_date` : sql`current_date`;
-
 /**
  * CTEs `cur` (current job row per person) and `scoped`: active participants
  * of launched cycles with their org dimensions per hierarchy (snapshot or
- * current), filtered and restricted to what the actor may see. Columns:
+ * current), filtered and restricted to what the actor may see (see
+ * `requirePeopleScope`). Columns:
  * participant_id, cycle_id, person_id, name, department, manager_id,
  * manager_name, location, job_title, published.
  */
@@ -77,11 +76,11 @@ export function scopedCtes(actor: ActorContext, f: DashboardFilters): SQL {
   if (f.managerId && isUuid(f.managerId)) {
     where.push(sql`${manager} = ${f.managerId}::uuid`);
   }
-  if (!isHr(actor)) {
-    requireHrOrManager(actor);
-    where.push(
-      chainContains(manager, hierarchyDate(f.hierarchy), actor.personId!),
-    );
+  const scope = requirePeopleScope(actor);
+  if (scope.kind === "directReports") {
+    // Direct reports only: the snapshot manager (asOf) or today's (current),
+    // never the whole chain below the manager.
+    where.push(sql`${manager} = ${scope.managerPersonId}::uuid`);
   }
   return sql`
     cur as (

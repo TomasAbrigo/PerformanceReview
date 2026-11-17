@@ -1,7 +1,11 @@
 // Drizzle- and server-free: shared by domain code and client components.
 import { z } from "zod";
 
-export const actorRoles = ["hr", "manager", "employee"] as const;
+/**
+ * `direction` (leadership) acts without a person and only reads aggregates;
+ * see `@/modules/insights/authz` for what each role may see.
+ */
+export const actorRoles = ["hr", "manager", "employee", "direction"] as const;
 export type ActorRole = (typeof actorRoles)[number];
 
 /**
@@ -18,6 +22,10 @@ export const actorSchema = z.object({
   role: z.enum(actorRoles),
 });
 
+/** Direction has no person: a person sent along with it is dropped. */
+export const normalizeActor = (actor: ActorContext): ActorContext =>
+  actor.role === "direction" ? { personId: null, role: "direction" } : actor;
+
 export const ACTOR_COOKIE = "pr_actor";
 
 /** Parses the cookie value; anything invalid falls back to the default. */
@@ -25,7 +33,7 @@ export function parseActor(raw: string | undefined | null): ActorContext {
   if (!raw) return DEFAULT_ACTOR;
   try {
     const parsed = actorSchema.safeParse(JSON.parse(raw));
-    return parsed.success ? parsed.data : DEFAULT_ACTOR;
+    return parsed.success ? normalizeActor(parsed.data) : DEFAULT_ACTOR;
   } catch {
     return DEFAULT_ACTOR;
   }

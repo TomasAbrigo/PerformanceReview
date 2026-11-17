@@ -3,6 +3,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { connection } from "next/server";
 import { Suspense } from "react";
+import { HrOnly } from "@/components/access/hr-only";
 import { TemplateEditor } from "@/components/templates/template-editor";
 import { db } from "@/db/client";
 import { Link } from "@/i18n/navigation";
@@ -25,7 +26,9 @@ type Params = PageProps<"/[locale]/settings/templates/[id]">["params"];
 export default function TemplatePage({ params }: { params: Params }) {
   return (
     <Suspense fallback={<div aria-busy="true" className="h-40" />}>
-      <Editor params={params} />
+      <HrOnly>
+        <Editor params={params} />
+      </HrOnly>
     </Suspense>
   );
 }

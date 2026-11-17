@@ -6,6 +6,7 @@ import type {
 } from "@/components/identity/issue-detail";
 import { db } from "@/db/client";
 import { actionResult } from "@/lib/action-result";
+import { actorIsHr, onlyHr } from "@/modules/actor/server";
 import { IdentityError, ignoreIssue, resolveIssue } from "@/modules/identity";
 import { listPeople } from "@/modules/people/queries";
 
@@ -17,9 +18,11 @@ const isIdentityError = (error: unknown): error is IdentityError =>
 
 /** The resolved issue stays on the server: the client only needs ok or a code. */
 const result = (fn: () => Promise<unknown>): Promise<ActionResult> =>
-  actionResult(async () => {
-    await fn();
-  }, isIdentityError);
+  onlyHr(() =>
+    actionResult(async () => {
+      await fn();
+    }, isIdentityError),
+  );
 
 const noteOf = (note: string) => note.trim().slice(0, MAX_NOTE) || undefined;
 
@@ -47,12 +50,15 @@ export async function ignoreIssueAction(issueId: string, note: string) {
   return result(() => ignoreIssue(db, issueId, noteOf(note)));
 }
 
-/** People to link a record to, found by name or email (never the full list). */
+/**
+ * People to link a record to, found by name or email (never the full list).
+ * Only People (HR) search: anyone else finds nobody.
+ */
 export async function searchPeopleAction(
   query: string,
 ): Promise<PersonOption[]> {
   const q = query.trim().slice(0, 100);
-  if (!q) return [];
+  if (!q || !(await actorIsHr())) return [];
   const people = await listPeople(db, q, { limit: SEARCH_LIMIT });
   return people.map(({ id, displayName, workEmail }) => ({
     id,

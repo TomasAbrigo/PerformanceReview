@@ -679,6 +679,8 @@ describe("scope parameters", () => {
     ["a removed participant", () => ({ personId: carla, role: "employee" })],
     ["a stranger", () => ({ personId: outsider, role: "employee" })],
     ["hr acting as a person", () => ({ personId: ana, role: "hr" })],
+    // Direction only reads aggregates: no request, whoever it is acting as.
+    ["direction", () => ({ personId: dora, role: "direction" })],
   ];
 
   it.each(actors)(

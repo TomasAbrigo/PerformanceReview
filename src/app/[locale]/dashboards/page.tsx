@@ -26,6 +26,7 @@ import {
   ratingStages,
   selfManagerGap,
 } from "@/modules/analytics/dashboards";
+import { canSeeIndividuals } from "@/modules/insights";
 import { type CycleStatus, listCycles } from "@/modules/review-core";
 
 async function Dashboards({
@@ -39,13 +40,14 @@ async function Dashboards({
   const actor = await getActor();
   const t = await getTranslations("Dashboards");
   const tStatus = await getTranslations("Cycles.status");
-  if (actor.role !== "hr" && actor.role !== "manager") {
+  // Direction only reads aggregates: its dashboard is the executive view.
+  if (actor.role === "direction") {
+    redirect({ href: "/dashboards/executive", locale });
+  }
+  if (!canSeeIndividuals(actor)) {
     if (actor.personId) {
       redirect({ href: `/dashboards/people/${actor.personId}`, locale });
     }
-    return <p>{t("forbidden")}</p>;
-  }
-  if (actor.role === "manager" && !actor.personId) {
     return <p>{t("forbidden")}</p>;
   }
   const p = parseParams(await searchParams);

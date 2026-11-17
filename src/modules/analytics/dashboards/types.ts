@@ -37,9 +37,6 @@ export const bins = Array.from({ length: BIN_COUNT }, (_, i) => ({
   to: (i + 1) / BIN_COUNT,
 }));
 
-/** Groups smaller than this are folded away in the executive view. */
-export const MIN_GROUP = 3;
-
 export type ProgressCounts = {
   total: number;
   submitted: number;
@@ -134,6 +131,11 @@ export type SelfManagerGap = {
 };
 
 export type ExecutiveSummary = {
+  /**
+   * The smallest group the viewer may see (direction: the
+   * `aggregation.minGroupSize` setting); null when nothing is masked (People).
+   */
+  minGroupSize: number | null;
   participants: number;
   progress: { relationship: Relationship; total: number; submitted: number }[];
   distribution: number[];
@@ -143,6 +145,12 @@ export type ExecutiveSummary = {
     mean: number | null;
     counts: number[];
   }[];
-  /** People in groups smaller than MIN_GROUP (not shown per department). */
+  /**
+   * The people of the groups under the minimum (and of people without a
+   * department) together, "Otros"; null when there are none or, for
+   * direction, they are still under the minimum.
+   */
+  others: { n: number; mean: number | null; counts: number[] } | null;
+  /** People left out of the breakdown: their groups, and "Otros", are under the minimum. */
   suppressed: number;
 };

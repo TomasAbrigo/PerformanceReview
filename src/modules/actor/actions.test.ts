@@ -42,6 +42,16 @@ describe("setActorAction", () => {
     expect(set).not.toHaveBeenCalled();
   });
 
+  it("direction has no person: the cookie never stores one", async () => {
+    expect(await setActorAction(ID, "direction")).toEqual({ ok: true });
+    expect(exists).not.toHaveBeenCalled();
+    expect(set).toHaveBeenCalledWith(
+      "pr_actor",
+      JSON.stringify({ personId: null, role: "direction" }),
+      expect.anything(),
+    );
+  });
+
   it("accepts HR without a person and rejects bad roles", async () => {
     expect(await setActorAction(null, "hr")).toEqual({ ok: true });
     expect(exists).not.toHaveBeenCalled();

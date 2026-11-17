@@ -1,6 +1,7 @@
 "use server";
 
 import { db } from "@/db/client";
+import { actorIsHr } from "@/modules/actor/server";
 import { storeUpload, UploadError } from "@/modules/lake/upload-store";
 import type { z } from "zod";
 import {
@@ -27,10 +28,13 @@ const fail = (
   issues: UploadFailure["issues"] = [],
 ): UploadFailure => ({ ok: false, code, message, issues });
 
+const forbidden = () => fail("forbidden", "Only People (HR) may import files");
+
 /** Store the uploaded file and look inside it (columns, first rows). */
 export async function inspectUploadAction(
   formData: FormData,
 ): Promise<InspectResult> {
+  if (!(await actorIsHr())) return forbidden();
   const file = formData.get("file");
   if (!(file instanceof File) || file.name === "") {
     return fail("no_file", "No file in the request");
@@ -71,6 +75,7 @@ export async function inspectUploadAction(
 export async function importUploadAction(
   input: z.input<typeof importInputSchema>,
 ): Promise<ImportResult> {
+  if (!(await actorIsHr())) return forbidden();
   const parsed = importInputSchema.safeParse(input);
   if (!parsed.success) {
     return fail(

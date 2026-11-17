@@ -103,3 +103,42 @@ test("dashboards of an imported cycle: progress, team as-of/current, trajectory 
     page.getByRole("heading", { name: `Trayectoria de ${employeeName}` }),
   ).toBeVisible();
 });
+
+test("direction only reads the leadership view; managers without a person and employees get no dashboard", async ({
+  page,
+}) => {
+  await page.goto("/es/cycles");
+  await page.getByRole("link", { name: cycleName }).click();
+  const cycleId = page.url().split("/").pop()!;
+
+  const bar = page.getByRole("form", { name: "Actuar como" });
+  await bar.getByLabel("Rol").selectOption({ label: "Dirección" });
+  await expect(bar.getByLabel("Persona", { exact: true })).toBeDisabled();
+  await bar.getByRole("button", { name: "Aplicar" }).click();
+  await expect(bar.getByText("Actuando como: Dirección")).toBeVisible();
+
+  // /dashboards sends direction to the aggregates; names never show up.
+  await page.goto(`/es/dashboards?cycle=${cycleId}`);
+  await expect(page).toHaveURL(/\/es\/dashboards\/executive/);
+  await expect(
+    page.getByRole("heading", { name: /^Vista de dirección/ }),
+  ).toBeVisible();
+  await expect(page.getByTestId("exec-participants")).toBeVisible();
+  await expect(page.getByText(employeeName)).toHaveCount(0);
+  // Individual views are closed to it.
+  await page.goto(
+    `/es/dashboards/team?cycle=${cycleId}&manager=00000000-0000-4000-8000-000000000000`,
+  );
+  await expect(
+    page.getByText("No tenés acceso a estos dashboards."),
+  ).toBeVisible();
+
+  // An employee has no dashboard (and no executive view either).
+  await bar.getByLabel("Rol").selectOption({ label: "Empleado" });
+  await bar.getByRole("button", { name: "Aplicar" }).click();
+  await expect(bar.getByText("Actuando como: Sin persona")).toBeVisible();
+  await page.goto(`/es/dashboards/executive?cycle=${cycleId}`);
+  await expect(
+    page.getByText("No tenés acceso a estos dashboards."),
+  ).toBeVisible();
+});

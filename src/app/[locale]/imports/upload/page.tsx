@@ -3,6 +3,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { connection } from "next/server";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
+import { HrOnly } from "@/components/access/hr-only";
 import { UploadForm } from "@/components/imports/upload-form";
 import { Link } from "@/i18n/navigation";
 import { routing } from "@/i18n/routing";
@@ -21,9 +22,19 @@ async function UploadData() {
   );
 }
 
-export default async function UploadPage({
-  params,
-}: PageProps<"/[locale]/imports/upload">) {
+export default function UploadPage(
+  props: PageProps<"/[locale]/imports/upload">,
+) {
+  return (
+    <Suspense>
+      <HrOnly>
+        <UploadBody {...props} />
+      </HrOnly>
+    </Suspense>
+  );
+}
+
+async function UploadBody({ params }: PageProps<"/[locale]/imports/upload">) {
   const { locale } = await params;
   if (!hasLocale(routing.locales, locale)) notFound();
   setRequestLocale(locale);
