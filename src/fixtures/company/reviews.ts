@@ -22,18 +22,41 @@ import type {
   IdentityGroundTruth,
 } from "./types";
 
-export const CYCLE_YEARS = [2023, 2024, 2025] as const;
+/** Semi-annual cycles (PRD iteration 2): 2024-H1 .. 2026-H1. */
+export const CYCLE_SEMESTERS = [
+  [2024, 1],
+  [2024, 2],
+  [2025, 1],
+  [2025, 2],
+  [2026, 1],
+] as const;
 
+/**
+ * Each semester's feedback window, then its assessment window, well inside
+ * the semester (more than the default ambiguity margin from a cutoff).
+ */
 export function buildCycles(): FixtureCycle[] {
-  return CYCLE_YEARS.map((year) => ({
-    name: `Evaluación de desempeño ${year}`,
-    periodStart: `${year}-01-01`,
-    periodEnd: `${year}-12-31`,
-    feedbackOpen: `${year}-11-06`,
-    feedbackDue: `${year}-11-24`,
-    assessmentOpen: `${year}-11-27`,
-    assessmentDue: `${year}-12-15`,
-  }));
+  return CYCLE_SEMESTERS.map(([year, half]) =>
+    half === 1
+      ? {
+          name: `Evaluación semestral ${year}-H1`,
+          periodStart: `${year}-01-01`,
+          periodEnd: `${year}-06-30`,
+          feedbackOpen: `${year}-04-21`,
+          feedbackDue: `${year}-05-09`,
+          assessmentOpen: `${year}-05-12`,
+          assessmentDue: `${year}-05-30`,
+        }
+      : {
+          name: `Evaluación semestral ${year}-H2`,
+          periodStart: `${year}-07-01`,
+          periodEnd: `${year}-12-31`,
+          feedbackOpen: `${year}-10-20`,
+          feedbackDue: `${year}-11-07`,
+          assessmentOpen: `${year}-11-10`,
+          assessmentDue: `${year}-11-28`,
+        },
+  );
 }
 
 export interface ReviewsInput {
@@ -193,6 +216,13 @@ export function buildReviews(
         rowOnDate(rowsByEmployee, e.id, cycle.feedbackDue)?.department,
       ]),
     );
+    // The report keys a row by both names: namesakes must not repeat a pair.
+    const namePairs = new Set<string>();
+    const byId = new Map(input.employees.map((e) => [e.id, e]));
+    const nameOf = (id: string) => {
+      const e = byId.get(id)!;
+      return `${e.firstName} ${e.lastName}`;
+    };
     for (const a of assessments) {
       if (a.cycle !== cycleIndex || a.managerIdAtReview === null) continue;
       const own = departmentOf.get(a.employeeId!);
@@ -204,6 +234,9 @@ export function buildReviews(
           ? sameDepartment
           : colleagues.filter((e) => e.id !== a.employeeId);
       for (const reviewer of rng.shuffle(pool).slice(0, rng.int(2, 4))) {
+        const pair = `${nameOf(a.employeeId!)}|${nameOf(reviewer.id)}`;
+        if (namePairs.has(pair)) continue;
+        namePairs.add(pair);
         feedback.push({
           cycle: cycleIndex,
           employeeId: a.employeeId!,
@@ -272,6 +305,20 @@ export function buildReviews(
       });
     }
   });
+
+  // The Employee Performance report keys a row by name, cycle and date:
+  // namesakes assessed on the same day move a day apart.
+  const employeeById = new Map(input.employees.map((e) => [e.id, e]));
+  const assessedOn = new Set<string>();
+  for (const a of assessments) {
+    if (a.employeeId === null || a.managerSubmittedOn === null) continue;
+    const name = fullName(employeeById.get(a.employeeId)!);
+    const step = a.managerSubmittedOn < cycles[a.cycle].assessmentDue ? 1 : -1;
+    while (assessedOn.has(`${a.cycle}|${name}|${a.managerSubmittedOn}`)) {
+      a.managerSubmittedOn = addDays(a.managerSubmittedOn, step);
+    }
+    assessedOn.add(`${a.cycle}|${name}|${a.managerSubmittedOn}`);
+  }
 
   // Typos in a few names, in one cycle's report each (hand-edited sheets).
   const spared = new Set([

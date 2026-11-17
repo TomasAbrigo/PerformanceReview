@@ -22,38 +22,15 @@
   "selectedFilter": "status-all",
   "goals": [
     {
-      "id": "7844",
-      "title": "Lanzar el nuevo flujo de onboarding",
-      "description": "Meta compartida con otra área; coordinar avances mensuales.",
-      "percentComplete": 80,
-      "alignsWithOptionId": 9002,
-      "sharedWithEmployeeIds": [
-        241
-      ],
-      "dueDate": "2025-12-26",
-      "completionDate": null,
-      "lastChangedDateTime": "2026-03-06T11:51:50Z",
-      "status": "in_progress",
-      "milestones": null,
-      "actions": {
-        "canEdit": true,
-        "canUpdateProgress": true,
-        "canClose": true,
-        "canReopen": false,
-        "canDelete": true,
-        "canComment": true
-      }
-    },
-    {
-      "id": "7846",
-      "title": "Completar la certificación del área",
-      "description": "Alineado con el plan del área para el año.",
+      "id": "7837",
+      "title": "Cerrar el plan de capacitación anual",
+      "description": "Pedido por el equipo directivo en la planificación.",
       "percentComplete": 100,
-      "alignsWithOptionId": 9001,
+      "alignsWithOptionId": null,
       "sharedWithEmployeeIds": [],
-      "dueDate": "2025-11-23",
-      "completionDate": "2025-11-12",
-      "lastChangedDateTime": "2025-11-12T12:02:04Z",
+      "dueDate": "2026-05-07",
+      "completionDate": "2026-05-02",
+      "lastChangedDateTime": "2026-05-02T08:25:11Z",
       "status": "completed",
       "milestones": null,
       "actions": {
@@ -66,22 +43,68 @@
       }
     },
     {
-      "id": "7847",
-      "title": "Renovar las cuentas clave del trimestre",
-      "description": "Pedido por el equipo directivo en la planificación.",
-      "percentComplete": 65,
-      "alignsWithOptionId": 9004,
-      "sharedWithEmployeeIds": [],
-      "dueDate": "2026-06-10",
+      "id": "7838",
+      "title": "Reducir el tiempo de primera respuesta un 20%",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "percentComplete": 0,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [
+        241
+      ],
+      "dueDate": "2026-10-17",
       "completionDate": null,
-      "lastChangedDateTime": "2026-06-29T08:03:14Z",
-      "status": "closed",
+      "lastChangedDateTime": "2026-08-30T08:38:35Z",
+      "status": "in_progress",
+      "milestones": [
+        {
+          "id": 1917,
+          "employeeGoalId": 7838,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2026-07-03T10:50:04Z",
+          "lastUpdateUserId": 753
+        },
+        {
+          "id": 1918,
+          "employeeGoalId": 7838,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2026-07-03T16:51:54Z",
+          "lastUpdateUserId": 753
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "7839",
+      "title": "Reducir el tiempo de primera respuesta un 20%",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2026-05-31",
+      "completionDate": "2026-04-17",
+      "lastChangedDateTime": "2026-04-17T08:22:54Z",
+      "status": "completed",
       "milestones": null,
       "actions": {
-        "canEdit": false,
+        "canEdit": true,
         "canUpdateProgress": false,
-        "canClose": false,
-        "canReopen": true,
+        "canClose": true,
+        "canReopen": false,
         "canDelete": true,
         "canComment": true
       }
@@ -103,12 +126,8 @@
   ],
   "comments": [
     {
-      "goalId": "7844",
-      "commentCount": 2
-    },
-    {
-      "goalId": "7847",
-      "commentCount": 1
+      "goalId": "7837",
+      "commentCount": 4
     }
   ]
 }

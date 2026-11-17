@@ -22,17 +22,53 @@
   "selectedFilter": "status-all",
   "goals": [
     {
-      "id": "6294",
-      "title": "Reducir los incidentes recurrentes a la mitad",
-      "description": "Sirve de base para el próximo ciclo de evaluación.",
-      "percentComplete": 55,
+      "id": "6246",
+      "title": "Lanzar el nuevo flujo de onboarding",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 33,
       "alignsWithOptionId": null,
-      "sharedWithEmployeeIds": [],
-      "dueDate": "2023-10-16",
+      "sharedWithEmployeeIds": [
+        65
+      ],
+      "dueDate": "2023-06-24",
       "completionDate": null,
-      "lastChangedDateTime": "2023-04-24T16:19:28Z",
+      "lastChangedDateTime": "2023-05-07T13:14:51Z",
       "status": "closed",
-      "milestones": null,
+      "milestones": [
+        {
+          "id": 1183,
+          "employeeGoalId": 6246,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2023-04-17T14:13:35Z",
+          "lastUpdateDateTime": "2023-04-17T14:13:35Z",
+          "lastUpdateUserId": 295
+        },
+        {
+          "id": 1184,
+          "employeeGoalId": 6246,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2023-03-05T16:22:51Z",
+          "lastUpdateUserId": 295
+        },
+        {
+          "id": 1185,
+          "employeeGoalId": 6246,
+          "title": "Hito 3",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2023-03-05T12:00:51Z",
+          "lastUpdateUserId": 295
+        }
+      ],
       "actions": {
         "canEdit": false,
         "canUpdateProgress": false,
@@ -49,6 +85,12 @@
       "firstName": "Matías",
       "lastName": "Morales",
       "preferredName": null
+    },
+    {
+      "employeeId": 65,
+      "firstName": "Valentina",
+      "lastName": "Díaz",
+      "preferredName": "Vale"
     }
   ],
   "comments": []

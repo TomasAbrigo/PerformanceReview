@@ -22,22 +22,45 @@
   "selectedFilter": "status-all",
   "goals": [
     {
-      "id": "7253",
-      "title": "Automatizar la conciliación mensual",
-      "description": "Pedido por el equipo directivo en la planificación.",
-      "percentComplete": 20,
-      "alignsWithOptionId": 9004,
+      "id": "7218",
+      "title": "Mentorear a dos personas nuevas",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
       "sharedWithEmployeeIds": [
         159
       ],
-      "dueDate": "2026-06-30",
-      "completionDate": null,
-      "lastChangedDateTime": "2026-05-04T08:19:59Z",
-      "status": "in_progress",
-      "milestones": null,
+      "dueDate": "2024-08-31",
+      "completionDate": "2024-05-08",
+      "lastChangedDateTime": "2024-05-08T11:44:20Z",
+      "status": "completed",
+      "milestones": [
+        {
+          "id": 1632,
+          "employeeGoalId": 7218,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2024-03-31T09:46:55Z",
+          "lastUpdateDateTime": "2024-03-31T09:46:55Z",
+          "lastUpdateUserId": 527
+        },
+        {
+          "id": 1633,
+          "employeeGoalId": 7218,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2024-02-28T19:11:49Z",
+          "lastUpdateDateTime": "2024-02-28T19:11:49Z",
+          "lastUpdateUserId": 527
+        }
+      ],
       "actions": {
         "canEdit": true,
-        "canUpdateProgress": true,
+        "canUpdateProgress": false,
         "canClose": true,
         "canReopen": false,
         "canDelete": true,
@@ -45,22 +68,43 @@
       }
     },
     {
-      "id": "7254",
-      "title": "Documentar los procesos críticos",
-      "description": "Pedido por el equipo directivo en la planificación.",
+      "id": "7219",
+      "title": "Migrar los reportes al nuevo tablero",
+      "description": "Alineado con el plan del área para el año.",
       "percentComplete": 100,
       "alignsWithOptionId": null,
       "sharedWithEmployeeIds": [
         159
       ],
-      "dueDate": "2026-04-10",
-      "completionDate": "2026-01-09",
-      "lastChangedDateTime": "2026-01-09T12:09:05Z",
+      "dueDate": "2024-08-20",
+      "completionDate": "2024-06-17",
+      "lastChangedDateTime": "2024-06-17T12:17:30Z",
       "status": "completed",
       "milestones": null,
       "actions": {
         "canEdit": true,
         "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "7221",
+      "title": "Completar la certificación del área",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 75,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2026-12-18",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-10-01T13:08:32Z",
+      "status": "in_progress",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
         "canClose": true,
         "canReopen": false,
         "canDelete": true,
@@ -84,8 +128,8 @@
   ],
   "comments": [
     {
-      "goalId": "7254",
-      "commentCount": 3
+      "goalId": "7219",
+      "commentCount": 1
     }
   ]
 }

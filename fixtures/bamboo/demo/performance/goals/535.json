@@ -22,62 +22,84 @@
   "selectedFilter": "status-all",
   "goals": [
     {
-      "id": "7280",
-      "title": "Renovar las cuentas clave del trimestre",
-      "description": "Pedido por el equipo directivo en la planificación.",
-      "percentComplete": 100,
+      "id": "7238",
+      "title": "Cerrar el plan de capacitación anual",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "percentComplete": 40,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [
+        243
+      ],
+      "dueDate": "2024-10-09",
+      "completionDate": null,
+      "lastChangedDateTime": "2024-11-18T13:25:30Z",
+      "status": "closed",
+      "milestones": null,
+      "actions": {
+        "canEdit": false,
+        "canUpdateProgress": false,
+        "canClose": false,
+        "canReopen": false,
+        "canDelete": false,
+        "canComment": false
+      }
+    },
+    {
+      "id": "7241",
+      "title": "Reducir los incidentes recurrentes a la mitad",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 50,
       "alignsWithOptionId": null,
       "sharedWithEmployeeIds": [],
-      "dueDate": "2025-05-15",
-      "completionDate": "2025-05-27",
-      "lastChangedDateTime": "2025-05-27T13:55:01Z",
-      "status": "completed",
+      "dueDate": "2025-06-03",
+      "completionDate": null,
+      "lastChangedDateTime": "2025-09-25T09:49:56Z",
+      "status": "in_progress",
       "milestones": [
         {
-          "id": 1751,
-          "employeeGoalId": 7280,
+          "id": 1644,
+          "employeeGoalId": 7241,
           "title": "Hito 1",
           "startValue": 0,
           "endValue": 1,
           "currentValue": 1,
-          "completedDateTime": "2025-05-01T13:06:07Z",
-          "lastUpdateDateTime": "2025-05-01T13:06:07Z",
+          "completedDateTime": "2025-04-25T16:47:15Z",
+          "lastUpdateDateTime": "2025-04-25T16:47:15Z",
           "lastUpdateUserId": 535
         },
         {
-          "id": 1752,
-          "employeeGoalId": 7280,
+          "id": 1645,
+          "employeeGoalId": 7241,
           "title": "Hito 2",
           "startValue": 0,
           "endValue": 1,
-          "currentValue": 1,
-          "completedDateTime": "2025-01-30T12:41:34Z",
-          "lastUpdateDateTime": "2025-01-30T12:41:34Z",
-          "lastUpdateUserId": 535
-        },
-        {
-          "id": 1753,
-          "employeeGoalId": 7280,
-          "title": "Hito 3",
-          "startValue": 0,
-          "endValue": 1,
-          "currentValue": 1,
-          "completedDateTime": "2025-04-09T13:32:59Z",
-          "lastUpdateDateTime": "2025-04-09T13:32:59Z",
-          "lastUpdateUserId": 535
-        },
-        {
-          "id": 1754,
-          "employeeGoalId": 7280,
-          "title": "Hito 4",
-          "startValue": 0,
-          "endValue": 1,
-          "currentValue": 1,
-          "completedDateTime": "2025-02-18T11:32:04Z",
-          "lastUpdateDateTime": "2025-02-18T11:32:04Z",
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2024-12-08T13:02:00Z",
           "lastUpdateUserId": 535
         }
       ],
+      "actions": {
+        "canEdit": false,
+        "canUpdateProgress": false,
+        "canClose": false,
+        "canReopen": false,
+        "canDelete": false,
+        "canComment": false
+      }
+    },
+    {
+      "id": "7243",
+      "title": "Automatizar la conciliación mensual",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2025-09-29",
+      "completionDate": "2025-06-14",
+      "lastChangedDateTime": "2025-06-14T17:34:45Z",
+      "status": "completed",
+      "milestones": null,
       "actions": {
         "canEdit": false,
         "canUpdateProgress": false,
@@ -93,6 +115,12 @@
       "employeeId": 535,
       "firstName": "Belén",
       "lastName": "Heredia",
+      "preferredName": null
+    },
+    {
+      "employeeId": 243,
+      "firstName": "Jimena",
+      "lastName": "Bustos",
       "preferredName": null
     }
   ],

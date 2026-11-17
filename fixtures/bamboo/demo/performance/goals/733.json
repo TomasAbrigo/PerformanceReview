@@ -22,15 +22,36 @@
   "selectedFilter": "status-all",
   "goals": [
     {
-      "id": "7798",
-      "title": "Lanzar el nuevo flujo de onboarding",
+      "id": "7789",
+      "title": "Mentorear a dos personas nuevas",
       "description": "Sirve de base para el próximo ciclo de evaluación.",
-      "percentComplete": 100,
-      "alignsWithOptionId": 9001,
+      "percentComplete": 40,
+      "alignsWithOptionId": null,
       "sharedWithEmployeeIds": [],
-      "dueDate": "2025-10-20",
-      "completionDate": "2025-09-01",
-      "lastChangedDateTime": "2025-09-01T08:02:20Z",
+      "dueDate": "2025-10-02",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-03-12T11:27:53Z",
+      "status": "in_progress",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "7790",
+      "title": "Aumentar la cobertura de pruebas al 80%",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2025-09-22",
+      "completionDate": "2025-10-01",
+      "lastChangedDateTime": "2025-10-01T08:00:41Z",
       "status": "completed",
       "milestones": null,
       "actions": {
@@ -43,80 +64,63 @@
       }
     },
     {
-      "id": "7799",
+      "id": "7793",
       "title": "Aumentar la cobertura de pruebas al 80%",
-      "description": "Pedido por el equipo directivo en la planificación.",
-      "percentComplete": 70,
-      "alignsWithOptionId": null,
-      "sharedWithEmployeeIds": [],
-      "dueDate": "2025-11-13",
-      "completionDate": null,
-      "lastChangedDateTime": "2026-08-16T17:00:10Z",
-      "status": "in_progress",
-      "milestones": null,
-      "actions": {
-        "canEdit": true,
-        "canUpdateProgress": true,
-        "canClose": true,
-        "canReopen": false,
-        "canDelete": true,
-        "canComment": true
-      }
-    },
-    {
-      "id": "7802",
-      "title": "Aumentar la cobertura de pruebas al 80%",
-      "description": "Alineado con el plan del área para el año.",
-      "percentComplete": 25,
-      "alignsWithOptionId": null,
-      "sharedWithEmployeeIds": [],
-      "dueDate": "2027-03-11",
-      "completionDate": null,
-      "lastChangedDateTime": "2026-09-23T09:55:20Z",
-      "status": "in_progress",
-      "milestones": null,
-      "actions": {
-        "canEdit": true,
-        "canUpdateProgress": true,
-        "canClose": true,
-        "canReopen": false,
-        "canDelete": true,
-        "canComment": true
-      }
-    },
-    {
-      "id": "7805",
-      "title": "Entregar el proyecto Norte sin desvíos",
       "description": "Meta compartida con otra área; coordinar avances mensuales.",
-      "percentComplete": 0,
-      "alignsWithOptionId": null,
-      "sharedWithEmployeeIds": [],
-      "dueDate": "2026-10-02",
-      "completionDate": null,
-      "lastChangedDateTime": "2026-07-29T13:09:37Z",
-      "status": "in_progress",
-      "milestones": null,
-      "actions": {
-        "canEdit": true,
-        "canUpdateProgress": true,
-        "canClose": true,
-        "canReopen": false,
-        "canDelete": true,
-        "canComment": true
-      }
-    },
-    {
-      "id": "7806",
-      "title": "Lanzar el nuevo flujo de onboarding",
-      "description": "Alineado con el plan del área para el año.",
       "percentComplete": 100,
       "alignsWithOptionId": null,
       "sharedWithEmployeeIds": [],
-      "dueDate": "2026-03-09",
-      "completionDate": "2026-01-24",
-      "lastChangedDateTime": "2026-01-24T08:08:24Z",
+      "dueDate": "2026-03-12",
+      "completionDate": "2025-12-29",
+      "lastChangedDateTime": "2025-12-29T12:20:45Z",
       "status": "completed",
       "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "7796",
+      "title": "Implementar el calendario editorial",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 100,
+      "alignsWithOptionId": 9001,
+      "sharedWithEmployeeIds": [
+        241
+      ],
+      "dueDate": "2026-09-19",
+      "completionDate": "2026-04-26",
+      "lastChangedDateTime": "2026-04-26T10:45:32Z",
+      "status": "completed",
+      "milestones": [
+        {
+          "id": 1895,
+          "employeeGoalId": 7796,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2026-03-15T11:16:10Z",
+          "lastUpdateDateTime": "2026-03-15T11:16:10Z",
+          "lastUpdateUserId": 733
+        },
+        {
+          "id": 1896,
+          "employeeGoalId": 7796,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2026-03-24T12:21:20Z",
+          "lastUpdateDateTime": "2026-03-24T12:21:20Z",
+          "lastUpdateUserId": 733
+        }
+      ],
       "actions": {
         "canEdit": true,
         "canUpdateProgress": false,
@@ -133,20 +137,22 @@
       "firstName": "Maximiliano",
       "lastName": "Cáceres",
       "preferredName": null
+    },
+    {
+      "employeeId": 241,
+      "firstName": "Daniela",
+      "lastName": "Reyes",
+      "preferredName": null
     }
   ],
   "comments": [
     {
-      "goalId": "7798",
-      "commentCount": 1
-    },
-    {
-      "goalId": "7802",
-      "commentCount": 2
-    },
-    {
-      "goalId": "7805",
+      "goalId": "7789",
       "commentCount": 4
+    },
+    {
+      "goalId": "7793",
+      "commentCount": 1
     }
   ]
 }

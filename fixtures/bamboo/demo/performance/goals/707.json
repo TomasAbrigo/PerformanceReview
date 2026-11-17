@@ -22,43 +22,20 @@
   "selectedFilter": "status-all",
   "goals": [
     {
-      "id": "7733",
-      "title": "Automatizar la conciliación mensual",
-      "description": "Meta compartida con otra área; coordinar avances mensuales.",
-      "percentComplete": 100,
-      "alignsWithOptionId": 9002,
+      "id": "7738",
+      "title": "Mejorar el NPS interno del equipo",
+      "description": "Sirve de base para el próximo ciclo de evaluación.",
+      "percentComplete": 25,
+      "alignsWithOptionId": null,
       "sharedWithEmployeeIds": [],
-      "dueDate": "2025-09-06",
-      "completionDate": "2025-08-19",
-      "lastChangedDateTime": "2025-08-19T17:12:26Z",
-      "status": "completed",
-      "milestones": [
-        {
-          "id": 1975,
-          "employeeGoalId": 7733,
-          "title": "Hito 1",
-          "startValue": 0,
-          "endValue": 1,
-          "currentValue": 1,
-          "completedDateTime": "2025-08-01T15:09:17Z",
-          "lastUpdateDateTime": "2025-08-01T15:09:17Z",
-          "lastUpdateUserId": 707
-        },
-        {
-          "id": 1976,
-          "employeeGoalId": 7733,
-          "title": "Hito 2",
-          "startValue": 0,
-          "endValue": 1,
-          "currentValue": 1,
-          "completedDateTime": "2025-07-16T19:21:03Z",
-          "lastUpdateDateTime": "2025-07-16T19:21:03Z",
-          "lastUpdateUserId": 707
-        }
-      ],
+      "dueDate": "2025-12-03",
+      "completionDate": null,
+      "lastChangedDateTime": "2025-09-25T14:18:42Z",
+      "status": "in_progress",
+      "milestones": null,
       "actions": {
         "canEdit": true,
-        "canUpdateProgress": false,
+        "canUpdateProgress": true,
         "canClose": true,
         "canReopen": false,
         "canDelete": true,
@@ -66,24 +43,56 @@
       }
     },
     {
-      "id": "7736",
-      "title": "Migrar los reportes al nuevo tablero",
+      "id": "7739",
+      "title": "Reducir los incidentes recurrentes a la mitad",
       "description": "Alineado con el plan del área para el año.",
-      "percentComplete": 60,
+      "percentComplete": 0,
       "alignsWithOptionId": null,
-      "sharedWithEmployeeIds": [
-        237
-      ],
-      "dueDate": "2025-06-30",
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2027-03-19",
       "completionDate": null,
-      "lastChangedDateTime": "2026-10-12T16:57:52Z",
-      "status": "closed",
-      "milestones": null,
+      "lastChangedDateTime": "2026-10-09T19:13:50Z",
+      "status": "in_progress",
+      "milestones": [
+        {
+          "id": 1871,
+          "employeeGoalId": 7739,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2026-08-31T09:31:48Z",
+          "lastUpdateUserId": 707
+        },
+        {
+          "id": 1872,
+          "employeeGoalId": 7739,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2026-08-31T11:21:07Z",
+          "lastUpdateUserId": 707
+        },
+        {
+          "id": 1873,
+          "employeeGoalId": 7739,
+          "title": "Hito 3",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2026-08-31T16:05:28Z",
+          "lastUpdateUserId": 707
+        }
+      ],
       "actions": {
-        "canEdit": false,
-        "canUpdateProgress": false,
-        "canClose": false,
-        "canReopen": true,
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
         "canDelete": true,
         "canComment": true
       }
@@ -95,13 +104,12 @@
       "firstName": "Milagros",
       "lastName": "Sánchez",
       "preferredName": "Mili"
-    },
-    {
-      "employeeId": 237,
-      "firstName": "Florencia",
-      "lastName": "Benítez",
-      "preferredName": "Flor"
     }
   ],
-  "comments": []
+  "comments": [
+    {
+      "goalId": "7739",
+      "commentCount": 4
+    }
+  ]
 }

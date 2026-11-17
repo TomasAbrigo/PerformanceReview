@@ -20,14 +20,136 @@
     }
   ],
   "selectedFilter": "status-all",
-  "goals": [],
+  "goals": [
+    {
+      "id": "7847",
+      "title": "Lanzar el nuevo flujo de onboarding",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 10,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2025-11-28",
+      "completionDate": null,
+      "lastChangedDateTime": "2025-10-31T18:34:10Z",
+      "status": "in_progress",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "7849",
+      "title": "Automatizar la conciliación mensual",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 50,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2025-10-15",
+      "completionDate": null,
+      "lastChangedDateTime": "2025-09-25T17:47:59Z",
+      "status": "in_progress",
+      "milestones": [
+        {
+          "id": 1924,
+          "employeeGoalId": 7849,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-08-23T14:21:46Z",
+          "lastUpdateDateTime": "2025-08-23T14:21:46Z",
+          "lastUpdateUserId": 759
+        },
+        {
+          "id": 1925,
+          "employeeGoalId": 7849,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-07-21T14:36:36Z",
+          "lastUpdateDateTime": "2025-07-21T14:36:36Z",
+          "lastUpdateUserId": 759
+        },
+        {
+          "id": 1926,
+          "employeeGoalId": 7849,
+          "title": "Hito 3",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2025-07-21T13:47:34Z",
+          "lastUpdateUserId": 759
+        },
+        {
+          "id": 1927,
+          "employeeGoalId": 7849,
+          "title": "Hito 4",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2025-07-21T15:02:49Z",
+          "lastUpdateUserId": 759
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "7850",
+      "title": "Reducir los incidentes recurrentes a la mitad",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 100,
+      "alignsWithOptionId": 9004,
+      "sharedWithEmployeeIds": [
+        137
+      ],
+      "dueDate": "2026-09-10",
+      "completionDate": "2026-06-09",
+      "lastChangedDateTime": "2026-06-09T11:17:04Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    }
+  ],
   "persons": [
     {
       "employeeId": 759,
       "firstName": "Eugenia",
       "lastName": "Sosa",
       "preferredName": null
+    },
+    {
+      "employeeId": 137,
+      "firstName": "Marcela",
+      "lastName": "Lezcano",
+      "preferredName": null
     }
   ],
-  "comments": []
+  "comments": [
+    {
+      "goalId": "7847",
+      "commentCount": 4
+    }
+  ]
 }

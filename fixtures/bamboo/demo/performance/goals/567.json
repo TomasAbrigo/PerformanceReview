@@ -22,17 +22,101 @@
   "selectedFilter": "status-all",
   "goals": [
     {
-      "id": "7382",
-      "title": "Entregar el proyecto Norte sin desvíos",
-      "description": "Alineado con el plan del área para el año.",
-      "percentComplete": 100,
-      "alignsWithOptionId": 9004,
-      "sharedWithEmployeeIds": [
-        301
+      "id": "7353",
+      "title": "Automatizar la conciliación mensual",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 0,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2024-12-26",
+      "completionDate": null,
+      "lastChangedDateTime": "2025-01-13T19:03:15Z",
+      "status": "closed",
+      "milestones": [
+        {
+          "id": 1670,
+          "employeeGoalId": 7353,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2024-07-01T18:08:39Z",
+          "lastUpdateUserId": 567
+        },
+        {
+          "id": 1671,
+          "employeeGoalId": 7353,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2024-07-01T14:49:46Z",
+          "lastUpdateUserId": 567
+        }
       ],
-      "dueDate": "2024-08-20",
-      "completionDate": "2024-08-17",
-      "lastChangedDateTime": "2024-08-17T09:23:19Z",
+      "actions": {
+        "canEdit": false,
+        "canUpdateProgress": false,
+        "canClose": false,
+        "canReopen": true,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "7356",
+      "title": "Renovar las cuentas clave del trimestre",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 25,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2024-10-06",
+      "completionDate": null,
+      "lastChangedDateTime": "2024-09-12T15:04:26Z",
+      "status": "in_progress",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "7357",
+      "title": "Cerrar el plan de capacitación anual",
+      "description": "Sirve de base para el próximo ciclo de evaluación.",
+      "percentComplete": 85,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2025-03-15",
+      "completionDate": null,
+      "lastChangedDateTime": "2025-01-30T10:17:53Z",
+      "status": "in_progress",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "7358",
+      "title": "Renovar las cuentas clave del trimestre",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 100,
+      "alignsWithOptionId": 9003,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2025-05-04",
+      "completionDate": "2025-05-10",
+      "lastChangedDateTime": "2025-05-10T18:31:18Z",
       "status": "completed",
       "milestones": null,
       "actions": {
@@ -45,17 +129,72 @@
       }
     },
     {
-      "id": "7384",
-      "title": "Documentar los procesos críticos",
-      "description": "Alineado con el plan del área para el año.",
+      "id": "7360",
+      "title": "Cerrar el plan de capacitación anual",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "percentComplete": 20,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2026-06-20",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-05-27T12:30:46Z",
+      "status": "in_progress",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "7363",
+      "title": "Mejorar el NPS interno del equipo",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
       "percentComplete": 100,
       "alignsWithOptionId": null,
       "sharedWithEmployeeIds": [],
-      "dueDate": "2026-06-19",
-      "completionDate": "2026-04-28",
-      "lastChangedDateTime": "2026-04-28T10:22:00Z",
+      "dueDate": "2026-08-04",
+      "completionDate": "2026-03-09",
+      "lastChangedDateTime": "2026-03-09T12:41:15Z",
       "status": "completed",
-      "milestones": null,
+      "milestones": [
+        {
+          "id": 1672,
+          "employeeGoalId": 7363,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2026-01-28T10:52:46Z",
+          "lastUpdateDateTime": "2026-01-28T10:52:46Z",
+          "lastUpdateUserId": 567
+        },
+        {
+          "id": 1673,
+          "employeeGoalId": 7363,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2026-01-24T18:03:36Z",
+          "lastUpdateDateTime": "2026-01-24T18:03:36Z",
+          "lastUpdateUserId": 567
+        },
+        {
+          "id": 1674,
+          "employeeGoalId": 7363,
+          "title": "Hito 3",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2026-03-04T09:14:20Z",
+          "lastUpdateDateTime": "2026-03-04T09:14:20Z",
+          "lastUpdateUserId": 567
+        }
+      ],
       "actions": {
         "canEdit": true,
         "canUpdateProgress": false,
@@ -72,22 +211,24 @@
       "firstName": "Gustavo",
       "lastName": "Núñez",
       "preferredName": null
-    },
-    {
-      "employeeId": 301,
-      "firstName": "Silvana",
-      "lastName": "Carrizo",
-      "preferredName": null
     }
   ],
   "comments": [
     {
-      "goalId": "7382",
-      "commentCount": 4
+      "goalId": "7353",
+      "commentCount": 1
     },
     {
-      "goalId": "7384",
-      "commentCount": 4
+      "goalId": "7358",
+      "commentCount": 1
+    },
+    {
+      "goalId": "7360",
+      "commentCount": 2
+    },
+    {
+      "goalId": "7363",
+      "commentCount": 1
     }
   ]
 }

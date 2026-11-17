@@ -22,20 +22,62 @@
   "selectedFilter": "status-all",
   "goals": [
     {
-      "id": "7366",
-      "title": "Implementar el calendario editorial",
-      "description": "Alineado con el plan del área para el año.",
+      "id": "7341",
+      "title": "Migrar los reportes al nuevo tablero",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
       "percentComplete": 100,
-      "alignsWithOptionId": null,
+      "alignsWithOptionId": 9002,
       "sharedWithEmployeeIds": [],
-      "dueDate": "2026-09-09",
-      "completionDate": "2026-08-04",
-      "lastChangedDateTime": "2026-08-04T13:34:17Z",
+      "dueDate": "2025-04-25",
+      "completionDate": "2025-03-19",
+      "lastChangedDateTime": "2025-03-19T09:13:45Z",
       "status": "completed",
       "milestones": null,
       "actions": {
         "canEdit": true,
         "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "7342",
+      "title": "Entregar el proyecto Norte sin desvíos",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "percentComplete": 100,
+      "alignsWithOptionId": 9003,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2026-07-30",
+      "completionDate": "2026-06-27",
+      "lastChangedDateTime": "2026-06-27T11:06:24Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "7343",
+      "title": "Mentorear a dos personas nuevas",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 45,
+      "alignsWithOptionId": 9001,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2026-12-20",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-10-10T18:48:20Z",
+      "status": "in_progress",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
         "canClose": true,
         "canReopen": false,
         "canDelete": true,
@@ -51,5 +93,10 @@
       "preferredName": null
     }
   ],
-  "comments": []
+  "comments": [
+    {
+      "goalId": "7341",
+      "commentCount": 4
+    }
+  ]
 }

@@ -20,7 +20,29 @@
     }
   ],
   "selectedFilter": "status-all",
-  "goals": [],
+  "goals": [
+    {
+      "id": "7659",
+      "title": "Mejorar el NPS interno del equipo",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2026-08-24",
+      "completionDate": "2026-06-25",
+      "lastChangedDateTime": "2026-06-25T19:03:18Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    }
+  ],
   "persons": [
     {
       "employeeId": 673,
@@ -29,5 +51,10 @@
       "preferredName": null
     }
   ],
-  "comments": []
+  "comments": [
+    {
+      "goalId": "7659",
+      "commentCount": 3
+    }
+  ]
 }

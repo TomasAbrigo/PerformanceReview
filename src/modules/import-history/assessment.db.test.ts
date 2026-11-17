@@ -226,7 +226,7 @@ describe("assessment import: one row", () => {
     expect(ana).toBeTruthy();
   });
 
-  it("the cycle period spans the assessment dates seen", async () => {
+  it("a named cycle's period spans the assessment dates seen (never snapped to a semester)", async () => {
     const ana = await addPerson("Ana García");
     const bruno = await addPerson("Bruno Pérez");
     const carla = await addPerson("Carla Romero");
@@ -254,6 +254,23 @@ describe("assessment import: one row", () => {
       "2023-12-09",
       "2023-12-09",
     ]);
+
+    // A later row in the next semester: the period spans the dates as seen.
+    await importReport(
+      await writeCsv([
+        HEADER,
+        "Bruno Pérez,Ana García,Ingeniería,Ciclo 2023,2024-02-10,B,Cumplo,A,Ok,4,5",
+      ]),
+    );
+    const [wide] = await db
+      .select()
+      .from(reviewCycle)
+      .where(eq(reviewCycle.sourceId, "Ciclo 2023"));
+    expect(wide).toMatchObject({
+      periodStart: "2023-11-28",
+      periodEnd: "2024-02-10",
+      snapshotDate: "2024-02-10",
+    });
   });
 });
 

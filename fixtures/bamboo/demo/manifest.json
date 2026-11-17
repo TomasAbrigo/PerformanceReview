@@ -3,9 +3,11 @@
   "seed": 2002,
   "asOf": "2026-11-01",
   "cycles": [
-    "Evaluación de desempeño 2023",
-    "Evaluación de desempeño 2024",
-    "Evaluación de desempeño 2025"
+    "Evaluación semestral 2024-H1",
+    "Evaluación semestral 2024-H2",
+    "Evaluación semestral 2025-H1",
+    "Evaluación semestral 2025-H2",
+    "Evaluación semestral 2026-H1"
   ],
   "pageLimit": 100,
   "counts": {
@@ -15,13 +17,13 @@
     "managerChanges": 71,
     "jobInfoRows": 564,
     "employmentStatusRows": 430,
-    "goals": 1484,
-    "assessments": 915,
-    "feedbackRequests": 2801,
+    "goals": 1460,
+    "assessments": 1638,
+    "feedbackRequests": 4973,
     "renames": 6,
     "misspelledNames": 12,
     "namesakePairs": 1,
-    "outsiderRows": 18,
+    "outsiderRows": 30,
     "apiFiles": 807
   }
 }

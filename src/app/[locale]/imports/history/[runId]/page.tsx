@@ -8,6 +8,7 @@ import { HistoryResult } from "@/components/imports/history-result";
 import { db } from "@/db/client";
 import { routing } from "@/i18n/routing";
 import { getHistoryImportResult } from "@/modules/import-history/results";
+import { resumeImportRunAction } from "../actions";
 
 async function HistoryData({
   params,
@@ -18,7 +19,7 @@ async function HistoryData({
   await connection();
   const result = await getHistoryImportResult(db, runId);
   if (!result) notFound();
-  return <HistoryResult result={result} />;
+  return <HistoryResult result={result} resume={resumeImportRunAction} />;
 }
 
 export default function HistoryImportPage(

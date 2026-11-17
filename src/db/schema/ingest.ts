@@ -28,12 +28,15 @@ export type IngestCounts = {
   ignored?: number;
   /** assessment: imported manager reviews whose CSV manager is not the one in force. */
   mismatches?: number;
+  /** Report rows held back until someone picks their cycle (needs_decision). */
+  deferred?: number;
 };
 
 /** The counters every run shows (the optional ones are entity-specific extras). */
 /** Entity-specific counters the run detail shows only when a run has them. */
 export const INGEST_EXTRA_COUNT_KEYS = [
   "mismatches",
+  "deferred",
 ] as const satisfies readonly (keyof IngestCounts)[];
 
 export const INGEST_COUNT_KEYS = [
@@ -64,6 +67,12 @@ export const ingestRunStatus = pgEnum("ingest_run_status", [
   "running",
   "succeeded",
   "error",
+  /**
+   * Some rows could not be placed in a cycle (ambiguous semester, unknown
+   * cycle name): they were not written and wait for someone to choose the
+   * target cycle (`params.decision`, see import-history/decision.ts).
+   */
+  "needs_decision",
 ]);
 
 export type IngestRunStatus = (typeof ingestRunStatus.enumValues)[number];

@@ -20,9 +20,9 @@ export type DashboardParams = {
 };
 
 type Raw = Record<string, string | string[] | undefined>;
-const one = (v: string | string[] | undefined) =>
+export const one = (v: string | string[] | undefined) =>
   (Array.isArray(v) ? v[0] : v) || undefined;
-const pick = <T extends string>(
+export const pick = <T extends string>(
   v: string | undefined,
   allowed: readonly T[],
   fallback: T,

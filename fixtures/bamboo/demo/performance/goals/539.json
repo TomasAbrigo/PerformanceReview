@@ -22,22 +22,87 @@
   "selectedFilter": "status-all",
   "goals": [
     {
-      "id": "7287",
-      "title": "Reducir los incidentes recurrentes a la mitad",
-      "description": "Alineado con el plan del área para el año.",
+      "id": "7252",
+      "title": "Automatizar la conciliación mensual",
+      "description": "Pedido por el equipo directivo en la planificación.",
       "percentComplete": 100,
       "alignsWithOptionId": null,
-      "sharedWithEmployeeIds": [
-        125
-      ],
-      "dueDate": "2025-12-14",
-      "completionDate": "2025-11-02",
-      "lastChangedDateTime": "2025-11-02T18:30:24Z",
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2024-11-02",
+      "completionDate": "2024-11-20",
+      "lastChangedDateTime": "2024-11-20T11:35:33Z",
       "status": "completed",
       "milestones": null,
       "actions": {
         "canEdit": true,
         "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "7255",
+      "title": "Cerrar el plan de capacitación anual",
+      "description": "Sirve de base para el próximo ciclo de evaluación.",
+      "percentComplete": 100,
+      "alignsWithOptionId": 9001,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2024-10-14",
+      "completionDate": "2024-09-18",
+      "lastChangedDateTime": "2024-09-18T14:19:14Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "7257",
+      "title": "Mentorear a dos personas nuevas",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "percentComplete": 50,
+      "alignsWithOptionId": 9002,
+      "sharedWithEmployeeIds": [
+        125
+      ],
+      "dueDate": "2026-08-24",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-08-25T14:32:57Z",
+      "status": "in_progress",
+      "milestones": [
+        {
+          "id": 1646,
+          "employeeGoalId": 7257,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2026-04-18T11:15:24Z",
+          "lastUpdateDateTime": "2026-04-18T11:15:24Z",
+          "lastUpdateUserId": 539
+        },
+        {
+          "id": 1647,
+          "employeeGoalId": 7257,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2026-01-06T08:20:09Z",
+          "lastUpdateUserId": 539
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
         "canClose": true,
         "canReopen": false,
         "canDelete": true,
@@ -59,5 +124,14 @@
       "preferredName": null
     }
   ],
-  "comments": []
+  "comments": [
+    {
+      "goalId": "7252",
+      "commentCount": 2
+    },
+    {
+      "goalId": "7255",
+      "commentCount": 4
+    }
+  ]
 }

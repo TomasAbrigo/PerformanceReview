@@ -77,10 +77,10 @@ describe("importUpload", () => {
       store,
     });
 
-    expect(counts).toMatchObject({ read: 69, inserted: 69, rejected: 0 });
+    expect(counts).toMatchObject({ read: 119, inserted: 119, rejected: 0 });
     expect(rejects).toEqual([]);
     const records = await db.select().from(rawRecord);
-    expect(records).toHaveLength(69);
+    expect(records).toHaveLength(119);
     expect(records.every((r) => r.payloadHash.length === 64)).toBe(true);
     // A Bamboo report export, not a lake table.
     expect(records[0].sourceSystem).toBe("bamboo_export");
@@ -122,8 +122,8 @@ describe("importUpload", () => {
     });
 
     expect(again.existed).toBe(true);
-    expect(counts).toMatchObject({ read: 69, inserted: 0, unchanged: 69 });
-    expect(await db.select().from(rawRecord)).toHaveLength(69);
+    expect(counts).toMatchObject({ read: 119, inserted: 0, unchanged: 119 });
+    expect(await db.select().from(rawRecord)).toHaveLength(119);
     expect(await db.select().from(ingestRun)).toHaveLength(2);
   });
 
@@ -164,8 +164,8 @@ describe("importUpload", () => {
       store,
     });
 
-    expect(counts).toMatchObject({ read: 119, inserted: 117, rejected: 2 });
-    expect(rejects).toHaveLength(2);
+    expect(counts).toMatchObject({ read: 132, inserted: 127, rejected: 5 });
+    expect(rejects).toHaveLength(5);
     expect(rejects[0].reason).toContain('key column "Goal" is empty');
     expect(rejects[0]).toMatchObject({ code: "empty_key", column: "Goal" });
   });
@@ -210,11 +210,13 @@ describe("importUpload with a custom profile", () => {
       uploadId: stored.id,
       fileName: "feedback-status.csv",
       profile: { custom: feedbackProfile },
+      // A feedback profile would import cycles (isHistoryProfile): land only.
+      landing: true,
       db,
       store,
     });
 
-    expect(counts).toMatchObject({ read: 220, inserted: 220 });
+    expect(counts).toMatchObject({ read: 392, inserted: 392 });
     expect(
       (await listProfiles(store)).find((p) => p.name === "mi-feedback"),
     ).toEqual(feedbackProfile);
@@ -349,11 +351,12 @@ describe("importUpload with a custom profile", () => {
       uploadId: stored.id,
       fileName: "feedback-status.csv",
       profile: { saved: "mi-feedback" },
+      landing: true,
       db,
       store,
     });
 
-    expect(counts).toMatchObject({ read: 220, inserted: 220 });
+    expect(counts).toMatchObject({ read: 392, inserted: 392 });
     const failed = await failure(
       importUpload({
         uploadId: stored.id,
@@ -431,11 +434,11 @@ describe("importUpload of a Bamboo performance report (domain mode)", () => {
     });
 
     expect(result.mode).toBe("domain");
-    expect(result.counts).toMatchObject({ read: 69, rejected: 0 });
+    expect(result.counts).toMatchObject({ read: 119, rejected: 0 });
     const cycles = await db.execute(
       sql`select name from review_cycle where source_system = 'bamboo_export'`,
     );
-    expect(cycles).toHaveLength(3);
+    expect(cycles).toHaveLength(5);
     // A file is not an incremental source: no watermark is kept for it.
     expect(
       await db.execute(sql`select 1 from sync_state where adapter = 'file'`),

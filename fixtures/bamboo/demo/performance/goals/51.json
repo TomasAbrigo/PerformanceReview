@@ -20,14 +20,243 @@
     }
   ],
   "selectedFilter": "status-all",
-  "goals": [],
+  "goals": [
+    {
+      "id": "5194",
+      "title": "Cerrar el plan de capacitación anual",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2024-08-12",
+      "completionDate": "2024-05-24",
+      "lastChangedDateTime": "2024-05-24T11:06:47Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "5195",
+      "title": "Lanzar el nuevo flujo de onboarding",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [
+        45
+      ],
+      "dueDate": "2025-04-11",
+      "completionDate": "2025-04-03",
+      "lastChangedDateTime": "2025-04-03T09:22:50Z",
+      "status": "completed",
+      "milestones": [
+        {
+          "id": 764,
+          "employeeGoalId": 5195,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-03-01T18:46:56Z",
+          "lastUpdateDateTime": "2025-03-01T18:46:56Z",
+          "lastUpdateUserId": 51
+        },
+        {
+          "id": 765,
+          "employeeGoalId": 5195,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-03-06T14:40:40Z",
+          "lastUpdateDateTime": "2025-03-06T14:40:40Z",
+          "lastUpdateUserId": 51
+        },
+        {
+          "id": 766,
+          "employeeGoalId": 5195,
+          "title": "Hito 3",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2024-12-23T09:10:48Z",
+          "lastUpdateDateTime": "2024-12-23T09:10:48Z",
+          "lastUpdateUserId": 51
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "5196",
+      "title": "Aumentar la cobertura de pruebas al 80%",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "percentComplete": 70,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [
+        45
+      ],
+      "dueDate": "2025-03-24",
+      "completionDate": null,
+      "lastChangedDateTime": "2025-11-27T10:03:55Z",
+      "status": "in_progress",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "5197",
+      "title": "Documentar los procesos críticos",
+      "description": "Sirve de base para el próximo ciclo de evaluación.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2025-02-01",
+      "completionDate": "2024-11-05",
+      "lastChangedDateTime": "2024-11-05T14:51:20Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "5200",
+      "title": "Mentorear a dos personas nuevas",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 25,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2027-02-10",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-09-08T12:26:10Z",
+      "status": "in_progress",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "5202",
+      "title": "Renovar las cuentas clave del trimestre",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2026-04-28",
+      "completionDate": "2026-01-11",
+      "lastChangedDateTime": "2026-01-11T19:00:56Z",
+      "status": "completed",
+      "milestones": [
+        {
+          "id": 767,
+          "employeeGoalId": 5202,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2026-01-03T13:36:32Z",
+          "lastUpdateDateTime": "2026-01-03T13:36:32Z",
+          "lastUpdateUserId": 51
+        },
+        {
+          "id": 768,
+          "employeeGoalId": 5202,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-12-26T14:04:55Z",
+          "lastUpdateDateTime": "2025-12-26T14:04:55Z",
+          "lastUpdateUserId": 51
+        },
+        {
+          "id": 769,
+          "employeeGoalId": 5202,
+          "title": "Hito 3",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-12-30T11:26:03Z",
+          "lastUpdateDateTime": "2025-12-30T11:26:03Z",
+          "lastUpdateUserId": 51
+        },
+        {
+          "id": 770,
+          "employeeGoalId": 5202,
+          "title": "Hito 4",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-12-06T13:50:38Z",
+          "lastUpdateDateTime": "2025-12-06T13:50:38Z",
+          "lastUpdateUserId": 51
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    }
+  ],
   "persons": [
     {
       "employeeId": 51,
       "firstName": "Gonzalo",
       "lastName": "Toledo",
       "preferredName": "Gonza"
+    },
+    {
+      "employeeId": 45,
+      "firstName": "Facundo",
+      "lastName": "Molina",
+      "preferredName": null
     }
   ],
-  "comments": []
+  "comments": [
+    {
+      "goalId": "5195",
+      "commentCount": 1
+    },
+    {
+      "goalId": "5200",
+      "commentCount": 4
+    },
+    {
+      "goalId": "5202",
+      "commentCount": 2
+    }
+  ]
 }

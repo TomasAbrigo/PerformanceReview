@@ -22,15 +22,17 @@
   "selectedFilter": "status-all",
   "goals": [
     {
-      "id": "5507",
-      "title": "Automatizar la conciliación mensual",
-      "description": "Sirve de base para el próximo ciclo de evaluación.",
+      "id": "5489",
+      "title": "Lanzar el nuevo flujo de onboarding",
+      "description": "Alineado con el plan del área para el año.",
       "percentComplete": 100,
       "alignsWithOptionId": 9004,
-      "sharedWithEmployeeIds": [],
-      "dueDate": "2023-03-30",
-      "completionDate": "2022-12-01",
-      "lastChangedDateTime": "2022-12-01T17:27:38Z",
+      "sharedWithEmployeeIds": [
+        27
+      ],
+      "dueDate": "2023-11-30",
+      "completionDate": "2023-08-04",
+      "lastChangedDateTime": "2023-08-04T12:37:16Z",
       "status": "completed",
       "milestones": null,
       "actions": {
@@ -43,17 +45,126 @@
       }
     },
     {
-      "id": "5510",
-      "title": "Renovar las cuentas clave del trimestre",
-      "description": "Sirve de base para el próximo ciclo de evaluación.",
-      "percentComplete": 0,
+      "id": "5490",
+      "title": "Mentorear a dos personas nuevas",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 100,
       "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2025-11-11",
+      "completionDate": "2025-06-12",
+      "lastChangedDateTime": "2025-06-12T19:53:09Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "5491",
+      "title": "Renovar las cuentas clave del trimestre",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 100,
+      "alignsWithOptionId": 9003,
       "sharedWithEmployeeIds": [
         27
       ],
-      "dueDate": "2024-11-06",
+      "dueDate": "2025-09-19",
+      "completionDate": "2025-10-09",
+      "lastChangedDateTime": "2025-10-09T19:20:56Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "5494",
+      "title": "Lanzar el nuevo flujo de onboarding",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2025-11-25",
+      "completionDate": "2025-09-29",
+      "lastChangedDateTime": "2025-09-29T13:59:30Z",
+      "status": "completed",
+      "milestones": [
+        {
+          "id": 873,
+          "employeeGoalId": 5494,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-08-16T15:24:25Z",
+          "lastUpdateDateTime": "2025-08-16T15:24:25Z",
+          "lastUpdateUserId": 125
+        },
+        {
+          "id": 874,
+          "employeeGoalId": 5494,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-08-31T16:33:08Z",
+          "lastUpdateDateTime": "2025-08-31T16:33:08Z",
+          "lastUpdateUserId": 125
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "5495",
+      "title": "Automatizar la conciliación mensual",
+      "description": "Sirve de base para el próximo ciclo de evaluación.",
+      "percentComplete": 75,
+      "alignsWithOptionId": 9003,
+      "sharedWithEmployeeIds": [
+        27
+      ],
+      "dueDate": "2026-05-17",
       "completionDate": null,
-      "lastChangedDateTime": "2024-07-06T12:12:51Z",
+      "lastChangedDateTime": "2026-04-23T11:33:24Z",
+      "status": "in_progress",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "5496",
+      "title": "Automatizar la conciliación mensual",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "percentComplete": 80,
+      "alignsWithOptionId": 9001,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2027-01-09",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-10-18T09:05:05Z",
       "status": "in_progress",
       "milestones": null,
       "actions": {
@@ -82,8 +193,12 @@
   ],
   "comments": [
     {
-      "goalId": "5510",
-      "commentCount": 2
+      "goalId": "5494",
+      "commentCount": 4
+    },
+    {
+      "goalId": "5495",
+      "commentCount": 3
     }
   ]
 }

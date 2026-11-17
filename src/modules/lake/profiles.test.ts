@@ -491,7 +491,7 @@ describe("built-in profiles", () => {
     });
     expect(progress).toHaveLength(3);
     expect(progress[1]).toMatchObject({
-      entity: "assessment",
+      entity: "assessment_progress",
       fields: {
         assessed: "In Progress",
         self_status: "Submitted",
@@ -664,5 +664,70 @@ describe("profiles against a drifted or damaged lake", () => {
     } finally {
       await rm(dir, { recursive: true, force: true });
     }
+  });
+});
+
+describe("question mapping and cycle/date columns", () => {
+  it("a profile accepts a question mapping, and rejects an unknown kind", () => {
+    const base = {
+      name: "perf",
+      table: "perf",
+      keyColumns: ["Name"],
+      entity: "assessment" as const,
+      columnMap: {},
+    };
+    expect(
+      sourceProfileSchema.safeParse({
+        ...base,
+        questions: [
+          { column: "Q", side: "self", kind: "likert", key: "self:q" },
+        ],
+      }).success,
+    ).toBe(true);
+    expect(
+      sourceProfileSchema.safeParse({
+        ...base,
+        questions: [{ column: "Q", side: "self", kind: "stars", key: "k" }],
+      }).success,
+    ).toBe(false);
+  });
+
+  it("cycleColumn and dateColumn feed review_cycle and assessment_date, and must exist", () => {
+    const profile: SourceProfile = {
+      name: "perf",
+      table: "perf",
+      keyColumns: ["Name"],
+      entity: "assessment",
+      columnMap: { Name: "employee_name" },
+      cycleColumn: "Periodo",
+      dateColumn: "Fecha",
+    };
+    expect(
+      applyProfile(profile, {
+        Name: "Ana",
+        Periodo: "2025-H1",
+        Fecha: "2025-03-01",
+      }).fields,
+    ).toEqual({
+      employee_name: "Ana",
+      review_cycle: "2025-H1",
+      assessment_date: "2025-03-01",
+    });
+    const issues = validateAgainstSchema(profile, [
+      { name: "Name", type: "VARCHAR", nullable: true },
+    ]);
+    expect(issues.map((i) => i.column)).toEqual(["Periodo", "Fecha"]);
+  });
+
+  it("bamboo employee performance ships a mapping for every question column of the fixtures", () => {
+    const mapping = getBuiltinProfile(
+      "bamboo-employee-performance",
+    )!.questions!;
+    expect(mapping.map((m) => m.column)).toEqual(
+      expect.arrayContaining(
+        mapping.map((m) => m.column).filter((c) => / Q\d+: /.test(c)),
+      ),
+    );
+    expect(new Set(mapping.map((m) => m.key)).size).toBe(mapping.length);
   });
 });

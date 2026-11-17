@@ -1,12 +1,15 @@
 import { errorMessage } from "@/lib/log";
 import { eq } from "drizzle-orm";
 import type { DbOrTx } from "@/db/client";
+import type { QuestionMapping } from "@/modules/lake/profiles";
 import {
   ingestRun,
   rawRecord,
   type IngestCounts,
   type IngestReject,
+  type IngestRunStatus,
 } from "@/db/schema";
+import type { DeferredRow } from "@/modules/import-history/decision";
 import { payloadHash } from "./canonical";
 import { handlerFor } from "./handlers";
 import { advanceSyncState } from "./sync-state";
@@ -49,9 +52,16 @@ export type RunIngestInput<E extends IngestEntity = Entity> = {
    * nobody: create the person (default) or queue it for review.
    */
   unmatched?: "create" | "queue";
+  /** Report rows: the profile's question mapping (HandlerContext.questions). */
+  questions?: QuestionMapping[];
 };
 
-export type RunIngestResult = { runId: string; counts: IngestCounts };
+export type RunIngestResult = {
+  runId: string;
+  counts: IngestCounts;
+  /** `needs_decision`: some rows wait for a cycle (params.decision). */
+  status?: Extract<IngestRunStatus, "succeeded" | "needs_decision">;
+};
 
 /**
  * A run that ended in status `error`. The run row (with the counts reached so
@@ -90,20 +100,22 @@ export async function runIngest<E extends IngestEntity = Entity>({
   params = {},
   extract = {},
   unmatched,
+  questions,
 }: RunIngestInput<E>): Promise<RunIngestResult> {
   const handler = handlerFor(entity, landing);
   const source = adapter.source;
+  const runParams = {
+    entity,
+    ...params,
+    ...(extract.since ? { since: extract.since } : {}),
+  };
   const [run] = await db
     .insert(ingestRun)
     .values({
       sourceSystem: source,
       adapter: adapter.name,
       entity,
-      params: {
-        entity,
-        ...params,
-        ...(extract.since ? { since: extract.since } : {}),
-      },
+      params: runParams,
       status: "running",
     })
     .returning({ id: ingestRun.id, startedAt: ingestRun.startedAt });
@@ -120,6 +132,8 @@ export async function runIngest<E extends IngestEntity = Entity>({
   const rejects: IngestReject[] = [];
   const seen = new Set<string>();
   const cache = new Map<string, unknown>();
+  const deferred: DeferredRow[] = [];
+  let status: NonNullable<RunIngestResult["status"]> = "succeeded";
 
   try {
     const context: ExtractContext = {
@@ -171,10 +185,18 @@ export async function runIngest<E extends IngestEntity = Entity>({
           payload: record.payload,
           unmatched,
           cache,
+          ...(questions ? { questions } : {}),
         }),
       );
       counts[outcome.result] = (counts[outcome.result] ?? 0) + 1;
       addCounts(counts, outcome.counts);
+      if (outcome.result === "deferred" && outcome.deferral) {
+        deferred.push({
+          sourceId: record.sourceId,
+          hash,
+          deferral: outcome.deferral,
+        });
+      }
       for (const reason of outcome.rejects) {
         rejects.push({ sourceId: record.sourceId, reason });
       }
@@ -193,12 +215,25 @@ export async function runIngest<E extends IngestEntity = Entity>({
       );
     }
 
+    // Rows held back for a decision: the run waits for someone to choose.
+    let decided: Record<string, unknown> | undefined;
+    if (deferred.length > 0 && !("landing" in handler) && handler.decide) {
+      decided = { ...runParams, decision: await handler.decide(db, deferred) };
+      status = "needs_decision";
+    }
+
     await db.transaction(async (tx) => {
       await tx
         .update(ingestRun)
-        .set({ status: "succeeded", finishedAt: new Date(), counts, rejects })
+        .set({
+          status,
+          finishedAt: new Date(),
+          counts,
+          rejects,
+          ...(decided ? { params: decided } : {}),
+        })
         .where(eq(ingestRun.id, run.id));
-      if (!landing && syncState) {
+      if (!landing && syncState && status === "succeeded") {
         await advanceSyncState(tx, {
           sourceSystem: source,
           adapter: adapter.name,
@@ -224,7 +259,7 @@ export async function runIngest<E extends IngestEntity = Entity>({
     throw new IngestRunError(message, run.id, counts, { cause: err });
   }
 
-  return { runId: run.id, counts };
+  return { runId: run.id, counts, status };
 }
 
 function addCounts(into: IngestCounts, extra: Partial<IngestCounts> = {}) {

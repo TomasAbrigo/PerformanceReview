@@ -10,13 +10,21 @@ import {
 } from "@/components/ui/table";
 import { Link } from "@/i18n/navigation";
 import type { HistoryImportResult } from "@/modules/import-history/results";
+import { CycleDecisionForm, type ResumeOutcome } from "./cycle-decision";
 
 /**
  * What a historical import (a Bamboo performance or feedback report) did,
  * per detected cycle: participants, requests and answers created or left
  * unchanged, rows sent to the identity queue and reviewer mismatches.
  */
-export function HistoryResult({ result }: { result: HistoryImportResult }) {
+export function HistoryResult({
+  result,
+  resume,
+}: {
+  result: HistoryImportResult;
+  /** Resumes a run waiting for a decision (server action). */
+  resume?: (runId: string, choice: string) => Promise<ResumeOutcome>;
+}) {
   const t = useTranslations("ImportHistory");
   const both = (created: number, unchanged: number) =>
     t("createdUnchanged", { created, unchanged });
@@ -32,6 +40,19 @@ export function HistoryResult({ result }: { result: HistoryImportResult }) {
           {t("summary", { count: result.cycles.length })}
         </p>
       </div>
+
+      {result.status === "needs_decision" && result.decision && resume ? (
+        <CycleDecisionForm
+          runId={result.runId}
+          decision={result.decision}
+          resume={resume}
+        />
+      ) : null}
+      {result.decision?.resolved ? (
+        <p className="text-sm text-muted-foreground">
+          {t("decision.resolved")}
+        </p>
+      ) : null}
 
       <Table aria-label={t("cycles")}>
         <TableHeader>

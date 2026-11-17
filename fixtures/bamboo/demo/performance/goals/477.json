@@ -20,7 +20,182 @@
     }
   ],
   "selectedFilter": "status-all",
-  "goals": [],
+  "goals": [
+    {
+      "id": "7033",
+      "title": "Migrar los reportes al nuevo tablero",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2024-06-15",
+      "completionDate": "2024-05-31",
+      "lastChangedDateTime": "2024-05-31T08:32:13Z",
+      "status": "completed",
+      "milestones": [
+        {
+          "id": 1577,
+          "employeeGoalId": 7033,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2024-03-24T16:00:36Z",
+          "lastUpdateDateTime": "2024-03-24T16:00:36Z",
+          "lastUpdateUserId": 477
+        },
+        {
+          "id": 1578,
+          "employeeGoalId": 7033,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2024-04-09T13:31:56Z",
+          "lastUpdateDateTime": "2024-04-09T13:31:56Z",
+          "lastUpdateUserId": 477
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "7034",
+      "title": "Lanzar el nuevo flujo de onboarding",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 0,
+      "alignsWithOptionId": 9002,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2025-08-18",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-10-05T19:21:51Z",
+      "status": "in_progress",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "7036",
+      "title": "Mejorar el NPS interno del equipo",
+      "description": "Sirve de base para el próximo ciclo de evaluación.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2026-07-16",
+      "completionDate": "2026-05-28",
+      "lastChangedDateTime": "2026-05-28T12:04:47Z",
+      "status": "completed",
+      "milestones": [
+        {
+          "id": 1579,
+          "employeeGoalId": 7036,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2026-04-06T10:16:00Z",
+          "lastUpdateDateTime": "2026-04-06T10:16:00Z",
+          "lastUpdateUserId": 477
+        },
+        {
+          "id": 1580,
+          "employeeGoalId": 7036,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2026-04-21T11:37:14Z",
+          "lastUpdateDateTime": "2026-04-21T11:37:14Z",
+          "lastUpdateUserId": 477
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "7037",
+      "title": "Reducir el tiempo de primera respuesta un 20%",
+      "description": "Sirve de base para el próximo ciclo de evaluación.",
+      "percentComplete": 50,
+      "alignsWithOptionId": 9004,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2026-04-20",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-09-22T11:46:45Z",
+      "status": "in_progress",
+      "milestones": [
+        {
+          "id": 1581,
+          "employeeGoalId": 7037,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2026-07-21T19:41:26Z",
+          "lastUpdateDateTime": "2026-07-21T19:41:26Z",
+          "lastUpdateUserId": 477
+        },
+        {
+          "id": 1582,
+          "employeeGoalId": 7037,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2025-10-22T19:11:36Z",
+          "lastUpdateUserId": 477
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "7040",
+      "title": "Implementar el calendario editorial",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 40,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2026-05-20",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-09-30T08:55:29Z",
+      "status": "in_progress",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    }
+  ],
   "persons": [
     {
       "employeeId": 477,
@@ -29,5 +204,18 @@
       "preferredName": null
     }
   ],
-  "comments": []
+  "comments": [
+    {
+      "goalId": "7033",
+      "commentCount": 3
+    },
+    {
+      "goalId": "7037",
+      "commentCount": 3
+    },
+    {
+      "goalId": "7040",
+      "commentCount": 4
+    }
+  ]
 }

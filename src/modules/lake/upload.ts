@@ -24,7 +24,7 @@ import {
   type UploadStore,
 } from "./upload-store";
 import {
-  HISTORY_PROFILES,
+  isHistoryProfile,
   PREVIEW_ROWS,
   type ImportUploadResult,
   type ProfileChoice,
@@ -144,7 +144,7 @@ export type ImportUploadInput = {
   store?: UploadStore;
   /** Aborted when the worker is told to stop: the run ends in error. */
   signal?: AbortSignal;
-  /** History profiles: only land the rows (no historical cycles). */
+  /** History profiles (see isHistoryProfile): only land the rows. */
   landing?: boolean;
 };
 
@@ -206,8 +206,7 @@ export async function importUpload({
   const { profile, source, isNew } = await chosenProfile(choice, store);
   // Bamboo's performance reports become historical cycles (import-history);
   // anything else, or when asked, is only landed in raw_record.
-  const domain =
-    "builtin" in choice && HISTORY_PROFILES.includes(profile.name) && !landing;
+  const domain = isHistoryProfile(profile) && !landing;
   const upload = await resolveUpload(uploadId, store);
 
   const result = await withUploadLake(upload, async (lake, table) => {
@@ -228,6 +227,7 @@ export async function importUpload({
       entity: profile.entity,
       landing: !domain,
       syncState: false,
+      ...(profile.questions ? { questions: profile.questions } : {}),
       db,
       extract: { signal },
       params: {

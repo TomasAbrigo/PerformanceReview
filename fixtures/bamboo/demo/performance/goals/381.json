@@ -20,7 +20,73 @@
     }
   ],
   "selectedFilter": "status-all",
-  "goals": [],
+  "goals": [
+    {
+      "id": "6591",
+      "title": "Reducir los incidentes recurrentes a la mitad",
+      "description": "Sirve de base para el próximo ciclo de evaluación.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2023-04-14",
+      "completionDate": "2022-11-30",
+      "lastChangedDateTime": "2022-11-30T13:39:42Z",
+      "status": "completed",
+      "milestones": [
+        {
+          "id": 1378,
+          "employeeGoalId": 6591,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2022-10-24T08:55:23Z",
+          "lastUpdateDateTime": "2022-10-24T08:55:23Z",
+          "lastUpdateUserId": 381
+        },
+        {
+          "id": 1379,
+          "employeeGoalId": 6591,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2022-11-11T19:49:26Z",
+          "lastUpdateDateTime": "2022-11-11T19:49:26Z",
+          "lastUpdateUserId": 381
+        }
+      ],
+      "actions": {
+        "canEdit": false,
+        "canUpdateProgress": false,
+        "canClose": false,
+        "canReopen": false,
+        "canDelete": false,
+        "canComment": false
+      }
+    },
+    {
+      "id": "6594",
+      "title": "Lanzar el nuevo flujo de onboarding",
+      "description": "Sirve de base para el próximo ciclo de evaluación.",
+      "percentComplete": 90,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2023-02-03",
+      "completionDate": null,
+      "lastChangedDateTime": "2023-03-02T16:38:25Z",
+      "status": "in_progress",
+      "milestones": null,
+      "actions": {
+        "canEdit": false,
+        "canUpdateProgress": false,
+        "canClose": false,
+        "canReopen": false,
+        "canDelete": false,
+        "canComment": false
+      }
+    }
+  ],
   "persons": [
     {
       "employeeId": 381,
@@ -29,5 +95,14 @@
       "preferredName": null
     }
   ],
-  "comments": []
+  "comments": [
+    {
+      "goalId": "6591",
+      "commentCount": 4
+    },
+    {
+      "goalId": "6594",
+      "commentCount": 2
+    }
+  ]
 }

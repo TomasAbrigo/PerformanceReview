@@ -22,42 +22,106 @@
   "selectedFilter": "status-all",
   "goals": [
     {
-      "id": "7202",
+      "id": "7177",
       "title": "Migrar los reportes al nuevo tablero",
-      "description": "Sirve de base para el próximo ciclo de evaluación.",
-      "percentComplete": 0,
-      "alignsWithOptionId": null,
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 100,
+      "alignsWithOptionId": 9002,
       "sharedWithEmployeeIds": [
         241
       ],
-      "dueDate": "2027-01-27",
-      "completionDate": null,
-      "lastChangedDateTime": "2026-10-28T08:55:50Z",
-      "status": "in_progress",
+      "dueDate": "2025-08-21",
+      "completionDate": "2025-04-20",
+      "lastChangedDateTime": "2025-04-20T11:05:07Z",
+      "status": "completed",
       "milestones": [
         {
-          "id": 1712,
-          "employeeGoalId": 7202,
+          "id": 1622,
+          "employeeGoalId": 7177,
           "title": "Hito 1",
           "startValue": 0,
           "endValue": 1,
-          "currentValue": 0,
-          "completedDateTime": null,
-          "lastUpdateDateTime": "2026-10-18T11:21:01Z",
+          "currentValue": 1,
+          "completedDateTime": "2025-03-16T12:46:02Z",
+          "lastUpdateDateTime": "2025-03-16T12:46:02Z",
           "lastUpdateUserId": 513
         },
         {
-          "id": 1713,
-          "employeeGoalId": 7202,
+          "id": 1623,
+          "employeeGoalId": 7177,
           "title": "Hito 2",
           "startValue": 0,
           "endValue": 1,
-          "currentValue": 0,
-          "completedDateTime": null,
-          "lastUpdateDateTime": "2026-10-18T19:01:04Z",
+          "currentValue": 1,
+          "completedDateTime": "2025-02-05T10:30:46Z",
+          "lastUpdateDateTime": "2025-02-05T10:30:46Z",
+          "lastUpdateUserId": 513
+        },
+        {
+          "id": 1624,
+          "employeeGoalId": 7177,
+          "title": "Hito 3",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-01-21T13:50:02Z",
+          "lastUpdateDateTime": "2025-01-21T13:50:02Z",
+          "lastUpdateUserId": 513
+        },
+        {
+          "id": 1625,
+          "employeeGoalId": 7177,
+          "title": "Hito 4",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-03-27T10:24:03Z",
+          "lastUpdateDateTime": "2025-03-27T10:24:03Z",
           "lastUpdateUserId": 513
         }
       ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "7179",
+      "title": "Aumentar la cobertura de pruebas al 80%",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 100,
+      "alignsWithOptionId": 9003,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2026-06-09",
+      "completionDate": "2026-04-26",
+      "lastChangedDateTime": "2026-04-26T19:02:41Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "7182",
+      "title": "Automatizar la conciliación mensual",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 35,
+      "alignsWithOptionId": 9003,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2027-03-16",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-10-15T14:23:52Z",
+      "status": "in_progress",
+      "milestones": null,
       "actions": {
         "canEdit": true,
         "canUpdateProgress": true,
@@ -82,5 +146,14 @@
       "preferredName": null
     }
   ],
-  "comments": []
+  "comments": [
+    {
+      "goalId": "7177",
+      "commentCount": 1
+    },
+    {
+      "goalId": "7182",
+      "commentCount": 4
+    }
+  ]
 }

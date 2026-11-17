@@ -13,7 +13,7 @@ import {
   type SourceProfile,
 } from "@/modules/lake/profiles";
 import {
-  HISTORY_PROFILES,
+  isHistoryProfile,
   UPLOAD_EXTENSIONS,
   UPLOAD_MAX_BYTES,
   type ImportResult,
@@ -336,9 +336,7 @@ function Preview({
         />
       ) : null}
 
-      {choice &&
-      "builtin" in choice &&
-      HISTORY_PROFILES.includes(choice.builtin) ? (
+      {profile && isHistoryProfile(profile) ? (
         <div className="flex max-w-xl flex-col gap-1">
           <div className="flex items-center gap-2">
             <input
@@ -392,9 +390,7 @@ function Preview({
             onImport(
               choice,
               isNew ? profile : null,
-              "builtin" in choice && HISTORY_PROFILES.includes(choice.builtin)
-                ? landingOnly
-                : undefined,
+              profile && isHistoryProfile(profile) ? landingOnly : undefined,
             )
           }
         >
