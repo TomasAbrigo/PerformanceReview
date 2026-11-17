@@ -1,7 +1,7 @@
 import { cp, mkdtemp, readFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
-import { and, eq, sql } from "drizzle-orm";
+import { and, eq, inArray, sql } from "drizzle-orm";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { closeDb, db } from "@/db/client";
 import {
@@ -446,7 +446,18 @@ describe("role backfill (migration)", () => {
 
     // As it was before the roles: none on questions nor on revisions, and the
     // goals rating's template question is gone (its revision is orphaned).
-    await db.update(question).set({ role: null });
+    // (Only the roles that backfill restores: retention/engagement of the
+    // Santex template are not part of it.)
+    await db
+      .update(question)
+      .set({ role: null })
+      .where(
+        inArray(question.role, [
+          "goals_rating",
+          "goals_comment",
+          "overall_rating",
+        ]),
+      );
     await db.update(questionRevision).set({ role: null });
     const goalsRating = before.find((r) => r.role === "goals_rating")!;
     await db

@@ -43,21 +43,38 @@ describe("templates module", () => {
     await closeDb();
   });
 
-  it("seeds the three system scales once, even when run twice", async () => {
+  it("seeds the system scales once, even when run twice", async () => {
     await seedSystemTemplates(db);
     const system = (await listScales(db)).filter((s) => s.isSystem);
     expect(system.map((s) => s.name.en).sort()).toEqual([
       "4-point descriptive",
       "5-point agreement",
+      "Engagement 1-5",
       "Never…Always",
+      "Retention 1-5",
     ]);
   });
 
-  it("seeds the four system templates; upward is disabled", async () => {
+  it("seeds the retention and engagement scales 1..5, normalized 0..1", async () => {
+    const scales = await listScales(db);
+    const retention = scales.find((s) => s.systemKey === "retention_1_5")!;
+    const engagement = scales.find((s) => s.systemKey === "engagement_1_5")!;
+    expect(retention.options.map((o) => o.value)).toEqual([1, 2, 3, 4, 5]);
+    expect(retention.options.map((o) => o.normalized)).toEqual([
+      0, 0.25, 0.5, 0.75, 1,
+    ]);
+    expect(retention.options[0].label.es).toBe("Me aliviaría que se fuera");
+    expect(retention.options[4].label.es).toBe("Haría todo por retenerlo");
+    expect(engagement.options[0].label.es).toBe("Sin compromiso");
+    expect(engagement.options[4].label.es).toBe("Muy comprometido");
+  });
+
+  it("seeds the five system templates; upward is disabled", async () => {
     const system = (await listTemplates(db)).filter((x) => x.isSystem);
     expect(system.map((x) => x.name.es).sort()).toEqual([
       "Ciclo de desarrollo de mitad de año",
       "Evaluación de fin de año",
+      "Evaluación semestral Santex",
       "Feedback de pares",
       "Upward",
     ]);
@@ -72,6 +89,40 @@ describe("templates module", () => {
       (q) => q.kind === "rating",
     );
     expect(ratings).toHaveLength(2);
+  });
+
+  it("Santex template: standard and custom open questions with dimensions, hidden Likert retention and engagement", async () => {
+    const template = await systemTemplate("santex_semester");
+    expect(template.name.en).toBe("Santex semi-annual review");
+    const detail = await getTemplate(db, template.id);
+    const questions = detail!.sections.flatMap((s) => s.questions);
+    const open = questions.filter((q) => q.kind === "text");
+    expect(open.map((q) => `${q.appliesTo.join("+")}:${q.dimension}`)).toEqual([
+      "self:strengths",
+      "self:improvement",
+      "manager:strengths",
+      "manager:improvement",
+      "self+manager:custom_1",
+      "self+manager:custom_2",
+      "self+manager:custom_3",
+    ]);
+    expect(open[0].prompt.es).toBe("¿Qué hago bien?");
+    expect(open[1].prompt.es).toBe("¿En qué puedo mejorar?");
+    expect(open[4].prompt.es).toMatch(/Pregunta custom 1/);
+    expect(open[4].prompt.es).toMatch(/placeholder/i);
+    const scales = await listScales(db);
+    for (const [role, key] of [
+      ["retention", "retention_1_5"],
+      ["engagement", "engagement_1_5"],
+    ] as const) {
+      const q = questions.find((x) => x.role === role)!;
+      expect(q).toMatchObject({
+        kind: "rating",
+        appliesTo: ["manager"],
+        visibleToReviewee: false,
+        scaleId: scales.find((s) => s.systemKey === key)!.id,
+      });
+    }
   });
 
   it("mid-year template has no rating questions", async () => {
