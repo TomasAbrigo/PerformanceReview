@@ -124,6 +124,7 @@ Hoy solo se lee el mínimo n (vista de dirección); los umbrales de alerta, los 
 - **Estados:** el enum conserva las fases del flujo anterior (borrador, nominaciones, recolección, revisión del manager, calibración, compartir resultados, cerrado) porque los datos las tienen; los ciclos importados quedan cerrados.
 - **Snapshot organizacional:** cada participante guarda el manager, el área, la división, el puesto y la ubicación a la fecha de snapshot (a partir del historial de puesto). Los análisis usan ese manager y esa área, no los actuales; un pedido del manager cuyo evaluador no coincide con el del snapshot queda marcado como `reviewer_mismatch` y se cuenta en `/data-quality`.
 - **Goals:** cada participante tiene su snapshot de goals (`participant_goal_snapshot`: título, estado, progreso y fecha límite) con los goals que se solapan con el período o que están vinculados al ciclo (`cycle_goal_link`). El rating de goals y su comentario (`goals_rating`, `goals_comment`) se guardan aparte y nunca alimentan el rating general (`overall_rating`).
+- **Detalle de un participante:** `/cycles/<id>/participants/<participante>` muestra sus respuestas y los goals del período; ver "Goals y assessments".
 - **Rating final:** `final_rating` es un registro append-only con etapas (`computed`, `manager`, `calibrated`, `override`); la vista `v_current_rating` toma la de mayor precedencia y, dentro de ella, la más reciente. Los dashboards la leen.
 
 ### Actor y visibilidad
@@ -161,6 +162,19 @@ Hoy solo se lee el mínimo n (vista de dirección); los umbrales de alerta, los 
 - **Importar etiquetas:** formulario en la página o `pnpm analysis:import-labels <archivo.csv>`; formato en [docs/qualitative-labels.md](docs/qualitative-labels.md). Las filas que no cruzan se listan.
 - **Quién ve qué:** People todo; un manager, los comentarios de sus reportes directos al snapshot del ciclo; un empleado, nada (nunca sus propias etiquetas). "Solo agregados" (vista dirección) deja los conteos sin comentarios ni citas.
 - **Pendiente:** la dimensión sale del texto de la pregunta (`dimensionOf`) hasta que exista `question_revision.dimension` (#57); el cruce con retención/compromiso usa `question_revision.role` (`retention`, `engagement`), que el import histórico todavía no asigna.
+
+### Goals y assessments (`/insights/goals`)
+
+- **Qué hace:** cruza los goals del período de cada persona (el snapshot de goals del ciclo, `participant_goal_snapshot`, sin los que "ya no aplican") con lo que dijo su manager en el assessment (retención y compromiso, Likert 1-5) y el sentimiento de sus comentarios. Las consultas viven en `src/modules/analytics/goals-insights/`:
+  - `goalKpis`: por persona, manager o área (del snapshot, o "actual"), cantidad de goals, % completados, % en curso, % vencidos y avance promedio. Los porcentajes son sobre los goals del grupo. **Vencido** es un goal en curso cuya fecha límite es anterior al fin del período del ciclo (uno con fecha justo el último día no lo es; uno sin fecha o cerrado en Bamboo, tampoco); los vencidos son un subconjunto de los "en curso".
+  - `goalsVsIndicators`: por participante, % de goals completados, avance promedio, retención, compromiso y % de comentarios positivos (sobre los comentarios con etiqueta efectiva, la corrección humana pisa a la máquina: `src/modules/qualitative-analysis/effective.ts`; `null` si no tiene ninguno), y agregados por tramo de cumplimiento (cinco tramos de 20 puntos de % de goals completados) con el promedio de cada indicador. Las personas sin goals no tienen cumplimiento: solo aparecen en la tabla y se cuentan aparte.
+  - `goalOutliers`: dos listas de personas con goals y respuestas que no cuadran. **Cumplidos pero con indicadores bajos**: completaron al menos el 80 % de sus goals y retención **o** compromiso está en el umbral de riesgo (`alerts.riskThreshold`, 2 por defecto) o por debajo. **Atrasados pero con indicadores altos**: completaron el 30 % o menos y retención **y** compromiso son 4 o más. Los límites son enteros y se comparan sin decimales (3 de 10 goals es exactamente 30 %); quien no tiene goals o le falta una respuesta nunca es un caso.
+- **Retención y compromiso** salen de la evaluación del manager enviada (`question_revision.role` = `retention` / `engagement`, `answer.option_value` 1..5); si hay varios evaluadores cuenta la última enviada.
+- **Página:** KPIs por grupo (con un medidor del % completado), dispersión SVG de % de goals completados contra retención o compromiso (una persona por punto, con tooltip y "ver como tabla"), barras del promedio de retención y compromiso por tramo, las dos listas de casos que no cuadran con enlace al detalle de cada persona y la tabla de personas. Filtros por ciclo, área y manager, y la jerarquía "al momento de la review" o "actual", todos en la URL.
+- **Quién ve qué** (`insightsScope`): People todo; un manager, **sus reportes directos del snapshot**, siempre (aunque la jerarquía de la vista sea la actual) y nunca a sí mismo; **Dirección** solo agregados con n ≥ `aggregation.minGroupSize`: los KPI por área o manager (nunca por persona; los grupos chicos se agrupan en "Otros" o se ocultan y el total se oculta si dejaría adivinar un grupo oculto), los tramos con al menos esa cantidad de personas y la cantidad de casos que no cuadran si llega al mínimo, sin nombres; un empleado, nada (nunca sobre sí mismo).
+- **Detalle del assessment** (`/cycles/<ciclo>/participants/<participante>`, se llega desde la tabla de participantes del ciclo): las respuestas del assessment importado que el actor puede leer (`canRead`, por pregunta: la autoevaluación y la evaluación del manager enviadas, con quién evaluó y si no era el manager del snapshot) y el bloque "Objetivos del período" del snapshot de goals (estado, progreso, fecha límite, vencidos y los que ya no aplican), de solo lectura. Lo ven People y el manager del snapshot; dirección y empleados no.
+- **CSV** (solo People, vía el registro de exports, sin emails): `insights-goal-kpis.csv` (`cycle`, `groupBy`, `hierarchy`, `department`, `manager`) e `insights-goal-outliers.csv` (`cycle`, `hierarchy`, `department`, `manager`).
+- **Depende de** que los ciclos importados tengan snapshot de goals (se toma al terminar la importación, #58) y de las etiquetas de sentimiento (`/insights/qualitative`); sin goals, los KPI muestran "Sin objetivos" y las listas quedan vacías.
 
 ### Calidad de datos y API (`/data-quality`, `/api/v1`)
 
@@ -465,16 +479,18 @@ Handlers en `src/modules/api/handlers.ts`, rutas en `src/app/api/v1/**`. Todos l
 
 `GET /api/v1/export/<entidad>.csv` (mismo token y mismos filtros que la API), con "Exportar CSV" en las listas de personas, organigrama, goals, corridas y ciclos. Archivos UTF-8 con BOM (Excel), líneas `CRLF`, comillas RFC 4180 y un apóstrofe delante del texto que una planilla evaluaría como fórmula (`=`, `+`, `-`, `@`). Se arman página por página (streaming): un error antes de la primera fila es un 500 como cualquier otro; si falla una página posterior, el error se registra y el archivo termina con una línea `# EXPORT INTERRUPTED: ...`. Los encabezados salen en el idioma de `?locale=es|en` (por defecto `es`; los botones mandan el idioma de la página). `people.csv` y `GET /api/v1/people` listan a las mismas personas que la pantalla de personas (las que tienen al menos un empleo vigente). **El email no sale por defecto**: `people.csv` solo trae la columna `email` con `?include_email=1` (también `true`; `0` o `false` equivalen a omitirlo), y `q` busca solo por nombre (ver [Datos sensibles](#datos-sensibles)).
 
-| Archivo                  | Una fila por…                     | Filtros                              |
-| ------------------------ | --------------------------------- | ------------------------------------ |
-| `people.csv`             | persona                           | `q`, `active`, `include_email`       |
-| `org.csv`                | fila de puesto vigente en `date`  | `date`                               |
-| `goals.csv`              | goal                              | `person_id`, `manager_id`, `status`  |
-| `ingest-runs.csv`        | corrida                           | `source`, `entity`, `status`         |
-| `cycle-participants.csv` | participante de ciclo             | `cycle_id`                           |
-| `requests.csv`           | pedido de evaluación              | `cycle_id`, `relationship`, `status` |
-| `answers.csv`            | evaluador × pregunta (respuesta)  | `cycle_id`, `relationship`, `status` |
-| `insights-sentiment.csv` | dimensión (conteo de sentimiento) | `cycle`, `department`                |
+| Archivo                      | Una fila por…                     | Filtros                                                  |
+| ---------------------------- | --------------------------------- | -------------------------------------------------------- |
+| `people.csv`                 | persona                           | `q`, `active`, `include_email`                           |
+| `org.csv`                    | fila de puesto vigente en `date`  | `date`                                                   |
+| `goals.csv`                  | goal                              | `person_id`, `manager_id`, `status`                      |
+| `ingest-runs.csv`            | corrida                           | `source`, `entity`, `status`                             |
+| `cycle-participants.csv`     | participante de ciclo             | `cycle_id`                                               |
+| `requests.csv`               | pedido de evaluación              | `cycle_id`, `relationship`, `status`                     |
+| `answers.csv`                | evaluador × pregunta (respuesta)  | `cycle_id`, `relationship`, `status`                     |
+| `insights-sentiment.csv`     | dimensión (conteo de sentimiento) | `cycle`, `department`                                    |
+| `insights-goal-kpis.csv`     | grupo (persona, manager o área)   | `cycle`, `groupBy`, `hierarchy`, `department`, `manager` |
+| `insights-goal-outliers.csv` | persona que no cuadra             | `cycle`, `hierarchy`, `department`, `manager`            |
 
 Cada fila trae los ids internos (uuid) y los de Bamboo (`bamboo_id`, `legajo`, y el del manager o del manager del snapshot), más área, división, puesto y ubicación.
 
