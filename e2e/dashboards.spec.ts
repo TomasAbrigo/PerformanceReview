@@ -109,10 +109,10 @@ test("direction only reads the leadership view; employees get no dashboard", asy
   // /dashboards sends direction to the aggregates; names never show up.
   await page.goto(`/es/dashboards?cycle=${cycleId}`);
   await expect(page).toHaveURL(
-    new RegExp(`/es/dashboards/executive\\?cycle=${cycleId}$`),
+    new RegExp(`/es/insights/executive\\?cycle=${cycleId}$`),
   );
   await expect(
-    page.getByRole("heading", { name: `Vista de dirección · ${cycleName}` }),
+    page.getByRole("heading", { name: `Vista ejecutiva · ${cycleName}` }),
   ).toBeVisible();
   await expect(page.getByTestId("exec-participants")).toBeVisible();
   await expect(page.getByText(employeeName)).toHaveCount(0);
@@ -127,7 +127,6 @@ test("direction only reads the leadership view; employees get no dashboard", asy
   // An employee has no dashboard (and no executive view either).
   await actAsRole(page, "Empleado", "Sin persona");
   await page.goto(`/es/dashboards/executive?cycle=${cycleId}`);
-  await expect(
-    page.getByText("No tenés acceso a estos dashboards."),
-  ).toBeVisible();
+  await expect(page).toHaveURL(/\/es\/insights\/executive/);
+  await expect(page.getByText("Sin acceso.")).toBeVisible();
 });

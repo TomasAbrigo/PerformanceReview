@@ -53,6 +53,7 @@ import {
   sentimentByDimension,
   type DimensionSentiment,
 } from "@/modules/qualitative-analysis";
+import { selfAssessmentReport } from "@/modules/insights/self-assessment";
 import { RUN_STATUSES } from "@/modules/ingest/run-status";
 import { todayLocal } from "@/modules/org-history/dates";
 import { requestStatuses } from "@/modules/review-core/request-status";
@@ -720,6 +721,84 @@ const insightsSentimentExport = defineExport({
   ],
 });
 
+type SelfAssessmentRow = {
+  section: "completion" | "sentiment" | "theme" | "gap";
+  group: string | null;
+  metric: string;
+  value: number;
+};
+
+/**
+ * The self-assessment report (People's visibility) in long format: one row
+ * per section × group × metric (completion per department, sentiment of the
+ * self comments per dimension, theme counts, gap per question).
+ */
+const selfAssessmentExport = defineExport({
+  file: () => "insights-self-assessment",
+  query: z.object({ cycle: uuid }),
+  rows: (db, q) =>
+    each(
+      selfAssessmentReport(db, DEFAULT_ACTOR, {
+        cycleId: q.cycle,
+        groupBy: "department",
+      }).then((r): SelfAssessmentRow[] => [
+        ...r.completion.groups.flatMap((g) =>
+          (
+            [
+              ["n", g.n],
+              ["self_submitted", g.self.submitted],
+              ["self_total", g.self.total],
+              ["manager_submitted", g.manager.submitted],
+              ["manager_total", g.manager.total],
+            ] as const
+          ).map(([metric, value]) => ({
+            section: "completion" as const,
+            group: g.label,
+            metric,
+            value,
+          })),
+        ),
+        ...r.sentiment.flatMap((d) =>
+          (["positive", "constructive", "negative", "total"] as const).map(
+            (metric) => ({
+              section: "sentiment" as const,
+              group: d.dimension,
+              metric,
+              value: d[metric],
+            }),
+          ),
+        ),
+        ...r.themes.map((t) => ({
+          section: "theme" as const,
+          group: t.theme,
+          metric: "count",
+          value: t.count,
+        })),
+        ...r.gap.flatMap((g) =>
+          (
+            [
+              ["n", g.n],
+              ["self", g.meanSelf],
+              ["manager", g.meanManager],
+              ["gap", g.meanGap],
+            ] as const
+          ).map(([metric, value]) => ({
+            section: "gap" as const,
+            group: g.prompt.es,
+            metric,
+            value,
+          })),
+        ),
+      ]),
+    ),
+  columns: (h) => [
+    { header: h("section"), value: (r: SelfAssessmentRow) => r.section },
+    { header: h("group"), value: (r) => r.group },
+    { header: h("metric"), value: (r) => r.metric },
+    { header: h("value"), value: (r) => r.value },
+  ],
+});
+
 const EXPORTS = {
   people: peopleExport,
   org: orgExport,
@@ -735,6 +814,7 @@ const EXPORTS = {
   "insights-indicator-distribution": indicatorDistributionExport,
   "insights-alerts": indicatorAlertsExport,
   "insights-sentiment": insightsSentimentExport,
+  "insights-self-assessment": selfAssessmentExport,
 } as const;
 
 export type ExportEntity = keyof typeof EXPORTS;

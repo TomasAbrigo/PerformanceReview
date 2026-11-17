@@ -31,6 +31,7 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
   const tDashboards = await getTranslations("Dashboards");
   const tIndicators = await getTranslations("Indicators");
   const tQualitative = await getTranslations("Qualitative");
+  const tInsights = await getTranslations("Insights");
 
   return (
     <main className="flex flex-1 items-center justify-center p-8">
@@ -64,6 +65,15 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
             </Link>
             <Link href="/insights/qualitative" className="underline">
               {tQualitative("nav")}
+            </Link>
+            <Link href="/insights/self-assessment" className="underline">
+              {tInsights("SelfAssessment.nav")}
+            </Link>
+            <Link href="/insights/executive" className="underline">
+              {tInsights("Executive.nav")}
+            </Link>
+            <Link href="/insights/health-check" className="underline">
+              {tInsights("HealthCheck.nav")}
             </Link>
             <Link href="/imports/runs" className="underline">
               {tImports("nav")}

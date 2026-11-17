@@ -310,7 +310,7 @@ describe("importUpload with a custom profile", () => {
 
     expect(failed?.code).toBe("profile_exists");
     expect(await db.select().from(ingestRun)).toHaveLength(0);
-    expect(await listProfiles(store)).toHaveLength(9);
+    expect(await listProfiles(store)).toHaveLength(10);
   });
 
   it("does not overwrite a saved profile unless asked to", async () => {
@@ -445,4 +445,33 @@ describe("importUpload of a Bamboo performance report (domain mode)", () => {
     ).toHaveLength(0);
     await db.execute(sql`TRUNCATE review_cycle, identity_match_issue CASCADE`);
   }, 60_000);
+
+  it("lands a CAP health check with any headers, keyed by a row hash", async () => {
+    const csv =
+      "Equipo,Pregunta libre,Puntaje\nPlataforma,Todo bien,4\nDatos,Falta foco,2\n";
+    const stored = await storeUpload(
+      { name: "health-check.csv", bytes: Buffer.from(csv) },
+      store,
+    );
+    const input = {
+      uploadId: stored.id,
+      fileName: "health-check.csv",
+      profile: builtin("cap-health-check"),
+      db,
+      store,
+    };
+    const { counts, mode } = await importUpload(input);
+    expect(mode).toBe("landing");
+    expect(counts).toMatchObject({ read: 2, inserted: 2, rejected: 0 });
+    const records = await db.select().from(rawRecord);
+    expect(records.map((r) => r.entity)).toEqual([
+      "health_check",
+      "health_check",
+    ]);
+    expect(records.every((r) => r.sourceId.startsWith("row:"))).toBe(true);
+    expect(new Set(records.map((r) => r.sourceId)).size).toBe(2);
+    // Landing the same rows again writes nothing new.
+    const again = await importUpload(input);
+    expect(again.counts).toMatchObject({ read: 2, inserted: 0, unchanged: 2 });
+  });
 });

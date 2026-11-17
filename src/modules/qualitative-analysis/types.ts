@@ -8,6 +8,8 @@ export type QualitativeFilters = {
   dimension?: string;
   sentiment?: Sentiment;
   theme?: string;
+  /** Only the answers of reviews of this relationship (self, manager...). */
+  relationship?: "self" | "manager" | "peer" | "upward";
   /** Leadership view: counts only, no comments, quotes or names. */
   aggregateOnly?: boolean;
 };

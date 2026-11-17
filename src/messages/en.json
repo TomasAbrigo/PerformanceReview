@@ -646,7 +646,8 @@
       "goal": "Goals",
       "assessment": "Assessments",
       "feedback": "Feedback",
-      "assessment_progress": "Assessment progress"
+      "assessment_progress": "Assessment progress",
+      "health_check": "Health check (CAP)"
     },
     "result": {
       "title": "Import finished",
@@ -931,7 +932,9 @@
       "dimension": "dimension",
       "positive": "positive",
       "constructive": "constructive",
-      "negative": "negative"
+      "negative": "negative",
+      "section": "section",
+      "metric": "metric"
     }
   },
   "ImportHistory": {
@@ -1330,6 +1333,102 @@
       "no_file": "Choose a file.",
       "unknown": "Something went wrong.",
       "not_labeled": "This comment has no label yet."
+    }
+  },
+  "Insights": {
+    "forbidden": "No access.",
+    "noCycles": "There are no cycles yet.",
+    "cycle": "Cycle",
+    "apply": "Apply",
+    "filters": "Filters",
+    "empty": "No data to show.",
+    "maskedHint": "Aggregates only: groups of fewer than {min} people are folded into Others or hidden.",
+    "fullHint": "Full People view.",
+    "others": "Others",
+    "suppressed": "{n, plural, =0 {Nobody in small groups} one {# person in small groups (not broken down)} other {# people in small groups (not broken down)}}",
+    "hidden": "Hidden: fewer than {min} people.",
+    "percent": "{value}%",
+    "groupBy": {
+      "label": "Group by",
+      "department": "Department",
+      "manager": "Manager"
+    },
+    "completion": {
+      "title": "Completion",
+      "table": "Completion by group",
+      "group": "Group",
+      "n": "People",
+      "self": "Self assessment",
+      "manager": "Manager review",
+      "all": "Total",
+      "noDepartment": "No department",
+      "meter": "{label}: {submitted} of {total} submitted"
+    },
+    "SelfAssessment": {
+      "nav": "Self-assessment report",
+      "title": "Self-assessment report",
+      "sentimentTitle": "Sentiment of the self assessments",
+      "sentimentChart": "Sentiment of the self assessments by dimension",
+      "themesTitle": "Themes of the self assessments",
+      "gapTitle": "Self vs. manager gap",
+      "gapHint": "Normalized mean (0 to 1) on the questions both answered; gap = manager − self.",
+      "gapTable": "Gap by question",
+      "question": "Question",
+      "answers": "Pairs",
+      "self": "Self",
+      "manager": "Manager",
+      "gap": "Gap",
+      "sentimentGapTitle": "Sentiment: self vs. manager",
+      "sentimentGapHint": "For text-only cycles: the sentiment share of each side per dimension.",
+      "sentimentGapChart": "Self and manager sentiment by dimension",
+      "rowSelf": "{dimension} · self",
+      "rowManager": "{dimension} · manager"
+    },
+    "HealthCheck": {
+      "nav": "Health check (CAP)",
+      "title": "Health check (CAP)",
+      "pending": "Format to be defined",
+      "pendingHint": "Health check files are imported with the cap-health-check profile and stored as they are (landed), without interpreting columns, until the format is defined.",
+      "files": "Files imported",
+      "runs": "Imports",
+      "rows": "Rows landed",
+      "lastLanded": "Last import",
+      "never": "Never",
+      "upload": "Upload a health check file",
+      "questionsTitle": "Open questions",
+      "questions": {
+        "format": "Format: which columns does the file have and what kind of file is it (CSV, Excel, a survey export)?",
+        "period": "Period: how often is it run and how does it map to a cycle or semester?",
+        "personKey": "Person key: are answers anonymous, per team or per person (email, employee number)?",
+        "scale": "Scale: which scale do answers use (1 to 5, traffic light, free text) and how is it read?"
+      }
+    },
+    "Executive": {
+      "nav": "Executive view",
+      "title": "Executive view",
+      "mode": "Mode",
+      "modes": {
+        "qualitative": "Qualitative",
+        "quantitative": "Quantitative",
+        "both": "Both"
+      },
+      "completionTitle": "Completion",
+      "participants": "Participants",
+      "selfPct": "Self assessments submitted",
+      "managerPct": "Manager reviews submitted",
+      "retention": "Retention",
+      "engagement": "Engagement",
+      "mean": "Mean {value}",
+      "n": "{n, plural, one {# person} other {# people}}",
+      "distribution": "{indicator} distribution (1 to 5)",
+      "risk": "Risk quadrant",
+      "riskCount": "{n, plural, one {# person} other {# people}} with low retention and engagement",
+      "riskOf": "of {total} with both indicators",
+      "sentiment": "Sentiment by dimension",
+      "sentimentChart": "Sentiment by dimension of the cycle",
+      "themes": "Top 5 themes",
+      "themeCount": "{n, plural, one {# mention} other {# mentions}}",
+      "ratings": "Ratings"
     }
   }
 }
