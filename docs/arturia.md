@@ -10,7 +10,7 @@ Informe de desempeño de un ciclo para publicar como mini app en Arturía. Se ge
 4. **Exportar**:
    - `pnpm export:arturia --cycle latest` → versión con datos personales (uso interno de People).
    - `pnpm export:arturia --cycle latest --anonymized` → versión anonimizada.
-   - `--cycle` acepta el id, el nombre exacto del ciclo o `latest`; `--out <dir>` cambia la carpeta.
+   - `--cycle` acepta el id, el nombre exacto del ciclo o `latest`; `--out <dir>` cambia la carpeta; `--locale es|en` el idioma (default `es`).
 5. **Subir a Arturía** el archivo que corresponda (ver preguntas abiertas: cuál de las dos versiones y cómo).
 
 El CLI imprime solo rutas y cantidades, nunca nombres. Código de salida: 0 ok, 1 falló, 2 argumentos inválidos.
@@ -26,7 +26,7 @@ Por defecto en `data/private/arturia/<ciclo-slug>/` (ignorado por git):
 | `report.anonymized.json` | Sin `people`, sin emails, sin nombres; grupos con menos de `aggregation.minGroupSize` personas en "Otros"; equipos "Equipo 1..N". |
 | `report.anonymized.html` | La página de la versión anonimizada.                                                                                              |
 
-El HTML no hace ningún request externo (sin `http(s)://`, ni `src`/`href`/`url()` salvo anclas `#` y `data:`; lo verifica un test). Tiene un selector "Todo / Cuantitativo / Cualitativo" que muestra u oculta secciones con JS puro. Los textos están en español en un único objeto `labels` (`src/modules/arturia-report/labels.ts`).
+El HTML no hace ningún request externo (sin `http(s)://`, ni `src`/`href`/`url()` salvo anclas `#` y `data:`; lo verifica un test). Tiene un selector "Todo / Cuantitativo / Cualitativo" que muestra u oculta secciones con JS puro. Los textos salen del namespace `Arturia` de `src/messages/{es,en}.json`.
 
 El formato del JSON está documentado en [arturia-schema.md](arturia-schema.md).
 

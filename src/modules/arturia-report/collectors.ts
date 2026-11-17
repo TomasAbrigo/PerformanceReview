@@ -1,22 +1,21 @@
-// Each section of the report is one collector: it reads as People
-// (DEFAULT_ACTOR: everything, unmasked) and applies the anonymization of the
-// export itself, so the report never depends on a role's masking rules.
+// Each section of the report is one collector. The named report reads as
+// People (DEFAULT_ACTOR: everything); the anonymized one as direction with
+// the report's minimum group size, so the analytics layer masks what it
+// already knows how to (indicators, executive groups), and this layer adds
+// the rest: "Otros" / suppressed folds, "Equipo N" labels, no totals next to
+// a suppressed group (no reconstruction by difference), re-pseudonymized
+// quotes, no people section.
 import { sql } from "drizzle-orm";
 import type { DbOrTx } from "@/db/client";
-import { DEFAULT_ACTOR } from "@/modules/actor/types";
-import {
-  bins,
-  cycleProgress,
-  executiveSummary,
-  type DashboardFilters,
-} from "@/modules/analytics/dashboards";
+import { type ActorContext, DEFAULT_ACTOR } from "@/modules/actor/types";
+import { bins, executiveSummary } from "@/modules/analytics/dashboards";
 import {
   indicatorAlerts,
   indicatorDistribution,
   indicators,
   riskMatrix,
 } from "@/modules/analytics/indicators";
-import { foldSmallGroups } from "@/modules/insights/aggregation";
+import { foldGroups } from "@/modules/insights/aggregation";
 import { effectiveCte } from "@/modules/qualitative-analysis/effective";
 import { pseudonymize } from "@/modules/qualitative-analysis/pseudonymize";
 import {
@@ -25,11 +24,11 @@ import {
   topThemes,
 } from "@/modules/qualitative-analysis/queries";
 import { pseudonymSources } from "@/modules/qualitative-analysis/service";
-import { foldGroups, OTHERS, sumBy, teamLabels } from "./anonymize";
+import { sumBy, teamLabels } from "./anonymize";
+import type { Labels } from "./labels";
 import type {
   ArturiaSections,
   CompletionSection,
-  ExecutiveSection,
   PersonRow,
   QualitativeSection,
 } from "./schema";
@@ -39,6 +38,7 @@ export type CollectContext = {
   anonymized: boolean;
   /** Smallest group shown: the report's minGroupSize when anonymized, else 1. */
   min: number;
+  labels: Labels;
 };
 
 export type Collector<K extends keyof ArturiaSections> = (
@@ -46,222 +46,249 @@ export type Collector<K extends keyof ArturiaSections> = (
   ctx: CollectContext,
 ) => Promise<ArturiaSections[K]>;
 
+/** Direction: aggregates only, groups under the minimum folded or hidden. */
+export const DIRECTION_ACTOR: ActorContext = {
+  personId: null,
+  role: "direction",
+};
+
+export const actorOf = (ctx: CollectContext): ActorContext =>
+  ctx.anonymized ? DIRECTION_ACTOR : DEFAULT_ACTOR;
+
 // ------------------------------------------------------------- executive
 
 export const collectExecutive: Collector<"executive"> = async (db, ctx) => {
-  // People's view: every department unmasked, people without one in "Otros".
-  const s = await executiveSummary(db, DEFAULT_ACTOR, { cycleId: ctx.cycleId });
-  const empty = bins.map(() => 0);
-  const base: ExecutiveSection = {
+  const s = await executiveSummary(db, actorOf(ctx), {
+    cycleId: ctx.cycleId,
+    minGroupSize: ctx.min,
+  });
+  const hidden = ctx.anonymized && s.suppressed > 0;
+  return {
     participants: s.participants,
     progress: s.progress,
     bins,
-    distribution: s.distribution,
-    byDepartment: [],
-    suppressed: 0,
-  };
-  const rated = sumBy(s.distribution, (c) => c);
-  if (s.participants < ctx.min) {
-    return { ...base, progress: [], distribution: empty, suppressed: rated };
-  }
-  const groups = [
-    ...s.byDepartment.map((d) => ({
-      key: d.department as string | null,
-      n: d.n,
-      mean: d.mean,
-      counts: d.counts,
-    })),
-    ...(s.others ? [{ key: null, ...s.others }] : []),
-  ];
-  const { shown, others, suppressed } = foldSmallGroups(groups, ctx.min);
-  return {
-    ...base,
-    distribution: rated < ctx.min ? empty : s.distribution,
+    distribution: hidden ? null : s.distribution,
     byDepartment: [
-      ...shown.map((g) => ({
-        label: g.key ?? OTHERS,
-        n: g.n,
-        mean: g.mean,
-        counts: g.counts,
+      ...s.byDepartment.map((d) => ({
+        label: d.department,
+        n: d.n,
+        mean: d.mean,
+        counts: d.counts,
         other: false,
       })),
-      ...(others ? [{ label: OTHERS, ...others, other: true }] : []),
+      ...(s.others
+        ? [{ label: ctx.labels.others, ...s.others, other: true }]
+        : []),
     ],
-    suppressed: suppressed + s.suppressed,
+    suppressed: s.suppressed,
   };
 };
 
 // ------------------------------------------------------------ completion
 
 type Row = CompletionSection["byDepartment"][number];
-
-function foldCompletion(
-  rows: Row[],
-  min: number,
-): { rows: Row[]; suppressed: number } {
-  const out: Row[] = [];
-  let suppressed = 0;
-  for (const rel of [...new Set(rows.map((r) => r.relationship))]) {
-    const f = foldGroups(
-      rows.filter((r) => r.relationship === rel),
-      min,
-      (r) => r.n,
-      (rest) => ({
-        label: OTHERS,
-        relationship: rel,
-        n: sumBy(rest, (r) => r.n),
-        total: sumBy(rest, (r) => r.total),
-        submitted: sumBy(rest, (r) => r.submitted),
-        other: true,
-      }),
-      (r) => !r.other,
-    );
-    out.push(...f.shown, ...(f.others ? [f.others] : []));
-    suppressed += f.suppressed;
-  }
-  return { rows: out, suppressed };
-}
+type Acc = Row & { ids: Set<string> };
 
 /**
- * Requests per relationship, area and team (the snapshot's), from the cycle
- * progress dashboard. A group's n is its number of requests of that
- * relationship. TODO(#59): enrich with completionSummary / missingAssessments
- * once `src/modules/analytics/completion` lands.
+ * Requests per relationship, area and team of the snapshot. A group's n is
+ * its distinct participants (a person with three peer reviews counts once).
+ * TODO(#59): enrich with completionSummary / missingAssessments.
  */
 export const collectCompletion: Collector<"completion"> = async (db, ctx) => {
-  const filters: DashboardFilters = {
-    cycleId: ctx.cycleId,
-    hierarchy: "asOf",
-  };
-  const p = await cycleProgress(db, DEFAULT_ACTOR, filters);
-  const teams = teamLabels(p.rows.flatMap((r) => r.managerId ?? []));
-  const by = (keyOf: (r: (typeof p.rows)[number]) => string | null) => {
-    const acc = new Map<string, Row>();
-    for (const r of p.rows) {
+  const rows = await db.execute<{
+    participant_id: string;
+    relationship: string;
+    department: string | null;
+    manager_id: string | null;
+    manager_name: string | null;
+    total: number;
+    submitted: number;
+    draft: number;
+    declined: number;
+  }>(sql`
+    select cp.id as participant_id, r.relationship::text as relationship,
+           cp.snap_department as department, cp.snap_manager_person_id as manager_id,
+           mp.display_name as manager_name, count(*)::int as total,
+           count(*) filter (where r.status = 'submitted')::int as submitted,
+           count(*) filter (where r.status = 'draft')::int as draft,
+           count(*) filter (where r.status = 'declined')::int as declined
+    from review_request r
+    join cycle_participant cp on cp.id = r.participant_id
+    left join person mp on mp.id = cp.snap_manager_person_id
+    where r.cycle_id = ${ctx.cycleId}::uuid and r.deleted_at is null and cp.removed_at is null
+    group by 1, 2, 3, 4, 5`);
+  if (!rows.length) return null;
+  const teams = teamLabels(
+    rows.flatMap((r) => r.manager_id ?? []),
+    ctx.labels.team,
+  );
+
+  const breakdown = (
+    keyOf: (r: (typeof rows)[number]) => { id: string; label: string } | null,
+  ) => {
+    const acc = new Map<string, Acc>();
+    for (const r of rows) {
       const key = keyOf(r);
-      const id = `${r.relationship}\u0000${key ?? ""}`;
-      const row = acc.get(id) ?? {
-        label: key ?? OTHERS,
+      const id = `${r.relationship}\u0000${key?.id ?? ""}`;
+      const a = acc.get(id) ?? {
+        label: key?.label ?? ctx.labels.others,
         relationship: r.relationship,
         n: 0,
         total: 0,
         submitted: 0,
         other: key === null,
+        ids: new Set<string>(),
       };
-      row.n += r.total;
-      row.total += r.total;
-      row.submitted += r.submitted;
-      acc.set(id, row);
+      a.ids.add(r.participant_id);
+      a.n = a.ids.size;
+      a.total += r.total;
+      a.submitted += r.submitted;
+      acc.set(id, a);
     }
-    return [...acc.values()].sort(
+    const groups = [...acc.values()].sort(
       (a, b) =>
         a.relationship.localeCompare(b.relationship) ||
         a.label.localeCompare(b.label, "es"),
     );
+    const out: Row[] = [];
+    let suppressed = 0;
+    for (const rel of [...new Set(groups.map((g) => g.relationship))]) {
+      const f = foldGroups(
+        groups.filter((g) => g.relationship === rel),
+        ctx.min,
+        {
+          size: (g) => g.n,
+          named: (g) => !g.other,
+          merge: (rest) => {
+            const ids = new Set(rest.flatMap((g) => [...g.ids]));
+            return {
+              label: ctx.labels.others,
+              relationship: rel,
+              n: ids.size,
+              total: sumBy(rest, (g) => g.total),
+              submitted: sumBy(rest, (g) => g.submitted),
+              other: true,
+              ids,
+            };
+          },
+        },
+      );
+      for (const { ids: _ids, ...g } of [
+        ...f.shown,
+        ...(f.others ? [f.others] : []),
+      ]) {
+        void _ids;
+        out.push(g);
+      }
+      suppressed = Math.max(suppressed, f.suppressed);
+    }
+    return { rows: out, suppressed };
   };
-  const dep = foldCompletion(
-    by((r) => r.department),
-    ctx.min,
+
+  const dep = breakdown((r) =>
+    r.department === null ? null : { id: r.department, label: r.department },
   );
-  const man = foldCompletion(
-    by((r) =>
-      r.managerId === null
-        ? null
-        : ctx.anonymized
-          ? teams.get(r.managerId)!
-          : (r.managerName ?? teams.get(r.managerId)!),
-    ),
-    ctx.min,
+  const man = breakdown((r) =>
+    r.manager_id === null
+      ? null
+      : {
+          id: r.manager_id,
+          label: ctx.anonymized
+            ? teams.get(r.manager_id)!
+            : (r.manager_name ?? teams.get(r.manager_id)!),
+        },
   );
+  const totals = new Map<
+    string,
+    NonNullable<CompletionSection["byRelationship"]>[number]
+  >();
+  for (const r of rows) {
+    const t = totals.get(r.relationship) ?? {
+      relationship: r.relationship,
+      total: 0,
+      submitted: 0,
+      draft: 0,
+      declined: 0,
+    };
+    t.total += r.total;
+    t.submitted += r.submitted;
+    t.draft += r.draft;
+    t.declined += r.declined;
+    totals.set(r.relationship, t);
+  }
+  const hidden = ctx.anonymized && (dep.suppressed > 0 || man.suppressed > 0);
   return {
-    byRelationship: p.totals.map((t) => ({
-      relationship: t.relationship,
-      total: t.total,
-      submitted: t.submitted,
-      draft: t.draft,
-      declined: t.declined,
-    })),
+    byRelationship: hidden
+      ? null
+      : [...totals.values()].sort((a, b) =>
+          a.relationship.localeCompare(b.relationship),
+        ),
     byDepartment: dep.rows,
     byManager: man.rows,
-    suppressed: Math.max(dep.suppressed, man.suppressed),
+    suppressed: { byDepartment: dep.suppressed, byManager: man.suppressed },
   };
 };
 
-// ------------------------------------------------- indicators and goals
+// ------------------------------------------------------------ indicators
 
 /**
- * Retention and engagement (#60) per area, the risk matrix and the alerts,
- * counted (never named). Anonymized: areas under the minimum fold into
- * "Otros", matrix cells and alert counts under it are hidden (null / left out).
+ * Retention and engagement (#60) per area, the risk matrix and the alert
+ * counts (never named). Anonymized, the indicators module masks as for
+ * direction: small areas folded into "others" or hidden, totals and matrix
+ * cells null when something is suppressed.
  */
 export const collectIndicators: Collector<"indicators"> = async (db, ctx) => {
+  const actor = actorOf(ctx);
+  const config = { minGroupSize: ctx.min };
   const [dists, matrix, alerts] = await Promise.all([
     Promise.all(
       indicators.map((indicator) =>
-        indicatorDistribution(db, DEFAULT_ACTOR, {
+        indicatorDistribution(db, actor, {
           cycleId: ctx.cycleId,
           indicator,
           groupBy: "department",
+          config,
         }),
       ),
     ),
-    riskMatrix(db, DEFAULT_ACTOR, { cycleId: ctx.cycleId }),
-    indicatorAlerts(db, DEFAULT_ACTOR, { cycleId: ctx.cycleId }),
+    riskMatrix(db, actor, { cycleId: ctx.cycleId, config }),
+    indicatorAlerts(db, actor, { cycleId: ctx.cycleId, config }),
   ]);
-  if (dists.every((d) => d.series.every((s) => s.n === 0))) return null;
-  const visible = (n: number | null) => (n !== null && n >= ctx.min ? n : null);
-  const alertCounts = new Map<
-    string,
-    { kind: string; indicator: string | null; count: number }
-  >();
-  for (const a of alerts.alerts) {
-    const indicator = a.kind === "drop" ? a.indicator : null;
-    const key = `${a.kind}:${indicator ?? ""}`;
-    const row = alertCounts.get(key) ?? { kind: a.kind, indicator, count: 0 };
-    row.count += 1;
-    alertCounts.set(key, row);
+  if (dists.every((d) => d.series.length === 0 && d.suppressed === 0)) {
+    return null;
   }
   return {
-    distribution: dists.map((d) => {
-      const { shown, others, suppressed } = foldSmallGroups(
-        d.series.map((s) => ({
-          key: s.others ? null : s.key === null ? null : (s.label ?? s.key),
-          n: s.n,
-          mean: s.mean,
-          counts: s.counts,
-        })),
-        ctx.min,
-      );
-      return {
-        indicator: d.indicator,
-        groups: [
-          ...shown.map((g) => ({
-            label: g.key ?? OTHERS,
-            n: g.n,
-            mean: g.mean,
-            counts: g.counts,
-            other: false,
-          })),
-          ...(others ? [{ label: OTHERS, ...others, other: true }] : []),
-        ],
-        total:
-          d.total && d.total.n >= ctx.min
-            ? { n: d.total.n, mean: d.total.mean, counts: d.total.counts }
-            : null,
-        suppressed: suppressed + d.suppressed,
-      };
-    }),
+    distribution: dists.map((d) => ({
+      indicator: d.indicator,
+      groups: d.series.map((s) => ({
+        label:
+          s.others || s.key === null ? ctx.labels.others : (s.label ?? s.key),
+        n: s.n,
+        mean: s.mean,
+        counts: s.counts,
+        other: s.others || s.key === null,
+      })),
+      total: d.total
+        ? { n: d.total.n, mean: d.total.mean, counts: d.total.counts }
+        : null,
+      suppressed: d.suppressed,
+    })),
     riskMatrix: {
       cells: matrix.cells.map((c) => ({
         retention: c.retention,
         engagement: c.engagement,
-        count: visible(c.count),
+        count: c.count,
         risk: c.risk,
       })),
-      total: visible(matrix.total),
-      riskCount: visible(matrix.riskCount),
+      total: matrix.total,
+      riskCount: matrix.riskCount,
     },
-    alerts: [...alertCounts.values()].filter((a) => a.count >= ctx.min),
+    alerts: [
+      { kind: "drop", indicator: null, count: alerts.peopleWithDrop },
+      { kind: "risk", indicator: null, count: alerts.peopleAtRisk },
+    ].flatMap((a) =>
+      a.count === null || a.count < ctx.min ? [] : [{ ...a, count: a.count }],
+    ),
   };
 };
 
@@ -295,6 +322,18 @@ async function qualitativeSizes(db: DbOrTx, cycleId: string) {
   return { dimension: of("dimension"), theme: of("theme"), cycle: of("cycle") };
 }
 
+const withoutN = <T extends { n: number }>(x: T): Omit<T, "n"> => {
+  const rest: Partial<T> = { ...x };
+  delete rest.n;
+  return rest as Omit<T, "n">;
+};
+
+/**
+ * Sentiment per dimension, trend over cycles and top themes, computed as
+ * People and folded here by distinct participants. `suppressed` counts
+ * people (the dimensions, themes and trend points left out; a person in
+ * several of them counts in each, so it is an upper bound).
+ */
 export const collectQualitative: Collector<"qualitative"> = async (db, ctx) => {
   const f = { cycleId: ctx.cycleId };
   const [dims, trend, themes, sizes, sources] = await Promise.all([
@@ -305,6 +344,7 @@ export const collectQualitative: Collector<"qualitative"> = async (db, ctx) => {
     pseudonymSources(db),
   ]);
   if (!dims.length && !trend.length) return null;
+  const others = ctx.labels.others;
 
   type Dim = QualitativeSection["sentimentByDimension"][number] & { n: number };
   const d = foldGroups<Dim>(
@@ -314,20 +354,22 @@ export const collectQualitative: Collector<"qualitative"> = async (db, ctx) => {
       n: sizes.dimension.get(x.dimension) ?? 0,
     })),
     ctx.min,
-    (x) => x.n,
-    (rest) => ({
-      dimension: OTHERS,
-      other: true,
-      n: Math.max(...rest.map((x) => x.n)),
-      positive: sumBy(rest, (x) => x.positive),
-      constructive: sumBy(rest, (x) => x.constructive),
-      negative: sumBy(rest, (x) => x.negative),
-      total: sumBy(rest, (x) => x.total),
-    }),
+    {
+      size: (x) => x.n,
+      // overlapping groups: the largest is a safe lower bound of the union
+      merge: (rest) => ({
+        dimension: others,
+        other: true,
+        n: Math.max(...rest.map((x) => x.n)),
+        positive: sumBy(rest, (x) => x.positive),
+        constructive: sumBy(rest, (x) => x.constructive),
+        negative: sumBy(rest, (x) => x.negative),
+        total: sumBy(rest, (x) => x.total),
+      }),
+    },
   );
-  const keptTrend = trend.filter(
-    (t) => (sizes.cycle.get(t.cycleId) ?? 0) >= ctx.min,
-  );
+  const cycleSize = (id: string) => sizes.cycle.get(id) ?? 0;
+  const keptTrend = trend.filter((t) => cycleSize(t.cycleId) >= ctx.min);
 
   type Theme = QualitativeSection["topThemes"][number] & { n: number };
   const t = foldGroups<Theme>(
@@ -337,38 +379,35 @@ export const collectQualitative: Collector<"qualitative"> = async (db, ctx) => {
       n: sizes.theme.get(x.theme) ?? 0,
     })),
     ctx.min,
-    (x) => x.n,
-    (rest) => ({
-      theme: OTHERS,
-      count: sumBy(rest, (x) => x.count),
-      other: true,
-      n: Math.max(...rest.map((x) => x.n)),
-      quotes: [],
-    }),
+    {
+      size: (x) => x.n,
+      merge: (rest) => ({
+        theme: others,
+        count: sumBy(rest, (x) => x.count),
+        other: true,
+        n: Math.max(...rest.map((x) => x.n)),
+        quotes: [],
+      }),
+    },
   );
   // Quotes come pseudonymized from the qualitative module; run them (and the
   // theme names) through the pseudonymizer again, belt and braces.
-  const shownThemes = [...t.shown, ...(t.others ? [t.others] : [])];
-  const strip = <T extends { n: number }>(x: T): Omit<T, "n"> => {
-    const rest: Partial<T> = { ...x };
-    delete rest.n;
-    return rest as Omit<T, "n">;
-  };
   return {
     sentimentByDimension: [...d.shown, ...(d.others ? [d.others] : [])].map(
-      strip,
+      withoutN,
     ),
     trend: keptTrend,
-    topThemes: shownThemes.map((x) => ({
-      ...strip(x),
+    topThemes: [...t.shown, ...(t.others ? [t.others] : [])].map((x) => ({
+      ...withoutN(x),
       theme: x.other ? x.theme : pseudonymize([x.theme], sources).texts[0],
       quotes: [...new Set(pseudonymize(x.quotes, sources).texts)],
     })),
     suppressed:
       d.suppressed +
+      t.suppressed +
       sumBy(
         trend.filter((x) => !keptTrend.includes(x)),
-        (x) => x.total,
+        (x) => cycleSize(x.cycleId),
       ),
   };
 };

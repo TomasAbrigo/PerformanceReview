@@ -6,6 +6,7 @@ export function sampleReport(over: Partial<ArturiaReport> = {}): ArturiaReport {
     schemaVersion: "arturia-report.v1",
     schemaMinor: 0,
     generatedAt: "2026-11-17T12:00:00.000Z",
+    locale: "es",
     cycle: {
       id: "00000000-0000-4000-8000-000000000001",
       name: "Evaluación 2025",

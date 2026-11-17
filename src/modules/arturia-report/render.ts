@@ -1,6 +1,6 @@
 // Pure: the report as JSON and as one self-contained HTML page (inline CSS,
 // JS, data and server-side SVG; no external request of any kind).
-import { labels as L } from "./labels";
+import { labelsFor, type Labels } from "./labels";
 import type {
   ArturiaReport,
   CompletionSection,
@@ -9,6 +9,12 @@ import type {
   IndicatorsSection,
   QualitativeSection,
 } from "./schema";
+
+/**
+ * Labels of the render in progress: set by renderHtml for its (synchronous)
+ * duration, so the helpers below need not thread them through.
+ */
+let L: Labels = labelsFor("es");
 
 export function renderJson(report: ArturiaReport): string {
   return `${JSON.stringify(report, null, 2)}\n`;
@@ -146,7 +152,7 @@ export function svgMatrix(
 
 const binLabel = (b: { from: number; to: number }) =>
   `${Math.round(b.from * 100)}–${Math.round(b.to * 100)}%`;
-const rel = (r: string) => L.relationships[r] ?? r;
+const rel = (r: string) => (L.relationships as Record<string, string>)[r] ?? r;
 
 const section = (
   id: string,
@@ -156,7 +162,8 @@ const section = (
 ) =>
   `<section id="${id}" data-kind="${kind}"><h2>${esc(title)}</h2>${body}</section>`;
 
-const unavailable = `<p class="muted">${esc(L.notAvailable)}</p>`;
+const unavailable = () => `<p class="muted">${esc(L.notAvailable)}</p>`;
+const hiddenTotal = () => `<p class="muted">${esc(L.hiddenTotal)}</p>`;
 const suppressedNote = (n: number) =>
   n ? `<p class="muted">${esc(L.suppressed)}: ${n}</p>` : "";
 
@@ -169,7 +176,7 @@ function executiveHtml(e: ExecutiveSection): string {
     ),
   ].join("");
   return `<div class="tiles">${tiles}</div>
-<h3>${esc(L.executive.distribution)}</h3>${svgBars(e.bins.map((b, i) => ({ label: binLabel(b), value: e.distribution[i] ?? 0 })))}
+<h3>${esc(L.executive.distribution)}</h3>${e.distribution ? svgBars(e.bins.map((b, i) => ({ label: binLabel(b), value: e.distribution![i] ?? 0 }))) : hiddenTotal()}
 <h3>${esc(L.executive.byDepartment)}</h3>${svgStacked(
     e.byDepartment.map((d) => ({
       label: `${d.label} (n=${d.n}, ${L.executive.mean} ${num(d.mean)})`,
@@ -180,7 +187,7 @@ function executiveHtml(e: ExecutiveSection): string {
 }
 
 function completionHtml(c: CompletionSection | null): string {
-  if (!c) return unavailable;
+  if (!c) return unavailable();
   const legend = [L.completion.submitted, L.completion.pending];
   const rows = (rs: CompletionSection["byDepartment"]) =>
     svgStacked(
@@ -190,19 +197,21 @@ function completionHtml(c: CompletionSection | null): string {
       })),
       legend,
     );
-  const table = c.byRelationship
-    .map(
-      (r) =>
-        `<tr><td>${esc(rel(r.relationship))}</td><td>${r.total}</td><td>${r.submitted}</td><td>${r.draft}</td><td>${r.declined}</td><td>${pct(r.submitted, r.total)}</td></tr>`,
-    )
-    .join("");
-  return `<h3>${esc(L.completion.byRelationship)}</h3><table><thead><tr><th></th><th>${esc(L.completion.total)}</th><th>${esc(L.completion.submitted)}</th><th>${esc(L.completion.draft)}</th><th>${esc(L.completion.declined)}</th><th>%</th></tr></thead><tbody>${table}</tbody></table>
-<h3>${esc(L.completion.byDepartment)}</h3>${rows(c.byDepartment)}
-<h3>${esc(L.completion.byManager)}</h3>${rows(c.byManager)}${suppressedNote(c.suppressed)}`;
+  const totals = c.byRelationship
+    ? `<table><thead><tr><th></th><th>${esc(L.completion.total)}</th><th>${esc(L.completion.submitted)}</th><th>${esc(L.completion.draft)}</th><th>${esc(L.completion.declined)}</th><th>%</th></tr></thead><tbody>${c.byRelationship
+        .map(
+          (r) =>
+            `<tr><td>${esc(rel(r.relationship))}</td><td>${r.total}</td><td>${r.submitted}</td><td>${r.draft}</td><td>${r.declined}</td><td>${pct(r.submitted, r.total)}</td></tr>`,
+        )
+        .join("")}</tbody></table>`
+    : hiddenTotal();
+  return `<h3>${esc(L.completion.byRelationship)}</h3>${totals}
+<h3>${esc(L.completion.byDepartment)}</h3>${rows(c.byDepartment)}${suppressedNote(c.suppressed.byDepartment)}
+<h3>${esc(L.completion.byManager)}</h3>${rows(c.byManager)}${suppressedNote(c.suppressed.byManager)}`;
 }
 
 function indicatorsHtml(s: IndicatorsSection | null): string {
-  if (!s) return unavailable;
+  if (!s) return unavailable();
   const dist = s.distribution
     .map(
       (d) =>
@@ -219,13 +228,13 @@ function indicatorsHtml(s: IndicatorsSection | null): string {
     ? `<h3>${esc(L.indicators.riskMatrix)}</h3>${svgMatrix(s.riskMatrix.cells)}`
     : "";
   const alerts = s.alerts.length
-    ? `<h3>${esc(L.indicators.alerts)}</h3><ul>${s.alerts.map((a) => `<li>${esc(a.kind)}${a.indicator ? ` · ${esc(a.indicator)}` : ""}: ${a.count}</li>`).join("")}</ul>`
+    ? `<h3>${esc(L.indicators.alerts)}</h3><ul>${s.alerts.map((a) => `<li>${esc(a.kind === "risk" ? L.indicators.risk : a.kind === "drop" ? L.indicators.drop : a.kind)}${a.indicator ? ` · ${esc(a.indicator)}` : ""}: ${a.count}</li>`).join("")}</ul>`
     : "";
   return dist + matrix + alerts;
 }
 
 function qualitativeHtml(q: QualitativeSection | null): string {
-  if (!q) return unavailable;
+  if (!q) return unavailable();
   const S = L.qualitative.sentiments;
   const themes = q.topThemes
     .map(
@@ -250,7 +259,7 @@ function qualitativeHtml(q: QualitativeSection | null): string {
 }
 
 function goalsHtml(g: GoalsSection | null): string {
-  if (!g) return unavailable;
+  if (!g) return unavailable();
   return `<div class="tiles"><div class="tile"><b>${g.participantsWithGoals}</b><span>${esc(L.goals.participantsWithGoals)}</span></div><div class="tile"><b>${g.goals}</b><span>${esc(L.goals.goals)}</span></div><div class="tile"><b>${pct(g.completed, g.goals)}</b><span>${esc(L.goals.completed)}</span></div><div class="tile"><b>${g.avgProgress === null ? "–" : `${Math.round(g.avgProgress)}%`}</b><span>${esc(L.goals.avgProgress)}</span></div></div>${svgBars(g.byDepartment.map((d) => ({ label: `${d.label} (n=${d.n})`, value: d.completed })))}`;
 }
 
@@ -319,7 +328,20 @@ const JS = `
 `;
 
 /** The whole report as one HTML page, with the report JSON embedded. */
-export function renderHtml(report: ArturiaReport): string {
+export function renderHtml(
+  report: ArturiaReport,
+  labels: Labels = labelsFor(report.locale),
+): string {
+  const previous = L;
+  L = labels;
+  try {
+    return page(report);
+  } finally {
+    L = previous;
+  }
+}
+
+function page(report: ArturiaReport): string {
   const s = report.sections;
   const c = report.cycle;
   const mode = report.anonymized
@@ -336,7 +358,7 @@ export function renderHtml(report: ArturiaReport): string {
     )
     .join("");
   return `<!doctype html>
-<html lang="es">
+<html lang="${report.locale}">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">

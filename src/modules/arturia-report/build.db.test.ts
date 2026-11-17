@@ -54,7 +54,7 @@ afterAll(async () => {
 
 describe("buildReport over the seed small company", () => {
   it("builds a valid named report with people, emails and all base sections", async () => {
-    const r = await buildReport(db, { cycleId, anonymized: false });
+    const r = await buildReport(db, { cycle: cycleId, anonymized: false });
     expect(arturiaReportV1.safeParse(r).success).toBe(true);
     expect(r.schemaVersion).toBe("arturia-report.v1");
     expect(r.anonymized).toBe(false);
@@ -71,7 +71,7 @@ describe("buildReport over the seed small company", () => {
 
   it("the anonymized report has no emails, no seed names and no group under the minimum", async () => {
     const r = await buildReport(db, {
-      cycleId,
+      cycle: cycleId,
       anonymized: true,
       minGroupSize: MIN,
     });
@@ -97,6 +97,43 @@ describe("buildReport over the seed small company", () => {
       expect(g.label).toMatch(/^(Equipo \d+|Otros)$/);
     }
   });
+
+  it.each([2, MIN, 8, 40])(
+    "with minimum %i no total sits next to a suppressed group (no differencing)",
+    async (min) => {
+      const r = await buildReport(db, {
+        cycle: cycleId,
+        anonymized: true,
+        minGroupSize: min,
+      });
+      const s = r.sections;
+      if (s.executive.suppressed > 0)
+        expect(s.executive.distribution).toBeNull();
+      const c = s.completion!;
+      if (c.suppressed.byDepartment + c.suppressed.byManager > 0) {
+        expect(c.byRelationship).toBeNull();
+      }
+      for (const g of [...c.byDepartment, ...c.byManager]) {
+        expect(g.n).toBeGreaterThanOrEqual(min);
+        expect(g.n).toBeLessThanOrEqual(s.executive.participants);
+      }
+      for (const d of s.indicators?.distribution ?? []) {
+        if (d.suppressed > 0) expect(d.total).toBeNull();
+        for (const g of d.groups) expect(g.n).toBeGreaterThanOrEqual(min);
+      }
+      const m = s.indicators?.riskMatrix;
+      if (m?.cells.some((x) => x.count === null)) {
+        expect(m.total).toBeNull();
+        // riskCount is the risk cell itself, masked like any other cell
+        expect(m.riskCount).toBe(m.cells.find((x) => x.risk)!.count);
+      }
+      if (min === 40) {
+        // everything is under 40: the suppression path is really exercised
+        expect(c.byRelationship).toBeNull();
+        expect(c.byDepartment).toEqual([]);
+      }
+    },
+  );
 
   it("the CLI writes both files (named and anonymized) and prints no names", async () => {
     const dir = await mkdtemp(path.join(tmpdir(), "arturia-"));

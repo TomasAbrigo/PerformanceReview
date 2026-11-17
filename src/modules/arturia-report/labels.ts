@@ -1,86 +1,16 @@
-// Every string of the exported HTML (es): one object, so a locale switch is a
-// second object with the same keys. The CLI has no next-intl.
-export const labels = {
-  title: "Informe de desempeño",
-  generatedAt: "Generado",
-  period: "Período",
-  anonymized: "Versión anonimizada",
-  named: "Versión con datos personales (uso interno de People)",
-  minGroupSize: "Grupo mínimo",
-  view: "Vista",
-  viewAll: "Todo",
-  viewQuantitative: "Cuantitativo",
-  viewQualitative: "Cualitativo",
-  others: "Otros",
-  team: "Equipo",
-  noData: "Sin datos",
-  notAvailable: "No disponible en esta versión del export",
-  suppressed: "Personas fuera del desglose (grupos menores al mínimo)",
-  executive: {
-    title: "Resumen ejecutivo",
-    participants: "Participantes",
-    distribution: "Distribución de calificaciones",
-    byDepartment: "Por área",
-    mean: "Promedio",
-  },
-  completion: {
-    title: "Completitud",
-    byRelationship: "Por tipo de evaluación",
-    byDepartment: "Por área",
-    byManager: "Por equipo",
-    submitted: "Enviadas",
-    draft: "Borrador",
-    declined: "Rechazadas",
-    pending: "Pendientes",
-    total: "Total",
-  },
-  indicators: {
-    title: "Indicadores de retención y compromiso",
-    distribution: "Distribución",
-    riskMatrix: "Matriz de riesgo (retención × compromiso)",
-    alerts: "Alertas",
-    retention: "Retención",
-    engagement: "Compromiso",
-    risk: "Riesgo",
-    bands: { low: "Bajo", mid: "Medio", high: "Alto" },
-  },
-  qualitative: {
-    title: "Análisis cualitativo",
-    byDimension: "Sentimiento por dimensión",
-    trend: "Evolución del sentimiento",
-    themes: "Temas principales",
-    quotes: "Citas (seudonimizadas)",
-    sentiments: {
-      positive: "Positivo",
-      constructive: "Constructivo",
-      negative: "Negativo",
-    },
-  },
-  goals: {
-    title: "Objetivos",
-    participantsWithGoals: "Personas con objetivos",
-    goals: "Objetivos",
-    completed: "Completados",
-    avgProgress: "Avance promedio",
-  },
-  people: {
-    title: "Personas",
-    name: "Nombre",
-    email: "Email",
-    department: "Área",
-    manager: "Manager",
-    self: "Autoevaluación",
-    managerReview: "Evaluación del manager",
-    retention: "Retención",
-    engagement: "Compromiso",
-    positiveShare: "Comentarios positivos",
-  },
-  relationships: {
-    self: "Autoevaluación",
-    manager: "Manager",
-    peer: "Pares",
-    upward: "Ascendente",
-  } as Record<string, string>,
-} as const;
+// The strings of the exported HTML: the `Arturia` namespace of the app
+// messages (plain JSON import; the CLI has no next-intl), so the es/en parity
+// test covers them.
+import en from "@/messages/en.json";
+import es from "@/messages/es.json";
 
-export type Labels = typeof labels;
+export const reportLocales = ["es", "en"] as const;
+export type ReportLocale = (typeof reportLocales)[number];
+
+export type Labels = (typeof es)["Arturia"];
+
+export const labelsFor = (locale: ReportLocale = "es"): Labels =>
+  locale === "en" ? en.Arturia : es.Arturia;
+
+/** Spanish, the default (the HTML is for People). */
+export const labels = labelsFor("es");

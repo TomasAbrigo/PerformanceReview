@@ -187,7 +187,7 @@ Hoy solo se lee el mínimo n (vista de dirección); los umbrales de alerta, los 
 
 ### Export para Arturía
 
-`pnpm export:arturia --cycle <id|nombre|latest> [--anonymized] [--out <dir>]` arma el informe del ciclo (ejecutivo, completitud, indicadores, cualitativo, objetivos) y escribe `report.json` (schema `arturia-report.v1`, ver [docs/arturia-schema.md](docs/arturia-schema.md)) y `report.html` (autocontenido: CSS, JS, datos y gráficos SVG inline, sin requests externos). Por defecto incluye nombres y emails y va a `data/private/arturia/<ciclo>/` (ignorado por git; el check de datos sensibles no lo deja commitear). `--anonymized` escribe `report.anonymized.json/.html`: sin personas ni emails, grupos con menos de `aggregation.minGroupSize` personas agrupados en "Otros", equipos como "Equipo 1..N". Flujo completo y preguntas abiertas en [docs/arturia.md](docs/arturia.md).
+`pnpm export:arturia --cycle <id|nombre|latest> [--anonymized] [--out <dir>] [--locale es|en]` arma el informe del ciclo (ejecutivo, completitud, indicadores, cualitativo, objetivos) y escribe `report.json` (schema `arturia-report.v1`, ver [docs/arturia-schema.md](docs/arturia-schema.md)) y `report.html` (autocontenido: CSS, JS, datos y gráficos SVG inline, sin requests externos). Por defecto incluye nombres y emails y va a `data/private/arturia/<ciclo>/` (ignorado por git; el check de datos sensibles no lo deja commitear). `--anonymized` escribe `report.anonymized.json/.html`: sin personas ni emails, grupos con menos de `aggregation.minGroupSize` personas agrupados en "Otros", equipos como "Equipo 1..N". Flujo completo y preguntas abiertas en [docs/arturia.md](docs/arturia.md).
 
 ### Calidad de datos y API (`/data-quality`, `/api/v1`)
 

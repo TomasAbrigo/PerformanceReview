@@ -55,6 +55,18 @@ describe("renderers", () => {
     expect(html).not.toContain('id="people"');
   });
 
+  it("renders in English with the en labels", () => {
+    const html = renderHtml(sampleReport({ locale: "en" }));
+    expect(html).toContain('<html lang="en">');
+    expect(html).toContain("Executive summary");
+  });
+
+  it("shows a note instead of totals hidden to avoid differencing", () => {
+    const r = sampleReport();
+    r.sections.executive.distribution = null;
+    expect(renderHtml(r)).toContain("Total oculto");
+  });
+
   it("the toggle shows and hides sections", () => {
     document.documentElement.innerHTML = renderHtml(report)
       .replace(/^<!doctype html>\s*<html[^>]*>/i, "")

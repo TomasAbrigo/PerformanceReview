@@ -6,17 +6,24 @@ import { DomainError } from "@/lib/domain-error";
 import { PRIVATE_DIR } from "@/lib/sensitive-data";
 import { UsageError } from "@/modules/ingest/cli";
 import { fold } from "@/modules/qualitative-analysis/dimension";
+import { ZodError } from "zod";
 import { buildReport, resolveCycle } from "./build";
+import { labelsFor, reportLocales, type ReportLocale } from "./labels";
 import { renderHtml, renderJson } from "./render";
 
 export const EXPORT_USAGE = [
-  "Usage: pnpm export:arturia --cycle <id|name|latest> [--anonymized] [--out <dir>]",
+  "Usage: pnpm export:arturia --cycle <id|name|latest> [--anonymized] [--out <dir>] [--locale es|en]",
   `  Writes report(.anonymized).json and .html; default dir ${PRIVATE_DIR}arturia/<cycle-slug>/.`,
   "  --anonymized: no names or emails, groups under aggregation.minGroupSize folded into Otros.",
   "Exit code: 0 ok, 1 the export failed, 2 bad arguments.",
 ].join("\n");
 
-export type ExportArgs = { cycle: string; anonymized: boolean; out?: string };
+export type ExportArgs = {
+  cycle: string;
+  anonymized: boolean;
+  out?: string;
+  locale: ReportLocale;
+};
 
 export function parseExportArgs(argv: string[]): ExportArgs {
   let values;
@@ -27,6 +34,7 @@ export function parseExportArgs(argv: string[]): ExportArgs {
         cycle: { type: "string" },
         anonymized: { type: "boolean", default: false },
         out: { type: "string" },
+        locale: { type: "string", default: "es" },
       },
     }));
   } catch (err) {
@@ -34,10 +42,15 @@ export function parseExportArgs(argv: string[]): ExportArgs {
   }
   if (!values.cycle) throw new UsageError("--cycle is required");
   if (values.out === "") throw new UsageError("--out must be a directory");
+  const locale = values.locale ?? "es";
+  if (!(reportLocales as readonly string[]).includes(locale)) {
+    throw new UsageError(`--locale must be es or en (got ${locale})`);
+  }
   return {
     cycle: values.cycle,
     anonymized: values.anonymized ?? false,
     out: values.out,
+    locale: locale as ReportLocale,
   };
 }
 
@@ -65,6 +78,15 @@ export type ExportCliDeps = {
   stderr?: (line: string) => void;
 };
 
+/** What went wrong, without data: the error, or the schema paths that failed. */
+export function failureOf(e: unknown): string {
+  if (e instanceof ZodError) {
+    return `report does not match the schema at ${e.issues.map((i) => i.path.join(".") || "(root)").join(", ")}`;
+  }
+  if (e instanceof DomainError) return e.code;
+  return e instanceof Error ? `${e.name}: ${e.message}` : String(e);
+}
+
 /** Runs `pnpm export:arturia`; returns the exit code. Prints paths and counts, never names. */
 export async function runExportCli(
   argv: string[],
@@ -85,8 +107,9 @@ export async function runExportCli(
   try {
     const cycle = await resolveCycle(deps.db, args.cycle);
     const report = await buildReport(deps.db, {
-      cycleId: cycle.id,
+      cycle,
       anonymized: args.anonymized,
+      locale: args.locale,
       now: deps.now,
     });
     const dir = path.resolve(
@@ -98,7 +121,7 @@ export async function runExportCli(
     const jsonPath = path.join(dir, names.json);
     const htmlPath = path.join(dir, names.html);
     await writeFile(jsonPath, renderJson(report));
-    await writeFile(htmlPath, renderHtml(report));
+    await writeFile(htmlPath, renderHtml(report, labelsFor(args.locale)));
     const s = report.sections;
     out(
       `arturia export (${report.anonymized ? "anonymized" : "named"}): ${s.executive.participants} participants, ${s.people?.length ?? 0} person rows, ${s.qualitative?.topThemes.length ?? 0} themes`,
@@ -107,9 +130,7 @@ export async function runExportCli(
     out(`  ${htmlPath}`);
     return 0;
   } catch (e) {
-    err(
-      `export failed: ${e instanceof DomainError ? e.code : e instanceof Error ? e.name : "error"}`,
-    );
+    err(`export failed: ${failureOf(e)}`);
     return 1;
   }
 }

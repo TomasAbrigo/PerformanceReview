@@ -14,10 +14,17 @@ describe("export:arturia arguments and paths", () => {
       cycle: "latest",
       anonymized: false,
       out: undefined,
+      locale: "es",
     });
     expect(
       parseExportArgs(["--cycle", "x", "--anonymized", "--out", "/tmp/a"]),
-    ).toEqual({ cycle: "x", anonymized: true, out: "/tmp/a" });
+    ).toEqual({ cycle: "x", anonymized: true, out: "/tmp/a", locale: "es" });
+    expect(parseExportArgs(["--cycle", "x", "--locale", "en"]).locale).toBe(
+      "en",
+    );
+    expect(() => parseExportArgs(["--cycle", "x", "--locale", "fr"])).toThrow(
+      /es or en/,
+    );
     expect(() => parseExportArgs([])).toThrow(/--cycle/);
     expect(() => parseExportArgs(["--cycle", "x", "--nope"])).toThrow();
   });
@@ -36,5 +43,15 @@ describe("export:arturia arguments and paths", () => {
       json: "report.anonymized.json",
       html: "report.anonymized.html",
     });
+  });
+});
+
+describe("failureOf", () => {
+  it("names the schema paths of a ZodError and the message of other errors", async () => {
+    const { failureOf } = await import("./cli");
+    const { arturiaReportV1 } = await import("./schema");
+    const zod = arturiaReportV1.safeParse({}).error!;
+    expect(failureOf(zod)).toMatch(/schema at .*schemaVersion/);
+    expect(failureOf(new Error("boom"))).toBe("Error: boom");
   });
 });

@@ -23,6 +23,8 @@ Contrato del JSON que genera `pnpm export:arturia` (zod: `arturiaReportV1` en `s
 
 Regla de anonimización: en toda serie agrupada, los grupos con `n < minGroupSize` (y el grupo sin nombre, p. ej. sin área) se juntan en uno `"Otros"` (`other: true`); si "Otros" sigue bajo el mínimo se omite y sus personas se cuentan en `suppressed`. Para grupos que se solapan (dimensiones, temas) el `n` de "Otros" es el máximo de los grupos (cota conservadora). Los managers se rotulan `"Equipo 1..N"` (orden estable por id dentro del informe). En la versión con nombres el mínimo es 1.
 
+**Sin reconstrucción por diferencia:** en la versión anonimizada, cuando un desglose tiene algún grupo suprimido, el total que lo acompaña se publica como `null` (`executive.distribution`, `completion.byRelationship`, `indicators.distribution[].total`, `indicators.riskMatrix.total`), así no se puede restar lo visible del total para obtener el grupo oculto. La versión anonimizada se calcula como "dirección" con el mínimo del informe: indicadores y resumen ejecutivo usan el enmascarado del módulo de analytics; completitud y cualitativo lo aplica el export.
+
 ## `sections.executive`
 
 | Campo          | Tipo                                 | Descripción                                                  |

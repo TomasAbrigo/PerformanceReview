@@ -29,30 +29,36 @@ const executive = z.object({
     z.object({ relationship: z.string(), total: int, submitted: int }),
   ),
   bins: z.array(z.object({ from: z.number(), to: z.number() })),
-  distribution: counts,
+  /** null when anonymized and any group is suppressed (no differencing). */
+  distribution: counts.nullable(),
   byDepartment: z.array(group.extend({ mean: z.number().nullable(), counts })),
   /** People left out of the breakdown (their groups, Otros included, are under the minimum). */
   suppressed: int,
 });
 
+/** `n`: distinct participants of the group; `total`: its requests. */
 const completionRow = group.extend({
   relationship: z.string(),
   total: int,
   submitted: int,
 });
 const completion = z.object({
-  byRelationship: z.array(
-    z.object({
-      relationship: z.string(),
-      total: int,
-      submitted: int,
-      draft: int,
-      declined: int,
-    }),
-  ),
+  /** null when anonymized and any group is suppressed (no differencing). */
+  byRelationship: z
+    .array(
+      z.object({
+        relationship: z.string(),
+        total: int,
+        submitted: int,
+        draft: int,
+        declined: int,
+      }),
+    )
+    .nullable(),
   byDepartment: z.array(completionRow),
   byManager: z.array(completionRow),
-  suppressed: int,
+  /** Participants left out of each breakdown. */
+  suppressed: z.object({ byDepartment: int, byManager: int }),
 });
 
 const band = z.enum(["low", "mid", "high"]);
@@ -147,6 +153,7 @@ export const arturiaReportV1 = z
     schemaVersion: z.literal(SCHEMA_VERSION),
     schemaMinor: z.number().int().nonnegative(),
     generatedAt: z.iso.datetime(),
+    locale: z.enum(["es", "en"]),
     cycle: z.object({
       id: z.string(),
       name: z.string(),

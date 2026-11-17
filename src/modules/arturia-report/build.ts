@@ -12,6 +12,7 @@ import {
   collectQualitative,
   type CollectContext,
 } from "./collectors";
+import { labelsFor, type ReportLocale } from "./labels";
 import {
   arturiaReportV1,
   SCHEMA_MINOR,
@@ -56,7 +57,9 @@ export async function resolveCycle(
 }
 
 export type BuildOptions = {
-  cycleId: string;
+  /** A cycle reference (id, name, `latest`) or the already resolved cycle. */
+  cycle: string | ReportCycle;
+  locale?: ReportLocale;
   anonymized: boolean;
   /** Default: the `aggregation.minGroupSize` setting. */
   minGroupSize?: number;
@@ -68,13 +71,18 @@ export async function buildReport(
   db: DbOrTx,
   opts: BuildOptions,
 ): Promise<ArturiaReport> {
-  const cycle = await resolveCycle(db, opts.cycleId);
+  const cycle =
+    typeof opts.cycle === "string"
+      ? await resolveCycle(db, opts.cycle)
+      : opts.cycle;
+  const locale = opts.locale ?? "es";
   const minGroupSize =
     opts.minGroupSize ?? (await getSetting(db, "aggregation.minGroupSize"));
   const ctx: CollectContext = {
     cycleId: cycle.id,
     anonymized: opts.anonymized,
     min: opts.anonymized ? minGroupSize : 1,
+    labels: labelsFor(locale),
   };
   const [executive, completion, indicators, qualitative, goals, people] =
     await Promise.all([
@@ -89,6 +97,7 @@ export async function buildReport(
     schemaVersion: SCHEMA_VERSION,
     schemaMinor: SCHEMA_MINOR,
     generatedAt: (opts.now ?? new Date()).toISOString(),
+    locale,
     cycle,
     anonymized: opts.anonymized,
     minGroupSize,
