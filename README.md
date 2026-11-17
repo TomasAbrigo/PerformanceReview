@@ -203,6 +203,10 @@ Hoy solo se lee el mínimo n (vista de dirección); los umbrales de alerta, los 
 - **Modo:** selector "Cualitativo | Cuantitativo | Ambos" (parámetro `mode` en la URL) que muestra los bloques de sentimiento/temas o los de indicadores. Los bloques son colectores enchufables en `src/modules/insights/executive.ts` (los KPIs de objetivos se agregan cuando esté #62).
 - **Quién ve qué:** People sin enmascarar; Dirección solo agregados con n ≥ `aggregation.minGroupSize` (lo que no llega dice "Oculto"); managers y empleados, "Sin acceso". `/dashboards/executive` redirige acá.
 
+### Export para Arturía
+
+`pnpm export:arturia --cycle <id|nombre|latest> [--anonymized] [--out <dir>] [--locale es|en]` arma el informe del ciclo (ejecutivo, completitud, indicadores, cualitativo, objetivos) y escribe `report.json` (schema `arturia-report.v1`, ver [docs/arturia-schema.md](docs/arturia-schema.md)) y `report.html` (autocontenido: CSS, JS, datos y gráficos SVG inline, sin requests externos). Por defecto incluye nombres y emails y va a `data/private/arturia/<ciclo>/` (ignorado por git; el check de datos sensibles no lo deja commitear). `--anonymized` escribe `report.anonymized.json/.html`: sin personas ni emails, grupos con menos de `aggregation.minGroupSize` personas agrupados en "Otros", equipos como "Equipo 1..N". Flujo completo y preguntas abiertas en [docs/arturia.md](docs/arturia.md).
+
 ### Calidad de datos y API (`/data-quality`, `/api/v1`)
 
 - **Panel `/data-quality`:** un conteo por indicador (identidades sin resolver, personas o participantes sin manager, snapshots incompletos, historial de puesto con huecos o abierto tras la baja, `reviewer_mismatch`, corridas fallidas, etc.) con enlace a la lista de casos.
