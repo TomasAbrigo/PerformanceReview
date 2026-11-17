@@ -49,17 +49,27 @@ const num = (x: number | null, digits = 2) =>
 const W = 640;
 const ROW = 26;
 const LABEL_W = 180;
+/** Room for the longest label (about 6.3 units a character at 12px), within bounds. */
+const labelWidth = (labels: readonly string[]) =>
+  Math.min(
+    320,
+    Math.max(
+      LABEL_W,
+      Math.ceil(Math.max(0, ...labels.map((l) => l.length)) * 6.3) + 16,
+    ),
+  );
 
 /** Horizontal bars: one per item, value labelled at the end. */
 export function svgBars(items: { label: string; value: number }[]): string {
   if (!items.length) return `<p class="muted">${esc(L.noData)}</p>`;
   const max = Math.max(1, ...items.map((i) => i.value));
-  const span = W - LABEL_W - 60;
+  const labelW = labelWidth(items.map((i) => i.label));
+  const span = W - labelW - 60;
   const rows = items
     .map((it, i) => {
       const y = i * ROW;
       const w = Math.round((it.value / max) * span);
-      return `<text x="${LABEL_W - 8}" y="${y + 17}" text-anchor="end">${esc(it.label)}</text><rect x="${LABEL_W}" y="${y + 5}" width="${w}" height="16" class="c0"/><text x="${LABEL_W + w + 6}" y="${y + 17}">${esc(it.value)}</text>`;
+      return `<text x="${labelW - 8}" y="${y + 17}" text-anchor="end">${esc(it.label)}</text><rect x="${labelW}" y="${y + 5}" width="${w}" height="16" class="c0"/><text x="${labelW + w + 6}" y="${y + 17}">${esc(it.value)}</text>`;
     })
     .join("");
   return `<svg viewBox="0 0 ${W} ${items.length * ROW}" role="img" class="chart">${rows}</svg>`;
@@ -71,12 +81,13 @@ export function svgStacked(
   legend: string[],
 ): string {
   if (!rows.length) return `<p class="muted">${esc(L.noData)}</p>`;
-  const span = W - LABEL_W - 60;
+  const labelW = labelWidth(rows.map((r) => r.label));
+  const span = W - labelW - 60;
   const body = rows
     .map((r, i) => {
       const y = i * ROW;
       const total = r.parts.reduce((a, b) => a + b, 0);
-      let x = LABEL_W;
+      let x = labelW;
       const rects = r.parts
         .map((p, k) => {
           const w = total ? (p / total) * span : 0;
@@ -85,7 +96,7 @@ export function svgStacked(
           return rect;
         })
         .join("");
-      return `<text x="${LABEL_W - 8}" y="${y + 17}" text-anchor="end">${esc(r.label)}</text>${rects}<text x="${LABEL_W + span + 6}" y="${y + 17}">${total}</text>`;
+      return `<text x="${labelW - 8}" y="${y + 17}" text-anchor="end">${esc(r.label)}</text>${rects}<text x="${labelW + span + 6}" y="${y + 17}">${total}</text>`;
     })
     .join("");
   const keys = legend
@@ -186,6 +197,23 @@ function executiveHtml(e: ExecutiveSection): string {
   )}${suppressedNote(e.suppressed)}`;
 }
 
+/** Percentage points with a sign; "–" without a rate to compare. */
+const signed = (x: number | null) =>
+  x === null ? "–" : `${x > 0 ? "+" : ""}${x}`;
+
+function completionDeltaHtml(d: NonNullable<CompletionSection["delta"]>) {
+  const row = (
+    label: string,
+    p: { self: number | null; manager: number | null },
+  ) =>
+    `<tr><td>${esc(label)}</td><td>${signed(p.self)}</td><td>${signed(p.manager)}</td></tr>`;
+  const rows = [
+    ...(d.total ? [row(L.completion.total, d.total)] : []),
+    ...d.byDepartment.map((x) => row(x.label, x)),
+  ].join("");
+  return `<h3>${esc(L.completion.delta)} (${esc(d.previousCycleName)}, ${esc(L.completion.points)})</h3><table><thead><tr><th></th><th>${esc(rel("self"))}</th><th>${esc(rel("manager"))}</th></tr></thead><tbody>${rows}</tbody></table>${d.total ? "" : hiddenTotal()}`;
+}
+
 function completionHtml(c: CompletionSection | null): string {
   if (!c) return unavailable();
   const legend = [L.completion.submitted, L.completion.pending];
@@ -198,16 +226,17 @@ function completionHtml(c: CompletionSection | null): string {
       legend,
     );
   const totals = c.byRelationship
-    ? `<table><thead><tr><th></th><th>${esc(L.completion.total)}</th><th>${esc(L.completion.submitted)}</th><th>${esc(L.completion.draft)}</th><th>${esc(L.completion.declined)}</th><th>%</th></tr></thead><tbody>${c.byRelationship
+    ? `<table><thead><tr><th></th><th>${esc(L.completion.total)}</th><th>${esc(L.completion.submitted)}</th><th>${esc(L.completion.pending)}</th><th>${esc(L.completion.rate)}</th></tr></thead><tbody>${c.byRelationship
         .map(
           (r) =>
-            `<tr><td>${esc(rel(r.relationship))}</td><td>${r.total}</td><td>${r.submitted}</td><td>${r.draft}</td><td>${r.declined}</td><td>${pct(r.submitted, r.total)}</td></tr>`,
+            `<tr><td>${esc(rel(r.relationship))}</td><td>${r.total}</td><td>${r.submitted}</td><td>${r.total - r.submitted}</td><td>${pct(r.submitted, r.total)}</td></tr>`,
         )
         .join("")}</tbody></table>`
     : hiddenTotal();
   return `<h3>${esc(L.completion.byRelationship)}</h3>${totals}
 <h3>${esc(L.completion.byDepartment)}</h3>${rows(c.byDepartment)}${suppressedNote(c.suppressed.byDepartment)}
-<h3>${esc(L.completion.byManager)}</h3>${rows(c.byManager)}${suppressedNote(c.suppressed.byManager)}`;
+<h3>${esc(L.completion.byManager)}</h3>${rows(c.byManager)}${suppressedNote(c.suppressed.byManager)}
+${c.delta ? completionDeltaHtml(c.delta) : ""}`;
 }
 
 function indicatorsHtml(s: IndicatorsSection | null): string {
@@ -260,7 +289,67 @@ function qualitativeHtml(q: QualitativeSection | null): string {
 
 function goalsHtml(g: GoalsSection | null): string {
   if (!g) return unavailable();
-  return `<div class="tiles"><div class="tile"><b>${g.participantsWithGoals}</b><span>${esc(L.goals.participantsWithGoals)}</span></div><div class="tile"><b>${g.goals}</b><span>${esc(L.goals.goals)}</span></div><div class="tile"><b>${pct(g.completed, g.goals)}</b><span>${esc(L.goals.completed)}</span></div><div class="tile"><b>${g.avgProgress === null ? "–" : `${Math.round(g.avgProgress)}%`}</b><span>${esc(L.goals.avgProgress)}</span></div></div>${svgBars(g.byDepartment.map((d) => ({ label: `${d.label} (n=${d.n})`, value: d.completed })))}`;
+  const G = L.goals;
+  const tile = (value: string | number, label: string) =>
+    `<div class="tile"><b>${value}</b><span>${esc(label)}</span></div>`;
+  const tiles =
+    g.goals === null
+      ? hiddenTotal()
+      : `<div class="tiles">${[
+          tile(g.participantsWithGoals ?? "–", G.participantsWithGoals),
+          tile(g.goals, G.goals),
+          tile(pct(g.completed ?? 0, g.goals), G.completed),
+          tile(
+            g.avgProgress === null ? "–" : `${Math.round(g.avgProgress)}%`,
+            G.avgProgress,
+          ),
+          ...(g.withoutGoals === null
+            ? []
+            : [tile(g.withoutGoals, G.withoutGoals)]),
+        ].join("")}</div>`;
+  // Goals by status per group: completed, in progress, closed.
+  const status = (rows: GoalsSection["byDepartment"]) =>
+    svgStacked(
+      rows.map((r) => ({
+        label: `${r.label} (n=${r.n})`,
+        parts: [r.completed, r.inProgress, r.closed],
+      })),
+      [G.completed, G.inProgress, G.closed],
+    );
+  const hiddenBucket = g.buckets.some((b) => b.hidden);
+  const buckets = `<div class="scroll"><table><thead><tr><th>${esc(G.bucket)}</th><th>${esc(G.people)}</th><th>${esc(G.meanRetention)}</th><th>${esc(G.meanEngagement)}</th><th>${esc(G.positiveShare)}</th></tr></thead><tbody>${g.buckets
+    .map(
+      (b) =>
+        `<tr><td>${b.from}–${b.to}%</td><td>${b.people ?? "–"}</td><td>${num(b.meanRetention)}</td><td>${num(b.meanEngagement)}</td><td>${b.meanPositiveShare === null ? "–" : pct(b.meanPositiveShare, 1)}</td></tr>`,
+    )
+    .join(
+      "",
+    )}</tbody></table></div>${hiddenBucket ? `<p class="muted">${esc(G.underMinimum)}</p>` : ""}${suppressedNote(g.suppressed.buckets)}`;
+
+  const groups = [
+    [G.doneButLow, g.outliers.doneButLow],
+    [G.behindButHigh, g.outliers.behindButHigh],
+  ] as const;
+  const named = (title: string, o: (typeof groups)[number][1]) =>
+    o.people.length
+      ? `<h4>${esc(title)}</h4><div class="scroll"><table><thead><tr><th>${esc(L.people.name)}</th><th>${esc(L.people.department)}</th><th>${esc(L.people.manager)}</th><th>${esc(G.goals)}</th><th>${esc(G.completedPct)}</th><th>${esc(L.indicators.retention)}</th><th>${esc(L.indicators.engagement)}</th></tr></thead><tbody>${o.people
+          .map(
+            (p) =>
+              `<tr><td>${esc(p.name)}</td><td>${p.department === null ? "–" : esc(p.department)}</td><td>${p.manager === null ? "–" : esc(p.manager)}</td><td>${p.completed}/${p.goals}</td><td>${Math.round(p.completedPct)}%</td><td>${p.retention ?? "–"}</td><td>${p.engagement ?? "–"}</td></tr>`,
+          )
+          .join("")}</tbody></table></div>`
+      : "";
+  const outliers = `<ul>${groups
+    .map(([title, o]) => `<li>${esc(title)}: <b>${o.count ?? "–"}</b></li>`)
+    .join(
+      "",
+    )}</ul>${groups.some(([, o]) => o.count === null) ? `<p class="muted">${esc(G.underMinimum)}</p>` : ""}${groups.map(([title, o]) => named(title, o)).join("")}`;
+
+  return `${tiles}
+<h3>${esc(G.byDepartment)} · ${esc(G.status)}</h3>${status(g.byDepartment)}${suppressedNote(g.suppressed.byDepartment)}
+<h3>${esc(G.byManager)} · ${esc(G.status)}</h3>${status(g.byManager)}${suppressedNote(g.suppressed.byManager)}
+<h3>${esc(G.buckets)}</h3>${buckets}
+<h3>${esc(G.outliers)}</h3>${outliers}`;
 }
 
 function peopleHtml(people: ArturiaReport["sections"]["people"]): string {

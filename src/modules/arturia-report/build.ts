@@ -25,8 +25,8 @@ export class ArturiaError extends DomainError<"cycle_not_found"> {}
 export type ReportCycle = ArturiaReport["cycle"];
 
 /**
- * A launched (non-draft) cycle by id, exact name, or `latest` (the one with
- * the latest period end).
+ * A launched (non-draft, not deleted) cycle by id, exact name, or `latest`
+ * (the one with the latest period end).
  */
 export async function resolveCycle(
   db: DbOrTx,
@@ -45,7 +45,7 @@ export async function resolveCycle(
     period_end: string;
   }>(sql`
     select id, name, period_start::text, period_end::text from review_cycle
-    where status <> 'draft' and ${where}
+    where status <> 'draft' and deleted_at is null and ${where}
     order by period_end desc, created_at desc limit 1`);
   if (!c) throw new ArturiaError("cycle_not_found");
   return {

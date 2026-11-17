@@ -1386,10 +1386,11 @@
       "byDepartment": "Por área",
       "byManager": "Por equipo",
       "submitted": "Enviadas",
-      "draft": "Borrador",
-      "declined": "Rechazadas",
       "pending": "Pendientes",
-      "total": "Total"
+      "total": "Total",
+      "delta": "Cambio contra el ciclo anterior",
+      "points": "puntos porcentuales",
+      "rate": "% enviadas"
     },
     "indicators": {
       "title": "Indicadores de retención y compromiso",
@@ -1423,7 +1424,26 @@
       "participantsWithGoals": "Personas con objetivos",
       "goals": "Objetivos",
       "completed": "Completados",
-      "avgProgress": "Avance promedio"
+      "avgProgress": "Avance promedio",
+      "byDepartment": "Por área",
+      "byManager": "Por equipo",
+      "status": "Objetivos por estado",
+      "inProgress": "En curso",
+      "closed": "Cerrados",
+      "overdue": "Vencidos",
+      "withoutGoals": "Personas sin objetivos",
+      "buckets": "Objetivos completados vs indicadores",
+      "bucket": "Objetivos completados",
+      "people": "Personas",
+      "meanRetention": "Retención (promedio)",
+      "meanEngagement": "Compromiso (promedio)",
+      "positiveShare": "Comentarios positivos (promedio)",
+      "outliers": "Casos atípicos",
+      "doneButLow": "Objetivos cumplidos con retención o compromiso bajo",
+      "behindButHigh": "Objetivos atrasados con retención y compromiso altos",
+      "count": "Cantidad",
+      "completedPct": "% completado",
+      "underMinimum": "Menos personas que el grupo mínimo: no se publica"
     },
     "people": {
       "title": "Personas",

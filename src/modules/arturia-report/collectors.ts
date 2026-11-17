@@ -1,14 +1,30 @@
 // Each section of the report is one collector. The named report reads as
 // People (DEFAULT_ACTOR: everything); the anonymized one as direction with
 // the report's minimum group size, so the analytics layer masks what it
-// already knows how to (indicators, executive groups), and this layer adds
-// the rest: "Otros" / suppressed folds, "Equipo N" labels, no totals next to
-// a suppressed group (no reconstruction by difference), re-pseudonymized
+// already knows how to (indicators, executive groups, completion by area,
+// goals), and this layer adds the rest: "Otros" / suppressed folds, "Equipo N"
+// labels (a manager is a person: direction never gets one from the analytics
+// layer, so the completion by team is folded here), no totals next to a
+// suppressed group (no reconstruction by difference), re-pseudonymized
 // quotes, no people section.
 import { sql } from "drizzle-orm";
 import type { DbOrTx } from "@/db/client";
 import { type ActorContext, DEFAULT_ACTOR } from "@/modules/actor/types";
+import {
+  type CompletionCounts,
+  type CompletionGroup,
+  type CompletionSummary,
+  completionOverview,
+  completionSummary,
+  withRates,
+} from "@/modules/analytics/completion";
 import { bins, executiveSummary } from "@/modules/analytics/dashboards";
+import {
+  type GoalKpiGroup,
+  type GoalKpis,
+  goalInsights,
+  goalKpis,
+} from "@/modules/analytics/goals-insights";
 import {
   indicatorAlerts,
   indicatorDistribution,
@@ -29,6 +45,7 @@ import type { Labels } from "./labels";
 import type {
   ArturiaSections,
   CompletionSection,
+  GoalsSection,
   PersonRow,
   QualitativeSection,
 } from "./schema";
@@ -86,146 +103,204 @@ export const collectExecutive: Collector<"executive"> = async (db, ctx) => {
 
 // ------------------------------------------------------------ completion
 
-type Row = CompletionSection["byDepartment"][number];
-type Acc = Row & { ids: Set<string> };
-
-/**
- * Requests per relationship, area and team of the snapshot. A group's n is
- * its distinct participants (a person with three peer reviews counts once).
- * TODO(#59): enrich with completionSummary / missingAssessments.
- */
-export const collectCompletion: Collector<"completion"> = async (db, ctx) => {
-  const rows = await db.execute<{
-    participant_id: string;
-    relationship: string;
-    department: string | null;
-    manager_id: string | null;
-    manager_name: string | null;
-    total: number;
-    submitted: number;
-    draft: number;
-    declined: number;
-  }>(sql`
-    select cp.id as participant_id, r.relationship::text as relationship,
-           cp.snap_department as department, cp.snap_manager_person_id as manager_id,
-           mp.display_name as manager_name, count(*)::int as total,
-           count(*) filter (where r.status = 'submitted')::int as submitted,
-           count(*) filter (where r.status = 'draft')::int as draft,
-           count(*) filter (where r.status = 'declined')::int as declined
-    from review_request r
-    join cycle_participant cp on cp.id = r.participant_id
-    left join person mp on mp.id = cp.snap_manager_person_id
-    where r.cycle_id = ${ctx.cycleId}::uuid and r.deleted_at is null and cp.removed_at is null
-    group by 1, 2, 3, 4, 5`);
-  if (!rows.length) return null;
-  const teams = teamLabels(
-    rows.flatMap((r) => r.manager_id ?? []),
+/** The "Equipo N" labels of a cycle's managers, the same in every section. */
+async function cycleTeams(db: DbOrTx, ctx: CollectContext) {
+  const rows = await db.execute<{ id: string }>(sql`
+    select distinct snap_manager_person_id as id from cycle_participant
+    where cycle_id = ${ctx.cycleId}::uuid and removed_at is null
+      and snap_manager_person_id is not null`);
+  return teamLabels(
+    rows.map((r) => r.id),
     ctx.labels.team,
   );
+}
 
-  const breakdown = (
-    keyOf: (r: (typeof rows)[number]) => { id: string; label: string } | null,
-  ) => {
-    const acc = new Map<string, Acc>();
-    for (const r of rows) {
-      const key = keyOf(r);
-      const id = `${r.relationship}\u0000${key?.id ?? ""}`;
-      const a = acc.get(id) ?? {
-        label: key?.label ?? ctx.labels.others,
-        relationship: r.relationship,
-        n: 0,
-        total: 0,
-        submitted: 0,
-        other: key === null,
-        ids: new Set<string>(),
-      };
-      a.ids.add(r.participant_id);
-      a.n = a.ids.size;
-      a.total += r.total;
-      a.submitted += r.submitted;
-      acc.set(id, a);
-    }
-    const groups = [...acc.values()].sort(
-      (a, b) =>
-        a.relationship.localeCompare(b.relationship) ||
-        a.label.localeCompare(b.label, "es"),
-    );
-    const out: Row[] = [];
-    let suppressed = 0;
-    for (const rel of [...new Set(groups.map((g) => g.relationship))]) {
-      const f = foldGroups(
-        groups.filter((g) => g.relationship === rel),
-        ctx.min,
-        {
-          size: (g) => g.n,
-          named: (g) => !g.other,
-          merge: (rest) => {
-            const ids = new Set(rest.flatMap((g) => [...g.ids]));
-            return {
-              label: ctx.labels.others,
-              relationship: rel,
-              n: ids.size,
-              total: sumBy(rest, (g) => g.total),
-              submitted: sumBy(rest, (g) => g.submitted),
-              other: true,
-              ids,
-            };
-          },
-        },
-      );
-      for (const { ids: _ids, ...g } of [
-        ...f.shown,
-        ...(f.others ? [f.others] : []),
-      ]) {
-        void _ids;
-        out.push(g);
-      }
-      suppressed = Math.max(suppressed, f.suppressed);
-    }
-    return { rows: out, suppressed };
-  };
+const round = (x: number | null, digits: number) =>
+  x === null ? null : Number(x.toFixed(digits));
 
-  const dep = breakdown((r) =>
-    r.department === null ? null : { id: r.department, label: r.department },
+type CompletionRows = CompletionSection["byDepartment"];
+type CompletionCell = CompletionCounts & { label: string; other: boolean };
+
+/** A row per side of the assessment that applies to the group (self first). */
+function completionRows(cells: readonly CompletionCell[]): CompletionRows {
+  return (["self", "manager"] as const).flatMap((relationship) =>
+    cells.flatMap((c) => {
+      const total =
+        relationship === "self" ? c.selfApplicable : c.managerApplicable;
+      return total === 0
+        ? []
+        : [
+            {
+              label: c.label,
+              relationship,
+              n: c.participants,
+              total,
+              submitted:
+                relationship === "self" ? c.selfSubmitted : c.managerSubmitted,
+              other: c.other,
+            },
+          ];
+    }),
   );
-  const man = breakdown((r) =>
-    r.manager_id === null
-      ? null
-      : {
-          id: r.manager_id,
-          label: ctx.anonymized
-            ? teams.get(r.manager_id)!
-            : (r.manager_name ?? teams.get(r.manager_id)!),
-        },
-  );
-  const totals = new Map<
-    string,
-    NonNullable<CompletionSection["byRelationship"]>[number]
-  >();
-  for (const r of rows) {
-    const t = totals.get(r.relationship) ?? {
-      relationship: r.relationship,
-      total: 0,
-      submitted: 0,
-      draft: 0,
-      declined: 0,
-    };
-    t.total += r.total;
-    t.submitted += r.submitted;
-    t.draft += r.draft;
-    t.declined += r.declined;
-    totals.set(r.relationship, t);
-  }
-  const hidden = ctx.anonymized && (dep.suppressed > 0 || man.suppressed > 0);
+}
+
+const counts = (g: CompletionGroup): CompletionCounts => ({
+  participants: g.participants,
+  selfSubmitted: g.selfSubmitted,
+  selfApplicable: g.selfApplicable,
+  managerSubmitted: g.managerSubmitted,
+  managerApplicable: g.managerApplicable,
+});
+
+/** The areas of the summary (direction already folded them), as cells. */
+const departmentCells = (
+  s: CompletionSummary,
+  ctx: CollectContext,
+): CompletionCell[] => [
+  ...s.groups.map((g) => ({
+    ...counts(g),
+    label: g.label ?? ctx.labels.others,
+    other: g.key === null,
+  })),
+  ...(s.others
+    ? [{ ...counts(s.others), label: ctx.labels.others, other: true }]
+    : []),
+];
+
+/**
+ * The teams of the cycle snapshot. The analytics layer never gives direction
+ * a manager (a manager is a person), so they are read as People and folded
+ * here: managers with fewer than the minimum participants (and the people
+ * with no manager) go to "Otros", hidden when that is still under it, and
+ * anonymized the managers are "Equipo N", never a name.
+ */
+async function teamCells(db: DbOrTx, ctx: CollectContext) {
+  const [summary, teams] = await Promise.all([
+    completionSummary(db, DEFAULT_ACTOR, {
+      cycleId: ctx.cycleId,
+      groupBy: "manager",
+    }),
+    cycleTeams(db, ctx),
+  ]);
+  const sum = (rest: CompletionGroup[]): CompletionCounts => ({
+    participants: sumBy(rest, (g) => g.participants),
+    selfSubmitted: sumBy(rest, (g) => g.selfSubmitted),
+    selfApplicable: sumBy(rest, (g) => g.selfApplicable),
+    managerSubmitted: sumBy(rest, (g) => g.managerSubmitted),
+    managerApplicable: sumBy(rest, (g) => g.managerApplicable),
+  });
+  const folded = foldGroups<CompletionGroup>(summary.groups, ctx.min, {
+    size: (g) => g.participants,
+    named: (g) => g.key !== null,
+    merge: (rest) => withRates(null, null, sum(rest)),
+  });
+  const label = (g: CompletionGroup) =>
+    ctx.anonymized
+      ? teams.get(g.key!)!
+      : (g.label ?? teams.get(g.key!) ?? ctx.labels.others);
   return {
-    byRelationship: hidden
-      ? null
-      : [...totals.values()].sort((a, b) =>
-          a.relationship.localeCompare(b.relationship),
-        ),
-    byDepartment: dep.rows,
-    byManager: man.rows,
-    suppressed: { byDepartment: dep.suppressed, byManager: man.suppressed },
+    cells: [
+      ...folded.shown.map((g) => ({
+        ...counts(g),
+        label: label(g),
+        other: false,
+      })),
+      ...(folded.others
+        ? [
+            {
+              ...counts(folded.others),
+              label: ctx.labels.others,
+              other: true,
+            },
+          ]
+        : []),
+    ],
+    suppressed: folded.suppressed,
+  };
+}
+
+/**
+ * Completion of the cycle (#59): how many participants submitted their self
+ * and their manager assessment, from the completion module (Assessment
+ * Progress first, then the review requests), total, by area and by team, and
+ * the change against the semester before. Peer and upward reviews are in
+ * the executive progress. A group's n is its participants.
+ *
+ * Anonymized, the module runs as direction with the report's minimum: areas
+ * under it are folded into "Otros" or hidden, and the totals (and the change
+ * of the total) are null whenever any breakdown has a suppressed group.
+ */
+export const collectCompletion: Collector<"completion"> = async (db, ctx) => {
+  const [{ delta }, teams] = await Promise.all([
+    completionOverview(db, actorOf(ctx), {
+      cycleId: ctx.cycleId,
+      groupBy: "department",
+      ...(ctx.anonymized ? { minGroupSize: ctx.min } : {}),
+    }),
+    teamCells(db, ctx),
+  ]);
+  const current = delta.current;
+  if (current.participants === 0) return null;
+  const suppressed = {
+    byDepartment: current.suppressed,
+    byManager: teams.suppressed,
+  };
+  const hidden =
+    ctx.anonymized &&
+    (suppressed.byDepartment > 0 ||
+      suppressed.byManager > 0 ||
+      current.total === null);
+  const total = hidden ? null : current.total;
+  const points = (d: {
+    selfDelta: number | null;
+    managerDelta: number | null;
+  }) => ({
+    self: d.selfDelta,
+    manager: d.managerDelta,
+  });
+  return {
+    participants: current.participants,
+    byRelationship: total
+      ? [
+          {
+            relationship: "self",
+            total: total.selfApplicable,
+            submitted: total.selfSubmitted,
+          },
+          {
+            relationship: "manager",
+            total: total.managerApplicable,
+            submitted: total.managerSubmitted,
+          },
+        ]
+          .filter((r) => r.total > 0)
+          .map((r) => ({ ...r, draft: null, declined: null }))
+      : null,
+    byDepartment: completionRows(departmentCells(current, ctx)),
+    byManager: completionRows(teams.cells),
+    suppressed,
+    delta: delta.previous
+      ? {
+          previousCycleName: delta.previous.cycleName,
+          total: hidden || !delta.total ? null : points(delta.total),
+          byDepartment: [
+            ...delta.groups.map((d) => ({
+              label: d.label ?? ctx.labels.others,
+              other: d.key === null,
+              ...points(d),
+            })),
+            ...(delta.others
+              ? [
+                  {
+                    label: ctx.labels.others,
+                    other: true,
+                    ...points(delta.others),
+                  },
+                ]
+              : []),
+          ],
+        }
+      : null,
   };
 };
 
@@ -292,8 +367,105 @@ export const collectIndicators: Collector<"indicators"> = async (db, ctx) => {
   };
 };
 
-/** TODO(#62): wire the goals insights once they land. */
-export const collectGoals: Collector<"goals"> = async () => null;
+// ----------------------------------------------------------------- goals
+
+/**
+ * Goals of the cycle (#62) from goals-insights: figures by area and by team
+ * (the goals of the period, completed / in progress / closed / overdue, mean
+ * progress), the buckets of the share of goals completed with the mean
+ * indicators of their people, and the outliers (goals and indicators that
+ * disagree).
+ *
+ * Anonymized, it runs as direction with the report's minimum: groups under it
+ * are folded into "Otros" or hidden, buckets under it are hidden, teams are
+ * "Equipo N" (the module names the manager; the label is replaced here), the
+ * outliers are only counted (and only from the minimum) and the totals are
+ * null whenever any breakdown has a suppressed group.
+ */
+export const collectGoals: Collector<"goals"> = async (db, ctx) => {
+  const input = { cycleId: ctx.cycleId, config: { minGroupSize: ctx.min } };
+  const actor = actorOf(ctx);
+  const [all, byManager, teams] = await Promise.all([
+    goalInsights(db, actor, { ...input, groupBy: "department" }),
+    goalKpis(db, actor, { ...input, groupBy: "manager" }),
+    cycleTeams(db, ctx),
+  ]);
+  const { kpis, vsIndicators: vs, outliers } = all;
+  if (kpis.groups.length === 0 && kpis.suppressed === 0) return null;
+
+  const row = (g: GoalKpiGroup, label: string, other: boolean) => ({
+    label,
+    n: g.people,
+    other,
+    peopleWithGoals: g.peopleWithGoals,
+    goals: g.goals,
+    completed: g.completed,
+    inProgress: g.inProgress,
+    closed: g.closed,
+    overdue: g.overdue,
+    avgProgress: round(g.avgProgress, 1),
+  });
+  const rows = (k: GoalKpis, labelOf: (g: GoalKpiGroup) => string) =>
+    k.groups.map((g) => {
+      const other = g.others || g.key === null;
+      return row(g, other ? ctx.labels.others : labelOf(g), other);
+    });
+  const teamLabel = (g: GoalKpiGroup) =>
+    ctx.anonymized
+      ? teams.get(g.key!)!
+      : (g.label ?? teams.get(g.key!) ?? ctx.labels.others);
+
+  const suppressed = {
+    byDepartment: kpis.suppressed,
+    byManager: byManager.suppressed,
+    buckets: vs.suppressed,
+  };
+  const hidden =
+    ctx.anonymized &&
+    (suppressed.byDepartment + suppressed.byManager + suppressed.buckets > 0 ||
+      kpis.total === null ||
+      byManager.total === null);
+  const total = hidden ? null : kpis.total;
+
+  const outlierGroup = (g: typeof outliers.doneButLow) => ({
+    count: g.count,
+    people: g.people.map((p) => ({
+      personId: p.personId,
+      name: p.name,
+      department: p.department,
+      manager: p.managerName,
+      goals: p.goals,
+      completed: p.completed,
+      completedPct: round(p.completedPct, 1)!,
+      retention: p.retention,
+      engagement: p.engagement,
+    })),
+  });
+  return {
+    participantsWithGoals: total?.peopleWithGoals ?? null,
+    goals: total?.goals ?? null,
+    completed: total?.completed ?? null,
+    avgProgress: round(total?.avgProgress ?? null, 1),
+    byDepartment: rows(kpis, (g) => g.label ?? ctx.labels.others),
+    byManager: rows(byManager, teamLabel),
+    buckets: vs.buckets.map((b) => ({
+      from: b.from,
+      to: b.to,
+      people: b.people,
+      meanRetention: round(b.meanRetention, 2),
+      meanEngagement: round(b.meanEngagement, 2),
+      meanPositiveShare: round(b.meanPositiveShare, 2),
+      hidden: b.hidden,
+    })),
+    withoutGoals: vs.withoutGoals,
+    outliers: {
+      thresholds: outliers.thresholds,
+      doneButLow: outlierGroup(outliers.doneButLow),
+      behindButHigh: outlierGroup(outliers.behindButHigh),
+    },
+    suppressed,
+  } satisfies GoalsSection;
+};
 
 // ----------------------------------------------------------- qualitative
 

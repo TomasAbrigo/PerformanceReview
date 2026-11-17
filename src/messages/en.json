@@ -1386,10 +1386,11 @@
       "byDepartment": "By department",
       "byManager": "By team",
       "submitted": "Submitted",
-      "draft": "Draft",
-      "declined": "Declined",
       "pending": "Pending",
-      "total": "Total"
+      "total": "Total",
+      "delta": "Change against the previous cycle",
+      "points": "percentage points",
+      "rate": "% submitted"
     },
     "indicators": {
       "title": "Retention and engagement indicators",
@@ -1423,7 +1424,26 @@
       "participantsWithGoals": "People with goals",
       "goals": "Goals",
       "completed": "Completed",
-      "avgProgress": "Average progress"
+      "avgProgress": "Average progress",
+      "byDepartment": "By department",
+      "byManager": "By team",
+      "status": "Goals by status",
+      "inProgress": "In progress",
+      "closed": "Closed",
+      "overdue": "Overdue",
+      "withoutGoals": "People without goals",
+      "buckets": "Goals completed vs indicators",
+      "bucket": "Goals completed",
+      "people": "People",
+      "meanRetention": "Retention (mean)",
+      "meanEngagement": "Engagement (mean)",
+      "positiveShare": "Positive comments (mean)",
+      "outliers": "Outliers",
+      "doneButLow": "Goals done but retention or engagement low",
+      "behindButHigh": "Goals behind but retention and engagement high",
+      "count": "Count",
+      "completedPct": "% completed",
+      "underMinimum": "Fewer people than the minimum group: not published"
     },
     "people": {
       "title": "People",
