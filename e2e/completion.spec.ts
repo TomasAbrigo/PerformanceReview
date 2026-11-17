@@ -131,8 +131,13 @@ test("People import the assessment progress and read the completion of a cycle",
   for (const m of missing) {
     const row = rowOf(page, fullName(m.person));
     await expect(row).toBeVisible();
-    await expect(row.getByText(STATUS_ES[m.selfStatus])).toBeVisible();
-    await expect(row.getByText(STATUS_ES[m.managerStatus])).toBeVisible();
+    // Columns: person, area, manager, self status, manager status, notes.
+    await expect(row.locator("td:nth-child(4)")).toContainText(
+      STATUS_ES[m.selfStatus],
+    );
+    await expect(row.locator("td:nth-child(5)")).toContainText(
+      STATUS_ES[m.managerStatus],
+    );
   }
   // The rows are the number the page announces, and there is no email.
   const rows = await table.getByRole("row").count();

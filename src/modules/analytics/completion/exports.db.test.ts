@@ -41,7 +41,7 @@ describe("insights-completion.csv", () => {
     expect(rows.map((r) => r.group)).toEqual(["Tecnología", "Ventas", ""]);
     expect(rows[0]).toMatchObject({
       cycle_name: "2025-H1",
-      previous_cycle: "2024-H2",
+      "previous cycle": "2024-H2",
       group_id: "Tecnología",
       participants: "3",
       self_submitted: "2",
@@ -112,7 +112,7 @@ describe("insights-completion.csv", () => {
       `?cycle=${c0}&groupBy=none&locale=en`,
     );
     expect(rows[0]).toMatchObject({
-      previous_cycle: "",
+      "previous cycle": "",
       self_delta_pp: "",
       manager_delta_pp: "",
     });
