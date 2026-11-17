@@ -22,20 +22,22 @@
   "selectedFilter": "status-all",
   "goals": [
     {
-      "id": "7290",
-      "title": "Mentorear a dos personas nuevas",
-      "description": "Sirve de base para el próximo ciclo de evaluación.",
-      "percentComplete": 100,
-      "alignsWithOptionId": 9001,
-      "sharedWithEmployeeIds": [],
-      "dueDate": "2025-07-27",
-      "completionDate": "2025-08-11",
-      "lastChangedDateTime": "2025-08-11T08:38:16Z",
-      "status": "completed",
+      "id": "7266",
+      "title": "Automatizar la conciliación mensual",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "percentComplete": 65,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [
+        363
+      ],
+      "dueDate": "2024-05-07",
+      "completionDate": null,
+      "lastChangedDateTime": "2025-10-15T08:03:19Z",
+      "status": "in_progress",
       "milestones": null,
       "actions": {
         "canEdit": true,
-        "canUpdateProgress": false,
+        "canUpdateProgress": true,
         "canClose": true,
         "canReopen": false,
         "canDelete": true,
@@ -43,61 +45,48 @@
       }
     },
     {
-      "id": "7292",
-      "title": "Renovar las cuentas clave del trimestre",
-      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "id": "7269",
+      "title": "Documentar los procesos críticos",
+      "description": "Sirve de base para el próximo ciclo de evaluación.",
       "percentComplete": 100,
-      "alignsWithOptionId": null,
-      "sharedWithEmployeeIds": [
-        363
-      ],
-      "dueDate": "2025-08-21",
-      "completionDate": "2025-07-22",
-      "lastChangedDateTime": "2025-07-22T12:26:22Z",
+      "alignsWithOptionId": 9004,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2024-04-12",
+      "completionDate": "2024-04-15",
+      "lastChangedDateTime": "2024-04-15T11:11:30Z",
       "status": "completed",
       "milestones": [
         {
-          "id": 1759,
-          "employeeGoalId": 7292,
+          "id": 1648,
+          "employeeGoalId": 7269,
           "title": "Hito 1",
           "startValue": 0,
           "endValue": 1,
           "currentValue": 1,
-          "completedDateTime": "2025-05-22T19:21:30Z",
-          "lastUpdateDateTime": "2025-05-22T19:21:30Z",
+          "completedDateTime": "2024-03-22T17:34:22Z",
+          "lastUpdateDateTime": "2024-03-22T17:34:22Z",
           "lastUpdateUserId": 543
         },
         {
-          "id": 1760,
-          "employeeGoalId": 7292,
+          "id": 1649,
+          "employeeGoalId": 7269,
           "title": "Hito 2",
           "startValue": 0,
           "endValue": 1,
           "currentValue": 1,
-          "completedDateTime": "2025-04-28T19:24:59Z",
-          "lastUpdateDateTime": "2025-04-28T19:24:59Z",
+          "completedDateTime": "2024-03-07T18:12:42Z",
+          "lastUpdateDateTime": "2024-03-07T18:12:42Z",
           "lastUpdateUserId": 543
         },
         {
-          "id": 1761,
-          "employeeGoalId": 7292,
+          "id": 1650,
+          "employeeGoalId": 7269,
           "title": "Hito 3",
           "startValue": 0,
           "endValue": 1,
           "currentValue": 1,
-          "completedDateTime": "2025-05-07T12:16:16Z",
-          "lastUpdateDateTime": "2025-05-07T12:16:16Z",
-          "lastUpdateUserId": 543
-        },
-        {
-          "id": 1762,
-          "employeeGoalId": 7292,
-          "title": "Hito 4",
-          "startValue": 0,
-          "endValue": 1,
-          "currentValue": 1,
-          "completedDateTime": "2025-05-30T15:37:09Z",
-          "lastUpdateDateTime": "2025-05-30T15:37:09Z",
+          "completedDateTime": "2024-03-31T13:14:42Z",
+          "lastUpdateDateTime": "2024-03-31T13:14:42Z",
           "lastUpdateUserId": 543
         }
       ],
@@ -111,15 +100,17 @@
       }
     },
     {
-      "id": "7295",
-      "title": "Implementar el calendario editorial",
-      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "id": "7272",
+      "title": "Renovar las cuentas clave del trimestre",
+      "description": "Pedido por el equipo directivo en la planificación.",
       "percentComplete": 100,
       "alignsWithOptionId": null,
-      "sharedWithEmployeeIds": [],
-      "dueDate": "2025-07-13",
-      "completionDate": "2025-06-21",
-      "lastChangedDateTime": "2025-06-21T14:08:07Z",
+      "sharedWithEmployeeIds": [
+        363
+      ],
+      "dueDate": "2025-06-30",
+      "completionDate": "2025-06-22",
+      "lastChangedDateTime": "2025-06-22T10:01:52Z",
       "status": "completed",
       "milestones": null,
       "actions": {
@@ -127,6 +118,50 @@
         "canUpdateProgress": false,
         "canClose": true,
         "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "7273",
+      "title": "Renovar las cuentas clave del trimestre",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 0,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2026-03-26",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-03-31T08:49:19Z",
+      "status": "closed",
+      "milestones": [
+        {
+          "id": 1651,
+          "employeeGoalId": 7273,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2025-08-12T18:33:15Z",
+          "lastUpdateUserId": 543
+        },
+        {
+          "id": 1652,
+          "employeeGoalId": 7273,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2025-08-12T10:57:54Z",
+          "lastUpdateUserId": 543
+        }
+      ],
+      "actions": {
+        "canEdit": false,
+        "canUpdateProgress": false,
+        "canClose": false,
+        "canReopen": true,
         "canDelete": true,
         "canComment": true
       }
@@ -148,8 +183,8 @@
   ],
   "comments": [
     {
-      "goalId": "7290",
-      "commentCount": 3
+      "goalId": "7273",
+      "commentCount": 4
     }
   ]
 }

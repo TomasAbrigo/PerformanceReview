@@ -641,6 +641,116 @@ describe.each(["es", "en"] as const)("UploadForm (%s)", (locale) => {
       });
     });
 
+    it("starts from a built-in report profile and edits its question mapping", async () => {
+      const columns = [
+        col("Employee Name"),
+        col("Manager"),
+        col("Department"),
+        col("Review Cycle"),
+        col("Assessment Date", "DATE"),
+        col("Employee Q3: What are some things I do well?"),
+        col("Pregunta propia"),
+      ];
+      const actions = await previewFile(locale, csv("perf.csv"), {
+        inspect: inspected({ fileName: "perf.csv", columns, rows: [] }),
+      });
+      await userEvent.selectOptions(
+        screen.getByLabelText(t.preview.profile),
+        t.preview.newProfile,
+      );
+      await userEvent.selectOptions(
+        screen.getByLabelText(t.custom.base),
+        "bamboo-employee-performance",
+      );
+      await userEvent.type(screen.getByLabelText(t.custom.name), "perf-cuenta");
+
+      const questions = screen.getByRole("table", {
+        name: t.custom.questions.title,
+      });
+      // The built-in's mapping for the columns this file has.
+      expect(
+        within(questions).getByLabelText(
+          t.custom.questions.kindLabel.replace(
+            "{column}",
+            "Employee Q3: What are some things I do well?",
+          ),
+        ),
+      ).toHaveValue("text");
+      const kind = t.custom.questions.kindLabel.replace(
+        "{column}",
+        "Pregunta propia",
+      );
+      await userEvent.selectOptions(
+        within(questions).getByLabelText(kind),
+        "likert",
+      );
+      await userEvent.selectOptions(
+        within(questions).getByLabelText(
+          t.custom.questions.sideLabel.replace("{column}", "Pregunta propia"),
+        ),
+        "manager",
+      );
+      await userEvent.selectOptions(
+        within(questions).getByLabelText(
+          t.custom.questions.dimensionLabel.replace(
+            "{column}",
+            "Pregunta propia",
+          ),
+        ),
+        "custom_3",
+      );
+      // Moving a base question to the other side derives a new key.
+      await userEvent.selectOptions(
+        within(questions).getByLabelText(
+          t.custom.questions.sideLabel.replace(
+            "{column}",
+            "Employee Q3: What are some things I do well?",
+          ),
+        ),
+        "manager",
+      );
+      // A performance profile imports cycles unless asked to only land.
+      expect(
+        screen.getByRole("checkbox", { name: t.preview.landingOnly }),
+      ).not.toBeChecked();
+      await userEvent.click(
+        screen.getByRole("button", { name: t.preview.import }),
+      );
+
+      await waitFor(() => expect(actions.importFile).toHaveBeenCalledOnce());
+      const sent = actions.importFile.mock.calls[0][0];
+      expect(sent.landing).toBe(false);
+      expect(sent.profile).toMatchObject({
+        custom: {
+          name: "perf-cuenta",
+          entity: "assessment",
+          keyColumns: ["Employee Name", "Review Cycle", "Assessment Date"],
+          cycleColumn: "Review Cycle",
+          dateColumn: "Assessment Date",
+          columnMap: {
+            "Employee Name": "employee_name",
+            Manager: "manager_name",
+          },
+          questions: [
+            {
+              column: "Employee Q3: What are some things I do well?",
+              side: "manager",
+              kind: "text",
+              key: "manager:employee q3: what are some things i do well?",
+              dimension: "strengths",
+            },
+            {
+              column: "Pregunta propia",
+              side: "manager",
+              kind: "likert",
+              key: "manager:pregunta propia",
+              dimension: "custom_3",
+            },
+          ],
+        },
+      });
+    });
+
     it("explains what is missing in the definition", async () => {
       await previewFile(locale);
       await userEvent.selectOptions(

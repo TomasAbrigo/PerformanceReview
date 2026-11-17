@@ -22,20 +22,130 @@
   "selectedFilter": "status-all",
   "goals": [
     {
-      "id": "6523",
-      "title": "Reducir los incidentes recurrentes a la mitad",
+      "id": "6473",
+      "title": "Completar la certificación del área",
       "description": "Alineado con el plan del área para el año.",
-      "percentComplete": 10,
+      "percentComplete": 100,
       "alignsWithOptionId": null,
       "sharedWithEmployeeIds": [],
-      "dueDate": "2026-09-16",
-      "completionDate": null,
-      "lastChangedDateTime": "2026-09-11T15:22:42Z",
-      "status": "in_progress",
+      "dueDate": "2023-06-26",
+      "completionDate": "2023-03-21",
+      "lastChangedDateTime": "2023-03-21T11:03:42Z",
+      "status": "completed",
+      "milestones": [
+        {
+          "id": 1308,
+          "employeeGoalId": 6473,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2023-01-17T13:01:00Z",
+          "lastUpdateDateTime": "2023-01-17T13:01:00Z",
+          "lastUpdateUserId": 349
+        },
+        {
+          "id": 1309,
+          "employeeGoalId": 6473,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2023-01-23T13:24:36Z",
+          "lastUpdateDateTime": "2023-01-23T13:24:36Z",
+          "lastUpdateUserId": 349
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "6474",
+      "title": "Documentar los procesos críticos",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2023-07-01",
+      "completionDate": "2022-12-18",
+      "lastChangedDateTime": "2022-12-18T19:33:31Z",
+      "status": "completed",
+      "milestones": [
+        {
+          "id": 1310,
+          "employeeGoalId": 6474,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2022-11-25T13:53:09Z",
+          "lastUpdateDateTime": "2022-11-25T13:53:09Z",
+          "lastUpdateUserId": 349
+        },
+        {
+          "id": 1311,
+          "employeeGoalId": 6474,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2022-12-09T18:06:01Z",
+          "lastUpdateDateTime": "2022-12-09T18:06:01Z",
+          "lastUpdateUserId": 349
+        },
+        {
+          "id": 1312,
+          "employeeGoalId": 6474,
+          "title": "Hito 3",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2022-11-25T13:22:03Z",
+          "lastUpdateDateTime": "2022-11-25T13:22:03Z",
+          "lastUpdateUserId": 349
+        },
+        {
+          "id": 1313,
+          "employeeGoalId": 6474,
+          "title": "Hito 4",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2022-11-23T16:21:10Z",
+          "lastUpdateDateTime": "2022-11-23T16:21:10Z",
+          "lastUpdateUserId": 349
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "6475",
+      "title": "Migrar los reportes al nuevo tablero",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 100,
+      "alignsWithOptionId": 9004,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2025-02-26",
+      "completionDate": "2025-01-30",
+      "lastChangedDateTime": "2025-01-30T09:41:04Z",
+      "status": "completed",
       "milestones": null,
       "actions": {
         "canEdit": true,
-        "canUpdateProgress": true,
+        "canUpdateProgress": false,
         "canClose": true,
         "canReopen": false,
         "canDelete": true,
@@ -53,8 +163,8 @@
   ],
   "comments": [
     {
-      "goalId": "6523",
-      "commentCount": 1
+      "goalId": "6475",
+      "commentCount": 4
     }
   ]
 }

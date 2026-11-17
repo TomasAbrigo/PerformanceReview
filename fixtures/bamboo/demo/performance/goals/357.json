@@ -22,40 +22,51 @@
   "selectedFilter": "status-all",
   "goals": [
     {
-      "id": "6544",
-      "title": "Mejorar el NPS interno del equipo",
-      "description": "Pedido por el equipo directivo en la planificación.",
-      "percentComplete": 100,
-      "alignsWithOptionId": 9003,
-      "sharedWithEmployeeIds": [
-        243
-      ],
-      "dueDate": "2023-03-19",
-      "completionDate": "2023-02-15",
-      "lastChangedDateTime": "2023-02-15T14:39:12Z",
-      "status": "completed",
-      "milestones": null,
-      "actions": {
-        "canEdit": true,
-        "canUpdateProgress": false,
-        "canClose": true,
-        "canReopen": false,
-        "canDelete": true,
-        "canComment": true
-      }
-    },
-    {
-      "id": "6545",
-      "title": "Reducir los incidentes recurrentes a la mitad",
-      "description": "Sirve de base para el próximo ciclo de evaluación.",
-      "percentComplete": 70,
-      "alignsWithOptionId": 9003,
+      "id": "6495",
+      "title": "Entregar el proyecto Norte sin desvíos",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "percentComplete": 0,
+      "alignsWithOptionId": null,
       "sharedWithEmployeeIds": [],
-      "dueDate": "2023-06-14",
+      "dueDate": "2023-05-24",
       "completionDate": null,
-      "lastChangedDateTime": "2023-05-17T18:19:57Z",
+      "lastChangedDateTime": "2023-07-19T15:36:41Z",
       "status": "closed",
-      "milestones": null,
+      "milestones": [
+        {
+          "id": 1317,
+          "employeeGoalId": 6495,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2023-03-16T15:33:09Z",
+          "lastUpdateUserId": 357
+        },
+        {
+          "id": 1318,
+          "employeeGoalId": 6495,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2023-03-16T16:25:23Z",
+          "lastUpdateUserId": 357
+        },
+        {
+          "id": 1319,
+          "employeeGoalId": 6495,
+          "title": "Hito 3",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2023-03-16T18:36:47Z",
+          "lastUpdateUserId": 357
+        }
+      ],
       "actions": {
         "canEdit": false,
         "canUpdateProgress": false,
@@ -66,106 +77,106 @@
       }
     },
     {
-      "id": "6546",
-      "title": "Renovar las cuentas clave del trimestre",
-      "description": "Sirve de base para el próximo ciclo de evaluación.",
-      "percentComplete": 100,
-      "alignsWithOptionId": null,
-      "sharedWithEmployeeIds": [],
-      "dueDate": "2023-08-22",
-      "completionDate": "2023-08-25",
-      "lastChangedDateTime": "2023-08-25T18:28:34Z",
-      "status": "completed",
-      "milestones": null,
-      "actions": {
-        "canEdit": true,
-        "canUpdateProgress": false,
-        "canClose": true,
-        "canReopen": false,
-        "canDelete": true,
-        "canComment": true
-      }
-    },
-    {
-      "id": "6548",
+      "id": "6496",
       "title": "Lanzar el nuevo flujo de onboarding",
-      "description": "Meta compartida con otra área; coordinar avances mensuales.",
-      "percentComplete": 100,
-      "alignsWithOptionId": null,
-      "sharedWithEmployeeIds": [
-        243
-      ],
-      "dueDate": "2025-07-20",
-      "completionDate": "2025-02-25",
-      "lastChangedDateTime": "2025-02-25T16:58:30Z",
-      "status": "completed",
-      "milestones": null,
-      "actions": {
-        "canEdit": true,
-        "canUpdateProgress": false,
-        "canClose": true,
-        "canReopen": false,
-        "canDelete": true,
-        "canComment": true
-      }
-    },
-    {
-      "id": "6549",
-      "title": "Reducir los incidentes recurrentes a la mitad",
       "description": "Sirve de base para el próximo ciclo de evaluación.",
       "percentComplete": 25,
       "alignsWithOptionId": null,
       "sharedWithEmployeeIds": [],
-      "dueDate": "2026-12-26",
+      "dueDate": "2024-07-27",
       "completionDate": null,
-      "lastChangedDateTime": "2026-09-30T10:54:08Z",
-      "status": "in_progress",
+      "lastChangedDateTime": "2024-04-08T13:38:16Z",
+      "status": "closed",
       "milestones": [
         {
-          "id": 1375,
-          "employeeGoalId": 6549,
+          "id": 1320,
+          "employeeGoalId": 6496,
           "title": "Hito 1",
           "startValue": 0,
           "endValue": 1,
           "currentValue": 1,
-          "completedDateTime": "2026-09-18T11:50:53Z",
-          "lastUpdateDateTime": "2026-09-18T11:50:53Z",
+          "completedDateTime": "2024-02-10T18:18:51Z",
+          "lastUpdateDateTime": "2024-02-10T18:18:51Z",
           "lastUpdateUserId": 357
         },
         {
-          "id": 1376,
-          "employeeGoalId": 6549,
+          "id": 1321,
+          "employeeGoalId": 6496,
           "title": "Hito 2",
           "startValue": 0,
           "endValue": 1,
           "currentValue": 0,
           "completedDateTime": null,
-          "lastUpdateDateTime": "2026-08-21T13:19:10Z",
+          "lastUpdateDateTime": "2024-02-03T09:43:24Z",
           "lastUpdateUserId": 357
         },
         {
-          "id": 1377,
-          "employeeGoalId": 6549,
+          "id": 1322,
+          "employeeGoalId": 6496,
           "title": "Hito 3",
           "startValue": 0,
           "endValue": 1,
           "currentValue": 0,
           "completedDateTime": null,
-          "lastUpdateDateTime": "2026-08-21T14:36:56Z",
+          "lastUpdateDateTime": "2024-02-03T09:43:37Z",
           "lastUpdateUserId": 357
         },
         {
-          "id": 1378,
-          "employeeGoalId": 6549,
+          "id": 1323,
+          "employeeGoalId": 6496,
           "title": "Hito 4",
           "startValue": 0,
           "endValue": 1,
           "currentValue": 0,
           "completedDateTime": null,
-          "lastUpdateDateTime": "2026-08-21T12:53:19Z",
+          "lastUpdateDateTime": "2024-02-03T08:20:50Z",
           "lastUpdateUserId": 357
         }
       ],
+      "actions": {
+        "canEdit": false,
+        "canUpdateProgress": false,
+        "canClose": false,
+        "canReopen": true,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "6497",
+      "title": "Migrar los reportes al nuevo tablero",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "percentComplete": 100,
+      "alignsWithOptionId": 9001,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2025-07-18",
+      "completionDate": "2025-08-03",
+      "lastChangedDateTime": "2025-08-03T16:55:39Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "6498",
+      "title": "Documentar los procesos críticos",
+      "description": "Sirve de base para el próximo ciclo de evaluación.",
+      "percentComplete": 80,
+      "alignsWithOptionId": 9003,
+      "sharedWithEmployeeIds": [
+        243
+      ],
+      "dueDate": "2025-02-20",
+      "completionDate": null,
+      "lastChangedDateTime": "2024-12-18T11:05:12Z",
+      "status": "in_progress",
+      "milestones": null,
       "actions": {
         "canEdit": true,
         "canUpdateProgress": true,
@@ -176,19 +187,40 @@
       }
     },
     {
-      "id": "6551",
+      "id": "6501",
       "title": "Mejorar el NPS interno del equipo",
-      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "description": "Alineado con el plan del área para el año.",
       "percentComplete": 100,
       "alignsWithOptionId": null,
-      "sharedWithEmployeeIds": [
-        243
-      ],
-      "dueDate": "2026-07-14",
-      "completionDate": "2026-04-30",
-      "lastChangedDateTime": "2026-04-30T12:30:02Z",
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2026-05-26",
+      "completionDate": "2026-06-05",
+      "lastChangedDateTime": "2026-06-05T16:42:24Z",
       "status": "completed",
-      "milestones": null,
+      "milestones": [
+        {
+          "id": 1324,
+          "employeeGoalId": 6501,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2026-04-11T17:16:37Z",
+          "lastUpdateDateTime": "2026-04-11T17:16:37Z",
+          "lastUpdateUserId": 357
+        },
+        {
+          "id": 1325,
+          "employeeGoalId": 6501,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2026-02-02T12:30:20Z",
+          "lastUpdateDateTime": "2026-02-02T12:30:20Z",
+          "lastUpdateUserId": 357
+        }
+      ],
       "actions": {
         "canEdit": true,
         "canUpdateProgress": false,
@@ -215,15 +247,11 @@
   ],
   "comments": [
     {
-      "goalId": "6544",
+      "goalId": "6496",
       "commentCount": 3
     },
     {
-      "goalId": "6548",
-      "commentCount": 3
-    },
-    {
-      "goalId": "6549",
+      "goalId": "6498",
       "commentCount": 1
     }
   ]

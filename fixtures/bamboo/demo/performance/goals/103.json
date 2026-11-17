@@ -20,7 +20,29 @@
     }
   ],
   "selectedFilter": "status-all",
-  "goals": [],
+  "goals": [
+    {
+      "id": "5406",
+      "title": "Reducir el tiempo de primera respuesta un 20%",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 15,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2023-06-25",
+      "completionDate": null,
+      "lastChangedDateTime": "2023-04-10T18:10:29Z",
+      "status": "closed",
+      "milestones": null,
+      "actions": {
+        "canEdit": false,
+        "canUpdateProgress": false,
+        "canClose": false,
+        "canReopen": false,
+        "canDelete": false,
+        "canComment": false
+      }
+    }
+  ],
   "persons": [
     {
       "employeeId": 103,
@@ -29,5 +51,10 @@
       "preferredName": null
     }
   ],
-  "comments": []
+  "comments": [
+    {
+      "goalId": "5406",
+      "commentCount": 2
+    }
+  ]
 }

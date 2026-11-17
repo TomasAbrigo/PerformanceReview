@@ -22,61 +22,82 @@
   "selectedFilter": "status-all",
   "goals": [
     {
-      "id": "6835",
-      "title": "Completar la certificación del área",
+      "id": "6791",
+      "title": "Lanzar el nuevo flujo de onboarding",
       "description": "Alineado con el plan del área para el año.",
       "percentComplete": 100,
-      "alignsWithOptionId": 9004,
+      "alignsWithOptionId": null,
       "sharedWithEmployeeIds": [
-        41
+        339
       ],
-      "dueDate": "2025-07-22",
-      "completionDate": "2025-05-29",
-      "lastChangedDateTime": "2025-05-29T10:28:39Z",
+      "dueDate": "2024-10-12",
+      "completionDate": "2024-10-13",
+      "lastChangedDateTime": "2024-10-13T15:03:55Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": false,
+        "canUpdateProgress": false,
+        "canClose": false,
+        "canReopen": false,
+        "canDelete": false,
+        "canComment": false
+      }
+    },
+    {
+      "id": "6794",
+      "title": "Cerrar el plan de capacitación anual",
+      "description": "Sirve de base para el próximo ciclo de evaluación.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2024-07-27",
+      "completionDate": "2024-01-26",
+      "lastChangedDateTime": "2024-01-26T13:49:08Z",
       "status": "completed",
       "milestones": [
         {
-          "id": 1515,
-          "employeeGoalId": 6835,
+          "id": 1464,
+          "employeeGoalId": 6794,
           "title": "Hito 1",
           "startValue": 0,
           "endValue": 1,
           "currentValue": 1,
-          "completedDateTime": "2025-05-28T09:14:50Z",
-          "lastUpdateDateTime": "2025-05-28T09:14:50Z",
+          "completedDateTime": "2024-01-15T08:27:53Z",
+          "lastUpdateDateTime": "2024-01-15T08:27:53Z",
           "lastUpdateUserId": 423
         },
         {
-          "id": 1516,
-          "employeeGoalId": 6835,
+          "id": 1465,
+          "employeeGoalId": 6794,
           "title": "Hito 2",
           "startValue": 0,
           "endValue": 1,
           "currentValue": 1,
-          "completedDateTime": "2025-05-10T12:08:51Z",
-          "lastUpdateDateTime": "2025-05-10T12:08:51Z",
+          "completedDateTime": "2024-01-16T11:40:45Z",
+          "lastUpdateDateTime": "2024-01-16T11:40:45Z",
           "lastUpdateUserId": 423
         },
         {
-          "id": 1517,
-          "employeeGoalId": 6835,
+          "id": 1466,
+          "employeeGoalId": 6794,
           "title": "Hito 3",
           "startValue": 0,
           "endValue": 1,
           "currentValue": 1,
-          "completedDateTime": "2025-05-24T09:59:47Z",
-          "lastUpdateDateTime": "2025-05-24T09:59:47Z",
+          "completedDateTime": "2023-12-15T13:42:43Z",
+          "lastUpdateDateTime": "2023-12-15T13:42:43Z",
           "lastUpdateUserId": 423
         },
         {
-          "id": 1518,
-          "employeeGoalId": 6835,
+          "id": 1467,
+          "employeeGoalId": 6794,
           "title": "Hito 4",
           "startValue": 0,
           "endValue": 1,
           "currentValue": 1,
-          "completedDateTime": "2025-05-25T12:53:00Z",
-          "lastUpdateDateTime": "2025-05-25T12:53:00Z",
+          "completedDateTime": "2023-12-29T15:24:25Z",
+          "lastUpdateDateTime": "2023-12-29T15:24:25Z",
           "lastUpdateUserId": 423
         }
       ],
@@ -98,11 +119,16 @@
       "preferredName": null
     },
     {
-      "employeeId": 41,
-      "firstName": "Florencia",
-      "lastName": "Morales",
-      "preferredName": "Flor"
+      "employeeId": 339,
+      "firstName": "Marcela",
+      "lastName": "Maldonado",
+      "preferredName": null
     }
   ],
-  "comments": []
+  "comments": [
+    {
+      "goalId": "6794",
+      "commentCount": 1
+    }
+  ]
 }

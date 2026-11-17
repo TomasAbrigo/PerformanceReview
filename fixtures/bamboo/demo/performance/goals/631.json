@@ -22,15 +22,15 @@
   "selectedFilter": "status-all",
   "goals": [
     {
-      "id": "7585",
-      "title": "Mentorear a dos personas nuevas",
-      "description": "Alineado con el plan del área para el año.",
-      "percentComplete": 45,
+      "id": "7577",
+      "title": "Migrar los reportes al nuevo tablero",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 70,
       "alignsWithOptionId": null,
       "sharedWithEmployeeIds": [],
-      "dueDate": "2024-12-20",
+      "dueDate": "2024-11-28",
       "completionDate": null,
-      "lastChangedDateTime": "2026-08-23T09:17:55Z",
+      "lastChangedDateTime": "2025-06-14T19:31:45Z",
       "status": "closed",
       "milestones": null,
       "actions": {
@@ -43,158 +43,17 @@
       }
     },
     {
-      "id": "7587",
-      "title": "Reducir los incidentes recurrentes a la mitad",
+      "id": "7580",
+      "title": "Implementar el calendario editorial",
       "description": "Alineado con el plan del área para el año.",
-      "percentComplete": 100,
-      "alignsWithOptionId": null,
+      "percentComplete": 10,
+      "alignsWithOptionId": 9004,
       "sharedWithEmployeeIds": [],
-      "dueDate": "2024-12-20",
-      "completionDate": "2024-12-22",
-      "lastChangedDateTime": "2024-12-22T08:15:04Z",
-      "status": "completed",
-      "milestones": null,
-      "actions": {
-        "canEdit": true,
-        "canUpdateProgress": false,
-        "canClose": true,
-        "canReopen": false,
-        "canDelete": true,
-        "canComment": true
-      }
-    },
-    {
-      "id": "7590",
-      "title": "Mejorar el NPS interno del equipo",
-      "description": "Sirve de base para el próximo ciclo de evaluación.",
-      "percentComplete": 100,
-      "alignsWithOptionId": null,
-      "sharedWithEmployeeIds": [],
-      "dueDate": "2025-08-11",
-      "completionDate": "2025-08-09",
-      "lastChangedDateTime": "2025-08-09T18:27:27Z",
-      "status": "completed",
-      "milestones": [
-        {
-          "id": 1894,
-          "employeeGoalId": 7590,
-          "title": "Hito 1",
-          "startValue": 0,
-          "endValue": 1,
-          "currentValue": 1,
-          "completedDateTime": "2025-06-19T13:20:21Z",
-          "lastUpdateDateTime": "2025-06-19T13:20:21Z",
-          "lastUpdateUserId": 631
-        },
-        {
-          "id": 1895,
-          "employeeGoalId": 7590,
-          "title": "Hito 2",
-          "startValue": 0,
-          "endValue": 1,
-          "currentValue": 1,
-          "completedDateTime": "2025-07-27T18:53:21Z",
-          "lastUpdateDateTime": "2025-07-27T18:53:21Z",
-          "lastUpdateUserId": 631
-        },
-        {
-          "id": 1896,
-          "employeeGoalId": 7590,
-          "title": "Hito 3",
-          "startValue": 0,
-          "endValue": 1,
-          "currentValue": 1,
-          "completedDateTime": "2025-06-01T14:40:12Z",
-          "lastUpdateDateTime": "2025-06-01T14:40:12Z",
-          "lastUpdateUserId": 631
-        }
-      ],
-      "actions": {
-        "canEdit": true,
-        "canUpdateProgress": false,
-        "canClose": true,
-        "canReopen": false,
-        "canDelete": true,
-        "canComment": true
-      }
-    },
-    {
-      "id": "7591",
-      "title": "Mejorar el NPS interno del equipo",
-      "description": "Alineado con el plan del área para el año.",
-      "percentComplete": 100,
-      "alignsWithOptionId": null,
-      "sharedWithEmployeeIds": [],
-      "dueDate": "2025-05-15",
-      "completionDate": "2024-11-24",
-      "lastChangedDateTime": "2024-11-24T16:02:42Z",
-      "status": "completed",
-      "milestones": null,
-      "actions": {
-        "canEdit": true,
-        "canUpdateProgress": false,
-        "canClose": true,
-        "canReopen": false,
-        "canDelete": true,
-        "canComment": true
-      }
-    },
-    {
-      "id": "7592",
-      "title": "Migrar los reportes al nuevo tablero",
-      "description": "Meta compartida con otra área; coordinar avances mensuales.",
-      "percentComplete": 100,
-      "alignsWithOptionId": null,
-      "sharedWithEmployeeIds": [],
-      "dueDate": "2025-08-23",
-      "completionDate": "2025-05-03",
-      "lastChangedDateTime": "2025-05-03T14:53:56Z",
-      "status": "completed",
-      "milestones": null,
-      "actions": {
-        "canEdit": true,
-        "canUpdateProgress": false,
-        "canClose": true,
-        "canReopen": false,
-        "canDelete": true,
-        "canComment": true
-      }
-    },
-    {
-      "id": "7594",
-      "title": "Lanzar el nuevo flujo de onboarding",
-      "description": "Pedido por el equipo directivo en la planificación.",
-      "percentComplete": 50,
-      "alignsWithOptionId": null,
-      "sharedWithEmployeeIds": [],
-      "dueDate": "2026-12-08",
+      "dueDate": "2026-11-23",
       "completionDate": null,
-      "lastChangedDateTime": "2026-10-15T12:47:31Z",
+      "lastChangedDateTime": "2026-08-28T14:43:47Z",
       "status": "in_progress",
-      "milestones": [
-        {
-          "id": 1897,
-          "employeeGoalId": 7594,
-          "title": "Hito 1",
-          "startValue": 0,
-          "endValue": 1,
-          "currentValue": 1,
-          "completedDateTime": "2026-07-17T19:05:39Z",
-          "lastUpdateDateTime": "2026-07-17T19:05:39Z",
-          "lastUpdateUserId": 631
-        },
-        {
-          "id": 1898,
-          "employeeGoalId": 7594,
-          "title": "Hito 2",
-          "startValue": 0,
-          "endValue": 1,
-          "currentValue": 0,
-          "completedDateTime": null,
-          "lastUpdateDateTime": "2026-07-12T08:12:47Z",
-          "lastUpdateUserId": 631
-        }
-      ],
+      "milestones": null,
       "actions": {
         "canEdit": true,
         "canUpdateProgress": true,
@@ -213,18 +72,5 @@
       "preferredName": null
     }
   ],
-  "comments": [
-    {
-      "goalId": "7591",
-      "commentCount": 3
-    },
-    {
-      "goalId": "7592",
-      "commentCount": 3
-    },
-    {
-      "goalId": "7594",
-      "commentCount": 2
-    }
-  ]
+  "comments": []
 }

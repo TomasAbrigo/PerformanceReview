@@ -53,12 +53,12 @@ describe("FileSourceAdapter", () => {
     const { records, rejected } = await collect(adapter);
 
     expect(rejected).toEqual([]);
-    expect(records).toHaveLength(69);
-    expect(new Set(records.map((r) => r.sourceId)).size).toBe(69);
+    expect(records).toHaveLength(119);
+    expect(new Set(records.map((r) => r.sourceId)).size).toBe(119);
     const id = JSON.stringify([
       "Adrián Bustos",
-      "Evaluación de desempeño 2023",
-      "2023-12-01",
+      "Evaluación semestral 2024-H1",
+      "2024-05-16",
     ]);
     expect(records.map((r) => r.sourceId)).toContain(id);
     expect(records[0].extractedAt).toBeInstanceOf(Date);
@@ -78,15 +78,15 @@ describe("FileSourceAdapter", () => {
         employee_name: "Adrián Bustos",
         manager_name: "Silvana Molina",
         department: "Ingeniería",
-        review_cycle: "Evaluación de desempeño 2023",
-        assessment_date: "2023-12-01",
+        review_cycle: "Evaluación semestral 2024-H1",
+        assessment_date: "2024-05-16",
       },
       deleted: false,
       watermark: null,
       // Exactly as the file has it, under the original headers.
       raw: {
         "Employee Name": "Adrián Bustos",
-        "Assessment Date": "2023-12-01",
+        "Assessment Date": "2024-05-16",
       },
     });
     const payload = adrian?.payload as {
@@ -115,7 +115,7 @@ describe("FileSourceAdapter", () => {
     expect(paged.records.map((r) => r.sourceId)).toEqual(
       whole.records.map((r) => r.sourceId),
     );
-    expect(paged.records.length + paged.rejected.length).toBe(119);
+    expect(paged.records.length + paged.rejected.length).toBe(132);
   });
 
   it("reports rows the profile rejects instead of throwing (people without goals)", async () => {
@@ -126,9 +126,9 @@ describe("FileSourceAdapter", () => {
 
     const { records, rejected } = await collect(adapter);
 
-    // 119 rows: 117 goals plus 2 people with "No Goals Set" and no Goal.
-    expect(records).toHaveLength(117);
-    expect(rejected).toHaveLength(2);
+    // 132 rows: 127 goals plus 5 people with "No Goals Set" and no Goal.
+    expect(records).toHaveLength(127);
+    expect(rejected).toHaveLength(5);
     for (const reject of rejected) {
       expect(reject.sourceId).toBeNull();
       expect(reject.reason).toContain('key column "Goal" is empty');
@@ -194,7 +194,7 @@ describe("FileSourceAdapter", () => {
     );
 
     expect(adapter.entities).toEqual(["assessment"]);
-    expect((await collect(adapter)).records).toHaveLength(69);
+    expect((await collect(adapter)).records).toHaveLength(119);
     await expect(
       collect(new FileSourceAdapter(profile, lake, "nope")),
     ).rejects.toThrow('Unknown table "nope"');

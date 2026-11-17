@@ -263,12 +263,14 @@
         "ignored": "Ignored",
         "log": "Log entries",
         "duration": "Duration",
-        "mismatches": "Reviewer mismatches"
+        "mismatches": "Reviewer mismatches",
+        "deferred": "Deferred"
       },
       "status": {
         "running": "Running",
         "succeeded": "Succeeded",
-        "error": "Failed"
+        "error": "Failed",
+        "needs_decision": "Needs decision"
       },
       "pagination": {
         "label": "Pagination",
@@ -595,14 +597,56 @@
         "builtinName": "That name belongs to a built-in profile: choose another.",
         "savedName": "A saved profile already has that name: choose another or replace it."
       },
-      "replace": "Replace the saved profile “{name}”"
+      "replace": "Replace the saved profile “{name}”",
+      "base": "Start from",
+      "baseNone": "None (from scratch)",
+      "baseHint": "Copies the key, the fields and the question mapping of a built-in profile.",
+      "questions": {
+        "title": "Question mapping",
+        "hint": "Which columns are questions, who answers them and how. Columns like “Employee/Manager [Custom] Qn: …” that you do not configure are detected on their own.",
+        "column": "Column",
+        "kind": "Kind",
+        "side": "Side",
+        "dimension": "Dimension",
+        "role": "Role",
+        "kindLabel": "Question kind: {column}",
+        "sideLabel": "Side: {column}",
+        "dimensionLabel": "Dimension: {column}",
+        "roleLabel": "Role: {column}",
+        "kinds": {
+          "none": "Not a question",
+          "text": "Text",
+          "likert": "1-5 scale",
+          "letter_choice": "Letter choice"
+        },
+        "sides": {
+          "self": "Self assessment",
+          "manager": "Manager"
+        },
+        "none": "—",
+        "dimensions": {
+          "strengths": "Strengths",
+          "improvement": "Improvement",
+          "custom_1": "Custom 1",
+          "custom_2": "Custom 2",
+          "custom_3": "Custom 3"
+        },
+        "roles": {
+          "goals_rating": "Goals rating",
+          "goals_comment": "Goals comment",
+          "overall_rating": "Overall rating",
+          "retention": "Retention",
+          "engagement": "Engagement"
+        }
+      }
     },
     "entities": {
       "employee": "Employees",
       "job_history": "Job history",
       "goal": "Goals",
       "assessment": "Assessments",
-      "feedback": "Feedback"
+      "feedback": "Feedback",
+      "assessment_progress": "Assessment progress"
     },
     "result": {
       "title": "Import finished",
@@ -911,7 +955,29 @@
     "viewRun": "View the run",
     "viewQueue": "View the identity queue",
     "viewResult": "View imported cycles",
-    "notFound": "This run imported no historical cycles."
+    "notFound": "This run imported no historical cycles.",
+    "decision": {
+      "title": "Some rows are waiting for a cycle",
+      "rows": "{count, plural, one {# row was not imported yet} other {# rows were not imported yet}}: choose the cycle they go to.",
+      "reasons": {
+        "ambiguous_semester": "Their date is close to the cutoff between semesters, so the semester they belong to is unclear.",
+        "unknown_cycle": "They name a cycle that does not exist (Assessment Progress has no dates to create it from)."
+      },
+      "names": "Cycles named in the file: {names}",
+      "choose": "Target cycle",
+      "create": "Create the cycle {name} ({start} – {end})",
+      "existing": "{name} ({start} – {end})",
+      "submit": "Import into that cycle",
+      "submitting": "Importing…",
+      "resolved": "The waiting rows were imported into the chosen cycle.",
+      "errors": {
+        "not_waiting": "This run is no longer waiting for a decision. Reload the page.",
+        "not_found": "The run does not exist.",
+        "unknown_cycle": "The chosen cycle no longer exists.",
+        "unknown_proposal": "That cycle was not one of the proposed ones.",
+        "unknown": "The import could not be resumed."
+      }
+    }
   },
   "Dashboards": {
     "nav": "Dashboards",

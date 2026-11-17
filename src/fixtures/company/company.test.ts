@@ -389,9 +389,9 @@ describe("review cycles", () => {
     ["small", small],
     ["demo", demo],
   ])(
-    "%s has three consecutive historical cycles with ordered windows",
+    "%s has five consecutive semi-annual cycles with ordered windows",
     (_, c) => {
-      expect(c.cycles).toHaveLength(3);
+      expect(c.cycles).toHaveLength(5);
       c.cycles.forEach((cycle, i) => {
         expect(cycle.name.length).toBeGreaterThan(0);
         const dates = [
@@ -420,25 +420,22 @@ describe("assessments", () => {
   it.each([
     ["small", small],
     ["demo", demo],
-  ])(
-    "%s has one assessment per participant in each of the 3 cycles",
-    (_, c) => {
-      c.cycles.forEach((cycle, index) => {
-        const rows = c.assessments.filter(
-          (a) => a.cycle === index && a.employeeId !== null,
-        );
-        const expected = c.employees.filter(
-          (e) =>
-            e.hireDate <= addDays(cycle.assessmentOpen, -60) &&
-            (e.terminationDate === null ||
-              e.terminationDate > cycle.assessmentDue),
-        );
-        expect(rows.map((a) => a.employeeId).sort()).toEqual(
-          expected.map((e) => e.id).sort(),
-        );
-      });
-    },
-  );
+  ])("%s has one assessment per participant in each cycle", (_, c) => {
+    c.cycles.forEach((cycle, index) => {
+      const rows = c.assessments.filter(
+        (a) => a.cycle === index && a.employeeId !== null,
+      );
+      const expected = c.employees.filter(
+        (e) =>
+          e.hireDate <= addDays(cycle.assessmentOpen, -60) &&
+          (e.terminationDate === null ||
+            e.terminationDate > cycle.assessmentDue),
+      );
+      expect(rows.map((a) => a.employeeId).sort()).toEqual(
+        expected.map((e) => e.id).sort(),
+      );
+    });
+  });
 
   it.each([
     ["small", small],
@@ -452,7 +449,7 @@ describe("assessments", () => {
       }
       const ceo = c.employees.find((e) => e.managerId === null)!;
       const ceoRows = c.assessments.filter((a) => a.employeeId === ceo.id);
-      expect(ceoRows).toHaveLength(3);
+      expect(ceoRows).toHaveLength(c.cycles.length);
       expect(ceoRows.every((a) => a.managerIdAtReview === null)).toBe(true);
       expect(
         ceoRows.every(

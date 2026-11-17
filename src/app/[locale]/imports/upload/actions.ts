@@ -109,5 +109,6 @@ export async function importUploadAction(
     counts: response.counts,
     rejects: response.rejects,
     mode: response.mode,
+    ...(response.status ? { status: response.status } : {}),
   };
 }

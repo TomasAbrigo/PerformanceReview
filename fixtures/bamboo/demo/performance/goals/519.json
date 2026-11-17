@@ -22,15 +22,36 @@
   "selectedFilter": "status-all",
   "goals": [
     {
-      "id": "7216",
-      "title": "Automatizar la conciliación mensual",
+      "id": "7189",
+      "title": "Implementar el calendario editorial",
       "description": "Meta compartida con otra área; coordinar avances mensuales.",
-      "percentComplete": 70,
+      "percentComplete": 100,
       "alignsWithOptionId": null,
       "sharedWithEmployeeIds": [],
-      "dueDate": "2024-05-21",
+      "dueDate": "2024-11-15",
+      "completionDate": "2024-11-28",
+      "lastChangedDateTime": "2024-11-28T14:51:28Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "7192",
+      "title": "Mejorar el NPS interno del equipo",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 45,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2025-11-07",
       "completionDate": null,
-      "lastChangedDateTime": "2024-10-31T11:07:26Z",
+      "lastChangedDateTime": "2025-12-24T14:38:26Z",
       "status": "in_progress",
       "milestones": null,
       "actions": {
@@ -43,20 +64,20 @@
       }
     },
     {
-      "id": "7217",
-      "title": "Renovar las cuentas clave del trimestre",
-      "description": "Meta compartida con otra área; coordinar avances mensuales.",
-      "percentComplete": 100,
+      "id": "7194",
+      "title": "Documentar los procesos críticos",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 40,
       "alignsWithOptionId": null,
       "sharedWithEmployeeIds": [],
-      "dueDate": "2024-02-11",
-      "completionDate": "2024-02-22",
-      "lastChangedDateTime": "2024-02-22T14:43:02Z",
-      "status": "completed",
+      "dueDate": "2025-05-09",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-08-22T13:40:15Z",
+      "status": "in_progress",
       "milestones": null,
       "actions": {
         "canEdit": true,
-        "canUpdateProgress": false,
+        "canUpdateProgress": true,
         "canClose": true,
         "canReopen": false,
         "canDelete": true,
@@ -64,45 +85,20 @@
       }
     },
     {
-      "id": "7220",
-      "title": "Reducir el tiempo de primera respuesta un 20%",
-      "description": "Meta compartida con otra área; coordinar avances mensuales.",
-      "percentComplete": 100,
-      "alignsWithOptionId": null,
-      "sharedWithEmployeeIds": [
-        189
-      ],
-      "dueDate": "2025-02-24",
-      "completionDate": "2025-03-05",
-      "lastChangedDateTime": "2025-03-05T15:21:58Z",
-      "status": "completed",
-      "milestones": [
-        {
-          "id": 1721,
-          "employeeGoalId": 7220,
-          "title": "Hito 1",
-          "startValue": 0,
-          "endValue": 1,
-          "currentValue": 1,
-          "completedDateTime": "2024-10-11T14:45:27Z",
-          "lastUpdateDateTime": "2024-10-11T14:45:27Z",
-          "lastUpdateUserId": 519
-        },
-        {
-          "id": 1722,
-          "employeeGoalId": 7220,
-          "title": "Hito 2",
-          "startValue": 0,
-          "endValue": 1,
-          "currentValue": 1,
-          "completedDateTime": "2025-01-07T12:31:55Z",
-          "lastUpdateDateTime": "2025-01-07T12:31:55Z",
-          "lastUpdateUserId": 519
-        }
-      ],
+      "id": "7197",
+      "title": "Implementar el calendario editorial",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 5,
+      "alignsWithOptionId": 9002,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2025-09-12",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-05-13T10:06:48Z",
+      "status": "in_progress",
+      "milestones": null,
       "actions": {
         "canEdit": true,
-        "canUpdateProgress": false,
+        "canUpdateProgress": true,
         "canClose": true,
         "canReopen": false,
         "canDelete": true,
@@ -116,26 +112,7 @@
       "firstName": "Cristian",
       "lastName": "Vázquez",
       "preferredName": null
-    },
-    {
-      "employeeId": 189,
-      "firstName": "Lucía",
-      "lastName": "Quiroga",
-      "preferredName": null
     }
   ],
-  "comments": [
-    {
-      "goalId": "7216",
-      "commentCount": 2
-    },
-    {
-      "goalId": "7217",
-      "commentCount": 2
-    },
-    {
-      "goalId": "7220",
-      "commentCount": 1
-    }
-  ]
+  "comments": []
 }

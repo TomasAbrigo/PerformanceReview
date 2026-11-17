@@ -22,59 +22,127 @@
   "selectedFilter": "status-all",
   "goals": [
     {
-      "id": "6902",
-      "title": "Migrar los reportes al nuevo tablero",
-      "description": "Pedido por el equipo directivo en la planificación.",
-      "percentComplete": 100,
-      "alignsWithOptionId": null,
-      "sharedWithEmployeeIds": [],
-      "dueDate": "2023-09-15",
-      "completionDate": "2023-07-07",
-      "lastChangedDateTime": "2023-07-07T15:00:47Z",
-      "status": "completed",
-      "milestones": null,
-      "actions": {
-        "canEdit": true,
-        "canUpdateProgress": false,
-        "canClose": true,
-        "canReopen": false,
-        "canDelete": true,
-        "canComment": true
-      }
-    },
-    {
-      "id": "6903",
-      "title": "Mentorear a dos personas nuevas",
-      "description": "Pedido por el equipo directivo en la planificación.",
-      "percentComplete": 100,
-      "alignsWithOptionId": null,
-      "sharedWithEmployeeIds": [],
-      "dueDate": "2024-11-12",
-      "completionDate": "2024-07-04",
-      "lastChangedDateTime": "2024-07-04T10:17:11Z",
-      "status": "completed",
-      "milestones": null,
-      "actions": {
-        "canEdit": true,
-        "canUpdateProgress": false,
-        "canClose": true,
-        "canReopen": false,
-        "canDelete": true,
-        "canComment": true
-      }
-    },
-    {
-      "id": "6906",
+      "id": "6874",
       "title": "Migrar los reportes al nuevo tablero",
       "description": "Alineado con el plan del área para el año.",
-      "percentComplete": 55,
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2023-08-24",
+      "completionDate": "2023-06-21",
+      "lastChangedDateTime": "2023-06-21T12:37:22Z",
+      "status": "completed",
+      "milestones": [
+        {
+          "id": 1499,
+          "employeeGoalId": 6874,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2023-06-15T12:06:15Z",
+          "lastUpdateDateTime": "2023-06-15T12:06:15Z",
+          "lastUpdateUserId": 437
+        },
+        {
+          "id": 1500,
+          "employeeGoalId": 6874,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2023-06-02T18:06:53Z",
+          "lastUpdateDateTime": "2023-06-02T18:06:53Z",
+          "lastUpdateUserId": 437
+        },
+        {
+          "id": 1501,
+          "employeeGoalId": 6874,
+          "title": "Hito 3",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2023-06-17T09:17:58Z",
+          "lastUpdateDateTime": "2023-06-17T09:17:58Z",
+          "lastUpdateUserId": 437
+        },
+        {
+          "id": 1502,
+          "employeeGoalId": 6874,
+          "title": "Hito 4",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2023-06-09T19:51:46Z",
+          "lastUpdateDateTime": "2023-06-09T19:51:46Z",
+          "lastUpdateUserId": 437
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "6876",
+      "title": "Documentar los procesos críticos",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 100,
+      "alignsWithOptionId": 9003,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2025-11-03",
+      "completionDate": "2025-10-21",
+      "lastChangedDateTime": "2025-10-21T10:21:44Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "6879",
+      "title": "Reducir los incidentes recurrentes a la mitad",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 100,
       "alignsWithOptionId": null,
       "sharedWithEmployeeIds": [
         49
       ],
-      "dueDate": "2026-11-02",
+      "dueDate": "2025-07-11",
+      "completionDate": "2025-06-22",
+      "lastChangedDateTime": "2025-06-22T09:10:25Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "6881",
+      "title": "Renovar las cuentas clave del trimestre",
+      "description": "Sirve de base para el próximo ciclo de evaluación.",
+      "percentComplete": 50,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [
+        49
+      ],
+      "dueDate": "2026-09-29",
       "completionDate": null,
-      "lastChangedDateTime": "2026-09-16T09:44:17Z",
+      "lastChangedDateTime": "2026-07-28T10:58:28Z",
       "status": "in_progress",
       "milestones": null,
       "actions": {
@@ -103,8 +171,12 @@
   ],
   "comments": [
     {
-      "goalId": "6902",
-      "commentCount": 4
+      "goalId": "6874",
+      "commentCount": 2
+    },
+    {
+      "goalId": "6881",
+      "commentCount": 1
     }
   ]
 }

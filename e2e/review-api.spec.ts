@@ -1,10 +1,10 @@
 import { expect, type APIRequestContext, test } from "@playwright/test";
-import { assessed2023, company, fullName } from "./seed-data";
+import { assessedFirstCycle, company, fullName } from "./seed-data";
 
 // Runs after the historical import (project "insights" depends on
 // "chromium", where e2e/historical-import.spec.ts imports the Employee
 // Performance report): the review data comes from that import.
-const employeeName = fullName(assessed2023);
+const employeeName = fullName(assessedFirstCycle);
 const cycleName = company.cycles[0].name;
 
 /** Id of the imported cycle named `name` (GET /api/v1/cycles). */
@@ -62,7 +62,9 @@ test("an imported self review shows up in the review endpoints and the answers e
   expect(list.status()).toBe(200);
   const requests = (await list.json()).data as Json[];
   expect(requests.length).toBeGreaterThan(1);
-  const mine = requests.find((r) => r.reviewee.source?.id === assessed2023.id)!;
+  const mine = requests.find(
+    (r) => r.reviewee.source?.id === assessedFirstCycle.id,
+  )!;
   expect(mine).toMatchObject({
     cycle_id: cycleId,
     relationship: "self",
@@ -137,7 +139,7 @@ test("an imported self review shows up in the review endpoints and the answers e
     expect(cell(row, "cycle_id")).toBe(cycleId);
     expect(cell(row, "ciclo")).toBe(cycleName);
     expect(cell(row, "person_id")).toBe(mine.reviewee.id);
-    expect(cell(row, "bamboo_id")).toBe(assessed2023.id);
+    expect(cell(row, "bamboo_id")).toBe(assessedFirstCycle.id);
     expect(cell(row, "nombre")).toBe(employeeName);
     expect(cell(row, "tipo")).toBe("self");
     expect(cell(row, "estado")).toBe("submitted");

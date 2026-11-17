@@ -34,7 +34,7 @@ describe("importLabels (synthetic fixture CSV)", () => {
       {
         line: 6,
         employee: "Persona Inexistente",
-        cycle: "Evaluación de desempeño 2023",
+        cycle: "Evaluación semestral 2024-H1",
         reason: "unknown_person",
       },
     ]);
@@ -78,7 +78,7 @@ describe("importLabels (synthetic fixture CSV)", () => {
       rows: [
         {
           employee_name: "adrian bustos",
-          review_cycle: "Evaluación de desempeño 2023",
+          review_cycle: "Evaluación semestral 2024-H1",
           dimension: "strengths",
           sentiment: "positive",
         },
@@ -90,7 +90,7 @@ describe("importLabels (synthetic fixture CSV)", () => {
         },
         {
           employee_name: "Adrián Bustos",
-          review_cycle: "Evaluación de desempeño 2023",
+          review_cycle: "Evaluación semestral 2024-H1",
           text: "x",
           sentiment: "feliz",
         },

@@ -1,221 +1,393 @@
 Employee Name,Receiving Feedback From,Date Completed,Due Date,Review Cycle
-Adrián Bustos,Marcela Delgado,2023-11-12,2023-11-24,Evaluación de desempeño 2023
-Adrián Bustos,Marcelo Ibáñez,,2023-11-24,Evaluación de desempeño 2023
-Adrián Bustos,Mateo Ibáñez,2023-11-09,2023-11-24,Evaluación de desempeño 2023
-Adrián Bustos,Silvana Quiroga,2023-11-14,2023-11-24,Evaluación de desempeño 2023
-Bruno Campos,Hugo Ríos,,2023-11-24,Evaluación de desempeño 2023
-Bruno Campos,Milagros González,2023-11-19,2023-11-24,Evaluación de desempeño 2023
-Bruno Campos,Pablo Urquiza,2023-11-14,2023-11-24,Evaluación de desempeño 2023
-Carolina Núñez,Bruno Campos,2023-11-15,2023-11-24,Evaluación de desempeño 2023
-Carolina Núñez,Hugo Ríos,2023-11-06,2023-11-24,Evaluación de desempeño 2023
-Carolina Núñez,Santiago Garrido,2023-11-23,2023-11-24,Evaluación de desempeño 2023
-Cecilia Pereyra,Marcelo Lagos,2023-11-21,2023-11-24,Evaluación de desempeño 2023
-Cecilia Pereyra,Rocío Ibáñez,2023-11-08,2023-11-24,Evaluación de desempeño 2023
-Cecilia Pereyra,Verónica Márquez,2023-11-16,2023-11-24,Evaluación de desempeño 2023
-Federico Rivas,Mateo Ibáñez,2023-11-23,2023-11-24,Evaluación de desempeño 2023
-Federico Rivas,Ramiro Valdez,,2023-11-24,Evaluación de desempeño 2023
-Franco Urquiza,Pablo Urquiza,2023-11-22,2023-11-24,Evaluación de desempeño 2023
-Franco Urquiza,Silvana Quiroga,2023-11-13,2023-11-24,Evaluación de desempeño 2023
-Hugo Ríos,Franco Urquiza,2023-11-15,2023-11-24,Evaluación de desempeño 2023
-Hugo Ríos,Milagros González,2023-11-06,2023-11-24,Evaluación de desempeño 2023
-Hugo Ríos,Pablo Urquiza,2023-11-19,2023-11-24,Evaluación de desempeño 2023
-Hugo Ríos,Patricia Romero,2023-11-11,2023-11-24,Evaluación de desempeño 2023
-Jimena Coronel,Marcelo Ibáñez,2023-11-11,2023-11-24,Evaluación de desempeño 2023
-Jimena Coronel,Santiago Fernández,2023-11-22,2023-11-24,Evaluación de desempeño 2023
-Marcelo Ibáñez,Jimena Coronel,,2023-11-24,Evaluación de desempeño 2023
-Marcelo Ibáñez,Santiago Fernández,2023-11-11,2023-11-24,Evaluación de desempeño 2023
-Marcelo Lagos,Cecilia Pereyra,,2023-11-24,Evaluación de desempeño 2023
-Marcelo Lagos,Rocío Ibáñez,2023-11-06,2023-11-24,Evaluación de desempeño 2023
-Marcelo Lagos,Romina Páez,2023-11-10,2023-11-24,Evaluación de desempeño 2023
-Marcelo Lagos,Verónica Márquez,,2023-11-24,Evaluación de desempeño 2023
-Mateo Ibáñez,Federico Rivas,2023-11-16,2023-11-24,Evaluación de desempeño 2023
-Mateo Ibáñez,Ramiro Valdez,,2023-11-24,Evaluación de desempeño 2023
-Milagros González,Bruno Campos,2023-11-16,2023-11-24,Evaluación de desempeño 2023
-Milagros González,Franco Urquiza,,2023-11-24,Evaluación de desempeño 2023
-Milagros González,Patricia Romero,2023-11-14,2023-11-24,Evaluación de desempeño 2023
-Pablo Urquiza,Hugo Ríos,2023-11-08,2023-11-24,Evaluación de desempeño 2023
-Pablo Urquiza,Patricia Romero,2023-11-11,2023-11-24,Evaluación de desempeño 2023
-Pablo Urquiza,Santiago Fernández,,2023-11-24,Evaluación de desempeño 2023
-Patricia Romero,Milagros González,2023-11-19,2023-11-24,Evaluación de desempeño 2023
-Patricia Romero,Santiago Fernández,2023-11-19,2023-11-24,Evaluación de desempeño 2023
-Patricia Romero,Silvana Quiroga,2023-11-14,2023-11-24,Evaluación de desempeño 2023
-Ramiro Valdez,Federico Rivas,2023-11-13,2023-11-24,Evaluación de desempeño 2023
-Ramiro Valdez,Mateo Ibáñez,2023-11-09,2023-11-24,Evaluación de desempeño 2023
-Rocío Ibáñez,Marcelo Lagos,2023-11-09,2023-11-24,Evaluación de desempeño 2023
-Rocío Ibáñez,Verónica Márquez,2023-11-11,2023-11-24,Evaluación de desempeño 2023
-Romina Páez,Cecilia Pereyra,2023-11-13,2023-11-24,Evaluación de desempeño 2023
-Romina Páez,Marcelo Lagos,2023-11-24,2023-11-24,Evaluación de desempeño 2023
-Romina Páez,Rocío Ibáñez,2023-11-20,2023-11-24,Evaluación de desempeño 2023
-Romina Páez,Verónica Márquez,,2023-11-24,Evaluación de desempeño 2023
-Santiago Fernández,Bruno Campos,2023-11-11,2023-11-24,Evaluación de desempeño 2023
-Santiago Fernández,Franco Urquiza,2023-11-18,2023-11-24,Evaluación de desempeño 2023
-Santiago Fernández,Hugo Ríos,2023-11-17,2023-11-24,Evaluación de desempeño 2023
-Santiago Fernández,Jimena Coronel,2023-11-14,2023-11-24,Evaluación de desempeño 2023
-Santiago Fernández,Marcelo Ibáñez,2023-11-09,2023-11-24,Evaluación de desempeño 2023
-Santiago Fernández,Milagros González,2023-11-07,2023-11-24,Evaluación de desempeño 2023
-Santiago Garrido,Bruno Campos,2023-11-21,2023-11-24,Evaluación de desempeño 2023
-Santiago Garrido,Silvana Molina,,2023-11-24,Evaluación de desempeño 2023
-Santiago Garrido,Silvana Quiroga,2023-11-21,2023-11-24,Evaluación de desempeño 2023
-Silvana Arias,Franco Urquiza,2023-11-10,2023-11-24,Evaluación de desempeño 2023
-Silvana Arias,Griselda Pavón,2023-11-19,2023-11-24,Evaluación de desempeño 2023
-Silvana Arias,Hugo Ríos,2023-11-12,2023-11-24,Evaluación de desempeño 2023
-Silvana Arias,Jimena Coronel,2023-11-07,2023-11-24,Evaluación de desempeño 2023
-Silvana Molina,Adrián Bustos,,2023-11-24,Evaluación de desempeño 2023
-Silvana Molina,Bruno Campos,2023-11-24,2023-11-24,Evaluación de desempeño 2023
-Silvana Molina,Marcelo Lagos,2023-11-11,2023-11-24,Evaluación de desempeño 2023
-Silvana Molina,Pablo Urquiza,2023-11-11,2023-11-24,Evaluación de desempeño 2023
-Silvana Quiroga,Bruno Campos,2023-11-20,2023-11-24,Evaluación de desempeño 2023
-Silvana Quiroga,Franco Urquiza,2023-11-19,2023-11-24,Evaluación de desempeño 2023
-Silvana Quiroga,Patricia Romero,,2023-11-24,Evaluación de desempeño 2023
-Silvana Quiroga,Santiago Fernández,2023-11-10,2023-11-24,Evaluación de desempeño 2023
-Verónica Márquez,Cecilia Pereyra,2023-11-21,2023-11-24,Evaluación de desempeño 2023
-Verónica Márquez,Marcelo Lagos,2023-11-22,2023-11-24,Evaluación de desempeño 2023
-Verónica Márquez,Rocío Ibáñez,2023-11-19,2023-11-24,Evaluación de desempeño 2023
-Verónica Márquez,Romina Páez,,2023-11-24,Evaluación de desempeño 2023
-Adrián Bustos,Carolina Núñez,2024-11-16,2024-11-24,Evaluación de desempeño 2024
-Adrián Bustos,Santiago Fernández,2024-11-23,2024-11-24,Evaluación de desempeño 2024
-Bruno Campos,Adrián Bustos,2024-11-24,2024-11-24,Evaluación de desempeño 2024
-Bruno Campos,Santiago Fernández,2024-11-24,2024-11-24,Evaluación de desempeño 2024
-Candela Godoy,Marcelo Lagos,2024-11-18,2024-11-24,Evaluación de desempeño 2024
-Candela Godoy,Ramiro Valdez,2024-11-15,2024-11-24,Evaluación de desempeño 2024
-Carolina Núñez,Adrián Bustos,2024-11-10,2024-11-24,Evaluación de desempeño 2024
-Carolina Núñez,Santiago Fernández,2024-11-13,2024-11-24,Evaluación de desempeño 2024
-Cecilia Pereyra,Federico Rivas,,2024-11-24,Evaluación de desempeño 2024
-Cecilia Pereyra,Franco Morales,,2024-11-24,Evaluación de desempeño 2024
-Cecilia Pereyra,Mateo Ibáñez,,2024-11-24,Evaluación de desempeño 2024
-Cecilia Pereyra,Maximiliano Acosta,2024-11-20,2024-11-24,Evaluación de desempeño 2024
-Facundo Sosa,Federico Rivas,2024-11-06,2024-11-24,Evaluación de desempeño 2024
-Facundo Sosa,Franco Morales,2024-11-08,2024-11-24,Evaluación de desempeño 2024
-Facundo Sosa,Mateo Ibáñez,2024-11-17,2024-11-24,Evaluación de desempeño 2024
-Facundo Sosa,Maximiliano Acosta,2024-11-22,2024-11-24,Evaluación de desempeño 2024
-Federico Rivas,Franco Morales,2024-11-14,2024-11-24,Evaluación de desempeño 2024
-Federico Rivas,Mateo Ibáñez,2024-11-15,2024-11-24,Evaluación de desempeño 2024
-Federico Rivas,Santiago Fernández,2024-11-10,2024-11-24,Evaluación de desempeño 2024
-Franco Morales,Federico Rivas,2024-11-09,2024-11-24,Evaluación de desempeño 2024
-Franco Morales,Mateo Ibáñez,2024-11-07,2024-11-24,Evaluación de desempeño 2024
-Hugo Ríos,Cristian Esquivel,,2024-11-24,Evaluación de desempeño 2024
-Hugo Ríos,Pablo Urquiza,,2024-11-24,Evaluación de desempeño 2024
-Hugo Ríos,Silvana Quiroga,2024-11-13,2024-11-24,Evaluación de desempeño 2024
-Jimena Coronel,Santiago Fernández,2024-11-15,2024-11-24,Evaluación de desempeño 2024
-Jimena Coronel,Silvana Quiroga,,2024-11-24,Evaluación de desempeño 2024
-Marcelo Ibáñez,Cristian Esquivel,2024-11-22,2024-11-24,Evaluación de desempeño 2024
-Marcelo Ibáñez,Facundo Sosa,2024-11-19,2024-11-24,Evaluación de desempeño 2024
-Marcelo Ibáñez,Santiago Garrido,2024-11-08,2024-11-24,Evaluación de desempeño 2024
-Marcelo Ibáñez,Silvana Arias,2024-11-22,2024-11-24,Evaluación de desempeño 2024
-Marcelo Lagos,Candela Godoy,2024-11-19,2024-11-24,Evaluación de desempeño 2024
-Marcelo Lagos,Victoria Yáñez,2024-11-23,2024-11-24,Evaluación de desempeño 2024
-Martín Fuentes,Cecilia Pereyra,2024-11-13,2024-11-24,Evaluación de desempeño 2024
-Martín Fuentes,Federico Rivas,2024-11-12,2024-11-24,Evaluación de desempeño 2024
-Martín Fuentes,Maximiliano Acosta,2024-11-23,2024-11-24,Evaluación de desempeño 2024
-Martín Fuentes,Santiago Fernández,2024-11-09,2024-11-24,Evaluación de desempeño 2024
-Mateo Ibáñez,Cecilia Pereyra,2024-11-24,2024-11-24,Evaluación de desempeño 2024
-Mateo Ibáñez,Martín Fuentes,2024-11-21,2024-11-24,Evaluación de desempeño 2024
-Maximiliano Acosta,Mateo Ibáñez,2024-11-14,2024-11-24,Evaluación de desempeño 2024
-Maximiliano Acosta,Santiago Fernández,2024-11-21,2024-11-24,Evaluación de desempeño 2024
-Maximiliano Acosta,Teodoro Landívar,2024-11-17,2024-11-24,Evaluación de desempeño 2024
-Pablo Urquiza,Hugo Ríos,,2024-11-24,Evaluación de desempeño 2024
-Pablo Urquiza,Sofía Valdez,2024-11-12,2024-11-24,Evaluación de desempeño 2024
-Ramiro Valdez,Marcelo Lagos,2024-11-10,2024-11-24,Evaluación de desempeño 2024
-Ramiro Valdez,Rocío Ibáñez,,2024-11-24,Evaluación de desempeño 2024
-Rocío Ibáñez,Candela Godoy,2024-11-10,2024-11-24,Evaluación de desempeño 2024
-Rocío Ibáñez,Marcelo Lagos,2024-11-16,2024-11-24,Evaluación de desempeño 2024
-Rocío Ibáñez,Verónica Márquez,2024-11-20,2024-11-24,Evaluación de desempeño 2024
-Santiago Fernández,Adrián Bustos,2024-11-24,2024-11-24,Evaluación de desempeño 2024
-Santiago Fernández,Bruno Campos,,2024-11-24,Evaluación de desempeño 2024
-Santiago Fernández,Facundo Sosa,2024-11-09,2024-11-24,Evaluación de desempeño 2024
-Santiago Fernández,Federico Rivas,,2024-11-24,Evaluación de desempeño 2024
-Santiago Garrido,Mateo Ibáñez,2024-11-07,2024-11-24,Evaluación de desempeño 2024
-Santiago Garrido,Patricia Romero,2024-11-09,2024-11-24,Evaluación de desempeño 2024
-Santiago Garrido,Verónica Márquez,2024-11-22,2024-11-24,Evaluación de desempeño 2024
-Silvana Arias,Carolina Núñez,2024-11-17,2024-11-24,Evaluación de desempeño 2024
-Silvana Arias,Marcela Delgado,2024-11-12,2024-11-24,Evaluación de desempeño 2024
-Silvana Arias,Marcelo Lagos,2024-11-06,2024-11-24,Evaluación de desempeño 2024
-Silvana Arias,Sofía Valdez,2024-11-06,2024-11-24,Evaluación de desempeño 2024
-Silvana Molina,Marcela Delgado,,2024-11-24,Evaluación de desempeño 2024
-Silvana Molina,Marcelo Lagos,2024-11-06,2024-11-24,Evaluación de desempeño 2024
-Silvana Molina,Ramiro Valdez,2024-11-18,2024-11-24,Evaluación de desempeño 2024
-Silvana Quiroga,Hugo Ríos,2024-11-20,2024-11-24,Evaluación de desempeño 2024
-Silvana Quiroga,Pablo Urquiza,2024-11-06,2024-11-24,Evaluación de desempeño 2024
-Silvana Quiroga,Patricia Romero,2024-11-18,2024-11-24,Evaluación de desempeño 2024
-Silvana Quiroga,Sofía Valdez,2024-11-07,2024-11-24,Evaluación de desempeño 2024
-Sofía Valdez,Hugo Ríos,2024-11-14,2024-11-24,Evaluación de desempeño 2024
-Sofía Valdez,Pablo Urquiza,2024-11-17,2024-11-24,Evaluación de desempeño 2024
-Sofía Valdez,Silvana Quiroga,,2024-11-24,Evaluación de desempeño 2024
-Verónica Márquez,Marcelo Lagos,2024-11-24,2024-11-24,Evaluación de desempeño 2024
-Verónica Márquez,Ramiro Valdez,2024-11-13,2024-11-24,Evaluación de desempeño 2024
-Verónica Márquez,Victoria Yáñez,2024-11-14,2024-11-24,Evaluación de desempeño 2024
-Adriá Cabrera,Natalia Lezcano,2025-11-11,2025-11-24,Evaluación de desempeño 2025
-Adriá Cabrera,Verónica Márquez,2025-11-21,2025-11-24,Evaluación de desempeño 2025
-Adrián Bustos,Carolina Núñez,2025-11-14,2025-11-24,Evaluación de desempeño 2025
-Adrián Bustos,Santiago Fernández,2025-11-07,2025-11-24,Evaluación de desempeño 2025
-Candela Campos,Facundo Sosa,,2025-11-24,Evaluación de desempeño 2025
-Candela Campos,Marcelo Lagos,2025-11-18,2025-11-24,Evaluación de desempeño 2025
-Candela Campos,Ramiro Valdez,,2025-11-24,Evaluación de desempeño 2025
-Carolina Núñez,Adrián Bustos,,2025-11-24,Evaluación de desempeño 2025
-Carolina Núñez,Santiago Fernández,2025-11-21,2025-11-24,Evaluación de desempeño 2025
-Cecilia Pereyra,Federico Rivas,2025-11-07,2025-11-24,Evaluación de desempeño 2025
-Cecilia Pereyra,Mateo Ibáñez,2025-11-16,2025-11-24,Evaluación de desempeño 2025
-Cecilia Pereyra,Natalia Lezcano,2025-11-23,2025-11-24,Evaluación de desempeño 2025
-Cecilia Pereyra,Verónica Márquez,,2025-11-24,Evaluación de desempeño 2025
-Facundo Sosa,Martín Fuente,2025-11-08,2025-11-24,Evaluación de desempeño 2025
-Facundo Sosa,Ramiro Valdez,2025-11-21,2025-11-24,Evaluación de desempeño 2025
-Facundo Sosa,Rocío Ibáñez,,2025-11-24,Evaluación de desempeño 2025
-Federico Rivas,Adriá Cabrera,2025-11-19,2025-11-24,Evaluación de desempeño 2025
-Federico Rivas,Natalia Lezcano,2025-11-23,2025-11-24,Evaluación de desempeño 2025
-Hugo Ríos,Patricia Romero,2025-11-06,2025-11-24,Evaluación de desempeño 2025
-Hugo Ríos,Santiago Fernández,2025-11-24,2025-11-24,Evaluación de desempeño 2025
-Jimena Coronel,Marcelo Ibáñez,2025-11-14,2025-11-24,Evaluación de desempeño 2025
-Jimena Coronel,Pablo Monzón,2025-11-22,2025-11-24,Evaluación de desempeño 2025
-Marcelo Ibáñez,Jimena Coronel,2025-11-10,2025-11-24,Evaluación de desempeño 2025
-Marcelo Ibáñez,Pablo Monzón,2025-11-10,2025-11-24,Evaluación de desempeño 2025
-Marcelo Lagos,Candela Campos,2025-11-24,2025-11-24,Evaluación de desempeño 2025
-Marcelo Lagos,Martín Fuente,2025-11-22,2025-11-24,Evaluación de desempeño 2025
-Marcelo Lagos,Ramiro Valdez,2025-11-15,2025-11-24,Evaluación de desempeño 2025
-Martín Fuente,Candela Campos,2025-11-08,2025-11-24,Evaluación de desempeño 2025
-Martín Fuente,Marcelo Lagos,2025-11-14,2025-11-24,Evaluación de desempeño 2025
-Martín Fuente,Ramiro Valdez,2025-11-09,2025-11-24,Evaluación de desempeño 2025
-Martín Fuente,Rocío Ibáñez,2025-11-14,2025-11-24,Evaluación de desempeño 2025
-Mateo Ibáñez,Maximiliano Acosta,2025-11-12,2025-11-24,Evaluación de desempeño 2025
-Mateo Ibáñez,Natalia Lezcano,2025-11-14,2025-11-24,Evaluación de desempeño 2025
-Maximiliano Acosta,Adriá Cabrera,2025-11-18,2025-11-24,Evaluación de desempeño 2025
-Maximiliano Acosta,Mateo Ibáñez,2025-11-23,2025-11-24,Evaluación de desempeño 2025
-Maximiliano Acosta,Natalia Lezcano,2025-11-14,2025-11-24,Evaluación de desempeño 2025
-Maximiliano Acosta,Verónica Márquez,2025-11-06,2025-11-24,Evaluación de desempeño 2025
-Natalia Lezcano,Abril Quintana,2025-11-24,2025-11-24,Evaluación de desempeño 2025
-Natalia Lezcano,Mateo Ibáñez,,2025-11-24,Evaluación de desempeño 2025
-Natalia Lezcano,Maximiliano Acosta,2025-11-13,2025-11-24,Evaluación de desempeño 2025
-Pablo Monzón,Jimena Coronel,2025-11-24,2025-11-24,Evaluación de desempeño 2025
-Pablo Monzón,Marcelo Ibáñez,,2025-11-24,Evaluación de desempeño 2025
-Patricia Romero,Hugo Ríos,2025-11-08,2025-11-24,Evaluación de desempeño 2025
-Patricia Romero,Rocío Fuentes,2025-11-10,2025-11-24,Evaluación de desempeño 2025
-Patricia Romero,Santiago Fernández,2025-11-20,2025-11-24,Evaluación de desempeño 2025
-Patricia Romero,Silvana Quiroga,2025-11-19,2025-11-24,Evaluación de desempeño 2025
-Ramiro Valdez,Candela Campos,,2025-11-24,Evaluación de desempeño 2025
-Ramiro Valdez,Facundo Sosa,2025-11-20,2025-11-24,Evaluación de desempeño 2025
-Ramiro Valdez,Marcelo Lagos,2025-11-24,2025-11-24,Evaluación de desempeño 2025
-Ramiro Valdez,Rocío Ibáñez,2025-11-18,2025-11-24,Evaluación de desempeño 2025
-Rocío Fuentes,Hugo Ríos,,2025-11-24,Evaluación de desempeño 2025
-Rocío Fuentes,Santiago Fernández,2025-11-18,2025-11-24,Evaluación de desempeño 2025
-Rocío Fuentes,Silvana Quiroga,2025-11-16,2025-11-24,Evaluación de desempeño 2025
-Rocío Ibáñez,Facundo Sosa,2025-11-09,2025-11-24,Evaluación de desempeño 2025
-Rocío Ibáñez,Martín Fuente,2025-11-13,2025-11-24,Evaluación de desempeño 2025
-Rocío Ibáñez,Ramiro Valdez,2025-11-20,2025-11-24,Evaluación de desempeño 2025
-Santiago Fernández,Adrián Bustos,2025-11-15,2025-11-24,Evaluación de desempeño 2025
-Santiago Fernández,Carolina Núñez,,2025-11-24,Evaluación de desempeño 2025
-Santiago Fernández,Hugo Ríos,2025-11-07,2025-11-24,Evaluación de desempeño 2025
-Santiago Fernández,Patricia Romero,,2025-11-24,Evaluación de desempeño 2025
-Santiago Fernández,Rocío Fuentes,2025-11-15,2025-11-24,Evaluación de desempeño 2025
-Santiago Fernández,Silvana Quiroga,2025-11-13,2025-11-24,Evaluación de desempeño 2025
-Santiago Garrido,Adriá Cabrera,,2025-11-24,Evaluación de desempeño 2025
-Santiago Garrido,Pablo Monzón,2025-11-14,2025-11-24,Evaluación de desempeño 2025
-Santiago Garrido,Verónica Márquez,,2025-11-24,Evaluación de desempeño 2025
-Silvana Arias,Jimena Coronel,2025-11-24,2025-11-24,Evaluación de desempeño 2025
-Silvana Arias,Martín Fuente,2025-11-14,2025-11-24,Evaluación de desempeño 2025
-Silvana Moilna,Candela Campos,2025-11-16,2025-11-24,Evaluación de desempeño 2025
-Silvana Moilna,Marcelo Ibáñez,2025-11-13,2025-11-24,Evaluación de desempeño 2025
-Silvana Moilna,Rocío Ibáñez,2025-11-21,2025-11-24,Evaluación de desempeño 2025
-Silvana Quiroga,Hugo Ríos,2025-11-18,2025-11-24,Evaluación de desempeño 2025
-Silvana Quiroga,Santiago Fernández,2025-11-08,2025-11-24,Evaluación de desempeño 2025
-Verónica Márquez,Adriá Cabrera,2025-11-23,2025-11-24,Evaluación de desempeño 2025
-Verónica Márquez,Mateo Ibáñez,2025-11-17,2025-11-24,Evaluación de desempeño 2025
-Verónica Márquez,Natalia Lezcano,2025-11-22,2025-11-24,Evaluación de desempeño 2025
+Adrián Bustos,Bruno Campos,,2024-05-09,Evaluación semestral 2024-H1
+Adrián Bustos,Carolina Núñez,2024-05-01,2024-05-09,Evaluación semestral 2024-H1
+Bruno Campos,Adrián Bustos,,2024-05-09,Evaluación semestral 2024-H1
+Bruno Campos,Carolina Núñez,,2024-05-09,Evaluación semestral 2024-H1
+Candela Godoy,Marcelo Lagos,,2024-05-09,Evaluación semestral 2024-H1
+Candela Godoy,Verónica Márquez,,2024-05-09,Evaluación semestral 2024-H1
+Carolina Núñez,Adrián Bustos,2024-05-05,2024-05-09,Evaluación semestral 2024-H1
+Carolina Núñez,Bruno Campos,2024-04-21,2024-05-09,Evaluación semestral 2024-H1
+Cecilia Pereyra,Federico Rivas,2024-04-21,2024-05-09,Evaluación semestral 2024-H1
+Cecilia Pereyra,Mateo Ibáñez,2024-05-04,2024-05-09,Evaluación semestral 2024-H1
+Facundo Sosa,Martín Fuentes,2024-04-27,2024-05-09,Evaluación semestral 2024-H1
+Facundo Sosa,Ramiro Valdez,2024-05-01,2024-05-09,Evaluación semestral 2024-H1
+Federico Rivas,Facundo Sosa,,2024-05-09,Evaluación semestral 2024-H1
+Federico Rivas,Martín Fuentes,2024-05-04,2024-05-09,Evaluación semestral 2024-H1
+Federico Rivas,Mateo Ibáñez,2024-05-03,2024-05-09,Evaluación semestral 2024-H1
+Hugo Ríos,Milagros González,2024-05-07,2024-05-09,Evaluación semestral 2024-H1
+Hugo Ríos,Silvana Quiroga,,2024-05-09,Evaluación semestral 2024-H1
+Jimena Coronel,Marcelo Ibáñez,2024-05-05,2024-05-09,Evaluación semestral 2024-H1
+Jimena Coronel,Santiago Fernández,2024-05-04,2024-05-09,Evaluación semestral 2024-H1
+Marcelo Ibáñez,Jimena Coronel,2024-04-26,2024-05-09,Evaluación semestral 2024-H1
+Marcelo Ibáñez,Santiago Fernández,2024-05-04,2024-05-09,Evaluación semestral 2024-H1
+Marcelo Lagos,Candela Godoy,2024-04-29,2024-05-09,Evaluación semestral 2024-H1
+Marcelo Lagos,Rocío Ibáñez,2024-05-04,2024-05-09,Evaluación semestral 2024-H1
+Marcelo Lagos,Verónica Márquez,2024-05-02,2024-05-09,Evaluación semestral 2024-H1
+Martín Fuentes,Cecilia Pereyra,2024-05-06,2024-05-09,Evaluación semestral 2024-H1
+Martín Fuentes,Facundo Sosa,,2024-05-09,Evaluación semestral 2024-H1
+Martín Fuentes,Federico Rivas,2024-05-04,2024-05-09,Evaluación semestral 2024-H1
+Martín Fuentes,Maximiliano Acosta,2024-05-07,2024-05-09,Evaluación semestral 2024-H1
+Mateo Ibáñez,Cecilia Pereyra,2024-05-09,2024-05-09,Evaluación semestral 2024-H1
+Mateo Ibáñez,Martín Fuentes,2024-04-26,2024-05-09,Evaluación semestral 2024-H1
+Mateo Ibáñez,Maximiliano Acosta,,2024-05-09,Evaluación semestral 2024-H1
+Mateo Ibáñez,Ramiro Valdez,2024-04-26,2024-05-09,Evaluación semestral 2024-H1
+Pablo Urquiza,Milagros González,,2024-05-09,Evaluación semestral 2024-H1
+Pablo Urquiza,Silvana Quiroga,2024-04-22,2024-05-09,Evaluación semestral 2024-H1
+Ramiro Valdez,Cecilia Pereyra,2024-05-07,2024-05-09,Evaluación semestral 2024-H1
+Ramiro Valdez,Martín Fuentes,2024-05-06,2024-05-09,Evaluación semestral 2024-H1
+Ramiro Valdez,Mateo Ibáñez,2024-05-08,2024-05-09,Evaluación semestral 2024-H1
+Ramiro Valdez,Maximiliano Acosta,2024-05-01,2024-05-09,Evaluación semestral 2024-H1
+Rocío Ibáñez,Candela Godoy,2024-04-29,2024-05-09,Evaluación semestral 2024-H1
+Rocío Ibáñez,Marcelo Lagos,2024-04-24,2024-05-09,Evaluación semestral 2024-H1
+Rocío Ibáñez,Verónica Márquez,2024-05-08,2024-05-09,Evaluación semestral 2024-H1
+Santiago Fernández,Abril Quintana,2024-05-07,2024-05-09,Evaluación semestral 2024-H1
+Santiago Fernández,Hugo Ríos,2024-05-09,2024-05-09,Evaluación semestral 2024-H1
+Santiago Fernández,Jimena Coronel,,2024-05-09,Evaluación semestral 2024-H1
+Santiago Fernández,Marcelo Ibáñez,2024-04-25,2024-05-09,Evaluación semestral 2024-H1
+Santiago Fernández,Milagros González,2024-04-27,2024-05-09,Evaluación semestral 2024-H1
+Santiago Fernández,Pablo Urquiza,2024-05-01,2024-05-09,Evaluación semestral 2024-H1
+Santiago Fernández,Silvana Quiroga,2024-04-27,2024-05-09,Evaluación semestral 2024-H1
+Santiago Garrido,Adrián Bustos,2024-05-01,2024-05-09,Evaluación semestral 2024-H1
+Santiago Garrido,Martín Fuentes,2024-04-28,2024-05-09,Evaluación semestral 2024-H1
+Silvana Arias,Facundo Sosa,2024-04-25,2024-05-09,Evaluación semestral 2024-H1
+Silvana Arias,Maximiliano Acosta,2024-04-23,2024-05-09,Evaluación semestral 2024-H1
+Silvana Arias,Pablo Urquiza,2024-04-22,2024-05-09,Evaluación semestral 2024-H1
+Silvana Arias,Silvana Quiroga,2024-05-05,2024-05-09,Evaluación semestral 2024-H1
+Silvana Molina,Adrián Bustos,2024-04-21,2024-05-09,Evaluación semestral 2024-H1
+Silvana Molina,Candela Godoy,2024-04-26,2024-05-09,Evaluación semestral 2024-H1
+Silvana Molina,Cecilia Pereyra,2024-04-27,2024-05-09,Evaluación semestral 2024-H1
+Silvana Molina,Silvana Quiroga,2024-05-05,2024-05-09,Evaluación semestral 2024-H1
+Silvana Quiroga,Hugo Ríos,2024-05-09,2024-05-09,Evaluación semestral 2024-H1
+Silvana Quiroga,Milagros González,2024-04-29,2024-05-09,Evaluación semestral 2024-H1
+Silvana Quiroga,Pablo Urquiza,,2024-05-09,Evaluación semestral 2024-H1
+Silvana Quiroga,Santiago Fernández,,2024-05-09,Evaluación semestral 2024-H1
+Verónica Márquez,Candela Godoy,2024-04-26,2024-05-09,Evaluación semestral 2024-H1
+Verónica Márquez,Rocío Ibáñez,2024-05-09,2024-05-09,Evaluación semestral 2024-H1
+Adrián Bustos,Carolina Núñez,2024-10-23,2024-11-07,Evaluación semestral 2024-H2
+Adrián Bustos,Santiago Fernández,2024-10-28,2024-11-07,Evaluación semestral 2024-H2
+Bruno Campos,Adrián Bustos,2024-10-30,2024-11-07,Evaluación semestral 2024-H2
+Bruno Campos,Carolina Núñez,2024-10-23,2024-11-07,Evaluación semestral 2024-H2
+Bruno Campos,Santiago Fernández,,2024-11-07,Evaluación semestral 2024-H2
+Candela Godoy,Marcelo Lagos,2024-10-22,2024-11-07,Evaluación semestral 2024-H2
+Candela Godoy,Rocío Ibáñez,2024-10-23,2024-11-07,Evaluación semestral 2024-H2
+Candela Godoy,Verónica Márquez,2024-10-29,2024-11-07,Evaluación semestral 2024-H2
+Carolina Núñez,Adrián Bustos,2024-10-31,2024-11-07,Evaluación semestral 2024-H2
+Carolina Núñez,Bruno Campos,2024-10-29,2024-11-07,Evaluación semestral 2024-H2
+Carolina Núñez,Santiago Fernández,2024-10-22,2024-11-07,Evaluación semestral 2024-H2
+Cecili Pereyra,Facundo Sosa,2024-11-06,2024-11-07,Evaluación semestral 2024-H2
+Cecili Pereyra,Maximiliano Acosta,2024-11-02,2024-11-07,Evaluación semestral 2024-H2
+Facundo Sosa,Federico Rivas,2024-11-02,2024-11-07,Evaluación semestral 2024-H2
+Facundo Sosa,Franco Morales,2024-11-07,2024-11-07,Evaluación semestral 2024-H2
+Facundo Sosa,Martín Fuentes,2024-10-21,2024-11-07,Evaluación semestral 2024-H2
+Facundo Sosa,Mateo Ibáñez,2024-10-23,2024-11-07,Evaluación semestral 2024-H2
+Federico Rivas,Cecili Pereyra,2024-11-03,2024-11-07,Evaluación semestral 2024-H2
+Federico Rivas,Facundo Sosa,,2024-11-07,Evaluación semestral 2024-H2
+Federico Rivas,Franco Morales,,2024-11-07,Evaluación semestral 2024-H2
+Federico Rivas,Santiago Fernández,2024-10-20,2024-11-07,Evaluación semestral 2024-H2
+Franco Morales,Cecili Pereyra,,2024-11-07,Evaluación semestral 2024-H2
+Franco Morales,Facundo Sosa,2024-10-27,2024-11-07,Evaluación semestral 2024-H2
+Franco Morales,Mateo Ibáñez,,2024-11-07,Evaluación semestral 2024-H2
+Franco Morales,Octavio Rearte,2024-10-21,2024-11-07,Evaluación semestral 2024-H2
+Franco Morales,Santiago Fernández,2024-10-30,2024-11-07,Evaluación semestral 2024-H2
+Hugo Ríos,Silvana Quiroga,2024-10-28,2024-11-07,Evaluación semestral 2024-H2
+Hugo Ríos,Sofía Valdez,2024-10-20,2024-11-07,Evaluación semestral 2024-H2
+Jimena Coronel,Candela Godoy,2024-10-31,2024-11-07,Evaluación semestral 2024-H2
+Jimena Coronel,Cecili Pereyra,2024-11-05,2024-11-07,Evaluación semestral 2024-H2
+Jimena Coronel,Franco Morales,2024-11-02,2024-11-07,Evaluación semestral 2024-H2
+Jimena Coronel,Martín Fuentes,2024-10-24,2024-11-07,Evaluación semestral 2024-H2
+Marcelo Ibáñez,Facundo Sosa,,2024-11-07,Evaluación semestral 2024-H2
+Marcelo Ibáñez,Mateo Ibáñez,,2024-11-07,Evaluación semestral 2024-H2
+Marcelo Ibáñez,Sofía Valdez,2024-10-22,2024-11-07,Evaluación semestral 2024-H2
+Marcelo Lagos,Candela Godoy,2024-11-05,2024-11-07,Evaluación semestral 2024-H2
+Marcelo Lagos,Ramiro Valdez,2024-10-27,2024-11-07,Evaluación semestral 2024-H2
+Marcelo Lagos,Rocío Ibáñez,2024-10-21,2024-11-07,Evaluación semestral 2024-H2
+Martín Fuentes,Federico Rivas,,2024-11-07,Evaluación semestral 2024-H2
+Martín Fuentes,Franco Morales,2024-10-24,2024-11-07,Evaluación semestral 2024-H2
+Martín Fuentes,Mateo Ibáñez,2024-11-03,2024-11-07,Evaluación semestral 2024-H2
+Mateo Ibáñez,Martín Fuentes,2024-10-22,2024-11-07,Evaluación semestral 2024-H2
+Mateo Ibáñez,Santiago Fernández,2024-10-25,2024-11-07,Evaluación semestral 2024-H2
+Maximiliano Acosta,Cecili Pereyra,2024-10-31,2024-11-07,Evaluación semestral 2024-H2
+Maximiliano Acosta,Franco Morales,2024-11-02,2024-11-07,Evaluación semestral 2024-H2
+Pablo Urquiza,Cristian Esquivel,2024-10-21,2024-11-07,Evaluación semestral 2024-H2
+Pablo Urquiza,Hugo Ríos,2024-10-20,2024-11-07,Evaluación semestral 2024-H2
+Pablo Urquiza,Silvana Quiroga,2024-11-03,2024-11-07,Evaluación semestral 2024-H2
+Pablo Urquiza,Sofía Valdez,2024-11-03,2024-11-07,Evaluación semestral 2024-H2
+Ramiro Valdez,Candela Godoy,2024-10-29,2024-11-07,Evaluación semestral 2024-H2
+Ramiro Valdez,Marcelo Lagos,2024-10-23,2024-11-07,Evaluación semestral 2024-H2
+Ramiro Valdez,Rocío Ibáñez,2024-11-02,2024-11-07,Evaluación semestral 2024-H2
+Ramiro Valdez,Verónica Márquez,2024-11-04,2024-11-07,Evaluación semestral 2024-H2
+Rocío Ibáñez,Candela Godoy,2024-10-29,2024-11-07,Evaluación semestral 2024-H2
+Rocío Ibáñez,Marcelo Lagos,2024-10-30,2024-11-07,Evaluación semestral 2024-H2
+Rocío Ibáñez,Verónica Márquez,2024-10-29,2024-11-07,Evaluación semestral 2024-H2
+Santiago Fernández,Adrián Bustos,2024-11-04,2024-11-07,Evaluación semestral 2024-H2
+Santiago Fernández,Bruno Campos,2024-10-20,2024-11-07,Evaluación semestral 2024-H2
+Santiago Fernández,Carolina Núñez,2024-11-02,2024-11-07,Evaluación semestral 2024-H2
+Santiago Fernández,Cecili Pereyra,2024-11-04,2024-11-07,Evaluación semestral 2024-H2
+Santiago Fernández,Facundo Sosa,2024-11-01,2024-11-07,Evaluación semestral 2024-H2
+Santiago Fernández,Franco Morales,2024-10-26,2024-11-07,Evaluación semestral 2024-H2
+Santiago Fernández,Mateo Ibáñez,2024-10-24,2024-11-07,Evaluación semestral 2024-H2
+Santiago Garrido,Federico Rivas,,2024-11-07,Evaluación semestral 2024-H2
+Santiago Garrido,Hugo Ríos,,2024-11-07,Evaluación semestral 2024-H2
+Santiago Garrido,Rocío Ibáñez,2024-10-27,2024-11-07,Evaluación semestral 2024-H2
+Santiago Garrido,Verónica Márquez,2024-10-20,2024-11-07,Evaluación semestral 2024-H2
+Silvana Arias,Cecili Pereyra,,2024-11-07,Evaluación semestral 2024-H2
+Silvana Arias,Facundo Sosa,2024-11-04,2024-11-07,Evaluación semestral 2024-H2
+Silvana Arias,Franco Morales,,2024-11-07,Evaluación semestral 2024-H2
+Silvana Arias,Hugo Ríos,2024-10-28,2024-11-07,Evaluación semestral 2024-H2
+Silvana Molina,Adrián Bustos,2024-10-30,2024-11-07,Evaluación semestral 2024-H2
+Silvana Molina,Jimena Coronel,,2024-11-07,Evaluación semestral 2024-H2
+Silvana Molina,Pablo Urquiza,,2024-11-07,Evaluación semestral 2024-H2
+Silvana Quiroga,Cristian Esquivel,2024-10-25,2024-11-07,Evaluación semestral 2024-H2
+Silvana Quiroga,Hugo Ríos,,2024-11-07,Evaluación semestral 2024-H2
+Silvana Quiroga,Pablo Urquiza,,2024-11-07,Evaluación semestral 2024-H2
+Silvana Quiroga,Sofía Valdez,,2024-11-07,Evaluación semestral 2024-H2
+Sofía Valdez,Hugo Ríos,2024-10-20,2024-11-07,Evaluación semestral 2024-H2
+Sofía Valdez,Pablo Urquiza,2024-11-07,2024-11-07,Evaluación semestral 2024-H2
+Sofía Valdez,Silvana Quiroga,2024-11-02,2024-11-07,Evaluación semestral 2024-H2
+Verónica Márquez,Marcelo Lagos,2024-10-24,2024-11-07,Evaluación semestral 2024-H2
+Verónica Márquez,Ramiro Valdez,2024-11-07,2024-11-07,Evaluación semestral 2024-H2
+Adrián Bustos,Carolina Núñez,2025-05-01,2025-05-09,Evaluación semestral 2025-H1
+Adrián Bustos,Franco Morales,2025-05-08,2025-05-09,Evaluación semestral 2025-H1
+Adrián Bustos,Santiago Fernández,2025-04-21,2025-05-09,Evaluación semestral 2025-H1
+Bruno Campos,Adrián Bustos,2025-05-05,2025-05-09,Evaluación semestral 2025-H1
+Bruno Campos,Franco Morales,2025-05-09,2025-05-09,Evaluación semestral 2025-H1
+Bruno Campos,Santiago Fernández,2025-05-03,2025-05-09,Evaluación semestral 2025-H1
+Candela Godoy,Marcelo Lagos,2025-05-08,2025-05-09,Evaluación semestral 2025-H1
+Candela Godoy,Martín Fuentes,2025-05-03,2025-05-09,Evaluación semestral 2025-H1
+Candela Godoy,Verónica Márquez,2025-04-21,2025-05-09,Evaluación semestral 2025-H1
+Candela Godoy,Victoria Yáñez,2025-04-29,2025-05-09,Evaluación semestral 2025-H1
+Carolina Núñez,Franco Morales,2025-04-29,2025-05-09,Evaluación semestral 2025-H1
+Carolina Núñez,Santiago Fernández,,2025-05-09,Evaluación semestral 2025-H1
+Cecilia Pereyra,Federico Rivas,2025-05-02,2025-05-09,Evaluación semestral 2025-H1
+Cecilia Pereyra,Mateo Ibáñez,2025-04-22,2025-05-09,Evaluación semestral 2025-H1
+Cecilia Pereyra,Maximiliano Acosta,2025-05-05,2025-05-09,Evaluación semestral 2025-H1
+Cristian Esquivel,Hugo Ríos,2025-04-26,2025-05-09,Evaluación semestral 2025-H1
+Cristian Esquivel,Pablo Urquiza,2025-04-24,2025-05-09,Evaluación semestral 2025-H1
+Facundo Sosa,Cecilia Pereyra,,2025-05-09,Evaluación semestral 2025-H1
+Facundo Sosa,Mateo Ibáñez,2025-05-09,2025-05-09,Evaluación semestral 2025-H1
+Facundo Sosa,Maximiliano Acosta,2025-04-21,2025-05-09,Evaluación semestral 2025-H1
+Federico Rivas,Facundo Sosa,2025-04-29,2025-05-09,Evaluación semestral 2025-H1
+Federico Rivas,Mateo Ibáñez,2025-05-09,2025-05-09,Evaluación semestral 2025-H1
+Franco Morales,Carolina Núñez,2025-05-06,2025-05-09,Evaluación semestral 2025-H1
+Franco Morales,Santiago Fernández,2025-04-26,2025-05-09,Evaluación semestral 2025-H1
+Hugo Ríos,Cristian Esquivel,,2025-05-09,Evaluación semestral 2025-H1
+Hugo Ríos,Pablo Urquiza,,2025-05-09,Evaluación semestral 2025-H1
+Hugo Ríos,Patricia Romero,2025-04-28,2025-05-09,Evaluación semestral 2025-H1
+Hugo Ríos,Silvana Quiroga,2025-04-29,2025-05-09,Evaluación semestral 2025-H1
+Jimena Coronel,Adrián Bustos,2025-04-25,2025-05-09,Evaluación semestral 2025-H1
+Jimena Coronel,Pablo Urquiza,2025-04-21,2025-05-09,Evaluación semestral 2025-H1
+Marcelo Ibáñez,Bruno Campos,,2025-05-09,Evaluación semestral 2025-H1
+Marcelo Ibáñez,Franco Morales,2025-05-01,2025-05-09,Evaluación semestral 2025-H1
+Marcelo Ibáñez,Magdalena Spinelli,2025-05-07,2025-05-09,Evaluación semestral 2025-H1
+Marcelo Ibáñez,Marcelo Lagos,,2025-05-09,Evaluación semestral 2025-H1
+Marcelo Ibáñez,Pablo Urquiza,2025-05-07,2025-05-09,Evaluación semestral 2025-H1
+Marcelo Lagos,Martín Fuentes,2025-05-06,2025-05-09,Evaluación semestral 2025-H1
+Marcelo Lagos,Ramiro Valdez,2025-04-28,2025-05-09,Evaluación semestral 2025-H1
+Marcelo Lagos,Rocío Ibáñez,2025-05-01,2025-05-09,Evaluación semestral 2025-H1
+Martín Fuentes,Ramiro Valdez,2025-04-23,2025-05-09,Evaluación semestral 2025-H1
+Martín Fuentes,Rocío Ibáñez,,2025-05-09,Evaluación semestral 2025-H1
+Martín Fuentes,Victoria Yáñez,2025-05-06,2025-05-09,Evaluación semestral 2025-H1
+Mateo Ibáñez,Facundo Sosa,2025-04-23,2025-05-09,Evaluación semestral 2025-H1
+Mateo Ibáñez,Federico Rivas,2025-05-08,2025-05-09,Evaluación semestral 2025-H1
+Mateo Ibáñez,Maximiliano Acosta,2025-05-09,2025-05-09,Evaluación semestral 2025-H1
+Maximiliano Acosta,Cecilia Pereyra,2025-05-05,2025-05-09,Evaluación semestral 2025-H1
+Maximiliano Acosta,Facundo Sosa,2025-04-25,2025-05-09,Evaluación semestral 2025-H1
+Maximiliano Acosta,Federico Rivas,2025-04-23,2025-05-09,Evaluación semestral 2025-H1
+Maximiliano Acosta,Mateo Ibáñez,2025-05-04,2025-05-09,Evaluación semestral 2025-H1
+Pablo Urquiza,Cristian Esquivel,,2025-05-09,Evaluación semestral 2025-H1
+Pablo Urquiza,Silvana Quiroga,2025-04-28,2025-05-09,Evaluación semestral 2025-H1
+Patricia Romero,Rocío Fuentes,,2025-05-09,Evaluación semestral 2025-H1
+Patricia Romero,Silvana Quiroga,2025-04-25,2025-05-09,Evaluación semestral 2025-H1
+Ramiro Valdez,Candela Godoy,2025-04-28,2025-05-09,Evaluación semestral 2025-H1
+Ramiro Valdez,Marcelo Lagos,,2025-05-09,Evaluación semestral 2025-H1
+Ramiro Valdez,Martín Fuentes,,2025-05-09,Evaluación semestral 2025-H1
+Ramiro Valdez,Rocío Ibáñez,2025-04-30,2025-05-09,Evaluación semestral 2025-H1
+Rocío Fuentes,Hugo Ríos,2025-04-30,2025-05-09,Evaluación semestral 2025-H1
+Rocío Fuentes,Pablo Urquiza,2025-05-05,2025-05-09,Evaluación semestral 2025-H1
+Rocío Fuentes,Silvana Quiroga,2025-05-02,2025-05-09,Evaluación semestral 2025-H1
+Rocío Fuentes,Sofía Valdez,,2025-05-09,Evaluación semestral 2025-H1
+Rocío Ibáñez,Martín Fuentes,2025-04-27,2025-05-09,Evaluación semestral 2025-H1
+Rocío Ibáñez,Victoria Yáñez,2025-04-29,2025-05-09,Evaluación semestral 2025-H1
+Santiago Fernández,Adrián Bustos,2025-05-06,2025-05-09,Evaluación semestral 2025-H1
+Santiago Fernández,Bruno Campos,2025-04-27,2025-05-09,Evaluación semestral 2025-H1
+Santiago Fernández,Carolina Núñez,2025-05-08,2025-05-09,Evaluación semestral 2025-H1
+Santiago Fernández,Santiago Fernández,2025-04-22,2025-05-09,Evaluación semestral 2025-H1
+Santiago Garrido,Carolina Núñez,2025-05-09,2025-05-09,Evaluación semestral 2025-H1
+Santiago Garrido,Jimena Coronel,2025-04-27,2025-05-09,Evaluación semestral 2025-H1
+Santiago Garrido,Sofía Valdez,2025-04-28,2025-05-09,Evaluación semestral 2025-H1
+Silvana Arias,Cecilia Pereyra,2025-04-30,2025-05-09,Evaluación semestral 2025-H1
+Silvana Arias,Jimena Coronel,,2025-05-09,Evaluación semestral 2025-H1
+Silvana Arias,Rocío Fuentes,2025-05-05,2025-05-09,Evaluación semestral 2025-H1
+Silvana Arias,Sofía Valdez,,2025-05-09,Evaluación semestral 2025-H1
+Silvana Molina,Adrián Bustos,2025-05-07,2025-05-09,Evaluación semestral 2025-H1
+Silvana Molina,Pablo Urquiza,2025-04-23,2025-05-09,Evaluación semestral 2025-H1
+Silvana Quiroga,Hugo Ríos,2025-05-08,2025-05-09,Evaluación semestral 2025-H1
+Silvana Quiroga,Rocío Fuentes,2025-04-24,2025-05-09,Evaluación semestral 2025-H1
+Silvana Quiroga,Sofía Valdez,2025-04-29,2025-05-09,Evaluación semestral 2025-H1
+Sofía Valdez,Cristian Esquivel,2025-04-22,2025-05-09,Evaluación semestral 2025-H1
+Sofía Valdez,Hugo Ríos,,2025-05-09,Evaluación semestral 2025-H1
+Sofía Valdez,Pablo Urquiza,2025-04-22,2025-05-09,Evaluación semestral 2025-H1
+Sofía Valdez,Patricia Romero,,2025-05-09,Evaluación semestral 2025-H1
+Verónica Márquez,Candela Godoy,,2025-05-09,Evaluación semestral 2025-H1
+Verónica Márquez,Martín Fuentes,2025-05-05,2025-05-09,Evaluación semestral 2025-H1
+Verónica Márquez,Ramiro Valdez,2025-05-09,2025-05-09,Evaluación semestral 2025-H1
+Verónica Márquez,Rocío Ibáñez,2025-05-05,2025-05-09,Evaluación semestral 2025-H1
+Victoria Yáñez,Marcelo Lagos,2025-05-07,2025-05-09,Evaluación semestral 2025-H1
+Victoria Yáñez,Martín Fuentes,2025-04-27,2025-05-09,Evaluación semestral 2025-H1
+Victoria Yáñez,Verónica Márquez,,2025-05-09,Evaluación semestral 2025-H1
+Adrián Bustos,Carolina Núñez,,2025-11-07,Evaluación semestral 2025-H2
+Adrián Bustos,Santiago Fernández,2025-10-29,2025-11-07,Evaluación semestral 2025-H2
+Adrián Cabrera,Mateo Ibáñez,2025-10-25,2025-11-07,Evaluación semestral 2025-H2
+Adrián Cabrera,Maximiliano Acosta,2025-11-02,2025-11-07,Evaluación semestral 2025-H2
+Candela Campos,Ramiro Valdez,2025-10-21,2025-11-07,Evaluación semestral 2025-H2
+Candela Campos,Rocío Ibáñez,2025-10-27,2025-11-07,Evaluación semestral 2025-H2
+Carolina Núñez,Adrián Bustos,2025-10-26,2025-11-07,Evaluación semestral 2025-H2
+Carolina Núñez,Santiago Fernández,2025-10-26,2025-11-07,Evaluación semestral 2025-H2
+Cecilia Pereyra,Adrián Cabrera,2025-11-03,2025-11-07,Evaluación semestral 2025-H2
+Cecilia Pereyra,Federico Rivas,2025-11-02,2025-11-07,Evaluación semestral 2025-H2
+Cecilia Pereyra,Mateo Ibáñez,2025-10-26,2025-11-07,Evaluación semestral 2025-H2
+Cecilia Pereyra,Maximiliano Acosta,2025-10-30,2025-11-07,Evaluación semestral 2025-H2
+Facundo Sosa,Candela Campos,,2025-11-07,Evaluación semestral 2025-H2
+Facundo Sosa,Martín Fuentes,2025-10-25,2025-11-07,Evaluación semestral 2025-H2
+Facundo Sosa,Ramiro Valdez,,2025-11-07,Evaluación semestral 2025-H2
+Facundo Sosa,Rocío Ibáñez,,2025-11-07,Evaluación semestral 2025-H2
+Federico Rivas,Cecilia Pereyra,2025-10-23,2025-11-07,Evaluación semestral 2025-H2
+Federico Rivas,Maximiliano Acosta,2025-10-23,2025-11-07,Evaluación semestral 2025-H2
+Hugo Ríos,Patricia Romero,2025-10-20,2025-11-07,Evaluación semestral 2025-H2
+Hugo Ríos,Rocío Fuentes,2025-10-27,2025-11-07,Evaluación semestral 2025-H2
+Hugo Ríos,Santiago Fernández,2025-10-25,2025-11-07,Evaluación semestral 2025-H2
+Hugo Ríos,Silvana Quiroga,2025-10-26,2025-11-07,Evaluación semestral 2025-H2
+Jimen Coronel,Marcelo Ibáñez,2025-10-23,2025-11-07,Evaluación semestral 2025-H2
+Jimen Coronel,Pablo Urquiza,2025-10-25,2025-11-07,Evaluación semestral 2025-H2
+Marcelo Ibáñez,Jimen Coronel,2025-10-25,2025-11-07,Evaluación semestral 2025-H2
+Marcelo Ibáñez,Pablo Urquiza,2025-11-01,2025-11-07,Evaluación semestral 2025-H2
+Marcelo Lagos,Candela Campos,2025-11-04,2025-11-07,Evaluación semestral 2025-H2
+Marcelo Lagos,Martín Fuentes,2025-10-30,2025-11-07,Evaluación semestral 2025-H2
+Marcelo Lagos,Ramiro Valdez,2025-10-29,2025-11-07,Evaluación semestral 2025-H2
+Martín Fuentes,Candela Campos,,2025-11-07,Evaluación semestral 2025-H2
+Martín Fuentes,Facundo Sosa,2025-11-05,2025-11-07,Evaluación semestral 2025-H2
+Mateo Ibáñez,Adrián Cabrera,2025-10-28,2025-11-07,Evaluación semestral 2025-H2
+Mateo Ibáñez,Cecilia Pereyra,2025-10-20,2025-11-07,Evaluación semestral 2025-H2
+Maximiliano Acosta,Cecilia Pereyra,2025-10-25,2025-11-07,Evaluación semestral 2025-H2
+Maximiliano Acosta,Natalia Lezcano,2025-11-06,2025-11-07,Evaluación semestral 2025-H2
+Natalia Lezcano,Federico Rivas,2025-10-21,2025-11-07,Evaluación semestral 2025-H2
+Natalia Lezcano,Maximiliano Acosta,2025-11-06,2025-11-07,Evaluación semestral 2025-H2
+Pablo Urquiza,Jimen Coronel,,2025-11-07,Evaluación semestral 2025-H2
+Pablo Urquiza,Marcelo Ibáñez,2025-11-04,2025-11-07,Evaluación semestral 2025-H2
+Patricia Romero,Rocío Fuentes,2025-10-25,2025-11-07,Evaluación semestral 2025-H2
+Patricia Romero,Santiago Fernández,2025-10-20,2025-11-07,Evaluación semestral 2025-H2
+Patricia Romero,Silvana Quiroga,2025-10-27,2025-11-07,Evaluación semestral 2025-H2
+Ramiro Valdez,Candela Campos,2025-11-02,2025-11-07,Evaluación semestral 2025-H2
+Ramiro Valdez,Marcelo Lagos,2025-10-27,2025-11-07,Evaluación semestral 2025-H2
+Ramiro Valdez,Rocío Ibáñez,2025-11-06,2025-11-07,Evaluación semestral 2025-H2
+Rocío Fuentes,Hugo Ríos,2025-10-25,2025-11-07,Evaluación semestral 2025-H2
+Rocío Fuentes,Patricia Romero,2025-10-27,2025-11-07,Evaluación semestral 2025-H2
+Rocío Fuentes,Santiago Fernández,2025-10-24,2025-11-07,Evaluación semestral 2025-H2
+Rocío Fuentes,Silvana Quiroga,2025-11-03,2025-11-07,Evaluación semestral 2025-H2
+Rocío Ibáñez,Candela Campos,,2025-11-07,Evaluación semestral 2025-H2
+Rocío Ibáñez,Facundo Sosa,2025-11-01,2025-11-07,Evaluación semestral 2025-H2
+Rocío Ibáñez,Martín Fuentes,2025-10-27,2025-11-07,Evaluación semestral 2025-H2
+Santiago Fernández,Adrián Bustos,2025-11-07,2025-11-07,Evaluación semestral 2025-H2
+Santiago Fernández,Carolina Núñez,2025-11-04,2025-11-07,Evaluación semestral 2025-H2
+Santiago Fernández,Hugo Ríos,2025-10-20,2025-11-07,Evaluación semestral 2025-H2
+Santiago Fernández,Patricia Romero,2025-10-31,2025-11-07,Evaluación semestral 2025-H2
+Santiago Fernández,Rocío Fuentes,2025-10-24,2025-11-07,Evaluación semestral 2025-H2
+Santiago Garrido,Adrián Bustos,,2025-11-07,Evaluación semestral 2025-H2
+Santiago Garrido,Cecilia Pereyra,2025-10-23,2025-11-07,Evaluación semestral 2025-H2
+Santiago Garrido,Hugo Ríos,2025-10-26,2025-11-07,Evaluación semestral 2025-H2
+Santiago Garrido,Santiago Fernández,2025-10-31,2025-11-07,Evaluación semestral 2025-H2
+Silvana Arias,Federico Rivas,2025-11-06,2025-11-07,Evaluación semestral 2025-H2
+Silvana Arias,Natalia Lezcano,2025-10-22,2025-11-07,Evaluación semestral 2025-H2
+Silvana Arias,Pablo Urquiza,2025-10-22,2025-11-07,Evaluación semestral 2025-H2
+Silvana Arias,Ramiro Valdez,,2025-11-07,Evaluación semestral 2025-H2
+Silvana Molin,Maximiliano Acosta,,2025-11-07,Evaluación semestral 2025-H2
+Silvana Molin,Silvana Arias,2025-11-05,2025-11-07,Evaluación semestral 2025-H2
+Silvana Molin,Silvana Quiroga,2025-11-01,2025-11-07,Evaluación semestral 2025-H2
+Silvana Quiroga,Hugo Ríos,2025-10-29,2025-11-07,Evaluación semestral 2025-H2
+Silvana Quiroga,Patricia Romero,2025-10-20,2025-11-07,Evaluación semestral 2025-H2
+Silvana Quiroga,Rocío Fuentes,2025-10-27,2025-11-07,Evaluación semestral 2025-H2
+Silvana Quiroga,Santiago Fernández,2025-11-03,2025-11-07,Evaluación semestral 2025-H2
+Verónica Márquez,Adrián Cabrera,2025-10-29,2025-11-07,Evaluación semestral 2025-H2
+Verónica Márquez,Cecilia Pereyra,2025-10-22,2025-11-07,Evaluación semestral 2025-H2
+Verónica Márquez,Ciro Valenzuela,2025-10-26,2025-11-07,Evaluación semestral 2025-H2
+Verónica Márquez,Maximiliano Acosta,2025-11-03,2025-11-07,Evaluación semestral 2025-H2
+Verónica Márquez,Natalia Lezcano,2025-11-07,2025-11-07,Evaluación semestral 2025-H2
+Adrián Bustos,Carolina Núñez,2026-04-28,2026-05-09,Evaluación semestral 2026-H1
+Adrián Bustos,Santiago Fernández,2026-05-07,2026-05-09,Evaluación semestral 2026-H1
+Adrián Cabrera,Mateo Ibáñez,2026-05-09,2026-05-09,Evaluación semestral 2026-H1
+Adrián Cabrera,Verónica Márquez,2026-04-25,2026-05-09,Evaluación semestral 2026-H1
+Candela Campos,Marcelo Lagos,,2026-05-09,Evaluación semestral 2026-H1
+Candela Campos,Martín Fuentes,2026-04-30,2026-05-09,Evaluación semestral 2026-H1
+Candela Campos,Ramiro Valdez,2026-04-21,2026-05-09,Evaluación semestral 2026-H1
+Candela Campos,Rocío Ibáñez,2026-04-27,2026-05-09,Evaluación semestral 2026-H1
+Carolina Núñez,Adrián Bustos,2026-04-25,2026-05-09,Evaluación semestral 2026-H1
+Carolina Núñez,Santiago Fernández,2026-04-30,2026-05-09,Evaluación semestral 2026-H1
+Cecilia Pereyra,Adrián Cabrera,2026-04-23,2026-05-09,Evaluación semestral 2026-H1
+Cecilia Pereyra,Federico Rivas,2026-04-29,2026-05-09,Evaluación semestral 2026-H1
+Cecilia Pereyra,Mateo Ibáñez,2026-04-23,2026-05-09,Evaluación semestral 2026-H1
+Cecilia Pereyra,Verónica Márquez,2026-05-06,2026-05-09,Evaluación semestral 2026-H1
+Cristian Esquivel,Hugo Ríos,2026-04-29,2026-05-09,Evaluación semestral 2026-H1
+Cristian Esquivel,Rocío Fuentes,2026-04-28,2026-05-09,Evaluación semestral 2026-H1
+Cristian Esquivel,Silvana Quiroga,2026-05-07,2026-05-09,Evaluación semestral 2026-H1
+Facundo Sosa,Candela Campos,2026-04-25,2026-05-09,Evaluación semestral 2026-H1
+Facundo Sosa,Rocío Ibáñez,,2026-05-09,Evaluación semestral 2026-H1
+Federico Rivas,Adrián Cabrera,2026-05-03,2026-05-09,Evaluación semestral 2026-H1
+Federico Rivas,Cecilia Pereyra,,2026-05-09,Evaluación semestral 2026-H1
+Federico Rivas,Mateo Ibáñez,2026-04-24,2026-05-09,Evaluación semestral 2026-H1
+Federico Rivas,Verónica Márquez,2026-04-24,2026-05-09,Evaluación semestral 2026-H1
+Hugo Ríos,Santiago Fernández,,2026-05-09,Evaluación semestral 2026-H1
+Hugo Ríos,Silvana Quiroga,2026-05-09,2026-05-09,Evaluación semestral 2026-H1
+Jimena Coronel,Marcelo Ibáñez,2026-04-22,2026-05-09,Evaluación semestral 2026-H1
+Jimena Coronel,Pablo Monzón,2026-04-24,2026-05-09,Evaluación semestral 2026-H1
+Marcelo Ibáñez,Jimena Coronel,2026-04-29,2026-05-09,Evaluación semestral 2026-H1
+Marcelo Ibáñez,Pablo Monzón,2026-04-30,2026-05-09,Evaluación semestral 2026-H1
+Marcelo Lagos,Candela Campos,2026-04-22,2026-05-09,Evaluación semestral 2026-H1
+Marcelo Lagos,Martín Fuentes,2026-05-04,2026-05-09,Evaluación semestral 2026-H1
+Marcelo Lagos,Ramiro Valdez,2026-04-21,2026-05-09,Evaluación semestral 2026-H1
+Martín Fuentes,Candela Campos,,2026-05-09,Evaluación semestral 2026-H1
+Martín Fuentes,Natalia Lezcano,,2026-05-09,Evaluación semestral 2026-H1
+Martín Fuentes,Ramiro Valdez,2026-05-02,2026-05-09,Evaluación semestral 2026-H1
+Martín Fuentes,Rocío Ibáñez,2026-04-26,2026-05-09,Evaluación semestral 2026-H1
+Mateo Ibáñez,Federico Rivas,2026-05-06,2026-05-09,Evaluación semestral 2026-H1
+Mateo Ibáñez,Verónica Márquez,2026-04-24,2026-05-09,Evaluación semestral 2026-H1
+Natalia Lezcano,Marcelo Lagos,,2026-05-09,Evaluación semestral 2026-H1
+Natalia Lezcano,Martín Fuentes,2026-04-29,2026-05-09,Evaluación semestral 2026-H1
+Pablo Monzón,Jimena Coronel,2026-04-26,2026-05-09,Evaluación semestral 2026-H1
+Pablo Monzón,Marcelo Ibáñez,2026-04-25,2026-05-09,Evaluación semestral 2026-H1
+Patricia Romero,Hugo Ríos,2026-05-06,2026-05-09,Evaluación semestral 2026-H1
+Patricia Romero,Rocío Fuentes,2026-04-28,2026-05-09,Evaluación semestral 2026-H1
+Patricia Romero,Santiago Fernández,2026-04-28,2026-05-09,Evaluación semestral 2026-H1
+Patricia Romero,Silvana Quiroga,,2026-05-09,Evaluación semestral 2026-H1
+Ramiro Valdez,Candela Campos,2026-04-29,2026-05-09,Evaluación semestral 2026-H1
+Ramiro Valdez,Marcelo Lagos,2026-05-01,2026-05-09,Evaluación semestral 2026-H1
+Ramiro Valdez,Natalia Lezcano,,2026-05-09,Evaluación semestral 2026-H1
+Rocío Fuentes,Hugo Ríos,2026-05-04,2026-05-09,Evaluación semestral 2026-H1
+Rocío Fuentes,Patricia Romero,2026-04-23,2026-05-09,Evaluación semestral 2026-H1
+Rocío Fuentes,Silvana Quiroga,2026-04-23,2026-05-09,Evaluación semestral 2026-H1
+Rocío Fuentes,Sofía Valdez,2026-05-07,2026-05-09,Evaluación semestral 2026-H1
+Rocío Ibáñez,Facundo Sosa,2026-05-02,2026-05-09,Evaluación semestral 2026-H1
+Rocío Ibáñez,Martín Fuentes,2026-04-27,2026-05-09,Evaluación semestral 2026-H1
+Rocío Ibáñez,Natalia Lezcano,2026-04-30,2026-05-09,Evaluación semestral 2026-H1
+Rocío Ibáñez,Ramiro Valdez,2026-05-06,2026-05-09,Evaluación semestral 2026-H1
+Santiago Fernández,Adrián Bustos,,2026-05-09,Evaluación semestral 2026-H1
+Santiago Fernández,Carolina Núñez,2026-05-03,2026-05-09,Evaluación semestral 2026-H1
+Santiago Fernández,Cristian Esquivel,2026-04-26,2026-05-09,Evaluación semestral 2026-H1
+Santiago Fernández,Rocío Fuentes,2026-04-29,2026-05-09,Evaluación semestral 2026-H1
+Santiago Fernández,Silvana Quiroga,2026-05-07,2026-05-09,Evaluación semestral 2026-H1
+Santiago Garrido,Cristian Esquivel,,2026-05-09,Evaluación semestral 2026-H1
+Santiago Garrido,Marcelo Lagos,2026-05-03,2026-05-09,Evaluación semestral 2026-H1
+Santiago Garrido,Silvana Molina,,2026-05-09,Evaluación semestral 2026-H1
+Silvana Arias,Adrián Cabrera,,2026-05-09,Evaluación semestral 2026-H1
+Silvana Arias,Cecilia Pereyra,,2026-05-09,Evaluación semestral 2026-H1
+Silvana Arias,Cristian Esquivel,2026-05-08,2026-05-09,Evaluación semestral 2026-H1
+Silvana Arias,Dolores Echagüe,2026-04-25,2026-05-09,Evaluación semestral 2026-H1
+Silvana Arias,Natalia Lezcano,2026-05-04,2026-05-09,Evaluación semestral 2026-H1
+Silvana Molina,Federico Rivas,,2026-05-09,Evaluación semestral 2026-H1
+Silvana Molina,Martín Fuentes,2026-04-30,2026-05-09,Evaluación semestral 2026-H1
+Silvana Quiroga,Hugo Ríos,2026-04-25,2026-05-09,Evaluación semestral 2026-H1
+Silvana Quiroga,Rocío Fuentes,2026-04-29,2026-05-09,Evaluación semestral 2026-H1
+Sofía Valdez,Hugo Ríos,,2026-05-09,Evaluación semestral 2026-H1
+Sofía Valdez,Santiago Fernández,,2026-05-09,Evaluación semestral 2026-H1
+Sofía Valdez,Silvana Quiroga,2026-04-30,2026-05-09,Evaluación semestral 2026-H1
+Verónica Márquez,Adrián Cabrera,2026-05-09,2026-05-09,Evaluación semestral 2026-H1
+Verónica Márquez,Mateo Ibáñez,,2026-05-09,Evaluación semestral 2026-H1

@@ -23,47 +23,47 @@
   "goals": [
     {
       "id": "7705",
-      "title": "Mejorar el NPS interno del equipo",
-      "description": "Sirve de base para el próximo ciclo de evaluación.",
+      "title": "Lanzar el nuevo flujo de onboarding",
+      "description": "Alineado con el plan del área para el año.",
       "percentComplete": 100,
       "alignsWithOptionId": null,
       "sharedWithEmployeeIds": [],
-      "dueDate": "2025-10-08",
-      "completionDate": "2025-07-10",
-      "lastChangedDateTime": "2025-07-10T10:28:04Z",
+      "dueDate": "2025-08-21",
+      "completionDate": "2025-08-08",
+      "lastChangedDateTime": "2025-08-08T19:50:01Z",
       "status": "completed",
       "milestones": [
         {
-          "id": 1953,
+          "id": 1839,
           "employeeGoalId": 7705,
           "title": "Hito 1",
           "startValue": 0,
           "endValue": 1,
           "currentValue": 1,
-          "completedDateTime": "2025-06-09T10:40:35Z",
-          "lastUpdateDateTime": "2025-06-09T10:40:35Z",
+          "completedDateTime": "2025-07-14T11:33:55Z",
+          "lastUpdateDateTime": "2025-07-14T11:33:55Z",
           "lastUpdateUserId": 687
         },
         {
-          "id": 1954,
+          "id": 1840,
           "employeeGoalId": 7705,
           "title": "Hito 2",
           "startValue": 0,
           "endValue": 1,
           "currentValue": 1,
-          "completedDateTime": "2025-07-01T14:41:12Z",
-          "lastUpdateDateTime": "2025-07-01T14:41:12Z",
+          "completedDateTime": "2025-07-02T11:41:43Z",
+          "lastUpdateDateTime": "2025-07-02T11:41:43Z",
           "lastUpdateUserId": 687
         },
         {
-          "id": 1955,
+          "id": 1841,
           "employeeGoalId": 7705,
           "title": "Hito 3",
           "startValue": 0,
           "endValue": 1,
           "currentValue": 1,
-          "completedDateTime": "2025-06-12T15:55:32Z",
-          "lastUpdateDateTime": "2025-06-12T15:55:32Z",
+          "completedDateTime": "2025-07-03T19:16:24Z",
+          "lastUpdateDateTime": "2025-07-03T19:16:24Z",
           "lastUpdateUserId": 687
         }
       ],
@@ -77,59 +77,58 @@
       }
     },
     {
-      "id": "7707",
-      "title": "Aumentar la cobertura de pruebas al 80%",
-      "description": "Pedido por el equipo directivo en la planificación.",
-      "percentComplete": 25,
+      "id": "7706",
+      "title": "Reducir el tiempo de primera respuesta un 20%",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "percentComplete": 100,
       "alignsWithOptionId": null,
       "sharedWithEmployeeIds": [],
-      "dueDate": "2025-06-19",
+      "dueDate": "2026-08-03",
+      "completionDate": "2026-05-06",
+      "lastChangedDateTime": "2026-05-06T10:58:12Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "7707",
+      "title": "Completar la certificación del área",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 0,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2026-11-13",
       "completionDate": null,
-      "lastChangedDateTime": "2025-05-02T15:03:33Z",
+      "lastChangedDateTime": "2026-07-28T16:06:55Z",
       "status": "in_progress",
       "milestones": [
         {
-          "id": 1956,
+          "id": 1842,
           "employeeGoalId": 7707,
           "title": "Hito 1",
           "startValue": 0,
           "endValue": 1,
-          "currentValue": 1,
-          "completedDateTime": "2025-04-01T18:24:50Z",
-          "lastUpdateDateTime": "2025-04-01T18:24:50Z",
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2026-06-30T17:46:18Z",
           "lastUpdateUserId": 687
         },
         {
-          "id": 1957,
+          "id": 1843,
           "employeeGoalId": 7707,
           "title": "Hito 2",
           "startValue": 0,
           "endValue": 1,
           "currentValue": 0,
           "completedDateTime": null,
-          "lastUpdateDateTime": "2025-02-18T17:29:14Z",
-          "lastUpdateUserId": 687
-        },
-        {
-          "id": 1958,
-          "employeeGoalId": 7707,
-          "title": "Hito 3",
-          "startValue": 0,
-          "endValue": 1,
-          "currentValue": 0,
-          "completedDateTime": null,
-          "lastUpdateDateTime": "2025-02-18T13:54:37Z",
-          "lastUpdateUserId": 687
-        },
-        {
-          "id": 1959,
-          "employeeGoalId": 7707,
-          "title": "Hito 4",
-          "startValue": 0,
-          "endValue": 1,
-          "currentValue": 0,
-          "completedDateTime": null,
-          "lastUpdateDateTime": "2025-02-18T18:20:26Z",
+          "lastUpdateDateTime": "2026-06-30T18:46:59Z",
           "lastUpdateUserId": 687
         }
       ],
@@ -151,5 +150,10 @@
       "preferredName": null
     }
   ],
-  "comments": []
+  "comments": [
+    {
+      "goalId": "7705",
+      "commentCount": 2
+    }
+  ]
 }

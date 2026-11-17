@@ -22,17 +22,62 @@
   "selectedFilter": "status-all",
   "goals": [
     {
-      "id": "6477",
-      "title": "Entregar el proyecto Norte sin desvíos",
-      "description": "Pedido por el equipo directivo en la planificación.",
+      "id": "6417",
+      "title": "Aumentar la cobertura de pruebas al 80%",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
       "percentComplete": 100,
-      "alignsWithOptionId": null,
+      "alignsWithOptionId": 9001,
       "sharedWithEmployeeIds": [],
-      "dueDate": "2023-06-29",
-      "completionDate": "2023-07-13",
-      "lastChangedDateTime": "2023-07-13T09:53:57Z",
+      "dueDate": "2023-09-05",
+      "completionDate": "2023-04-01",
+      "lastChangedDateTime": "2023-04-01T18:08:31Z",
       "status": "completed",
-      "milestones": null,
+      "milestones": [
+        {
+          "id": 1281,
+          "employeeGoalId": 6417,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2023-02-20T08:14:50Z",
+          "lastUpdateDateTime": "2023-02-20T08:14:50Z",
+          "lastUpdateUserId": 339
+        },
+        {
+          "id": 1282,
+          "employeeGoalId": 6417,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2023-03-26T09:36:58Z",
+          "lastUpdateDateTime": "2023-03-26T09:36:58Z",
+          "lastUpdateUserId": 339
+        },
+        {
+          "id": 1283,
+          "employeeGoalId": 6417,
+          "title": "Hito 3",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2023-03-09T15:46:06Z",
+          "lastUpdateDateTime": "2023-03-09T15:46:06Z",
+          "lastUpdateUserId": 339
+        },
+        {
+          "id": 1284,
+          "employeeGoalId": 6417,
+          "title": "Hito 4",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2023-02-28T10:24:44Z",
+          "lastUpdateDateTime": "2023-02-28T10:24:44Z",
+          "lastUpdateUserId": 339
+        }
+      ],
       "actions": {
         "canEdit": false,
         "canUpdateProgress": false,
@@ -43,36 +88,15 @@
       }
     },
     {
-      "id": "6479",
+      "id": "6420",
       "title": "Completar la certificación del área",
-      "description": "Sirve de base para el próximo ciclo de evaluación.",
-      "percentComplete": 30,
-      "alignsWithOptionId": null,
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 45,
+      "alignsWithOptionId": 9001,
       "sharedWithEmployeeIds": [],
-      "dueDate": "2023-04-22",
+      "dueDate": "2023-11-13",
       "completionDate": null,
-      "lastChangedDateTime": "2024-09-16T16:52:28Z",
-      "status": "in_progress",
-      "milestones": null,
-      "actions": {
-        "canEdit": false,
-        "canUpdateProgress": false,
-        "canClose": false,
-        "canReopen": false,
-        "canDelete": false,
-        "canComment": false
-      }
-    },
-    {
-      "id": "6481",
-      "title": "Documentar los procesos críticos",
-      "description": "Pedido por el equipo directivo en la planificación.",
-      "percentComplete": 35,
-      "alignsWithOptionId": null,
-      "sharedWithEmployeeIds": [],
-      "dueDate": "2024-07-10",
-      "completionDate": null,
-      "lastChangedDateTime": "2024-06-26T13:12:31Z",
+      "lastChangedDateTime": "2023-10-22T09:12:37Z",
       "status": "closed",
       "milestones": null,
       "actions": {
@@ -95,12 +119,8 @@
   ],
   "comments": [
     {
-      "goalId": "6477",
-      "commentCount": 1
-    },
-    {
-      "goalId": "6481",
-      "commentCount": 1
+      "goalId": "6417",
+      "commentCount": 3
     }
   ]
 }

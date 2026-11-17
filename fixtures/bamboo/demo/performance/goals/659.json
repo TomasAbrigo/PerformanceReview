@@ -22,36 +22,15 @@
   "selectedFilter": "status-all",
   "goals": [
     {
-      "id": "7666",
-      "title": "Cerrar el plan de capacitación anual",
-      "description": "Meta compartida con otra área; coordinar avances mensuales.",
-      "percentComplete": 70,
+      "id": "7637",
+      "title": "Entregar el proyecto Norte sin desvíos",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 100,
       "alignsWithOptionId": null,
       "sharedWithEmployeeIds": [],
-      "dueDate": "2025-10-30",
-      "completionDate": null,
-      "lastChangedDateTime": "2025-05-26T16:11:40Z",
-      "status": "in_progress",
-      "milestones": null,
-      "actions": {
-        "canEdit": true,
-        "canUpdateProgress": true,
-        "canClose": true,
-        "canReopen": false,
-        "canDelete": true,
-        "canComment": true
-      }
-    },
-    {
-      "id": "7667",
-      "title": "Implementar el calendario editorial",
-      "description": "Meta compartida con otra área; coordinar avances mensuales.",
-      "percentComplete": 100,
-      "alignsWithOptionId": 9001,
-      "sharedWithEmployeeIds": [],
-      "dueDate": "2025-03-22",
-      "completionDate": "2025-01-27",
-      "lastChangedDateTime": "2025-01-27T19:56:17Z",
+      "dueDate": "2025-08-13",
+      "completionDate": "2025-03-01",
+      "lastChangedDateTime": "2025-03-01T11:58:40Z",
       "status": "completed",
       "milestones": null,
       "actions": {
@@ -64,100 +43,22 @@
       }
     },
     {
-      "id": "7670",
-      "title": "Implementar el calendario editorial",
-      "description": "Pedido por el equipo directivo en la planificación.",
-      "percentComplete": 0,
-      "alignsWithOptionId": null,
-      "sharedWithEmployeeIds": [],
-      "dueDate": "2026-12-03",
-      "completionDate": null,
-      "lastChangedDateTime": "2026-10-29T10:43:14Z",
-      "status": "in_progress",
-      "milestones": [
-        {
-          "id": 1931,
-          "employeeGoalId": 7670,
-          "title": "Hito 1",
-          "startValue": 0,
-          "endValue": 1,
-          "currentValue": 0,
-          "completedDateTime": null,
-          "lastUpdateDateTime": "2026-09-01T19:28:15Z",
-          "lastUpdateUserId": 659
-        },
-        {
-          "id": 1932,
-          "employeeGoalId": 7670,
-          "title": "Hito 2",
-          "startValue": 0,
-          "endValue": 1,
-          "currentValue": 0,
-          "completedDateTime": null,
-          "lastUpdateDateTime": "2026-09-01T09:50:46Z",
-          "lastUpdateUserId": 659
-        }
-      ],
-      "actions": {
-        "canEdit": true,
-        "canUpdateProgress": true,
-        "canClose": true,
-        "canReopen": false,
-        "canDelete": true,
-        "canComment": true
-      }
-    },
-    {
-      "id": "7672",
+      "id": "7639",
       "title": "Entregar el proyecto Norte sin desvíos",
       "description": "Sirve de base para el próximo ciclo de evaluación.",
-      "percentComplete": 67,
+      "percentComplete": 45,
       "alignsWithOptionId": null,
       "sharedWithEmployeeIds": [],
-      "dueDate": "2026-05-07",
+      "dueDate": "2026-09-02",
       "completionDate": null,
-      "lastChangedDateTime": "2026-09-21T19:56:04Z",
-      "status": "in_progress",
-      "milestones": [
-        {
-          "id": 1933,
-          "employeeGoalId": 7672,
-          "title": "Hito 1",
-          "startValue": 0,
-          "endValue": 1,
-          "currentValue": 1,
-          "completedDateTime": "2026-03-18T09:38:30Z",
-          "lastUpdateDateTime": "2026-03-18T09:38:30Z",
-          "lastUpdateUserId": 659
-        },
-        {
-          "id": 1934,
-          "employeeGoalId": 7672,
-          "title": "Hito 2",
-          "startValue": 0,
-          "endValue": 1,
-          "currentValue": 1,
-          "completedDateTime": "2026-01-24T14:44:22Z",
-          "lastUpdateDateTime": "2026-01-24T14:44:22Z",
-          "lastUpdateUserId": 659
-        },
-        {
-          "id": 1935,
-          "employeeGoalId": 7672,
-          "title": "Hito 3",
-          "startValue": 0,
-          "endValue": 1,
-          "currentValue": 0,
-          "completedDateTime": null,
-          "lastUpdateDateTime": "2025-11-23T08:38:12Z",
-          "lastUpdateUserId": 659
-        }
-      ],
+      "lastChangedDateTime": "2026-09-06T13:12:09Z",
+      "status": "closed",
+      "milestones": null,
       "actions": {
-        "canEdit": true,
-        "canUpdateProgress": true,
-        "canClose": true,
-        "canReopen": false,
+        "canEdit": false,
+        "canUpdateProgress": false,
+        "canClose": false,
+        "canReopen": true,
         "canDelete": true,
         "canComment": true
       }
@@ -171,14 +72,5 @@
       "preferredName": null
     }
   ],
-  "comments": [
-    {
-      "goalId": "7667",
-      "commentCount": 4
-    },
-    {
-      "goalId": "7672",
-      "commentCount": 4
-    }
-  ]
+  "comments": []
 }

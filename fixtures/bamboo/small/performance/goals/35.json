@@ -20,14 +20,261 @@
     }
   ],
   "selectedFilter": "status-all",
-  "goals": [],
+  "goals": [
+    {
+      "id": "5146",
+      "title": "Mejorar el NPS interno del equipo",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2023-04-19",
+      "completionDate": "2023-04-28",
+      "lastChangedDateTime": "2023-04-28T15:37:21Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "5149",
+      "title": "Lanzar el nuevo flujo de onboarding",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2024-05-27",
+      "completionDate": "2024-03-25",
+      "lastChangedDateTime": "2024-03-25T18:51:30Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "5152",
+      "title": "Lanzar el nuevo flujo de onboarding",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "percentComplete": 100,
+      "alignsWithOptionId": 9002,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2024-05-09",
+      "completionDate": "2024-04-16",
+      "lastChangedDateTime": "2024-04-16T17:22:36Z",
+      "status": "completed",
+      "milestones": [
+        {
+          "id": 769,
+          "employeeGoalId": 5152,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2024-03-08T15:35:02Z",
+          "lastUpdateDateTime": "2024-03-08T15:35:02Z",
+          "lastUpdateUserId": 35
+        },
+        {
+          "id": 770,
+          "employeeGoalId": 5152,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2024-04-12T16:15:51Z",
+          "lastUpdateDateTime": "2024-04-12T16:15:51Z",
+          "lastUpdateUserId": 35
+        },
+        {
+          "id": 771,
+          "employeeGoalId": 5152,
+          "title": "Hito 3",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2024-02-24T15:56:37Z",
+          "lastUpdateDateTime": "2024-02-24T15:56:37Z",
+          "lastUpdateUserId": 35
+        },
+        {
+          "id": 772,
+          "employeeGoalId": 5152,
+          "title": "Hito 4",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2024-03-20T18:58:01Z",
+          "lastUpdateDateTime": "2024-03-20T18:58:01Z",
+          "lastUpdateUserId": 35
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "5154",
+      "title": "Aumentar la cobertura de pruebas al 80%",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "percentComplete": 35,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2024-07-04",
+      "completionDate": null,
+      "lastChangedDateTime": "2024-08-21T10:13:25Z",
+      "status": "in_progress",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "5156",
+      "title": "Migrar los reportes al nuevo tablero",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "percentComplete": 25,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2025-04-14",
+      "completionDate": null,
+      "lastChangedDateTime": "2025-12-19T14:24:14Z",
+      "status": "in_progress",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "5157",
+      "title": "Aumentar la cobertura de pruebas al 80%",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2025-11-04",
+      "completionDate": "2025-10-30",
+      "lastChangedDateTime": "2025-10-30T12:16:56Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "5158",
+      "title": "Completar la certificación del área",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "percentComplete": 100,
+      "alignsWithOptionId": 9003,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2026-02-23",
+      "completionDate": "2025-09-07",
+      "lastChangedDateTime": "2025-09-07T19:02:00Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "5160",
+      "title": "Renovar las cuentas clave del trimestre",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "percentComplete": 90,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [
+        23
+      ],
+      "dueDate": "2027-01-10",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-08-25T09:09:49Z",
+      "status": "in_progress",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    }
+  ],
   "persons": [
     {
       "employeeId": 35,
       "firstName": "Carolina",
       "lastName": "Núñez",
       "preferredName": null
+    },
+    {
+      "employeeId": 23,
+      "firstName": "Adrián",
+      "lastName": "Bustos",
+      "preferredName": null
     }
   ],
-  "comments": []
+  "comments": [
+    {
+      "goalId": "5146",
+      "commentCount": 2
+    },
+    {
+      "goalId": "5154",
+      "commentCount": 3
+    },
+    {
+      "goalId": "5156",
+      "commentCount": 4
+    },
+    {
+      "goalId": "5157",
+      "commentCount": 3
+    },
+    {
+      "goalId": "5158",
+      "commentCount": 1
+    },
+    {
+      "goalId": "5160",
+      "commentCount": 4
+    }
+  ]
 }
