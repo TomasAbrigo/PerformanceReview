@@ -37,7 +37,8 @@ export default defineConfig({
     {
       name: "chromium",
       use: { ...devices["Desktop Chrome"] },
-      testIgnore: /(identity(-later)?|dashboards|review-api|qualitative)\.spec\.ts/,
+      testIgnore:
+        /(identity(-later)?|dashboards|review-api|qualitative)\.spec\.ts/,
     },
     // These read the review data of the historical import, which
     // e2e/historical-import.spec.ts (project chromium) brings in: they run
