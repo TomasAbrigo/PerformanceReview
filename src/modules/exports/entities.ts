@@ -8,7 +8,7 @@ import es from "@/messages/es.json";
 import { notFound } from "@/modules/api/errors";
 import { parseQuery } from "@/modules/api/http";
 import { allPages, pages } from "@/modules/api/pagination";
-import { bool, isoDate, uuid } from "@/modules/api/params";
+import { bool, flag, isoDate, uuid } from "@/modules/api/params";
 import {
   listParticipantRows,
   type ParticipantRow,
@@ -89,7 +89,7 @@ type Export<Q, R> = {
   file: (query: Q) => string;
   query: ZodType<Q>;
   rows: (db: DbOrTx, query: Q) => AsyncIterable<R>;
-  columns: (header: Header) => CsvColumn<R>[];
+  columns: (header: Header, query: Q) => CsvColumn<R>[];
 };
 
 function defineExport<Q, R>(def: Export<Q, R>) {
@@ -99,7 +99,7 @@ function defineExport<Q, R>(def: Export<Q, R>) {
     return csvResponse(
       `${def.file(query)}.csv`,
       def.rows(db, query),
-      def.columns(headerIn(locale)),
+      def.columns(headerIn(locale), query),
     );
   };
 }
@@ -111,16 +111,20 @@ const peopleExport = defineExport({
   query: z.object({
     q: z.string().max(200).optional(),
     active: bool.optional(),
+    // The email is personal data: out of the file unless asked for.
+    include_email: flag,
   }),
-  rows: (db, query) =>
+  rows: (db, { q, active }) =>
     allPages((cursor) =>
-      listPeopleRows(db, { ...query, limit: PAGE_SIZE, cursor }),
+      listPeopleRows(db, { q, active, limit: PAGE_SIZE, cursor }),
     ),
-  columns: (h) => [
+  columns: (h, { include_email }) => [
     { header: h("person_id"), value: (p: PersonRow) => p.id },
     { header: h("bamboo_id"), value: (p) => p.bambooId },
     { header: h("employee_number"), value: (p) => p.employeeNumber },
-    { header: h("email"), value: (p) => p.workEmail },
+    ...(include_email
+      ? [{ header: h("email"), value: (p: PersonRow) => p.workEmail }]
+      : []),
     { header: h("name"), value: (p) => p.displayName },
     { header: h("status"), value: (p) => p.status },
     { header: h("manager_id"), value: (p) => p.job?.manager?.id },

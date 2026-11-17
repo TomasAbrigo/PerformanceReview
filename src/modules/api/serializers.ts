@@ -42,11 +42,12 @@ const serializeCurrentJob = (j: CurrentJob) => ({
   location: j.location,
 });
 
-export const serializePerson = (p: PersonRow) => ({
+/** `withEmail`: whether the reader may see the work email (see `canSeeEmail`). */
+export const serializePerson = (p: PersonRow, withEmail: boolean) => ({
   id: p.id,
   source: sourceOf(p.sourceSystem, p.bambooId),
   display_name: p.displayName,
-  work_email: p.workEmail,
+  ...(withEmail ? { work_email: p.workEmail } : {}),
   employee_number: p.employeeNumber,
   status: p.status,
   active: p.active,
@@ -73,16 +74,18 @@ const serializeJobHistory = (h: JobHistoryRow) => ({
   updated_at: h.updatedAt,
 });
 
-export const serializePersonDetail = (p: PersonDetail) => ({
-  ...serializePerson(p),
-  source_identities: p.identities.map((i) => ({
-    id: i.id,
-    system: i.sourceSystem,
-    kind: i.kind,
-    value: i.value,
-    valid_from: i.validFrom,
-    valid_to: i.validTo,
-  })),
+export const serializePersonDetail = (p: PersonDetail, withEmail: boolean) => ({
+  ...serializePerson(p, withEmail),
+  source_identities: p.identities
+    .filter((i) => withEmail || i.kind !== "work_email")
+    .map((i) => ({
+      id: i.id,
+      system: i.sourceSystem,
+      kind: i.kind,
+      value: i.value,
+      valid_from: i.validFrom,
+      valid_to: i.validTo,
+    })),
   employments: p.employments.map((e) => ({
     id: e.id,
     source: sourceOf(e.sourceSystem, e.sourceId),
