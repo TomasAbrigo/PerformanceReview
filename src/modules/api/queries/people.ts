@@ -103,7 +103,7 @@ function toPersonRow(r: RawPersonRow): PersonRow {
 export type ListPeopleInput = {
   limit: number;
   cursor?: string | null;
-  /** Substring of the name or email, case-insensitive. */
+  /** Substring of the name, case-insensitive (never of the email). */
   q?: string;
   active?: boolean;
   /** The day "active" and the current job are read at (default: today). */

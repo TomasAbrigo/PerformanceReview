@@ -19,6 +19,12 @@ export type ActorContext = { personId: string | null; role: ActorRole };
 
 export const DEFAULT_ACTOR: ActorContext = { personId: null, role: "hr" };
 
+/**
+ * Work emails are personal data: only People (hr) sees them, in the person
+ * sheet, the JSON API and, on request, the people CSV. One rule for all.
+ */
+export const canSeeEmail = (role: ActorRole): boolean => role === "hr";
+
 export const actorSchema = z.object({
   personId: z.uuid().nullable(),
   role: z.enum(actorRoles),

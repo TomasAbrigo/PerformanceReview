@@ -6,6 +6,7 @@ import { RUN_STATUSES } from "@/modules/ingest/run-status";
 import { requestStatuses } from "@/modules/review-core/request-status";
 import { relationships } from "@/modules/templates/constants";
 import { todayLocal } from "@/modules/org-history/dates";
+import { canSeeEmail } from "@/modules/actor/types";
 import { notFound } from "./errors";
 import { apiRoute, ok, parseQuery } from "./http";
 import { bool, isoDate, uuid } from "./params";
@@ -67,20 +68,35 @@ const detailOr404 = async <T>(
 
 // ---------------------------------------------------------------- people
 
-const peopleQuery = pageParams.extend({
-  q: z.string().max(200).optional(),
-  active: bool.optional(),
-});
+/**
+ * Like the review endpoints, people are read as HR by default and, with
+ * `?as_person=&role=`, as a person: the work email (and the work_email source
+ * identity) is only in the answer for the hr role.
+ */
+const peopleQuery = pageParams
+  .extend({
+    q: z.string().max(200).optional(),
+    active: bool.optional(),
+    ...scopeFields,
+  })
+  .superRefine(checkScope);
 
 export const listPeopleRoute = apiRoute(async (request) => {
-  const query = parseQuery(request, peopleQuery);
-  return ok(envelope(await listPeopleRows(db, query), serializePerson));
+  const { scope, as_person, role, ...query } = parseQuery(request, peopleQuery);
+  const actor = await scopeActor(db, { scope, as_person, role });
+  const page = await listPeopleRows(db, query);
+  const withEmail = canSeeEmail(actor.role);
+  return ok(envelope(page, (p) => serializePerson(p, withEmail)));
 });
 
 export const getPersonRoute = apiRoute<{ id: string }>(
-  async (_request, { id }) => {
+  async (request, { id }) => {
+    const scope = parseQuery(request, scopeQuery);
+    const actor = await scopeActor(db, scope);
     const person = await detailOr404("Person", () => getPersonDetail(db, id));
-    return ok({ data: serializePersonDetail(person) });
+    return ok({
+      data: serializePersonDetail(person, canSeeEmail(actor.role)),
+    });
   },
 );
 

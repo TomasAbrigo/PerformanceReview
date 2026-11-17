@@ -108,18 +108,33 @@ test("the people list downloads its CSV: header and one row per person, with ids
   const lines = raw.slice(1).split("\r\n");
   expect(lines.pop()).toBe(""); // every line, the last one too, ends in CRLF
   expect(lines[0]).toBe(
-    "person_id,bamboo_id,legajo,email,nombre,estado,manager_id,manager,área,división,puesto,ubicación,fecha ingreso,fecha baja",
+    "person_id,bamboo_id,legajo,nombre,estado,manager_id,manager,área,división,puesto,ubicación,fecha ingreso,fecha baja",
   );
+  // The email is personal data: not in the file unless asked for.
+  expect(raw).not.toContain("@");
   // The same people the screen lists: one per human.
   expect(lines).toHaveLength(employees.length + 1);
   const row = lines.find((l) => l.includes(`,${report.id},`))!;
   expect(row).toMatch(
     new RegExp(
-      `^[0-9a-f-]{36},${report.id},${report.employeeNumber},${report.workEmail},`,
+      `^[0-9a-f-]{36},${report.id},${report.employeeNumber},${fullName(report)},`,
     ),
   );
-  expect(row).toContain(fullName(report));
   expect(row).toContain(fullName(manager));
+
+  // `include_email=1` adds the column after legajo.
+  const withEmail = await (
+    await page.request.get("/api/v1/export/people.csv?include_email=1")
+  ).text();
+  const emailLines = withEmail.slice(1).split("\r\n");
+  expect(emailLines[0]).toBe(
+    "person_id,bamboo_id,legajo,email,nombre,estado,manager_id,manager,área,división,puesto,ubicación,fecha ingreso,fecha baja",
+  );
+  expect(emailLines.find((l) => l.includes(`,${report.id},`))).toMatch(
+    new RegExp(
+      `^[0-9a-f-]{36},${report.id},${report.employeeNumber},${report.workEmail},${fullName(report)},`,
+    ),
+  );
 });
 
 test("the JSON API pages through every person with ids and source ids, and 404s unknown ones", async ({
