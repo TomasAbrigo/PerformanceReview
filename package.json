@@ -27,9 +27,12 @@
     "ingest:employees": "tsx scripts/ingest-employees.ts",
     "ingest:goals": "tsx scripts/ingest-employees.ts --entity goal",
     "fixtures:build": "tsx src/fixtures/build.ts",
-    "fixtures:parquet": "tsx scripts/fixtures-parquet.ts"
+    "fixtures:parquet": "tsx scripts/fixtures-parquet.ts",
+    "analysis:run": "tsx scripts/analysis-run.ts",
+    "analysis:import-labels": "tsx scripts/analysis-import-labels.ts"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^1.9.0",
     "@base-ui/react": "^1.9.0",
     "class-variance-authority": "^0.7.1",
     "cn": "^0.5.2",

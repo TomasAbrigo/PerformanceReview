@@ -874,7 +874,11 @@
       "avg_progress": "avance promedio",
       "normalized": "rating normalizado",
       "gap": "brecha",
-      "answers": "respuestas"
+      "answers": "respuestas",
+      "dimension": "dimensión",
+      "positive": "positivo",
+      "constructive": "constructivo",
+      "negative": "negativo"
     }
   },
   "ImportHistory": {
@@ -1024,6 +1028,116 @@
       "others": "Otros",
       "belowMinimum": "Hay menos de {min} participantes: no se muestran datos para proteger a las personas.",
       "suppressed": "{n, plural, =0 {Ninguna persona en grupos chicos} one {# persona en áreas chicas (no se desglosa)} other {# personas en áreas chicas (no se desglosan)}}"
+    }
+  },
+  "Qualitative": {
+    "nav": "Análisis cualitativo",
+    "title": "Análisis cualitativo de comentarios",
+    "forbidden": "No tenés acceso al análisis cualitativo.",
+    "empty": "Todavía no hay comentarios analizados.",
+    "filters": {
+      "label": "Filtros",
+      "cycle": "Ciclo",
+      "allCycles": "Todos los ciclos",
+      "department": "Área",
+      "dimension": "Dimensión",
+      "sentiment": "Sentimiento",
+      "theme": "Tema",
+      "any": "Todos",
+      "aggregate": "Solo agregados (vista dirección)",
+      "apply": "Aplicar"
+    },
+    "sentiment": {
+      "positive": "Positivo",
+      "constructive": "Constructivo",
+      "negative": "Negativo"
+    },
+    "dimensions": {
+      "strengths": "Fortalezas",
+      "improvement": "Oportunidades de mejora",
+      "other": "Otros"
+    },
+    "byDimension": {
+      "title": "Sentimiento por dimensión",
+      "chart": "Barras apiladas de sentimiento por dimensión",
+      "bar": "{label}: {positive} positivos, {constructive} constructivos, {negative} negativos"
+    },
+    "trend": {
+      "title": "Evolución entre ciclos",
+      "chart": "Barras apiladas de sentimiento por ciclo"
+    },
+    "themes": {
+      "title": "Temas más frecuentes",
+      "count": "{n, plural, one {# comentario} other {# comentarios}}",
+      "quotesNote": "Citas con nombres, emails y legajos reemplazados."
+    },
+    "indicators": {
+      "title": "Sentimiento vs. retención y compromiso",
+      "empty": "No hay respuestas de retención o compromiso en este ciclo.",
+      "indicator": "Indicador",
+      "answer": "Respuesta",
+      "retention": "Retención",
+      "engagement": "Compromiso"
+    },
+    "comments": {
+      "title": "Comentarios",
+      "table": "Comentarios etiquetados",
+      "person": "Persona",
+      "cycle": "Ciclo",
+      "relationship": "Quién escribe",
+      "text": "Comentario",
+      "label": "Etiqueta",
+      "source": "Origen",
+      "human": "corregido",
+      "confidence": "confianza {value}",
+      "correct": "Corregir",
+      "cancel": "Cancelar",
+      "save": "Guardar corrección",
+      "themes": "Temas (separados por ;)",
+      "reason": "Motivo",
+      "saved": "Corrección guardada.",
+      "relationships": {
+        "self": "Autoevaluación",
+        "manager": "Manager",
+        "peer": "Par",
+        "upward": "Ascendente"
+      }
+    },
+    "run": {
+      "button": "Correr análisis",
+      "running": "Analizando…",
+      "done": "{total} textos: {analyzed} analizados, {cached} ya estaban, {corrected} corregidos a mano.",
+      "provider": "Proveedor: {name}"
+    },
+    "import": {
+      "title": "Importar etiquetas (CSV)",
+      "file": "Archivo de etiquetas",
+      "button": "Importar etiquetas",
+      "done": "{total} filas: {matched} cruzadas, {unmatched} sin cruzar.",
+      "unmatched": "Filas sin cruzar",
+      "row": "Fila",
+      "employee": "Persona",
+      "reason": "Motivo",
+      "reasons": {
+        "missing_fields": "Faltan columnas",
+        "invalid_sentiment": "Sentimiento inválido",
+        "unknown_person": "Persona desconocida",
+        "unknown_cycle": "Ciclo desconocido",
+        "no_match": "Sin comentario que coincida",
+        "ambiguous": "Más de un comentario posible"
+      }
+    },
+    "errors": {
+      "forbidden": "No tenés permiso para esto.",
+      "not_found": "No encontrado.",
+      "validation": "Revisá los datos.",
+      "missing_api_key": "Falta ANTHROPIC_API_KEY para usar Anthropic.",
+      "unknown_provider": "ANALYSIS_PROVIDER debe ser mock o anthropic.",
+      "provider_failed": "El proveedor de análisis falló.",
+      "invalid_csv": "El CSV no tiene las columnas esperadas.",
+      "no_file": "Elegí un archivo.",
+      "unknown": "Algo salió mal.",
+      "not_labeled": "Este comentario todavía no tiene etiqueta."
     }
   }
 }

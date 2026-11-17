@@ -80,6 +80,9 @@ Viven en `.env.local` (ignorado por git); `.env.example` es la plantilla. Con la
 | `BAMBOO_COMPANY_DOMAIN` / `BAMBOO_API_KEY`                   | Solo para `pnpm ingest <entidad> --source bamboo`.                                                                                                                              | sin definir                                                                    |
 | `API_TOKEN`                                                  | Si está definido, `/api/v1` y los CSV piden `Authorization: Bearer <API_TOKEN>`.                                                                                                | vacío: API abierta (desarrollo local)                                          |
 | `UPLOADS_DIR` / `PROFILES_DIR`                               | Carpetas de los archivos subidos en `/imports/upload` y de los perfiles guardados.                                                                                              | `var/uploads` / `var/profiles`                                                 |
+| `ANALYSIS_PROVIDER`                                          | Proveedor del análisis cualitativo: `mock` (heurística local, determinista) o `anthropic` (Claude API).                                                                         | `mock`                                                                         |
+| `ANTHROPIC_API_KEY`                                          | Obligatoria con `ANALYSIS_PROVIDER=anthropic`; sin ella el análisis falla con `missing_api_key`.                                                                                | sin definir                                                                    |
+| `ANALYSIS_MODEL`                                             | Modelo de Claude para el análisis.                                                                                                                                              | `claude-opus-5-5`                                                              |
 
 ## Funcionalidades
 
@@ -149,6 +152,15 @@ Hoy solo se lee el mínimo n (vista de dirección); los umbrales de alerta, los 
 - **Quién ve qué:** People ve todo; un manager, **sus reportes directos** del snapshot del ciclo (o los actuales, con la jerarquía "actual"), no toda la cadena: su equipo (`/dashboards/team`) lista solo a sus reportes directos y no puede abrir el de otro manager; una trayectoria se abre si la persona fue su reporte directo en el snapshot o lo es hoy. Un empleado es redirigido a su propia trayectoria, con solo lo publicado. **Dirección** va directo a `/dashboards/executive` (`/dashboards` la redirige) y no ve nada más.
 - **Vista de dirección (`/dashboards/executive`):** para People y Dirección, agregados sin nombres ni ids. People la ve sin enmascarar; Dirección solo lo que llega al mínimo `aggregation.minGroupSize` (se lee una vez por pedido): las áreas con menos personas se agrupan en "Otros" y, si "Otros" tampoco llega, solo se cuenta cuántas personas quedaron afuera; un ciclo con menos participantes que el mínimo muestra solo el total de participantes.
 - **CSV:** los botones "Exportar CSV" bajan avance, distribución, goals vs rating y brecha self vs manager (`dashboard-*.csv`, ver "Exports CSV").
+
+### Análisis cualitativo (`/insights/qualitative`)
+
+- **Qué hace:** etiqueta cada comentario abierto (respuestas de preguntas de texto de pedidos enviados) con un sentimiento (`positive`, `constructive`, `negative`), una confianza y 1 a 3 temas, por dimensión (fortalezas, mejora, ...). La página muestra barras apiladas por dimensión, la evolución entre ciclos, el ranking de temas con 2-3 citas seudonimizadas, el sentimiento contra las respuestas de retención y compromiso, y la lista de comentarios con filtros. CSV: `insights-sentiment.csv` (conteos, sin texto ni emails).
+- **Correr:** botón "Correr análisis" (People) o `pnpm analysis:run [--cycle <id>] [--provider mock|anthropic]`. Por defecto usa el `mock` (sin red); `ANALYSIS_PROVIDER=anthropic` + `ANTHROPIC_API_KEY` usa Claude, por lotes y con salida JSON estructurada. Antes de enviar, los nombres conocidos (completos, nombre y apellido sueltos, sin importar tildes ni mayúsculas), los emails y los legajos se reemplazan por `[P1]`, `[E1]`, `[N1]`. Caché por hash del texto normalizado + proveedor + versión de prompt: una segunda corrida no reenvía nada. Cada corrida queda en `analysis_run` con conteos, nunca con contenido.
+- **Corrección humana:** People corrige la etiqueta en la tabla; queda en `analysis_correction` (solo se agrega) y en el log de auditoría, y ninguna corrida la pisa.
+- **Importar etiquetas:** formulario en la página o `pnpm analysis:import-labels <archivo.csv>`; formato en [docs/qualitative-labels.md](docs/qualitative-labels.md). Las filas que no cruzan se listan.
+- **Quién ve qué:** People todo; un manager, los comentarios de sus reportes directos al snapshot del ciclo; un empleado, nada (nunca sus propias etiquetas). "Solo agregados" (vista dirección) deja los conteos sin comentarios ni citas.
+- **Pendiente:** la dimensión sale del texto de la pregunta (`dimensionOf`) hasta que exista `question_revision.dimension` (#57); el cruce con retención/compromiso usa `question_revision.role` (`retention`, `engagement`), que el import histórico todavía no asigna.
 
 ### Calidad de datos y API (`/data-quality`, `/api/v1`)
 
@@ -453,15 +465,16 @@ Handlers en `src/modules/api/handlers.ts`, rutas en `src/app/api/v1/**`. Todos l
 
 `GET /api/v1/export/<entidad>.csv` (mismo token y mismos filtros que la API), con "Exportar CSV" en las listas de personas, organigrama, goals, corridas y ciclos. Archivos UTF-8 con BOM (Excel), líneas `CRLF`, comillas RFC 4180 y un apóstrofe delante del texto que una planilla evaluaría como fórmula (`=`, `+`, `-`, `@`). Se arman página por página (streaming): un error antes de la primera fila es un 500 como cualquier otro; si falla una página posterior, el error se registra y el archivo termina con una línea `# EXPORT INTERRUPTED: ...`. Los encabezados salen en el idioma de `?locale=es|en` (por defecto `es`; los botones mandan el idioma de la página). `people.csv` y `GET /api/v1/people` listan a las mismas personas que la pantalla de personas (las que tienen al menos un empleo vigente). **El email no sale por defecto**: `people.csv` solo trae la columna `email` con `?include_email=1` (también `true`; `0` o `false` equivalen a omitirlo), y `q` busca solo por nombre (ver [Datos sensibles](#datos-sensibles)).
 
-| Archivo                  | Una fila por…                    | Filtros                              |
-| ------------------------ | -------------------------------- | ------------------------------------ |
-| `people.csv`             | persona                          | `q`, `active`, `include_email`       |
-| `org.csv`                | fila de puesto vigente en `date` | `date`                               |
-| `goals.csv`              | goal                             | `person_id`, `manager_id`, `status`  |
-| `ingest-runs.csv`        | corrida                          | `source`, `entity`, `status`         |
-| `cycle-participants.csv` | participante de ciclo            | `cycle_id`                           |
-| `requests.csv`           | pedido de evaluación             | `cycle_id`, `relationship`, `status` |
-| `answers.csv`            | evaluador × pregunta (respuesta) | `cycle_id`, `relationship`, `status` |
+| Archivo                  | Una fila por…                     | Filtros                              |
+| ------------------------ | --------------------------------- | ------------------------------------ |
+| `people.csv`             | persona                           | `q`, `active`, `include_email`       |
+| `org.csv`                | fila de puesto vigente en `date`  | `date`                               |
+| `goals.csv`              | goal                              | `person_id`, `manager_id`, `status`  |
+| `ingest-runs.csv`        | corrida                           | `source`, `entity`, `status`         |
+| `cycle-participants.csv` | participante de ciclo             | `cycle_id`                           |
+| `requests.csv`           | pedido de evaluación              | `cycle_id`, `relationship`, `status` |
+| `answers.csv`            | evaluador × pregunta (respuesta)  | `cycle_id`, `relationship`, `status` |
+| `insights-sentiment.csv` | dimensión (conteo de sentimiento) | `cycle`, `department`                |
 
 Cada fila trae los ids internos (uuid) y los de Bamboo (`bamboo_id`, `legajo`, y el del manager o del manager del snapshot), más área, división, puesto y ubicación.
 
