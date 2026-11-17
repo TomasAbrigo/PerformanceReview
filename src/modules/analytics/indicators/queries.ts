@@ -378,6 +378,7 @@ export type IndicatorCycle = {
   name: string;
   periodStart: string;
   periodEnd: string;
+  localizedName?: { es: string; en: string } | null;
 };
 
 /** Launched cycles, the latest period first (the order of the cycle picker). */
@@ -387,14 +388,16 @@ export async function indicatorCycles(db: DbOrTx): Promise<IndicatorCycle[]> {
     name: string;
     period_start: string;
     period_end: string;
+    localized_name: { es: string; en: string } | null;
   }>(sql`
-    select id, name, period_start::text as period_start, period_end::text as period_end
+    select id, name, localized_name, period_start::text as period_start, period_end::text as period_end
     from review_cycle
     where deleted_at is null and status <> 'draft'
     order by period_start desc, period_end desc, created_at desc, id desc`);
   return rows.map((r) => ({
     id: r.id,
     name: r.name,
+    localizedName: r.localized_name,
     periodStart: r.period_start,
     periodEnd: r.period_end,
   }));

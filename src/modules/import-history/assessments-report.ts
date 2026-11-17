@@ -9,7 +9,6 @@ import {
   atNoon,
   columnsOf,
   emptyTally,
-  nameIndexOf,
   recordRow,
   resolveRow,
 } from "./assessment";
@@ -23,7 +22,6 @@ import {
   upsertRequest,
 } from "./cycles";
 import { parseReportDate } from "./dates";
-import { matchName } from "./names";
 import { customQuestionColumns, type QuestionColumn } from "./questions";
 
 const cell = z
@@ -48,8 +46,8 @@ export const stagedReportSchema = z
       work_email: cell,
       employee_name: cell,
       period_start: z.unknown(),
-      self_completed_on: z.unknown(),
-      manager_completed_on: z.unknown(),
+      self_completed_on: z.unknown().optional(),
+      manager_completed_on: z.unknown().optional(),
       manager_name: cell,
     }),
     raw: z.record(z.string(), z.unknown()),
@@ -133,17 +131,20 @@ export async function upsertReportAssessment(
 
   const tally = emptyTally();
   const rejects: string[] = [];
-  const { revieweeId, issue } = await resolveRow(
+  // The manager's name: matched when unique; matching nobody falls back to
+  // the snapshot manager; matching several people goes to the queue.
+  const { revieweeId, reviewerId, reviewerFailed, issue } = await resolveRow(
     tx,
     ctx,
     "assessment",
     sourceId,
-    { reviewee: fields.employee_name, reviewer: null },
+    { reviewee: fields.employee_name, reviewer: fields.manager_name },
     {
       ids: {
         bamboo_id: fields.employee_bamboo_id,
         work_email: fields.work_email,
       },
+      reviewerOptional: true,
     },
   );
 
@@ -151,15 +152,9 @@ export async function upsertReportAssessment(
   if (revieweeId) {
     const participant = await ensureParticipant(tx, cycle, revieweeId);
     if (participant.created) tally.participantsCreated++;
-    let named: string | null = null;
-    if (fields.manager_name) {
-      const match = matchName(
-        await nameIndexOf(tx, ctx.cache),
-        fields.manager_name,
-      );
-      named = "personId" in match ? match.personId : null;
-    }
-    const managerId = named ?? participant.snapManagerPersonId;
+    const managerId = reviewerFailed
+      ? null
+      : (reviewerId ?? participant.snapManagerPersonId);
     const sides = [
       {
         side: "self" as const,
@@ -177,16 +172,14 @@ export async function upsertReportAssessment(
       // An empty side (no date, no answer) is not a review: nothing written.
       if (!date && answeredCells(sideColumns, raw) === 0) continue;
       if (!reviewer) {
+        // In the identity queue already (an ambiguous name): no reject.
+        if (reviewerFailed) continue;
         rejects.push(
           `The manager review has no reviewer: "${fields.manager_name ?? ""}" matches nobody and the person had no manager at ${cycle.periodStart}`,
         );
         continue;
       }
-      const submittedOn =
-        date ??
-        fields.self_completed_on ??
-        fields.manager_completed_on ??
-        cycle.periodStart;
+      // Answers without a completion date: a draft, never a made-up date.
       const request = await upsertRequest(tx, {
         cycleId: cycle.id,
         participantId: participant.id,
@@ -195,14 +188,20 @@ export async function upsertReportAssessment(
         sourceId: `${sourceId}#${side}`,
         hash: ctx.hash,
         runId: ctx.runId,
-        submittedAt: atNoon(submittedOn),
+        submittedAt: date ? atNoon(date) : null,
+        draft: !date,
         declinedAt: null,
         csvReviewerName: side === "manager" ? fields.manager_name : null,
         reviewerMismatch:
           side === "manager" && reviewer !== participant.snapManagerPersonId,
       });
       results.push(request.result);
-      if (request.result === "superseded") continue;
+      if (request.result === "superseded") {
+        rejects.push(
+          `A later assessment of ${fields.employee_bamboo_id ?? fields.work_email ?? sourceId} in "${cycle.name}" replaces this ${side} review (one per cycle)`,
+        );
+        continue;
+      }
       if (request.result === "unchanged") {
         tally.requestsUnchanged++;
         tally.answersUnchanged += answeredCells(sideColumns, raw);

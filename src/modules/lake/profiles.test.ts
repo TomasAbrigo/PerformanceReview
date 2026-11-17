@@ -579,11 +579,9 @@ describe("bamboo report profiles against the real fixtures", () => {
     },
   );
 
-  // The grouped status export is keyed by FileSourceAdapter (its own test).
+  // The real-report formats are keyed by FileSourceAdapter (its own tests).
   it.each(
-    reportProfiles
-      .filter((p) => p.format !== "assessment_status")
-      .map((p) => [p.name, p] as const),
+    reportProfiles.filter((p) => !p.format).map((p) => [p.name, p] as const),
   )(
     "%s keys every row of the real report to a distinct source id",
     async (_name, profile) => {

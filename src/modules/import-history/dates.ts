@@ -35,3 +35,25 @@ export function parseReportDate(
   if (!order) return null;
   return order === "mdy" ? valid(y, a, b) : valid(y, b, a);
 }
+
+const DATE_TOKEN = String.raw`\d{1,4}[/.-]\d{1,2}[/.-]\d{1,4}`;
+const PERIOD = new RegExp(
+  `^\\s*(${DATE_TOKEN})\\s*[-–—]\\s*(${DATE_TOKEN})\\s*$`,
+);
+
+/**
+ * A review period as Assessment Progress writes it: "03/29/2024 -
+ * 09/28/2024" (also an en dash, no spaces, ISO dates). Both ends as ISO
+ * dates, or null when either is not one.
+ */
+export function parseReportPeriod(
+  value: unknown,
+  format?: DateFormat,
+): { start: string; end: string } | null {
+  if (value === null || value === undefined) return null;
+  const match = PERIOD.exec(String(value));
+  if (!match) return null;
+  const start = parseReportDate(match[1], format);
+  const end = parseReportDate(match[2], format);
+  return start && end ? { start, end } : null;
+}

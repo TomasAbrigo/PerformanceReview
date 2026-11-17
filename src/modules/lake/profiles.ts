@@ -598,7 +598,9 @@ export const builtinProfiles: SourceProfile[] = [
   {
     name: "bamboo-assessments-report",
     table: "assessments-report",
-    keyColumns: ["EEID", "Review Period Start"],
+    // The key is EEID (else work email, else name) + period start, built in
+    // FileSourceAdapter: a row without an EEID is still imported.
+    keyColumns: ["Review Period Start"],
     entity: "assessment",
     format: "assessments_report",
     dateFormat: "mdy",

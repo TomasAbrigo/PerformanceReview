@@ -1,3 +1,4 @@
+import { localizeCycles } from "@/modules/review-core/cycle-name";
 import { hasLocale } from "next-intl";
 import { setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
@@ -19,7 +20,12 @@ async function HistoryData({
   await connection();
   const result = await getHistoryImportResult(db, runId);
   if (!result) notFound();
-  return <HistoryResult result={result} resume={resumeImportRunAction} />;
+  return (
+    <HistoryResult
+      result={{ ...result, cycles: localizeCycles(result.cycles, locale) }}
+      resume={resumeImportRunAction}
+    />
+  );
 }
 
 export default function HistoryImportPage(

@@ -7,6 +7,7 @@ import {
   answerQualityIssue,
   assessmentProgress,
   identityMatchIssue,
+  ingestRun,
   questionRevision,
   reviewCycle,
   reviewRequest,
@@ -19,6 +20,7 @@ import {
   resetDb,
   seedSmallCompany,
   type SeededCompany,
+  writeCsv,
 } from "./test-support";
 
 const REPORT = path.join(REPORTS, "assessments-report.csv");
@@ -186,5 +188,60 @@ describe("Assessment Progress as exported, grouped (#83)", () => {
     expect(again.counts.inserted).toBe(0);
     expect(again.counts.updated).toBe(0);
     expect(await db.$count(identityMatchIssue)).toBeGreaterThan(0);
+  });
+});
+
+describe("edge rows of the raw report (#83)", () => {
+  const HEADER =
+    "EEID,Review Period Start,Work Email,Employee - What do I do well?,Manager - What does [Employee] do well?,Self Assessment Completed Date,Manager Assessment Completed Date,Manager At Time Of Assessment";
+
+  it("drafts answered sides without a date, queues ambiguous managers, explains superseded rows", async () => {
+    const [someone, other] = seeded.company.employees;
+    const twin = seeded.company.identity.duplicateNames[0];
+    expect(twin).toBeDefined();
+    const file = await writeCsv([
+      HEADER,
+      // Answers, no completion date: a draft.
+      `${someone.id},01/25/2023,,Ok,,,,`,
+      // An ambiguous manager name: the identity queue, no manager review.
+      `${other.id},01/25/2023,,Ok,Bien,01/27/2023,01/28/2023,${twin.name}`,
+      // The same person again by email, an older self date: superseded.
+      `,01/25/2023,${other.workEmail},Viejo,,01/26/2023,,`,
+    ]);
+    const run = await importReport(file, "bamboo-assessments-report");
+
+    const requests = await db
+      .select()
+      .from(reviewRequest)
+      .innerJoin(reviewCycle, eq(reviewRequest.cycleId, reviewCycle.id))
+      .where(eq(reviewCycle.periodStart, "2023-01-25"));
+
+    const draft = requests.find(
+      (r) =>
+        r.review_request.reviewerPersonId === seeded.personOf.get(someone.id),
+    )!;
+    expect(draft.review_request).toMatchObject({
+      status: "draft",
+      submittedAt: null,
+    });
+    expect(
+      requests.filter((r) => r.review_request.relationship === "manager"),
+    ).toHaveLength(0);
+
+    const [issue] = await db
+      .select()
+      .from(identityMatchIssue)
+      .where(eq(identityMatchIssue.ingestRunId, run.runId));
+    expect(issue.payload).toMatchObject({
+      failedRole: "manager",
+      failedName: twin.name,
+    });
+    expect(issue.candidates.length).toBeGreaterThan(1);
+
+    const [stored] = await db
+      .select({ rejects: ingestRun.rejects })
+      .from(ingestRun)
+      .where(eq(ingestRun.id, run.runId));
+    expect(JSON.stringify(stored.rejects)).toMatch(/replaces this self review/);
   });
 });

@@ -6,6 +6,10 @@ import type {
   SourceAdapter,
 } from "@/modules/ingest/types";
 import { payloadHash } from "@/modules/ingest/canonical";
+import {
+  parseReportDate,
+  parseReportPeriod,
+} from "@/modules/import-history/dates";
 import { applyProfile, readOptionsFor, type SourceProfile } from "./profiles";
 import type { JsonValue, LakeAdapter, LakeRow, ReadOptions } from "./types";
 
@@ -130,6 +134,16 @@ export class FileSourceAdapter implements SourceAdapter<IngestEntity> {
           row,
           () => `row:${payloadHash({ file: fileKey, row: index })}`,
         );
+        if (profile.format === "assessments_report") {
+          const key = rawReportKey(profile, record.fields);
+          if (!key) {
+            const reason = `Profile "${profile.name}": the row has no EEID, work email or name (${describeKey(profile, row)})`;
+            if (!ctx.onReject) throw new Error(reason);
+            ctx.onReject({ sourceId: null, reason });
+            continue;
+          }
+          record.sourceId = key;
+        }
         yield {
           sourceId: record.sourceId,
           payload: {
@@ -232,10 +246,11 @@ async function* groupedStatusRecords(
         if (canonical) fields[canonical] = value;
         else extra[column] = value;
       }
+      const parsed = parseReportPeriod(period, profile.dateFormat);
       yield {
         sourceId: JSON.stringify([
           group.employeeNumber ?? group.name,
-          period.split(/\s+-\s+/)[0],
+          parsed?.start ?? period,
         ]),
         payload: {
           format: profile.format,
@@ -250,4 +265,26 @@ async function* groupedStatusRecords(
       };
     }
   }
+}
+
+/**
+ * The key of a raw assessments report row: who (EEID, else the work email,
+ * else the name) and the period start as an ISO date. Rows without an EEID
+ * still get one, so the email/name fallback of the import can run.
+ */
+function rawReportKey(
+  profile: SourceProfile,
+  fields: Record<string, JsonValue>,
+): string | null {
+  const text = (v: JsonValue | undefined) => textOf(v);
+  const eeid = text(fields.employee_bamboo_id);
+  const email = text(fields.work_email)?.toLowerCase();
+  const name = text(fields.employee_name);
+  const who = eeid ?? (email ? `email:${email}` : name ? `name:${name}` : null);
+  if (!who) return null;
+  const start = text(fields.period_start);
+  return JSON.stringify([
+    who,
+    parseReportDate(start, profile.dateFormat) ?? start ?? "",
+  ]);
 }

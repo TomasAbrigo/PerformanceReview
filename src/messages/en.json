@@ -1012,7 +1012,8 @@
         "unknown_proposal": "That cycle was not one of the proposed ones.",
         "unknown": "The import could not be resumed."
       }
-    }
+    },
+    "periodCycleName": "Semi-annual review {start} – {end}"
   },
   "Dashboards": {
     "nav": "Dashboards",

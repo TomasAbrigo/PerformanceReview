@@ -1,3 +1,4 @@
+import { localizeCycles } from "@/modules/review-core/cycle-name";
 import { hasLocale } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
@@ -47,7 +48,7 @@ async function GoalsInsights({
   // Direction never sees a person: its grouping is the area or the manager.
   const groupBy: GoalGroupBy =
     aggregates && p.groupBy === "person" ? "department" : p.groupBy;
-  const cycles = (await listCycles(db))
+  const cycles = localizeCycles(await listCycles(db), locale)
     .filter((c) => c.status !== "draft")
     .sort(
       (a, b) =>

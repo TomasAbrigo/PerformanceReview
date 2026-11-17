@@ -169,6 +169,13 @@
       "when": 1794948123057,
       "tag": "0023_bamboo_reports",
       "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "7",
+      "when": 1794958109412,
+      "tag": "0024_cycle_localized_name",
+      "breakpoints": true
     }
   ]
 }

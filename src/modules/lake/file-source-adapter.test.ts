@@ -304,7 +304,7 @@ describe("FileSourceAdapter: Bamboo's real report shapes (#83)", () => {
       self_status: "Completado",
       manager_status: "Completed by Silvana Molina",
     });
-    expect(JSON.parse(first.sourceId)).toEqual(["10033", "04/15/2024"]);
+    expect(JSON.parse(first.sourceId)).toEqual(["10033", "2024-04-15"]);
   });
 
   it("hands raw report rows over with their format and custom question pairs", async () => {
@@ -314,6 +314,8 @@ describe("FileSourceAdapter: Bamboo's real report shapes (#83)", () => {
     const { records, rejected } = await collect(adapter);
 
     expect(rejected).toEqual([]);
+    expect(new Set(records.map((r) => r.sourceId)).size).toBe(records.length);
+    expect(JSON.parse(records[0].sourceId)[1]).toMatch(/^\d{4}-\d{2}-\d{2}$/);
     const payload = records[0].payload as {
       format: string;
       fields: Record<string, unknown>;
@@ -343,5 +345,31 @@ describe("splitGroupHeader", () => {
       name: "Sin Número",
       employeeNumber: null,
     });
+  });
+});
+
+describe("raw report keys without an EEID (#83)", () => {
+  it("keys the row by work email, else name, instead of rejecting it", async () => {
+    const { mkdtemp, writeFile } = await import("node:fs/promises");
+    const { tmpdir } = await import("node:os");
+    const dir = await mkdtemp(resolve(tmpdir(), "raw-key-"));
+    await writeFile(
+      resolve(dir, "assessments-report.csv"),
+      [
+        "EEID,Review Period Start,Work Email,Employee Name,Self Assessment Completed Date,Manager Assessment Completed Date,Manager At Time Of Assessment",
+        ",03/29/2024,Ana@Example.invalid,,,,",
+        ",03/29/2024,,Bruno Paz,,,",
+        ",03/29/2024,,,,,",
+      ].join("\n") + "\n",
+    );
+    const profile = profileNamed("bamboo-assessments-report");
+    const { records, rejected } = await collect(
+      new FileSourceAdapter(profile, await open(dir)),
+    );
+    expect(records.map((r) => JSON.parse(r.sourceId))).toEqual([
+      ["email:ana@example.invalid", "2024-03-29"],
+      ["name:Bruno Paz", "2024-03-29"],
+    ]);
+    expect(rejected).toHaveLength(1);
   });
 });

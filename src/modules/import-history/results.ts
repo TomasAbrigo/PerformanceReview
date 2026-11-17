@@ -64,6 +64,7 @@ export async function getHistoryImportResult(
     .select({
       cycleId: reviewCycle.id,
       name: reviewCycle.name,
+      localizedName: reviewCycle.localizedName,
       periodStart: reviewCycle.periodStart,
       periodEnd: reviewCycle.periodEnd,
       rows: sql<number>`count(*)::int`,

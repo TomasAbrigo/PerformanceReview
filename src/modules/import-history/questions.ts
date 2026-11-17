@@ -177,6 +177,16 @@ function fromPattern(header: string): Found | null {
   };
 }
 
+/** FNV-1a of a text, 8 hex digits (stable, no crypto: runs in the browser too). */
+export function shortHash(text: string): string {
+  let h = 0x811c9dc5;
+  for (const ch of text) {
+    h ^= ch.codePointAt(0)!;
+    h = Math.imul(h, 0x01000193) >>> 0;
+  }
+  return h.toString(16).padStart(8, "0");
+}
+
 /** "The company direction..." -> "the_company_direction" (a stable code). */
 export const slugOf = (text: string, max = 40) =>
   foldText(text)
@@ -265,7 +275,8 @@ export function customQuestionColumns(
     const cell = row[pair.questionColumn];
     const text = cell === null || cell === undefined ? "" : String(cell).trim();
     if (!text) continue;
-    const slug = slugOf(text) || `q${pair.n}`;
+    // Slug for reading, hash of the whole text so long texts never collide.
+    const slug = `${slugOf(text) || `q${pair.n}`}_${shortHash(foldText(text))}`;
     columns.push({
       key: `${pair.side}:custom:${pair.n}:${slug}`,
       header: pair.answerColumn,

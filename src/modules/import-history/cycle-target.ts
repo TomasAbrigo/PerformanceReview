@@ -5,8 +5,10 @@ import type { Deferral, HandlerContext } from "@/modules/ingest/handlers";
 import { SOURCE, upsertImportedCycle } from "./cycles";
 import {
   periodCycleName,
+  periodCycleNames,
   periodEndFor,
   periodSourceId,
+  legacySemesterConfig,
   semesterConfig,
   semesterOf,
   semesterPeriod,
@@ -37,7 +39,21 @@ function neighbour(date: string, semester: Semester, cfg: SemesterConfig) {
 
 export type CycleTarget = { cycle: ReviewCycle } | { deferred: Deferral };
 
-export async function cachedConfig(
+/** Legacy semester inference (calendar halves), once per run. */
+async function cachedConfig(
+  tx: DbOrTx,
+  cache: Map<string, unknown>,
+): Promise<SemesterConfig> {
+  let cfg = cache.get("legacySemesterConfig") as SemesterConfig | undefined;
+  if (!cfg) {
+    cfg = await legacySemesterConfig(tx);
+    cache.set("legacySemesterConfig", cfg);
+  }
+  return cfg;
+}
+
+/** Review periods of the real reports (settings `semester.*`), once per run. */
+async function cachedPeriodConfig(
   tx: DbOrTx,
   cache: Map<string, unknown>,
 ): Promise<SemesterConfig> {
@@ -198,6 +214,8 @@ export async function cycleForPeriod(
   tx: DbOrTx,
   ctx: HandlerContext,
   periodStart: string,
+  /** The end the report gives (Assessment Progress), else inferred. */
+  givenEnd: string | null = null,
 ): Promise<ReviewCycle> {
   const sourceId = periodSourceId(periodStart);
   const key = `cycle:${sourceId}`;
@@ -213,12 +231,15 @@ export async function cycleForPeriod(
       ),
     );
   if (!cycle) {
-    const cfg = await cachedConfig(tx, ctx.cache);
-    const periodEnd = periodEndFor(periodStart, cfg);
+    const periodEnd =
+      givenEnd && givenEnd >= periodStart
+        ? givenEnd
+        : periodEndFor(periodStart, await cachedPeriodConfig(tx, ctx.cache));
     [cycle] = await tx
       .insert(reviewCycle)
       .values({
         name: periodCycleName(periodStart, periodEnd),
+        localizedName: periodCycleNames(periodStart, periodEnd),
         periodStart,
         periodEnd,
         snapshotDate: periodStart,

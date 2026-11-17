@@ -347,15 +347,31 @@ describe("Bamboo raw report questions (#83)", () => {
     });
     expect(found.map((c) => [c.key, c.header, c.dimension])).toEqual([
       [
-        "self:custom:1:que_necesitas_de_tu_lider",
+        expect.stringMatching(
+          /^self:custom:1:que_necesitas_de_tu_lider_[0-9a-f]{8}$/,
+        ),
         "Employee - Custom Answer 1",
-        "custom_que_necesitas_de_tu_lider",
+        expect.stringMatching(/^custom_que_necesitas_de_tu_lider_[0-9a-f]{8}$/),
       ],
       [
-        "manager:custom:2:que_rol_podria_asumir",
+        expect.stringMatching(
+          /^manager:custom:2:que_rol_podria_asumir_[0-9a-f]{8}$/,
+        ),
         "Manager - Custom Answer 2",
-        "custom_que_rol_podria_asumir",
+        expect.stringMatching(/^custom_que_rol_podria_asumir_[0-9a-f]{8}$/),
       ],
     ]);
+  });
+
+  it("tells apart long texts that share their first 40 characters", () => {
+    const pairs = getBuiltinProfile(
+      "bamboo-assessments-report",
+    )!.customQuestions!;
+    const long = "¿Qué podrías mejorar en la comunicación con tu equipo y ";
+    const keyOf = (end: string) =>
+      customQuestionColumns(pairs, {
+        "Employee - Custom Question 1": long + end,
+      })[0].key;
+    expect(keyOf("con el cliente?")).not.toBe(keyOf("con tu líder?"));
   });
 });

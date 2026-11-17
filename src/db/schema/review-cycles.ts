@@ -37,6 +37,11 @@ export const reviewCycle = pgTable(
   {
     id: uuid("id").primaryKey().defaultRandom(),
     name: text("name").notNull(),
+    /**
+     * The name per language, when the app generated it (imported review
+     * periods, #83); `name` is then its Spanish text, for search and sorting.
+     */
+    localizedName: jsonb("localized_name").$type<LocalizedText>(),
     description: text("description"),
     periodStart: date("period_start").notNull(),
     periodEnd: date("period_end").notNull(),

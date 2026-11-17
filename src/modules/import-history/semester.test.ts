@@ -31,6 +31,13 @@ describe("defaults and review periods (#83)", () => {
     expect(periodEndFor("2024-01-10", real)).toBe("2024-03-28");
   });
 
+  it("puts a start just before a cutoff in the semester that cutoff opens", () => {
+    const real = DEFAULT_SEMESTER_CONFIG;
+    // 4 days before 29/3 (within the 15-day margin): the H1 period.
+    expect(periodEndFor("2024-03-25", real)).toBe("2024-09-28");
+    expect(periodEndFor("2024-03-10", real)).toBe("2024-03-28");
+  });
+
   it("names the cycle by its period", () => {
     expect(periodCycleName("2024-03-29", "2024-09-28")).toBe(
       "Evaluación semestral 2024-03-29 – 2024-09-28",

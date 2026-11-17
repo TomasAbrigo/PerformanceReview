@@ -1,3 +1,4 @@
+import { localizeCycles } from "@/modules/review-core/cycle-name";
 import { hasLocale } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
@@ -32,7 +33,7 @@ async function Indicators({
   const t = await getTranslations("Indicators");
   const scope = insightsScope(actor);
   if (scope.kind === "none") return <p>{t("forbidden")}</p>;
-  const cycles = await indicatorCycles(db);
+  const cycles = localizeCycles(await indicatorCycles(db), locale);
   if (!cycles.length) return <p>{t("noCycles")}</p>;
   const p = parseIndicatorParams(await searchParams);
   const cycle = cycles.find((c) => c.id === p.cycle) ?? cycles[0];

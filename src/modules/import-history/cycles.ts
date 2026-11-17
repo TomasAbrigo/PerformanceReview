@@ -259,6 +259,8 @@ export type RequestInput = {
   declinedAt: Date | null;
   csvReviewerName: string | null;
   reviewerMismatch: boolean;
+  /** Answered but never completed (no completion date): a draft. */
+  draft?: boolean;
 };
 
 /**
@@ -296,9 +298,13 @@ export async function upsertRequest(
     participantId: input.participantId,
     reviewerPersonId: input.reviewerPersonId,
     relationship: input.relationship,
-    status: input.submittedAt ? ("submitted" as const) : ("declined" as const),
+    status: input.draft
+      ? ("draft" as const)
+      : input.submittedAt
+        ? ("submitted" as const)
+        : ("declined" as const),
     submittedAt: input.submittedAt,
-    declinedAt: input.submittedAt ? null : input.declinedAt,
+    declinedAt: input.submittedAt || input.draft ? null : input.declinedAt,
     sourceSystem: SOURCE,
     sourceId: input.sourceId,
     payloadHash: input.hash,

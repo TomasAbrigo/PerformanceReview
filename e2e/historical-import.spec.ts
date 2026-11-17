@@ -91,7 +91,7 @@ test("a row whose semester is ambiguous waits for a cycle, and the run finishes 
     file,
     [
       "Employee Name,Manager,Department,Review Cycle,Assessment Date,Employee Q3: What are some things I do well?",
-      `${fullName(assessedFirstCycle)},,${assessedFirstCycle.department},,2024-03-25,Ok`,
+      `${fullName(assessedFirstCycle)},,${assessedFirstCycle.department},,2023-12-28,Ok`,
     ].join("\n") + "\n",
   );
   await importFile(page, file, "bamboo-employee-performance");
@@ -103,8 +103,8 @@ test("a row whose semester is ambiguous waits for a cycle, and the run finishes 
     .getByRole("radio", {
       name: decision.create
         .replace("{name}", "2023-H2")
-        .replace("{start}", "2023-09-29")
-        .replace("{end}", "2024-03-28"),
+        .replace("{start}", "2023-07-01")
+        .replace("{end}", "2023-12-31"),
     })
     .check();
   await page.getByRole("button", { name: decision.submit }).click();

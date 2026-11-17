@@ -1012,7 +1012,8 @@
         "unknown_proposal": "Ese ciclo no estaba entre los propuestos.",
         "unknown": "No se pudo reanudar la importación."
       }
-    }
+    },
+    "periodCycleName": "Evaluación semestral {start} – {end}"
   },
   "Dashboards": {
     "nav": "Dashboards",

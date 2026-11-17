@@ -194,7 +194,10 @@ export async function resolveRow(
      * name then only proposes candidates (the row goes to the queue).
      */
     ids?: RowIds;
-    /** A reviewer name that matches nobody is dropped, not an issue. */
+    /**
+     * A reviewer name that matches nobody is dropped, not an issue (the
+     * caller falls back); one that matches several people still is.
+     */
     reviewerOptional?: boolean;
   } = {},
 ) {
@@ -229,7 +232,10 @@ export async function resolveRow(
     ? lookup(reviewerRole, names.reviewer)
     : null;
   const reviewer =
-    options.reviewerOptional && reviewerMatch && !("personId" in reviewerMatch)
+    options.reviewerOptional &&
+    reviewerMatch &&
+    !("personId" in reviewerMatch) &&
+    reviewerMatch.reason === "no_match"
       ? null
       : reviewerMatch;
   const failed: (NameMatch & ReportIssuePayload) | null = !(
@@ -278,6 +284,8 @@ export async function resolveRow(
   return {
     revieweeId: "personId" in reviewee ? reviewee.personId : null,
     reviewerId: reviewer && "personId" in reviewer ? reviewer.personId : null,
+    /** The reviewer's name is in the queue (ambiguous or unmatched). */
+    reviewerFailed: reviewer !== null && !("personId" in reviewer),
     issue,
   };
 }

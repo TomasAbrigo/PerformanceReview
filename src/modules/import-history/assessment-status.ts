@@ -6,7 +6,7 @@ import type { HandlerContext, HandlerOutcome } from "@/modules/ingest/handlers";
 import { emptyTally, recordRow, resolveRow } from "./assessment";
 import { cycleForPeriod } from "./cycle-target";
 import { ensureParticipant, SOURCE } from "./cycles";
-import { parseReportDate } from "./dates";
+import { parseReportPeriod } from "./dates";
 
 const text = z
   .union([z.string(), z.number(), z.boolean(), z.null()])
@@ -42,9 +42,6 @@ export function parseStatusCell(
   return null;
 }
 
-/** "03/29/2024 - 09/28/2024" -> its two dates. */
-const PERIOD = /^\s*(\S+)\s*[-–]\s*(\S+)\s*$/;
-
 /**
  * One period row of Bamboo's Assessment Progress export as grouped by
  * person (profile `bamboo-assessment-status`; FileSourceAdapter has joined it
@@ -65,9 +62,8 @@ export const stagedStatusSchema = z
   })
   .transform((row, ctx) => {
     const f = row.fields;
-    const period = PERIOD.exec(f.period);
-    const start = period && parseReportDate(period[1], row.dateFormat);
-    if (!start) {
+    const period = parseReportPeriod(f.period, row.dateFormat);
+    if (!period) {
       ctx.addIssue({
         code: "custom",
         message: `Period "${f.period}" is not "MM/DD/YYYY - MM/DD/YYYY"`,
@@ -92,7 +88,8 @@ export const stagedStatusSchema = z
       ...row,
       fields: {
         ...f,
-        period_start: start,
+        period_start: period.start,
+        period_end: period.end,
         self_status: self!.status,
         manager_status: manager!.status,
         manager_name: manager!.by,
@@ -114,7 +111,12 @@ export async function upsertStatus(
   ctx: HandlerContext,
 ): Promise<HandlerOutcome> {
   const { fields } = staged;
-  const cycle = await cycleForPeriod(tx, ctx, fields.period_start);
+  const cycle = await cycleForPeriod(
+    tx,
+    ctx,
+    fields.period_start,
+    fields.period_end,
+  );
   const tally = emptyTally();
   const { revieweeId, reviewerId, issue } = await resolveRow(
     tx,
