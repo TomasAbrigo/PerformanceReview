@@ -8,7 +8,7 @@ import {
   hasUniqueName,
   isActive,
 } from "./seed-data";
-import { actAs } from "./act-as";
+import { actAs, actAsRole } from "./act-as";
 
 // Runs after the historical import (project "insights" depends on
 // "chromium", where e2e/historical-import.spec.ts imports the Employee
@@ -92,7 +92,7 @@ test("dashboards of an imported cycle: progress, team as-of/current, trajectory 
   ).toBeVisible();
 });
 
-test("direction only reads the leadership view; managers without a person and employees get no dashboard", async ({
+test("direction only reads the leadership view; employees get no dashboard", async ({
   page,
 }) => {
   await page.goto("/es/cycles");
@@ -122,9 +122,7 @@ test("direction only reads the leadership view; managers without a person and em
   ).toBeVisible();
 
   // An employee has no dashboard (and no executive view either).
-  await bar.getByLabel("Rol").selectOption({ label: "Empleado" });
-  await bar.getByRole("button", { name: "Aplicar" }).click();
-  await expect(bar.getByText("Actuando como: Sin persona")).toBeVisible();
+  await actAsRole(page, "Empleado", "Sin persona");
   await page.goto(`/es/dashboards/executive?cycle=${cycleId}`);
   await expect(
     page.getByText("No tenés acceso a estos dashboards."),

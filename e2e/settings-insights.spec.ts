@@ -1,13 +1,5 @@
-import { expect, type Page, test } from "@playwright/test";
-
-// Acts as a role without a person (enough for the People-only gates); waits
-// for the bar to say so, i.e. for the cookie to be set.
-async function actAsRole(page: Page, role: string, shown: string) {
-  const bar = page.getByRole("form", { name: "Actuar como" });
-  await bar.getByLabel("Rol").selectOption({ label: role });
-  await bar.getByRole("button", { name: "Aplicar" }).click();
-  await expect(bar.getByText(/Actuando como:/)).toContainText(shown);
-}
+import { expect, test } from "@playwright/test";
+import { actAsRole } from "./act-as";
 
 test("People edit the insights settings, the server validates, and the change sticks", async ({
   page,
