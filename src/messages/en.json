@@ -1345,6 +1345,94 @@
       "not_labeled": "This comment has no label yet."
     }
   },
+  "Arturia": {
+    "title": "Performance report",
+    "generatedAt": "Generated",
+    "period": "Period",
+    "anonymized": "Anonymized version",
+    "named": "Version with personal data (People internal use)",
+    "minGroupSize": "Minimum group",
+    "view": "View",
+    "viewAll": "All",
+    "viewQuantitative": "Quantitative",
+    "viewQualitative": "Qualitative",
+    "others": "Others",
+    "team": "Team",
+    "noData": "No data",
+    "notAvailable": "Not available in this export version",
+    "hiddenTotal": "Total hidden so small groups cannot be derived by difference",
+    "suppressed": "People left out of the breakdown (groups under the minimum)",
+    "executive": {
+      "title": "Executive summary",
+      "participants": "Participants",
+      "distribution": "Rating distribution",
+      "byDepartment": "By department",
+      "mean": "Mean"
+    },
+    "completion": {
+      "title": "Completion",
+      "byRelationship": "By review type",
+      "byDepartment": "By department",
+      "byManager": "By team",
+      "submitted": "Submitted",
+      "draft": "Draft",
+      "declined": "Declined",
+      "pending": "Pending",
+      "total": "Total"
+    },
+    "indicators": {
+      "title": "Retention and engagement indicators",
+      "distribution": "Distribution",
+      "riskMatrix": "Risk matrix (retention × engagement)",
+      "alerts": "Alerts",
+      "retention": "Retention",
+      "engagement": "Engagement",
+      "risk": "Risk",
+      "drop": "Drop",
+      "bands": {
+        "low": "Low",
+        "mid": "Mid",
+        "high": "High"
+      }
+    },
+    "qualitative": {
+      "title": "Qualitative analysis",
+      "byDimension": "Sentiment by dimension",
+      "trend": "Sentiment trend",
+      "themes": "Top themes",
+      "quotes": "Quotes (pseudonymized)",
+      "sentiments": {
+        "positive": "Positive",
+        "constructive": "Constructive",
+        "negative": "Negative"
+      }
+    },
+    "goals": {
+      "title": "Goals",
+      "participantsWithGoals": "People with goals",
+      "goals": "Goals",
+      "completed": "Completed",
+      "avgProgress": "Average progress"
+    },
+    "people": {
+      "title": "People",
+      "name": "Name",
+      "email": "Email",
+      "department": "Department",
+      "manager": "Manager",
+      "self": "Self review",
+      "managerReview": "Manager review",
+      "retention": "Retention",
+      "engagement": "Engagement",
+      "positiveShare": "Positive comments"
+    },
+    "relationships": {
+      "self": "Self review",
+      "manager": "Manager",
+      "peer": "Peers",
+      "upward": "Upward"
+    }
+  },
   "Completion": {
     "nav": "Completion",
     "title": "Assessment completion",
