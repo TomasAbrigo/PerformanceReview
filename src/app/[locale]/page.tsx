@@ -29,6 +29,7 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
   const tDataQuality = await getTranslations("DataQuality");
   const tUpload = await getTranslations("Upload");
   const tDashboards = await getTranslations("Dashboards");
+  const tCompletion = await getTranslations("Completion");
 
   return (
     <main className="flex flex-1 items-center justify-center p-8">
@@ -56,6 +57,9 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
             </Link>
             <Link href="/dashboards" className="underline">
               {tDashboards("nav")}
+            </Link>
+            <Link href="/insights/completion" className="underline">
+              {tCompletion("nav")}
             </Link>
             <Link href="/imports/runs" className="underline">
               {tImports("nav")}

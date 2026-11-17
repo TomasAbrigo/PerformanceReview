@@ -17,9 +17,6 @@ import {
 // The rows (and the numbers hand-computed from them) are in ./test-support.
 let ana: string;
 let beto: string;
-let carla: string;
-let dani: string;
-let emi: string;
 let marta: string;
 let nico: string;
 let c1: string;
@@ -35,7 +32,7 @@ const as = (
 ): ActorContext => ({ personId, role });
 
 beforeAll(async () => {
-  ({ marta, nico, ana, beto, carla, dani, emi, c0, c1, c2, draftCycle } =
+  ({ marta, nico, ana, beto, c0, c1, c2, draftCycle } =
     await buildCompletionScenario());
 });
 

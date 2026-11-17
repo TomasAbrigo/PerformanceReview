@@ -9,10 +9,7 @@ import {
   scopedCtes,
 } from "@/modules/analytics/dashboards/scope";
 import type { DashboardFilters } from "@/modules/analytics/dashboards/types";
-import {
-  type GroupCell,
-  foldSmallGroups,
-} from "@/modules/insights/aggregation";
+import { foldSmallGroups } from "@/modules/insights/aggregation";
 import { insightsScope } from "@/modules/insights/authz";
 import { ReviewError } from "@/modules/review-core/review-errors";
 import { getSetting } from "@/modules/settings/service";
