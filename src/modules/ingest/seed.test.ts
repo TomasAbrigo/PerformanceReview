@@ -3,17 +3,35 @@ import { parseSeedArgs } from "./seed";
 
 describe("parseSeedArgs", () => {
   it("defaults to the small size without reset", () => {
-    expect(parseSeedArgs([])).toEqual({ size: "small", reset: false });
+    expect(parseSeedArgs([])).toEqual({
+      size: "small",
+      reset: false,
+      reports: true,
+      analysis: true,
+    });
   });
 
   it("reads --size and --reset", () => {
     expect(parseSeedArgs(["--size", "demo", "--reset"])).toEqual({
       size: "demo",
       reset: true,
+      reports: true,
+      analysis: true,
     });
     expect(parseSeedArgs(["--size=small"])).toEqual({
       size: "small",
       reset: false,
+      reports: true,
+      analysis: true,
+    });
+  });
+
+  it("reads --no-reports and --no-analysis", () => {
+    expect(parseSeedArgs(["--no-reports", "--no-analysis"])).toEqual({
+      size: "small",
+      reset: false,
+      reports: false,
+      analysis: false,
     });
   });
 

@@ -1,9 +1,13 @@
 /**
- * pnpm db:seed [--size small|demo] [--reset]
+ * pnpm db:seed [--size small|demo] [--reset] [--no-reports] [--no-analysis]
  *
  * Fills the local database from the generated Bamboo fixtures
  * (fixtures/bamboo/<size>) through the registered ingest pipelines, the same
  * ones (and the same summary table) as `pnpm ingest --all --source fixture`.
+ * Then (unless --no-reports) it imports the report exports of
+ * fixtures/bamboo-reports/<size> through the upload path (semi-annual cycles,
+ * answers, completion) and (unless --no-analysis) labels the open-text answers
+ * with the mock provider. Prints counts and elapsed time, never names.
  * Idempotent: running it again reports everything unchanged. --reset empties
  * the domain tables first (local database only, refused while a run is in
  * progress). Exit code: 0 all runs succeeded, 1 a run (or the reset) failed,
@@ -22,6 +26,7 @@ import {
   seedFromFixtures,
   SEED_USAGE,
 } from "../src/modules/ingest/seed";
+import { seedAnalysis, seedReports } from "../src/modules/ingest/seed-reports";
 
 try {
   process.loadEnvFile(".env.local");
@@ -50,6 +55,7 @@ async function main(): Promise<number> {
     return 2;
   }
 
+  const started = performance.now();
   if (args.reset) {
     try {
       assertLocalDatabase(process.env.DATABASE_URL);
@@ -84,13 +90,45 @@ async function main(): Promise<number> {
   console.log(
     `\nperson: ${await count("person")}, job history rows: ${await count("employee_job_history")}, goals: ${await count("goal")}`,
   );
+  let failed = outcomes.some((o) => o.status === "error");
+  if (args.reports && !failed) {
+    try {
+      for (const r of await seedReports({ size: args.size, db })) {
+        const c = r.counts;
+        console.log(
+          `${r.profile}: read ${c.read}, inserted ${c.inserted}, updated ${c.updated}, unchanged ${c.unchanged}, rejected ${c.rejected} (${r.status ?? "succeeded"}, run ${r.runId})`,
+        );
+      }
+    } catch (err) {
+      console.error(`reports: ${errorMessage(err)}`);
+      failed = true;
+    }
+    console.log(
+      `cycles: ${await count("review_cycle")}, participants: ${await count("cycle_participant")}, answers: ${await count("answer")}, completion rows: ${await count("assessment_progress")}`,
+    );
+  }
+  if (args.reports && args.analysis && !failed) {
+    try {
+      const a = await seedAnalysis(db);
+      console.log(
+        `analysis mock: ${a.total} texts, ${a.analyzed} analyzed, ${a.cached} cached, ${a.corrected} corrected (run ${a.runId})`,
+      );
+    } catch (err) {
+      console.error(`analysis: ${errorMessage(err)}`);
+      failed = true;
+    }
+  }
+  console.log(
+    `Seed finished in ${((performance.now() - started) / 1000).toFixed(1)} s`,
+  );
+
   const waiting = outcomes.find((o) => o.entity === "employee")?.counts?.issues;
   if (waiting) {
     console.log(
       `${waiting} records wait for a person in the identity queue (rehires): /es/imports/identity`,
     );
   }
-  return outcomes.some((o) => o.status === "error") ? 1 : 0;
+  return failed ? 1 : 0;
 }
 
 main()

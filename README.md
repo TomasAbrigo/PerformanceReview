@@ -54,18 +54,24 @@ pnpm install
 cp .env.example .env.local
 supabase start
 pnpm db:migrate
-pnpm db:seed --size demo   # 400 registros de Bamboo: 392 personas, 8 casos en la cola de identidad, 1399 goals
-pnpm dev                   # http://localhost:3000 -> redirige a /es
+pnpm db:seed --size demo --reset   # ~40 s en una laptop (medido: 37 s; re-correrlo: 13 s, no cambia nada)
+pnpm dev                           # http://localhost:3000 -> redirige a /es
 ```
 
-Las escalas y los templates del sistema se crean solos cuando arranca el servidor. No hay login: empezás actuando como **People** (sin persona), que ve todo; el selector **"Actuar como"** (arriba) cambia el rol (People, Manager, Empleado o Dirección) y la persona (Dirección no tiene persona). Después:
+El seed demo deja todo listo para los insights, con datos sintéticos: 400 registros de Bamboo (392 personas, 8 reingresos en la cola de identidad, 1391 goals), la importación de `fixtures/bamboo-reports/demo/employee-performance.csv` y `assessment-progress.csv` por el mismo camino que una subida (5 ciclos semestrales, 1604 participantes, ~15 000 respuestas con retención y compromiso normalizados, 1604 filas de completitud) y el análisis cualitativo con el proveedor `mock` sobre todos los ciclos (~5000 textos). `--no-reports` y `--no-analysis` saltean esos pasos. Imprime conteos y tiempo, nunca nombres.
 
-1. **Mirar los datos.** `/es/people` (ficha con identificadores de origen e historial de puesto), `/es/org` (organigrama con selector de fecha), `/es/team/goals` (goals de los reportes de un manager), `/es/imports/runs` (las corridas del seed), `/es/imports/identity` (los 8 reingresos esperando resolución) y `/es/data-quality`.
-2. **Importar la historia de evaluaciones.** En `/es/imports/upload` subí `fixtures/bamboo-reports/demo/employee-performance.csv` (perfil `bamboo-employee-performance`) e "Importar"; corre en un proceso aparte y con el tamaño demo puede tardar. El resultado (`/es/imports/history/<corrida>`) lista los ciclos semestrales 2024-H1 a 2026-H1, ya cerrados; quien no se pudo cruzar por nombre queda en la cola de identidad. Opcional: `assessment-progress.csv` suma la completitud de cada participante y `feedback-status.csv` el feedback de pares.
-3. **Ver un ciclo.** `/es/cycles` y el detalle de un ciclo: período, cantidad de preguntas y los participantes con su manager, área y puesto a la fecha del snapshot.
-4. **Historial de una persona.** Desde su ficha, "Evaluaciones" (`/es/people/<id>/reviews`): cada ciclo con el manager y el puesto de ese momento y las respuestas que el actor puede leer.
-5. **Dashboards.** Como People, `/es/dashboards`: avance del ciclo, distribución de ratings, goals vs rating y brecha self vs manager; "Trayectoria" por persona, "Ver equipo" (jerarquía "al momento de la review" o "actual"), la vista de dirección y los botones "Exportar CSV". Actuando como un manager, solo su equipo.
-6. **API y exports.** `/api/v1/cycles`, `/api/v1/cycles/<id>/requests` y `/api/v1/export/answers.csv?cycle_id=<id>` devuelven los mismos datos en JSON y CSV.
+No hay login: empezás actuando como **People**, que ve todo; el selector **"Actuar como"** (arriba) cambia el rol (People, Manager, Empleado o Dirección) y la persona. Recorrido:
+
+1. **Importaciones e historia.** `/es/imports/runs` (las corridas del seed), `/es/imports/history/<corrida>` (ciclos detectados por la importación) y `/es/imports/identity` (los reingresos y quienes no se pudieron cruzar por nombre). Subir otra vez un CSV en `/es/imports/upload` es idempotente.
+2. **Calidad de datos.** `/es/data-quality`: problemas de los datos importados (respuestas vacías o de baja calidad, revisores que no coinciden con el snapshot, filas en espera).
+3. **Completitud.** `/es/insights/completion`: resumen por ciclo y "quién falta" (self, manager).
+4. **Indicadores.** `/es/insights/indicators`: distribución de retención y compromiso, matriz retención × compromiso, alertas por caída y riesgo.
+5. **Cualitativo.** `/es/insights/qualitative`: sentimiento y temas por dimensión (fortalezas, oportunidades de mejora); "Correr análisis" vuelve a correr el `mock` (lo ya etiquetado queda en caché).
+6. **Goals.** `/es/insights/goals`: KPIs de goals, cruce con indicadores y detalle por assessment.
+7. **Vista ejecutiva.** `/es/insights/executive` en modo **cualitativo** y **cuantitativo**; también `/es/insights/self-assessment` y `/es/insights/health-check`.
+8. **Configuración.** `/es/settings/insights`: umbrales de alerta, mínimo n de agregación, cortes de semestre y proveedor del análisis.
+9. **Roles.** Con "Actuar como": **Dirección** ve la vista ejecutiva solo con agregados (grupos con menos de n personas enmascarados); un **Manager** solo a sus reportes directos; un **Empleado** recibe "Sin acceso" en los indicadores.
+10. **Export para Arturía.** `pnpm export:arturia --cycle latest --anonymized --out var/arturia` genera un HTML y un JSON autocontenidos, sin emails ni nombres.
 
 ## Variables de entorno
 

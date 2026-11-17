@@ -29,6 +29,12 @@ function run(script: string, args: string[]) {
   }
 }
 
+/**
+ * The e2e seed leaves the report exports out: e2e/historical-import.spec.ts
+ * imports them through the UI and asserts what that first import creates.
+ */
+const NO_REPORTS = ["--no-reports", "--no-analysis"];
+
 const ingest = (args: string[]) => run("ingest", args);
 
 /**
@@ -51,9 +57,9 @@ export default async function globalSetup() {
   process.env.E2E_DATABASE_URL = databaseUrl;
   process.env.DATABASE_URL = databaseUrl;
 
-  const seed = run("db:seed", ["--size", "small", "--reset"]);
+  const seed = run("db:seed", ["--size", "small", "--reset", ...NO_REPORTS]);
   if (seed.status !== 0) throw new Error(`seeding failed:\n${seed.stdout}`);
-  const rerun = run("db:seed", ["--size", "small"]);
+  const rerun = run("db:seed", ["--size", "small", ...NO_REPORTS]);
   if (rerun.status !== 0) throw new Error(`re-run failed:\n${rerun.stdout}`);
   process.stdout.write(rerun.stdout);
   process.env.E2E_RUN_OK = runIdOf(rerun.stdout, "employee");

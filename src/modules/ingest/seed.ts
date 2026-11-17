@@ -154,11 +154,18 @@ export async function seedFromFixtures({
   });
 }
 
-export const SEED_USAGE = `Usage: pnpm db:seed [--size small|demo] [--reset]
-  --size   fixtures/bamboo/<size>: small (40 employees) or demo (400); default small
-  --reset  empty the domain tables first (local database only)`;
+export const SEED_USAGE = `Usage: pnpm db:seed [--size small|demo] [--reset] [--no-reports] [--no-analysis]
+  --size         fixtures/bamboo/<size>: small (40 employees) or demo (400); default small
+  --reset        empty the domain tables first (local database only)
+  --no-reports   skip importing fixtures/bamboo-reports/<size> (cycles, answers, completion)
+  --no-analysis  skip the qualitative analysis with the mock provider`;
 
-export type SeedArgs = { size: SeedSize; reset: boolean };
+export type SeedArgs = {
+  size: SeedSize;
+  reset: boolean;
+  reports: boolean;
+  analysis: boolean;
+};
 
 /** Throws a plain Error with the reason when the arguments are wrong. */
 export function parseSeedArgs(argv: string[]): SeedArgs {
@@ -167,6 +174,8 @@ export function parseSeedArgs(argv: string[]): SeedArgs {
     options: {
       size: { type: "string", default: "small" },
       reset: { type: "boolean", default: false },
+      "no-reports": { type: "boolean", default: false },
+      "no-analysis": { type: "boolean", default: false },
     },
   });
   if (!(SEED_SIZES as readonly string[]).includes(values.size)) {
@@ -174,5 +183,10 @@ export function parseSeedArgs(argv: string[]): SeedArgs {
       `--size must be ${SEED_SIZES.join(" or ")} (got ${values.size})`,
     );
   }
-  return { size: values.size as SeedSize, reset: values.reset };
+  return {
+    size: values.size as SeedSize,
+    reset: values.reset,
+    reports: !values["no-reports"],
+    analysis: !values["no-analysis"],
+  };
 }
