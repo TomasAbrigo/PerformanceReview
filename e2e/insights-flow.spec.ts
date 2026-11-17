@@ -30,7 +30,9 @@ async function upload(page: Page, file: string, profile: string) {
 async function chooseCycle(page: Page, route: string) {
   await page.goto(route);
   const filters = page.getByRole("form", { name: "Filtros" });
-  await filters.locator('select[name="cycle"]').selectOption({ label: cycleName });
+  await filters
+    .locator('select[name="cycle"]')
+    .selectOption({ label: cycleName });
   await filters.getByRole("button", { name: "Aplicar" }).click();
   await expect(page).toHaveURL(/cycle=[0-9a-f-]{36}/);
 }
@@ -121,16 +123,17 @@ test("People upload the reports, read every insight and export for Arturía", as
   }
 });
 
-test("direction sees the executive view masked; an employee cannot read the indicators", async ({
-  page,
-}) => {
+test("direction sees the executive view masked", async ({ page }) => {
   await page.goto("/es");
   await actAsRole(page, "Dirección", "Dirección");
   await page.goto("/es/insights/executive?mode=both");
   await expect(
     page.getByText(/grupos de menos de \d+ personas/).first(),
   ).toBeVisible();
+});
 
+test("an employee cannot read the indicators", async ({ page }) => {
+  await page.goto("/es");
   await actAs(page, fullName(assessedFirstCycle), "Empleado");
   await page.goto("/es/insights/indicators");
   await expect(

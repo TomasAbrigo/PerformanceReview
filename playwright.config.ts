@@ -48,7 +48,7 @@ export default defineConfig({
       name: "insights",
       use: { ...devices["Desktop Chrome"] },
       testMatch:
-        /(dashboards|completion|indicators|review-api|qualitative|goals-insights|executive|insights-flow)\.spec\.ts/,
+        /(dashboards|completion|indicators|review-api|qualitative|goals-insights|executive)\.spec\.ts/,
       dependencies: ["chromium"],
     },
     // The whole insights flow, end to end (uploads the reports again and runs
