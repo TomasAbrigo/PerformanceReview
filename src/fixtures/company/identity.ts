@@ -1,4 +1,5 @@
-import { EMAIL_DOMAIN, FIRST_NAMES, LAST_NAMES } from "./catalog";
+import { SYNTHETIC_EMAIL_DOMAIN } from "../../lib/sensitive-data";
+import { FIRST_NAMES, LAST_NAMES } from "./catalog";
 import type { Rng } from "./rng";
 
 export interface PersonName {
@@ -62,9 +63,9 @@ export class IdentityPool {
   /** Unique work email: first.last@domain, with a numeric suffix on clashes. */
   newEmail(name: PersonName): string {
     const base = `${emailSlug(name.firstName)}.${emailSlug(name.lastName)}`;
-    let candidate = `${base}@${EMAIL_DOMAIN}`;
+    let candidate = `${base}@${SYNTHETIC_EMAIL_DOMAIN}`;
     for (let n = 2; this.usedEmails.has(candidate); n++) {
-      candidate = `${base}${n}@${EMAIL_DOMAIN}`;
+      candidate = `${base}${n}@${SYNTHETIC_EMAIL_DOMAIN}`;
     }
     this.usedEmails.add(candidate);
     return candidate;

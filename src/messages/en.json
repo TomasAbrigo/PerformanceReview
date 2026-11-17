@@ -132,8 +132,8 @@
   "People": {
     "title": "People",
     "nav": "People",
-    "searchLabel": "Search by name or email",
-    "searchPlaceholder": "Name or email",
+    "searchLabel": "Search by name",
+    "searchPlaceholder": "Name",
     "search": "Search",
     "total": "{count, plural, =1 {1 person} other {# people}}",
     "empty": "No people to show.",
@@ -141,7 +141,6 @@
     "notFound": "Person not found.",
     "columns": {
       "name": "Name",
-      "email": "Email",
       "status": "Status"
     },
     "status": {
