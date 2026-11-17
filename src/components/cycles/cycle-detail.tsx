@@ -29,6 +29,8 @@ export type CycleDetailData = {
     snapJobTitle: string | null;
     withoutManager: boolean;
     removedAt: Date | null;
+    /** The viewer may open the participant's assessment (People, the snapshot manager). */
+    canOpenAssessment?: boolean;
   }[];
 };
 
@@ -78,6 +80,7 @@ export function CycleDetailView({ cycle }: { cycle: CycleDetailData }) {
                   <TableHead>{td("columns.manager")}</TableHead>
                   <TableHead>{td("columns.department")}</TableHead>
                   <TableHead>{td("columns.jobTitle")}</TableHead>
+                  <TableHead>{td("columns.assessment")}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -101,6 +104,19 @@ export function CycleDetailView({ cycle }: { cycle: CycleDetailData }) {
                     </TableCell>
                     <TableCell>{p.snapDepartment ?? "—"}</TableCell>
                     <TableCell>{p.snapJobTitle ?? "—"}</TableCell>
+                    <TableCell>
+                      {p.canOpenAssessment ? (
+                        <Link
+                          href={`/cycles/${cycle.id}/participants/${p.id}`}
+                          className="underline"
+                          aria-label={td("viewAssessmentOf", {
+                            name: p.displayName,
+                          })}
+                        >
+                          {td("viewAssessment")}
+                        </Link>
+                      ) : null}
+                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>

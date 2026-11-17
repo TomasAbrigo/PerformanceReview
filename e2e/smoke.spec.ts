@@ -25,6 +25,7 @@ test("home navigation lists only the remaining sections", async ({ page }) => {
     "Reporte de autoevaluación",
     "Vista ejecutiva",
     "Health check (CAP)",
+    "Goals y assessments",
     "Importaciones",
     "Subir archivo",
     "Cola de identidad",

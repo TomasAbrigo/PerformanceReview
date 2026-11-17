@@ -28,6 +28,7 @@ test("People see the executive view of an imported cycle in every mode", async (
   await expect(page.getByTestId("exec-retention")).toBeVisible();
   await expect(page.getByTestId("exec-engagement")).toBeVisible();
   await expect(page.getByTestId("exec-risk")).toBeVisible();
+  await expect(page.getByTestId("exec-goals")).toBeVisible();
   await expect(page.getByTestId("exec-sentiment")).toHaveCount(0);
 
   await toggle.getByRole("link", { name: "Cualitativo" }).click();

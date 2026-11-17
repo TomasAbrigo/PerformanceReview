@@ -8,8 +8,18 @@ import { type CycleDetailData, CycleDetailView } from "./cycle-detail";
 import { CyclesList } from "./cycles-list";
 
 vi.mock("@/i18n/navigation", () => ({
-  Link: ({ href, children }: { href: string; children: ReactNode }) => (
-    <a href={href}>{children}</a>
+  Link: ({
+    href,
+    children,
+    ...rest
+  }: {
+    href: string;
+    children: ReactNode;
+    "aria-label"?: string;
+  }) => (
+    <a href={href} {...rest}>
+      {children}
+    </a>
   ),
 }));
 
@@ -129,6 +139,39 @@ describe("CycleDetailView", () => {
       expect(within(brunoRow).getByText("Ingeniería")).toBeVisible();
     },
   );
+
+  it.each([
+    ["es", "Ver el assessment de Bruno Pérez"],
+    ["en", "View Bruno Pérez's assessment"],
+  ] as const)(
+    "links to the assessment of the participants the viewer may open in %s",
+    (locale, name) => {
+      renderIn(
+        locale,
+        <CycleDetailView
+          cycle={{
+            ...detail,
+            participants: [
+              detail.participants[0],
+              { ...detail.participants[1], canOpenAssessment: true },
+            ],
+          }}
+        />,
+      );
+      // Only Bruno's row has the link (Ana's viewer cannot open hers).
+      const links = screen.getAllByRole("link", { name: /assessment/i });
+      expect(links).toHaveLength(1);
+      expect(links[0]).toHaveAccessibleName(name);
+      expect(links[0]).toHaveAttribute("href", "/cycles/c1/participants/p2");
+    },
+  );
+
+  it("has no assessment links unless the page says the viewer may open them", () => {
+    renderIn("es", <CycleDetailView cycle={detail} />);
+    expect(
+      screen.queryByRole("link", { name: /assessment/i }),
+    ).not.toBeInTheDocument();
+  });
 
   it("is read-only: no phase changes, launch or log", () => {
     renderIn("en", <CycleDetailView cycle={detail} />);

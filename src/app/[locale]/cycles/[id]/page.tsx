@@ -6,6 +6,8 @@ import { Suspense } from "react";
 import { CycleDetailView } from "@/components/cycles/cycle-detail";
 import { db } from "@/db/client";
 import { routing } from "@/i18n/routing";
+import { getActor } from "@/modules/actor/server";
+import { canOpenAssessment } from "@/modules/insights/authz";
 import { getCycle } from "@/modules/review-core";
 
 async function Detail({ params }: PageProps<"/[locale]/cycles/[id]">) {
@@ -15,7 +17,22 @@ async function Detail({ params }: PageProps<"/[locale]/cycles/[id]">) {
   await connection();
   const cycle = await getCycle(db, id);
   if (!cycle) notFound();
-  return <CycleDetailView cycle={cycle} />;
+  // Only who may open a participant's assessment gets its link.
+  const actor = await getActor();
+  return (
+    <CycleDetailView
+      cycle={{
+        ...cycle,
+        participants: cycle.participants.map((p) => ({
+          ...p,
+          // The same rule as the assessment page (no link that ends in a
+          // refusal); a draft has no launched assessments.
+          canOpenAssessment:
+            cycle.status !== "draft" && canOpenAssessment(actor, p),
+        })),
+      }}
+    />
+  );
 }
 
 export default function CyclePage(props: PageProps<"/[locale]/cycles/[id]">) {

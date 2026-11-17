@@ -213,6 +213,22 @@ describe("ExecutiveReportView", () => {
     retention: { n: 9, mean: 28 / 9, counts: [1, 3, 1, 2, 2] },
     engagement: { n: 8, mean: 2.875, counts: [1, 3, 1, 2, 1] },
     risk: { riskCount: 3, total: 8 },
+    goals: {
+      key: null,
+      label: null,
+      others: false,
+      people: 9,
+      peopleWithGoals: 6,
+      goals: 20,
+      completed: 10,
+      inProgress: 8,
+      closed: 2,
+      overdue: 3,
+      completedPct: 50,
+      inProgressPct: 40,
+      overduePct: 15,
+      avgProgress: 60,
+    },
     sentiment: [{ dimension: "strengths", ...counts }],
     themes: [
       { theme: "calidad", count: 2, quotes: [] },
@@ -220,11 +236,12 @@ describe("ExecutiveReportView", () => {
     ],
   };
   const forMode = (mode: ExecutiveMode): ExecutiveReport => {
-    const { retention, engagement, risk, sentiment, themes, ...rest } = full;
+    const { retention, engagement, risk, goals, sentiment, themes, ...rest } =
+      full;
     return {
       ...rest,
       mode,
-      ...(mode !== "qualitative" ? { retention, engagement, risk } : {}),
+      ...(mode !== "qualitative" ? { retention, engagement, risk, goals } : {}),
       ...(mode !== "quantitative" ? { sentiment, themes } : {}),
     };
   };
@@ -251,6 +268,7 @@ describe("ExecutiveReportView", () => {
         expect(screen.queryByTestId("exec-retention") !== null).toBe(quant);
         expect(screen.queryByTestId("exec-engagement") !== null).toBe(quant);
         expect(screen.queryByTestId("exec-risk") !== null).toBe(quant);
+        expect(screen.queryByTestId("exec-goals") !== null).toBe(quant);
         expect(screen.queryByTestId("exec-sentiment") !== null).toBe(qual);
         expect(screen.queryByTestId("exec-themes") !== null).toBe(qual);
         if (quant) {
@@ -258,6 +276,9 @@ describe("ExecutiveReportView", () => {
             "3.11",
           );
           expect(screen.getByTestId("exec-risk")).toHaveTextContent("3");
+          expect(screen.getByTestId("exec-goals")).toHaveTextContent(
+            locale === "es" ? "50 %" : "50%",
+          );
         }
         if (qual) {
           expect(screen.getByText("colaboracion")).toBeVisible();

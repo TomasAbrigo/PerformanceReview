@@ -72,6 +72,13 @@ describe("executiveReport", () => {
     expect(quant.retention).toBeDefined();
     expect(quant.engagement).toBeDefined();
     expect(quant.sentiment).toBeUndefined();
+    // Goal KPIs (#62): the scenario's people have no goals in the period.
+    expect(quant.goals).toMatchObject({
+      people: 9,
+      goals: 0,
+      completedPct: null,
+    });
+    expect(qual.goals).toBeUndefined();
     expect(quant.themes).toBeUndefined();
     expect(quant.completion.total?.participants).toBe(9);
   });

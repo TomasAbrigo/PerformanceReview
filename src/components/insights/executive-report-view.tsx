@@ -233,6 +233,40 @@ export function ExecutiveReportView({
             )}
           </Tile>
         ) : null}
+        {report.goals !== undefined ? (
+          <Tile title={t("goals")} testId="exec-goals">
+            {report.goals ? (
+              <dl className="flex flex-col gap-1 text-sm">
+                <div>
+                  <dt>{t("goalsCompleted")}</dt>
+                  <dd className="text-3xl font-semibold tabular-nums">
+                    {report.goals.completedPct === null
+                      ? "—"
+                      : ti("percent", {
+                          value: Math.round(report.goals.completedPct),
+                        })}
+                  </dd>
+                </div>
+                <div className="flex gap-4">
+                  <dt>{t("goalsCount")}</dt>
+                  <dd className="tabular-nums">{report.goals.goals}</dd>
+                </div>
+                <div className="flex gap-4">
+                  <dt>{t("goalsOverdue")}</dt>
+                  <dd className="tabular-nums">
+                    {report.goals.overduePct === null
+                      ? "—"
+                      : ti("percent", {
+                          value: Math.round(report.goals.overduePct),
+                        })}
+                  </dd>
+                </div>
+              </dl>
+            ) : (
+              <Unavailable min={min} />
+            )}
+          </Tile>
+        ) : null}
       </div>
       {report.sentiment ? (
         <Tile title={t("sentiment")} testId="exec-sentiment">

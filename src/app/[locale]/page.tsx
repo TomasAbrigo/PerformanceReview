@@ -29,6 +29,7 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
   const tDataQuality = await getTranslations("DataQuality");
   const tUpload = await getTranslations("Upload");
   const tDashboards = await getTranslations("Dashboards");
+  const tGoalsInsights = await getTranslations("GoalsInsights");
   const tCompletion = await getTranslations("Completion");
   const tIndicators = await getTranslations("Indicators");
   const tQualitative = await getTranslations("Qualitative");
@@ -78,6 +79,9 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
             </Link>
             <Link href="/insights/health-check" className="underline">
               {tInsights("HealthCheck.nav")}
+            </Link>
+            <Link href="/insights/goals" className="underline">
+              {tGoalsInsights("nav")}
             </Link>
             <Link href="/imports/runs" className="underline">
               {tImports("nav")}

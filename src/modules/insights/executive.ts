@@ -1,5 +1,7 @@
 import type { DbOrTx } from "@/db/client";
 import type { ActorContext } from "@/modules/actor/types";
+import { goalKpis } from "@/modules/analytics/goals-insights/queries";
+import type { GoalKpiGroup } from "@/modules/analytics/goals-insights/types";
 import { indicatorSnapshot } from "@/modules/analytics/indicators/queries";
 import type { IndicatorDistribution } from "@/modules/analytics/indicators/types";
 import {
@@ -38,6 +40,8 @@ export type ExecutiveSections = {
   /** People in the risk quadrant and with both indicators (null: masked). */
   risk?: { riskCount: number | null; total: number | null };
   sentiment?: DimensionSentiment[];
+  /** Goal KPIs of everybody in reach (#62); null when direction cannot see them. */
+  goals?: GoalKpiGroup | null;
   /** Top 5 themes, counts only. */
   themes?: ThemeRank[];
 };
@@ -107,6 +111,12 @@ export const COLLECTORS: readonly Collector[] = [
     },
   },
   {
+    key: "goals",
+    modes: QUANT,
+    collect: async ({ db, actor, cycleId }) =>
+      (await goalKpis(db, actor, { cycleId, groupBy: "department" })).total,
+  },
+  {
     key: "sentiment",
     modes: QUAL,
     collect: ({ db, actor, cycleId, minGroupSize }) =>
@@ -127,7 +137,7 @@ export const COLLECTORS: readonly Collector[] = [
 /**
  * The one-page executive view of a cycle: completion always, plus the
  * qualitative blocks (sentiment per dimension, top themes) and/or the
- * quantitative ones (retention, engagement, risk quadrant) per `mode`.
+ * quantitative ones (retention, engagement, risk quadrant, goal KPIs) per `mode`.
  * People see everything unmasked; direction only aggregates of at least the
  * `aggregation.minGroupSize` setting; managers and employees are forbidden.
  */
