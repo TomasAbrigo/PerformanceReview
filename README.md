@@ -80,6 +80,9 @@ Viven en `.env.local` (ignorado por git); `.env.example` es la plantilla. Con la
 | `BAMBOO_COMPANY_DOMAIN` / `BAMBOO_API_KEY`                   | Solo para `pnpm ingest <entidad> --source bamboo`.                                                                                                                              | sin definir                                                                    |
 | `API_TOKEN`                                                  | Si está definido, `/api/v1` y los CSV piden `Authorization: Bearer <API_TOKEN>`.                                                                                                | vacío: API abierta (desarrollo local)                                          |
 | `UPLOADS_DIR` / `PROFILES_DIR`                               | Carpetas de los archivos subidos en `/imports/upload` y de los perfiles guardados.                                                                                              | `var/uploads` / `var/profiles`                                                 |
+| `ANALYSIS_PROVIDER`                                          | Proveedor del análisis cualitativo: `mock` (heurística local, determinista) o `anthropic` (Claude API).                                                                         | `mock`                                                                         |
+| `ANTHROPIC_API_KEY`                                          | Obligatoria con `ANALYSIS_PROVIDER=anthropic`; sin ella el análisis falla con `missing_api_key`.                                                                                | sin definir                                                                    |
+| `ANALYSIS_MODEL`                                             | Modelo de Claude para el análisis.                                                                                                                                              | `claude-opus-5-5`                                                              |
 
 ## Funcionalidades
 
@@ -172,6 +175,15 @@ Hoy solo se lee el mínimo n (vista de dirección); los umbrales de alerta, los 
 - **CSV:** "Exportar CSV" (solo People, como los dashboards) baja `insights-indicator-distribution.csv` (una fila por grupo y valor, con n y promedio; filtros `cycle` (obligatorio), `indicator`, `groupBy`, `hierarchy`, `department`, `manager`) e `insights-alerts.csv` (una fila por alerta; `cycle` obligatorio, `hierarchy`, `department`, `manager`). Sin email.
 - **Tests:** `src/modules/analytics/indicators/indicators.db.test.ts` calcula a mano las cuatro consultas sobre filas insertadas (dos ciclos, dos equipos, un cambio de área) y prueba cada rol y cada umbral; `indicators-export.db.test.ts` los CSV; `src/components/indicators/indicators.test.tsx` las vistas en es y en en; `e2e/indicators.spec.ts` la pantalla sobre un ciclo importado.
 - **Límites conocidos:** la supresión de Dirección actúa por consulta (un grupo, una celda): comparar a mano dos vistas con distintos filtros podría deducir un grupo chico; no hay supresión complementaria entre consultas.
+
+### Análisis cualitativo (`/insights/qualitative`)
+
+- **Qué hace:** etiqueta cada comentario abierto (respuestas de preguntas de texto de pedidos enviados) con un sentimiento (`positive`, `constructive`, `negative`), una confianza y 1 a 3 temas, por dimensión (fortalezas, mejora, ...). La página muestra barras apiladas por dimensión, la evolución entre ciclos, el ranking de temas con 2-3 citas seudonimizadas, el sentimiento contra las respuestas de retención y compromiso, y la lista de comentarios con filtros. CSV: `insights-sentiment.csv` (conteos, sin texto ni emails).
+- **Correr:** botón "Correr análisis" (People) o `pnpm analysis:run [--cycle <id>] [--provider mock|anthropic]`. Por defecto usa el `mock` (sin red); `ANALYSIS_PROVIDER=anthropic` + `ANTHROPIC_API_KEY` usa Claude, por lotes y con salida JSON estructurada. Antes de enviar, los nombres conocidos (completos, nombre y apellido sueltos, sin importar tildes ni mayúsculas), los emails y los legajos se reemplazan por `[P1]`, `[E1]`, `[N1]`. Caché por hash del texto normalizado + proveedor + versión de prompt: una segunda corrida no reenvía nada. Cada corrida queda en `analysis_run` con conteos, nunca con contenido.
+- **Corrección humana:** People corrige la etiqueta en la tabla; queda en `analysis_correction` (solo se agrega) y en el log de auditoría, y ninguna corrida la pisa.
+- **Importar etiquetas:** formulario en la página o `pnpm analysis:import-labels <archivo.csv>`; formato en [docs/qualitative-labels.md](docs/qualitative-labels.md). Las filas que no cruzan se listan.
+- **Quién ve qué:** People todo; un manager, los comentarios de sus reportes directos al snapshot del ciclo; un empleado, nada (nunca sus propias etiquetas). "Solo agregados" (vista dirección) deja los conteos sin comentarios ni citas.
+- **Pendiente:** la dimensión sale del texto de la pregunta (`dimensionOf`) hasta que exista `question_revision.dimension` (#57); el cruce con retención/compromiso usa `question_revision.role` (`retention`, `engagement`), que el import histórico todavía no asigna.
 
 ### Calidad de datos y API (`/data-quality`, `/api/v1`)
 
@@ -487,6 +499,7 @@ Handlers en `src/modules/api/handlers.ts`, rutas en `src/app/api/v1/**`. Todos l
 | `answers.csv`                         | evaluador × pregunta (respuesta)                | `cycle_id`, `relationship`, `status`                                  |
 | `insights-indicator-distribution.csv` | grupo × valor (1 a 5) de retención o compromiso | `cycle`, `indicator`, `groupBy`, `hierarchy`, `department`, `manager` |
 | `insights-alerts.csv`                 | alerta (caída o riesgo)                         | `cycle`, `hierarchy`, `department`, `manager`                         |
+| `insights-sentiment.csv`              | dimensión (conteo de sentimiento)               | `cycle`, `department`                                                 |
 
 Cada fila trae los ids internos (uuid) y los de Bamboo (`bamboo_id`, `legajo`, y el del manager o del manager del snapshot), más área, división, puesto y ubicación.
 
