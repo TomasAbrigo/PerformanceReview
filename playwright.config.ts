@@ -38,7 +38,7 @@ export default defineConfig({
       name: "chromium",
       use: { ...devices["Desktop Chrome"] },
       testIgnore:
-        /(identity(-later)?|dashboards|indicators|review-api|qualitative|insights-flow)\.spec\.ts/,
+        /(identity(-later)?|dashboards|completion|indicators|review-api|qualitative|goals-insights|insights-flow)\.spec\.ts/,
     },
     // These read the review data of the historical import, which
     // e2e/historical-import.spec.ts (project chromium) brings in: they run
@@ -47,7 +47,8 @@ export default defineConfig({
     {
       name: "insights",
       use: { ...devices["Desktop Chrome"] },
-      testMatch: /(dashboards|indicators|review-api|qualitative)\.spec\.ts/,
+      testMatch:
+        /(dashboards|completion|indicators|review-api|qualitative|goals-insights)\.spec\.ts/,
       dependencies: ["chromium"],
     },
     // The whole insights flow, end to end (uploads the reports again and runs

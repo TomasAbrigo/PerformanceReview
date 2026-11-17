@@ -30,7 +30,8 @@
     "fixtures:parquet": "tsx scripts/fixtures-parquet.ts",
     "reports:inspect": "tsx scripts/reports-inspect.ts",
     "analysis:run": "tsx scripts/analysis-run.ts",
-    "analysis:import-labels": "tsx scripts/analysis-import-labels.ts"
+    "analysis:import-labels": "tsx scripts/analysis-import-labels.ts",
+    "export:arturia": "tsx scripts/export-arturia.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^1.9.0",

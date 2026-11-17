@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { foldSmallGroups, type GroupCell } from "./aggregation";
+import { foldGroups, foldSmallGroups, type GroupCell } from "./aggregation";
 
 const group = (
   key: string | null,
@@ -71,5 +71,37 @@ describe("foldSmallGroups", () => {
   it("a folded group without a mean does not break the average", () => {
     const r = foldSmallGroups([group("A", 3, null), group("B", 2, 0.5)], 5);
     expect(r.others?.mean).toBeCloseTo(0.5);
+  });
+});
+
+describe("foldGroups", () => {
+  const opts = {
+    size: (g: { k: string; n: number }) => g.n,
+    merge: (rest: { k: string; n: number }[]) => ({
+      k: "Otros",
+      n: rest.reduce((s, r) => s + r.n, 0),
+    }),
+  };
+  const groups = [
+    { k: "a", n: 6 },
+    { k: "b", n: 3 },
+    { k: "c", n: 2 },
+  ];
+  it("folds small groups into Otros, or suppresses them when Otros is still small", () => {
+    expect(foldGroups(groups, 5, opts)).toEqual({
+      shown: [{ k: "a", n: 6 }],
+      others: { k: "Otros", n: 5 },
+      suppressed: 0,
+    });
+    expect(foldGroups(groups, 6, opts)).toEqual({
+      shown: [{ k: "a", n: 6 }],
+      others: null,
+      suppressed: 5,
+    });
+  });
+  it("folds unnamed groups whatever their size", () => {
+    expect(
+      foldGroups(groups, 1, { ...opts, named: (g) => g.k !== "a" }).others,
+    ).toEqual({ k: "Otros", n: 6 });
   });
 });

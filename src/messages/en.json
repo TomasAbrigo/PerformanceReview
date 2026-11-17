@@ -493,8 +493,11 @@
         "name": "Person",
         "manager": "Manager (snapshot)",
         "department": "Department",
-        "jobTitle": "Job title"
-      }
+        "jobTitle": "Job title",
+        "assessment": "Assessment"
+      },
+      "viewAssessment": "View assessment",
+      "viewAssessmentOf": "View {name}'s assessment"
     }
   },
   "Actor": {
@@ -931,7 +934,28 @@
       "dimension": "dimension",
       "positive": "positive",
       "constructive": "constructive",
-      "negative": "negative"
+      "negative": "negative",
+      "group_id": "group_id",
+      "participants": "participants",
+      "self_submitted": "self_submitted",
+      "self_applicable": "self_applicable",
+      "self_pct": "self_pct",
+      "manager_submitted": "manager_submitted",
+      "manager_applicable": "manager_applicable",
+      "manager_pct": "manager_pct",
+      "self_delta_pp": "self_delta_pp",
+      "manager_delta_pp": "manager_delta_pp",
+      "self_status": "self_status",
+      "manager_status": "manager_status",
+      "follow_up_notes": "follow_up_notes",
+      "people": "people",
+      "in_progress": "in_progress",
+      "closed": "closed",
+      "overdue": "overdue",
+      "completed_pct": "completed_pct",
+      "in_progress_pct": "in_progress_pct",
+      "overdue_pct": "overdue_pct",
+      "outlier_kind": "kind"
     }
   },
   "ImportHistory": {
@@ -1330,6 +1354,344 @@
       "no_file": "Choose a file.",
       "unknown": "Something went wrong.",
       "not_labeled": "This comment has no label yet."
+    }
+  },
+  "Arturia": {
+    "title": "Performance report",
+    "generatedAt": "Generated",
+    "period": "Period",
+    "anonymized": "Anonymized version",
+    "named": "Version with personal data (People internal use)",
+    "minGroupSize": "Minimum group",
+    "view": "View",
+    "viewAll": "All",
+    "viewQuantitative": "Quantitative",
+    "viewQualitative": "Qualitative",
+    "others": "Others",
+    "team": "Team",
+    "noData": "No data",
+    "notAvailable": "Not available in this export version",
+    "hiddenTotal": "Total hidden so small groups cannot be derived by difference",
+    "suppressed": "People left out of the breakdown (groups under the minimum)",
+    "executive": {
+      "title": "Executive summary",
+      "participants": "Participants",
+      "distribution": "Rating distribution",
+      "byDepartment": "By department",
+      "mean": "Mean"
+    },
+    "completion": {
+      "title": "Completion",
+      "byRelationship": "By review type",
+      "byDepartment": "By department",
+      "byManager": "By team",
+      "submitted": "Submitted",
+      "draft": "Draft",
+      "declined": "Declined",
+      "pending": "Pending",
+      "total": "Total"
+    },
+    "indicators": {
+      "title": "Retention and engagement indicators",
+      "distribution": "Distribution",
+      "riskMatrix": "Risk matrix (retention × engagement)",
+      "alerts": "Alerts",
+      "retention": "Retention",
+      "engagement": "Engagement",
+      "risk": "Risk",
+      "drop": "Drop",
+      "bands": {
+        "low": "Low",
+        "mid": "Mid",
+        "high": "High"
+      }
+    },
+    "qualitative": {
+      "title": "Qualitative analysis",
+      "byDimension": "Sentiment by dimension",
+      "trend": "Sentiment trend",
+      "themes": "Top themes",
+      "quotes": "Quotes (pseudonymized)",
+      "sentiments": {
+        "positive": "Positive",
+        "constructive": "Constructive",
+        "negative": "Negative"
+      }
+    },
+    "goals": {
+      "title": "Goals",
+      "participantsWithGoals": "People with goals",
+      "goals": "Goals",
+      "completed": "Completed",
+      "avgProgress": "Average progress"
+    },
+    "people": {
+      "title": "People",
+      "name": "Name",
+      "email": "Email",
+      "department": "Department",
+      "manager": "Manager",
+      "self": "Self review",
+      "managerReview": "Manager review",
+      "retention": "Retention",
+      "engagement": "Engagement",
+      "positiveShare": "Positive comments"
+    },
+    "relationships": {
+      "self": "Self review",
+      "manager": "Manager",
+      "peer": "Peers",
+      "upward": "Upward"
+    }
+  },
+  "Completion": {
+    "nav": "Completion",
+    "title": "Assessment completion",
+    "forbidden": "You do not have access to this screen.",
+    "noCycles": "There are no cycles with assessments yet.",
+    "hint": {
+      "all": "Self and manager assessments submitted, out of the people that assessment applies to in the cycle.",
+      "directReports": "Only your direct reports. Assessments submitted out of those that apply in the cycle.",
+      "aggregates": "Aggregates only: no names or managers. Groups of fewer than {min} people are put together in Others or hidden."
+    },
+    "filters": {
+      "label": "Filters",
+      "cycle": "Cycle",
+      "department": "Department",
+      "manager": "Manager",
+      "any": "All",
+      "apply": "Apply"
+    },
+    "groupBy": {
+      "label": "Group by",
+      "none": "Ungrouped",
+      "department": "Department",
+      "manager": "Manager"
+    },
+    "hierarchy": {
+      "label": "Hierarchy",
+      "asOf": "At review time",
+      "current": "Current"
+    },
+    "summary": {
+      "title": "Progress",
+      "total": "Whole cycle",
+      "unassigned": "Unassigned",
+      "others": "Others",
+      "people": "{n, plural, one {# person} other {# people}}",
+      "self": "Self assessment",
+      "manager": "Manager assessment",
+      "meter": "{side}, {group}: {submitted} of {applicable} submitted",
+      "notApplicable": "Does not apply",
+      "empty": "There are no participants for these filters.",
+      "belowMinimum": "There are fewer than {min} participants: only the head count is shown ({n}).",
+      "suppressed": "{n, plural, one {# person is} other {# people are}} left out of the breakdown: their group has fewer than {min}.",
+      "sources": "Status taken from Assessment Progress for {progress, plural, one {# participant} other {# participants}} and from the review requests for {requests, plural, one {# participant} other {# participants}}.",
+      "columns": {
+        "group": "Group",
+        "participants": "Participants",
+        "self": "Self assessment submitted",
+        "manager": "Manager assessment submitted"
+      }
+    },
+    "delta": {
+      "title": "Compared with {cycle}",
+      "none": "There is no earlier cycle to compare with.",
+      "pp": "{value} pp",
+      "up": "Up",
+      "down": "Down",
+      "same": "No change",
+      "noData": "Nothing to compare with"
+    },
+    "missing": {
+      "title": "Who is missing",
+      "hint": "People who have not yet submitted an assessment that applies to them, ordered by manager.",
+      "count": "{n, plural, =0 {Nobody is missing} one {# person is missing} other {# people are missing}}",
+      "empty": "Nobody is missing for these filters.",
+      "directionOnly": "Direction only sees aggregates: the detail per person is for People and for each manager.",
+      "status": {
+        "label": "Missing",
+        "any": "Any",
+        "self_missing": "Self assessment",
+        "manager_missing": "Manager assessment"
+      },
+      "columns": {
+        "person": "Person",
+        "department": "Department",
+        "manager": "Manager",
+        "self": "Self assessment",
+        "managerReview": "Manager assessment",
+        "notes": "Follow-up"
+      },
+      "notes": "Has follow-up notes",
+      "none": "Unassigned",
+      "statuses": {
+        "not_started": "Not started",
+        "in_progress": "In progress",
+        "submitted": "Submitted",
+        "not_applicable": "Does not apply"
+      }
+    },
+    "export": {
+      "csv": "Export CSV",
+      "csvEmail": "Export CSV with email"
+    }
+  },
+  "GoalsInsights": {
+    "nav": "Goals and assessments",
+    "title": "Goals and assessments",
+    "heading": "Goals and assessments · {cycle}",
+    "forbidden": "You do not have access to this view.",
+    "noCycles": "There are no launched cycles yet.",
+    "tableView": "View as table",
+    "empty": "There is no data for these filters.",
+    "personLink": "View {name}'s assessment",
+    "scope": {
+      "directReports": "You only see your direct reports at the time of each cycle.",
+      "aggregatesOnly": "Aggregates only: groups of fewer than {min} people are folded into Others or hidden."
+    },
+    "filters": {
+      "label": "Filters",
+      "cycle": "Cycle",
+      "department": "Area",
+      "manager": "Manager",
+      "any": "All",
+      "apply": "Apply"
+    },
+    "groupBy": {
+      "label": "Group by",
+      "person": "Person",
+      "manager": "Manager",
+      "department": "Area"
+    },
+    "hierarchy": {
+      "label": "Hierarchy",
+      "asOf": "At review time",
+      "current": "Current"
+    },
+    "indicator": {
+      "label": "Indicator",
+      "retention": "Retention",
+      "engagement": "Engagement"
+    },
+    "kpis": {
+      "title": "Goal indicators",
+      "hint": "Each person's goals of the period (the cycle's snapshot). Overdue: in progress and due before the period ended; a closed goal never is.",
+      "columns": {
+        "group": "Group",
+        "people": "People",
+        "goals": "Goals",
+        "completed": "Completed",
+        "inProgress": "In progress",
+        "overdue": "Overdue",
+        "avgProgress": "Average progress"
+      },
+      "others": "Others",
+      "total": "Total",
+      "none": "No goals",
+      "share": "{count} ({pct} %)",
+      "meter": "{group}: {pct} % of goals completed",
+      "suppressed": "{n, plural, one {# person in small groups is not shown} other {# people in small groups are not shown}}",
+      "totalHidden": "The total is hidden so it does not reveal the small groups.",
+      "unassigned": "Unassigned"
+    },
+    "scatter": {
+      "title": "Goals completion vs {indicator}",
+      "hint": "One person per dot: horizontal, % of goals completed; vertical, the value the manager gave (1 to 5). Only people with goals and that answer appear.",
+      "xAxis": "Goals completed (%)",
+      "yAxis": "{indicator} (1 to 5)",
+      "point": "{name}: {completed} % of goals completed, {indicator} {value}",
+      "missing": "{n, plural, one {# person does not appear} other {# people do not appear}} for lack of goals or that answer."
+    },
+    "buckets": {
+      "title": "Indicators by goals completion",
+      "hint": "Mean retention and engagement of the people, by the % of goals they completed.",
+      "bucket": "{from}–{to} %",
+      "people": "{n, plural, one {# person} other {# people}}",
+      "positive": "Positive comments",
+      "hidden": "Hidden: fewer than {min} people",
+      "noData": "No data",
+      "bar": "{bucket}, {indicator}: {value}",
+      "withoutGoals": "{n, plural, one {# person without goals is} other {# people without goals are}} not in this chart.",
+      "suppressed": "{n, plural, one {# person in small buckets is not shown} other {# people in small buckets are not shown}}.",
+      "columns": {
+        "bucket": "Goals completed",
+        "people": "People",
+        "retention": "Retention (mean)",
+        "engagement": "Engagement (mean)",
+        "positive": "Positive comments"
+      }
+    },
+    "people": {
+      "title": "People",
+      "columns": {
+        "name": "Person",
+        "manager": "Manager",
+        "goals": "Goals",
+        "completed": "Completed",
+        "avgProgress": "Average progress",
+        "retention": "Retention",
+        "engagement": "Engagement",
+        "positive": "Positive comments"
+      },
+      "noValue": "–"
+    },
+    "outliers": {
+      "title": "Cases that do not add up",
+      "count": "{n, plural, =0 {Nobody} one {# person} other {# people}}",
+      "hidden": "There are fewer than {min} people: the number is not shown.",
+      "none": "Nobody.",
+      "doneButLow": {
+        "title": "Goals done, low indicators",
+        "description": "They completed {goals} % or more of their goals, but retention or engagement is {risk} or less."
+      },
+      "behindButHigh": {
+        "title": "Goals behind, high indicators",
+        "description": "They completed {goals} % or less of their goals, but retention and engagement are {high} or more."
+      },
+      "columns": {
+        "person": "Person",
+        "manager": "Manager",
+        "completed": "Goals completed",
+        "retention": "Retention",
+        "engagement": "Engagement"
+      },
+      "completed": "{completed} of {goals} ({pct} %)"
+    }
+  },
+  "ParticipantDetail": {
+    "title": "{name} · {cycle}",
+    "back": "Back to the cycle",
+    "forbidden": "You do not have access to this assessment.",
+    "period": "Period {start} → {end}",
+    "manager": "Manager at the snapshot: {name}",
+    "noManager": "No manager at the snapshot",
+    "job": "{title} · {department}",
+    "removed": "Removed from the cycle",
+    "answers": {
+      "title": "Assessment answers",
+      "self": "Self assessment",
+      "manager": "Manager assessment",
+      "reviewer": "Written by: {name}",
+      "mismatch": "The author was not the manager at the snapshot",
+      "empty": "There are no submitted assessments of this person.",
+      "noQuestions": "There are no answers visible to you."
+    },
+    "goals": {
+      "title": "Goals of the period",
+      "asOf": "Status as of {date}",
+      "summary": "{completed} of {total, plural, one {# goal completed} other {# goals completed}}",
+      "empty": "There are no goals in this period.",
+      "progress": "Progress",
+      "dueDate": "Due {date}",
+      "noDueDate": "No due date",
+      "overdue": "Overdue",
+      "noLongerApplicable": "No longer applies",
+      "status": {
+        "in_progress": "In progress",
+        "completed": "Completed",
+        "closed": "Closed"
+      }
     }
   }
 }
