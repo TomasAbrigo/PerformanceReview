@@ -24,6 +24,7 @@ test("home navigation lists only the remaining sections", async ({ page }) => {
     "Subir archivo",
     "Cola de identidad",
     "Calidad de datos",
+    "Insights",
     "Templates de evaluación",
     "Escalas de rating",
   ]);

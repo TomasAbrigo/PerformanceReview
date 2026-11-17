@@ -3,15 +3,26 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { connection } from "next/server";
 import { Suspense } from "react";
+import { HrOnly } from "@/components/access/hr-only";
 import { ScalesView } from "@/components/templates/scales-view";
 import { db } from "@/db/client";
 import { routing } from "@/i18n/routing";
 import { listScales } from "@/modules/templates";
 import { createScaleAction, deleteScaleAction } from "../actions";
 
-export default async function ScalesPage({
-  params,
-}: PageProps<"/[locale]/settings/scales">) {
+export default function ScalesPage(
+  props: PageProps<"/[locale]/settings/scales">,
+) {
+  return (
+    <Suspense>
+      <HrOnly>
+        <ScalesBody {...props} />
+      </HrOnly>
+    </Suspense>
+  );
+}
+
+async function ScalesBody({ params }: PageProps<"/[locale]/settings/scales">) {
   const { locale } = await params;
   if (!hasLocale(routing.locales, locale)) notFound();
   setRequestLocale(locale);

@@ -24,6 +24,7 @@ import {
   share,
   type TestCycleInput,
 } from "@/modules/review-core/test-support";
+import { setSetting } from "@/modules/settings";
 import {
   addQuestion,
   addSection,
@@ -42,6 +43,7 @@ import {
   ratingDistribution,
   selfManagerGap,
 } from ".";
+import { insertJob, insertPerson } from "../test-support";
 
 const FIXTURES = path.resolve("src/modules/bamboo-client/__fixtures__");
 
@@ -64,7 +66,7 @@ const as = (
 
 async function reset() {
   await db.execute(
-    sql`TRUNCATE review_cycle, employee_job_history, employee_status_history, source_identity, employment, person, raw_record, ingest_run CASCADE`,
+    sql`TRUNCATE review_cycle, employee_job_history, employee_status_history, source_identity, employment, person, raw_record, ingest_run, app_setting, admin_audit_log CASCADE`,
   );
 }
 
@@ -304,7 +306,7 @@ describe("cycleProgress", () => {
     ]);
   });
 
-  it("a manager sees only their team; employees are forbidden", async () => {
+  it("a manager sees only their direct reports; employees are forbidden", async () => {
     const { cycle } = await h1();
     const asOf = await cycleProgress(db, as(carla, "manager"), {
       cycleId: cycle.id,
@@ -319,6 +321,28 @@ describe("cycleProgress", () => {
       hierarchy: "current",
     });
     expect(now.rows).toEqual([]);
+    // Ana: at the snapshot she managed Carla only (Bruno was Carla's report);
+    // today she manages Bruno only (Carla has left).
+    const anaAsOf = await cycleProgress(db, as(ana, "manager"), {
+      cycleId: cycle.id,
+      hierarchy: "asOf",
+    });
+    expect(
+      anaAsOf.rows.map((x) => [x.relationship, x.managerName, x.submitted]),
+    ).toEqual([
+      ["self", "Ana García", 0],
+      ["manager", "Ana García", 1],
+    ]);
+    const anaNow = await cycleProgress(db, as(ana, "manager"), {
+      cycleId: cycle.id,
+      hierarchy: "current",
+    });
+    expect(
+      anaNow.rows.map((x) => [x.relationship, x.managerName, x.submitted]),
+    ).toEqual([
+      ["self", "Ana García", 1],
+      ["manager", "Ana García", 1],
+    ]);
     await expect(
       cycleProgress(db, as(bruno), { cycleId: cycle.id, hierarchy: "asOf" }),
     ).rejects.toMatchObject({ code: "forbidden" });
@@ -509,11 +533,19 @@ describe("managerTeam", () => {
     ]);
   });
 
-  it("a manager can only open their own team", async () => {
+  it("a manager can only open their own team, not a sub-team", async () => {
     const { cycle } = await h1();
     await expect(
       managerTeam(db, as(carla, "manager"), {
         managerId: ana,
+        cycleId: cycle.id,
+        hierarchy: "asOf",
+      }),
+    ).rejects.toMatchObject({ code: "forbidden" });
+    // Ana manages Carla, who manages Bruno: Carla's team is closed to Ana.
+    await expect(
+      managerTeam(db, as(ana, "manager"), {
+        managerId: carla,
         cycleId: cycle.id,
         hierarchy: "asOf",
       }),
@@ -586,26 +618,333 @@ describe("selfManagerGap", () => {
   });
 });
 
+const direction: ActorContext = { personId: null, role: "direction" };
+
+/**
+ * Dora (Ventas, reports to Ana at the snapshot) joins the H1 2022 cycle with
+ * a manager review: overall 3 (2/3). With Bruno and Carla (Ingeniería) the
+ * cycle has 3 participants and 3 ratings: Ingeniería 2, Ventas 1.
+ */
+async function h1WithDora() {
+  const dora = await insertPerson({ displayName: "Dora Díaz" });
+  await insertJob({
+    personId: dora,
+    validFrom: "2022-01-01",
+    managerPersonId: ana,
+    department: "Ventas",
+    jobTitle: "Vendedora",
+    location: "Rosario",
+  });
+  const cycle = await createTestCycle(
+    input({ personIds: [bruno, carla, dora] }),
+  );
+  await questionIds(cycle.id);
+  await managerReview(cycle.id, bruno, carla, 3, 2);
+  await managerReview(cycle.id, carla, ana, 5, 4);
+  await managerReview(cycle.id, dora, ana, 3, 3);
+  return { cycle, dora };
+}
+
 describe("executiveSummary", () => {
-  it("aggregates without names or ids and suppresses small groups", async () => {
+  it("People see every group, unmasked, and no names or ids", async () => {
     const { cycle } = await h1();
     const r = await executiveSummary(db, hr, { cycleId: cycle.id });
+    expect(r.minGroupSize).toBeNull();
     expect(r.participants).toBe(2);
     expect(r.progress).toEqual([
       { relationship: "self", total: 2, submitted: 1 },
       { relationship: "manager", total: 2, submitted: 2 },
     ]);
     expect(r.distribution).toEqual([0, 0, 0, 1, 1]);
-    // Ingeniería has 2 people (< MIN_GROUP 3): folded into "suppressed".
-    expect(r.byDepartment).toEqual([]);
-    expect(r.suppressed).toBe(2);
+    // Ingeniería has 2 people: People still see it (no minimum applies).
+    expect(r.byDepartment).toEqual([
+      expect.objectContaining({ department: "Ingeniería", n: 2 }),
+    ]);
+    expect(r.others).toBeNull();
+    expect(r.suppressed).toBe(0);
     const json = JSON.stringify(r);
     for (const secret of [ana, bruno, carla, "Bruno", "Carla", "García"]) {
       expect(json).not.toContain(secret);
     }
+  });
+
+  it("direction gets nothing but the head count below the minimum group size", async () => {
+    const { cycle } = await h1();
+    // Default minimum 5: two participants are under it.
+    const r = await executiveSummary(db, direction, { cycleId: cycle.id });
+    expect(r).toEqual({
+      minGroupSize: 5,
+      participants: 2,
+      progress: [],
+      distribution: [0, 0, 0, 0, 0],
+      byDepartment: [],
+      others: null,
+      suppressed: 2,
+    });
+  });
+
+  it("direction sees the totals and the groups that reach the minimum", async () => {
+    const { cycle } = await h1();
+    const r = await executiveSummary(db, direction, {
+      cycleId: cycle.id,
+      minGroupSize: 2,
+    });
+    expect(r.minGroupSize).toBe(2);
+    expect(r.participants).toBe(2);
+    expect(r.progress).toHaveLength(2);
+    expect(r.distribution).toEqual([0, 0, 0, 1, 1]);
+    expect(r.byDepartment.map((d) => [d.department, d.n])).toEqual([
+      ["Ingeniería", 2],
+    ]);
+    expect(r.suppressed).toBe(0);
+    const json = JSON.stringify(r);
+    for (const secret of [ana, bruno, carla, "Bruno", "Carla", "García"]) {
+      expect(json).not.toContain(secret);
+    }
+  });
+
+  it("direction: groups under the minimum are folded into Otros, or hidden if still under it", async () => {
+    const { cycle } = await h1WithDora();
+    // Minimum 2: Ingeniería (2) is listed; Ventas (1) alone is under it.
+    const two = await executiveSummary(db, direction, {
+      cycleId: cycle.id,
+      minGroupSize: 2,
+    });
+    expect(two.participants).toBe(3);
+    expect(two.byDepartment.map((d) => [d.department, d.n])).toEqual([
+      ["Ingeniería", 2],
+    ]);
+    expect(two.others).toBeNull();
+    expect(two.suppressed).toBe(1);
+    // Minimum 3: neither group reaches it, together they do: one "Otros".
+    const three = await executiveSummary(db, direction, {
+      cycleId: cycle.id,
+      minGroupSize: 3,
+    });
+    expect(three.byDepartment).toEqual([]);
+    expect(three.others).toMatchObject({ n: 3 });
+    expect(three.others!.counts.reduce((a, b) => a + b, 0)).toBe(3);
+    expect(three.suppressed).toBe(0);
+    // People see both departments.
+    const all = await executiveSummary(db, hr, { cycleId: cycle.id });
+    expect(all.byDepartment.map((d) => [d.department, d.n])).toEqual([
+      ["Ingeniería", 2],
+      ["Ventas", 1],
+    ]);
+  });
+
+  it("takes the minimum from the aggregation.minGroupSize setting", async () => {
+    const { cycle } = await h1WithDora();
+    expect(
+      (await executiveSummary(db, direction, { cycleId: cycle.id }))
+        .minGroupSize,
+    ).toBe(5);
+    await setSetting(db, hr, "aggregation.minGroupSize", 2);
+    const r = await executiveSummary(db, direction, { cycleId: cycle.id });
+    expect(r.minGroupSize).toBe(2);
+    expect(r.byDepartment.map((d) => d.department)).toEqual(["Ingeniería"]);
+  });
+
+  it("is forbidden to managers and employees", async () => {
+    const { cycle } = await h1();
+    const lost: ActorContext = { personId: null, role: "manager" };
+    for (const actor of [as(ana, "manager"), as(ana), lost]) {
+      await expect(
+        executiveSummary(db, actor, { cycleId: cycle.id }),
+      ).rejects.toMatchObject({ code: "forbidden" });
+    }
+  });
+});
+
+describe("manager scope: direct reports of the snapshot", () => {
+  it("a skip-level manager does not see the reports of their reports", async () => {
+    const { cycle } = await h1WithDora();
+    // Ana -> Carla -> Bruno at the snapshot; Dora reports to Ana directly.
+    const carlaView = await cycleProgress(db, as(carla, "manager"), {
+      cycleId: cycle.id,
+      hierarchy: "asOf",
+    });
+    expect(carlaView.totals.map((t) => [t.relationship, t.total])).toEqual([
+      ["self", 1],
+      ["manager", 1],
+    ]);
+    const anaView = await cycleProgress(db, as(ana, "manager"), {
+      cycleId: cycle.id,
+      hierarchy: "asOf",
+    });
+    // Carla and Dora, not Bruno (Carla's report).
+    expect(anaView.totals.map((t) => [t.relationship, t.total])).toEqual([
+      ["self", 2],
+      ["manager", 2],
+    ]);
+    const dist = await ratingDistribution(db, as(ana, "manager"), {
+      cycleId: cycle.id,
+      hierarchy: "asOf",
+      groupBy: "manager",
+      stage: "current",
+    });
+    expect(dist.series.map((s) => [s.label, s.n])).toEqual([["Ana García", 2]]);
+    const goals = await goalsVsRating(db, as(ana, "manager"), {
+      cycleId: cycle.id,
+      hierarchy: "asOf",
+    });
+    expect(goals.rows.map((r) => r.name)).toEqual([
+      "Carla Romero",
+      "Dora Díaz",
+    ]);
+    const options = await dashboardFilterOptions(db, as(carla, "manager"), {
+      cycleId: cycle.id,
+      hierarchy: "asOf",
+    });
+    expect(options.managers).toEqual([{ id: carla, name: "Carla Romero" }]);
+  });
+
+  it("the team of a manager is their direct reports; People see the whole subtree", async () => {
+    const { cycle } = await h1WithDora();
+    const mgr = await managerTeam(db, as(ana, "manager"), {
+      cycleId: cycle.id,
+      hierarchy: "asOf",
+    });
+    expect(mgr.members.map((m) => [m.name, m.depth])).toEqual([
+      ["Carla Romero", 1],
+      ["Dora Díaz", 1],
+    ]);
+    const all = await managerTeam(db, hr, {
+      managerId: ana,
+      cycleId: cycle.id,
+      hierarchy: "asOf",
+    });
+    expect(all.members.map((m) => [m.name, m.depth])).toEqual([
+      ["Carla Romero", 1],
+      ["Dora Díaz", 1],
+      ["Bruno Pérez", 2],
+    ]);
+  });
+
+  it("a trajectory is open to the manager of the person at the snapshot or today, not to a skip-level", async () => {
+    await h1WithDora();
+    const dora = await idOf("Dora Díaz");
+    // Carla managed Bruno in 2022; Dora reported to Ana: Carla sees only
+    // the first.
+    expect(
+      (await personTrajectory(db, as(carla, "manager"), bruno)).points,
+    ).toHaveLength(1);
     await expect(
-      executiveSummary(db, as(ana, "manager"), { cycleId: cycle.id }),
+      personTrajectory(db, as(carla, "manager"), dora),
     ).rejects.toMatchObject({ code: "forbidden" });
+    expect(
+      (await personTrajectory(db, as(ana, "manager"), dora)).points,
+    ).toHaveLength(1);
+  });
+});
+
+describe("authorization by role", () => {
+  // Carla manages Bruno at the snapshot; Ana as an employee has no part in
+  // any of it.
+  const actorFor = (name: string): ActorContext =>
+    ({
+      hr,
+      manager: as(carla, "manager"),
+      managerWithoutPerson: { personId: null, role: "manager" } as const,
+      employee: as(ana),
+      direction,
+    })[name as "hr"];
+  const roleNames = [
+    "hr",
+    "manager",
+    "managerWithoutPerson",
+    "employee",
+    "direction",
+  ];
+  type Run = (actor: ActorContext) => Promise<unknown>;
+  type Case = { query: string; run: (cycleId: string) => Run };
+  const queries: Case[] = [
+    {
+      query: "cycleProgress",
+      run: (cycleId) => (a) =>
+        cycleProgress(db, a, { cycleId, hierarchy: "asOf" }),
+    },
+    {
+      query: "ratingDistribution",
+      run: (cycleId) => (a) =>
+        ratingDistribution(db, a, {
+          cycleId,
+          hierarchy: "asOf",
+          groupBy: "department",
+          stage: "current",
+        }),
+    },
+    {
+      query: "goalsVsRating",
+      run: (cycleId) => (a) =>
+        goalsVsRating(db, a, { cycleId, hierarchy: "asOf" }),
+    },
+    {
+      query: "selfManagerGap",
+      run: (cycleId) => (a) =>
+        selfManagerGap(db, a, { cycleId, hierarchy: "asOf" }),
+    },
+    {
+      query: "dashboardFilterOptions",
+      run: (cycleId) => (a) =>
+        dashboardFilterOptions(db, a, { cycleId, hierarchy: "asOf" }),
+    },
+    {
+      query: "managerTeam (own team)",
+      run: (cycleId) => (a) =>
+        managerTeam(db, a, {
+          managerId: a.personId ?? carla,
+          cycleId,
+          hierarchy: "asOf",
+        }),
+    },
+    {
+      query: "personTrajectory (a report)",
+      run: () => (a) => personTrajectory(db, a, bruno),
+    },
+    {
+      query: "executiveSummary",
+      run: (cycleId) => (a) => executiveSummary(db, a, { cycleId }),
+    },
+  ];
+  const allowed: Record<string, string[]> = {
+    hr: queries.map((q) => q.query),
+    manager: queries
+      .map((q) => q.query)
+      .filter((q) => q !== "executiveSummary"),
+    managerWithoutPerson: [],
+    employee: [],
+    direction: ["executiveSummary"],
+  };
+
+  it.each(roleNames)("%s", async (name) => {
+    const { cycle } = await h1();
+    const actor = actorFor(name);
+    for (const { query, run } of queries) {
+      const outcome = run(cycle.id)(actor);
+      if (allowed[name].includes(query)) {
+        await expect(outcome, `${name} ${query}`).resolves.toBeDefined();
+      } else {
+        await expect(outcome, `${name} ${query}`).rejects.toMatchObject({
+          code: "forbidden",
+        });
+      }
+    }
+  });
+
+  it("an employee reads their own trajectory (never the stage), nobody else's", async () => {
+    await h1();
+    expect(
+      (await personTrajectory(db, as(bruno), bruno)).points.every(
+        (p) => p.stage === null,
+      ),
+    ).toBe(true);
+    await expect(personTrajectory(db, as(ana), bruno)).rejects.toMatchObject({
+      code: "forbidden",
+    });
+    await expect(personTrajectory(db, direction, bruno)).rejects.toMatchObject({
+      code: "forbidden",
+    });
   });
 });
 

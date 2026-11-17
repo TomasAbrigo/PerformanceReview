@@ -3,6 +3,7 @@ import { setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { connection } from "next/server";
 import { Suspense } from "react";
+import { HrOnly } from "@/components/access/hr-only";
 import { HistoryResult } from "@/components/imports/history-result";
 import { db } from "@/db/client";
 import { routing } from "@/i18n/routing";
@@ -26,7 +27,9 @@ export default function HistoryImportPage(
   return (
     <main className="mx-auto w-full max-w-5xl p-8">
       <Suspense>
-        <HistoryData {...props} />
+        <HrOnly>
+          <HistoryData {...props} />
+        </HrOnly>
       </Suspense>
     </main>
   );

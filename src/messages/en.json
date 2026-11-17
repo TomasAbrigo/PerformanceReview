@@ -18,8 +18,53 @@
     "nav": {
       "label": "Settings",
       "home": "Home",
+      "insights": "Insights",
       "scales": "Rating scales",
       "templates": "Review templates"
+    }
+  },
+  "InsightsSettings": {
+    "title": "Insights settings",
+    "description": "Alert thresholds, minimum group size, semester cuts and analysis provider. Only People can change them and every change goes to the audit log.",
+    "alerts": {
+      "title": "Alerts",
+      "dropThreshold": "Minimum drop between cycles (points)",
+      "dropThresholdHint": "An alert fires when retention or engagement drop at least this many points between two cycles.",
+      "riskThreshold": "Risk threshold",
+      "riskThresholdHint": "Risk: retention and engagement both at or under this value (1 to 5 scale)."
+    },
+    "aggregation": {
+      "title": "Aggregation",
+      "minGroupSize": "Minimum group size (n)",
+      "minGroupSizeHint": "Direction and anonymized exports do not show groups with fewer people than this."
+    },
+    "semester": {
+      "title": "Semesters",
+      "h1Start": "First semester starts (MM-DD)",
+      "h2Start": "Second semester starts (MM-DD)",
+      "daysHint": "Day of the year as MM-DD, for example 07-01.",
+      "ambiguityDays": "Ambiguity margin (days)",
+      "ambiguityDaysHint": "An assessment within this many days of a cut is ambiguous and you are asked which cycle it belongs to."
+    },
+    "analysis": {
+      "title": "Qualitative analysis",
+      "provider": "Provider",
+      "providerHint": "Anthropic also needs the ANALYSIS_PROVIDER flag and an API key; Mock is the default.",
+      "providers": {
+        "mock": "Mock (deterministic, no cost)",
+        "anthropic": "Anthropic"
+      }
+    },
+    "save": "Save changes",
+    "saved": "Changes saved.",
+    "errors": {
+      "invalid_number": "Enter a whole number.",
+      "out_of_range": "Must be between {min} and {max}.",
+      "invalid_day": "Enter a valid day as MM-DD.",
+      "invalid_choice": "Pick an option from the list.",
+      "semester_order": "The second semester must start after the first.",
+      "unknown_key": "Unknown setting.",
+      "invalid": "Invalid value."
     }
   },
   "Common": {
@@ -45,6 +90,7 @@
     "invalid": "Invalid value.",
     "validation": "Check the highlighted fields.",
     "not_found": "The item no longer exists.",
+    "forbidden": "Only People (HR) can do this.",
     "system_readonly": "System items cannot be changed or deleted; clone them instead.",
     "in_use": "The scale is used by a question.",
     "unknown": "Something went wrong.",
@@ -460,10 +506,16 @@
     "roles": {
       "hr": "People (HR)",
       "manager": "Manager",
-      "employee": "Employee"
+      "employee": "Employee",
+      "direction": "Direction"
     },
     "apply": "Apply",
     "error": "Could not change the actor."
+  },
+  "Access": {
+    "title": "No access",
+    "description": "This screen is for People (HR) only. If that applies, switch the role in “Act as”.",
+    "home": "Back to home"
   },
   "Review": {
     "noAnswer": "No answer"
@@ -577,6 +629,7 @@
       "invalid_profile": "The file does not have what the profile needs.",
       "invalid_profile_definition": "The profile is not valid: check the name and the key columns.",
       "profile_exists": "A profile with that name already exists: choose another.",
+      "forbidden": "Only People (HR) can import files.",
       "unknown": "An unexpected error occurred.",
       "unknown_profile": "The chosen profile no longer exists.",
       "timeout": "The import took too long and was cancelled. Try again."
@@ -972,10 +1025,13 @@
     "executive": {
       "title": "Leadership view",
       "link": "Leadership view",
-      "hint": "Aggregates only: no names or ids. Departments with fewer than {min} people are grouped.",
+      "hint": "Aggregates only: no names or ids. Groups of fewer than {min} people are folded into Others or hidden.",
+      "hintPeople": "Aggregates only: no names or ids.",
       "participants": "Participants",
       "completion": "Completion",
       "byDepartment": "By department",
+      "others": "Others",
+      "belowMinimum": "There are fewer than {min} participants: no data is shown to protect people.",
       "suppressed": "{n, plural, =0 {Nobody in small groups} one {# person in small departments (not broken out)} other {# people in small departments (not broken out)}}"
     }
   },

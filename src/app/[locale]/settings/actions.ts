@@ -5,14 +5,16 @@ import type { QuestionPayload } from "@/components/templates/template-editor";
 import { db } from "@/db/client";
 import type { LocalizedText } from "@/db/schema";
 import { actionResult } from "@/lib/action-result";
+import { onlyHr } from "@/modules/actor/server";
 import * as templates from "@/modules/templates";
 
 const isTemplatesError = (error: unknown): error is templates.TemplatesError =>
   error instanceof templates.TemplatesError;
 
+/** Scales and templates are People-only: anyone else gets `forbidden`. */
 const result = <T extends object = object>(
   fn: () => Promise<T | void>,
-): Promise<ActionResult<T>> => actionResult(fn, isTemplatesError);
+): Promise<ActionResult<T>> => onlyHr(() => actionResult(fn, isTemplatesError));
 
 // Scales
 
