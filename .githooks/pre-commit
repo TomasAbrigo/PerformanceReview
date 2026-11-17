@@ -1,0 +1,4 @@
+#!/bin/sh
+# Blocks commits that carry personal data (CSV/XLSX outside fixtures/, emails
+# outside the synthetic domain). Enable with `pnpm hooks:install`.
+exec pnpm --silent check:sensitive

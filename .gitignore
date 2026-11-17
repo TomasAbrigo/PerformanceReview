@@ -56,3 +56,6 @@ next-env.d.ts
 
 # local data: uploaded files and custom source profiles
 /var/
+
+# real Bamboo exports and other private data (never commit; see README "Datos sensibles")
+/data/private/
