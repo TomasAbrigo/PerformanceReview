@@ -1387,7 +1387,8 @@
       "all": "Total",
       "noDepartment": "No department",
       "meter": "{label}: {submitted} of {total} submitted",
-      "noManager": "No manager"
+      "noManager": "No manager",
+      "team": "Team {n}"
     },
     "SelfAssessment": {
       "nav": "Self-assessment report",
@@ -1493,7 +1494,8 @@
       "total": "Total",
       "delta": "Change against the previous cycle",
       "points": "percentage points",
-      "rate": "% submitted"
+      "rate": "% submitted",
+      "notApplicable": "Not applicable"
     },
     "indicators": {
       "title": "Retention and engagement indicators",
@@ -1544,7 +1546,6 @@
       "outliers": "Outliers",
       "doneButLow": "Goals done but retention or engagement low",
       "behindButHigh": "Goals behind but retention and engagement high",
-      "count": "Count",
       "completedPct": "% completed",
       "underMinimum": "Fewer people than the minimum group: not published"
     },
@@ -1716,7 +1717,8 @@
       "meter": "{group}: {pct} % of goals completed",
       "suppressed": "{n, plural, one {# person in small groups is not shown} other {# people in small groups are not shown}}",
       "totalHidden": "The total is hidden so it does not reveal the small groups.",
-      "unassigned": "Unassigned"
+      "unassigned": "Unassigned",
+      "team": "Team {n}"
     },
     "scatter": {
       "title": "Goals completion vs {indicator}",

@@ -100,9 +100,11 @@ function outliersView(
  * area are the snapshot's, or today's with `hierarchy: "current"`.
  *
  * People: everything. A manager: their direct reports of the snapshot.
- * Direction: only areas and managers with at least the
+ * Direction: only areas and teams with at least the
  * `aggregation.minGroupSize` people (smaller ones are folded into "Otros",
- * hidden when that is still under it), never a person. An employee: forbidden.
+ * hidden when that is still under it), never a person; a team keeps its
+ * `key` but has no `label` (a manager is a person, so no name). An employee:
+ * forbidden.
  */
 export async function goalKpis(
   db: DbOrTx,
@@ -197,27 +199,39 @@ export async function goalInsightsFilterOptions(
  * the authorization, the cycle and the settings are read once, and the KPIs,
  * the goals-vs-indicators aggregate, the outliers and the filter options are
  * all derived from the same rows (the options from the unfiltered ones).
+ * `groupBys` asks for more groupings of the KPIs off the same rows (the
+ * Arturía export wants areas and teams); `kpisBy` has them all, `groupBy`'s
+ * included, and `kpis` is the one of `groupBy`.
  */
 export async function goalInsights(
   db: DbOrTx,
   actor: ActorContext,
-  input: GoalInsightsInput & { groupBy: GoalGroupBy },
+  input: GoalInsightsInput & {
+    groupBy: GoalGroupBy;
+    groupBys?: readonly GoalGroupBy[];
+  },
 ): Promise<{
   kpis: GoalKpis;
+  kpisBy: Partial<Record<GoalGroupBy, GoalKpis>>;
   vsIndicators: GoalsVsIndicators;
   outliers: GoalOutliers;
   options: GoalInsightsFilterOptions;
 }> {
   const ctx = await goalContext(db, actor, input.cycleId, input.config);
-  requireGroupable(ctx, input.groupBy);
+  const groupBys = [...new Set([input.groupBy, ...(input.groupBys ?? [])])];
+  for (const g of groupBys) requireGroupable(ctx, g);
   const hierarchy = input.hierarchy ?? "asOf";
   const all = await loadParticipantRows(db, ctx, {
     hierarchy,
     sentiment: true,
   });
   const rows = filterRows(all, input.filters);
+  const kpisBy = Object.fromEntries(
+    groupBys.map((g) => [g, kpisView(ctx, hierarchy, g, rows)]),
+  ) as Record<GoalGroupBy, GoalKpis>;
   return {
-    kpis: kpisView(ctx, hierarchy, input.groupBy, rows),
+    kpis: kpisBy[input.groupBy],
+    kpisBy,
     vsIndicators: vsView(ctx, rows),
     outliers: outliersView(ctx, rows),
     options: filterOptionsOf(all, minOf(ctx) === null),

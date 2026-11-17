@@ -44,8 +44,15 @@ export function KpisTable({ kpis }: { kpis: GoalKpis }) {
   const pct = usePct();
   const decimal = useDecimal();
   if (kpis.groups.length === 0 && kpis.suppressed === 0) return <Empty />;
+  // A team with a key but no name is one of direction's (a manager is a
+  // person): numbered in the order they come.
+  const teams = kpis.groups.filter((g) => g.key !== null && g.label === null);
   const label = (g: GoalKpiGroup) =>
-    g.others ? t("others") : (g.label ?? t("unassigned"));
+    g.others
+      ? t("others")
+      : g.key !== null && g.label === null
+        ? t("team", { n: teams.indexOf(g) + 1 })
+        : (g.label ?? t("unassigned"));
   const share = (count: number, value: number | null) =>
     value === null ? t("none") : t("share", { count, pct: pct(value) ?? 0 });
   const row = (g: GoalKpiGroup, name: string, strong = false) => (

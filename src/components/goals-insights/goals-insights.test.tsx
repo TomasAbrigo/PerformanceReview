@@ -138,6 +138,28 @@ describe("KpisTable", () => {
     expect(screen.getByText(/El total se oculta/)).toBeInTheDocument();
   });
 
+  it("direction's teams have a key but no name: numbered, not 'Sin asignar'", () => {
+    renderIn(
+      "en",
+      <KpisTable
+        kpis={kpis({
+          groupBy: "manager",
+          groups: [
+            group("m1", null, { people: 6, goals: 10, completed: 5 }),
+            group("m2", null, { people: 5, goals: 4, completed: 1 }),
+            group(null, null, { people: 5, goals: 4, completed: 1 }, true),
+          ],
+          total: null,
+          minGroupSize: 5,
+        })}
+      />,
+    );
+    expect(screen.getByRole("row", { name: /Team 1/ })).toBeInTheDocument();
+    expect(screen.getByRole("row", { name: /Team 2/ })).toBeInTheDocument();
+    expect(screen.getByRole("row", { name: /Others/ })).toBeInTheDocument();
+    expect(screen.queryByText("Unassigned")).toBeNull();
+  });
+
   it("an unnamed group is 'Sin asignar'; nothing at all is the empty message", () => {
     const { unmount } = renderIn(
       "es",

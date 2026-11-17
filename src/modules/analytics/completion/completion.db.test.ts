@@ -279,7 +279,7 @@ describe("completionSummary", () => {
       expect(s.others).toBeNull();
     });
 
-    it("direction never gets managers (nor filters), and reads the minimum from the settings", async () => {
+    it("direction gets teams without names (nor filters), and reads the minimum from the settings", async () => {
       await setSetting(db, hr, "aggregation.minGroupSize", 3);
       const s = await completionSummary(db, direction, {
         cycleId: c1,
@@ -288,10 +288,30 @@ describe("completionSummary", () => {
         managerId: marta,
         department: "Ventas",
       });
-      expect(s.groupBy).toBe("none");
-      expect(s.groups).toEqual([]);
+      expect(s.groupBy).toBe("manager");
+      // Marta has 3 participants and Nico 4: both reach 3. The filters are
+      // ignored, and a team has its key but never its manager's name.
+      expect(s.groups.map((g) => [g.key, g.label])).toEqual([
+        [marta, null],
+        [nico, null],
+      ]);
+      expect(s.groups.map((g) => g.participants)).toEqual([3, 4]);
+      expect(JSON.stringify(s)).not.toMatch(/Marta|Nico/);
       expect(s.minGroupSize).toBe(3);
       expect(s.participants).toBe(7);
+    });
+
+    it("a team under the minimum is hidden (and only counted), never named", async () => {
+      await setSetting(db, hr, "aggregation.minGroupSize", 4);
+      const s = await completionSummary(db, direction, {
+        cycleId: c1,
+        groupBy: "manager",
+        hierarchy: "asOf",
+      });
+      expect(s.groups.map((g) => [g.key, g.label])).toEqual([[nico, null]]);
+      // Marta's 3 are the only ones left for "Otros": under 4, so hidden.
+      expect(s.others).toBeNull();
+      expect(s.suppressed).toBe(3);
     });
   });
 });

@@ -162,7 +162,7 @@ const minGroupSizeFor = async (db: DbOrTx, override?: number) =>
 
 /**
  * Who may read what: everybody in scope (People, a manager's direct reports)
- * or only aggregates (direction: no managers, no filters). Anybody else is
+ * or only aggregates (direction: teams without names, no filters). Anybody else is
  * forbidden. Then the cycle must exist.
  */
 async function resolve(
@@ -180,13 +180,12 @@ async function resolve(
   const cycle = await requireCycle(db, f.cycleId);
   const masked = scope.kind === "aggregatesOnly";
   const hierarchy = f.hierarchy ?? "asOf";
-  // Direction reads aggregates by department only: a manager is a person.
-  const requested = f.groupBy ?? "department";
   return {
     cycle,
     masked,
     minGroupSize: scope.kind === "aggregatesOnly" ? scope.minGroupSize : null,
-    groupBy: masked && requested === "manager" ? "none" : requested,
+    // Direction may group by manager too: a team, never a name (`summarize`).
+    groupBy: f.groupBy ?? "department",
     hierarchy,
     filters: {
       cycleId: cycle.id,
@@ -214,9 +213,10 @@ function summaryOf(r: Resolved, rows: SideRow[]): CompletionSummary {
  * their review requests (see `sidesCte`).
  *
  * People read everything and a manager their direct reports; direction only
- * aggregates: no managers, no filters, groups under the minimum group size
- * folded into "Otros" (or hidden if that is under it too), and a cycle with
- * fewer participants than that shows only its head count. Employees (and a
+ * aggregates: no filters, no names (a team keeps its manager's `key` but has
+ * no `label`), groups under the minimum group size folded into "Otros" (or
+ * hidden if that is under it too), and a cycle with fewer participants than
+ * that shows only its head count. Employees (and a
  * manager acting without a person) are forbidden.
  */
 export async function completionSummary(

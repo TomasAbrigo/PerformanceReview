@@ -1387,7 +1387,8 @@
       "all": "Total",
       "noDepartment": "Sin área",
       "meter": "{label}: {submitted} de {total} enviadas",
-      "noManager": "Sin manager"
+      "noManager": "Sin manager",
+      "team": "Equipo {n}"
     },
     "SelfAssessment": {
       "nav": "Reporte de autoevaluación",
@@ -1493,7 +1494,8 @@
       "total": "Total",
       "delta": "Cambio contra el ciclo anterior",
       "points": "puntos porcentuales",
-      "rate": "% enviadas"
+      "rate": "% enviadas",
+      "notApplicable": "No aplica"
     },
     "indicators": {
       "title": "Indicadores de retención y compromiso",
@@ -1544,7 +1546,6 @@
       "outliers": "Casos atípicos",
       "doneButLow": "Objetivos cumplidos con retención o compromiso bajo",
       "behindButHigh": "Objetivos atrasados con retención y compromiso altos",
-      "count": "Cantidad",
       "completedPct": "% completado",
       "underMinimum": "Menos personas que el grupo mínimo: no se publica"
     },
@@ -1716,7 +1717,8 @@
       "meter": "{group}: {pct} % de objetivos completados",
       "suppressed": "{n, plural, one {# persona en grupos chicos no se muestra} other {# personas en grupos chicos no se muestran}}",
       "totalHidden": "El total se oculta para no revelar los grupos chicos.",
-      "unassigned": "Sin asignar"
+      "unassigned": "Sin asignar",
+      "team": "Equipo {n}"
     },
     "scatter": {
       "title": "Cumplimiento de objetivos vs {indicator}",

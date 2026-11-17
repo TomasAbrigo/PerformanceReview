@@ -61,6 +61,47 @@ describe("goalInsights (everything the page shows, from one load)", () => {
     ]);
   });
 
+  it("groupBys: more groupings of the same rows, direction's teams without a name", async () => {
+    const input = { cycleId: s.h1.cycleId };
+    const all = await goalInsights(db, hr, {
+      ...input,
+      groupBy: "department",
+      groupBys: ["manager"],
+    });
+    expect(Object.keys(all.kpisBy).sort()).toEqual(["department", "manager"]);
+    expect(all.kpisBy.department).toEqual(all.kpis);
+    expect(all.kpisBy.manager).toEqual(
+      await goalKpis(db, hr, { ...input, groupBy: "manager" }),
+    );
+    expect(all.kpisBy.manager!.groups.map((g) => g.label)).toContain(
+      "Marta Quiroga",
+    );
+
+    const config = { minGroupSize: 3 };
+    const dir = await goalInsights(db, direction, {
+      ...input,
+      config,
+      groupBy: "department",
+      groupBys: ["manager"],
+    });
+    expect(dir.kpisBy.manager).toEqual(
+      await goalKpis(db, direction, { ...input, config, groupBy: "manager" }),
+    );
+    const teams = dir.kpisBy.manager!.groups;
+    expect(teams.length).toBeGreaterThan(0);
+    for (const g of teams) {
+      expect(g.key).not.toBeNull();
+      expect(g.label).toBeNull();
+    }
+    await expect(
+      goalInsights(db, direction, {
+        ...input,
+        groupBy: "department",
+        groupBys: ["person"],
+      }),
+    ).rejects.toMatchObject({ code: "forbidden" });
+  });
+
   it("applies the same reach to all of it: a manager, direction, nobody else", async () => {
     const marta = await goalInsights(db, as(s.id.marta, "manager"), {
       cycleId: s.h1.cycleId,

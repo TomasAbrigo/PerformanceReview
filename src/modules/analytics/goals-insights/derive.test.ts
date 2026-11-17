@@ -110,6 +110,26 @@ describe("kpisOf", () => {
     ]);
   });
 
+  it("with a minimum a team keeps its key but never its manager's name", () => {
+    const named = kpisOf(rows, "manager", null).groups;
+    expect(named.map((g) => g.label)).toEqual(["Marta", "Nora"]);
+    const masked = kpisOf(rows, "manager", 1);
+    expect(masked.groups.map((g) => [g.key, g.label, g.people])).toEqual([
+      [M1, null, 4],
+      [M2, null, 1],
+    ]);
+    expect(masked.total).not.toBeNull();
+    // the area keeps its name (it is not a person); the unnamed one is "Otros"
+    expect(kpisOf(rows, "department", 1).groups.map((g) => g.label)).toEqual([
+      "Ingeniería",
+      "Producto",
+      null,
+    ]);
+    // equal labels (none) fall back to the key, so the order is stable
+    const [a, b] = kpisOf([...rows].reverse(), "manager", 1).groups;
+    expect([a.key, b.key]).toEqual([M1, M2]);
+  });
+
   it("with a minimum folds and hides like the aggregate views do", () => {
     const { groups, total, suppressed, minGroupSize } = kpisOf(
       rows,

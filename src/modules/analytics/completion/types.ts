@@ -72,7 +72,7 @@ export const withRates = (
 export type CompletionSummary = {
   cycleId: string;
   cycleName: string;
-  /** The grouping actually applied (direction never gets managers). */
+  /** The grouping asked for (direction's teams have a key but no label). */
   groupBy: CompletionGroupBy;
   hierarchy: Hierarchy;
   /**

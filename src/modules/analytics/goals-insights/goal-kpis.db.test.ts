@@ -331,7 +331,10 @@ describe("goalKpis (who reads)", () => {
       cycleId: h1(),
       groupBy: "manager",
     });
-    expect(byManager.groups.map((g) => g.label)).toEqual(["Marta Quiroga"]);
+    // A manager is a person: the team keeps its key, not the name.
+    expect(byManager.groups.map((g) => [g.key, g.label])).toEqual([
+      [s.id.marta, null],
+    ]);
     expect(byManager.suppressed).toBe(3);
   });
 
@@ -391,7 +394,8 @@ describe("goalKpis (who reads)", () => {
       cycleId: h1(),
       groupBy: "manager",
     });
-    expect(hidden.groups.map((g) => g.label)).toEqual(["Marta Quiroga"]);
+    expect(hidden.groups.map((g) => g.key)).toEqual([s.id.marta]);
+    expect(hidden.groups.map((g) => g.label)).toEqual([null]);
     expect(hidden.suppressed).toBe(3);
   });
 });
