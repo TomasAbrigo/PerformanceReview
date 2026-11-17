@@ -183,6 +183,8 @@ UI en español e inglés desde el inicio. Primera versión sin login: modo admin
 - Sin curva de distribución forzada; sin decisiones de compensación dentro del módulo.
 - Snapshot organizacional al lanzar ciclo y SCD2 como mecanismo para "manager al momento de la review"; las vistas eligen explícitamente as-of o actual.
 
+- **Poda realizada (#54):** se quitaron el asistente y las fases de ciclo, la cadencia por fecha de ingreso, la autoevaluación y la evaluación del manager, pares y nominaciones, comparación, notas, acuse de recibo, calibración (grupos, propuestas, publicación), operación del ciclo, notificaciones, `/me`, `/team` y los roles `peer` y `calibrator`. La migración `0019_prune` borra las tablas `calibration_group*`, `cycle_transition`, `review_audit`, `follow_up_note`, `peer_nomination` y `notification`, sus columnas propias y los enums `calibration_group_kind`, `schedule_kind`, `review_audit_action`, `peer_nomination_status` y `notification_kind`. Se conservan los enums `cycle_status`, `review_relationship`, `review_request_status` y `final_rating_stage` (sacar valores obliga a reescribir filas), además de `final_rating` y `v_current_rating`, que leen los dashboards, la API y los exports.
+
 ## Testing Decisions
 
 - Un buen test verifica comportamiento observable a través de la interfaz pública del módulo (entradas → salidas, filas en la base, estados), nunca detalles internos. Los tests de dominio corren contra Postgres real (Supabase local vía Vitest proyecto `db`) y se escriben antes del código (rojo → verde → refactor).
@@ -215,6 +217,150 @@ UI en español e inglés desde el inicio. Primera versión sin login: modo admin
 - Preguntas abiertas al negocio: clave confiable de empleado (id, legajo, email) y casos de reingreso; escalas históricas y su significado; si hoy existe calibración en planillas; cuántos años de histórico migrar; sistema de registro de la organización una vez reemplazado Bamboo; quién puede ver feedback de pares y con qué anonimato.
 - Hallazgos de Bamboo a replicar que no están en el proceso default pero el modelo soporta: cadencia por fecha de ingreso, publicación diferida de la evaluación del manager, "vista del empleado" para compartir pantalla, assessments impromptu y salteo, reglas de cambio de manager a mitad de ciclo.
 
-## Iteración 2: poda (#54)
+---
 
-La iteración 2 ("Insights sobre Bamboo", PRD en el issue #53) deja a Bamboo como el lugar donde se hacen las evaluaciones y a esta app como la capa de análisis. La poda quitó los flujos de las secciones Ciclos (asistente, fases, cadencia por fecha de ingreso, duplicar), Autoevaluación, Evaluación del manager, Feedback de pares y upward (nominaciones), Calibración (grupos, propuestas, publicación) y Operación y notificaciones (evaluadores alternos, en nombre de otro, desbloqueo, notificaciones, bandeja), además de la comparación, las notas de seguimiento y el acuse de recibo, y los roles `peer` y `calibrator`. Se conservan como datos los ciclos (contenedores de solo lectura con snapshot org y de goals), los pedidos, las respuestas, las revisiones de pregunta, `final_rating` y `v_current_rating`, que alimentan los dashboards, la API y los exports. Los user stories de esas secciones quedan como referencia histórica de v1.
+# Iteración 2: Insights sobre Bamboo
+
+Fecha: 2026-11-17. Reemplaza la prioridad de la v1: el reemplazo total de Bamboo sigue siendo el norte, pero lo urgente es sacar valor de los datos que ya existen en Bamboo y presentárselos a People. La app pasa a ser **solo este módulo**: se conserva todo lo que el módulo usa (identidad, historial de puesto, personas, organigrama, ingesta y carga de archivos, goals, templates y escalas, ciclos como contenedores con participantes y snapshot, pedidos y respuestas, visibilidad de lectura, analítica, exports, API, selector "Actuar como") y se elimina lo que no usa (correr ciclos dentro de la app: autoevaluación y evaluación del manager como formularios, pares y upward, nominaciones, calibración, compartir y acuse de recibo, notas de seguimiento, notificaciones e inbox, cadencia por fecha de ingreso, asistente de ciclos). Las tablas que quedan sin uso se eliminan por migración.
+
+## Problem Statement
+
+People corre dos veces por año un proceso de evaluación en Bamboo con dos etapas desconectadas: Goals y Assessments. La evaluación tiene 5 preguntas abiertas y 2 cerradas (retención y compromiso, Likert 1-5, respondidas por el manager y ocultas al empleado). Bamboo sólo ofrece dos reportes nativos exportables (Assessment Progress y el reporte crudo de respuestas, que es Employee Performance), sin IDs ni cruce con la organización del momento. Hoy existe un dashboard HTML armado a mano con completitud y análisis cualitativo (etiquetas de sentimiento y temas por comentario) que nunca se compartió. People necesita ver completitud, quién falta, distribución y evolución de retención y compromiso, el análisis cualitativo y la relación con los goals, con permisos por rol y un export para una mini app de Arturía, todo sin exponer datos sensibles.
+
+## Solution
+
+Sobre el pipeline existente (ingesta, perfiles de fuente, historial de importación, identidad golden, snapshot organizacional por participante):
+
+1. **Importar los dos reportes nativos** con CSV y XLSX, mapeo de columnas configurable por perfil, detección del ciclo semestral (nombre de ciclo primero, fecha como respaldo, ambigüedad resuelta en la UI), idempotencia por archivo y actualización por ciclo, cola de identidad para lo que no cruza, y un comando `reports:inspect` que imprime sólo encabezados y conteos.
+2. **Modelar las preguntas de Santex** en un template de sistema "Evaluación semestral Santex": 2 estándar de Bamboo (self y manager), 3 custom (placeholders), y las 2 cerradas del manager (Retención, Compromiso) en Likert 1-5 no visibles para el evaluado. Cada pregunta abierta lleva una dimensión. Las codificaciones históricas con letra se normalizan a 1-5 con una tabla de equivalencias configurable; lo que no mapea va a calidad de datos.
+3. **Dashboards**: completitud (global, por área, por manager, quién falta, CSV, comparación con el ciclo anterior); indicadores de retención y compromiso (distribución, evolución por persona y equipo, matriz de cuadrantes con lista de riesgo, alertas con umbrales configurables); análisis cualitativo (sentimiento por dimensión, temas, evolución, sentimiento vs. indicadores); goals vs. indicadores e indicadores por objetivo; reporte de autoevaluación; sección de health check preparada; vista ejecutiva con selector cualitativo / cuantitativo.
+4. **Módulo `qualitative-analysis`** con interfaz `AnalysisProvider`: `MockProvider` determinista (tests y seed) y `AnthropicProvider` apagado por defecto (flag explícita, lotes, seudonimización testeada, caché por hash de texto y versión de prompt, registro de corridas sin contenido). Importación de etiquetas ya existentes desde CSV documentado. Corrección humana auditada que nunca se pisa.
+5. **Export para Arturía** (`pnpm export:arturia --cycle <id> [--anonymized]`): HTML autocontenido y JSON con contrato versionado. Por defecto con todos los datos (nombres y email) en `data/private/`; `--anonymized` deja sólo agregados con mínimo n = 5 por celda.
+6. **Permisos**: nuevo rol `direction`; People ve todo, Manager sólo sus reportes directos del snapshot y agregados de su equipo, Dirección sólo agregados con n ≥ 5, Empleado nunca ve retención, compromiso ni etiquetas sobre sí mismo.
+7. **Datos sensibles**: `data/private/` ignorado por git, check que falla si se commitea un CSV/XLSX fuera de `fixtures/` o un archivo con emails fuera del dominio sintético del seed; el email no se muestra salvo en la ficha de persona para People, no sale en exports por defecto (opción explícita), no se loguea ni se manda a servicios externos.
+
+## User Stories
+
+### Poda y datos sensibles
+
+1. Como People, quiero que la app contenga sólo el módulo de insights y lo que éste necesita, para que la herramienta sea clara y mantenible.
+2. Como desarrollador, quiero que los exports reales de Bamboo vivan en `data/private/` ignorado por git, para no filtrar datos.
+3. Como desarrollador, quiero un check que falle si se intenta commitear un CSV/XLSX fuera de `fixtures/` o un archivo con emails que no sean del dominio sintético, para que ningún dato real llegue al repo.
+4. Como People, quiero que el email sólo se muestre en la ficha de persona y no en listados ni exports por defecto, para minimizar exposición.
+5. Como People, quiero poder incluir el email en un export con una opción explícita, para cruzar con otras fuentes cuando haga falta.
+
+### Importación de reportes
+
+6. Como People, quiero subir el reporte Assessment Progress (CSV o XLSX) y que alimente la completitud por persona y manager de un ciclo, para saber quién falta.
+7. Como People, quiero subir el reporte crudo de respuestas (Employee Performance) y que cree o actualice el ciclo semestral correspondiente con participantes, pedidos y respuestas, para tener el histórico.
+8. Como People, quiero que el sistema detecte el ciclo semestral de cada fila por el nombre del ciclo y, si no hay, por la fecha de assessment con cortes configurables, para no clasificar a mano.
+9. Como People, quiero que cuando el ciclo sea ambiguo la UI me pregunte a qué ciclo va cada grupo de filas, en vez de adivinar.
+10. Como People, quiero que reimportar el mismo archivo no duplique ni cambie nada, para repetir con confianza.
+11. Como People, quiero que un archivo nuevo del mismo ciclo actualice los datos existentes, porque la carga es manual y se repite.
+12. Como People, quiero que las personas que no cruzan con la identidad golden vayan a la cola de conflictos, para resolverlas a mano.
+13. Como People, quiero que el mapeo de columnas de cada reporte sea configurable (nombre de columna, tipo de pregunta, dimensión, lado self/manager), para ajustarlo cuando vea las columnas reales.
+14. Como desarrollador, quiero `pnpm reports:inspect <archivo>` que imprima sólo encabezados y conteos, nunca valores, para ajustar el perfil contra un export real sin exponer datos.
+15. Como desarrollador, quiero fixtures sintéticos de ambos reportes en `fixtures/bamboo-reports/`, para desarrollar y testear.
+16. Como People, quiero que los ciclos importados tengan snapshot de goals por solapamiento de fechas, para relacionar assessments con goals históricos.
+
+### Modelo de preguntas
+
+17. Como People, quiero un template de sistema "Evaluación semestral Santex" con las 2 preguntas estándar (self y manager), 3 custom y las 2 cerradas del manager, para que la evaluación refleje el proceso real.
+18. Como People, quiero que Retención y Compromiso sean Likert 1-5 y no visibles para el evaluado, para proteger la información.
+19. Como People, quiero que las respuestas históricas con letra (A-D o A-E) se normalicen a 1-5 con una tabla de equivalencias configurable y documentada, para comparar entre ciclos.
+20. Como People, quiero que una opción que no mapea aparezca en calidad de datos en lugar de descartarse, para corregir el mapeo.
+21. Como People, quiero que cada pregunta abierta tenga una dimensión (Fortalezas, Oportunidades de mejora, una por custom), para agrupar el análisis cualitativo.
+22. Como People, quiero que un evaluador importado que no es el manager directo del snapshot quede marcado como mismatch y aparezca en calidad de datos, para auditar quién evaluó.
+
+### Completitud
+
+23. Como People, quiero ver el % de completitud de autoevaluación y de evaluación del manager, global, por área y por manager, para seguir el ciclo.
+24. Como People, quiero el detalle de quién falta por persona y por manager, filtrable y exportable a CSV sin email por defecto, para reclamar.
+25. Como People, quiero comparar la completitud con el ciclo anterior, para ver tendencias.
+26. Como Manager, quiero ver la completitud de mis reportes directos del snapshot, para gestionar a mi equipo.
+
+### Retención y compromiso
+
+27. Como People, quiero la distribución de retención y de compromiso por ciclo, área y manager del snapshot, para detectar focos.
+28. Como People, quiero la evolución de ambos indicadores por persona y por equipo a lo largo de los ciclos, para ver trayectorias.
+29. Como People, quiero la matriz retención × compromiso por cuadrantes con la lista de personas del cuadrante de riesgo, para actuar.
+30. Como People, quiero alertas por caída de 2 o más puntos entre ciclos o por retención y compromiso ≤ 2 a la vez, con umbrales configurables, para no revisar todo a mano.
+31. Como People, quiero editar umbrales, mínimo n y cortes de semestre en una pantalla de configuración auditada, para ajustar sin tocar código.
+32. Como Empleado, no quiero ver nunca mi retención, compromiso ni etiquetas de sentimiento, para que el proceso sea confiable.
+
+### Análisis cualitativo
+
+33. Como People, quiero que cada respuesta abierta tenga sentimiento (positivo, constructivo, negativo) por dimensión con confianza, para medir el clima.
+34. Como People, quiero los temas principales por dimensión, ciclo, área y manager con frecuencia y 2-3 citas seudonimizadas, para entender qué dice la gente.
+35. Como People, quiero correr el análisis con un proveedor determinista (Mock) para demos y tests, para validar el enfoque sin costo.
+36. Como People, quiero que el proveedor Anthropic esté apagado por defecto y sólo se active con una flag explícita, para decidir yo cuándo usarlo.
+37. Como People, quiero que todo texto enviado a un LLM externo esté seudonimizado (sin nombres, emails, legajos; IDs reemplazados por tokens) y re-asociado al volver, con tests, para proteger a las personas.
+38. Como People, quiero que el análisis se cachee por hash del texto y versión del prompt, para no reprocesar ni gastar de más.
+39. Como People, quiero un registro de cada corrida (cuántos textos, modelo, versión de prompt, nunca el contenido), para auditar.
+40. Como People, quiero importar etiquetas ya hechas desde un CSV documentado, para reaprovechar el análisis existente.
+41. Como People, quiero corregir la etiqueta de un comentario, que quede auditado y que ninguna corrida posterior la pise, para mantener la calidad.
+42. Como People, quiero ver sentimiento por dimensión en barras apiladas, evolución entre ciclos, ranking de temas y sentimiento vs. retención/compromiso, para presentar hallazgos.
+
+### Goals ↔ Assessments
+
+43. Como People, quiero ver, por assessment importado, los goals de la persona en ese período con estado y progreso, para conectar las dos etapas.
+44. Como People, quiero el avance de goals vs. retención, compromiso y sentimiento, y las personas con goals cumplidos pero indicadores bajos y viceversa, para detectar incoherencias.
+45. Como People, quiero indicadores por objetivo (% completados, en curso y vencidos por persona, equipo y área) y su relación con los indicadores del assessment, para evaluar el enfoque cuantitativo.
+
+### Reportes y vista ejecutiva
+
+46. Como People, quiero un reporte de autoevaluación con completitud, temas, sentimiento y brecha self vs. manager, para la presentación.
+47. Como People, quiero un perfil de importación genérico y una sección preparada para el health check de CAP, para enchufarlo cuando conozca el formato.
+48. Como People, quiero una vista ejecutiva de una página con completitud, retención, compromiso, sentimiento y top temas, con selector cualitativo / cuantitativo, para elegir enfoque.
+49. Como Dirección, quiero ver sólo agregados con mínimo n = 5 por celda (celdas menores ocultas o agrupadas en "Otros"), para seguir sin ver datos personales.
+
+### Export para Arturía
+
+50. Como People, quiero `pnpm export:arturia --cycle <id>` que genere un HTML autocontenido sin requests externos y un JSON con contrato versionado, para subirlo a la mini app.
+51. Como People, quiero que el export salga por defecto con todos los datos (nombres y email) en `data/private/`, y con `--anonymized` sólo agregados n ≥ 5, para controlar qué comparto.
+52. Como People, quiero `docs/arturia.md` con el flujo de actualización manual y las preguntas abiertas sobre restricciones técnicas, sin respuestas inventadas.
+
+### Demo y calidad
+
+53. Como People, quiero que `pnpm db:seed --size demo` deje todo lo anterior visible con datos sintéticos en 5 minutos, para demostrar.
+54. Como desarrollador, quiero un e2e que importe los dos reportes sintéticos, vea completitud y quién falta, retención/compromiso, corra el análisis con Mock, vea la vista ejecutiva y genere el export verificando que no contiene emails ni nombres reales (en modo anonimizado), para proteger el flujo completo.
+55. Como desarrollador, quiero tests de autorización para cada vista nueva por rol, para que los permisos no se rompan.
+
+## Implementation Decisions
+
+**Poda.** Se elimina el código, las rutas, los componentes, los tests, los mensajes y las tablas de: nominaciones de pares, feedback de pares y upward, calibración (grupos, cambios, publicación; se conserva `final_rating` sólo si alguna analítica la usa, de lo contrario se elimina), compartir y acuse de recibo, notas de seguimiento, notificaciones e inbox, cadencia por fecha de ingreso, asistente de creación de ciclos, formularios de autoevaluación y de evaluación del manager, operación del ciclo (evaluadores alternos, en nombre de otro). Se conservan los pedidos y respuestas como datos importados, las revisiones de pregunta, el snapshot organizacional y de goals, el estado del ciclo (reducido a `closed` para importados), la función de visibilidad de lectura (simplificada) y el registro de auditoría administrativa (reutilizado para settings y correcciones). Una migración elimina tablas y enums sin uso.
+
+**Configuración.** Tabla `app_setting` (clave, valor jsonb, actualizado por, fecha) con defaults en código y pantalla `/settings/insights`. Claves: umbrales de alerta (caída ≥ 2, riesgo ≤ 2), mínimo n (5), cortes de semestre (H1 1/1-30/6, H2 1/7-31/12, margen de ambigüedad 15 días), proveedor de análisis. Cada cambio escribe auditoría.
+
+**Roles.** Se agrega `direction` a los roles del actor; `peer` y `calibrator` se eliminan. Una única función de autorización por vista decide: People todo; Manager sus reportes directos del snapshot (no toda la cadena) y agregados de su equipo; Dirección sólo agregados con n ≥ 5; Empleado nunca retención, compromiso ni sentimiento sobre sí mismo. Las rutas de importación, calidad de datos y settings quedan restringidas a People.
+
+**Importación.** El perfil de fuente gana un mapeo de preguntas configurable por columna: lado (self/manager), tipo (texto, Likert, opción con letra), dimensión, clave estable y tabla de equivalencias de opciones a 1-5. El perfil `bamboo-employee-performance` se extiende con esa configuración por defecto; `bamboo-assessment-progress` pasa a dominio escribiendo una tabla de completitud por participante y ciclo (estado self, estado manager, notas, fuente) y requiere un ciclo destino existente o elegido. Detección de ciclo: el nombre crea o actualiza un ciclo semestral; sin nombre, la fecha de assessment decide el semestre; a menos de N días del corte o con nombre que no coincide, la corrida se detiene en estado "requiere decisión" y la UI pide el ciclo destino antes de continuar. La idempotencia se mantiene con las claves actuales (raw_record por hash, pedidos por source_id y hash, respuestas por pedido y revisión). Al finalizar la importación se toma el snapshot de goals de cada participante por solapamiento con el período del ciclo. Las opciones sin equivalencia se guardan en una tabla de problemas de respuesta visible en calidad de datos. `reports:inspect` lee CSV/XLSX con el lector existente y escribe sólo encabezados, cantidad de filas y cantidad de celdas no vacías por columna.
+
+**Template Santex.** Nuevo template de sistema con clave propia, preguntas con `dimension`, dos preguntas Likert 1-5 con rol `retention` y `engagement` (roles nuevos) y `visibleToReviewee=false`, escala de sistema nueva de 1 a 5 con etiquetas de retención y de compromiso. Las revisiones de pregunta importadas se vinculan a estos roles y dimensiones por el mapeo del perfil, de modo que la analítica consulta por rol y dimensión y no por texto.
+
+**Analítica.** Consultas SQL nombradas, por rol de pregunta y dimensión, siempre con el manager y el área del snapshot: completitud (desde la tabla de completitud y desde pedidos enviados), distribución y evolución de indicadores, cuadrantes, alertas, goals vs. indicadores, indicadores por objetivo, brecha self vs. manager, resumen ejecutivo. La supresión por mínimo n se aplica en la consulta cuando el actor es Dirección o el export es anonimizado.
+
+**Análisis cualitativo.** Módulo con interfaz `AnalysisProvider { analyze(batch: PseudonymizedText[]): Promise<AnalysisResult[]>; name; promptVersion }`. Tablas: `qualitative_analysis` (respuesta, dimensión, sentimiento, confianza, temas, proveedor, versión de prompt, hash del texto, corrida), `analysis_run` (proveedor, modelo, versión, cantidad de textos, inicio, fin, estado; nunca contenido), `analysis_correction` (append-only: respuesta, etiqueta anterior, nueva, quién, cuándo, motivo), `theme` (nombre normalizado por dimensión). La seudonimización reemplaza nombres de personas conocidas, emails y legajos por tokens estables por corrida y revierte al volver; se testea con fixtures. El proveedor Anthropic usa la Claude API, se activa sólo con `ANALYSIS_PROVIDER=anthropic` y `ANTHROPIC_API_KEY`, procesa por lotes y respeta la caché. La corrección humana tiene precedencia sobre cualquier corrida. La importación de etiquetas acepta un CSV documentado (persona, ciclo, dimensión o pregunta, texto o hash, sentimiento, confianza, temas) y cruza por hash normalizado del texto.
+
+**Export Arturía.** Módulo de export que arma un objeto `ArturiaReport` (schema versionado `arturia-report.v1`, documentado en `docs/`) a partir de las mismas consultas de analítica, lo serializa a JSON y a un HTML autocontenido (CSS y JS inline, gráficos SVG propios, sin requests externos). El comando escribe en `data/private/<ciclo>/` por defecto, y en modo anonimizado aplica la supresión n ≥ 5 y elimina nombres y emails; un test verifica la ausencia de emails y de nombres del seed en la salida anonimizada.
+
+**Datos sensibles.** `data/private/` en `.gitignore` y `.prettierignore`. Un test unitario recorre los archivos trackeados por git y falla si hay CSV/XLSX fuera de `fixtures/` o emails con dominio distinto del sintético; un hook pre-commit opcional (`.githooks/pre-commit`, `git config core.hooksPath`) corre el mismo check. El dominio sintético del seed queda declarado en un único lugar.
+
+## Testing Decisions
+
+- Un buen test verifica comportamiento observable por la interfaz pública del módulo: entradas, filas en la base, salidas; nunca detalles internos. TDD rojo → verde → refactor.
+- Unitarios (jsdom): mapeo de columnas y equivalencias Likert, detección de semestre y ambigüedad, seudonimización y reversión, MockProvider determinista, caché por hash, serialización del export, check de datos sensibles, `reports:inspect`, componentes de cada vista nueva en ambos idiomas, paridad de mensajes es/en.
+- DB (Postgres local): importación de ambos reportes desde fixtures (idempotencia, actualización por ciclo, cola de identidad, mismatch, problemas de respuesta), snapshot de goals en históricos, cada consulta de analítica con valores calculados a mano sobre el seed chico, autorización por rol en cada consulta, corrección humana que sobrevive a una corrida, settings auditados, migración de poda sobre una base con datos.
+- e2e (Playwright): el flujo completo del pedido: importar los dos reportes sintéticos → completitud y quién falta → retención y compromiso → análisis con Mock → vista ejecutiva → export anonimizado sin emails ni nombres.
+- Prior art: tests de importación histórica desde fixtures, tests de dashboards con seed y actores, tests de exports CSV, test de paridad de mensajes, e2e de importación histórica.
+
+## Out of Scope
+
+- Deploy, login real, envío de emails, conectores reales al lake, escritura en Bamboo.
+- Activar el AnthropicProvider contra datos reales (decisión del owner tras aprobación de People).
+- Correr ciclos de evaluación dentro de la app (se elimina en esta iteración; el reemplazo total de Bamboo queda para después).
+- Formato real del health check de CAP y restricciones técnicas de Arturía: quedan como preguntas en la documentación.
+
+## Further Notes
+
+Preguntas abiertas para el owner y People, que no se asumen: texto exacto y dimensión de las 3 preguntas custom; columnas reales de los dos reportes (tras `reports:inspect`); formato del health check de CAP; restricciones de las mini apps de Arturía (tamaño, scripts, auth); preferencia de People por el enfoque cualitativo, cuantitativo o ambos. Supuestos provisorios: equivalencias Retención A=5…E=1 y Compromiso A=5…E=1 (variante de 4 opciones A=5, B=4, C=2, D=1); semestres calendario; custom como placeholders "Custom 1..3".
