@@ -1,9 +1,6 @@
 import { expect, type Page, test } from "@playwright/test";
 import { actAs } from "./act-as";
-import {
-  ensureIndicatorAnswers,
-  snapshotManagerWithIndicators,
-} from "./indicator-data";
+import { snapshotManagerWithIndicators } from "./indicator-data";
 import { assessed2023, company, fullName } from "./seed-data";
 
 // Runs after the historical import (project "insights" depends on
@@ -18,10 +15,6 @@ const applyFilters = (page: Page) =>
     .getByRole("form", { name: "Filtros" })
     .getByRole("button", { name: "Aplicar" })
     .click();
-
-test.beforeAll(async () => {
-  await ensureIndicatorAnswers();
-});
 
 test("People see the distribution, the risk matrix and the alerts of an imported cycle", async ({
   page,

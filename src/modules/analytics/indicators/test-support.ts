@@ -7,7 +7,6 @@ import { sql } from "drizzle-orm";
 import { db } from "@/db/client";
 import {
   answer,
-  type QuestionRole,
   questionRevision,
   reviewCycle,
   reviewRequest,
@@ -75,8 +74,7 @@ export async function insertIndicatorCycle(c: {
         required: true,
         scale: { options: LIKERT },
         sort,
-        // The roles arrive with the import of the Santex template (#57).
-        role: indicator as string as QuestionRole,
+        role: indicator,
       })
       .returning({ id: questionRevision.id });
     return row.id;
