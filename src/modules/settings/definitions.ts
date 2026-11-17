@@ -19,14 +19,17 @@ const int = (key: keyof typeof settingRanges) =>
     .min(settingRanges[key].min, { error: "out_of_range" })
     .max(settingRanges[key].max, { error: "out_of_range" });
 
-/** A real day of the year as "MM-DD" (29 February counts). */
+/**
+ * A day of the year as "MM-DD" that exists every year: 29 February is out,
+ * a semester cannot start on a day that is missing in most years.
+ */
 const monthDay = z
   .string({ error: "invalid_day" })
   .regex(/^\d{2}-\d{2}$/, { error: "invalid_day" })
   .refine(
     (value) => {
       const [month, day] = value.split("-").map(Number);
-      const date = new Date(Date.UTC(2024, month - 1, day));
+      const date = new Date(Date.UTC(2023, month - 1, day));
       return date.getUTCMonth() === month - 1 && date.getUTCDate() === day;
     },
     { error: "invalid_day" },

@@ -17,18 +17,24 @@ import {
 
 export class SettingsError extends DomainError<"validation"> {}
 
-/** The effective settings: the stored override of each key, else its default. */
-export async function getSettings(db: DbOrTx): Promise<Settings> {
-  const rows = await db.select().from(appSetting);
-  const stored = new Map(rows.map((row) => [row.key, row.value]));
+/** The effective settings out of the stored rows: an override, else the default. */
+function effective(rows: Map<string, unknown>): Settings {
   const settings = { ...DEFAULT_SETTINGS };
   for (const key of settingKeys) {
-    if (!stored.has(key)) continue;
+    if (!rows.has(key)) continue;
     // A value that no longer validates (edited by hand) never breaks a page.
-    const parsed = parseSettingValue(key, stored.get(key));
+    const parsed = parseSettingValue(key, rows.get(key));
     if (parsed.success) Object.assign(settings, { [key]: parsed.data });
   }
   return settings;
+}
+
+const storedRows = async (db: DbOrTx) =>
+  new Map((await db.select().from(appSetting)).map((r) => [r.key, r.value]));
+
+/** The effective settings: the stored override of each key, else its default. */
+export async function getSettings(db: DbOrTx): Promise<Settings> {
+  return effective(await storedRows(db));
 }
 
 export async function getSetting<K extends SettingKey>(
@@ -64,9 +70,19 @@ export async function updateSettings(
   if (issues.length) throw new SettingsError("validation", issues);
 
   return db.transaction(async (tx) => {
-    const current = await getSettings(tx);
+    // One writer at a time: the read below and the writes must not interleave
+    // with another save (no lost update, no change audited twice).
+    await tx.execute(
+      sql`select pg_advisory_xact_lock(hashtextextended('app_setting', 0))`,
+    );
+    const rows = await storedRows(tx);
+    const current = effective(rows);
+    // A change is a difference with what is *stored* (or the default when
+    // there is no row): saving the default over an invalid row repairs it.
+    const before = (key: SettingKey): unknown =>
+      rows.has(key) ? rows.get(key) : DEFAULT_SETTINGS[key];
     const changed = (Object.keys(parsed) as SettingKey[]).filter(
-      (key) => parsed[key] !== current[key],
+      (key) => parsed[key] !== before(key),
     );
     if (changed.some((key) => key.startsWith("semester."))) {
       const crossed = checkSettings({ ...current, ...parsed });
@@ -89,7 +105,7 @@ export async function updateSettings(
         action: "setting.update",
         targetType: "app_setting",
         targetKey: key,
-        before: { value: current[key] },
+        before: { value: before(key) },
         after: { value: parsed[key] },
       });
     }

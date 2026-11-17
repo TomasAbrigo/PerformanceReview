@@ -46,27 +46,36 @@ export function canSeeIndividuals(actor: ActorContext): boolean {
 }
 
 /**
- * Retention, engagement and sentiment about one person. People see them; a
- * manager about other people (whether that person is a direct report is the
- * scope's job, not this function's), never about themself; an employee never,
- * and direction only reads aggregates.
+ * Retention, engagement and sentiment about one person, who is `revieweePersonId`
+ * and had `snapManagerPersonId` as manager in the cycle snapshot. They follow
+ * the scope: People see them about anyone; a manager only about their direct
+ * reports of the snapshot, never about themself; an employee never (not even
+ * about themself), and direction only reads aggregates.
  */
 export function canSeeSensitiveIndicators(
   actor: ActorContext,
-  revieweePersonId: string,
+  reviewee: {
+    revieweePersonId: string;
+    snapManagerPersonId: string | null;
+  },
 ): boolean {
-  switch (actor.role) {
-    case "hr":
+  const scope = insightsScope(actor);
+  switch (scope.kind) {
+    case "all":
       return true;
-    case "manager":
-      return actor.personId !== null && actor.personId !== revieweePersonId;
-    case "direction":
-    case "employee":
+    case "directReports":
+      return (
+        reviewee.snapManagerPersonId === scope.managerPersonId &&
+        reviewee.revieweePersonId !== scope.managerPersonId
+      );
+    case "aggregatesOnly":
+    case "none":
       return false;
   }
 }
 
 /** The one-page executive view: People (unmasked) and direction (aggregates). */
 export function canSeeExecutiveView(actor: ActorContext): boolean {
-  return actor.role === "hr" || actor.role === "direction";
+  const { kind } = insightsScope(actor);
+  return kind === "all" || kind === "aggregatesOnly";
 }

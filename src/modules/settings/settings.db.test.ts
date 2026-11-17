@@ -126,6 +126,25 @@ describe("setSetting", () => {
     expect(await audit()).toHaveLength(1);
   });
 
+  it("saving the default repairs a stored value that no longer validates", async () => {
+    await db
+      .insert(appSetting)
+      .values({ key: "aggregation.minGroupSize", value: "muchos" });
+    // The effective value is already the default, but the row is garbage:
+    // saving the default is a change and writes it over.
+    await setSetting(db, hr, "aggregation.minGroupSize", 5);
+    expect(await stored()).toMatchObject([
+      { key: "aggregation.minGroupSize", value: 5 },
+    ]);
+    expect(await audit()).toMatchObject([
+      {
+        targetKey: "aggregation.minGroupSize",
+        before: { value: "muchos" },
+        after: { value: 5 },
+      },
+    ]);
+  });
+
   it("can go back to the default value, keeping the audit trail", async () => {
     await setSetting(db, hr, "semester.ambiguityDays", 30);
     await setSetting(db, hr, "semester.ambiguityDays", 15);
@@ -202,6 +221,54 @@ describe("only People change settings", () => {
       expect(await audit()).toEqual([]);
     },
   );
+});
+
+describe("concurrent saves", () => {
+  it("do not lose updates or audit the same change twice", async () => {
+    await Promise.all([
+      setSetting(db, hr, "aggregation.minGroupSize", 8),
+      setSetting(db, hr, "aggregation.minGroupSize", 8),
+      setSetting(db, hr, "aggregation.minGroupSize", 8),
+    ]);
+    expect(await getSetting(db, "aggregation.minGroupSize")).toBe(8);
+    expect(await audit()).toMatchObject([
+      { before: { value: 5 }, after: { value: 8 } },
+    ]);
+  });
+
+  it("keep every key that different saves changed", async () => {
+    await Promise.all([
+      setSetting(db, hr, "alerts.dropThreshold", 3),
+      setSetting(db, hr, "alerts.riskThreshold", 1),
+      setSetting(db, hr, "semester.ambiguityDays", 30),
+    ]);
+    expect(await getSettings(db)).toEqual({
+      ...DEFAULT_SETTINGS,
+      "alerts.dropThreshold": 3,
+      "alerts.riskThreshold": 1,
+      "semester.ambiguityDays": 30,
+    });
+    expect(await audit()).toHaveLength(3);
+  });
+
+  it("a chain of saves of one key audits each step from the previous value", async () => {
+    await Promise.all([
+      setSetting(db, hr, "aggregation.minGroupSize", 6),
+      setSetting(db, hr, "aggregation.minGroupSize", 7),
+    ]);
+    const rows = await audit();
+    expect(rows).toHaveLength(2);
+    const steps = rows.map((r) => [
+      (r.before as { value: number }).value,
+      (r.after as { value: number }).value,
+    ]);
+    // Whichever went first, the second starts where the first ended.
+    const [first] = steps.filter(([before]) => before === 5);
+    const [second] = steps.filter(([before]) => before !== 5);
+    expect(first).toBeDefined();
+    expect(second[0]).toBe(first[1]);
+    expect(await getSetting(db, "aggregation.minGroupSize")).toBe(second[1]);
+  });
 });
 
 describe("updateSettings", () => {

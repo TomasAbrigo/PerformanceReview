@@ -107,9 +107,11 @@ test("direction only reads the leadership view; employees get no dashboard", asy
 
   // /dashboards sends direction to the aggregates; names never show up.
   await page.goto(`/es/dashboards?cycle=${cycleId}`);
-  await expect(page).toHaveURL(/\/es\/dashboards\/executive/);
+  await expect(page).toHaveURL(
+    new RegExp(`/es/dashboards/executive\\?cycle=${cycleId}$`),
+  );
   await expect(
-    page.getByRole("heading", { name: /^Vista de dirección/ }),
+    page.getByRole("heading", { name: `Vista de dirección · ${cycleName}` }),
   ).toBeVisible();
   await expect(page.getByTestId("exec-participants")).toBeVisible();
   await expect(page.getByText(employeeName)).toHaveCount(0);

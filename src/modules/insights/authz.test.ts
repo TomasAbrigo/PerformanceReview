@@ -9,6 +9,7 @@ import {
 
 const ANA = "00000000-0000-4000-8000-00000000000a";
 const BRUNO = "00000000-0000-4000-8000-00000000000b";
+const CARLA = "00000000-0000-4000-8000-00000000000c";
 
 const hr: ActorContext = { personId: null, role: "hr" };
 const hrPerson: ActorContext = { personId: ANA, role: "hr" };
@@ -69,24 +70,60 @@ describe("canSeeIndividuals", () => {
 });
 
 describe("canSeeSensitiveIndicators (retention, engagement, sentiment)", () => {
+  // Bruno reports to Ana at the snapshot; Carla reports to somebody else.
+  const bruno = { revieweePersonId: BRUNO, snapManagerPersonId: ANA };
+  const carla = { revieweePersonId: CARLA, snapManagerPersonId: BRUNO };
+
   it("People see them about anyone", () => {
-    expect(canSeeSensitiveIndicators(hr, BRUNO)).toBe(true);
-    expect(canSeeSensitiveIndicators(hrPerson, BRUNO)).toBe(true);
+    expect(canSeeSensitiveIndicators(hr, bruno)).toBe(true);
+    expect(canSeeSensitiveIndicators(hr, carla)).toBe(true);
+    expect(canSeeSensitiveIndicators(hrPerson, bruno)).toBe(true);
   });
 
-  it("a manager sees them about other people, never about themself", () => {
-    expect(canSeeSensitiveIndicators(manager, BRUNO)).toBe(true);
-    expect(canSeeSensitiveIndicators(manager, ANA)).toBe(false);
-    expect(canSeeSensitiveIndicators(lostManager, BRUNO)).toBe(false);
+  it("a manager sees them only about their direct reports of the snapshot", () => {
+    expect(canSeeSensitiveIndicators(manager, bruno)).toBe(true);
+    // A skip-level report, or someone with no manager in the snapshot.
+    expect(canSeeSensitiveIndicators(manager, carla)).toBe(false);
+    expect(
+      canSeeSensitiveIndicators(manager, {
+        revieweePersonId: CARLA,
+        snapManagerPersonId: null,
+      }),
+    ).toBe(false);
+  });
+
+  it("a manager never sees them about themself", () => {
+    expect(
+      canSeeSensitiveIndicators(manager, {
+        revieweePersonId: ANA,
+        snapManagerPersonId: ANA,
+      }),
+    ).toBe(false);
+  });
+
+  it("a manager acting without a person sees none", () => {
+    expect(canSeeSensitiveIndicators(lostManager, bruno)).toBe(false);
+    expect(
+      canSeeSensitiveIndicators(lostManager, {
+        revieweePersonId: BRUNO,
+        snapManagerPersonId: null,
+      }),
+    ).toBe(false);
   });
 
   it("an employee never sees them, about themself or anyone", () => {
-    expect(canSeeSensitiveIndicators(employee, BRUNO)).toBe(false);
-    expect(canSeeSensitiveIndicators(employee, ANA)).toBe(false);
+    expect(canSeeSensitiveIndicators(employee, bruno)).toBe(false);
+    expect(
+      canSeeSensitiveIndicators(employee, {
+        revieweePersonId: BRUNO,
+        snapManagerPersonId: BRUNO,
+      }),
+    ).toBe(false);
+    expect(canSeeSensitiveIndicators(employee, carla)).toBe(false);
   });
 
   it("direction never sees them about a person", () => {
-    expect(canSeeSensitiveIndicators(direction, BRUNO)).toBe(false);
+    expect(canSeeSensitiveIndicators(direction, bruno)).toBe(false);
   });
 });
 

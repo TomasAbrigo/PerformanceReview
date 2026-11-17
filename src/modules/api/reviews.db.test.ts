@@ -15,6 +15,7 @@ import type { ActorContext } from "@/modules/actor/types";
 import { getReview } from "@/modules/review-core";
 import { currentRatingFor } from "@/modules/review-core/rating";
 import { ApiError } from "./errors";
+import { scopeActor } from "./scope";
 import { listAnswerRows, listRequestRows } from "./queries/reviews";
 import type { CycleAnonymity } from "@/modules/review-core/status";
 import {
@@ -661,6 +662,16 @@ describe("scope parameters", () => {
     expect(listed.status).toBe(404);
   });
 
+  it("direction never carries the person it was asked for", async () => {
+    expect(
+      await scopeActor(db, { as_person: dora, role: "direction" }),
+    ).toEqual({ personId: null, role: "direction" });
+    expect(await scopeActor(db, { as_person: dora, role: "manager" })).toEqual({
+      personId: dora,
+      role: "manager",
+    });
+  });
+
   it("answers 403 for a request the person may not read", async () => {
     const res = await requestOf(selfDora, `?as_person=${outsider}`);
     expect(res.status).toBe(403);
@@ -679,9 +690,15 @@ describe("scope parameters", () => {
     ["a removed participant", () => ({ personId: carla, role: "employee" })],
     ["a stranger", () => ({ personId: outsider, role: "employee" })],
     ["hr acting as a person", () => ({ personId: ana, role: "hr" })],
-    // Direction only reads aggregates: no request, whoever it is acting as.
-    ["direction", () => ({ personId: dora, role: "direction" })],
+    // Direction has no person and only reads aggregates: no request.
+    ["direction", () => ({ personId: null, role: "direction" })],
   ];
+  /**
+   * The query that reads as `actor`. The API needs an as_person with a role;
+   * for direction, which has no person, any one is given and is dropped.
+   */
+  const asQuery = (actor: ActorContext) =>
+    `as_person=${actor.personId ?? dora}&role=${actor.role}`;
 
   it.each(actors)(
     "lists exactly what the review module lets %s read (canRead parity)",
@@ -702,26 +719,17 @@ describe("scope parameters", () => {
         if (review) {
           readable.push(id);
           // The answers endpoint shows the answers canRead lets through.
-          const res = await answersOf(
-            id,
-            `?as_person=${actor.personId}&role=${actor.role}&limit=200`,
-          );
+          const res = await answersOf(id, `?${asQuery(actor)}&limit=200`);
           expect(res.status).toBe(200);
           expect(res.body.data.map((a: Json) => a.question.id).sort()).toEqual(
             Object.keys(review.answers).sort(),
           );
         } else {
-          const res = await requestOf(
-            id,
-            `?as_person=${actor.personId}&role=${actor.role}`,
-          );
+          const res = await requestOf(id, `?${asQuery(actor)}`);
           expect(res.status).toBe(403);
         }
       }
-      const listed = await requestsOf(
-        cycleId,
-        `?as_person=${actor.personId}&role=${actor.role}&limit=200`,
-      );
+      const listed = await requestsOf(cycleId, `?${asQuery(actor)}&limit=200`);
       expect(listed.body.data.map((r: Json) => r.id).sort()).toEqual(
         readable.sort(),
       );
@@ -732,7 +740,7 @@ describe("scope parameters", () => {
     "counts for %s only the answers they may read: answer_count = what /answers returns",
     async (_who, actorOf) => {
       const actor = actorOf();
-      const scope = `as_person=${actor.personId}&role=${actor.role}`;
+      const scope = asQuery(actor);
       const listed = await requestsOf(cycleId, `?${scope}&limit=200`);
       for (const row of listed.body.data) {
         const answers = await answersOf(row.id, `?${scope}&limit=200`);

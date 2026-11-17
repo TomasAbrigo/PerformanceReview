@@ -38,16 +38,17 @@ const validOn = (date: SQL) =>
 
 /**
  * Subtree of `rootId` on `date` (recursive CTE over job history): rows
- * (person_id, depth), depth 1 = direct reports. Use as a CTE body.
+ * (person_id, depth), depth 1 = direct reports, down to `maxDepth` levels
+ * (the recursion stops there). Use as a CTE body.
  */
-export const subtree = (rootId: string, date: SQL) => sql`
+export const subtree = (rootId: string, date: SQL, maxDepth = 50) => sql`
   select h.person_id, 1 as depth, array[h.person_id] as ids
   from employee_job_history h
   where h.manager_person_id = ${rootId}::uuid and ${validOn(date)}
   union all
   select h.person_id, s.depth + 1, s.ids || h.person_id
   from sub s join employee_job_history h on h.manager_person_id = s.person_id and ${validOn(date)}
-  where not h.person_id = any(s.ids) and s.depth < 50`;
+  where not h.person_id = any(s.ids) and s.depth < ${maxDepth}::int`;
 
 /**
  * CTEs `cur` (current job row per person) and `scoped`: active participants

@@ -53,13 +53,14 @@ describe("parseSettingValue", () => {
 
   it("semester starts are real MM-DD days", () => {
     for (const key of ["semester.h1Start", "semester.h2Start"] as const) {
-      for (const ok of ["01-01", "07-01", "02-29", "12-31"]) {
+      for (const ok of ["01-01", "07-01", "02-28", "12-31"]) {
         expect(parseSettingValue(key, ok).success, ok).toBe(true);
       }
       for (const bad of [
         "1-1",
         "13-01",
         "00-10",
+        "02-29", // does not exist in most years: not a semester start
         "02-30",
         "04-31",
         "0701",

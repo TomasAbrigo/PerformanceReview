@@ -4,7 +4,7 @@ import type { LocalizedText } from "@/db/schema/rating-scales";
 import { isUuid } from "@/lib/uuid";
 import type { ActorContext } from "@/modules/actor/types";
 import { foldSmallGroups } from "@/modules/insights/aggregation";
-import { canSeeExecutiveView, insightsScope } from "@/modules/insights/authz";
+import { insightsScope } from "@/modules/insights/authz";
 import { ReviewError } from "@/modules/review-core/review-errors";
 import { getSetting } from "@/modules/settings/service";
 import type { Relationship } from "@/modules/templates/constants";
@@ -280,11 +280,8 @@ export async function managerTeam(
     participant_id: string | null;
     normalized: number | null;
   }>(sql`
-    with recursive sub as (${subtree(managerId, date)}),
-    members as (
-      select person_id, min(depth) as depth from sub
-      where depth <= ${maxDepth} group by person_id
-    )
+    with recursive sub as (${subtree(managerId, date, maxDepth)}),
+    members as (select person_id, min(depth) as depth from sub group by person_id)
     select m.person_id, p.display_name as name, m.depth::int as depth,
            h.job_title, h.department, cp.id as participant_id,
            v.normalized::float8 as normalized
@@ -439,32 +436,35 @@ export async function executiveSummary(
   actor: ActorContext,
   f: { cycleId: string; minGroupSize?: number },
 ): Promise<ExecutiveSummary> {
-  if (!canSeeExecutiveView(actor)) throw new ReviewError("forbidden");
+  // The scope decides: People see all, direction aggregates over the minimum.
   const scope = insightsScope(
     actor,
-    actor.role === "direction"
-      ? (f.minGroupSize ?? (await getSetting(db, "aggregation.minGroupSize")))
-      : undefined,
+    f.minGroupSize ?? (await getSetting(db, "aggregation.minGroupSize")),
   );
-  const masked = scope.kind === "aggregatesOnly";
-  const min = masked ? scope.minGroupSize : 1;
+  if (scope.kind !== "all" && scope.kind !== "aggregatesOnly") {
+    throw new ReviewError("forbidden");
+  }
+  const min = scope.kind === "aggregatesOnly" ? scope.minGroupSize : 1;
   // Computed over everybody (the actor was authorized above) and masked here.
   const filters: DashboardFilters = {
     cycleId: f.cycleId,
     hierarchy: "asOf",
     aggregateOnly: true,
   };
-  const progress = await cycleProgress(db, ALL_PEOPLE, filters);
-  const dist = await ratingDistribution(db, ALL_PEOPLE, {
-    ...filters,
-    groupBy: "department",
-    stage: "current",
-  });
-  const [count] = await db.execute<{ n: number }>(sql`
-    with recursive ${scopedCtes(ALL_PEOPLE, filters)}
-    select count(*)::int as n from scoped`);
+  const [progress, dist, [count]] = await Promise.all([
+    cycleProgress(db, ALL_PEOPLE, filters),
+    ratingDistribution(db, ALL_PEOPLE, {
+      ...filters,
+      groupBy: "department",
+      stage: "current",
+    }),
+    db.execute<{ n: number }>(sql`
+      with recursive ${scopedCtes(ALL_PEOPLE, filters)}
+      select count(*)::int as n from scoped`),
+  ]);
   const empty = Array<number>(BIN_COUNT).fill(0);
   const rated = dist.total.reduce((a, b) => a + b, 0);
+  const masked = scope.kind === "aggregatesOnly";
   if (masked && count.n < min) {
     return {
       minGroupSize: min,
