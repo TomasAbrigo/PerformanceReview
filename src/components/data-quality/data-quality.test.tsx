@@ -321,6 +321,43 @@ describe("IndicatorDetail", () => {
     ).toBeInTheDocument();
   });
 
+  it("lists unmapped answers by cycle, column and raw value", () => {
+    renderIn(
+      "es",
+      <IndicatorDetail
+        indicator={{
+          key: "unmapped_answers",
+          count: 1,
+          items: [
+            {
+              id: "i1",
+              cycleId: "c1",
+              cycleName: "Ciclo 2023",
+              columnKey: "manager:q1",
+              rawValue: "Z",
+              reason: "unmapped_option",
+              createdAt: new Date("2026-11-12T10:00:00Z"),
+            },
+          ],
+        }}
+      />,
+    );
+    expect(
+      screen.getByRole("heading", {
+        name: "Respuestas sin equivalencia Likert",
+      }),
+    ).toBeInTheDocument();
+    const row = screen.getAllByRole("row")[1];
+    expect(
+      within(row).getByRole("link", { name: "Ciclo 2023" }),
+    ).toHaveAttribute("href", "/cycles/c1");
+    expect(within(row).getByText("manager:q1")).toBeInTheDocument();
+    expect(within(row).getByText("Z")).toBeInTheDocument();
+    expect(
+      within(row).getByText("Opción sin equivalencia"),
+    ).toBeInTheDocument();
+  });
+
   it("links goals to their owner", () => {
     renderIn(
       "es",

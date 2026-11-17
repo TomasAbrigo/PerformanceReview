@@ -69,6 +69,9 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
             <Link href="/data-quality" className="underline">
               {tDataQuality("nav")}
             </Link>
+            <Link href="/settings/insights" className="underline">
+              {tSettings("insights")}
+            </Link>
             <Link href="/settings/templates" className="underline">
               {tSettings("templates")}
             </Link>

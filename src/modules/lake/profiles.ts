@@ -399,9 +399,13 @@ const BAMBOO_PERFORMANCE_QUESTIONS: QuestionMapping[] = [
     side: side as QuestionMapping["side"],
     kind: kind as QuestionMappingKind,
     key: custom ? `${side}:${q}:${text.toLowerCase()}` : `${side}:${q}`,
-    // What the standard manager letters measure (#57 maps them to 1-5).
+    // What the standard manager letters measure (#57 maps them to 1-5) and
+    // what each open question is about.
     ...(side === "manager" && q === "q1" ? { role: "retention" } : {}),
     ...(side === "manager" && q === "q2" ? { role: "engagement" } : {}),
+    ...(q === "q3" ? { dimension: "strengths" } : {}),
+    ...(q === "q4" ? { dimension: "improvement" } : {}),
+    ...(custom && Number(n) <= 3 ? { dimension: `custom_${n}` } : {}),
   };
 });
 

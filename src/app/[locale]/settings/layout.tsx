@@ -16,6 +16,7 @@ export default async function SettingsLayout({
 
   const links = [
     { href: "/", label: t("home") },
+    { href: "/settings/insights", label: t("insights") },
     { href: "/settings/templates", label: t("templates") },
     { href: "/settings/scales", label: t("scales") },
   ] as const;

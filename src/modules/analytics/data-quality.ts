@@ -1,7 +1,10 @@
-import { and, asc, eq, gte, sql } from "drizzle-orm";
+import { and, asc, eq, gte, isNull, sql } from "drizzle-orm";
 import type { DbOrTx } from "@/db/client";
 import {
+  type AnswerQualityReason,
+  answerQualityIssue,
   ingestRun,
+  reviewCycle,
   type IdentityIssueReason,
   type SourceSystem,
 } from "@/db/schema";
@@ -46,6 +49,7 @@ export const DATA_QUALITY_KEYS = [
   "duplicate_names",
   "failed_runs",
   "reviewer_mismatch",
+  "unmapped_answers",
 ] as const;
 export type DataQualityKey = (typeof DATA_QUALITY_KEYS)[number];
 
@@ -490,6 +494,51 @@ export async function reviewerMismatch(
   return indicator("reviewer_mismatch", rows);
 }
 
+// ---------------------------------------------------------------- answers
+
+export type UnmappedAnswerItem = {
+  /** answer_quality_issue id. */
+  id: string;
+  cycleId: string;
+  cycleName: string;
+  /** Report column ("manager:q1"). */
+  columnKey: string;
+  rawValue: string;
+  reason: AnswerQualityReason;
+  createdAt: Date;
+};
+
+/**
+ * Imported answers whose option has no Likert equivalence (still open): the
+ * answer is kept with the raw value and no 1-5 value. No person names.
+ */
+export async function unmappedAnswers(
+  db: DbOrTx,
+): Promise<Indicator<"unmapped_answers", UnmappedAnswerItem>> {
+  const rows = await db
+    .select({
+      id: answerQualityIssue.id,
+      cycleId: answerQualityIssue.cycleId,
+      cycleName: reviewCycle.name,
+      columnKey: answerQualityIssue.columnKey,
+      rawValue: answerQualityIssue.rawValue,
+      reason: answerQualityIssue.reason,
+      createdAt: answerQualityIssue.createdAt,
+    })
+    .from(answerQualityIssue)
+    .innerJoin(reviewCycle, eq(reviewCycle.id, answerQualityIssue.cycleId))
+    .where(
+      and(isNull(answerQualityIssue.resolvedAt), isNull(reviewCycle.deletedAt)),
+    )
+    .orderBy(
+      asc(reviewCycle.name),
+      asc(answerQualityIssue.columnKey),
+      asc(answerQualityIssue.rawValue),
+      asc(answerQualityIssue.id),
+    );
+  return indicator("unmapped_answers", rows);
+}
+
 // ----------------------------------------------------------------- report
 
 export type DataQualityIndicator =
@@ -503,7 +552,8 @@ export type DataQualityIndicator =
   | Indicator<"goals_without_employment", GoalWithoutEmploymentItem>
   | Indicator<"duplicate_names", DuplicateNameItem>
   | Indicator<"failed_runs", FailedRunItem>
-  | Indicator<"reviewer_mismatch", ReviewerMismatchItem>;
+  | Indicator<"reviewer_mismatch", ReviewerMismatchItem>
+  | Indicator<"unmapped_answers", UnmappedAnswerItem>;
 
 const QUERIES: Record<
   DataQualityKey,
@@ -523,6 +573,7 @@ const QUERIES: Record<
   duplicate_names: (db, options) => duplicateDisplayNames(db, options),
   failed_runs: (db, options) => failedIngestRuns(db, options),
   reviewer_mismatch: (db) => reviewerMismatch(db),
+  unmapped_answers: (db) => unmappedAnswers(db),
 };
 
 /** Every indicator, in panel order. */

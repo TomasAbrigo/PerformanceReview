@@ -37,6 +37,7 @@ function template(overrides: Partial<EditorTemplate> = {}): EditorTemplate {
             prompt: { es: "Calificación general", en: "Overall rating" },
             choices: null,
             role: null,
+            dimension: null,
           },
         ],
       },
@@ -203,11 +204,16 @@ describe("TemplateEditor", () => {
         .getAllByRole("option")
         .map((o) => o.textContent);
     expect(roles()).toEqual(["Ninguna", "Comentario de objetivos"]);
+    expect(within(form).getByLabelText("Dimensión")).toBeInTheDocument();
     await user.selectOptions(within(form).getByLabelText("Tipo"), "rating");
+    // Only text questions have a dimension.
+    expect(within(form).queryByLabelText("Dimensión")).toBeNull();
     expect(roles()).toEqual([
       "Ninguna",
       "Calificación de objetivos",
       "Calificación general de desempeño",
+      "Retención (Likert 1-5)",
+      "Compromiso (Likert 1-5)",
     ]);
     await user.selectOptions(
       within(form).getByLabelText("Función especial"),
@@ -245,6 +251,65 @@ describe("TemplateEditor", () => {
     expect(updateQuestion).toHaveBeenCalledWith(
       "q1",
       expect.objectContaining({ role: null }),
+    );
+  });
+
+  it("retention makes the question manager-only and hidden from the reviewee", async () => {
+    const addQuestion = vi.fn().mockResolvedValue({ ok: true });
+    renderIn("es", { actions: actions({ addQuestion }) });
+    const user = userEvent.setup();
+    const form = screen.getByRole("form", { name: "Nueva pregunta" });
+    await user.type(within(form).getByLabelText("Texto (español)"), "Ret");
+    await user.type(within(form).getByLabelText("Texto (inglés)"), "Ret");
+    await user.selectOptions(within(form).getByLabelText("Tipo"), "rating");
+    await user.selectOptions(within(form).getByLabelText("Escala"), "4 puntos");
+    await user.selectOptions(
+      within(form).getByLabelText("Función especial"),
+      "Retención (Likert 1-5)",
+    );
+    expect(within(form).getByLabelText("Manager")).toBeChecked();
+    expect(within(form).getByLabelText("Autoevaluación")).not.toBeChecked();
+    expect(
+      within(form).getByLabelText("Visible para la persona evaluada"),
+    ).not.toBeChecked();
+    await user.click(
+      within(form).getByRole("button", { name: "Agregar pregunta" }),
+    );
+    expect(addQuestion).toHaveBeenCalledWith(
+      "sec1",
+      expect.objectContaining({
+        role: "retention",
+        appliesTo: ["manager"],
+        visibleToReviewee: false,
+      }),
+    );
+  });
+
+  it("shows and edits the dimension of a question", async () => {
+    const updateQuestion = vi.fn().mockResolvedValue({ ok: true });
+    const marked = template();
+    marked.sections[0].questions[0] = {
+      ...marked.sections[0].questions[0],
+      kind: "text",
+      scaleId: null,
+      dimension: "strengths",
+    };
+    renderIn("en", { template: marked, actions: actions({ updateQuestion }) });
+    const user = userEvent.setup();
+    expect(screen.getByText("Strengths", { selector: "span" })).toBeVisible();
+    await user.click(screen.getByRole("button", { name: "Edit question" }));
+    const form = screen.getByRole("form", { name: "Edit question" });
+    expect(within(form).getByLabelText("Dimension")).toHaveValue("strengths");
+    await user.selectOptions(
+      within(form).getByLabelText("Dimension"),
+      "Custom 2",
+    );
+    await user.click(
+      within(form).getByRole("button", { name: "Save question" }),
+    );
+    expect(updateQuestion).toHaveBeenCalledWith(
+      "q1",
+      expect.objectContaining({ dimension: "custom_2" }),
     );
   });
 

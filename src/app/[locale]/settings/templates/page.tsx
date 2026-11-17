@@ -3,6 +3,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { connection } from "next/server";
 import { Suspense } from "react";
+import { HrOnly } from "@/components/access/hr-only";
 import { TemplatesView } from "@/components/templates/templates-view";
 import { db } from "@/db/client";
 import { routing } from "@/i18n/routing";
@@ -13,7 +14,19 @@ import {
   deleteTemplateAction,
 } from "../actions";
 
-export default async function TemplatesPage({
+export default function TemplatesPage(
+  props: PageProps<"/[locale]/settings/templates">,
+) {
+  return (
+    <Suspense>
+      <HrOnly>
+        <TemplatesBody {...props} />
+      </HrOnly>
+    </Suspense>
+  );
+}
+
+async function TemplatesBody({
   params,
 }: PageProps<"/[locale]/settings/templates">) {
   const { locale } = await params;

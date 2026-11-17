@@ -21,9 +21,20 @@ describe("parseActor", () => {
   });
 });
 
+describe("direction", () => {
+  it("is a valid cookie role and never carries a person", () => {
+    expect(
+      parseActor(JSON.stringify({ personId: ID, role: "direction" })),
+    ).toEqual({ personId: null, role: "direction" });
+    expect(
+      parseActor(JSON.stringify({ personId: null, role: "direction" })),
+    ).toEqual({ personId: null, role: "direction" });
+  });
+});
+
 describe("actorRoles", () => {
-  it("are People (hr), manager and employee only", () => {
-    expect(actorRoles).toEqual(["hr", "manager", "employee"]);
+  it("are People (hr), manager, employee and direction", () => {
+    expect(actorRoles).toEqual(["hr", "manager", "employee", "direction"]);
   });
   it("rejects the removed peer and calibrator roles", () => {
     for (const role of ["peer", "calibrator"]) {
