@@ -54,11 +54,22 @@ export const subtree = (rootId: string, date: SQL, maxDepth = 50) => sql`
  * CTEs `cur` (current job row per person) and `scoped`: active participants
  * of launched cycles with their org dimensions per hierarchy (snapshot or
  * current), filtered and restricted to what the actor may see (see
- * `requirePeopleScope`). Columns:
- * participant_id, cycle_id, person_id, name, department, manager_id,
- * manager_name, location, job_title, published.
+ * `requirePeopleScope`). Cycles that are drafts or deleted are left out.
+ * Columns: participant_id, cycle_id, cycle_name, period_start, period_end,
+ * cycle_created_at (epoch seconds; with the period, the order of cycles),
+ * person_id, name, department, manager_id, manager_name, location, job_title,
+ * published.
+ *
+ * A manager's reach is the direct reports of the dimension the view reads
+ * (the snapshot manager with `asOf`, today's with `current`); with
+ * `snapshotScope` it is always the snapshot's, and never themself (the rule
+ * of the retention and engagement indicators, see `canSeeSensitiveIndicators`).
  */
-export function scopedCtes(actor: ActorContext, f: DashboardFilters): SQL {
+export function scopedCtes(
+  actor: ActorContext,
+  f: DashboardFilters,
+  options: { snapshotScope?: boolean } = {},
+): SQL {
   const asOf = f.hierarchy === "asOf";
   const dim = (snap: string, cur: string) =>
     sql.raw(asOf ? `cp.${snap}` : `cur.${cur}`);
@@ -66,7 +77,11 @@ export function scopedCtes(actor: ActorContext, f: DashboardFilters): SQL {
   const manager = dim("snap_manager_person_id", "manager_person_id");
   const location = dim("snap_location", "location");
   const jobTitle = dim("snap_job_title", "job_title");
-  const where: SQL[] = [sql`cp.removed_at is null`, sql`c.status <> 'draft'`];
+  const where: SQL[] = [
+    sql`cp.removed_at is null`,
+    sql`c.status <> 'draft'`,
+    sql`c.deleted_at is null`,
+  ];
   if (f.cycleId) {
     if (!isUuid(f.cycleId)) throw new ReviewError("not_found");
     where.push(sql`cp.cycle_id = ${f.cycleId}::uuid`);
@@ -81,7 +96,14 @@ export function scopedCtes(actor: ActorContext, f: DashboardFilters): SQL {
   if (scope.kind === "directReports") {
     // Direct reports only: the snapshot manager (asOf) or today's (current),
     // never the whole chain below the manager.
-    where.push(sql`${manager} = ${scope.managerPersonId}::uuid`);
+    if (options.snapshotScope) {
+      where.push(
+        sql`cp.snap_manager_person_id = ${scope.managerPersonId}::uuid`,
+        sql`cp.reviewee_person_id <> ${scope.managerPersonId}::uuid`,
+      );
+    } else {
+      where.push(sql`${manager} = ${scope.managerPersonId}::uuid`);
+    }
   }
   return sql`
     cur as (
@@ -92,7 +114,10 @@ export function scopedCtes(actor: ActorContext, f: DashboardFilters): SQL {
       order by h.person_id, h.valid_from desc
     ),
     scoped as (
-      select cp.id as participant_id, cp.cycle_id, cp.reviewee_person_id as person_id,
+      select cp.id as participant_id, cp.cycle_id, c.name as cycle_name,
+             c.period_start::text as period_start, c.period_end::text as period_end,
+             extract(epoch from c.created_at)::float8 as cycle_created_at,
+             cp.reviewee_person_id as person_id,
              rp.display_name as name, ${department} as department,
              ${manager} as manager_id, mp.display_name as manager_name,
              ${location} as location, ${jobTitle} as job_title,
