@@ -102,6 +102,25 @@ describe("qualitative queries", () => {
     expect(ventas.reduce((n, r) => n + r.total, 0)).toBe(2);
   });
 
+  it("filters by the relationship of the review", async () => {
+    // The fixture's open-text answers are all from manager reviews.
+    expect(
+      await sentimentByDimension(db, hr, {
+        cycleId: c2023,
+        relationship: "self",
+      }),
+    ).toEqual([]);
+    expect(
+      await sentimentByDimension(db, hr, {
+        cycleId: c2023,
+        relationship: "manager",
+      }),
+    ).toEqual(await sentimentByDimension(db, hr, { cycleId: c2023 }));
+    expect(
+      await topThemes(db, hr, { cycleId: c2023, relationship: "self" }),
+    ).toEqual([]);
+  });
+
   it("manager: only direct reports of the snapshot; employee: nothing", async () => {
     const mgr: ActorContext = { personId: boss, role: "manager" };
     const rows = await listComments(db, mgr, { cycleId: c2023 });

@@ -364,6 +364,8 @@ export async function selfManagerGap(
   db: DbOrTx,
   actor: ActorContext,
   f: DashboardFilters,
+  /** `byPerson: false` skips the per-person query (byPerson comes back empty). */
+  options: { byPerson?: boolean } = {},
 ): Promise<SelfManagerGap> {
   requirePeopleScope(actor);
   requireCycle(f.cycleId);
@@ -394,13 +396,17 @@ export async function selfManagerGap(
            avg(p.manager) as manager, avg(p.manager - p.self) as gap
     from pairs p join question_revision q on q.id = p.question_revision_id
     group by q.id, q.prompt, q.sort order by q.sort`);
-  const byPerson = await db.execute<{
+  type PersonGapRow = {
     participant_id: string;
     person_id: string;
     name: string;
     n: number;
     gap: number;
-  }>(sql`${ctes}
+  };
+  const byPerson: PersonGapRow[] =
+    options.byPerson === false
+      ? []
+      : await db.execute<PersonGapRow>(sql`${ctes}
     select participant_id, person_id, name, count(*)::int as n,
            avg(manager - self) as gap
     from pairs group by 1, 2, 3 order by gap, name`);

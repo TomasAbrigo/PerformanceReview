@@ -38,7 +38,7 @@ export default defineConfig({
       name: "chromium",
       use: { ...devices["Desktop Chrome"] },
       testIgnore:
-        /(identity(-later)?|dashboards|completion|indicators|review-api|qualitative|goals-insights)\.spec\.ts/,
+        /(identity(-later)?|dashboards|completion|indicators|review-api|qualitative|goals-insights|executive)\.spec\.ts/,
     },
     // These read the review data of the historical import, which
     // e2e/historical-import.spec.ts (project chromium) brings in: they run
@@ -48,7 +48,7 @@ export default defineConfig({
       name: "insights",
       use: { ...devices["Desktop Chrome"] },
       testMatch:
-        /(dashboards|completion|indicators|review-api|qualitative|goals-insights)\.spec\.ts/,
+        /(dashboards|completion|indicators|review-api|qualitative|goals-insights|executive)\.spec\.ts/,
       dependencies: ["chromium"],
     },
     // The identity specs resolve and queue cases (they link a seeded rehire to

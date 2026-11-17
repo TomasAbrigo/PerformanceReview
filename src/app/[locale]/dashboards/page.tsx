@@ -46,7 +46,7 @@ async function Dashboards({
   // cycle that was asked for.
   if (scope.kind === "aggregatesOnly") {
     redirect({
-      href: hrefWith("/dashboards/executive", {
+      href: hrefWith("/insights/executive", {
         cycle: p.cycle === "all" ? undefined : p.cycle,
       }),
       locale,
@@ -118,7 +118,7 @@ async function Dashboards({
           {actor.role === "hr" && cycleId ? (
             <Link
               className="underline"
-              href={hrefWith("/dashboards/executive", { cycle: cycleId })}
+              href={hrefWith("/insights/executive", { cycle: cycleId })}
             >
               {t("executive.link")}
             </Link>

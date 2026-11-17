@@ -148,10 +148,10 @@ Hoy solo se lee el mínimo n (vista de dirección); los umbrales de alerta, los 
 
 ### Dashboards (`/dashboards`)
 
-- **Dónde:** `/dashboards` (filtros por ciclo, área, manager, ubicación y puesto), `/dashboards/team` (el equipo de un manager), `/dashboards/people/<id>` (trayectoria de una persona) y `/dashboards/executive` (vista de dirección).
+- **Dónde:** `/dashboards` (filtros por ciclo, área, manager, ubicación y puesto), `/dashboards/team` (el equipo de un manager), `/dashboards/people/<id>` (trayectoria de una persona) y `/dashboards/executive` (vista de dirección; hoy redirige a `/insights/executive`).
 - **Qué muestra:** avance del ciclo por tipo de evaluación; distribución de ratings normalizados (0 a 100 %) antes y después de calibrar, agrupada por área, manager, ubicación o puesto; goals del período contra el rating final; brecha entre autoevaluación y manager por pregunta y por persona; y la trayectoria de una persona con el rating, el manager y el puesto de cada ciclo.
 - **Jerarquía:** el equipo de un manager se elige explícitamente "al momento de la review" (el snapshot del ciclo) o "actual".
-- **Quién ve qué:** People ve todo; un manager, **sus reportes directos** del snapshot del ciclo (o los actuales, con la jerarquía "actual"), no toda la cadena: su equipo (`/dashboards/team`) lista solo a sus reportes directos y no puede abrir el de otro manager; una trayectoria se abre si la persona fue su reporte directo en el snapshot o lo es hoy. Un empleado es redirigido a su propia trayectoria, con solo lo publicado. **Dirección** va directo a `/dashboards/executive` (`/dashboards` la redirige) y no ve nada más.
+- **Quién ve qué:** People ve todo; un manager, **sus reportes directos** del snapshot del ciclo (o los actuales, con la jerarquía "actual"), no toda la cadena: su equipo (`/dashboards/team`) lista solo a sus reportes directos y no puede abrir el de otro manager; una trayectoria se abre si la persona fue su reporte directo en el snapshot o lo es hoy. Un empleado es redirigido a su propia trayectoria, con solo lo publicado. **Dirección** va directo a `/insights/executive` (`/dashboards` la redirige) y no ve nada más.
 - **Vista de dirección (`/dashboards/executive`):** para People y Dirección, agregados sin nombres ni ids. People la ve sin enmascarar; Dirección solo lo que llega al mínimo `aggregation.minGroupSize` (se lee una vez por pedido): las áreas con menos personas se agrupan en "Otros" y, si "Otros" tampoco llega, solo se cuenta cuántas personas quedaron afuera; un ciclo con menos participantes que el mínimo muestra solo el total de participantes.
 - **CSV:** los botones "Exportar CSV" bajan avance, distribución, goals vs rating y brecha self vs manager (`dashboard-*.csv`, ver "Exports CSV").
 
@@ -197,6 +197,24 @@ Hoy solo se lee el mínimo n (vista de dirección); los umbrales de alerta, los 
 - **Importar etiquetas:** formulario en la página o `pnpm analysis:import-labels <archivo.csv>`; formato en [docs/qualitative-labels.md](docs/qualitative-labels.md). Las filas que no cruzan se listan.
 - **Quién ve qué:** People todo; un manager, los comentarios de sus reportes directos al snapshot del ciclo; un empleado, nada (nunca sus propias etiquetas). "Solo agregados" (vista dirección) deja los conteos sin comentarios ni citas.
 - **Pendiente:** la dimensión sale del texto de la pregunta (`dimensionOf`) hasta que exista `question_revision.dimension` (#57); el cruce con retención/compromiso usa `question_revision.role` (`retention`, `engagement`), que el import histórico todavía no asigna.
+
+### Reporte de autoevaluación (`/insights/self-assessment`)
+
+- **Qué muestra:** por ciclo, la completitud de autoevaluaciones y evaluaciones del manager por área o por manager; el sentimiento por dimensión y los temas más frecuentes **solo de las autoevaluaciones** (filtro `relationship` de las consultas cualitativas); la brecha self vs. manager por pregunta (normalizada, donde ambos respondieron la misma pregunta de rating) y, para ciclos solo de texto, la proporción de sentimiento de cada lado por dimensión.
+- **Completitud:** la del módulo de completitud (`completionSummary`, ver "Completitud"), la misma fuente que `/insights/completion` y la vista ejecutiva.
+- **Quién ve qué:** People todo; un manager sus reportes directos del snapshot; Dirección solo grupos de al menos `aggregation.minGroupSize` (sin citas); un empleado, "Sin acceso".
+- **CSV:** `insights-self-assessment.csv?cycle=<id>` en formato largo (`section, group, metric, value`).
+
+### Health check (CAP) (`/insights/health-check`)
+
+- **Formato pendiente de definir.** Los archivos se suben en `/imports/upload` con el perfil incorporado `cap-health-check` (entidad `health_check`), que acepta **cualquier columna**: es un perfil `syntheticKey`, así que si el archivo no trae la columna clave (`id`) la validación no falla y cada fila se identifica por el archivo y su posición (`row:<sha256(sha256 del archivo + n.º de fila)>`): las filas idénticas se conservan, volver a subir el mismo archivo no crea registros nuevos y un archivo editado se aterriza como una versión nueva (las filas anteriores no se reconcilian). Las filas quedan aterrizadas en `raw_record`, todas las columnas en `extra`.
+- La página muestra cuántos archivos, importaciones y filas se aterrizaron y las preguntas abiertas: formato, período, clave de persona y escala.
+
+### Vista ejecutiva (`/insights/executive`)
+
+- **Qué muestra:** en una página, por ciclo: completitud (participantes, % de autoevaluaciones y de evaluaciones del manager), retención y compromiso (promedio y distribución 1 a 5), cantidad de personas en el cuadrante de riesgo, KPIs de objetivos, sentimiento por dimensión y top 5 temas, más la distribución de calificaciones de la vista de dirección anterior (sin su bloque de avance: la completitud sale de un solo lugar).
+- **Modo:** selector "Cualitativo | Cuantitativo | Ambos" (parámetro `mode` en la URL) que muestra los bloques de sentimiento/temas o los de indicadores. Los bloques son colectores enchufables en `src/modules/insights/executive.ts`; el modo cuantitativo incluye los KPIs de objetivos (`goalKpis`, % completados, cantidad y % vencidos).
+- **Quién ve qué:** People sin enmascarar; Dirección solo agregados con n ≥ `aggregation.minGroupSize` (lo que no llega dice "Oculto"); managers y empleados, "Sin acceso". `/dashboards/executive` redirige acá.
 
 ### Goals y assessments (`/insights/goals`)
 
