@@ -10,6 +10,7 @@ import {
   type IngestReject,
 } from "@/db/schema";
 import { snapshots } from "@/modules/review-core/service";
+import { reapplyLikertMappings } from "./likert-reapply";
 
 /**
  * After a run, for each cycle it touched: rows are processed one by one and
@@ -17,7 +18,9 @@ import { snapshots } from "@/modules/review-core/service";
  * period end), so only now is the period final. Every participant's snapshot
  * is (re)computed as of it, and manager requests whose reviewer (the CSV
  * Manager, i.e. the manager at export time) is not the one in force at period
- * end are flagged `reviewer_mismatch` and logged on the run.
+ * end are flagged `reviewer_mismatch` and logged on the run. Finally the
+ * retention/engagement answers are remapped with the option count of their
+ * column (reapplyLikertMappings).
  */
 export async function finishHistoryImport(
   db: DbOrTx,
@@ -34,6 +37,9 @@ export async function finishHistoryImport(
       refreshCycle(tx, cycleId, runId, reject),
     );
   }
+  // Rows were mapped one by one assuming 5 options; now that the whole file
+  // is in, the option count of each Likert column is known (A-D vs A-E).
+  await reapplyLikertMappings(db, { cycleIds });
   return { mismatches };
 }
 

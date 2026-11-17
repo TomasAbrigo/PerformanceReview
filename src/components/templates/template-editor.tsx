@@ -525,6 +525,7 @@ function QuestionForm({
   const choicesIssue = issueAt("choices");
   const roleIssue = issueAt("role");
   const visibleIssue = issueAt("visibleToReviewee");
+  const dimensionIssue = issueAt("dimension");
 
   return (
     <form
@@ -537,6 +538,7 @@ function QuestionForm({
             submit({
               ...value,
               scaleId: value.kind === "rating" ? value.scaleId : null,
+              dimension: value.kind === "text" ? value.dimension : null,
               choices: value.kind === "single_choice" ? choices : null,
             }),
           () => {
@@ -630,26 +632,31 @@ function QuestionForm({
         </select>
         {roleIssue ? <FieldError>{text.issue(roleIssue)}</FieldError> : null}
       </Field>
-      <Field>
-        <FieldLabel htmlFor={`${id}-dimension`}>{t("dimension")}</FieldLabel>
-        <select
-          id={`${id}-dimension`}
-          className={selectClass}
-          value={value.dimension ?? ""}
-          onChange={(e) =>
-            set({
-              dimension: (e.target.value || null) as QuestionDimension | null,
-            })
-          }
-        >
-          <option value="">{t("dimensions.none")}</option>
-          {DIMENSIONS.map((d) => (
-            <option key={d} value={d}>
-              {t(`dimensions.${d}`)}
-            </option>
-          ))}
-        </select>
-      </Field>
+      {value.kind === "text" ? (
+        <Field data-invalid={dimensionIssue ? true : undefined}>
+          <FieldLabel htmlFor={`${id}-dimension`}>{t("dimension")}</FieldLabel>
+          <select
+            id={`${id}-dimension`}
+            className={selectClass}
+            value={value.dimension ?? ""}
+            onChange={(e) =>
+              set({
+                dimension: (e.target.value || null) as QuestionDimension | null,
+              })
+            }
+          >
+            <option value="">{t("dimensions.none")}</option>
+            {DIMENSIONS.map((d) => (
+              <option key={d} value={d}>
+                {t(`dimensions.${d}`)}
+              </option>
+            ))}
+          </select>
+          {dimensionIssue ? (
+            <FieldError>{text.issue(dimensionIssue)}</FieldError>
+          ) : null}
+        </Field>
+      ) : null}
       {value.kind === "single_choice" ? (
         <fieldset className="flex flex-col gap-2">
           <legend className="text-sm font-medium">{t("choices")}</legend>

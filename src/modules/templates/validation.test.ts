@@ -50,5 +50,8 @@ describe("questionInput: retention and engagement roles", () => {
     expect(messages({ ...open, dimension: "strengths" })).toEqual([]);
     expect(messages({ ...open, dimension: "custom_3" })).toEqual([]);
     expect(messages({ ...open, dimension: "nope" })).not.toEqual([]);
+    expect(messages({ ...likert, dimension: "strengths" })).toContain(
+      "dimension:dimension_text_only",
+    );
   });
 });

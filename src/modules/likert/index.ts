@@ -4,9 +4,13 @@
  * letters (A = best); the table of equivalences is per role and per option
  * count (A-E and A-D). See docs/likert-mapping.md.
  */
+import type { QuestionRole } from "@/modules/templates/constants";
 
-export const likertRoles = ["retention", "engagement"] as const;
-export type LikertRole = (typeof likertRoles)[number];
+export type LikertRole = Extract<QuestionRole, "retention" | "engagement">;
+export const likertRoles = [
+  "retention",
+  "engagement",
+] as const satisfies readonly LikertRole[];
 
 export const isLikertRole = (role: unknown): role is LikertRole =>
   (likertRoles as readonly unknown[]).includes(role);
@@ -27,39 +31,74 @@ export const defaultLikertMappings: Record<
   engagement: { 5: { ...FIVE }, 4: { ...FOUR } },
 };
 
+type Text = { es: string; en: string };
+/** One option, best first: Bamboo's wording (research/07) and our scale's. */
+type LikertOption = { bamboo: Text; scale: Text };
+
 /**
- * Bamboo's option labels (research/07) and our scale labels, best first
- * (index 0 = 5). Matched case- and accent-insensitively.
+ * The single source of the option labels: the importer's choices (Bamboo
+ * wording), the system scales (`retention_1_5`, `engagement_1_5`) and the
+ * label matching of mapLikert all come from here. Index 0 = 5.
  */
-export const LIKERT_LABELS: Record<LikertRole, string[][]> = {
+export const LIKERT_OPTIONS: Record<LikertRole, LikertOption[]> = {
   retention: [
-    [
-      "Do everything to keep them",
-      "Do everything I could to keep them",
-      "Haría todo para retenerlo",
-      "Haría todo por retenerlo",
-    ],
-    ["Try to convince them to stay", "Intentaría convencerlo de quedarse"],
-    ["Need to think about it", "Tendría que pensarlo"],
-    ["Wish them well", "Le desearía lo mejor"],
-    [
-      "Be relieved",
-      "I'd be relieved",
-      "Me sentiría aliviado",
-      "Me aliviaría que se fuera",
-    ],
+    {
+      bamboo: {
+        en: "Do everything to keep them",
+        es: "Haría todo para retenerlo",
+      },
+      scale: {
+        en: "Do everything to keep them",
+        es: "Haría todo por retenerlo",
+      },
+    },
+    {
+      bamboo: {
+        en: "Try to convince them to stay",
+        es: "Intentaría convencerlo de quedarse",
+      },
+      scale: {
+        en: "Try to convince them to stay",
+        es: "Intentaría convencerlo de quedarse",
+      },
+    },
+    {
+      bamboo: { en: "Need to think about it", es: "Tendría que pensarlo" },
+      scale: { en: "Need to think about it", es: "Tendría que pensarlo" },
+    },
+    {
+      bamboo: { en: "Wish them well", es: "Le desearía lo mejor" },
+      scale: { en: "Wish them well", es: "Le desearía lo mejor" },
+    },
+    {
+      bamboo: { en: "Be relieved", es: "Me sentiría aliviado" },
+      scale: { en: "I'd be relieved", es: "Me aliviaría que se fuera" },
+    },
   ],
   engagement: [
-    ["Highly engaged", "Muy comprometido"],
-    ["Engaged", "Comprometido"],
-    ["Somewhat engaged", "Algo comprometido"],
-    ["Not very engaged", "Poco comprometido"],
-    [
-      "No engagement, checked out",
-      "No engagement",
-      "Sin compromiso, desconectado",
-      "Sin compromiso",
-    ],
+    {
+      bamboo: { en: "Highly engaged", es: "Muy comprometido" },
+      scale: { en: "Highly engaged", es: "Muy comprometido" },
+    },
+    {
+      bamboo: { en: "Engaged", es: "Comprometido" },
+      scale: { en: "Engaged", es: "Comprometido" },
+    },
+    {
+      bamboo: { en: "Somewhat engaged", es: "Algo comprometido" },
+      scale: { en: "Somewhat engaged", es: "Algo comprometido" },
+    },
+    {
+      bamboo: { en: "Not very engaged", es: "Poco comprometido" },
+      scale: { en: "Not very engaged", es: "Poco comprometido" },
+    },
+    {
+      bamboo: {
+        en: "No engagement, checked out",
+        es: "Sin compromiso, desconectado",
+      },
+      scale: { en: "No engagement", es: "Sin compromiso" },
+    },
   ],
 };
 
@@ -89,6 +128,23 @@ export const foldText = (s: string) =>
     .trim()
     .toLowerCase();
 
+/** Folded label -> value, per role (built once). */
+const LABEL_VALUES: Record<LikertRole, Map<string, number>> = {
+  retention: labelMap("retention"),
+  engagement: labelMap("engagement"),
+};
+
+function labelMap(role: LikertRole): Map<string, number> {
+  const map = new Map<string, number>();
+  LIKERT_OPTIONS[role].forEach((option, i) => {
+    for (const text of [option.bamboo, option.scale]) {
+      map.set(foldText(text.es), LIKERT_MAX - i);
+      map.set(foldText(text.en), LIKERT_MAX - i);
+    }
+  });
+  return map;
+}
+
 const result = (value: number | undefined): LikertResult =>
   value !== undefined &&
   Number.isInteger(value) &&
@@ -105,18 +161,22 @@ export function mapLikert(
   const text = foldText(String(input.raw ?? ""));
   if (text === "") return { unmapped: true };
   const count = input.optionCount ?? input.options?.length ?? 5;
+  const own = overrides[input.role];
   if (/^[a-z]$/.test(text)) {
     const letter = text.toUpperCase();
-    const own = overrides[input.role];
     return result(
       own?.[`${count}:${letter}`] ??
         own?.[letter] ??
         defaultLikertMappings[input.role][count]?.[letter],
     );
   }
-  if (/^\d+$/.test(text)) return result(Number(text));
-  const index = LIKERT_LABELS[input.role].findIndex((labels) =>
-    labels.some((l) => foldText(l) === text),
-  );
-  return index === -1 ? { unmapped: true } : result(LIKERT_MAX - index);
+  if (/^\d+$/.test(text)) {
+    // Numbers go through the same overrides; otherwise they are the value
+    // itself, within 1..optionCount.
+    const n = Number(text);
+    const overridden = own?.[`${count}:${text}`] ?? own?.[text];
+    if (overridden !== undefined) return result(overridden);
+    return n >= LIKERT_MIN && n <= count ? result(n) : { unmapped: true };
+  }
+  return result(LABEL_VALUES[input.role].get(text));
 }

@@ -1,7 +1,9 @@
 import type { LocalizedText, ScaleSnapshot } from "@/db/schema";
 import {
   isLikertRole,
+  LIKERT_OPTIONS,
   type LikertOverrides,
+  type LikertRole,
   mapLikert,
 } from "@/modules/likert";
 import type {
@@ -30,6 +32,13 @@ const choices = (labels: [string, string][]): Choice[] =>
     label: { es, en },
   }));
 
+/** Bamboo's manager Q1/Q2 options, A = best (one source: the likert module). */
+const likertChoices = (role: LikertRole): Choice[] =>
+  LIKERT_OPTIONS[role].map((o, i) => ({
+    value: String.fromCharCode(65 + i),
+    label: { es: o.bamboo.es, en: o.bamboo.en },
+  }));
+
 const STANDARD = {
   self: {
     q1: choices([
@@ -50,20 +59,8 @@ const STANDARD = {
     ]),
   },
   manager: {
-    q1: choices([
-      ["Do everything to keep them", "Haría todo para retenerlo"],
-      ["Try to convince them to stay", "Intentaría convencerlo de quedarse"],
-      ["Need to think about it", "Tendría que pensarlo"],
-      ["Wish them well", "Le desearía lo mejor"],
-      ["Be relieved", "Me sentiría aliviado"],
-    ]),
-    q2: choices([
-      ["Highly engaged", "Muy comprometido"],
-      ["Engaged", "Comprometido"],
-      ["Somewhat engaged", "Algo comprometido"],
-      ["Not very engaged", "Poco comprometido"],
-      ["No engagement, checked out", "Sin compromiso, desconectado"],
-    ]),
+    q1: likertChoices("retention"),
+    q2: likertChoices("engagement"),
   },
 } as const;
 

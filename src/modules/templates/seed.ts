@@ -11,6 +11,7 @@ import {
   type Relationship,
   templateSection,
 } from "@/db/schema";
+import { LIKERT_OPTIONS, type LikertRole } from "@/modules/likert";
 import { createScale, createTemplate } from "./service";
 import type { ScaleInput } from "./validation";
 
@@ -23,6 +24,17 @@ export const SYSTEM_SCALES = {
   engagement: "engagement_1_5",
 } as const;
 type ScaleKey = (typeof SYSTEM_SCALES)[keyof typeof SYSTEM_SCALES];
+
+/** A 1-5 scale from the likert module's labels (index 0 there = 5). */
+function likertScale(role: LikertRole, name: LocalizedText): ScaleInput {
+  return {
+    name,
+    options: [...LIKERT_OPTIONS[role]].reverse().map((o, i) => ({
+      value: i + 1,
+      label: { es: o.scale.es, en: o.scale.en },
+    })),
+  };
+}
 
 const scales: Record<ScaleKey, ScaleInput> = {
   four_point_descriptive: {
@@ -70,44 +82,14 @@ const scales: Record<ScaleKey, ScaleInput> = {
     ],
   },
   // Bamboo's manager Q1 and Q2 (research/07), worst to best.
-  retention_1_5: {
-    name: { es: "Retención 1-5", en: "Retention 1-5" },
-    options: [
-      {
-        value: 1,
-        label: { es: "Me aliviaría que se fuera", en: "I'd be relieved" },
-      },
-      { value: 2, label: { es: "Le desearía lo mejor", en: "Wish them well" } },
-      {
-        value: 3,
-        label: { es: "Tendría que pensarlo", en: "Need to think about it" },
-      },
-      {
-        value: 4,
-        label: {
-          es: "Intentaría convencerlo de quedarse",
-          en: "Try to convince them to stay",
-        },
-      },
-      {
-        value: 5,
-        label: {
-          es: "Haría todo por retenerlo",
-          en: "Do everything to keep them",
-        },
-      },
-    ],
-  },
-  engagement_1_5: {
-    name: { es: "Compromiso 1-5", en: "Engagement 1-5" },
-    options: [
-      { value: 1, label: { es: "Sin compromiso", en: "No engagement" } },
-      { value: 2, label: { es: "Poco comprometido", en: "Not very engaged" } },
-      { value: 3, label: { es: "Algo comprometido", en: "Somewhat engaged" } },
-      { value: 4, label: { es: "Comprometido", en: "Engaged" } },
-      { value: 5, label: { es: "Muy comprometido", en: "Highly engaged" } },
-    ],
-  },
+  retention_1_5: likertScale("retention", {
+    es: "Retención 1-5",
+    en: "Retention 1-5",
+  }),
+  engagement_1_5: likertScale("engagement", {
+    es: "Compromiso 1-5",
+    en: "Engagement 1-5",
+  }),
 };
 
 type SeedQuestion = {
@@ -180,7 +162,7 @@ const open = (
   dimension,
 });
 const likert = (
-  role: "retention" | "engagement",
+  role: LikertRole,
   scale: ScaleKey,
   es: string,
   en: string,

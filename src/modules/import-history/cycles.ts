@@ -356,6 +356,49 @@ export async function saveAnswers(
       ),
     );
   const had = new Set(existing.map((a) => a.revisionId));
+  // Revisions of this request with an open quality issue: only those can be
+  // resolved by this write (one lookup per request).
+  const open = new Set(
+    (
+      await tx
+        .select({ revisionId: answerQualityIssue.questionRevisionId })
+        .from(answerQualityIssue)
+        .where(
+          and(
+            eq(answerQualityIssue.requestId, requestId),
+            isNull(answerQualityIssue.resolvedAt),
+          ),
+        )
+    ).map((r) => r.revisionId),
+  );
+  const flag = async (
+    column: QuestionColumn,
+    revisionId: string,
+    raw: string,
+    reason: "unmapped_option" | "invalid_value",
+    answerId: string | null,
+  ) => {
+    const issue = {
+      answerId,
+      cycleId: context.cycleId,
+      columnKey: column.key,
+      rawValue: raw,
+      reason,
+      runId: context.runId,
+      resolvedAt: null,
+    };
+    await tx
+      .insert(answerQualityIssue)
+      .values({ requestId, questionRevisionId: revisionId, ...issue })
+      .onConflictDoUpdate({
+        target: [
+          answerQualityIssue.requestId,
+          answerQualityIssue.questionRevisionId,
+        ],
+        set: issue,
+      });
+  };
+  const resolved: string[] = [];
   let created = 0;
   let updated = 0;
   const invalid: string[] = [];
@@ -364,8 +407,16 @@ export async function saveAnswers(
     const cell = answerColumns(column, row[column.header], context.overrides);
     if (cell === null) continue;
     if ("invalid" in cell) {
+      // Rejected (the row reports it) and kept as a quality issue too.
       invalid.push(
         `Column "${column.header}": "${String(row[column.header])}" is not a valid answer`,
+      );
+      await flag(
+        column,
+        revisionId,
+        String(row[column.header]).trim(),
+        "invalid_value",
+        null,
       );
       continue;
     }
@@ -387,39 +438,24 @@ export async function saveAnswers(
       })
       .returning({ id: answer.id });
     if ("unmapped" in cell) {
-      const issue = {
-        answerId: saved.id,
-        cycleId: context.cycleId,
-        columnKey: column.key,
-        rawValue: cell.raw,
-        reason: "unmapped_option" as const,
-        runId: context.runId,
-        resolvedAt: null,
-      };
-      await tx
-        .insert(answerQualityIssue)
-        .values({ requestId, questionRevisionId: revisionId, ...issue })
-        .onConflictDoUpdate({
-          target: [
-            answerQualityIssue.requestId,
-            answerQualityIssue.questionRevisionId,
-          ],
-          set: issue,
-        });
-    } else if (column.role) {
-      await tx
-        .update(answerQualityIssue)
-        .set({ resolvedAt: new Date() })
-        .where(
-          and(
-            eq(answerQualityIssue.requestId, requestId),
-            eq(answerQualityIssue.questionRevisionId, revisionId),
-            isNull(answerQualityIssue.resolvedAt),
-          ),
-        );
+      await flag(column, revisionId, cell.raw, "unmapped_option", saved.id);
+    } else if (open.has(revisionId)) {
+      resolved.push(revisionId);
     }
     if (had.has(revisionId)) updated++;
     else created++;
+  }
+  if (resolved.length) {
+    await tx
+      .update(answerQualityIssue)
+      .set({ resolvedAt: new Date() })
+      .where(
+        and(
+          eq(answerQualityIssue.requestId, requestId),
+          inArray(answerQualityIssue.questionRevisionId, resolved),
+          isNull(answerQualityIssue.resolvedAt),
+        ),
+      );
   }
   return { created, updated, invalid };
 }

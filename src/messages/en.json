@@ -50,7 +50,8 @@
     "unknown": "Something went wrong.",
     "duplicateRole": "This template already has a question with that role.",
     "managerOnly": "Retention and engagement are answered by the manager only.",
-    "hiddenRequired": "Retention and engagement must be hidden from the reviewee."
+    "hiddenRequired": "Retention and engagement must be hidden from the reviewee.",
+    "dimensionTextOnly": "Only text questions have a dimension."
   },
   "Scales": {
     "title": "Rating scales",
@@ -718,7 +719,10 @@
     "answerReasons": {
       "unmapped_option": "Option without equivalence",
       "invalid_value": "Invalid value"
-    }
+    },
+    "reapply": "Reapply equivalences",
+    "reapplyDone": "{count, plural, =0 {No answer changed.} =1 {1 answer remapped.} other {# answers remapped.}}",
+    "reapplyHelp": "Recomputes the retention and engagement answers with the current likert_mapping table."
   },
   "Exports": {
     "columns": {

@@ -34,6 +34,8 @@ export function useErrorText() {
       if (issue.message === "duplicate_role") return t("duplicateRole");
       if (issue.message === "manager_only") return t("managerOnly");
       if (issue.message === "hidden_required") return t("hiddenRequired");
+      if (issue.message === "dimension_text_only")
+        return t("dimensionTextOnly");
       return t("invalid");
     },
   };

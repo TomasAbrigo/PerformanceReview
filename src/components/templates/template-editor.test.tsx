@@ -204,7 +204,10 @@ describe("TemplateEditor", () => {
         .getAllByRole("option")
         .map((o) => o.textContent);
     expect(roles()).toEqual(["Ninguna", "Comentario de objetivos"]);
+    expect(within(form).getByLabelText("Dimensión")).toBeInTheDocument();
     await user.selectOptions(within(form).getByLabelText("Tipo"), "rating");
+    // Only text questions have a dimension.
+    expect(within(form).queryByLabelText("Dimensión")).toBeNull();
     expect(roles()).toEqual([
       "Ninguna",
       "Calificación de objetivos",

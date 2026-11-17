@@ -85,6 +85,15 @@ describe("mapLikert", () => {
     );
   });
 
+  it("rejects numbers above the option count and applies overrides to numbers", () => {
+    expect(mapLikert({ role: "engagement", optionCount: 4, raw: "5" })).toEqual(
+      { unmapped: true },
+    );
+    expect(
+      mapLikert({ role: "engagement", raw: "3" }, { engagement: { "5:3": 4 } }),
+    ).toEqual({ value: 4, normalized: 0.75 });
+  });
+
   it("reports letters, numbers and text outside the table as unmapped", () => {
     expect(mapLikert({ role: "retention", optionCount: 4, raw: "E" })).toEqual({
       unmapped: true,

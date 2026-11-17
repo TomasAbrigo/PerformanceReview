@@ -10,7 +10,9 @@ import {
   questionRevision,
 } from "@/db/schema";
 import { getIndicator } from "@/modules/analytics/data-quality";
+import { likertMapping } from "@/db/schema";
 import { seedLikertMappings } from "@/modules/likert/store";
+import { reapplyLikertMappings } from "./likert-reapply";
 import {
   importReport,
   REPORTS,
@@ -146,7 +148,7 @@ describe("a letter outside the equivalence table", () => {
     // A corrected file maps the answer and resolves the issue.
     const fixed = await writeCsv([
       HEADER,
-      "Bruno Pérez,Ana García,Ingeniería,Ciclo 2023,2023-12-01,C,B",
+      "Bruno Pérez,Ana García,Ingeniería,Ciclo 2023,2023-12-01,E,B",
     ]);
     await importReport(fixed);
     expect(
@@ -159,12 +161,111 @@ describe("a letter outside the equivalence table", () => {
     const [retention] = (await likertAnswers()).filter(
       (a) => a.role === "retention",
     );
-    expect(retention).toMatchObject({ optionValue: 3, normalized: 0.5 });
+    expect(retention).toMatchObject({ optionValue: 1, normalized: 0 });
     expect(
       await db.$count(
         answerQualityIssue,
         and(eq(answerQualityIssue.rawValue, "Z")),
       ),
     ).toBe(1);
+  });
+});
+
+async function twoPeople() {
+  await resetDb();
+  const [ana] = await db
+    .insert(person)
+    .values({ displayName: "Ana García" })
+    .returning();
+  const names = ["Bruno Pérez", "Carla Romero", "Diego Sosa"];
+  for (const name of names) {
+    const [p] = await db
+      .insert(person)
+      .values({ displayName: name })
+      .returning();
+    await db.insert(employeeJobHistory).values({
+      personId: p.id,
+      validFrom: "2020-01-01",
+      managerPersonId: ana.id,
+    });
+  }
+}
+
+describe("a file whose letters only go A-D", () => {
+  it("uses the 4-option table (C = 2, D = 1)", async () => {
+    await twoPeople();
+    await seedLikertMappings(db);
+    const file = await writeCsv([
+      HEADER,
+      "Bruno Pérez,Ana García,Ingeniería,Ciclo 2024,2024-06-01,C,D",
+      "Carla Romero,Ana García,Ingeniería,Ciclo 2024,2024-06-02,A,B",
+      "Diego Sosa,Ana García,Ingeniería,Ciclo 2024,2024-06-03,D,C",
+    ]);
+    await importReport(file);
+    const answers = await likertAnswers();
+    const value = (role: string, label: string) =>
+      answers.find((a) => a.role === role && a.optionLabel === label)
+        ?.optionValue;
+    expect(value("retention", "C")).toBe(2);
+    expect(value("retention", "D")).toBe(1);
+    expect(value("retention", "A")).toBe(5);
+    expect(value("engagement", "B")).toBe(4);
+    expect(value("engagement", "C")).toBe(2);
+  });
+});
+
+describe("reapplyLikertMappings", () => {
+  it("remaps an unmapped answer after the table changes and resolves its issue", async () => {
+    await twoPeople();
+    await seedLikertMappings(db);
+    const file = await writeCsv([
+      HEADER,
+      "Bruno Pérez,Ana García,Ingeniería,Ciclo 2023,2023-12-01,X,A",
+    ]);
+    await importReport(file);
+    expect((await getIndicator(db, "unmapped_answers"))!.count).toBe(1);
+
+    // People adds the missing equivalence; no new file is needed.
+    await db.delete(likertMapping).where(eq(likertMapping.source, "custom"));
+    await db.insert(likertMapping).values({
+      role: "retention",
+      sourceOption: "X",
+      optionCount: 5,
+      value: 1,
+      source: "custom",
+      updatedBy: "people",
+    });
+    expect((await getIndicator(db, "unmapped_answers"))!.count).toBe(1);
+
+    const outcome = await reapplyLikertMappings(db);
+
+    expect(outcome).toMatchObject({ remapped: 1, resolved: 1 });
+    expect((await getIndicator(db, "unmapped_answers"))!.count).toBe(0);
+    const retention = (await likertAnswers()).find(
+      (a) => a.role === "retention",
+    );
+    expect(retention).toMatchObject({
+      optionLabel: "X",
+      optionValue: 1,
+      normalized: 0,
+    });
+    await db.delete(likertMapping).where(eq(likertMapping.source, "custom"));
+  });
+});
+
+describe("an invalid cell", () => {
+  it("is reported on the run and also recorded as an invalid_value issue", async () => {
+    await twoPeople();
+    const file = await writeCsv([
+      `${HEADER},Manager Custom Q1: Claridad.`,
+      "Bruno Pérez,Ana García,Ingeniería,Ciclo 2023,2023-12-01,A,A,7",
+    ]);
+    await importReport(file);
+    const [issue] = await db.select().from(answerQualityIssue);
+    expect(issue).toMatchObject({
+      reason: "invalid_value",
+      rawValue: "7",
+      answerId: null,
+    });
   });
 });

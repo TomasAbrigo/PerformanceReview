@@ -50,7 +50,8 @@
     "unknown": "Ocurrió un error inesperado.",
     "duplicateRole": "Este template ya tiene una pregunta con esa función.",
     "managerOnly": "Retención y compromiso las responde solo el manager.",
-    "hiddenRequired": "Retención y compromiso deben estar ocultas para la persona evaluada."
+    "hiddenRequired": "Retención y compromiso deben estar ocultas para la persona evaluada.",
+    "dimensionTextOnly": "Solo las preguntas de texto llevan dimensión."
   },
   "Scales": {
     "title": "Escalas de rating",
@@ -718,7 +719,10 @@
     "answerReasons": {
       "unmapped_option": "Opción sin equivalencia",
       "invalid_value": "Valor inválido"
-    }
+    },
+    "reapply": "Reaplicar equivalencias",
+    "reapplyDone": "{count, plural, =0 {Ninguna respuesta cambió.} =1 {1 respuesta remapeada.} other {# respuestas remapeadas.}}",
+    "reapplyHelp": "Vuelve a calcular las respuestas de retención y compromiso con la tabla likert_mapping actual."
   },
   "Exports": {
     "columns": {

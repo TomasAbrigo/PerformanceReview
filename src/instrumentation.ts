@@ -12,10 +12,15 @@ export async function register() {
     const { db } = await import("@/db/client");
     const { seedSystemTemplates } = await import("@/modules/templates");
     await seedSystemTemplates(db);
-    const { seedLikertMappings } = await import("@/modules/likert/store");
-    await seedLikertMappings(db);
   } catch (error) {
     // A missing/unmigrated DB must not prevent the server from starting.
     logError(error, "Could not seed system templates");
+  }
+  try {
+    const { db } = await import("@/db/client");
+    const { seedLikertMappings } = await import("@/modules/likert/store");
+    await seedLikertMappings(db);
+  } catch (error) {
+    logError(error, "Could not seed the default Likert equivalences");
   }
 }

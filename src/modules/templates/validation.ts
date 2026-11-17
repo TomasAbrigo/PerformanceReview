@@ -54,6 +54,13 @@ export const questionInput = z
   })
   .superRefine((q, ctx) => {
     for (const issue of roleKindIssues(q.kind, q.role)) ctx.addIssue(issue);
+    if (q.dimension && q.kind !== "text") {
+      ctx.addIssue({
+        code: "custom",
+        message: "dimension_text_only",
+        path: ["dimension"],
+      });
+    }
     if (q.role === "retention" || q.role === "engagement") {
       if (q.appliesTo.some((r) => r !== "manager")) {
         ctx.addIssue({
