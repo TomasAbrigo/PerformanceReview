@@ -1,0 +1,495 @@
+import { render, screen, within } from "@testing-library/react";
+import { NextIntlClientProvider } from "next-intl";
+import type { ReactNode } from "react";
+import { describe, expect, it, vi } from "vitest";
+import en from "@/messages/en.json";
+import es from "@/messages/es.json";
+import { kpiGroup } from "@/modules/analytics/goals-insights/kpi";
+import type {
+  GoalIndicatorRow,
+  GoalKpis,
+  GoalOutliers,
+  GoalsVsIndicators,
+} from "@/modules/analytics/goals-insights/types";
+import { buckets } from "@/modules/analytics/goals-insights/types";
+import { BucketsChart } from "./buckets-chart";
+import { GoalsFilters } from "./filters";
+import { GoalsScatter } from "./goals-scatter";
+import { KpisTable } from "./kpis-table";
+import { OutliersView } from "./outliers";
+import { PeopleTable } from "./people-table";
+import { parseGoalsInsightsParams } from "./url-state";
+
+vi.mock("@/i18n/navigation", () => ({
+  Link: ({
+    href,
+    children,
+    ...rest
+  }: {
+    href: string;
+    children: ReactNode;
+  }) => (
+    <a href={href} {...rest}>
+      {children}
+    </a>
+  ),
+}));
+
+const messages = { es, en };
+const renderIn = (locale: "es" | "en", ui: ReactNode) =>
+  render(
+    <NextIntlClientProvider
+      locale={locale}
+      messages={messages[locale]}
+      timeZone="UTC"
+    >
+      {ui}
+    </NextIntlClientProvider>,
+  );
+const locales = ["es", "en"] as const;
+
+const group = (
+  key: string | null,
+  label: string | null,
+  c: { people: number; goals: number; completed: number; overdue?: number },
+  others = false,
+) =>
+  kpiGroup({
+    key,
+    label,
+    others,
+    people: c.people,
+    peopleWithGoals: c.people,
+    goals: c.goals,
+    completed: c.completed,
+    inProgress: c.goals - c.completed,
+    closed: 0,
+    overdue: c.overdue ?? 0,
+    progressSum: c.completed * 100,
+  });
+
+const kpis = (over: Partial<GoalKpis> = {}): GoalKpis => ({
+  cycleId: "c1",
+  groupBy: "department",
+  hierarchy: "asOf",
+  groups: [
+    group("Ing", "Ingeniería", {
+      people: 6,
+      goals: 26,
+      completed: 14,
+      overdue: 2,
+    }),
+    group("Prod", "Producto", { people: 3, goals: 0, completed: 0 }),
+  ],
+  total: group(null, null, { people: 9, goals: 26, completed: 14, overdue: 2 }),
+  suppressed: 0,
+  minGroupSize: null,
+  ...over,
+});
+
+describe("KpisTable", () => {
+  it.each(locales)("shows the shares of each group in %s", (locale) => {
+    renderIn(locale, <KpisTable kpis={kpis()} />);
+    const table = screen.getByTestId("kpis-table");
+    const ing = within(table).getByRole("row", { name: /Ingeniería/ });
+    // 14 of 26 completed = 54 %, 12 in progress = 46 %, 2 overdue = 8 %.
+    expect(ing).toHaveTextContent("14 (54 %)");
+    expect(ing).toHaveTextContent("12 (46 %)");
+    expect(ing).toHaveTextContent("2 (8 %)");
+    expect(
+      within(ing).getByRole("img", {
+        name:
+          locale === "es"
+            ? /54 % de objetivos completados/
+            : /54 % of goals completed/,
+      }),
+    ).toBeInTheDocument();
+    // A group without goals has no shares (not 0 %).
+    const prod = within(table).getByRole("row", { name: /Producto/ });
+    expect(prod).toHaveTextContent(
+      locale === "es" ? "Sin objetivos" : "No goals",
+    );
+    expect(
+      within(table).getByRole("row", { name: /Total/ }),
+    ).toBeInTheDocument();
+  });
+
+  it("labels the Otros cell and says how many people are not shown (direction)", () => {
+    renderIn(
+      "es",
+      <KpisTable
+        kpis={kpis({
+          groups: [
+            group("Ing", "Ingeniería", { people: 6, goals: 10, completed: 5 }),
+            group(null, null, { people: 5, goals: 4, completed: 1 }, true),
+          ],
+          total: null,
+          suppressed: 3,
+          minGroupSize: 5,
+        })}
+      />,
+    );
+    expect(screen.getByRole("row", { name: /Otros/ })).toBeInTheDocument();
+    expect(
+      screen.getByText(/3 personas en grupos chicos no se muestran/),
+    ).toBeInTheDocument();
+    // No total: it would give the hidden groups away.
+    expect(screen.queryByRole("row", { name: /^Total/ })).toBeNull();
+    expect(screen.getByText(/El total se oculta/)).toBeInTheDocument();
+  });
+
+  it("an unnamed group is 'Sin asignar'; nothing at all is the empty message", () => {
+    const { unmount } = renderIn(
+      "es",
+      <KpisTable
+        kpis={kpis({
+          groups: [group(null, null, { people: 1, goals: 1, completed: 1 })],
+        })}
+      />,
+    );
+    expect(
+      screen.getByRole("row", { name: /Sin asignar/ }),
+    ).toBeInTheDocument();
+    unmount();
+    renderIn("en", <KpisTable kpis={kpis({ groups: [], total: null })} />);
+    expect(
+      screen.getByText("There is no data for these filters."),
+    ).toBeInTheDocument();
+  });
+});
+
+const row = (
+  name: string,
+  over: Partial<GoalIndicatorRow> = {},
+): GoalIndicatorRow => ({
+  participantId: `p-${name}`,
+  personId: `person-${name}`,
+  name,
+  managerId: "m1",
+  managerName: "Marta Quiroga",
+  department: "Ingeniería",
+  goals: 5,
+  completed: 4,
+  completedPct: 80,
+  avgProgress: 92,
+  retention: 2,
+  engagement: 4,
+  positiveShare: 0.5,
+  labeledComments: 4,
+  ...over,
+});
+
+describe("GoalsScatter", () => {
+  const rows = [
+    row("Ana"),
+    row("Bruno", { completedPct: 25, retention: 5 }),
+    row("Dario", { goals: 0, completed: 0, completedPct: null }),
+    row("Iris", { retention: null }),
+  ];
+
+  it.each(locales)(
+    "draws a dot per person with goals and the indicator in %s",
+    (locale) => {
+      const { container } = renderIn(
+        locale,
+        <GoalsScatter rows={rows} indicator="retention" />,
+      );
+      // Two visible dots (+ their transparent hit targets): 2 titles.
+      expect(container.querySelectorAll("svg title")).toHaveLength(2);
+      expect(
+        screen.getByText(
+          locale === "es"
+            ? "Ana: 80 % de objetivos completados, Retención 2"
+            : "Ana: 80 % of goals completed, Retention 2",
+        ),
+      ).toBeInTheDocument();
+      // Dario (no goals) and Iris (no retention) have no point; they are counted.
+      expect(
+        screen.getByText(
+          locale === "es"
+            ? "2 personas no aparecen por no tener objetivos o esa respuesta."
+            : "2 people do not appear for lack of goals or that answer.",
+        ),
+      ).toBeInTheDocument();
+    },
+  );
+
+  it("switches to engagement", () => {
+    const { container } = renderIn(
+      "es",
+      <GoalsScatter rows={rows} indicator="engagement" />,
+    );
+    // Engagement is answered by Ana, Bruno and Iris; Dario has no goals.
+    expect(container.querySelectorAll("svg title")).toHaveLength(3);
+    expect(
+      screen.getByText(/Ana: 80 % de objetivos completados, Compromiso 4/),
+    ).toBeInTheDocument();
+  });
+
+  it("has the points as a table too", () => {
+    renderIn("en", <GoalsScatter rows={rows} indicator="retention" />);
+    expect(screen.getByText("View as table")).toBeInTheDocument();
+  });
+});
+
+const vs = (over: Partial<GoalsVsIndicators> = {}): GoalsVsIndicators => ({
+  cycleId: "c1",
+  rows: [],
+  buckets: buckets.map((b, i) => ({
+    ...b,
+    people: i === 1 ? 3 : i === 4 ? 4 : 0,
+    meanRetention: i === 1 ? 4 : i === 4 ? 3.5 : null,
+    meanEngagement: i === 1 ? 4 : i === 4 ? 3.5 : null,
+    meanPositiveShare: i === 1 ? 0.75 : null,
+    hidden: false,
+  })),
+  withoutGoals: 1,
+  suppressed: 0,
+  minGroupSize: null,
+  ...over,
+});
+
+describe("BucketsChart", () => {
+  it.each(locales)(
+    "draws the means of each bucket and counts who is left out in %s",
+    (locale) => {
+      renderIn(locale, <BucketsChart data={vs()} />);
+      const chart = screen.getByRole("img", {
+        name:
+          locale === "es"
+            ? /Indicadores según el cumplimiento de objetivos/
+            : /Indicators by goals completion/,
+      });
+      expect(chart).toHaveAccessibleName(/20–40 %/);
+      expect(chart).toHaveAccessibleName(
+        locale === "es" ? /20–40 %, Retención: 4/ : /20–40 %, Retention: 4/,
+      );
+      expect(
+        screen.getByText(
+          locale === "es"
+            ? "1 persona sin objetivos no entra en este gráfico."
+            : "1 person without goals is not in this chart.",
+        ),
+      ).toBeInTheDocument();
+    },
+  );
+
+  it("labels the buckets direction may not see, without numbers", () => {
+    renderIn(
+      "es",
+      <BucketsChart
+        data={vs({
+          buckets: vs().buckets.map((b) =>
+            b.people === 3
+              ? {
+                  from: b.from,
+                  to: b.to,
+                  people: null,
+                  meanRetention: null,
+                  meanEngagement: null,
+                  meanPositiveShare: null,
+                  hidden: true,
+                }
+              : b,
+          ),
+          withoutGoals: null,
+          suppressed: 3,
+          minGroupSize: 5,
+        })}
+      />,
+    );
+    expect(
+      screen.getByRole("img", { name: /Oculto: menos de 5 personas/ }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText("3 personas en tramos chicos no se muestran."),
+    ).toBeInTheDocument();
+  });
+
+  it("says there is no data when nobody has goals", () => {
+    renderIn(
+      "en",
+      <BucketsChart
+        data={vs({
+          buckets: vs().buckets.map((b) => ({
+            ...b,
+            people: 0,
+            meanRetention: null,
+            meanEngagement: null,
+            meanPositiveShare: null,
+          })),
+        })}
+      />,
+    );
+    expect(
+      screen.getByText("There is no data for these filters."),
+    ).toBeInTheDocument();
+  });
+});
+
+const outliers = (over: Partial<GoalOutliers> = {}): GoalOutliers => ({
+  cycleId: "c1",
+  thresholds: {
+    goalsHigh: 80,
+    goalsLow: 30,
+    riskThreshold: 2,
+    indicatorHigh: 4,
+  },
+  doneButLow: {
+    count: 1,
+    people: [
+      {
+        participantId: "pa",
+        personId: "a",
+        name: "Ana Prieto",
+        managerId: "m",
+        managerName: "Marta Quiroga",
+        department: "Ingeniería",
+        goals: 5,
+        completed: 4,
+        completedPct: 80,
+        retention: 2,
+        engagement: 4,
+      },
+    ],
+  },
+  behindButHigh: { count: 0, people: [] },
+  minGroupSize: null,
+  ...over,
+});
+
+describe("OutliersView", () => {
+  it.each(locales)(
+    "lists the people of each group with a link to their assessment in %s",
+    (locale) => {
+      renderIn(locale, <OutliersView data={outliers()} />);
+      const done = screen.getByTestId("outliers-done-low");
+      expect(done).toHaveTextContent(
+        locale === "es"
+          ? "Completaron 80 % o más de sus objetivos, pero retención o compromiso están en 2 o menos."
+          : "They completed 80 % or more of their goals, but retention or engagement is 2 or less.",
+      );
+      expect(
+        within(done).getByTestId("outliers-done-low-count"),
+      ).toHaveTextContent(locale === "es" ? "1 persona" : "1 person");
+      expect(
+        within(done).getByRole("link", { name: /Ana Prieto/ }),
+      ).toHaveAttribute("href", "/cycles/c1/participants/pa");
+      expect(done).toHaveTextContent(
+        locale === "es" ? "4 de 5 (80 %)" : "4 of 5 (80 %)",
+      );
+      const behind = screen.getByTestId("outliers-behind-high");
+      expect(behind).toHaveTextContent(
+        locale === "es" ? "Ninguna persona" : "Nobody",
+      );
+      expect(within(behind).queryByRole("table")).toBeNull();
+    },
+  );
+
+  it("direction gets counts, or a note when they are under the minimum, never people", () => {
+    renderIn(
+      "es",
+      <OutliersView
+        data={outliers({
+          doneButLow: { count: 6, people: [] },
+          behindButHigh: { count: null, people: [] },
+          minGroupSize: 5,
+        })}
+      />,
+    );
+    expect(screen.getByTestId("outliers-done-low-count")).toHaveTextContent(
+      "6 personas",
+    );
+    expect(screen.getByTestId("outliers-behind-high-count")).toHaveTextContent(
+      "Hay menos de 5 personas: no se muestra el número.",
+    );
+    expect(screen.queryByRole("link")).toBeNull();
+  });
+});
+
+describe("PeopleTable", () => {
+  it("shows goals, indicators and positive comments, with dashes where there is none", () => {
+    renderIn(
+      "es",
+      <PeopleTable
+        cycleId="c1"
+        rows={[
+          row("Ana"),
+          row("Dario", {
+            goals: 0,
+            completed: 0,
+            completedPct: null,
+            avgProgress: null,
+            positiveShare: null,
+            engagement: null,
+          }),
+        ]}
+      />,
+    );
+    const table = screen.getByTestId("people-table");
+    const ana = within(table).getByRole("row", { name: /Ana/ });
+    expect(ana).toHaveTextContent("80 %");
+    expect(ana).toHaveTextContent("92 %");
+    expect(ana).toHaveTextContent("50 %");
+    const dario = within(table).getByRole("row", { name: /Dario/ });
+    expect(dario).toHaveTextContent("–");
+    expect(
+      within(table).getByRole("link", { name: "Ver assessment de Ana" }),
+    ).toHaveAttribute("href", "/cycles/c1/participants/p-Ana");
+  });
+});
+
+describe("GoalsFilters", () => {
+  const params = parseGoalsInsightsParams({ cycle: "c2" });
+  const cycles = [
+    { id: "c1", name: "H1 2024" },
+    { id: "c2", name: "H2 2024" },
+  ];
+
+  it("offers the cycles (no 'all'), the areas and the managers it was given", () => {
+    renderIn(
+      "en",
+      <GoalsFilters
+        params={params}
+        cycles={cycles}
+        options={{
+          departments: ["Ingeniería"],
+          managers: [{ id: "m1", name: "Marta" }],
+        }}
+      />,
+    );
+    const cycle = screen.getByLabelText("Cycle") as HTMLSelectElement;
+    expect(
+      within(cycle)
+        .getAllByRole("option")
+        .map((o) => o.textContent),
+    ).toEqual(["H1 2024", "H2 2024"]);
+    expect(cycle.value).toBe("c2");
+    expect(
+      within(screen.getByLabelText("Area"))
+        .getAllByRole("option")
+        .map((o) => o.textContent),
+    ).toEqual(["All", "Ingeniería"]);
+    expect(
+      within(screen.getByLabelText("Manager"))
+        .getAllByRole("option")
+        .map((o) => o.textContent),
+    ).toEqual(["All", "Marta"]);
+  });
+
+  it("has no manager picker without managers (direction), and keeps the grouping in the URL", () => {
+    const { container } = renderIn(
+      "es",
+      <GoalsFilters
+        params={parseGoalsInsightsParams({ groupBy: "manager" })}
+        cycles={cycles}
+        options={{ departments: ["Ingeniería"], managers: [] }}
+      />,
+    );
+    expect(screen.queryByLabelText("Manager")).toBeNull();
+    expect(container.querySelector('input[name="groupBy"]')).toHaveValue(
+      "manager",
+    );
+    expect(screen.getByRole("button", { name: "Aplicar" })).toBeInTheDocument();
+  });
+});

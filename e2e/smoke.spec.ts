@@ -20,6 +20,7 @@ test("home navigation lists only the remaining sections", async ({ page }) => {
     "Objetivos del equipo",
     "Dashboards",
     "Análisis cualitativo",
+    "Goals y assessments",
     "Importaciones",
     "Subir archivo",
     "Cola de identidad",
