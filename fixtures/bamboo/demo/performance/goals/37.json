@@ -22,15 +22,15 @@
   "selectedFilter": "status-all",
   "goals": [
     {
-      "id": "5150",
-      "title": "Mejorar el NPS interno del equipo",
-      "description": "Sirve de base para el próximo ciclo de evaluación.",
+      "id": "5119",
+      "title": "Entregar el proyecto Norte sin desvíos",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
       "percentComplete": 100,
       "alignsWithOptionId": 9004,
       "sharedWithEmployeeIds": [],
-      "dueDate": "2025-09-23",
-      "completionDate": "2025-08-16",
-      "lastChangedDateTime": "2025-08-16T12:44:24Z",
+      "dueDate": "2023-11-25",
+      "completionDate": "2023-08-08",
+      "lastChangedDateTime": "2023-08-08T08:11:30Z",
       "status": "completed",
       "milestones": null,
       "actions": {
@@ -43,15 +43,15 @@
       }
     },
     {
-      "id": "5151",
-      "title": "Implementar el calendario editorial",
+      "id": "5120",
+      "title": "Migrar los reportes al nuevo tablero",
       "description": "Sirve de base para el próximo ciclo de evaluación.",
       "percentComplete": 100,
-      "alignsWithOptionId": 9002,
+      "alignsWithOptionId": null,
       "sharedWithEmployeeIds": [],
-      "dueDate": "2026-07-23",
-      "completionDate": "2026-05-20",
-      "lastChangedDateTime": "2026-05-20T18:30:14Z",
+      "dueDate": "2024-06-26",
+      "completionDate": "2024-06-12",
+      "lastChangedDateTime": "2024-06-12T17:24:30Z",
       "status": "completed",
       "milestones": null,
       "actions": {
@@ -64,64 +64,106 @@
       }
     },
     {
-      "id": "5153",
-      "title": "Automatizar la conciliación mensual",
-      "description": "Alineado con el plan del área para el año.",
-      "percentComplete": 85,
-      "alignsWithOptionId": null,
-      "sharedWithEmployeeIds": [],
-      "dueDate": "2027-02-02",
-      "completionDate": null,
-      "lastChangedDateTime": "2026-10-31T12:05:30Z",
-      "status": "in_progress",
-      "milestones": null,
-      "actions": {
-        "canEdit": true,
-        "canUpdateProgress": true,
-        "canClose": true,
-        "canReopen": false,
-        "canDelete": true,
-        "canComment": true
-      }
-    },
-    {
-      "id": "5155",
-      "title": "Aumentar la cobertura de pruebas al 80%",
+      "id": "5121",
+      "title": "Cerrar el plan de capacitación anual",
       "description": "Meta compartida con otra área; coordinar avances mensuales.",
       "percentComplete": 100,
-      "alignsWithOptionId": 9003,
+      "alignsWithOptionId": null,
       "sharedWithEmployeeIds": [],
-      "dueDate": "2026-10-14",
-      "completionDate": "2026-10-05",
-      "lastChangedDateTime": "2026-10-05T13:46:26Z",
+      "dueDate": "2025-11-20",
+      "completionDate": "2025-06-27",
+      "lastChangedDateTime": "2025-06-27T17:20:18Z",
       "status": "completed",
       "milestones": [
         {
-          "id": 769,
-          "employeeGoalId": 5155,
+          "id": 732,
+          "employeeGoalId": 5121,
           "title": "Hito 1",
           "startValue": 0,
           "endValue": 1,
           "currentValue": 1,
-          "completedDateTime": "2026-06-04T10:35:55Z",
-          "lastUpdateDateTime": "2026-06-04T10:35:55Z",
+          "completedDateTime": "2025-06-04T16:03:04Z",
+          "lastUpdateDateTime": "2025-06-04T16:03:04Z",
           "lastUpdateUserId": 37
         },
         {
-          "id": 770,
-          "employeeGoalId": 5155,
+          "id": 733,
+          "employeeGoalId": 5121,
           "title": "Hito 2",
           "startValue": 0,
           "endValue": 1,
           "currentValue": 1,
-          "completedDateTime": "2026-07-26T17:11:08Z",
-          "lastUpdateDateTime": "2026-07-26T17:11:08Z",
+          "completedDateTime": "2025-03-30T14:22:06Z",
+          "lastUpdateDateTime": "2025-03-30T14:22:06Z",
           "lastUpdateUserId": 37
         }
       ],
       "actions": {
         "canEdit": true,
         "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "5123",
+      "title": "Reducir los incidentes recurrentes a la mitad",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2025-02-03",
+      "completionDate": "2025-01-16",
+      "lastChangedDateTime": "2025-01-16T17:58:23Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "5125",
+      "title": "Aumentar la cobertura de pruebas al 80%",
+      "description": "Sirve de base para el próximo ciclo de evaluación.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2026-03-18",
+      "completionDate": "2025-11-28",
+      "lastChangedDateTime": "2025-11-28T14:34:59Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "5126",
+      "title": "Automatizar la conciliación mensual",
+      "description": "Sirve de base para el próximo ciclo de evaluación.",
+      "percentComplete": 85,
+      "alignsWithOptionId": 9004,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2026-11-01",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-09-06T16:51:52Z",
+      "status": "in_progress",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
         "canClose": true,
         "canReopen": false,
         "canDelete": true,
@@ -139,15 +181,19 @@
   ],
   "comments": [
     {
-      "goalId": "5150",
+      "goalId": "5120",
       "commentCount": 4
     },
     {
-      "goalId": "5153",
-      "commentCount": 4
+      "goalId": "5121",
+      "commentCount": 3
     },
     {
-      "goalId": "5155",
+      "goalId": "5125",
+      "commentCount": 2
+    },
+    {
+      "goalId": "5126",
       "commentCount": 2
     }
   ]

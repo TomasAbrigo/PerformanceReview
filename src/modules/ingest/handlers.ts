@@ -1,6 +1,7 @@
 import { and, eq, isNull, notInArray } from "drizzle-orm";
 import type { z } from "zod";
 import type { DbOrTx } from "@/db/client";
+import type { QuestionMapping } from "@/modules/lake/profiles";
 import {
   employment,
   type IngestCounts,
@@ -9,12 +10,16 @@ import {
 } from "@/db/schema";
 import { openIssueSourceIds } from "@/modules/identity/raise";
 import {
+  buildCycleDecision,
   finishHistoryImport,
   stagedAssessmentSchema,
   stagedFeedbackSchema,
+  stagedProgressSchema,
   upsertAssessment,
   upsertFeedback,
+  upsertProgress,
 } from "@/modules/import-history";
+import type { DeferredRow } from "@/modules/import-history/decision";
 import { upsertEmployee } from "./employee";
 import {
   stagedJobHistorySchema,
@@ -37,6 +42,34 @@ export type HandlerContext = {
   unmatched?: "create" | "queue";
   /** Per-run scratch space (memoized lookups shared by all records). */
   cache: Map<string, unknown>;
+  /**
+   * Report rows: the cycle someone chose for the rows the run could not place
+   * (resuming a `needs_decision` run). Used only for rows that would be
+   * deferred again; the others resolve their cycle as usual.
+   */
+  forcedCycleId?: string;
+  /**
+   * Report rows: the source profile's question mapping. Not part of the
+   * payload (hashes stay those of the row); re-processing a stored row gets
+   * it again from the run's profile (questionsOfRun).
+   */
+  questions?: QuestionMapping[];
+};
+
+/** A cycle a decision may create: a semester, or a cycle named in the file. */
+export type CycleProposal = {
+  name: string;
+  periodStart: string;
+  periodEnd: string;
+};
+
+/** Why a report row was held back, and what could be done with it. */
+export type Deferral = {
+  reason: "ambiguous_semester" | "unknown_cycle";
+  /** The cycle name the row gave, if any. */
+  cycleName: string | null;
+  /** Cycles a decision may create for the row (none: pick an existing one). */
+  proposals: CycleProposal[];
 };
 
 export type HandlerOutcome = {
@@ -48,8 +81,12 @@ export type HandlerOutcome = {
     /** employee: held in (or flagged for) the identity queue. */
     | "issues"
     /** employee: held back, a reviewer already ignored this exact record. */
-    | "ignored";
+    | "ignored"
+    /** Report rows: not written until someone picks their cycle. */
+    | "deferred";
   rejects: string[];
+  /** With result `deferred`: why, and the cycle it could go to. */
+  deferral?: Deferral;
   /** Extra counters added to the run's counts. */
   counts?: Partial<IngestCounts>;
 };
@@ -74,6 +111,11 @@ export type EntityHandler<S> = {
       reject: (reject: IngestReject) => void;
     },
   ): Promise<Partial<IngestCounts>>;
+  /**
+   * What to ask about the rows the run deferred (result `deferred`): stored
+   * as `params.decision`, and the run ends in `needs_decision`.
+   */
+  decide?(db: DbOrTx, deferred: DeferredRow[]): Promise<unknown>;
 };
 
 /**
@@ -172,6 +214,17 @@ export const entityHandlers: Partial<
     upsert: upsertAssessment,
     finish: async (db, { runId, reject }) =>
       finishHistoryImport(db, { runId, reject }),
+    decide: buildCycleDecision,
+  }),
+  assessment_progress: defineHandler({
+    schema: stagedProgressSchema,
+    counts: { issues: 0, ignored: 0 },
+    upsert: upsertProgress,
+    finish: async (db, { runId, reject }) => {
+      await finishHistoryImport(db, { runId, reject });
+      return {};
+    },
+    decide: buildCycleDecision,
   }),
   feedback: defineHandler({
     schema: stagedFeedbackSchema,

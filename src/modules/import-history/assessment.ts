@@ -15,7 +15,6 @@ import {
   likertOverridesOf,
   saveAnswers,
   SOURCE,
-  upsertImportedCycle,
   upsertRequest,
 } from "./cycles";
 import { parseReportDate } from "./dates";
@@ -25,7 +24,9 @@ import {
   type NameIndex,
   type NameMatch,
 } from "./names";
+import { cycleForAssessment } from "./cycle-target";
 import { detectQuestionColumns, type QuestionColumn } from "./questions";
+import type { QuestionMapping } from "@/modules/lake/profiles";
 
 const cell = z
   .union([z.string(), z.number(), z.boolean(), z.null()])
@@ -46,7 +47,8 @@ export const stagedAssessmentSchema = z
     fields: z.object({
       employee_name: cell.pipe(z.string({ message: "Employee Name is empty" })),
       manager_name: cell,
-      review_cycle: cell.pipe(z.string({ message: "Review Cycle is empty" })),
+      // Without a cycle name, the semester of the Assessment Date (#58).
+      review_cycle: cell,
       assessment_date: z.unknown(),
     }),
     raw: z.record(z.string(), z.unknown()),
@@ -82,6 +84,9 @@ export const emptyTally = (): RowTally => ({
   answersUnchanged: 0,
 });
 
+/** The report entities whose rows import-history maps. */
+export type ReportEntity = "assessment" | "assessment_progress" | "feedback";
+
 export async function nameIndexOf(
   tx: DbOrTx,
   cache: Map<string, unknown>,
@@ -98,7 +103,7 @@ export async function recordRow(
   tx: DbOrTx,
   row: {
     runId: string;
-    entity: "assessment" | "feedback";
+    entity: ReportEntity;
     sourceId: string;
     cycleId: string;
     result: HandlerOutcome["result"];
@@ -136,7 +141,7 @@ export type ReportIssuePayload = {
 async function resolvedLinks(
   tx: DbOrTx,
   cache: Map<string, unknown>,
-  entity: "assessment" | "feedback",
+  entity: ReportEntity,
 ): Promise<Map<string, Partial<Record<RowRole, string>>>> {
   const key = `resolvedLinks:${entity}`;
   let links = cache.get(key) as
@@ -179,14 +184,13 @@ async function resolvedLinks(
 export async function resolveRow(
   tx: DbOrTx,
   ctx: HandlerContext,
-  entity: "assessment" | "feedback",
+  entity: ReportEntity,
   sourceId: string,
   names: { reviewee: string; reviewer: string | null },
 ) {
   const index = await nameIndexOf(tx, ctx.cache);
   const linked = (await resolvedLinks(tx, ctx.cache, entity)).get(sourceId);
-  const reviewerRole: RowRole =
-    entity === "assessment" ? "manager" : "reviewer";
+  const reviewerRole: RowRole = entity === "feedback" ? "reviewer" : "manager";
   const lookup = (role: RowRole, name: string): NameMatch =>
     linked?.[role] ? { personId: linked[role] } : matchName(index, name);
   const reviewee = lookup("employee", names.reviewee);
@@ -244,11 +248,12 @@ export async function resolveRow(
 function columnsOf(
   cache: Map<string, unknown>,
   headers: string[],
+  mapping: QuestionMapping[] = [],
 ): QuestionColumn[] {
-  const key = `columns:${headers.join("\u0000")}`;
+  const key = `columns:${headers.join("\u0000")}:${JSON.stringify(mapping)}`;
   let columns = cache.get(key) as QuestionColumn[] | undefined;
   if (!columns) {
-    columns = detectQuestionColumns(headers);
+    columns = detectQuestionColumns(headers, mapping);
     cache.set(key, columns);
   }
   return columns;
@@ -270,18 +275,16 @@ export async function upsertAssessment(
   const { fields, raw } = staged;
   const { sourceId } = ctx;
   const date = fields.assessment_date;
-  const cycle = await upsertImportedCycle(
-    tx,
-    {
-      name: fields.review_cycle,
-      date,
-      runId: ctx.runId,
-      widen: true,
-    },
-    {},
-    ctx.cache,
-  );
-  const columns = columnsOf(ctx.cache, Object.keys(raw));
+  const target = await cycleForAssessment(tx, ctx, {
+    name: fields.review_cycle,
+    date,
+  });
+  if ("deferred" in target) {
+    return { result: "deferred", rejects: [], deferral: target.deferred };
+  }
+  const { cycle } = target;
+  const cycleName = fields.review_cycle ?? cycle.name;
+  const columns = columnsOf(ctx.cache, Object.keys(raw), ctx.questions);
   const revisions = await ensureQuestions(tx, cycle.id, columns, ctx.cache);
 
   const tally = emptyTally();
@@ -323,7 +326,7 @@ export async function upsertAssessment(
       results.push(request.result);
       if (request.result === "superseded") {
         rejects.push(
-          `A later assessment of ${fields.employee_name} in "${fields.review_cycle}" replaces this ${side} review (one per cycle)`,
+          `A later assessment of ${fields.employee_name} in "${cycleName}" replaces this ${side} review (one per cycle)`,
         );
         continue;
       }

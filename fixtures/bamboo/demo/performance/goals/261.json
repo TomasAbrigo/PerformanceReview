@@ -22,64 +22,17 @@
   "selectedFilter": "status-all",
   "goals": [
     {
-      "id": "6146",
-      "title": "Aumentar la cobertura de pruebas al 80%",
-      "description": "Pedido por el equipo directivo en la planificación.",
-      "percentComplete": 25,
-      "alignsWithOptionId": null,
-      "sharedWithEmployeeIds": [
-        59
-      ],
-      "dueDate": "2023-02-15",
+      "id": "6113",
+      "title": "Renovar las cuentas clave del trimestre",
+      "description": "Sirve de base para el próximo ciclo de evaluación.",
+      "percentComplete": 70,
+      "alignsWithOptionId": 9003,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2024-04-27",
       "completionDate": null,
-      "lastChangedDateTime": "2026-05-09T10:21:44Z",
+      "lastChangedDateTime": "2025-03-27T17:11:38Z",
       "status": "in_progress",
-      "milestones": [
-        {
-          "id": 1211,
-          "employeeGoalId": 6146,
-          "title": "Hito 1",
-          "startValue": 0,
-          "endValue": 1,
-          "currentValue": 1,
-          "completedDateTime": "2024-06-26T11:24:59Z",
-          "lastUpdateDateTime": "2024-06-26T11:24:59Z",
-          "lastUpdateUserId": 261
-        },
-        {
-          "id": 1212,
-          "employeeGoalId": 6146,
-          "title": "Hito 2",
-          "startValue": 0,
-          "endValue": 1,
-          "currentValue": 0,
-          "completedDateTime": null,
-          "lastUpdateDateTime": "2022-10-29T11:17:22Z",
-          "lastUpdateUserId": 261
-        },
-        {
-          "id": 1213,
-          "employeeGoalId": 6146,
-          "title": "Hito 3",
-          "startValue": 0,
-          "endValue": 1,
-          "currentValue": 0,
-          "completedDateTime": null,
-          "lastUpdateDateTime": "2022-10-29T09:23:10Z",
-          "lastUpdateUserId": 261
-        },
-        {
-          "id": 1214,
-          "employeeGoalId": 6146,
-          "title": "Hito 4",
-          "startValue": 0,
-          "endValue": 1,
-          "currentValue": 0,
-          "completedDateTime": null,
-          "lastUpdateDateTime": "2022-10-29T17:20:33Z",
-          "lastUpdateUserId": 261
-        }
-      ],
+      "milestones": null,
       "actions": {
         "canEdit": true,
         "canUpdateProgress": true,
@@ -90,15 +43,15 @@
       }
     },
     {
-      "id": "6148",
+      "id": "6114",
       "title": "Lanzar el nuevo flujo de onboarding",
-      "description": "Alineado con el plan del área para el año.",
+      "description": "Sirve de base para el próximo ciclo de evaluación.",
       "percentComplete": 100,
       "alignsWithOptionId": null,
       "sharedWithEmployeeIds": [],
-      "dueDate": "2024-07-17",
-      "completionDate": "2024-07-14",
-      "lastChangedDateTime": "2024-07-14T14:41:24Z",
+      "dueDate": "2025-09-16",
+      "completionDate": "2025-07-22",
+      "lastChangedDateTime": "2025-07-22T12:58:01Z",
       "status": "completed",
       "milestones": null,
       "actions": {
@@ -111,20 +64,20 @@
       }
     },
     {
-      "id": "6149",
-      "title": "Aumentar la cobertura de pruebas al 80%",
+      "id": "6115",
+      "title": "Renovar las cuentas clave del trimestre",
       "description": "Alineado con el plan del área para el año.",
-      "percentComplete": 100,
+      "percentComplete": 0,
       "alignsWithOptionId": null,
       "sharedWithEmployeeIds": [],
-      "dueDate": "2025-12-18",
-      "completionDate": "2025-12-17",
-      "lastChangedDateTime": "2025-12-17T19:13:29Z",
-      "status": "completed",
+      "dueDate": "2025-05-21",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-10-04T19:11:48Z",
+      "status": "in_progress",
       "milestones": null,
       "actions": {
         "canEdit": true,
-        "canUpdateProgress": false,
+        "canUpdateProgress": true,
         "canClose": true,
         "canReopen": false,
         "canDelete": true,
@@ -132,38 +85,59 @@
       }
     },
     {
-      "id": "6150",
+      "id": "6118",
       "title": "Cerrar el plan de capacitación anual",
-      "description": "Sirve de base para el próximo ciclo de evaluación.",
-      "percentComplete": 100,
-      "alignsWithOptionId": null,
-      "sharedWithEmployeeIds": [],
-      "dueDate": "2026-06-19",
-      "completionDate": "2026-04-17",
-      "lastChangedDateTime": "2026-04-17T12:54:14Z",
-      "status": "completed",
-      "milestones": null,
-      "actions": {
-        "canEdit": true,
-        "canUpdateProgress": false,
-        "canClose": true,
-        "canReopen": false,
-        "canDelete": true,
-        "canComment": true
-      }
-    },
-    {
-      "id": "6152",
-      "title": "Automatizar la conciliación mensual",
-      "description": "Sirve de base para el próximo ciclo de evaluación.",
-      "percentComplete": 100,
-      "alignsWithOptionId": null,
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 50,
+      "alignsWithOptionId": 9002,
       "sharedWithEmployeeIds": [
         59
       ],
-      "dueDate": "2026-07-21",
-      "completionDate": "2026-04-01",
-      "lastChangedDateTime": "2026-04-01T15:19:11Z",
+      "dueDate": "2025-02-08",
+      "completionDate": null,
+      "lastChangedDateTime": "2025-04-26T17:14:50Z",
+      "status": "in_progress",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "6121",
+      "title": "Documentar los procesos críticos",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 5,
+      "alignsWithOptionId": 9001,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2027-02-03",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-08-08T10:00:43Z",
+      "status": "in_progress",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "6122",
+      "title": "Reducir el tiempo de primera respuesta un 20%",
+      "description": "Sirve de base para el próximo ciclo de evaluación.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2026-06-09",
+      "completionDate": "2026-04-17",
+      "lastChangedDateTime": "2026-04-17T12:42:46Z",
       "status": "completed",
       "milestones": null,
       "actions": {
@@ -192,11 +166,11 @@
   ],
   "comments": [
     {
-      "goalId": "6149",
-      "commentCount": 1
+      "goalId": "6118",
+      "commentCount": 3
     },
     {
-      "goalId": "6150",
+      "goalId": "6121",
       "commentCount": 1
     }
   ]

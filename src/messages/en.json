@@ -263,12 +263,14 @@
         "ignored": "Ignored",
         "log": "Log entries",
         "duration": "Duration",
-        "mismatches": "Reviewer mismatches"
+        "mismatches": "Reviewer mismatches",
+        "deferred": "Deferred"
       },
       "status": {
         "running": "Running",
         "succeeded": "Succeeded",
-        "error": "Failed"
+        "error": "Failed",
+        "needs_decision": "Needs decision"
       },
       "pagination": {
         "label": "Pagination",
@@ -595,14 +597,56 @@
         "builtinName": "That name belongs to a built-in profile: choose another.",
         "savedName": "A saved profile already has that name: choose another or replace it."
       },
-      "replace": "Replace the saved profile “{name}”"
+      "replace": "Replace the saved profile “{name}”",
+      "base": "Start from",
+      "baseNone": "None (from scratch)",
+      "baseHint": "Copies the key, the fields and the question mapping of a built-in profile.",
+      "questions": {
+        "title": "Question mapping",
+        "hint": "Which columns are questions, who answers them and how. Columns like “Employee/Manager [Custom] Qn: …” that you do not configure are detected on their own.",
+        "column": "Column",
+        "kind": "Kind",
+        "side": "Side",
+        "dimension": "Dimension",
+        "role": "Role",
+        "kindLabel": "Question kind: {column}",
+        "sideLabel": "Side: {column}",
+        "dimensionLabel": "Dimension: {column}",
+        "roleLabel": "Role: {column}",
+        "kinds": {
+          "none": "Not a question",
+          "text": "Text",
+          "likert": "1-5 scale",
+          "letter_choice": "Letter choice"
+        },
+        "sides": {
+          "self": "Self assessment",
+          "manager": "Manager"
+        },
+        "none": "—",
+        "dimensions": {
+          "strengths": "Strengths",
+          "improvement": "Improvement",
+          "custom_1": "Custom 1",
+          "custom_2": "Custom 2",
+          "custom_3": "Custom 3"
+        },
+        "roles": {
+          "goals_rating": "Goals rating",
+          "goals_comment": "Goals comment",
+          "overall_rating": "Overall rating",
+          "retention": "Retention",
+          "engagement": "Engagement"
+        }
+      }
     },
     "entities": {
       "employee": "Employees",
       "job_history": "Job history",
       "goal": "Goals",
       "assessment": "Assessments",
-      "feedback": "Feedback"
+      "feedback": "Feedback",
+      "assessment_progress": "Assessment progress"
     },
     "result": {
       "title": "Import finished",
@@ -875,6 +919,15 @@
       "normalized": "normalized",
       "gap": "gap",
       "answers": "answers",
+      "indicator": "indicator",
+      "value": "value",
+      "mean": "mean",
+      "alert_kind": "alert",
+      "previous_cycle": "previous cycle",
+      "previous_value": "previous value",
+      "fall": "fall",
+      "retention": "retention",
+      "engagement": "engagement",
       "dimension": "dimension",
       "positive": "positive",
       "constructive": "constructive",
@@ -902,7 +955,29 @@
     "viewRun": "View the run",
     "viewQueue": "View the identity queue",
     "viewResult": "View imported cycles",
-    "notFound": "This run imported no historical cycles."
+    "notFound": "This run imported no historical cycles.",
+    "decision": {
+      "title": "Some rows are waiting for a cycle",
+      "rows": "{count, plural, one {# row was not imported yet} other {# rows were not imported yet}}: choose the cycle they go to.",
+      "reasons": {
+        "ambiguous_semester": "Their date is close to the cutoff between semesters, so the semester they belong to is unclear.",
+        "unknown_cycle": "They name a cycle that does not exist (Assessment Progress has no dates to create it from)."
+      },
+      "names": "Cycles named in the file: {names}",
+      "choose": "Target cycle",
+      "create": "Create the cycle {name} ({start} – {end})",
+      "existing": "{name} ({start} – {end})",
+      "submit": "Import into that cycle",
+      "submitting": "Importing…",
+      "resolved": "The waiting rows were imported into the chosen cycle.",
+      "errors": {
+        "not_waiting": "This run is no longer waiting for a decision. Reload the page.",
+        "not_found": "The run does not exist.",
+        "unknown_cycle": "The chosen cycle no longer exists.",
+        "unknown_proposal": "That cycle was not one of the proposed ones.",
+        "unknown": "The import could not be resumed."
+      }
+    }
   },
   "Dashboards": {
     "nav": "Dashboards",
@@ -1028,6 +1103,123 @@
       "others": "Others",
       "belowMinimum": "There are fewer than {min} participants: no data is shown to protect people.",
       "suppressed": "{n, plural, =0 {Nobody in small groups} one {# person in small departments (not broken out)} other {# people in small departments (not broken out)}}"
+    }
+  },
+  "Indicators": {
+    "nav": "Retention and engagement",
+    "title": "Retention and engagement indicators",
+    "forbidden": "You do not have access to these indicators.",
+    "noCycles": "There are no launched cycles yet.",
+    "none": "Unassigned",
+    "scope": {
+      "directReports": "You see only your direct reports as they were in each cycle.",
+      "aggregatesOnly": "Aggregates only: groups of at least {min} people are shown."
+    },
+    "indicator": {
+      "label": "Indicator",
+      "retention": "Retention",
+      "engagement": "Engagement"
+    },
+    "groupBy": {
+      "label": "Group by",
+      "department": "Area",
+      "manager": "Manager",
+      "none": "No grouping"
+    },
+    "hierarchy": {
+      "label": "Hierarchy",
+      "asOf": "At the time of the cycle",
+      "current": "Current"
+    },
+    "filters": {
+      "label": "Filters",
+      "cycle": "Cycle",
+      "department": "Area",
+      "manager": "Manager",
+      "any": "All",
+      "apply": "Apply"
+    },
+    "distribution": {
+      "title": "{indicator} distribution",
+      "hint": "How many people got each value, from 1 to 5, in the manager's review.",
+      "n": "{n, plural, one {# person} other {# people}}",
+      "mean": "Average {value}",
+      "all": "All",
+      "others": "Others",
+      "group": "Group",
+      "people": "People",
+      "average": "Average",
+      "valueCount": "value {value}: {count}",
+      "barLabel": "{group}, value {value}: {count}",
+      "suppressed": "{n, plural, one {# person is in a group smaller than {min} and is not shown} other {# people are in groups smaller than {min} and are not shown}}"
+    },
+    "matrix": {
+      "title": "Retention and engagement matrix",
+      "hint": "How many people are in each crossing of bands; the risk quadrant is low retention and low engagement at once.",
+      "band": {
+        "low": "Low",
+        "mid": "Mid",
+        "high": "High"
+      },
+      "cell": "Retention {retention}, engagement {engagement}: {count, plural, one {# person} other {# people}}",
+      "cellHidden": "Retention {retention}, engagement {engagement}: fewer than {min} people",
+      "total": "{n, plural, one {# person with both indicators} other {# people with both indicators}}",
+      "totalHidden": "Total not available",
+      "riskCount": "At risk: {n}",
+      "suppressed": "Cells with fewer than {min} people are not shown, nor is the total.",
+      "risk": {
+        "label": "Risk",
+        "title": "People in the risk quadrant",
+        "empty": "Nobody is in the risk quadrant.",
+        "person": "Person",
+        "manager": "Manager",
+        "department": "Area"
+      }
+    },
+    "alerts": {
+      "title": "Alerts",
+      "hint": "A fall of {drop} points or more since the previous cycle, or retention and engagement both at {risk} or less.",
+      "summary": "People with a fall: {drop} · People at risk: {risk}",
+      "under": "fewer than {min}",
+      "aggregateOnly": "Direction sees only how many people have alerts, not who.",
+      "kind": {
+        "label": "Alert",
+        "drop": "Fall",
+        "risk": "Risk"
+      },
+      "person": "Person",
+      "manager": "Manager",
+      "department": "Area",
+      "detail": "Detail",
+      "dropDetail": "{indicator}: {previous} → {value} (−{delta}) since {cycle}",
+      "riskDetail": "Retention {retention}, engagement {engagement}"
+    },
+    "trend": {
+      "title": "Retention and engagement over time",
+      "link": "See over time",
+      "hint": "Pick a person, a team or an area; with none, {scope} is shown.",
+      "back": "Back to the indicators",
+      "subject": {
+        "all": "the whole organisation",
+        "myTeam": "your team",
+        "team": "{name}'s team",
+        "department": "the {name} area",
+        "person": "{name}"
+      },
+      "of": "{indicator}: {subject}",
+      "chartLabel": "{indicator} by cycle, {subject}",
+      "point": "{cycle}: {value}",
+      "hidden": "not available",
+      "under": "fewer than {min}",
+      "cycle": "Cycle",
+      "pick": {
+        "label": "Choose what to see",
+        "person": "Person",
+        "manager": "Team (manager)",
+        "department": "Area",
+        "any": "—",
+        "apply": "Show"
+      }
     }
   },
   "Qualitative": {

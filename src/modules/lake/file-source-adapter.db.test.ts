@@ -43,15 +43,15 @@ describe("landing a file through FileSourceAdapter", () => {
     const { runId, counts } = await landReport("bamboo-employee-performance");
 
     expect(counts).toEqual({
-      read: 69,
-      inserted: 69,
+      read: 119,
+      inserted: 119,
       updated: 0,
       unchanged: 0,
       rejected: 0,
       deleted: 0,
     });
     const records = await db.select().from(rawRecord);
-    expect(records).toHaveLength(69);
+    expect(records).toHaveLength(119);
     expect(records[0]).toMatchObject({
       runId,
       sourceSystem: "bamboo_export",
@@ -79,12 +79,12 @@ describe("landing a file through FileSourceAdapter", () => {
     const again = await landReport("bamboo-employee-performance");
 
     expect(again.counts).toMatchObject({
-      read: 69,
+      read: 119,
       inserted: 0,
-      unchanged: 69,
+      unchanged: 119,
       rejected: 0,
     });
-    expect(await db.select().from(rawRecord)).toHaveLength(69);
+    expect(await db.select().from(rawRecord)).toHaveLength(119);
     expect(await db.select().from(ingestRun)).toHaveLength(2);
   });
 
@@ -92,17 +92,17 @@ describe("landing a file through FileSourceAdapter", () => {
     const { runId, counts } = await landReport("bamboo-goal-status");
 
     expect(counts).toMatchObject({
-      read: 119,
-      inserted: 117,
-      rejected: 2,
+      read: 132,
+      inserted: 127,
+      rejected: 5,
     });
-    expect(await db.select().from(rawRecord)).toHaveLength(117);
+    expect(await db.select().from(rawRecord)).toHaveLength(127);
     const [run] = await db
       .select()
       .from(ingestRun)
       .where(eq(ingestRun.id, runId));
     expect(run.status).toBe("succeeded");
-    expect(run.rejects).toHaveLength(2);
+    expect(run.rejects).toHaveLength(5);
     expect(run.rejects?.[0].reason).toContain('key column "Goal" is empty');
     // Stored structured too, for UIs that word it themselves.
     expect(run.rejects?.[0]).toMatchObject({
@@ -165,7 +165,7 @@ describe("landing a file through FileSourceAdapter", () => {
     await landReport("bamboo-feedback-status");
 
     expect(await db.select().from(person)).toEqual(peopleBefore);
-    expect(await db.select().from(rawRecord)).toHaveLength(220);
+    expect(await db.select().from(rawRecord)).toHaveLength(392);
   });
 
   it("refuses a domain entity without landing mode instead of upserting garbage", async () => {

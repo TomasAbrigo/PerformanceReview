@@ -22,51 +22,214 @@
   "selectedFilter": "status-all",
   "goals": [
     {
-      "id": "5669",
-      "title": "Mejorar el NPS interno del equipo",
+      "id": "5621",
+      "title": "Completar la certificación del área",
       "description": "Meta compartida con otra área; coordinar avances mensuales.",
       "percentComplete": 100,
-      "alignsWithOptionId": 9001,
+      "alignsWithOptionId": 9003,
       "sharedWithEmployeeIds": [],
-      "dueDate": "2025-02-02",
-      "completionDate": "2024-08-10",
-      "lastChangedDateTime": "2024-08-10T14:09:57Z",
+      "dueDate": "2023-04-02",
+      "completionDate": "2023-03-07",
+      "lastChangedDateTime": "2023-03-07T13:18:11Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "5624",
+      "title": "Migrar los reportes al nuevo tablero",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2024-08-11",
+      "completionDate": "2023-12-24",
+      "lastChangedDateTime": "2023-12-24T15:21:30Z",
       "status": "completed",
       "milestones": [
         {
-          "id": 987,
-          "employeeGoalId": 5669,
+          "id": 921,
+          "employeeGoalId": 5624,
           "title": "Hito 1",
           "startValue": 0,
           "endValue": 1,
           "currentValue": 1,
-          "completedDateTime": "2024-08-02T16:59:01Z",
-          "lastUpdateDateTime": "2024-08-02T16:59:01Z",
+          "completedDateTime": "2023-12-20T18:56:14Z",
+          "lastUpdateDateTime": "2023-12-20T18:56:14Z",
           "lastUpdateUserId": 157
         },
         {
-          "id": 988,
-          "employeeGoalId": 5669,
+          "id": 922,
+          "employeeGoalId": 5624,
           "title": "Hito 2",
           "startValue": 0,
           "endValue": 1,
           "currentValue": 1,
-          "completedDateTime": "2024-07-25T18:24:32Z",
-          "lastUpdateDateTime": "2024-07-25T18:24:32Z",
+          "completedDateTime": "2023-12-24T08:28:14Z",
+          "lastUpdateDateTime": "2023-12-24T08:28:14Z",
           "lastUpdateUserId": 157
         },
         {
-          "id": 989,
-          "employeeGoalId": 5669,
+          "id": 923,
+          "employeeGoalId": 5624,
           "title": "Hito 3",
           "startValue": 0,
           "endValue": 1,
           "currentValue": 1,
-          "completedDateTime": "2024-07-14T19:25:54Z",
-          "lastUpdateDateTime": "2024-07-14T19:25:54Z",
+          "completedDateTime": "2023-12-17T15:02:04Z",
+          "lastUpdateDateTime": "2023-12-17T15:02:04Z",
+          "lastUpdateUserId": 157
+        },
+        {
+          "id": 924,
+          "employeeGoalId": 5624,
+          "title": "Hito 4",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2023-12-24T15:21:30Z",
+          "lastUpdateDateTime": "2023-12-24T15:21:30Z",
           "lastUpdateUserId": 157
         }
       ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "5626",
+      "title": "Mentorear a dos personas nuevas",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 100,
+      "alignsWithOptionId": 9004,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2025-06-25",
+      "completionDate": "2025-04-30",
+      "lastChangedDateTime": "2025-04-30T15:08:18Z",
+      "status": "completed",
+      "milestones": [
+        {
+          "id": 925,
+          "employeeGoalId": 5626,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-04-23T10:17:14Z",
+          "lastUpdateDateTime": "2025-04-23T10:17:14Z",
+          "lastUpdateUserId": 157
+        },
+        {
+          "id": 926,
+          "employeeGoalId": 5626,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2024-12-17T14:52:57Z",
+          "lastUpdateDateTime": "2024-12-17T14:52:57Z",
+          "lastUpdateUserId": 157
+        },
+        {
+          "id": 927,
+          "employeeGoalId": 5626,
+          "title": "Hito 3",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-02-19T09:27:54Z",
+          "lastUpdateDateTime": "2025-02-19T09:27:54Z",
+          "lastUpdateUserId": 157
+        },
+        {
+          "id": 928,
+          "employeeGoalId": 5626,
+          "title": "Hito 4",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-02-03T11:13:24Z",
+          "lastUpdateDateTime": "2025-02-03T11:13:24Z",
+          "lastUpdateUserId": 157
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "5629",
+      "title": "Reducir el tiempo de primera respuesta un 20%",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2025-07-17",
+      "completionDate": "2025-04-21",
+      "lastChangedDateTime": "2025-04-21T09:00:53Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "5630",
+      "title": "Aumentar la cobertura de pruebas al 80%",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 20,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2026-12-27",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-09-05T09:45:05Z",
+      "status": "in_progress",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "5631",
+      "title": "Mejorar el NPS interno del equipo",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [
+        65
+      ],
+      "dueDate": "2026-10-18",
+      "completionDate": "2026-09-25",
+      "lastChangedDateTime": "2026-09-25T18:17:05Z",
+      "status": "completed",
+      "milestones": null,
       "actions": {
         "canEdit": true,
         "canUpdateProgress": false,
@@ -83,7 +246,34 @@
       "firstName": "Sebastián",
       "lastName": "Garrido",
       "preferredName": "Seba"
+    },
+    {
+      "employeeId": 65,
+      "firstName": "Valentina",
+      "lastName": "Díaz",
+      "preferredName": "Vale"
     }
   ],
-  "comments": []
+  "comments": [
+    {
+      "goalId": "5621",
+      "commentCount": 3
+    },
+    {
+      "goalId": "5624",
+      "commentCount": 1
+    },
+    {
+      "goalId": "5629",
+      "commentCount": 4
+    },
+    {
+      "goalId": "5630",
+      "commentCount": 3
+    },
+    {
+      "goalId": "5631",
+      "commentCount": 3
+    }
+  ]
 }

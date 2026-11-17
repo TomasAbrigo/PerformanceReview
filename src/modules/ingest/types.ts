@@ -15,7 +15,7 @@ export type Entity = "employee" | "job_history" | "goal";
  * cycles (src/modules/import-history); any entity can also just be landed in
  * `raw_record` (landing mode, see `RunIngestInput.landing`).
  */
-export type LandingEntity = "assessment" | "feedback";
+export type LandingEntity = "assessment" | "assessment_progress" | "feedback";
 
 /** Everything an ingest run can be about. */
 export type IngestEntity = Entity | LandingEntity;

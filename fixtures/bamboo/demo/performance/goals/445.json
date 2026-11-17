@@ -22,36 +22,15 @@
   "selectedFilter": "status-all",
   "goals": [
     {
-      "id": "6937",
-      "title": "Mentorear a dos personas nuevas",
+      "id": "6896",
+      "title": "Reducir los incidentes recurrentes a la mitad",
       "description": "Pedido por el equipo directivo en la planificación.",
-      "percentComplete": 100,
-      "alignsWithOptionId": null,
+      "percentComplete": 75,
+      "alignsWithOptionId": 9003,
       "sharedWithEmployeeIds": [],
-      "dueDate": "2023-11-10",
-      "completionDate": "2023-10-20",
-      "lastChangedDateTime": "2023-10-20T09:48:24Z",
-      "status": "completed",
-      "milestones": null,
-      "actions": {
-        "canEdit": true,
-        "canUpdateProgress": false,
-        "canClose": true,
-        "canReopen": false,
-        "canDelete": true,
-        "canComment": true
-      }
-    },
-    {
-      "id": "6939",
-      "title": "Mentorear a dos personas nuevas",
-      "description": "Pedido por el equipo directivo en la planificación.",
-      "percentComplete": 30,
-      "alignsWithOptionId": null,
-      "sharedWithEmployeeIds": [],
-      "dueDate": "2023-06-12",
+      "dueDate": "2024-11-24",
       "completionDate": null,
-      "lastChangedDateTime": "2024-11-20T16:47:53Z",
+      "lastChangedDateTime": "2025-05-28T14:24:31Z",
       "status": "in_progress",
       "milestones": null,
       "actions": {
@@ -64,36 +43,15 @@
       }
     },
     {
-      "id": "6940",
+      "id": "6899",
       "title": "Entregar el proyecto Norte sin desvíos",
       "description": "Sirve de base para el próximo ciclo de evaluación.",
       "percentComplete": 100,
-      "alignsWithOptionId": 9002,
-      "sharedWithEmployeeIds": [],
-      "dueDate": "2025-02-05",
-      "completionDate": "2024-11-02",
-      "lastChangedDateTime": "2024-11-02T13:30:11Z",
-      "status": "completed",
-      "milestones": null,
-      "actions": {
-        "canEdit": true,
-        "canUpdateProgress": false,
-        "canClose": true,
-        "canReopen": false,
-        "canDelete": true,
-        "canComment": true
-      }
-    },
-    {
-      "id": "6942",
-      "title": "Entregar el proyecto Norte sin desvíos",
-      "description": "Pedido por el equipo directivo en la planificación.",
-      "percentComplete": 100,
       "alignsWithOptionId": null,
       "sharedWithEmployeeIds": [],
-      "dueDate": "2025-04-02",
-      "completionDate": "2024-12-06",
-      "lastChangedDateTime": "2024-12-06T10:47:37Z",
+      "dueDate": "2024-02-17",
+      "completionDate": "2023-10-26",
+      "lastChangedDateTime": "2023-10-26T13:56:29Z",
       "status": "completed",
       "milestones": null,
       "actions": {
@@ -106,17 +64,103 @@
       }
     },
     {
-      "id": "6945",
-      "title": "Aumentar la cobertura de pruebas al 80%",
-      "description": "Meta compartida con otra área; coordinar avances mensuales.",
-      "percentComplete": 100,
+      "id": "6901",
+      "title": "Entregar el proyecto Norte sin desvíos",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 55,
       "alignsWithOptionId": null,
       "sharedWithEmployeeIds": [
         47
       ],
-      "dueDate": "2025-02-13",
-      "completionDate": "2024-12-20",
-      "lastChangedDateTime": "2024-12-20T08:15:26Z",
+      "dueDate": "2025-02-28",
+      "completionDate": null,
+      "lastChangedDateTime": "2025-04-20T09:46:57Z",
+      "status": "in_progress",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "6903",
+      "title": "Lanzar el nuevo flujo de onboarding",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 100,
+      "alignsWithOptionId": 9003,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2025-10-15",
+      "completionDate": "2025-10-25",
+      "lastChangedDateTime": "2025-10-25T13:09:20Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "6904",
+      "title": "Completar la certificación del área",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "percentComplete": 30,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [
+        47
+      ],
+      "dueDate": "2026-11-04",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-05-18T15:12:19Z",
+      "status": "in_progress",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "6906",
+      "title": "Implementar el calendario editorial",
+      "description": "Sirve de base para el próximo ciclo de evaluación.",
+      "percentComplete": 15,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2026-12-23",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-07-28T12:39:03Z",
+      "status": "in_progress",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "6908",
+      "title": "Cerrar el plan de capacitación anual",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "percentComplete": 100,
+      "alignsWithOptionId": 9004,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2026-05-24",
+      "completionDate": "2026-02-18",
+      "lastChangedDateTime": "2026-02-18T13:12:53Z",
       "status": "completed",
       "milestones": null,
       "actions": {
@@ -145,16 +189,8 @@
   ],
   "comments": [
     {
-      "goalId": "6937",
-      "commentCount": 4
-    },
-    {
-      "goalId": "6939",
-      "commentCount": 4
-    },
-    {
-      "goalId": "6940",
-      "commentCount": 4
+      "goalId": "6904",
+      "commentCount": 1
     }
   ]
 }

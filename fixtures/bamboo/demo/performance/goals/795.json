@@ -22,96 +22,130 @@
   "selectedFilter": "status-all",
   "goals": [
     {
-      "id": "7929",
-      "title": "Migrar los reportes al nuevo tablero",
-      "description": "Pedido por el equipo directivo en la planificación.",
-      "percentComplete": 85,
-      "alignsWithOptionId": null,
-      "sharedWithEmployeeIds": [],
-      "dueDate": "2025-11-17",
-      "completionDate": null,
-      "lastChangedDateTime": "2026-10-28T08:14:23Z",
-      "status": "in_progress",
-      "milestones": null,
-      "actions": {
-        "canEdit": true,
-        "canUpdateProgress": true,
-        "canClose": true,
-        "canReopen": false,
-        "canDelete": true,
-        "canComment": true
-      }
-    },
-    {
-      "id": "7931",
-      "title": "Entregar el proyecto Norte sin desvíos",
-      "description": "Pedido por el equipo directivo en la planificación.",
+      "id": "7918",
+      "title": "Reducir el tiempo de primera respuesta un 20%",
+      "description": "Sirve de base para el próximo ciclo de evaluación.",
       "percentComplete": 100,
-      "alignsWithOptionId": null,
+      "alignsWithOptionId": 9004,
       "sharedWithEmployeeIds": [],
-      "dueDate": "2026-05-14",
-      "completionDate": "2026-01-11",
-      "lastChangedDateTime": "2026-01-11T09:48:08Z",
-      "status": "completed",
-      "milestones": null,
-      "actions": {
-        "canEdit": true,
-        "canUpdateProgress": false,
-        "canClose": true,
-        "canReopen": false,
-        "canDelete": true,
-        "canComment": true
-      }
-    },
-    {
-      "id": "7933",
-      "title": "Lanzar el nuevo flujo de onboarding",
-      "description": "Alineado con el plan del área para el año.",
-      "percentComplete": 100,
-      "alignsWithOptionId": null,
-      "sharedWithEmployeeIds": [],
-      "dueDate": "2026-04-10",
-      "completionDate": "2026-01-20",
-      "lastChangedDateTime": "2026-01-20T15:36:19Z",
+      "dueDate": "2025-12-15",
+      "completionDate": "2025-12-23",
+      "lastChangedDateTime": "2025-12-23T08:43:00Z",
       "status": "completed",
       "milestones": [
         {
-          "id": 2038,
-          "employeeGoalId": 7933,
+          "id": 1945,
+          "employeeGoalId": 7918,
           "title": "Hito 1",
           "startValue": 0,
           "endValue": 1,
           "currentValue": 1,
-          "completedDateTime": "2025-12-05T10:27:15Z",
-          "lastUpdateDateTime": "2025-12-05T10:27:15Z",
+          "completedDateTime": "2025-10-27T10:23:18Z",
+          "lastUpdateDateTime": "2025-10-27T10:23:18Z",
           "lastUpdateUserId": 795
         },
         {
-          "id": 2039,
-          "employeeGoalId": 7933,
+          "id": 1946,
+          "employeeGoalId": 7918,
           "title": "Hito 2",
           "startValue": 0,
           "endValue": 1,
           "currentValue": 1,
-          "completedDateTime": "2025-10-17T10:05:41Z",
-          "lastUpdateDateTime": "2025-10-17T10:05:41Z",
+          "completedDateTime": "2025-12-12T19:25:15Z",
+          "lastUpdateDateTime": "2025-12-12T19:25:15Z",
           "lastUpdateUserId": 795
         },
         {
-          "id": 2040,
-          "employeeGoalId": 7933,
+          "id": 1947,
+          "employeeGoalId": 7918,
           "title": "Hito 3",
           "startValue": 0,
           "endValue": 1,
           "currentValue": 1,
-          "completedDateTime": "2026-01-07T17:46:22Z",
-          "lastUpdateDateTime": "2026-01-07T17:46:22Z",
+          "completedDateTime": "2025-12-05T09:44:44Z",
+          "lastUpdateDateTime": "2025-12-05T09:44:44Z",
           "lastUpdateUserId": 795
         }
       ],
       "actions": {
         "canEdit": true,
         "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "7919",
+      "title": "Documentar los procesos críticos",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 100,
+      "alignsWithOptionId": 9004,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2025-12-19",
+      "completionDate": "2026-01-06",
+      "lastChangedDateTime": "2026-01-06T18:40:36Z",
+      "status": "completed",
+      "milestones": [
+        {
+          "id": 1948,
+          "employeeGoalId": 7919,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-08-31T13:12:31Z",
+          "lastUpdateDateTime": "2025-08-31T13:12:31Z",
+          "lastUpdateUserId": 795
+        },
+        {
+          "id": 1949,
+          "employeeGoalId": 7919,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-09-27T11:46:44Z",
+          "lastUpdateDateTime": "2025-09-27T11:46:44Z",
+          "lastUpdateUserId": 795
+        },
+        {
+          "id": 1950,
+          "employeeGoalId": 7919,
+          "title": "Hito 3",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-10-10T08:20:23Z",
+          "lastUpdateDateTime": "2025-10-10T08:20:23Z",
+          "lastUpdateUserId": 795
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "7922",
+      "title": "Migrar los reportes al nuevo tablero",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 0,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2027-01-11",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-09-27T08:55:46Z",
+      "status": "in_progress",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
         "canClose": true,
         "canReopen": false,
         "canDelete": true,
@@ -129,12 +163,12 @@
   ],
   "comments": [
     {
-      "goalId": "7931",
-      "commentCount": 1
+      "goalId": "7918",
+      "commentCount": 3
     },
     {
-      "goalId": "7933",
-      "commentCount": 2
+      "goalId": "7919",
+      "commentCount": 4
     }
   ]
 }

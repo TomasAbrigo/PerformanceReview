@@ -27,6 +27,8 @@ function renderIn(locale: "es" | "en", ui: ReactNode) {
 const result: HistoryImportResult = {
   runId: "run-1",
   entity: "assessment",
+  status: "succeeded",
+  decision: null,
   cycles: [
     {
       cycleId: "c-2023",

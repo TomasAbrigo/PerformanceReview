@@ -22,15 +22,17 @@
   "selectedFilter": "status-all",
   "goals": [
     {
-      "id": "7607",
-      "title": "Cerrar el plan de capacitación anual",
+      "id": "7583",
+      "title": "Implementar el calendario editorial",
       "description": "Pedido por el equipo directivo en la planificación.",
       "percentComplete": 100,
       "alignsWithOptionId": null,
-      "sharedWithEmployeeIds": [],
-      "dueDate": "2025-06-18",
-      "completionDate": "2025-03-03",
-      "lastChangedDateTime": "2025-03-03T16:41:27Z",
+      "sharedWithEmployeeIds": [
+        321
+      ],
+      "dueDate": "2025-11-03",
+      "completionDate": "2025-10-23",
+      "lastChangedDateTime": "2025-10-23T14:51:24Z",
       "status": "completed",
       "milestones": null,
       "actions": {
@@ -43,20 +45,143 @@
       }
     },
     {
-      "id": "7610",
-      "title": "Migrar los reportes al nuevo tablero",
-      "description": "Alineado con el plan del área para el año.",
-      "percentComplete": 0,
+      "id": "7585",
+      "title": "Documentar los procesos críticos",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [
+        321
+      ],
+      "dueDate": "2025-04-14",
+      "completionDate": "2025-02-19",
+      "lastChangedDateTime": "2025-02-19T17:03:32Z",
+      "status": "completed",
+      "milestones": [
+        {
+          "id": 1800,
+          "employeeGoalId": 7585,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-02-19T13:12:11Z",
+          "lastUpdateDateTime": "2025-02-19T13:12:11Z",
+          "lastUpdateUserId": 635
+        },
+        {
+          "id": 1801,
+          "employeeGoalId": 7585,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-01-18T18:09:51Z",
+          "lastUpdateDateTime": "2025-01-18T18:09:51Z",
+          "lastUpdateUserId": 635
+        },
+        {
+          "id": 1802,
+          "employeeGoalId": 7585,
+          "title": "Hito 3",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2024-12-08T15:28:26Z",
+          "lastUpdateDateTime": "2024-12-08T15:28:26Z",
+          "lastUpdateUserId": 635
+        },
+        {
+          "id": 1803,
+          "employeeGoalId": 7585,
+          "title": "Hito 4",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-01-08T16:59:00Z",
+          "lastUpdateDateTime": "2025-01-08T16:59:00Z",
+          "lastUpdateUserId": 635
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "7588",
+      "title": "Renovar las cuentas clave del trimestre",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "percentComplete": 100,
+      "alignsWithOptionId": 9004,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2026-07-18",
+      "completionDate": "2026-02-26",
+      "lastChangedDateTime": "2026-02-26T17:38:46Z",
+      "status": "completed",
+      "milestones": [
+        {
+          "id": 1804,
+          "employeeGoalId": 7588,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2026-02-09T12:37:28Z",
+          "lastUpdateDateTime": "2026-02-09T12:37:28Z",
+          "lastUpdateUserId": 635
+        },
+        {
+          "id": 1805,
+          "employeeGoalId": 7588,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2026-01-22T19:20:26Z",
+          "lastUpdateDateTime": "2026-01-22T19:20:26Z",
+          "lastUpdateUserId": 635
+        },
+        {
+          "id": 1806,
+          "employeeGoalId": 7588,
+          "title": "Hito 3",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2026-02-06T15:21:28Z",
+          "lastUpdateDateTime": "2026-02-06T15:21:28Z",
+          "lastUpdateUserId": 635
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "7590",
+      "title": "Cerrar el plan de capacitación anual",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 100,
       "alignsWithOptionId": null,
       "sharedWithEmployeeIds": [],
-      "dueDate": "2026-08-10",
-      "completionDate": null,
-      "lastChangedDateTime": "2026-06-19T14:14:04Z",
-      "status": "in_progress",
+      "dueDate": "2026-05-27",
+      "completionDate": "2026-03-28",
+      "lastChangedDateTime": "2026-03-28T15:42:16Z",
+      "status": "completed",
       "milestones": null,
       "actions": {
         "canEdit": true,
-        "canUpdateProgress": true,
+        "canUpdateProgress": false,
         "canClose": true,
         "canReopen": false,
         "canDelete": true,
@@ -70,11 +195,17 @@
       "firstName": "Federico",
       "lastName": "Bravo",
       "preferredName": null
+    },
+    {
+      "employeeId": 321,
+      "firstName": "Facundo",
+      "lastName": "Figueroa",
+      "preferredName": null
     }
   ],
   "comments": [
     {
-      "goalId": "7610",
+      "goalId": "7590",
       "commentCount": 3
     }
   ]

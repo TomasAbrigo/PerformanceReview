@@ -193,6 +193,12 @@ export const OUTSIDER_NAMES = [
   "Ludmila Scaglia",
   "Anselmo Barrionuevo",
   "Ivanna Cardozo",
+  "Fermín Zubizarreta",
+  "Celeste Arguindegui",
+  "Baltasar Oyhenart",
+  "Rufina Etcheverry",
+  "Ismael Garmendia",
+  "Pilar Irazusta",
 ] as const;
 
 /** Short forms some people go by (Bamboo `preferredName`). */

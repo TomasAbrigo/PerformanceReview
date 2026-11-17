@@ -22,59 +22,59 @@
   "selectedFilter": "status-all",
   "goals": [
     {
-      "id": "7826",
-      "title": "Mejorar el NPS interno del equipo",
-      "description": "Alineado con el plan del área para el año.",
+      "id": "7813",
+      "title": "Renovar las cuentas clave del trimestre",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
       "percentComplete": 100,
       "alignsWithOptionId": null,
       "sharedWithEmployeeIds": [],
-      "dueDate": "2025-10-31",
-      "completionDate": "2025-10-16",
-      "lastChangedDateTime": "2025-10-16T13:49:55Z",
+      "dueDate": "2025-12-30",
+      "completionDate": "2025-08-19",
+      "lastChangedDateTime": "2025-08-19T09:51:13Z",
       "status": "completed",
       "milestones": [
         {
-          "id": 2003,
-          "employeeGoalId": 7826,
+          "id": 1904,
+          "employeeGoalId": 7813,
           "title": "Hito 1",
           "startValue": 0,
           "endValue": 1,
           "currentValue": 1,
-          "completedDateTime": "2025-07-13T18:41:21Z",
-          "lastUpdateDateTime": "2025-07-13T18:41:21Z",
+          "completedDateTime": "2025-07-31T09:52:49Z",
+          "lastUpdateDateTime": "2025-07-31T09:52:49Z",
           "lastUpdateUserId": 743
         },
         {
-          "id": 2004,
-          "employeeGoalId": 7826,
+          "id": 1905,
+          "employeeGoalId": 7813,
           "title": "Hito 2",
           "startValue": 0,
           "endValue": 1,
           "currentValue": 1,
-          "completedDateTime": "2025-08-13T14:05:14Z",
-          "lastUpdateDateTime": "2025-08-13T14:05:14Z",
+          "completedDateTime": "2025-06-30T14:05:18Z",
+          "lastUpdateDateTime": "2025-06-30T14:05:18Z",
           "lastUpdateUserId": 743
         },
         {
-          "id": 2005,
-          "employeeGoalId": 7826,
+          "id": 1906,
+          "employeeGoalId": 7813,
           "title": "Hito 3",
           "startValue": 0,
           "endValue": 1,
           "currentValue": 1,
-          "completedDateTime": "2025-08-03T08:56:41Z",
-          "lastUpdateDateTime": "2025-08-03T08:56:41Z",
+          "completedDateTime": "2025-07-07T14:26:07Z",
+          "lastUpdateDateTime": "2025-07-07T14:26:07Z",
           "lastUpdateUserId": 743
         },
         {
-          "id": 2006,
-          "employeeGoalId": 7826,
+          "id": 1907,
+          "employeeGoalId": 7813,
           "title": "Hito 4",
           "startValue": 0,
           "endValue": 1,
           "currentValue": 1,
-          "completedDateTime": "2025-10-07T11:32:36Z",
-          "lastUpdateDateTime": "2025-10-07T11:32:36Z",
+          "completedDateTime": "2025-07-28T18:36:49Z",
+          "lastUpdateDateTime": "2025-07-28T18:36:49Z",
           "lastUpdateUserId": 743
         }
       ],
@@ -88,82 +88,48 @@
       }
     },
     {
-      "id": "7827",
+      "id": "7814",
       "title": "Reducir los incidentes recurrentes a la mitad",
-      "description": "Meta compartida con otra área; coordinar avances mensuales.",
-      "percentComplete": 45,
-      "alignsWithOptionId": 9002,
-      "sharedWithEmployeeIds": [],
-      "dueDate": "2026-12-04",
-      "completionDate": null,
-      "lastChangedDateTime": "2026-04-16T18:02:24Z",
-      "status": "in_progress",
-      "milestones": null,
-      "actions": {
-        "canEdit": true,
-        "canUpdateProgress": true,
-        "canClose": true,
-        "canReopen": false,
-        "canDelete": true,
-        "canComment": true
-      }
-    },
-    {
-      "id": "7830",
-      "title": "Reducir los incidentes recurrentes a la mitad",
-      "description": "Sirve de base para el próximo ciclo de evaluación.",
+      "description": "Alineado con el plan del área para el año.",
       "percentComplete": 100,
-      "alignsWithOptionId": null,
-      "sharedWithEmployeeIds": [
-        363
-      ],
-      "dueDate": "2026-08-15",
-      "completionDate": "2026-06-18",
-      "lastChangedDateTime": "2026-06-18T10:13:52Z",
+      "alignsWithOptionId": 9001,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2025-10-28",
+      "completionDate": "2025-11-09",
+      "lastChangedDateTime": "2025-11-09T12:01:37Z",
       "status": "completed",
       "milestones": [
         {
-          "id": 2007,
-          "employeeGoalId": 7830,
+          "id": 1908,
+          "employeeGoalId": 7814,
           "title": "Hito 1",
           "startValue": 0,
           "endValue": 1,
           "currentValue": 1,
-          "completedDateTime": "2026-02-14T11:27:20Z",
-          "lastUpdateDateTime": "2026-02-14T11:27:20Z",
+          "completedDateTime": "2025-09-29T09:41:44Z",
+          "lastUpdateDateTime": "2025-09-29T09:41:44Z",
           "lastUpdateUserId": 743
         },
         {
-          "id": 2008,
-          "employeeGoalId": 7830,
+          "id": 1909,
+          "employeeGoalId": 7814,
           "title": "Hito 2",
           "startValue": 0,
           "endValue": 1,
           "currentValue": 1,
-          "completedDateTime": "2026-05-05T17:47:07Z",
-          "lastUpdateDateTime": "2026-05-05T17:47:07Z",
+          "completedDateTime": "2025-10-16T17:27:49Z",
+          "lastUpdateDateTime": "2025-10-16T17:27:49Z",
           "lastUpdateUserId": 743
         },
         {
-          "id": 2009,
-          "employeeGoalId": 7830,
+          "id": 1910,
+          "employeeGoalId": 7814,
           "title": "Hito 3",
           "startValue": 0,
           "endValue": 1,
           "currentValue": 1,
-          "completedDateTime": "2026-04-04T08:44:18Z",
-          "lastUpdateDateTime": "2026-04-04T08:44:18Z",
-          "lastUpdateUserId": 743
-        },
-        {
-          "id": 2010,
-          "employeeGoalId": 7830,
-          "title": "Hito 4",
-          "startValue": 0,
-          "endValue": 1,
-          "currentValue": 1,
-          "completedDateTime": "2026-06-15T16:17:30Z",
-          "lastUpdateDateTime": "2026-06-15T16:17:30Z",
+          "completedDateTime": "2025-09-30T14:46:26Z",
+          "lastUpdateDateTime": "2025-09-30T14:46:26Z",
           "lastUpdateUserId": 743
         }
       ],
@@ -183,22 +149,16 @@
       "firstName": "Ivana",
       "lastName": "Páez",
       "preferredName": null
-    },
-    {
-      "employeeId": 363,
-      "firstName": "Agustina",
-      "lastName": "Navarro",
-      "preferredName": null
     }
   ],
   "comments": [
     {
-      "goalId": "7826",
-      "commentCount": 4
+      "goalId": "7813",
+      "commentCount": 3
     },
     {
-      "goalId": "7827",
-      "commentCount": 4
+      "goalId": "7814",
+      "commentCount": 1
     }
   ]
 }

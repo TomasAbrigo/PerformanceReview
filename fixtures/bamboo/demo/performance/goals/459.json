@@ -20,14 +20,97 @@
     }
   ],
   "selectedFilter": "status-all",
-  "goals": [],
+  "goals": [
+    {
+      "id": "6968",
+      "title": "Completar la certificación del área",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2023-10-26",
+      "completionDate": "2023-09-24",
+      "lastChangedDateTime": "2023-09-24T19:11:00Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": false,
+        "canUpdateProgress": false,
+        "canClose": false,
+        "canReopen": false,
+        "canDelete": false,
+        "canComment": false
+      }
+    },
+    {
+      "id": "6969",
+      "title": "Documentar los procesos críticos",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [
+        135
+      ],
+      "dueDate": "2023-11-11",
+      "completionDate": "2023-11-08",
+      "lastChangedDateTime": "2023-11-08T19:56:02Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": false,
+        "canUpdateProgress": false,
+        "canClose": false,
+        "canReopen": false,
+        "canDelete": false,
+        "canComment": false
+      }
+    },
+    {
+      "id": "6971",
+      "title": "Cerrar el plan de capacitación anual",
+      "description": "Sirve de base para el próximo ciclo de evaluación.",
+      "percentComplete": 50,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [
+        135
+      ],
+      "dueDate": "2024-07-04",
+      "completionDate": null,
+      "lastChangedDateTime": "2024-05-14T14:43:24Z",
+      "status": "in_progress",
+      "milestones": null,
+      "actions": {
+        "canEdit": false,
+        "canUpdateProgress": false,
+        "canClose": false,
+        "canReopen": false,
+        "canDelete": false,
+        "canComment": false
+      }
+    }
+  ],
   "persons": [
     {
       "employeeId": 459,
       "firstName": "Nicolás",
       "lastName": "Esquivel",
       "preferredName": "Nico"
+    },
+    {
+      "employeeId": 135,
+      "firstName": "Marcela",
+      "lastName": "Trejo",
+      "preferredName": null
     }
   ],
-  "comments": []
+  "comments": [
+    {
+      "goalId": "6969",
+      "commentCount": 2
+    },
+    {
+      "goalId": "6971",
+      "commentCount": 3
+    }
+  ]
 }

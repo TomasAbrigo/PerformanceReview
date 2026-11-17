@@ -22,40 +22,19 @@
   "selectedFilter": "status-all",
   "goals": [
     {
-      "id": "5116",
-      "title": "Aumentar la cobertura de pruebas al 80%",
-      "description": "Sirve de base para el próximo ciclo de evaluación.",
+      "id": "5172",
+      "title": "Mejorar el NPS interno del equipo",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
       "percentComplete": 100,
-      "alignsWithOptionId": null,
-      "sharedWithEmployeeIds": [],
-      "dueDate": "2023-11-25",
-      "completionDate": "2023-11-16",
-      "lastChangedDateTime": "2023-11-16T14:10:18Z",
-      "status": "completed",
-      "milestones": [
-        {
-          "id": 754,
-          "employeeGoalId": 5116,
-          "title": "Hito 1",
-          "startValue": 0,
-          "endValue": 1,
-          "currentValue": 1,
-          "completedDateTime": "2023-07-14T13:34:38Z",
-          "lastUpdateDateTime": "2023-07-14T13:34:38Z",
-          "lastUpdateUserId": 41
-        },
-        {
-          "id": 755,
-          "employeeGoalId": 5116,
-          "title": "Hito 2",
-          "startValue": 0,
-          "endValue": 1,
-          "currentValue": 1,
-          "completedDateTime": "2023-07-21T17:48:15Z",
-          "lastUpdateDateTime": "2023-07-21T17:48:15Z",
-          "lastUpdateUserId": 41
-        }
+      "alignsWithOptionId": 9003,
+      "sharedWithEmployeeIds": [
+        25
       ],
+      "dueDate": "2023-12-21",
+      "completionDate": "2023-12-09",
+      "lastChangedDateTime": "2023-12-09T15:33:20Z",
+      "status": "completed",
+      "milestones": null,
       "actions": {
         "canEdit": false,
         "canUpdateProgress": false,
@@ -66,19 +45,62 @@
       }
     },
     {
-      "id": "5117",
-      "title": "Implementar el calendario editorial",
-      "description": "Meta compartida con otra área; coordinar avances mensuales.",
-      "percentComplete": 60,
-      "alignsWithOptionId": null,
-      "sharedWithEmployeeIds": [
-        25
-      ],
-      "dueDate": "2023-05-06",
+      "id": "5173",
+      "title": "Aumentar la cobertura de pruebas al 80%",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 50,
+      "alignsWithOptionId": 9002,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2024-07-25",
       "completionDate": null,
-      "lastChangedDateTime": "2023-05-18T15:47:43Z",
-      "status": "in_progress",
-      "milestones": null,
+      "lastChangedDateTime": "2024-03-02T13:27:03Z",
+      "status": "closed",
+      "milestones": [
+        {
+          "id": 783,
+          "employeeGoalId": 5173,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2024-02-22T08:56:56Z",
+          "lastUpdateDateTime": "2024-02-22T08:56:56Z",
+          "lastUpdateUserId": 41
+        },
+        {
+          "id": 784,
+          "employeeGoalId": 5173,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2024-02-17T19:28:08Z",
+          "lastUpdateDateTime": "2024-02-17T19:28:08Z",
+          "lastUpdateUserId": 41
+        },
+        {
+          "id": 785,
+          "employeeGoalId": 5173,
+          "title": "Hito 3",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2024-02-10T13:25:22Z",
+          "lastUpdateUserId": 41
+        },
+        {
+          "id": 786,
+          "employeeGoalId": 5173,
+          "title": "Hito 4",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2024-02-10T11:17:13Z",
+          "lastUpdateUserId": 41
+        }
+      ],
       "actions": {
         "canEdit": false,
         "canUpdateProgress": false,
@@ -103,5 +125,10 @@
       "preferredName": null
     }
   ],
-  "comments": []
+  "comments": [
+    {
+      "goalId": "5173",
+      "commentCount": 1
+    }
+  ]
 }

@@ -73,7 +73,7 @@ describe("fixture layout", () => {
     expect(manifest.counts.terminations).toBeGreaterThanOrEqual(10);
     expect(manifest.counts.rehires).toBeGreaterThanOrEqual(3);
     expect(manifest.counts.managerChanges).toBeGreaterThanOrEqual(20);
-    expect(manifest.cycles).toHaveLength(3);
+    expect(manifest.cycles).toHaveLength(5);
   });
 });
 

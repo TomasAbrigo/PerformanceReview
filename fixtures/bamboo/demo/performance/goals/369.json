@@ -22,17 +22,63 @@
   "selectedFilter": "status-all",
   "goals": [
     {
-      "id": "6601",
-      "title": "Reducir los incidentes recurrentes a la mitad",
-      "description": "Pedido por el equipo directivo en la planificación.",
+      "id": "6551",
+      "title": "Cerrar el plan de capacitación anual",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 60,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [
+        241
+      ],
+      "dueDate": "2024-10-28",
+      "completionDate": null,
+      "lastChangedDateTime": "2025-06-20T15:25:29Z",
+      "status": "in_progress",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "6552",
+      "title": "Completar la certificación del área",
+      "description": "Sirve de base para el próximo ciclo de evaluación.",
       "percentComplete": 100,
       "alignsWithOptionId": null,
       "sharedWithEmployeeIds": [],
-      "dueDate": "2023-04-16",
-      "completionDate": "2022-11-22",
-      "lastChangedDateTime": "2022-11-22T10:26:22Z",
+      "dueDate": "2024-05-02",
+      "completionDate": "2024-02-16",
+      "lastChangedDateTime": "2024-02-16T10:36:43Z",
       "status": "completed",
-      "milestones": null,
+      "milestones": [
+        {
+          "id": 1351,
+          "employeeGoalId": 6552,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2024-02-12T08:11:17Z",
+          "lastUpdateDateTime": "2024-02-12T08:11:17Z",
+          "lastUpdateUserId": 369
+        },
+        {
+          "id": 1352,
+          "employeeGoalId": 6552,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2024-02-12T16:52:33Z",
+          "lastUpdateDateTime": "2024-02-12T16:52:33Z",
+          "lastUpdateUserId": 369
+        }
+      ],
       "actions": {
         "canEdit": true,
         "canUpdateProgress": false,
@@ -43,20 +89,20 @@
       }
     },
     {
-      "id": "6604",
-      "title": "Automatizar la conciliación mensual",
+      "id": "6554",
+      "title": "Reducir el tiempo de primera respuesta un 20%",
       "description": "Meta compartida con otra área; coordinar avances mensuales.",
-      "percentComplete": 100,
+      "percentComplete": 45,
       "alignsWithOptionId": null,
       "sharedWithEmployeeIds": [],
-      "dueDate": "2023-05-13",
-      "completionDate": "2023-04-15",
-      "lastChangedDateTime": "2023-04-15T10:16:22Z",
-      "status": "completed",
+      "dueDate": "2025-10-22",
+      "completionDate": null,
+      "lastChangedDateTime": "2025-09-07T15:51:42Z",
+      "status": "in_progress",
       "milestones": null,
       "actions": {
         "canEdit": true,
-        "canUpdateProgress": false,
+        "canUpdateProgress": true,
         "canClose": true,
         "canReopen": false,
         "canDelete": true,
@@ -64,15 +110,15 @@
       }
     },
     {
-      "id": "6605",
-      "title": "Mejorar el NPS interno del equipo",
+      "id": "6555",
+      "title": "Documentar los procesos críticos",
       "description": "Meta compartida con otra área; coordinar avances mensuales.",
       "percentComplete": 100,
       "alignsWithOptionId": null,
       "sharedWithEmployeeIds": [],
-      "dueDate": "2024-07-22",
-      "completionDate": "2024-05-21",
-      "lastChangedDateTime": "2024-05-21T17:08:59Z",
+      "dueDate": "2025-06-05",
+      "completionDate": "2025-05-02",
+      "lastChangedDateTime": "2025-05-02T08:10:51Z",
       "status": "completed",
       "milestones": null,
       "actions": {
@@ -91,7 +137,18 @@
       "firstName": "Gonzalo",
       "lastName": "Luna",
       "preferredName": "Gonza"
+    },
+    {
+      "employeeId": 241,
+      "firstName": "Daniela",
+      "lastName": "Reyes",
+      "preferredName": null
     }
   ],
-  "comments": []
+  "comments": [
+    {
+      "goalId": "6551",
+      "commentCount": 4
+    }
+  ]
 }

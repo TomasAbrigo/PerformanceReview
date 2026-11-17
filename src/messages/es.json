@@ -263,12 +263,14 @@
         "ignored": "Ignorados",
         "log": "Entradas del log",
         "duration": "Duración",
-        "mismatches": "Evaluador distinto"
+        "mismatches": "Evaluador distinto",
+        "deferred": "En espera"
       },
       "status": {
         "running": "En curso",
         "succeeded": "Exitosa",
-        "error": "Con error"
+        "error": "Con error",
+        "needs_decision": "Requiere decisión"
       },
       "pagination": {
         "label": "Paginación",
@@ -595,14 +597,56 @@
         "builtinName": "Ese nombre es de un perfil incluido: elegí otro.",
         "savedName": "Ya hay un perfil guardado con ese nombre: elegí otro o reemplazalo."
       },
-      "replace": "Reemplazar el perfil guardado «{name}»"
+      "replace": "Reemplazar el perfil guardado «{name}»",
+      "base": "Partir de",
+      "baseNone": "Ninguno (desde cero)",
+      "baseHint": "Copia la clave, los campos y el mapeo de preguntas de un perfil incluido.",
+      "questions": {
+        "title": "Mapeo de preguntas",
+        "hint": "Qué columnas son preguntas, quién las responde y cómo. Las columnas «Employee/Manager [Custom] Qn: …» que no configures se detectan solas.",
+        "column": "Columna",
+        "kind": "Tipo",
+        "side": "Lado",
+        "dimension": "Dimensión",
+        "role": "Rol",
+        "kindLabel": "Tipo de pregunta: {column}",
+        "sideLabel": "Lado: {column}",
+        "dimensionLabel": "Dimensión: {column}",
+        "roleLabel": "Rol: {column}",
+        "kinds": {
+          "none": "No es pregunta",
+          "text": "Texto",
+          "likert": "Escala 1-5",
+          "letter_choice": "Opción por letra"
+        },
+        "sides": {
+          "self": "Autoevaluación",
+          "manager": "Manager"
+        },
+        "none": "—",
+        "dimensions": {
+          "strengths": "Fortalezas",
+          "improvement": "A mejorar",
+          "custom_1": "Custom 1",
+          "custom_2": "Custom 2",
+          "custom_3": "Custom 3"
+        },
+        "roles": {
+          "goals_rating": "Rating de goals",
+          "goals_comment": "Comentario de goals",
+          "overall_rating": "Rating general",
+          "retention": "Retención",
+          "engagement": "Engagement"
+        }
+      }
     },
     "entities": {
       "employee": "Empleados",
       "job_history": "Historial de puesto",
       "goal": "Metas",
       "assessment": "Evaluaciones",
-      "feedback": "Feedback"
+      "feedback": "Feedback",
+      "assessment_progress": "Progreso de evaluaciones"
     },
     "result": {
       "title": "Importación terminada",
@@ -875,6 +919,15 @@
       "normalized": "rating normalizado",
       "gap": "brecha",
       "answers": "respuestas",
+      "indicator": "indicador",
+      "value": "valor",
+      "mean": "promedio",
+      "alert_kind": "alerta",
+      "previous_cycle": "ciclo anterior",
+      "previous_value": "valor anterior",
+      "fall": "caída",
+      "retention": "retención",
+      "engagement": "compromiso",
       "dimension": "dimensión",
       "positive": "positivo",
       "constructive": "constructivo",
@@ -902,7 +955,29 @@
     "viewRun": "Ver la corrida",
     "viewQueue": "Ver la cola de identidad",
     "viewResult": "Ver ciclos importados",
-    "notFound": "Esta corrida no importó ciclos históricos."
+    "notFound": "Esta corrida no importó ciclos históricos.",
+    "decision": {
+      "title": "Hay filas esperando un ciclo",
+      "rows": "{count, plural, one {# fila no se importó todavía} other {# filas no se importaron todavía}}: elegí a qué ciclo van.",
+      "reasons": {
+        "ambiguous_semester": "Su fecha está cerca del corte entre semestres, así que no se puede saber a cuál pertenecen.",
+        "unknown_cycle": "Nombran un ciclo que no existe (Assessment Progress no trae fechas para crearlo)."
+      },
+      "names": "Ciclos nombrados en el archivo: {names}",
+      "choose": "Ciclo destino",
+      "create": "Crear el ciclo {name} ({start} – {end})",
+      "existing": "{name} ({start} – {end})",
+      "submit": "Importar en ese ciclo",
+      "submitting": "Importando…",
+      "resolved": "Las filas en espera se importaron en el ciclo elegido.",
+      "errors": {
+        "not_waiting": "Esta corrida ya no espera una decisión. Recargá la página.",
+        "not_found": "La corrida no existe.",
+        "unknown_cycle": "El ciclo elegido ya no existe.",
+        "unknown_proposal": "Ese ciclo no estaba entre los propuestos.",
+        "unknown": "No se pudo reanudar la importación."
+      }
+    }
   },
   "Dashboards": {
     "nav": "Dashboards",
@@ -1028,6 +1103,123 @@
       "others": "Otros",
       "belowMinimum": "Hay menos de {min} participantes: no se muestran datos para proteger a las personas.",
       "suppressed": "{n, plural, =0 {Ninguna persona en grupos chicos} one {# persona en áreas chicas (no se desglosa)} other {# personas en áreas chicas (no se desglosan)}}"
+    }
+  },
+  "Indicators": {
+    "nav": "Retención y compromiso",
+    "title": "Indicadores de retención y compromiso",
+    "forbidden": "No tenés acceso a estos indicadores.",
+    "noCycles": "Todavía no hay ciclos lanzados.",
+    "none": "Sin asignar",
+    "scope": {
+      "directReports": "Ves solo a tus reportes directos al momento de cada ciclo.",
+      "aggregatesOnly": "Solo agregados: se muestran grupos de al menos {min} personas."
+    },
+    "indicator": {
+      "label": "Indicador",
+      "retention": "Retención",
+      "engagement": "Compromiso"
+    },
+    "groupBy": {
+      "label": "Agrupar por",
+      "department": "Área",
+      "manager": "Manager",
+      "none": "Sin agrupar"
+    },
+    "hierarchy": {
+      "label": "Jerarquía",
+      "asOf": "Al momento del ciclo",
+      "current": "Actual"
+    },
+    "filters": {
+      "label": "Filtros",
+      "cycle": "Ciclo",
+      "department": "Área",
+      "manager": "Manager",
+      "any": "Todos",
+      "apply": "Aplicar"
+    },
+    "distribution": {
+      "title": "Distribución de {indicator}",
+      "hint": "Cuántas personas recibieron cada valor, de 1 a 5, en la evaluación del manager.",
+      "n": "{n, plural, one {# persona} other {# personas}}",
+      "mean": "Promedio {value}",
+      "all": "Todos",
+      "others": "Otros",
+      "group": "Grupo",
+      "people": "Personas",
+      "average": "Promedio",
+      "valueCount": "valor {value}: {count}",
+      "barLabel": "{group}, valor {value}: {count}",
+      "suppressed": "{n, plural, one {# persona está en un grupo de menos de {min} y no se muestra} other {# personas están en grupos de menos de {min} y no se muestran}}"
+    },
+    "matrix": {
+      "title": "Matriz de retención y compromiso",
+      "hint": "Cuántas personas hay en cada cruce de bandas; el cuadrante de riesgo es el de retención y compromiso bajos a la vez.",
+      "band": {
+        "low": "Bajo",
+        "mid": "Medio",
+        "high": "Alto"
+      },
+      "cell": "Retención {retention}, compromiso {engagement}: {count, plural, one {# persona} other {# personas}}",
+      "cellHidden": "Retención {retention}, compromiso {engagement}: menos de {min} personas",
+      "total": "{n, plural, one {# persona con ambos indicadores} other {# personas con ambos indicadores}}",
+      "totalHidden": "Total no disponible",
+      "riskCount": "En riesgo: {n}",
+      "suppressed": "Las celdas con menos de {min} personas no se muestran, y tampoco el total.",
+      "risk": {
+        "label": "Riesgo",
+        "title": "Personas en el cuadrante de riesgo",
+        "empty": "Nadie está en el cuadrante de riesgo.",
+        "person": "Persona",
+        "manager": "Manager",
+        "department": "Área"
+      }
+    },
+    "alerts": {
+      "title": "Alertas",
+      "hint": "Caída de {drop} puntos o más respecto del ciclo anterior, o retención y compromiso en {risk} o menos a la vez.",
+      "summary": "Personas con caída: {drop} · Personas en riesgo: {risk}",
+      "under": "menos de {min}",
+      "aggregateOnly": "Dirección ve solo cuántas personas tienen alertas, no quiénes.",
+      "kind": {
+        "label": "Alerta",
+        "drop": "Caída",
+        "risk": "Riesgo"
+      },
+      "person": "Persona",
+      "manager": "Manager",
+      "department": "Área",
+      "detail": "Detalle",
+      "dropDetail": "{indicator}: {previous} → {value} (−{delta}) desde {cycle}",
+      "riskDetail": "Retención {retention}, compromiso {engagement}"
+    },
+    "trend": {
+      "title": "Evolución de retención y compromiso",
+      "link": "Ver evolución",
+      "hint": "Elegí una persona, un equipo o un área; sin elegir, se muestra {scope}.",
+      "back": "Volver a los indicadores",
+      "subject": {
+        "all": "toda la organización",
+        "myTeam": "tu equipo",
+        "team": "el equipo de {name}",
+        "department": "el área {name}",
+        "person": "{name}"
+      },
+      "of": "{indicator}: {subject}",
+      "chartLabel": "{indicator} por ciclo, {subject}",
+      "point": "{cycle}: {value}",
+      "hidden": "no disponible",
+      "under": "menos de {min}",
+      "cycle": "Ciclo",
+      "pick": {
+        "label": "Elegir qué ver",
+        "person": "Persona",
+        "manager": "Equipo (manager)",
+        "department": "Área",
+        "any": "—",
+        "apply": "Ver"
+      }
     }
   },
   "Qualitative": {

@@ -22,19 +22,51 @@
   "selectedFilter": "status-all",
   "goals": [
     {
-      "id": "6271",
-      "title": "Mejorar el NPS interno del equipo",
+      "id": "6220",
+      "title": "Mentorear a dos personas nuevas",
       "description": "Alineado con el plan del área para el año.",
       "percentComplete": 100,
       "alignsWithOptionId": null,
-      "sharedWithEmployeeIds": [
-        159
-      ],
-      "dueDate": "2023-11-14",
-      "completionDate": "2023-10-09",
-      "lastChangedDateTime": "2023-10-09T12:10:00Z",
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2024-08-28",
+      "completionDate": "2024-04-30",
+      "lastChangedDateTime": "2024-04-30T11:41:13Z",
       "status": "completed",
-      "milestones": null,
+      "milestones": [
+        {
+          "id": 1172,
+          "employeeGoalId": 6220,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2024-04-03T15:11:58Z",
+          "lastUpdateDateTime": "2024-04-03T15:11:58Z",
+          "lastUpdateUserId": 289
+        },
+        {
+          "id": 1173,
+          "employeeGoalId": 6220,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2024-04-16T19:27:43Z",
+          "lastUpdateDateTime": "2024-04-16T19:27:43Z",
+          "lastUpdateUserId": 289
+        },
+        {
+          "id": 1174,
+          "employeeGoalId": 6220,
+          "title": "Hito 3",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2024-04-09T12:26:42Z",
+          "lastUpdateDateTime": "2024-04-09T12:26:42Z",
+          "lastUpdateUserId": 289
+        }
+      ],
       "actions": {
         "canEdit": true,
         "canUpdateProgress": false,
@@ -45,126 +77,15 @@
       }
     },
     {
-      "id": "6272",
-      "title": "Reducir los incidentes recurrentes a la mitad",
-      "description": "Pedido por el equipo directivo en la planificación.",
-      "percentComplete": 15,
-      "alignsWithOptionId": null,
-      "sharedWithEmployeeIds": [],
-      "dueDate": "2024-06-18",
-      "completionDate": null,
-      "lastChangedDateTime": "2025-08-18T15:38:30Z",
-      "status": "closed",
-      "milestones": null,
-      "actions": {
-        "canEdit": false,
-        "canUpdateProgress": false,
-        "canClose": false,
-        "canReopen": true,
-        "canDelete": true,
-        "canComment": true
-      }
-    },
-    {
-      "id": "6275",
-      "title": "Aumentar la cobertura de pruebas al 80%",
-      "description": "Pedido por el equipo directivo en la planificación.",
-      "percentComplete": 50,
-      "alignsWithOptionId": null,
-      "sharedWithEmployeeIds": [],
-      "dueDate": "2024-07-28",
-      "completionDate": null,
-      "lastChangedDateTime": "2026-08-11T17:15:02Z",
-      "status": "closed",
-      "milestones": [
-        {
-          "id": 1267,
-          "employeeGoalId": 6275,
-          "title": "Hito 1",
-          "startValue": 0,
-          "endValue": 1,
-          "currentValue": 1,
-          "completedDateTime": "2025-01-25T18:08:54Z",
-          "lastUpdateDateTime": "2025-01-25T18:08:54Z",
-          "lastUpdateUserId": 289
-        },
-        {
-          "id": 1268,
-          "employeeGoalId": 6275,
-          "title": "Hito 2",
-          "startValue": 0,
-          "endValue": 1,
-          "currentValue": 0,
-          "completedDateTime": null,
-          "lastUpdateDateTime": "2024-05-26T13:49:46Z",
-          "lastUpdateUserId": 289
-        }
-      ],
-      "actions": {
-        "canEdit": false,
-        "canUpdateProgress": false,
-        "canClose": false,
-        "canReopen": true,
-        "canDelete": true,
-        "canComment": true
-      }
-    },
-    {
-      "id": "6277",
-      "title": "Lanzar el nuevo flujo de onboarding",
+      "id": "6223",
+      "title": "Mejorar el NPS interno del equipo",
       "description": "Meta compartida con otra área; coordinar avances mensuales.",
-      "percentComplete": 50,
-      "alignsWithOptionId": null,
-      "sharedWithEmployeeIds": [
-        159
-      ],
-      "dueDate": "2025-08-18",
-      "completionDate": null,
-      "lastChangedDateTime": "2026-01-07T16:01:18Z",
-      "status": "in_progress",
-      "milestones": [
-        {
-          "id": 1269,
-          "employeeGoalId": 6277,
-          "title": "Hito 1",
-          "startValue": 0,
-          "endValue": 1,
-          "currentValue": 1,
-          "completedDateTime": "2025-08-06T09:12:41Z",
-          "lastUpdateDateTime": "2025-08-06T09:12:41Z",
-          "lastUpdateUserId": 289
-        },
-        {
-          "id": 1270,
-          "employeeGoalId": 6277,
-          "title": "Hito 2",
-          "startValue": 0,
-          "endValue": 1,
-          "currentValue": 0,
-          "completedDateTime": null,
-          "lastUpdateDateTime": "2025-01-24T12:56:09Z",
-          "lastUpdateUserId": 289
-        }
-      ],
-      "actions": {
-        "canEdit": true,
-        "canUpdateProgress": true,
-        "canClose": true,
-        "canReopen": false,
-        "canDelete": true,
-        "canComment": true
-      }
-    },
-    {
-      "id": "6278",
-      "title": "Automatizar la conciliación mensual",
-      "description": "Alineado con el plan del área para el año.",
-      "percentComplete": 20,
+      "percentComplete": 90,
       "alignsWithOptionId": null,
       "sharedWithEmployeeIds": [],
-      "dueDate": "2025-11-28",
+      "dueDate": "2025-04-27",
       "completionDate": null,
-      "lastChangedDateTime": "2026-06-05T08:46:04Z",
+      "lastChangedDateTime": "2025-09-24T12:43:01Z",
       "status": "in_progress",
       "milestones": null,
       "actions": {
@@ -177,36 +98,15 @@
       }
     },
     {
-      "id": "6281",
-      "title": "Aumentar la cobertura de pruebas al 80%",
+      "id": "6224",
+      "title": "Entregar el proyecto Norte sin desvíos",
       "description": "Sirve de base para el próximo ciclo de evaluación.",
-      "percentComplete": 75,
-      "alignsWithOptionId": null,
+      "percentComplete": 35,
+      "alignsWithOptionId": 9001,
       "sharedWithEmployeeIds": [],
-      "dueDate": "2026-04-08",
+      "dueDate": "2025-09-18",
       "completionDate": null,
-      "lastChangedDateTime": "2026-03-22T08:54:17Z",
-      "status": "in_progress",
-      "milestones": null,
-      "actions": {
-        "canEdit": true,
-        "canUpdateProgress": true,
-        "canClose": true,
-        "canReopen": false,
-        "canDelete": true,
-        "canComment": true
-      }
-    },
-    {
-      "id": "6283",
-      "title": "Lanzar el nuevo flujo de onboarding",
-      "description": "Pedido por el equipo directivo en la planificación.",
-      "percentComplete": 15,
-      "alignsWithOptionId": 9004,
-      "sharedWithEmployeeIds": [],
-      "dueDate": "2027-02-10",
-      "completionDate": null,
-      "lastChangedDateTime": "2026-09-03T09:07:54Z",
+      "lastChangedDateTime": "2026-07-03T09:41:15Z",
       "status": "in_progress",
       "milestones": null,
       "actions": {
@@ -225,26 +125,12 @@
       "firstName": "Belén",
       "lastName": "Soria",
       "preferredName": null
-    },
-    {
-      "employeeId": 159,
-      "firstName": "Marcela",
-      "lastName": "Ríos",
-      "preferredName": null
     }
   ],
   "comments": [
     {
-      "goalId": "6271",
-      "commentCount": 3
-    },
-    {
-      "goalId": "6272",
-      "commentCount": 1
-    },
-    {
-      "goalId": "6283",
-      "commentCount": 4
+      "goalId": "6223",
+      "commentCount": 2
     }
   ]
 }

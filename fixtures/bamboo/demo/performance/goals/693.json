@@ -22,17 +22,63 @@
   "selectedFilter": "status-all",
   "goals": [
     {
-      "id": "7719",
-      "title": "Documentar los procesos críticos",
-      "description": "Sirve de base para el próximo ciclo de evaluación.",
-      "percentComplete": 5,
-      "alignsWithOptionId": null,
+      "id": "7715",
+      "title": "Mejorar el NPS interno del equipo",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "percentComplete": 65,
+      "alignsWithOptionId": 9004,
       "sharedWithEmployeeIds": [],
-      "dueDate": "2025-11-07",
+      "dueDate": "2025-10-16",
       "completionDate": null,
-      "lastChangedDateTime": "2025-07-01T14:29:32Z",
+      "lastChangedDateTime": "2025-08-23T19:20:10Z",
       "status": "closed",
       "milestones": null,
+      "actions": {
+        "canEdit": false,
+        "canUpdateProgress": false,
+        "canClose": false,
+        "canReopen": false,
+        "canDelete": false,
+        "canComment": false
+      }
+    },
+    {
+      "id": "7716",
+      "title": "Completar la certificación del área",
+      "description": "Sirve de base para el próximo ciclo de evaluación.",
+      "percentComplete": 50,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [
+        59
+      ],
+      "dueDate": "2025-12-26",
+      "completionDate": null,
+      "lastChangedDateTime": "2025-08-23T12:50:18Z",
+      "status": "closed",
+      "milestones": [
+        {
+          "id": 1848,
+          "employeeGoalId": 7716,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-07-05T19:52:35Z",
+          "lastUpdateDateTime": "2025-07-05T19:52:35Z",
+          "lastUpdateUserId": 693
+        },
+        {
+          "id": 1849,
+          "employeeGoalId": 7716,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 0,
+          "completedDateTime": null,
+          "lastUpdateDateTime": "2025-06-25T10:59:02Z",
+          "lastUpdateUserId": 693
+        }
+      ],
       "actions": {
         "canEdit": false,
         "canUpdateProgress": false,
@@ -49,12 +95,22 @@
       "firstName": "Mariana",
       "lastName": "Yáñez",
       "preferredName": null
+    },
+    {
+      "employeeId": 59,
+      "firstName": "Gonzalo",
+      "lastName": "Soria",
+      "preferredName": null
     }
   ],
   "comments": [
     {
-      "goalId": "7719",
-      "commentCount": 1
+      "goalId": "7715",
+      "commentCount": 3
+    },
+    {
+      "goalId": "7716",
+      "commentCount": 2
     }
   ]
 }

@@ -6,6 +6,7 @@ const VARIANT = {
   running: "secondary",
   succeeded: "default",
   error: "destructive",
+  needs_decision: "outline",
 } as const satisfies Record<RunStatus, string>;
 
 /** `ingest_run.status` as a localized badge. */

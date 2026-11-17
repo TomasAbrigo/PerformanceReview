@@ -20,13 +20,64 @@
     }
   ],
   "selectedFilter": "status-all",
-  "goals": [],
+  "goals": [
+    {
+      "id": "7925",
+      "title": "Implementar el calendario editorial",
+      "description": "Sirve de base para el próximo ciclo de evaluación.",
+      "percentComplete": 45,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2026-08-29",
+      "completionDate": null,
+      "lastChangedDateTime": "2026-07-07T15:49:54Z",
+      "status": "in_progress",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": true,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "7927",
+      "title": "Cerrar el plan de capacitación anual",
+      "description": "Alineado con el plan del área para el año.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [
+        83
+      ],
+      "dueDate": "2026-03-28",
+      "completionDate": "2026-02-03",
+      "lastChangedDateTime": "2026-02-03T13:12:12Z",
+      "status": "completed",
+      "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    }
+  ],
   "persons": [
     {
       "employeeId": 797,
       "firstName": "Gabriela",
       "lastName": "Figueroa",
       "preferredName": "Gabi"
+    },
+    {
+      "employeeId": 83,
+      "firstName": "Daniela",
+      "lastName": "Franco",
+      "preferredName": null
     }
   ],
   "comments": []

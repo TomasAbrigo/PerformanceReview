@@ -65,14 +65,21 @@ export type ProfileChoice =
   | { saved: string }
   | { custom: SourceProfile; replace?: boolean };
 
-/**
- * Built-in profiles of Bamboo report exports whose rows can be imported as
- * historical review cycles (domain mode) instead of only landed.
- */
-export const HISTORY_PROFILES: readonly string[] = [
-  "bamboo-employee-performance",
-  "bamboo-feedback-status",
+/** Entities whose rows can be imported into review cycles (import-history). */
+export const HISTORY_ENTITIES: readonly string[] = [
+  "assessment",
+  "assessment_progress",
+  "feedback",
 ];
+
+/**
+ * Whether a profile's rows can be imported as historical review cycles
+ * (domain mode) instead of only landed: Bamboo's performance reports, and
+ * custom profiles of the same entities (e.g. one with its own question
+ * mapping, started from a built-in).
+ */
+export const isHistoryProfile = (profile: Pick<SourceProfile, "entity">) =>
+  HISTORY_ENTITIES.includes(profile.entity);
 
 /** What the import action and the upload worker take. */
 export const importInputSchema = z.object({
@@ -101,6 +108,8 @@ export type ImportUploadResult = {
   rejects: IngestReject[];
   /** `domain`: imported as historical cycles; `landing`: rows only landed. */
   mode?: "domain" | "landing";
+  /** `needs_decision`: some rows wait for someone to choose their cycle. */
+  status?: "succeeded" | "needs_decision";
 };
 
 /** Result of storing and looking inside an uploaded file. */

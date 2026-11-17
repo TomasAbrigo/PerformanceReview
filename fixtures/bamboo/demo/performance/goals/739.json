@@ -22,19 +22,142 @@
   "selectedFilter": "status-all",
   "goals": [
     {
-      "id": "7818",
-      "title": "Implementar el calendario editorial",
+      "id": "7802",
+      "title": "Entregar el proyecto Norte sin desvíos",
       "description": "Pedido por el equipo directivo en la planificación.",
       "percentComplete": 100,
       "alignsWithOptionId": null,
       "sharedWithEmployeeIds": [
         111
       ],
-      "dueDate": "2025-12-24",
-      "completionDate": "2025-09-14",
-      "lastChangedDateTime": "2025-09-14T19:04:10Z",
+      "dueDate": "2025-10-09",
+      "completionDate": "2025-09-21",
+      "lastChangedDateTime": "2025-09-21T12:18:05Z",
       "status": "completed",
       "milestones": null,
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "7805",
+      "title": "Cerrar el plan de capacitación anual",
+      "description": "Pedido por el equipo directivo en la planificación.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [
+        111
+      ],
+      "dueDate": "2025-10-19",
+      "completionDate": "2025-09-19",
+      "lastChangedDateTime": "2025-09-19T12:39:25Z",
+      "status": "completed",
+      "milestones": [
+        {
+          "id": 1897,
+          "employeeGoalId": 7805,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-08-14T14:13:33Z",
+          "lastUpdateDateTime": "2025-08-14T14:13:33Z",
+          "lastUpdateUserId": 739
+        },
+        {
+          "id": 1898,
+          "employeeGoalId": 7805,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-08-19T13:20:43Z",
+          "lastUpdateDateTime": "2025-08-19T13:20:43Z",
+          "lastUpdateUserId": 739
+        },
+        {
+          "id": 1899,
+          "employeeGoalId": 7805,
+          "title": "Hito 3",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-08-08T19:20:19Z",
+          "lastUpdateDateTime": "2025-08-08T19:20:19Z",
+          "lastUpdateUserId": 739
+        },
+        {
+          "id": 1900,
+          "employeeGoalId": 7805,
+          "title": "Hito 4",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2025-08-23T17:45:08Z",
+          "lastUpdateDateTime": "2025-08-23T17:45:08Z",
+          "lastUpdateUserId": 739
+        }
+      ],
+      "actions": {
+        "canEdit": true,
+        "canUpdateProgress": false,
+        "canClose": true,
+        "canReopen": false,
+        "canDelete": true,
+        "canComment": true
+      }
+    },
+    {
+      "id": "7808",
+      "title": "Renovar las cuentas clave del trimestre",
+      "description": "Meta compartida con otra área; coordinar avances mensuales.",
+      "percentComplete": 100,
+      "alignsWithOptionId": null,
+      "sharedWithEmployeeIds": [],
+      "dueDate": "2026-10-27",
+      "completionDate": "2026-06-11",
+      "lastChangedDateTime": "2026-06-11T16:05:28Z",
+      "status": "completed",
+      "milestones": [
+        {
+          "id": 1901,
+          "employeeGoalId": 7808,
+          "title": "Hito 1",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2026-05-27T09:09:48Z",
+          "lastUpdateDateTime": "2026-05-27T09:09:48Z",
+          "lastUpdateUserId": 739
+        },
+        {
+          "id": 1902,
+          "employeeGoalId": 7808,
+          "title": "Hito 2",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2026-06-07T19:01:39Z",
+          "lastUpdateDateTime": "2026-06-07T19:01:39Z",
+          "lastUpdateUserId": 739
+        },
+        {
+          "id": 1903,
+          "employeeGoalId": 7808,
+          "title": "Hito 3",
+          "startValue": 0,
+          "endValue": 1,
+          "currentValue": 1,
+          "completedDateTime": "2026-05-28T14:47:06Z",
+          "lastUpdateDateTime": "2026-05-28T14:47:06Z",
+          "lastUpdateUserId": 739
+        }
+      ],
       "actions": {
         "canEdit": true,
         "canUpdateProgress": false,
@@ -61,8 +184,8 @@
   ],
   "comments": [
     {
-      "goalId": "7818",
-      "commentCount": 1
+      "goalId": "7802",
+      "commentCount": 3
     }
   ]
 }

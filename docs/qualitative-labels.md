@@ -37,5 +37,5 @@ Las filas que no cruzan (`missing_fields`, `invalid_sentiment`, `unknown_person`
 
 ```csv
 employee_name,review_cycle,dimension,text,sentiment,confidence,themes
-Adrián Bustos,Evaluación de desempeño 2023,improvement,Necesito mejorar la planificación de mis tiempos.,constructive,0.85,planificacion
+Adrián Bustos,Evaluación semestral 2024-H1,improvement,Necesito mejorar la planificación de mis tiempos.,constructive,0.85,planificacion
 ```

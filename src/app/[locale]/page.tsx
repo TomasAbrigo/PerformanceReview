@@ -29,6 +29,7 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
   const tDataQuality = await getTranslations("DataQuality");
   const tUpload = await getTranslations("Upload");
   const tDashboards = await getTranslations("Dashboards");
+  const tIndicators = await getTranslations("Indicators");
   const tQualitative = await getTranslations("Qualitative");
 
   return (
@@ -57,6 +58,9 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
             </Link>
             <Link href="/dashboards" className="underline">
               {tDashboards("nav")}
+            </Link>
+            <Link href="/insights/indicators" className="underline">
+              {tIndicators("nav")}
             </Link>
             <Link href="/insights/qualitative" className="underline">
               {tQualitative("nav")}

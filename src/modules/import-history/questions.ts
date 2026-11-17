@@ -6,6 +6,7 @@ import {
   type LikertRole,
   mapLikert,
 } from "@/modules/likert";
+import type { QuestionMapping } from "@/modules/lake/profiles";
 import type {
   QuestionDimension,
   QuestionKind,
@@ -119,62 +120,125 @@ const STANDARD_DIMENSIONS: Record<number, QuestionDimension> = {
 
 const PATTERN = /^(Employee|Manager) (Custom )?Q(\d+):\s*(.+)$/;
 
+type Found = Omit<QuestionColumn, "sort"> & { order: number };
+
+/** A header Bamboo's pattern recognises, as its question column. */
+function fromPattern(header: string): Found | null {
+  const match = PATTERN.exec(header.trim());
+  if (!match) return null;
+  const [, who, custom, n, text] = match;
+  const side: Side = who === "Employee" ? "self" : "manager";
+  const number = Number(n);
+  const base = {
+    header,
+    relationship: side,
+    prompt: { es: text, en: text },
+    sectionTitle: SECTIONS[side],
+  };
+  if (custom) {
+    return {
+      ...base,
+      key: `${side}:custom:${number}:${text.toLowerCase()}`,
+      kind: "rating",
+      visibleToReviewee: true,
+      choices: null,
+      scale: IMPORTED_SCALE,
+      role: null,
+      dimension: CUSTOM_DIMENSIONS[number] ?? null,
+      order: (side === "self" ? 0 : 1000) + 100 + number,
+    };
+  }
+  if (number > 4) return null;
+  const options =
+    number <= 2
+      ? STANDARD[side][`q${number}` as "q1" | "q2"].map((c) => ({ ...c }))
+      : null;
+  return {
+    ...base,
+    key: `${side}:q${number}`,
+    kind: options ? "single_choice" : "text",
+    // Bamboo: the employee never sees the manager's Q1/Q2.
+    visibleToReviewee: !(side === "manager" && number <= 2),
+    choices: options,
+    scale: null,
+    role:
+      side === "manager" && number === 1
+        ? "retention"
+        : side === "manager" && number === 2
+          ? "engagement"
+          : null,
+    dimension: STANDARD_DIMENSIONS[number] ?? null,
+    order: (side === "self" ? 0 : 1000) + number,
+  };
+}
+
+/** The letters of a configured letter choice (Bamboo's own for Q1/Q2). */
+function letterChoices(entry: QuestionMapping): Choice[] {
+  if (entry.options?.length) {
+    return choices(entry.options.map((label) => [label, label]));
+  }
+  const standard = /^(self|manager):(q[12])$/.exec(entry.key);
+  if (standard) {
+    return STANDARD[standard[1] as Side][standard[2] as "q1" | "q2"].map(
+      (c) => ({ ...c }),
+    );
+  }
+  return choices(["A", "B", "C", "D", "E"].map((l) => [l, l]));
+}
+
+/** A configured column; ordered like its pattern twin when it has one. */
+function fromMapping(entry: QuestionMapping, index: number): Found {
+  const twin = fromPattern(entry.column);
+  const text = twin?.prompt.es ?? entry.column;
+  const kind: QuestionKind =
+    entry.kind === "likert"
+      ? "rating"
+      : entry.kind === "letter_choice"
+        ? "single_choice"
+        : "text";
+  return {
+    key: entry.key,
+    header: entry.column,
+    relationship: entry.side,
+    kind,
+    prompt: { es: text, en: text },
+    sectionTitle: SECTIONS[entry.side],
+    // As in Bamboo: the employee never sees the manager's letter questions.
+    visibleToReviewee: !(
+      entry.side === "manager" && entry.kind === "letter_choice"
+    ),
+    choices: kind === "single_choice" ? letterChoices(entry) : null,
+    scale: kind === "rating" ? IMPORTED_SCALE : null,
+    // The configured role/dimension win; else what the pattern twin implies.
+    role: entry.role ?? twin?.role ?? null,
+    dimension: entry.dimension ?? twin?.dimension ?? null,
+    order: twin?.order ?? (entry.side === "self" ? 0 : 1000) + 500 + index,
+  };
+}
+
 /**
  * The question columns among a report's headers: self questions first, then
- * the manager's; standard ones before custom ones. Other columns are ignored.
+ * the manager's; standard ones before custom ones. Columns in `mapping` (the
+ * source profile's `questions`) are taken as configured; the others are
+ * detected by Bamboo's header pattern. Other columns are ignored.
  */
-export function detectQuestionColumns(headers: string[]): QuestionColumn[] {
-  const found: (Omit<QuestionColumn, "sort"> & { order: number })[] = [];
+export function detectQuestionColumns(
+  headers: string[],
+  mapping: readonly QuestionMapping[] = [],
+): QuestionColumn[] {
+  const configured = new Map(mapping.map((m, i) => [m.column, { m, i }]));
+  const found: Found[] = [];
   for (const header of headers) {
-    const match = PATTERN.exec(header.trim());
-    if (!match) continue;
-    const [, who, custom, n, text] = match;
-    const side: Side = who === "Employee" ? "self" : "manager";
-    const number = Number(n);
-    const base = {
-      header,
-      relationship: side,
-      prompt: { es: text, en: text },
-      sectionTitle: SECTIONS[side],
-    };
-    if (custom) {
-      found.push({
-        ...base,
-        key: `${side}:custom:${number}:${text.toLowerCase()}`,
-        kind: "rating",
-        visibleToReviewee: true,
-        choices: null,
-        scale: IMPORTED_SCALE,
-        role: null,
-        dimension: CUSTOM_DIMENSIONS[number] ?? null,
-        order: (side === "self" ? 0 : 1000) + 100 + number,
-      });
-      continue;
-    }
-    if (number > 4) continue;
-    const options =
-      number <= 2
-        ? STANDARD[side][`q${number}` as "q1" | "q2"].map((c) => ({ ...c }))
-        : null;
-    found.push({
-      ...base,
-      key: `${side}:q${number}`,
-      kind: options ? "single_choice" : "text",
-      // Bamboo: the employee never sees the manager's Q1/Q2.
-      visibleToReviewee: !(side === "manager" && number <= 2),
-      choices: options,
-      scale: null,
-      role:
-        side === "manager" && number === 1
-          ? "retention"
-          : side === "manager" && number === 2
-            ? "engagement"
-            : null,
-      dimension: STANDARD_DIMENSIONS[number] ?? null,
-      order: (side === "self" ? 0 : 1000) + number,
-    });
+    const entry = configured.get(header);
+    const column = entry ? fromMapping(entry.m, entry.i) : fromPattern(header);
+    if (column) found.push(column);
   }
+  // A configured key wins over a detected column that happens to share it.
+  const keys = new Set(
+    found.filter((f) => configured.has(f.header)).map((f) => f.key),
+  );
   return found
+    .filter((f) => configured.has(f.header) || !keys.has(f.key))
     .sort((a, b) => a.order - b.order)
     .map((entry, sort) => {
       const column: QuestionColumn & { order?: number } = { ...entry, sort };

@@ -1,8 +1,35 @@
+import { mkdtempSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
 import path from "node:path";
 import { expect, test } from "@playwright/test";
-import { assessed2023, company, fullName } from "./seed-data";
+import { assessedFirstCycle, company, fullName } from "./seed-data";
 
 const REPORTS = path.resolve("fixtures/bamboo-reports/small");
+/** es.json ImportHistory.decision */
+const decision = {
+  title: "Hay filas esperando un ciclo",
+  create: "Crear el ciclo {name} ({start} – {end})",
+  submit: "Importar en ese ciclo",
+  resolved: "Las filas en espera se importaron en el ciclo elegido.",
+};
+
+// Assessment Progress needs the cycles the performance report creates.
+test.describe.configure({ mode: "serial" });
+
+async function importFile(
+  page: import("@playwright/test").Page,
+  file: string,
+  profile: string,
+) {
+  await page.goto("/es/imports/upload");
+  await page.getByLabel("Archivo", { exact: true }).setInputFiles(file);
+  await page.getByRole("button", { name: "Previsualizar" }).click();
+  await expect(page.getByLabel("Perfil de fuente")).toHaveValue(profile);
+  await page.getByRole("button", { name: "Importar" }).click();
+  await expect(page).toHaveURL(/\/es\/imports\/history\/[0-9a-f-]{36}$/, {
+    timeout: 150_000,
+  });
+}
 
 test("importing the employee performance report creates the historical cycles and their participants", async ({
   page,
@@ -30,13 +57,13 @@ test("importing the employee performance report creates the historical cycles an
     await expect(cycles.getByRole("link", { name: cycle.name })).toBeVisible();
   }
 
-  // The 2023 cycle lists a person assessed in it, with their as-of snapshot.
+  // The first cycle lists a person assessed in it, with their as-of snapshot.
   await cycles.getByRole("link", { name: company.cycles[0].name }).click();
   await expect(page).toHaveURL(/\/es\/cycles\/[0-9a-f-]{36}$/);
   await expect(
-    page
-      .getByRole("table", { name: "Participantes" })
-      .getByRole("row", { name: new RegExp(`^${fullName(assessed2023)}`) }),
+    page.getByRole("table", { name: "Participantes" }).getByRole("row", {
+      name: new RegExp(`^${fullName(assessedFirstCycle)}`),
+    }),
   ).toBeVisible();
 
   // People the HRIS does not know wait in the identity queue.
@@ -48,4 +75,61 @@ test("importing the employee performance report creates the historical cycles an
       page.getByRole("link", { name: outsider.name }).first(),
     ).toBeVisible();
   }
+});
+
+test("importing the assessment progress report fills the completion of the semi-annual cycles", async ({
+  page,
+}) => {
+  test.setTimeout(240_000);
+  await importFile(
+    page,
+    path.join(REPORTS, "assessment-progress.csv"),
+    "bamboo-assessment-progress",
+  );
+
+  const cycles = page.getByRole("table", { name: "Ciclos detectados" });
+  await expect(cycles.getByRole("row")).toHaveCount(1 + company.cycles.length);
+  await expect(page.getByRole("heading", { name: decision.title })).toHaveCount(
+    0,
+  );
+});
+
+test("a row whose semester is ambiguous waits for a cycle, and the run finishes once one is chosen", async ({
+  page,
+}) => {
+  test.setTimeout(240_000);
+  // No cycle name, and a date 4 days before a semester cutoff.
+  const dir = mkdtempSync(path.join(tmpdir(), "e2e-ambiguous-"));
+  const file = path.join(dir, "employee-performance.csv");
+  writeFileSync(
+    file,
+    [
+      "Employee Name,Manager,Department,Review Cycle,Assessment Date,Employee Q3: What are some things I do well?",
+      `${fullName(assessedFirstCycle)},,${assessedFirstCycle.department},,2023-12-28,Ok`,
+    ].join("\n") + "\n",
+  );
+  await importFile(page, file, "bamboo-employee-performance");
+
+  await expect(
+    page.getByRole("heading", { name: decision.title }),
+  ).toBeVisible();
+  await page
+    .getByRole("radio", {
+      name: decision.create
+        .replace("{name}", "2023-H2")
+        .replace("{start}", "2023-07-01")
+        .replace("{end}", "2023-12-31"),
+    })
+    .check();
+  await page.getByRole("button", { name: decision.submit }).click();
+
+  await expect(page.getByText(decision.resolved)).toBeVisible();
+  await expect(page.getByRole("heading", { name: decision.title })).toHaveCount(
+    0,
+  );
+  await expect(
+    page
+      .getByRole("table", { name: "Ciclos detectados" })
+      .getByRole("link", { name: "2023-H2" }),
+  ).toBeVisible();
 });

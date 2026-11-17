@@ -78,7 +78,9 @@ export class FileSourceAdapter implements SourceAdapter<IngestEntity> {
       for (const row of rows) {
         // A stopped run (the worker was told to terminate) ends at the next row.
         ctx.signal?.throwIfAborted();
-        const empty = profile.keyColumns.find((c) => isEmpty(row[c]));
+        const empty = profile.keyColumns.find(
+          (c) => c !== profile.cycleColumn && isEmpty(row[c]),
+        );
         if (empty !== undefined) {
           const reason =
             `Profile "${profile.name}": key column "${empty}" is empty in the row ` +
