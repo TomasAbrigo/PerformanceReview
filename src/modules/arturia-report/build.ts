@@ -10,6 +10,7 @@ import {
   collectIndicators,
   collectPeople,
   collectQualitative,
+  cycleTeams,
   type CollectContext,
 } from "./collectors";
 import { labelsFor, type ReportLocale } from "./labels";
@@ -78,11 +79,13 @@ export async function buildReport(
   const locale = opts.locale ?? "es";
   const minGroupSize =
     opts.minGroupSize ?? (await getSetting(db, "aggregation.minGroupSize"));
+  const labels = labelsFor(locale);
   const ctx: CollectContext = {
     cycleId: cycle.id,
     anonymized: opts.anonymized,
     min: opts.anonymized ? minGroupSize : 1,
-    labels: labelsFor(locale),
+    labels,
+    teams: await cycleTeams(db, cycle.id, labels.team),
   };
   const [executive, completion, indicators, qualitative, goals, people] =
     await Promise.all([

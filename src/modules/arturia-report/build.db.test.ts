@@ -4,11 +4,15 @@ import path from "node:path";
 import { eq, sql } from "drizzle-orm";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { closeDb, db } from "@/db/client";
-import { reviewCycle } from "@/db/schema";
+import { cycleParticipant, person, reviewCycle } from "@/db/schema";
 import { generateCompany } from "@/fixtures/company";
 import { DEFAULT_ACTOR } from "@/modules/actor/types";
 import { completionSummary } from "@/modules/analytics/completion";
 import { goalKpis, goalOutliers } from "@/modules/analytics/goals-insights";
+import {
+  insertParticipant,
+  insertPerson,
+} from "@/modules/analytics/test-support";
 import {
   importReport,
   REPORTS,
@@ -19,6 +23,7 @@ import { MockProvider } from "@/modules/qualitative-analysis/mock-provider";
 import { runAnalysis } from "@/modules/qualitative-analysis/service";
 import { ArturiaError, buildReport, resolveCycle } from "./build";
 import { runExportCli } from "./cli";
+import { cycleTeams } from "./collectors";
 import { renderHtml, renderJson } from "./render";
 import { arturiaReportV1, type ArturiaReport, SCHEMA_MINOR } from "./schema";
 
@@ -208,6 +213,7 @@ describe("buildReport over the seed small company", () => {
         relationship: "self",
         total: t.selfApplicable,
         submitted: t.selfSubmitted,
+        applicable: true,
         draft: null,
         declined: null,
       },
@@ -215,6 +221,7 @@ describe("buildReport over the seed small company", () => {
         relationship: "manager",
         total: t.managerApplicable,
         submitted: t.managerSubmitted,
+        applicable: true,
         draft: null,
         declined: null,
       },
@@ -223,17 +230,14 @@ describe("buildReport over the seed small company", () => {
       list
         .filter((x) => x.relationship === rel)
         .map((x) => [x.label, x.n, x.total, x.submitted]);
+    // every group has a row per side, also where it applies to nobody
     const expected = (groups: typeof dept.groups, rel: "self" | "manager") =>
-      groups
-        .filter((g) =>
-          rel === "self" ? g.selfApplicable : g.managerApplicable,
-        )
-        .map((g) => [
-          g.label ?? "Otros",
-          g.participants,
-          rel === "self" ? g.selfApplicable : g.managerApplicable,
-          rel === "self" ? g.selfSubmitted : g.managerSubmitted,
-        ]);
+      groups.map((g) => [
+        g.label ?? "Otros",
+        g.participants,
+        rel === "self" ? g.selfApplicable : g.managerApplicable,
+        rel === "self" ? g.selfSubmitted : g.managerSubmitted,
+      ]);
     for (const rel of ["self", "manager"] as const) {
       expect(rows(c.byDepartment, rel)).toEqual(expected(dept.groups, rel));
       expect(rows(c.byManager, rel)).toEqual(expected(team.groups, rel));
@@ -246,34 +250,106 @@ describe("buildReport over the seed small company", () => {
     expect(c.delta?.total).not.toBeNull();
   });
 
-  it("completion anonymized: departments by the direction view, teams as Equipo N, totals only when nothing is suppressed", async () => {
+  it("completion anonymized: the direction view of areas and teams, teams as Equipo N, totals only when nothing is suppressed", async () => {
     const r = await buildReport(db, {
       cycle: cycleId,
       anonymized: true,
       minGroupSize: MIN,
     });
     const c = r.sections.completion!;
-    const dir = await completionSummary(
-      db,
-      { personId: null, role: "direction" },
-      { cycleId, groupBy: "department", minGroupSize: MIN },
-    );
+    const direction = { personId: null, role: "direction" } as const;
+    const input = { cycleId, minGroupSize: MIN };
+    const dir = await completionSummary(db, direction, {
+      ...input,
+      groupBy: "department",
+    });
+    const team = await completionSummary(db, direction, {
+      ...input,
+      groupBy: "manager",
+    });
+    const teams = await cycleTeams(db, cycleId, "Equipo");
+    const selfRows = (rows: typeof c.byDepartment) =>
+      rows.filter((x) => x.relationship === "self").map((x) => [x.label, x.n]);
+    const withOthers = (s: typeof dir) => [
+      ...s.groups,
+      ...(s.others ? [s.others] : []),
+    ];
     expect(c.participants).toBe(dir.participants);
-    expect(
-      c.byDepartment
-        .filter((x) => x.relationship === "self")
-        .map((x) => [x.label, x.n]),
-    ).toEqual(
-      [...dir.groups, ...(dir.others ? [dir.others] : [])]
-        .filter((g) => g.selfApplicable)
-        .map((g) => [g.label ?? "Otros", g.participants]),
+    expect(selfRows(c.byDepartment)).toEqual(
+      withOthers(dir).map((g) => [g.label ?? "Otros", g.participants]),
     );
-    expect(c.suppressed.byDepartment).toBe(dir.suppressed);
+    // the module gives direction no manager name: the export only numbers them
+    expect(team.groups.every((g) => g.label === null)).toBe(true);
+    expect(selfRows(c.byManager)).toEqual(
+      withOthers(team).map((g) => [
+        g.key === null ? "Otros" : teams.get(g.key),
+        g.participants,
+      ]),
+    );
     for (const g of c.byManager)
       expect(g.label).toMatch(/^(Equipo \d+|Otros)$/);
+    expect(c.suppressed).toEqual({
+      byDepartment: dir.suppressed,
+      byManager: team.suppressed,
+    });
     const anySuppressed =
       c.suppressed.byDepartment + c.suppressed.byManager > 0;
     expect(c.byRelationship === null).toBe(anySuppressed || dir.total === null);
+  });
+
+  it("the same team has the same Equipo N in completion and goals", async () => {
+    const r = await buildReport(db, {
+      cycle: cycleId,
+      anonymized: true,
+      minGroupSize: 2,
+    });
+    const people = new Map(
+      r.sections
+        .completion!.byManager.filter((x) => x.relationship === "self")
+        .map((x) => [x.label, x.n]),
+    );
+    const shared = r.sections.goals!.byManager.filter((x) =>
+      people.has(x.label),
+    );
+    expect(shared.some((x) => x.label.startsWith("Equipo"))).toBe(true);
+    for (const x of shared) expect(x.n).toBe(people.get(x.label));
+  });
+
+  it("completion is null when no assessment applies to anybody", async () => {
+    const lead = await insertPerson({
+      displayName: "Lía Prueba",
+      noEmployment: true,
+    });
+    const [empty] = await db
+      .insert(reviewCycle)
+      .values({
+        name: "Sin evaluaciones",
+        periodStart: "2098-01-01",
+        periodEnd: "2098-06-30",
+        snapshotDate: "2098-06-30",
+        status: "closed",
+        components: {
+          self: true,
+          manager: true,
+          peer: false,
+          upward: false,
+          calibration: false,
+        },
+        anonymity: { peer: "transparent", upward: "transparent" },
+      })
+      .returning({ id: reviewCycle.id });
+    try {
+      await insertParticipant({ cycleId: empty.id, personId: lead });
+      const r = await buildReport(db, { cycle: empty.id, anonymized: false });
+      expect(r.sections.executive.participants).toBe(1);
+      expect(r.sections.completion).toBeNull();
+    } finally {
+      await db
+        .delete(cycleParticipant)
+        .where(eq(cycleParticipant.cycleId, empty.id));
+      await db.delete(reviewCycle).where(eq(reviewCycle.id, empty.id));
+      await db.delete(person).where(eq(person.id, lead));
+    }
   });
 
   it("goals: the named report is goals-insights run as People, outliers by name", async () => {

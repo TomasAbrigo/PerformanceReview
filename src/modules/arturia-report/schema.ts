@@ -39,12 +39,14 @@ const executive = z.object({
 /**
  * One side (`self` or `manager`) of the assessment of a group: `n` is the
  * group's participants, `total` those the side applies to and `submitted`
- * the ones who submitted it.
+ * the ones who submitted it. `applicable` is false (and `total` 0) when the
+ * side applies to nobody in the group: there is nothing to complete.
  */
 const completionRow = group.extend({
   relationship: z.string(),
   total: int,
   submitted: int,
+  applicable: z.boolean(),
 });
 /** Percentage points against the previous cycle; null without a rate to compare. */
 const points = z.number().nullable();
@@ -52,9 +54,11 @@ const completion = z.object({
   /** Participants of the cycle (the head count, shown even when groups are not). */
   participants: int,
   /**
-   * null when anonymized and any group is suppressed (no differencing).
-   * `draft` and `declined` are always null: the completion figures count
-   * submitted against applicable sides and do not tell drafts from the rest.
+   * `self` and `manager` always (`applicable` false when it applies to
+   * nobody); null when anonymized and any group is suppressed (no
+   * differencing). `draft` and `declined` are always null: the completion
+   * figures count submitted against applicable sides and do not tell drafts
+   * from the rest.
    */
   byRelationship: z
     .array(
@@ -62,6 +66,7 @@ const completion = z.object({
         relationship: z.string(),
         total: int,
         submitted: int,
+        applicable: z.boolean(),
         draft: int.nullable(),
         declined: int.nullable(),
       }),

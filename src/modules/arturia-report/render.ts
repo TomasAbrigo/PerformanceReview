@@ -49,15 +49,22 @@ const num = (x: number | null, digits = 2) =>
 const W = 640;
 const ROW = 26;
 const LABEL_W = 180;
-/** Room for the longest label (about 6.3 units a character at 12px), within bounds. */
+/** Longest label drawn in full; longer ones end in "…" and keep the whole text in a <title>. */
+const MAX_LABEL = 40;
+const clip = (label: string) =>
+  label.length > MAX_LABEL ? `${label.slice(0, MAX_LABEL - 1)}…` : label;
+/** Room for the longest (clipped) label, about 6.3 units a character at 12px, within bounds. */
 const labelWidth = (labels: readonly string[]) =>
   Math.min(
     320,
     Math.max(
       LABEL_W,
-      Math.ceil(Math.max(0, ...labels.map((l) => l.length)) * 6.3) + 16,
+      Math.ceil(Math.max(0, ...labels.map((l) => clip(l).length)) * 6.3) + 16,
     ),
   );
+/** The text of a row's label, right-aligned against the bars. */
+const labelText = (label: string, x: number, y: number) =>
+  `<text x="${x}" y="${y}" text-anchor="end">${esc(clip(label))}${label.length > MAX_LABEL ? `<title>${esc(label)}</title>` : ""}</text>`;
 
 /** Horizontal bars: one per item, value labelled at the end. */
 export function svgBars(items: { label: string; value: number }[]): string {
@@ -69,7 +76,7 @@ export function svgBars(items: { label: string; value: number }[]): string {
     .map((it, i) => {
       const y = i * ROW;
       const w = Math.round((it.value / max) * span);
-      return `<text x="${labelW - 8}" y="${y + 17}" text-anchor="end">${esc(it.label)}</text><rect x="${labelW}" y="${y + 5}" width="${w}" height="16" class="c0"/><text x="${labelW + w + 6}" y="${y + 17}">${esc(it.value)}</text>`;
+      return `${labelText(it.label, labelW - 8, y + 17)}<rect x="${labelW}" y="${y + 5}" width="${w}" height="16" class="c0"/><text x="${labelW + w + 6}" y="${y + 17}">${esc(it.value)}</text>`;
     })
     .join("");
   return `<svg viewBox="0 0 ${W} ${items.length * ROW}" role="img" class="chart">${rows}</svg>`;
@@ -96,7 +103,7 @@ export function svgStacked(
           return rect;
         })
         .join("");
-      return `<text x="${labelW - 8}" y="${y + 17}" text-anchor="end">${esc(r.label)}</text>${rects}<text x="${labelW + span + 6}" y="${y + 17}">${total}</text>`;
+      return `${labelText(r.label, labelW - 8, y + 17)}${rects}<text x="${labelW + span + 6}" y="${y + 17}">${total}</text>`;
     })
     .join("");
   const keys = legend
@@ -220,7 +227,7 @@ function completionHtml(c: CompletionSection | null): string {
   const rows = (rs: CompletionSection["byDepartment"]) =>
     svgStacked(
       rs.map((r) => ({
-        label: `${r.label} · ${rel(r.relationship)}`,
+        label: `${r.label} · ${rel(r.relationship)}${r.applicable ? "" : ` (${L.completion.notApplicable})`}`,
         parts: [r.submitted, r.total - r.submitted],
       })),
       legend,
@@ -229,7 +236,7 @@ function completionHtml(c: CompletionSection | null): string {
     ? `<table><thead><tr><th></th><th>${esc(L.completion.total)}</th><th>${esc(L.completion.submitted)}</th><th>${esc(L.completion.pending)}</th><th>${esc(L.completion.rate)}</th></tr></thead><tbody>${c.byRelationship
         .map(
           (r) =>
-            `<tr><td>${esc(rel(r.relationship))}</td><td>${r.total}</td><td>${r.submitted}</td><td>${r.total - r.submitted}</td><td>${pct(r.submitted, r.total)}</td></tr>`,
+            `<tr><td>${esc(rel(r.relationship))}</td><td>${r.total}</td><td>${r.submitted}</td><td>${r.total - r.submitted}</td><td>${r.applicable ? pct(r.submitted, r.total) : esc(L.completion.notApplicable)}</td></tr>`,
         )
         .join("")}</tbody></table>`
     : hiddenTotal();
@@ -307,14 +314,15 @@ function goalsHtml(g: GoalsSection | null): string {
             ? []
             : [tile(g.withoutGoals, G.withoutGoals)]),
         ].join("")}</div>`;
-  // Goals by status per group: completed, in progress, closed.
+  // Goals by status per group: completed, in progress (on time), overdue
+  // (a subset of the in progress ones) and closed: the parts add up to goals.
   const status = (rows: GoalsSection["byDepartment"]) =>
     svgStacked(
       rows.map((r) => ({
         label: `${r.label} (n=${r.n})`,
-        parts: [r.completed, r.inProgress, r.closed],
+        parts: [r.completed, r.inProgress - r.overdue, r.overdue, r.closed],
       })),
-      [G.completed, G.inProgress, G.closed],
+      [G.completed, G.inProgress, G.overdue, G.closed],
     );
   const hiddenBucket = g.buckets.some((b) => b.hidden);
   const buckets = `<div class="scroll"><table><thead><tr><th>${esc(G.bucket)}</th><th>${esc(G.people)}</th><th>${esc(G.meanRetention)}</th><th>${esc(G.meanEngagement)}</th><th>${esc(G.positiveShare)}</th></tr></thead><tbody>${g.buckets
