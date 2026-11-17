@@ -16,6 +16,7 @@ import { loadLikertOverrides } from "@/modules/likert/store";
 import { snapshots } from "@/modules/review-core/service";
 import type { Relationship } from "@/modules/templates/constants";
 import { answerColumns, type QuestionColumn } from "./questions";
+import { snapshotDateFor } from "./semester";
 
 /** Imported cycles come from Bamboo's report exports, keyed by cycle name. */
 export const SOURCE = "bamboo_export" as const;
@@ -137,7 +138,10 @@ export async function createImportedCycle(
   }
   const [updated] = await tx
     .update(reviewCycle)
-    .set({ periodStart: input.periodStart })
+    .set({
+      periodStart: input.periodStart,
+      snapshotDate: snapshotDateFor(input.periodEnd),
+    })
     .where(eq(reviewCycle.id, cycle.id))
     .returning();
   return updated;

@@ -1,6 +1,7 @@
 import { errorMessage } from "@/lib/log";
 import { eq } from "drizzle-orm";
 import type { DbOrTx } from "@/db/client";
+import type { QuestionMapping } from "@/modules/lake/profiles";
 import {
   ingestRun,
   rawRecord,
@@ -51,6 +52,8 @@ export type RunIngestInput<E extends IngestEntity = Entity> = {
    * nobody: create the person (default) or queue it for review.
    */
   unmatched?: "create" | "queue";
+  /** Report rows: the profile's question mapping (HandlerContext.questions). */
+  questions?: QuestionMapping[];
 };
 
 export type RunIngestResult = {
@@ -97,6 +100,7 @@ export async function runIngest<E extends IngestEntity = Entity>({
   params = {},
   extract = {},
   unmatched,
+  questions,
 }: RunIngestInput<E>): Promise<RunIngestResult> {
   const handler = handlerFor(entity, landing);
   const source = adapter.source;
@@ -181,6 +185,7 @@ export async function runIngest<E extends IngestEntity = Entity>({
           payload: record.payload,
           unmatched,
           cache,
+          ...(questions ? { questions } : {}),
         }),
       );
       counts[outcome.result] = (counts[outcome.result] ?? 0) + 1;

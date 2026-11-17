@@ -1,3 +1,4 @@
+import { isUuid } from "@/lib/uuid";
 import { and, desc, eq, sql, type SQL } from "drizzle-orm";
 import type { DbOrTx } from "@/db/client";
 import {
@@ -49,7 +50,6 @@ export type RunDetail = Omit<RunListItem, "issues"> & {
 
 const DEFAULT_LIMIT = 25;
 const MAX_LIMIT = 200;
-const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 /**
  * Keyset cursor over (started_at, id), the order of `ingest_run_started_at_idx`.
@@ -72,7 +72,7 @@ function decodeCursor(cursor: string): [string, string] | null {
       typeof parsed[0] === "string" &&
       /^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d(\.\d{1,6})?Z$/.test(parsed[0]) &&
       typeof parsed[1] === "string" &&
-      UUID.test(parsed[1])
+      isUuid(parsed[1])
     ) {
       return [parsed[0], parsed[1]];
     }
@@ -154,7 +154,7 @@ export async function getRun(
   db: DbOrTx,
   id: string,
 ): Promise<RunDetail | null> {
-  if (!UUID.test(id)) return null;
+  if (!isUuid(id)) return null;
   const [run] = await db
     .select({
       id: ingestRun.id,

@@ -1,4 +1,8 @@
 import { z } from "zod";
+import {
+  questionDimensions,
+  questionRoles,
+} from "@/modules/templates/constants";
 import type { JsonValue, LakeColumn, LakeRow, ReadOptions } from "./types";
 
 /** Canonical entities a source table can feed. */
@@ -40,8 +44,8 @@ export const questionMappingSchema = z.object({
   side: z.enum(["self", "manager"]),
   kind: z.enum(QUESTION_KINDS),
   key: name,
-  dimension: name.optional(),
-  role: name.optional(),
+  dimension: z.enum(questionDimensions).optional(),
+  role: z.enum(questionRoles).optional(),
   /** letter_choice: the label of A, B, C... in order. */
   options: z.array(name).optional(),
 });
@@ -399,13 +403,14 @@ const BAMBOO_PERFORMANCE_QUESTIONS: QuestionMapping[] = [
     side: side as QuestionMapping["side"],
     kind: kind as QuestionMappingKind,
     key: custom ? `${side}:${q}:${text.toLowerCase()}` : `${side}:${q}`,
-    // What the standard manager letters measure (#57 maps them to 1-5) and
-    // what each open question is about.
-    ...(side === "manager" && q === "q1" ? { role: "retention" } : {}),
-    ...(side === "manager" && q === "q2" ? { role: "engagement" } : {}),
-    ...(q === "q3" ? { dimension: "strengths" } : {}),
-    ...(q === "q4" ? { dimension: "improvement" } : {}),
-    ...(custom && Number(n) <= 3 ? { dimension: `custom_${n}` } : {}),
+    // What the standard manager letters measure (#57 maps them to 1-5).
+    ...(side === "manager" && q === "q1" ? { role: "retention" as const } : {}),
+    ...(side === "manager" && q === "q2"
+      ? { role: "engagement" as const }
+      : {}),
+    ...(q === "q3" ? { dimension: "strengths" as const } : {}),
+    ...(q === "q4" ? { dimension: "improvement" as const } : {}),
+    ...(custom ? { dimension: `custom_${n}` as "custom_1" | "custom_2" } : {}),
   };
 });
 

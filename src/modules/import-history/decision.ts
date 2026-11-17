@@ -77,9 +77,7 @@ export async function buildCycleDecision(
       ),
     ].sort(),
     proposals: distinct(
-      deferred.flatMap((d) =>
-        d.deferral.proposal ? [d.deferral.proposal] : [],
-      ),
+      deferred.flatMap((d) => d.deferral.proposals),
       (p: CycleProposal) => p.name,
     ).sort((a, b) => a.periodStart.localeCompare(b.periodStart)),
     options: cycles,

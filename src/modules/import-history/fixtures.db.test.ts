@@ -62,12 +62,10 @@ describe("importing the small Employee Performance report", () => {
         templateId: null,
       });
       expect(cycle.periodEnd).toBe(cycle.snapshotDate);
-      // Its assessment dates fall in one semester: the period is that one.
+      // A named cycle: its period spans its assessment dates (no snapping).
       const fixture = seeded.company.cycles.find((c) => c.name === cycle.name)!;
-      expect([cycle.periodStart, cycle.periodEnd]).toEqual([
-        fixture.periodStart,
-        fixture.periodEnd,
-      ]);
+      expect(cycle.periodStart >= fixture.assessmentOpen).toBe(true);
+      expect(cycle.periodEnd <= fixture.assessmentDue).toBe(true);
       const participants = await db.$count(
         cycleParticipant,
         eq(cycleParticipant.cycleId, cycle.id),
@@ -190,6 +188,31 @@ describe("importing the small Employee Performance report", () => {
         "If [Employee] got a job offer elsewhere, I would...",
       ].flatMap((p) => seeded.company.cycles.map(() => p)),
     );
+  });
+
+  it("scores retention/engagement letters 1-5 and sets the dimensions of the mapped questions (#57, #58)", async () => {
+    const rows = await db
+      .select({ a: answer, q: questionRevision })
+      .from(answer)
+      .innerJoin(
+        questionRevision,
+        eq(questionRevision.id, answer.questionRevisionId),
+      );
+    const likert = rows.filter(
+      ({ q }) => q.role === "retention" || q.role === "engagement",
+    );
+    expect(new Set(likert.map(({ q }) => q.role))).toEqual(
+      new Set(["retention", "engagement"]),
+    );
+    for (const { a } of likert) {
+      expect(a.normalized).not.toBeNull();
+      expect(a.optionValue).toBeGreaterThanOrEqual(1);
+    }
+    const revisions = await db.select().from(questionRevision);
+    const dimensions = new Set(revisions.map((q) => q.dimension));
+    for (const d of ["strengths", "improvement", "custom_1", "custom_2"]) {
+      expect(dimensions).toContain(d);
+    }
   });
 
   it("re-importing the same file creates nothing new", async () => {

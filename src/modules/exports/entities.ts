@@ -43,6 +43,17 @@ import {
   selfManagerGap,
 } from "@/modules/analytics/dashboards";
 import {
+  type IndicatorAlert,
+  indicatorAlerts,
+  indicatorDistribution,
+  indicatorGroupBys,
+  indicators,
+} from "@/modules/analytics/indicators";
+import {
+  sentimentByDimension,
+  type DimensionSentiment,
+} from "@/modules/qualitative-analysis";
+import {
   type CompletionGroup,
   completionCycles,
   completionDelta,
@@ -588,6 +599,138 @@ const gapExport = defineExport({
   ],
 });
 
+// ------------------------------------------------- insights: indicators
+// Retention and engagement, with People's visibility like the dashboards.
+
+const indicatorQuery = z.object({
+  cycle: uuid,
+  indicator: z.enum(indicators).default("retention"),
+  groupBy: z.enum(indicatorGroupBys).default("department"),
+  hierarchy: z.enum(hierarchies).default("asOf"),
+  department: z.string().optional(),
+  manager: uuid.optional(),
+});
+
+type IndicatorDistributionRow = {
+  group: string | null;
+  indicator: string;
+  value: number;
+  count: number;
+  n: number;
+  mean: number | null;
+};
+
+/** One row per group × value 1-5, with the group's n and mean. */
+const indicatorDistributionExport = defineExport({
+  file: ({ cycle, indicator }) =>
+    `insights-indicator-distribution-${cycle}-${indicator}`,
+  query: indicatorQuery,
+  rows: (db, q) =>
+    each(
+      indicatorDistribution(db, DEFAULT_ACTOR, {
+        cycleId: q.cycle,
+        indicator: q.indicator,
+        groupBy: q.groupBy,
+        hierarchy: q.hierarchy,
+        filters: { department: q.department, managerId: q.manager },
+      }).then((d) =>
+        d.series.flatMap((s) =>
+          s.counts.map((count, i): IndicatorDistributionRow => ({
+            group: s.label,
+            indicator: d.indicator,
+            value: i + 1,
+            count,
+            n: s.n,
+            mean: s.mean,
+          })),
+        ),
+      ),
+    ),
+  columns: (h) => [
+    { header: h("group"), value: (r: IndicatorDistributionRow) => r.group },
+    { header: h("indicator"), value: (r) => r.indicator },
+    { header: h("value"), value: (r) => r.value },
+    { header: h("count"), value: (r) => r.count },
+    { header: h("n"), value: (r) => r.n },
+    { header: h("mean"), value: (r) => r.mean },
+  ],
+});
+
+/** One row per alert: a fall of an indicator, or a risk (both low). */
+const indicatorAlertsExport = defineExport({
+  file: ({ cycle }) => `insights-alerts-${cycle}`,
+  query: indicatorQuery.pick({
+    cycle: true,
+    hierarchy: true,
+    department: true,
+    manager: true,
+  }),
+  rows: (db, q) =>
+    each(
+      indicatorAlerts(db, DEFAULT_ACTOR, {
+        cycleId: q.cycle,
+        hierarchy: q.hierarchy,
+        filters: { department: q.department, managerId: q.manager },
+      }).then((a) => a.alerts),
+    ),
+  columns: (h) => [
+    { header: h("alert_kind"), value: (a: IndicatorAlert) => a.kind },
+    {
+      header: h("indicator"),
+      value: (a) => (a.kind === "drop" ? a.indicator : null),
+    },
+    { header: h("person_id"), value: (a) => a.person.personId },
+    { header: h("name"), value: (a) => a.person.name },
+    { header: h("manager_id"), value: (a) => a.person.managerId },
+    { header: h("manager"), value: (a) => a.person.managerName },
+    { header: h("department"), value: (a) => a.person.department },
+    {
+      header: h("previous_cycle"),
+      value: (a) => (a.kind === "drop" ? a.previousCycleName : null),
+    },
+    {
+      header: h("previous_value"),
+      value: (a) => (a.kind === "drop" ? a.previousValue : null),
+    },
+    { header: h("value"), value: (a) => (a.kind === "drop" ? a.value : null) },
+    { header: h("fall"), value: (a) => (a.kind === "drop" ? a.delta : null) },
+    {
+      header: h("retention"),
+      value: (a) => (a.kind === "risk" ? a.retention : null),
+    },
+    {
+      header: h("engagement"),
+      value: (a) => (a.kind === "risk" ? a.engagement : null),
+    },
+  ],
+});
+
+// ---------------------------------------------------------------- insights
+
+/** Sentiment counts per dimension (HR visibility, counts only: no text, names or emails). */
+const insightsSentimentExport = defineExport({
+  file: () => "insights-sentiment",
+  query: z.object({
+    cycle: uuid.optional(),
+    department: z.string().optional(),
+  }),
+  rows: (db, q) =>
+    each(
+      sentimentByDimension(db, DEFAULT_ACTOR, {
+        cycleId: q.cycle,
+        department: q.department,
+        aggregateOnly: true,
+      }),
+    ),
+  columns: (h) => [
+    { header: h("dimension"), value: (r: DimensionSentiment) => r.dimension },
+    { header: h("positive"), value: (r) => r.positive },
+    { header: h("constructive"), value: (r) => r.constructive },
+    { header: h("negative"), value: (r) => r.negative },
+    { header: h("total"), value: (r) => r.total },
+  ],
+});
+
 // ------------------------------------------------------------- completion
 // The insights completion views (/insights/completion), read as People (like
 // the dashboards above): a cycle (required) and the same filters as the page.
@@ -729,6 +872,9 @@ const EXPORTS = {
   "dashboard-self-manager-gap": gapExport,
   "insights-completion": completionExport,
   "insights-missing": missingExport,
+  "insights-indicator-distribution": indicatorDistributionExport,
+  "insights-alerts": indicatorAlertsExport,
+  "insights-sentiment": insightsSentimentExport,
 } as const;
 
 export type ExportEntity = keyof typeof EXPORTS;

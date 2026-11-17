@@ -25,7 +25,7 @@ describe("insights-completion.csv", () => {
     );
     expect(header).toEqual([
       "cycle_name",
-      "previous_cycle",
+      "previous cycle",
       "group_id",
       "group",
       "participants",

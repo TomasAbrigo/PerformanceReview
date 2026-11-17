@@ -111,9 +111,6 @@ export class FileSourceAdapter implements SourceAdapter<IngestEntity> {
             raw: row,
             // Only when set: payloads (and their hashes) stay as they were.
             ...(profile.dateFormat ? { dateFormat: profile.dateFormat } : {}),
-            // The question mapping travels with the row, so re-processing a
-            // stored row (identity queue, a resumed run) maps it the same way.
-            ...(profile.questions ? { questions: profile.questions } : {}),
           },
           extractedAt,
         };

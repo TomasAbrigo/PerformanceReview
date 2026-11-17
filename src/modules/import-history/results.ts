@@ -1,5 +1,6 @@
 import { and, type AnyColumn, asc, eq, sql } from "drizzle-orm";
 import type { DbOrTx } from "@/db/client";
+import { isUuid } from "@/lib/uuid";
 import {
   historyImportRow,
   importedRequest,
@@ -37,8 +38,6 @@ export type HistoryImportResult = {
   decision: Omit<CycleDecision, "pending"> | null;
 };
 
-const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-
 const sum = (column: AnyColumn) =>
   sql<number>`coalesce(sum(${column}), 0)::int`;
 
@@ -50,7 +49,7 @@ export async function getHistoryImportResult(
   db: DbOrTx,
   runId: string,
 ): Promise<HistoryImportResult | null> {
-  if (!UUID.test(runId)) return null;
+  if (!isUuid(runId)) return null;
   const [run] = await db
     .select({
       id: ingestRun.id,

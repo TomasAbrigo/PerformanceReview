@@ -690,14 +690,24 @@ describe.each(["es", "en"] as const)("UploadForm (%s)", (locale) => {
         ),
         "manager",
       );
-      await userEvent.type(
+      await userEvent.selectOptions(
         within(questions).getByLabelText(
           t.custom.questions.dimensionLabel.replace(
             "{column}",
             "Pregunta propia",
           ),
         ),
-        "engagement",
+        "custom_3",
+      );
+      // Moving a base question to the other side derives a new key.
+      await userEvent.selectOptions(
+        within(questions).getByLabelText(
+          t.custom.questions.sideLabel.replace(
+            "{column}",
+            "Employee Q3: What are some things I do well?",
+          ),
+        ),
+        "manager",
       );
       // A performance profile imports cycles unless asked to only land.
       expect(
@@ -724,16 +734,17 @@ describe.each(["es", "en"] as const)("UploadForm (%s)", (locale) => {
           questions: [
             {
               column: "Employee Q3: What are some things I do well?",
-              side: "self",
+              side: "manager",
               kind: "text",
-              key: "self:q3",
+              key: "manager:employee q3: what are some things i do well?",
+              dimension: "strengths",
             },
             {
               column: "Pregunta propia",
               side: "manager",
               kind: "likert",
               key: "manager:pregunta propia",
-              dimension: "engagement",
+              dimension: "custom_3",
             },
           ],
         },

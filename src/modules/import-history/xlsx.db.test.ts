@@ -77,8 +77,9 @@ describe("importing the small reports as xlsx", () => {
     );
     for (const cycle of cycles) {
       const fixture = seeded.company.cycles.find((c) => c.name === cycle.name)!;
-      expect(cycle.periodStart).toBe(fixture.periodStart);
-      expect(cycle.periodEnd).toBe(fixture.periodEnd);
+      // A named cycle: its period spans its assessment window.
+      expect(cycle.periodStart >= fixture.assessmentOpen).toBe(true);
+      expect(cycle.periodEnd <= fixture.assessmentDue).toBe(true);
     }
 
     const progress = await importXlsx(

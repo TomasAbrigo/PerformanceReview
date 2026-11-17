@@ -2,6 +2,7 @@ import type { DbOrTx } from "@/db/client";
 import type { IdentityMatchIssue } from "@/db/schema";
 import { stagedAssessmentSchema, upsertAssessment } from "./assessment";
 import { stagedProgressSchema, upsertProgress } from "./assessment-progress";
+import { questionsOfRun } from "./run-profile";
 import { stagedFeedbackSchema, upsertFeedback } from "./feedback";
 
 /** Report rows (historical import) are the entities this module resolves. */
@@ -30,6 +31,7 @@ export async function reprocessReportRow(
     sourceId: issue.sourceId,
     payload: stored,
     cache: new Map<string, unknown>(),
+    questions: await questionsOfRun(tx, issue.ingestRunId),
   };
   if (issue.entity === "assessment") {
     const staged = stagedAssessmentSchema.safeParse(stored);

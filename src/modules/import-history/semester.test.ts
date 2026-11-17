@@ -2,7 +2,9 @@ import { describe, expect, it } from "vitest";
 import {
   DEFAULT_SEMESTER_CONFIG,
   semesterOf,
+  isSemesterLabel,
   semesterPeriod,
+  snapshotDateFor,
   snapToSemester,
 } from "./semester";
 
@@ -74,5 +76,18 @@ describe("semesterPeriod / snapToSemester", () => {
         cfg,
       ),
     ).toBeNull();
+  });
+});
+
+describe("isSemesterLabel / snapshotDateFor", () => {
+  it("tells bare semester labels from named cycles", () => {
+    expect(isSemesterLabel("2025-H1")).toBe(true);
+    expect(isSemesterLabel("Evaluación semestral 2025-H1")).toBe(false);
+    expect(isSemesterLabel(null)).toBe(false);
+  });
+
+  it("never takes a snapshot as of a future date", () => {
+    expect(snapshotDateFor("2025-06-30", "2026-11-17")).toBe("2025-06-30");
+    expect(snapshotDateFor("2026-12-31", "2026-11-17")).toBe("2026-11-17");
   });
 });

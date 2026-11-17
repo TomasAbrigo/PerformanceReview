@@ -224,7 +224,7 @@ describe("configured question mapping (source profile `questions`)", () => {
           side: "self",
           kind: "likert",
           key: "self:enps",
-          dimension: "custom_1",
+          dimension: "custom_3",
         },
         {
           column: "Comentario del manager",
@@ -243,7 +243,7 @@ describe("configured question mapping (source profile `questions`)", () => {
     expect(
       columns.map((c) => [c.key, c.relationship, c.kind, c.dimension ?? null]),
     ).toEqual([
-      ["self:enps", "self", "rating", "custom_1"],
+      ["self:enps", "self", "rating", "custom_3"],
       ["manager:q3", "manager", "text", "strengths"],
       ["manager:comment", "manager", "text", null],
     ]);

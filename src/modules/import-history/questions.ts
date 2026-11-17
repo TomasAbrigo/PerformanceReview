@@ -7,12 +7,10 @@ import {
   mapLikert,
 } from "@/modules/likert";
 import type { QuestionMapping } from "@/modules/lake/profiles";
-import {
-  type QuestionDimension,
-  type QuestionKind,
-  type QuestionRole,
-  questionDimensions,
-  questionRoles,
+import type {
+  QuestionDimension,
+  QuestionKind,
+  QuestionRole,
 } from "@/modules/templates/constants";
 
 /**
@@ -188,11 +186,6 @@ function letterChoices(entry: QuestionMapping): Choice[] {
   return choices(["A", "B", "C", "D", "E"].map((l) => [l, l]));
 }
 
-const asRole = (value: string | undefined): QuestionRole | null =>
-  questionRoles.find((r) => r === value) ?? null;
-const asDimension = (value: string | undefined): QuestionDimension | null =>
-  questionDimensions.find((d) => d === value) ?? null;
-
 /** A configured column; ordered like its pattern twin when it has one. */
 function fromMapping(entry: QuestionMapping, index: number): Found {
   const twin = fromPattern(entry.column);
@@ -216,9 +209,10 @@ function fromMapping(entry: QuestionMapping, index: number): Found {
     ),
     choices: kind === "single_choice" ? letterChoices(entry) : null,
     scale: kind === "rating" ? IMPORTED_SCALE : null,
+    // The configured role/dimension win; else what the pattern twin implies.
+    role: entry.role ?? twin?.role ?? null,
+    dimension: entry.dimension ?? twin?.dimension ?? null,
     order: twin?.order ?? (entry.side === "self" ? 0 : 1000) + 500 + index,
-    role: asRole(entry.role),
-    dimension: asDimension(entry.dimension),
   };
 }
 

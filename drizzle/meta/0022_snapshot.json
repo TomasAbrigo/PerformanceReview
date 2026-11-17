@@ -1,5 +1,5 @@
 {
-  "id": "768a376e-5c41-4289-9b2d-b3b2b17df31b",
+  "id": "af98e487-fac4-430c-a6ff-2c2e99c840a9",
   "prevId": "d9cccd32-3e65-4dbf-b4f9-c4160a78ae7c",
   "version": "7",
   "dialect": "postgresql",
@@ -1239,158 +1239,6 @@
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public.assessment_progress": {
-      "name": "assessment_progress",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true,
-          "default": "gen_random_uuid()"
-        },
-        "cycle_id": {
-          "name": "cycle_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "participant_id": {
-          "name": "participant_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "self_status": {
-          "name": "self_status",
-          "type": "progress_status",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "manager_status": {
-          "name": "manager_status",
-          "type": "progress_status",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "assessed": {
-          "name": "assessed",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "follow_up_notes": {
-          "name": "follow_up_notes",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "csv_manager_name": {
-          "name": "csv_manager_name",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "reviewer_mismatch": {
-          "name": "reviewer_mismatch",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": true,
-          "default": false
-        },
-        "source_system": {
-          "name": "source_system",
-          "type": "source_system",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "source_id": {
-          "name": "source_id",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "payload_hash": {
-          "name": "payload_hash",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "ingest_run_id": {
-          "name": "ingest_run_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "assessment_progress_cycle_id_review_cycle_id_fk": {
-          "name": "assessment_progress_cycle_id_review_cycle_id_fk",
-          "tableFrom": "assessment_progress",
-          "tableTo": "review_cycle",
-          "columnsFrom": [
-            "cycle_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "assessment_progress_participant_id_cycle_participant_id_fk": {
-          "name": "assessment_progress_participant_id_cycle_participant_id_fk",
-          "tableFrom": "assessment_progress",
-          "tableTo": "cycle_participant",
-          "columnsFrom": [
-            "participant_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "assessment_progress_ingest_run_id_ingest_run_id_fk": {
-          "name": "assessment_progress_ingest_run_id_ingest_run_id_fk",
-          "tableFrom": "assessment_progress",
-          "tableTo": "ingest_run",
-          "columnsFrom": [
-            "ingest_run_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "set null",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {
-        "assessment_progress_cycle_participant_uq": {
-          "name": "assessment_progress_cycle_participant_uq",
-          "nullsNotDistinct": false,
-          "columns": [
-            "cycle_id",
-            "participant_id"
-          ]
-        }
-      },
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
@@ -4054,6 +3902,429 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
+    "public.analysis_correction": {
+      "name": "analysis_correction",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "answer_id": {
+          "name": "answer_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "previous_sentiment": {
+          "name": "previous_sentiment",
+          "type": "sentiment",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "new_sentiment": {
+          "name": "new_sentiment",
+          "type": "sentiment",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "previous_themes": {
+          "name": "previous_themes",
+          "type": "text[]",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "new_themes": {
+          "name": "new_themes",
+          "type": "text[]",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "actor_person_id": {
+          "name": "actor_person_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "reason": {
+          "name": "reason",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "analysis_correction_answer_idx": {
+          "name": "analysis_correction_answer_idx",
+          "columns": [
+            {
+              "expression": "answer_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "created_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "analysis_correction_answer_id_answer_id_fk": {
+          "name": "analysis_correction_answer_id_answer_id_fk",
+          "tableFrom": "analysis_correction",
+          "tableTo": "answer",
+          "columnsFrom": [
+            "answer_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "analysis_correction_actor_person_id_person_id_fk": {
+          "name": "analysis_correction_actor_person_id_person_id_fk",
+          "tableFrom": "analysis_correction",
+          "tableTo": "person",
+          "columnsFrom": [
+            "actor_person_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.analysis_run": {
+      "name": "analysis_run",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "provider": {
+          "name": "provider",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "model": {
+          "name": "model",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "prompt_version": {
+          "name": "prompt_version",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "status": {
+          "name": "status",
+          "type": "analysis_run_status",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'running'"
+        },
+        "texts_total": {
+          "name": "texts_total",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "texts_analyzed": {
+          "name": "texts_analyzed",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "texts_cached": {
+          "name": "texts_cached",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "started_at": {
+          "name": "started_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "finished_at": {
+          "name": "finished_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "error": {
+          "name": "error",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "cycle_id": {
+          "name": "cycle_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "triggered_by": {
+          "name": "triggered_by",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "analysis_run_cycle_id_review_cycle_id_fk": {
+          "name": "analysis_run_cycle_id_review_cycle_id_fk",
+          "tableFrom": "analysis_run",
+          "tableTo": "review_cycle",
+          "columnsFrom": [
+            "cycle_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "analysis_run_triggered_by_person_id_fk": {
+          "name": "analysis_run_triggered_by_person_id_fk",
+          "tableFrom": "analysis_run",
+          "tableTo": "person",
+          "columnsFrom": [
+            "triggered_by"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.qualitative_analysis": {
+      "name": "qualitative_analysis",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "answer_id": {
+          "name": "answer_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "provider": {
+          "name": "provider",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "prompt_version": {
+          "name": "prompt_version",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "dimension": {
+          "name": "dimension",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "sentiment": {
+          "name": "sentiment",
+          "type": "sentiment",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "confidence": {
+          "name": "confidence",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "themes": {
+          "name": "themes",
+          "type": "text[]",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'{}'::text[]"
+        },
+        "text_hash": {
+          "name": "text_hash",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "source_md5": {
+          "name": "source_md5",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "run_id": {
+          "name": "run_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "qualitative_analysis_answer_id_answer_id_fk": {
+          "name": "qualitative_analysis_answer_id_answer_id_fk",
+          "tableFrom": "qualitative_analysis",
+          "tableTo": "answer",
+          "columnsFrom": [
+            "answer_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "qualitative_analysis_run_id_analysis_run_id_fk": {
+          "name": "qualitative_analysis_run_id_analysis_run_id_fk",
+          "tableFrom": "qualitative_analysis",
+          "tableTo": "analysis_run",
+          "columnsFrom": [
+            "run_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "qualitative_analysis_answer_provider_prompt_uq": {
+          "name": "qualitative_analysis_answer_provider_prompt_uq",
+          "nullsNotDistinct": false,
+          "columns": [
+            "answer_id",
+            "provider",
+            "prompt_version"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {
+        "qualitative_analysis_confidence_ck": {
+          "name": "qualitative_analysis_confidence_ck",
+          "value": "\"qualitative_analysis\".\"confidence\" is null or (\"qualitative_analysis\".\"confidence\" >= 0 and \"qualitative_analysis\".\"confidence\" <= 1)"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.theme": {
+      "name": "theme",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "dimension": {
+          "name": "dimension",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "normalized_name": {
+          "name": "normalized_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "theme_dimension_name_uq": {
+          "name": "theme_dimension_name_uq",
+          "nullsNotDistinct": false,
+          "columns": [
+            "dimension",
+            "normalized_name"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
     "public.answer_quality_issue": {
       "name": "answer_quality_issue",
       "schema": "",
@@ -4338,16 +4609,6 @@
         "ignored"
       ]
     },
-    "public.progress_status": {
-      "name": "progress_status",
-      "schema": "public",
-      "values": [
-        "not_started",
-        "in_progress",
-        "submitted",
-        "not_applicable"
-      ]
-    },
     "public.source_system": {
       "name": "source_system",
       "schema": "public",
@@ -4364,8 +4625,7 @@
       "values": [
         "running",
         "succeeded",
-        "error",
-        "needs_decision"
+        "error"
       ]
     },
     "public.cycle_status": {
@@ -4399,6 +4659,24 @@
         "submitted",
         "declined",
         "superseded"
+      ]
+    },
+    "public.analysis_run_status": {
+      "name": "analysis_run_status",
+      "schema": "public",
+      "values": [
+        "running",
+        "succeeded",
+        "error"
+      ]
+    },
+    "public.sentiment": {
+      "name": "sentiment",
+      "schema": "public",
+      "values": [
+        "positive",
+        "constructive",
+        "negative"
       ]
     }
   },
