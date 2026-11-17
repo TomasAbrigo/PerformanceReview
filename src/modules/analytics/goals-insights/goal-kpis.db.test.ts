@@ -207,6 +207,25 @@ describe("goalKpis (People)", () => {
     expect(mgr.total).toMatchObject({ people: 3, goals: 7 });
   });
 
+  it("ignores a filter id that is not a uuid, like the dashboards do", async () => {
+    const all = await goalKpis(db, hr, { cycleId: h1(), groupBy: "person" });
+    const ignored = await goalKpis(db, hr, {
+      cycleId: h1(),
+      groupBy: "person",
+      filters: { managerId: "not-a-uuid" },
+    });
+    expect(ignored.groups.map((g) => g.label)).toEqual(
+      all.groups.map((g) => g.label),
+    );
+    // A uuid nobody manages is a filter that matches nobody.
+    const nobody = await goalKpis(db, hr, {
+      cycleId: h1(),
+      groupBy: "person",
+      filters: { managerId: "00000000-0000-4000-8000-000000000000" },
+    });
+    expect(nobody.groups).toEqual([]);
+  });
+
   it("only counts the goals of the cycle that was asked for", async () => {
     const { groups } = await goalKpis(db, hr, {
       cycleId: s.h2.cycleId,

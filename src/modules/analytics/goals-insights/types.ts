@@ -102,6 +102,13 @@ export type GoalIndicatorRow = {
   department: string | null;
   goals: number;
   completed: number;
+  inProgress: number;
+  /** Closed in Bamboo without being completed. */
+  closed: number;
+  /** In progress and due before the cycle's period ended. */
+  overdue: number;
+  /** Sum of the goals' percent complete (the mean is `avgProgress`). */
+  progressSum: number;
   /** Completed / goals, 0-100; null without goals. */
   completedPct: number | null;
   avgProgress: number | null;

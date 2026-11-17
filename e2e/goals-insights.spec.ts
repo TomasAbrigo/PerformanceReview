@@ -1,4 +1,5 @@
 import { expect, type Page, test } from "@playwright/test";
+import { parseCsv } from "../src/modules/exports/csv-parse";
 import { actAs, actAsRole } from "./act-as";
 import { goalTotals, participantOf } from "./goals-data";
 import { assessedFirstCycle, company, fullName } from "./seed-data";
@@ -115,15 +116,14 @@ test("People see the goal KPIs, the indicators by completion, the outliers and t
       .getAttribute("href"))!,
   );
   expect(kpisCsv.ok()).toBe(true);
-  const csvText = await kpisCsv.text();
-  expect(csvText).toContain("grupo_id,grupo,personas");
+  // Parsed like the exports' own tests do (quoted cells, CRLF), not split on commas.
+  const [header, ...kpiRows] = parseCsv(await kpisCsv.text()).filter(
+    (row) => row.length > 1,
+  );
+  expect(header.slice(0, 3)).toEqual(["grupo_id", "grupo", "personas"]);
   // The rows of the file add up to the goals of the snapshot.
-  const rows = csvText
-    .replace(/^\uFEFF/, "")
-    .trim()
-    .split(/\r?\n/)
-    .slice(1);
-  expect(rows.reduce((sum, row) => sum + Number(row.split(",")[3]), 0)).toBe(
+  const goalsColumn = header.indexOf("goals");
+  expect(kpiRows.reduce((sum, row) => sum + Number(row[goalsColumn]), 0)).toBe(
     totals.goals,
   );
   const outliersCsv = await page.request.get(
@@ -132,8 +132,13 @@ test("People see the goal KPIs, the indicators by completion, the outliers and t
       .getAttribute("href"))!,
   );
   expect(outliersCsv.ok()).toBe(true);
-  expect(await outliersCsv.text()).toContain("tipo,person_id,nombre");
-  expect(await outliersCsv.text()).not.toContain("@");
+  const outliersText = await outliersCsv.text();
+  expect(parseCsv(outliersText)[0].slice(0, 3)).toEqual([
+    "tipo",
+    "person_id",
+    "nombre",
+  ]);
+  expect(outliersText).not.toContain("@");
 });
 
 test("the participant detail shows the answers and the goals of the period, to People and to the snapshot manager only", async ({

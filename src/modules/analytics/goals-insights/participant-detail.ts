@@ -10,7 +10,7 @@ import {
 } from "@/db/schema";
 import { isUuid } from "@/lib/uuid";
 import type { ActorContext } from "@/modules/actor/types";
-import { canSeeSensitiveIndicators } from "@/modules/insights/authz";
+import { canOpenAssessment } from "@/modules/insights/authz";
 import { getReview, type Review } from "@/modules/review-core/answers";
 import { ReviewError } from "@/modules/review-core/review-errors";
 
@@ -21,7 +21,7 @@ export type PeriodGoal = {
   status: GoalStatus;
   percentComplete: number;
   dueDate: string | null;
-  /** In progress and due before the period ended (the KPIs' overdue). */
+  /** In progress and due before the period ended, as the KPIs count it (never a goal that no longer applies). */
   overdue: boolean;
   /** The goal was deleted after the snapshot. */
   noLongerApplicable: boolean;
@@ -81,7 +81,8 @@ export async function participantAssessment(
     .select()
     .from(reviewCycle)
     .where(and(eq(reviewCycle.id, cycleId), isNull(reviewCycle.deletedAt)));
-  if (!cycle) throw new ReviewError("not_found");
+  // A draft has no launched assessments: the queries leave it out, so does this.
+  if (!cycle || cycle.status === "draft") throw new ReviewError("not_found");
   const [participant] = await db
     .select()
     .from(cycleParticipant)
@@ -92,14 +93,9 @@ export async function participantAssessment(
       ),
     );
   if (!participant) throw new ReviewError("not_found");
-  const allowed =
-    canSeeSensitiveIndicators(actor, {
-      revieweePersonId: participant.revieweePersonId,
-      snapManagerPersonId: participant.snapManagerPersonId,
-    }) &&
-    // A participant removed from the cycle is People's business only.
-    (actor.role === "hr" || !participant.removedAt);
-  if (!allowed) throw new ReviewError("forbidden");
+  if (!canOpenAssessment(actor, participant)) {
+    throw new ReviewError("forbidden");
+  }
 
   const goalRows = await db
     .select()
@@ -117,6 +113,7 @@ export async function participantAssessment(
     percentComplete: g.percentComplete,
     dueDate: g.dueDate,
     overdue:
+      !g.noLongerApplicable &&
       g.status === "in_progress" &&
       g.dueDate !== null &&
       g.dueDate < cycle.periodEnd,

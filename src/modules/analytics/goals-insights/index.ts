@@ -1,7 +1,19 @@
-export { goalKpis } from "./kpis";
-export { goalsVsIndicators } from "./goals-vs-indicators";
-export { goalOutliers } from "./outliers";
-export { goalInsightsFilterOptions } from "./filter-options";
+export {
+  goalInsights,
+  goalInsightsFilterOptions,
+  goalKpis,
+  goalOutliers,
+  goalsVsIndicators,
+  type GoalInsightsInput,
+} from "./queries";
+export {
+  bucketRows,
+  filterOptionsOf,
+  filterRows,
+  kpisOf,
+  outlierRows,
+  outlierThresholds,
+} from "./derive";
 export {
   participantAssessment,
   type AssessmentReview,

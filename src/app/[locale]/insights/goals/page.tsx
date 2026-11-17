@@ -24,10 +24,7 @@ import { hierarchies } from "@/modules/analytics/dashboards/types";
 import {
   type GoalGroupBy,
   goalGroupBys,
-  goalInsightsFilterOptions,
-  goalKpis,
-  goalOutliers,
-  goalsVsIndicators,
+  goalInsights,
   indicators,
 } from "@/modules/analytics/goals-insights";
 import { insightsScope } from "@/modules/insights/authz";
@@ -60,17 +57,19 @@ async function GoalsInsights({
   const cycle =
     cycles.find((c) => c.id === p.cycle && isUuid(c.id)) ?? cycles[0];
   const shown = { ...p, groupBy, cycle: cycle.id };
-  const filters = { department: p.department, managerId: p.manager };
-  const input = { cycleId: cycle.id, hierarchy: p.hierarchy, filters };
-  const [options, kpis, vs, outliers] = await Promise.all([
-    goalInsightsFilterOptions(db, actor, {
-      cycleId: cycle.id,
-      hierarchy: p.hierarchy,
-    }),
-    goalKpis(db, actor, { ...input, groupBy }),
-    goalsVsIndicators(db, actor, input),
-    goalOutliers(db, actor, input),
-  ]);
+  // One load of the participants feeds the KPIs, the buckets, the outliers
+  // and the filter options.
+  const {
+    kpis,
+    vsIndicators: vs,
+    outliers,
+    options,
+  } = await goalInsights(db, actor, {
+    cycleId: cycle.id,
+    hierarchy: p.hierarchy,
+    groupBy,
+    filters: { department: p.department, managerId: p.manager },
+  });
   const here = "/insights/goals";
   // CSV exports go through the API (People's visibility): offered to People only.
   const csv = (file: string, extra: Record<string, string> = {}) =>

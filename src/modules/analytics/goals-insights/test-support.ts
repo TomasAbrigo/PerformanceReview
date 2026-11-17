@@ -148,7 +148,7 @@ export async function insertReview(r: {
   reviewerPersonId: string;
   retention?: number | null;
   engagement?: number | null;
-  relationship?: "manager" | "self";
+  relationship?: "manager" | "self" | "peer" | "upward";
   status?: "submitted" | "draft";
   submittedAt?: Date;
   deleted?: boolean;

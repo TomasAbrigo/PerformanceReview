@@ -1,11 +1,15 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { closeDb, db } from "@/db/client";
+import { cycleParticipant } from "@/db/schema";
+import { canOpenAssessment } from "@/modules/insights/authz";
 import { participantAssessment } from ".";
+import { insertParticipant } from "@/modules/analytics/test-support";
 import {
   as,
   buildScenario,
   direction,
   hr,
+  insertCycle,
   insertReview,
   reset,
   type Scenario,
@@ -71,8 +75,11 @@ describe("participantAssessment", () => {
       ["2024-06-30", "in_progress", false],
     ]);
     const carla = await read(hr, "carla");
+    // It is in progress and past due, but it no longer applies: never overdue
+    // (the KPIs do not count it either).
     expect(carla.goals.find((g) => g.noLongerApplicable)).toMatchObject({
       status: "in_progress",
+      overdue: false,
     });
     const dario = await read(hr, "dario");
     expect(dario.goals).toEqual([]);
@@ -123,6 +130,53 @@ describe("participantAssessment", () => {
     await expect(read(as(s.id.marta, "manager"), "zoe")).rejects.toMatchObject({
       code: "forbidden",
     });
+  });
+
+  it("opens exactly what the cycle page links to: one predicate, no link that ends in a refusal", async () => {
+    const participants = await db.select().from(cycleParticipant);
+    const actors = [
+      hr,
+      as(s.id.marta, "manager"),
+      as(s.id.nora, "manager"),
+      as(s.id.ana, "manager"),
+      as(s.id.ana, "employee"),
+      direction,
+    ];
+    for (const actor of actors) {
+      for (const p of participants.filter((p) => p.cycleId === s.h1.cycleId)) {
+        const linked = canOpenAssessment(actor, p);
+        const opened = await participantAssessment(
+          db,
+          actor,
+          p.cycleId,
+          p.id,
+        ).then(
+          () => true,
+          (error: unknown) => {
+            expect(error).toMatchObject({ code: "forbidden" });
+            return false;
+          },
+        );
+        expect(opened, `${actor.role} ${actor.personId} ${p.id}`).toBe(linked);
+      }
+    }
+  });
+
+  it("is not_found for a draft cycle, as the queries leave drafts out", async () => {
+    const draft = await insertCycle({
+      name: "Borrador",
+      periodStart: "2025-01-01",
+      periodEnd: "2025-06-30",
+      status: "draft",
+    });
+    const participantId = await insertParticipant({
+      cycleId: draft.cycleId,
+      personId: s.id.bruno,
+      snapManagerPersonId: s.id.marta,
+    });
+    await expect(
+      participantAssessment(db, hr, draft.cycleId, participantId),
+    ).rejects.toMatchObject({ code: "not_found" });
   });
 
   it("is not_found for a participant of another cycle or a bad id", async () => {

@@ -170,6 +170,10 @@ const row = (
   department: "Ingeniería",
   goals: 5,
   completed: 4,
+  inProgress: 1,
+  closed: 0,
+  overdue: 0,
+  progressSum: 460,
   completedPct: 80,
   avgProgress: 92,
   retention: 2,
@@ -440,10 +444,12 @@ describe("PeopleTable", () => {
 });
 
 describe("GoalsFilters", () => {
-  const params = parseGoalsInsightsParams({ cycle: "c2" });
+  const C1 = "8d8d2b72-0c8a-4e7e-bab0-42b903eeff41";
+  const C2 = "8d8d2b72-0c8a-4e7e-bab0-42b903eeff42";
+  const params = parseGoalsInsightsParams({ cycle: C2 });
   const cycles = [
-    { id: "c1", name: "H1 2024" },
-    { id: "c2", name: "H2 2024" },
+    { id: C1, name: "H1 2024" },
+    { id: C2, name: "H2 2024" },
   ];
 
   it("offers the cycles (no 'all'), the areas and the managers it was given", () => {
@@ -464,7 +470,7 @@ describe("GoalsFilters", () => {
         .getAllByRole("option")
         .map((o) => o.textContent),
     ).toEqual(["H1 2024", "H2 2024"]);
-    expect(cycle.value).toBe("c2");
+    expect(cycle.value).toBe(C2);
     expect(
       within(screen.getByLabelText("Area"))
         .getAllByRole("option")

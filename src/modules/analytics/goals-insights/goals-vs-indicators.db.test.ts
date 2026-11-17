@@ -8,6 +8,7 @@ import {
   buildScenario,
   direction,
   hr,
+  insertLabeledComments,
   insertReview,
   reset,
   type Scenario,
@@ -278,6 +279,37 @@ describe("goalsVsIndicators (who reads)", () => {
       meanPositiveShare: null,
     });
     expect(suppressed).toBe(1);
+  });
+});
+
+describe("goalsVsIndicators (sentiment)", () => {
+  it("counts the comments of the self and manager reviews only, not a peer's or upward feedback", async () => {
+    const fresh = await buildScenario();
+    try {
+      for (const relationship of ["peer", "upward"] as const) {
+        const request = await insertReview({
+          cycle: fresh.h1,
+          participantId: fresh.participant.ana,
+          reviewerPersonId: fresh.id.bruno,
+          relationship,
+        });
+        await insertLabeledComments(fresh.h1, request, [
+          "negative",
+          "negative",
+          "negative",
+        ]);
+      }
+      const { rows } = await goalsVsIndicators(db, hr, {
+        cycleId: fresh.h1.cycleId,
+      });
+      // Still Ana's 4 comments (2 positive): the 6 negative ones are not hers.
+      expect(rowOf(rows, "Ana Prieto")).toMatchObject({
+        positiveShare: 0.5,
+        labeledComments: 4,
+      });
+    } finally {
+      s = await buildScenario();
+    }
   });
 });
 
