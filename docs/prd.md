@@ -393,3 +393,29 @@ Preguntas abiertas para People:
 - Formato esperado del health check de CAP.
 - Restricciones de las mini apps de Arturía (tamaño, scripts, autenticación).
 - Preferencia por el enfoque cualitativo, cuantitativo o ambos en la vista ejecutiva.
+
+---
+
+# Iteración 3: Datos reales de Bamboo y paridad con el dashboard de People
+
+Fecha: 2026-11-17. Fuente: grabación y transcripción de la reunión de relevamiento. El health check queda fuera de alcance (vive en CAP).
+
+## Hallazgos que cambian decisiones
+
+- **Ciclos reales:** semestrales "Bi-annual", ~29/3–25/9 y ~29/9–28/3; históricamente irregulares (abr-23, dos en oct-23, mar-24, abr-24…). El ciclo se identifica por fecha de inicio del período, no por nombre.
+- **Reporte crudo real** (reporte custom de Bamboo): columnas `EEID`, `Review Period Start`, email de trabajo, cuatro cerradas (`Employee - How well does [Company] recognize my value?`, `Manager - Does [Employee] feel valued? (Performance Score)` = retención, `Employee - What would help me do my best work?`, `Manager - How engaged is [Employee]? (Engagement Score)`), abiertas estándar de cada lado, pares `Employee|Manager - Custom Question N` / `Custom Answer N` (el texto de la pregunta va en la celda y cambia entre ciclos), `Self Assessment Completed Date`, `Manager Assessment Completed Date`, `Manager At Time Of Assessment`. Las cerradas vienen como etiqueta en inglés.
+- **Escalas:** valoración propia 1-4, retención 1-5, compromiso 1-5 (mayor = mejor); "best work" es opción única con "Other" + texto.
+- **Assessment Progress real:** agrupado por persona (nombre + número de empleado), período como rango de fechas, estado propio, estado del manager como texto ("Completed by X" / "No iniciado por X"), notas de seguimiento.
+- **Análisis cualitativo actual de People:** cinco sentimientos (Positivo, Constructivo, Neutral, Mixto, Negativo), una dimensión por pregunta (incluidas las cerradas), filtro propio/manager, temas (proyecto, equipo, comunicación, crecimiento, cultura, procesos, bienestar, reconocimiento).
+- **Cortes organizacionales que usa People:** cuenta, proyecto, DM y Santex Lead, además de área. Vista "Análisis 360" por DM.
+- **Detalle por período:** N, self %, manager %, valor de retención y engagement promedio del manager por período (hoy vacío en su dashboard). Goals completados en 0 % porque nadie los cierra.
+- **Engagement mensual** (score 0-1, segmentos Alto/Medio/Regular/Bajo/Falta) y participación vienen de otra fuente, por archivo.
+
+## Alcance
+
+1. Importación real: perfiles para el reporte crudo y Assessment Progress reales, identidad por EEID y email, ciclo por período, custom por ciclo, mapeo de etiquetas en inglés a escala, "Other" con texto, manager al momento de la evaluación para el mismatch, `reports:inspect --values` (solo columnas cerradas), fixtures sintéticos con la forma real.
+2. Análisis cualitativo con cinco sentimientos, dimensión por pregunta, filtro propio/manager y vocabulario de temas inicial.
+3. Atributos organizacionales (cuenta, proyecto, DM, Santex Lead) importables por archivo y usados como filtro y agrupación en todas las vistas, más la vista "Análisis 360" por DM.
+4. Engagement mensual por archivo, detalle por período en la vista de completitud/indicadores, remoción del placeholder de health check, seed demo, e2e, README y PRD.
+
+Fuera de alcance: health check, conectar fuentes en vivo, NPS/eNPS y asistencia.
