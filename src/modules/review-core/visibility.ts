@@ -84,7 +84,8 @@ const isReviewee = (actor: ActorContext, ctx: VisibilityContext) =>
 /**
  * The single place that decides whether `actor` may read a review request
  * (and, with `questionRevision`, one of its answers). Roles: hr, manager,
- * employee. HR (People) reads everything; the author reads their own request
+ * employee, direction. HR (People) reads everything; direction reads no
+ * request (aggregates only); the author reads their own request
  * (a manager or employee acting as that person). Then:
  * - self: the snapshot manager reads it once submitted; under double blind
  *   only after the manager review is submitted;
@@ -102,6 +103,8 @@ const isReviewee = (actor: ActorContext, ctx: VisibilityContext) =>
  */
 export function canRead(actor: ActorContext, ctx: VisibilityContext): boolean {
   if (actor.role === "hr") return true;
+  // Direction only reads aggregates (see modules/insights/authz): no request.
+  if (actor.role === "direction") return false;
   const { request } = ctx;
   if (isReviewer(actor, request)) return true;
   if (actor.personId === null || !isActiveParticipant(ctx.participant)) {

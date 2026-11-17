@@ -35,6 +35,19 @@ describe("canRead", () => {
     );
     expect(canRead(as(null), { request: request(), ...ctx })).toBe(false);
   });
+  it("never lets direction read a request: aggregates only", () => {
+    const manager = request({
+      relationship: "manager",
+      reviewerPersonId: ANA,
+      status: "submitted",
+      sharedAt: new Date(),
+    });
+    for (const who of [null, ANA, BRUNO]) {
+      expect(canRead(as(who, "direction"), { request: manager, ...ctx })).toBe(
+        false,
+      );
+    }
+  });
   it("lets the reviewer of a non-self review read it, nobody else", () => {
     const peer = request({ relationship: "peer", reviewerPersonId: ANA });
     expect(canRead(as(ANA), { request: peer, ...ctx })).toBe(true);

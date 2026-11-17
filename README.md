@@ -58,7 +58,7 @@ pnpm db:seed --size demo   # 400 registros de Bamboo: 392 personas, 8 casos en l
 pnpm dev                   # http://localhost:3000 -> redirige a /es
 ```
 
-Las escalas y los templates del sistema se crean solos cuando arranca el servidor. No hay login: empezás actuando como **People** (sin persona), que ve todo; el selector **"Actuar como"** (arriba) cambia el rol (People, Manager o Empleado) y la persona. Después:
+Las escalas y los templates del sistema se crean solos cuando arranca el servidor. No hay login: empezás actuando como **People** (sin persona), que ve todo; el selector **"Actuar como"** (arriba) cambia el rol (People, Manager, Empleado o Dirección) y la persona (Dirección no tiene persona). Después:
 
 1. **Mirar los datos.** `/es/people` (ficha con identificadores de origen e historial de puesto), `/es/org` (organigrama con selector de fecha), `/es/team/goals` (goals de los reportes de un manager), `/es/imports/runs` (las corridas del seed), `/es/imports/identity` (los 8 reingresos esperando resolución) y `/es/data-quality`.
 2. **Importar la historia de evaluaciones.** En `/es/imports/upload` subí `fixtures/bamboo-reports/demo/employee-performance.csv` (perfil `bamboo-employee-performance`) e "Importar"; corre en un proceso aparte y con el tamaño demo puede tardar. El resultado (`/es/imports/history/<corrida>`) lista los ciclos 2023 a 2025, ya cerrados; quien no se pudo cruzar por nombre queda en la cola de identidad. Opcional: `feedback-status.csv` suma el feedback de pares.
@@ -90,6 +90,24 @@ Qué hay en la app, dónde está en la UI y las reglas que conviene conocer. Las
 - **Dónde:** `/people` (búsqueda solo por nombre y sin email en la lista; la ficha muestra identificadores de origen, períodos de empleo, historial de puesto y manager, y los goals de la persona, y el email solo con el rol People, ver [Datos sensibles](#datos-sensibles)), `/org` (organigrama a una fecha elegida), `/team/goals` (goals de los reportes directos de un manager) y la cola de identidad `/imports/identity`.
 - **Reglas:** los cruces usan el UUID interno y se conservan los IDs de Bamboo. Una persona dada de baja y reingresada es una sola persona con dos períodos de empleo y su reingreso siempre pasa por la cola de identidad. El manager y el área "de entonces" salen del historial de puesto con vigencias, no del dato actual.
 
+### Configuración de insights (`/settings/insights`)
+
+- **Dónde:** `/settings/insights`, solo People (los demás roles ven "Sin acceso"). Un formulario edita los valores de abajo; el servidor valida cada uno (y los cortes de semestre entre sí) y devuelve los errores campo por campo.
+- **Cómo se guarda:** la tabla `app_setting` (clave, valor `jsonb`, quién y cuándo) solo guarda lo que People cambió; las claves, su validación y sus valores por defecto viven en el código (`src/modules/settings/definitions.ts`). `getSettings(db)`, `getSetting(db, clave)` y `setSetting(db, actor, clave, valor)` / `updateSettings(db, actor, cambios)` (todo o nada) están en `src/modules/settings`. Un valor guardado que ya no valida se ignora y vale el default.
+- **Auditoría:** cada cambio efectivo escribe una fila en `admin_audit_log` (`action = setting.update`, `target_type = app_setting`, `target_key = <clave>`, `before` y `after` con el valor, y la persona con la que actuó People si había una). Un valor igual al actual no es un cambio y no audita. `pnpm db:seed --reset` no toca los valores de `app_setting` (sí vacía el log de auditoría, que cuelga de los ciclos).
+
+| Clave                      | Para qué                                                                             | Por defecto | Valores válidos          |
+| -------------------------- | ------------------------------------------------------------------------------------ | ----------- | ------------------------ |
+| `alerts.dropThreshold`     | Caída de retención o compromiso entre ciclos que dispara una alerta (puntos).        | `2`         | entero de 1 a 4          |
+| `alerts.riskThreshold`     | Riesgo: retención y compromiso a la vez iguales o menores a este valor (escala 1-5). | `2`         | entero de 1 a 4          |
+| `aggregation.minGroupSize` | Mínimo de personas (n) que Dirección y los exports anonimizados pueden mostrar.      | `5`         | entero de 2 a 100        |
+| `semester.h1Start`         | Inicio del primer semestre (`MM-DD`).                                                | `01-01`     | día real, antes del H2   |
+| `semester.h2Start`         | Inicio del segundo semestre (`MM-DD`).                                               | `07-01`     | día real, después del H1 |
+| `semester.ambiguityDays`   | Margen en días de un corte de semestre dentro del cual un assessment es ambiguo.     | `15`        | entero de 0 a 60         |
+| `analysis.provider`        | Proveedor del análisis cualitativo.                                                  | `mock`      | `mock` o `anthropic`     |
+
+Hoy solo se lee el mínimo n (vista de dirección); los umbrales de alerta, los cortes de semestre y el proveedor los van a leer las pantallas e importaciones siguientes del módulo de insights.
+
 ### Escalas y templates (`/settings`)
 
 - **Dónde:** `/settings/scales` (escalas de rating) y `/settings/templates` (lista y editor `/settings/templates/<id>`).
@@ -107,8 +125,20 @@ Qué hay en la app, dónde está en la UI y las reglas que conviene conocer. Las
 
 ### Actor y visibilidad
 
-- **Selector "Actuar como":** como no hay login, la barra superior permite elegir un rol (People, Manager o Empleado) y una persona; queda en la cookie `pr_actor`. Por defecto se actúa como "People (RR. HH.)", sin persona, que ve todo.
+- **Selector "Actuar como":** como no hay login, la barra superior permite elegir un rol (People, Manager, Empleado o Dirección) y una persona; queda en la cookie `pr_actor`. Por defecto se actúa como "People (RR. HH.)", sin persona, que ve todo. **Dirección** no tiene persona (el selector la deshabilita y la cookie nunca guarda una): solo lee agregados.
 - **Visibilidad:** una única función, `canRead` (`src/modules/review-core/visibility.ts`), decide quién lee cada pedido y cada respuesta: People todo; cada persona lo que escribió; el manager del snapshot la evaluación del manager y, ya enviadas, la autoevaluación (con double-blind) y el feedback de pares; la persona evaluada la evaluación del manager una vez compartida y solo las preguntas visibles para ella; el manager del manager y el manager actual lo ya compartido. El anonimato de pares lo decide `reviewerVisible`.
+- **Reglas de autorización de los insights:** una función por concern en `src/modules/insights/authz.ts` (pura, sin servidor), que usan las consultas de los dashboards y las páginas:
+
+| Rol                     | Alcance (`insightsScope`)                                          | Individuos | Indicadores sensibles (retención, compromiso, sentimiento) | Vista de dirección | `/imports`, `/data-quality`, `/settings` |
+| ----------------------- | ------------------------------------------------------------------ | ---------- | ---------------------------------------------------------- | ------------------ | ---------------------------------------- |
+| People (`hr`)           | `all`: todo, sin enmascarar                                        | sí         | sí                                                         | sí, sin enmascarar | sí                                       |
+| Manager (`manager`)     | `directReports`: sus reportes directos del snapshot (no la cadena) | sí         | sobre otras personas, nunca sobre sí mismo                 | no                 | no                                       |
+| Dirección (`direction`) | `aggregatesOnly`: agregados con n ≥ `aggregation.minGroupSize`     | no         | no (solo agregados)                                        | sí, enmascarada    | no                                       |
+| Empleado (`employee`)   | `none`                                                             | no         | nunca, ni sobre sí mismo                                   | no                 | no                                       |
+
+`canSeeIndividuals`, `canSeeSensitiveIndicators(actor, personaId)` y `canSeeExecutiveView` completan la función de alcance. Un manager sin persona no ve nada. Dirección tampoco lee pedidos ni respuestas (`canRead` siempre devuelve `false`) ni la API como persona.
+
+- **Pantallas solo de People:** `/imports/*`, `/data-quality/*` y `/settings/*` (y sus server actions: subir e importar archivos, la cola de identidad, escalas, templates y la configuración de insights) responden "Sin acceso" a cualquier otro rol. Las páginas se envuelven en `HrOnly` (`src/components/access`) y las acciones en `onlyHr` / `requireHr(actor)` (`src/modules/actor`). La API (`/api/v1`) no cambia, salvo que `role=` acepta también `direction`.
 - **Historial** `/people/<id>/reviews`: los ciclos cerrados o compartidos de una persona, con el manager, el puesto y el área de ese momento, el rating vigente y las respuestas que el actor puede leer.
 
 ### Dashboards (`/dashboards`)
@@ -116,7 +146,8 @@ Qué hay en la app, dónde está en la UI y las reglas que conviene conocer. Las
 - **Dónde:** `/dashboards` (filtros por ciclo, área, manager, ubicación y puesto), `/dashboards/team` (el equipo de un manager), `/dashboards/people/<id>` (trayectoria de una persona) y `/dashboards/executive` (vista de dirección).
 - **Qué muestra:** avance del ciclo por tipo de evaluación; distribución de ratings normalizados (0 a 100 %) antes y después de calibrar, agrupada por área, manager, ubicación o puesto; goals del período contra el rating final; brecha entre autoevaluación y manager por pregunta y por persona; y la trayectoria de una persona con el rating, el manager y el puesto de cada ciclo.
 - **Jerarquía:** el equipo de un manager se elige explícitamente "al momento de la review" (el snapshot del ciclo) o "actual".
-- **Quién ve qué:** People ve todo; un manager, su equipo; el resto es redirigido a su propia trayectoria, con solo lo publicado. La vista de dirección es solo de People: agregados sin nombres ni ids, y las áreas con menos de 3 personas no se desglosan.
+- **Quién ve qué:** People ve todo; un manager, **sus reportes directos** del snapshot del ciclo (o los actuales, con la jerarquía "actual"), no toda la cadena: su equipo (`/dashboards/team`) lista solo a sus reportes directos y no puede abrir el de otro manager; una trayectoria se abre si la persona fue su reporte directo en el snapshot o lo es hoy. Un empleado es redirigido a su propia trayectoria, con solo lo publicado. **Dirección** va directo a `/dashboards/executive` (`/dashboards` la redirige) y no ve nada más.
+- **Vista de dirección (`/dashboards/executive`):** para People y Dirección, agregados sin nombres ni ids. People la ve sin enmascarar; Dirección solo lo que llega al mínimo `aggregation.minGroupSize` (se lee una vez por pedido): las áreas con menos personas se agrupan en "Otros" y, si "Otros" tampoco llega, solo se cuenta cuántas personas quedaron afuera; un ciclo con menos participantes que el mínimo muestra solo el total de participantes.
 - **CSV:** los botones "Exportar CSV" bajan avance, distribución, goals vs rating y brecha self vs manager (`dashboard-*.csv`, ver "Exports CSV").
 
 ### Calidad de datos y API (`/data-quality`, `/api/v1`)

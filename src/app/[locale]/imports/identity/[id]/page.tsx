@@ -3,6 +3,7 @@ import { setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { connection } from "next/server";
 import { Suspense } from "react";
+import { HrOnly } from "@/components/access/hr-only";
 import { IssueDetail } from "@/components/identity/issue-detail";
 import { db } from "@/db/client";
 import { routing } from "@/i18n/routing";
@@ -42,7 +43,9 @@ export default function IdentityIssuePage(
   return (
     <main className="mx-auto w-full max-w-4xl p-8">
       <Suspense>
-        <IssueData {...props} />
+        <HrOnly>
+          <IssueData {...props} />
+        </HrOnly>
       </Suspense>
     </main>
   );

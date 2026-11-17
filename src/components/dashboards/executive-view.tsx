@@ -2,18 +2,26 @@ import { useTranslations } from "next-intl";
 import {
   bins,
   type ExecutiveSummary,
-  MIN_GROUP,
 } from "@/modules/analytics/dashboards/types";
 import { Meter, Panel } from "./parts";
 import { RatingHistogram } from "./rating-histogram";
 
-/** Leadership view: stat tiles + aggregate distribution; never names or ids. */
+/**
+ * Leadership view: stat tiles + aggregate distribution; never names or ids.
+ * Direction's view has a minimum group size: smaller groups arrive folded into
+ * "Otros" (or not at all), and a cycle under the minimum only shows its head
+ * count.
+ */
 export function ExecutiveView({ data }: { data: ExecutiveSummary }) {
   const t = useTranslations("Dashboards");
+  const min = data.minGroupSize;
+  const belowMinimum = min !== null && data.participants < min;
   return (
     <div className="flex flex-col gap-4">
       <p className="text-sm text-muted-foreground">
-        {t("executive.hint", { min: MIN_GROUP })}
+        {min === null
+          ? t("executive.hintPeople")
+          : t("executive.hint", { min })}
       </p>
       <div className="flex flex-wrap gap-4">
         <div className="rounded-lg border p-4">
@@ -50,38 +58,55 @@ export function ExecutiveView({ data }: { data: ExecutiveSummary }) {
           </div>
         ))}
       </div>
-      <Panel
-        id="exec-distribution"
-        title={t("distribution.title")}
-        hint={t("distribution.hint")}
-      >
-        <RatingHistogram
-          aggregateOnly
-          data={{
-            bins,
-            total: data.distribution,
-            series: [
-              {
-                key: null,
-                label: null,
-                counts: data.distribution,
-                n: data.distribution.reduce((a, b) => a + b, 0),
-                mean: null,
-              },
-              ...data.byDepartment.map((d) => ({
-                key: d.department,
-                label: d.department,
-                counts: d.counts,
-                n: d.n,
-                mean: d.mean,
-              })),
-            ],
-          }}
-        />
-        <p className="text-sm text-muted-foreground">
-          {t("executive.suppressed", { n: data.suppressed })}
+      {belowMinimum ? (
+        <p role="status" className="text-sm">
+          {t("executive.belowMinimum", { min })}
         </p>
-      </Panel>
+      ) : (
+        <Panel
+          id="exec-distribution"
+          title={t("distribution.title")}
+          hint={t("distribution.hint")}
+        >
+          <RatingHistogram
+            aggregateOnly
+            data={{
+              bins,
+              total: data.distribution,
+              series: [
+                {
+                  key: null,
+                  label: null,
+                  counts: data.distribution,
+                  n: data.distribution.reduce((a, b) => a + b, 0),
+                  mean: null,
+                },
+                ...data.byDepartment.map((d) => ({
+                  key: d.department,
+                  label: d.department,
+                  counts: d.counts,
+                  n: d.n,
+                  mean: d.mean,
+                })),
+                ...(data.others
+                  ? [
+                      {
+                        key: "others",
+                        label: t("executive.others"),
+                        counts: data.others.counts,
+                        n: data.others.n,
+                        mean: data.others.mean,
+                      },
+                    ]
+                  : []),
+              ],
+            }}
+          />
+          <p className="text-sm text-muted-foreground">
+            {t("executive.suppressed", { n: data.suppressed })}
+          </p>
+        </Panel>
+      )}
     </div>
   );
 }
