@@ -199,6 +199,10 @@ Hoy solo se lee el mínimo n (vista de dirección); los umbrales de alerta, los 
 - **CSV** (solo People, vía el registro de exports, sin emails): `insights-goal-kpis.csv` (`cycle`, `groupBy`, `hierarchy`, `department`, `manager`) e `insights-goal-outliers.csv` (`cycle`, `hierarchy`, `department`, `manager`).
 - **De dónde salen los datos:** el snapshot de goals de cada participante lo toma la importación al terminar (los goals se solapan con el período del ciclo, ver "Importación histórica"), retención y compromiso son las respuestas importadas del manager y el sentimiento sale de las etiquetas de `/insights/qualitative` (corridas y correcciones). Sin goals, los KPI muestran "Sin objetivos" y las listas de casos quedan vacías; sin etiquetas, el % de comentarios positivos queda en blanco.
 
+### Export para Arturía
+
+`pnpm export:arturia --cycle <id|nombre|latest> [--anonymized] [--out <dir>] [--locale es|en]` arma el informe del ciclo (ejecutivo, completitud, indicadores, cualitativo, objetivos) y escribe `report.json` (schema `arturia-report.v1`, ver [docs/arturia-schema.md](docs/arturia-schema.md)) y `report.html` (autocontenido: CSS, JS, datos y gráficos SVG inline, sin requests externos). Por defecto incluye nombres y emails y va a `data/private/arturia/<ciclo>/` (ignorado por git; el check de datos sensibles no lo deja commitear). `--anonymized` escribe `report.anonymized.json/.html`: sin personas ni emails, grupos con menos de `aggregation.minGroupSize` personas agrupados en "Otros", equipos como "Equipo 1..N". Flujo completo y preguntas abiertas en [docs/arturia.md](docs/arturia.md).
+
 ### Calidad de datos y API (`/data-quality`, `/api/v1`)
 
 - **Panel `/data-quality`:** un conteo por indicador (identidades sin resolver, personas o participantes sin manager, snapshots incompletos, historial de puesto con huecos o abierto tras la baja, `reviewer_mismatch`, corridas fallidas, etc.) con enlace a la lista de casos.

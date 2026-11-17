@@ -1344,6 +1344,94 @@
       "not_labeled": "Este comentario todavía no tiene etiqueta."
     }
   },
+  "Arturia": {
+    "title": "Informe de desempeño",
+    "generatedAt": "Generado",
+    "period": "Período",
+    "anonymized": "Versión anonimizada",
+    "named": "Versión con datos personales (uso interno de People)",
+    "minGroupSize": "Grupo mínimo",
+    "view": "Vista",
+    "viewAll": "Todo",
+    "viewQuantitative": "Cuantitativo",
+    "viewQualitative": "Cualitativo",
+    "others": "Otros",
+    "team": "Equipo",
+    "noData": "Sin datos",
+    "notAvailable": "No disponible en esta versión del export",
+    "hiddenTotal": "Total oculto para no revelar grupos chicos por diferencia",
+    "suppressed": "Personas fuera del desglose (grupos menores al mínimo)",
+    "executive": {
+      "title": "Resumen ejecutivo",
+      "participants": "Participantes",
+      "distribution": "Distribución de calificaciones",
+      "byDepartment": "Por área",
+      "mean": "Promedio"
+    },
+    "completion": {
+      "title": "Completitud",
+      "byRelationship": "Por tipo de evaluación",
+      "byDepartment": "Por área",
+      "byManager": "Por equipo",
+      "submitted": "Enviadas",
+      "draft": "Borrador",
+      "declined": "Rechazadas",
+      "pending": "Pendientes",
+      "total": "Total"
+    },
+    "indicators": {
+      "title": "Indicadores de retención y compromiso",
+      "distribution": "Distribución",
+      "riskMatrix": "Matriz de riesgo (retención × compromiso)",
+      "alerts": "Alertas",
+      "retention": "Retención",
+      "engagement": "Compromiso",
+      "risk": "Riesgo",
+      "drop": "Caída",
+      "bands": {
+        "low": "Bajo",
+        "mid": "Medio",
+        "high": "Alto"
+      }
+    },
+    "qualitative": {
+      "title": "Análisis cualitativo",
+      "byDimension": "Sentimiento por dimensión",
+      "trend": "Evolución del sentimiento",
+      "themes": "Temas principales",
+      "quotes": "Citas (seudonimizadas)",
+      "sentiments": {
+        "positive": "Positivo",
+        "constructive": "Constructivo",
+        "negative": "Negativo"
+      }
+    },
+    "goals": {
+      "title": "Objetivos",
+      "participantsWithGoals": "Personas con objetivos",
+      "goals": "Objetivos",
+      "completed": "Completados",
+      "avgProgress": "Avance promedio"
+    },
+    "people": {
+      "title": "Personas",
+      "name": "Nombre",
+      "email": "Email",
+      "department": "Área",
+      "manager": "Manager",
+      "self": "Autoevaluación",
+      "managerReview": "Evaluación del manager",
+      "retention": "Retención",
+      "engagement": "Compromiso",
+      "positiveShare": "Comentarios positivos"
+    },
+    "relationships": {
+      "self": "Autoevaluación",
+      "manager": "Manager",
+      "peer": "Pares",
+      "upward": "Ascendente"
+    }
+  },
   "GoalsInsights": {
     "nav": "Goals y assessments",
     "title": "Goals y assessments",
