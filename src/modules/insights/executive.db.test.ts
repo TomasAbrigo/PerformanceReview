@@ -27,9 +27,12 @@ describe("executiveReport", () => {
     });
     expect(r.minGroupSize).toBeNull();
     expect(r.completion.total).toMatchObject({
-      n: 9,
-      self: { submitted: 3, total: 9 },
-      manager: { submitted: 9, total: 9 },
+      participants: 9,
+      // The completion module (#59): a side applies to whoever has a request.
+      selfSubmitted: 3,
+      selfApplicable: 4,
+      managerSubmitted: 9,
+      managerApplicable: 9,
     });
     // Retention in C2: 2,2,5,3,4,1,2,4,5; engagement: 4,2,5,3,2,1,2,4.
     expect(r.retention).toMatchObject({ n: 9, counts: [1, 3, 1, 2, 2] });
@@ -70,7 +73,7 @@ describe("executiveReport", () => {
     expect(quant.engagement).toBeDefined();
     expect(quant.sentiment).toBeUndefined();
     expect(quant.themes).toBeUndefined();
-    expect(quant.completion.total?.n).toBe(9);
+    expect(quant.completion.total?.participants).toBe(9);
   });
 
   it("direction: masked under the minimum group size", async () => {
@@ -79,7 +82,7 @@ describe("executiveReport", () => {
       mode: "both",
     });
     expect(r.minGroupSize).toBe(5);
-    expect(r.completion.total?.n).toBe(9);
+    expect(r.completion.total?.participants).toBe(9);
     expect(r.retention?.n).toBe(9);
     // The risk quadrant holds 3 people: under 5, its count is hidden.
     expect(r.risk?.riskCount).toBeNull();

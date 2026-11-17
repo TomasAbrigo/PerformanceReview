@@ -13,7 +13,10 @@ import type {
 import { ReviewError } from "@/modules/review-core/review-errors";
 import { getSetting } from "@/modules/settings/service";
 import { type InsightsScope, insightsScope } from "./authz";
-import { completion, type Completion } from "./completion";
+import {
+  completionSummary,
+  type CompletionSummary,
+} from "@/modules/analytics/completion";
 
 /** The toggle of the executive view: comments, numbers, or both. */
 export const executiveModes = ["qualitative", "quantitative", "both"] as const;
@@ -29,7 +32,7 @@ export type IndicatorSummary = {
 
 /** The blocks of the view; a block the mode leaves out is absent. */
 export type ExecutiveSections = {
-  completion: Completion;
+  completion: CompletionSummary;
   retention?: IndicatorSummary;
   engagement?: IndicatorSummary;
   /** People in the risk quadrant and with both indicators (null: masked). */
@@ -82,8 +85,8 @@ export const COLLECTORS: readonly Collector[] = [
   {
     key: "completion",
     modes: ALL,
-    collect: ({ db, scope, cycleId }) =>
-      completion(db, scope, { cycleId, groupBy: "none" }),
+    collect: ({ db, actor, cycleId, minGroupSize }) =>
+      completionSummary(db, actor, { cycleId, groupBy: "none", minGroupSize }),
   },
   {
     key: "retention",

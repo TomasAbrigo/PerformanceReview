@@ -19,6 +19,7 @@ test("home navigation lists only the remaining sections", async ({ page }) => {
     "Ciclos de evaluación",
     "Objetivos del equipo",
     "Dashboards",
+    "Completitud",
     "Retención y compromiso",
     "Análisis cualitativo",
     "Reporte de autoevaluación",

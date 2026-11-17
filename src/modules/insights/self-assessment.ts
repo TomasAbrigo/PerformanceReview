@@ -16,10 +16,9 @@ import { ReviewError } from "@/modules/review-core/review-errors";
 import { getSetting } from "@/modules/settings/service";
 import { insightsScope } from "./authz";
 import {
-  completion,
-  type Completion,
-  type CompletionGroupBy,
-} from "./completion";
+  completionSummary,
+  type CompletionSummary,
+} from "@/modules/analytics/completion";
 
 export type SentimentGap = {
   dimension: string;
@@ -31,7 +30,7 @@ export type SentimentGap = {
 export type SelfAssessmentReport = {
   /** The minimum group size applied (direction), else null. */
   minGroupSize: number | null;
-  completion: Completion;
+  completion: CompletionSummary;
   /** Sentiment of the self reviews' comments, per dimension. */
   sentiment: DimensionSentiment[];
   /** Most frequent themes of the self reviews' comments. */
@@ -54,7 +53,7 @@ export type SelfAssessmentReport = {
 export async function selfAssessmentReport(
   db: DbOrTx,
   actor: ActorContext,
-  f: { cycleId: string; groupBy: CompletionGroupBy },
+  f: { cycleId: string; groupBy: "department" | "manager" },
 ): Promise<SelfAssessmentReport> {
   const minGroupSize = await getSetting(db, "aggregation.minGroupSize");
   const scope = insightsScope(actor, minGroupSize);
@@ -62,7 +61,7 @@ export async function selfAssessmentReport(
   const min = scope.kind === "aggregatesOnly" ? scope.minGroupSize : null;
   const q = { cycleId: f.cycleId, minGroupSize };
   const [done, self, manager, themes, gap] = await Promise.all([
-    completion(db, scope, f),
+    completionSummary(db, actor, { ...f, minGroupSize }),
     sentimentByDimension(db, actor, { ...q, relationship: "self" }),
     sentimentByDimension(db, actor, { ...q, relationship: "manager" }),
     topThemes(db, actor, { ...q, relationship: "self" }),

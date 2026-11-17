@@ -1,13 +1,20 @@
 import { useTranslations } from "next-intl";
 import { Meter } from "@/components/dashboards/parts";
 import type {
-  Completion,
   CompletionGroup,
   CompletionGroupBy,
-  Ratio,
-} from "@/modules/insights/completion";
+  CompletionSummary,
+} from "@/modules/analytics/completion";
 
-export const pct = (r: Ratio) =>
+export type Side = "self" | "manager";
+
+/** submitted / applicable of one side of a group. */
+export const sideOf = (g: CompletionGroup, side: Side) =>
+  side === "self"
+    ? { submitted: g.selfSubmitted, total: g.selfApplicable }
+    : { submitted: g.managerSubmitted, total: g.managerApplicable };
+
+export const pct = (r: { submitted: number; total: number }) =>
   r.total ? Math.round((r.submitted / r.total) * 100) : 0;
 
 /** Completion per group (self and manager), meters in inline SVG. */
@@ -15,25 +22,22 @@ export function CompletionTable({
   data,
   groupBy = "department",
 }: {
-  data: Completion;
+  data: CompletionSummary;
   /** What the groups are: words the group without a key. */
   groupBy?: CompletionGroupBy;
 }) {
   const t = useTranslations("Insights.completion");
   const ti = useTranslations("Insights");
-  const rows: (Omit<CompletionGroup, "key" | "label"> & {
-    id: string;
-    label: string;
-  })[] = [
+  const rows: (CompletionGroup & { id: string; name: string })[] = [
     ...data.groups.map((g) => ({
       ...g,
       id: g.key ?? "none",
-      label: g.label ?? t(groupBy === "manager" ? "noManager" : "noDepartment"),
+      name: g.label ?? t(groupBy === "manager" ? "noManager" : "noDepartment"),
     })),
     ...(data.others
-      ? [{ ...data.others, id: "others", label: ti("others") }]
+      ? [{ ...data.others, id: "others", name: ti("others") }]
       : []),
-    ...(data.total ? [{ ...data.total, id: "total", label: t("all") }] : []),
+    ...(data.total ? [{ ...data.total, id: "total", name: t("all") }] : []),
   ];
   const suppressed =
     data.minGroupSize !== null ? (
@@ -51,20 +55,23 @@ export function CompletionTable({
       </div>
     );
   }
-  const cell = (label: string, side: string, r: Ratio) => (
-    <div className="flex items-center gap-2">
-      <Meter
-        width={100}
-        value={r.total ? r.submitted / r.total : 0}
-        label={t("meter", {
-          label: `${label} · ${side}`,
-          submitted: r.submitted,
-          total: r.total,
-        })}
-      />
-      <span className="tabular-nums">{ti("percent", { value: pct(r) })}</span>
-    </div>
-  );
+  const cell = (r: (typeof rows)[number], side: Side) => {
+    const v = sideOf(r, side);
+    return (
+      <div className="flex items-center gap-2">
+        <Meter
+          width={100}
+          value={v.total ? v.submitted / v.total : 0}
+          label={t("meter", {
+            label: `${r.name} · ${t(side)}`,
+            submitted: v.submitted,
+            total: v.total,
+          })}
+        />
+        <span className="tabular-nums">{ti("percent", { value: pct(v) })}</span>
+      </div>
+    );
+  };
   return (
     <div className="flex flex-col gap-2">
       <table aria-label={t("table")} className="text-sm">
@@ -79,10 +86,10 @@ export function CompletionTable({
         <tbody>
           {rows.map((r) => (
             <tr key={r.id}>
-              <td className="pr-4">{r.label}</td>
-              <td className="pr-4 tabular-nums">{r.n}</td>
-              <td className="pr-4">{cell(r.label, t("self"), r.self)}</td>
-              <td className="pr-4">{cell(r.label, t("manager"), r.manager)}</td>
+              <td className="pr-4">{r.name}</td>
+              <td className="pr-4 tabular-nums">{r.participants}</td>
+              <td className="pr-4">{cell(r, "self")}</td>
+              <td className="pr-4">{cell(r, "manager")}</td>
             </tr>
           ))}
         </tbody>

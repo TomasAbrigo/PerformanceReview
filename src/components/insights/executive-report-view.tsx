@@ -8,7 +8,7 @@ import {
   type ExecutiveReport,
   type IndicatorSummary,
 } from "@/modules/insights/executive";
-import { pct } from "./completion-table";
+import { pct, sideOf } from "./completion-table";
 
 /** "Cualitativo | Cuantitativo | Ambos": links, the mode lives in the URL. */
 export function ModeToggle({
@@ -167,37 +167,36 @@ export function ExecutiveReportView({
               <div>
                 <dt className="text-sm">{t("participants")}</dt>
                 <dd className="text-2xl font-semibold tabular-nums">
-                  {total.n}
+                  {total.participants}
                 </dd>
               </div>
-              {(["self", "manager"] as const).map((side) => (
-                <div key={side}>
-                  <dt className="text-sm">
-                    {t(side === "self" ? "selfPct" : "managerPct")}
-                  </dt>
-                  <dd className="flex items-center gap-2">
-                    <span
-                      className="text-2xl font-semibold tabular-nums"
-                      data-testid={`exec-${side}-pct`}
-                    >
-                      {ti("percent", { value: pct(total[side]) })}
-                    </span>
-                    <Meter
-                      width={100}
-                      value={
-                        total[side].total
-                          ? total[side].submitted / total[side].total
-                          : 0
-                      }
-                      label={ti("completion.meter", {
-                        label: t(side === "self" ? "selfPct" : "managerPct"),
-                        submitted: total[side].submitted,
-                        total: total[side].total,
-                      })}
-                    />
-                  </dd>
-                </div>
-              ))}
+              {(["self", "manager"] as const).map((side) => {
+                const v = sideOf(total, side);
+                return (
+                  <div key={side}>
+                    <dt className="text-sm">
+                      {t(side === "self" ? "selfPct" : "managerPct")}
+                    </dt>
+                    <dd className="flex items-center gap-2">
+                      <span
+                        className="text-2xl font-semibold tabular-nums"
+                        data-testid={`exec-${side}-pct`}
+                      >
+                        {ti("percent", { value: pct(v) })}
+                      </span>
+                      <Meter
+                        width={100}
+                        value={v.total ? v.submitted / v.total : 0}
+                        label={ti("completion.meter", {
+                          label: t(side === "self" ? "selfPct" : "managerPct"),
+                          submitted: v.submitted,
+                          total: v.total,
+                        })}
+                      />
+                    </dd>
+                  </div>
+                );
+              })}
             </dl>
           ) : (
             <Unavailable min={min} />

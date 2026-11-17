@@ -4,7 +4,10 @@ import type { ComponentProps, ReactNode } from "react";
 import { describe, expect, it, vi } from "vitest";
 import en from "@/messages/en.json";
 import es from "@/messages/es.json";
-import type { Completion } from "@/modules/insights/completion";
+import type {
+  CompletionGroup,
+  CompletionSummary,
+} from "@/modules/analytics/completion";
 import type {
   ExecutiveMode,
   ExecutiveReport,
@@ -37,26 +40,34 @@ const renderIn = (locale: "es" | "en", ui: ReactNode) =>
 const locales = ["es", "en"] as const;
 const counts = { positive: 3, constructive: 1, negative: 1, total: 5 };
 
-const completion: Completion = {
-  groups: [
-    {
-      key: "Ingeniería",
-      label: "Ingeniería",
-      n: 6,
-      self: { submitted: 3, total: 6 },
-      manager: { submitted: 6, total: 6 },
-    },
-  ],
+const group = (
+  key: string | null,
+  participants: number,
+  self: [number, number],
+  manager: [number, number],
+): CompletionGroup => ({
+  key,
+  label: key,
+  participants,
+  selfSubmitted: self[0],
+  selfApplicable: self[1],
+  managerSubmitted: manager[0],
+  managerApplicable: manager[1],
+  selfRate: self[1] ? self[0] / self[1] : null,
+  managerRate: manager[1] ? manager[0] / manager[1] : null,
+});
+const completion: CompletionSummary = {
+  cycleId: "c1",
+  cycleName: "H2",
+  groupBy: "department",
+  hierarchy: "asOf",
+  participants: 9,
+  groups: [group("Ingeniería", 6, [3, 6], [6, 6])],
   others: null,
-  total: {
-    key: null,
-    label: null,
-    n: 9,
-    self: { submitted: 3, total: 9 },
-    manager: { submitted: 9, total: 9 },
-  },
+  total: group(null, 9, [3, 9], [9, 9]),
   suppressed: 3,
   minGroupSize: 5,
+  sources: { progress: 0, requests: 9 },
 };
 
 const dims = (locale: "es" | "en") => ({
@@ -337,13 +348,7 @@ describe("unavailable data and suppressed groups", () => {
   });
 
   it("names the group without a key per grouping", () => {
-    const g = {
-      key: null,
-      label: null,
-      n: 2,
-      self: { submitted: 1, total: 2 },
-      manager: { submitted: 2, total: 2 },
-    };
+    const g = group(null, 2, [1, 2], [2, 2]);
     const data = {
       ...completion,
       groups: [g],

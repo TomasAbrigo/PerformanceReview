@@ -13,9 +13,12 @@ import { buttonVariants } from "@/components/ui/button";
 export function ExportCsvLink({
   file,
   params = {},
+  label,
 }: {
   file: string;
   params?: Record<string, string | undefined>;
+  /** Text of the button; default "Exportar CSV". */
+  label?: string;
 }) {
   const t = useTranslations("Common");
   const locale = useLocale();
@@ -32,7 +35,7 @@ export function ExportCsvLink({
       download
       className={buttonVariants({ variant: "outline" })}
     >
-      {t("exportCsv")}
+      {label ?? t("exportCsv")}
     </a>
   );
 }

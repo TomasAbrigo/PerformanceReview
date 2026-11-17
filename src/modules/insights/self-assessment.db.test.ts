@@ -36,10 +36,15 @@ describe("selfAssessmentReport", () => {
     });
     expect(r.minGroupSize).toBeNull();
     expect(
-      r.completion.groups.map((g) => [g.key, g.self.submitted, g.self.total]),
+      r.completion.groups.map((g) => [
+        g.key,
+        g.selfSubmitted,
+        g.selfApplicable,
+      ]),
     ).toEqual([
-      ["Ingeniería", 3, 6],
-      ["Producto", 0, 3],
+      // A self assessment applies to whoever has a self request (#59).
+      ["Ingeniería", 3, 4],
+      ["Producto", 0, 0],
     ]);
     expect(r.sentiment).toEqual([
       { dimension: "strengths", ...counts(2, 0, 1) },
