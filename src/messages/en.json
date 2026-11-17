@@ -918,7 +918,11 @@
       "avg_progress": "avg_progress",
       "normalized": "normalized",
       "gap": "gap",
-      "answers": "answers"
+      "answers": "answers",
+      "dimension": "dimension",
+      "positive": "positive",
+      "constructive": "constructive",
+      "negative": "negative"
     }
   },
   "ImportHistory": {
@@ -1090,6 +1094,116 @@
       "others": "Others",
       "belowMinimum": "There are fewer than {min} participants: no data is shown to protect people.",
       "suppressed": "{n, plural, =0 {Nobody in small groups} one {# person in small departments (not broken out)} other {# people in small departments (not broken out)}}"
+    }
+  },
+  "Qualitative": {
+    "nav": "Qualitative analysis",
+    "title": "Qualitative analysis of comments",
+    "forbidden": "You do not have access to the qualitative analysis.",
+    "empty": "No analyzed comments yet.",
+    "filters": {
+      "label": "Filters",
+      "cycle": "Cycle",
+      "allCycles": "All cycles",
+      "department": "Department",
+      "dimension": "Dimension",
+      "sentiment": "Sentiment",
+      "theme": "Theme",
+      "any": "Any",
+      "aggregate": "Aggregates only (leadership view)",
+      "apply": "Apply"
+    },
+    "sentiment": {
+      "positive": "Positive",
+      "constructive": "Constructive",
+      "negative": "Negative"
+    },
+    "dimensions": {
+      "strengths": "Strengths",
+      "improvement": "Improvement",
+      "other": "Other"
+    },
+    "byDimension": {
+      "title": "Sentiment by dimension",
+      "chart": "Stacked bars of sentiment by dimension",
+      "bar": "{label}: {positive} positive, {constructive} constructive, {negative} negative"
+    },
+    "trend": {
+      "title": "Trend across cycles",
+      "chart": "Stacked bars of sentiment by cycle"
+    },
+    "themes": {
+      "title": "Top themes",
+      "count": "{n, plural, one {# comment} other {# comments}}",
+      "quotesNote": "Quotes with names, emails and employee numbers replaced."
+    },
+    "indicators": {
+      "title": "Sentiment vs. retention and engagement",
+      "empty": "No retention or engagement answers in this cycle.",
+      "indicator": "Indicator",
+      "answer": "Answer",
+      "retention": "Retention",
+      "engagement": "Engagement"
+    },
+    "comments": {
+      "title": "Comments",
+      "table": "Labeled comments",
+      "person": "Person",
+      "cycle": "Cycle",
+      "relationship": "Written by",
+      "text": "Comment",
+      "label": "Label",
+      "source": "Source",
+      "human": "corrected",
+      "confidence": "confidence {value}",
+      "correct": "Correct",
+      "cancel": "Cancel",
+      "save": "Save correction",
+      "themes": "Themes (separated by ;)",
+      "reason": "Reason",
+      "saved": "Correction saved.",
+      "relationships": {
+        "self": "Self",
+        "manager": "Manager",
+        "peer": "Peer",
+        "upward": "Upward"
+      }
+    },
+    "run": {
+      "button": "Run analysis",
+      "running": "Analyzing…",
+      "done": "{total} texts: {analyzed} analyzed, {cached} cached, {corrected} corrected by hand.",
+      "provider": "Provider: {name}"
+    },
+    "import": {
+      "title": "Import labels (CSV)",
+      "file": "Labels file",
+      "button": "Import labels",
+      "done": "{total} rows: {matched} matched, {unmatched} unmatched.",
+      "unmatched": "Unmatched rows",
+      "row": "Row",
+      "employee": "Person",
+      "reason": "Reason",
+      "reasons": {
+        "missing_fields": "Missing fields",
+        "invalid_sentiment": "Invalid sentiment",
+        "unknown_person": "Unknown person",
+        "unknown_cycle": "Unknown cycle",
+        "no_match": "No matching comment",
+        "ambiguous": "More than one possible comment"
+      }
+    },
+    "errors": {
+      "forbidden": "You are not allowed to do this.",
+      "not_found": "Not found.",
+      "validation": "Check the data.",
+      "missing_api_key": "ANTHROPIC_API_KEY is missing for Anthropic.",
+      "unknown_provider": "ANALYSIS_PROVIDER must be mock or anthropic.",
+      "provider_failed": "The analysis provider failed.",
+      "invalid_csv": "The CSV does not have the expected columns.",
+      "no_file": "Choose a file.",
+      "unknown": "Something went wrong.",
+      "not_labeled": "This comment has no label yet."
     }
   }
 }
