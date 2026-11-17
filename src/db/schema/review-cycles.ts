@@ -1,7 +1,5 @@
-import { sql } from "drizzle-orm";
 import {
   boolean,
-  check,
   date,
   index,
   integer,
@@ -18,8 +16,6 @@ import {
   type CycleComponents,
   type CycleDueDates,
   cycleStatuses,
-  type HireDateSchedule,
-  scheduleKinds,
 } from "../../modules/review-core/status";
 import { employeeJobHistory } from "./org-history";
 import { person } from "./people";
@@ -34,22 +30,6 @@ import {
 } from "./templates";
 
 export const cycleStatus = pgEnum("cycle_status", cycleStatuses);
-export const scheduleKind = pgEnum("schedule_kind", scheduleKinds);
-
-/** Who a cycle reviews; stored as chosen in the wizard. */
-export type ParticipantFilter =
-  | { kind: "all" }
-  | {
-      kind: "filter";
-      departments?: string[];
-      divisions?: string[];
-      locations?: string[];
-      jobTitles?: string[];
-      statuses?: string[];
-    }
-  | { kind: "people"; personIds: string[] };
-
-export type { HireDateSchedule };
 
 export const reviewCycle = pgTable(
   "review_cycle",
@@ -71,14 +51,8 @@ export const reviewCycle = pgTable(
       onDelete: "restrict",
     }),
     dueDates: jsonb("due_dates").$type<CycleDueDates>().notNull().default({}),
-    scheduleKind: scheduleKind("schedule_kind").notNull().default("fixed"),
-    hireDateSchedule: jsonb("hire_date_schedule").$type<HireDateSchedule>(),
-    participantFilter: jsonb("participant_filter")
-      .$type<ParticipantFilter>()
-      .notNull()
-      .default({ kind: "all" }),
     launchedAt: timestamp("launched_at", { withTimezone: true }),
-    /** Calibration published (#16): employees see the current rating; sharing waits for it. */
+    /** Calibration published: employees see the current rating (dashboards gate on it). */
     calibrationPublishedAt: timestamp("calibration_published_at", {
       withTimezone: true,
     }),
@@ -103,7 +77,7 @@ export const cycleTemplateGroup = pgTable(
     templateId: uuid("template_id")
       .notNull()
       .references(() => reviewTemplate.id, { onDelete: "restrict" }),
-    filter: jsonb("filter").$type<ParticipantFilter>().notNull(),
+    filter: jsonb("filter").notNull(),
     sort: integer("sort").notNull(),
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
@@ -142,30 +116,15 @@ export const cycleParticipant = pgTable(
       () => cycleTemplateGroup.id,
       { onDelete: "set null" },
     ),
-    /**
-     * Own deadlines (hire-date cycles: milestone + window, per person).
-     * Null = the cycle's due_dates apply.
-     */
-    dueDates: jsonb("due_dates").$type<CycleDueDates>(),
     addedAt: timestamp("added_at", { withTimezone: true })
       .notNull()
       .defaultNow(),
     removedAt: timestamp("removed_at", { withTimezone: true }),
-    /**
-     * The reviewee acknowledged the shared manager review (#15). Set once and
-     * never changed: the domain only updates rows where it is still null.
-     */
-    acknowledgedAt: timestamp("acknowledged_at", { withTimezone: true }),
-    acknowledgementNote: text("acknowledgement_note"),
   },
   (t) => [
     unique("cycle_participant_cycle_reviewee_uq").on(
       t.cycleId,
       t.revieweePersonId,
-    ),
-    check(
-      "cycle_participant_ack_note_ck",
-      sql`${t.acknowledgementNote} IS NULL OR ${t.acknowledgedAt} IS NOT NULL`,
     ),
   ],
 );
@@ -214,27 +173,7 @@ export const questionRevision = pgTable(
   (t) => [index("question_revision_cycle_idx").on(t.cycleId, t.sort)],
 );
 
-/** Audit log of status changes (launch included). */
-export const cycleTransition = pgTable(
-  "cycle_transition",
-  {
-    id: uuid("id").primaryKey().defaultRandom(),
-    cycleId: uuid("cycle_id")
-      .notNull()
-      .references(() => reviewCycle.id, { onDelete: "cascade" }),
-    fromStatus: cycleStatus("from_status").notNull(),
-    toStatus: cycleStatus("to_status").notNull(),
-    actorPersonId: uuid("actor_person_id").references(() => person.id),
-    note: text("note"),
-    createdAt: timestamp("created_at", { withTimezone: true })
-      .notNull()
-      .defaultNow(),
-  },
-  (t) => [index("cycle_transition_cycle_idx").on(t.cycleId, t.createdAt)],
-);
-
 export type ReviewCycle = typeof reviewCycle.$inferSelect;
 export type CycleTemplateGroup = typeof cycleTemplateGroup.$inferSelect;
 export type CycleParticipant = typeof cycleParticipant.$inferSelect;
 export type QuestionRevision = typeof questionRevision.$inferSelect;
-export type CycleTransition = typeof cycleTransition.$inferSelect;

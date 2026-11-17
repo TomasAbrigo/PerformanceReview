@@ -114,9 +114,6 @@ export type NewRequest = {
   deleted?: boolean;
   reviewerMissing?: boolean;
   reviewerMismatch?: boolean;
-  additional?: boolean;
-  assignedByHr?: boolean;
-  submittedOnBehalf?: boolean;
 };
 
 const requestValues = (r: NewRequest) => ({
@@ -136,9 +133,6 @@ const requestValues = (r: NewRequest) => ({
   sharedAt: r.sharedAt ?? null,
   reviewerMissing: r.reviewerMissing ?? false,
   reviewerMismatch: r.reviewerMismatch ?? false,
-  additional: r.additional ?? false,
-  assignedByHr: r.assignedByHr ?? false,
-  submittedOnBehalf: r.submittedOnBehalf ?? false,
   deletedAt: r.deleted ? new Date() : null,
 });
 

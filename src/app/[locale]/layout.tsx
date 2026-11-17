@@ -5,7 +5,6 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { ActorBar } from "@/components/actor/actor-bar";
-import { NotificationBell } from "@/components/notifications/notification-bell";
 import { routing } from "@/i18n/routing";
 import "../globals.css";
 
@@ -54,9 +53,6 @@ export default async function LocaleLayout({
           <header className="flex flex-wrap items-center justify-between gap-2 border-b px-8 py-2">
             <Suspense fallback={<div aria-busy="true" className="h-8" />}>
               <ActorBar />
-            </Suspense>
-            <Suspense fallback={<div aria-busy="true" className="size-8" />}>
-              <NotificationBell />
             </Suspense>
           </header>
           {children}

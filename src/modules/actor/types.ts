@@ -1,13 +1,7 @@
 // Drizzle- and server-free: shared by domain code and client components.
 import { z } from "zod";
 
-export const actorRoles = [
-  "hr",
-  "manager",
-  "employee",
-  "peer",
-  "calibrator",
-] as const;
+export const actorRoles = ["hr", "manager", "employee"] as const;
 export type ActorRole = (typeof actorRoles)[number];
 
 /**

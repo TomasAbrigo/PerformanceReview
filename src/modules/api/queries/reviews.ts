@@ -4,7 +4,7 @@ import type { LocalizedText, ScaleSnapshot } from "@/db/schema";
 import { rowsOf } from "@/lib/sql";
 import { isUuid } from "@/lib/uuid";
 import { DEFAULT_ACTOR, type ActorContext } from "@/modules/actor/types";
-import type { FinalRatingStage } from "@/modules/review-core/calibration-constants";
+import type { FinalRatingStage } from "@/modules/review-core/rating-constants";
 import type { RequestStatus } from "@/modules/review-core/request-status";
 import {
   visibilityContexts,
@@ -135,16 +135,9 @@ export type RequestRow = {
   reviewerVisible: boolean;
   reviewerMissing: boolean;
   reviewerMismatch: boolean;
-  /** A second manager request next to the participant's primary one (#17). */
-  additional: boolean;
-  /** HR picked this reviewer on purpose (alternate assessor, #17). */
-  assignedByHr: boolean;
-  /** HR completed the review in the reviewer's name (#17). */
-  submittedOnBehalf: boolean;
   requestedAt: string;
   submittedAt: string | null;
   declinedAt: string | null;
-  unlockedAt: string | null;
   /** Manager reviews: when it was shared with the reviewee. */
   sharedAt: string | null;
   /** The answers the actor may read (the reviewee does not count the ones hidden from them). */
@@ -314,12 +307,9 @@ async function selectRequests(
         rbi.source_system as "reviewerSystem", rbi.value as "reviewerBambooId",
         r.reviewer_missing as "reviewerMissing",
         r.reviewer_mismatch as "reviewerMismatch",
-        r.additional, r.assigned_by_hr as "assignedByHr",
-        r.submitted_on_behalf as "submittedOnBehalf",
         ${iso("r.requested_at")} as "requestedAt",
         ${iso("r.submitted_at")} as "submittedAt",
         ${iso("r.declined_at")} as "declinedAt",
-        ${iso("r.unlocked_at")} as "unlockedAt",
         ${iso("r.shared_at")} as "sharedAt",
         cr.stage::text as "ratingStage", cr.option_value::float8 as "ratingValue",
         cr.option_label as "ratingLabel", cr.normalized::float8 as "ratingNormalized",

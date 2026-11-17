@@ -3,21 +3,18 @@
 import { useFormatter, useTranslations } from "next-intl";
 import { useLocalized } from "@/components/templates/shared";
 import { Badge } from "@/components/ui/badge";
-import { buttonVariants } from "@/components/ui/button";
-import { Link } from "@/i18n/navigation";
 import type { HistoryItem } from "@/modules/review-core/history";
-import { ReadOnlyAnswers } from "./manager-review-form";
-import type { SelfReviewData } from "./self-review-form";
+import { ReadOnlyAnswers, type ReviewData } from "./read-only-answers";
 
 export type HistoryItemView = Omit<HistoryItem, "self" | "manager"> & {
-  self: SelfReviewData | null;
-  manager: SelfReviewData | null;
+  self: ReviewData | null;
+  manager: ReviewData | null;
 };
 
 /**
  * A person's finalized or shared cycles (/people/[id]/reviews): per cycle the
  * manager and job of that moment (snapshot), the current rating, whether it
- * was shared and acknowledged, and the answers the viewer may read.
+ * was shared, and the answers the viewer may read.
  */
 export function ReviewHistory({
   personName,
@@ -85,11 +82,6 @@ export function ReviewHistory({
                       ? t("shared", { date: day(item.sharedAt) })
                       : t("notShared")}
                   </p>
-                  <p>
-                    {item.acknowledgedAt
-                      ? t("acknowledged", { date: day(item.acknowledgedAt) })
-                      : t("notAcknowledged")}
-                  </p>
                 </div>
                 <p className="font-medium">
                   <span className="sr-only">{t("rating")}: </span>
@@ -125,17 +117,6 @@ export function ReviewHistory({
                     {t("noAnswers")}
                   </p>
                 )}
-                {item.canCompare ? (
-                  <Link
-                    href={`/cycles/${item.cycleId}/compare/${item.participantId}`}
-                    className={buttonVariants({
-                      size: "sm",
-                      variant: "outline",
-                    })}
-                  >
-                    {t("compare")}
-                  </Link>
-                ) : null}
               </article>
             </li>
           ))}

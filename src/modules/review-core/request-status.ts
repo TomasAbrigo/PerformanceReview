@@ -11,14 +11,3 @@ export const requestStatuses = [
   "superseded",
 ] as const;
 export type RequestStatus = (typeof requestStatuses)[number];
-
-export const reviewActions = [
-  "unlock",
-  "shared",
-  "unshared",
-  "reminder_sent",
-  "reviewer_reassigned",
-  "calibration_published",
-  "rating_override",
-] as const;
-export type ReviewAction = (typeof reviewActions)[number];

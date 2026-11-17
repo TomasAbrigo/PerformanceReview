@@ -1,4 +1,4 @@
-import { and, arrayContains, asc, eq, inArray, isNull } from "drizzle-orm";
+import { and, arrayContains, asc, eq, isNull } from "drizzle-orm";
 import type { DbOrTx } from "@/db/client";
 import {
   answer,
@@ -6,21 +6,18 @@ import {
   type QuestionRevision,
   questionRevision,
   type Relationship,
-  reviewRequest,
   type ReviewRequest,
 } from "@/db/schema";
 import type { ActorContext } from "@/modules/actor/types";
-import { recordManagerRating } from "./calibration";
 import {
   goalsQuestionsOptional,
   type GoalsScope,
   isGoalsQuestion,
 } from "./goal-snapshot";
 import { loadRequest } from "./requests";
-import { notifyFeedbackReceived } from "@/modules/notifications";
 import { ReviewError } from "./review-errors";
 import type { CycleAnonymity, CycleStatus } from "./status";
-import { canRead, canWrite, isReviewer, reviewerVisible } from "./visibility";
+import { canRead, isReviewer, reviewerVisible } from "./visibility";
 
 /** Value of an answer as the form handles it (rating: the scale value). */
 export type AnswerValue = string | number | null;
@@ -38,7 +35,6 @@ export type SelfReview = GoalsScope & {
   questions: QuestionRevision[];
   /** Current answers by question revision id. */
   answers: Record<string, AnswerValue>;
-  canWrite: boolean;
   /**
    * Whether the actor may know who wrote it (peer/upward anonymity); when
    * not, request.reviewerPersonId is null.
@@ -86,20 +82,8 @@ export function answerValueOf(
   return a.textValue;
 }
 
-const isEmpty = (v: AnswerValue) =>
-  v === null || (typeof v === "string" && v.trim() === "");
-
 /** A review of any relationship (questions, answers, writability). */
 export type Review = SelfReview;
-
-/** A self review with its questions and answers; null when not visible. */
-export async function getSelfReview(
-  db: DbOrTx,
-  actor: ActorContext,
-  requestId: string,
-): Promise<SelfReview | null> {
-  return getReview(db, actor, requestId);
-}
 
 /**
  * A review (self, manager, ...) with the questions and answers the actor may
@@ -158,9 +142,7 @@ export async function getReview(
     cycle: {
       id: cycle.id,
       name: cycle.name,
-      // Hire-date cycles: the participant's own deadline first.
-      dueDate:
-        participant.dueDates?.[duePhase] ?? cycle.dueDates[duePhase] ?? null,
+      dueDate: cycle.dueDates[duePhase] ?? null,
       anonymity: cycle.anonymity,
       status: cycle.status,
     },
@@ -173,168 +155,5 @@ export async function getReview(
           answerValueOf(byId.get(a.questionRevisionId), a),
         ]),
     ),
-    canWrite: canWrite(actor, request, row),
   };
-}
-
-/** Columns to store for a value, validated against the question. */
-function columns(q: QuestionRevision, value: AnswerValue) {
-  const none = {
-    optionValue: null,
-    optionLabel: null,
-    normalized: null,
-    textValue: null,
-  };
-  const invalid = () =>
-    new ReviewError("validation", [{ path: q.id, message: "invalid" }]);
-  if (q.kind === "rating") {
-    const option = q.scale?.options.find((o) => o.value === Number(value));
-    if (!option) throw invalid();
-    return {
-      ...none,
-      optionValue: option.value,
-      optionLabel: option.label.es,
-      normalized: option.normalized,
-    };
-  }
-  if (q.kind === "single_choice") {
-    const choice = q.choices?.find((c) => c.value === String(value));
-    if (!choice) throw invalid();
-    return { ...none, optionLabel: choice.value };
-  }
-  if (typeof value !== "string") throw invalid();
-  return { ...none, textValue: value };
-}
-
-async function writable(db: DbOrTx, actor: ActorContext, requestId: string) {
-  const row = await loadRequest(db, actor, requestId, { forUpdate: true });
-  if (!canWrite(actor, row.request, row)) throw new ReviewError("forbidden");
-  // A shared manager review must be unshared before it is edited again.
-  if (row.request.relationship === "manager" && row.request.sharedAt) {
-    throw new ReviewError("shared");
-  }
-  return row;
-}
-
-/**
- * Upserts answers of a draft (autosave). Empty values clear the answer. The
- * request stays in draft.
- */
-export async function saveDraft(
-  db: DbOrTx,
-  actor: ActorContext,
-  requestId: string,
-  answers: AnswerInput[],
-): Promise<void> {
-  await db.transaction(async (tx) => {
-    const { request, cycle, participant } = await writable(
-      tx,
-      actor,
-      requestId,
-    );
-    const questions = new Map(
-      (
-        await questionsFor(
-          tx,
-          cycle.id,
-          participant.templateGroupId,
-          request.relationship,
-        )
-      ).map((q) => [q.id, q]),
-    );
-    const clear: string[] = [];
-    const upserts = [];
-    for (const a of answers) {
-      const q = questions.get(a.questionRevisionId);
-      if (!q) {
-        throw new ReviewError("validation", [
-          { path: a.questionRevisionId, message: "invalid" },
-        ]);
-      }
-      if (isEmpty(a.value)) clear.push(q.id);
-      else
-        upserts.push({
-          requestId,
-          questionRevisionId: q.id,
-          ...columns(q, a.value),
-        });
-    }
-    if (clear.length) {
-      await tx
-        .delete(answer)
-        .where(
-          and(
-            eq(answer.requestId, requestId),
-            inArray(answer.questionRevisionId, clear),
-          ),
-        );
-    }
-    for (const values of upserts) {
-      await tx
-        .insert(answer)
-        .values(values)
-        .onConflictDoUpdate({
-          target: [answer.requestId, answer.questionRevisionId],
-          set: { ...values, updatedAt: new Date() },
-        });
-    }
-  });
-}
-
-/** Submits a draft: every required question must be answered. Final. */
-export async function submit(
-  db: DbOrTx,
-  actor: ActorContext,
-  requestId: string,
-): Promise<ReviewRequest> {
-  return db.transaction(async (tx) => {
-    const { request, cycle, participant } = await writable(
-      tx,
-      actor,
-      requestId,
-    );
-    const questions = await questionsFor(
-      tx,
-      cycle.id,
-      participant.templateGroupId,
-      request.relationship,
-    );
-    const answered = new Set(
-      (
-        await tx
-          .select({ q: answer.questionRevisionId })
-          .from(answer)
-          .where(eq(answer.requestId, requestId))
-      ).map((r) => r.q),
-    );
-    const goalsOptional = await goalsQuestionsOptional(tx, request);
-    const missing = questions.filter(
-      (q) =>
-        q.required &&
-        !(goalsOptional && isGoalsQuestion(q)) &&
-        !answered.has(q.id),
-    );
-    if (missing.length) {
-      throw new ReviewError(
-        "missing_required",
-        missing.map((q) => ({ path: q.id, message: "required" })),
-      );
-    }
-    const [updated] = await tx
-      .update(reviewRequest)
-      .set({ status: "submitted", submittedAt: new Date() })
-      .where(eq(reviewRequest.id, requestId))
-      .returning();
-    await recordManagerRating(tx, updated);
-    // Peer/upward feedback: tell the reviewee it arrived (never who wrote it;
-    // reading it still waits for the share, see canRead).
-    if (request.relationship === "peer" || request.relationship === "upward") {
-      await notifyFeedbackReceived(tx, {
-        cycleId: cycle.id,
-        requestId,
-        recipientPersonId: participant.revieweePersonId,
-      });
-    }
-    return updated;
-  });
 }

@@ -5,11 +5,8 @@ import type { ReactNode } from "react";
 import { describe, expect, it, vi } from "vitest";
 import en from "@/messages/en.json";
 import es from "@/messages/es.json";
-import { AcknowledgeTasks } from "./acknowledge-box";
-import { MyTasksView } from "./my-tasks";
 import { type HistoryItemView, ReviewHistory } from "./review-history";
-import type { SelfReviewData } from "./self-review-form";
-import { TeamView, type TeamViewRow } from "./team-view";
+import type { ReviewData } from "./read-only-answers";
 
 vi.mock("@/i18n/navigation", () => ({
   Link: ({ href, children }: { href: string; children: ReactNode }) => (
@@ -33,13 +30,12 @@ function renderIn(locale: "es" | "en", ui: ReactNode) {
 const reviewData = (
   prompt: { es: string; en: string },
   answer: string,
-): SelfReviewData => ({
+): ReviewData => ({
   requestId: "r",
   cycleName: "H1 2022",
   dueDate: null,
   status: "submitted",
   submittedAt: new Date("2022-07-01T00:00:00Z"),
-  canWrite: false,
   questions: [
     {
       id: "q",
@@ -67,7 +63,6 @@ function item(overrides: Partial<HistoryItemView> = {}): HistoryItemView {
     jobTitle: "Developer",
     department: "Ingeniería",
     sharedAt: new Date("2022-07-10T12:00:00Z"),
-    acknowledgedAt: new Date("2022-07-12T12:00:00Z"),
     rating: {
       value: 3,
       label: { es: "Cumple", en: "Meets" },
@@ -81,7 +76,6 @@ function item(overrides: Partial<HistoryItemView> = {}): HistoryItemView {
       { es: "¿Cómo le fue?", en: "How did they do?" },
       "Muy bien",
     ),
-    canCompare: true,
     ...overrides,
   };
 }
@@ -116,14 +110,6 @@ describe("ReviewHistory", () => {
     ).toBeVisible();
     expect(within(card).getByText("Cumple (67%)")).toBeVisible();
     expect(within(card).getByText("Compartida el 10 jul 2022")).toBeVisible();
-    expect(
-      within(card).getByText("Acuse de recibo el 12 jul 2022"),
-    ).toBeVisible();
-    expect(
-      within(card).getByRole("link", {
-        name: "Comparar autoevaluación y evaluación",
-      }),
-    ).toHaveAttribute("href", "/cycles/c1/compare/p1");
   });
 
   it("includes the readable answers of both reviews", async () => {
@@ -136,7 +122,7 @@ describe("ReviewHistory", () => {
     expect(screen.getByText("Muy bien")).toBeVisible();
   });
 
-  it("renders a cycle without rating, acknowledgement, manager review or compare link (en)", () => {
+  it("renders a cycle without rating, sharing or manager review (en)", () => {
     renderIn(
       "en",
       <ReviewHistory
@@ -149,9 +135,7 @@ describe("ReviewHistory", () => {
             department: null,
             rating: null,
             sharedAt: null,
-            acknowledgedAt: null,
             manager: null,
-            canCompare: false,
           }),
         ]}
       />,
@@ -160,7 +144,6 @@ describe("ReviewHistory", () => {
     expect(within(card).getByText("No manager at the time")).toBeVisible();
     expect(within(card).getByText("No rating")).toBeVisible();
     expect(within(card).getByText("Not shared")).toBeVisible();
-    expect(within(card).getByText("Not acknowledged")).toBeVisible();
     expect(within(card).queryByRole("link")).not.toBeInTheDocument();
     expect(within(card).queryByText("Manager review")).not.toBeInTheDocument();
   });
@@ -179,134 +162,5 @@ describe("ReviewHistory", () => {
     expect(
       screen.getAllByRole("article").map((a) => a.getAttribute("aria-label")),
     ).toEqual(["H1 2024", "H1 2022"]);
-  });
-});
-
-describe("AcknowledgeTasks (/me)", () => {
-  it("links each pending acknowledgement to the shared review", () => {
-    renderIn(
-      "es",
-      <AcknowledgeTasks
-        tasks={[
-          {
-            participantId: "p1",
-            cycleId: "c1",
-            cycleName: "H1 2026",
-            deadline: new Date("2026-03-17T15:30:00Z"),
-          },
-        ]}
-      />,
-    );
-    expect(
-      screen.getByRole("heading", { name: "Acusar recibo" }),
-    ).toBeVisible();
-    const row = screen.getByRole("listitem");
-    expect(within(row).getByText("Acusar recibo: H1 2026")).toBeVisible();
-    expect(within(row).getByText("Hasta el 17 mar 2026")).toBeVisible();
-    expect(
-      within(row).getByRole("link", { name: "Acusar recibo" }),
-    ).toHaveAttribute("href", "/cycles/c1/result#acknowledge");
-  });
-
-  it("renders nothing without tasks", () => {
-    renderIn("en", <AcknowledgeTasks tasks={[]} />);
-    expect(screen.queryByRole("heading")).not.toBeInTheDocument();
-  });
-});
-
-describe("MyTasksView acknowledgements", () => {
-  const ack = {
-    participantId: "p1",
-    cycleId: "c1",
-    cycleName: "H1 2026",
-    deadline: new Date("2026-03-17T15:30:00Z"),
-  };
-
-  it("counts an acknowledgement as a task and links to the history", () => {
-    renderIn(
-      "es",
-      <MyTasksView
-        hasPerson
-        personId="person-1"
-        tasks={{
-          selfAssessments: [],
-          sharedReviews: [],
-          acknowledgements: [ack],
-        }}
-      />,
-    );
-    expect(screen.queryByText("No tenés tareas pendientes.")).toBeNull();
-    expect(screen.getByText("Acusar recibo: H1 2026")).toBeVisible();
-    expect(
-      screen.getByRole("link", { name: "Mi historial de evaluaciones" }),
-    ).toHaveAttribute("href", "/people/person-1/reviews");
-  });
-
-  it("is empty without tasks but keeps the history link (en)", () => {
-    renderIn(
-      "en",
-      <MyTasksView
-        hasPerson
-        personId="person-1"
-        tasks={{ selfAssessments: [], sharedReviews: [] }}
-      />,
-    );
-    expect(screen.getByText("You have no pending tasks.")).toBeVisible();
-    expect(
-      screen.getByRole("link", { name: "My review history" }),
-    ).toHaveAttribute("href", "/people/person-1/reviews");
-  });
-
-  it("has no history link without a person", () => {
-    renderIn(
-      "es",
-      <MyTasksView
-        hasPerson={false}
-        personId={null}
-        tasks={{ selfAssessments: [], sharedReviews: [] }}
-      />,
-    );
-    expect(screen.queryByRole("link")).not.toBeInTheDocument();
-  });
-});
-
-describe("TeamView compare and history links", () => {
-  const row = (overrides: Partial<TeamViewRow> = {}): TeamViewRow => ({
-    cycleId: "c1",
-    cycleName: "H1 2026",
-    participantId: "p1",
-    revieweePersonId: "person-1",
-    revieweeName: "Bruno Pérez",
-    selfRequestId: "s1",
-    selfStatus: "submitted",
-    managerRequestId: "m1",
-    managerStatus: "submitted",
-    sharedAt: null,
-    ...overrides,
-  });
-  const ok = async () => ({ ok: true as const });
-
-  it("links to the comparison once both reviews are submitted, and to the history", () => {
-    renderIn("es", <TeamView hasPerson rows={[row()]} remind={ok} />);
-    expect(screen.getByRole("link", { name: "Comparar" })).toHaveAttribute(
-      "href",
-      "/cycles/c1/compare/p1",
-    );
-    expect(screen.getByRole("link", { name: "Evaluaciones" })).toHaveAttribute(
-      "href",
-      "/people/person-1/reviews",
-    );
-  });
-
-  it("offers no comparison while a review is a draft", () => {
-    renderIn(
-      "es",
-      <TeamView
-        hasPerson
-        rows={[row({ managerStatus: "draft" })]}
-        remind={ok}
-      />,
-    );
-    expect(screen.queryByRole("link", { name: "Comparar" })).toBeNull();
   });
 });

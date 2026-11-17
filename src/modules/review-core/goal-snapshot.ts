@@ -1,4 +1,4 @@
-import { and, asc, eq, inArray, isNull, notExists, sql } from "drizzle-orm";
+import { and, asc, eq, inArray, isNull } from "drizzle-orm";
 import type { DbOrTx } from "@/db/client";
 import {
   cycleGoalLink,
@@ -11,11 +11,7 @@ import {
   type QuestionRole,
   reviewCycle,
 } from "@/db/schema";
-import { isUuid } from "@/lib/uuid";
-import type { ActorContext } from "@/modules/actor/types";
 import { todayLocal } from "@/modules/org-history/dates";
-import { loadRequest } from "./requests";
-import { ReviewError } from "./review-errors";
 import type { CycleStatus } from "./status";
 
 /*
@@ -24,8 +20,9 @@ import type { CycleStatus } from "./status";
  * - A participant's goals are copied into `participant_goal_snapshot` once,
  *   when the cycle launches (or when the participant is added): title, status,
  *   progress and due date "as of" that moment. Goals created later never
- *   appear; "update progress" only refreshes the figures of the rows that are
- *   there, and flags the ones whose goal was deleted ("ya no aplica").
+ *   appear. (Refreshing progress and linking goals by hand were UI flows,
+ *   removed in #54; `refreshed_at`, `no_longer_applicable` and
+ *   `cycle_goal_link` stay as data.)
  * - The goals rating (one rating for all goals) and its comment are ordinary
  *   questions of the manager template marked with a `role`. They are stored
  *   like any answer but apart from the overall rating, and they NEVER feed the
@@ -190,9 +187,7 @@ export const snapshotGoalsForParticipant = (
   asOf?: Date,
 ) => snapshotGoalsForParticipants(db, [participantId], asOf);
 
-// ---------------------------------------------------------------- refresh
-
-/** Where a snapshot lives: its participant and the cycle's phase. */
+/** Where a review lives: its participant and the cycle's phase. */
 export type GoalsScope = {
   participant: Pick<
     CycleParticipant,
@@ -200,251 +195,6 @@ export type GoalsScope = {
   >;
   cycle: { status: CycleStatus };
 };
-
-/** Phases in which the snapshot may still be refreshed or extended. */
-const isLive = ({ participant, cycle }: GoalsScope) =>
-  participant.removedAt === null &&
-  cycle.status !== "draft" &&
-  cycle.status !== "closed";
-
-/** People (HR) and the participant's snapshot manager refresh the progress. */
-const mayRefresh = (actor: ActorContext, { participant }: GoalsScope) =>
-  actor.role === "hr" ||
-  (actor.role === "manager" &&
-    actor.personId !== null &&
-    actor.personId === participant.snapManagerPersonId);
-
-/**
- * Brings the figures of every snapshot row of a participant up to date with
- * the goals as they are now (two statements, whatever the number of goals):
- * live goals update status and progress; goals that are gone (soft or hard
- * deleted) are flagged and keep the figures they had.
- */
-async function refreshSnapshotRows(
-  db: DbOrTx,
-  participantId: string,
-  now: Date,
-): Promise<void> {
-  await db
-    .update(participantGoalSnapshot)
-    .set({
-      status: sql`${goal.status}`,
-      percentComplete: sql`${goal.percentComplete}`,
-      noLongerApplicable: false,
-      refreshedAt: now,
-    })
-    .from(goal)
-    .where(
-      and(
-        eq(participantGoalSnapshot.participantId, participantId),
-        eq(goal.id, participantGoalSnapshot.goalId),
-        isNull(goal.deletedAt),
-      ),
-    );
-  await db
-    .update(participantGoalSnapshot)
-    .set({ noLongerApplicable: true, refreshedAt: now })
-    .where(
-      and(
-        eq(participantGoalSnapshot.participantId, participantId),
-        notExists(
-          db
-            .select({ one: sql`1` })
-            .from(goal)
-            .where(
-              and(
-                eq(goal.id, participantGoalSnapshot.goalId),
-                isNull(goal.deletedAt),
-              ),
-            ),
-        ),
-      ),
-    );
-}
-
-/**
- * "Update progress": refreshes status and progress of the participant's
- * snapshot goals from the goals as they are now and stamps `refreshed_at`
- * (the legend date). It never adds goals nor touches titles or due dates; a
- * goal that was deleted is flagged `no_longer_applicable` and keeps the
- * figures it had. HR or the snapshot manager, while the cycle is live.
- */
-export async function refreshGoalProgress(
-  db: DbOrTx,
-  actor: ActorContext,
-  participantId: string,
-  now: Date = new Date(),
-): Promise<void> {
-  if (!isUuid(participantId)) throw new ReviewError("not_found");
-  await db.transaction(async (tx) => {
-    const [scope] = await tx
-      .select({
-        participant: cycleParticipant,
-        cycle: { status: reviewCycle.status },
-      })
-      .from(cycleParticipant)
-      .innerJoin(reviewCycle, eq(reviewCycle.id, cycleParticipant.cycleId))
-      .where(
-        and(
-          eq(cycleParticipant.id, participantId),
-          isNull(reviewCycle.deletedAt),
-        ),
-      );
-    if (!scope) throw new ReviewError("not_found");
-    if (!mayRefresh(actor, scope) || !isLive(scope)) {
-      throw new ReviewError("forbidden");
-    }
-    await refreshSnapshotRows(tx, participantId, now);
-  });
-}
-
-// ------------------------------------------------------------------- link
-
-/**
- * People attaches a goal to a cycle explicitly (one the period overlap did
- * not pick up). It is remembered (so a participant added later gets it) and,
- * if the goal's owner is already a participant, added to their snapshot and
- * the whole snapshot is refreshed, so that every goal (and the legend) is as
- * of the same moment. HR only, before the cycle closes. Idempotent.
- */
-export async function linkGoalToCycle(
-  db: DbOrTx,
-  actor: ActorContext,
-  cycleId: string,
-  goalId: string,
-  now: Date = new Date(),
-): Promise<void> {
-  if (actor.role !== "hr") throw new ReviewError("forbidden");
-  if (!isUuid(cycleId) || !isUuid(goalId)) throw new ReviewError("not_found");
-  await db.transaction(async (tx) => {
-    const [cycle] = await tx
-      .select({ status: reviewCycle.status })
-      .from(reviewCycle)
-      .where(and(eq(reviewCycle.id, cycleId), isNull(reviewCycle.deletedAt)));
-    const [target] = await tx
-      .select()
-      .from(goal)
-      .where(and(eq(goal.id, goalId), isNull(goal.deletedAt)));
-    if (!cycle || !target) throw new ReviewError("not_found");
-    if (cycle.status === "closed") throw new ReviewError("forbidden");
-    await tx
-      .insert(cycleGoalLink)
-      .values({ cycleId, goalId, linkedBy: actor.personId })
-      .onConflictDoNothing();
-    const [owner] = await tx
-      .select({ id: cycleParticipant.id })
-      .from(cycleParticipant)
-      .where(
-        and(
-          eq(cycleParticipant.cycleId, cycleId),
-          eq(cycleParticipant.revieweePersonId, target.personId),
-          isNull(cycleParticipant.removedAt),
-        ),
-      );
-    if (!owner) return; // not a participant (yet): the link waits
-    await tx
-      .insert(participantGoalSnapshot)
-      .values(snapshotRow(owner.id, target, now))
-      .onConflictDoNothing();
-    await refreshSnapshotRows(tx, owner.id, now);
-  });
-}
-
-// ------------------------------------------------------------------ reads
-
-export type GoalSnapshotView = {
-  id: string;
-  title: string;
-  status: GoalStatus;
-  percentComplete: number;
-  /** yyyy-mm-dd */
-  dueDate: string | null;
-  noLongerApplicable: boolean;
-};
-
-export type GoalsBlockData = {
-  participantId: string;
-  goals: GoalSnapshotView[];
-  /**
-   * The legend date ("progress as of", yyyy-mm-dd in the company's time
-   * zone): the latest refresh, else the capture; null without goals.
-   */
-  asOf: string | null;
-  canRefresh: boolean;
-  canLink: boolean;
-  /** Owner's live goals that are not in the snapshot (HR can link them). */
-  linkable: { id: string; title: string }[];
-};
-
-/**
- * The goals block of a review the actor can read (the request's participant's
- * snapshot): null when the request is not visible. Goals are never filtered
- * out: the reviewee sees the same list as their manager.
- *
- * `source` is the request id, or the review the caller already loaded with
- * getReview (which checked that the actor may read it): then it is not loaded
- * (nor its visibility computed) a second time.
- */
-export async function getReviewGoals(
-  db: DbOrTx,
-  actor: ActorContext,
-  source: string | GoalsScope,
-): Promise<GoalsBlockData | null> {
-  let scope: GoalsScope;
-  if (typeof source === "string") {
-    try {
-      scope = await loadRequest(db, actor, source);
-    } catch (error) {
-      if (error instanceof ReviewError) return null;
-      throw error;
-    }
-  } else {
-    scope = source;
-  }
-  const { participant, cycle } = scope;
-  const rows = await db
-    .select()
-    .from(participantGoalSnapshot)
-    .where(eq(participantGoalSnapshot.participantId, participant.id))
-    .orderBy(
-      sql`${participantGoalSnapshot.dueDate} asc nulls last`,
-      asc(participantGoalSnapshot.title),
-      asc(participantGoalSnapshot.id),
-    );
-  const canLink =
-    actor.role === "hr" && cycle.status !== "closed" && !participant.removedAt;
-  const inSnapshot = new Set(rows.flatMap((r) => (r.goalId ? [r.goalId] : [])));
-  const linkable = canLink
-    ? (
-        await db
-          .select({ id: goal.id, title: goal.title })
-          .from(goal)
-          .where(
-            and(
-              eq(goal.personId, participant.revieweePersonId),
-              isNull(goal.deletedAt),
-            ),
-          )
-          .orderBy(asc(goal.title), asc(goal.id))
-      ).filter((g) => !inSnapshot.has(g.id))
-    : [];
-  const dates = rows.map((r) => (r.refreshedAt ?? r.capturedAt).getTime());
-  return {
-    participantId: participant.id,
-    goals: rows.map((r) => ({
-      id: r.id,
-      title: r.title,
-      status: r.status,
-      percentComplete: r.percentComplete,
-      dueDate: r.dueDate,
-      noLongerApplicable: r.noLongerApplicable,
-    })),
-    asOf: dates.length ? todayLocal(new Date(Math.max(...dates))) : null,
-    canRefresh: rows.length > 0 && mayRefresh(actor, scope) && isLive(scope),
-    canLink,
-    linkable,
-  };
-}
 
 /**
  * Whether the goals rating and its comment are optional for a review: a

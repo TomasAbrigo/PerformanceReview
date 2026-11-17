@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { ActorContext } from "@/modules/actor/types";
-import { canRead, canWrite, type VisibilityRequest } from "./visibility";
+import { canRead, type VisibilityRequest } from "./visibility";
 
 const BRUNO = "b";
 const ANA = "a";
@@ -37,37 +37,7 @@ describe("canRead", () => {
   });
   it("lets the reviewer of a non-self review read it, nobody else", () => {
     const peer = request({ relationship: "peer", reviewerPersonId: ANA });
-    expect(canRead(as(ANA, "peer"), { request: peer, ...ctx })).toBe(true);
+    expect(canRead(as(ANA), { request: peer, ...ctx })).toBe(true);
     expect(canRead(as(BRUNO), { request: peer, ...ctx })).toBe(false);
-  });
-});
-
-describe("canWrite", () => {
-  const open = {
-    cycle: { status: "collecting" as const },
-    participant: { removedAt: null },
-  };
-  it("lets only the reviewer write, and only while in draft", () => {
-    expect(canWrite(as(BRUNO), request(), open)).toBe(true);
-    expect(canWrite(as(BRUNO), request({ status: "submitted" }), open)).toBe(
-      false,
-    );
-    expect(canWrite(as(ANA), request(), open)).toBe(false);
-    expect(canWrite(as(null, "hr"), request(), open)).toBe(false);
-  });
-  it("allows writing a self review only while the cycle is collecting", () => {
-    for (const status of ["nominations", "manager_review", "closed"] as const) {
-      expect(
-        canWrite(as(BRUNO), request(), { ...open, cycle: { status } }),
-      ).toBe(false);
-    }
-  });
-  it("denies writing for a removed participant", () => {
-    expect(
-      canWrite(as(BRUNO), request(), {
-        ...open,
-        participant: { removedAt: new Date() },
-      }),
-    ).toBe(false);
   });
 });

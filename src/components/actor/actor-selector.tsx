@@ -5,7 +5,6 @@ import { useId, useState, useTransition } from "react";
 import type { ActionResult } from "@/components/templates/shared";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Link } from "@/i18n/navigation";
 import {
   type ActorContext,
   type ActorRole,
@@ -110,9 +109,6 @@ export function ActorSelector({
       <Button type="submit" size="sm" disabled={pending}>
         {t("apply")}
       </Button>
-      <Link href="/me" className="underline">
-        {t("myTasks")}
-      </Link>
       {error ? (
         <span role="alert" className="text-destructive">
           {t("error")}
