@@ -58,6 +58,7 @@ export const KEPT_TABLES = [
   "review_template",
   "template_section",
   "question",
+  "app_setting",
 ] as const;
 
 /**
