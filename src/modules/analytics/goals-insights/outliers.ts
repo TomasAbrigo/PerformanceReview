@@ -68,7 +68,7 @@ export async function goalOutliers(
     ...input.thresholds,
   };
   const rows = (
-    await participantRows(db, reach, { ...input, sentiment: false })
+    await participantRows(db, actor, reach, { ...input, sentiment: false })
   ).filter((r) => r.goals > 0);
   const doneButLow = rows
     .filter(

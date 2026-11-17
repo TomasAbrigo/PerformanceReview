@@ -57,7 +57,10 @@ export async function goalsVsIndicators(
   },
 ): Promise<GoalsVsIndicators> {
   const reach = await reachOf(db, actor);
-  const rows = await participantRows(db, reach, { ...input, sentiment: true });
+  const rows = await participantRows(db, actor, reach, {
+    ...input,
+    sentiment: true,
+  });
   const slices: GoalIndicatorRow[][] = buckets.map(() => []);
   for (const r of rows) {
     if (r.goals > 0) slices[bucketOf(r.completed, r.goals)].push(r);

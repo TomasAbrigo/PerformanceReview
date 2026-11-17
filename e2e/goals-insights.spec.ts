@@ -1,7 +1,7 @@
 import { expect, type Page, test } from "@playwright/test";
 import { actAs, actAsRole } from "./act-as";
-import { goalSnapshotCount, participantOf } from "./goals-data";
-import { assessed2023, company, fullName } from "./seed-data";
+import { goalTotals, participantOf } from "./goals-data";
+import { assessedFirstCycle, company, fullName } from "./seed-data";
 
 // Runs after the historical import (project "insights" depends on
 // "chromium", where e2e/historical-import.spec.ts imports the Employee
@@ -10,7 +10,7 @@ import { assessed2023, company, fullName } from "./seed-data";
 // participant when it finishes): the specs assert what renders either way, and
 // the figures only when goals are there.
 const cycleName = company.cycles[0].name;
-const personName = fullName(assessed2023);
+const personName = fullName(assessedFirstCycle);
 
 /** Picks the cycle in the filters form and applies it. */
 async function openGoals(page: Page, query = "") {
@@ -34,36 +34,72 @@ test("People see the goal KPIs, the indicators by completion, the outliers and t
   await actAs(page, null, "People (RR. HH.)");
   await openGoals(page);
 
-  // Goal KPIs per area: a table with every group and a total.
+  // The import left a goal snapshot for the cycle's participants.
+  const totals = await goalTotals(cycleName);
+  expect(totals.goals).toBeGreaterThan(0);
+  const share = (n: number) =>
+    `${n} \\(${Math.round((n / totals.goals) * 100)} %\\)`;
+
+  // Goal KPIs per area: every group and a total that is what the snapshot says.
   const kpis = page.getByRole("region", { name: "Indicadores de objetivos" });
   const table = kpis.getByTestId("kpis-table");
   await expect(table).toBeVisible();
-  await expect(table.getByRole("row", { name: /^Total/ })).toBeVisible();
+  const total = table.getByRole("row", { name: /^Total/ });
+  const cells = total.getByRole("cell");
+  await expect(cells.nth(1)).toHaveText(String(totals.people));
+  await expect(cells.nth(2)).toHaveText(String(totals.goals));
+  await expect(cells.nth(3)).toHaveText(
+    new RegExp(`^${share(totals.completed)}`),
+  );
+  await expect(cells.nth(4)).toHaveText(
+    new RegExp(`^${share(totals.inProgress)}$`),
+  );
+  await expect(cells.nth(5)).toHaveText(
+    new RegExp(`^${share(totals.overdue)}$`),
+  );
   // At least the header, a group and the total.
   expect(await table.getByRole("row").count()).toBeGreaterThanOrEqual(3);
 
-  // Grouping lives in the URL.
+  // Grouping lives in the URL; the total stays.
   await kpis.getByRole("link", { name: "Manager", exact: true }).click();
   await expect(page).toHaveURL(/groupBy=manager/);
+  const byManager = page.getByRole("region", {
+    name: "Indicadores de objetivos",
+  });
   await expect(
-    page
-      .getByRole("region", { name: "Indicadores de objetivos" })
-      .getByRole("link", { name: "Manager", exact: true }),
+    byManager.getByRole("link", { name: "Manager", exact: true }),
   ).toHaveAttribute("aria-current", "true");
-
-  // Indicators by goals completion and the outliers render (counts >= 0).
   await expect(
-    page.getByRole("region", {
-      name: "Indicadores según el cumplimiento de objetivos",
+    byManager
+      .getByTestId("kpis-table")
+      .getByRole("row", { name: /^Total/ })
+      .getByRole("cell")
+      .nth(2),
+  ).toHaveText(String(totals.goals));
+
+  // Goals completion against retention: dots, and the indicators by bucket.
+  const scatter = page.getByTestId("scatter-chart");
+  await expect(scatter).toBeVisible();
+  expect(await scatter.locator("svg title").count()).toBeGreaterThan(0);
+  await expect(page.getByTestId("buckets-chart")).toBeVisible();
+  await expect(
+    page.getByRole("img", {
+      name: /^Indicadores según el cumplimiento de objetivos: /,
     }),
   ).toBeVisible();
+
+  // The outliers: how many, with the people listed when there are any.
   const outliers = page.getByRole("region", { name: "Casos que no cuadran" });
-  await expect(outliers.getByTestId("outliers-done-low-count")).toHaveText(
-    /^(Ninguna persona|\d+ personas?)$/,
-  );
-  await expect(outliers.getByTestId("outliers-behind-high-count")).toHaveText(
-    /^(Ninguna persona|\d+ personas?)$/,
-  );
+  for (const group of ["outliers-done-low", "outliers-behind-high"]) {
+    const count = outliers.getByTestId(`${group}-count`);
+    await expect(count).toHaveText(/^(Ninguna persona|\d+ personas?)$/);
+    const n = (await count.innerText()).match(/^(\d+)/)?.[1];
+    if (n) {
+      expect(await outliers.getByTestId(group).getByRole("row").count()).toBe(
+        Number(n) + 1,
+      );
+    }
+  }
 
   // The people of the cycle, with their goals and indicators side by side.
   const people = page.getByTestId("people-table");
@@ -72,14 +108,6 @@ test("People see the goal KPIs, the indicators by completion, the outliers and t
     people.getByRole("link", { name: `Ver assessment de ${personName}` }),
   ).toBeVisible();
 
-  // With goals in the snapshot the scatter and the buckets have numbers.
-  if ((await goalSnapshotCount(cycleName)) > 0) {
-    await expect(page.getByTestId("goals-scatter")).toBeVisible();
-    await expect(table.getByRole("row", { name: /^Total/ })).toContainText(
-      /\d+ \(\d+ %\)/,
-    );
-  }
-
   // The CSVs follow the filters; the headers are the file's language.
   const kpisCsv = await page.request.get(
     (await kpis
@@ -87,7 +115,17 @@ test("People see the goal KPIs, the indicators by completion, the outliers and t
       .getAttribute("href"))!,
   );
   expect(kpisCsv.ok()).toBe(true);
-  expect(await kpisCsv.text()).toContain("grupo_id,grupo,personas");
+  const csvText = await kpisCsv.text();
+  expect(csvText).toContain("grupo_id,grupo,personas");
+  // The rows of the file add up to the goals of the snapshot.
+  const rows = csvText
+    .replace(/^\uFEFF/, "")
+    .trim()
+    .split(/\r?\n/)
+    .slice(1);
+  expect(rows.reduce((sum, row) => sum + Number(row.split(",")[3]), 0)).toBe(
+    totals.goals,
+  );
   const outliersCsv = await page.request.get(
     (await outliers
       .getByRole("link", { name: "Exportar CSV" })
@@ -181,9 +219,11 @@ test("direction only sees aggregates; employees are forbidden", async ({
   await expect(
     page.getByRole("link", { name: "Persona", exact: true }),
   ).toHaveCount(0);
-  await expect(page.getByText(fullName(assessed2023))).toHaveCount(0);
+  await expect(page.getByText(fullName(assessedFirstCycle))).toHaveCount(0);
   await expect(page.getByRole("link", { name: "Exportar CSV" })).toHaveCount(0);
 
+  // The person picker is off while acting as direction: leave it first.
+  await actAsRole(page, "Empleado", "Sin persona");
   await actAs(page, personName, "Empleado");
   await page.goto("/es/insights/goals");
   await expect(page.getByText("No tenés acceso a esta vista.")).toBeVisible();

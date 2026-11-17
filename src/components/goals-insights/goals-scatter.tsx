@@ -42,7 +42,7 @@ export function GoalsScatter({
     });
   const missing = rows.length - dots.length;
   return (
-    <div className="flex flex-col gap-3" data-testid="goals-scatter">
+    <div className="flex flex-col gap-3" data-testid="scatter-chart">
       <svg
         viewBox={`0 0 ${W} ${H}`}
         className="w-full max-w-md"
