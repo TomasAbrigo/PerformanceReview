@@ -79,10 +79,11 @@ const dimensions: Record<
   department: (r) => ({ key: r.department, label: r.department }),
 };
 
-/** Collator order of the labels, the unlabelled last. */
+/** Collator order of the labels, the unlabelled last (by key among themselves). */
 const byLabel = (a: GoalKpiGroup, b: GoalKpiGroup) =>
   a.label === null || b.label === null
-    ? Number(a.label === null) - Number(b.label === null)
+    ? Number(a.label === null) - Number(b.label === null) ||
+      (a.key ?? "").localeCompare(b.key ?? "")
     : collator(a.label, b.label) || (a.key ?? "").localeCompare(b.key ?? "");
 
 /**
@@ -90,7 +91,9 @@ const byLabel = (a: GoalKpiGroup, b: GoalKpiGroup) =>
  * in the period, the shares of completed, in progress and overdue goals (of
  * the group's goals) and the mean progress. With a minimum (direction), the
  * groups under it are folded into "Otros", hidden when that is still under
- * it, and the total is dropped if it would give a hidden group away.
+ * it, and the total is dropped if it would give a hidden group away. A
+ * manager is a person: with a minimum the teams keep their key (to tell them
+ * apart) but never their name, the label is null.
  */
 export function kpisOf(
   rows: readonly GoalIndicatorRow[],
@@ -105,6 +108,8 @@ export function kpisOf(
   const sums = new Map<string, KpiCounts>();
   for (const r of rows) {
     const d = dimensions[groupBy](r);
+    // Direction reads teams, not the people who lead them.
+    if (minGroupSize !== null && groupBy === "manager") d.label = null;
     const id = d.key ?? "\u0000";
     const c = sums.get(id) ?? {
       key: d.key,

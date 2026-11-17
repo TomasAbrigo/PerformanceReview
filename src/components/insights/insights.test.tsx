@@ -368,6 +368,28 @@ describe("unavailable data and suppressed groups", () => {
     expect(screen.queryByText("Sin datos para mostrar.")).toBeNull();
   });
 
+  it("direction's teams have a key but no name: numbered, never 'Sin manager'", () => {
+    const team = (key: string) => ({
+      ...group(key, 6, [3, 6], [6, 6]),
+      label: null,
+    });
+    renderIn(
+      "es",
+      <CompletionTable
+        data={{
+          ...completion,
+          groupBy: "manager",
+          groups: [team("m-1"), team("m-2")],
+          total: null,
+        }}
+        groupBy="manager"
+      />,
+    );
+    expect(screen.getByText("Equipo 1")).toBeVisible();
+    expect(screen.getByText("Equipo 2")).toBeVisible();
+    expect(screen.queryByText("Sin manager")).toBeNull();
+  });
+
   it("names the group without a key per grouping", () => {
     const g = group(null, 2, [1, 2], [2, 2]);
     const data = {

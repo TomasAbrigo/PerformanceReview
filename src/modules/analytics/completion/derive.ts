@@ -101,8 +101,9 @@ type Summary = Omit<CompletionSummary, "cycleId" | "cycleName" | "hierarchy">;
  * The summary of a cycle's participants. `minGroupSize` null: nothing is
  * masked (People, a manager). A number (direction): groups under it, and the
  * unassigned one, are folded into "Otros" (hidden if that is under it too),
- * and with fewer participants than that only the head count is given.
- * Direction never gets managers: the caller passes `none` or `department`.
+ * and with fewer participants than that only the head count is given. A
+ * manager is a person: grouped by manager, direction's teams keep their key
+ * (to tell them apart) but have no label.
  */
 export function summarize(
   rows: readonly SideRow[],
@@ -163,7 +164,11 @@ export function summarize(
     minGroupSize,
     total: withRates(null, null, all),
     groups: folded.shown.map((g) =>
-      withRates(g.key, g.label, fromBins(g.n, g.counts)),
+      withRates(
+        g.key,
+        groupBy === "manager" ? null : g.label,
+        fromBins(g.n, g.counts),
+      ),
     ),
     others: folded.others
       ? withRates(null, null, fromBins(folded.others.n, folded.others.counts))

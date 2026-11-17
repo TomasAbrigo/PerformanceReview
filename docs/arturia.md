@@ -4,14 +4,26 @@ Informe de desempeño de un ciclo para publicar como mini app en Arturía. Se ge
 
 ## Flujo de actualización (manual)
 
-1. **Exportar de Bamboo** los reportes del ciclo (Employee Performance, Assessment Progress, Goal Status, Feedback Status) y guardarlos en `data/private/` (nunca en el repo; ver README "Datos sensibles").
-2. **Importar** cada archivo en `/imports/upload` (o con `pnpm ingest`), revisar la cola de identidad en `/imports/identity`.
+1. **Exportar de Bamboo** los reportes del ciclo (Employee Performance, Assessment Progress, Feedback Status) y guardarlos en `data/private/` (nunca en el repo; ver README "Datos sensibles").
+2. **Importar** cada archivo en `/imports/upload` (o con `pnpm ingest`), revisar la cola de identidad en `/imports/identity`. Los goals entran por la ingesta de la API de Bamboo (`pnpm ingest:goals`), antes de importar el Employee Performance: el ciclo toma el snapshot de goals de cada participante cuando se crea (el reporte Goal Status solo aterriza en `raw_record`).
 3. **Analizar** los comentarios en `/insights/qualitative` (o `pnpm analysis:run`), corregir etiquetas si hace falta.
 4. **Exportar**:
    - `pnpm export:arturia --cycle latest` → versión con datos personales (uso interno de People).
    - `pnpm export:arturia --cycle latest --anonymized` → versión anonimizada.
    - `--cycle` acepta el id, el nombre exacto del ciclo o `latest`; `--out <dir>` cambia la carpeta; `--locale es|en` el idioma (default `es`).
 5. **Subir a Arturía** el archivo que corresponda (ver preguntas abiertas: cuál de las dos versiones y cómo).
+
+De dónde sale cada sección (el informe reusa los módulos de analytics: la versión con nombres corre como People y la anonimizada como dirección con el mínimo del informe, ver [arturia-schema.md](arturia-schema.md)):
+
+| Sección       | Módulo                                                                                                         |
+| ------------- | -------------------------------------------------------------------------------------------------------------- |
+| `executive`   | `analytics/dashboards` (`executiveSummary`)                                                                    |
+| `completion`  | `analytics/completion` (`completionOverview`, `completionSummary`): Assessment Progress, si no las solicitudes |
+| `indicators`  | `analytics/indicators`                                                                                         |
+| `goals`       | `analytics/goals-insights` (`goalInsights`, `goalKpis`): KPIs por área y equipo, tramos, casos atípicos        |
+| `qualitative` | `qualitative-analysis`                                                                                         |
+
+Anonimizado, los casos atípicos de objetivos solo se cuentan (y solo desde el mínimo); con nombres se listan con sus valores en `goals.outliers`.
 
 El CLI imprime solo rutas y cantidades, nunca nombres. Código de salida: 0 ok, 1 falló, 2 argumentos inválidos.
 

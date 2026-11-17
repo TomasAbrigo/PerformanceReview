@@ -4,7 +4,7 @@ import { z } from "zod";
 
 export const SCHEMA_VERSION = "arturia-report.v1";
 /** Bumped on every additive change of v1 (new optional field / section). */
-export const SCHEMA_MINOR = 0;
+export const SCHEMA_MINOR = 1;
 
 const int = z.number().int().nonnegative();
 const counts = z.array(int);
@@ -36,22 +36,39 @@ const executive = z.object({
   suppressed: int,
 });
 
-/** `n`: distinct participants of the group; `total`: its requests. */
+/**
+ * One side (`self` or `manager`) of the assessment of a group: `n` is the
+ * group's participants, `total` those the side applies to and `submitted`
+ * the ones who submitted it. `applicable` is false (and `total` 0) when the
+ * side applies to nobody in the group: there is nothing to complete.
+ */
 const completionRow = group.extend({
   relationship: z.string(),
   total: int,
   submitted: int,
+  applicable: z.boolean(),
 });
+/** Percentage points against the previous cycle; null without a rate to compare. */
+const points = z.number().nullable();
 const completion = z.object({
-  /** null when anonymized and any group is suppressed (no differencing). */
+  /** Participants of the cycle (the head count, shown even when groups are not). */
+  participants: int,
+  /**
+   * `self` and `manager` always (`applicable` false when it applies to
+   * nobody); null when anonymized and any group is suppressed (no
+   * differencing). `draft` and `declined` are always null: the completion
+   * figures count submitted against applicable sides and do not tell drafts
+   * from the rest.
+   */
   byRelationship: z
     .array(
       z.object({
         relationship: z.string(),
         total: int,
         submitted: int,
-        draft: int,
-        declined: int,
+        applicable: z.boolean(),
+        draft: int.nullable(),
+        declined: int.nullable(),
       }),
     )
     .nullable(),
@@ -59,6 +76,22 @@ const completion = z.object({
   byManager: z.array(completionRow),
   /** Participants left out of each breakdown. */
   suppressed: z.object({ byDepartment: int, byManager: int }),
+  /** The semester before, per area; null when there is none. */
+  delta: z
+    .object({
+      previousCycleName: z.string(),
+      /** null when anonymized and any group is suppressed. */
+      total: z.object({ self: points, manager: points }).nullable(),
+      byDepartment: z.array(
+        z.object({
+          label: z.string(),
+          other: z.boolean(),
+          self: points,
+          manager: points,
+        }),
+      ),
+    })
+    .nullable(),
 });
 
 const band = z.enum(["low", "mid", "high"]);
@@ -118,18 +151,80 @@ const qualitative = z.object({
   suppressed: int,
 });
 
-const goals = z.object({
-  participantsWithGoals: int,
+/** The goal figures of a group; `n` is its people (cycle participants). */
+const goalRow = group.extend({
+  peopleWithGoals: int,
   goals: int,
   completed: int,
+  inProgress: int,
+  closed: int,
+  /** In progress and due before the period ended. */
+  overdue: int,
+  /** Mean progress of the goals, 0-100. */
   avgProgress: z.number().nullable(),
-  byDepartment: z.array(
-    group.extend({
-      goals: int,
-      completed: int,
-      avgProgress: z.number().nullable(),
+});
+/** A person whose goals and indicators disagree (named report only). */
+const goalOutlier = z.object({
+  personId: z.string(),
+  name: z.string(),
+  department: z.string().nullable(),
+  manager: z.string().nullable(),
+  goals: int,
+  completed: int,
+  completedPct: z.number(),
+  /** 1-5 as the manager answered; null when not answered. */
+  retention: z.number().nullable(),
+  engagement: z.number().nullable(),
+});
+const outlierGroup = z.object({
+  /** null when anonymized and fewer people than the minimum. */
+  count: int.nullable(),
+  /** Empty when anonymized (the schema requires it). */
+  people: z.array(goalOutlier),
+});
+const goals = z.object({
+  /**
+   * The four totals are null when anonymized and any breakdown (areas,
+   * teams, buckets) has a suppressed group (no differencing).
+   */
+  participantsWithGoals: int.nullable(),
+  goals: int.nullable(),
+  completed: int.nullable(),
+  avgProgress: z.number().nullable(),
+  byDepartment: z.array(goalRow),
+  byManager: z.array(goalRow),
+  /** Slices of the share of goals completed (`from`-`to`, 0-100) with the indicators of their people. */
+  buckets: z.array(
+    z.object({
+      from: z.number(),
+      to: z.number(),
+      /** null when anonymized and the bucket is under the minimum. */
+      people: int.nullable(),
+      meanRetention: z.number().nullable(),
+      meanEngagement: z.number().nullable(),
+      meanPositiveShare: z.number().nullable(),
+      hidden: z.boolean(),
     }),
   ),
+  /** People without goals in the period; null when anonymized. */
+  withoutGoals: int.nullable(),
+  outliers: z.object({
+    thresholds: z.object({
+      /** Share (%) of completed goals that counts as done / behind. */
+      goalsHigh: z.number(),
+      goalsLow: z.number(),
+      /** Retention or engagement at or under this is low. */
+      riskThreshold: z.number(),
+      /** Both indicators at or above this are high. */
+      indicatorHigh: z.number(),
+    }),
+    /** Goals done but retention or engagement low. */
+    doneButLow: outlierGroup,
+    /** Goals behind but both indicators high. */
+    behindButHigh: outlierGroup,
+  }),
+  /** People left out of each breakdown (their groups are under the minimum). */
+  suppressed: z.object({ byDepartment: int, byManager: int, buckets: int }),
 });
 
 const status = z.string().nullable();
@@ -176,7 +271,20 @@ export const arturiaReportV1 = z
   .refine((r) => !r.anonymized || r.sections.people === null, {
     message: "An anonymized report has no people section",
     path: ["sections", "people"],
-  });
+  })
+  .refine(
+    (r) =>
+      !r.anonymized ||
+      !r.sections.goals ||
+      [
+        r.sections.goals.outliers.doneButLow,
+        r.sections.goals.outliers.behindButHigh,
+      ].every((o) => o.people.length === 0),
+    {
+      message: "An anonymized report names nobody among the goal outliers",
+      path: ["sections", "goals", "outliers"],
+    },
+  );
 
 export type ArturiaReport = z.infer<typeof arturiaReportV1>;
 export type ArturiaSections = ArturiaReport["sections"];

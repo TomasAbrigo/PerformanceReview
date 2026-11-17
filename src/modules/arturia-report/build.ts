@@ -10,6 +10,7 @@ import {
   collectIndicators,
   collectPeople,
   collectQualitative,
+  cycleTeams,
   type CollectContext,
 } from "./collectors";
 import { labelsFor, type ReportLocale } from "./labels";
@@ -25,8 +26,8 @@ export class ArturiaError extends DomainError<"cycle_not_found"> {}
 export type ReportCycle = ArturiaReport["cycle"];
 
 /**
- * A launched (non-draft) cycle by id, exact name, or `latest` (the one with
- * the latest period end).
+ * A launched (non-draft, not deleted) cycle by id, exact name, or `latest`
+ * (the one with the latest period end).
  */
 export async function resolveCycle(
   db: DbOrTx,
@@ -45,7 +46,7 @@ export async function resolveCycle(
     period_end: string;
   }>(sql`
     select id, name, period_start::text, period_end::text from review_cycle
-    where status <> 'draft' and ${where}
+    where status <> 'draft' and deleted_at is null and ${where}
     order by period_end desc, created_at desc limit 1`);
   if (!c) throw new ArturiaError("cycle_not_found");
   return {
@@ -78,11 +79,13 @@ export async function buildReport(
   const locale = opts.locale ?? "es";
   const minGroupSize =
     opts.minGroupSize ?? (await getSetting(db, "aggregation.minGroupSize"));
+  const labels = labelsFor(locale);
   const ctx: CollectContext = {
     cycleId: cycle.id,
     anonymized: opts.anonymized,
     min: opts.anonymized ? minGroupSize : 1,
-    labels: labelsFor(locale),
+    labels,
+    teams: await cycleTeams(db, cycle.id, labels.team),
   };
   const [executive, completion, indicators, qualitative, goals, people] =
     await Promise.all([

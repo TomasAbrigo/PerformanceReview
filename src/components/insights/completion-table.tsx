@@ -28,11 +28,18 @@ export function CompletionTable({
 }) {
   const t = useTranslations("Insights.completion");
   const ti = useTranslations("Insights");
+  // A team with a key but no name is one of direction's (a manager is a
+  // person): numbered in the order they come.
+  const teams = data.groups.filter((g) => g.key !== null && g.label === null);
   const rows: (CompletionGroup & { id: string; name: string })[] = [
     ...data.groups.map((g) => ({
       ...g,
       id: g.key ?? "none",
-      name: g.label ?? t(groupBy === "manager" ? "noManager" : "noDepartment"),
+      name:
+        g.key !== null && g.label === null
+          ? t("team", { n: teams.indexOf(g) + 1 })
+          : (g.label ??
+            t(groupBy === "manager" ? "noManager" : "noDepartment")),
     })),
     ...(data.others
       ? [{ ...data.others, id: "others", name: ti("others") }]

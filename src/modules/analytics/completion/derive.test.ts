@@ -101,6 +101,25 @@ describe("summarize", () => {
     expect(five.suppressed).toBe(3);
   });
 
+  it("a manager is a person: with a minimum the teams keep their key but not their name", () => {
+    const s = summarize(rows, { groupBy: "manager", minGroupSize: 3 });
+    // Marta leads 3 people, Nico 2 and the unassigned one 1: both fold into "Otros".
+    expect(s.groups.map((g) => [g.key, g.label, g.participants])).toEqual([
+      ["id-Marta", null, 3],
+    ]);
+    expect(s.others).toMatchObject({ key: null, label: null, participants: 3 });
+    const all = summarize(rows, { groupBy: "manager", minGroupSize: 2 });
+    expect(all.groups.map((g) => [g.key, g.label])).toEqual([
+      ["id-Marta", null],
+      ["id-Nico", null],
+    ]);
+    // areas keep their names: they are not people
+    expect(
+      summarize(rows, { groupBy: "department", minGroupSize: 3 }).groups[0]
+        .label,
+    ).toBe("Ventas");
+  });
+
   it("under the minimum gives only the head count", () => {
     const s = summarize(rows, { groupBy: "department", minGroupSize: 7 });
     expect(s).toMatchObject({

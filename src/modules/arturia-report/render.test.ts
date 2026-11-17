@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { renderHtml, renderJson } from "./render";
+import { renderHtml, renderJson, svgBars, svgStacked } from "./render";
 import { arturiaReportV1 } from "./schema";
 import { sampleReport } from "./test-support";
 
@@ -50,15 +50,175 @@ describe("renderers", () => {
     expect(html).toContain('data-kind="qualitative"');
     expect(html).toContain('data-show="quantitative"');
     expect(html).toContain("Resumen ejecutivo");
-    expect(html).toContain("No disponible");
+    expect(html).not.toContain("No disponible");
     expect(html).toContain("<svg");
     expect(html).not.toContain('id="people"');
+  });
+
+  it("a section that is not available says so", () => {
+    const r = sampleReport();
+    r.sections.completion = null;
+    r.sections.goals = null;
+    const html = renderHtml(r);
+    expect(html.match(/No disponible/g)).toHaveLength(2);
+    expect(html).toContain('<section id="goals"');
   });
 
   it("renders in English with the en labels", () => {
     const html = renderHtml(sampleReport({ locale: "en" }));
     expect(html).toContain('<html lang="en">');
     expect(html).toContain("Executive summary");
+  });
+
+  describe("goals section", () => {
+    const goals = (html: string) =>
+      html.match(/<section id="goals"[\s\S]*?<\/section>/)![0];
+
+    it("draws the KPIs as SVG bars, the buckets as a table and counts the outliers", () => {
+      const html = goals(renderHtml(sampleReport()));
+      // by area and by team: one stacked bar per group, labelled with its n
+      expect(html.match(/<svg/g)).toHaveLength(2);
+      expect(html).toContain("Ingeniería (n=7)");
+      expect(html).toContain("Equipo 1 (n=6)");
+      // tiles
+      expect(html).toContain("<b>10</b><span>Personas con objetivos</span>");
+      expect(html).toContain("<b>38%</b><span>Completados</span>");
+      expect(html).toContain("<b>62%</b><span>Avance promedio</span>");
+      // goals by status: completed 6, in progress on time 6, overdue 2, closed 1
+      expect(html).toContain("<title>Vencidos: 2</title>");
+      expect(html).toContain("<title>En curso: 6</title>");
+      expect(html).toContain("Vencidos</span>");
+      // buckets table: a hidden bucket shows dashes and a note
+      expect(html).toContain(
+        "<td>0–50%</td><td>6</td><td>3.50</td><td>3.25</td><td>40%</td>",
+      );
+      expect(html).toContain(
+        "<td>50–100%</td><td>–</td><td>–</td><td>–</td><td>–</td>",
+      );
+      expect(html).toContain("Menos personas que el grupo mínimo");
+      expect(html).toContain(
+        "Personas fuera del desglose (grupos menores al mínimo): 4",
+      );
+      // outliers: counts only, the hidden one as a dash
+      expect(html).toContain(
+        "Objetivos cumplidos con retención o compromiso bajo: <b>5</b>",
+      );
+      expect(html).toContain(
+        "Objetivos atrasados con retención y compromiso altos: <b>–</b>",
+      );
+      expect(html).not.toContain("<th>Nombre</th>");
+    });
+
+    it("hides the totals when the report says they would give a group away", () => {
+      const r = sampleReport();
+      r.sections.goals!.participantsWithGoals = null;
+      r.sections.goals!.goals = null;
+      r.sections.goals!.completed = null;
+      r.sections.goals!.avgProgress = null;
+      const html = goals(renderHtml(r));
+      expect(html).toContain("Total oculto");
+      expect(html).not.toContain("Personas con objetivos");
+    });
+
+    it("lists the outliers by name (escaped) in the named report only", () => {
+      const r = sampleReport({ anonymized: false, minGroupSize: 5 });
+      r.sections.people = [];
+      r.sections.goals!.withoutGoals = 3;
+      r.sections.goals!.outliers.doneButLow = {
+        count: 1,
+        people: [
+          {
+            personId: "p1",
+            name: "Ana <b>Prueba</b>",
+            department: "Ingeniería",
+            manager: null,
+            goals: 4,
+            completed: 4,
+            completedPct: 100,
+            retention: 2,
+            engagement: null,
+          },
+        ],
+      };
+      expect(arturiaReportV1.safeParse(r).success).toBe(true);
+      const html = goals(renderHtml(r));
+      expect(html).toContain("Ana &lt;b&gt;Prueba&lt;/b&gt;");
+      expect(html).not.toContain("<b>Prueba</b>");
+      expect(html).toContain("<td>4/4</td><td>100%</td><td>2</td><td>–</td>");
+      expect(html).toContain("<b>3</b><span>Personas sin objetivos</span>");
+    });
+
+    it("an anonymized report may not name the outliers", () => {
+      const r = sampleReport();
+      r.sections.goals!.outliers.doneButLow.people = [
+        {
+          personId: "p1",
+          name: "Ana",
+          department: null,
+          manager: null,
+          goals: 1,
+          completed: 1,
+          completedPct: 100,
+          retention: 1,
+          engagement: 1,
+        },
+      ];
+      expect(arturiaReportV1.safeParse(r).success).toBe(false);
+    });
+
+    it("speaks English with the en labels", () => {
+      const html = goals(renderHtml(sampleReport({ locale: "en" })));
+      expect(html).toContain("Goals completed vs indicators");
+      expect(html).toContain("Outliers");
+      expect(html).toContain("Fewer people than the minimum group");
+    });
+  });
+
+  it("completion: the totals, the sides by group and the change against the previous cycle", () => {
+    const html = renderHtml(sampleReport()).match(
+      /<section id="completion"[\s\S]*?<\/section>/,
+    )![0];
+    expect(html).toContain(
+      "<td>Autoevaluación</td><td>12</td><td>9</td><td>3</td><td>75%</td>",
+    );
+    expect(html).toContain("Ingeniería · Autoevaluación");
+    // a side that applies to nobody stays, marked, so the groups match the totals
+    expect(html).toContain("Equipo 1 · Autoevaluación (No aplica)");
+    expect(html).toContain("Equipo 1 · Manager");
+    expect(html).toContain(
+      "Cambio contra el ciclo anterior (Evaluación 2024, puntos porcentuales)",
+    );
+    expect(html).toContain("<td>Total</td><td>+5.5</td><td>-2</td>");
+    expect(html).toContain("<td>Ingeniería</td><td>0</td><td>–</td>");
+  });
+
+  it("completion: a total side that applies to nobody says so instead of 0 %", () => {
+    const r = sampleReport();
+    r.sections.completion!.byRelationship![1] = {
+      relationship: "manager",
+      total: 0,
+      submitted: 0,
+      applicable: false,
+      draft: null,
+      declined: null,
+    };
+    const html = renderHtml(r).match(
+      /<section id="completion"[\s\S]*?<\/section>/,
+    )![0];
+    expect(html).toContain(
+      "<td>Manager</td><td>0</td><td>0</td><td>0</td><td>No aplica</td>",
+    );
+  });
+
+  it("completion: a hidden total and a hidden change of the total show a note", () => {
+    const r = sampleReport();
+    r.sections.completion!.byRelationship = null;
+    r.sections.completion!.delta!.total = null;
+    const html = renderHtml(r).match(
+      /<section id="completion"[\s\S]*?<\/section>/,
+    )![0];
+    expect(html.match(/Total oculto/g)).toHaveLength(2);
+    expect(html).not.toContain("<td>Total</td>");
   });
 
   it("shows a note instead of totals hidden to avoid differencing", () => {
@@ -87,5 +247,48 @@ describe("renderers", () => {
     expect(hidden("qualitative")).toBe(true);
     btn("all").click();
     expect(hidden("qualitative")).toBe(false);
+  });
+});
+
+describe("SVG labels", () => {
+  const long = `${"Dirección de Corporativo y Tecnología ".repeat(2)}.`.slice(
+    0,
+    60,
+  );
+  const text = (svg: string) =>
+    [...svg.matchAll(/<text [^>]*>([^<]*)/g)].map((m) => m[1]);
+
+  it("a label of 60 characters is cut at 40 with an ellipsis, the whole text in a title", () => {
+    expect(long).toHaveLength(60);
+    for (const svg of [
+      svgBars([{ label: long, value: 3 }]),
+      svgStacked([{ label: long, parts: [1, 2] }], ["a", "b"]),
+    ]) {
+      const [shown] = text(svg);
+      expect(shown).toHaveLength(40);
+      expect(shown.endsWith("…")).toBe(true);
+      expect(shown).toBe(`${long.slice(0, 39)}…`);
+      expect(svg).toContain(`<title>${long}</title>`);
+      // the bars start after the room the cut label needs (40 x 6.3 + 16)
+      expect(svg).toMatch(/<rect x="268(\.0)?"/);
+    }
+  });
+
+  it("a label up to 40 characters is drawn whole, without a title of its own", () => {
+    const label = "x".repeat(40);
+    const svg = svgBars([{ label, value: 1 }]);
+    expect(text(svg)[0]).toBe(label);
+    expect(svg).not.toContain("<title>");
+  });
+
+  it("escapes the full text of the title", () => {
+    const label = `<b>"${"y".repeat(60)}"</b>`;
+    const svg = svgBars([{ label, value: 1 }]);
+    expect(svg).toContain("<title>&lt;b&gt;&quot;");
+    expect(svg).not.toContain("<b>");
+  });
+
+  it("short labels keep the minimum room", () => {
+    expect(svgBars([{ label: "Ventas", value: 1 }])).toMatch(/<rect x="180"/);
   });
 });
