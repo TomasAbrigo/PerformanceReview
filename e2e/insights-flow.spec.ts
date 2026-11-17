@@ -30,7 +30,7 @@ async function upload(page: Page, file: string, profile: string) {
 async function chooseCycle(page: Page, route: string) {
   await page.goto(route);
   const filters = page.getByRole("form", { name: "Filtros" });
-  await filters.getByLabel("Ciclo").selectOption({ label: cycleName });
+  await filters.locator('select[name="cycle"]').selectOption({ label: cycleName });
   await filters.getByRole("button", { name: "Aplicar" }).click();
   await expect(page).toHaveURL(/cycle=[0-9a-f-]{36}/);
 }
