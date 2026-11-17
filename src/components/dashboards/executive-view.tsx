@@ -12,7 +12,14 @@ import { RatingHistogram } from "./rating-histogram";
  * "Otros" (or not at all), and a cycle under the minimum only shows its head
  * count.
  */
-export function ExecutiveView({ data }: { data: ExecutiveSummary }) {
+export function ExecutiveView({
+  data,
+  showProgress = true,
+}: {
+  data: ExecutiveSummary;
+  /** False where completion is shown elsewhere (the executive view's tile). */
+  showProgress?: boolean;
+}) {
   const t = useTranslations("Dashboards");
   const min = data.minGroupSize;
   const belowMinimum = min !== null && data.participants < min;
@@ -35,7 +42,7 @@ export function ExecutiveView({ data }: { data: ExecutiveSummary }) {
             {data.participants}
           </div>
         </div>
-        {data.progress.map((p) => (
+        {(showProgress ? data.progress : []).map((p) => (
           <div
             key={p.relationship}
             className="flex flex-col gap-2 rounded-lg border p-4"

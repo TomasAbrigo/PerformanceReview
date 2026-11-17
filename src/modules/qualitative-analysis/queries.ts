@@ -37,7 +37,7 @@ async function resolve(
   const scope = insightsScope(
     actor,
     actor.role === "direction"
-      ? await getSetting(db, "aggregation.minGroupSize")
+      ? (f.minGroupSize ?? (await getSetting(db, "aggregation.minGroupSize")))
       : undefined,
   );
   if (scope.kind === "none") return null;
@@ -66,6 +66,7 @@ function labeledCtes({ scope, f }: Resolved): SQL {
   if (f.dimension) where.push(sql`eff.dimension = ${f.dimension}`);
   if (f.sentiment) where.push(sql`eff.sentiment = ${f.sentiment}`);
   if (f.theme) where.push(sql`${f.theme} = any(eff.themes)`);
+  if (f.relationship) where.push(sql`r.relationship = ${f.relationship}`);
   if (scope.kind === "directReports") {
     where.push(
       sql`cp.snap_manager_person_id = ${scope.managerPersonId}::uuid`,

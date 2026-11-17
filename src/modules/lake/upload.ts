@@ -223,7 +223,10 @@ export async function importUpload({
       );
     }
     return runIngest({
-      adapter: new FileSourceAdapter(profile, lake, table, { source }),
+      adapter: new FileSourceAdapter(profile, lake, table, {
+        source,
+        fileKey: upload.sha256,
+      }),
       entity: profile.entity,
       landing: !domain,
       syncState: false,

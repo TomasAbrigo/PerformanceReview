@@ -13,6 +13,8 @@ export const PROFILE_ENTITIES = [
   "assessment",
   "assessment_progress",
   "feedback",
+  // CAP's health check: landed only, its format is still to be defined.
+  "health_check",
 ] as const;
 export type ProfileEntity = (typeof PROFILE_ENTITIES)[number];
 
@@ -62,6 +64,15 @@ export const sourceProfileSchema = z.object({
   table: name,
   /** Columns that identify a row in the source. */
   keyColumns: z.array(name).min(1),
+  /**
+   * Accept a file with any columns: key columns missing from it are not an
+   * issue, and a row without a value in them is keyed by its file and
+   * ordinal (`row:<sha256(file sha256 + row index)>`): identical rows are
+   * kept, the same file lands unchanged, and an edited file lands as a new
+   * version (its old rows are not reconciled).
+   * For files whose format is not defined yet (CAP's health check).
+   */
+  syntheticKey: z.boolean().optional(),
   /** Change-tracking column for incremental reads (e.g. _fivetran_synced). */
   watermarkColumn: name.optional(),
   /** Flag column: a truthy value means the row was deleted at the source. */
@@ -122,11 +133,21 @@ function isDeleted(flag: JsonValue | undefined): boolean {
   return true;
 }
 
+/**
+ * `fallbackKey` (with `syntheticKey` profiles) is the sourceId of a row that
+ * has no value in some key column: the caller hashes the row (this module is
+ * also used in the browser, so it does not hash).
+ */
 export function applyProfile(
   profile: SourceProfile,
   row: LakeRow,
+  fallbackKey?: () => string,
 ): CanonicalRecord {
-  const keyValues = profile.keyColumns.map((column) => {
+  const keyless =
+    profile.syntheticKey &&
+    fallbackKey &&
+    profile.keyColumns.some((c) => row[c] === null || row[c] === undefined);
+  const keyValues = (keyless ? [] : profile.keyColumns).map((column) => {
     const value = row[column];
     if (
       (value === null || value === undefined) &&
@@ -160,7 +181,11 @@ export function applyProfile(
     : null;
   return {
     entity: profile.entity,
-    sourceId: keyValues.length === 1 ? keyValues[0] : JSON.stringify(keyValues),
+    sourceId: keyless
+      ? fallbackKey()
+      : keyValues.length === 1
+        ? keyValues[0]
+        : JSON.stringify(keyValues),
     fields,
     extra,
     deleted: profile.softDeleteColumn
@@ -240,7 +265,10 @@ export function validateAgainstSchema(
   const need = (column: string | undefined, role: ColumnRole) => {
     if (column && !roles.has(column)) roles.set(column, role);
   };
-  profile.keyColumns.forEach((column) => need(column, "key"));
+  // A synthetic-key profile takes any columns: its keys are optional.
+  if (!profile.syntheticKey) {
+    profile.keyColumns.forEach((column) => need(column, "key"));
+  }
   need(profile.watermarkColumn, "watermark");
   need(profile.softDeleteColumn, "soft_delete");
   need(profile.cycleColumn, "mapped");
@@ -577,6 +605,19 @@ export const builtinProfiles: SourceProfile[] = [
       "Manager Status": "manager_status",
       "Follow-up Notes": "follow_up_notes",
     },
+  },
+  {
+    // CAP's health check: its format, period, person key and scale are still
+    // open questions (see /insights/health-check), so the profile assumes no
+    // columns. Rows are landed in raw_record as they come (every column in
+    // `extra`), keyed by an "id" column if the file has one, else by the
+    // file's hash and the row's ordinal. Mapping them to people and a period is a later step.
+    name: "cap-health-check",
+    table: "health-check",
+    keyColumns: ["id"],
+    syntheticKey: true,
+    entity: "health_check",
+    columnMap: {},
   },
 ];
 

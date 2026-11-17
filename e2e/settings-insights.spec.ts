@@ -91,5 +91,5 @@ test("direction lands on the leadership view from /dashboards", async ({
   await page.goto("/es");
   await actAsRole(page, "Dirección", "Dirección");
   await page.goto("/es/dashboards");
-  await expect(page).toHaveURL(/\/es\/dashboards\/executive/);
+  await expect(page).toHaveURL(/\/es\/insights\/executive/);
 });

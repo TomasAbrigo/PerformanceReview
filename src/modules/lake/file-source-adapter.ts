@@ -5,6 +5,7 @@ import type {
   IngestEntity,
   SourceAdapter,
 } from "@/modules/ingest/types";
+import { payloadHash } from "@/modules/ingest/canonical";
 import { applyProfile, readOptionsFor, type SourceProfile } from "./profiles";
 import type { LakeAdapter, LakeRow } from "./types";
 
@@ -24,6 +25,13 @@ export type FileSourceAdapterOptions = {
   batchSize?: number;
   /** Where the rows come from (default `lake`; see {@link builtinSourceSystem}). */
   source?: SourceSystem;
+  /**
+   * Identity of the file (its sha256), for `syntheticKey` profiles: a row
+   * without a key is `row:<sha256(file + ordinal)>`, so identical rows are
+   * kept apart and the same file lands unchanged. An edited file is a new
+   * version: its rows land again, the old ones are not reconciled.
+   */
+  fileKey?: string;
 };
 
 /**
@@ -74,13 +82,25 @@ export class FileSourceAdapter implements SourceAdapter<IngestEntity> {
       since: ctx.since,
       batchSize: this.options.batchSize,
     });
+    if (profile.syntheticKey) {
+      // Any columns: page by the key columns the file has, or by all of them.
+      const columns = (await this.lake.describeTable(this.table)).map(
+        (c) => c.name,
+      );
+      const present = options.keyColumns.filter((c) => columns.includes(c));
+      options.keyColumns = present.length > 0 ? present : columns;
+    }
+    let ordinal = 0;
+    const fileKey = this.options.fileKey ?? this.table;
     for await (const { rows } of this.lake.readBatches(this.table, options)) {
       for (const row of rows) {
         // A stopped run (the worker was told to terminate) ends at the next row.
         ctx.signal?.throwIfAborted();
-        const empty = profile.keyColumns.find(
-          (c) => c !== profile.cycleColumn && isEmpty(row[c]),
-        );
+        const empty = profile.syntheticKey
+          ? undefined
+          : profile.keyColumns.find(
+              (c) => c !== profile.cycleColumn && isEmpty(row[c]),
+            );
         if (empty !== undefined) {
           const reason =
             `Profile "${profile.name}": key column "${empty}" is empty in the row ` +
@@ -100,7 +120,12 @@ export class FileSourceAdapter implements SourceAdapter<IngestEntity> {
           });
           continue;
         }
-        const record = applyProfile(profile, row);
+        const index = ordinal++;
+        const record = applyProfile(
+          profile,
+          row,
+          () => `row:${payloadHash({ file: fileKey, row: index })}`,
+        );
         yield {
           sourceId: record.sourceId,
           payload: {
