@@ -7,11 +7,20 @@ import { ExportCsvLink } from "@/components/data-quality/export-csv-link";
 import { CommentsTable } from "@/components/qualitative/comments-table";
 import { QualitativeFilters } from "@/components/qualitative/filters";
 import { ImportLabelsForm } from "@/components/qualitative/import-form";
-import { parseQualitativeParams } from "@/components/qualitative/params";
+import {
+  dimensionLabels,
+  KNOWN_DIMENSIONS,
+} from "@/components/qualitative/dimension-labels";
+import {
+  parseQualitativeParams,
+  withSide,
+} from "@/components/qualitative/params";
+import { SideToggle } from "@/components/qualitative/side-toggle";
 import { RunButton } from "@/components/qualitative/run-button";
 import {
   ByDimension,
   Indicators,
+  Kpis,
   Themes,
   Trend,
 } from "@/components/qualitative/views";
@@ -24,12 +33,14 @@ import {
   listComments,
   qualitativeFilterOptions,
   sentimentByDimension,
+  sentimentTotals,
   sentimentTrend,
   sentimentVsIndicators,
   topThemes,
   type QualitativeFilters as Filters,
 } from "@/modules/qualitative-analysis";
 import { listCycles } from "@/modules/review-core";
+import { getSetting } from "@/modules/settings/service";
 import {
   correctLabelAction,
   importLabelsAction,
@@ -61,11 +72,14 @@ async function Qualitative({
     dimension: p.dimension,
     sentiment: p.sentiment,
     theme: p.theme,
+    relationship: p.side,
+    includeClosed: await getSetting(db, "analysis.includeClosed"),
     aggregateOnly: p.aggregate,
   };
-  const [options, byDimension, trend, themes, indicators, comments] =
+  const [options, totals, byDimension, trend, themes, indicators, comments] =
     await Promise.all([
       qualitativeFilterOptions(db),
+      sentimentTotals(db, actor, f),
       sentimentByDimension(db, actor, f),
       sentimentTrend(db, actor, f),
       topThemes(db, actor, f),
@@ -73,18 +87,19 @@ async function Qualitative({
       listComments(db, actor, f),
     ]);
   const tDim = await getTranslations("Qualitative.dimensions");
-  const dimensionLabel = Object.fromEntries(
-    options.dimensions.map((d) => [
-      d,
-      tDim.has(d as "other") ? tDim(d as "other") : d,
-    ]),
-  );
+  const dimensionLabel = dimensionLabels(options.dimensions, {
+    names: Object.fromEntries(KNOWN_DIMENSIONS.map((k) => [k, tDim(k)])),
+    custom: (n) => t("customDimension", { n }),
+    prompts: options.dimensionPrompts,
+    locale,
+  });
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <h1 className="text-2xl font-semibold">{t("title")}</h1>
         {hr ? <RunButton cycleId={cycleId} run={runAnalysisAction} /> : null}
       </div>
+      <SideToggle current={p.side} hrefFor={(side) => withSide(p, side)} />
       <QualitativeFilters
         params={p}
         cycles={cycles}
@@ -97,9 +112,14 @@ async function Qualitative({
       {hr ? (
         <ExportCsvLink
           file="insights-sentiment"
-          params={{ cycle: cycleId, department: p.department }}
+          params={{
+            cycle: cycleId,
+            department: p.department,
+            relationship: p.side,
+          }}
         />
       ) : null}
+      <Kpis counts={totals} />
       <ByDimension rows={byDimension} dimensionLabel={dimensionLabel} />
       <Trend points={trend} />
       <Themes themes={themes} />

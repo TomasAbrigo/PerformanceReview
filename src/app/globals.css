@@ -27,6 +27,11 @@
   --color-chart-div-pos: var(--chart-div-pos);
   --color-chart-div-neg: var(--chart-div-neg);
   --color-chart-div-mid: var(--chart-div-mid);
+  --color-chart-sent-positive: var(--chart-sent-positive);
+  --color-chart-sent-constructive: var(--chart-sent-constructive);
+  --color-chart-sent-neutral: var(--chart-sent-neutral);
+  --color-chart-sent-mixed: var(--chart-sent-mixed);
+  --color-chart-sent-negative: var(--chart-sent-negative);
   --color-ring: var(--ring);
   --color-input: var(--input);
   --color-border: var(--border);
@@ -59,6 +64,17 @@
   --chart-div-pos: #2a78d6;
   --chart-div-neg: #e34948;
   --chart-div-mid: #f0efec;
+  /*
+   * Qualitative sentiment, in reading order: green, teal, gray, amber, red.
+   * Validated with the dataviz palette script (CVD separation and normal-vision
+   * floor pass; the gray is a deliberate neutral and the low-contrast fills
+   * always carry a count label, a tooltip and a table view).
+   */
+  --chart-sent-positive: #5d9e2f;
+  --chart-sent-constructive: #0b7f95;
+  --chart-sent-neutral: #b4b4b0;
+  --chart-sent-mixed: #e5a100;
+  --chart-sent-negative: #d4393a;
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
@@ -98,6 +114,7 @@
   --chart-div-pos: #3987e5;
   --chart-div-neg: #e66767;
   --chart-div-mid: #383835;
+  --chart-sent-neutral: #a8a8a4;
   --background: oklch(0.145 0 0);
   --foreground: oklch(0.985 0 0);
   --card: oklch(0.205 0 0);

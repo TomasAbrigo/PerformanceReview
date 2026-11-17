@@ -7,10 +7,11 @@ import {
   sentimentByDimension,
   topThemes,
 } from "@/modules/qualitative-analysis/queries";
-import type {
-  DimensionSentiment,
-  SentimentCounts,
-  ThemeRank,
+import {
+  type DimensionSentiment,
+  pickCounts,
+  type SentimentCounts,
+  type ThemeRank,
 } from "@/modules/qualitative-analysis/types";
 import { ReviewError } from "@/modules/review-core/review-errors";
 import { getSetting } from "@/modules/settings/service";
@@ -78,12 +79,7 @@ export async function selfAssessmentReport(
       { byPerson: false },
     ).then((g) => g.byQuestion.filter((row) => min === null || row.n >= min)),
   ]);
-  const strip = (d: DimensionSentiment): SentimentCounts => ({
-    positive: d.positive,
-    constructive: d.constructive,
-    negative: d.negative,
-    total: d.total,
-  });
+  const strip = (d: DimensionSentiment): SentimentCounts => pickCounts(d);
   const dimensions = [
     ...new Set([...self, ...manager].map((r) => r.dimension)),
   ].sort();

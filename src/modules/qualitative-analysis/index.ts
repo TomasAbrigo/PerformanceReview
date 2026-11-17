@@ -2,6 +2,7 @@ export * from "./constants";
 export * from "./types";
 export { AnalysisError } from "./errors";
 export { dimensionOf } from "./dimension";
+export { INITIAL_THEMES, initialThemeRows } from "./themes";
 export type {
   AnalysisInput,
   AnalysisOutput,
@@ -27,6 +28,7 @@ export {
   listComments,
   qualitativeFilterOptions,
   sentimentByDimension,
+  sentimentTotals,
   sentimentTrend,
   sentimentVsIndicators,
   topThemes,

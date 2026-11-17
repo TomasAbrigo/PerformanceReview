@@ -7,7 +7,9 @@ import {
   theme,
 } from "@/db/schema/qualitative";
 import { isUuid } from "@/lib/uuid";
+import { getSetting } from "@/modules/settings/service";
 import { DomainError } from "@/lib/domain-error";
+import { analysisTextSql, analyzableSql } from "./analysis-text";
 import { dimensionOf, fold } from "./dimension";
 import { AnalysisError } from "./errors";
 import type { AnalysisInput, AnalysisProvider } from "./provider";
@@ -17,6 +19,7 @@ import {
   type PseudonymMap,
   type PseudonymSources,
 } from "./pseudonymize";
+import { initialThemeRows } from "./themes";
 import { textHash } from "./text-hash";
 
 const DEFAULT_BATCH = 50;
@@ -27,23 +30,30 @@ type TextAnswer = {
   text: string;
   prompt: LocalizedText;
   dimension: string | null;
+  /** Question kind: text, rating or single_choice (closed). */
+  kind: string;
   cached_hash: string | null;
   /** The cached label was made from exactly this text. */
   fresh: boolean;
   corrected: boolean;
 };
 
-/** Submitted, non-empty open-text answers (optionally of one cycle). */
+/**
+ * Submitted analyzable answers (optionally of one cycle): the non-empty
+ * open-text ones, plus the closed ones of a question with a dimension when
+ * `includeClosed` (their text is the chosen option's label).
+ */
 async function textAnswers(
   db: DbOrTx,
   cycleId: string | undefined,
   provider: string,
   promptVersion: string,
+  includeClosed: boolean,
 ): Promise<TextAnswer[]> {
   return db.execute<TextAnswer>(sql`
-    select a.id as answer_id, a.text_value as text, q.prompt, q.dimension,
-           qa.text_hash as cached_hash,
-           coalesce(qa.source_md5 = md5(a.text_value), false) as fresh,
+    select a.id as answer_id, ${analysisTextSql()} as text, q.prompt, q.dimension,
+           q.kind::text as kind, qa.text_hash as cached_hash,
+           coalesce(qa.source_md5 = md5(${analysisTextSql()}), false) as fresh,
            exists (select 1 from analysis_correction c where c.answer_id = a.id) as corrected
     from answer a
     join review_request r on r.id = a.request_id
@@ -51,7 +61,7 @@ async function textAnswers(
     join question_revision q on q.id = a.question_revision_id
     left join qualitative_analysis qa on qa.answer_id = a.id
       and qa.provider = ${provider} and qa.prompt_version = ${promptVersion}
-    where q.kind = 'text' and a.text_value is not null and btrim(a.text_value) <> ''
+    where ${analyzableSql(includeClosed)}
       and r.deleted_at is null and r.status = 'submitted'
       ${cycleId ? sql`and r.cycle_id = ${cycleId}::uuid` : sql``}
     order by a.id`);
@@ -98,6 +108,8 @@ export async function runAnalysis(
   opts: {
     cycleId?: string;
     provider: AnalysisProvider;
+    /** Also label closed-question answers; the `analysis.includeClosed` setting when absent. */
+    includeClosed?: boolean;
     actorPersonId?: string | null;
     signal?: AbortSignal;
   },
@@ -123,8 +135,10 @@ export async function runAnalysis(
       opts.cycleId,
       provider.name,
       provider.promptVersion,
+      opts.includeClosed ?? (await getSetting(db, "analysis.includeClosed")),
     );
     counts.total = rows.length;
+    await seedInitialThemes(db, rows.map(dimensionOf));
     const todo: (TextAnswer & { hash: string; dimension: string })[] = [];
     for (const row of rows) {
       const hash = textHash(row.text);
@@ -145,6 +159,7 @@ export async function runAnalysis(
           token: `t${i + j}`,
           dimension: t.dimension,
           text: texts[i + j],
+          ...(t.kind === "text" ? {} : { closed: true }),
         }));
         const outputs = await provider.analyze(inputs, opts.signal);
         const byToken = new Map(outputs.map((o) => [o.token, o]));
@@ -211,7 +226,9 @@ export async function storeLabels(db: DbOrTx, labels: LabelRow[]) {
     .values(
       unique.map((l) => ({
         ...l,
-        sourceMd5: sql`(select md5(text_value) from answer where id = ${l.answerId}::uuid)`,
+        sourceMd5: sql`(select md5(${analysisTextSql()}) from answer a
+          join question_revision q on q.id = a.question_revision_id
+          where a.id = ${l.answerId}::uuid)`,
       })),
     )
     .onConflictDoUpdate({
@@ -252,6 +269,11 @@ export async function upsertThemes(
     db,
     themes.map((name) => ({ dimension, name })),
   );
+}
+
+/** Catalogs the initial theme vocabulary under each of `dimensions`. */
+export async function seedInitialThemes(db: DbOrTx, dimensions: string[]) {
+  await upsertThemeRows(db, initialThemeRows(dimensions));
 }
 
 async function upsertThemeRows(

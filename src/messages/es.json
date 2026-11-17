@@ -50,6 +50,8 @@
       "title": "Análisis cualitativo",
       "provider": "Proveedor",
       "providerHint": "Anthropic además necesita la flag ANALYSIS_PROVIDER y una API key; por defecto se usa Mock.",
+      "includeClosed": "Analizar también las preguntas cerradas",
+      "includeClosedHint": "Etiqueta además la opción elegida en las preguntas cerradas que tienen dimensión (por ejemplo, el reconocimiento de valor), no solo los comentarios abiertos.",
       "providers": {
         "mock": "Mock (determinista, sin costo)",
         "anthropic": "Anthropic"
@@ -935,6 +937,8 @@
       "dimension": "dimensión",
       "positive": "positivo",
       "constructive": "constructivo",
+      "neutral": "neutral",
+      "mixed": "mixto",
       "negative": "negativo",
       "section": "sección",
       "metric": "métrica",
@@ -1269,25 +1273,51 @@
     "sentiment": {
       "positive": "Positivo",
       "constructive": "Constructivo",
+      "neutral": "Neutral",
+      "mixed": "Mixto",
       "negative": "Negativo"
+    },
+    "legend": "Leyenda de sentimientos",
+    "side": {
+      "label": "Quién escribe",
+      "all": "Todos",
+      "self": "Propios",
+      "manager": "Manager"
+    },
+    "kpis": {
+      "title": "Indicadores",
+      "total": "Total",
+      "positive": "Positivos",
+      "constructive": "Constructivos",
+      "mixed": "Mixtos",
+      "negative": "Negativos",
+      "neutral": "Neutrales"
     },
     "dimensions": {
       "strengths": "Fortalezas",
       "improvement": "Oportunidades de mejora",
+      "valued": "Reconocimiento de valor",
+      "best_work": "Qué me ayudaría a hacer mi mejor trabajo",
       "other": "Otros"
     },
+    "customDimension": "Pregunta personalizada {n}",
     "byDimension": {
       "title": "Sentimiento por dimensión",
       "chart": "Barras apiladas de sentimiento por dimensión",
-      "bar": "{label}: {positive} positivos, {constructive} constructivos, {negative} negativos"
+      "table": "Sentimiento por dimensión (tabla)",
+      "label": "Dimensión",
+      "bar": "{label}: {positive} positivos, {constructive} constructivos, {neutral} neutrales, {mixed} mixtos, {negative} negativos"
     },
     "trend": {
       "title": "Evolución entre ciclos",
-      "chart": "Barras apiladas de sentimiento por ciclo"
+      "chart": "Barras apiladas de sentimiento por ciclo",
+      "table": "Sentimiento por ciclo (tabla)",
+      "label": "Ciclo"
     },
     "themes": {
       "title": "Temas más frecuentes",
       "count": "{n, plural, one {# comentario} other {# comentarios}}",
+      "sentiment": "Sentimiento de los comentarios de {theme}",
       "quotesNote": "Citas con nombres, emails y legajos reemplazados."
     },
     "indicators": {
@@ -1303,6 +1333,14 @@
       "table": "Comentarios etiquetados",
       "person": "Persona",
       "cycle": "Ciclo",
+      "period": "Período",
+      "themeTags": "Temas",
+      "tags": {
+        "self": "PROPIO",
+        "manager": "MANAGER",
+        "peer": "PAR",
+        "upward": "ASCENDENTE"
+      },
       "relationship": "Quién escribe",
       "text": "Comentario",
       "label": "Etiqueta",
@@ -1518,9 +1556,15 @@
       "trend": "Evolución del sentimiento",
       "themes": "Temas principales",
       "quotes": "Citas (seudonimizadas)",
+      "totals": "Comentarios analizados",
+      "bySide": "Por quién escribe",
+      "own": "Comentarios propios",
+      "manager": "Comentarios del manager",
       "sentiments": {
         "positive": "Positivo",
         "constructive": "Constructivo",
+        "neutral": "Neutral",
+        "mixed": "Mixto",
         "negative": "Negativo"
       }
     },

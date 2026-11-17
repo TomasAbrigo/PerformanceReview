@@ -50,6 +50,9 @@ export function QualitativeFilters({
       aria-label={t("label")}
       className="flex flex-wrap items-end gap-3"
     >
+      {params.side ? (
+        <input type="hidden" name="side" value={params.side} />
+      ) : null}
       {select(
         "cycle",
         t("cycle"),

@@ -4,17 +4,20 @@ import type { DbOrTx } from "@/db/client";
 import { analysisRun } from "@/db/schema/qualitative";
 import type { LocalizedText } from "@/db/schema/rating-scales";
 import { parseCsv } from "@/fixtures/serialize/csv";
-import { IMPORT_PROVIDER, sentiments, type Sentiment } from "./constants";
+import { IMPORT_PROVIDER, parseSentiment } from "./constants";
+import { analysisTextSql, analyzableSql } from "./analysis-text";
 import { dimensionOf, fold } from "./dimension";
 import { AnalysisError } from "./errors";
 import {
   finishRun,
   normalizeTheme,
+  seedInitialThemes,
   storeLabels,
   type LabelRow,
 } from "./service";
 import type { UnmatchedReason, UnmatchedRow } from "./import-labels-types";
 import { textHash } from "./text-hash";
+import { getSetting } from "@/modules/settings/service";
 
 export {
   unmatchedReasons,
@@ -65,14 +68,18 @@ type Candidate = {
 /**
  * Imports labels made elsewhere (spreadsheet, earlier tool) as provider
  * `import`. Each row is matched to an answer about that person in that cycle
- * by normalized text hash, else by dimension when exactly one answer fits.
+ * by normalized text hash, else by dimension when exactly one answer fits
+ * (closed-question answers too, by the label of the chosen option). The
+ * sentiment may be spelled in Spanish or English (Positivo, Mixto...).
  * Rows that do not match are returned (and counted in the run), never guessed.
  */
 export async function importLabels(
   db: DbOrTx,
   input: { csvPath: string } | { csv: string } | { rows: LabelImportRow[] },
-  opts: { actorPersonId?: string | null } = {},
+  opts: { actorPersonId?: string | null; includeClosed?: boolean } = {},
 ): Promise<ImportLabelsResult> {
+  const includeClosed =
+    opts.includeClosed ?? (await getSetting(db, "analysis.includeClosed"));
   const rows =
     "rows" in input
       ? input.rows
@@ -89,7 +96,7 @@ export async function importLabels(
     .returning({ id: analysisRun.id });
 
   const candidates = await db.execute<Candidate>(sql`
-    select a.id as answer_id, a.text_value as text, q.prompt, q.dimension,
+    select a.id as answer_id, ${analysisTextSql()} as text, q.prompt, q.dimension,
            p.id as person_id, p.display_name as person_name,
            (select si.value from source_identity si where si.person_id = p.id
              and si.kind = 'bamboo_id' order by si.valid_from desc limit 1) as bamboo_id,
@@ -101,7 +108,7 @@ export async function importLabels(
     join person p on p.id = cp.reviewee_person_id
     join review_cycle c on c.id = r.cycle_id
     join question_revision q on q.id = a.question_revision_id
-    where q.kind = 'text' and a.text_value is not null and btrim(a.text_value) <> ''`);
+    where ${analyzableSql(includeClosed)}`);
   const enriched = candidates.map((c) => ({
     ...c,
     hash: textHash(c.text),
@@ -129,8 +136,8 @@ export async function importLabels(
       miss("missing_fields");
       continue;
     }
-    const sentiment = row.sentiment.toLowerCase() as Sentiment;
-    if (!sentiments.includes(sentiment)) {
+    const sentiment = parseSentiment(row.sentiment);
+    if (!sentiment) {
       miss("invalid_sentiment");
       continue;
     }
@@ -189,6 +196,10 @@ export async function importLabels(
     matched++;
   }
   await storeLabels(db, labels);
+  await seedInitialThemes(
+    db,
+    labels.map((l) => l.dimension),
+  );
   await finishRun(
     db,
     run.id,

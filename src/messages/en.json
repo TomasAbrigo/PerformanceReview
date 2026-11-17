@@ -50,6 +50,8 @@
       "title": "Qualitative analysis",
       "provider": "Provider",
       "providerHint": "Anthropic also needs the ANALYSIS_PROVIDER flag and an API key; Mock is the default.",
+      "includeClosed": "Also analyze closed questions",
+      "includeClosedHint": "Also labels the chosen option of closed questions that have a dimension (for example, recognition of value), not only open-text comments.",
       "providers": {
         "mock": "Mock (deterministic, no cost)",
         "anthropic": "Anthropic"
@@ -935,6 +937,8 @@
       "dimension": "dimension",
       "positive": "positive",
       "constructive": "constructive",
+      "neutral": "neutral",
+      "mixed": "mixed",
       "negative": "negative",
       "section": "section",
       "metric": "metric",
@@ -1269,25 +1273,51 @@
     "sentiment": {
       "positive": "Positive",
       "constructive": "Constructive",
+      "neutral": "Neutral",
+      "mixed": "Mixed",
       "negative": "Negative"
     },
+    "legend": "Sentiment legend",
+    "side": {
+      "label": "Written by",
+      "all": "All",
+      "self": "Own",
+      "manager": "Manager"
+    },
+    "kpis": {
+      "title": "KPIs",
+      "total": "Total",
+      "positive": "Positive",
+      "constructive": "Constructive",
+      "mixed": "Mixed",
+      "negative": "Negative",
+      "neutral": "Neutral"
+    },
+    "customDimension": "Custom question {n}",
     "dimensions": {
       "strengths": "Strengths",
-      "improvement": "Improvement",
+      "improvement": "Opportunities to improve",
+      "valued": "Recognition of value",
+      "best_work": "What would help me do my best work",
       "other": "Other"
     },
     "byDimension": {
       "title": "Sentiment by dimension",
       "chart": "Stacked bars of sentiment by dimension",
-      "bar": "{label}: {positive} positive, {constructive} constructive, {negative} negative"
+      "table": "Sentiment by dimension (table)",
+      "label": "Dimension",
+      "bar": "{label}: {positive} positive, {constructive} constructive, {neutral} neutral, {mixed} mixed, {negative} negative"
     },
     "trend": {
       "title": "Trend across cycles",
-      "chart": "Stacked bars of sentiment by cycle"
+      "chart": "Stacked bars of sentiment by cycle",
+      "table": "Sentiment by cycle (table)",
+      "label": "Cycle"
     },
     "themes": {
       "title": "Top themes",
       "count": "{n, plural, one {# comment} other {# comments}}",
+      "sentiment": "Sentiment of the comments about {theme}",
       "quotesNote": "Quotes with names, emails and employee numbers replaced."
     },
     "indicators": {
@@ -1303,6 +1333,14 @@
       "table": "Labeled comments",
       "person": "Person",
       "cycle": "Cycle",
+      "period": "Period",
+      "themeTags": "Themes",
+      "tags": {
+        "self": "SELF",
+        "manager": "MANAGER",
+        "peer": "PEER",
+        "upward": "UPWARD"
+      },
       "relationship": "Written by",
       "text": "Comment",
       "label": "Label",
@@ -1518,9 +1556,15 @@
       "trend": "Sentiment trend",
       "themes": "Top themes",
       "quotes": "Quotes (pseudonymized)",
+      "totals": "Comments analyzed",
+      "bySide": "By who wrote them",
+      "own": "Own comments",
+      "manager": "Manager comments",
       "sentiments": {
         "positive": "Positive",
         "constructive": "Constructive",
+        "neutral": "Neutral",
+        "mixed": "Mixed",
         "negative": "Negative"
       }
     },

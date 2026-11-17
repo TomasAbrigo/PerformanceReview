@@ -70,6 +70,55 @@ describe("renderers", () => {
     expect(html).toContain("Executive summary");
   });
 
+  describe("qualitative section", () => {
+    const qualitative = (html: string) =>
+      html.match(/<section id="qualitative"[\s\S]*?<\/section>/)![0];
+
+    it("draws the five sentiments with their legend, and the same cut by side", () => {
+      const html = qualitative(renderHtml(sampleReport()));
+      for (const name of [
+        "Positivo",
+        "Constructivo",
+        "Neutral",
+        "Mixto",
+        "Negativo",
+      ]) {
+        expect(html).toContain(name);
+      }
+      // one stacked chart for everybody and one for each side
+      expect(html).toContain("Comentarios propios");
+      expect(html).toContain("Comentarios del manager");
+      expect(html.match(/<svg/g)?.length).toBeGreaterThanOrEqual(4);
+      // five segments per dimension bar carry their own class
+      for (const k of [0, 1, 2, 3, 4]) expect(html).toContain(`class="s${k}"`);
+      // each theme tells its sentiment
+      expect(html).toMatch(/comunicacion[\s\S]*Mixto 1/);
+    });
+
+    it("in English too, and an old report (three sentiments, no sides) still renders", () => {
+      const en = qualitative(renderHtml(sampleReport({ locale: "en" })));
+      expect(en).toContain("Mixed");
+      expect(en).toContain("Own comments");
+      const old = sampleReport();
+      delete old.sections.qualitative!.bySide;
+      delete old.sections.qualitative!.totals;
+      expect(qualitative(renderHtml(old))).not.toContain("Comentarios propios");
+    });
+
+    it("the schema reads a minor-1 report: missing neutral and mixed are zero", () => {
+      const r = sampleReport();
+      const json = JSON.parse(renderJson(r));
+      for (const row of json.sections.qualitative.sentimentByDimension) {
+        delete row.neutral;
+        delete row.mixed;
+      }
+      const parsed = arturiaReportV1.parse(json);
+      expect(
+        parsed.sections.qualitative?.sentimentByDimension[0],
+      ).toMatchObject({ neutral: 0, mixed: 0 });
+    });
+  });
+
   describe("goals section", () => {
     const goals = (html: string) =>
       html.match(/<section id="goals"[\s\S]*?<\/section>/)![0];

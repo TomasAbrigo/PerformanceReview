@@ -1,6 +1,6 @@
 "use client";
 
-import { useTranslations } from "next-intl";
+import { useFormatter, useTranslations } from "next-intl";
 import { useState, useTransition } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -32,7 +32,7 @@ export function CommentsTable({
       <thead>
         <tr className="text-left">
           <th className="pr-3">{t("comments.person")}</th>
-          <th className="pr-3">{t("comments.cycle")}</th>
+          <th className="pr-3">{t("comments.period")}</th>
           <th className="pr-3">{t("filters.dimension")}</th>
           <th className="pr-3">{t("comments.text")}</th>
           <th className="pr-3">{t("comments.label")}</th>
@@ -68,17 +68,26 @@ function Row({
   const [editing, setEditing] = useState(false);
   const [pending, start] = useTransition();
   const [error, setError] = useState<string | null>(null);
+  const format = useFormatter();
+  const day = (iso: string) =>
+    format.dateTime(new Date(`${iso}T00:00:00Z`), {
+      dateStyle: "medium",
+      timeZone: "UTC",
+    });
   return (
     <tr className="border-t align-top">
       <td className="py-1 pr-3">
-        {row.personName}
+        <div>{row.personName}</div>
+        <span className="rounded border px-1 text-[10px] font-semibold tracking-wide">
+          {t(`comments.tags.${row.relationship}` as "comments.tags.self")}
+        </span>
+      </td>
+      <td className="py-1 pr-3">
+        <div>{row.cycleName}</div>
         <div className="text-xs text-muted-foreground">
-          {t(
-            `comments.relationships.${row.relationship}` as "comments.relationships.self",
-          )}
+          {day(row.periodStart)} – {day(row.periodEnd)}
         </div>
       </td>
-      <td className="py-1 pr-3">{row.cycleName}</td>
       <td className="py-1 pr-3">{dimension}</td>
       <td className="py-1 pr-3 whitespace-pre-line">{row.text}</td>
       <td className="py-1 pr-3">
@@ -91,7 +100,18 @@ function Row({
             {t("comments.confidence", { value: row.confidence.toFixed(2) })}
           </div>
         ) : null}
-        <div className="text-xs">{row.themes.join(", ")}</div>
+        {row.themes.length > 0 ? (
+          <ul
+            aria-label={t("comments.themeTags")}
+            className="mt-1 flex flex-wrap gap-1 text-xs"
+          >
+            {row.themes.map((theme) => (
+              <li key={theme} className="rounded-full border px-2">
+                {theme}
+              </li>
+            ))}
+          </ul>
+        ) : null}
         {correct && !editing ? (
           <Button size="sm" variant="outline" onClick={() => setEditing(true)}>
             {t("comments.correct")}

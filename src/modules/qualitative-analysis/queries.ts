@@ -4,20 +4,24 @@ import type { LocalizedText } from "@/db/schema/rating-scales";
 import { isUuid } from "@/lib/uuid";
 import type { ActorContext } from "@/modules/actor/types";
 import { sentiments, type Sentiment } from "./constants";
+import { analysisTextSql } from "./analysis-text";
 import { effectiveCte } from "./effective";
+import { INITIAL_THEMES } from "./themes";
 import { insightsScope, type InsightsScope } from "@/modules/insights/authz";
 import { getSetting } from "@/modules/settings/service";
 import { AnalysisError } from "./errors";
 import { pseudonymize } from "./pseudonymize";
 import { pseudonymSources } from "./service";
-import type {
-  CommentRow,
-  DimensionSentiment,
-  IndicatorSentiment,
-  QualitativeFilters,
-  SentimentCounts,
-  ThemeRank,
-  TrendPoint,
+import {
+  type CommentRow,
+  type DimensionSentiment,
+  type IndicatorSentiment,
+  pickCounts,
+  type QualitativeFilterOptions,
+  type QualitativeFilters,
+  type SentimentCounts,
+  type ThemeRank,
+  type TrendPoint,
 } from "./types";
 
 /**
@@ -27,7 +31,12 @@ import type {
  * nothing (never their own labels). aggregateOnly (also People's toggle)
  * keeps counts and drops comments and quotes.
  */
-type Resolved = { scope: InsightsScope; f: QualitativeFilters; min: number };
+type Resolved = {
+  scope: InsightsScope;
+  f: QualitativeFilters;
+  min: number;
+  includeClosed: boolean;
+};
 
 async function resolve(
   db: DbOrTx,
@@ -41,10 +50,17 @@ async function resolve(
       : undefined,
   );
   if (scope.kind === "none") return null;
+  const includeClosed =
+    f.includeClosed ?? (await getSetting(db, "analysis.includeClosed"));
   if (scope.kind === "aggregatesOnly") {
-    return { scope, f: { ...f, aggregateOnly: true }, min: scope.minGroupSize };
+    return {
+      scope,
+      f: { ...f, aggregateOnly: true },
+      min: scope.minGroupSize,
+      includeClosed,
+    };
   }
-  return { scope, f, min: 0 };
+  return { scope, f, min: 0, includeClosed };
 }
 
 /** Groups with fewer distinct participants than `min` are left out. */
@@ -52,12 +68,13 @@ const minGroup = (min: number, col = sql`participant_id`) =>
   min > 1 ? sql`having count(distinct ${col}) >= ${min}` : sql``;
 
 /** CTEs eff + labeled: effective labels of submitted answers in scope. */
-function labeledCtes({ scope, f }: Resolved): SQL {
+function labeledCtes({ scope, f, includeClosed }: Resolved): SQL {
   const where: SQL[] = [
     sql`r.deleted_at is null`,
     sql`r.status = 'submitted'`,
     sql`cp.removed_at is null`,
   ];
+  if (!includeClosed) where.push(sql`eff.kind = 'text'`);
   if (f.cycleId) {
     if (!isUuid(f.cycleId)) throw new AnalysisError("not_found");
     where.push(sql`r.cycle_id = ${f.cycleId}::uuid`);
@@ -75,12 +92,15 @@ function labeledCtes({ scope, f }: Resolved): SQL {
   }
   return sql`${effectiveCte()},
     labeled as (
-      select eff.*, a.text_value as text, r.cycle_id, r.relationship::text as relationship,
-             c.name as cycle_name, c.period_end::text as period_end,
+      select eff.*, ${analysisTextSql("a", "q")} as text, r.cycle_id,
+             r.relationship::text as relationship,
+             c.name as cycle_name, c.period_start::text as period_start,
+             c.period_end::text as period_end,
              cp.id as participant_id, p.display_name as person_name,
              cp.snap_department as department
       from eff
       join answer a on a.id = eff.answer_id
+      join question_revision q on q.id = a.question_revision_id
       join review_request r on r.id = a.request_id
       join cycle_participant cp on cp.id = r.participant_id
       join review_cycle c on c.id = r.cycle_id
@@ -94,14 +114,7 @@ const countCols = sql.raw(
     .map((s) => `count(*) filter (where sentiment = '${s}')::int as ${s}`)
     .join(", "),
 );
-const counts = (
-  r: Record<Sentiment, number> & { total: number },
-): SentimentCounts => ({
-  positive: r.positive,
-  constructive: r.constructive,
-  negative: r.negative,
-  total: r.total,
-});
+const counts = pickCounts;
 
 /** Sentiment counts per dimension (stacked bars). */
 export async function sentimentByDimension(
@@ -116,6 +129,24 @@ export async function sentimentByDimension(
     select dimension, ${countCols}, count(*)::int as total
     from labeled group by dimension ${minGroup(r.min)} order by dimension`);
   return rows.map((r) => ({ dimension: r.dimension, ...counts(r) }));
+}
+
+/**
+ * Sentiment counts of everything in scope (the KPIs). Direction: null when
+ * fewer than `aggregation.minGroupSize` people are behind them.
+ */
+export async function sentimentTotals(
+  db: DbOrTx,
+  actor: ActorContext,
+  f: QualitativeFilters,
+): Promise<SentimentCounts | null> {
+  const r = await resolve(db, actor, f);
+  if (!r) return null;
+  const rows = await db.execute<SentimentCounts>(sql`
+    with ${labeledCtes(r)}
+    select ${countCols}, count(*)::int as total
+    from labeled ${minGroup(r.min)}`);
+  return rows[0] ? counts(rows[0]) : null;
 }
 
 /** Sentiment counts per cycle, ordered by period (all cycles). */
@@ -153,23 +184,21 @@ export async function topThemes(
 ): Promise<ThemeRank[]> {
   const r = await resolve(db, actor, f);
   if (!r) return [];
-  const rows = await db.execute<{
-    theme: string;
-    count: number;
-    quotes: string[];
-  }>(sql`
+  const rows = await db.execute<
+    SentimentCounts & { theme: string; count: number; quotes: string[] }
+  >(sql`
     with ${labeledCtes(r)},
-    t as (select unnest(themes) as theme, text, answer_id, participant_id from labeled)
-    select theme, count(*)::int as count,
+    t as (select unnest(themes) as theme, text, answer_id, participant_id, sentiment from labeled)
+    select theme, count(*)::int as count, ${countCols}, count(*)::int as total,
            (array_agg(text order by length(text), answer_id))[1:3] as quotes
     from t group by theme ${minGroup(r.min)}
     order by count desc, theme limit ${limit}`);
-  if (r.f.aggregateOnly) return rows.map((row) => ({ ...row, quotes: [] }));
-  const sources = await pseudonymSources(db);
+  const sources = r.f.aggregateOnly ? null : await pseudonymSources(db);
   return rows.map((row) => ({
     theme: row.theme,
     count: row.count,
-    quotes: pseudonymize(row.quotes, sources).texts,
+    sentiment: counts(row),
+    quotes: sources ? pseudonymize(row.quotes, sources).texts : [],
   }));
 }
 
@@ -230,6 +259,8 @@ export async function listComments(
   const rows = await db.execute<{
     answer_id: string;
     cycle_name: string;
+    period_start: string;
+    period_end: string;
     person_name: string;
     relationship: string;
     dimension: string;
@@ -240,13 +271,15 @@ export async function listComments(
     source: string;
   }>(sql`
     with ${labeledCtes(r)}
-    select answer_id, cycle_name, person_name, relationship, dimension, text,
-           sentiment, themes, confidence, source
+    select answer_id, cycle_name, period_start, period_end, person_name,
+           relationship, dimension, text, sentiment, themes, confidence, source
     from labeled order by period_end desc, person_name, dimension, answer_id
     limit ${limit}`);
   return rows.map((r) => ({
     answerId: r.answer_id,
     cycleName: r.cycle_name,
+    periodStart: r.period_start,
+    periodEnd: r.period_end,
     personName: r.person_name,
     relationship: r.relationship,
     dimension: r.dimension,
@@ -258,10 +291,13 @@ export async function listComments(
   }));
 }
 
-/** Dimensions and themes present, for the filters. */
+/**
+ * Dimensions and themes present, for the filters. The themes are the initial
+ * vocabulary plus whatever the analysis added.
+ */
 export async function qualitativeFilterOptions(
   db: DbOrTx,
-): Promise<{ dimensions: string[]; themes: string[]; departments: string[] }> {
+): Promise<QualitativeFilterOptions> {
   const dims = await db.execute<{ d: string }>(
     sql`select distinct dimension as d from qualitative_analysis order by 1`,
   );
@@ -271,9 +307,17 @@ export async function qualitativeFilterOptions(
   const deps = await db.execute<{ d: string }>(
     sql`select distinct snap_department as d from cycle_participant where snap_department is not null order by 1`,
   );
+  const prompts = await db.execute<{ d: string; prompt: LocalizedText }>(sql`
+    select distinct on (qa.dimension) qa.dimension as d, q.prompt
+    from qualitative_analysis qa
+    join answer a on a.id = qa.answer_id
+    join question_revision q on q.id = a.question_revision_id
+    join review_cycle c on c.id = q.cycle_id
+    order by qa.dimension, c.period_end desc, q.sort, q.id`);
   return {
     dimensions: dims.map((r) => r.d),
-    themes: themes.map((r) => r.t),
+    themes: [...new Set([...INITIAL_THEMES, ...themes.map((r) => r.t)])].sort(),
     departments: deps.map((r) => r.d),
+    dimensionPrompts: Object.fromEntries(prompts.map((r) => [r.d, r.prompt])),
   };
 }
