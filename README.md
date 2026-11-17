@@ -16,7 +16,7 @@ Alcance y decisiones: [`docs/prd.md`](docs/prd.md) (issue [#1](https://github.co
 
 - Datos: ingesta desde Bamboo (empleados, historial de puesto y manager, goals) con identidad "golden" y cola de conflictos, organigrama a una fecha, importación por archivo con perfiles de fuente (incluida la importación histórica de assessments y feedback desde los CSV de Bamboo), adaptador de lake sobre archivos, log de corridas, seed y fixtures.
 - Modelo de evaluaciones como datos: escalas y templates, ciclos como contenedores de solo lectura con el snapshot organizacional y de goals de cada participante, pedidos, respuestas y preguntas congeladas, con una única regla de lectura (`canRead`).
-- Análisis: dashboards, panel de calidad de datos, API JSON de solo lectura (incluidos los pedidos y respuestas) y exports CSV.
+- Análisis: dashboards, indicadores de retención y compromiso (`/insights/indicators`), panel de calidad de datos, API JSON de solo lectura (incluidos los pedidos y respuestas) y exports CSV.
 
 Se quitaron los flujos para hacer evaluaciones dentro de la app: asistente y fases de ciclo, autoevaluación y evaluación del manager, pares y upward, comparación, notas, acuse de recibo, calibración, operación del ciclo, notificaciones, cadencia por fecha de ingreso, `/me` y `/team`. Sus datos (tablas de pedidos, respuestas y `final_rating`) se conservan.
 
@@ -118,6 +118,29 @@ Qué hay en la app, dónde está en la UI y las reglas que conviene conocer. Las
 - **Jerarquía:** el equipo de un manager se elige explícitamente "al momento de la review" (el snapshot del ciclo) o "actual".
 - **Quién ve qué:** People ve todo; un manager, su equipo; el resto es redirigido a su propia trayectoria, con solo lo publicado. La vista de dirección es solo de People: agregados sin nombres ni ids, y las áreas con menos de 3 personas no se desglosan.
 - **CSV:** los botones "Exportar CSV" bajan avance, distribución, goals vs rating y brecha self vs manager (`dashboard-*.csv`, ver "Exports CSV").
+
+### Indicadores de retención y compromiso (`/insights/indicators`)
+
+- **Dónde:** `/insights/indicators` (filtros por ciclo, indicador, agrupación, jerarquía, área y manager) y `/insights/indicators/trend` (la evolución de una persona, un equipo o un área, con los dos indicadores). Se entra desde la home.
+- **De dónde salen los datos:** de las dos preguntas cerradas que responde el manager (Retención y Compromiso, Likert 1 a 5, ocultas para el evaluado): las respuestas (`answer.option_value`, 1 a 5) a las revisiones de pregunta con rol `retention` o `engagement`, en el pedido `manager` enviado de cada participante. El área y el manager son los del snapshot del ciclo (`snap_department`, `snap_manager_person_id`); los ciclos se ordenan por `period_start`. Si hay más de un pedido enviado del mismo participante cuenta el último, y los borradores, los pedidos borrados, los participantes removidos, los ciclos en borrador y los valores fuera de 1 a 5 no cuentan.
+- **Qué muestra:**
+  - _Distribución_: cuántas personas recibieron cada valor (1 a 5) en un ciclo, con n y promedio, por área, por manager o todos juntos (barras SVG propias, una por grupo, con la tabla equivalente). "Jerarquía" elige el área y el manager del snapshot (por defecto) o los de hoy; el alcance del manager sigue siendo el del snapshot.
+  - _Evolución_: el promedio de cada ciclo para una persona (su valor), un equipo (el manager del snapshot de cada ciclo), un área o toda la organización.
+  - _Matriz_: retención × compromiso en tres bandas por eje (bajo: hasta el umbral de riesgo; alto: desde el valor espejo; medio entre ambos; con el umbral 2: 1-2, 3 y 4-5) con las personas de cada celda contadas; la celda con ambos bajos es el cuadrante de riesgo. Solo entran quienes tienen los dos indicadores en el ciclo.
+  - _Alertas_: `drop`, un indicador que cayó el umbral de caída o más respecto del ciclo anterior en el que la persona tiene valor, y `risk`, retención y compromiso ambos en el umbral de riesgo o menos.
+- **Umbrales:** caída de 2 (`alerts.dropThreshold`), riesgo en 2 (`alerts.riskThreshold`) y mínimo de 5 personas (`aggregation.minGroupSize`). Los lee `indicatorConfig` (`src/modules/analytics/indicators/config.ts`); cada consulta acepta `config` para reemplazar alguno en una llamada (los tests de umbrales lo usan).
+- **Quién ve qué** (una sola decisión, `indicatorScope`):
+
+| Rol                | Distribución, evolución, matriz y alertas                                                                                                                                                                                                                                                            |
+| ------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| People (`hr`)      | Todo, con las personas: la lista del cuadrante de riesgo (solo People) y las alertas con persona, manager y área.                                                                                                                                                                                    |
+| Manager            | Solo sus reportes directos del snapshot (nunca sobre sí mismo), sin mínimo; las alertas con persona, la matriz solo con conteos. La evolución de una persona (y la comparación con el ciclo anterior) usa solo los ciclos en que era su reporte directo.                                             |
+| Dirección          | Solo agregados con grupos de al menos el mínimo: los grupos más chicos se juntan en "Otros" (si ese grupo sigue siendo chico, se oculta) y, si algo se oculta, tampoco se muestra el total; de la matriz, las celdas con menos del mínimo; de las alertas, solo cuántas personas. Nunca una persona. |
+| Empleado (y otros) | Nada, tampoco sobre sí mismo: la página dice que no hay acceso y las consultas fallan con `forbidden`.                                                                                                                                                                                               |
+
+- **CSV:** "Exportar CSV" (solo People, como los dashboards) baja `insights-indicator-distribution.csv` (una fila por grupo y valor, con n y promedio; filtros `cycle` (obligatorio), `indicator`, `groupBy`, `hierarchy`, `department`, `manager`) e `insights-alerts.csv` (una fila por alerta; `cycle` obligatorio, `department`, `manager`). Sin email.
+- **Tests:** `src/modules/analytics/indicators/indicators.db.test.ts` calcula a mano las cuatro consultas sobre filas insertadas (dos ciclos, dos equipos, un cambio de área) y prueba cada rol y cada umbral; `indicators-export.db.test.ts` los CSV; `src/components/indicators/indicators.test.tsx` las vistas en es y en en; `e2e/indicators.spec.ts` la pantalla sobre un ciclo importado.
+- **Límites conocidos:** la supresión de Dirección actúa por consulta (un grupo, una celda): comparar a mano dos vistas con distintos filtros podría deducir un grupo chico; no hay supresión complementaria entre consultas.
 
 ### Calidad de datos y API (`/data-quality`, `/api/v1`)
 
@@ -421,15 +444,17 @@ Handlers en `src/modules/api/handlers.ts`, rutas en `src/app/api/v1/**`. Todos l
 
 `GET /api/v1/export/<entidad>.csv` (mismo token y mismos filtros que la API), con "Exportar CSV" en las listas de personas, organigrama, goals, corridas y ciclos. Archivos UTF-8 con BOM (Excel), líneas `CRLF`, comillas RFC 4180 y un apóstrofe delante del texto que una planilla evaluaría como fórmula (`=`, `+`, `-`, `@`). Se arman página por página (streaming): un error antes de la primera fila es un 500 como cualquier otro; si falla una página posterior, el error se registra y el archivo termina con una línea `# EXPORT INTERRUPTED: ...`. Los encabezados salen en el idioma de `?locale=es|en` (por defecto `es`; los botones mandan el idioma de la página). `people.csv` y `GET /api/v1/people` listan a las mismas personas que la pantalla de personas (las que tienen al menos un empleo vigente). **El email no sale por defecto**: `people.csv` solo trae la columna `email` con `?include_email=1` (también `true`; `0` o `false` equivalen a omitirlo), y `q` busca solo por nombre (ver [Datos sensibles](#datos-sensibles)).
 
-| Archivo                  | Una fila por…                    | Filtros                              |
-| ------------------------ | -------------------------------- | ------------------------------------ |
-| `people.csv`             | persona                          | `q`, `active`, `include_email`       |
-| `org.csv`                | fila de puesto vigente en `date` | `date`                               |
-| `goals.csv`              | goal                             | `person_id`, `manager_id`, `status`  |
-| `ingest-runs.csv`        | corrida                          | `source`, `entity`, `status`         |
-| `cycle-participants.csv` | participante de ciclo            | `cycle_id`                           |
-| `requests.csv`           | pedido de evaluación             | `cycle_id`, `relationship`, `status` |
-| `answers.csv`            | evaluador × pregunta (respuesta) | `cycle_id`, `relationship`, `status` |
+| Archivo                               | Una fila por…                                   | Filtros                                                               |
+| ------------------------------------- | ----------------------------------------------- | --------------------------------------------------------------------- |
+| `people.csv`                          | persona                                         | `q`, `active`, `include_email`                                        |
+| `org.csv`                             | fila de puesto vigente en `date`                | `date`                                                                |
+| `goals.csv`                           | goal                                            | `person_id`, `manager_id`, `status`                                   |
+| `ingest-runs.csv`                     | corrida                                         | `source`, `entity`, `status`                                          |
+| `cycle-participants.csv`              | participante de ciclo                           | `cycle_id`                                                            |
+| `requests.csv`                        | pedido de evaluación                            | `cycle_id`, `relationship`, `status`                                  |
+| `answers.csv`                         | evaluador × pregunta (respuesta)                | `cycle_id`, `relationship`, `status`                                  |
+| `insights-indicator-distribution.csv` | grupo × valor (1 a 5) de retención o compromiso | `cycle`, `indicator`, `groupBy`, `hierarchy`, `department`, `manager` |
+| `insights-alerts.csv`                 | alerta (caída o riesgo)                         | `cycle`, `department`, `manager`                                      |
 
 Cada fila trae los ids internos (uuid) y los de Bamboo (`bamboo_id`, `legajo`, y el del manager o del manager del snapshot), más área, división, puesto y ubicación.
 
