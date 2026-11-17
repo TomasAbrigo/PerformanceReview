@@ -364,3 +364,32 @@ Sobre el pipeline existente (ingesta, perfiles de fuente, historial de importaci
 ## Further Notes
 
 Preguntas abiertas para el owner y People, que no se asumen: texto exacto y dimensión de las 3 preguntas custom; columnas reales de los dos reportes (tras `reports:inspect`); formato del health check de CAP; restricciones de las mini apps de Arturía (tamaño, scripts, auth); preferencia de People por el enfoque cualitativo, cuantitativo o ambos. Supuestos provisorios: equivalencias Retención A=5…E=1 y Compromiso A=5…E=1 (variante de 4 opciones A=5, B=4, C=2, D=1); semestres calendario; custom como placeholders "Custom 1..3".
+
+## Estado al cierre
+
+Entregado por bloque (todo local y con datos sintéticos):
+
+1. **Poda y datos sensibles** (#54, #55): se quitaron los flujos de evaluación dentro de la app; guardas de datos sensibles (sin emails en listas, check que impide commitear exports privados, logs sin texto ni nombres).
+2. **Importación de reportes** (#58): Employee Performance y Assessment Progress con perfiles built-in, ciclos semestrales detectados, filas ambiguas en `needs_decision` con resolución en la UI, `assessment_progress` y `pnpm reports:inspect` para mirar las columnas de un export real.
+3. **Modelo de preguntas** (#57): template "Evaluación semestral Santex", escalas Likert de retención y compromiso con su normalización, dimensiones de las preguntas abiertas.
+4. **Completitud** (#59): `/insights/completion` con resumen por ciclo y "quién falta".
+5. **Retención y compromiso** (#60): `/insights/indicators` con distribución, matriz, alertas por caída y riesgo.
+6. **Análisis cualitativo** (#61): `/insights/qualitative`, `MockProvider` determinista y `AnthropicProvider` (apagado por defecto), seudonimización, correcciones a mano, `analysis:run` y `analysis:import-labels`.
+7. **Goals ↔ assessments** (#62): `/insights/goals` con KPIs de goals y cruce con indicadores.
+8. **Reportes y vista ejecutiva** (#56, #63): roles con Dirección y reglas de autorización, `/settings/insights`, `/insights/executive` (cualitativo, cuantitativo, ambos; enmascarada para Dirección), `/insights/self-assessment` y `/insights/health-check` (formato provisorio).
+9. **Export para Arturía y demo** (#64, #65): `pnpm export:arturia` (HTML y JSON autocontenidos, modo anonimizado), seed demo con reportes y análisis (~40 s), e2e `insights-flow` de punta a punta, README y este estado.
+
+Pendiente:
+
+- Validar todo contra exports reales de Bamboo (hoy las columnas de los reportes son supuestas) y acceso a la API (#23).
+- Activar el `AnthropicProvider` sobre datos reales, tras aprobación de People.
+- Formato real del health check de CAP y empaquetado definitivo para Arturía.
+- Login real, roles y RLS; deploy (fuera de alcance).
+
+Preguntas abiertas para People:
+
+- Texto exacto y dimensión de las 3 preguntas custom (hoy placeholders "Custom 1..3").
+- Columnas reales de los dos reportes: correr `pnpm reports:inspect` sobre un export real y ajustar los perfiles.
+- Formato esperado del health check de CAP.
+- Restricciones de las mini apps de Arturía (tamaño, scripts, autenticación).
+- Preferencia por el enfoque cualitativo, cuantitativo o ambos en la vista ejecutiva.

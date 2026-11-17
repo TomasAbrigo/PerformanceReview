@@ -1,14 +1,12 @@
-import { copyFile, mkdtemp, rm, writeFile } from "node:fs/promises";
+import { mkdtemp, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { sql } from "drizzle-orm";
 import { db } from "@/db/client";
 import { employeeJobHistory, person } from "@/db/schema";
 import { generateCompany, type CompanyFixture } from "@/fixtures/company";
-import { runIngest } from "@/modules/ingest/run-ingest";
-import { DuckDbFileLake } from "@/modules/lake/duckdb-file-lake";
-import { FileSourceAdapter } from "@/modules/lake/file-source-adapter";
-import { getBuiltinProfile, type SourceProfile } from "@/modules/lake/profiles";
+import type { SourceProfile } from "@/modules/lake/profiles";
+import { importReportFile } from "@/modules/lake/upload";
 
 /** Shared setup of the historical import DB tests. */
 
@@ -76,34 +74,10 @@ export async function seedSmallCompany(): Promise<SeededCompany> {
 }
 
 /** Imports one report CSV through a profile (a built-in by name), in domain mode. */
-export async function importReport(
+export const importReport = (
   file: string,
-  profileOrName: string | SourceProfile = "bamboo-employee-performance",
-) {
-  const profile =
-    typeof profileOrName === "string"
-      ? getBuiltinProfile(profileOrName)!
-      : profileOrName;
-  const dir = await mkdtemp(path.join(tmpdir(), "history-import-"));
-  try {
-    await copyFile(file, path.join(dir, `${profile.table}.csv`));
-    const lake = await DuckDbFileLake.open(dir);
-    try {
-      return await runIngest({
-        adapter: new FileSourceAdapter(profile, lake, profile.table, {
-          source: "bamboo_export",
-        }),
-        entity: profile.entity,
-        db,
-        ...(profile.questions ? { questions: profile.questions } : {}),
-      });
-    } finally {
-      await lake.close();
-    }
-  } finally {
-    await rm(dir, { recursive: true, force: true });
-  }
-}
+  profile: string | SourceProfile = "bamboo-employee-performance",
+) => importReportFile(db, { path: file, profile, source: "bamboo_export" });
 
 /** Writes a CSV (header + rows, already quoted) to a scratch file. */
 export async function writeCsv(lines: string[]): Promise<string> {

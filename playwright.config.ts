@@ -38,12 +38,12 @@ export default defineConfig({
       name: "chromium",
       use: { ...devices["Desktop Chrome"] },
       testIgnore:
-        /(identity(-later)?|dashboards|completion|indicators|review-api|qualitative|goals-insights|executive)\.spec\.ts/,
+        /(identity(-later)?|dashboards|completion|indicators|review-api|qualitative|goals-insights|executive|insights-flow)\.spec\.ts/,
     },
     // These read the review data of the historical import, which
     // e2e/historical-import.spec.ts (project chromium) brings in: they run
     // once it is done. The projects form one line: chromium, insights,
-    // identity-setup, identity.
+    // insights-flow, identity-setup, identity.
     {
       name: "insights",
       use: { ...devices["Desktop Chrome"] },
@@ -51,13 +51,21 @@ export default defineConfig({
         /(dashboards|completion|indicators|review-api|qualitative|goals-insights|executive)\.spec\.ts/,
       dependencies: ["chromium"],
     },
+    // The whole insights flow, end to end (uploads the reports again and runs
+    // the export): after every spec that reads the imported data.
+    {
+      name: "insights-flow",
+      use: { ...devices["Desktop Chrome"] },
+      testMatch: /insights-flow\.spec\.ts/,
+      dependencies: ["insights"],
+    },
     // The identity specs resolve and queue cases (they link a seeded rehire to
     // the person who left, and one more run brings a rehire in), so they run on
     // their own, once every spec that only reads is done.
     {
       name: "identity-setup",
       testMatch: /identity\.setup\.ts/,
-      dependencies: ["insights"],
+      dependencies: ["insights-flow"],
     },
     {
       name: "identity",

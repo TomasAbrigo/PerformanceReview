@@ -16,7 +16,7 @@ Alcance y decisiones: [`docs/prd.md`](docs/prd.md) (issue [#1](https://github.co
 
 - Datos: ingesta desde Bamboo (empleados, historial de puesto y manager, goals) con identidad "golden" y cola de conflictos, organigrama a una fecha, importación por archivo con perfiles de fuente (incluida la importación histórica de assessments y feedback desde los CSV de Bamboo), adaptador de lake sobre archivos, log de corridas, seed y fixtures.
 - Modelo de evaluaciones como datos: escalas y templates, ciclos como contenedores de solo lectura con el snapshot organizacional y de goals de cada participante, pedidos, respuestas y preguntas congeladas, con una única regla de lectura (`canRead`).
-- Análisis: dashboards, completitud de evaluaciones (quién falta y comparación con el ciclo anterior), indicadores de retención y compromiso (`/insights/indicators`), panel de calidad de datos, API JSON de solo lectura (incluidos los pedidos y respuestas) y exports CSV.
+- Análisis: dashboards, vista ejecutiva (`/insights/executive`), reporte de autoevaluación y health check, goals ↔ assessments (`/insights/goals`), análisis cualitativo (`/insights/qualitative`), export para Arturía (`pnpm export:arturia`), completitud de evaluaciones (quién falta y comparación con el ciclo anterior), indicadores de retención y compromiso (`/insights/indicators`), panel de calidad de datos, API JSON de solo lectura (incluidos los pedidos y respuestas) y exports CSV.
 
 Se quitaron los flujos para hacer evaluaciones dentro de la app: asistente y fases de ciclo, autoevaluación y evaluación del manager, pares y upward, comparación, notas, acuse de recibo, calibración, operación del ciclo, notificaciones, cadencia por fecha de ingreso, `/me` y `/team`. Sus datos (tablas de pedidos, respuestas y `final_rating`) se conservan.
 
@@ -54,19 +54,41 @@ pnpm install
 cp .env.example .env.local
 supabase start
 pnpm db:migrate
-pnpm db:seed --size demo   # 400 registros de Bamboo: 392 personas, 8 casos en la cola de identidad, 1399 goals
-pnpm dev                   # http://localhost:3000 -> redirige a /es
+pnpm db:seed --size demo --reset   # ~40 s en una laptop (medido: 37 s; re-correrlo: 13 s, no cambia nada)
+pnpm dev                           # http://localhost:3000 -> redirige a /es
 ```
 
-Las escalas y los templates del sistema se crean solos cuando arranca el servidor. No hay login: empezás actuando como **People** (sin persona), que ve todo; el selector **"Actuar como"** (arriba) cambia el rol (People, Manager, Empleado o Dirección) y la persona (Dirección no tiene persona). Después:
+El seed demo deja todo listo para los insights, con datos sintéticos: 400 registros de Bamboo (392 personas, 8 reingresos en la cola de identidad, 1391 goals), la importación de `fixtures/bamboo-reports/demo/employee-performance.csv` y `assessment-progress.csv` por el mismo camino que una subida (5 ciclos semestrales, 1604 participantes, ~15 000 respuestas con retención y compromiso normalizados, 1604 filas de completitud) y el análisis cualitativo con el proveedor `mock` sobre todos los ciclos (~5000 textos). `--no-reports` y `--no-analysis` saltean esos pasos. Imprime conteos y tiempo, nunca nombres.
 
-1. **Mirar los datos.** `/es/people` (ficha con identificadores de origen e historial de puesto), `/es/org` (organigrama con selector de fecha), `/es/team/goals` (goals de los reportes de un manager), `/es/imports/runs` (las corridas del seed), `/es/imports/identity` (los 8 reingresos esperando resolución) y `/es/data-quality`.
-2. **Importar la historia de evaluaciones.** En `/es/imports/upload` subí `fixtures/bamboo-reports/demo/employee-performance.csv` (perfil `bamboo-employee-performance`) e "Importar"; corre en un proceso aparte y con el tamaño demo puede tardar. El resultado (`/es/imports/history/<corrida>`) lista los ciclos semestrales 2024-H1 a 2026-H1, ya cerrados; quien no se pudo cruzar por nombre queda en la cola de identidad. Opcional: `assessment-progress.csv` suma la completitud de cada participante y `feedback-status.csv` el feedback de pares.
-3. **Ver un ciclo.** `/es/cycles` y el detalle de un ciclo: período, cantidad de preguntas y los participantes con su manager, área y puesto a la fecha del snapshot.
-4. **Historial de una persona.** Desde su ficha, "Evaluaciones" (`/es/people/<id>/reviews`): cada ciclo con el manager y el puesto de ese momento y las respuestas que el actor puede leer.
-5. **Dashboards.** Como People, `/es/dashboards`: avance del ciclo, distribución de ratings, goals vs rating y brecha self vs manager; "Trayectoria" por persona, "Ver equipo" (jerarquía "al momento de la review" o "actual"), la vista de dirección y los botones "Exportar CSV". Actuando como un manager, solo su equipo.
-6. **Completitud.** `/es/insights/completion` (con `assessment-progress.csv` importado, perfil `bamboo-assessment-progress`): el avance de autoevaluaciones y evaluaciones del manager por área o manager, la comparación con el ciclo anterior y "Quién falta" con sus filtros; como manager, solo sus reportes.
-7. **API y exports.** `/api/v1/cycles`, `/api/v1/cycles/<id>/requests` y `/api/v1/export/answers.csv?cycle_id=<id>` devuelven los mismos datos en JSON y CSV.
+No hay login: empezás actuando como **People**, que ve todo; el selector **"Actuar como"** (arriba) cambia el rol (People, Manager, Empleado o Dirección) y la persona. Recorrido:
+
+1. **Importaciones e historia.** `/es/imports/runs` (las corridas del seed), `/es/imports/history/<corrida>` (ciclos detectados por la importación) y `/es/imports/identity` (los reingresos y quienes no se pudieron cruzar por nombre). Subir otra vez un CSV en `/es/imports/upload` es idempotente.
+2. **Calidad de datos.** `/es/data-quality`: problemas de los datos importados (respuestas vacías o de baja calidad, revisores que no coinciden con el snapshot, filas en espera).
+3. **Completitud.** `/es/insights/completion`: resumen por ciclo y "quién falta" (self, manager).
+4. **Indicadores.** `/es/insights/indicators`: distribución de retención y compromiso, matriz retención × compromiso, alertas por caída y riesgo.
+5. **Cualitativo.** `/es/insights/qualitative`: sentimiento y temas por dimensión (fortalezas, oportunidades de mejora); "Correr análisis" vuelve a correr el `mock` (lo ya etiquetado queda en caché).
+6. **Goals.** `/es/insights/goals`: KPIs de goals, cruce con indicadores y detalle por assessment.
+7. **Vista ejecutiva.** `/es/insights/executive` en modo **cualitativo** y **cuantitativo**; también `/es/insights/self-assessment` y `/es/insights/health-check`.
+8. **Configuración.** `/es/settings/insights`: umbrales de alerta, mínimo n de agregación, cortes de semestre y proveedor del análisis.
+9. **Roles.** Con "Actuar como": **Dirección** ve la vista ejecutiva solo con agregados (grupos con menos de n personas enmascarados); un **Manager** solo a sus reportes directos; un **Empleado** recibe "Sin acceso" en los indicadores.
+10. **Export para Arturía.** `pnpm export:arturia --cycle latest --anonymized --out var/arturia` genera un HTML y un JSON autocontenidos, sin emails ni nombres.
+11. **Datos de base, dashboards y API.** `/es/people`, `/es/org`, `/es/team/goals`, `/es/cycles`, `/es/dashboards` y `/api/v1/cycles` (más `/api/v1/export/answers.csv?cycle_id=<id>`).
+
+## Comandos
+
+| Comando                                                                       | Qué hace                                                                |
+| ----------------------------------------------------------------------------- | ----------------------------------------------------------------------- |
+| `pnpm dev` / `pnpm build` / `pnpm start`                                      | Servidor de desarrollo, build y servidor de producción                  |
+| `pnpm check`                                                                  | typecheck + lint + format:check + tests unitarios (lo mismo que CI)     |
+| `pnpm test:db` / `pnpm test:e2e`                                              | Tests contra Postgres / Playwright                                      |
+| `pnpm db:migrate` / `pnpm db:generate` / `pnpm db:reset`                      | Migraciones de Drizzle / recrear la base local                          |
+| `pnpm db:seed --size small\|demo [--reset] [--no-reports] [--no-analysis]`    | Seed: ingesta de fixtures, reportes y análisis mock (ver [Seed](#seed)) |
+| `pnpm ingest <entidad> --source …`                                            | Ingesta de una entidad del registro (ver [Ingesta](#ingesta))           |
+| `pnpm reports:inspect <archivo>`                                              | Encabezados y conteos por columna de un export, sin valores             |
+| `pnpm analysis:run [--cycle id] [--provider mock\|anthropic]`                 | Análisis cualitativo de las respuestas abiertas                         |
+| `pnpm analysis:import-labels <csv>`                                           | Importa etiquetas cualitativas                                          |
+| `pnpm export:arturia --cycle <id\|nombre\|latest> [--anonymized] [--out dir]` | Informe HTML + JSON para Arturía                                        |
+| `pnpm fixtures:build` / `pnpm fixtures:parquet`                               | Regenera los fixtures sintéticos / los pasa a Parquet                   |
 
 ## Variables de entorno
 
@@ -269,7 +291,7 @@ pnpm format      # Prettier
 
 Playwright baja su propio navegador, que se instala aparte: en local `pnpm exec playwright install chromium` (la primera vez); en CI, además de las librerías del sistema, `pnpm exec playwright install --with-deps chromium`.
 
-`pnpm test:e2e` no toca tu base de desarrollo: corre contra una base propia, `E2E_DATABASE_URL` o, por defecto, `<DATABASE_URL>_e2e`, es decir `DATABASE_URL` con `_e2e` al final del nombre de la base (con la URL local de abajo, `postgres_e2e`). El global setup la crea si no existe (solo en un host local), le aplica las migraciones y la siembra con `pnpm db:seed --size small --reset`. El servidor de Next del e2e escucha en `E2E_PORT` (por defecto **3100**, para no chocar con `pnpm dev` en :3000) y usa esa misma base. Las dos variables son opcionales (ver "Variables de entorno").
+`pnpm test:e2e` no toca tu base de desarrollo: corre contra una base propia, `E2E_DATABASE_URL` o, por defecto, `<DATABASE_URL>_e2e`, es decir `DATABASE_URL` con `_e2e` al final del nombre de la base (con la URL local de abajo, `postgres_e2e`). El global setup la crea si no existe (solo en un host local), le aplica las migraciones y la siembra con `pnpm db:seed --size small --reset --no-reports --no-analysis`. El proyecto `insights-flow` (`e2e/insights-flow.spec.ts`, corre después de `insights`) recorre el módulo de punta a punta: sube los dos reportes, completitud, indicadores, análisis mock, vista ejecutiva en los dos modos y `pnpm export:arturia --anonymized` (sin emails, nombres ni URLs externas), más Dirección enmascarada y Empleado sin acceso. El servidor de Next del e2e escucha en `E2E_PORT` (por defecto **3100**, para no chocar con `pnpm dev` en :3000) y usa esa misma base. Las dos variables son opcionales (ver "Variables de entorno").
 
 ## Datos sensibles
 
@@ -344,7 +366,10 @@ Puebla la base local con la empresa sintética de `fixtures/bamboo/<size>` pasan
 pnpm db:seed                       # --size small por defecto
 pnpm db:seed --size small --reset  # vacía las tablas de dominio y siembra
 pnpm db:seed --size demo           # 400 personas
+pnpm db:seed --no-reports --no-analysis  # solo la ingesta (lo que usa el e2e)
 ```
+
+Después de la ingesta, salvo `--no-reports`, importa `fixtures/bamboo-reports/<size>/employee-performance.csv` y `assessment-progress.csv` por el mismo camino que una subida (`importReportFile`, `src/modules/lake/upload.ts`: valida contra el perfil built-in y guarda perfil, archivo y hash en los parámetros de la corrida, así reprocesar y reanudar funcionan; en el mismo proceso, sin el worker y bajo el lock de cada entidad): ciclos semestrales, participantes, respuestas con retención y compromiso normalizados, filas de completitud y snapshots de goals. Salvo `--no-analysis`, corre el análisis cualitativo con `MockProvider` sobre todos los ciclos (`seedInsights`, `src/modules/ingest/seed-reports.ts`, que antes crea los templates del sistema y los mapeos Likert, así una base nueva funciona sin `pnpm dev`). Si un reporte queda en `needs_decision` o falla, el comando termina con código 1. Imprime conteos y el tiempo total, nunca nombres. Medido en una laptop: `demo --reset` 37 s, re-corrida 13 s; `small` unos pocos segundos.
 
 - **Qué deja:** `small` lee 40 registros de Bamboo y deja **36 personas** (las del generador: `company.identity.persons`), 65 filas de historial de puesto y 109 goals. Los 4 reingresos (misma persona, legajo y casi siempre email, con un id de Bamboo nuevo) quedan **en la cola de identidad** (`/es/imports/identity`, ver `--unmatched` más arriba): el módulo de identidad nunca los une solo. Hasta que alguien los resuelva, ese id no es una persona, no tiene historial ni goals (`job_history` los rechaza: "unknown employee") y no aparece en el organigrama. `demo` lee 400 registros y deja 392 personas, 8 casos en la cola, 555 filas de historial y 1399 goals. Los goals son los de los empleados activos (la pipeline de goals solo lee a esos, ver #6), no los 143 / 1484 del fixture. Los comentarios de goals traen el conteo pero no el texto (los fixtures no tienen cuerpos).
 - **`--reset`** hace `TRUNCATE` (no `DROP`) de las tablas que llena la ingesta y de lo que cuelga de ellas, hijas primero: `person`, `source_identity`, `employment`, historiales, `identity_match_issue`, `goal*`, los ciclos de evaluación (`review_cycle`, `cycle_*`, `question_revision`: apuntan a personas), `raw_record`, `ingest_run` y `sync_state` (lista en `RESET_TABLES`, `src/modules/ingest/seed.ts`). No toca lo que es de la app (escalas y plantillas de evaluación). Solo corre contra una base local: si `DATABASE_URL` no apunta a `localhost`/`127.0.0.1` se niega. Un test falla si aparece una tabla nueva que no esté clasificada en `RESET_TABLES` o `KEPT_TABLES`.
@@ -352,9 +377,9 @@ pnpm db:seed --size demo           # 400 personas
 - **Igual que la CLI de ingesta:** `seedFromFixtures` usa el mismo ciclo que `pnpm ingest --all` (`runEntities`, `src/modules/ingest/cli.ts`) y cada entidad corre bajo el mismo lock advisory (`ingest:<entidad>`), así que no se pisa con un cron. Si una pipeline falla, sigue con la siguiente, la tabla la muestra como `error` con el id de su corrida, el detalle sale por stderr y el comando termina con código `1` (`2` si los argumentos o la configuración son inválidos).
 - **`--reset` mientras hay una corrida:** se niega. Antes de truncar intenta tomar el lock de cada entidad (el que una corrida en curso tiene tomado todo el tiempo que dura) y si alguno está tomado aborta sin tocar nada. Se usa el lock y no el estado `running` de `ingest_run` porque un proceso que murió deja esa fila para siempre y bloquearía el reset; el lock se libera solo.
 - **Historial de puesto:** el manager de la fila vigente de cada persona sale de `supervisorEId`; el de las filas anteriores viene solo como nombre ("Apellido, Nombre") y se resuelve con `resolveManagerName` (`src/modules/ingest/job-history.ts`): (1) se pasa a "Nombre Apellido" y se compara con el nombre de las personas respetando el orden de las palabras, sin contar mayúsculas, acentos ni espacios (`orderedName`, `src/modules/identity/normalize.ts`: "Páez, Martín" es "Martin Paez", pero "López, María José" no es "José María López"); (2) si hay homónimos, gana el único que tenía un empleo vigente en la fecha de la fila (alguien que se fue y otro que entró después con el mismo nombre no se pisan); si siguen siendo varios, queda sin resolver; (3) solo si nadie tiene el nombre en ese orden se prueba con las mismas palabras en cualquier orden (`normalizeName`), exigiendo lo mismo, y esa coincidencia se cuenta aparte como `managerResolvedFuzzy`. Lo que no se resuelve queda con `manager_person_id` null y `manager_raw` intacto (se ve como "(sin resolver)") y se cuenta en `managerUnresolved` de la corrida de `job_history`. Con el seed `small` se resuelven todas las filas históricas (29 de 29; antes 0), con `demo` 163 de 163.
-- **Desde código:** `seedFromFixtures({ size, db, lock? })` (`src/modules/ingest/seed.ts`) corre las pipelines y devuelve el resultado de cada una (con su `status`); `resetDomainTables(db)` vacía. Los usa `pnpm db:seed` y los tests. `e2e/global-setup.ts` llama a `pnpm db:seed --size small --reset` (y de nuevo sin `--reset`, para tener una corrida de `employee` sin cambios; `e2e/seed-data.ts` calcula lo que los specs esperan a partir del mismo generador). El caso de un reingreso que llega en una corrida posterior contra una base ya poblada lo cubren `e2e/identity.setup.ts` y `identity-later.spec.ts`.
+- **Desde código:** `seedFromFixtures({ size, db, lock? })` (`src/modules/ingest/seed.ts`) corre las pipelines y devuelve el resultado de cada una (con su `status`); `resetDomainTables(db)` vacía. Los usa `pnpm db:seed` y los tests. `e2e/global-setup.ts` llama a `pnpm db:seed --size small --reset --no-reports --no-analysis` (y de nuevo sin `--reset`, para tener una corrida de `employee` sin cambios; `e2e/seed-data.ts` calcula lo que los specs esperan a partir del mismo generador). El caso de un reingreso que llega en una corrida posterior contra una base ya poblada lo cubren `e2e/identity.setup.ts` y `identity-later.spec.ts`.
 - **`FixtureAdapter`** lee ese layout (`employees/list/page-NNN.json`, `employees/get/<id>.json`, `employees/tables/<tabla>/all.json`, `performance/goals/<id>.json`) y también el plano escrito a mano de `src/modules/bamboo-client/__fixtures__` (casos borde de los tests). Para ingestar el generado con la CLI genérica: `pnpm ingest --all --source fixture --dir fixtures/bamboo/small`.
-- Los CSV de `fixtures/bamboo-reports/<size>` no los siembra `db:seed`: se importan a mano en `/es/imports/upload` (ver [Importación histórica](#importación-histórica)).
+- El e2e siembra con `--no-reports --no-analysis`: `e2e/historical-import.spec.ts` importa los reportes por la UI y verifica lo que crea esa primera importación.
 
 ## Base de datos
 
