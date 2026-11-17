@@ -1,5 +1,6 @@
 "use server";
 
+import { logError } from "@/lib/log";
 import { db } from "@/db/client";
 import { actorIsHr } from "@/modules/actor/server";
 import { storeUpload, UploadError } from "@/modules/lake/upload-store";
@@ -52,7 +53,7 @@ export async function inspectUploadAction(
     });
   } catch (error) {
     if (error instanceof UploadError) return fail(error.code, error.message);
-    console.error(error);
+    logError(error);
     return fail("unknown", "The file could not be stored");
   }
 
@@ -98,7 +99,7 @@ export async function importUploadAction(
         sha256,
         since: startedAt,
         message: response.message,
-      }).catch((error: unknown) => console.error(error));
+      }).catch((error: unknown) => logError(error));
     }
   }
   if (!response.ok) return response;

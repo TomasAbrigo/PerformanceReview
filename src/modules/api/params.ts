@@ -13,3 +13,9 @@ export const isoDate = z
   );
 
 export const bool = z.enum(["true", "false"]).transform((v) => v === "true");
+
+/** An opt-in switch: `1`/`true` on, `0`/`false` off (the default when absent). */
+export const flag = z
+  .enum(["1", "0", "true", "false"])
+  .default("0")
+  .transform((v) => v === "1" || v === "true");

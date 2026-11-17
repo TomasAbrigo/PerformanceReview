@@ -8,11 +8,26 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Link } from "@/i18n/navigation";
+import { type ActorRole, canSeeEmail } from "@/modules/actor/types";
 import type { PersonDetailData } from "@/modules/people/queries";
 import { StatusBadge } from "./status-badge";
 
-export function PersonDetail({ person }: { person: PersonDetailData }) {
+/**
+ * The person sheet. The work email (under the name and as a source identity)
+ * is only for People: `role` is the actor's, and no other role gets it.
+ */
+export function PersonDetail({
+  person,
+  role,
+}: {
+  person: PersonDetailData;
+  role: ActorRole;
+}) {
   const t = useTranslations("People");
+  const withEmail = canSeeEmail(role);
+  const identities = person.identities.filter(
+    (i) => withEmail || i.kind !== "work_email",
+  );
   const tHistory = useTranslations("History");
   const format = useFormatter();
   const fmt = (d: Date | null) =>
@@ -25,7 +40,9 @@ export function PersonDetail({ person }: { person: PersonDetailData }) {
       </Link>
       <div>
         <h1 className="text-2xl font-semibold">{person.displayName}</h1>
-        <p className="text-muted-foreground">{person.workEmail ?? "—"}</p>
+        {withEmail ? (
+          <p className="text-muted-foreground">{person.workEmail ?? "—"}</p>
+        ) : null}
         <Link
           href={`/people/${person.id}/reviews`}
           className="text-sm hover:underline"
@@ -46,7 +63,7 @@ export function PersonDetail({ person }: { person: PersonDetailData }) {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {person.identities.map((i) => (
+            {identities.map((i) => (
               <TableRow key={`${i.kind}:${i.value}`}>
                 <TableCell>{t(`identities.kinds.${i.kind}`)}</TableCell>
                 <TableCell className="font-mono">{i.value}</TableCell>

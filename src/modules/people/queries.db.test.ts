@@ -40,14 +40,27 @@ describe("people queries", () => {
     ).toEqual(["Ana García"]);
   });
 
-  it("searches by name or email, case-insensitively", async () => {
+  it("searches by name only, case-insensitively", async () => {
     expect((await listPeople(db, "CARLA")).map((p) => p.displayName)).toEqual([
       "Carla Romero",
     ]);
-    expect(
-      (await listPeople(db, "bruno.perez@")).map((p) => p.displayName),
-    ).toEqual(["Bruno Pérez"]);
+    // An email (or a piece of one) finds nobody: the list never matches it.
+    expect(await listPeople(db, "bruno.perez@")).toEqual([]);
+    expect(await listPeople(db, "example.com")).toEqual([]);
     expect(await listPeople(db, "%")).toEqual([]);
+  });
+
+  it("matches emails too only when asked (identity resolution)", async () => {
+    expect(
+      (await listPeople(db, "bruno.perez@", { matchEmail: true })).map(
+        (p) => p.displayName,
+      ),
+    ).toEqual(["Bruno Pérez"]);
+    expect(
+      (await listPeople(db, "carla", { matchEmail: true })).map(
+        (p) => p.displayName,
+      ),
+    ).toEqual(["Carla Romero"]);
   });
 
   it("returns a person's identities and employment periods", async () => {

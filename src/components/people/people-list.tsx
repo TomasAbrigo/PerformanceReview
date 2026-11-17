@@ -49,7 +49,6 @@ export function PeopleList({
           <TableHeader>
             <TableRow>
               <TableHead>{t("columns.name")}</TableHead>
-              <TableHead>{t("columns.email")}</TableHead>
               <TableHead>{t("columns.status")}</TableHead>
             </TableRow>
           </TableHeader>
@@ -61,7 +60,6 @@ export function PeopleList({
                     {p.displayName}
                   </Link>
                 </TableCell>
-                <TableCell>{p.workEmail ?? "—"}</TableCell>
                 <TableCell>
                   <StatusBadge status={p.status} />
                 </TableCell>

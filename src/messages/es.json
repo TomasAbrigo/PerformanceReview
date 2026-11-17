@@ -178,8 +178,8 @@
   "People": {
     "title": "Personas",
     "nav": "Personas",
-    "searchLabel": "Buscar por nombre o email",
-    "searchPlaceholder": "Nombre o email",
+    "searchLabel": "Buscar por nombre",
+    "searchPlaceholder": "Nombre",
     "search": "Buscar",
     "total": "{count, plural, =1 {1 persona} other {# personas}}",
     "empty": "No hay personas para mostrar.",
@@ -187,7 +187,6 @@
     "notFound": "Persona no encontrada.",
     "columns": {
       "name": "Nombre",
-      "email": "Email",
       "status": "Estado"
     },
     "status": {

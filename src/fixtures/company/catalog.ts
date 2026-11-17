@@ -1,7 +1,6 @@
 /** Static pools the generator draws from (all synthetic). */
 
 export const COMPANY_NAME = "Meridian Andina";
-export const EMAIL_DOMAIN = "meridian-andina.example";
 
 export const FIRST_NAMES = [
   "María",

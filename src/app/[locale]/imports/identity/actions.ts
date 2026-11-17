@@ -59,7 +59,10 @@ export async function searchPeopleAction(
 ): Promise<PersonOption[]> {
   const q = query.trim().slice(0, 100);
   if (!q || !(await actorIsHr())) return [];
-  const people = await listPeople(db, q, { limit: SEARCH_LIMIT });
+  const people = await listPeople(db, q, {
+    limit: SEARCH_LIMIT,
+    matchEmail: true,
+  });
   return people.map(({ id, displayName, workEmail }) => ({
     id,
     displayName,

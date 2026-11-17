@@ -8,6 +8,7 @@ import { JobHistoryTable } from "@/components/org/job-history-table";
 import { PersonDetail } from "@/components/people/person-detail";
 import { db } from "@/db/client";
 import { routing } from "@/i18n/routing";
+import { getActor } from "@/modules/actor/server";
 import { listPersonGoals } from "@/modules/goals";
 import { getJobHistory } from "@/modules/org-history/queries";
 import { getPerson } from "@/modules/people/queries";
@@ -17,7 +18,7 @@ async function PersonData({ params }: PageProps<"/[locale]/people/[id]">) {
   if (!hasLocale(routing.locales, locale)) notFound();
   setRequestLocale(locale);
   await connection();
-  const person = await getPerson(db, id);
+  const [person, actor] = await Promise.all([getPerson(db, id), getActor()]);
   if (!person) notFound();
   const [jobHistory, goals] = await Promise.all([
     getJobHistory(db, person.id),
@@ -25,7 +26,7 @@ async function PersonData({ params }: PageProps<"/[locale]/people/[id]">) {
   ]);
   return (
     <div className="flex flex-col gap-6">
-      <PersonDetail person={person} />
+      <PersonDetail person={person} role={actor.role} />
       <JobHistoryTable rows={jobHistory} />
       <GoalsSection goals={goals} />
     </div>
