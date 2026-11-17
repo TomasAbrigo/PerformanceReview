@@ -60,6 +60,8 @@ describe("buildReport over the seed small company", () => {
     expect(r.anonymized).toBe(false);
     expect(r.sections.executive.participants).toBeGreaterThan(0);
     expect(r.sections.completion).not.toBeNull();
+    expect(r.sections.indicators?.distribution).toHaveLength(2);
+    expect(r.sections.indicators?.riskMatrix?.cells).toHaveLength(9);
     expect(r.sections.qualitative?.topThemes.length).toBeGreaterThan(0);
     expect(r.sections.people?.length).toBe(r.sections.executive.participants);
     // The named report carries personal data: emails and names.

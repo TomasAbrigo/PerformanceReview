@@ -10,6 +10,12 @@ import {
   executiveSummary,
   type DashboardFilters,
 } from "@/modules/analytics/dashboards";
+import {
+  indicatorAlerts,
+  indicatorDistribution,
+  indicators,
+  riskMatrix,
+} from "@/modules/analytics/indicators";
 import { foldSmallGroups } from "@/modules/insights/aggregation";
 import { effectiveCte } from "@/modules/qualitative-analysis/effective";
 import { pseudonymize } from "@/modules/qualitative-analysis/pseudonymize";
@@ -183,8 +189,81 @@ export const collectCompletion: Collector<"completion"> = async (db, ctx) => {
 
 // ------------------------------------------------- indicators and goals
 
-/** TODO(#60): wire indicatorDistribution / riskMatrix / indicatorAlerts once they land. */
-export const collectIndicators: Collector<"indicators"> = async () => null;
+/**
+ * Retention and engagement (#60) per area, the risk matrix and the alerts,
+ * counted (never named). Anonymized: areas under the minimum fold into
+ * "Otros", matrix cells and alert counts under it are hidden (null / left out).
+ */
+export const collectIndicators: Collector<"indicators"> = async (db, ctx) => {
+  const [dists, matrix, alerts] = await Promise.all([
+    Promise.all(
+      indicators.map((indicator) =>
+        indicatorDistribution(db, DEFAULT_ACTOR, {
+          cycleId: ctx.cycleId,
+          indicator,
+          groupBy: "department",
+        }),
+      ),
+    ),
+    riskMatrix(db, DEFAULT_ACTOR, { cycleId: ctx.cycleId }),
+    indicatorAlerts(db, DEFAULT_ACTOR, { cycleId: ctx.cycleId }),
+  ]);
+  if (dists.every((d) => d.series.every((s) => s.n === 0))) return null;
+  const visible = (n: number | null) => (n !== null && n >= ctx.min ? n : null);
+  const alertCounts = new Map<
+    string,
+    { kind: string; indicator: string | null; count: number }
+  >();
+  for (const a of alerts.alerts) {
+    const indicator = a.kind === "drop" ? a.indicator : null;
+    const key = `${a.kind}:${indicator ?? ""}`;
+    const row = alertCounts.get(key) ?? { kind: a.kind, indicator, count: 0 };
+    row.count += 1;
+    alertCounts.set(key, row);
+  }
+  return {
+    distribution: dists.map((d) => {
+      const { shown, others, suppressed } = foldSmallGroups(
+        d.series.map((s) => ({
+          key: s.others ? null : s.key === null ? null : (s.label ?? s.key),
+          n: s.n,
+          mean: s.mean,
+          counts: s.counts,
+        })),
+        ctx.min,
+      );
+      return {
+        indicator: d.indicator,
+        groups: [
+          ...shown.map((g) => ({
+            label: g.key ?? OTHERS,
+            n: g.n,
+            mean: g.mean,
+            counts: g.counts,
+            other: false,
+          })),
+          ...(others ? [{ label: OTHERS, ...others, other: true }] : []),
+        ],
+        total:
+          d.total && d.total.n >= ctx.min
+            ? { n: d.total.n, mean: d.total.mean, counts: d.total.counts }
+            : null,
+        suppressed: suppressed + d.suppressed,
+      };
+    }),
+    riskMatrix: {
+      cells: matrix.cells.map((c) => ({
+        retention: c.retention,
+        engagement: c.engagement,
+        count: visible(c.count),
+        risk: c.risk,
+      })),
+      total: visible(matrix.total),
+      riskCount: visible(matrix.riskCount),
+    },
+    alerts: [...alertCounts.values()].filter((a) => a.count >= ctx.min),
+  };
+};
 
 /** TODO(#62): wire the goals insights once they land. */
 export const collectGoals: Collector<"goals"> = async () => null;
