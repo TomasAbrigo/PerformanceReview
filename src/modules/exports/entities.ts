@@ -42,6 +42,10 @@ import {
   ratingStages,
   selfManagerGap,
 } from "@/modules/analytics/dashboards";
+import {
+  sentimentByDimension,
+  type DimensionSentiment,
+} from "@/modules/qualitative-analysis";
 import { RUN_STATUSES } from "@/modules/ingest/run-status";
 import { todayLocal } from "@/modules/org-history/dates";
 import { requestStatuses } from "@/modules/review-core/request-status";
@@ -573,6 +577,32 @@ const gapExport = defineExport({
   ],
 });
 
+// ---------------------------------------------------------------- insights
+
+/** Sentiment counts per dimension (HR visibility, counts only: no text, names or emails). */
+const insightsSentimentExport = defineExport({
+  file: () => "insights-sentiment",
+  query: z.object({
+    cycle: uuid.optional(),
+    department: z.string().optional(),
+  }),
+  rows: (db, q) =>
+    each(
+      sentimentByDimension(db, DEFAULT_ACTOR, {
+        cycleId: q.cycle,
+        department: q.department,
+        aggregateOnly: true,
+      }),
+    ),
+  columns: (h) => [
+    { header: h("dimension"), value: (r: DimensionSentiment) => r.dimension },
+    { header: h("positive"), value: (r) => r.positive },
+    { header: h("constructive"), value: (r) => r.constructive },
+    { header: h("negative"), value: (r) => r.negative },
+    { header: h("total"), value: (r) => r.total },
+  ],
+});
+
 const EXPORTS = {
   people: peopleExport,
   org: orgExport,
@@ -585,6 +615,7 @@ const EXPORTS = {
   "dashboard-distribution": distributionExport,
   "dashboard-goals-vs-rating": goalsVsRatingExport,
   "dashboard-self-manager-gap": gapExport,
+  "insights-sentiment": insightsSentimentExport,
 } as const;
 
 export type ExportEntity = keyof typeof EXPORTS;
