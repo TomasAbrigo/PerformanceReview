@@ -6,10 +6,11 @@ export {
   indicatorCycles,
   indicatorDistribution,
   indicatorFilterOptions,
+  indicatorOverview,
   indicatorSubjects,
   indicatorTrend,
+  indicatorTrendOverview,
   riskMatrix,
 } from "./queries";
-export { DEFAULT_INDICATOR_CONFIG, indicatorConfig } from "./config";
-export { type IndicatorScope, indicatorScope } from "./scope";
+export { indicatorConfig } from "./config";
 export * from "./types";

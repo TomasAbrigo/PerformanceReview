@@ -226,7 +226,7 @@ describe("RiskMatrixView", () => {
     },
   );
 
-  it("without the list (manager, direction) there is no list and no names", () => {
+  it("without the list (direction) there is no list and no names", () => {
     renderIn("es", <RiskMatrixView matrix={{ ...matrix, atRisk: null }} />);
     expect(screen.queryByTestId("risk-list")).not.toBeInTheDocument();
     expect(screen.queryByText("Fabio Luna")).not.toBeInTheDocument();
@@ -417,6 +417,33 @@ describe("TrendChart", () => {
       }),
     ).toBeInTheDocument();
     expect(screen.getAllByText("H2 2024").length).toBeGreaterThan(0);
+  });
+
+  it("a suppressed cycle is a gap: the line is not drawn across it", () => {
+    const point = (n: number, mean: number | null) => ({
+      cycleId: `c${n}`,
+      cycleName: `C${n}`,
+      periodStart: `2024-0${n}-01`,
+      n: mean === null ? null : 5,
+      mean,
+      counts: mean === null ? null : [0, 0, 5, 0, 0],
+      suppressed: mean === null,
+    });
+    renderIn(
+      "en",
+      <TrendChart
+        data={{
+          ...trend,
+          minGroupSize: 5,
+          points: [point(1, 3), point(2, null), point(3, 3), point(4, 4)],
+        }}
+        subject="Producto"
+      />,
+    );
+    const d = screen.getByTestId("trend-line").getAttribute("d")!;
+    // Two strokes: C1 alone, then C3 to C4.
+    expect(d.match(/M/g)).toHaveLength(2);
+    expect(d.match(/L/g)).toHaveLength(1);
   });
 
   it.each(locales)("empty, and cycles hidden by the minimum (%s)", (locale) => {

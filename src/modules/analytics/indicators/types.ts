@@ -1,5 +1,4 @@
 // Drizzle- and server-free: shared by the queries and client components.
-import type { ActorRole } from "@/modules/actor/types";
 
 /**
  * The two closed questions of the assessment, answered by the manager (Likert
@@ -16,16 +15,7 @@ export type IndicatorGroupBy = (typeof indicatorGroupBys)[number];
 export const INDICATOR_VALUES = [1, 2, 3, 4, 5] as const;
 export const VALUE_COUNT = INDICATOR_VALUES.length;
 
-/**
- * Who reads: the actor roles plus `direction` (leadership, aggregates only).
- * The union stays valid once `ActorRole` itself carries `direction`.
- */
-export type IndicatorActor = {
-  personId: string | null;
-  role: ActorRole | "direction";
-};
-
-/** Thresholds and minimum group size (settings `alerts.*`, `aggregation.minGroupSize`). */
+/** Thresholds and minimum group size: the settings `alerts.*` and `aggregation.minGroupSize`. */
 export type IndicatorConfig = {
   /** An indicator that fell by this many points or more between cycles is an alert. */
   dropThreshold: number;
@@ -133,7 +123,10 @@ export type RiskMatrix = {
   /** People with both indicators answered; null when direction cannot see it. */
   total: number | null;
   riskCount: number | null;
-  /** The people in the risk quadrant: People (hr) only, null for everybody else. */
+  /**
+   * The people in the risk quadrant, for those who may name people (People:
+   * everybody; a manager: their direct reports); null for direction.
+   */
   atRisk: RiskPerson[] | null;
   suppressed: boolean;
   minGroupSize: number | null;
@@ -175,7 +168,7 @@ export type IndicatorAlerts = {
   /** People with a drop / at risk; null when direction cannot see it (under the minimum). */
   peopleWithDrop: number | null;
   peopleAtRisk: number | null;
-  /** The alerts with their person: People and the direct manager; empty for direction. */
+  /** The alerts with their person: People and the direct manager (the same people as the risk list); empty for direction. */
   alerts: IndicatorAlert[];
   minGroupSize: number | null;
 };

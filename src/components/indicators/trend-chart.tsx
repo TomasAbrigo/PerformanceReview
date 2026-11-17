@@ -31,11 +31,16 @@ export function TrendChart({
     PAD.l +
     (n === 1 ? (W - PAD.l - PAD.r) / 2 : (i * (W - PAD.l - PAD.r)) / (n - 1));
   const y = (v: number) => PAD.t + ((5 - v) / 4) * (H - PAD.t - PAD.b);
-  const known = data.points
+  // One stroke per run of visible cycles: a suppressed one is a real gap, the
+  // line does not bridge it.
+  const path = data.points
     .map((p, i) => ({ p, i }))
-    .filter(({ p }) => p.mean !== null);
-  const path = known
-    .map(({ p, i }, k) => `${k ? "L" : "M"}${x(i)},${y(p.mean!)}`)
+    .reduce<string[]>((parts, { p, i }, k) => {
+      if (p.mean === null) return parts;
+      const joined = k > 0 && data.points[k - 1].mean !== null;
+      parts.push(`${joined ? "L" : "M"}${x(i)},${y(p.mean)}`);
+      return parts;
+    }, [])
     .join(" ");
   const pointText = (p: IndicatorTrend["points"][number]) =>
     t("trend.point", {
@@ -71,14 +76,13 @@ export function TrendChart({
             </text>
           </g>
         ))}
-        {known.length > 1 ? (
-          <path
-            d={path}
-            fill="none"
-            strokeWidth={2}
-            className="stroke-chart-seq"
-          />
-        ) : null}
+        <path
+          d={path}
+          fill="none"
+          strokeWidth={2}
+          className="stroke-chart-seq"
+          data-testid="trend-line"
+        />
         {data.points.map((p, i) => (
           <g key={p.cycleId}>
             <title>{pointText(p)}</title>

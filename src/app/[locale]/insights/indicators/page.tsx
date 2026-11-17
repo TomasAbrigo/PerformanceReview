@@ -15,13 +15,10 @@ import { Link } from "@/i18n/navigation";
 import { routing } from "@/i18n/routing";
 import { getActor } from "@/modules/actor/server";
 import {
-  indicatorAlerts,
   indicatorCycles,
-  indicatorDistribution,
-  indicatorFilterOptions,
-  indicatorScope,
-  riskMatrix,
+  indicatorOverview,
 } from "@/modules/analytics/indicators";
+import { insightsScope } from "@/modules/insights";
 
 async function Indicators({
   params,
@@ -33,26 +30,25 @@ async function Indicators({
   await connection();
   const actor = await getActor();
   const t = await getTranslations("Indicators");
-  const scope = indicatorScope(actor);
-  if (scope === "none") return <p>{t("forbidden")}</p>;
+  const scope = insightsScope(actor);
+  if (scope.kind === "none") return <p>{t("forbidden")}</p>;
   const cycles = await indicatorCycles(db);
   if (!cycles.length) return <p>{t("noCycles")}</p>;
   const p = parseIndicatorParams(await searchParams);
   const cycle = cycles.find((c) => c.id === p.cycle) ?? cycles[0];
   const shown = { ...p, cycle: cycle.id };
-  const filters = { department: p.department, managerId: p.manager };
-  const [options, distribution, matrix, alerts] = await Promise.all([
-    indicatorFilterOptions(db, actor, { cycleId: cycle.id }),
-    indicatorDistribution(db, actor, {
+  // One read of the rows, one authorization: the panels and the selects.
+  const { options, distribution, matrix, alerts } = await indicatorOverview(
+    db,
+    actor,
+    {
       cycleId: cycle.id,
       indicator: p.indicator,
       groupBy: p.groupBy,
       hierarchy: p.hierarchy,
-      filters,
-    }),
-    riskMatrix(db, actor, { cycleId: cycle.id, filters }),
-    indicatorAlerts(db, actor, { cycleId: cycle.id, filters }),
-  ]);
+      filters: { department: p.department, managerId: p.manager },
+    },
+  );
   // CSV exports go through the API (People's visibility): offered to People only.
   const isHr = actor.role === "hr";
   const indicator = t(`indicator.${p.indicator}`);
@@ -68,12 +64,12 @@ async function Indicators({
           </Link>
         </nav>
       </div>
-      {scope === "directReports" ? (
+      {scope.kind === "directReports" ? (
         <p className="text-sm text-muted-foreground">
           {t("scope.directReports")}
         </p>
       ) : null}
-      {scope === "aggregatesOnly" ? (
+      {scope.kind === "aggregatesOnly" ? (
         <p className="text-sm text-muted-foreground">
           {t("scope.aggregatesOnly", { min: distribution.minGroupSize ?? 0 })}
         </p>
@@ -121,6 +117,7 @@ async function Indicators({
               file="insights-alerts"
               params={{
                 cycle: cycle.id,
+                hierarchy: p.hierarchy,
                 department: p.department,
                 manager: p.manager,
               }}

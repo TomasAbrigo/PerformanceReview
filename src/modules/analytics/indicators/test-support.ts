@@ -16,14 +16,15 @@ import {
   insertParticipant,
   insertPerson,
 } from "@/modules/analytics/test-support";
-import type { Indicator, IndicatorActor } from "./types";
+import type { ActorContext } from "@/modules/actor/types";
+import type { Indicator } from "./types";
 
-export const hr: IndicatorActor = { personId: null, role: "hr" };
-export const direction: IndicatorActor = { personId: null, role: "direction" };
+export const hr: ActorContext = { personId: null, role: "hr" };
+export const direction: ActorContext = { personId: null, role: "direction" };
 export const as = (
   personId: string,
-  role: IndicatorActor["role"],
-): IndicatorActor => ({ personId, role });
+  role: ActorContext["role"],
+): ActorContext => ({ personId, role });
 
 const LIKERT = [1, 2, 3, 4, 5].map((value) => ({
   value,
@@ -35,6 +36,33 @@ export type TestCycle = {
   cycleId: string;
   questions: Record<Indicator, string>;
 };
+
+/**
+ * A question revision of the role `indicator` (manager, hidden from the
+ * reviewee). A second one in the same cycle is how template groups look.
+ */
+export async function insertIndicatorQuestion(
+  cycleId: string,
+  indicator: Indicator,
+  sort: number,
+): Promise<string> {
+  const [row] = await db
+    .insert(questionRevision)
+    .values({
+      cycleId,
+      sectionTitle: { es: "Evaluación del manager", en: "Manager review" },
+      prompt: { es: indicator, en: indicator },
+      kind: "rating",
+      appliesTo: ["manager"],
+      visibleToReviewee: false,
+      required: true,
+      scale: { options: LIKERT },
+      sort,
+      role: indicator,
+    })
+    .returning({ id: questionRevision.id });
+  return row.id;
+}
 
 /** A closed cycle with its two indicator questions (manager, hidden from the reviewee). */
 export async function insertIndicatorCycle(c: {
@@ -61,29 +89,11 @@ export async function insertIndicatorCycle(c: {
       anonymity: { peer: "transparent", upward: "transparent" },
     })
     .returning({ id: reviewCycle.id });
-  const question = async (indicator: Indicator, sort: number) => {
-    const [row] = await db
-      .insert(questionRevision)
-      .values({
-        cycleId: cycle.id,
-        sectionTitle: { es: "Evaluación del manager", en: "Manager review" },
-        prompt: { es: indicator, en: indicator },
-        kind: "rating",
-        appliesTo: ["manager"],
-        visibleToReviewee: false,
-        required: true,
-        scale: { options: LIKERT },
-        sort,
-        role: indicator,
-      })
-      .returning({ id: questionRevision.id });
-    return row.id;
-  };
   return {
     cycleId: cycle.id,
     questions: {
-      retention: await question("retention", 0),
-      engagement: await question("engagement", 1),
+      retention: await insertIndicatorQuestion(cycle.id, "retention", 0),
+      engagement: await insertIndicatorQuestion(cycle.id, "engagement", 1),
     },
   };
 }
@@ -197,7 +207,7 @@ const departmentOf = (who: Who) =>
 
 export async function reset() {
   await db.execute(
-    sql`TRUNCATE review_cycle, employee_job_history, employee_status_history, source_identity, employment, person, raw_record, ingest_run CASCADE`,
+    sql`TRUNCATE app_setting, admin_audit_log, review_cycle, employee_job_history, employee_status_history, source_identity, employment, person, raw_record, ingest_run CASCADE`,
   );
 }
 

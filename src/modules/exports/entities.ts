@@ -646,6 +646,7 @@ const indicatorAlertsExport = defineExport({
   file: ({ cycle }) => `insights-alerts-${cycle}`,
   query: indicatorQuery.pick({
     cycle: true,
+    hierarchy: true,
     department: true,
     manager: true,
   }),
@@ -653,6 +654,7 @@ const indicatorAlertsExport = defineExport({
     each(
       indicatorAlerts(db, DEFAULT_ACTOR, {
         cycleId: q.cycle,
+        hierarchy: q.hierarchy,
         filters: { department: q.department, managerId: q.manager },
       }).then((a) => a.alerts),
     ),

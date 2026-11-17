@@ -1,3 +1,4 @@
+import { sql } from "drizzle-orm";
 import { afterAll, beforeEach, describe, expect, it } from "vitest";
 import { closeDb, db } from "@/db/client";
 import {
@@ -5,15 +6,17 @@ import {
   insertPerson,
 } from "@/modules/analytics/test-support";
 import { ReviewError } from "@/modules/review-core/review-errors";
+import { setSetting } from "@/modules/settings";
 import {
-  DEFAULT_INDICATOR_CONFIG,
   indicatorAlerts,
   indicatorConfig,
   indicatorCycles,
   indicatorDistribution,
   indicatorFilterOptions,
+  indicatorOverview,
   indicatorSubjects,
   indicatorTrend,
+  indicatorTrendOverview,
   riskMatrix,
 } from ".";
 import {
@@ -22,6 +25,7 @@ import {
   direction,
   hr,
   insertIndicatorCycle,
+  insertIndicatorQuestion,
   insertIndicatorReview,
   names,
   reset,
@@ -715,15 +719,24 @@ describe("riskMatrix", () => {
   });
 
   describe("authorization", () => {
-    it("a manager gets the counts of their direct reports and never the list", async () => {
+    it("a manager gets the counts and the named list of their direct reports, like their alerts", async () => {
       const m = await riskMatrix(db, marta(), { cycleId: c2.cycleId });
       expect(m.total).toBe(6);
       expect(cell(m, "low", "low")).toMatchObject({ count: 2, risk: true });
       expect(m.riskCount).toBe(2);
-      expect(m.atRisk).toBeNull();
+      expect(m.atRisk!.map((p) => p.name)).toEqual([names.fabio, names.bruno]);
       const other = await riskMatrix(db, nora(), { cycleId: c2.cycleId });
       expect(other.total).toBe(2);
-      expect(other.atRisk).toBeNull();
+      expect(other.atRisk!.map((p) => p.name)).toEqual([names.gina]);
+      // The same people their alerts name.
+      const alerts = await indicatorAlerts(db, marta(), {
+        cycleId: c2.cycleId,
+      });
+      expect(
+        alerts.alerts
+          .filter((a) => a.kind === "risk")
+          .map((a) => a.person.name),
+      ).toEqual(m.atRisk!.map((p) => p.name).sort());
     });
 
     it("an employee is forbidden", async () => {
@@ -934,19 +947,74 @@ describe("indicatorAlerts", () => {
   });
 });
 
-describe("indicatorConfig", () => {
-  it("defaults to a fall of 2, a risk at 2 and groups of 5, and takes overrides", async () => {
-    expect(DEFAULT_INDICATOR_CONFIG).toEqual({
-      dropThreshold: 2,
-      riskThreshold: 2,
-      minGroupSize: 5,
-    });
-    expect(await indicatorConfig(db)).toEqual(DEFAULT_INDICATOR_CONFIG);
-    expect(await indicatorConfig(db, { dropThreshold: 3 })).toEqual({
+describe("indicatorConfig and the settings", () => {
+  it("reads the settings (defaults: a fall of 2, a risk at 2, groups of 5) and takes overrides", async () => {
+    const defaults = { dropThreshold: 2, riskThreshold: 2, minGroupSize: 5 };
+    expect(await indicatorConfig(db)).toEqual(defaults);
+    await setSetting(db, hr, "alerts.dropThreshold", 3);
+    await setSetting(db, hr, "alerts.riskThreshold", 1);
+    await setSetting(db, hr, "aggregation.minGroupSize", 7);
+    expect(await indicatorConfig(db)).toEqual({
       dropThreshold: 3,
-      riskThreshold: 2,
-      minGroupSize: 5,
+      riskThreshold: 1,
+      minGroupSize: 7,
     });
+    expect(await indicatorConfig(db, { dropThreshold: 4 })).toEqual({
+      dropThreshold: 4,
+      riskThreshold: 1,
+      minGroupSize: 7,
+    });
+  });
+
+  it("changing the drop and risk thresholds changes the alerts", async () => {
+    const names2 = async () =>
+      (await indicatorAlerts(db, hr, { cycleId: c2.cycleId })).alerts.map(
+        (a) => `${a.kind}:${a.person.name}`,
+      );
+    expect(await names2()).toEqual([
+      `risk:${names.bruno}`,
+      `risk:${names.fabio}`,
+      `risk:${names.gina}`,
+      `drop:${names.ana}`,
+      `drop:${names.elena}`,
+      `drop:${names.fabio}`,
+      `drop:${names.fabio}`,
+    ]);
+    await setSetting(db, hr, "alerts.dropThreshold", 3);
+    await setSetting(db, hr, "alerts.riskThreshold", 1);
+    expect(await names2()).toEqual([
+      `risk:${names.fabio}`,
+      `drop:${names.elena}`,
+      `drop:${names.fabio}`,
+    ]);
+    await setSetting(db, hr, "alerts.dropThreshold", 1);
+    await setSetting(db, hr, "alerts.riskThreshold", 3);
+    const loose = await indicatorAlerts(db, hr, { cycleId: c2.cycleId });
+    expect(loose.peopleAtRisk).toBe(4);
+    expect(loose.peopleWithDrop).toBe(4);
+    // The matrix follows the risk threshold too.
+    const m = await riskMatrix(db, hr, { cycleId: c2.cycleId });
+    expect(m.riskThreshold).toBe(3);
+    expect(m.riskCount).toBe(4);
+  });
+
+  it("changing the minimum group size changes what direction sees", async () => {
+    const input = {
+      cycleId: c2.cycleId,
+      indicator: "retention" as const,
+      groupBy: "department" as const,
+    };
+    expect(
+      (await indicatorDistribution(db, direction, input)).series.map(
+        (s) => s.key,
+      ),
+    ).toEqual(["Ingeniería"]);
+    await setSetting(db, hr, "aggregation.minGroupSize", 3);
+    const d = await indicatorDistribution(db, direction, input);
+    expect(d.series.map((s) => s.key)).toEqual(["Ingeniería", "Producto"]);
+    expect(d.minGroupSize).toBe(3);
+    expect(d.suppressed).toBe(0);
+    expect(d.total).toMatchObject({ n: 9 });
   });
 });
 
@@ -1008,5 +1076,291 @@ describe("pickers", () => {
     expect(lead.people).toEqual([]);
     expect(lead.departments).toEqual(["Ingeniería", "Producto"]);
     await forbidden(indicatorSubjects(db, as(id.ana, "employee")));
+  });
+});
+
+describe("what the cycles and revisions leave out or order", () => {
+  it("deleted cycles are out of every read", async () => {
+    await db.execute(
+      sql`update review_cycle set deleted_at = now() where id = ${c1.cycleId}::uuid`,
+    );
+    await expect(
+      indicatorDistribution(db, hr, {
+        cycleId: c1.cycleId,
+        indicator: "retention",
+        groupBy: "none",
+      }),
+    ).rejects.toMatchObject({ code: "not_found" });
+    await expect(
+      indicatorFilterOptions(db, hr, { cycleId: c1.cycleId }),
+    ).rejects.toMatchObject({ code: "not_found" });
+    await expect(
+      riskMatrix(db, hr, { cycleId: c1.cycleId }),
+    ).rejects.toMatchObject({ code: "not_found" });
+    expect((await indicatorCycles(db)).map((c) => c.name)).toEqual(["H2 2024"]);
+    const trend = await indicatorTrend(db, hr, { indicator: "retention" });
+    expect(trend.points.map((p) => p.cycleName)).toEqual(["H2 2024"]);
+    // Nothing before H2 2024 any more: no drops, only the risks.
+    const alerts = await indicatorAlerts(db, hr, { cycleId: c2.cycleId });
+    expect(alerts.alerts.map((a) => a.kind)).toEqual(["risk", "risk", "risk"]);
+    expect((await indicatorSubjects(db, hr)).people.map((p) => p.name)).toEqual(
+      [
+        names.ana,
+        names.bruno,
+        names.carla,
+        names.dario,
+        names.elena,
+        names.fabio,
+        names.gina,
+        names.hugo,
+        names.iris,
+      ],
+    );
+  });
+
+  it("two revisions of a role in a cycle: one value per person, always the same", async () => {
+    // A second retention revision (sort 5), as a template group leaves it.
+    const extra = await insertIndicatorQuestion(c2.cycleId, "retention", 5);
+    // Dario Mena answered both in his review: the first revision (3) counts.
+    const [request] = await db.execute<{ id: string }>(
+      sql`select id from review_request
+          where participant_id = ${participant(c2, "dario")}::uuid
+            and relationship = 'manager'`,
+    );
+    await db.execute(
+      sql`insert into answer (request_id, question_revision_id, option_value, normalized)
+          values (${request.id}::uuid, ${extra}::uuid, 1, 0)`,
+    );
+    // Jana Moya answered only the second: she counts, once.
+    const jana = await insertPerson({
+      displayName: "Jana Moya",
+      noEmployment: true,
+    });
+    const p = await insertParticipant({
+      cycleId: c2.cycleId,
+      personId: jana,
+      snapManagerPersonId: id.marta,
+      snapDepartment: "Ingeniería",
+    });
+    await insertIndicatorReview({
+      cycle: { ...c2, questions: { ...c2.questions, retention: extra } },
+      participantId: p,
+      reviewerPersonId: id.marta,
+      retention: 5,
+      engagement: 3,
+    });
+    const read = () =>
+      indicatorDistribution(db, hr, {
+        cycleId: c2.cycleId,
+        indicator: "retention",
+        groupBy: "none",
+      });
+    for (let i = 0; i < 3; i++) {
+      expect((await read()).total).toMatchObject({
+        counts: [1, 3, 1, 2, 3],
+        n: 10,
+      });
+    }
+  });
+
+  it("the previous cycle is the one before in a total order: a cycle of the same period counts, by creation", async () => {
+    // A re-import of the same semester, created after H2 2024.
+    const again = await insertIndicatorCycle({
+      name: "H2 2024 (nueva)",
+      periodStart: "2024-07-01",
+      periodEnd: "2024-12-31",
+    });
+    const p = await insertParticipant({
+      cycleId: again.cycleId,
+      personId: id.elena,
+      snapManagerPersonId: id.marta,
+      snapDepartment: "Ingeniería",
+    });
+    await insertIndicatorReview({
+      cycle: again,
+      participantId: p,
+      reviewerPersonId: id.marta,
+      retention: 1,
+      engagement: 5,
+    });
+    const alerts = await indicatorAlerts(db, hr, { cycleId: again.cycleId });
+    expect(alerts.alerts).toHaveLength(1);
+    expect(alerts.alerts[0]).toMatchObject({
+      kind: "drop",
+      indicator: "retention",
+      previousCycleName: "H2 2024",
+      previousValue: 4,
+      value: 1,
+      delta: 3,
+    });
+    // The earlier one does not see the later as its previous.
+    const before = await indicatorAlerts(db, hr, { cycleId: c2.cycleId });
+    expect(
+      before.alerts.filter((a) => a.person.name === names.elena),
+    ).toHaveLength(1);
+    const trend = await indicatorTrend(db, hr, {
+      indicator: "retention",
+      personId: id.elena,
+    });
+    expect(trend.points.map((p) => [p.cycleName, p.mean])).toEqual([
+      ["H1 2024", 4],
+      ["H2 2024", 4],
+      ["H2 2024 (nueva)", 1],
+    ]);
+  });
+
+  it("the filter options and the matrix follow the hierarchy asked for", async () => {
+    await db.execute(
+      sql`update employee_job_history set department = 'Soporte'
+          where person_id = ${id.dario}::uuid and valid_to is null`,
+    );
+    expect(
+      (await indicatorFilterOptions(db, hr, { cycleId: c2.cycleId }))
+        .departments,
+    ).toEqual(["Ingeniería", "Producto"]);
+    expect(
+      (
+        await indicatorFilterOptions(db, hr, {
+          cycleId: c2.cycleId,
+          hierarchy: "current",
+        })
+      ).departments,
+    ).toEqual(["Ingeniería", "Producto", "Soporte"]);
+    // Ana Prieto (2, 4) works in Producto today: with Gina and Hugo.
+    const asOf = await riskMatrix(db, hr, {
+      cycleId: c2.cycleId,
+      filters: { department: "Producto" },
+    });
+    const current = await riskMatrix(db, hr, {
+      cycleId: c2.cycleId,
+      filters: { department: "Producto" },
+      hierarchy: "current",
+    });
+    expect([asOf.total, current.total]).toEqual([2, 3]);
+    const alerts = await indicatorAlerts(db, hr, {
+      cycleId: c2.cycleId,
+      filters: { department: "Producto" },
+      hierarchy: "current",
+    });
+    expect(
+      alerts.alerts.map(
+        (a) => `${a.kind}:${a.person.name}:${a.person.department}`,
+      ),
+    ).toEqual([`risk:${names.gina}:Producto`, `drop:${names.ana}:Producto`]);
+  });
+
+  it("a manager never reads a person who is themself, nor who was their report only in a draft cycle", async () => {
+    const own = await insertParticipant({
+      cycleId: c2.cycleId,
+      personId: id.nora,
+      snapManagerPersonId: id.nora,
+      snapDepartment: "Producto",
+    });
+    await insertIndicatorReview({
+      cycle: c2,
+      participantId: own,
+      reviewerPersonId: id.nora,
+      retention: 2,
+      engagement: 2,
+    });
+    await forbidden(
+      indicatorTrend(db, nora(), { indicator: "retention", personId: id.nora }),
+    );
+    // Jana Moya reported to Marta only in a draft cycle.
+    const draft = await insertIndicatorCycle({
+      name: "Borrador",
+      periodStart: "2025-01-01",
+      periodEnd: "2025-06-30",
+      status: "draft",
+    });
+    const jana = await insertPerson({
+      displayName: "Jana Moya",
+      noEmployment: true,
+    });
+    const p = await insertParticipant({
+      cycleId: draft.cycleId,
+      personId: jana,
+      snapManagerPersonId: id.marta,
+    });
+    await insertIndicatorReview({
+      cycle: draft,
+      participantId: p,
+      reviewerPersonId: id.marta,
+      retention: 1,
+      engagement: 1,
+    });
+    await forbidden(
+      indicatorTrend(db, marta(), { indicator: "retention", personId: jana }),
+    );
+    // People may ask: nothing to draw, but nothing wrong either.
+    expect(
+      (await indicatorTrend(db, hr, { indicator: "retention", personId: jana }))
+        .points,
+    ).toEqual([]);
+  });
+});
+
+describe("the page reads", () => {
+  it.each([
+    ["hr", () => hr],
+    ["a manager", () => marta()],
+    ["direction", () => direction],
+  ])(
+    "indicatorOverview gives what the separate reads give (%s)",
+    async (_, who) => {
+      const actor = who();
+      const input = {
+        cycleId: c2.cycleId,
+        indicator: "retention" as const,
+        groupBy: "department" as const,
+      };
+      const overview = await indicatorOverview(db, actor, {
+        ...input,
+        filters: {},
+      });
+      expect(overview.distribution).toEqual(
+        await indicatorDistribution(db, actor, input),
+      );
+      expect(overview.matrix).toEqual(
+        await riskMatrix(db, actor, { cycleId: c2.cycleId }),
+      );
+      expect(overview.alerts).toEqual(
+        await indicatorAlerts(db, actor, { cycleId: c2.cycleId }),
+      );
+      expect(overview.options).toEqual(
+        await indicatorFilterOptions(db, actor, { cycleId: c2.cycleId }),
+      );
+      // Filtered: the options stay those of the whole cycle.
+      const filtered = await indicatorOverview(db, actor, {
+        ...input,
+        filters: { department: "Producto" },
+      });
+      expect(filtered.options).toEqual(overview.options);
+      expect(filtered.matrix).toEqual(
+        await riskMatrix(db, actor, {
+          cycleId: c2.cycleId,
+          filters: { department: "Producto" },
+        }),
+      );
+    },
+  );
+
+  it("indicatorTrendOverview: both indicators and the picker values in one read", async () => {
+    const overview = await indicatorTrendOverview(db, hr, {
+      personId: id.ana,
+    });
+    expect(overview.trends.map((t) => t.indicator)).toEqual([
+      "retention",
+      "engagement",
+    ]);
+    expect(overview.trends[0]).toEqual(
+      await indicatorTrend(db, hr, {
+        indicator: "retention",
+        personId: id.ana,
+      }),
+    );
+    expect(overview.subjects).toEqual(await indicatorSubjects(db, hr));
+    await forbidden(indicatorTrendOverview(db, as(id.ana, "employee"), {}));
+    await forbidden(indicatorTrendOverview(db, marta(), { personId: id.gina }));
   });
 });

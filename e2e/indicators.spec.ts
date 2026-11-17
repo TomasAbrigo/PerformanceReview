@@ -1,5 +1,5 @@
 import { expect, type Page, test } from "@playwright/test";
-import { actAs } from "./act-as";
+import { actAs, actAsRole } from "./act-as";
 import { snapshotManagerWithIndicators } from "./indicator-data";
 import { assessed2023, company, fullName } from "./seed-data";
 
@@ -138,7 +138,41 @@ test("a manager sees only their direct reports; an employee is forbidden", async
   await expect(
     page.locator('select[name="manager"]').locator("option"),
   ).toHaveText(["Todos", manager.name]);
-  // The list of people at risk is for People only.
-  await expect(page.getByTestId("risk-list")).toHaveCount(0);
+  // The people at risk of their own reports are listed; the CSV is People's.
+  await expect(page.getByTestId("risk-list")).toBeVisible();
   await expect(page.getByRole("link", { name: "Exportar CSV" })).toHaveCount(0);
+});
+
+test("direction reads aggregates only: no people anywhere", async ({
+  page,
+}) => {
+  test.setTimeout(120_000);
+  await page.goto("/es");
+  await actAsRole(page, "Dirección", "Dirección");
+  await page.goto("/es/insights/indicators");
+  await page.locator('select[name="cycle"]').selectOption({ label: cycleName });
+  await applyFilters(page);
+  await expect(
+    page.getByText(
+      "Solo agregados: se muestran grupos de al menos 5 personas.",
+    ),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("region", { name: "Distribución de Retención" }),
+  ).toBeVisible();
+  await expect(
+    page.getByText(
+      "Dirección ve solo cuántas personas tienen alertas, no quiénes.",
+    ),
+  ).toBeVisible();
+  for (const testId of ["risk-list", "alerts-table"]) {
+    await expect(page.getByTestId(testId)).toHaveCount(0);
+  }
+  await expect(page.getByRole("link", { name: "Exportar CSV" })).toHaveCount(0);
+  // The evolution has no person to pick.
+  await page.goto("/es/insights/indicators/trend");
+  await expect(
+    page.getByRole("region", { name: "Retención: toda la organización" }),
+  ).toBeVisible();
+  await expect(page.locator('select[name="person"]')).toHaveCount(0);
 });

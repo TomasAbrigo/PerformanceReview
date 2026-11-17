@@ -1,5 +1,6 @@
 // URL params of the indicator pages (filters live in the URL, never in state).
 import { isUuid } from "@/lib/uuid";
+import { one, pick } from "@/components/dashboards/url-state";
 import {
   hierarchies,
   type Hierarchy,
@@ -21,13 +22,6 @@ export type IndicatorParams = {
 };
 
 type Raw = Record<string, string | string[] | undefined>;
-const one = (v: string | string[] | undefined) =>
-  (Array.isArray(v) ? v[0] : v) || undefined;
-const pick = <T extends string>(
-  v: string | undefined,
-  allowed: readonly T[],
-  fallback: T,
-): T => (allowed.includes(v as T) ? (v as T) : fallback);
 
 export function parseIndicatorParams(sp: Raw): IndicatorParams {
   const manager = one(sp.manager);

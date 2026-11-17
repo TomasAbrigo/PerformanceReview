@@ -11,13 +11,8 @@ import { db } from "@/db/client";
 import { Link } from "@/i18n/navigation";
 import { routing } from "@/i18n/routing";
 import { getActor } from "@/modules/actor/server";
-import {
-  indicators,
-  indicatorScope,
-  indicatorSubjects,
-  indicatorTrend,
-  type IndicatorTrend,
-} from "@/modules/analytics/indicators";
+import { indicatorTrendOverview } from "@/modules/analytics/indicators";
+import { insightsScope } from "@/modules/insights";
 import { ReviewError } from "@/modules/review-core";
 
 async function Trend({
@@ -30,7 +25,7 @@ async function Trend({
   await connection();
   const actor = await getActor();
   const t = await getTranslations("Indicators");
-  if (indicatorScope(actor) === "none") return <p>{t("forbidden")}</p>;
+  if (insightsScope(actor).kind === "none") return <p>{t("forbidden")}</p>;
   const p = parseTrendParams(await searchParams);
   // One subject: a person, else a team, else an area, else the actor's reach.
   const subject = p.person
@@ -40,16 +35,11 @@ async function Trend({
       : p.department
         ? { department: p.department }
         : {};
-  const [subjects, ...trends] = await Promise.all([
-    indicatorSubjects(db, actor),
-    ...indicators.map((indicator) =>
-      indicatorTrend(db, actor, { indicator, ...subject }).catch(
-        forbiddenAsNull,
-      ),
-    ),
-  ]);
-  if (trends.some((trend) => trend === null)) return <p>{t("forbidden")}</p>;
-  const found = trends as IndicatorTrend[];
+  const overview = await indicatorTrendOverview(db, actor, subject).catch(
+    forbiddenAsNull,
+  );
+  if (!overview) return <p>{t("forbidden")}</p>;
+  const { trends: found, subjects } = overview;
   const about = found[0].subject;
   const subjectLabel =
     about.kind === "person"
