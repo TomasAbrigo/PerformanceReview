@@ -1,5 +1,9 @@
-/** Runs once per server start: makes sure the system scales/templates and the
- * default Likert equivalences exist. */
+import { logError } from "@/lib/log";
+
+/**
+ * Runs once per server start: makes sure the system scales/templates and the
+ * default Likert equivalences exist.
+ */
 export async function register() {
   if (process.env.NEXT_RUNTIME !== "nodejs" || !process.env.DATABASE_URL) {
     return;
@@ -12,6 +16,6 @@ export async function register() {
     await seedLikertMappings(db);
   } catch (error) {
     // A missing/unmigrated DB must not prevent the server from starting.
-    console.error("Could not seed system templates", error);
+    logError(error, "Could not seed system templates");
   }
 }

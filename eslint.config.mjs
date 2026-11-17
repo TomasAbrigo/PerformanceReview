@@ -16,6 +16,8 @@ const eslintConfig = defineConfig([
     "coverage/**",
     "playwright-report/**",
     "test-results/**",
+    // Private data (ignored by git): never linted.
+    "data/**",
   ]),
 ]);
 

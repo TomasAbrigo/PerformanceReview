@@ -1,3 +1,4 @@
+import { logError } from "@/lib/log";
 import { createHash, timingSafeEqual } from "node:crypto";
 import type { ZodType } from "zod";
 import { ApiError, badRequest } from "./errors";
@@ -78,7 +79,7 @@ export function apiRoute<P = Record<string, string>>(
       return await handler(request, params);
     } catch (error) {
       if (error instanceof ApiError) return problem(error);
-      console.error(error);
+      logError(error);
       return problem(new ApiError(500, "Internal Server Error"));
     }
   };

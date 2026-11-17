@@ -1,4 +1,4 @@
-import { expect, type Page, test } from "@playwright/test";
+import { expect, test } from "@playwright/test";
 import {
   byId,
   company,
@@ -8,6 +8,7 @@ import {
   hasUniqueName,
   isActive,
 } from "./seed-data";
+import { actAs } from "./act-as";
 
 // Runs after the historical import (project "insights" depends on
 // "chromium", where e2e/historical-import.spec.ts imports the Employee
@@ -39,19 +40,6 @@ const employee = find(
 const manager = byId.get(employee.managerId!)!;
 const employeeName = fullName(employee);
 const managerName = fullName(manager);
-
-async function actAs(page: Page, person: string | null, role: string) {
-  const bar = page.getByRole("form", { name: "Actuar como" });
-  if (person) await bar.getByLabel("Buscar persona").fill(person);
-  await bar
-    .getByLabel("Persona", { exact: true })
-    .selectOption({ label: person ?? "Sin persona" });
-  await bar.getByLabel("Rol").selectOption({ label: role });
-  await bar.getByRole("button", { name: "Aplicar" }).click();
-  await expect(bar.getByText(/Actuando como:/)).toContainText(
-    person ?? "People",
-  );
-}
 
 test("dashboards of an imported cycle: progress, team as-of/current, trajectory and leadership view", async ({
   page,

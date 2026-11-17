@@ -79,6 +79,7 @@ async function table(file: string, query = "") {
   const [header, ...rows] = parseCsv(text);
   return {
     header,
+    text,
     rows: rows.map((r) => Object.fromEntries(header.map((h, i) => [h, r[i]]))),
   };
 }
@@ -154,7 +155,6 @@ describe("people.csv", () => {
       "person_id",
       "bamboo_id",
       "legajo",
-      "email",
       "nombre",
       "estado",
       "manager_id",
@@ -177,7 +177,6 @@ describe("people.csv", () => {
     expect(by.get(bruno)).toMatchObject({
       bamboo_id: "102",
       legajo: "0002",
-      email: "bruno.perez@example.com",
       nombre: "Bruno Pérez",
       estado: "Active",
       manager_id: ana,
@@ -236,6 +235,54 @@ describe("people.csv", () => {
     );
   });
 
+  it("leaves the email out by default: no column, no address anywhere in the file", async () => {
+    const { header, rows, text } = await table("people.csv");
+    expect(header).not.toContain("email");
+    expect(rows.every((r) => !("email" in r))).toBe(true);
+    expect(text).not.toContain("@");
+    const en = await table("people.csv", "?locale=en&include_email=0");
+    expect(en.header).not.toContain("email");
+    expect(en.text).not.toContain("@");
+  });
+
+  it("includes the email column, after legajo, with include_email=1", async () => {
+    const { header, rows, text } = await table(
+      "people.csv",
+      "?include_email=1",
+    );
+    expect(header.slice(0, 5)).toEqual([
+      "person_id",
+      "bamboo_id",
+      "legajo",
+      "email",
+      "nombre",
+    ]);
+    expect(header).toHaveLength((await table("people.csv")).header.length + 1);
+    expect(text).toContain("bruno.perez@example.com");
+    expect(rows.find((r) => r.person_id === bruno)).toMatchObject({
+      email: "bruno.perez@example.com",
+      nombre: "Bruno Pérez",
+    });
+    expect(rows.find((r) => r.person_id === dora)).toMatchObject({
+      email: "dora@example.com",
+    });
+    // Same people, the same filters, in the other language too.
+    const en = await table("people.csv", "?include_email=1&locale=en&q=bruno");
+    expect(en.header).toContain("email");
+    expect(en.rows.map((r) => r.person_id)).toEqual([bruno]);
+  });
+
+  it("rejects an include_email that is not 1/0/true/false", async () => {
+    const bad = await download("people.csv", "?include_email=maybe");
+    expect(bad.status).toBe(400);
+  });
+
+  it("searches the name only: a q that is an email finds nobody", async () => {
+    expect(
+      (await table("people.csv", "?q=bruno.perez@&include_email=1")).rows,
+    ).toEqual([]);
+  });
+
   it("writes the header in the language asked for (es by default)", async () => {
     const es = (await table("people.csv", "?locale=es")).header;
     expect(es).toEqual((await table("people.csv")).header);
@@ -244,7 +291,6 @@ describe("people.csv", () => {
       "person_id",
       "bamboo_id",
       "employee_number",
-      "email",
       "name",
       "status",
       "manager_id",

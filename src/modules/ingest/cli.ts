@@ -1,3 +1,4 @@
+import { errorMessage } from "@/lib/log";
 import path from "node:path";
 import { parseArgs } from "node:util";
 import { closeDb, db, type DbOrTx } from "@/db/client";
@@ -106,7 +107,7 @@ export function parseIngestArgs(
       },
     });
   } catch (err) {
-    throw new UsageError(err instanceof Error ? err.message : String(err));
+    throw new UsageError(errorMessage(err));
   }
   const { values, positionals } = parsed;
 
@@ -303,7 +304,7 @@ export async function runEntities({
         counts: failed?.counts,
         runId: failed?.runId,
         durationMs: Date.now() - started,
-        error: err instanceof Error ? err.message : String(err),
+        error: errorMessage(err),
       });
     }
   }
@@ -369,7 +370,7 @@ export async function runIngestCli(
       adapters.set(entity, registry.get(entity)!.adapters[args.source](ctx));
     }
   } catch (err) {
-    stderr(err instanceof Error ? err.message : String(err));
+    stderr(errorMessage(err));
     return 2;
   }
 
