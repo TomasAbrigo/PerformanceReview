@@ -32,6 +32,10 @@ export function useErrorText() {
       if (issue.message === "min_options") return t("minOptions");
       if (issue.message === "duplicate_values") return t("duplicateValues");
       if (issue.message === "duplicate_role") return t("duplicateRole");
+      if (issue.message === "manager_only") return t("managerOnly");
+      if (issue.message === "hidden_required") return t("hiddenRequired");
+      if (issue.message === "dimension_text_only")
+        return t("dimensionTextOnly");
       return t("invalid");
     },
   };

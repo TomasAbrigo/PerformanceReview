@@ -4,9 +4,12 @@ import { notFound } from "next/navigation";
 import { connection } from "next/server";
 import { Suspense } from "react";
 import { IndicatorDetail } from "@/components/data-quality/indicator-detail";
+import { ReapplyButton } from "@/components/data-quality/reapply-button";
 import { db } from "@/db/client";
 import { routing } from "@/i18n/routing";
+import { getActor } from "@/modules/actor/server";
 import { getIndicator } from "@/modules/analytics/data-quality";
+import { reapplyLikertAction } from "../actions";
 
 async function IndicatorData({
   params,
@@ -17,7 +20,15 @@ async function IndicatorData({
   await connection();
   const indicator = await getIndicator(db, key);
   if (!indicator) notFound();
-  return <IndicatorDetail indicator={indicator} />;
+  const actor = await getActor();
+  return (
+    <div className="flex flex-col gap-4">
+      <IndicatorDetail indicator={indicator} />
+      {indicator.key === "unmapped_answers" && actor.role === "hr" ? (
+        <ReapplyButton action={reapplyLikertAction} />
+      ) : null}
+    </div>
+  );
 }
 
 export default function IndicatorPage(
