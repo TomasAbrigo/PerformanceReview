@@ -97,6 +97,7 @@ test("direction only reads the leadership view; employees get no dashboard", asy
 }) => {
   await page.goto("/es/cycles");
   await page.getByRole("link", { name: cycleName }).click();
+  await expect(page).toHaveURL(/\/es\/cycles\/[0-9a-f-]{36}$/);
   const cycleId = page.url().split("/").pop()!;
 
   const bar = page.getByRole("form", { name: "Actuar como" });
