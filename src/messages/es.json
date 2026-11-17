@@ -935,7 +935,19 @@
       "positive": "positivo",
       "constructive": "constructivo",
       "negative": "negativo",
-      "group_id": "grupo_id",
+      "group_id": "group_id",
+      "participants": "participantes",
+      "self_submitted": "autoevaluaciones enviadas",
+      "self_applicable": "autoevaluaciones que aplican",
+      "self_pct": "autoevaluación (%)",
+      "manager_submitted": "evaluaciones del manager enviadas",
+      "manager_applicable": "evaluaciones del manager que aplican",
+      "manager_pct": "evaluación del manager (%)",
+      "self_delta_pp": "autoevaluación vs ciclo anterior (pp)",
+      "manager_delta_pp": "evaluación del manager vs ciclo anterior (pp)",
+      "self_status": "estado de la autoevaluación",
+      "manager_status": "estado de la evaluación del manager",
+      "follow_up_notes": "con notas de seguimiento",
       "people": "personas",
       "in_progress": "en curso",
       "closed": "cerrados",
@@ -1430,6 +1442,99 @@
       "manager": "Manager",
       "peer": "Pares",
       "upward": "Ascendente"
+    }
+  },
+  "Completion": {
+    "nav": "Completitud",
+    "title": "Completitud de evaluaciones",
+    "forbidden": "No tenés acceso a esta pantalla.",
+    "noCycles": "Todavía no hay ciclos con evaluaciones.",
+    "hint": {
+      "all": "Autoevaluaciones y evaluaciones del manager enviadas, sobre las personas a las que esa evaluación les aplica en el ciclo.",
+      "directReports": "Solo tus reportes directos. Evaluaciones enviadas sobre las que aplican en el ciclo.",
+      "aggregates": "Solo agregados: sin nombres ni managers. Los grupos de menos de {min} personas se agrupan en Otros o se ocultan."
+    },
+    "filters": {
+      "label": "Filtros",
+      "cycle": "Ciclo",
+      "department": "Área",
+      "manager": "Manager",
+      "any": "Todos",
+      "apply": "Aplicar"
+    },
+    "groupBy": {
+      "label": "Agrupar por",
+      "none": "Sin agrupar",
+      "department": "Área",
+      "manager": "Manager"
+    },
+    "hierarchy": {
+      "label": "Jerarquía",
+      "asOf": "Al momento de la review",
+      "current": "Actual"
+    },
+    "summary": {
+      "title": "Avance",
+      "total": "Total del ciclo",
+      "unassigned": "Sin asignar",
+      "others": "Otros",
+      "people": "{n, plural, one {# persona} other {# personas}}",
+      "self": "Autoevaluación",
+      "manager": "Evaluación del manager",
+      "meter": "{side}, {group}: {submitted} de {applicable} enviadas",
+      "notApplicable": "No aplica",
+      "empty": "No hay participantes con estos filtros.",
+      "belowMinimum": "Hay menos de {min} participantes: solo se muestra la cantidad ({n}).",
+      "suppressed": "{n, plural, one {# persona queda} other {# personas quedan}} fuera del desglose: su grupo tiene menos de {min}.",
+      "sources": "Estado tomado de Assessment Progress para {progress, plural, one {# participante} other {# participantes}} y de los pedidos de evaluación para {requests, plural, one {# participante} other {# participantes}}.",
+      "columns": {
+        "group": "Grupo",
+        "participants": "Participantes",
+        "self": "Autoevaluación enviada",
+        "manager": "Evaluación del manager enviada"
+      }
+    },
+    "delta": {
+      "title": "Comparación con {cycle}",
+      "none": "No hay un ciclo anterior para comparar.",
+      "pp": "{value} pp",
+      "up": "Subió",
+      "down": "Bajó",
+      "same": "Sin cambios",
+      "noData": "Sin dato para comparar"
+    },
+    "missing": {
+      "title": "Quién falta",
+      "hint": "Quienes todavía no enviaron una evaluación que les aplica, ordenados por manager.",
+      "count": "{n, plural, =0 {Nadie falta} one {Falta # persona} other {Faltan # personas}}",
+      "empty": "Nadie falta con estos filtros.",
+      "directionOnly": "Dirección solo ve agregados: el detalle por persona es para People y para cada manager.",
+      "status": {
+        "label": "Falta",
+        "any": "Cualquiera",
+        "self_missing": "Autoevaluación",
+        "manager_missing": "Evaluación del manager"
+      },
+      "columns": {
+        "person": "Persona",
+        "department": "Área",
+        "manager": "Manager",
+        "self": "Autoevaluación",
+        "managerReview": "Evaluación del manager",
+        "notes": "Seguimiento"
+      },
+      "notes": "Con notas de seguimiento",
+      "none": "Sin asignar",
+      "statuses": {
+        "not_started": "No iniciada",
+        "in_progress": "En curso",
+        "submitted": "Enviada",
+        "not_applicable": "No aplica"
+      }
+    },
+    "export": {
+      "csv": "Exportar CSV",
+      "csvEmail": "Exportar CSV con email"
     }
   },
   "GoalsInsights": {

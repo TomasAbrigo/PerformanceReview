@@ -39,7 +39,7 @@ describe("goals insights CSV exports", () => {
     // Producto: 7 goals, 3 completed (42.9 %), 4 in progress (57.1 %),
     // 2 overdue (28.6 %), mean progress 370 / 7 = 52.9.
     expect(lines).toEqual([
-      "grupo_id,grupo,personas,goals,completados,en curso,cerrados,vencidos,% completados,% en curso,% vencidos,avance promedio",
+      "group_id,grupo,personas,goals,completados,en curso,cerrados,vencidos,% completados,% en curso,% vencidos,avance promedio",
       "Ingeniería,Ingeniería,6,26,14,11,1,2,53.8,42.3,7.7,73.8",
       "Producto,Producto,3,7,3,4,0,2,42.9,57.1,28.6,52.9",
     ]);

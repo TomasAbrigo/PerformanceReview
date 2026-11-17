@@ -120,7 +120,7 @@ test("People see the goal KPIs, the indicators by completion, the outliers and t
   const [header, ...kpiRows] = parseCsv(await kpisCsv.text()).filter(
     (row) => row.length > 1,
   );
-  expect(header.slice(0, 3)).toEqual(["grupo_id", "grupo", "personas"]);
+  expect(header.slice(0, 3)).toEqual(["group_id", "grupo", "personas"]);
   // The rows of the file add up to the goals of the snapshot.
   const goalsColumn = header.indexOf("goals");
   expect(kpiRows.reduce((sum, row) => sum + Number(row[goalsColumn]), 0)).toBe(
