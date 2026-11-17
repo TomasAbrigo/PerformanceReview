@@ -27,10 +27,14 @@ test("home navigation lists only the remaining sections", async ({ page }) => {
     "Escalas de rating",
   ]);
   // The removed flows have no route anymore.
-  for (const path of ["/es/me", "/es/team", "/es/inbox", "/es/cycles/new"]) {
+  for (const path of ["/es/me", "/es/team", "/es/inbox"]) {
     const res = await page.request.get(path);
     expect(res.status(), path).toBe(404);
   }
+  // "new" is not a cycle id: the (streamed) cycle page renders not found.
+  await page.goto("/es/cycles/new");
+  await expect(page.getByText("This page could not be found.")).toBeVisible();
+  await page.goto("/es");
   // Nor a notifications bell or a "my tasks" link in the header.
   await expect(page.getByRole("link", { name: "Mis tareas" })).toHaveCount(0);
 });

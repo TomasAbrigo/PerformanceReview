@@ -110,22 +110,24 @@ test("an imported self review shows up in the review endpoints and the answers e
     expect(revisionIds).toContain(a.question.id);
   }
 
-  // Read as the employee (same canRead as the screens): only their own request.
+  // Read as the person (same canRead as the screens): their own self review
+  // and, if they are a manager, their (skip-level) reports' ones; not all.
   const asEmployee = await request.get(
     `/api/v1/cycles/${cycleId}/requests?relationship=self&as_person=${mine.reviewee.id}&role=employee&limit=200`,
   );
-  expect((await asEmployee.json()).data.map((r: Json) => r.id)).toEqual([
-    mine.id,
-  ]);
+  const readable = (await asEmployee.json()).data as Json[];
+  expect(readable.map((r) => r.id)).toContain(mine.id);
+  expect(readable.length).toBeLessThan(requests.length);
 
-  // The answers export: one row per answer, ids on every row.
+  // The answers export (read as HR): one row per answer, ids on every row.
   const csv = await request.get(
-    `/api/v1/export/answers.csv?cycle_id=${cycleId}&relationship=self&as_person=${mine.reviewee.id}&role=employee`,
+    `/api/v1/export/answers.csv?cycle_id=${cycleId}&relationship=self`,
   );
   expect(csv.status()).toBe(200);
   expect(csv.headers()["content-type"]).toBe("text/csv; charset=utf-8");
   expect(csv.headers()["content-disposition"]).toContain("answers.csv");
-  const [header, ...rows] = parseCsv(await csv.text());
+  const [header, ...all] = parseCsv(await csv.text());
+  const rows = all.filter((r) => r[header.indexOf("request_id")] === mine.id);
   expect(header).toContain("request_id");
   expect(header).toContain("pregunta (es)");
   expect(rows).toHaveLength(answers.length);
@@ -147,12 +149,12 @@ test("an imported self review shows up in the review endpoints and the answers e
 
   // The English header carries the same columns.
   const en = await request.get(
-    `/api/v1/export/answers.csv?cycle_id=${cycleId}&relationship=self&as_person=${mine.reviewee.id}&role=employee&locale=en`,
+    `/api/v1/export/answers.csv?cycle_id=${cycleId}&relationship=self&locale=en`,
   );
   const [enHeader, ...enRows] = parseCsv(await en.text());
   expect(enHeader).toHaveLength(header.length);
   expect(enHeader).toContain("answer_text");
-  expect(enRows).toHaveLength(rows.length);
+  expect(enRows).toHaveLength(all.length);
 
   // The requests export lists every self request of the cycle.
   const requestsCsv = await request.get(
