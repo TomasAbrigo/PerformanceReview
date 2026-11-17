@@ -1,20 +1,6 @@
 import { DomainError } from "@/lib/domain-error";
 
-export type ReviewErrorCode =
-  | "not_found"
-  | "forbidden"
-  | "validation"
-  | "missing_required"
-  | "not_submitted"
-  | "nominations_full"
-  | "invalid_nominee"
-  | "already_nominated"
-  | "wrong_phase"
-  | "no_approval"
-  | "not_shareable"
-  | "not_remindable"
-  | "reason_required"
-  | "shared";
+export type ReviewErrorCode = "not_found" | "forbidden" | "validation";
 
-/** Errors of review requests and answers (issues: per-question paths). */
+/** Errors of reading review data (cycles, requests, answers, dashboards). */
 export class ReviewError extends DomainError<ReviewErrorCode> {}

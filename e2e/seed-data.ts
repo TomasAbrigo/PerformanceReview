@@ -117,3 +117,27 @@ export function laterRehire() {
   );
   return { earlier, later: { ...earlier, id: LATER_REHIRE_ID } };
 }
+
+const renamed = new Set(company.identity.renames.map((r) => r.employeeId));
+const misspelled = new Set(
+  company.identity.misspellings.map((m) => `${m.employeeId}:${m.cycle}`),
+);
+const seeded = new Map(employees.map((e) => [e.id, e]));
+
+/**
+ * Someone whose 2023 assessment (the first cycle of the Employee Performance
+ * report, fixtures/bamboo-reports/small) is in the report under their seeded
+ * name, with both the self and the manager review submitted.
+ */
+export const assessed2023 = company.assessments
+  .filter(
+    (a) =>
+      a.cycle === 0 &&
+      a.employeeId !== null &&
+      a.selfStatus === "Submitted" &&
+      a.managerStatus === "Submitted" &&
+      !renamed.has(a.employeeId) &&
+      !misspelled.has(`${a.employeeId}:0`),
+  )
+  .map((a) => seeded.get(a.employeeId!))
+  .find((e) => e !== undefined && hasUniqueName(e))!;

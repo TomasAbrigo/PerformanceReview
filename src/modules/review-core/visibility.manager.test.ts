@@ -1,12 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { ActorContext } from "@/modules/actor/types";
-import type { CycleStatus } from "./status";
-import {
-  canRead,
-  canWrite,
-  type VisibilityContext,
-  writablePhases,
-} from "./visibility";
+import { canRead, type VisibilityContext } from "./visibility";
 
 // Bruno is the reviewee, Carla his manager (snapshot), Ana Carla's manager.
 const BRUNO = "bruno";
@@ -134,29 +128,5 @@ describe("canRead matrix (self/manager × actor × state)", () => {
     };
     expect(canRead({ personId: null, role: "employee" }, c)).toBe(false);
     expect(canRead(actors.hr, c)).toBe(true);
-  });
-});
-
-describe("canWrite for manager reviews", () => {
-  const request = {
-    relationship: "manager" as const,
-    reviewerPersonId: CARLA,
-    status: "draft" as const,
-  };
-  const scope = (status: CycleStatus) => ({
-    cycle: { status },
-    participant: { removedAt: null },
-  });
-  it.each([
-    ["collecting", true],
-    ["manager_review", true],
-    ["calibration", false],
-    ["sharing", false],
-  ] as const)("in %s: %s", (status, expected) => {
-    expect(canWrite(actors.manager, request, scope(status))).toBe(expected);
-    expect(writablePhases.manager.includes(status)).toBe(expected);
-  });
-  it("is reviewer-only", () => {
-    expect(canWrite(actors.skip, request, scope("collecting"))).toBe(false);
   });
 });

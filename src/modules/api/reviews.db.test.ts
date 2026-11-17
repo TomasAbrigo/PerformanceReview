@@ -13,7 +13,7 @@ import { eq } from "drizzle-orm";
 import { insertParticipant, resetAll } from "@/modules/analytics/test-support";
 import type { ActorContext } from "@/modules/actor/types";
 import { getReview } from "@/modules/review-core";
-import { currentRatingFor } from "@/modules/review-core/calibration";
+import { currentRatingFor } from "@/modules/review-core/rating";
 import { ApiError } from "./errors";
 import { listAnswerRows, listRequestRows } from "./queries/reviews";
 import type { CycleAnonymity } from "@/modules/review-core/status";
@@ -193,9 +193,6 @@ describe("GET /api/v1/cycles/{id}/requests", () => {
       reviewer_visible: true,
       reviewer_missing: false,
       reviewer_mismatch: false,
-      additional: false,
-      assigned_by_hr: false,
-      submitted_on_behalf: false,
       declined_at: null,
       answer_count: 3,
     });
@@ -423,8 +420,8 @@ describe("current rating", () => {
   });
 });
 
-describe("alternate and additional assessors (#17)", () => {
-  it("tells the primary, superseded, additional and on-behalf manager requests apart", async () => {
+describe("superseded manager requests (history data)", () => {
+  it("are listed with their status and can be filtered", async () => {
     const cycle = await insertReviewCycle({ name: "Assessors" });
     const participant = await insertParticipant({
       cycleId: cycle,
@@ -438,30 +435,21 @@ describe("alternate and additional assessors (#17)", () => {
       relationship: "manager",
       status: "superseded",
     });
-    const additional = await insertRequest({
+    const current = await insertRequest({
       cycleId: cycle,
       participantId: participant,
       reviewerPersonId: ana,
       relationship: "manager",
-      additional: true,
-      assignedByHr: true,
-      submittedOnBehalf: true,
     });
     const res = await requestsOf(cycle, "?relationship=manager");
     expect(res.body.data).toHaveLength(2);
     const byId = new Map(res.body.data.map((r: Json) => [r.id, r]));
     expect(byId.get(superseded)).toMatchObject({
       status: "superseded",
-      additional: false,
-      assigned_by_hr: false,
-      submitted_on_behalf: false,
       reviewer: { id: bruno },
     });
-    expect(byId.get(additional)).toMatchObject({
+    expect(byId.get(current)).toMatchObject({
       status: "submitted",
-      additional: true,
-      assigned_by_hr: true,
-      submitted_on_behalf: true,
       reviewer: { id: ana },
     });
     const history = await requestsOf(cycle, "?status=superseded");
@@ -545,7 +533,7 @@ describe("reviewer anonymity", () => {
       [peer, eva],
       [upward, fede],
     ]) {
-      const res = await requestOf(id, `?as_person=${author}&role=peer`);
+      const res = await requestOf(id, `?as_person=${author}&role=employee`);
       expect(res.status).toBe(200);
       expect(res.body.data).toMatchObject({
         reviewer: null,
@@ -686,8 +674,8 @@ describe("scope parameters", () => {
     ["the reviewee", () => ({ personId: dora, role: "employee" })],
     ["the snapshot manager", () => ({ personId: bruno, role: "manager" })],
     ["the skip-level manager", () => ({ personId: ana, role: "manager" })],
-    ["a peer reviewer", () => ({ personId: eva, role: "peer" })],
-    ["a peer with a draft", () => ({ personId: fede, role: "peer" })],
+    ["a peer reviewer", () => ({ personId: eva, role: "employee" })],
+    ["a peer with a draft", () => ({ personId: fede, role: "employee" })],
     ["a removed participant", () => ({ personId: carla, role: "employee" })],
     ["a stranger", () => ({ personId: outsider, role: "employee" })],
     ["hr acting as a person", () => ({ personId: ana, role: "hr" })],

@@ -9,10 +9,7 @@ import {
   unique,
   uuid,
 } from "drizzle-orm/pg-core";
-import {
-  requestStatuses,
-  reviewActions,
-} from "../../modules/review-core/request-status";
+import { requestStatuses } from "../../modules/review-core/request-status";
 import { person } from "./people";
 import {
   cycleParticipant,
@@ -27,7 +24,6 @@ export const reviewRequestStatus = pgEnum(
   "review_request_status",
   requestStatuses,
 );
-export const reviewAuditAction = pgEnum("review_audit_action", reviewActions);
 
 /** One review to write: who (reviewer) writes about whom (participant). */
 export const reviewRequest = pgTable(
@@ -55,25 +51,8 @@ export const reviewRequest = pgTable(
     submittedAt: timestamp("submitted_at", { withTimezone: true }),
     declinedAt: timestamp("declined_at", { withTimezone: true }),
     declineReason: text("decline_reason"),
-    unlockedAt: timestamp("unlocked_at", { withTimezone: true }),
-    unlockedBy: uuid("unlocked_by").references(() => person.id),
-    /** A second manager request next to the primary one (#17 "additional"). */
-    additional: boolean("additional").notNull().default(false),
-    /**
-     * HR picked this reviewer on purpose (assignAlternateAssessor, #17). The
-     * sync with the snapshot manager leaves such a request alone, and a
-     * snapshot manager who was replaced loses manager-side access.
-     */
-    assignedByHr: boolean("assigned_by_hr").notNull().default(false),
-    /** HR completed this review in the reviewer's name (#17). */
-    submittedOnBehalf: boolean("submitted_on_behalf").notNull().default(false),
-    /** Who completed it (null: HR acting as People without a person). */
-    submittedOnBehalfBy: uuid("submitted_on_behalf_by").references(
-      () => person.id,
-    ),
     /** Manager review shared with the reviewee (visible to them from then). */
     sharedAt: timestamp("shared_at", { withTimezone: true }),
-    sharedBy: uuid("shared_by").references(() => person.id),
     ...sourceColumns,
   },
   (t) => [
@@ -114,24 +93,5 @@ export const answer = pgTable(
   ],
 );
 
-/** Audit log of sensitive request actions (unlock, ...). */
-export const reviewAudit = pgTable(
-  "review_audit",
-  {
-    id: uuid("id").primaryKey().defaultRandom(),
-    requestId: uuid("request_id")
-      .notNull()
-      .references(() => reviewRequest.id, { onDelete: "cascade" }),
-    action: reviewAuditAction("action").notNull(),
-    actorPersonId: uuid("actor_person_id").references(() => person.id),
-    note: text("note"),
-    createdAt: timestamp("created_at", { withTimezone: true })
-      .notNull()
-      .defaultNow(),
-  },
-  (t) => [index("review_audit_request_idx").on(t.requestId, t.createdAt)],
-);
-
 export type ReviewRequest = typeof reviewRequest.$inferSelect;
 export type Answer = typeof answer.$inferSelect;
-export type ReviewAudit = typeof reviewAudit.$inferSelect;

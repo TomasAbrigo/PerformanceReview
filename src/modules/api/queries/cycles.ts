@@ -5,9 +5,7 @@ import type {
   CycleComponents,
   CycleDueDates,
   CycleStatus,
-  ScheduleKind,
 } from "@/modules/review-core/status";
-import type { ParticipantFilter } from "@/db/schema";
 import { rowsOf } from "@/lib/sql";
 import { isUuid } from "@/lib/uuid";
 import { encodeCursor, pageOf, type Page } from "../pagination";
@@ -34,8 +32,6 @@ export type CycleRow = {
   templateId: string | null;
   finalScaleId: string | null;
   dueDates: CycleDueDates;
-  scheduleKind: ScheduleKind;
-  participantFilter: ParticipantFilter;
   launchedAt: string | null;
   /** Participants not removed. */
   participantCount: number;
@@ -49,8 +45,7 @@ const CYCLE_COLUMNS = sql`
   c.period_end::text as "periodEnd", c.snapshot_date::text as "snapshotDate",
   c.status::text as status, c.components, c.anonymity,
   c.template_id as "templateId", c.final_scale_id as "finalScaleId",
-  c.due_dates as "dueDates", c.schedule_kind::text as "scheduleKind",
-  c.participant_filter as "participantFilter",
+  c.due_dates as "dueDates",
   ${iso("c.launched_at")} as "launchedAt",
   (select count(*)::int from cycle_participant cp
     where cp.cycle_id = c.id and cp.removed_at is null) as "participantCount",

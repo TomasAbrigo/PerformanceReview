@@ -11,9 +11,9 @@ import type { LocalizedText } from "@/db/schema/rating-scales";
 import { isUuid } from "@/lib/uuid";
 import type { ActorContext } from "@/modules/actor/types";
 import { getReview, type Review } from "./answers";
-import { currentRatingFor, finalScale } from "./calibration";
+import { currentRatingFor, finalScale } from "./rating";
 import { overallRatingQuestion } from "./goal-snapshot";
-import { isCurrentManager } from "./manager";
+import { isCurrentManager } from "./org-relations";
 import { ReviewError } from "./review-errors";
 import type { CycleStatus } from "./status";
 
@@ -38,13 +38,10 @@ export type HistoryItem = {
   jobTitle: string | null;
   department: string | null;
   sharedAt: Date | null;
-  acknowledgedAt: Date | null;
   rating: HistoryRating | null;
   /** The reviews as far as the actor may read them (canRead), submitted only. */
   self: Review | null;
   manager: Review | null;
-  /** Both reviews are readable: the comparison page is available. */
-  canCompare: boolean;
 };
 
 /**
@@ -221,11 +218,9 @@ export async function reviewHistory(
         jobTitle: participant.snapJobTitle,
         department: participant.snapDepartment,
         sharedAt: managerRequest?.sharedAt ?? null,
-        acknowledgedAt: participant.acknowledgedAt,
         rating,
         self,
         manager,
-        canCompare: self !== null && manager !== null,
       };
     }),
   );

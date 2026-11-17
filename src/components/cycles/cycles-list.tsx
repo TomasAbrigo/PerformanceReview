@@ -1,6 +1,5 @@
 import { useTranslations } from "next-intl";
 import { ExportCsvLink } from "@/components/data-quality/export-csv-link";
-import { buttonVariants } from "@/components/ui/button";
 import {
   Table,
   TableBody,
@@ -30,9 +29,6 @@ export function CyclesList({ cycles }: { cycles: CycleRow[] }) {
         <h1 className="text-2xl font-semibold">{t("title")}</h1>
         <div className="flex items-center gap-2">
           <ExportCsvLink file="cycle-participants" />
-          <Link href="/cycles/new" className={buttonVariants()}>
-            {t("new")}
-          </Link>
         </div>
       </div>
       {cycles.length === 0 ? (

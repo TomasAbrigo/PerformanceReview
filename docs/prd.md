@@ -183,6 +183,8 @@ UI en español e inglés desde el inicio. Primera versión sin login: modo admin
 - Sin curva de distribución forzada; sin decisiones de compensación dentro del módulo.
 - Snapshot organizacional al lanzar ciclo y SCD2 como mecanismo para "manager al momento de la review"; las vistas eligen explícitamente as-of o actual.
 
+- **Poda realizada (#54):** se quitaron el asistente y las fases de ciclo, la cadencia por fecha de ingreso, la autoevaluación y la evaluación del manager, pares y nominaciones, comparación, notas, acuse de recibo, calibración (grupos, propuestas, publicación), operación del ciclo, notificaciones, `/me`, `/team` y los roles `peer` y `calibrator`. La migración `0019_prune` borra las tablas `calibration_group*`, `cycle_transition`, `review_audit`, `follow_up_note`, `peer_nomination` y `notification`, sus columnas propias y los enums `calibration_group_kind`, `schedule_kind`, `review_audit_action`, `peer_nomination_status` y `notification_kind`. Se conservan los enums `cycle_status`, `review_relationship`, `review_request_status` y `final_rating_stage` (sacar valores obliga a reescribir filas), además de `final_rating` y `v_current_rating`, que leen los dashboards, la API y los exports.
+
 ## Testing Decisions
 
 - Un buen test verifica comportamiento observable a través de la interfaz pública del módulo (entradas → salidas, filas en la base, estados), nunca detalles internos. Los tests de dominio corren contra Postgres real (Supabase local vía Vitest proyecto `db`) y se escriben antes del código (rojo → verde → refactor).

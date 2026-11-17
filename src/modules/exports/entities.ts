@@ -343,12 +343,6 @@ function requestColumns<R>(
     },
     { header: h("reviewer"), value: (r) => of(r).reviewer?.displayName },
     { header: h("reviewer_visible"), value: (r) => of(r).reviewerVisible },
-    { header: h("additional"), value: (r) => of(r).additional },
-    { header: h("assigned_by_hr"), value: (r) => of(r).assignedByHr },
-    {
-      header: h("submitted_on_behalf"),
-      value: (r) => of(r).submittedOnBehalf,
-    },
   ];
 }
 

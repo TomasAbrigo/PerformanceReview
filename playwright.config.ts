@@ -37,17 +37,16 @@ export default defineConfig({
     {
       name: "chromium",
       use: { ...devices["Desktop Chrome"] },
-      testIgnore: /(identity(-later)?|notifications)\.spec\.ts/,
+      testIgnore: /(identity(-later)?|dashboards|review-api)\.spec\.ts/,
     },
-    // Phase changes notify every participant, so counting a person's unread
-    // notifications needs a quiet system: this spec runs alone, once the
-    // specs that launch cycles are done and before the identity chain (the
-    // projects form one line: chromium, notifications, identity-setup,
-    // identity).
+    // These read the review data of the historical import, which
+    // e2e/historical-import.spec.ts (project chromium) brings in: they run
+    // once it is done. The projects form one line: chromium, insights,
+    // identity-setup, identity.
     {
-      name: "notifications",
+      name: "insights",
       use: { ...devices["Desktop Chrome"] },
-      testMatch: /notifications\.spec\.ts/,
+      testMatch: /(dashboards|review-api)\.spec\.ts/,
       dependencies: ["chromium"],
     },
     // The identity specs resolve and queue cases (they link a seeded rehire to
@@ -56,7 +55,7 @@ export default defineConfig({
     {
       name: "identity-setup",
       testMatch: /identity\.setup\.ts/,
-      dependencies: ["notifications"],
+      dependencies: ["insights"],
     },
     {
       name: "identity",

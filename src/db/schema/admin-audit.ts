@@ -6,19 +6,15 @@ import {
   timestamp,
   uuid,
 } from "drizzle-orm/pg-core";
-import type {
-  AdminAction,
-  AdminTargetType,
-  AuditSnapshot,
-} from "../../modules/review-core/ops-constants";
 import { person } from "./people";
 import { reviewCycle } from "./review-cycles";
 
+/** JSON stored in admin_audit_log.before / after. */
+export type AuditSnapshot = Record<string, unknown>;
+
 /**
- * Append-only log of administrative actions on a cycle (#17): participants
- * added/removed, due dates extended, unlocks, reviews completed on behalf and
- * alternate assessors. One row per action, written in the same transaction
- * as the change, with the state before and after as JSON.
+ * Append-only log of administrative actions on a cycle. The cycle operations
+ * that wrote it (#17) were removed in #54; the rows are kept as history.
  */
 export const adminAuditLog = pgTable(
   "admin_audit_log",
@@ -26,8 +22,8 @@ export const adminAuditLog = pgTable(
     id: uuid("id").primaryKey().defaultRandom(),
     /** Null when HR acts as the People team without a person. */
     actorPersonId: uuid("actor_person_id").references(() => person.id),
-    action: text("action").$type<AdminAction>().notNull(),
-    targetType: text("target_type").$type<AdminTargetType>().notNull(),
+    action: text("action").notNull(),
+    targetType: text("target_type").notNull(),
     /** Id of the cycle, participant or request the action was about. */
     targetId: uuid("target_id").notNull(),
     cycleId: uuid("cycle_id")

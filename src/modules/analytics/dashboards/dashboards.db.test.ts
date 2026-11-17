@@ -4,24 +4,26 @@ import path from "node:path";
 import { and, eq, sql } from "drizzle-orm";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { closeDb, db } from "@/db/client";
-import { cycleParticipant, participantGoalSnapshot, person } from "@/db/schema";
+import {
+  cycleParticipant,
+  participantGoalSnapshot,
+  person,
+  reviewRequest,
+} from "@/db/schema";
 import type { ActorContext } from "@/modules/actor/types";
 import { exportCsv } from "@/modules/exports/entities";
-import { assignAlternateAssessor } from "@/modules/review-core/ops";
 import { FixtureAdapter, runIngest } from "@/modules/ingest";
+import { finalScale } from "@/modules/review-core";
 import {
-  createCycle,
-  findManagerRequestId,
-  findMySelfRequestId,
-  launchCycle,
-  proposeRating,
-  publishCalibration,
-  saveDraft,
-  shareAll,
-  submit,
-  transition,
-  type CycleInput,
-} from "@/modules/review-core";
+  addRating,
+  answerRequest,
+  createTestCycle,
+  publish,
+  requestIdOf,
+  setStatus,
+  share,
+  type TestCycleInput,
+} from "@/modules/review-core/test-support";
 import {
   addQuestion,
   addSection,
@@ -124,22 +126,14 @@ afterAll(async () => {
   await closeDb();
 });
 
-const input = (overrides: Partial<CycleInput> = {}): CycleInput => ({
+const input = (overrides: Partial<TestCycleInput> = {}): TestCycleInput => ({
   name: "H1 2022",
   periodStart: "2022-01-01",
   periodEnd: "2022-06-30",
   snapshotDate: "2022-06-01",
-  components: {
-    self: true,
-    manager: true,
-    peer: false,
-    upward: false,
-    calibration: true,
-  },
-  anonymity: { peer: "anonymous_to_employee", upward: "fully_anonymous" },
+  components: { calibration: true },
   templateId,
-  dueDates: {},
-  participantFilter: { kind: "people", personIds: [bruno, carla] },
+  personIds: [bruno, carla],
   ...overrides,
 });
 
@@ -164,17 +158,21 @@ async function questionIds(cycleId: string) {
   overall = rows.find((r) => r.role === "overall_rating")!.id;
 }
 
+/** Answers (and optionally submits) the self review: Q1 only. */
 async function selfReview(
   cycleId: string,
   who: string,
   value: number,
   done: boolean,
 ) {
-  const id = (await findMySelfRequestId(db, as(who), cycleId))!;
-  await saveDraft(db, as(who), id, [{ questionRevisionId: q1, value }]);
-  if (done) await submit(db, as(who), id);
+  const p = await participantOf(cycleId, who);
+  const id = await requestIdOf(p.id, "self");
+  await answerRequest(id, (q) => (q.id === q1 ? value : null), {
+    submit: done,
+  });
 }
 
+/** Submits the manager review: Q1 and the overall rating (final_rating `manager`). */
 async function managerReview(
   cycleId: string,
   reviewee: string,
@@ -183,12 +181,10 @@ async function managerReview(
   rating: number,
 ) {
   const p = await participantOf(cycleId, reviewee);
-  const id = (await findManagerRequestId(db, as(manager), p.id))!;
-  await saveDraft(db, as(manager), id, [
-    { questionRevisionId: q1, value },
-    { questionRevisionId: overall, value: rating },
-  ]);
-  await submit(db, as(manager), id);
+  const id = await requestIdOf(p.id, "manager", manager);
+  await answerRequest(id, (q) =>
+    q.id === q1 ? value : q.id === overall ? rating : null,
+  );
   return p.id;
 }
 
@@ -198,32 +194,33 @@ async function managerReview(
  * overall 4 (1). HR calibrates Bruno to 3 (2/3).
  */
 async function h1() {
-  const cycle = await createCycle(db, input());
-  await launchCycle(db, cycle.id, null);
+  const cycle = await createTestCycle(input());
   await questionIds(cycle.id);
   await selfReview(cycle.id, bruno, 4, true);
   await selfReview(cycle.id, carla, 2, false);
   const pb = await managerReview(cycle.id, bruno, carla, 3, 2);
   const pc = await managerReview(cycle.id, carla, ana, 5, 4);
-  await transition(db, cycle.id, "manager_review", null);
-  await transition(db, cycle.id, "calibration", null);
-  await proposeRating(db, hr, pb, { value: 3, reason: "Impacto" });
+  await setStatus(cycle.id, "calibration");
+  const three = (await finalScale(db, cycle.id)).find((o) => o.value === 3)!;
+  await addRating(pb, "calibrated", 3, {
+    label: three.label.es,
+    normalized: three.normalized,
+    reason: "Impacto",
+  });
   return { cycle, pb, pc };
 }
 
 /** H1 2024 (snapshot 2024-02-01): only Bruno; Ana rates overall 4 (1). */
 async function h2024() {
-  const cycle = await createCycle(
-    db,
+  const cycle = await createTestCycle(
     input({
       name: "H1 2024",
       periodStart: "2024-01-01",
       periodEnd: "2024-06-30",
       snapshotDate: "2024-02-01",
-      participantFilter: { kind: "people", personIds: [bruno] },
+      personIds: [bruno],
     }),
   );
-  await launchCycle(db, cycle.id, null);
   await questionIds(cycle.id);
   await managerReview(cycle.id, bruno, ana, 5, 4);
   return cycle;
@@ -462,11 +459,14 @@ describe("personTrajectory", () => {
 describe("personTrajectory (own view)", () => {
   it("shows the own rating only once published AND shared, never the stage", async () => {
     const { cycle } = await h1();
-    await publishCalibration(db, hr, cycle.id);
+    await publish(cycle.id);
     let own = await personTrajectory(db, as(bruno), bruno);
     expect(own.points[0].normalized).toBeNull();
-    await transition(db, cycle.id, "sharing", null);
-    await shareAll(db, hr, cycle.id);
+    await setStatus(cycle.id, "sharing");
+    for (const p of [bruno, carla]) {
+      const { id } = await participantOf(cycle.id, p);
+      await share(await requestIdOf(id, "manager"));
+    }
     own = await personTrajectory(db, as(bruno), bruno);
     expect(close(own.points[0].normalized)).toBe(close(2 / 3));
     expect(own.points[0].stage).toBeNull();
@@ -612,9 +612,19 @@ describe("executiveSummary", () => {
 describe("reassigned manager review", () => {
   it("superseded requests are neither counted nor paired", async () => {
     const { cycle, pb } = await h1();
-    // Ana replaces Carla: Carla's submitted review becomes superseded and
-    // Ana gets a fresh draft.
-    await assignAlternateAssessor(db, hr, pb, ana, "replace");
+    // Ana replaced Carla: Carla's submitted review is superseded and Ana
+    // has a fresh draft.
+    const carlas = await requestIdOf(pb, "manager", carla);
+    await db
+      .update(reviewRequest)
+      .set({ status: "superseded" })
+      .where(eq(reviewRequest.id, carlas));
+    await db.insert(reviewRequest).values({
+      cycleId: cycle.id,
+      participantId: pb,
+      relationship: "manager",
+      reviewerPersonId: ana,
+    });
     const r = await cycleProgress(db, hr, {
       cycleId: cycle.id,
       hierarchy: "asOf",

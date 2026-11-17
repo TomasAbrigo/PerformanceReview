@@ -1,28 +1,8 @@
 import path from "node:path";
 import { expect, test } from "@playwright/test";
-import { company, employees, fullName, hasUniqueName } from "./seed-data";
+import { assessed2023, company, fullName } from "./seed-data";
 
 const REPORTS = path.resolve("fixtures/bamboo-reports/small");
-
-const renamed = new Set(company.identity.renames.map((r) => r.employeeId));
-const misspelled = new Set(
-  company.identity.misspellings.map((m) => `${m.employeeId}:${m.cycle}`),
-);
-const seeded = new Map(employees.map((e) => [e.id, e]));
-
-/** Someone whose 2023 assessment is in the report under their seeded name. */
-const assessed2023 = company.assessments
-  .filter(
-    (a) =>
-      a.cycle === 0 &&
-      a.employeeId !== null &&
-      a.selfStatus === "Submitted" &&
-      a.managerStatus === "Submitted" &&
-      !renamed.has(a.employeeId) &&
-      !misspelled.has(`${a.employeeId}:0`),
-  )
-  .map((a) => seeded.get(a.employeeId!))
-  .find((e) => e !== undefined && hasUniqueName(e))!;
 
 test("importing the employee performance report creates the historical cycles and their participants", async ({
   page,

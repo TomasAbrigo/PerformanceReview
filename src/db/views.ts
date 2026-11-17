@@ -6,7 +6,7 @@ import {
   timestamp,
   uuid,
 } from "drizzle-orm/pg-core";
-import { finalRatingStage } from "./schema/calibration";
+import { finalRatingStage } from "./schema/final-rating";
 
 // Views live outside src/db/schema (drizzle-kit would see them twice via
 // index.ts) and are created by hand in migrations: see src/db/sql/.

@@ -134,6 +134,13 @@
       "when": 1794666404067,
       "tag": "0018_compare_ack",
       "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1794942574687,
+      "tag": "0019_prune",
+      "breakpoints": true
     }
   ]
 }

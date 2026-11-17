@@ -397,7 +397,7 @@ describe("people API: email only for People (hr)", () => {
     expect(res.body.data[0].work_email).toBe("bruno.perez@example.com");
   });
 
-  it.each(["manager", "employee", "peer", "calibrator"])(
+  it.each(["manager", "employee"])(
     "leaves the email out when reading as %s, in the list and in the detail",
     async (role) => {
       const list = await call(

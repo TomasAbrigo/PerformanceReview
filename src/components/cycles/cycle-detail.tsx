@@ -1,10 +1,5 @@
-"use client";
-
-import { useFormatter, useTranslations } from "next-intl";
-import { useState, useTransition } from "react";
-import { type ActionResult, useLocalized } from "@/components/templates/shared";
+import { useTranslations } from "next-intl";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import {
   Table,
   TableBody,
@@ -13,31 +8,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  type SelfReviewColumn,
-  SelfStatusCell,
-} from "@/components/review/self-status-cell";
-import type { ParticipantFilter } from "@/db/schema";
-import type { LocalizedText } from "@/db/schema/rating-scales";
 import { Link } from "@/i18n/navigation";
-import {
-  type CycleDueDates,
-  type CycleStatus,
-  DUPLICATE_NOTE_PREFIX,
-  type HireDateSchedule,
-  type ScheduleKind,
-} from "@/modules/review-core/status";
+import type { CycleStatus } from "@/modules/review-core/status";
 import { CycleStatusBadge } from "./cycle-status-badge";
-import { useCycleError } from "./errors";
-import { DuplicateButton, type DuplicateAction } from "./duplicate-button";
-
-const FILTER_KEYS = [
-  "departments",
-  "divisions",
-  "locations",
-  "jobTitles",
-  "statuses",
-] as const;
 
 export type CycleDetailData = {
   id: string;
@@ -48,19 +21,6 @@ export type CycleDetailData = {
   snapshotDate: string;
   questionCount: number;
   stats: { active: number; removed: number; withoutManager: number };
-  allowedTransitions: CycleStatus[];
-  scheduleKind: ScheduleKind;
-  hireDateSchedule: HireDateSchedule | null;
-  /** Template of the cycle: used by whoever is in no group. */
-  defaultTemplateName: LocalizedText | null;
-  groups: {
-    id: string;
-    name: string;
-    templateName: LocalizedText;
-    filter: ParticipantFilter;
-    participantCount: number;
-    questionCount: number;
-  }[];
   participants: {
     id: string;
     displayName: string;
@@ -69,88 +29,13 @@ export type CycleDetailData = {
     snapJobTitle: string | null;
     withoutManager: boolean;
     removedAt: Date | null;
-    templateGroupId: string | null;
-    /** Own deadlines (hire-date cycles); null = the cycle's. */
-    dueDates: CycleDueDates | null;
-  }[];
-  transitions: {
-    id: string;
-    fromStatus: CycleStatus;
-    toStatus: CycleStatus;
-    actorName: string | null;
-    note: string | null;
-    createdAt: Date;
   }[];
 };
 
-export type CycleDetailActions = {
-  transition: (id: string, to: CycleStatus) => Promise<ActionResult>;
-  launch: (id: string) => Promise<ActionResult>;
-  duplicate: DuplicateAction;
-};
-
-export function CycleDetailView({
-  cycle,
-  actions,
-  selfReview,
-}: {
-  cycle: CycleDetailData;
-  actions: CycleDetailActions;
-  /** Self review status per participant (HR view, #11). */
-  selfReview?: SelfReviewColumn;
-}) {
+/** A cycle as a read-only container: its period and its participants' snapshot. */
+export function CycleDetailView({ cycle }: { cycle: CycleDetailData }) {
   const t = useTranslations("Cycles");
-  const tReview = useTranslations("Review");
   const td = useTranslations("Cycles.detail");
-  const tx = useTranslations("Cycles.extras");
-  const tg = useTranslations("Cycles.extras.groups");
-  const tw = useTranslations("Cycles.wizard");
-  const localized = useLocalized();
-  const format = useFormatter();
-  const errorText = useCycleError();
-  const [confirming, setConfirming] = useState<CycleStatus | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [pending, startTransition] = useTransition();
-
-  const targets: CycleStatus[] =
-    cycle.status === "draft" ? [] : cycle.allowedTransitions;
-
-  const byHireDate = cycle.scheduleKind === "hire_date";
-  const groupName = new Map(cycle.groups.map((g) => [g.id, g.name]));
-  const withoutGroup = cycle.participants.filter(
-    (p) => !p.removedAt && !p.templateGroupId,
-  ).length;
-  function filterText(filter: ParticipantFilter): string {
-    if (filter.kind === "people") {
-      return tg("criteriaPeople", { count: filter.personIds.length });
-    }
-    const parts =
-      filter.kind === "filter"
-        ? FILTER_KEYS.flatMap((key) =>
-            filter[key]?.length
-              ? [`${tw(`filters.${key}`)}: ${filter[key].join(", ")}`]
-              : [],
-          )
-        : [];
-    return parts.length > 0 ? parts.join(" · ") : tg("criteriaAll");
-  }
-
-  function confirm() {
-    const to = confirming;
-    if (!to) return;
-    startTransition(async () => {
-      const result =
-        cycle.status === "draft"
-          ? await actions.launch(cycle.id)
-          : await actions.transition(cycle.id, to);
-      if (result.ok) {
-        setError(null);
-        setConfirming(null);
-      } else {
-        setError(errorText(result.code));
-      }
-    });
-  }
 
   return (
     <div className="flex flex-col gap-6">
@@ -164,135 +49,13 @@ export function CycleDetailView({
         <div className="flex flex-wrap items-center gap-3">
           <h1 className="text-2xl font-semibold">{cycle.name}</h1>
           <CycleStatusBadge status={cycle.status} />
-          <DuplicateButton cycleId={cycle.id} duplicate={actions.duplicate} />
         </div>
         <p className="text-sm text-muted-foreground">
           {t("period", { start: cycle.periodStart, end: cycle.periodEnd })} ·{" "}
           {td("snapshotDate", { date: cycle.snapshotDate })} ·{" "}
           {td("questions", { count: cycle.questionCount })}
         </p>
-        {byHireDate && cycle.hireDateSchedule ? (
-          <p className="text-sm text-muted-foreground">
-            {tx("schedule.summary", {
-              milestone: tx(
-                `schedule.milestones.${cycle.hireDateSchedule.milestoneDays}`,
-              ),
-              window: tx("schedule.weeks", {
-                count: cycle.hireDateSchedule.windowWeeks,
-              }),
-            })}
-          </p>
-        ) : null}
       </header>
-
-      <section aria-labelledby="cycle-actions" className="flex flex-col gap-2">
-        <h2 id="cycle-actions" className="text-lg font-medium">
-          {td("actions")}
-        </h2>
-        <div className="flex flex-wrap gap-2">
-          {cycle.status === "draft" ? (
-            <Button onClick={() => setConfirming("nominations")}>
-              {td("launch")}
-            </Button>
-          ) : null}
-          {targets.map((to) => (
-            <Button
-              key={to}
-              variant="outline"
-              onClick={() => setConfirming(to)}
-            >
-              {td("moveTo", { status: t(`status.${to}`) })}
-            </Button>
-          ))}
-          {cycle.status !== "draft" && targets.length === 0 ? (
-            <p className="text-sm text-muted-foreground">{td("noActions")}</p>
-          ) : null}
-        </div>
-        {confirming ? (
-          <div
-            role="alertdialog"
-            aria-labelledby="confirm-title"
-            className="flex flex-col gap-2 rounded-md border p-4"
-          >
-            <p id="confirm-title" className="font-medium">
-              {td("confirmTitle")}
-            </p>
-            {cycle.status !== "draft" ? (
-              <p>
-                {td("confirmBody", {
-                  from: t(`status.${cycle.status}`),
-                  to: t(`status.${confirming}`),
-                })}
-              </p>
-            ) : null}
-            <div className="flex gap-2">
-              <Button onClick={confirm} disabled={pending}>
-                {td("confirm")}
-              </Button>
-              <Button
-                variant="outline"
-                onClick={() => setConfirming(null)}
-                disabled={pending}
-              >
-                {td("cancel")}
-              </Button>
-            </div>
-          </div>
-        ) : null}
-        {error ? (
-          <p role="alert" className="text-sm text-destructive">
-            {error}
-          </p>
-        ) : null}
-      </section>
-
-      {cycle.groups.length > 0 ? (
-        <section aria-labelledby="cycle-groups" className="flex flex-col gap-2">
-          <h2 id="cycle-groups" className="text-lg font-medium">
-            {tg("title")}
-          </h2>
-          <div className="flex flex-wrap gap-x-4 text-sm text-muted-foreground">
-            {cycle.defaultTemplateName ? (
-              <span>
-                {tg("defaultTemplate", {
-                  name: localized(cycle.defaultTemplateName),
-                })}
-              </span>
-            ) : null}
-            <span>{tg("withoutGroup", { count: withoutGroup })}</span>
-          </div>
-          <Table aria-label={tg("title")}>
-            <TableHeader>
-              <TableRow>
-                <TableHead>{tg("columns.group")}</TableHead>
-                <TableHead>{tg("columns.template")}</TableHead>
-                <TableHead>{tg("columns.criteria")}</TableHead>
-                <TableHead className="text-right">
-                  {tg("columns.people")}
-                </TableHead>
-                <TableHead className="text-right">
-                  {tg("columns.questions")}
-                </TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {cycle.groups.map((g) => (
-                <TableRow key={g.id}>
-                  <TableCell>{g.name}</TableCell>
-                  <TableCell>{localized(g.templateName)}</TableCell>
-                  <TableCell>{filterText(g.filter)}</TableCell>
-                  <TableCell className="text-right">
-                    {g.participantCount}
-                  </TableCell>
-                  <TableCell className="text-right">
-                    {g.questionCount}
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </section>
-      ) : null}
 
       <section
         aria-labelledby="cycle-participants"
@@ -315,15 +78,6 @@ export function CycleDetailView({
                   <TableHead>{td("columns.manager")}</TableHead>
                   <TableHead>{td("columns.department")}</TableHead>
                   <TableHead>{td("columns.jobTitle")}</TableHead>
-                  {cycle.groups.length > 0 ? (
-                    <TableHead>{tx("detail.group")}</TableHead>
-                  ) : null}
-                  {byHireDate ? (
-                    <TableHead>{tx("detail.due")}</TableHead>
-                  ) : null}
-                  {selfReview ? (
-                    <TableHead>{tReview("selfColumn")}</TableHead>
-                  ) : null}
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -347,83 +101,11 @@ export function CycleDetailView({
                     </TableCell>
                     <TableCell>{p.snapDepartment ?? "—"}</TableCell>
                     <TableCell>{p.snapJobTitle ?? "—"}</TableCell>
-                    {cycle.groups.length > 0 ? (
-                      <TableCell>
-                        {(p.templateGroupId &&
-                          groupName.get(p.templateGroupId)) ||
-                          tg("none")}
-                      </TableCell>
-                    ) : null}
-                    {byHireDate ? (
-                      <TableCell>
-                        {p.dueDates?.self ?? p.dueDates?.manager ?? "—"}
-                      </TableCell>
-                    ) : null}
-                    {selfReview ? (
-                      <TableCell>
-                        <SelfStatusCell
-                          request={selfReview.byParticipant[p.id]}
-                          canUnlock={selfReview.canUnlock}
-                          unlock={selfReview.unlock}
-                        />
-                      </TableCell>
-                    ) : null}
                   </TableRow>
                 ))}
               </TableBody>
             </Table>
           </>
-        )}
-      </section>
-
-      <section
-        aria-labelledby="cycle-transitions"
-        className="flex flex-col gap-2"
-      >
-        <h2 id="cycle-transitions" className="text-lg font-medium">
-          {td("transitions")}
-        </h2>
-        {cycle.transitions.length === 0 ? (
-          <p>{td("noTransitions")}</p>
-        ) : (
-          <Table aria-label={td("transitions")}>
-            <TableHeader>
-              <TableRow>
-                <TableHead>{td("columns.from")}</TableHead>
-                <TableHead>{td("columns.to")}</TableHead>
-                <TableHead>{td("columns.actor")}</TableHead>
-                <TableHead>{td("columns.when")}</TableHead>
-                <TableHead>{td("columns.note")}</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {cycle.transitions.map((tr) => (
-                <TableRow key={tr.id}>
-                  <TableCell>{t(`status.${tr.fromStatus}`)}</TableCell>
-                  <TableCell>{t(`status.${tr.toStatus}`)}</TableCell>
-                  <TableCell>{tr.actorName ?? td("system")}</TableCell>
-                  <TableCell>
-                    {format.dateTime(tr.createdAt, {
-                      dateStyle: "medium",
-                      timeStyle: "short",
-                    })}
-                  </TableCell>
-                  <TableCell>
-                    {tr.note?.startsWith(DUPLICATE_NOTE_PREFIX) ? (
-                      <Link
-                        href={`/cycles/${tr.note.slice(DUPLICATE_NOTE_PREFIX.length)}`}
-                        className="hover:underline"
-                      >
-                        {tx("duplicate.from")}
-                      </Link>
-                    ) : (
-                      (tr.note ?? "")
-                    )}
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
         )}
       </section>
     </div>

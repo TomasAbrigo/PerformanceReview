@@ -1,11 +1,7 @@
-import type { PeerSettings } from "./peer-settings";
-
 /**
- * Cycle status machine (docs/research/06): the phases of a cycle depend on
- * its components (no nominations without peers, no calibration phase when
- * calibration is off, no manager review without managers). From any active phase a cycle may move one step
- * forward or one step back; `draft` is left only by launching, and `closed`
- * is terminal.
+ * Phases a cycle went through in the review flow that this app no longer
+ * runs (#54): kept as the cycle_status enum, since cycles carry them as data
+ * (imported cycles are `closed`).
  */
 export const cycleStatuses = [
   "draft",
@@ -36,8 +32,8 @@ export type CycleComponents = {
    * are submitted (manager) / it is shared (employee). Missing = on.
    */
   doubleBlind?: boolean;
-  /** #14: nominations cap, approval and load warning (defaults apply). */
-  peerSettings?: Partial<PeerSettings>;
+  /** Peer settings of the removed nominations flow (#14), kept as data. */
+  peerSettings?: Record<string, unknown>;
 };
 
 export const isDoubleBlind = (c: Pick<CycleComponents, "doubleBlind">) =>
@@ -57,66 +53,3 @@ export const dueDatePhases = [
 ] as const;
 export type DueDatePhase = (typeof dueDatePhases)[number];
 export type CycleDueDates = Partial<Record<DueDatePhase, string>>;
-
-export const scheduleKinds = ["fixed", "hire_date"] as const;
-export type ScheduleKind = (typeof scheduleKinds)[number];
-
-/** Prefix of the status-log note that links a duplicated cycle to its source. */
-export const DUPLICATE_NOTE_PREFIX = "duplicate_of:";
-
-/** Something a duplicate could not carry over from the source cycle. */
-export type DuplicateWarning =
-  { kind: "template" } | { kind: "group"; name: string };
-
-/** Hire-date milestones, in days after hire (6 months = 180, 1 year = 365). */
-export const hireMilestoneDays = [30, 60, 90, 180, 365] as const;
-export type HireMilestoneDays = (typeof hireMilestoneDays)[number];
-/** Length of the window (weeks) that opens at the milestone. */
-export const hireWindowWeeks = [1, 2, 3, 4] as const;
-export type HireWindowWeeks = (typeof hireWindowWeeks)[number];
-
-/**
- * Cadence of a `hire_date` cycle: each person joins when hire date +
- * `milestoneDays` is reached and has `windowWeeks` weeks to complete it.
- */
-export type HireDateSchedule = {
-  milestoneDays: HireMilestoneDays;
-  windowWeeks: HireWindowWeeks;
-};
-
-export function phasesFor(components: CycleComponents): CycleStatus[] {
-  return cycleStatuses.filter(
-    (s) =>
-      (s !== "nominations" || components.peer) &&
-      (s !== "manager_review" || components.manager) &&
-      (s !== "calibration" || components.calibration),
-  );
-}
-
-/** Statuses reachable from `from`: next phase first, then the previous one. */
-export function allowedTransitions(
-  components: CycleComponents,
-  from: CycleStatus,
-): CycleStatus[] {
-  if (from === "draft" || from === "closed") return [];
-  const phases = phasesFor(components);
-  const i = phases.indexOf(from);
-  if (i < 0) return [];
-  const result: CycleStatus[] = [];
-  if (i + 1 < phases.length) result.push(phases[i + 1]);
-  if (i - 1 > 0) result.push(phases[i - 1]);
-  return result;
-}
-
-export function canTransition(
-  components: CycleComponents,
-  from: CycleStatus,
-  to: CycleStatus,
-): boolean {
-  return allowedTransitions(components, from).includes(to);
-}
-
-/** First active phase after launching a draft. */
-export function launchStatus(components: CycleComponents): CycleStatus {
-  return phasesFor(components)[1];
-}

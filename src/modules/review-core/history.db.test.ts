@@ -2,7 +2,7 @@ import { eq } from "drizzle-orm";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { closeDb, db } from "@/db/client";
 import { employeeJobHistory, questionRevision, reviewCycle } from "@/db/schema";
-import { acknowledge, reviewHistory, transition } from ".";
+import { reviewHistory } from ".";
 import {
   as,
   askBoth,
@@ -13,11 +13,12 @@ import {
   people,
   resetDb,
   revisions,
+  setStatus,
   sharedCycle,
   submitManager,
   submitSelf,
   systemTemplateId,
-} from "./compare-ack.fixtures";
+} from "./test-support";
 
 let templateId: string;
 
@@ -44,9 +45,7 @@ async function story() {
     periodEnd: "2024-06-30",
     snapshotDate: "2024-06-01",
   });
-  for (const to of ["manager_review", "sharing", "closed"] as const) {
-    await transition(db, second.id, to, null);
-  }
+  await setStatus(second.id, "closed");
   await collectingCycle(templateId, {
     name: "H2 2022",
     periodStart: "2022-07-01",
@@ -74,7 +73,6 @@ describe("reviewHistory", () => {
       managerPersonId: people.carla,
       jobTitle: "Developer", // not Senior Developer
       department: "Ingeniería",
-      acknowledgedAt: null,
     });
     expect(shared.sharedAt).not.toBeNull();
     expect(closed).toMatchObject({
@@ -139,7 +137,6 @@ describe("reviewHistory", () => {
       true,
     );
     expect(Object.keys(item.manager!.answers)).not.toContain(hiddenIds[0]);
-    expect(item.canCompare).toBe(true);
 
     // HR reads all of it.
     const [forHr] = (await reviewHistory(db, hr, people.bruno)).filter(
@@ -192,14 +189,6 @@ describe("reviewHistory", () => {
     expect((await ofCycle(as(people.carla, "manager"))).rating).not.toBeNull();
   });
 
-  it("shows the acknowledgement", async () => {
-    await story();
-    const [item] = await reviewHistory(db, as(people.bruno), people.bruno);
-    await acknowledge(db, as(people.bruno), item.participantId, "Leído");
-    const [after] = await reviewHistory(db, as(people.bruno), people.bruno);
-    expect(after.acknowledgedAt).not.toBeNull();
-  });
-
   it("the snapshot manager sees only the cycles they managed", async () => {
     await story();
     // Carla manages nobody named Bruno now, but did in H1 2022.
@@ -240,9 +229,7 @@ describe("reviewHistory", () => {
       const cycle = await collectingCycle(templateId);
       await submitSelf(cycle.id);
       await submitManager(cycle.id);
-      for (const to of ["manager_review", "sharing", "closed"] as const) {
-        await transition(db, cycle.id, to, null);
-      }
+      await setStatus(cycle.id, "closed");
       const [seenByAna] = await reviewHistory(db, ana(), people.bruno);
       expect(seenByAna).toMatchObject({
         cycleName: "H1 2022",
@@ -252,7 +239,6 @@ describe("reviewHistory", () => {
         rating: null,
         self: null,
         manager: null,
-        canCompare: false,
       });
       // People still read it all.
       const [seenByHr] = await reviewHistory(db, hr, people.bruno);
@@ -266,7 +252,6 @@ describe("reviewHistory", () => {
       expect(item.rating).not.toBeNull();
       expect(item.manager?.request.status).toBe("submitted");
       expect(item.self?.request.status).toBe("submitted");
-      expect(item.canCompare).toBe(true);
     });
   });
 
