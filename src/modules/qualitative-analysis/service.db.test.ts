@@ -3,6 +3,7 @@ import { afterAll, beforeEach, describe, expect, it } from "vitest";
 import { closeDb, db } from "@/db/client";
 import type { ActorContext } from "@/modules/actor/types";
 import { correctLabel } from "./correction";
+import { effectiveCte } from "./effective";
 import { MockProvider } from "./mock-provider";
 import type { AnalysisInput, AnalysisProvider } from "./provider";
 import { runAnalysis } from "./service";
@@ -169,5 +170,34 @@ describe("runAnalysis", () => {
       sql`select status, error from analysis_run`,
     );
     expect(run).toEqual({ status: "error", error: "Error" });
+  });
+
+  it("refuses to correct a comment without a label", async () => {
+    await expect(
+      correctLabel(db, hr, answers[0], { sentiment: "negative", themes: [] }),
+    ).rejects.toThrow(/not_labeled/);
+  });
+
+  it("skips answers of removed participants and draft requests", async () => {
+    await db.execute(sql`update cycle_participant set removed_at = now()`);
+    const spy = new SpyProvider();
+    expect((await runAnalysis(db, { provider: spy })).total).toBe(0);
+  });
+
+  it("a label made from an older text is stale: hidden until re-analyzed", async () => {
+    await runAnalysis(db, { provider: new SpyProvider() });
+    // Whitespace-only edit: same normalized hash, different text.
+    await db.execute(
+      sql`update answer set text_value = text_value || '  ' where id = ${answers[0]}::uuid`,
+    );
+    const [{ n }] = await db.execute<{ n: number }>(sql`
+      with ${effectiveCte()} select count(*)::int as n from eff`);
+    expect(n).toBe(2);
+    const spy = new SpyProvider();
+    await runAnalysis(db, { provider: spy });
+    expect(spy.sent).toHaveLength(1);
+    const [{ m }] = await db.execute<{ m: number }>(sql`
+      with ${effectiveCte()} select count(*)::int as m from eff`);
+    expect(m).toBe(3);
   });
 });

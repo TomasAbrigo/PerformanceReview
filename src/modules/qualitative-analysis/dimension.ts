@@ -1,9 +1,9 @@
 import type { LocalizedText } from "@/db/schema/rating-scales";
 
 /**
- * Dimension of an open-text question. TEMPORARY fallback until
- * question_revision.dimension (#57) lands: a stable key derived from the
- * prompt. Replace the body with the column once it exists.
+ * Dimension of an open-text question: question_revision.dimension (#57) when
+ * set, else a stable key derived from the prompt (revisions copied before the
+ * column existed, or questions without one).
  */
 export function dimensionOf(q: {
   prompt: LocalizedText;

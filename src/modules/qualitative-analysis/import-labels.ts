@@ -55,6 +55,7 @@ type Candidate = {
   answer_id: string;
   text: string;
   prompt: LocalizedText;
+  dimension: string | null;
   person_id: string;
   person_name: string;
   bamboo_id: string | null;
@@ -88,7 +89,7 @@ export async function importLabels(
     .returning({ id: analysisRun.id });
 
   const candidates = await db.execute<Candidate>(sql`
-    select a.id as answer_id, a.text_value as text, q.prompt,
+    select a.id as answer_id, a.text_value as text, q.prompt, q.dimension,
            p.id as person_id, p.display_name as person_name,
            (select si.value from source_identity si where si.person_id = p.id
              and si.kind = 'bamboo_id' order by si.valid_from desc limit 1) as bamboo_id,

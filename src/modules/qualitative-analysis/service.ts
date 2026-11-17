@@ -26,6 +26,7 @@ type TextAnswer = {
   answer_id: string;
   text: string;
   prompt: LocalizedText;
+  dimension: string | null;
   cached_hash: string | null;
   /** The cached label was made from exactly this text. */
   fresh: boolean;
@@ -40,7 +41,7 @@ async function textAnswers(
   promptVersion: string,
 ): Promise<TextAnswer[]> {
   return db.execute<TextAnswer>(sql`
-    select a.id as answer_id, a.text_value as text, q.prompt,
+    select a.id as answer_id, a.text_value as text, q.prompt, q.dimension,
            qa.text_hash as cached_hash,
            coalesce(qa.source_md5 = md5(a.text_value), false) as fresh,
            exists (select 1 from analysis_correction c where c.answer_id = a.id) as corrected

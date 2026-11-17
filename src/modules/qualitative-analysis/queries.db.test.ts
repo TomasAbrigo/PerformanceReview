@@ -55,6 +55,14 @@ beforeAll(async () => {
       { questionId: retention, option: "A" },
     ]);
     if (cycle === c2023) firstAnswer = ids[0];
+    // A self review that also answers the retention question, and a second
+    // manager review: neither may count the participant's comments twice.
+    await insertAnswer(cycle, a, emp, "self", [
+      { questionId: retention, option: "D" },
+    ]);
+    await insertAnswer(cycle, a, other, "manager", [
+      { questionId: retention, option: "A" },
+    ]);
     await insertAnswer(cycle, b, other, "manager", [
       {
         questionId: well,
