@@ -22,6 +22,7 @@ test("home navigation lists only the remaining sections", async ({ page }) => {
     "Completitud",
     "Retención y compromiso",
     "Análisis cualitativo",
+    "Goals y assessments",
     "Importaciones",
     "Subir archivo",
     "Cola de identidad",

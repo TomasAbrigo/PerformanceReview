@@ -54,6 +54,13 @@ import {
   type DimensionSentiment,
 } from "@/modules/qualitative-analysis";
 import {
+  type GoalKpiGroup,
+  type GoalOutlier,
+  goalGroupBys,
+  goalKpis,
+  goalOutliers,
+} from "@/modules/analytics/goals-insights";
+import {
   type CompletionGroup,
   completionDelta,
   completionGroupBys,
@@ -740,6 +747,95 @@ const insightsSentimentExport = defineExport({
   ],
 });
 
+// ------------------------------------------------ insights: goals vs assessment
+// Goal KPIs and the goals/indicators outliers, with People's visibility like
+// the dashboards (the API has no actor). No emails.
+
+const goalsInsightsQuery = z.object({
+  cycle: uuid,
+  hierarchy: z.enum(hierarchies).default("asOf"),
+  department: z.string().optional(),
+  manager: uuid.optional(),
+});
+
+/** A share with one decimal: 53.8, not 53.84615384615385. */
+const oneDecimal = (n: number | null) =>
+  n === null ? null : Math.round(n * 10) / 10;
+
+/** One row per group (person, manager or area): goals, shares and mean progress. */
+const goalKpisExport = defineExport({
+  file: ({ cycle, groupBy }) => `insights-goal-kpis-${cycle}-${groupBy}`,
+  query: goalsInsightsQuery.extend({
+    groupBy: z.enum(goalGroupBys).default("department"),
+  }),
+  rows: (db, q) =>
+    each(
+      goalKpis(db, DEFAULT_ACTOR, {
+        cycleId: q.cycle,
+        groupBy: q.groupBy,
+        hierarchy: q.hierarchy,
+        filters: { department: q.department, managerId: q.manager },
+      }).then((k) => k.groups),
+    ),
+  columns: (h) => [
+    { header: h("group_id"), value: (g: GoalKpiGroup) => g.key },
+    { header: h("group"), value: (g) => g.label },
+    { header: h("people"), value: (g) => g.people },
+    { header: h("goals"), value: (g) => g.goals },
+    { header: h("completed"), value: (g) => g.completed },
+    { header: h("in_progress"), value: (g) => g.inProgress },
+    { header: h("closed"), value: (g) => g.closed },
+    { header: h("overdue"), value: (g) => g.overdue },
+    { header: h("completed_pct"), value: (g) => oneDecimal(g.completedPct) },
+    {
+      header: h("in_progress_pct"),
+      value: (g) => oneDecimal(g.inProgressPct),
+    },
+    { header: h("overdue_pct"), value: (g) => oneDecimal(g.overduePct) },
+    { header: h("avg_progress"), value: (g) => oneDecimal(g.avgProgress) },
+  ],
+});
+
+type GoalOutlierRow = GoalOutlier & {
+  kind: "done_but_low" | "behind_but_high";
+};
+
+/** One row per outlier: goals done with low indicators, or goals behind with high ones. */
+const goalOutliersExport = defineExport({
+  file: ({ cycle }) => `insights-goal-outliers-${cycle}`,
+  query: goalsInsightsQuery,
+  rows: (db, q) =>
+    each(
+      goalOutliers(db, DEFAULT_ACTOR, {
+        cycleId: q.cycle,
+        hierarchy: q.hierarchy,
+        filters: { department: q.department, managerId: q.manager },
+      }).then((o): GoalOutlierRow[] => [
+        ...o.doneButLow.people.map((p) => ({
+          ...p,
+          kind: "done_but_low" as const,
+        })),
+        ...o.behindButHigh.people.map((p) => ({
+          ...p,
+          kind: "behind_but_high" as const,
+        })),
+      ]),
+    ),
+  columns: (h) => [
+    { header: h("outlier_kind"), value: (p: GoalOutlierRow) => p.kind },
+    { header: h("person_id"), value: (p) => p.personId },
+    { header: h("name"), value: (p) => p.name },
+    { header: h("manager_id"), value: (p) => p.managerId },
+    { header: h("manager"), value: (p) => p.managerName },
+    { header: h("department"), value: (p) => p.department },
+    { header: h("goals"), value: (p) => p.goals },
+    { header: h("completed"), value: (p) => p.completed },
+    { header: h("completed_pct"), value: (p) => oneDecimal(p.completedPct) },
+    { header: h("retention"), value: (p) => p.retention },
+    { header: h("engagement"), value: (p) => p.engagement },
+  ],
+});
+
 // ------------------------------------------------------------- completion
 // The insights completion views (/insights/completion), read as People (like
 // the dashboards above): a cycle (required) and the same filters as the page.
@@ -879,6 +975,8 @@ const EXPORTS = {
   "insights-indicator-distribution": indicatorDistributionExport,
   "insights-alerts": indicatorAlertsExport,
   "insights-sentiment": insightsSentimentExport,
+  "insights-goal-kpis": goalKpisExport,
+  "insights-goal-outliers": goalOutliersExport,
 } as const;
 
 export type ExportEntity = keyof typeof EXPORTS;

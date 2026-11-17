@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { ActorContext } from "@/modules/actor/types";
 import {
+  canOpenAssessment,
   canSeeExecutiveView,
   canSeeIndividuals,
   canSeeSensitiveIndicators,
@@ -124,6 +125,41 @@ describe("canSeeSensitiveIndicators (retention, engagement, sentiment)", () => {
 
   it("direction never sees them about a person", () => {
     expect(canSeeSensitiveIndicators(direction, bruno)).toBe(false);
+  });
+});
+
+describe("canOpenAssessment (the participant's assessment page)", () => {
+  const bruno = {
+    revieweePersonId: BRUNO,
+    snapManagerPersonId: ANA,
+    removedAt: null,
+  };
+  const removed = { ...bruno, removedAt: new Date("2024-03-01T12:00:00Z") };
+
+  it("People open any participant, a removed one included", () => {
+    expect(canOpenAssessment(hr, bruno)).toBe(true);
+    expect(canOpenAssessment(hr, removed)).toBe(true);
+  });
+
+  it("a manager opens their direct reports of the snapshot while they are in the cycle", () => {
+    expect(canOpenAssessment(manager, bruno)).toBe(true);
+    expect(canOpenAssessment(manager, removed)).toBe(false);
+    expect(
+      canOpenAssessment(manager, { ...bruno, snapManagerPersonId: CARLA }),
+    ).toBe(false);
+    expect(
+      canOpenAssessment(manager, {
+        revieweePersonId: ANA,
+        snapManagerPersonId: ANA,
+        removedAt: null,
+      }),
+    ).toBe(false);
+  });
+
+  it("nobody else does: employees (not even their own), direction, a manager without a person", () => {
+    expect(canOpenAssessment(employee, bruno)).toBe(false);
+    expect(canOpenAssessment(direction, bruno)).toBe(false);
+    expect(canOpenAssessment(lostManager, bruno)).toBe(false);
   });
 });
 
