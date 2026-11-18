@@ -12,6 +12,7 @@ import { GoalsFilters } from "@/components/goals-insights/filters";
 import { GoalsScatter } from "@/components/goals-insights/goals-scatter";
 import { KpisTable } from "@/components/goals-insights/kpis-table";
 import { OutliersView } from "@/components/goals-insights/outliers";
+import { orgFiltersOf } from "@/components/org/params";
 import { PeopleTable } from "@/components/goals-insights/people-table";
 import {
   hrefWith,
@@ -69,7 +70,11 @@ async function GoalsInsights({
     cycleId: cycle.id,
     hierarchy: p.hierarchy,
     groupBy,
-    filters: { department: p.department, managerId: p.manager },
+    filters: {
+      department: p.department,
+      managerId: p.manager,
+      ...orgFiltersOf(p),
+    },
   });
   const here = "/insights/goals";
   // CSV exports go through the API (People's visibility): offered to People only.
@@ -82,6 +87,7 @@ async function GoalsInsights({
           hierarchy: p.hierarchy,
           department: p.department,
           manager: p.manager,
+          ...orgFiltersOf(p),
           ...extra,
         }}
       />

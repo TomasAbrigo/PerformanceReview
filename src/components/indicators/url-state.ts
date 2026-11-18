@@ -1,6 +1,7 @@
 // URL params of the indicator pages (filters live in the URL, never in state).
 import { isUuid } from "@/lib/uuid";
 import { one, pick } from "@/components/dashboards/url-state";
+import { type OrgParams, parseOrgParams } from "@/components/org/params";
 import {
   hierarchies,
   type Hierarchy,
@@ -12,7 +13,7 @@ import {
   indicators,
 } from "@/modules/analytics/indicators/types";
 
-export type IndicatorParams = {
+export type IndicatorParams = OrgParams & {
   cycle?: string;
   indicator: Indicator;
   groupBy: IndicatorGroupBy;
@@ -26,6 +27,7 @@ type Raw = Record<string, string | string[] | undefined>;
 export function parseIndicatorParams(sp: Raw): IndicatorParams {
   const manager = one(sp.manager);
   return {
+    ...parseOrgParams(sp),
     cycle: one(sp.cycle),
     indicator: pick(one(sp.indicator), indicators, "retention"),
     groupBy: pick(one(sp.groupBy), indicatorGroupBys, "department"),

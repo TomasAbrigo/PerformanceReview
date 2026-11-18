@@ -320,6 +320,13 @@
       "current": "Current",
       "unresolved": "{name} (unresolved)",
       "empty": "No job history."
+    },
+    "filters": {
+      "any": "All",
+      "account": "Account",
+      "project": "Project",
+      "dm": "DM",
+      "santexLead": "Santex Lead"
     }
   },
   "Goals": {
@@ -1165,7 +1172,11 @@
       "label": "Group by",
       "department": "Area",
       "manager": "Manager",
-      "none": "No grouping"
+      "none": "No grouping",
+      "account": "Account",
+      "project": "Project",
+      "dm": "DM",
+      "santex_lead": "Santex Lead"
     },
     "hierarchy": {
       "label": "Hierarchy",
@@ -1398,6 +1409,22 @@
       "no_file": "Choose a file.",
       "unknown": "Something went wrong.",
       "not_labeled": "This comment has no label yet."
+    },
+    "byGroup": {
+      "title": "Sentiment by group",
+      "chart": "Sentiment of the comments by group of people",
+      "label": "Group",
+      "groupBy": "Group by",
+      "groups": {
+        "department": "Department",
+        "account": "Account",
+        "project": "Project",
+        "dm": "DM",
+        "santex_lead": "Santex Lead"
+      },
+      "unassigned": "Unassigned",
+      "team": "Team {n}",
+      "people": "{n, plural, one {# person} other {# people}}"
     }
   },
   "Insights": {
@@ -1644,7 +1671,11 @@
       "label": "Group by",
       "none": "Ungrouped",
       "department": "Department",
-      "manager": "Manager"
+      "manager": "Manager",
+      "account": "Account",
+      "project": "Project",
+      "dm": "DM",
+      "santex_lead": "Santex Lead"
     },
     "hierarchy": {
       "label": "Hierarchy",
@@ -1740,7 +1771,11 @@
       "label": "Group by",
       "person": "Person",
       "manager": "Manager",
-      "department": "Area"
+      "department": "Area",
+      "account": "Account",
+      "project": "Project",
+      "dm": "DM",
+      "santex_lead": "Santex Lead"
     },
     "hierarchy": {
       "label": "Hierarchy",
@@ -1871,6 +1906,74 @@
         "completed": "Completed",
         "closed": "Closed"
       }
+    }
+  },
+  "Insights360": {
+    "nav": "360 analysis by DM",
+    "title": "360 analysis",
+    "heading": "360 analysis · {cycle}",
+    "forbidden": "You do not have access to the 360 analysis.",
+    "noCycles": "There are no launched cycles yet.",
+    "hint": {
+      "all": "One card per DM (delivery manager) with the people in their charge in the cycle, according to the org attributes file.",
+      "own": "Your card as a DM, with your direct reports of the cycle.",
+      "aggregates": "Aggregates only: DMs with at least {min} people, without a name; the rest are grouped as \"Others\".",
+      "notDm": "You are not listed as a DM in the org attributes file: there is no card to show."
+    },
+    "filters": {
+      "label": "Filters",
+      "cycle": "Cycle",
+      "scope": "Scope",
+      "apply": "Apply"
+    },
+    "scope": {
+      "direct": "Direct reports",
+      "tree": "Whole tree"
+    },
+    "scopeHint": {
+      "direct": "People whose DM is the card's DM according to the file.",
+      "tree": "Plus everybody below the DM in the org chart of the cycle snapshot."
+    },
+    "card": {
+      "team": "Team {n}",
+      "others": "Others",
+      "people": "{n, plural, one {# person} other {# people}}",
+      "retention": "Mean retention",
+      "engagement": "Mean engagement",
+      "risk": "At risk",
+      "riskValue": "{percent}% ({people} of {of})",
+      "sentiment": "Sentiment of the comments",
+      "comments": "{n, plural, one {# comment} other {# comments}} from {people, plural, one {# person} other {# people}}",
+      "noComments": "No comments",
+      "self": "Self assessment complete",
+      "manager": "Manager assessment complete",
+      "completion": "{percent}%",
+      "trend": "Evolution by cycle",
+      "reading": "Reading",
+      "none": "–",
+      "meanOf": "over {n}"
+    },
+    "spark": {
+      "label": "Retention and engagement by cycle",
+      "retention": "Retention",
+      "engagement": "Engagement",
+      "noData": "no data",
+      "point": "{cycle}: {value}"
+    },
+    "insight": {
+      "retentionDrop": "Mean retention fell {delta} points since {cycle} (from {previous} to {current}).",
+      "engagementDrop": "Mean engagement fell {delta} points since {cycle} (from {previous} to {current}).",
+      "negativeSentiment": "{percent}% of the {comments} comments are negative.",
+      "riskHigh": "{percent}% of the people with both indicators ({people}) are at risk: low retention and engagement.",
+      "completionLow": "Only {percent}% of the manager assessments are complete.",
+      "stable": "No alerts in this cycle.",
+      "noData": "There is not enough data yet to read this team."
+    },
+    "empty": "No DM has people in this cycle. Upload the org attributes file in Import.",
+    "withoutDm": "{n, plural, one {# person} other {# people}} without a DM in the file.",
+    "suppressed": "{n, plural, one {# person is} other {# people are}} left out: their DMs have fewer than {min} people.",
+    "export": {
+      "csv": "Export CSV"
     }
   }
 }

@@ -11,12 +11,15 @@ import { DistributionView } from "@/components/indicators/distribution-view";
 import { IndicatorFiltersForm } from "@/components/indicators/filters";
 import { RiskMatrixView } from "@/components/indicators/risk-matrix-view";
 import { parseIndicatorParams } from "@/components/indicators/url-state";
+import { orgFiltersOf } from "@/components/org/params";
 import { db } from "@/db/client";
 import { Link } from "@/i18n/navigation";
 import { routing } from "@/i18n/routing";
 import { getActor } from "@/modules/actor/server";
 import {
+  type IndicatorGroupBy,
   indicatorCycles,
+  indicatorGroupBys,
   indicatorOverview,
 } from "@/modules/analytics/indicators";
 import { insightsScope } from "@/modules/insights";
@@ -37,7 +40,13 @@ async function Indicators({
   if (!cycles.length) return <p>{t("noCycles")}</p>;
   const p = parseIndicatorParams(await searchParams);
   const cycle = cycles.find((c) => c.id === p.cycle) ?? cycles[0];
-  const shown = { ...p, cycle: cycle.id };
+  // Direction reads teams, not the people who lead them (a DM, a Santex Lead).
+  const groupBys: readonly IndicatorGroupBy[] =
+    scope.kind === "aggregatesOnly"
+      ? indicatorGroupBys.filter((g) => g !== "dm" && g !== "santex_lead")
+      : indicatorGroupBys;
+  const groupBy = groupBys.includes(p.groupBy) ? p.groupBy : "department";
+  const shown = { ...p, groupBy, cycle: cycle.id };
   // One read of the rows, one authorization: the panels and the selects.
   const { options, distribution, matrix, alerts } = await indicatorOverview(
     db,
@@ -45,9 +54,13 @@ async function Indicators({
     {
       cycleId: cycle.id,
       indicator: p.indicator,
-      groupBy: p.groupBy,
+      groupBy,
       hierarchy: p.hierarchy,
-      filters: { department: p.department, managerId: p.manager },
+      filters: {
+        department: p.department,
+        managerId: p.manager,
+        ...orgFiltersOf(p),
+      },
     },
   );
   // CSV exports go through the API (People's visibility): offered to People only.
@@ -79,6 +92,7 @@ async function Indicators({
         params={shown}
         cycles={cycles.map((c) => ({ id: c.id, name: c.name }))}
         options={options}
+        groupBys={groupBys}
       />
       <Panel
         id="distribution"
@@ -91,10 +105,11 @@ async function Indicators({
               params={{
                 cycle: cycle.id,
                 indicator: p.indicator,
-                groupBy: p.groupBy,
+                groupBy,
                 hierarchy: p.hierarchy,
                 department: p.department,
                 manager: p.manager,
+                ...orgFiltersOf(p),
               }}
             />
           ) : undefined
@@ -121,6 +136,7 @@ async function Indicators({
                 hierarchy: p.hierarchy,
                 department: p.department,
                 manager: p.manager,
+                ...orgFiltersOf(p),
               }}
             />
           ) : undefined

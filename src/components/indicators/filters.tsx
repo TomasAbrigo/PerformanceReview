@@ -1,6 +1,8 @@
 import { useTranslations } from "next-intl";
+import { OrgFilterFields } from "@/components/org/org-filter-fields";
 import { hierarchies } from "@/modules/analytics/dashboards/types";
 import {
+  type IndicatorGroupBy,
   indicatorGroupBys,
   indicators,
 } from "@/modules/analytics/indicators/types";
@@ -14,10 +16,13 @@ export function IndicatorFiltersForm({
   params,
   cycles,
   options,
+  groupBys = indicatorGroupBys,
 }: {
   params: IndicatorParams;
   cycles: { id: string; name: string }[];
   options: IndicatorFilterOptions;
+  /** The groupings on offer (direction is not offered the people). */
+  groupBys?: readonly IndicatorGroupBy[];
 }) {
   const t = useTranslations("Indicators");
   const select = (
@@ -63,7 +68,7 @@ export function IndicatorFiltersForm({
       {select(
         "groupBy",
         t("groupBy.label"),
-        indicatorGroupBys.map((g) => ({ value: g, label: t(`groupBy.${g}`) })),
+        groupBys.map((g) => ({ value: g, label: t(`groupBy.${g}`) })),
         null,
       )}
       {select(
@@ -82,6 +87,7 @@ export function IndicatorFiltersForm({
         t("filters.manager"),
         options.managers.map((m) => ({ value: m.id, label: m.name })),
       )}
+      <OrgFilterFields params={params} options={options.org} />
       <button type="submit" className="rounded-md border px-3 py-1 text-sm">
         {t("filters.apply")}
       </button>

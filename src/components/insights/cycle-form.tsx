@@ -10,11 +10,14 @@ export function CycleForm({
   cycleId,
   hidden = {},
   groupBy,
+  children,
 }: {
   cycles: { id: string; name: string }[];
   cycleId: string;
   hidden?: Record<string, string>;
   groupBy?: "department" | "manager";
+  /** More fields of the form (the org selects), before the button. */
+  children?: React.ReactNode;
 }) {
   const t = useTranslations("Insights");
   return (
@@ -46,6 +49,7 @@ export function CycleForm({
           </select>
         </label>
       ) : null}
+      {children}
       {Object.entries(hidden).map(([k, v]) => (
         <input key={k} type="hidden" name={k} value={v} />
       ))}

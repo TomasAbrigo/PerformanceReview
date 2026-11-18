@@ -14,17 +14,25 @@ import { pct, sideOf } from "./completion-table";
 export function ModeToggle({
   mode,
   cycleId,
+  filters = {},
 }: {
   mode: ExecutiveMode;
   cycleId: string;
+  /** The org cuts (account, project, DM, Santex Lead) that ride along. */
+  filters?: Record<string, string | undefined>;
 }) {
   const t = useTranslations("Insights.Executive");
+  const hrefFor = (m: ExecutiveMode) => {
+    const q = new URLSearchParams({ cycle: cycleId, mode: m });
+    for (const [k, v] of Object.entries(filters)) if (v) q.set(k, v);
+    return `/insights/executive?${q.toString()}`;
+  };
   return (
     <nav aria-label={t("mode")} className="inline-flex rounded-md border">
       {executiveModes.map((m) => (
         <Link
           key={m}
-          href={`/insights/executive?cycle=${cycleId}&mode=${m}`}
+          href={hrefFor(m)}
           aria-current={m === mode ? "true" : undefined}
           className={`px-3 py-1 text-sm ${
             m === mode ? "bg-primary text-primary-foreground" : ""

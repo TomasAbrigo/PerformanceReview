@@ -32,6 +32,7 @@ describe("FiltersForm / parseParams", () => {
           managers: [],
           locations: [],
           jobTitles: [],
+          org: { accounts: [], projects: [], dms: [], santexLeads: [] },
         }}
       />,
     );

@@ -222,11 +222,14 @@ describe("parseIngestArgs", () => {
 
 describe("REGISTRY", () => {
   it("has the handler entities and goal, dependencies first", () => {
-    // Report-only entities (assessment, feedback) are imported from files.
+    // Report-only entities (assessment, feedback, org_attribute) are imported from files.
     expect([...REGISTRY.keys()]).toEqual([
       ...Object.keys(entityHandlers).filter(
         (e) =>
-          e !== "assessment" && e !== "assessment_progress" && e !== "feedback",
+          e !== "assessment" &&
+          e !== "assessment_progress" &&
+          e !== "feedback" &&
+          e !== "org_attribute",
       ),
       "goal",
     ]);

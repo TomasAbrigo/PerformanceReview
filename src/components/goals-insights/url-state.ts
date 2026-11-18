@@ -8,8 +8,9 @@ import {
   indicators,
 } from "@/modules/analytics/goals-insights/types";
 import { hierarchies } from "@/modules/analytics/dashboards/types";
+import { type OrgParams, parseOrgParams } from "@/components/org/params";
 
-export type GoalsInsightsParams = {
+export type GoalsInsightsParams = OrgParams & {
   cycle?: string;
   groupBy: GoalGroupBy;
   hierarchy: Hierarchy;
@@ -35,6 +36,7 @@ const pick = <T extends string>(
 
 export function parseGoalsInsightsParams(sp: Raw): GoalsInsightsParams {
   return {
+    ...parseOrgParams(sp),
     cycle: id(sp.cycle),
     groupBy: pick(one(sp.groupBy), goalGroupBys, "department"),
     hierarchy: pick(one(sp.hierarchy), hierarchies, "asOf"),

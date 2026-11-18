@@ -380,7 +380,7 @@ describe("buildReport over the seed small company", () => {
     expect(dms.length).toBeGreaterThan(0);
     expect(dms.every((d) => names.includes(d))).toBe(true);
     // Every participant is in exactly one account group (self rows), one way or another.
-    const selfN = (rows: typeof s.completion.byAccount) =>
+    const selfN = (rows: NonNullable<typeof s.completion>["byAccount"]) =>
       rows!
         .filter((x) => x.relationship === "self")
         .reduce((n, x) => n + x.n, 0);

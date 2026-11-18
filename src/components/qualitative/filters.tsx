@@ -1,4 +1,6 @@
 import { useTranslations } from "next-intl";
+import { OrgFilterFields } from "@/components/org/org-filter-fields";
+import type { OrgOptions } from "@/modules/org-attributes/kinds";
 import { sentiments } from "@/modules/qualitative-analysis/constants";
 import type { QualitativeParams } from "./params";
 
@@ -11,6 +13,7 @@ export function QualitativeFilters({
   themes,
   dimensionLabel,
   showAggregate,
+  org = null,
 }: {
   params: QualitativeParams;
   cycles: { id: string; name: string }[];
@@ -19,6 +22,8 @@ export function QualitativeFilters({
   themes: string[];
   dimensionLabel: Record<string, string>;
   showAggregate: boolean;
+  /** Accounts, projects, DMs and Santex Leads on offer; null: no org filters. */
+  org?: OrgOptions | null;
 }) {
   const t = useTranslations("Qualitative.filters");
   const ts = useTranslations("Qualitative.sentiment");
@@ -64,6 +69,7 @@ export function QualitativeFilters({
         t("department"),
         departments.map((d) => ({ value: d, label: d })),
       )}
+      <OrgFilterFields params={params} options={org} />
       {select(
         "dimension",
         t("dimension"),

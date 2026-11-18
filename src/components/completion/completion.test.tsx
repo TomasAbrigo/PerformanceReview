@@ -444,6 +444,7 @@ describe.each(locales)("CompletionFilters (%s)", (locale) => {
     managers: [{ id: "m1", name: "Marta Gómez" }],
     locations: [],
     jobTitles: [],
+    org: { accounts: [], projects: [], dms: [], santexLeads: [] },
   };
   const label = {
     es: {
@@ -577,5 +578,94 @@ describe("parseCompletionParams / completionHref", () => {
     ).toBe(
       "/insights/completion?cycle=c1&groupBy=manager&hierarchy=asOf&status=any",
     );
+  });
+});
+
+describe("org cuts in the completion filters", () => {
+  const org = {
+    accounts: ["Cuenta A", "Cuenta B"],
+    projects: ["Proyecto A1"],
+    dms: ["Diego"],
+    santexLeads: ["Lía"],
+  };
+  const options = {
+    departments: ["Tecnología"],
+    managers: [],
+    locations: [],
+    jobTitles: [],
+    org,
+  };
+
+  it("shows the account, project, DM and Santex Lead selects and keeps the URL's values", () => {
+    renderIn(
+      "es",
+      <CompletionFilters
+        params={parseCompletionParams({
+          cycle: "c1",
+          account: "Cuenta B",
+          dm: "Diego",
+        })}
+        cycles={[{ id: "c1", name: "2025-H1" }]}
+        options={options}
+        groupBys={[
+          "none",
+          "department",
+          "account",
+          "project",
+          "dm",
+          "santex_lead",
+        ]}
+      />,
+    );
+
+    expect(screen.getByLabelText("Cuenta")).toHaveValue("Cuenta B");
+    expect(screen.getByLabelText("DM")).toHaveValue("Diego");
+    expect(screen.getByLabelText("Santex Lead")).toHaveValue("");
+    const groupBy = screen.getByRole("group", { name: "Agrupar por" });
+    expect(
+      within(groupBy)
+        .getAllByRole("link")
+        .map((a) => a.textContent),
+    ).toEqual([
+      "Sin agrupar",
+      "Área",
+      "Cuenta",
+      "Proyecto",
+      "DM",
+      "Santex Lead",
+    ]);
+  });
+
+  it("the group toggles keep the cuts in the link", () => {
+    renderIn(
+      "en",
+      <CompletionFilters
+        params={parseCompletionParams({ cycle: "c1", account: "Cuenta B" })}
+        cycles={[{ id: "c1", name: "2025-H1" }]}
+        options={options}
+        groupBys={["none", "dm"]}
+      />,
+    );
+
+    const link = within(
+      screen.getByRole("group", { name: "Group by" }),
+    ).getByRole("link", { name: "DM" });
+    expect(link.getAttribute("href")).toContain("account=Cuenta+B");
+    expect(link.getAttribute("href")).toContain("groupBy=dm");
+  });
+
+  it("direction, who has no filters, gets none of the selects", () => {
+    renderIn(
+      "es",
+      <CompletionFilters
+        params={parseCompletionParams({ cycle: "c1" })}
+        cycles={[{ id: "c1", name: "2025-H1" }]}
+        options={null}
+        groupBys={["none", "department", "account", "project"]}
+      />,
+    );
+
+    expect(screen.queryByLabelText("Cuenta")).toBeNull();
+    expect(screen.getByRole("link", { name: "Cuenta" })).toBeInTheDocument();
   });
 });

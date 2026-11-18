@@ -5,7 +5,11 @@ import { isUuid } from "@/lib/uuid";
 import type { ActorContext } from "@/modules/actor/types";
 import { foldSmallGroups } from "@/modules/insights/aggregation";
 import { insightsScope } from "@/modules/insights/authz";
-import { type OrgOptions, orgOptionsOf } from "@/modules/org-attributes/kinds";
+import {
+  type OrgFilters,
+  type OrgOptions,
+  orgOptionsOf,
+} from "@/modules/org-attributes/kinds";
 import { ReviewError } from "@/modules/review-core/review-errors";
 import { getSetting } from "@/modules/settings/service";
 import type { Relationship } from "@/modules/templates/constants";
@@ -441,7 +445,12 @@ export async function selfManagerGap(
 export async function executiveSummary(
   db: DbOrTx,
   actor: ActorContext,
-  f: { cycleId: string; minGroupSize?: number },
+  f: {
+    cycleId: string;
+    minGroupSize?: number;
+    /** An account, project, DM or Santex Lead to narrow to: People only (direction reads the whole cycle). */
+    filters?: OrgFilters;
+  },
 ): Promise<ExecutiveSummary> {
   // The scope decides: People see all, direction aggregates over the minimum.
   const scope = insightsScope(
@@ -454,6 +463,7 @@ export async function executiveSummary(
   const min = scope.kind === "aggregatesOnly" ? scope.minGroupSize : 1;
   // Computed over everybody (the actor was authorized above) and masked here.
   const filters: DashboardFilters = {
+    ...(scope.kind === "all" ? f.filters : {}),
     cycleId: f.cycleId,
     hierarchy: "asOf",
     aggregateOnly: true,

@@ -7,14 +7,18 @@ import { ExportCsvLink } from "@/components/data-quality/export-csv-link";
 import { CommentsTable } from "@/components/qualitative/comments-table";
 import { QualitativeFilters } from "@/components/qualitative/filters";
 import { ImportLabelsForm } from "@/components/qualitative/import-form";
+import { Toggle } from "@/components/dashboards/controls";
+import { orgFiltersOf } from "@/components/org/params";
 import {
   parseQualitativeParams,
+  withGroupBy,
   withSide,
 } from "@/components/qualitative/params";
 import { SideToggle } from "@/components/qualitative/side-toggle";
 import { RunButton } from "@/components/qualitative/run-button";
 import {
   ByDimension,
+  ByGroup,
   Indicators,
   Kpis,
   Themes,
@@ -25,10 +29,14 @@ import { routing } from "@/i18n/routing";
 import { isUuid } from "@/lib/uuid";
 import { getActor } from "@/modules/actor/server";
 import { canSeeIndividuals, insightsScope } from "@/modules/insights/authz";
+import { orgFilterOptions } from "@/modules/org-attributes";
 import {
   listComments,
   qualitativeFilterOptions,
+  qualitativeGroupBys,
+  type QualitativeGroupBy,
   sentimentByDimension,
+  sentimentByGroup,
   sentimentTotals,
   sentimentTrend,
   sentimentVsIndicators,
@@ -66,6 +74,7 @@ async function Qualitative({
   const f: Filters = {
     cycleId,
     department: p.department,
+    ...orgFiltersOf(p),
     dimension: p.dimension,
     sentiment: p.sentiment,
     theme: p.theme,
@@ -73,16 +82,36 @@ async function Qualitative({
     includeClosed: await getSetting(db, "analysis.includeClosed"),
     aggregateOnly: p.aggregate,
   };
-  const [options, totals, byDimension, trend, themes, indicators, comments] =
-    await Promise.all([
-      qualitativeFilterOptions(db),
-      sentimentTotals(db, actor, f),
-      sentimentByDimension(db, actor, f),
-      sentimentTrend(db, actor, f),
-      topThemes(db, actor, f),
-      sentimentVsIndicators(db, actor, f),
-      listComments(db, actor, f),
-    ]);
+  // Direction reads teams, not the people who lead them (a DM, a Santex Lead).
+  const groupBys: readonly QualitativeGroupBy[] =
+    scope.kind === "aggregatesOnly"
+      ? qualitativeGroupBys.filter((g) => g !== "dm" && g !== "santex_lead")
+      : qualitativeGroupBys;
+  const groupBy =
+    p.groupBy && groupBys.includes(p.groupBy) ? p.groupBy : "account";
+  const [
+    options,
+    org,
+    totals,
+    byDimension,
+    trend,
+    themes,
+    indicators,
+    comments,
+    byGroup,
+  ] = await Promise.all([
+    qualitativeFilterOptions(db),
+    orgFilterOptions(db, actor, { cycleId }),
+    sentimentTotals(db, actor, f),
+    sentimentByDimension(db, actor, f),
+    sentimentTrend(db, actor, f),
+    topThemes(db, actor, f),
+    sentimentVsIndicators(db, actor, f),
+    listComments(db, actor, f),
+    sentimentByGroup(db, actor, f, groupBy),
+  ]);
+  // The panel only appears when People have loaded org attributes.
+  const hasOrg = Object.values(org).some((values) => values.length > 0);
   const dimensionLabel = await dimensionLabels(
     options.dimensions,
     options.dimensionPrompts,
@@ -102,6 +131,7 @@ async function Qualitative({
         themes={options.themes}
         dimensionLabel={dimensionLabel}
         showAggregate={hr}
+        org={org}
       />
       {hr ? (
         <ExportCsvLink
@@ -110,12 +140,38 @@ async function Qualitative({
             cycle: cycleId,
             department: p.department,
             relationship: p.side,
+            ...orgFiltersOf(p),
           }}
         />
       ) : null}
       <Kpis counts={totals} />
       <ByDimension rows={byDimension} dimensionLabel={dimensionLabel} />
       <Trend points={trend} />
+      {hasOrg ? (
+        <ByGroup rows={byGroup}>
+          <div className="flex flex-wrap items-center gap-3">
+            <Toggle
+              label={t("byGroup.groupBy")}
+              options={groupBys}
+              current={groupBy}
+              hrefFor={(g) => withGroupBy(p, g)}
+              text={(g) => t(`byGroup.groups.${g}`)}
+            />
+            {hr ? (
+              <ExportCsvLink
+                file="insights-sentiment-by"
+                params={{
+                  cycle: cycleId,
+                  groupBy,
+                  department: p.department,
+                  relationship: p.side,
+                  ...orgFiltersOf(p),
+                }}
+              />
+            ) : null}
+          </div>
+        </ByGroup>
+      ) : null}
       <Themes themes={themes} />
       <Indicators rows={indicators} />
       {individuals && !p.aggregate ? (

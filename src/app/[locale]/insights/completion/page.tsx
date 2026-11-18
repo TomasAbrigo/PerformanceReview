@@ -11,6 +11,7 @@ import {
 } from "@/components/completion/completion-filters";
 import { MissingTable } from "@/components/completion/missing-table";
 import { parseCompletionParams } from "@/components/completion/params";
+import { orgFiltersOf } from "@/components/org/params";
 import { ExportCsvLink } from "@/components/data-quality/export-csv-link";
 import { Panel } from "@/components/dashboards/parts";
 import { db } from "@/db/client";
@@ -57,9 +58,18 @@ async function Completion({
   const minGroupSize = masked
     ? await getSetting(db, "aggregation.minGroupSize")
     : undefined;
+  // Direction reads areas, accounts and projects (a manager or DM is a person).
   const groupBys: CompletionGroupBy[] = masked
-    ? ["none", "department"]
-    : ["none", "department", "manager"];
+    ? ["none", "department", "account", "project"]
+    : [
+        "none",
+        "department",
+        "manager",
+        "account",
+        "project",
+        "dm",
+        "santex_lead",
+      ];
   const groupBy = groupBys.includes(p.groupBy) ? p.groupBy : "department";
   const shown = { ...p, cycle: cycle.id, groupBy };
   const filters = {
@@ -68,6 +78,7 @@ async function Completion({
     hierarchy: p.hierarchy,
     department: p.department,
     managerId: p.manager,
+    ...orgFiltersOf(p),
     minGroupSize,
   };
   // The summary and the list of who is missing are read off the same rows.
@@ -86,6 +97,7 @@ async function Completion({
     hierarchy: p.hierarchy,
     department: p.department,
     manager: p.manager,
+    ...orgFiltersOf(p),
   };
   const hr = isHr(actor);
   const hint = masked
