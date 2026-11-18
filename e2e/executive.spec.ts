@@ -57,9 +57,7 @@ test("direction sees the masked view; an employee has no access", async ({
   await expect(page.getByText("Sin acceso.")).toBeVisible();
 });
 
-test("self-assessment report and health check pages render", async ({
-  page,
-}) => {
+test("self-assessment report page renders", async ({ page }) => {
   await page.goto("/es");
   await actAs(page, null, "People (RR. HH.)");
   await page.goto("/es/insights/self-assessment");
@@ -69,15 +67,4 @@ test("self-assessment report and health check pages render", async ({
   await expect(
     page.getByRole("table", { name: "Completitud por grupo" }),
   ).toBeVisible();
-
-  await page.goto("/es/insights/health-check");
-  await expect(page.getByRole("status")).toContainText(
-    "Formato pendiente de definir",
-  );
-  await expect(page.getByTestId("health-check-files")).toBeVisible();
-  await expect(
-    page
-      .getByRole("list", { name: "Preguntas abiertas" })
-      .getByRole("listitem"),
-  ).toHaveCount(4);
 });

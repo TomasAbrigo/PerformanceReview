@@ -664,7 +664,6 @@
       "assessment": "Evaluaciones",
       "feedback": "Feedback",
       "assessment_progress": "Progreso de evaluaciones",
-      "health_check": "Health check (CAP)",
       "org_attribute": "Atributos organizacionales"
     },
     "result": {
@@ -1474,26 +1473,6 @@
       "sentimentGapChart": "Sentimiento de autoevaluación y manager por dimensión",
       "rowSelf": "{dimension} · autoevaluación",
       "rowManager": "{dimension} · manager"
-    },
-    "HealthCheck": {
-      "nav": "Health check (CAP)",
-      "title": "Health check (CAP)",
-      "pending": "Formato pendiente de definir",
-      "pendingHint": "Los archivos de health check se importan con el perfil cap-health-check y quedan guardados tal cual (aterrizados), sin interpretar columnas, hasta que se defina el formato.",
-      "files": "Archivos importados",
-      "runs": "Importaciones",
-      "rows": "Filas aterrizadas",
-      "lastLanded": "Última importación",
-      "never": "Nunca",
-      "upload": "Subir un archivo de health check",
-      "questionsTitle": "Preguntas abiertas",
-      "questions": {
-        "format": "Formato: ¿qué columnas trae el archivo y en qué tipo de archivo llega (CSV, Excel, export de una encuesta)?",
-        "period": "Período: ¿cada cuánto se hace y cómo se asocia a un ciclo o semestre?",
-        "personKey": "Clave de persona: ¿las respuestas son anónimas, por equipo o por persona (email, legajo)?",
-        "scale": "Escala: ¿qué escala usan las respuestas (1 a 5, semáforo, texto libre) y cómo se interpreta?"
-      },
-      "versionNote": "Cada fila se identifica por el archivo y su posición: subir el mismo archivo otra vez no cambia nada, y un archivo editado se guarda como una versión nueva (las filas anteriores no se reconcilian)."
     },
     "Executive": {
       "nav": "Vista ejecutiva",

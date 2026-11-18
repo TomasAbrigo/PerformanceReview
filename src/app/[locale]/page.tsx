@@ -78,9 +78,6 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
             <Link href="/insights/executive" className="underline">
               {tInsights("Executive.nav")}
             </Link>
-            <Link href="/insights/health-check" className="underline">
-              {tInsights("HealthCheck.nav")}
-            </Link>
             <Link href="/insights/goals" className="underline">
               {tGoalsInsights("nav")}
             </Link>

@@ -354,7 +354,6 @@ describe("built-in profiles", () => {
       "bamboo-feedback-status",
       "bamboo-goal-status",
       "bamboo-assessment-progress",
-      "cap-health-check",
     ]);
     for (const profile of builtinProfiles) {
       expect(sourceProfileSchema.parse(profile)).toEqual(profile);
@@ -745,15 +744,14 @@ describe("question mapping and cycle/date columns", () => {
   });
 });
 
-describe("cap-health-check (format still undefined)", () => {
-  const profile = getBuiltinProfile("cap-health-check")!;
-
-  it("is a built-in landing profile of the health_check entity", () => {
-    expect(profile).toMatchObject({
-      entity: "health_check",
-      syntheticKey: true,
-    });
-    expect(sourceProfileSchema.parse(profile)).toEqual(profile);
+describe("syntheticKey profiles (a file whose format is not defined)", () => {
+  const profile = sourceProfileSchema.parse({
+    name: "any-columns",
+    table: "any-columns",
+    keyColumns: ["id"],
+    syntheticKey: true,
+    entity: "goal",
+    columnMap: {},
   });
 
   it("accepts any columns: a missing key column is not an issue", () => {
@@ -768,7 +766,7 @@ describe("cap-health-check (format still undefined)", () => {
   it("keys a row without the key column by the given fallback (a row hash)", () => {
     const row = { Equipo: "Plataforma", Puntaje: 4 };
     expect(applyProfile(profile, row, () => "row:abc")).toMatchObject({
-      entity: "health_check",
+      entity: "goal",
       sourceId: "row:abc",
       extra: row,
     });

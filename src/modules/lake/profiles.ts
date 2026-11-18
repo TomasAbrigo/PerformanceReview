@@ -15,8 +15,6 @@ export const PROFILE_ENTITIES = [
   "feedback",
   // People's file of accounts, projects, DMs and Santex leads per person.
   "org_attribute",
-  // CAP's health check: landed only, its format is still to be defined.
-  "health_check",
 ] as const;
 export type ProfileEntity = (typeof PROFILE_ENTITIES)[number];
 
@@ -111,7 +109,7 @@ export const sourceProfileSchema = z.object({
    * ordinal (`row:<sha256(file sha256 + row index)>`): identical rows are
    * kept, the same file lands unchanged, and an edited file lands as a new
    * version (its old rows are not reconciled).
-   * For files whose format is not defined yet (CAP's health check).
+   * For files whose format is not defined yet.
    */
   syntheticKey: z.boolean().optional(),
   /** Change-tracking column for incremental reads (e.g. _fivetran_synced). */
@@ -858,19 +856,6 @@ export const builtinProfiles: SourceProfile[] = [
       "Manager Status": "manager_status",
       "Follow-up Notes": "follow_up_notes",
     },
-  },
-  {
-    // CAP's health check: its format, period, person key and scale are still
-    // open questions (see /insights/health-check), so the profile assumes no
-    // columns. Rows are landed in raw_record as they come (every column in
-    // `extra`), keyed by an "id" column if the file has one, else by the
-    // file's hash and the row's ordinal. Mapping them to people and a period is a later step.
-    name: "cap-health-check",
-    table: "health-check",
-    keyColumns: ["id"],
-    syntheticKey: true,
-    entity: "health_check",
-    columnMap: {},
   },
 ];
 

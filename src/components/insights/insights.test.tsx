@@ -15,7 +15,6 @@ import type {
 import type { SelfAssessmentReport } from "@/modules/insights/self-assessment";
 import { CompletionTable } from "./completion-table";
 import { ExecutiveReportView, ModeToggle } from "./executive-report-view";
-import { HealthCheckView } from "./health-check-view";
 import { SelfAssessmentView } from "./self-assessment-view";
 
 vi.mock("@/i18n/navigation", () => ({
@@ -175,47 +174,6 @@ describe("SelfAssessmentView", () => {
     expect(
       screen.getAllByText("Sin datos para mostrar.").length,
     ).toBeGreaterThan(0);
-  });
-});
-
-describe("HealthCheckView", () => {
-  it.each(locales)(
-    "shows the landed counts and the open questions (%s)",
-    (locale) => {
-      renderIn(
-        locale,
-        <HealthCheckView
-          data={{
-            runs: 3,
-            files: 2,
-            rows: 5,
-            lastLandedAt: new Date("2026-05-02T10:00:00Z"),
-          }}
-        />,
-      );
-      expect(screen.getByRole("status")).toHaveTextContent(
-        locale === "es"
-          ? "Formato pendiente de definir"
-          : "Format to be defined",
-      );
-      expect(screen.getByTestId("health-check-files")).toHaveTextContent("2");
-      expect(screen.getByTestId("health-check-runs")).toHaveTextContent("3");
-      expect(screen.getByTestId("health-check-rows")).toHaveTextContent("5");
-      const questions = screen.getByRole("list", {
-        name: locale === "es" ? "Preguntas abiertas" : "Open questions",
-      });
-      expect(within(questions).getAllByRole("listitem")).toHaveLength(4);
-    },
-  );
-
-  it("nothing landed yet", () => {
-    renderIn(
-      "es",
-      <HealthCheckView
-        data={{ runs: 0, files: 0, rows: 0, lastLandedAt: null }}
-      />,
-    );
-    expect(screen.getByText("Nunca")).toBeVisible();
   });
 });
 

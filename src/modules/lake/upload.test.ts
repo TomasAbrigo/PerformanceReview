@@ -294,7 +294,7 @@ describe("profiles", () => {
     expect(profiles.map((p) => p.name)).toContain(
       "bamboo-employee-performance",
     );
-    expect(profiles).toHaveLength(13);
+    expect(profiles).toHaveLength(12);
   });
 
   it("saves a custom profile as JSON under the profiles folder and lists it", async () => {
@@ -307,7 +307,7 @@ describe("profiles", () => {
     ).toEqual(custom);
     const profiles = await listProfiles(store);
     expect(profiles.at(-1)).toEqual(custom);
-    expect(profiles).toHaveLength(14);
+    expect(profiles).toHaveLength(13);
   });
 
   it("does not silently overwrite a saved profile", async () => {

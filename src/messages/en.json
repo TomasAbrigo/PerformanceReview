@@ -664,7 +664,6 @@
       "assessment": "Assessments",
       "feedback": "Feedback",
       "assessment_progress": "Assessment progress",
-      "health_check": "Health check (CAP)",
       "org_attribute": "Organizational attributes"
     },
     "result": {
@@ -1474,26 +1473,6 @@
       "sentimentGapChart": "Self and manager sentiment by dimension",
       "rowSelf": "{dimension} · self",
       "rowManager": "{dimension} · manager"
-    },
-    "HealthCheck": {
-      "nav": "Health check (CAP)",
-      "title": "Health check (CAP)",
-      "pending": "Format to be defined",
-      "pendingHint": "Health check files are imported with the cap-health-check profile and stored as they are (landed), without interpreting columns, until the format is defined.",
-      "files": "Files imported",
-      "runs": "Imports",
-      "rows": "Rows landed",
-      "lastLanded": "Last import",
-      "never": "Never",
-      "upload": "Upload a health check file",
-      "questionsTitle": "Open questions",
-      "questions": {
-        "format": "Format: which columns does the file have and what kind of file is it (CSV, Excel, a survey export)?",
-        "period": "Period: how often is it run and how does it map to a cycle or semester?",
-        "personKey": "Person key: are answers anonymous, per team or per person (email, employee number)?",
-        "scale": "Scale: which scale do answers use (1 to 5, traffic light, free text) and how is it read?"
-      },
-      "versionNote": "Each row is identified by its file and position: uploading the same file again changes nothing, and an edited file is stored as a new version (earlier rows are not reconciled)."
     },
     "Executive": {
       "nav": "Executive view",
