@@ -75,3 +75,44 @@ describe("maskBreakdown", () => {
     });
   });
 });
+
+// ---- qual (#117): comments with a scope, and the people of a DM card ----
+describe("parseDrill / formatDrill: comments and dm", () => {
+  const cycle = "0b6a4f8e-1c2d-4e5f-8a9b-0c1d2e3f4a5b";
+  const valid: Drill[] = [
+    { kind: "comments", scope: {} },
+    { kind: "comments", scope: { sentiment: "negative" } },
+    {
+      kind: "comments",
+      scope: {
+        cycle,
+        dimension: "strengths",
+        theme: "comunicacion",
+        side: "self",
+        account: "Cuenta: A, B",
+      },
+    },
+    { kind: "comments", scope: { role: "retention", value: 4 } },
+    { kind: "comments", scope: { department: "Ingeniería", dm: "Ana Pérez" } },
+    { kind: "dm", dm: "Brenda Ortiz", metric: "risk" },
+    { kind: "dm", dm: "A:B,C", metric: "comments" },
+  ];
+  it.each(valid)("round-trips %o", (d) => {
+    expect(parseDrill(formatDrill(d))).toEqual(d);
+  });
+  it.each([
+    "comments:sentiment=angry",
+    "comments:cycle=nope",
+    "comments:role=retention",
+    "comments:role=mood,value=2",
+    "comments:role=retention,value=7",
+    "comments:side=boss",
+    "comments:color=red",
+    "comments:theme=a b",
+    "dm:risk:",
+    "dm:height:Ana",
+    "dm:risk",
+  ])("rejects %o", (raw) => {
+    expect(parseDrill(raw)).toBeNull();
+  });
+});

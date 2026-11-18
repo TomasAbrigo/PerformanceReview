@@ -18,13 +18,23 @@ export function ImportLabelsForm({
   const [pending, start] = useTransition();
   const [result, setResult] = useState<ImportOutcome | null>(null);
   return (
-    <section className="admin-surface flex flex-col gap-5">
-      <IconTile>
-        <FileUp className="size-5" />
-      </IconTile>
-      <h2>{t("import.title")}</h2>
+    <section
+      className="admin-surface flex flex-col gap-3 border-dashed bg-muted/40 p-4"
+      aria-labelledby="import-labels-title"
+    >
+      <div className="flex flex-wrap items-center gap-3">
+        <IconTile className="size-8">
+          <FileUp className="size-4" />
+        </IconTile>
+        <div className="flex flex-col">
+          <h2 id="import-labels-title" className="text-base">
+            {t("import.title")}
+          </h2>
+          <p className="text-xs text-muted-foreground">{t("import.hint")}</p>
+        </div>
+      </div>
       <form
-        className="flex flex-wrap items-end gap-2"
+        className="flex flex-wrap items-end gap-2 text-sm"
         onSubmit={(e) => {
           e.preventDefault();
           const form = new FormData(e.currentTarget);
@@ -35,7 +45,7 @@ export function ImportLabelsForm({
           {t("import.file")}
           <input type="file" name="file" accept=".csv,text/csv" required />
         </label>
-        <Button type="submit" variant="outline" disabled={pending}>
+        <Button type="submit" size="sm" variant="outline" disabled={pending}>
           {t("import.button")}
         </Button>
       </form>

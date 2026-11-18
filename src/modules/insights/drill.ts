@@ -17,15 +17,22 @@ import type { OrgFilters } from "@/modules/org-attributes/kinds";
 import {
   listComments,
   sentimentByDimension,
+  sentimentTotals,
   topThemes,
 } from "@/modules/qualitative-analysis/queries";
+import type { QualitativeFilters } from "@/modules/qualitative-analysis/types";
 import {
   type Sentiment,
   sentiments,
 } from "@/modules/qualitative-analysis/constants";
 import { ReviewError } from "@/modules/review-core/review-errors";
 import { insightsScope } from "./authz";
-import { type Drill, type DrillGroup, maskBreakdown } from "./drill-spec";
+import {
+  type CommentScope,
+  type Drill,
+  type DrillGroup,
+  maskBreakdown,
+} from "./drill-spec";
 
 /** The figures a person row can carry (message keys of `Drill.fact`). */
 export type DrillFact =
@@ -323,6 +330,136 @@ async function commentRecords(
   };
 }
 
+// ---- qual (#117): comments with a scope, the DM card of the 360 ----
+
+/** The Feedback filters a comment scope stands for (the page's org cuts first). */
+function scopeFilters(ctx: Ctx, scope: CommentScope): QualitativeFilters {
+  return {
+    ...ctx.filters,
+    cycleId: scope.cycle,
+    dimension: scope.dimension,
+    sentiment: scope.sentiment,
+    theme: scope.theme,
+    relationship: scope.side,
+    department: scope.department,
+    ...(scope.account ? { account: scope.account } : {}),
+    ...(scope.project ? { project: scope.project } : {}),
+    ...(scope.dm ? { dm: scope.dm } : {}),
+    ...(scope.santexLead ? { santexLead: scope.santexLead } : {}),
+    ...(scope.role && scope.value
+      ? { indicator: { role: scope.role, value: scope.value } }
+      : {}),
+  };
+}
+
+/** Where the comments of a scope live in full: Feedback with its filters. */
+function feedbackHref(scope: CommentScope): string {
+  const q = new URLSearchParams();
+  const pairs: [string, string | undefined][] = [
+    ["cycle", scope.cycle],
+    ["dimension", scope.dimension],
+    ["sentiment", scope.sentiment],
+    ["theme", scope.theme],
+    ["side", scope.side],
+    ["department", scope.department],
+    ["account", scope.account],
+    ["project", scope.project],
+    ["dm", scope.dm],
+    ["santexLead", scope.santexLead],
+  ];
+  for (const [k, v] of pairs) if (v) q.set(k, v);
+  const qs = q.toString();
+  return qs ? `/insights/qualitative?${qs}` : "/insights/qualitative";
+}
+
+/**
+ * The comments of a scope: counts from the aggregate reader (direction:
+ * masked by its minimum, null under it), the comments themselves (the
+ * first COMMENT_LIMIT) only for who may read them.
+ */
+async function scopedComments(
+  ctx: Ctx,
+  scope: CommentScope,
+  extra: Pick<QualitativeFilters, "includeClosed"> = {},
+): Promise<DrillResult> {
+  const f = { ...scopeFilters(ctx, scope), ...extra };
+  const totals = await sentimentTotals(ctx.db, ctx.actor, {
+    ...f,
+    aggregateOnly: true,
+    ...(ctx.min !== null ? { minGroupSize: ctx.min } : {}),
+  });
+  const total = totals ? totals.total : ctx.min === null ? 0 : null;
+  const breakdown: DrillGroup[] = totals
+    ? sentiments
+        .filter((k) => totals[k] > 0)
+        .map((key) => ({ key, others: false, n: totals[key] }))
+    : [];
+  const base = {
+    drill: ctx.drill,
+    unit: "comments" as const,
+    people: null,
+    breakdownBy: "sentiment" as const,
+    minGroupSize: ctx.min,
+    moreHref: feedbackHref(scope),
+    total,
+    breakdown,
+  };
+  if (ctx.min !== null) return { ...base, comments: null, truncated: false };
+  const rows = await listComments(ctx.db, ctx.actor, f, COMMENT_LIMIT);
+  return {
+    ...base,
+    comments: rows.map((r) => ({
+      answerId: r.answerId,
+      personName: r.personName,
+      dimension: r.dimension,
+      sentiment: r.sentiment,
+      text: r.text,
+    })),
+    truncated: (total ?? 0) > rows.length,
+  };
+}
+
+/**
+ * One figure of a DM card (direct scope: the people whose DM attribute is
+ * the DM): its people, or its open-text comments. Never for direction,
+ * whose cards carry an opaque key instead of the DM.
+ */
+async function dmRecords(
+  ctx: Ctx,
+  drill: Extract<Drill, { kind: "dm" }>,
+): Promise<DrillResult> {
+  if (ctx.min !== null) throw new ReviewError("forbidden");
+  const inDm: Ctx = { ...ctx, filters: { ...ctx.filters, dm: drill.dm } };
+  switch (drill.metric) {
+    case "retention":
+    case "engagement":
+      return indicatorPeople(inDm, {
+        kind: "indicator",
+        indicator: drill.metric,
+        value: null,
+      });
+    case "risk":
+      return indicatorPeople(inDm, {
+        kind: "risk",
+        retention: "low",
+        engagement: "low",
+      });
+    case "self":
+    case "manager":
+      return completionPeople(inDm, {
+        kind: "completion",
+        side: drill.metric,
+        state: "pending",
+      });
+    case "comments":
+      return scopedComments(
+        inDm,
+        { cycle: ctx.cycleId, dm: drill.dm },
+        { includeClosed: false },
+      );
+  }
+}
+
 /** The most comments a drill lists (the full view has them all). */
 export const COMMENT_LIMIT = 200;
 
@@ -366,5 +503,10 @@ export async function drillRecords(
     case "theme":
     case "sentiment":
       return commentRecords(ctx, drill);
+    // ---- qual (#117) ----
+    case "comments":
+      return scopedComments(ctx, drill.scope);
+    case "dm":
+      return dmRecords(ctx, drill);
   }
 }

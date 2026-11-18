@@ -119,11 +119,11 @@ describe("SelfAssessmentView", () => {
         locale,
         <SelfAssessmentView report={report} dimensionLabel={dims(locale)} />,
       );
-      const table = screen.getByRole("group", {
+      const table = screen.getByRole("list", {
         name: locale === "es" ? "Completitud por grupo" : "Completion by group",
       });
       expect(within(table).getByText("Ingeniería")).toBeVisible();
-      expect(within(table).getAllByText("50%")).toHaveLength(1);
+      expect(within(table).getAllByText(/^50 % · /)).toHaveLength(1);
       expect(
         screen.getByRole("group", {
           name:
@@ -132,14 +132,14 @@ describe("SelfAssessmentView", () => {
               : "Sentiment of the self assessments by dimension",
         }),
       ).toBeVisible();
-      expect(screen.getByText("calidad")).toBeVisible();
-      const gap = screen.getByRole("group", {
+      expect(screen.getByText(/^(calidad|quality)$/i)).toBeVisible();
+      const gap = screen.getByRole("list", {
         name: locale === "es" ? "Brecha por pregunta" : "Gap by question",
       });
       expect(
         within(gap).getByText(locale === "es" ? "Retención" : "Retention"),
       ).toBeVisible();
-      expect(within(gap).getByText("-0.38")).toBeVisible();
+      expect(gap).toHaveTextContent(/-0[.,]4/);
       // The bar's label (and its row in the table twin of the chart).
       expect(
         screen.getAllByText(

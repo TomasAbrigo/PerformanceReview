@@ -8,6 +8,7 @@ import {
   listComments,
   sentimentByDimension,
   sentimentTrend,
+  sentimentTotals,
   sentimentVsIndicators,
   topThemes,
 } from "./queries";
@@ -52,16 +53,16 @@ beforeAll(async () => {
         questionId: improve,
         text: "Podría mejorar la planificación de sus tiempos.",
       },
-      { questionId: retention, option: "A" },
+      { questionId: retention, option: "A", value: 4 },
     ]);
     if (cycle === c2023) firstAnswer = ids[0];
     // A self review that also answers the retention question, and a second
     // manager review: neither may count the participant's comments twice.
     await insertAnswer(cycle, a, emp, "self", [
-      { questionId: retention, option: "D" },
+      { questionId: retention, option: "D", value: 1 },
     ]);
     await insertAnswer(cycle, a, other, "manager", [
-      { questionId: retention, option: "A" },
+      { questionId: retention, option: "A", value: 4 },
     ]);
     await insertAnswer(cycle, b, other, "manager", [
       {
@@ -69,7 +70,7 @@ beforeAll(async () => {
         text: "Carla tiene mucha calidad, gran trabajo en equipo.",
       },
       { questionId: improve, text: "Siempre llega tarde, un problema." },
-      { questionId: retention, option: "B" },
+      { questionId: retention, option: "B", value: 2 },
     ]);
   }
   await runAnalysis(db, { provider: new MockProvider() });
@@ -182,6 +183,7 @@ describe("qualitative queries", () => {
     expect(rows).toEqual([
       {
         role: "retention",
+        value: 4,
         option: "A",
         label: { es: "A", en: "A" },
         positive: 1,
@@ -193,6 +195,7 @@ describe("qualitative queries", () => {
       },
       {
         role: "retention",
+        value: 2,
         option: "B",
         label: { es: "B", en: "B" },
         positive: 1,
@@ -203,6 +206,24 @@ describe("qualitative queries", () => {
         total: 2,
       },
     ]);
+  });
+
+  it("narrows the comments to a manager's answer to an indicator", async () => {
+    const four = await listComments(db, hr, {
+      cycleId: c2024,
+      indicator: { role: "retention", value: 4 },
+    });
+    expect(four.map((c) => c.personName)).toEqual([
+      "Adrián Bustos",
+      "Adrián Bustos",
+    ]);
+    // The self review's "D" (1) is not the manager's answer.
+    expect(
+      await sentimentTotals(db, hr, {
+        cycleId: c2024,
+        indicator: { role: "retention", value: 1 },
+      }),
+    ).toMatchObject({ total: 0 });
   });
 
   it("exports insights-sentiment.csv with counts only", async () => {

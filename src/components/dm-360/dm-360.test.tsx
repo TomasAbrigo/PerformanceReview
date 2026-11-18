@@ -123,7 +123,7 @@ describe("Dm360View", () => {
     expect(within(c).getByTestId("dm-self")).toHaveTextContent("100 %");
     expect(within(c).getByTestId("dm-manager")).toHaveTextContent("60 %");
     expect(within(c).getByTestId("dm-comments")).toHaveTextContent(
-      "6 comentarios de 4 personas",
+      "6 de 4 personas",
     );
     expect(within(c).getByTestId("dm-sentiment")).toHaveTextContent(
       "Positivo 50 %",
@@ -133,6 +133,32 @@ describe("Dm360View", () => {
       "La retención media cayó 2 puntos desde H1 2024 (de 4 a 2).",
       "El 33 % de los 6 comentarios es negativo.",
     ]);
+  });
+
+  it("with a base (direct scope, names): each figure opens the DM's people or comments", () => {
+    renderIn(
+      "es",
+      <Dm360View
+        data={data()}
+        base={{ pathname: "/insights/360", query: {} }}
+        thresholds={{ goodPct: 80, watchPct: 60 }}
+      />,
+    );
+    const c = screen.getByTestId("dm-card");
+    const drills = within(c)
+      .getAllByRole("link")
+      .map((a) => a.getAttribute("data-drill"));
+    expect(drills).toEqual(
+      expect.arrayContaining([
+        "dm:retention:Diego",
+        "dm:risk:Diego",
+        "dm:manager:Diego",
+        "dm:comments:Diego",
+      ]),
+    );
+    // Self assessments are all in: nothing pending to open.
+    expect(drills).not.toContain("dm:self:Diego");
+    expect(within(c).getAllByRole("meter").length).toBeGreaterThanOrEqual(5);
   });
 
   it("the same in English", () => {
@@ -203,10 +229,10 @@ describe("Dm360View", () => {
 });
 
 describe("Sparkline", () => {
-  it("draws retention solid and engagement dashed, breaking the line where a cycle has no value, with a text twin", () => {
-    const { container } = renderIn("en", <Sparkline points={trend} />);
+  it("draws retention and engagement as small multiples, breaking the line where a cycle has no value, with a text twin", () => {
+    renderIn("en", <Sparkline points={trend} />);
 
-    const svg = container.querySelector("svg")!;
+    const svg = screen.getByTestId("dm-spark-multiples");
     expect(svg).toHaveAttribute("role", "img");
     expect(svg.getAttribute("aria-label")).toContain(
       "Retention: H1 2024: 4.0, H2 2024: no data, H1 2025: 2.0",
@@ -216,7 +242,8 @@ describe("Sparkline", () => {
     );
     const retention = svg.querySelector('[data-series="retention"]')!;
     const engagement = svg.querySelector('[data-series="engagement"]')!;
-    // Two separate points around the gap: no line, only dots.
+    // Two separate points around the gap: no line, only dots (each cycle
+    // on the same 1-5 scale, a small multiple per indicator).
     expect(retention.querySelector("path")).toBeNull();
     expect(retention.querySelectorAll("circle").length).toBeGreaterThanOrEqual(
       2,
@@ -227,7 +254,7 @@ describe("Sparkline", () => {
     ).toHaveTextContent("Retention");
   });
 
-  it("joins consecutive cycles with a line, the engagement one dashed", () => {
+  it("joins consecutive cycles with a line, one small multiple per indicator", () => {
     const { container } = renderIn(
       "es",
       <Sparkline
@@ -250,9 +277,8 @@ describe("Sparkline", () => {
     expect(retention.getAttribute("d")).toMatch(
       /^M[\d.]+,[\d.]+ L[\d.]+,[\d.]+$/,
     );
-    expect(retention).not.toHaveAttribute("stroke-dasharray");
     expect(
       container.querySelector('[data-series="engagement"] path'),
-    ).toHaveAttribute("stroke-dasharray", "4 3");
+    ).not.toBeNull();
   });
 });
