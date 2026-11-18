@@ -5,12 +5,6 @@ import { useTranslations } from "next-intl";
 export const pct = (n: number | null | undefined) =>
   n == null ? null : Math.round(n * 100);
 
-/** Signed normalized points (gap): -0.25 -> "-25". */
-export const signedPts = (n: number) => {
-  const v = Math.round(n * 100);
-  return v > 0 ? `+${v}` : `${v}`;
-};
-
 /** A titled dashboard section. */
 export function Panel({
   id,
@@ -51,7 +45,7 @@ export function TableView({
   head: ReactNode[];
   rows: ReactNode[][];
 }) {
-  const t = useTranslations("Dashboards");
+  const t = useTranslations("Charts");
   return (
     <details>
       <summary className="cursor-pointer text-sm">{t("tableView")}</summary>
@@ -84,7 +78,7 @@ export function TableView({
 }
 
 export function Empty() {
-  const t = useTranslations("Dashboards");
+  const t = useTranslations("Charts");
   return <p className="text-sm text-muted-foreground">{t("empty")}</p>;
 }
 

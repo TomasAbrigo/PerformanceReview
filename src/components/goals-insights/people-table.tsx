@@ -7,19 +7,11 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Link } from "@/i18n/navigation";
 import type { GoalIndicatorRow } from "@/modules/analytics/goals-insights/types";
 import { Empty, useDecimal, usePct } from "./shared";
 
 /** Every person of the view: goals, indicators and positive comments side by side. */
-export function PeopleTable({
-  rows,
-  cycleId,
-}: {
-  rows: GoalIndicatorRow[];
-  cycleId: string;
-}) {
-  const t = useTranslations("GoalsInsights");
+export function PeopleTable({ rows }: { rows: GoalIndicatorRow[] }) {
   const tc = useTranslations("GoalsInsights.people");
   const pct = usePct();
   const decimal = useDecimal();
@@ -42,15 +34,7 @@ export function PeopleTable({
       <TableBody>
         {rows.map((r) => (
           <TableRow key={r.participantId}>
-            <TableCell>
-              <Link
-                href={`/cycles/${cycleId}/participants/${r.participantId}`}
-                className="underline"
-                aria-label={t("personLink", { name: r.name })}
-              >
-                {r.name}
-              </Link>
-            </TableCell>
+            <TableCell>{r.name}</TableCell>
             <TableCell>{r.managerName ?? dash}</TableCell>
             <TableCell className="tabular-nums">{r.goals}</TableCell>
             <TableCell className="tabular-nums">

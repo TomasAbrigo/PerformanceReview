@@ -4,8 +4,8 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { connection } from "next/server";
 import { Suspense } from "react";
-import { Toggle } from "@/components/dashboards/controls";
-import { Panel } from "@/components/dashboards/parts";
+import { Toggle } from "@/components/insights/controls";
+import { Panel } from "@/components/insights/parts";
 import { ExportCsvLink } from "@/components/data-quality/export-csv-link";
 import { BucketsChart } from "@/components/goals-insights/buckets-chart";
 import { GoalsFilters } from "@/components/goals-insights/filters";
@@ -174,7 +174,7 @@ async function GoalsInsights({
       </Panel>
       {vs.rows.length > 0 ? (
         <Panel id="goal-people" title={t("people.title")}>
-          <PeopleTable rows={vs.rows} cycleId={cycle.id} />
+          <PeopleTable rows={vs.rows} />
         </Panel>
       ) : null}
     </div>

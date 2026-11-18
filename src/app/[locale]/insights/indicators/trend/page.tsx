@@ -3,7 +3,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { connection } from "next/server";
 import { Suspense } from "react";
-import { Panel } from "@/components/dashboards/parts";
+import { Panel } from "@/components/insights/parts";
 import { TrendChart } from "@/components/indicators/trend-chart";
 import { TrendPicker } from "@/components/indicators/trend-picker";
 import { parseTrendParams } from "@/components/indicators/url-state";

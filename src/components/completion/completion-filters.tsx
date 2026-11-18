@@ -1,5 +1,5 @@
 import { useTranslations } from "next-intl";
-import { Toggle } from "@/components/dashboards/controls";
+import { Toggle } from "@/components/insights/controls";
 import { OrgFilterFields } from "@/components/org/org-filter-fields";
 import type { FilterOptions } from "@/modules/analytics/dashboards";
 import {

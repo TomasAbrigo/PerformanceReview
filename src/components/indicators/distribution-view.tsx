@@ -1,6 +1,6 @@
 import { useFormatter, useTranslations } from "next-intl";
-import { HistogramBars } from "@/components/dashboards/histogram-bars";
-import { Empty, TableView } from "@/components/dashboards/parts";
+import { HistogramBars } from "@/components/insights/histogram-bars";
+import { Empty, TableView } from "@/components/insights/parts";
 import {
   INDICATOR_VALUES,
   type IndicatorDistribution,

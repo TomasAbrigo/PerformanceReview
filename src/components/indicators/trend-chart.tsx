@@ -1,5 +1,5 @@
 import { useFormatter, useTranslations } from "next-intl";
-import { Empty, TableView } from "@/components/dashboards/parts";
+import { Empty, TableView } from "@/components/insights/parts";
 import type { IndicatorTrend } from "@/modules/analytics/indicators/types";
 
 const W = 480;

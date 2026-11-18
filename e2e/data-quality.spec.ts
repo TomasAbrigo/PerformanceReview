@@ -1,4 +1,3 @@
-import { readFile } from "node:fs/promises";
 import { expect, test } from "@playwright/test";
 import {
   byId,
@@ -48,9 +47,7 @@ test("the panel flags the CEO without a manager and opens the case list", async 
   const rows = page.getByRole("row");
   await expect(rows).toHaveCount(withoutManager.length + 1); // + header
   const row = rows.filter({ hasText: fullName(ceo) });
-  await expect(
-    row.getByRole("link", { name: fullName(ceo), exact: true }),
-  ).toHaveAttribute("href", /\/es\/people\/[0-9a-f-]{36}$/);
+  await expect(row.getByText(fullName(ceo), { exact: true })).toBeVisible();
   // The top of the org has reports: not having a manager is expected, so it is badged.
   await expect(row.getByText("Tope")).toBeVisible();
 
@@ -86,8 +83,8 @@ test("an unknown indicator renders the not-found page", async ({ page }) => {
   await expect(page.getByText("This page could not be found.")).toBeVisible();
 });
 
-test("the people list downloads its CSV: header and one row per person, with ids", async ({
-  page,
+test("the people CSV export: header and one row per person, with ids", async ({
+  request,
 }) => {
   const report = find(
     employees,
@@ -96,13 +93,12 @@ test("the people list downloads its CSV: header and one row per person, with ids
   );
   const manager = byId.get(report.managerId!)!;
 
-  await page.goto("/es/people");
-  const download = page.waitForEvent("download");
-  await page.getByRole("link", { name: "Exportar CSV" }).click();
-  const file = await download;
-
-  expect(file.suggestedFilename()).toBe("people.csv");
-  const raw = await readFile(await file.path(), "utf8");
+  const file = await request.get("/api/v1/export/people.csv");
+  expect(file.status()).toBe(200);
+  expect(file.headers()["content-disposition"]).toContain(
+    'filename="people.csv"',
+  );
+  const raw = await file.text();
   // UTF-8 BOM so Excel reads the accents.
   expect(raw.charCodeAt(0)).toBe(0xfeff);
   const lines = raw.slice(1).split("\r\n");
@@ -112,7 +108,7 @@ test("the people list downloads its CSV: header and one row per person, with ids
   );
   // The email is personal data: not in the file unless asked for.
   expect(raw).not.toContain("@");
-  // The same people the screen lists: one per human.
+  // One row per human.
   expect(lines).toHaveLength(employees.length + 1);
   const row = lines.find((l) => l.includes(`,${report.id},`))!;
   expect(row).toMatch(
@@ -124,7 +120,7 @@ test("the people list downloads its CSV: header and one row per person, with ids
 
   // `include_email=1` adds the column after legajo.
   const withEmail = await (
-    await page.request.get("/api/v1/export/people.csv?include_email=1")
+    await request.get("/api/v1/export/people.csv?include_email=1")
   ).text();
   const emailLines = withEmail.slice(1).split("\r\n");
   expect(emailLines[0]).toBe(

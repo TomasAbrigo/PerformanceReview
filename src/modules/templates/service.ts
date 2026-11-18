@@ -336,27 +336,6 @@ export async function addSection(
   return section;
 }
 
-export async function updateSection(
-  db: DbOrTx,
-  sectionId: string,
-  input: SectionInput,
-): Promise<void> {
-  const data = parse(sectionInput, input);
-  await editableSection(db, sectionId);
-  await db
-    .update(templateSection)
-    .set({ title: data.title })
-    .where(eq(templateSection.id, sectionId));
-}
-
-export async function deleteSection(
-  db: DbOrTx,
-  sectionId: string,
-): Promise<void> {
-  await editableSection(db, sectionId);
-  await db.delete(templateSection).where(eq(templateSection.id, sectionId));
-}
-
 function questionValues(data: ReturnType<typeof questionInput.parse>) {
   return {
     kind: data.kind,
@@ -456,14 +435,6 @@ export async function updateQuestion(
     .where(eq(question.id, questionId))
     .returning();
   return updated;
-}
-
-export async function deleteQuestion(
-  db: DbOrTx,
-  questionId: string,
-): Promise<void> {
-  await editableQuestion(db, questionId);
-  await db.delete(question).where(eq(question.id, questionId));
 }
 
 /**

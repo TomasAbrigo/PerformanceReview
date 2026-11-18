@@ -40,17 +40,8 @@ test("importing the employee performance report creates the historical cycles an
   const cycles = page.getByRole("table", { name: "Ciclos detectados" });
   await expect(cycles.getByRole("row")).toHaveCount(1 + company.cycles.length);
   for (const cycle of company.cycles) {
-    await expect(cycles.getByRole("link", { name: cycle.name })).toBeVisible();
+    await expect(cycles.getByRole("cell", { name: cycle.name })).toBeVisible();
   }
-
-  // The first cycle lists a person assessed in it, with their as-of snapshot.
-  await cycles.getByRole("link", { name: company.cycles[0].name }).click();
-  await expect(page).toHaveURL(/\/es\/cycles\/[0-9a-f-]{36}$/);
-  await expect(
-    page.getByRole("table", { name: "Participantes" }).getByRole("row", {
-      name: new RegExp(`^${fullName(assessedFirstCycle)}`),
-    }),
-  ).toBeVisible();
 
   // People the HRIS does not know wait in the identity queue.
   await page.goto("/es/imports/identity");
@@ -116,7 +107,7 @@ test("a row whose semester is ambiguous waits for a cycle, and the run finishes 
   await expect(
     page
       .getByRole("table", { name: "Ciclos detectados" })
-      .getByRole("link", { name: "2023-H2" }),
+      .getByRole("cell", { name: "2023-H2" }),
   ).toBeVisible();
 });
 
@@ -135,7 +126,7 @@ test("Bamboo's real reports: the raw assessments report and the grouped Assessme
     await expect(cycles.getByRole("row")).toHaveCount(
       1 + company.cycles.length,
     );
-    await expect(cycles.getByRole("link", { name: firstPeriod })).toBeVisible();
+    await expect(cycles.getByRole("cell", { name: firstPeriod })).toBeVisible();
     await expect(
       page.getByRole("heading", { name: decision.title }),
     ).toHaveCount(0);

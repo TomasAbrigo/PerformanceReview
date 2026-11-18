@@ -1,5 +1,5 @@
 import { useFormatter, useTranslations } from "next-intl";
-import { Empty, Panel } from "@/components/dashboards/parts";
+import { Empty, Panel } from "@/components/insights/parts";
 import type {
   EngagementEvolution,
   EngagementMonth,

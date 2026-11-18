@@ -1,6 +1,5 @@
 import { type SQL, sql } from "drizzle-orm";
 import { isUuid } from "@/lib/uuid";
-import { isHr } from "@/modules/actor/access";
 import type { ActorContext } from "@/modules/actor/types";
 import { type InsightsScope, insightsScope } from "@/modules/insights/authz";
 import {
@@ -10,8 +9,6 @@ import {
 } from "@/modules/org-attributes/sql";
 import { ReviewError } from "@/modules/review-core/review-errors";
 import type { DashboardFilters } from "./types";
-
-export { isHr };
 
 /** The scope of the dashboards that name people: People or a manager. */
 export type PeopleScope = Extract<
@@ -36,24 +33,6 @@ export function requirePeopleScope(actor: ActorContext): PeopleScope {
  * computed over everybody and masked afterwards (see `executiveSummary`).
  */
 export const ALL_PEOPLE: ActorContext = { personId: null, role: "hr" };
-
-/** A job_history row (alias h) valid on `date`. */
-const validOn = (date: SQL) =>
-  sql`h.deleted_at is null and h.valid_from <= ${date} and (h.valid_to is null or h.valid_to > ${date})`;
-
-/**
- * Subtree of `rootId` on `date` (recursive CTE over job history): rows
- * (person_id, depth), depth 1 = direct reports, down to `maxDepth` levels
- * (the recursion stops there). Use as a CTE body.
- */
-export const subtree = (rootId: string, date: SQL, maxDepth = 50) => sql`
-  select h.person_id, 1 as depth, array[h.person_id] as ids
-  from employee_job_history h
-  where h.manager_person_id = ${rootId}::uuid and ${validOn(date)}
-  union all
-  select h.person_id, s.depth + 1, s.ids || h.person_id
-  from sub s join employee_job_history h on h.manager_person_id = s.person_id and ${validOn(date)}
-  where not h.person_id = any(s.ids) and s.depth < ${maxDepth}::int`;
 
 /**
  * CTEs `cur` (current job row per person) and `scoped`: active participants

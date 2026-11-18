@@ -2,7 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import { useId, useState, useTransition } from "react";
-import type { ActionResult } from "@/components/templates/shared";
+import type { ActionResult } from "@/components/form-helpers";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {

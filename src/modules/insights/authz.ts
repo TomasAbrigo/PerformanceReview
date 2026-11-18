@@ -74,27 +74,6 @@ export function canSeeSensitiveIndicators(
   }
 }
 
-/**
- * The assessment page of one cycle participant (their answers and goals of the
- * period): People for anyone, a removed participant included; a manager only
- * for a direct report of the snapshot who is still in the cycle (so
- * `canSeeSensitiveIndicators` plus the removal rule). The page and the link
- * to it ask this one function, so no link leads to a refusal.
- */
-export function canOpenAssessment(
-  actor: ActorContext,
-  participant: {
-    revieweePersonId: string;
-    snapManagerPersonId: string | null;
-    removedAt: Date | null;
-  },
-): boolean {
-  return (
-    canSeeSensitiveIndicators(actor, participant) &&
-    (actor.role === "hr" || participant.removedAt === null)
-  );
-}
-
 /** The one-page executive view: People (unmasked) and direction (aggregates). */
 export function canSeeExecutiveView(actor: ActorContext): boolean {
   const { kind } = insightsScope(actor);

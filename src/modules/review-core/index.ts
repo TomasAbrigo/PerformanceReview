@@ -42,4 +42,3 @@ export {
   type GoalsScope,
   type GoalWindow,
 } from "./goal-snapshot";
-export { reviewHistory, type HistoryItem, type HistoryRating } from "./history";

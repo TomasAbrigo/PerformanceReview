@@ -1,5 +1,5 @@
 import { useFormatter, useTranslations } from "next-intl";
-import { Meter, TableView, pct } from "@/components/dashboards/parts";
+import { Meter, TableView, pct } from "@/components/insights/parts";
 import type {
   CompletionDelta,
   CompletionDeltaRow,

@@ -2,7 +2,7 @@
 
 import { useFormatter, useTranslations } from "next-intl";
 import { useId, useState, useTransition, type ReactNode } from "react";
-import { StatusBadge } from "@/components/people/status-badge";
+import { StatusBadge } from "./status-badge";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Field, FieldLabel } from "@/components/ui/field";
@@ -202,12 +202,7 @@ function CandidateItem({
     >
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div>
-          <Link
-            href={`/people/${candidate.personId}`}
-            className="font-medium hover:underline"
-          >
-            {candidate.displayName}
-          </Link>
+          <p className="font-medium">{candidate.displayName}</p>
           <p className="text-sm text-muted-foreground">
             {candidate.workEmail ?? "—"}
           </p>
@@ -353,14 +348,6 @@ function ResolutionSummary({ issue }: { issue: IssueDetailData }) {
             }),
           })}
         </p>
-      ) : null}
-      {resolvedPerson ? (
-        <Link
-          href={`/people/${resolvedPerson.id}`}
-          className="text-sm hover:underline"
-        >
-          {t("detail.viewPerson")}
-        </Link>
       ) : null}
     </Section>
   );

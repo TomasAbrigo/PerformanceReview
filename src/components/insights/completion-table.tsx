@@ -1,5 +1,5 @@
 import { useTranslations } from "next-intl";
-import { Meter } from "@/components/dashboards/parts";
+import { Meter } from "@/components/insights/parts";
 import type {
   CompletionGroup,
   CompletionGroupBy,

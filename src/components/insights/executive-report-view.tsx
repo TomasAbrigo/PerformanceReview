@@ -1,5 +1,5 @@
 import { useFormatter, useTranslations } from "next-intl";
-import { Meter } from "@/components/dashboards/parts";
+import { Meter } from "@/components/insights/parts";
 import { SEGMENT_SWATCH } from "@/components/engagement/segments";
 import { engagementSegments } from "@/modules/engagement/kinds";
 import { SentimentBars } from "@/components/qualitative/sentiment-bars";

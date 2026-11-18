@@ -1,7 +1,7 @@
 import { expect, type Page, test } from "@playwright/test";
 import { parseCsv } from "../src/modules/exports/csv-parse";
 import { actAs, actAsRole } from "./act-as";
-import { goalTotals, participantOf } from "./goals-data";
+import { goalTotals } from "./goals-data";
 import { assessedFirstCycle, company, fullName } from "./seed-data";
 
 // Runs after the historical import (project "insights" depends on
@@ -105,8 +105,9 @@ test("People see the goal KPIs, the indicators by completion, the outliers and t
   // The people of the cycle, with their goals and indicators side by side.
   const people = page.getByTestId("people-table");
   await expect(people).toBeVisible();
+  // The name also shows up as the manager of the people who report to them.
   await expect(
-    people.getByRole("link", { name: `Ver assessment de ${personName}` }),
+    people.getByRole("cell", { name: personName, exact: true }).first(),
   ).toBeVisible();
 
   // The CSVs follow the filters; the headers are the file's language.
@@ -141,69 +142,6 @@ test("People see the goal KPIs, the indicators by completion, the outliers and t
   expect(outliersText).not.toContain("@");
 });
 
-test("the participant detail shows the answers and the goals of the period, to People and to the snapshot manager only", async ({
-  page,
-}) => {
-  test.setTimeout(120_000);
-  const { cycleId, participantId, managerName } = await participantOf(
-    cycleName,
-    personName,
-  );
-  const detail = `/es/cycles/${cycleId}/participants/${participantId}`;
-
-  await page.goto("/es");
-  await actAs(page, null, "People (RR. HH.)");
-  // From the cycle: the participant's row links to it.
-  await page.goto(`/es/cycles/${cycleId}`);
-  await page
-    .getByRole("link", { name: `Ver el assessment de ${personName}` })
-    .click();
-  await expect(page).toHaveURL(new RegExp(`${detail}$`));
-  await expect(
-    page.getByRole("heading", {
-      level: 1,
-      name: `${personName} · ${cycleName}`,
-    }),
-  ).toBeVisible();
-  const answers = page.getByTestId("assessment-answers");
-  await expect(
-    answers.getByRole("article", { name: "Autoevaluación" }),
-  ).toBeVisible();
-  await expect(
-    answers.getByRole("article", { name: "Evaluación del manager" }),
-  ).toBeVisible();
-  // The goals of the period sit on the same page (empty or not).
-  await expect(
-    page.getByRole("region", { name: "Objetivos del período" }),
-  ).toBeVisible();
-
-  // The manager of the snapshot reads it too; somebody else's manager and the
-  // person themself do not.
-  if (managerName) {
-    await actAs(page, managerName, "Manager");
-    await page.goto(detail);
-    await expect(
-      page.getByRole("heading", {
-        level: 1,
-        name: `${personName} · ${cycleName}`,
-      }),
-    ).toBeVisible();
-    await expect(
-      page.getByRole("article", { name: "Evaluación del manager" }),
-    ).toBeVisible();
-  }
-  await actAs(page, personName, "Empleado");
-  await page.goto(detail);
-  await expect(
-    page.getByText("No tenés acceso a este assessment."),
-  ).toBeVisible();
-  await actAsRole(page, "Dirección", "Dirección");
-  await page.goto(detail);
-  await expect(
-    page.getByText("No tenés acceso a este assessment."),
-  ).toBeVisible();
-});
-
 test("direction only sees aggregates; employees are forbidden", async ({
   page,
 }) => {
@@ -214,13 +152,10 @@ test("direction only sees aggregates; employees are forbidden", async ({
   await expect(
     page.getByText(/Solo agregados: los grupos de menos de \d+ personas/),
   ).toBeVisible();
-  // Never a person: no scatter, no people table, no links to an assessment,
-  // and the grouping by person is not even offered.
+  // Never a person: no scatter, no people table, and the grouping by person is
+  // not even offered.
   await expect(page.getByTestId("people-table")).toHaveCount(0);
   await expect(page.getByTestId("goals-scatter")).toHaveCount(0);
-  await expect(
-    page.getByRole("link", { name: /^Ver assessment de/ }),
-  ).toHaveCount(0);
   await expect(
     page.getByRole("link", { name: "Persona", exact: true }),
   ).toHaveCount(0);

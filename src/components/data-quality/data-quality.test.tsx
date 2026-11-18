@@ -154,9 +154,7 @@ describe("IndicatorDetail", () => {
       );
       const rows = screen.getAllByRole("row").slice(1);
       expect(rows).toHaveLength(2);
-      expect(
-        within(rows[0]).getByRole("link", { name: "Ana García" }),
-      ).toHaveAttribute("href", "/people/p1");
+      expect(within(rows[0]).getByText("Ana García")).toBeInTheDocument();
       expect(within(rows[0]).getByText(top)).toBeInTheDocument();
       expect(within(rows[1]).queryByText(top)).not.toBeInTheDocument();
       expect(within(rows[1]).getByText("Nadie, Alguien")).toBeInTheDocument();
@@ -196,20 +194,12 @@ describe("IndicatorDetail", () => {
         }}
       />,
     );
-    expect(screen.getByRole("link", { name: "Ciclo A" })).toHaveAttribute(
-      "href",
-      "/cycles/c1",
-    );
-    expect(screen.getByRole("link", { name: "Ciclo B" })).toHaveAttribute(
-      "href",
-      "/cycles/c2",
-    );
+    expect(screen.getByText("Ciclo A")).toBeInTheDocument();
+    expect(screen.getByText("Ciclo B")).toBeInTheDocument();
     const tables = screen.getAllByRole("table");
     expect(tables).toHaveLength(2);
     expect(within(tables[0]).getAllByRole("row")).toHaveLength(3);
-    expect(
-      within(tables[1]).getByRole("link", { name: "Carla Romero" }),
-    ).toHaveAttribute("href", "/people/p3");
+    expect(within(tables[1]).getByText("Carla Romero")).toBeInTheDocument();
     expect(screen.getByText("2 participantes")).toBeInTheDocument();
   });
 
@@ -307,15 +297,9 @@ describe("IndicatorDetail", () => {
       />,
     );
     const row = screen.getAllByRole("row")[1];
-    expect(
-      within(row).getByRole("link", { name: "Carla Romero" }),
-    ).toHaveAttribute("href", "/people/p1");
-    expect(
-      within(row).getByRole("link", { name: "Bruno Pérez" }),
-    ).toHaveAttribute("href", "/people/p2");
-    expect(
-      within(row).getByRole("link", { name: "Ana García" }),
-    ).toHaveAttribute("href", "/people/p3");
+    expect(within(row).getByText("Carla Romero")).toBeInTheDocument();
+    expect(within(row).getByText("Bruno Pérez")).toBeInTheDocument();
+    expect(within(row).getByText("Ana García")).toBeInTheDocument();
     expect(
       screen.getByRole("columnheader", { name: "Snapshot manager" }),
     ).toBeInTheDocument();
@@ -348,9 +332,7 @@ describe("IndicatorDetail", () => {
       }),
     ).toBeInTheDocument();
     const row = screen.getAllByRole("row")[1];
-    expect(
-      within(row).getByRole("link", { name: "Ciclo 2023" }),
-    ).toHaveAttribute("href", "/cycles/c1");
+    expect(within(row).getByText("Ciclo 2023")).toBeInTheDocument();
     expect(within(row).getByText("manager:q1")).toBeInTheDocument();
     expect(within(row).getByText("Z")).toBeInTheDocument();
     expect(
@@ -378,9 +360,7 @@ describe("IndicatorDetail", () => {
     );
     const row = screen.getAllByRole("row")[1];
     expect(within(row).getByText("Meta")).toBeInTheDocument();
-    expect(
-      within(row).getByRole("link", { name: "Inés Mora" }),
-    ).toHaveAttribute("href", "/people/p9");
+    expect(within(row).getByText("Inés Mora")).toBeInTheDocument();
   });
 
   it.each([

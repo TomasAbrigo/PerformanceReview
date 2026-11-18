@@ -6,22 +6,32 @@
   "Home": {
     "heading": "Performance reviews",
     "welcome": "Welcome to Performance Review.",
-    "settings": "Settings"
+    "navigation": "Navigation",
+    "groups": {
+      "insights": "Insights",
+      "data": "Data",
+      "settings": "Settings"
+    },
+    "descriptions": {
+      "executive": "Completion, retention, engagement, risk and sentiment of the cycle in a single view.",
+      "completion": "Who sent their self-assessment and their manager review, and who is missing.",
+      "indicators": "Alerts, distribution and trend of retention and engagement across cycles.",
+      "qualitative": "Sentiment and themes of the comments, by dimension, department and cycle.",
+      "selfAssessment": "Sentiment of the self-assessments and the gap against the manager review.",
+      "goals": "Goal completion next to each person's retention and engagement.",
+      "dm360": "One card per DM (delivery manager) with the people in their care for the cycle.",
+      "engagement": "Engagement score, participation and segments month by month.",
+      "upload": "Upload a Bamboo report or a data lake table.",
+      "imports": "Import runs, their outcome and the history.",
+      "identity": "Records that could not be matched to a person automatically.",
+      "dataQuality": "Cases to fix before analysing or reporting.",
+      "insightsSettings": "Alert thresholds, minimum group size, semester cuts and analysis provider."
+    }
   },
   "LocaleSwitcher": {
     "label": "Language",
     "es": "Español",
     "en": "English"
-  },
-  "Settings": {
-    "title": "Settings",
-    "nav": {
-      "label": "Settings",
-      "home": "Home",
-      "insights": "Insights",
-      "scales": "Rating scales",
-      "templates": "Review templates"
-    }
   },
   "InsightsSettings": {
     "title": "Insights settings",
@@ -75,172 +85,17 @@
       "cutoffMedio": "Medium segment from (% of the score)",
       "cutoffRegular": "Regular segment from (% of the score)",
       "hint": "Only used when the file has no Segmento column: below Regular the segment is Low."
-    }
+    },
+    "nav": "Insights settings"
   },
   "Common": {
-    "nameEs": "Name (Spanish)",
-    "nameEn": "Name (English)",
-    "system": "System",
-    "disabled": "Off",
-    "delete": "Delete",
-    "save": "Save",
-    "cancel": "Cancel",
-    "edit": "Edit",
-    "clone": "Clone",
-    "actions": "Actions",
-    "loading": "Loading…",
     "exportCsv": "Export CSV"
   },
   "Errors": {
-    "missingEs": "The Spanish text is missing.",
-    "missingEn": "The English text is missing.",
-    "required": "This field is required.",
-    "minOptions": "Add at least two options.",
-    "duplicateValues": "Option values must be unique.",
-    "invalid": "Invalid value.",
     "validation": "Check the highlighted fields.",
     "not_found": "The item no longer exists.",
     "forbidden": "Only People (HR) can do this.",
-    "system_readonly": "System items cannot be changed or deleted; clone them instead.",
-    "in_use": "The scale is used by a question.",
-    "unknown": "Something went wrong.",
-    "duplicateRole": "This template already has a question with that role.",
-    "managerOnly": "Retention and engagement are answered by the manager only.",
-    "hiddenRequired": "Retention and engagement must be hidden from the reviewee.",
-    "dimensionTextOnly": "Only text questions have a dimension."
-  },
-  "Scales": {
-    "title": "Rating scales",
-    "description": "System scales cannot be deleted. The normalized value (0 to 1) makes different scales comparable.",
-    "empty": "There are no scales yet.",
-    "name": "Name",
-    "options": "Options",
-    "new": "New scale",
-    "create": "Create scale",
-    "value": "Value",
-    "labelEs": "Label (Spanish)",
-    "labelEn": "Label (English)",
-    "addOption": "Add option",
-    "removeOption": "Remove option",
-    "normalized": "normalized {value}",
-    "deleteScale": "Delete scale"
-  },
-  "Templates": {
-    "title": "Review templates",
-    "description": "System templates cannot be edited or deleted: clone them to adapt them.",
-    "empty": "There are no templates yet.",
-    "name": "Name",
-    "new": "New template",
-    "create": "Create template",
-    "deleteTemplate": "Delete template",
-    "cloneTemplate": "Clone template",
-    "back": "Back to templates",
-    "notFound": "The template does not exist."
-  },
-  "Editor": {
-    "systemNotice": "This is a system template: it cannot be edited or deleted, only cloned.",
-    "emptySections": "This template has no sections yet.",
-    "emptyQuestions": "This section has no questions yet.",
-    "saveName": "Save name",
-    "newSection": "New section",
-    "sectionTitleEs": "Title (Spanish)",
-    "sectionTitleEn": "Title (English)",
-    "addSection": "Add section",
-    "deleteSection": "Delete section",
-    "sectionUp": "Move section up",
-    "sectionDown": "Move section down",
-    "newQuestion": "New question",
-    "editQuestion": "Edit question",
-    "addQuestion": "Add question",
-    "saveQuestion": "Save question",
-    "deleteQuestion": "Delete question",
-    "questionUp": "Move question up",
-    "questionDown": "Move question down",
-    "promptEs": "Text (Spanish)",
-    "promptEn": "Text (English)",
-    "kind": "Type",
-    "kinds": {
-      "text": "Text",
-      "rating": "Rating",
-      "single_choice": "Single choice"
-    },
-    "appliesTo": "Answered by",
-    "relationships": {
-      "self": "Self",
-      "manager": "Manager",
-      "peer": "Peer",
-      "upward": "Upward"
-    },
-    "visibleToReviewee": "Visible to the reviewee",
-    "required": "Required",
-    "scale": "Scale",
-    "choices": "Options",
-    "choiceEs": "Option {n} (Spanish)",
-    "choiceEn": "Option {n} (English)",
-    "addChoice": "Add option",
-    "hiddenFromReviewee": "Hidden from the reviewee",
-    "chooseScale": "Choose a scale",
-    "role": "Special role",
-    "roles": {
-      "none": "None",
-      "goals_rating": "Goals rating",
-      "goals_comment": "Goals comment",
-      "overall_rating": "Overall performance rating",
-      "retention": "Retention (Likert 1-5)",
-      "engagement": "Engagement (Likert 1-5)",
-      "valued": "Feeling valued (1-4)"
-    },
-    "dimension": "Dimension",
-    "dimensions": {
-      "none": "None",
-      "strengths": "Strengths",
-      "improvement": "Opportunities for improvement",
-      "custom_1": "Custom 1",
-      "custom_2": "Custom 2",
-      "custom_3": "Custom 3",
-      "valued": "Feeling valued",
-      "best_work": "What would help"
-    }
-  },
-  "People": {
-    "title": "People",
-    "nav": "People",
-    "searchLabel": "Search by name",
-    "searchPlaceholder": "Name",
-    "search": "Search",
-    "total": "{count, plural, =1 {1 person} other {# people}}",
-    "empty": "No people to show.",
-    "back": "← Back to people",
-    "notFound": "Person not found.",
-    "columns": {
-      "name": "Name",
-      "status": "Status"
-    },
-    "status": {
-      "active": "Active",
-      "inactive": "Inactive",
-      "unknown": "No status"
-    },
-    "identities": {
-      "title": "Source identifiers",
-      "kind": "Kind",
-      "value": "Value",
-      "validFrom": "From",
-      "validTo": "To",
-      "current": "Current",
-      "kinds": {
-        "bamboo_id": "Bamboo ID",
-        "employee_number": "Employee number",
-        "work_email": "Email"
-      }
-    },
-    "employments": {
-      "title": "Employment periods",
-      "hireDate": "Hire date",
-      "terminationDate": "Termination date",
-      "status": "Status",
-      "empty": "No employment periods."
-    }
+    "unknown": "Something went wrong."
   },
   "Imports": {
     "nav": "Imports",
@@ -306,59 +161,6 @@
         "noRejects": "This run had no rejects or issues.",
         "noSourceId": "No source ID"
       }
-    }
-  },
-  "Org": {
-    "title": "Org chart",
-    "nav": "Org chart",
-    "treeLabel": "Org chart",
-    "dateLabel": "Date",
-    "show": "Show",
-    "empty": "Nobody was in the organization on that date.",
-    "expand": "Expand {name}",
-    "collapse": "Collapse {name}",
-    "history": {
-      "title": "Job history",
-      "validFrom": "From",
-      "validTo": "To",
-      "jobTitle": "Job title",
-      "area": "Area",
-      "manager": "Manager",
-      "location": "Location",
-      "current": "Current",
-      "unresolved": "{name} (unresolved)",
-      "empty": "No job history."
-    }
-  },
-  "Goals": {
-    "title": "Goals",
-    "nav": "Team goals",
-    "empty": "No goals imported yet.",
-    "status": {
-      "in_progress": "In progress",
-      "completed": "Completed",
-      "closed": "Closed"
-    },
-    "progress": "Progress",
-    "dueDate": "Due {date}",
-    "noDueDate": "No due date",
-    "completedOn": "Completed on {date}",
-    "milestones": {
-      "title": "Milestones",
-      "summary": "{done} of {total, plural, =1 {1 milestone} other {# milestones}}",
-      "done": "Done",
-      "pending": "Pending"
-    },
-    "comments": "{count, plural, =0 {No comments} =1 {1 comment} other {# comments}}",
-    "sharedWith": "Shared with {names}",
-    "team": {
-      "title": "Team goals",
-      "description": "Goals of {manager}'s direct reports.",
-      "goalCount": "{count, plural, =1 {1 goal} other {# goals}}",
-      "noGoals": "No goals.",
-      "noReports": "{manager} has no direct reports.",
-      "chooseManager": "Choose a manager to see their team's goals.",
-      "noManagers": "No managers with direct reports."
     }
   },
   "Identity": {
@@ -437,8 +239,7 @@
       "employmentLine": "{hire} → {end}",
       "noDate": "—",
       "resolutionTitle": "Resolution",
-      "resolvedAt": "Resolved on {date}",
-      "viewPerson": "View person"
+      "resolvedAt": "Resolved on {date}"
     },
     "actions": {
       "title": "Resolve",
@@ -471,46 +272,11 @@
       "employee": "employee",
       "manager": "manager",
       "reviewer": "reviewer"
-    }
-  },
-  "Cycles": {
-    "nav": "Review cycles",
-    "title": "Review cycles",
-    "back": "Back to cycles",
-    "empty": "There are no cycles yet.",
-    "columns": {
-      "name": "Name",
-      "status": "Status",
-      "period": "Period",
-      "participants": "Participants"
     },
-    "period": "{start} → {end}",
     "status": {
-      "draft": "Draft",
-      "nominations": "Nominations",
-      "collecting": "Collecting",
-      "manager_review": "Manager review",
-      "calibration": "Calibration",
-      "sharing": "Sharing",
-      "closed": "Closed"
-    },
-    "detail": {
-      "snapshotDate": "Snapshot as of {date}",
-      "participants": "Participants",
-      "stats": "{active} active · {removed} removed · {withoutManager} without manager",
-      "questions": "{count, plural, one {# frozen question} other {# frozen questions}}",
-      "noParticipants": "This cycle has no participants yet.",
-      "noManager": "No manager",
-      "removed": "Removed",
-      "columns": {
-        "name": "Person",
-        "manager": "Manager (snapshot)",
-        "department": "Department",
-        "jobTitle": "Job title",
-        "assessment": "Assessment"
-      },
-      "viewAssessment": "View assessment",
-      "viewAssessmentOf": "View {name}'s assessment"
+      "active": "Active",
+      "inactive": "Inactive",
+      "unknown": "No status"
     }
   },
   "Actor": {
@@ -534,9 +300,6 @@
     "title": "No access",
     "description": "This screen is for People (HR) only. If that applies, switch the role in “Act as”.",
     "home": "Back to home"
-  },
-  "Review": {
-    "noAnswer": "No answer"
   },
   "Upload": {
     "nav": "Upload a file",
@@ -706,36 +469,6 @@
       "unknown_profile": "The chosen profile no longer exists.",
       "timeout": "The import took too long and was cancelled. Try again."
     }
-  },
-  "History": {
-    "title": "Reviews of {name}",
-    "link": "Reviews",
-    "back": "Back to the person",
-    "empty": "There are no finalized or shared reviews yet.",
-    "forbidden": "You do not have access to this person's reviews.",
-    "notFound": "Person not found.",
-    "period": "{start} to {end}",
-    "manager": "Manager at the time: {name}",
-    "noManager": "No manager at the time",
-    "job": "Job and department at the time: {title}, {department}",
-    "rating": "Current rating",
-    "noRating": "No rating",
-    "ratingValue": "{label} ({percent})",
-    "shared": "Shared on {date}",
-    "notShared": "Not shared",
-    "status": {
-      "closed": "Closed cycle",
-      "sharing": "Sharing",
-      "calibration": "In calibration",
-      "manager_review": "In manager review",
-      "collecting": "Collecting",
-      "nominations": "In nominations",
-      "draft": "Draft"
-    },
-    "showAnswers": "Show answers",
-    "selfAnswers": "Self assessment",
-    "managerAnswers": "Manager review",
-    "noAnswers": "You do not have access to this cycle's answers."
   },
   "DataQuality": {
     "nav": "Data quality",
@@ -1042,61 +775,18 @@
     },
     "periodCycleName": "Semi-annual review {start} – {end}"
   },
-  "Dashboards": {
-    "nav": "Dashboards",
-    "title": "Dashboards",
-    "noCycles": "There are no launched cycles yet.",
-    "forbidden": "You have no access to these dashboards.",
-    "filters": {
-      "label": "Filters",
-      "cycle": "Cycle",
-      "allCycles": "All cycles",
-      "department": "Department",
-      "manager": "Manager",
-      "location": "Location",
-      "jobTitle": "Job title",
-      "any": "All",
-      "apply": "Apply"
-    },
-    "hierarchy": {
-      "label": "Hierarchy",
-      "asOf": "At review time",
-      "current": "Current"
-    },
-    "groupBy": {
-      "label": "Group by",
-      "department": "Department",
-      "manager": "Manager",
-      "location": "Location",
-      "jobTitle": "Job title"
-    },
-    "stage": {
-      "label": "Rating",
-      "manager": "Pre calibration (manager)",
-      "current": "Post calibration (current)"
-    },
+  "Charts": {
+    "empty": "No data for these filters.",
+    "none": "Unassigned",
+    "tableView": "View as table",
     "relationships": {
       "self": "Self assessment",
       "manager": "Manager review",
       "peer": "Peers",
       "upward": "Upward"
     },
-    "statuses": {
-      "submitted": "Submitted",
-      "draft": "Pending",
-      "declined": "Declined"
-    },
-    "phase": "Cycle phase: {phase}",
-    "none": "Unassigned",
-    "tableView": "View as table",
-    "empty": "No data for these filters.",
-    "pickCycle": "Pick a cycle to see this panel.",
-    "exportCsv": "Export CSV",
     "progress": {
-      "title": "Cycle progress",
-      "meter": "{relationship}: {submitted} of {total} submitted",
-      "relationship": "Type",
-      "total": "Total"
+      "meter": "{relationship}: {submitted} of {total} submitted"
     },
     "distribution": {
       "title": "Rating distribution",
@@ -1107,65 +797,13 @@
       "all": "All",
       "barLabel": "{group}, {bin}: {count}"
     },
-    "trajectory": {
-      "title": "Trajectory of {name}",
-      "link": "Trajectory",
-      "cycle": "Cycle",
-      "rating": "Normalized rating",
-      "manager": "Manager at the time",
-      "jobTitle": "Job title at the time",
-      "hidden": "Not published",
-      "point": "{cycle}: {value}",
-      "chartLabel": "Normalized rating per cycle"
-    },
-    "team": {
-      "title": "Team",
-      "link": "View team",
-      "of": "Team of {name}",
-      "member": "Person",
-      "depth": "Level",
-      "rating": "Rating",
-      "notInCycle": "Not in cycle",
-      "noRating": "No rating",
-      "ratingLabel": "{name}: {value} %",
-      "pickManager": "Pick a manager in the filters."
-    },
-    "goals": {
-      "title": "Period goals vs final rating",
-      "goals": "Goals",
-      "completed": "Completed",
-      "progress": "Average progress",
-      "rating": "Final rating",
-      "point": "{name}: progress {progress} %, rating {rating} %",
-      "xAxis": "Average goal progress (%)",
-      "yAxis": "Normalized rating (%)"
-    },
-    "gap": {
-      "title": "Self vs manager gap",
-      "hint": "Manager minus self assessment, in normalized points. Negative: the manager rated lower.",
-      "question": "Question",
-      "person": "Person",
-      "self": "Self",
-      "manager": "Manager",
-      "gap": "Gap",
-      "n": "Answers",
-      "byQuestion": "By question",
-      "byPerson": "By person",
-      "bar": "{label}: {gap} points",
-      "lower": "Manager lower",
-      "higher": "Manager higher"
-    },
     "executive": {
-      "link": "Leadership view",
       "hint": "Aggregates only: no names or ids. Groups of fewer than {min} people are folded into Others or hidden.",
       "hintPeople": "Aggregates only: no names or ids.",
       "participants": "Participants",
-      "others": "Others",
       "belowMinimum": "There are fewer than {min} participants: no data is shown to protect people.",
-      "suppressed": "{n, plural, =0 {Nobody in small groups} one {# person in small departments (not broken out)} other {# people in small departments (not broken out)}}",
-      "title": "Leadership view",
-      "completion": "Completion",
-      "byDepartment": "By department"
+      "others": "Others",
+      "suppressed": "{n, plural, =0 {Nobody in small groups} one {# person in small departments (not broken out)} other {# people in small departments (not broken out)}}"
     }
   },
   "Indicators": {
@@ -1788,7 +1426,6 @@
     "noCycles": "There are no launched cycles yet.",
     "tableView": "View as table",
     "empty": "There is no data for these filters.",
-    "personLink": "View {name}'s assessment",
     "scope": {
       "directReports": "You only see your direct reports at the time of each cycle.",
       "aggregatesOnly": "Aggregates only: groups of fewer than {min} people are folded into Others or hidden."
@@ -1905,41 +1542,6 @@
         "engagement": "Engagement"
       },
       "completed": "{completed} of {goals} ({pct} %)"
-    }
-  },
-  "ParticipantDetail": {
-    "title": "{name} · {cycle}",
-    "back": "Back to the cycle",
-    "forbidden": "You do not have access to this assessment.",
-    "period": "Period {start} → {end}",
-    "manager": "Manager at the snapshot: {name}",
-    "noManager": "No manager at the snapshot",
-    "job": "{title} · {department}",
-    "removed": "Removed from the cycle",
-    "answers": {
-      "title": "Assessment answers",
-      "self": "Self assessment",
-      "manager": "Manager assessment",
-      "reviewer": "Written by: {name}",
-      "mismatch": "The author was not the manager at the snapshot",
-      "empty": "There are no submitted assessments of this person.",
-      "noQuestions": "There are no answers visible to you."
-    },
-    "goals": {
-      "title": "Goals of the period",
-      "asOf": "Status as of {date}",
-      "summary": "{completed} of {total, plural, one {# goal completed} other {# goals completed}}",
-      "empty": "There are no goals in this period.",
-      "progress": "Progress",
-      "dueDate": "Due {date}",
-      "noDueDate": "No due date",
-      "overdue": "Overdue",
-      "noLongerApplicable": "No longer applies",
-      "status": {
-        "in_progress": "In progress",
-        "completed": "Completed",
-        "closed": "Closed"
-      }
     }
   },
   "Insights360": {

@@ -37,10 +37,12 @@ export default function InsightsSettingsPage(
   props: PageProps<"/[locale]/settings/insights">,
 ) {
   return (
-    <Suspense fallback={<div aria-busy="true" className="h-40" />}>
-      <HrOnly>
-        <InsightsSettings {...props} />
-      </HrOnly>
-    </Suspense>
+    <main className="mx-auto flex w-full max-w-5xl flex-col gap-6 p-8">
+      <Suspense fallback={<div aria-busy="true" className="h-40" />}>
+        <HrOnly>
+          <InsightsSettings {...props} />
+        </HrOnly>
+      </Suspense>
+    </main>
   );
 }

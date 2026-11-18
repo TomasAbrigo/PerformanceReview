@@ -1,5 +1,5 @@
 import { useTranslations } from "next-intl";
-import { Empty } from "@/components/dashboards/parts";
+import { Empty } from "@/components/insights/parts";
 import { Link } from "@/i18n/navigation";
 import type { IndicatorAlerts } from "@/modules/analytics/indicators/types";
 

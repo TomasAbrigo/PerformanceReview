@@ -7,7 +7,7 @@ import { ExportCsvLink } from "@/components/data-quality/export-csv-link";
 import { CommentsTable } from "@/components/qualitative/comments-table";
 import { QualitativeFilters } from "@/components/qualitative/filters";
 import { ImportLabelsForm } from "@/components/qualitative/import-form";
-import { Toggle } from "@/components/dashboards/controls";
+import { Toggle } from "@/components/insights/controls";
 import { orgFiltersOf } from "@/components/org/params";
 import {
   parseQualitativeParams,
