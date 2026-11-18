@@ -19,6 +19,7 @@ import {
   resetDb,
 } from "@/modules/import-history/test-support";
 import { seedFromFixtures } from "@/modules/ingest/seed";
+import { importReportFile } from "@/modules/lake/upload";
 import { MockProvider } from "@/modules/qualitative-analysis/mock-provider";
 import { runAnalysis } from "@/modules/qualitative-analysis/service";
 import { ArturiaError, buildReport, resolveCycle } from "./build";
@@ -44,9 +45,17 @@ function groupSizes(r: ArturiaReport): { label: string; n: number }[] {
     ...s.executive.byDepartment,
     ...(s.completion?.byDepartment ?? []),
     ...(s.completion?.byManager ?? []),
-    ...(s.indicators?.distribution.flatMap((d) => d.groups) ?? []),
+    ...(s.completion?.byAccount ?? []),
+    ...(s.completion?.byDm ?? []),
+    ...(s.indicators?.distribution.flatMap((d) => [
+      ...d.groups,
+      ...(d.byAccount ?? []),
+      ...(d.byDm ?? []),
+    ]) ?? []),
     ...(s.goals?.byDepartment ?? []),
     ...(s.goals?.byManager ?? []),
+    ...(s.goals?.byAccount ?? []),
+    ...(s.goals?.byDm ?? []),
   ];
 }
 
@@ -59,6 +68,11 @@ beforeAll(async () => {
   // then the Bamboo reports (the cycles take their goal snapshot as they are
   // created, so the goals come first).
   await seedFromFixtures({ size: "small", db });
+  // People's org attributes file (accounts, projects, DMs, Santex Leads).
+  await importReportFile(db, {
+    path: path.resolve("fixtures/org/small/org-attributes.csv"),
+    profile: "org-attributes",
+  });
   await importReport(path.join(REPORTS, "employee-performance.csv"));
   await importReport(
     path.join(REPORTS, "assessment-progress.csv"),
@@ -98,7 +112,7 @@ describe("buildReport over the seed small company", () => {
   it("the qualitative section has five sentiments and the cut by side", async () => {
     const r = await buildReport(db, { cycle: cycleId, anonymized: false });
     const q = r.sections.qualitative!;
-    expect(r.schemaMinor).toBe(2);
+    expect(r.schemaMinor).toBe(3);
     const t = q.totals!;
     expect(t.positive + t.constructive + t.neutral + t.mixed + t.negative).toBe(
       t.total,
@@ -326,14 +340,121 @@ describe("buildReport over the seed small company", () => {
     );
     for (const g of c.byManager)
       expect(g.label).toMatch(/^(Equipo \d+|Otros)$/);
+    const account = await completionSummary(db, direction, {
+      ...input,
+      groupBy: "account",
+    });
+    const dm = await completionSummary(db, direction, {
+      ...input,
+      groupBy: "dm",
+    });
     expect(c.suppressed).toEqual({
       byDepartment: dir.suppressed,
       byManager: team.suppressed,
+      byAccount: account.suppressed,
+      byDm: dm.suppressed,
     });
     const anySuppressed =
-      c.suppressed.byDepartment + c.suppressed.byManager > 0;
+      c.suppressed.byDepartment +
+        c.suppressed.byManager +
+        account.suppressed +
+        dm.suppressed >
+      0;
     expect(c.byRelationship === null).toBe(anySuppressed || dir.total === null);
   });
+
+  it("org cuts: named, by account and by DM with their names, in completion, indicators and goals", async () => {
+    const r = await buildReport(db, { cycle: cycleId, anonymized: false });
+    const s = r.sections;
+    const accounts = (rows: { label: string; n: number }[]) =>
+      new Set(rows.map((x) => x.label));
+
+    expect(s.completion?.byAccount?.length).toBeGreaterThan(0);
+    expect(
+      [...accounts(s.completion!.byAccount!)].every((l) =>
+        /^(Cuenta [A-Z]|Otros)$/.test(l),
+      ),
+    ).toBe(true);
+    // DMs are managers of the company, named as People wrote them.
+    const dms = [...accounts(s.completion!.byDm!)].filter((l) => l !== "Otros");
+    expect(dms.length).toBeGreaterThan(0);
+    expect(dms.every((d) => names.includes(d))).toBe(true);
+    // Every participant is in exactly one account group (self rows), one way or another.
+    const selfN = (rows: typeof s.completion.byAccount) =>
+      rows!
+        .filter((x) => x.relationship === "self")
+        .reduce((n, x) => n + x.n, 0);
+    expect(selfN(s.completion!.byAccount)).toBe(s.completion!.participants);
+    expect(selfN(s.completion!.byDm)).toBe(s.completion!.participants);
+    expect(s.completion!.suppressed).toMatchObject({ byAccount: 0, byDm: 0 });
+    for (const d of s.indicators!.distribution) {
+      expect(d.byAccount!.length).toBeGreaterThan(0);
+      expect(d.byDm!.length).toBeGreaterThan(0);
+      expect(d.suppressedBy).toEqual({ account: 0, dm: 0 });
+    }
+    const goalsN = (rows: NonNullable<typeof s.goals>["byAccount"]) =>
+      rows!.reduce((n, x) => n + x.n, 0);
+    expect(goalsN(s.goals!.byAccount)).toBe(s.executive.participants);
+    expect(goalsN(s.goals!.byDm)).toBe(s.executive.participants);
+    expect(renderHtml(r)).toContain("Por cuenta");
+    expect(renderHtml(r)).toContain("Por DM");
+  });
+
+  it.each([2, MIN, 8])(
+    "org cuts, anonymized (minimum %i): DMs are DM N, accounts keep their name, small groups folded, no total beside a suppressed one",
+    async (min) => {
+      const r = await buildReport(db, {
+        cycle: cycleId,
+        anonymized: true,
+        minGroupSize: min,
+      });
+      const s = r.sections;
+      const dmRows = [
+        ...(s.completion?.byDm ?? []),
+        ...(s.goals?.byDm ?? []),
+        ...(s.indicators?.distribution.flatMap((d) => d.byDm ?? []) ?? []),
+      ];
+      for (const g of dmRows) expect(g.label).toMatch(/^(DM \d+|Otros)$/);
+      for (const g of [
+        ...(s.completion?.byAccount ?? []),
+        ...(s.goals?.byAccount ?? []),
+      ]) {
+        expect(g.label).toMatch(/^(Cuenta [A-Z]|Otros)$/);
+        expect(g.n).toBeGreaterThanOrEqual(min);
+      }
+      for (const g of groupSizes(r)) expect(g.n).toBeGreaterThanOrEqual(min);
+      const c = s.completion!;
+      if ((c.suppressed.byAccount ?? 0) + (c.suppressed.byDm ?? 0) > 0) {
+        expect(c.byRelationship).toBeNull();
+      }
+      const g = s.goals!;
+      if ((g.suppressed.byAccount ?? 0) + (g.suppressed.byDm ?? 0) > 0) {
+        expect(g.goals).toBeNull();
+        expect(g.participantsWithGoals).toBeNull();
+      }
+      for (const d of s.indicators!.distribution) {
+        if (d.suppressedBy!.account + d.suppressedBy!.dm > 0) {
+          expect(d.total).toBeNull();
+        }
+      }
+      // The same DM has the same number in every section.
+      const numbered = new Map<string, number>();
+      for (const rows of [
+        c.byDm!.filter((x) => x.relationship === "self"),
+        g.byDm!,
+      ]) {
+        for (const x of rows) {
+          if (x.other) continue;
+          expect(x.label).toMatch(/^DM \d+$/);
+          numbered.set(x.label, (numbered.get(x.label) ?? 0) + 1);
+        }
+      }
+      for (const text of [renderJson(r), renderHtml(r)]) {
+        const folded = text.normalize("NFC");
+        for (const n of names) expect(folded).not.toContain(n);
+      }
+    },
+  );
 
   it("the same team has the same Equipo N in completion and goals", async () => {
     const r = await buildReport(db, {

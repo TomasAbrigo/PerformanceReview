@@ -341,3 +341,55 @@ describe("SVG labels", () => {
     expect(svgBars([{ label: "Ventas", value: 1 }])).toMatch(/<rect x="180"/);
   });
 });
+
+describe("org cuts (schema minor 3)", () => {
+  it("a report of minor 2, without them, is still valid and renders without their sections", () => {
+    const old = sampleReport();
+    expect(old.schemaMinor).toBe(2);
+    expect(arturiaReportV1.safeParse(old).success).toBe(true);
+    const html = renderHtml(old);
+    expect(html).not.toContain("Por cuenta");
+    expect(html).not.toContain("Por DM");
+  });
+
+  it("renders the cuts by account and by DM in completion, indicators and goals", () => {
+    const r = sampleReport({ schemaMinor: 3 });
+    const completion = r.sections.completion!;
+    const row = (label: string) => ({
+      label,
+      relationship: "self",
+      n: 6,
+      total: 6,
+      submitted: 4,
+      applicable: true,
+      other: false,
+    });
+    completion.byAccount = [row("Cuenta A")];
+    completion.byDm = [row("DM 1")];
+    completion.suppressed = { ...completion.suppressed, byAccount: 0, byDm: 2 };
+    const distribution = r.sections.indicators!.distribution[0];
+    const group = {
+      label: "DM 1",
+      n: 6,
+      mean: 3,
+      counts: [0, 1, 4, 1, 0],
+      other: false,
+    };
+    distribution.byDm = [group];
+    distribution.byAccount = [{ ...group, label: "Cuenta A" }];
+    distribution.suppressedBy = { account: 0, dm: 0 };
+    expect(arturiaReportV1.safeParse(r).success).toBe(true);
+
+    const html = renderHtml(r);
+
+    expect(html).toContain("Por cuenta");
+    expect(html).toContain("Por DM");
+    expect(html).toContain("Cuenta A");
+    expect(html).toContain("DM 1");
+    // The people left out of the DM cut are said.
+    expect(html).toContain("2");
+    const en = renderHtml({ ...r, locale: "en" });
+    expect(en).toContain("By account");
+    expect(en).toContain("By DM");
+  });
+});

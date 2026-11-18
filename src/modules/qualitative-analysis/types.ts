@@ -42,6 +42,11 @@ export function pickCounts(
 
 export type DimensionSentiment = SentimentCounts & { dimension: string };
 
+/** The sentiment of one participant's comments in their cycle. */
+export type ParticipantSentiment = SentimentCounts & {
+  participantId: string;
+};
+
 /** What the comments can be cut by besides their dimension: area or an org attribute. */
 export const qualitativeGroupBys = [
   "department",

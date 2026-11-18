@@ -10,6 +10,7 @@ import {
   collectIndicators,
   collectPeople,
   collectQualitative,
+  cycleDms,
   cycleTeams,
   type CollectContext,
 } from "./collectors";
@@ -86,6 +87,7 @@ export async function buildReport(
     min: opts.anonymized ? minGroupSize : 1,
     labels,
     teams: await cycleTeams(db, cycle.id, labels.team),
+    dms: await cycleDms(db, cycle.id, labels.dm),
   };
   const [executive, completion, indicators, qualitative, goals, people] =
     await Promise.all([

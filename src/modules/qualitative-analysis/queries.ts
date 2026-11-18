@@ -23,6 +23,7 @@ import {
   type DimensionSentiment,
   type GroupSentiment,
   type IndicatorSentiment,
+  type ParticipantSentiment,
   pickCounts,
   type QualitativeFilterOptions,
   type QualitativeGroupBy,
@@ -139,6 +140,34 @@ export async function sentimentByDimension(
     select dimension, ${countCols}, count(*)::int as total
     from labeled group by dimension ${minGroup(r.min)} order by dimension`);
   return rows.map((r) => ({ dimension: r.dimension, ...counts(r) }));
+}
+
+/**
+ * The sentiment of the comments (open text only, whatever the
+ * `analysis.includeClosed` setting says) of each participant in scope, in
+ * every cycle, for views that build their own groups out of people (the DM
+ * cards, `dm360`). The rows are people: whoever reads them aggregates and
+ * masks. Direction is authorized like everywhere (it reads aggregates), so
+ * its callers must never show a row; People: every participant; a manager:
+ * their direct reports of the snapshot; an employee: nothing.
+ */
+export async function sentimentByParticipant(
+  db: DbOrTx,
+  actor: ActorContext,
+  f: Pick<QualitativeFilters, "cycleId" | "relationship"> = {},
+): Promise<ParticipantSentiment[]> {
+  const r = await resolve(db, actor, { ...f, includeClosed: false });
+  if (!r) return [];
+  const rows = await db.execute<SentimentCounts & { participant_id: string }>(
+    sql`
+    with ${labeledCtes(r)}
+    select participant_id, ${countCols}, count(*)::int as total
+    from labeled group by participant_id`,
+  );
+  return rows.map((row) => ({
+    participantId: row.participant_id,
+    ...counts(row),
+  }));
 }
 
 /**

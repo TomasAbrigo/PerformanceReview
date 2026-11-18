@@ -50,8 +50,11 @@ import {
   indicators,
 } from "@/modules/analytics/indicators";
 import {
+  qualitativeGroupBys,
   sentimentByDimension,
+  sentimentByGroup,
   type DimensionSentiment,
+  type GroupSentiment,
   type SentimentCounts,
 } from "@/modules/qualitative-analysis";
 import { selfAssessmentReport } from "@/modules/insights/self-assessment";
@@ -489,7 +492,27 @@ const answersExport = defineExport({
 // The API has no actor (it is the HR / system surface, like every export
 // here): dashboards export with HR visibility; aggregateOnly is honored.
 
+/** The org cuts every insights export takes, as the pages' URL params. */
+const orgQuery = {
+  account: z.string().optional(),
+  project: z.string().optional(),
+  dm: z.string().optional(),
+  santexLead: z.string().optional(),
+};
+const orgFiltersOf = (q: {
+  account?: string;
+  project?: string;
+  dm?: string;
+  santexLead?: string;
+}) => ({
+  account: q.account,
+  project: q.project,
+  dm: q.dm,
+  santexLead: q.santexLead,
+});
+
 const dashboardQuery = z.object({
+  ...orgQuery,
   cycle: uuid.optional(),
   hierarchy: z.enum(hierarchies).default("asOf"),
   department: z.string().optional(),
@@ -508,6 +531,7 @@ const filtersOf = (q: DashboardQuery): DashboardFilters => ({
   managerId: q.manager,
   location: q.location,
   jobTitle: q.jobTitle,
+  ...orgFiltersOf(q),
   aggregateOnly: q.aggregateOnly,
 });
 
@@ -621,6 +645,7 @@ const gapExport = defineExport({
 // Retention and engagement, with People's visibility like the dashboards.
 
 const indicatorQuery = z.object({
+  ...orgQuery,
   cycle: uuid,
   indicator: z.enum(indicators).default("retention"),
   groupBy: z.enum(indicatorGroupBys).default("department"),
@@ -650,7 +675,11 @@ const indicatorDistributionExport = defineExport({
         indicator: q.indicator,
         groupBy: q.groupBy,
         hierarchy: q.hierarchy,
-        filters: { department: q.department, managerId: q.manager },
+        filters: {
+          department: q.department,
+          managerId: q.manager,
+          ...orgFiltersOf(q),
+        },
       }).then((d) =>
         d.series.flatMap((s) =>
           s.counts.map((count, i): IndicatorDistributionRow => ({
@@ -682,13 +711,21 @@ const indicatorAlertsExport = defineExport({
     hierarchy: true,
     department: true,
     manager: true,
+    account: true,
+    project: true,
+    dm: true,
+    santexLead: true,
   }),
   rows: (db, q) =>
     each(
       indicatorAlerts(db, DEFAULT_ACTOR, {
         cycleId: q.cycle,
         hierarchy: q.hierarchy,
-        filters: { department: q.department, managerId: q.manager },
+        filters: {
+          department: q.department,
+          managerId: q.manager,
+          ...orgFiltersOf(q),
+        },
       }).then((a) => a.alerts),
     ),
   columns: (h) => [
@@ -733,6 +770,7 @@ const indicatorAlertsExport = defineExport({
 const insightsSentimentExport = defineExport({
   file: () => "insights-sentiment",
   query: z.object({
+    ...orgQuery,
     cycle: uuid.optional(),
     department: z.string().optional(),
     relationship: z.enum(relationships).optional(),
@@ -743,11 +781,53 @@ const insightsSentimentExport = defineExport({
         cycleId: q.cycle,
         department: q.department,
         relationship: q.relationship,
+        ...orgFiltersOf(q),
         aggregateOnly: true,
       }),
     ),
   columns: (h) => [
     { header: h("dimension"), value: (r: DimensionSentiment) => r.dimension },
+    { header: h("positive"), value: (r) => r.positive },
+    { header: h("constructive"), value: (r) => r.constructive },
+    { header: h("neutral"), value: (r) => r.neutral },
+    { header: h("mixed"), value: (r) => r.mixed },
+    { header: h("negative"), value: (r) => r.negative },
+    { header: h("total"), value: (r) => r.total },
+  ],
+});
+
+/**
+ * Sentiment counts (the five sentiments) per group of people: area, account,
+ * project, DM or Santex Lead (`groupBy`), with the people behind each. Same
+ * filters as the page; counts only.
+ */
+const insightsSentimentGroupsExport = defineExport({
+  file: ({ groupBy }) => `insights-sentiment-by-${groupBy}`,
+  query: z.object({
+    ...orgQuery,
+    groupBy: z.enum(qualitativeGroupBys).default("account"),
+    cycle: uuid.optional(),
+    department: z.string().optional(),
+    relationship: z.enum(relationships).optional(),
+  }),
+  rows: (db, q) =>
+    each(
+      sentimentByGroup(
+        db,
+        DEFAULT_ACTOR,
+        {
+          cycleId: q.cycle,
+          department: q.department,
+          relationship: q.relationship,
+          ...orgFiltersOf(q),
+          aggregateOnly: true,
+        },
+        q.groupBy,
+      ),
+    ),
+  columns: (h) => [
+    { header: h("group"), value: (r: GroupSentiment) => r.label },
+    { header: h("people"), value: (r) => r.participants },
     { header: h("positive"), value: (r) => r.positive },
     { header: h("constructive"), value: (r) => r.constructive },
     { header: h("neutral"), value: (r) => r.neutral },
@@ -876,6 +956,7 @@ const selfAssessmentExport = defineExport({
 // the dashboards (the API has no actor). No emails.
 
 const goalsInsightsQuery = z.object({
+  ...orgQuery,
   cycle: uuid,
   hierarchy: z.enum(hierarchies).default("asOf"),
   department: z.string().optional(),
@@ -898,7 +979,11 @@ const goalKpisExport = defineExport({
         cycleId: q.cycle,
         groupBy: q.groupBy,
         hierarchy: q.hierarchy,
-        filters: { department: q.department, managerId: q.manager },
+        filters: {
+          department: q.department,
+          managerId: q.manager,
+          ...orgFiltersOf(q),
+        },
       }).then((k) => k.groups),
     ),
   columns: (h) => [
@@ -933,7 +1018,11 @@ const goalOutliersExport = defineExport({
       goalOutliers(db, DEFAULT_ACTOR, {
         cycleId: q.cycle,
         hierarchy: q.hierarchy,
-        filters: { department: q.department, managerId: q.manager },
+        filters: {
+          department: q.department,
+          managerId: q.manager,
+          ...orgFiltersOf(q),
+        },
       }).then((o): GoalOutlierRow[] => [
         ...o.doneButLow.people.map((p) => ({
           ...p,
@@ -976,6 +1065,7 @@ type CompletionRow = {
 const completionExport = defineExport({
   file: () => "insights-completion",
   query: z.object({
+    ...orgQuery,
     cycle: uuid,
     groupBy: z.enum(completionGroupBys).default("department"),
     hierarchy: z.enum(hierarchies).default("asOf"),
@@ -990,6 +1080,7 @@ const completionExport = defineExport({
         hierarchy: q.hierarchy,
         department: q.department,
         managerId: q.manager,
+        ...orgFiltersOf(q),
       }).then((d): CompletionRow[] => {
         const t = createTranslator({
           locale,
@@ -1047,6 +1138,7 @@ function percent(rate: number | null) {
 const missingExport = defineExport({
   file: () => "insights-missing",
   query: z.object({
+    ...orgQuery,
     cycle: uuid,
     department: z.string().optional(),
     manager: uuid.optional(),
@@ -1064,6 +1156,7 @@ const missingExport = defineExport({
         status: q.status,
         hierarchy: q.hierarchy,
         includeEmail: q.include_email,
+        ...orgFiltersOf(q),
       }),
     ),
   columns: (h, { include_email }) => [
@@ -1099,6 +1192,7 @@ const EXPORTS = {
   "insights-indicator-distribution": indicatorDistributionExport,
   "insights-alerts": indicatorAlertsExport,
   "insights-sentiment": insightsSentimentExport,
+  "insights-sentiment-by": insightsSentimentGroupsExport,
   "insights-self-assessment": selfAssessmentExport,
   "insights-goal-kpis": goalKpisExport,
   "insights-goal-outliers": goalOutliersExport,

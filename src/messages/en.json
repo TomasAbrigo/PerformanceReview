@@ -1536,7 +1536,9 @@
       "delta": "Change against the previous cycle",
       "points": "percentage points",
       "rate": "% submitted",
-      "notApplicable": "Not applicable"
+      "notApplicable": "Not applicable",
+      "byAccount": "By account",
+      "byDm": "By DM"
     },
     "indicators": {
       "title": "Retention and engagement indicators",
@@ -1551,7 +1553,9 @@
         "low": "Low",
         "mid": "Mid",
         "high": "High"
-      }
+      },
+      "byAccount": "By account",
+      "byDm": "By DM"
     },
     "qualitative": {
       "title": "Qualitative analysis",
@@ -1594,7 +1598,9 @@
       "doneButLow": "Goals done but retention or engagement low",
       "behindButHigh": "Goals behind but retention and engagement high",
       "completedPct": "% completed",
-      "underMinimum": "Fewer people than the minimum group: not published"
+      "underMinimum": "Fewer people than the minimum group: not published",
+      "byAccount": "By account",
+      "byDm": "By DM"
     },
     "people": {
       "title": "People",
@@ -1613,7 +1619,8 @@
       "manager": "Manager",
       "peer": "Peers",
       "upward": "Upward"
-    }
+    },
+    "dm": "DM"
   },
   "Completion": {
     "nav": "Completion",

@@ -1536,7 +1536,9 @@
       "delta": "Cambio contra el ciclo anterior",
       "points": "puntos porcentuales",
       "rate": "% enviadas",
-      "notApplicable": "No aplica"
+      "notApplicable": "No aplica",
+      "byAccount": "Por cuenta",
+      "byDm": "Por DM"
     },
     "indicators": {
       "title": "Indicadores de retención y compromiso",
@@ -1551,7 +1553,9 @@
         "low": "Bajo",
         "mid": "Medio",
         "high": "Alto"
-      }
+      },
+      "byAccount": "Por cuenta",
+      "byDm": "Por DM"
     },
     "qualitative": {
       "title": "Análisis cualitativo",
@@ -1594,7 +1598,9 @@
       "doneButLow": "Objetivos cumplidos con retención o compromiso bajo",
       "behindButHigh": "Objetivos atrasados con retención y compromiso altos",
       "completedPct": "% completado",
-      "underMinimum": "Menos personas que el grupo mínimo: no se publica"
+      "underMinimum": "Menos personas que el grupo mínimo: no se publica",
+      "byAccount": "Por cuenta",
+      "byDm": "Por DM"
     },
     "people": {
       "title": "Personas",
@@ -1613,7 +1619,8 @@
       "manager": "Manager",
       "peer": "Pares",
       "upward": "Ascendente"
-    }
+    },
+    "dm": "DM"
   },
   "Completion": {
     "nav": "Completitud",

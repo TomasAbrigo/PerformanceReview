@@ -249,22 +249,36 @@ function completionHtml(c: CompletionSection | null): string {
   return `<h3>${esc(L.completion.byRelationship)}</h3>${totals}
 <h3>${esc(L.completion.byDepartment)}</h3>${rows(c.byDepartment)}${suppressedNote(c.suppressed.byDepartment)}
 <h3>${esc(L.completion.byManager)}</h3>${rows(c.byManager)}${suppressedNote(c.suppressed.byManager)}
+${c.byAccount ? `<h3>${esc(L.completion.byAccount)}</h3>${rows(c.byAccount)}${suppressedNote(c.suppressed.byAccount ?? 0)}` : ""}
+${c.byDm ? `<h3>${esc(L.completion.byDm)}</h3>${rows(c.byDm)}${suppressedNote(c.suppressed.byDm ?? 0)}` : ""}
 ${c.delta ? completionDeltaHtml(c.delta) : ""}`;
 }
 
 function indicatorsHtml(s: IndicatorsSection | null): string {
   if (!s) return unavailable();
   const dist = s.distribution
-    .map(
-      (d) =>
-        `<h3>${esc(L.indicators.distribution)} · ${esc(L.indicators[d.indicator as "retention" | "engagement"] ?? d.indicator)}</h3>${svgStacked(
-          d.groups.map((g) => ({
+    .map((d) => {
+      const name = esc(
+        L.indicators[d.indicator as "retention" | "engagement"] ?? d.indicator,
+      );
+      const chart = (groups: typeof d.groups) =>
+        svgStacked(
+          groups.map((g) => ({
             label: `${g.label} (n=${g.n}, ${L.executive.mean} ${num(g.mean)})`,
             parts: g.counts,
           })),
           ["1", "2", "3", "4", "5"],
-        )}${suppressedNote(d.suppressed)}`,
-    )
+        );
+      const cut = (
+        title: string,
+        groups: typeof d.groups | undefined,
+        left: number | undefined,
+      ) =>
+        groups
+          ? `<h3>${esc(title)} · ${name}</h3>${chart(groups)}${suppressedNote(left ?? 0)}`
+          : "";
+      return `<h3>${esc(L.indicators.distribution)} · ${name}</h3>${chart(d.groups)}${suppressedNote(d.suppressed)}${cut(L.indicators.byAccount, d.byAccount, d.suppressedBy?.account)}${cut(L.indicators.byDm, d.byDm, d.suppressedBy?.dm)}`;
+    })
     .join("");
   const matrix = s.riskMatrix
     ? `<h3>${esc(L.indicators.riskMatrix)}</h3>${svgMatrix(s.riskMatrix.cells)}`
@@ -395,6 +409,8 @@ function goalsHtml(g: GoalsSection | null): string {
   return `${tiles}
 <h3>${esc(G.byDepartment)} · ${esc(G.status)}</h3>${status(g.byDepartment)}${suppressedNote(g.suppressed.byDepartment)}
 <h3>${esc(G.byManager)} · ${esc(G.status)}</h3>${status(g.byManager)}${suppressedNote(g.suppressed.byManager)}
+${g.byAccount ? `<h3>${esc(G.byAccount)} · ${esc(G.status)}</h3>${status(g.byAccount)}${suppressedNote(g.suppressed.byAccount ?? 0)}` : ""}
+${g.byDm ? `<h3>${esc(G.byDm)} · ${esc(G.status)}</h3>${status(g.byDm)}${suppressedNote(g.suppressed.byDm ?? 0)}` : ""}
 <h3>${esc(G.buckets)}</h3>${buckets}
 <h3>${esc(G.outliers)}</h3>${outliers}`;
 }

@@ -30,6 +30,7 @@ export {
   qualitativeFilterOptions,
   sentimentByDimension,
   sentimentByGroup,
+  sentimentByParticipant,
   sentimentTotals,
   sentimentTrend,
   sentimentVsIndicators,

@@ -16,6 +16,8 @@ import {
   completionSummary,
 } from "@/modules/analytics/completion";
 import { bins, executiveSummary } from "@/modules/analytics/dashboards";
+import { ALL_PEOPLE, scopedCtes } from "@/modules/analytics/dashboards/scope";
+import { opaqueKey } from "@/modules/org-attributes/kinds";
 import {
   type GoalKpiGroup,
   type GoalKpis,
@@ -58,6 +60,11 @@ export type CollectContext = {
    * every section gives a team the analytics modules leave without a name.
    */
   teams: ReadonlyMap<string, string>;
+  /**
+   * "DM N" of each DM of the cycle by their opaque key (see `cycleDms`), for
+   * the DMs the analytics modules give direction without a name.
+   */
+  dms: ReadonlyMap<string, string>;
 };
 
 export type Collector<K extends keyof ArturiaSections> = (
@@ -125,16 +132,38 @@ export async function cycleTeams(
 }
 
 /**
- * The label of a group of the analytics modules: its own (an area, People's
- * manager name), else "Equipo N" for a team that came without a name
- * (direction), else "Otros" (the unassigned and folded group, no key).
+ * The "DM N" labels of a cycle's DMs (the org attributes file's, as of each
+ * participant's snapshot), numbered by their opaque key, which is what the
+ * analytics modules give direction instead of the name.
+ */
+export async function cycleDms(
+  db: DbOrTx,
+  cycleId: string,
+  dm: string,
+): Promise<Map<string, string>> {
+  const rows = await db.execute<{ dm: string }>(sql`
+    with recursive ${scopedCtes(ALL_PEOPLE, { cycleId, hierarchy: "asOf" })}
+    select distinct dm from scoped where dm is not null`);
+  return new Map(
+    rows
+      .map((r) => opaqueKey(r.dm))
+      .sort()
+      .map((key, i) => [key, `${dm} ${i + 1}`]),
+  );
+}
+
+/**
+ * The label of a group of the analytics modules: its own (an area, an
+ * account, People's manager or DM name), else "Equipo N" for a team that came
+ * without a name (direction), else "DM N" for a DM likewise, else "Otros" (the
+ * unassigned and folded group, no key).
  */
 const groupLabel = (
   g: { key: string | null; label: string | null },
   ctx: CollectContext,
 ) =>
   g.label ??
-  (g.key === null ? undefined : ctx.teams.get(g.key)) ??
+  (g.key === null ? undefined : (ctx.teams.get(g.key) ?? ctx.dms.get(g.key))) ??
   ctx.labels.others;
 
 const round = (x: number | null, digits: number) =>
@@ -204,9 +233,11 @@ export const collectCompletion: Collector<"completion"> = async (db, ctx) => {
     ...(ctx.anonymized ? { minGroupSize: ctx.min } : {}),
   };
   const actor = actorOf(ctx);
-  const [delta, byTeam] = await Promise.all([
+  const [delta, byTeam, byAccount, byDm] = await Promise.all([
     completionDelta(db, actor, { ...input, groupBy: "department" }),
     completionSummary(db, actor, { ...input, groupBy: "manager" }),
+    completionSummary(db, actor, { ...input, groupBy: "account" }),
+    completionSummary(db, actor, { ...input, groupBy: "dm" }),
   ]);
   const current = delta.current;
   if (current.participants === 0) return null;
@@ -215,13 +246,20 @@ export const collectCompletion: Collector<"completion"> = async (db, ctx) => {
   const suppressed = {
     byDepartment: current.suppressed,
     byManager: byTeam.suppressed,
+    byAccount: byAccount.suppressed,
+    byDm: byDm.suppressed,
   };
+  // No total next to a suppressed group, in any of the cuts.
   const hidden =
     ctx.anonymized &&
     (suppressed.byDepartment > 0 ||
       suppressed.byManager > 0 ||
+      suppressed.byAccount > 0 ||
+      suppressed.byDm > 0 ||
       current.total === null ||
-      byTeam.total === null);
+      byTeam.total === null ||
+      byAccount.total === null ||
+      byDm.total === null);
   const total = hidden ? null : current.total;
   const side = (relationship: string, totalOf: number, submitted: number) => ({
     relationship,
@@ -248,6 +286,8 @@ export const collectCompletion: Collector<"completion"> = async (db, ctx) => {
       : null,
     byDepartment: completionRows(completionCells(current, ctx)),
     byManager: completionRows(completionCells(byTeam, ctx)),
+    byAccount: completionRows(completionCells(byAccount, ctx)),
+    byDm: completionRows(completionCells(byDm, ctx)),
     suppressed,
     delta: delta.previous
       ? {
@@ -285,39 +325,58 @@ export const collectCompletion: Collector<"completion"> = async (db, ctx) => {
 export const collectIndicators: Collector<"indicators"> = async (db, ctx) => {
   const actor = actorOf(ctx);
   const config = { minGroupSize: ctx.min };
-  const [dists, matrix, alerts] = await Promise.all([
-    Promise.all(
-      indicators.map((indicator) =>
-        indicatorDistribution(db, actor, {
-          cycleId: ctx.cycleId,
-          indicator,
-          groupBy: "department",
-          config,
-        }),
-      ),
-    ),
+  const distribution = (
+    indicator: (typeof indicators)[number],
+    groupBy: "department" | "account" | "dm",
+  ) =>
+    indicatorDistribution(db, actor, {
+      cycleId: ctx.cycleId,
+      indicator,
+      groupBy,
+      config,
+    });
+  const [dists, matrix, alerts, accounts, dms] = await Promise.all([
+    Promise.all(indicators.map((i) => distribution(i, "department"))),
     riskMatrix(db, actor, { cycleId: ctx.cycleId, config }),
     indicatorAlerts(db, actor, { cycleId: ctx.cycleId, config }),
+    Promise.all(indicators.map((i) => distribution(i, "account"))),
+    Promise.all(indicators.map((i) => distribution(i, "dm"))),
   ]);
   if (dists.every((d) => d.series.length === 0 && d.suppressed === 0)) {
     return null;
   }
+  const groups = (d: (typeof dists)[number]) =>
+    d.series.map((s) => ({
+      label:
+        s.others || s.key === null
+          ? ctx.labels.others
+          : (s.label ?? ctx.dms.get(s.key) ?? s.key),
+      n: s.n,
+      mean: s.mean,
+      counts: s.counts,
+      other: s.others || s.key === null,
+    }));
   return {
-    distribution: dists.map((d) => ({
-      indicator: d.indicator,
-      groups: d.series.map((s) => ({
-        label:
-          s.others || s.key === null ? ctx.labels.others : (s.label ?? s.key),
-        n: s.n,
-        mean: s.mean,
-        counts: s.counts,
-        other: s.others || s.key === null,
-      })),
-      total: d.total
-        ? { n: d.total.n, mean: d.total.mean, counts: d.total.counts }
-        : null,
-      suppressed: d.suppressed,
-    })),
+    distribution: dists.map((d, i) => {
+      // No total next to a suppressed group, in any of the cuts.
+      const cutHidden =
+        ctx.anonymized && (accounts[i].suppressed > 0 || dms[i].suppressed > 0);
+      return {
+        indicator: d.indicator,
+        groups: groups(d),
+        byAccount: groups(accounts[i]),
+        byDm: groups(dms[i]),
+        total:
+          d.total && !cutHidden
+            ? { n: d.total.n, mean: d.total.mean, counts: d.total.counts }
+            : null,
+        suppressed: d.suppressed,
+        suppressedBy: {
+          account: accounts[i].suppressed,
+          dm: dms[i].suppressed,
+        },
+      };
+    }),
     riskMatrix: {
       cells: matrix.cells.map((c) => ({
         retention: c.retention,
@@ -359,10 +418,12 @@ export const collectGoals: Collector<"goals"> = async (db, ctx) => {
     cycleId: ctx.cycleId,
     config: { minGroupSize: ctx.min },
     groupBy: "department",
-    groupBys: ["manager"],
+    groupBys: ["manager", "account", "dm"],
   });
   const { kpis, vsIndicators: vs, outliers } = all;
   const byManager = all.kpisBy.manager!;
+  const byAccount = all.kpisBy.account!;
+  const byDm = all.kpisBy.dm!;
   if (kpis.groups.length === 0 && kpis.suppressed === 0) return null;
 
   const rows = (k: GoalKpis) =>
@@ -382,13 +443,22 @@ export const collectGoals: Collector<"goals"> = async (db, ctx) => {
   const suppressed = {
     byDepartment: kpis.suppressed,
     byManager: byManager.suppressed,
+    byAccount: byAccount.suppressed,
+    byDm: byDm.suppressed,
     buckets: vs.suppressed,
   };
   const hidden =
     ctx.anonymized &&
-    (suppressed.byDepartment + suppressed.byManager + suppressed.buckets > 0 ||
+    (suppressed.byDepartment +
+      suppressed.byManager +
+      suppressed.byAccount +
+      suppressed.byDm +
+      suppressed.buckets >
+      0 ||
       kpis.total === null ||
-      byManager.total === null);
+      byManager.total === null ||
+      byAccount.total === null ||
+      byDm.total === null);
   const total = hidden ? null : kpis.total;
 
   const outlierGroup = (g: typeof outliers.doneButLow) => ({
@@ -412,6 +482,8 @@ export const collectGoals: Collector<"goals"> = async (db, ctx) => {
     avgProgress: round(total?.avgProgress ?? null, 1),
     byDepartment: rows(kpis),
     byManager: rows(byManager),
+    byAccount: rows(byAccount),
+    byDm: rows(byDm),
     buckets: vs.buckets.map((b) => ({
       from: b.from,
       to: b.to,
