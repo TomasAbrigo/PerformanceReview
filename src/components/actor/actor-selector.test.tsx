@@ -8,6 +8,7 @@ import type { ActorContext } from "@/modules/actor/types";
 import { ActorSelector } from "./actor-selector";
 
 const ANA = "00000000-0000-4000-8000-000000000001";
+const BETO = "00000000-0000-4000-8000-000000000002";
 const people = [{ id: ANA, displayName: "Ana García" }];
 
 function renderIn(
@@ -24,6 +25,10 @@ function renderIn(
         actor={actor}
         actorName={null}
         people={people}
+        examples={{
+          manager: { id: BETO, displayName: "Beto Paz" },
+          employee: { id: ANA, displayName: "Ana García" },
+        }}
         setActor={setActor}
       />
     </NextIntlClientProvider>,
@@ -54,5 +59,28 @@ describe("ActorSelector", () => {
   it("shows who the app acts as when it is direction", () => {
     renderIn("es", { personId: null, role: "direction" });
     expect(screen.getByText("Actuando como: Dirección")).toBeVisible();
+  });
+
+  it("acts as an example manager in one click", async () => {
+    const user = userEvent.setup();
+    const setActor = renderIn("es", { personId: null, role: "hr" });
+    await user.click(screen.getByRole("button", { name: "Manager: Beto Paz" }));
+    expect(setActor).toHaveBeenCalledWith(BETO, "manager");
+  });
+
+  it("acts as an example employee in one click", async () => {
+    const user = userEvent.setup();
+    const setActor = renderIn("en", { personId: null, role: "hr" });
+    await user.click(
+      screen.getByRole("button", { name: "Employee: Ana García" }),
+    );
+    expect(setActor).toHaveBeenCalledWith(ANA, "employee");
+  });
+
+  it("lists people before searching, so someone can be picked right away", () => {
+    renderIn("es", { personId: null, role: "employee" });
+    expect(
+      screen.getByRole("option", { name: "Ana García" }),
+    ).toBeInTheDocument();
   });
 });

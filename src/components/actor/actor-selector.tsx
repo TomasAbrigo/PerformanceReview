@@ -5,22 +5,28 @@ import { useTranslations } from "next-intl";
 import { useId, useState, useTransition } from "react";
 import type { ActionResult } from "@/components/form-helpers";
 import { Button } from "@/components/ui/button";
+import type { ActorExamples } from "@/modules/actor/queries";
 import {
   type ActorContext,
   type ActorRole,
   actorRoles,
 } from "@/modules/actor/types";
 
+/** People listed in the person select at most (a search narrows them). */
+const MAX_OPTIONS = 50;
+
 /** Header control: pick the person and role the app acts as (no login). */
 export function ActorSelector({
   actor,
   actorName,
   people,
+  examples,
   setActor,
 }: {
   actor: ActorContext;
   actorName: string | null;
   people: { id: string; displayName: string }[];
+  examples: ActorExamples;
   setActor: (personId: string | null, role: ActorRole) => Promise<ActionResult>;
 }) {
   const t = useTranslations("Actor");
@@ -32,12 +38,16 @@ export function ActorSelector({
   const [pending, startTransition] = useTransition();
 
   const q = query.trim().toLocaleLowerCase();
-  // Only the current person and search matches are listed (not everyone).
-  const matches = people.filter(
-    (p) =>
-      p.id === personId ||
-      (q !== "" && p.displayName.toLocaleLowerCase().includes(q)),
-  );
+  // Without a search, the first people are listed so one can be picked
+  // right away; a search narrows the list (the current person always stays).
+  const matches = people
+    .filter(
+      (p) =>
+        p.id === personId ||
+        q === "" ||
+        p.displayName.toLocaleLowerCase().includes(q),
+    )
+    .slice(0, MAX_OPTIONS);
   const name =
     actorName ??
     (actor.role === "hr"
@@ -52,12 +62,49 @@ export function ActorSelector({
   // Direction acts without a person: only aggregates, nobody in particular.
   const noPerson = role === "direction";
 
-  function apply() {
+  function actAs(next: string | null, nextRole: ActorRole) {
     startTransition(async () => {
-      const result = await setActor(noPerson ? null : personId || null, role);
+      const result = await setActor(next, nextRole);
       setError(!result.ok);
     });
   }
+
+  function apply() {
+    actAs(noPerson ? null : personId || null, role);
+  }
+
+  const presets: { key: string; label: string; run: () => void }[] = [
+    { key: "hr", label: t("roles.hr"), run: () => actAs(null, "hr") },
+    ...(examples.manager
+      ? [
+          {
+            key: "manager",
+            label: t("example", {
+              role: t("roles.manager"),
+              name: examples.manager.displayName,
+            }),
+            run: () => actAs(examples.manager?.id ?? null, "manager"),
+          },
+        ]
+      : []),
+    ...(examples.employee
+      ? [
+          {
+            key: "employee",
+            label: t("example", {
+              role: t("roles.employee"),
+              name: examples.employee.displayName,
+            }),
+            run: () => actAs(examples.employee?.id ?? null, "employee"),
+          },
+        ]
+      : []),
+    {
+      key: "direction",
+      label: t("roles.direction"),
+      run: () => actAs(null, "direction"),
+    },
+  ];
 
   return (
     <form
@@ -122,6 +169,20 @@ export function ActorSelector({
       <Button type="submit" size="lg" disabled={pending}>
         {t("apply")}
       </Button>
+      <span className="flex basis-full flex-wrap items-center gap-1.5 text-xs">
+        <span className="text-muted-foreground">{t("examples")}</span>
+        {presets.map((p) => (
+          <button
+            key={p.key}
+            type="button"
+            className="rounded-full border border-brand-200 px-2.5 py-0.5 text-brand-900 hover:bg-brand-fog disabled:opacity-50"
+            disabled={pending}
+            onClick={p.run}
+          >
+            {p.label}
+          </button>
+        ))}
+      </span>
       {error ? (
         <span role="alert" className="text-destructive">
           {t("error")}

@@ -298,7 +298,9 @@
       "direction": "Direction"
     },
     "apply": "Apply",
-    "error": "Could not change the actor."
+    "error": "Could not change the actor.",
+    "examples": "Examples:",
+    "example": "{role}: {name}"
   },
   "Access": {
     "title": "No access",
