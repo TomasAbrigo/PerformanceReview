@@ -1634,7 +1634,25 @@
       "peer": "Peers",
       "upward": "Upward"
     },
-    "dm": "DM"
+    "dm": "DM",
+    "engagement": {
+      "title": "Monthly engagement",
+      "evolution": "Mean score by month",
+      "bySegment": "People by segment and month",
+      "month": "Month",
+      "people": "People",
+      "respondents": "Answered",
+      "participation": "Participation",
+      "meanScore": "Mean score",
+      "underMinimum": "Under the minimum group size: not shown.",
+      "segments": {
+        "alto": "High",
+        "medio": "Medium",
+        "regular": "Regular",
+        "bajo": "Low",
+        "falta": "Missing"
+      }
+    }
   },
   "Completion": {
     "nav": "Completion",

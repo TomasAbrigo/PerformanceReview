@@ -18,12 +18,14 @@ Contrato del JSON que genera `pnpm export:arturia` (zod: `arturiaReportV1` en `s
 
 - **3**: cortes organizacionales (#85): cuenta y DM, de los atributos que People carga por archivo (ver [org-attributes.md](org-attributes.md)). Agrega `completion.byAccount` / `completion.byDm` (mismas filas que `byDepartment`), `completion.suppressed.byAccount` / `byDm`, `goals.byAccount` / `goals.byDm` (mismas filas que `goals.byDepartment`), `goals.suppressed.byAccount` / `byDm`, y en cada `indicators.distribution[]` `byAccount`, `byDm` (mismos grupos que `groups`) y `suppressedBy: {account, dm}`. Cada corte tiene además su propio total (`completion.byAccountTotal` / `byDmTotal`, `goals.byAccountTotal` / `byDmTotal`, `indicators.distribution[].byAccountTotal` / `byDmTotal`), `null` si en la versión anonimizada algún grupo de ese corte quedó suprimido. Todos opcionales: un informe de un minor anterior sigue siendo válido. No cambia ningún campo existente. Sin atributos cargados los desgloses salen con un solo grupo "Otros" (las personas sin cuenta ni DM).
 
+- **4**: engagement mensual (#86), del archivo que People carga (ver [engagement-monthly.md](engagement-monthly.md)). Agrega la sección opcional `sections.engagementMonthly` (ver abajo). No cambia ningún campo existente: un informe de un minor anterior sigue siendo válido (la sección no aparece) y un informe de minor 4 sin datos de engagement en el período trae `null`.
+
 ## Raíz
 
 | Campo           | Tipo                                 | Descripción                                                                                          |
 | --------------- | ------------------------------------ | ---------------------------------------------------------------------------------------------------- |
 | `schemaVersion` | `"arturia-report.v1"`                | Versión mayor del formato.                                                                           |
-| `schemaMinor`   | entero ≥ 0                           | Versión menor (cambios aditivos). Hoy `3`.                                                           |
+| `schemaMinor`   | entero ≥ 0                           | Versión menor (cambios aditivos). Hoy `4`.                                                           |
 | `generatedAt`   | ISO 8601 (UTC)                       | Momento de generación.                                                                               |
 | `cycle`         | `{id, name, periodStart, periodEnd}` | Ciclo: uuid, nombre, fechas `YYYY-MM-DD`.                                                            |
 | `anonymized`    | boolean                              | `true`: versión anonimizada (sin `people`, sin emails ni nombres, sin personas en `goals.outliers`). |
@@ -113,6 +115,19 @@ Los cuatro totales (`participantsWithGoals`, `goals`, `completed`, `avgProgress`
 `buckets`: `from`-`to` en porcentaje (0-20, 20-40, ...); `people` y los promedios son `null` y `hidden` es `true` cuando anonimizado y el tramo tiene menos personas que el mínimo (un tramo vacío no oculta a nadie y queda en 0).
 
 `outliers`: `thresholds` = `{goalsHigh, goalsLow, riskThreshold, indicatorHigh}` (porcentajes de objetivos y escala 1-5 usados). `doneButLow`: objetivos cumplidos (`>= goalsHigh`) pero retención o compromiso bajos (`<= riskThreshold`); `behindButHigh`: objetivos atrasados (`<= goalsLow`) pero ambos indicadores altos (`>= indicatorHigh`). Cada uno es `{count, people}`: con nombres, `people` lista `{personId, name, department, manager, goals, completed, completedPct, retention, engagement}` (sin emails); anonimizado, `people` está siempre vacío (el schema lo exige) y `count` es `null` si hay menos personas que el mínimo.
+
+## `sections.engagementMonthly` (opcional, nullable)
+
+Minor 4. Ausente en un informe de un minor anterior; `null` cuando ningún mes del período del ciclo tiene datos. Cubre los meses desde el de `cycle.periodStart` hasta el de `cycle.periodEnd` que tienen datos.
+
+| Campo              | Tipo    | Descripción                                                     |
+| ------------------ | ------- | --------------------------------------------------------------- |
+| `months`           | arreglo | Un elemento por mes con datos, del más viejo al más nuevo.      |
+| `suppressedMonths` | entero  | Meses sin números por estar bajo el grupo mínimo (anonimizado). |
+
+Cada mes: `month` (`YYYY-MM`), `hidden`, `people` (personas con fila ese mes), `respondents` (respondieron: cualquier segmento menos `falta`), `participation` (0-1), `meanScore` (0-1, de quienes tienen score) y `segments` (`{alto, medio, regular, bajo, falta}`, personas por segmento).
+
+En la versión **anonimizada** (como "dirección", con `minGroupSize`): un mes con menos personas, o menos scores, que el mínimo viene con `hidden: true` y todo lo demás `null`; `participation` (y `respondents`) es `null` cuando delataría una celda chica (menos respondientes que el mínimo, o `falta` distinto de cero y bajo el mínimo); `segments` es `null` cuando alguna celda no vacía queda bajo el mínimo. No hay personas, emails ni nombres en la sección (es agregada). La versión con nombres lo lleva todo, sin mínimo.
 
 ## `sections.people` (nullable)
 

@@ -29,6 +29,7 @@ import {
   indicators,
   riskMatrix,
 } from "@/modules/analytics/indicators";
+import { engagementEvolution } from "@/modules/analytics/engagement/queries";
 import { foldGroups } from "@/modules/insights/aggregation";
 import { effectiveCte } from "@/modules/qualitative-analysis/effective";
 import { pseudonymize } from "@/modules/qualitative-analysis/pseudonymize";
@@ -51,6 +52,8 @@ import type {
 
 export type CollectContext = {
   cycleId: string;
+  /** The cycle's period (ISO dates): the months the engagement section covers. */
+  period: { start: string; end: string };
   anonymized: boolean;
   /** Smallest group shown: the report's minGroupSize when anonymized, else 1. */
   min: number;
@@ -710,6 +713,39 @@ export const collectQualitative: Collector<"qualitative"> = async (db, ctx) => {
 };
 
 // ---------------------------------------------------------------- people
+
+// ------------------------------------------------------ engagement monthly
+
+/**
+ * The monthly engagement of the months the cycle's period touches (first to
+ * last), month by month, as `engagementEvolution` reads it for the report's
+ * reader: the named report as People, the anonymized one as direction with the
+ * report's minimum (months and cells under it come without numbers). null when
+ * no month of the period has data.
+ */
+export const collectEngagementMonthly: Collector<"engagementMonthly"> = async (
+  db,
+  ctx,
+) => {
+  const evolution = await engagementEvolution(db, actorOf(ctx), {
+    from: `${ctx.period.start.slice(0, 7)}-01`,
+    to: `${ctx.period.end.slice(0, 7)}-01`,
+    minGroupSize: ctx.min,
+  });
+  if (!evolution.months.length) return null;
+  return {
+    months: evolution.months.map((m) => ({
+      month: m.month.slice(0, 7),
+      hidden: m.hidden,
+      people: m.people,
+      respondents: m.respondents,
+      participation: round(m.participation, 4),
+      meanScore: round(m.mean, 4),
+      segments: m.segments,
+    })),
+    suppressedMonths: evolution.hiddenMonths,
+  };
+};
 
 /** Per-person rows: only the named report (null when anonymized). */
 export const collectPeople: Collector<"people"> = async (db, ctx) => {

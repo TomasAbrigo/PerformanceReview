@@ -342,6 +342,91 @@ describe("SVG labels", () => {
   });
 });
 
+describe("monthly engagement (schema minor 4)", () => {
+  const month = (m: string, over = {}) => ({
+    month: m,
+    hidden: false,
+    people: 20,
+    respondents: 16,
+    participation: 0.8,
+    meanScore: 0.64,
+    segments: { alto: 5, medio: 6, regular: 3, bajo: 2, falta: 4 },
+    ...over,
+  });
+
+  it("a report of an earlier minor, without the section, is valid and renders without it", () => {
+    const old = sampleReport();
+    expect(arturiaReportV1.safeParse(old).success).toBe(true);
+    expect(renderHtml(old)).not.toContain('id="engagement-monthly"');
+  });
+
+  it("a null section (no data in the period) says it is not available", () => {
+    const r = sampleReport({
+      schemaMinor: 4,
+      sections: { ...sampleReport().sections, engagementMonthly: null },
+    });
+    expect(arturiaReportV1.safeParse(r).success).toBe(true);
+    expect(renderHtml(r)).toMatch(
+      /id="engagement-monthly"[^]*?No disponible en esta versión/,
+    );
+  });
+
+  it("renders the months with their segments, and says which are under the minimum", () => {
+    const r = sampleReport({
+      schemaMinor: 4,
+      sections: {
+        ...sampleReport().sections,
+        engagementMonthly: {
+          suppressedMonths: 1,
+          months: [
+            month("2026-01"),
+            month("2026-02", { meanScore: 0.7 }),
+            month("2026-03", {
+              hidden: true,
+              people: null,
+              respondents: null,
+              participation: null,
+              meanScore: null,
+              segments: null,
+            }),
+          ],
+        },
+      },
+    });
+    expect(arturiaReportV1.safeParse(r).success).toBe(true);
+
+    const html = renderHtml(r);
+
+    expect(html).toContain("Engagement mensual");
+    expect(html).toContain("2026-01");
+    expect(html).toContain("0.64");
+    expect(html).toContain("80%");
+    expect(html).toContain("Menos que el grupo mínimo");
+    expect(html).toContain("Falta");
+    expect(renderHtml({ ...r, locale: "en" })).toContain("Monthly engagement");
+  });
+
+  it("rejects a score or a share out of 0-1", () => {
+    const base = sampleReport().sections;
+    const bad = (e: object) =>
+      arturiaReportV1.safeParse(
+        sampleReport({
+          sections: {
+            ...base,
+            engagementMonthly: {
+              suppressedMonths: 0,
+              months: [month("2026-01", e)],
+            },
+          },
+        }),
+      ).success;
+    expect(bad({})).toBe(true);
+    expect(bad({ meanScore: 1.2 })).toBe(false);
+    expect(bad({ participation: -0.1 })).toBe(false);
+    expect(bad({ month: "enero" })).toBe(false);
+  });
+});
+
 describe("org cuts (schema minor 3)", () => {
   it("a report of minor 2, without them, is still valid and renders without their sections", () => {
     const old = sampleReport();

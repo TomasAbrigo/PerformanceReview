@@ -4,7 +4,7 @@ import { z } from "zod";
 
 export const SCHEMA_VERSION = "arturia-report.v1";
 /** Bumped on every additive change of v1 (new optional field / section). */
-export const SCHEMA_MINOR = 3;
+export const SCHEMA_MINOR = 4;
 
 const int = z.number().int().nonnegative();
 const counts = z.array(int);
@@ -320,6 +320,35 @@ const goals = z.object({
   }),
 });
 
+/**
+ * One month of the monthly engagement file (minor 4). Anonymized, a month
+ * under the minimum group size is `hidden` and carries no number, and the
+ * cells that would give a small group away are null (see
+ * docs/engagement-monthly.md).
+ */
+const engagementMonth = z.object({
+  /** `YYYY-MM`. */
+  month: z.string().regex(/^\d{4}-\d{2}$/),
+  hidden: z.boolean(),
+  /** People with a row that month; null when hidden. */
+  people: int.nullable(),
+  /** People who answered (any segment but `falta`). */
+  respondents: int.nullable(),
+  /** Share of the people who answered, 0-1. */
+  participation: z.number().min(0).max(1).nullable(),
+  /** Mean score of those with one, 0-1. */
+  meanScore: z.number().min(0).max(1).nullable(),
+  segments: z
+    .object({ alto: int, medio: int, regular: int, bajo: int, falta: int })
+    .nullable(),
+});
+const engagementMonthly = z.object({
+  /** The months of the cycle's period that have data, oldest first. */
+  months: z.array(engagementMonth),
+  /** Months left without numbers because they are under the minimum. */
+  suppressedMonths: int,
+});
+
 const status = z.string().nullable();
 const person = z.object({
   personId: z.string(),
@@ -357,6 +386,11 @@ export const arturiaReportV1 = z
       indicators: indicators.nullable(),
       qualitative: qualitative.nullable(),
       goals: goals.nullable(),
+      /**
+       * The monthly engagement of the months of the cycle's period (minor 4);
+       * null when the period has no engagement data, absent before minor 4.
+       */
+      engagementMonthly: engagementMonthly.nullable().optional(),
       /** Per-person rows: only in the named (non anonymized) report. */
       people: z.array(person).nullable(),
     }),
@@ -387,4 +421,5 @@ export type IndicatorsSection = z.infer<typeof indicators>;
 export type QualitativeSection = z.infer<typeof qualitative>;
 export type QualitativeSideSection = z.infer<typeof qualitativeSide>;
 export type GoalsSection = z.infer<typeof goals>;
+export type EngagementMonthlySection = z.infer<typeof engagementMonthly>;
 export type PersonRow = z.infer<typeof person>;

@@ -1634,7 +1634,25 @@
       "peer": "Pares",
       "upward": "Ascendente"
     },
-    "dm": "DM"
+    "dm": "DM",
+    "engagement": {
+      "title": "Engagement mensual",
+      "evolution": "Score promedio por mes",
+      "bySegment": "Personas por segmento y por mes",
+      "month": "Mes",
+      "people": "Personas",
+      "respondents": "Respondieron",
+      "participation": "Participación",
+      "meanScore": "Score promedio",
+      "underMinimum": "Menos que el grupo mínimo: no se muestra.",
+      "segments": {
+        "alto": "Alto",
+        "medio": "Medio",
+        "regular": "Regular",
+        "bajo": "Bajo",
+        "falta": "Falta"
+      }
+    }
   },
   "Completion": {
     "nav": "Completitud",

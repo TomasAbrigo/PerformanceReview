@@ -4,6 +4,7 @@ import { labelsFor, type Labels } from "./labels";
 import type {
   ArturiaReport,
   CompletionSection,
+  EngagementMonthlySection,
   ExecutiveSection,
   GoalsSection,
   IndicatorsSection,
@@ -415,6 +416,47 @@ ${g.byDm ? `<h3>${esc(G.byDm)} · ${esc(G.status)}</h3>${status(g.byDm)}${suppre
 <h3>${esc(G.outliers)}</h3>${outliers}`;
 }
 
+const SEGMENTS = ["alto", "medio", "regular", "bajo", "falta"] as const;
+
+/** The monthly engagement: the mean score by month, the segments by month and the table. */
+function engagementMonthlyHtml(
+  e: EngagementMonthlySection | null | undefined,
+): string {
+  if (!e) return unavailable();
+  const E = L.engagement;
+  const shown = e.months.filter((m) => !m.hidden);
+  const scored = e.months.flatMap((m) =>
+    m.meanScore === null ? [] : [{ label: m.month, value: m.meanScore }],
+  );
+  const stacked = e.months.flatMap((m) =>
+    m.segments === null
+      ? []
+      : [
+          {
+            label: m.month,
+            parts: SEGMENTS.map((s) => m.segments![s]),
+          },
+        ],
+  );
+  const cell = (v: number | null) => (v === null ? "–" : v);
+  const table = `<div class="scroll"><table><thead><tr><th>${esc(E.month)}</th><th>${esc(E.people)}</th><th>${esc(E.respondents)}</th><th>${esc(E.participation)}</th><th>${esc(E.meanScore)}</th>${SEGMENTS.map((s) => `<th>${esc(E.segments[s])}</th>`).join("")}</tr></thead><tbody>${e.months
+    .map((m) =>
+      m.hidden
+        ? `<tr><td>${esc(m.month)}</td><td colspan="${4 + SEGMENTS.length}" class="muted">${esc(E.underMinimum)}</td></tr>`
+        : `<tr><td>${esc(m.month)}</td><td>${cell(m.people)}</td><td>${cell(m.respondents)}</td><td>${m.participation === null ? "–" : pct(m.participation, 1)}</td><td>${num(m.meanScore)}</td>${SEGMENTS.map((s) => `<td>${m.segments ? m.segments[s] : "–"}</td>`).join("")}</tr>`,
+    )
+    .join("")}</tbody></table></div>`;
+  return `<h3>${esc(E.evolution)}</h3>${svgLine(scored)}
+<h3>${esc(E.bySegment)}</h3>${
+    shown.length
+      ? svgStacked(
+          stacked,
+          SEGMENTS.map((s) => E.segments[s]),
+        )
+      : `<p class="muted">${esc(L.noData)}</p>`
+  }${table}${suppressedNote(e.suppressedMonths)}`;
+}
+
 function peopleHtml(people: ArturiaReport["sections"]["people"]): string {
   if (!people) return "";
   const P = L.people;
@@ -530,6 +572,7 @@ ${section("completion", "quantitative", L.completion.title, completionHtml(s.com
 ${section("indicators", "quantitative", L.indicators.title, indicatorsHtml(s.indicators))}
 ${section("qualitative", "qualitative", L.qualitative.title, qualitativeHtml(s.qualitative))}
 ${section("goals", "quantitative", L.goals.title, goalsHtml(s.goals))}
+${s.engagementMonthly === undefined ? "" : section("engagement-monthly", "quantitative", L.engagement.title, engagementMonthlyHtml(s.engagementMonthly))}
 ${peopleHtml(s.people)}
 </main>
 <script type="application/json" id="report">${scriptJson(report)}</script>
