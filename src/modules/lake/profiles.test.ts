@@ -5,6 +5,7 @@ import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 import { DuckDbFileLake } from "./duckdb-file-lake";
+import { FileSourceAdapter } from "./file-source-adapter";
 import { fixtureDir } from "./fixtures";
 import {
   applyProfile,
@@ -313,8 +314,8 @@ const scenarioFor = (profile: SourceProfile) =>
     ? "initial"
     : profile.name.startsWith("airbyte-")
       ? "airbyte"
-      : profile.name.startsWith("cap-")
-        ? "cap"
+      : profile.name === "engagement-monthly"
+        ? "engagement"
         : profile.name === "org-attributes"
           ? "org"
           : "bamboo-reports";
@@ -344,6 +345,7 @@ describe("built-in profiles", () => {
     expect(builtinProfiles.map((p) => p.name)).toEqual([
       "bamboo-assessments-report",
       "bamboo-assessment-status",
+      "engagement-monthly",
       "org-attributes",
       "fivetran-bamboohr-employee",
       "fivetran-bamboohr-goal",
@@ -771,5 +773,58 @@ describe("syntheticKey profiles (a file whose format is not defined)", () => {
       extra: row,
     });
     expect(applyProfile(profile, { id: 7, Equipo: "X" }).sourceId).toBe("7");
+  });
+});
+
+describe("engagement-monthly", () => {
+  const profile = getBuiltinProfile("engagement-monthly")!;
+
+  it("is the monthly engagement file: EEID and Mes identify a row, Score and Segmento are optional", () => {
+    expect(profile).toMatchObject({
+      entity: "engagement_monthly",
+      format: "engagement_monthly",
+      keyColumns: ["EEID", "Mes"],
+    });
+    expect(sourceProfileSchema.parse(profile)).toEqual(profile);
+    expect(profile.optionalColumns).toEqual(
+      expect.arrayContaining(["Score", "Segmento", "Nombre", "Name"]),
+    );
+    expect(profile.optionalColumns).not.toContain("EEID");
+    expect(profile.optionalColumns).not.toContain("Mes");
+  });
+
+  it("is not satisfied by the org attributes file, nor does it satisfy the others first", () => {
+    const columns = (...names: string[]) =>
+      names.map((name) => ({ name, type: "VARCHAR", nullable: true }));
+    const org = columns("EEID", "Nombre", "Cuenta", "Proyecto", "DM", "Desde");
+    const engagement = columns("EEID", "Nombre", "Mes", "Score", "Segmento");
+    expect(validateAgainstSchema(profile, org)).not.toEqual([]);
+    expect(validateAgainstSchema(profile, engagement)).toEqual([]);
+    // The upload starts on the first built-in the file satisfies: for an
+    // engagement file that is this one, ahead of the (EEID-only) org profile.
+    const first = (cols: ReturnType<typeof columns>) =>
+      builtinProfiles.find((p) => validateAgainstSchema(p, cols).length === 0)
+        ?.name;
+    expect(first(engagement)).toBe("engagement-monthly");
+    expect(first(org)).toBe("org-attributes");
+  });
+
+  it("keys a row by EEID and the first of its month, however the file writes it", async () => {
+    const lake = await DuckDbFileLake.open(fixtureDir("engagement"));
+    const records = [];
+    for await (const r of new FileSourceAdapter(
+      profile,
+      lake,
+      profile.table,
+    ).extract({}, "engagement_monthly")) {
+      records.push(r);
+    }
+    await lake.close();
+    expect(records.map((r) => r.sourceId).sort()).toEqual([
+      '["11","2026-01-01"]',
+      '["11","2026-03-01"]',
+      '["12","2026-01-01"]',
+      '["99","2026-01-01"]',
+    ]);
   });
 });

@@ -696,6 +696,23 @@ export const builtinProfiles: SourceProfile[] = [
     },
     optionalColumns: [ASSESSMENT_STATUS_COLUMNS.notes],
   },
+  // The monthly engagement file (issue #86): score 0-1 and segment per person
+  // and month, from another source than Bamboo. One row per EEID and month.
+  // Before the org attributes file on purpose: that one only needs an EEID, so
+  // the upload (which starts on the first profile a file satisfies) would take
+  // an engagement file for it.
+  {
+    name: "engagement-monthly",
+    table: "engagement-monthly",
+    // The key is EEID + month, built in FileSourceAdapter.
+    keyColumns: ["EEID", "Mes"],
+    entity: "engagement_monthly",
+    format: "engagement_monthly",
+    columnMap: ENGAGEMENT_MAP,
+    optionalColumns: Object.keys(ENGAGEMENT_MAP).filter(
+      (header) => header !== "EEID" && header !== "Mes",
+    ),
+  },
   // People's file of organizational attributes (issue #85): who is on which
   // account / project, and whose delivery manager and Santex lead they have,
   // from which date. Only EEID is required; the other headers are optional
@@ -712,20 +729,6 @@ export const builtinProfiles: SourceProfile[] = [
     columnMap: ORG_ATTRIBUTE_MAP,
     optionalColumns: Object.keys(ORG_ATTRIBUTE_MAP).filter(
       (header) => header !== "EEID",
-    ),
-  },
-  // The monthly engagement file (issue #86): score 0-1 and segment per person
-  // and month, from another source than Bamboo. One row per EEID and month.
-  {
-    name: "engagement-monthly",
-    table: "engagement-monthly",
-    // The key is EEID + month, built in FileSourceAdapter.
-    keyColumns: ["EEID", "Mes"],
-    entity: "engagement_monthly",
-    format: "engagement_monthly",
-    columnMap: ENGAGEMENT_MAP,
-    optionalColumns: Object.keys(ENGAGEMENT_MAP).filter(
-      (header) => header !== "EEID" && header !== "Mes",
     ),
   },
   {
