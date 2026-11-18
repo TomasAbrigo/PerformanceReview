@@ -14,16 +14,22 @@ const alias = (kind: OrgAttributeKind) => sql.raw(`oa_${kind}`);
  * date, valid_to open or >= date; the latest start if two overlap; rows
  * People emptied are out). Put after `from cycle_participant cp ...`; the
  * columns come from `orgAttributeColumns`. The one place that says what an
- * attribute "as of" means, for every view that cuts by them.
+ * attribute "as of" means, for every view that cuts by them. `personColumn`
+ * is the person's column of `cp` (a participant's `reviewee_person_id`; the
+ * monthly engagement view passes its own `person_id`).
  */
-export function orgAttributeJoins(cp: string, date: SQL): SQL {
+export function orgAttributeJoins(
+  cp: string,
+  date: SQL,
+  personColumn = "reviewee_person_id",
+): SQL {
   return sql.join(
     orgAttributeKinds.map(
       (kind) => sql`
       left join lateral (
         select oa.value, oa.ref_person_id
         from person_org_attribute oa
-        where oa.person_id = ${sql.raw(cp)}.reviewee_person_id
+        where oa.person_id = ${sql.raw(`${cp}.${personColumn}`)}
           and oa.kind = ${kind}::org_attribute_kind
           and oa.deleted_at is null
           and oa.valid_from <= ${date}
