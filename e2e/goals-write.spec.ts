@@ -33,7 +33,7 @@ test("an employee creates a goal that is overdue until they complete it", async 
   test.setTimeout(120_000);
   await page.goto("/es");
   await actAsCookie(page, { personId: pair.personId, role: "employee" });
-  await page.goto("/es/goals");
+  await page.goto("/es/goals?cycle=all");
 
   await page.getByRole("button", { name: "Nuevo goal" }).click();
   const dialog = page.getByRole("dialog", { name: "Nuevo goal" });
@@ -135,7 +135,7 @@ test("a manager creates a goal for someone of their team", async ({ page }) => {
   const forReport = `Goal del manager ${Date.now().toString(36)}`;
   await page.goto("/es");
   await actAsCookie(page, { personId: pair.managerId, role: "manager" });
-  await page.goto("/es/goals");
+  await page.goto("/es/goals?cycle=all");
   await page.getByRole("button", { name: "Nuevo goal" }).click();
   const dialog = page.getByRole("dialog", { name: "Nuevo goal" });
   await dialog.getByLabel("Persona").selectOption({ label: pair.personName });
@@ -149,6 +149,6 @@ test("a manager creates a goal for someone of their team", async ({ page }) => {
 
   // It is the report's goal: they see it, and may complete it.
   await actAsCookie(page, { personId: pair.personId, role: "employee" });
-  await page.goto("/es/goals");
+  await page.goto("/es/goals?cycle=all");
   await expect(goalCard(page, forReport)).toBeVisible();
 });
