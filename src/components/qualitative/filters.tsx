@@ -33,12 +33,12 @@ export function QualitativeFilters({
     values: { value: string; label: string }[],
     any: string = t("any"),
   ) => (
-    <label className="flex flex-col gap-1 text-sm">
+    <label className="control-label">
       {label}
       <select
         name={name}
         defaultValue={String(params[name] ?? "")}
-        className="rounded-md border px-2 py-1"
+        className="control"
       >
         <option value="">{any}</option>
         {values.map((v) => (
@@ -96,7 +96,7 @@ export function QualitativeFilters({
           {t("aggregate")}
         </label>
       ) : null}
-      <button type="submit" className="rounded-md border px-3 py-1 text-sm">
+      <button type="submit" className="button-outline">
         {t("apply")}
       </button>
     </form>

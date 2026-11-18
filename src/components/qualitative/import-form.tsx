@@ -16,7 +16,7 @@ export function ImportLabelsForm({
   const [result, setResult] = useState<ImportOutcome | null>(null);
   return (
     <section className="flex flex-col gap-2">
-      <h2 className="text-lg font-semibold">{t("import.title")}</h2>
+      <h2>{t("import.title")}</h2>
       <form
         className="flex flex-wrap items-end gap-2"
         onSubmit={(e) => {
@@ -25,7 +25,7 @@ export function ImportLabelsForm({
           start(async () => setResult(await importLabels(form)));
         }}
       >
-        <label className="flex flex-col gap-1 text-sm">
+        <label className="control-label">
           {t("import.file")}
           <input type="file" name="file" accept=".csv,text/csv" required />
         </label>

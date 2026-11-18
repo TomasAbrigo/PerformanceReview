@@ -30,27 +30,24 @@ export function ExecutiveView({
           ? t("executive.hintPeople")
           : t("executive.hint", { min })}
       </p>
-      <div className="flex flex-wrap gap-4">
-        <div className="rounded-lg border p-4">
-          <div className="text-sm text-muted-foreground">
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <div className="flex flex-col gap-3 rounded-xl border border-border bg-card p-5">
+          <div className="kicker text-muted-foreground">
             {t("executive.participants")}
           </div>
-          <div
-            className="text-3xl font-semibold tabular-nums"
-            data-testid="exec-participants"
-          >
+          <div className="stat-value" data-testid="exec-participants">
             {data.participants}
           </div>
         </div>
         {(showProgress ? data.progress : []).map((p) => (
           <div
             key={p.relationship}
-            className="flex flex-col gap-2 rounded-lg border p-4"
+            className="flex flex-col gap-3 rounded-xl border border-border bg-card p-5"
           >
-            <div className="text-sm text-muted-foreground">
+            <div className="kicker text-muted-foreground">
               {t(`relationships.${p.relationship}`)}
             </div>
-            <div className="text-3xl font-semibold tabular-nums">
+            <div className="stat-value">
               {p.total ? Math.round((p.submitted / p.total) * 100) : 0} %
             </div>
             <Meter

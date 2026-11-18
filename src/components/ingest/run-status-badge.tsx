@@ -4,9 +4,9 @@ import type { RunStatus } from "@/modules/ingest/run-status";
 
 const VARIANT = {
   running: "secondary",
-  succeeded: "default",
+  succeeded: "success",
   error: "destructive",
-  needs_decision: "outline",
+  needs_decision: "warning",
 } as const satisfies Record<RunStatus, string>;
 
 /** `ingest_run.status` as a localized badge. */

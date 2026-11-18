@@ -27,10 +27,10 @@ const SWATCH: Record<Sentiment, string> = {
 };
 /** Count text on each fill (dark on the light fills, white on the dark ones). */
 const COUNT_TEXT: Record<Sentiment, string> = {
-  positive: "fill-[#1a1a19]",
-  constructive: "fill-white",
-  neutral: "fill-[#1a1a19]",
-  mixed: "fill-[#1a1a19]",
+  positive: "fill-white",
+  constructive: "fill-[#0f2826]",
+  neutral: "fill-[#0f2826]",
+  mixed: "fill-white",
   negative: "fill-white",
 };
 

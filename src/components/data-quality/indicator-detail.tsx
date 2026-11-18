@@ -75,7 +75,7 @@ function ByCycle<T extends ParticipantItem>({
     <div className="flex flex-col gap-6">
       {[...groups].map(([cycleId, group]) => (
         <section key={cycleId} className="flex flex-col gap-2">
-          <h2 className="font-medium">
+          <h2 className="text-lg">
             {group.name}{" "}
             <span className="text-sm font-normal text-muted-foreground">
               {t("participantsCount", { count: group.items.length })}
@@ -293,13 +293,11 @@ export function IndicatorDetail({
   const t = useTranslations("DataQuality");
   return (
     <div className="flex flex-col gap-4">
-      <Link href="/data-quality" className="text-sm hover:underline">
+      <Link href="/data-quality" className="text-sm underline">
         {t("back")}
       </Link>
       <div>
-        <h1 className="text-2xl font-semibold">
-          {t(`indicators.${indicator.key}.title`)}
-        </h1>
+        <h1>{t(`indicators.${indicator.key}.title`)}</h1>
         <p className="text-muted-foreground">
           {t(`indicators.${indicator.key}.description`)}
         </p>

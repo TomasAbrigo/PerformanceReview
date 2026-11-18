@@ -4,6 +4,8 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { connection } from "next/server";
 import { Suspense } from "react";
+import { PageHeader } from "@/components/page-header";
+import { groupKicker } from "@/components/page-kicker";
 import { ExportCsvLink } from "@/components/data-quality/export-csv-link";
 import { CycleForm } from "@/components/insights/cycle-form";
 import { SelfAssessmentView } from "@/components/insights/self-assessment-view";
@@ -25,6 +27,7 @@ async function SelfAssessment({
   await connection();
   const actor = await getActor();
   const t = await getTranslations("Insights");
+  const kicker = await groupKicker("insights");
   if (insightsScope(actor).kind === "none") return <p>{t("forbidden")}</p>;
   const sp = await searchParams;
   const groupBy = sp.groupBy === "manager" ? "manager" : "department";
@@ -41,23 +44,29 @@ async function SelfAssessment({
     report.sentimentGap.map((g) => g.dimension),
   );
   return (
-    <div className="flex flex-col gap-4">
-      <h1 className="text-2xl font-semibold">
-        {t("SelfAssessment.title")} · {cycle.name}
-      </h1>
-      <div className="flex flex-wrap items-end justify-between gap-4">
+    <div className="flex flex-col gap-8">
+      <PageHeader
+        kicker={kicker}
+        title={
+          <>
+            {t("SelfAssessment.title")} · {cycle.name}
+          </>
+        }
+        actions={
+          actor.role === "hr" ? (
+            <ExportCsvLink
+              file="insights-self-assessment"
+              params={{ cycle: cycle.id }}
+            />
+          ) : undefined
+        }
+      >
         <CycleForm
           cycles={cycles.map((c) => ({ id: c.id, name: c.name }))}
           cycleId={cycle.id}
           groupBy={groupBy}
         />
-        {actor.role === "hr" ? (
-          <ExportCsvLink
-            file="insights-self-assessment"
-            params={{ cycle: cycle.id }}
-          />
-        ) : null}
-      </div>
+      </PageHeader>
       <SelfAssessmentView
         report={report}
         dimensionLabel={dimensionLabel}
@@ -71,7 +80,7 @@ export default function SelfAssessmentPage(
   props: PageProps<"/[locale]/insights/self-assessment">,
 ) {
   return (
-    <main className="mx-auto w-full max-w-5xl p-8">
+    <main className="mx-auto w-full max-w-6xl p-6 lg:p-10">
       <Suspense fallback={<div aria-busy="true" className="h-40" />}>
         <SelfAssessment {...props} />
       </Suspense>

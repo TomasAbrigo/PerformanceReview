@@ -1,6 +1,6 @@
 import { Link } from "@/i18n/navigation";
 
-/** A row of link toggles (aria-current marks the active one). */
+/** A labelled segmented row of link toggles (aria-current marks the active one). */
 export function Toggle<T extends string>({
   label,
   options,
@@ -18,19 +18,20 @@ export function Toggle<T extends string>({
     <div
       role="group"
       aria-label={label}
-      className="flex items-center gap-1 text-sm"
+      className="flex flex-wrap items-center gap-2 text-sm"
     >
-      <span className="text-muted-foreground">{label}:</span>
-      {options.map((o) => (
-        <Link
-          key={o}
-          href={hrefFor(o)}
-          aria-current={o === current ? "true" : undefined}
-          className={`rounded-md border px-2 py-1 ${o === current ? "bg-foreground text-background" : ""}`}
-        >
-          {text(o)}
-        </Link>
-      ))}
+      <span className="text-xs font-medium text-muted-foreground">{label}</span>
+      <span className="segmented">
+        {options.map((o) => (
+          <Link
+            key={o}
+            href={hrefFor(o)}
+            aria-current={o === current ? "true" : undefined}
+          >
+            {text(o)}
+          </Link>
+        ))}
+      </span>
     </div>
   );
 }

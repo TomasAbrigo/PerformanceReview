@@ -17,12 +17,12 @@ export function TrendPicker({
     values: { value: string; label: string }[],
   ) =>
     values.length === 0 ? null : (
-      <label className="flex flex-col gap-1 text-sm">
+      <label className="control-label">
         {label}
         <select
           name={name}
           defaultValue={params[name] ?? ""}
-          className="rounded-md border bg-background px-2 py-1"
+          className="control"
         >
           <option value="">{t("trend.pick.any")}</option>
           {values.map((v) => (
@@ -54,7 +54,7 @@ export function TrendPicker({
         t("trend.pick.department"),
         subjects.departments.map((d) => ({ value: d, label: d })),
       )}
-      <button type="submit" className="rounded-md border px-3 py-1 text-sm">
+      <button type="submit" className="button-outline">
         {t("trend.pick.apply")}
       </button>
     </form>

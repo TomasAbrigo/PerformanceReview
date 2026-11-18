@@ -20,13 +20,9 @@ export function GoalsFilters({
     values: { value: string; label: string }[],
     any: boolean,
   ) => (
-    <label className="flex flex-col gap-1 text-sm">
+    <label className="control-label">
       {label}
-      <select
-        name={name}
-        defaultValue={params[name] ?? ""}
-        className="rounded-md border bg-background px-2 py-1"
-      >
+      <select name={name} defaultValue={params[name] ?? ""} className="control">
         {any ? <option value="">{t("any")}</option> : null}
         {values.map((v) => (
           <option key={v.value} value={v.value}>
@@ -66,7 +62,7 @@ export function GoalsFilters({
           )
         : null}
       <OrgFilterFields params={params} options={options.org} />
-      <button type="submit" className="rounded-md border px-3 py-1 text-sm">
+      <button type="submit" className="button-outline">
         {t("apply")}
       </button>
     </form>

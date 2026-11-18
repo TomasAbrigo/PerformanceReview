@@ -295,9 +295,7 @@ function Preview({
   return (
     <section aria-labelledby="upload-preview" className="flex flex-col gap-6">
       <div className="flex flex-col gap-1">
-        <h2 id="upload-preview" className="text-lg font-semibold">
-          {t("preview.title")}
-        </h2>
+        <h2 id="upload-preview">{t("preview.title")}</h2>
         <p className="text-sm">
           {t("preview.file", {
             name: file.fileName,

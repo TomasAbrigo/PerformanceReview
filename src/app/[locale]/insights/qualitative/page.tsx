@@ -3,6 +3,8 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { connection } from "next/server";
 import { Suspense } from "react";
+import { PageHeader } from "@/components/page-header";
+import { groupKicker } from "@/components/page-kicker";
 import { ExportCsvLink } from "@/components/data-quality/export-csv-link";
 import { CommentsTable } from "@/components/qualitative/comments-table";
 import { QualitativeFilters } from "@/components/qualitative/filters";
@@ -63,6 +65,7 @@ async function Qualitative({
   await connection();
   const actor = await getActor();
   const t = await getTranslations("Qualitative");
+  const kicker = await groupKicker("insights");
   const scope = insightsScope(actor);
   if (scope.kind === "none") return <p>{t("forbidden")}</p>;
   const individuals = canSeeIndividuals(actor);
@@ -122,33 +125,39 @@ async function Qualitative({
     options.dimensionPrompts,
   );
   return (
-    <div className="flex flex-col gap-6">
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <h1 className="text-2xl font-semibold">{t("title")}</h1>
-        {hr ? <RunButton cycleId={cycleId} run={runAnalysisAction} /> : null}
-      </div>
-      <SideToggle current={p.side} hrefFor={(side) => withSide(p, side)} />
-      <QualitativeFilters
-        params={p}
-        cycles={cycles}
-        departments={options.departments}
-        dimensions={options.dimensions}
-        themes={options.themes}
-        dimensionLabel={dimensionLabel}
-        showAggregate={hr}
-        org={org}
-      />
-      {hr ? (
-        <ExportCsvLink
-          file="insights-sentiment"
-          params={{
-            cycle: cycleId,
-            department: p.department,
-            relationship: p.side,
-            ...orgFiltersOf(p),
-          }}
+    <div className="flex flex-col gap-8">
+      <PageHeader
+        kicker={kicker}
+        title={t("title")}
+        actions={
+          hr ? (
+            <>
+              <ExportCsvLink
+                file="insights-sentiment"
+                params={{
+                  cycle: cycleId,
+                  department: p.department,
+                  relationship: p.side,
+                  ...orgFiltersOf(p),
+                }}
+              />
+              <RunButton cycleId={cycleId} run={runAnalysisAction} />
+            </>
+          ) : undefined
+        }
+      >
+        <SideToggle current={p.side} hrefFor={(side) => withSide(p, side)} />
+        <QualitativeFilters
+          params={p}
+          cycles={cycles}
+          departments={options.departments}
+          dimensions={options.dimensions}
+          themes={options.themes}
+          dimensionLabel={dimensionLabel}
+          showAggregate={hr}
+          org={org}
         />
-      ) : null}
+      </PageHeader>
       <Kpis counts={totals} />
       <ByDimension rows={byDimension} dimensionLabel={dimensionLabel} />
       <Trend points={trend} />
@@ -182,7 +191,7 @@ async function Qualitative({
       <Indicators rows={indicators} />
       {individuals && !p.aggregate ? (
         <section className="flex flex-col gap-2">
-          <h2 className="text-lg font-semibold">{t("comments.title")}</h2>
+          <h2>{t("comments.title")}</h2>
           <CommentsTable
             rows={comments}
             dimensionLabel={dimensionLabel}
@@ -199,7 +208,7 @@ export default function QualitativePage(
   props: PageProps<"/[locale]/insights/qualitative">,
 ) {
   return (
-    <main className="mx-auto w-full max-w-6xl p-8">
+    <main className="mx-auto w-full max-w-6xl p-6 lg:p-10">
       <Suspense fallback={<div aria-busy="true" className="h-40" />}>
         <Qualitative {...props} />
       </Suspense>

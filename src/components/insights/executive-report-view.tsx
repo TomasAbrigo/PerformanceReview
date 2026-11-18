@@ -30,15 +30,12 @@ export function ModeToggle({
     return `/insights/executive?${q.toString()}`;
   };
   return (
-    <nav aria-label={t("mode")} className="inline-flex rounded-md border">
+    <nav aria-label={t("mode")} className="segmented">
       {executiveModes.map((m) => (
         <Link
           key={m}
           href={hrefFor(m)}
           aria-current={m === mode ? "true" : undefined}
-          className={`px-3 py-1 text-sm ${
-            m === mode ? "bg-primary text-primary-foreground" : ""
-          }`}
         >
           {t(`modes.${m}`)}
         </Link>
@@ -60,9 +57,9 @@ function Tile({
     <section
       aria-label={title}
       data-testid={testId}
-      className="flex min-w-48 flex-col gap-2 rounded-lg border p-4"
+      className="flex min-w-0 flex-col gap-3 rounded-xl border border-border bg-card p-5"
     >
-      <h2 className="text-sm text-muted-foreground">{title}</h2>
+      <h2 className="kicker text-muted-foreground">{title}</h2>
       {children}
     </section>
   );
@@ -91,7 +88,7 @@ function CountBars({ counts, label }: { counts: number[]; label: string }) {
               y={BAR_H - h}
               width={BAR_W}
               height={h}
-              rx={2}
+              rx={3}
               className="fill-chart-seq"
             >
               <title>{`${i + 1}: ${c}`}</title>
@@ -125,7 +122,7 @@ function IndicatorTile({
     <Tile title={t(which)} testId={`exec-${which}`}>
       {data ? (
         <>
-          <div className="text-3xl font-semibold tabular-nums">
+          <div className="stat-value">
             {data.mean === null ? "—" : data.mean.toFixed(2)}
           </div>
           <div className="text-sm text-muted-foreground">
@@ -187,7 +184,7 @@ function EngagementMonthlyTile({
         <dl className="flex flex-col gap-1 text-sm">
           <div>
             <dt>{t("mean")}</dt>
-            <dd className="text-3xl font-semibold tabular-nums">
+            <dd className="stat-value">
               {latest.mean === null
                 ? "—"
                 : format.number(latest.mean, {
@@ -255,26 +252,26 @@ export function ExecutiveReportView({
       <p className="text-sm text-muted-foreground">
         {min === null ? ti("fullHint") : ti("maskedHint", { min })}
       </p>
-      <div className="flex flex-wrap gap-4">
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
         <Tile title={t("completionTitle")} testId="exec-completion">
           {total ? (
             <dl className="flex flex-col gap-2">
               <div>
-                <dt className="text-sm">{t("participants")}</dt>
-                <dd className="text-2xl font-semibold tabular-nums">
-                  {total.participants}
-                </dd>
+                <dt className="text-sm text-muted-foreground">
+                  {t("participants")}
+                </dt>
+                <dd className="stat-value">{total.participants}</dd>
               </div>
               {(["self", "manager"] as const).map((side) => {
                 const v = sideOf(total, side);
                 return (
                   <div key={side}>
-                    <dt className="text-sm">
+                    <dt className="text-sm text-muted-foreground">
                       {t(side === "self" ? "selfPct" : "managerPct")}
                     </dt>
                     <dd className="flex items-center gap-2">
                       <span
-                        className="text-2xl font-semibold tabular-nums"
+                        className="stat-value-sm"
                         data-testid={`exec-${side}-pct`}
                       >
                         {ti("percent", { value: pct(v) })}
@@ -313,9 +310,7 @@ export function ExecutiveReportView({
               <Unavailable min={min} />
             ) : (
               <>
-                <div className="text-3xl font-semibold tabular-nums">
-                  {report.risk.riskCount}
-                </div>
+                <div className="stat-value">{report.risk.riskCount}</div>
                 <p className="text-sm">
                   {t("riskCount", { n: report.risk.riskCount })}
                 </p>
@@ -346,7 +341,7 @@ export function ExecutiveReportView({
               <dl className="flex flex-col gap-1 text-sm">
                 <div>
                   <dt>{t("goalsCompleted")}</dt>
-                  <dd className="text-3xl font-semibold tabular-nums">
+                  <dd className="stat-value">
                     {report.goals.completedPct === null
                       ? "—"
                       : ti("percent", {
@@ -375,40 +370,42 @@ export function ExecutiveReportView({
           </Tile>
         ) : null}
       </div>
-      {report.sentiment ? (
-        <Tile title={t("sentiment")} testId="exec-sentiment">
-          {report.sentiment.length === 0 ? (
-            <p className="text-sm text-muted-foreground">{ti("empty")}</p>
-          ) : (
-            <SentimentBars
-              label={t("sentimentChart")}
-              rows={report.sentiment.map((r) => ({
-                ...r,
-                key: r.dimension,
-                label: dimensionLabel[r.dimension] ?? r.dimension,
-              }))}
-            />
-          )}
-        </Tile>
-      ) : null}
-      {report.themes ? (
-        <Tile title={t("themes")} testId="exec-themes">
-          {report.themes.length === 0 ? (
-            <p className="text-sm text-muted-foreground">{ti("empty")}</p>
-          ) : (
-            <ol aria-label={t("themes")} className="flex flex-col gap-1">
-              {report.themes.map((th) => (
-                <li key={th.theme} className="flex justify-between gap-4">
-                  <span>{th.theme}</span>
-                  <span className="text-sm text-muted-foreground tabular-nums">
-                    {t("themeCount", { n: th.count })}
-                  </span>
-                </li>
-              ))}
-            </ol>
-          )}
-        </Tile>
-      ) : null}
+      <div className="grid gap-4 xl:grid-cols-[3fr_2fr]">
+        {report.sentiment ? (
+          <Tile title={t("sentiment")} testId="exec-sentiment">
+            {report.sentiment.length === 0 ? (
+              <p className="text-sm text-muted-foreground">{ti("empty")}</p>
+            ) : (
+              <SentimentBars
+                label={t("sentimentChart")}
+                rows={report.sentiment.map((r) => ({
+                  ...r,
+                  key: r.dimension,
+                  label: dimensionLabel[r.dimension] ?? r.dimension,
+                }))}
+              />
+            )}
+          </Tile>
+        ) : null}
+        {report.themes ? (
+          <Tile title={t("themes")} testId="exec-themes">
+            {report.themes.length === 0 ? (
+              <p className="text-sm text-muted-foreground">{ti("empty")}</p>
+            ) : (
+              <ol aria-label={t("themes")} className="flex flex-col gap-2">
+                {report.themes.map((th) => (
+                  <li key={th.theme} className="flex justify-between gap-4">
+                    <span className="text-sm">{th.theme}</span>
+                    <span className="text-sm text-muted-foreground tabular-nums">
+                      {t("themeCount", { n: th.count })}
+                    </span>
+                  </li>
+                ))}
+              </ol>
+            )}
+          </Tile>
+        ) : null}
+      </div>
     </div>
   );
 }

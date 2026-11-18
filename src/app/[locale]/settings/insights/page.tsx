@@ -3,6 +3,8 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { connection } from "next/server";
 import { Suspense } from "react";
+import { PageHeader } from "@/components/page-header";
+import { groupKicker } from "@/components/page-kicker";
 import { HrOnly } from "@/components/access/hr-only";
 import { InsightsSettingsForm } from "@/components/settings/insights-settings-form";
 import { db } from "@/db/client";
@@ -18,13 +20,15 @@ async function InsightsSettings({
   setRequestLocale(locale);
   await connection();
   const t = await getTranslations("InsightsSettings");
+  const kicker = await groupKicker("settings");
   const values = await getSettings(db);
   return (
     <>
-      <header className="flex flex-col gap-1">
-        <h1 className="text-2xl font-semibold">{t("title")}</h1>
-        <p className="text-sm text-muted-foreground">{t("description")}</p>
-      </header>
+      <PageHeader
+        kicker={kicker}
+        title={t("title")}
+        description={t("description")}
+      />
       <InsightsSettingsForm
         values={values}
         save={updateInsightsSettingsAction}
@@ -37,7 +41,7 @@ export default function InsightsSettingsPage(
   props: PageProps<"/[locale]/settings/insights">,
 ) {
   return (
-    <main className="mx-auto flex w-full max-w-5xl flex-col gap-6 p-8">
+    <main className="mx-auto flex w-full max-w-6xl flex-col gap-8 p-6 lg:p-10">
       <Suspense fallback={<div aria-busy="true" className="h-40" />}>
         <HrOnly>
           <InsightsSettings {...props} />

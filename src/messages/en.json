@@ -5,7 +5,7 @@
   },
   "Home": {
     "heading": "Performance reviews",
-    "welcome": "Welcome to Performance Review.",
+    "welcome": "What the semester reviews say, in one place: completion, retention, engagement and what people write.",
     "navigation": "Navigation",
     "groups": {
       "insights": "Insights",
@@ -1680,5 +1680,13 @@
       "segments": "Segments",
       "link": "See the evolution"
     }
+  },
+  "Nav": {
+    "label": "Sections",
+    "home": "Home"
+  },
+  "Brand": {
+    "company": "Santex Group",
+    "tagline": "yes, it's possible"
   }
 }

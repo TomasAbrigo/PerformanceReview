@@ -1,30 +1,24 @@
 import { useLocale, useTranslations } from "next-intl";
-import { buttonVariants } from "@/components/ui/button";
 import { Link } from "@/i18n/navigation";
 import { routing } from "@/i18n/routing";
-import { cn } from "@/lib/utils";
 
+/** ES | EN as a small segmented control (the full name is the accessible label). */
 export function LocaleSwitcher() {
   const t = useTranslations("LocaleSwitcher");
   const current = useLocale();
 
   return (
-    <nav aria-label={t("label")} className="flex items-center gap-2">
-      <span className="text-sm text-muted-foreground">{t("label")}:</span>
+    <nav aria-label={t("label")} className="segmented">
       {routing.locales.map((locale) => (
         <Link
           key={locale}
           href="/"
           locale={locale}
+          aria-label={t(locale)}
           aria-current={locale === current ? "true" : undefined}
-          className={cn(
-            buttonVariants({
-              variant: locale === current ? "default" : "outline",
-              size: "sm",
-            }),
-          )}
+          className="text-xs font-medium tracking-wide uppercase"
         >
-          {t(locale)}
+          {locale}
         </Link>
       ))}
     </nav>

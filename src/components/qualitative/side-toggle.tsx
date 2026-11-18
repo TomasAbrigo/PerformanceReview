@@ -18,15 +18,12 @@ export function SideToggle({
 }) {
   const t = useTranslations("Qualitative.side");
   return (
-    <nav aria-label={t("label")} className="inline-flex rounded-md border">
+    <nav aria-label={t("label")} className="segmented">
       {SIDES.map((side) => (
         <Link
           key={side ?? "all"}
           href={hrefFor(side)}
           aria-current={side === current ? "true" : undefined}
-          className={`px-3 py-1 text-sm ${
-            side === current ? "bg-primary text-primary-foreground" : ""
-          }`}
         >
           {t(side ?? "all")}
         </Link>

@@ -22,7 +22,7 @@ export function EngagementFiltersForm({
       aria-label={t("filters.label")}
       className="flex flex-wrap items-end gap-3"
     >
-      <label className="flex flex-col gap-1 text-sm">
+      <label className="control-label">
         {t("filters.from")}
         <input
           type="month"
@@ -30,10 +30,10 @@ export function EngagementFiltersForm({
           defaultValue={params.from ?? month(range.from)}
           min={month(options.firstMonth)}
           max={month(options.lastMonth)}
-          className="rounded-md border bg-background px-2 py-1"
+          className="control"
         />
       </label>
-      <label className="flex flex-col gap-1 text-sm">
+      <label className="control-label">
         {t("filters.to")}
         <input
           type="month"
@@ -41,16 +41,16 @@ export function EngagementFiltersForm({
           defaultValue={params.to ?? month(range.to)}
           min={month(options.firstMonth)}
           max={month(options.lastMonth)}
-          className="rounded-md border bg-background px-2 py-1"
+          className="control"
         />
       </label>
       {options.departments.length > 0 ? (
-        <label className="flex flex-col gap-1 text-sm">
+        <label className="control-label">
           {t("filters.department")}
           <select
             name="department"
             defaultValue={params.department ?? ""}
-            className="rounded-md border bg-background px-2 py-1"
+            className="control"
           >
             <option value="">{t("filters.any")}</option>
             {options.departments.map((d) => (
@@ -62,7 +62,7 @@ export function EngagementFiltersForm({
         </label>
       ) : null}
       <OrgFilterFields params={params} options={options.org} />
-      <button type="submit" className="rounded-md border px-3 py-1 text-sm">
+      <button type="submit" className="button-outline">
         {t("filters.apply")}
       </button>
     </form>

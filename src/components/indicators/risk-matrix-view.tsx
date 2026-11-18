@@ -191,7 +191,9 @@ export function RiskMatrixView({ matrix }: { matrix: RiskMatrix }) {
       ) : null}
       {matrix.atRisk ? (
         <div className="flex flex-col gap-2" data-testid="risk-list">
-          <h3 className="font-medium">{t("matrix.risk.title")}</h3>
+          <h3 className="font-sans text-sm font-medium">
+            {t("matrix.risk.title")}
+          </h3>
           {matrix.atRisk.length === 0 ? (
             <p className="text-sm text-muted-foreground">
               {t("matrix.risk.empty")}

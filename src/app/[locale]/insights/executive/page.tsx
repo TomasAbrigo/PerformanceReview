@@ -4,6 +4,8 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { connection } from "next/server";
 import { Suspense } from "react";
+import { PageHeader } from "@/components/page-header";
+import { groupKicker } from "@/components/page-kicker";
 import { ExecutiveView } from "@/components/insights/executive-view";
 import { CycleForm } from "@/components/insights/cycle-form";
 import { OrgFilterFields } from "@/components/org/org-filter-fields";
@@ -38,6 +40,7 @@ async function Executive({
   await connection();
   const actor = await getActor();
   const t = await getTranslations("Insights");
+  const kicker = await groupKicker("insights");
   if (!canSeeExecutiveView(actor)) return <p>{t("forbidden")}</p>;
   const sp = await searchParams;
   const mode: ExecutiveMode = executiveModes.includes(sp.mode as ExecutiveMode)
@@ -72,24 +75,30 @@ async function Executive({
     report.sentiment?.map((r) => r.dimension) ?? [],
   );
   return (
-    <div className="flex flex-col gap-4">
-      <h1 className="text-2xl font-semibold">
-        {t("Executive.title")} · {cycle.name}
-      </h1>
-      <div className="flex flex-wrap items-end justify-between gap-4">
-        <CycleForm
-          cycles={cycles.map((c) => ({ id: c.id, name: c.name }))}
-          cycleId={cycle.id}
-          hidden={{ mode }}
-        >
-          <OrgFilterFields params={filters} options={org} />
-        </CycleForm>
-        <ModeToggle mode={mode} cycleId={cycle.id} filters={filters} />
-      </div>
+    <div className="flex flex-col gap-8">
+      <PageHeader
+        kicker={kicker}
+        title={
+          <>
+            {t("Executive.title")} · {cycle.name}
+          </>
+        }
+      >
+        <div className="flex flex-wrap items-end justify-between gap-4">
+          <CycleForm
+            cycles={cycles.map((c) => ({ id: c.id, name: c.name }))}
+            cycleId={cycle.id}
+            hidden={{ mode }}
+          >
+            <OrgFilterFields params={filters} options={org} />
+          </CycleForm>
+          <ModeToggle mode={mode} cycleId={cycle.id} filters={filters} />
+        </div>
+      </PageHeader>
       <ExecutiveReportView report={report} dimensionLabel={dimensionLabel} />
       {summary ? (
-        <section className="flex flex-col gap-2">
-          <h2 className="text-lg font-semibold">{t("Executive.ratings")}</h2>
+        <section className="flex flex-col gap-4">
+          <h2 className="text-2xl">{t("Executive.ratings")}</h2>
           <ExecutiveView data={summary} showProgress={false} />
         </section>
       ) : null}
@@ -101,7 +110,7 @@ export default function ExecutivePage(
   props: PageProps<"/[locale]/insights/executive">,
 ) {
   return (
-    <main className="mx-auto w-full max-w-5xl p-8">
+    <main className="mx-auto w-full max-w-6xl p-6 lg:p-10">
       <Suspense fallback={<div aria-busy="true" className="h-40" />}>
         <Executive {...props} />
       </Suspense>

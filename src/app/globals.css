@@ -7,9 +7,24 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-foreground-secondary: var(--foreground-secondary);
   --font-sans: var(--font-sans);
-  --font-mono: var(--font-geist-mono);
-  --font-heading: var(--font-sans);
+  --font-mono: var(--font-mono);
+  --font-heading: var(--font-heading);
+  --color-brand-900: var(--brand-900);
+  --color-brand-700: var(--brand-700);
+  --color-brand-600: var(--brand-600);
+  --color-brand-500: var(--brand-500);
+  --color-brand-400: var(--brand-400);
+  --color-brand-200: var(--brand-200);
+  --color-brand-fog: var(--brand-fog);
+  --color-brand-warm: var(--brand-warm);
+  --color-status-done: var(--status-done);
+  --color-status-done-bg: var(--status-done-bg);
+  --color-status-progress: var(--status-progress);
+  --color-status-progress-bg: var(--status-progress-bg);
+  --color-status-pending: var(--status-pending);
+  --color-status-pending-bg: var(--status-pending-bg);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -57,105 +72,255 @@
   --radius-4xl: calc(var(--radius) * 2.6);
 }
 
+/*
+ * Santex Group brand kit, light mode (reports, dashboards): the teal scale,
+ * the three text tones, teal-200 borders, a background that is never pure
+ * white and the three status pairs. Charts take a single sequential teal,
+ * a teal/red diverging pair and the sentiment order green, teal, gray,
+ * amber, red (every fill carries a label, a tooltip and a table twin).
+ */
 :root {
-  /* Calibration histogram (dataviz skill: sequential blue, validated). */
-  --chart-seq: #2a78d6;
-  /* Dashboards diverging pair (blue <-> red, gray midpoint; validated). */
-  --chart-div-pos: #2a78d6;
-  --chart-div-neg: #e34948;
-  --chart-div-mid: #f0efec;
-  /*
-   * Qualitative sentiment, in reading order: green, teal, gray, amber, red.
-   * Validated with the dataviz palette script (CVD separation and normal-vision
-   * floor pass; the gray is a deliberate neutral and the low-contrast fills
-   * always carry a count label, a tooltip and a table view).
-   */
-  --chart-sent-positive: #5d9e2f;
-  --chart-sent-constructive: #0b7f95;
-  --chart-sent-neutral: #b4b4b0;
-  --chart-sent-mixed: #e5a100;
-  --chart-sent-negative: #d4393a;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --radius: 0.625rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  --brand-900: #0a4242;
+  --brand-700: #006060;
+  --brand-600: #27a7a7;
+  --brand-500: #629fa0;
+  --brand-400: #76b3b4;
+  --brand-200: #c3e1e0;
+  --brand-fog: #ecf6f5;
+  --brand-warm: #dd9354;
+  --status-done: #1e7a4c;
+  --status-done-bg: #dcf0e6;
+  --status-progress: #a9701b;
+  --status-progress-bg: #fdf1dd;
+  --status-pending: #a13a3a;
+  --status-pending-bg: #f3e4e4;
+  --chart-seq: #006060;
+  --chart-div-pos: #006060;
+  --chart-div-neg: #a13a3a;
+  --chart-div-mid: #ecf6f5;
+  --chart-sent-positive: #1e7a4c;
+  --chart-sent-constructive: #27a7a7;
+  --chart-sent-neutral: #b2b6b6;
+  --chart-sent-mixed: #a9701b;
+  --chart-sent-negative: #a13a3a;
+  --background: #fafbfb;
+  --foreground: #0f2826;
+  --foreground-secondary: #2c4644;
+  --card: #ffffff;
+  --card-foreground: #0f2826;
+  --popover: #ffffff;
+  --popover-foreground: #0f2826;
+  --primary: #006060;
+  --primary-foreground: #f4f9f9;
+  --secondary: #ecf6f5;
+  --secondary-foreground: #0f2826;
+  --muted: #ecf6f5;
+  --muted-foreground: #5a706e;
+  --accent: #ecf6f5;
+  --accent-foreground: #0a4242;
+  --destructive: #a13a3a;
+  --border: #c3e1e0;
+  --input: #c3e1e0;
+  --ring: #27a7a7;
+  --chart-1: #0a4242;
+  --chart-2: #006060;
+  --chart-3: #27a7a7;
+  --chart-4: #76b3b4;
+  --chart-5: #c3e1e0;
+  --radius: 0.75rem;
+  --sidebar: #0a4242;
+  --sidebar-foreground: #cccccc;
+  --sidebar-primary: #27a7a7;
+  --sidebar-primary-foreground: #f4f9f9;
+  --sidebar-accent: rgb(255 255 255 / 7%);
+  --sidebar-accent-foreground: #f4f9f9;
+  --sidebar-border: rgb(217 217 217 / 12%);
+  --sidebar-ring: #27a7a7;
+  --font-mono:
+    ui-monospace, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
 }
 
+/* Brand dark mode (decks, heroes): kept in step with the kit, no toggle yet. */
 .dark {
-  --chart-seq: #3987e5;
-  --chart-div-pos: #3987e5;
-  --chart-div-neg: #e66767;
-  --chart-div-mid: #383835;
-  --chart-sent-neutral: #a8a8a4;
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  --chart-div-mid: #1b2a2a;
+  --chart-sent-neutral: #b2b6b6;
+  --background: #000d0e;
+  --foreground: #f4f9f9;
+  --foreground-secondary: #cccccc;
+  --card: rgb(255 255 255 / 7%);
+  --card-foreground: #f4f9f9;
+  --popover: #0a4242;
+  --popover-foreground: #f4f9f9;
+  --primary: #27a7a7;
+  --primary-foreground: #000d0e;
+  --secondary: rgb(255 255 255 / 7%);
+  --secondary-foreground: #f4f9f9;
+  --muted: rgb(255 255 255 / 7%);
+  --muted-foreground: #b2b6b6;
+  --accent: rgb(255 255 255 / 7%);
+  --accent-foreground: #f4f9f9;
+  --destructive: #e07a7a;
+  --border: rgb(217 217 217 / 12%);
+  --input: rgb(217 217 217 / 12%);
+  --ring: #27a7a7;
+  --sidebar: #000d0e;
+  --sidebar-foreground: #cccccc;
+  --sidebar-primary: #27a7a7;
+  --sidebar-primary-foreground: #f4f9f9;
+  --sidebar-accent: rgb(255 255 255 / 7%);
+  --sidebar-accent-foreground: #f4f9f9;
+  --sidebar-border: rgb(217 217 217 / 12%);
+  --sidebar-ring: #27a7a7;
 }
 
 @layer base {
   * {
     @apply border-border outline-ring/50;
   }
-  body {
-    @apply bg-background text-foreground;
-  }
   html {
     @apply font-sans;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "cv11", "ss01";
+  }
+  /* Headings are the brand's signature: Chakra Petch Light, never bold. */
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-heading);
+    font-weight: 300;
+    letter-spacing: -0.01em;
+    line-height: 1.15;
+  }
+  h1 {
+    @apply text-3xl;
+  }
+  h2 {
+    @apply text-xl;
+  }
+  h3 {
+    @apply text-lg;
+  }
+  /* Data tables inside the pages: quiet header, hairline rows, tabular numbers. */
+  main table {
+    @apply w-full border-collapse text-sm;
+  }
+  main thead th {
+    @apply pb-2 text-xs font-medium tracking-wide text-muted-foreground uppercase;
+    letter-spacing: 0.08em;
+  }
+  main tbody th {
+    @apply font-medium;
+  }
+  main tbody td,
+  main tbody th {
+    @apply py-2 align-top;
+  }
+  main tbody tr {
+    border-top: 1px solid color-mix(in srgb, var(--border) 70%, transparent);
+  }
+  main tbody tr:first-child {
+    border-top: 1px solid var(--border);
+  }
+  main a.underline {
+    @apply text-primary decoration-brand-200 underline-offset-4 hover:decoration-brand-600;
+  }
+  main details > summary {
+    @apply text-sm text-primary;
+  }
+  ::selection {
+    background: var(--brand-200);
+    color: var(--brand-900);
+  }
+}
+
+@layer components {
+  /* Kicker or label: Inter 500, uppercase, 2px tracking. */
+  .kicker {
+    font-family: var(--font-sans);
+    font-size: 0.75rem;
+    font-weight: 500;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+  /* A big number: the hierarchy is size and color, never weight. */
+  .stat-value {
+    font-family: var(--font-heading);
+    font-size: 2.25rem;
+    font-weight: 300;
+    line-height: 1;
+    letter-spacing: -0.02em;
+    font-variant-numeric: tabular-nums;
+  }
+  .stat-value-sm {
+    font-family: var(--font-heading);
+    font-size: 1.5rem;
+    font-weight: 300;
+    line-height: 1.1;
+    font-variant-numeric: tabular-nums;
+  }
+  /* Hero without a photo: 140deg teal gradient and a very subtle line texture. */
+  .brand-hero {
+    position: relative;
+    isolation: isolate;
+    color: #f4f9f9;
+    background: linear-gradient(140deg, #0a4242 0%, #006060 55%, #0a7a78 100%);
+  }
+  .brand-hero::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    opacity: 0.35;
+    background: repeating-linear-gradient(
+      140deg,
+      transparent 0,
+      transparent 22px,
+      rgb(255 255 255 / 4%) 22px,
+      rgb(255 255 255 / 4%) 23px
+    );
+  }
+  .brand-hero::after {
+    content: "";
+    position: absolute;
+    z-index: -1;
+    width: 60%;
+    height: 180%;
+    right: -20%;
+    top: -40%;
+    opacity: 0.55;
+    background: radial-gradient(
+      closest-side,
+      rgb(39 167 167 / 45%),
+      transparent 70%
+    );
+    filter: blur(20px);
+  }
+  /* Native form controls share one look (selects, inputs of the filter rows). */
+  .control {
+    @apply h-9 rounded-lg border border-input bg-card px-3 text-sm text-foreground transition-colors outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/40 disabled:cursor-not-allowed disabled:opacity-50;
+  }
+  .control-label {
+    @apply flex flex-col gap-1.5 text-xs font-medium text-muted-foreground;
+  }
+  /* A segmented row of links or buttons; aria-current / data-active marks the chosen one. */
+  .segmented {
+    @apply inline-flex items-center overflow-hidden rounded-lg border border-input bg-card p-0.5;
+  }
+  .segmented > * {
+    @apply rounded-md px-3 py-1.5 text-sm whitespace-nowrap text-foreground-secondary transition-colors hover:bg-brand-fog hover:text-foreground;
+  }
+  .segmented > [aria-current="true"],
+  .segmented > [aria-current="page"],
+  .segmented > [data-active="true"] {
+    @apply bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground;
+  }
+}
+
+@layer components {
+  /* The outline button of the plain filter forms (same look as Button outline). */
+  .button-outline {
+    @apply inline-flex h-9 items-center justify-center rounded-lg border border-input bg-card px-3 text-sm font-medium whitespace-nowrap text-foreground transition-colors outline-none hover:bg-brand-fog focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/40 disabled:pointer-events-none disabled:opacity-50;
   }
 }

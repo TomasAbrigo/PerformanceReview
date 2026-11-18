@@ -38,9 +38,7 @@ export function UploadResult({
 
   return (
     <section aria-labelledby="upload-result" className="flex flex-col gap-4">
-      <h2 id="upload-result" className="text-lg font-semibold">
-        {t("title")}
-      </h2>
+      <h2 id="upload-result">{t("title")}</h2>
       <dl className="grid max-w-xl grid-cols-2 gap-3 sm:grid-cols-4">
         {figures.map(([key, label, value]) => (
           <div
@@ -49,7 +47,7 @@ export function UploadResult({
             className="rounded-lg border p-3 text-center"
           >
             <dt className="text-xs text-muted-foreground">{label}</dt>
-            <dd className="text-2xl font-semibold tabular-nums">{value}</dd>
+            <dd className="stat-value-sm">{value}</dd>
           </div>
         ))}
       </dl>

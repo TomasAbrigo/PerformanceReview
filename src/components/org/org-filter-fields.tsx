@@ -35,12 +35,12 @@ export function OrgFilterFields({
           current && !values.includes(current) ? [current, ...values] : values;
         if (all.length === 0) return null;
         return (
-          <label key={name} className="flex flex-col gap-1 text-sm">
+          <label key={name} className="control-label">
             {t(name)}
             <select
               name={name}
               defaultValue={current ?? ""}
-              className="rounded-md border bg-background px-2 py-1"
+              className="control"
             >
               <option value="">{t("any")}</option>
               {all.map((v) => (

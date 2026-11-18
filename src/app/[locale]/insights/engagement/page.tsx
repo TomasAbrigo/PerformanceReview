@@ -3,6 +3,8 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { connection } from "next/server";
 import { Suspense } from "react";
+import { PageHeader } from "@/components/page-header";
+import { groupKicker } from "@/components/page-kicker";
 import { EngagementView } from "@/components/engagement/engagement-view";
 import { EngagementFiltersForm } from "@/components/engagement/filters";
 import {
@@ -30,6 +32,7 @@ async function Engagement({
   await connection();
   const actor = await getActor();
   const t = await getTranslations("Engagement");
+  const kicker = await groupKicker("insights");
   const minGroupSize = await getSetting(db, "aggregation.minGroupSize");
   // The scope decides what is shown: People everything, a manager their
   // direct reports, direction aggregates; anybody else nothing.
@@ -37,7 +40,7 @@ async function Engagement({
   if (scope.kind === "none") {
     return (
       <section className="flex flex-col gap-2" data-testid="no-access">
-        <h1 className="text-2xl font-semibold">{t("title")}</h1>
+        <h1>{t("title")}</h1>
         <p>{t("forbidden")}</p>
       </section>
     );
@@ -60,14 +63,14 @@ async function Engagement({
         ? t("hint.reports")
         : t("hint.all");
   return (
-    <div className="flex flex-col gap-4">
-      <h1 className="text-2xl font-semibold">{t("title")}</h1>
-      <p className="text-sm text-muted-foreground">{hint}</p>
-      <EngagementFiltersForm
-        params={p}
-        options={options}
-        range={{ from: data.from, to: data.to }}
-      />
+    <div className="flex flex-col gap-8">
+      <PageHeader kicker={kicker} title={t("title")} description={hint}>
+        <EngagementFiltersForm
+          params={p}
+          options={options}
+          range={{ from: data.from, to: data.to }}
+        />
+      </PageHeader>
       {options.lastMonth === null ? (
         <p data-testid="engagement-empty">{t("noData")}</p>
       ) : (
@@ -81,7 +84,7 @@ export default function EngagementPage(
   props: PageProps<"/[locale]/insights/engagement">,
 ) {
   return (
-    <main className="mx-auto w-full max-w-6xl p-8">
+    <main className="mx-auto w-full max-w-6xl p-6 lg:p-10">
       <Suspense fallback={<div aria-busy="true" className="h-40" />}>
         <Engagement {...props} />
       </Suspense>

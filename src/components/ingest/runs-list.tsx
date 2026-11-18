@@ -1,5 +1,6 @@
 import { useTranslations } from "next-intl";
 import { ExportCsvLink } from "@/components/data-quality/export-csv-link";
+import { PageHeader } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -33,13 +34,9 @@ function FilterSelect({
   options: { value: string; label: string }[];
 }) {
   return (
-    <label className="flex flex-col gap-1 text-sm">
+    <label className="control-label">
       {label}
-      <select
-        name={name}
-        defaultValue={value ?? ""}
-        className="h-8 rounded-lg border border-input bg-transparent px-2 text-sm dark:bg-input/30"
-      >
+      <select name={name} defaultValue={value ?? ""} className="control">
         <option value="">{allLabel}</option>
         {options.map((o) => (
           <option key={o.value} value={o.value}>
@@ -67,6 +64,7 @@ export function RunsList({
   nextHref: string | null;
 }) {
   const t = useTranslations("Imports.runs");
+  const tHome = useTranslations("Home");
   const { dateTime, duration } = useRunFormat();
   const hasFilters = Boolean(
     filters.source || filters.entity || filters.status,
@@ -75,20 +73,21 @@ export function RunsList({
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex items-start justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-semibold">{t("title")}</h1>
-          <p className="text-muted-foreground">{t("description")}</p>
-        </div>
-        <ExportCsvLink
-          file="ingest-runs"
-          params={{
-            source: filters.source,
-            entity: filters.entity,
-            status: filters.status,
-          }}
-        />
-      </div>
+      <PageHeader
+        kicker={tHome("groups.data")}
+        title={t("title")}
+        description={t("description")}
+        actions={
+          <ExportCsvLink
+            file="ingest-runs"
+            params={{
+              source: filters.source,
+              entity: filters.entity,
+              status: filters.status,
+            }}
+          />
+        }
+      />
 
       <form
         role="search"
@@ -184,7 +183,7 @@ export function RunsList({
 
       {nextHref ? (
         <nav aria-label={t("pagination.label")}>
-          <Link href={nextHref} className="text-sm hover:underline">
+          <Link href={nextHref} className="text-sm underline">
             {t("pagination.next")}
           </Link>
         </nav>

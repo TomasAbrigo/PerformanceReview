@@ -56,9 +56,7 @@ export function CycleDecisionForm({
       aria-labelledby={`${id}-title`}
       className="flex flex-col gap-3 rounded-lg border border-amber-500/50 p-4"
     >
-      <h2 id={`${id}-title`} className="text-lg font-semibold">
-        {t("title")}
-      </h2>
+      <h2 id={`${id}-title`}>{t("title")}</h2>
       <p className="text-sm">{t("rows", { count: decision.rows })}</p>
       {decision.reasons.map((reason) => (
         <p key={reason} className="text-sm text-muted-foreground">
