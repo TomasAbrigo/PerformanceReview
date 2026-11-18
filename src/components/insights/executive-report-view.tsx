@@ -671,12 +671,12 @@ function EngagementMonthlyTile({
     latest.mean !== null && previous?.mean != null
       ? Math.round((latest.mean - previous.mean) * 100)
       : null;
+  // The same figure as the Engagement view: a percentage of the 0-1 score.
   const mean =
     latest.mean === null
       ? null
-      : format.number(latest.mean, {
-          minimumFractionDigits: 2,
-          maximumFractionDigits: 2,
+      : format.number(Math.round(latest.mean * 100) / 100, {
+          style: "percent",
         });
   const tone =
     latest.mean === null
@@ -721,9 +721,11 @@ function EngagementMonthlyTile({
               {latest.mean !== null ? (
                 <dd>
                   <ScaleBar
-                    value={latest.mean}
+                    value={Math.round(latest.mean * 100)}
                     min={0}
-                    max={1}
+                    max={100}
+                    minLabel="0 %"
+                    maxLabel="100 %"
                     tone={tone}
                     label={`${t("mean")}: ${mean}`}
                   />

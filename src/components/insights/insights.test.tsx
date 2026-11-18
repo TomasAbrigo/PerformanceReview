@@ -330,7 +330,7 @@ describe("ExecutiveReportView", () => {
         />,
       );
       const tile = screen.getByTestId("exec-engagement-monthly");
-      expect(tile).toHaveTextContent(locale === "es" ? "0,62" : "0.62");
+      expect(tile).toHaveTextContent(locale === "es" ? "62 %" : "62%");
       expect(tile).toHaveTextContent(locale === "es" ? "80 %" : "80%");
       expect(tile).toHaveTextContent(
         locale === "es" ? /febrero de 2026/ : /February 2026/,
