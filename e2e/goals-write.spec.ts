@@ -23,7 +23,7 @@ test.beforeAll(async () => {
 
 const goalCard = (page: Page, name: string) =>
   page
-    .getByRole("group", { name: "Lista de goals" })
+    .getByRole("group", { name: "Lista de objetivos" })
     .getByRole("article")
     .filter({ hasText: name });
 
@@ -35,8 +35,8 @@ test("an employee creates a goal that is overdue until they complete it", async 
   await actAsCookie(page, { personId: pair.personId, role: "employee" });
   await page.goto("/es/goals?cycle=all");
 
-  await page.getByRole("button", { name: "Nuevo goal" }).click();
-  const dialog = page.getByRole("dialog", { name: "Nuevo goal" });
+  await page.getByRole("button", { name: "Nuevo objetivo" }).click();
+  const dialog = page.getByRole("dialog", { name: "Nuevo objetivo" });
   // The server refuses an empty title and a date that is not one.
   await dialog.getByRole("button", { name: "Guardar" }).click();
   await expect(dialog.getByText("Este campo es obligatorio.")).toBeVisible();
@@ -79,7 +79,7 @@ test("an employee creates a goal that is overdue until they complete it", async 
 
   // Edit the title.
   await summary.getByRole("button", { name: "Editar" }).click();
-  const edit = page.getByRole("dialog", { name: "Editar goal" });
+  const edit = page.getByRole("dialog", { name: "Editar objetivo" });
   await expect(edit.getByLabel("Título", { exact: true })).toHaveValue(title);
   await edit.getByLabel("Título", { exact: true }).fill(`${title} (editado)`);
   await edit.getByRole("button", { name: "Guardar" }).click();
@@ -96,7 +96,7 @@ test("an employee creates a goal that is overdue until they complete it", async 
   await expect(page.getByLabel("Avance (%)")).toHaveValue("100");
   await page.getByRole("button", { name: "Reabrir" }).click();
   await expect(summary.locator('[data-state="overdue"]')).toBeVisible();
-  await page.getByRole("button", { name: "Cerrar goal" }).click();
+  await page.getByRole("button", { name: "Cerrar objetivo" }).click();
   await expect(summary.locator('[data-state="closed"]')).toBeVisible();
   await expect(page.getByRole("button", { name: "Reabrir" })).toBeVisible();
   expect(await goalRow(pair.personId, `${title} (editado)`)).toMatchObject({
@@ -112,7 +112,7 @@ test("only the owner, their manager and People reach the controls", async ({
   await page.goto("/es");
   await actAsCookie(page, { personId: stranger, role: "employee" });
   await page.goto(`/es/goals/${goalId}`);
-  await expect(page.getByText(/No tenés acceso a este goal/)).toBeVisible();
+  await expect(page.getByText(/No tenés acceso a este objetivo/)).toBeVisible();
   await expect(page.getByRole("button", { name: "Editar" })).toHaveCount(0);
   await expect(page.getByLabel("Avance (%)")).toHaveCount(0);
 
@@ -136,8 +136,8 @@ test("a manager creates a goal for someone of their team", async ({ page }) => {
   await page.goto("/es");
   await actAsCookie(page, { personId: pair.managerId, role: "manager" });
   await page.goto("/es/goals?cycle=all");
-  await page.getByRole("button", { name: "Nuevo goal" }).click();
-  const dialog = page.getByRole("dialog", { name: "Nuevo goal" });
+  await page.getByRole("button", { name: "Nuevo objetivo" }).click();
+  const dialog = page.getByRole("dialog", { name: "Nuevo objetivo" });
   await dialog.getByLabel("Persona").selectOption({ label: pair.personName });
   await dialog.getByLabel("Título", { exact: true }).fill(forReport);
   await dialog.getByRole("button", { name: "Guardar" }).click();

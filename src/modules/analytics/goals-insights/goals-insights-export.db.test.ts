@@ -1,3 +1,11 @@
+import { vi } from "vitest";
+
+/** "Today" of these tests: the last day of H1 2024 (see `test-support`). */
+const today = "2024-06-30";
+vi.mock("@/modules/org-history/dates", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@/modules/org-history/dates")>()),
+  todayLocal: () => today,
+}));
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { closeDb, db } from "@/db/client";
 import { exportCsv } from "@/modules/exports/entities";
@@ -39,7 +47,7 @@ describe("goals insights CSV exports", () => {
     // Producto: 7 goals, 3 completed (42.9 %), 4 in progress (57.1 %),
     // 2 overdue (28.6 %), mean progress 370 / 7 = 52.9.
     expect(lines).toEqual([
-      "group_id,grupo,personas,goals,completados,en curso,cerrados,vencidos,% completados,% en curso,% vencidos,avance promedio",
+      "group_id,grupo,personas,objetivos,completados,en curso,cerrados,vencidos,% completados,% en curso,% vencidos,avance promedio",
       "Ingeniería,Ingeniería,6,26,14,11,1,2,53.8,42.3,7.7,73.8",
       "Producto,Producto,3,7,3,4,0,2,42.9,57.1,28.6,52.9",
     ]);
@@ -77,7 +85,7 @@ describe("goals insights CSV exports", () => {
       `cycle=${s.h1.cycleId}`,
     );
     expect(lines).toEqual([
-      "tipo,person_id,nombre,manager_id,manager,área,goals,completados,% completados,retención,compromiso",
+      "tipo,person_id,nombre,manager_id,manager,área,objetivos,completados,% completados,retención,compromiso",
       `done_but_low,${s.id.fabio},${names.fabio},${s.id.marta},${names.marta},Ingeniería,5,4,80,3,1`,
       `done_but_low,${s.id.ana},${names.ana},${s.id.marta},${names.marta},Ingeniería,5,4,80,2,4`,
       `behind_but_high,${s.id.gina},${names.gina},${s.id.nora},${names.nora},Producto,4,1,25,5,4`,

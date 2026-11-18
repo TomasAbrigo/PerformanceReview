@@ -125,7 +125,7 @@ test("People see the goal KPIs, the indicators by completion, the outliers and t
   );
   expect(header.slice(0, 3)).toEqual(["group_id", "grupo", "personas"]);
   // The rows of the file add up to the goals of the snapshot.
-  const goalsColumn = header.indexOf("goals");
+  const goalsColumn = header.indexOf("objetivos");
   expect(kpiRows.reduce((sum, row) => sum + Number(row[goalsColumn]), 0)).toBe(
     totals.goals,
   );

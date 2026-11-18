@@ -8,6 +8,7 @@ import {
   requireCycle,
 } from "@/modules/analytics/indicators/rows";
 import type { IndicatorConfig } from "@/modules/analytics/indicators/types";
+import { todayLocal } from "@/modules/org-history/dates";
 import type { Hierarchy } from "./types";
 
 /**
@@ -28,6 +29,8 @@ export type GoalContext = {
   reach: Reach;
   indicators: IndicatorContext;
   cycleId: string;
+  /** The date "overdue" is measured against (YYYY-MM-DD): today. */
+  today: string;
 };
 
 /**
@@ -43,7 +46,13 @@ export async function goalContext(
 ): Promise<GoalContext> {
   const indicators = await indicatorContext(db, actor, config);
   await requireCycle(db, cycleId);
-  return { actor, reach: indicators.scope, indicators, cycleId };
+  return {
+    actor,
+    reach: indicators.scope,
+    indicators,
+    cycleId,
+    today: todayLocal(),
+  };
 }
 
 /**
@@ -56,8 +65,9 @@ export async function goalContext(
  *   authorized) and masked by the callers;
  * - `g`: per participant the figures of the goals of the period (the cycle's
  *   goal snapshot, `no_longer_applicable` ones left out): total, completed,
- *   in progress, closed, overdue (in progress and due before the period
- *   ended) and the sum of their percent complete.
+ *   in progress, closed, overdue (in progress and due before today: the same
+ *   rule as the goals list and the home, `src/modules/goals/state.ts`) and
+ *   the sum of their percent complete.
  */
 export function goalCtes(ctx: GoalContext, hierarchy: Hierarchy): SQL {
   const runAs = ctx.reach.kind === "aggregatesOnly" ? ALL_PEOPLE : ctx.actor;
@@ -74,12 +84,12 @@ export function goalCtes(ctx: GoalContext, hierarchy: Hierarchy): SQL {
              count(s.id) filter (where s.status = 'in_progress')::int as in_progress,
              count(s.id) filter (where s.status = 'closed')::int as closed,
              count(s.id) filter (
-               where s.status = 'in_progress' and s.due_date < b.period_end::date
+               where s.status = 'in_progress' and s.due_date < ${ctx.today}::date
              )::int as overdue,
              coalesce(sum(s.percent_complete), 0)::int as progress_sum
       from scoped b
       left join participant_goal_snapshot s
         on s.participant_id = b.participant_id and not s.no_longer_applicable
-      group by b.participant_id, b.period_end
+      group by b.participant_id
     )`;
 }

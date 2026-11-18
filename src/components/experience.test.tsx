@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
-import { ProgressRing, ScaleBar } from "./experience";
+import { DeltaPill, ProgressRing, ScaleBar } from "./experience";
 
 describe("ProgressRing", () => {
   it.each([
@@ -60,5 +60,21 @@ describe("ScaleBar", () => {
       />,
     );
     expect(container.querySelector(".scale-target")).toBeNull();
+  });
+});
+
+describe("DeltaPill", () => {
+  it("a flat change shows a dash, neither up nor down, and no colour", () => {
+    render(<DeltaPill value={0} text="0,0 vs. ciclo anterior" />);
+    const pill = screen.getByTestId("delta");
+    expect(pill.querySelector("svg.lucide-minus")).not.toBeNull();
+    expect(pill.className).not.toMatch(/delta-good|delta-bad/);
+  });
+
+  it("a rise points up and is good when up is better", () => {
+    render(<DeltaPill value={2} text="+2 pts" />);
+    const pill = screen.getByTestId("delta");
+    expect(pill.querySelector("svg.lucide-arrow-up-right")).not.toBeNull();
+    expect(pill.className).toMatch(/delta-good/);
   });
 });

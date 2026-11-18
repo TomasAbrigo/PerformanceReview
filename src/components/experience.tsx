@@ -3,6 +3,7 @@ import {
   ArrowDownRight,
   ArrowUpRight,
   CircleDot,
+  Minus,
   Search,
   SlidersHorizontal,
 } from "lucide-react";
@@ -123,7 +124,8 @@ export function DeltaPill({
   better?: "up" | "down";
 }) {
   const good = value === 0 ? null : value > 0 === (better === "up");
-  const Arrow = value >= 0 ? ArrowUpRight : ArrowDownRight;
+  // Flat is neither up nor down: a dash, not an arrow.
+  const Arrow = value === 0 ? Minus : value > 0 ? ArrowUpRight : ArrowDownRight;
   return (
     <span
       className={cn(

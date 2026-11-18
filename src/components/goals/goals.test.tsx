@@ -116,7 +116,9 @@ describe("GoalsTable", () => {
         hrefForPage={() => "/goals"}
       />,
     );
-    expect(screen.getByText("No hay goals con estos filtros.")).toBeVisible();
+    expect(
+      screen.getByText("No hay objetivos con estos filtros."),
+    ).toBeVisible();
     unmount();
     renderIn(
       "es",
@@ -163,7 +165,7 @@ describe("GoalStateChips", () => {
         hrefFor={(s) => `/goals?state=${s ?? ""}`}
       />,
     );
-    const group = screen.getByRole("group", { name: "Goals por estado" });
+    const group = screen.getByRole("group", { name: "Objetivos por estado" });
     expect(
       within(group).getByRole("link", { name: "Todos 4" }),
     ).toHaveAttribute("href", "/goals?state=");
@@ -194,7 +196,7 @@ describe("GoalsFilters", () => {
         ownOnly={false}
       />,
     );
-    const form = screen.getByRole("form", { name: "Filtros de goals" });
+    const form = screen.getByRole("form", { name: "Filtros de objetivos" });
     expect(form).toHaveAttribute("method", "get");
     expect(new FormData(form as HTMLFormElement).get("state")).toBe("overdue");
     expect(within(form).getByLabelText("DM")).not.toBeVisible();

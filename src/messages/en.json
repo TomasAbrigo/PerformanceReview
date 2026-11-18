@@ -38,7 +38,12 @@
       "person": "Good morning, {name}",
       "noPerson": "Good morning"
     },
-    "intro": "A starting point to support people's development.",
+    "intro": {
+      "hr": "A starting point to support people's development.",
+      "manager": "Your team and you: goals, assessments and the cycle's analysis.",
+      "employee": "Your goals and your assessments of the cycle.",
+      "direction": "The company's aggregated analysis, cycle by cycle."
+    },
     "focus": {
       "kicker": "Cycle in focus",
       "noCycle": "No cycles yet: once there is one, its progress shows here.",

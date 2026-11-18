@@ -1,3 +1,11 @@
+import { vi } from "vitest";
+
+/** "Today" of these tests: the last day of H1 2024 (see `test-support`). */
+let today = "2024-06-30";
+vi.mock("@/modules/org-history/dates", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@/modules/org-history/dates")>()),
+  todayLocal: () => today,
+}));
 import { sql } from "drizzle-orm";
 import { afterAll, afterEach, beforeAll, describe, expect, it } from "vitest";
 import { closeDb, db } from "@/db/client";
@@ -33,6 +41,21 @@ const byLabel = <G extends { label: string | null }>(
 ): G => groups.find((g) => g.label === label)!;
 
 describe("goalKpis (People)", () => {
+  it("overdue is measured against today, as the goals list does, not the period end", async () => {
+    const was = today;
+    today = "2024-10-01";
+    try {
+      const { groups } = await goalKpis(db, hr, {
+        cycleId: h1(),
+        groupBy: "person",
+      });
+      // Ana's goal in progress is due 2024-09-30: overdue on 2024-10-01.
+      expect(byLabel(groups, "Ana Prieto").overdue).toBe(1);
+    } finally {
+      today = was;
+    }
+  });
+
   it("per person: goals, shares and mean progress, worked out by hand", async () => {
     const { groups, total, minGroupSize } = await goalKpis(db, hr, {
       cycleId: h1(),
