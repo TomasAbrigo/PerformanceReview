@@ -1,12 +1,12 @@
 import { useTranslations } from "next-intl";
+import { ChartTableToggle, Histogram } from "@/components/charts";
 import type { RatingDistribution } from "@/modules/analytics/dashboards/types";
-import { HistogramBars } from "./histogram-bars";
-import { Empty, pct, TableView } from "./parts";
+import { Empty, pct } from "./parts";
 
 /**
- * Normalized rating distribution, per dataviz skill (same primitive as the
- * calibration histogram): one small multiple per group, shared y-scale, a
- * caption with n and mean, and a table view.
+ * Normalized rating distribution with the kit Histogram: one small multiple
+ * per group (shared height scale), count and share written on each bar, the
+ * bins as percent ranges, a caption with n and mean, and the table twin.
  */
 export function RatingHistogram({
   data,
@@ -28,7 +28,7 @@ export function RatingHistogram({
   const max = Math.max(1, ...data.series.flatMap((s) => s.counts));
   return (
     <div className="flex flex-col gap-3">
-      <div className="flex flex-wrap gap-6">
+      <div className="flex flex-wrap gap-8">
         {data.series.map((s) => (
           <figure
             key={s.key ?? "none"}
@@ -44,28 +44,35 @@ export function RatingHistogram({
                   : ""}
               </span>
             </figcaption>
-            <HistogramBars
+            <Histogram
               max={max}
+              xTitle={t("distribution.xTitle")}
               label={`${label(s.label)}: ${s.counts
                 .map((c, i) => `${binLabel(i)} ${c}`)
                 .join(", ")}`}
-              bars={s.counts.map((c, i) => ({
-                key: i,
+              bins={s.counts.map((c, i) => ({
+                key: String(i),
                 count: c,
-                title: t("distribution.barLabel", {
+                tip: t("distribution.barLabel", {
                   group: label(s.label),
                   bin: binLabel(i),
                   count: c,
                 }),
-                tick: pct(data.bins[i].to)!,
+                tick: binLabel(i),
               }))}
             />
           </figure>
         ))}
       </div>
-      <TableView
-        head={["", ...data.bins.map((_, i) => binLabel(i))]}
-        rows={data.series.map((s) => [label(s.label), ...s.counts])}
+      <ChartTableToggle
+        caption={t("distribution.title")}
+        table={{
+          head: [
+            t("distribution.group"),
+            ...data.bins.map((_, i) => binLabel(i)),
+          ],
+          rows: data.series.map((s) => [label(s.label), ...s.counts]),
+        }}
       />
     </div>
   );

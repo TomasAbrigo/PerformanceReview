@@ -57,7 +57,7 @@ describe("RatingHistogram", () => {
     renderIn(locale, <RatingHistogram data={dist} />);
     expect(screen.getAllByTestId("histogram")).toHaveLength(1);
     expect(
-      screen.getByRole("img", { name: /Ingeniería: 0–20 % 0, 20–40 % 1/ }),
+      screen.getByRole("group", { name: /Ingeniería: 0–20 % 0, 20–40 % 1/ }),
     ).toBeInTheDocument();
     expect(
       screen.getByText(locale === "es" ? /2 personas/ : /2 people/),
@@ -75,7 +75,7 @@ describe("RatingHistogram", () => {
         }}
       />,
     );
-    expect(screen.getByRole("img", { name: /^All:/ })).toBeInTheDocument();
+    expect(screen.getByRole("group", { name: /^All:/ })).toBeInTheDocument();
   });
 });
 const exec: ExecutiveSummary = {

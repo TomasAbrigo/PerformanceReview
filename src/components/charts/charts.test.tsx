@@ -6,6 +6,9 @@ import en from "@/messages/en.json";
 import es from "@/messages/es.json";
 import {
   BulletBar,
+  GroupedBars,
+  Histogram,
+  Scatter,
   ChartFrame,
   DivergingLikert,
   LineTrend,
@@ -281,5 +284,85 @@ describe("Sparkline", () => {
     for (const m of ["min", "max", "last"])
       expect(container.querySelector(`[data-mark='${m}']`)).not.toBeNull();
     expect(container).toHaveTextContent("4.0");
+  });
+});
+
+describe("Histogram", () => {
+  it("writes count and share on each bar, bars focusable", () => {
+    renderIn(
+      "es",
+      <Histogram
+        max={3}
+        label="H"
+        bins={[
+          { key: "a", tick: "0–50 %", count: 1, tip: "A: 1" },
+          { key: "b", tick: "50–100 %", count: 3, tip: "B: 3" },
+        ]}
+      />,
+    );
+    expect(screen.getByRole("img", { name: "B: 3" })).toHaveAttribute(
+      "tabindex",
+      "0",
+    );
+    expect(nb(screen.getByRole("group").textContent)).toContain("75 %");
+    expect(screen.getByText("50–100 %")).toBeInTheDocument();
+  });
+});
+
+describe("GroupedBars", () => {
+  it("labels each bar with its value and explains masked groups", () => {
+    renderIn(
+      "en",
+      <GroupedBars
+        label="G"
+        yTitle="Mean (1–5)"
+        domain={[0, 5]}
+        ticks={[1, 5]}
+        fmt={(v) => v.toFixed(1)}
+        series={[{ key: "r", label: "Retention", fill: "bg-chart-seq" }]}
+        groups={[
+          { key: "a", label: "0–20%", sub: "n = 4", values: { r: 3.5 } },
+          { key: "b", label: "20–40%", values: { r: null }, masked: "Hidden" },
+        ]}
+      />,
+    );
+    expect(
+      screen.getByRole("img", { name: "0–20% · Retention: 3.5" }),
+    ).toBeInTheDocument();
+    expect(screen.getByText("n = 4")).toBeInTheDocument();
+    expect(screen.getByText("Hidden")).toBeInTheDocument();
+  });
+});
+
+describe("Scatter", () => {
+  it("has titled axes, reference lines and a focusable point per person (duplicates spread)", () => {
+    const { container } = renderIn(
+      "es",
+      <Scatter
+        label="S"
+        points={[
+          { key: "1", x: 50, y: 3, tip: "Ana" },
+          { key: "2", x: 50, y: 3, tip: "Beto" },
+        ]}
+        xDomain={[0, 100]}
+        yDomain={[1, 5]}
+        xTicks={[0, 100]}
+        yTicks={[1, 5]}
+        xFmt={(v) => `${v} %`}
+        yFmt={String}
+        xTitle="Objetivos"
+        yTitle="Retención"
+        refs={[{ axis: "y", value: 2.5, label: "Riesgo" }]}
+      />,
+    );
+    expect(screen.getByText("Objetivos →")).toBeInTheDocument();
+    expect(screen.getByText("↑ Retención")).toBeInTheDocument();
+    expect(screen.getByTestId("scatter-ref")).toHaveTextContent("Riesgo");
+    const [a, b] = screen.getAllByRole("img");
+    expect(a).toHaveAttribute("tabindex", "0");
+    const cx = (g: Element) =>
+      g.querySelectorAll("circle")[1].getAttribute("cx");
+    expect(cx(a)).not.toBe(cx(b));
+    expect(container.querySelectorAll("svg title")).toHaveLength(2);
   });
 });

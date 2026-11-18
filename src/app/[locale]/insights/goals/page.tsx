@@ -158,7 +158,11 @@ async function GoalsInsights({
             hrefFor={(i) => hrefWith(here, shown, { indicator: i })}
             text={(i) => t(`indicator.${i}`)}
           />
-          <GoalsScatter rows={vs.rows} indicator={p.indicator} />
+          <GoalsScatter
+            rows={vs.rows}
+            indicator={p.indicator}
+            thresholds={outliers.thresholds}
+          />
         </Panel>
       ) : null}
       <Panel

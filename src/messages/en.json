@@ -795,7 +795,9 @@
       "n": "{n, plural, one {# person} other {# people}}",
       "mean": "Average {value} %",
       "all": "All",
-      "barLabel": "{group}, {bin}: {count}"
+      "barLabel": "{group}, {bin}: {count}",
+      "xTitle": "Normalized rating (%)",
+      "group": "Group"
     },
     "executive": {
       "hint": "Aggregates only: no names or ids. Groups of fewer than {min} people are folded into Others or hidden.",
@@ -1535,7 +1537,9 @@
       "xAxis": "Goals completed (%)",
       "yAxis": "{indicator} (1 to 5)",
       "point": "{name}: {completed} % of goals completed, {indicator} {value}",
-      "missing": "{n, plural, one {# person does not appear} other {# people do not appear}} for lack of goals or that answer."
+      "missing": "{n, plural, one {# person does not appear} other {# people do not appear}} for lack of goals or that answer.",
+      "riskLine": "Risk: {max} or less",
+      "goalsLine": "Done: {min}% or more"
     },
     "buckets": {
       "title": "Do retention and engagement change with goal completion?",
@@ -1554,7 +1558,9 @@
         "retention": "Retention (mean)",
         "engagement": "Engagement (mean)",
         "positive": "Positive comments"
-      }
+      },
+      "yTitle": "Mean (1–5)",
+      "xTitle": "Goals completed (%)"
     },
     "people": {
       "title": "People",

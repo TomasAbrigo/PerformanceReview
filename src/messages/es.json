@@ -795,7 +795,9 @@
       "n": "{n, plural, one {# persona} other {# personas}}",
       "mean": "Promedio {value} %",
       "all": "Todos",
-      "barLabel": "{group}, {bin}: {count}"
+      "barLabel": "{group}, {bin}: {count}",
+      "xTitle": "Rating normalizado (%)",
+      "group": "Grupo"
     },
     "executive": {
       "hint": "Solo agregados: sin nombres ni ids. Los grupos de menos de {min} personas se agrupan en Otros o se ocultan.",
@@ -1535,7 +1537,9 @@
       "xAxis": "Objetivos completados (%)",
       "yAxis": "{indicator} (1 a 5)",
       "point": "{name}: {completed} % de objetivos completados, {indicator} {value}",
-      "missing": "{n, plural, one {# persona no aparece} other {# personas no aparecen}} por no tener objetivos o esa respuesta."
+      "missing": "{n, plural, one {# persona no aparece} other {# personas no aparecen}} por no tener objetivos o esa respuesta.",
+      "riskLine": "Riesgo: {max} o menos",
+      "goalsLine": "Cumplidos: {min} % o más"
     },
     "buckets": {
       "title": "¿Cambian retención y compromiso según el cumplimiento de objetivos?",
@@ -1554,7 +1558,9 @@
         "retention": "Retención (promedio)",
         "engagement": "Compromiso (promedio)",
         "positive": "Comentarios positivos"
-      }
+      },
+      "yTitle": "Promedio (1–5)",
+      "xTitle": "Objetivos completados (%)"
     },
     "people": {
       "title": "Personas",
