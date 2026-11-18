@@ -1,3 +1,5 @@
+import { ChartNoAxesCombined } from "lucide-react";
+import { EmptyState, IconTile } from "@/components/experience";
 import type { ReactNode } from "react";
 import { useTranslations } from "next-intl";
 import { ChartTooltip } from "./chart-tooltip";
@@ -146,12 +148,15 @@ export function ChartFrame({
   const body = (
     <>
       <div className="flex flex-wrap items-start justify-between gap-3">
-        <div className="flex flex-col gap-1">
+        <div className="flex min-w-0 flex-1 flex-col gap-2">
+          {level === 2 ? (
+            <IconTile>
+              <ChartNoAxesCombined className="size-5" />
+            </IconTile>
+          ) : null}
           <Heading
             id={`${id}-title`}
-            className={
-              level === 3 ? "font-sans text-base font-medium" : undefined
-            }
+            className={level === 3 ? "text-lg" : undefined}
           >
             {title}
           </Heading>
@@ -175,16 +180,13 @@ export function ChartFrame({
         {actions}
       </div>
       {empty ? (
-        <p
-          className="rounded-md border border-dashed border-border p-4 text-sm text-muted-foreground"
-          data-testid="chart-empty"
-        >
-          {empty}
-        </p>
+        <div data-testid="chart-empty">
+          <EmptyState>{empty}</EmptyState>
+        </div>
       ) : (
         <>
           {takeaway ? (
-            <p className="text-sm font-medium" data-testid="chart-takeaway">
+            <p className="insight-callout" data-testid="chart-takeaway">
               {takeaway}
             </p>
           ) : null}
@@ -198,7 +200,7 @@ export function ChartFrame({
   return level === 2 ? (
     <section
       aria-labelledby={`${id}-title`}
-      className="flex flex-col gap-4 rounded-xl border border-border bg-card p-5 lg:p-6"
+      className="chart-panel"
       data-testid={id}
     >
       {body}

@@ -1,3 +1,5 @@
+import { EmptyState } from "@/components/experience";
+import { PageSkeleton } from "@/components/experience";
 import { localizeCycles } from "@/modules/review-core/cycle-name";
 import { hasLocale } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
@@ -35,7 +37,7 @@ async function SelfAssessment({
     (c) => c.status !== "draft",
   );
   const cycle = cycles.find((c) => c.id === sp.cycle) ?? cycles[0];
-  if (!cycle) return <p>{t("noCycles")}</p>;
+  if (!cycle) return <EmptyState>{t("noCycles")}</EmptyState>;
   const report = await selfAssessmentReport(db, actor, {
     cycleId: cycle.id,
     groupBy,
@@ -81,7 +83,7 @@ export default function SelfAssessmentPage(
 ) {
   return (
     <main className="mx-auto w-full max-w-6xl p-6 lg:p-10">
-      <Suspense fallback={<div aria-busy="true" className="h-40" />}>
+      <Suspense fallback={<PageSkeleton />}>
         <SelfAssessment {...props} />
       </Suspense>
     </main>

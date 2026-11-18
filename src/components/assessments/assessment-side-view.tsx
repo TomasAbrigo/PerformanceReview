@@ -56,7 +56,7 @@ export function AssessmentSideView({ side }: { side: AssessmentSide }) {
               <div
                 key={q.id}
                 data-testid="question"
-                className="flex flex-col gap-1.5 border-t border-border pt-3 first:border-t-0 first:pt-0"
+                className="flex flex-col gap-3 rounded-lg bg-brand-fog/60 p-4"
               >
                 <dt className="flex flex-wrap items-baseline gap-x-2 gap-y-1 text-sm font-medium">
                   {pickLocalized(q.prompt, locale)}

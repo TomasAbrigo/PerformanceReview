@@ -128,10 +128,10 @@ describe.each(locales)("CompletionSummaryView (%s)", (locale) => {
     expect(within(groups[0]).getByText("3/4")).toBeInTheDocument();
     expect(within(groups[1]).getByText("Tecnología")).toBeInTheDocument();
     expect(
-      within(groups[1]).getByRole("img", { name: text.meter }),
+      within(groups[1]).getByRole("progressbar", { name: text.meter }),
     ).toBeInTheDocument();
     expect(
-      within(groups[1]).getByRole("img", { name: text.managerMeter }),
+      within(groups[1]).getByRole("progressbar", { name: text.managerMeter }),
     ).toBeInTheDocument();
     expect(within(groups[1]).getByText("67 %")).toBeInTheDocument();
     expect(within(groups[1]).getByText("33 %")).toBeInTheDocument();
@@ -410,10 +410,10 @@ describe.each(locales)("MissingTable (%s)", (locale) => {
       />,
     );
     expect(screen.getByRole("status")).toHaveTextContent(t.count);
-    const table = screen.getByRole("table", { name: t.title });
-    const [, beto, carla] = within(table).getAllByRole("row");
+    const table = screen.getByRole("group", { name: t.title });
+    const [beto, carla] = within(table).getAllByRole("article");
     expect(within(beto).getByText("Beto Benítez")).toBeInTheDocument();
-    expect(within(beto).getByText("Marta Gómez")).toBeInTheDocument();
+    expect(within(beto).getByText(/Marta Gómez/)).toBeInTheDocument();
     expect(within(beto).getByText(t.submitted)).toHaveAttribute(
       "data-status",
       "submitted",
@@ -424,14 +424,16 @@ describe.each(locales)("MissingTable (%s)", (locale) => {
     );
     expect(within(beto).queryByText(t.notes)).not.toBeInTheDocument();
     expect(within(carla).getAllByText(t.notStarted)).toHaveLength(2);
-    expect(within(carla).getAllByText(t.unassigned)).toHaveLength(2);
+    expect(within(carla).getAllByText(new RegExp(t.unassigned))).toHaveLength(
+      2,
+    );
     expect(within(carla).getByText(t.notes)).toBeInTheDocument();
     expect(table).not.toHaveTextContent("carla@example.test");
   });
 
   it("says so when nobody is missing", () => {
     renderIn(locale, <MissingTable rows={[]} />);
-    expect(screen.getByRole("status")).toHaveTextContent(t.none);
+    expect(screen.getByText(t.none)).toBeInTheDocument();
     expect(screen.getByText(t.empty)).toBeInTheDocument();
     expect(screen.queryByRole("table")).not.toBeInTheDocument();
   });

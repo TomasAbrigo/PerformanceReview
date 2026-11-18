@@ -1,3 +1,4 @@
+import { CardCollection } from "@/components/card-collection";
 import { useTranslations } from "next-intl";
 import { Matrix } from "@/components/charts";
 import { Empty, TableView } from "@/components/insights/parts";
@@ -105,45 +106,38 @@ export function RiskMatrixView({ matrix }: { matrix: RiskMatrix }) {
               {t("matrix.risk.empty")}
             </p>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="text-sm">
-                <thead>
-                  <tr>
-                    <th className="p-1 text-left">{t("matrix.risk.person")}</th>
-                    <th className="p-1 text-left">
-                      {t("matrix.risk.manager")}
-                    </th>
-                    <th className="p-1 text-left">
-                      {t("matrix.risk.department")}
-                    </th>
-                    <th className="p-1 text-left">
-                      {t("indicator.retention")}
-                    </th>
-                    <th className="p-1 text-left">
-                      {t("indicator.engagement")}
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {matrix.atRisk.map((p) => (
-                    <tr key={p.personId} className="border-t">
-                      <td className="p-1">
-                        <Link
-                          href={`/insights/indicators/trend?person=${p.personId}`}
-                          className="underline"
-                        >
-                          {p.name}
-                        </Link>
-                      </td>
-                      <td className="p-1">{p.managerName ?? t("none")}</td>
-                      <td className="p-1">{p.department ?? t("none")}</td>
-                      <td className="p-1 tabular-nums">{p.retention}</td>
-                      <td className="p-1 tabular-nums">{p.engagement}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+            <CardCollection gridClassName="record-grid">
+              {matrix.atRisk.map((p) => (
+                <article key={p.personId} className="record-card">
+                  <h4 className="text-lg">
+                    <Link
+                      href={`/insights/indicators/trend?person=${p.personId}`}
+                      className="underline decoration-brand-200 underline-offset-4"
+                    >
+                      {p.name}
+                    </Link>
+                  </h4>
+                  <p className="text-xs text-muted-foreground">
+                    {p.department ?? t("none")} · {t("matrix.risk.manager")}:{" "}
+                    {p.managerName ?? t("none")}
+                  </p>
+                  <dl className="record-facts">
+                    <div>
+                      <dt>{t("indicator.retention")}</dt>
+                      <dd>
+                        <span className="stat-value-sm">{p.retention}</span>
+                      </dd>
+                    </div>
+                    <div>
+                      <dt>{t("indicator.engagement")}</dt>
+                      <dd>
+                        <span className="stat-value-sm">{p.engagement}</span>
+                      </dd>
+                    </div>
+                  </dl>
+                </article>
+              ))}
+            </CardCollection>
           )}
         </div>
       ) : null}

@@ -8,14 +8,14 @@ export function ProgressBar({
 }) {
   const value = Math.min(100, Math.max(0, Math.round(percent)));
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex w-full min-w-0 items-center gap-3">
       <div
         role="progressbar"
         aria-label={label}
         aria-valuemin={0}
         aria-valuemax={100}
         aria-valuenow={value}
-        className="h-1.5 w-20 shrink-0 overflow-hidden rounded-full bg-brand-fog"
+        className="h-2 min-w-16 flex-1 overflow-hidden rounded-full bg-brand-fog"
       >
         <div
           className="h-full rounded-full bg-brand-600"

@@ -38,7 +38,7 @@ test("the queue holds the ambiguous row and suggests the person", async ({
   ).toBeVisible();
 
   await page.goto("/en/imports/identity");
-  const row = page.getByRole("row", { name: queueRow });
+  const row = page.getByRole("article").filter({ hasText: queueRow });
   await expect(row.getByText("Possible match")).toBeVisible();
   await expect(row.getByText("1 candidate")).toBeVisible();
 
@@ -56,7 +56,8 @@ test("the candidate's email is shown to People only", async ({ page }) => {
   // In Spanish: the "Actuar como" bar helpers use its Spanish labels.
   await page.goto("/es/imports/identity");
   await page
-    .getByRole("row", { name: queueRow })
+    .getByRole("article")
+    .filter({ hasText: queueRow })
     .getByRole("link", { name })
     .click();
   const candidate = page.getByRole("listitem", { name });
@@ -76,7 +77,8 @@ test("linking the case adds the new employment to the same person", async ({
 }) => {
   await page.goto("/en/imports/identity");
   await page
-    .getByRole("row", { name: queueRow })
+    .getByRole("article")
+    .filter({ hasText: queueRow })
     .getByRole("link", { name })
     .click();
 
@@ -84,7 +86,9 @@ test("linking the case adds the new employment to the same person", async ({
   await page.getByRole("button", { name: `Link to ${name}` }).click();
 
   await expect(page).toHaveURL(/\/en\/imports\/identity$/);
-  await expect(page.getByRole("row", { name: queueRow })).toHaveCount(0);
+  await expect(
+    page.getByRole("article").filter({ hasText: queueRow }),
+  ).toHaveCount(0);
 
   await page.getByRole("link", { name: "History" }).click();
   const done = page.getByRole("row", { name: queueRow });

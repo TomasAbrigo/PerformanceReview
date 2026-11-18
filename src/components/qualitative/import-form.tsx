@@ -1,5 +1,8 @@
 "use client";
 
+import { CardCollection } from "@/components/card-collection";
+import { FileUp } from "lucide-react";
+import { IconTile } from "@/components/experience";
 import { useTranslations } from "next-intl";
 import { useState, useTransition } from "react";
 import { Button } from "@/components/ui/button";
@@ -15,7 +18,10 @@ export function ImportLabelsForm({
   const [pending, start] = useTransition();
   const [result, setResult] = useState<ImportOutcome | null>(null);
   return (
-    <section className="flex flex-col gap-2">
+    <section className="admin-surface flex flex-col gap-5">
+      <IconTile>
+        <FileUp className="size-5" />
+      </IconTile>
       <h2>{t("import.title")}</h2>
       <form
         className="flex flex-wrap items-end gap-2"
@@ -48,24 +54,19 @@ export function ImportLabelsForm({
             })}
           </p>
           {result.unmatched.length > 0 ? (
-            <table aria-label={t("import.unmatched")}>
-              <thead>
-                <tr className="text-left">
-                  <th className="pr-4">{t("import.row")}</th>
-                  <th className="pr-4">{t("import.employee")}</th>
-                  <th className="pr-4">{t("import.reason")}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {result.unmatched.map((u) => (
-                  <tr key={u.line}>
-                    <td className="pr-4 tabular-nums">{u.line}</td>
-                    <td className="pr-4">{u.employee}</td>
-                    <td className="pr-4">{t(`import.reasons.${u.reason}`)}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+            <CardCollection role="group" aria-label={t("import.unmatched")}>
+              {result.unmatched.map((u) => (
+                <article key={u.line} className="record-card">
+                  <h3 className="text-lg">{u.employee}</h3>
+                  <p className="text-xs text-muted-foreground">
+                    {t("import.row")}: {u.line}
+                  </p>
+                  <p className="insight-callout">
+                    {t(`import.reasons.${u.reason}`)}
+                  </p>
+                </article>
+              ))}
+            </CardCollection>
           ) : null}
         </div>
       ) : null}

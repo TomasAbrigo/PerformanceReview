@@ -4,7 +4,7 @@ import { useDates } from "@/components/dates";
 import { Fact } from "@/components/fact";
 import { cycleName } from "@/modules/review-core/cycle-name";
 import { Panel } from "@/components/insights/parts";
-import { ProgressBar } from "@/components/progress-bar";
+import { ProgressRing } from "@/components/experience";
 import { Link } from "@/i18n/navigation";
 import type { GoalDetail } from "@/modules/goals/browse";
 import { GoalStateBadge } from "./goal-state-badge";
@@ -29,16 +29,16 @@ export function GoalDetailView({
   const d = useDates();
   const doneMilestones = goal.milestones.filter((m) => m.completedAt).length;
   return (
-    <div className="flex flex-col gap-6">
+    <div className="goal-detail-layout">
       <Panel id="goal-summary" title={t("summary")}>
-        <dl className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+        <dl className="grid gap-5 sm:grid-cols-2">
           <Fact label={t("owner")}>{goal.person.name}</Fact>
           <Fact label={t("department")}>{goal.department ?? "–"}</Fact>
           <Fact label={t("state")}>
             <GoalStateBadge state={goal.state} />
           </Fact>
           <Fact label={t("progress")}>
-            <ProgressBar
+            <ProgressRing
               percent={goal.percentComplete}
               label={tg("progress", { percent: goal.percentComplete })}
             />
@@ -81,7 +81,10 @@ export function GoalDetailView({
         ) : (
           <ol className="flex flex-col gap-2 text-sm">
             {goal.milestones.map((m) => (
-              <li key={m.id} className="flex items-start gap-3">
+              <li
+                key={m.id}
+                className="flex items-start gap-3 rounded-lg bg-brand-fog p-4"
+              >
                 {m.completedAt ? (
                   <Check
                     className="mt-0.5 size-4 shrink-0 text-status-done"
@@ -112,7 +115,10 @@ export function GoalDetailView({
         ) : (
           <ul className="flex flex-col gap-4">
             {goal.comments.map((c) => (
-              <li key={c.id} className="flex flex-col gap-1 text-sm">
+              <li
+                key={c.id}
+                className="flex flex-col gap-2 rounded-lg bg-brand-fog p-4 text-sm"
+              >
                 <span className="text-xs text-muted-foreground">
                   <span className="font-medium text-foreground">
                     {c.author ?? t("unknownAuthor")}

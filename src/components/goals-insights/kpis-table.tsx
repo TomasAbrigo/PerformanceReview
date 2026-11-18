@@ -1,44 +1,19 @@
+import { CardCollection } from "@/components/card-collection";
 import { useTranslations } from "next-intl";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { Target } from "lucide-react";
+import { IconTile, ProgressRing } from "@/components/experience";
+import { TableView } from "@/components/insights/parts";
 import type {
   GoalKpiGroup,
   GoalKpis,
 } from "@/modules/analytics/goals-insights/types";
-import { BulletBar } from "@/components/charts";
 import { Empty, useDecimal, usePct } from "./shared";
 
-/** Share of the goals completed, as the kit's bullet bar. */
-function CompletedMeter({ pct, label }: { pct: number; label: string }) {
-  return (
-    <BulletBar
-      value={pct / 100}
-      label={label}
-      width={96}
-      showValue={false}
-      fullLabel
-    />
-  );
-}
-
-/**
- * The goal indicators of each group: goals, and how many (and what share)
- * are completed, in progress and overdue, and the mean progress. Direction's
- * "Otros" cell and the people left out are labelled, never hidden silently.
- */
 export function KpisTable({ kpis }: { kpis: GoalKpis }) {
   const t = useTranslations("GoalsInsights.kpis");
   const pct = usePct();
   const decimal = useDecimal();
   if (kpis.groups.length === 0 && kpis.suppressed === 0) return <Empty />;
-  // A team with a key but no name is one of direction's (a manager is a
-  // person): numbered in the order they come.
   const teams = kpis.groups.filter((g) => g.key !== null && g.label === null);
   const label = (g: GoalKpiGroup) =>
     g.others
@@ -48,61 +23,108 @@ export function KpisTable({ kpis }: { kpis: GoalKpis }) {
         : (g.label ?? t("unassigned"));
   const share = (count: number, value: number | null) =>
     value === null ? t("none") : t("share", { count, pct: pct(value) ?? 0 });
-  const row = (g: GoalKpiGroup, name: string, strong = false) => (
-    <TableRow
-      key={`${g.others}-${g.key ?? ""}-${name}`}
-      className={strong ? "font-medium" : undefined}
-    >
-      <TableCell>{name}</TableCell>
-      <TableCell className="tabular-nums">{g.people}</TableCell>
-      <TableCell className="tabular-nums">{g.goals}</TableCell>
-      <TableCell className="tabular-nums">
-        <div className="flex items-center gap-2">
-          {share(g.completed, g.completedPct)}
-          {g.completedPct === null ? null : (
-            <CompletedMeter
-              pct={g.completedPct}
-              label={t("meter", { group: name, pct: pct(g.completedPct) ?? 0 })}
-            />
-          )}
-        </div>
-      </TableCell>
-      <TableCell className="tabular-nums">
-        {share(g.inProgress, g.inProgressPct)}
-      </TableCell>
-      <TableCell className="tabular-nums">
-        {share(g.overdue, g.overduePct)}
-      </TableCell>
-      <TableCell className="tabular-nums">
-        {g.avgProgress === null ? t("none") : `${decimal(g.avgProgress)} %`}
-      </TableCell>
-    </TableRow>
-  );
+  const groups = [
+    ...(kpis.total
+      ? [{ group: kpis.total, name: t("total"), total: true }]
+      : []),
+    ...kpis.groups.map((group) => ({
+      group,
+      name: label(group),
+      total: false,
+    })),
+  ];
+  const columns = [
+    "group",
+    "people",
+    "goals",
+    "completed",
+    "inProgress",
+    "overdue",
+    "avgProgress",
+  ] as const;
   return (
-    <div className="flex flex-col gap-2">
-      <Table aria-label={t("title")} data-testid="kpis-table">
-        <TableHeader>
-          <TableRow>
-            <TableHead>{t("columns.group")}</TableHead>
-            <TableHead>{t("columns.people")}</TableHead>
-            <TableHead>{t("columns.goals")}</TableHead>
-            <TableHead>{t("columns.completed")}</TableHead>
-            <TableHead>{t("columns.inProgress")}</TableHead>
-            <TableHead>{t("columns.overdue")}</TableHead>
-            <TableHead>{t("columns.avgProgress")}</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {kpis.groups.map((g) => row(g, label(g)))}
-          {kpis.total ? row(kpis.total, t("total"), true) : null}
-        </TableBody>
-      </Table>
+    <div className="flex flex-col gap-5" data-testid="kpis-table">
+      <CardCollection
+        gridClassName="comparison-grid"
+        role="group"
+        aria-label={t("title")}
+      >
+        {groups.map(({ group: g, name, total }, i) => (
+          <article
+            key={i}
+            aria-label={name}
+            className={`comparison-card ${total ? "comparison-featured" : ""}`}
+          >
+            <header className="flex items-center gap-3">
+              <IconTile>
+                <Target className="size-5" />
+              </IconTile>
+              <div>
+                <h3 className="text-xl">{name}</h3>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  {t("columns.people")}: {g.people} · {t("columns.goals")}:{" "}
+                  {g.goals}
+                </p>
+              </div>
+            </header>
+            <div className="flex flex-wrap items-center gap-5">
+              {g.completedPct === null ? (
+                <p>{t("none")}</p>
+              ) : (
+                <ProgressRing
+                  percent={g.completedPct}
+                  label={t("meter", {
+                    group: name,
+                    pct: pct(g.completedPct) ?? 0,
+                  })}
+                />
+              )}
+              <dl className="grid flex-1 grid-cols-2 gap-4 text-sm">
+                {(
+                  [
+                    ["completed", share(g.completed, g.completedPct)],
+                    ["inProgress", share(g.inProgress, g.inProgressPct)],
+                    ["overdue", share(g.overdue, g.overduePct)],
+                    [
+                      "avgProgress",
+                      g.avgProgress === null
+                        ? t("none")
+                        : `${decimal(g.avgProgress)} %`,
+                    ],
+                  ] as const
+                ).map(([key, value]) => (
+                  <div key={key}>
+                    <dt className="text-xs text-muted-foreground">
+                      {t(`columns.${key}`)}
+                    </dt>
+                    <dd className="mt-2 font-heading text-xl tabular-nums">
+                      {value}
+                    </dd>
+                  </div>
+                ))}
+              </dl>
+            </div>
+          </article>
+        ))}
+      </CardCollection>
       {kpis.suppressed > 0 ? (
         <p className="text-sm text-muted-foreground">
           {t("suppressed", { n: kpis.suppressed })}
           {kpis.total === null ? ` ${t("totalHidden")}` : ""}
         </p>
       ) : null}
+      <TableView
+        head={columns.map((key) => t(`columns.${key}`))}
+        rows={groups.map(({ group: g, name }) => [
+          name,
+          g.people,
+          g.goals,
+          share(g.completed, g.completedPct),
+          share(g.inProgress, g.inProgressPct),
+          share(g.overdue, g.overduePct),
+          g.avgProgress === null ? t("none") : `${decimal(g.avgProgress)} %`,
+        ])}
+      />
     </div>
   );
 }

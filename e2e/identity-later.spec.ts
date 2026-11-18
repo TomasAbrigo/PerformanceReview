@@ -13,8 +13,8 @@ test("a rehire that arrives in a later run waits in the queue", async ({
 }) => {
   await page.goto("/en/imports/identity");
 
-  const row = page.getByRole("row", {
-    name: new RegExp(`${escapeRegExp(name)}.*\\b${later.id}\\b`),
+  const row = page.getByRole("article").filter({
+    hasText: new RegExp(`${escapeRegExp(name)}.*\\b${later.id}\\b`),
   });
   await expect(row.getByText("Possible match")).toBeVisible();
   await expect(row.getByText("1 candidate")).toBeVisible();

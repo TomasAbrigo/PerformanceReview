@@ -1,4 +1,5 @@
 import { render, screen, within } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { NextIntlClientProvider } from "next-intl";
 import type { ReactNode } from "react";
 import { describe, expect, it } from "vitest";
@@ -110,7 +111,7 @@ describe("EngagementView", () => {
     },
   );
 
-  it("leaves a gap and a message for a month direction cannot see", () => {
+  it("leaves a gap and a message for a month direction cannot see", async () => {
     renderIn(
       "es",
       <EngagementView
@@ -133,6 +134,7 @@ describe("EngagementView", () => {
     );
 
     const table = screen.getByRole("table", { name: "Detalle por mes" });
+    await userEvent.click(screen.getByText("Ver como tabla"));
     expect(
       within(table).getByText("Menos de 5 personas: no se muestra."),
     ).toBeVisible();

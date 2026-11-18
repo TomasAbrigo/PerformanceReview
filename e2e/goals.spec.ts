@@ -32,9 +32,9 @@ test("People list every goal, filter them and page through them", async ({
     page.getByRole("heading", { level: 1, name: "Goals" }),
   ).toBeVisible();
   const total = await allGoalCount();
-  await expect(page.getByRole("heading", { level: 2 }).first()).toHaveText(
-    plural(total),
-  );
+  await expect(
+    page.getByTestId("goals-list").getByRole("heading", { level: 2 }).first(),
+  ).toHaveText(plural(total));
   const states = page.getByRole("group", { name: "Goals por estado" });
   await expect(
     states.getByRole("link", { name: `Todos ${total}` }),
@@ -42,10 +42,9 @@ test("People list every goal, filter them and page through them", async ({
 
   // By state: every row of the list is in it.
   const filters = page.getByRole("form", { name: "Filtros de goals" });
-  await filters.locator('select[name="state"]').selectOption("completed");
-  await filters.getByRole("button", { name: "Aplicar" }).click();
+  await states.getByRole("link", { name: /^Completado \d+$/ }).click();
   await expect(page).toHaveURL(/state=completed/);
-  const rows = page.getByRole("table", { name: "Lista de goals" });
+  const rows = page.getByRole("group", { name: "Lista de goals" });
   await expect(rows.locator("[data-state]").first()).toBeVisible();
   await expect(
     rows.locator('[data-state]:not([data-state="completed"])'),
@@ -61,9 +60,9 @@ test("People list every goal, filter them and page through them", async ({
     .selectOption({ label: subject.cycleName });
   await filters.getByRole("button", { name: "Aplicar" }).click();
   await expect(page).toHaveURL(/cycle=[0-9a-f-]{36}/);
-  await expect(page.getByRole("heading", { level: 2 }).first()).toHaveText(
-    plural(await cycleGoalCount(subject.cycleId)),
-  );
+  await expect(
+    page.getByTestId("goals-list").getByRole("heading", { level: 2 }).first(),
+  ).toHaveText(plural(await cycleGoalCount(subject.cycleId)));
 
   // By person.
   await page.goto("/es/goals");
@@ -71,27 +70,27 @@ test("People list every goal, filter them and page through them", async ({
   await filters.getByRole("button", { name: "Aplicar" }).click();
   await expect(page).toHaveURL(/q=/);
   const own = await goalCount(subject.personId);
-  await expect(page.getByRole("heading", { level: 2 }).first()).toHaveText(
-    plural(own),
-  );
+  await expect(
+    page.getByTestId("goals-list").getByRole("heading", { level: 2 }).first(),
+  ).toHaveText(plural(own));
   await expect(rows.getByText(subject.personName)).toHaveCount(own);
 
   // Paging: the first page is full, the next one has others.
   await page.goto("/es/goals");
   await expect(page.getByText(/^Página 1 de \d+$/)).toBeVisible();
-  const first = await rows.locator("tbody tr").first().innerText();
+  const first = await rows.getByRole("article").first().innerText();
   await page.getByRole("link", { name: "Siguiente" }).click();
   await expect(page).toHaveURL(/page=2/);
   await expect(page.getByText(/^Página 2 de \d+$/)).toBeVisible();
-  expect(await rows.locator("tbody tr").first().innerText()).not.toBe(first);
+  expect(await rows.getByRole("article").first().innerText()).not.toBe(first);
 });
 
 test("a page past the last one shows the last page, not an empty list", async ({
   page,
 }) => {
   await page.goto("/es/goals?page=99999");
-  const rows = page.getByRole("table", { name: "Lista de goals" });
-  await expect(rows.locator("tbody tr").first()).toBeVisible();
+  const rows = page.getByRole("group", { name: "Lista de goals" });
+  await expect(rows.getByRole("article").first()).toBeVisible();
   const position = page.getByText(/^Página (\d+) de (\d+)$/);
   await expect(position).toBeVisible();
   const [, current, pages] = (await position.innerText()).match(
@@ -101,7 +100,7 @@ test("a page past the last one shows the last page, not an empty list", async ({
   await expect(page.getByRole("link", { name: "Anterior" })).toBeVisible();
   await page.goto("/es/assessments?page=99999999999999");
   await expect(
-    page.getByRole("table", { name: "Participantes del ciclo" }),
+    page.getByRole("group", { name: "Participantes del ciclo" }),
   ).toBeVisible();
 });
 
@@ -114,7 +113,7 @@ test("a goal's page shows its summary, milestones and comments, and leads to the
   await filters.getByLabel("Persona").fill(goal.personName);
   await filters.getByRole("button", { name: "Aplicar" }).click();
   await page
-    .getByRole("table", { name: "Lista de goals" })
+    .getByRole("group", { name: "Lista de goals" })
     .getByRole("link", { name: goal.title })
     .first()
     .click();
@@ -149,17 +148,17 @@ test("an employee only sees their own goals", async ({ page }) => {
   await actAsCookie(page, { personId: subject.personId, role: "employee" });
   await page.goto("/es/goals");
   const own = await goalCount(subject.personId);
-  await expect(page.getByRole("heading", { level: 2 }).first()).toHaveText(
-    plural(own),
-  );
+  await expect(
+    page.getByTestId("goals-list").getByRole("heading", { level: 2 }).first(),
+  ).toHaveText(plural(own));
   // Themself only: no person column, no person search.
   const filters = page.getByRole("form", { name: "Filtros de goals" });
   await expect(filters.getByLabel("Persona")).toHaveCount(0);
-  const rows = page.getByRole("table", { name: "Lista de goals" });
+  const rows = page.getByRole("group", { name: "Lista de goals" });
   await expect(rows.getByRole("columnheader", { name: "Persona" })).toHaveCount(
     0,
   );
-  await expect(rows.locator("tbody tr")).toHaveCount(own);
+  await expect(rows.getByRole("article")).toHaveCount(own);
 
   // Somebody else's goal: no access, and nothing of it on the page.
   const other = await goalOfSomeoneElse(subject.personId);
@@ -186,14 +185,14 @@ test("a manager sees their team's goals and not other people's", async ({
   const filters = page.getByRole("form", { name: "Filtros de goals" });
   await filters.getByLabel("Persona").fill(subject.personName);
   await filters.getByRole("button", { name: "Aplicar" }).click();
-  const rows = page.getByRole("table", { name: "Lista de goals" });
-  await expect(rows.locator("tbody tr").first()).toContainText(
+  const rows = page.getByRole("group", { name: "Lista de goals" });
+  await expect(rows.getByRole("article").first()).toContainText(
     subject.personName,
   );
   // The whole company's goals are not theirs.
   await page.goto("/es/goals");
   const total = await allGoalCount();
-  await expect(page.getByRole("heading", { level: 2 }).first()).not.toHaveText(
-    plural(total),
-  );
+  await expect(
+    page.getByTestId("goals-list").getByRole("heading", { level: 2 }).first(),
+  ).not.toHaveText(plural(total));
 });

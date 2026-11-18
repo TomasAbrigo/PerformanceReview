@@ -15,8 +15,8 @@ const badgeVariants = cva(
           "bg-status-pending-bg text-status-pending focus-visible:ring-destructive/20 dark:bg-destructive/20 dark:focus-visible:ring-destructive/40 [a]:hover:bg-destructive/20",
         outline:
           "border-border text-foreground [a]:hover:bg-muted [a]:hover:text-muted-foreground",
-        success: "bg-status-done-bg text-status-done",
-        warning: "bg-status-progress-bg text-status-progress",
+        success: "bg-status-done-bg text-foreground",
+        warning: "bg-status-progress-bg text-foreground",
         ghost:
           "hover:bg-muted hover:text-muted-foreground dark:hover:bg-muted/50",
         link: "text-primary underline-offset-4 hover:underline",

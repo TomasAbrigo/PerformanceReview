@@ -1,5 +1,6 @@
 "use client";
 
+import { CardCollection } from "@/components/card-collection";
 import { useTranslations } from "next-intl";
 import { useId } from "react";
 import {
@@ -9,14 +10,7 @@ import {
   FieldLabel,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+
 import {
   builtinProfiles,
   PROFILE_ENTITIES,
@@ -323,80 +317,68 @@ export function ProfileEditor({
         </Field>
       </div>
 
-      <Table aria-label={t("custom.title")}>
-        <TableHeader>
-          <TableRow>
-            <TableHead>{t("preview.columnName")}</TableHead>
-            <TableHead>{t("preview.columnType")}</TableHead>
-            <TableHead>{t("custom.key")}</TableHead>
-            <TableHead>{t("custom.watermark")}</TableHead>
-            <TableHead>{t("custom.field")}</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          <TableRow>
-            <TableCell colSpan={3} />
-            <TableCell>
-              <label className="flex items-center gap-1 text-xs text-muted-foreground">
-                <input
-                  type="radio"
-                  name={`${id}-watermark`}
-                  checked={draft.watermark === ""}
-                  onChange={() => patch({ watermark: "" })}
-                />
-                {t("custom.noWatermark")}
-              </label>
-            </TableCell>
-            <TableCell />
-          </TableRow>
-          {columns.map((column) => (
-            <TableRow key={column.name}>
-              <TableCell className="font-medium">{column.name}</TableCell>
-              <TableCell className="font-mono text-xs">{column.type}</TableCell>
-              <TableCell>
-                <input
-                  type="checkbox"
-                  aria-label={t("custom.keyLabel", { column: column.name })}
-                  checked={draft.keys.includes(column.name)}
-                  onChange={(e) =>
-                    patch({
-                      keys: e.target.checked
-                        ? [...draft.keys, column.name]
-                        : draft.keys.filter((k) => k !== column.name),
-                    })
-                  }
-                />
-              </TableCell>
-              <TableCell>
-                <input
-                  type="radio"
-                  name={`${id}-watermark`}
-                  aria-label={t("custom.watermarkLabel", {
-                    column: column.name,
-                  })}
-                  checked={draft.watermark === column.name}
-                  onChange={() => patch({ watermark: column.name })}
-                />
-              </TableCell>
-              <TableCell>
-                <Input
-                  aria-label={t("custom.fieldLabel", { column: column.name })}
-                  value={draft.fields[column.name] ?? ""}
-                  autoComplete="off"
-                  onChange={(e) =>
-                    patch({
-                      fields: {
-                        ...draft.fields,
-                        [column.name]: e.target.value,
-                      },
-                    })
-                  }
-                />
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+      <label className="flex items-center gap-2 rounded-lg bg-brand-fog p-4 text-sm">
+        <input
+          type="radio"
+          name={`${id}-watermark`}
+          checked={draft.watermark === ""}
+          onChange={() => patch({ watermark: "" })}
+        />
+        {t("custom.noWatermark")}
+      </label>
+      <CardCollection role="group" aria-label={t("custom.title")}>
+        {columns.map((column) => (
+          <article key={column.name} className="record-card">
+            <h4 className="text-lg break-words">{column.name}</h4>
+            <p className="font-mono text-xs text-muted-foreground">
+              {column.type}
+            </p>
+            <label className="control-label">
+              {t("custom.key")}
+              <input
+                type="checkbox"
+                aria-label={t("custom.keyLabel", { column: column.name })}
+                checked={draft.keys.includes(column.name)}
+                onChange={(e) =>
+                  patch({
+                    keys: e.target.checked
+                      ? [...draft.keys, column.name]
+                      : draft.keys.filter((k) => k !== column.name),
+                  })
+                }
+              />
+            </label>
+            <label className="control-label">
+              {t("custom.watermark")}
+              <input
+                type="radio"
+                name={`${id}-watermark`}
+                aria-label={t("custom.watermarkLabel", {
+                  column: column.name,
+                })}
+                checked={draft.watermark === column.name}
+                onChange={() => patch({ watermark: column.name })}
+              />
+            </label>
+            <label className="control-label">
+              {t("custom.field")}
+              <Input
+                aria-label={t("custom.fieldLabel", { column: column.name })}
+                value={draft.fields[column.name] ?? ""}
+                autoComplete="off"
+                onChange={(e) =>
+                  patch({
+                    fields: {
+                      ...draft.fields,
+                      [column.name]: e.target.value,
+                    },
+                  })
+                }
+              />
+            </label>
+          </article>
+        ))}
+      </CardCollection>
       {draft.entity === "assessment" ? (
         <QuestionTable
           columns={columns}
@@ -441,99 +423,92 @@ function QuestionTable({
   return (
     <div className="flex flex-col gap-2">
       <p className="text-sm text-muted-foreground">{t("hint")}</p>
-      <Table aria-label={t("title")}>
-        <TableHeader>
-          <TableRow>
-            <TableHead>{t("column")}</TableHead>
-            <TableHead>{t("kind")}</TableHead>
-            <TableHead>{t("side")}</TableHead>
-            <TableHead>{t("dimension")}</TableHead>
-            <TableHead>{t("role")}</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {columns.map(({ name: column }) => {
-            const q = questions[column] ?? emptyQuestion;
-            const off = q.kind === "";
-            return (
-              <TableRow key={column}>
-                <TableCell className="font-medium">{column}</TableCell>
-                <TableCell>
-                  <NativeSelect
-                    aria-label={t("kindLabel", { column })}
-                    value={q.kind}
-                    onChange={(e) =>
-                      set(column, {
-                        kind: e.target.value as QuestionDraft["kind"],
-                      })
-                    }
-                  >
-                    <option value="">{t("kinds.none")}</option>
-                    {QUESTION_KINDS.map((kind) => (
-                      <option key={kind} value={kind}>
-                        {t(`kinds.${kind}`)}
-                      </option>
-                    ))}
-                  </NativeSelect>
-                </TableCell>
-                <TableCell>
-                  <NativeSelect
-                    aria-label={t("sideLabel", { column })}
-                    value={q.side}
-                    disabled={off}
-                    onChange={(e) =>
-                      set(column, {
-                        side: e.target.value as QuestionDraft["side"],
-                      })
-                    }
-                  >
-                    <option value="self">{t("sides.self")}</option>
-                    <option value="manager">{t("sides.manager")}</option>
-                  </NativeSelect>
-                </TableCell>
-                <TableCell>
-                  <NativeSelect
-                    aria-label={t("dimensionLabel", { column })}
-                    value={q.dimension}
-                    disabled={off}
-                    onChange={(e) =>
-                      set(column, {
-                        dimension: e.target.value as QuestionDraft["dimension"],
-                      })
-                    }
-                  >
-                    <option value="">{t("none")}</option>
-                    {questionDimensions.map((d) => (
-                      <option key={d} value={d}>
-                        {t(`dimensions.${d}`)}
-                      </option>
-                    ))}
-                  </NativeSelect>
-                </TableCell>
-                <TableCell>
-                  <NativeSelect
-                    aria-label={t("roleLabel", { column })}
-                    value={q.role}
-                    disabled={off}
-                    onChange={(e) =>
-                      set(column, {
-                        role: e.target.value as QuestionDraft["role"],
-                      })
-                    }
-                  >
-                    <option value="">{t("none")}</option>
-                    {questionRoles.map((r) => (
-                      <option key={r} value={r}>
-                        {t(`roles.${r}`)}
-                      </option>
-                    ))}
-                  </NativeSelect>
-                </TableCell>
-              </TableRow>
-            );
-          })}
-        </TableBody>
-      </Table>
+      <CardCollection role="group" aria-label={t("title")}>
+        {columns.map(({ name: column }) => {
+          const q = questions[column] ?? emptyQuestion;
+          const off = q.kind === "";
+          return (
+            <article key={column} className="record-card">
+              <h4 className="text-lg break-words">{column}</h4>
+              <label className="control-label">
+                {t("kind")}
+                <NativeSelect
+                  aria-label={t("kindLabel", { column })}
+                  value={q.kind}
+                  onChange={(e) =>
+                    set(column, {
+                      kind: e.target.value as QuestionDraft["kind"],
+                    })
+                  }
+                >
+                  <option value="">{t("kinds.none")}</option>
+                  {QUESTION_KINDS.map((kind) => (
+                    <option key={kind} value={kind}>
+                      {t(`kinds.${kind}`)}
+                    </option>
+                  ))}
+                </NativeSelect>
+              </label>
+              <label className="control-label">
+                {t("side")}
+                <NativeSelect
+                  aria-label={t("sideLabel", { column })}
+                  value={q.side}
+                  disabled={off}
+                  onChange={(e) =>
+                    set(column, {
+                      side: e.target.value as QuestionDraft["side"],
+                    })
+                  }
+                >
+                  <option value="self">{t("sides.self")}</option>
+                  <option value="manager">{t("sides.manager")}</option>
+                </NativeSelect>
+              </label>
+              <label className="control-label">
+                {t("dimension")}
+                <NativeSelect
+                  aria-label={t("dimensionLabel", { column })}
+                  value={q.dimension}
+                  disabled={off}
+                  onChange={(e) =>
+                    set(column, {
+                      dimension: e.target.value as QuestionDraft["dimension"],
+                    })
+                  }
+                >
+                  <option value="">{t("none")}</option>
+                  {questionDimensions.map((d) => (
+                    <option key={d} value={d}>
+                      {t(`dimensions.${d}`)}
+                    </option>
+                  ))}
+                </NativeSelect>
+              </label>
+              <label className="control-label">
+                {t("role")}
+                <NativeSelect
+                  aria-label={t("roleLabel", { column })}
+                  value={q.role}
+                  disabled={off}
+                  onChange={(e) =>
+                    set(column, {
+                      role: e.target.value as QuestionDraft["role"],
+                    })
+                  }
+                >
+                  <option value="">{t("none")}</option>
+                  {questionRoles.map((r) => (
+                    <option key={r} value={r}>
+                      {t(`roles.${r}`)}
+                    </option>
+                  ))}
+                </NativeSelect>
+              </label>
+            </article>
+          );
+        })}
+      </CardCollection>
     </div>
   );
 }

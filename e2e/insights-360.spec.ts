@@ -134,6 +134,7 @@ test("the org cuts filter and group the completion view", async ({ page }) => {
 
   // Narrowing to one account leaves only its group.
   const filters = page.getByRole("form", { name: "Filtros" });
+  await filters.getByText("Más filtros", { exact: true }).click();
   await filters.locator('select[name="account"]').selectOption("Cuenta A");
   await filters.getByRole("button", { name: "Aplicar" }).click();
   await expect(page).toHaveURL(/account=Cuenta\+A|account=Cuenta%20A/);

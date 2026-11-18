@@ -1,3 +1,5 @@
+import { EmptyState } from "@/components/experience";
+import { PageSkeleton } from "@/components/experience";
 import { localizeCycles } from "@/modules/review-core/cycle-name";
 import { hasLocale } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
@@ -55,7 +57,7 @@ async function Completion({
     );
   }
   const cycles = localizeCycles(await completionCycles(db), locale);
-  if (!cycles.length) return <p>{t("noCycles")}</p>;
+  if (!cycles.length) return <EmptyState>{t("noCycles")}</EmptyState>;
   const p = parseCompletionParams(await searchParams);
   const cycle = cycles.find((c) => c.id === p.cycle) ?? cycles[0];
   const masked = scope.kind === "aggregatesOnly";
@@ -224,7 +226,7 @@ export default function CompletionPage(
 ) {
   return (
     <main className="mx-auto w-full max-w-6xl p-6 lg:p-10">
-      <Suspense fallback={<div aria-busy="true" className="h-40" />}>
+      <Suspense fallback={<PageSkeleton />}>
         <Completion {...props} />
       </Suspense>
     </main>

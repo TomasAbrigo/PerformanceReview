@@ -119,13 +119,11 @@ describe("SelfAssessmentView", () => {
         locale,
         <SelfAssessmentView report={report} dimensionLabel={dims(locale)} />,
       );
-      const table = screen.getByRole("table", {
+      const table = screen.getByRole("group", {
         name: locale === "es" ? "Completitud por grupo" : "Completion by group",
       });
       expect(within(table).getByText("Ingeniería")).toBeVisible();
-      expect(
-        within(table).getAllByText(locale === "es" ? "50 %" : "50%"),
-      ).toHaveLength(1);
+      expect(within(table).getAllByText("50%")).toHaveLength(1);
       expect(
         screen.getByRole("group", {
           name:
@@ -135,7 +133,7 @@ describe("SelfAssessmentView", () => {
         }),
       ).toBeVisible();
       expect(screen.getByText("calidad")).toBeVisible();
-      const gap = screen.getByRole("table", {
+      const gap = screen.getByRole("group", {
         name: locale === "es" ? "Brecha por pregunta" : "Gap by question",
       });
       expect(

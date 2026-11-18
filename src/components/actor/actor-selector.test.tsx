@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { NextIntlClientProvider } from "next-intl";
 import { describe, expect, it, vi } from "vitest";
@@ -33,6 +33,7 @@ function renderIn(
       />
     </NextIntlClientProvider>,
   );
+  fireEvent.click(document.querySelector(".actor-trigger")!);
   return setActor;
 }
 

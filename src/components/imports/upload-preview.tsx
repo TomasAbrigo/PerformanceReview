@@ -1,5 +1,6 @@
 "use client";
 
+import { CardCollection } from "@/components/card-collection";
 import { useTranslations } from "next-intl";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -83,66 +84,59 @@ export function ColumnsTable({
   const missing = issues.filter((i) => i.kind === "missing_column");
 
   return (
-    <Table aria-label={t("preview.columns")}>
-      <TableHeader>
-        <TableRow>
-          <TableHead>{t("preview.columnName")}</TableHead>
-          <TableHead>{t("preview.columnType")}</TableHead>
-          <TableHead>{t("preview.columnUse")}</TableHead>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {columns.map((column) => {
-          const uses = usesOf(profile, column.name);
-          const flagged = typeIssues.has(column.name);
-          return (
-            <TableRow
-              key={column.name}
-              data-issue={flagged ? "type_mismatch" : undefined}
-              className={flagged ? FLAGGED : undefined}
-            >
-              <TableCell className="font-medium">{column.name}</TableCell>
-              <TableCell className="font-mono text-xs">{column.type}</TableCell>
-              <TableCell>
-                <span className="flex flex-wrap gap-1">
-                  {uses.length === 0 ? (
-                    <span className="text-muted-foreground">
-                      {t("preview.unused")}
-                    </span>
-                  ) : (
-                    uses.map((use) => (
-                      <Badge
-                        key={`${use.kind}-${use.field ?? ""}`}
-                        variant={use.kind === "key" ? "default" : "secondary"}
-                      >
-                        {use.kind === "mapped"
-                          ? t("roles.mapped", { field: use.field ?? "" })
-                          : use.kind === "key"
-                            ? t("roles.key")
-                            : use.kind === "watermark"
-                              ? t("roles.watermark")
-                              : t("roles.soft_delete")}
-                      </Badge>
-                    ))
-                  )}
-                </span>
-              </TableCell>
-            </TableRow>
-          );
-        })}
-        {missing.map((issue) => (
-          <TableRow
-            key={`missing-${issue.column}`}
-            data-issue="missing_column"
-            className={FLAGGED}
+    <CardCollection role="group" aria-label={t("preview.columns")}>
+      {columns.map((column) => {
+        const uses = usesOf(profile, column.name);
+        const flagged = typeIssues.has(column.name);
+        return (
+          <article
+            key={column.name}
+            data-issue={flagged ? "type_mismatch" : undefined}
+            className={`record-card ${flagged ? FLAGGED : ""}`}
           >
-            <TableCell className="font-medium">{issue.column}</TableCell>
-            <TableCell>—</TableCell>
-            <TableCell>{t("preview.missingInFile")}</TableCell>
-          </TableRow>
-        ))}
-      </TableBody>
-    </Table>
+            <h4 className="text-lg">{column.name}</h4>
+            <p className="font-mono text-xs text-muted-foreground">
+              {column.type}
+            </p>
+            <div className="text-sm">
+              <span className="flex flex-wrap gap-1">
+                {uses.length === 0 ? (
+                  <span className="text-muted-foreground">
+                    {t("preview.unused")}
+                  </span>
+                ) : (
+                  uses.map((use) => (
+                    <Badge
+                      key={`${use.kind}-${use.field ?? ""}`}
+                      variant={use.kind === "key" ? "default" : "secondary"}
+                    >
+                      {use.kind === "mapped"
+                        ? t("roles.mapped", { field: use.field ?? "" })
+                        : use.kind === "key"
+                          ? t("roles.key")
+                          : use.kind === "watermark"
+                            ? t("roles.watermark")
+                            : t("roles.soft_delete")}
+                    </Badge>
+                  ))
+                )}
+              </span>
+            </div>
+          </article>
+        );
+      })}
+      {missing.map((issue) => (
+        <article
+          key={`missing-${issue.column}`}
+          data-issue="missing_column"
+          className={`record-card ${FLAGGED}`}
+        >
+          <h4 className="text-lg">{issue.column}</h4>
+          <div className="text-sm">—</div>
+          <div className="text-sm">{t("preview.missingInFile")}</div>
+        </article>
+      ))}
+    </CardCollection>
   );
 }
 
