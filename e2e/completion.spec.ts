@@ -147,8 +147,8 @@ test("People import the assessment progress and read the completion of a cycle",
 
   // The side that is missing narrows the list.
   await page
+    .getByRole("group", { name: "Falta" })
     .getByRole("link", { name: "Autoevaluación", exact: true })
-    .first()
     .click();
   await expect(page).toHaveURL(/status=self_missing/);
   const selfMissing = missing.filter((m) => m.selfStatus !== "Submitted");

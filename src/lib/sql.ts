@@ -13,3 +13,11 @@ export function jobValidOn(alias: string, date?: string): SQL {
   const a = sql.raw(alias);
   return sql`${a}.deleted_at is null and ${a}.valid_from <= ${on} and (${a}.valid_to is null or ${a}.valid_to > ${on})`;
 }
+
+/** The conditions joined with `and` (an empty list is `true`). */
+export const allOf = (conditions: SQL[]): SQL =>
+  conditions.length ? sql.join(conditions, sql` and `) : sql`true`;
+
+/** A `like`/`ilike` pattern that matches `text` anywhere, searched as typed (`%`, `_` and `\` are not wildcards). */
+export const containsPattern = (text: string): string =>
+  `%${text.replace(/[\\%_]/g, "\\$&")}%`;
