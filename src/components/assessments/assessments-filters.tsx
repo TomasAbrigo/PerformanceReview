@@ -2,7 +2,6 @@ import { useTranslations } from "next-intl";
 import { OrgFilterFields } from "@/components/org/org-filter-fields";
 import { Link } from "@/i18n/navigation";
 import type { AssessmentFilterOptions } from "@/modules/assessments";
-import { progressValues } from "@/modules/assessments/state";
 import type { AssessmentsParams } from "./url-state";
 
 /**
@@ -24,7 +23,6 @@ export function AssessmentsFilters({
   options: AssessmentFilterOptions;
   ownOnly: boolean;
 }) {
-  const t = useTranslations("Assessments");
   const f = useTranslations("Assessments.filters");
   return (
     <form
@@ -48,21 +46,7 @@ export function AssessmentsFilters({
       </label>
       {ownOnly ? null : (
         <>
-          <label className="control-label max-w-full">
-            {f("progress")}
-            <select
-              name="progress"
-              defaultValue={params.progress ?? ""}
-              className="control max-w-full"
-            >
-              <option value="">{f("anyProgress")}</option>
-              {progressValues.map((v) => (
-                <option key={v} value={v}>
-                  {t(`progress.${v}`)}
-                </option>
-              ))}
-            </select>
-          </label>
+          <input type="hidden" name="progress" value={params.progress ?? ""} />
           <label className="control-label max-w-full">
             {f("person")}
             <input

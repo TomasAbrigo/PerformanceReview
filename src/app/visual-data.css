@@ -1,0 +1,105 @@
+/* Visual data surfaces shared by analysis and operational screens. */
+.comparison-grid,
+.record-grid {
+  display: grid;
+  gap: 1.25rem;
+}
+.comparison-card,
+.record-card {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 1.25rem;
+  border: 1px solid var(--border);
+  border-radius: 0.875rem;
+  background: var(--card);
+  padding: 1.5rem;
+}
+.comparison-metrics {
+  display: grid;
+  gap: 1rem;
+}
+.completion-side {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 1rem;
+  border-radius: 0.75rem;
+  background: var(--brand-fog);
+  padding: 1rem;
+}
+.completion-side .progress-ring {
+  width: 6rem;
+  height: 6rem;
+}
+.completion-side .progress-ring > span {
+  font-size: 1.5rem;
+}
+.comparison-featured {
+  background: var(--brand-900);
+  color: var(--primary-foreground);
+}
+.comparison-featured .text-muted-foreground {
+  color: var(--brand-200);
+}
+.comparison-featured .completion-side,
+.comparison-featured .icon-tile {
+  background: #ffffff14;
+  color: var(--primary-foreground);
+}
+.delta-pill {
+  display: inline-flex;
+  border-radius: 999px;
+  background: var(--brand-fog);
+  padding: 0.25rem 0.625rem;
+  font-size: 0.75rem;
+  white-space: nowrap;
+  color: var(--foreground);
+  font-variant-numeric: tabular-nums;
+}
+.delta-down {
+  background: var(--status-progress-bg);
+}
+.delta-up {
+  background: var(--status-done-bg);
+}
+.record-facts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+.record-facts > div {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 0.5rem;
+  border-radius: 0.5rem;
+  background: var(--brand-fog);
+  padding: 0.75rem;
+}
+.record-facts dt {
+  font-size: 0.75rem;
+  color: var(--muted-foreground);
+}
+.record-facts dd {
+  overflow-wrap: anywhere;
+  font-size: 0.875rem;
+}
+@media (min-width: 640px) {
+  .comparison-metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (min-width: 1024px) {
+  .record-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (min-width: 1280px) {
+  .comparison-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .comparison-featured {
+    grid-column: 1 / -1;
+  }
+}

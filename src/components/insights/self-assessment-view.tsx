@@ -1,3 +1,5 @@
+import { CardCollection } from "@/components/card-collection";
+import { ProgressBar } from "@/components/progress-bar";
 import { useLocale, useTranslations } from "next-intl";
 import { SentimentBars } from "@/components/qualitative/sentiment-bars";
 import { Themes } from "@/components/qualitative/views";
@@ -75,28 +77,42 @@ export function SelfAssessmentView({
         ) : (
           <>
             <p className="text-sm text-muted-foreground">{t("gapHint")}</p>
-            <table aria-label={t("gapTable")} className="text-sm">
-              <thead>
-                <tr className="text-left">
-                  <th className="pr-4">{t("question")}</th>
-                  <th className="pr-4">{t("answers")}</th>
-                  <th className="pr-4">{t("self")}</th>
-                  <th className="pr-4">{t("manager")}</th>
-                  <th className="pr-4">{t("gap")}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {report.gap.map((g) => (
-                  <tr key={g.questionRevisionId}>
-                    <td className="pr-4">{g.prompt[locale]}</td>
-                    <td className="pr-4 tabular-nums">{g.n}</td>
-                    <td className="pr-4 tabular-nums">{fmt(g.meanSelf)}</td>
-                    <td className="pr-4 tabular-nums">{fmt(g.meanManager)}</td>
-                    <td className="pr-4 tabular-nums">{fmt(g.meanGap)}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+            <CardCollection
+              gridClassName="record-grid"
+              role="group"
+              aria-label={t("gapTable")}
+            >
+              {report.gap.map((g) => (
+                <article key={g.questionRevisionId} className="record-card">
+                  <header>
+                    <h3 className="text-lg">{g.prompt[locale]}</h3>
+                    <p className="mt-2 text-xs text-muted-foreground">
+                      {t("answers")}: {g.n}
+                    </p>
+                  </header>
+                  {(
+                    [
+                      ["self", g.meanSelf],
+                      ["manager", g.meanManager],
+                    ] as const
+                  ).map(([key, value]) => (
+                    <div key={key}>
+                      <p className="mb-2 flex justify-between text-sm">
+                        <span>{t(key)}</span>
+                        <span>{fmt(value)}</span>
+                      </p>
+                      <ProgressBar percent={value * 100} label={t(key)} />
+                    </div>
+                  ))}
+                  <p className="insight-callout">
+                    {t("gap")}:{" "}
+                    <span className="font-heading text-2xl tabular-nums">
+                      {fmt(g.meanGap)}
+                    </span>
+                  </p>
+                </article>
+              ))}
+            </CardCollection>
           </>
         )}
       </section>

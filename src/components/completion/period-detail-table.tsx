@@ -1,3 +1,7 @@
+import { CardCollection } from "@/components/card-collection";
+import { CalendarRange } from "lucide-react";
+import { IconTile } from "@/components/experience";
+import { ProgressBar } from "@/components/progress-bar";
 import { useFormatter, useTranslations } from "next-intl";
 import type {
   MeanOf,
@@ -16,8 +20,6 @@ export function PeriodDetailTable({ data }: { data: PeriodDetail }) {
   const format = useFormatter();
   const hidden = data.minGroupSize !== null;
   const empty = hidden ? t("hidden") : "—";
-  const percent = (rate: number | null) =>
-    rate === null ? empty : format.number(rate, { style: "percent" });
   const mean = (m: MeanOf | null) =>
     m === null ? (
       empty
@@ -42,64 +44,80 @@ export function PeriodDetailTable({ data }: { data: PeriodDetail }) {
     return <p className="text-sm text-muted-foreground">{t("empty")}</p>;
   }
   return (
-    <div className="overflow-x-auto">
-      <table
-        aria-label={t("label")}
-        className="min-w-full text-sm"
-        data-testid="period-detail"
-      >
-        <thead>
-          <tr className="text-left">
+    <CardCollection
+      gridClassName="record-grid"
+      data-testid="period-detail"
+      role="group"
+      aria-label={t("label")}
+    >
+      {data.rows.map((r) => (
+        <article
+          key={r.cycleId}
+          data-cycle={r.cycleId}
+          className="record-card"
+          aria-label={r.cycleName}
+        >
+          <header className="flex items-start gap-3">
+            <IconTile>
+              <CalendarRange className="size-5" />
+            </IconTile>
+            <div>
+              <h3 className="text-xl">{r.cycleName}</h3>
+              <p className="mt-1 text-xs text-muted-foreground">
+                {date(r.periodStart)} – {date(r.periodEnd)}
+              </p>
+            </div>
+          </header>
+          <p className="text-sm">{t("people", { n: r.participants })}</p>
+          <div className="grid gap-4 rounded-lg bg-brand-fog p-4">
             {(
               [
-                "cycle",
-                "n",
-                "self",
-                "manager",
-                "valued",
-                "retention",
-                "engagement",
-                "goals",
+                ["self", r.selfRate],
+                ["manager", r.managerRate],
+                [
+                  "goals",
+                  r.goalsCompletedPct === null
+                    ? null
+                    : r.goalsCompletedPct / 100,
+                ],
               ] as const
-            ).map((key) => (
-              <th key={key} scope="col" className="p-1 font-medium">
-                {t(`columns.${key}`)}
-              </th>
+            ).map(([key, rate]) => (
+              <div key={key}>
+                <p className="mb-2 text-xs text-muted-foreground">
+                  {t(`columns.${key}`)}
+                </p>
+                {rate === null ? (
+                  <p>{empty}</p>
+                ) : (
+                  <ProgressBar
+                    percent={rate * 100}
+                    label={t(`columns.${key}`)}
+                  />
+                )}
+              </div>
             ))}
-          </tr>
-        </thead>
-        <tbody>
-          {data.rows.map((r) => (
-            <tr key={r.cycleId} className="border-t" data-cycle={r.cycleId}>
-              <th scope="row" className="p-1 text-left font-medium">
-                {r.cycleName}
-                <span className="block text-xs font-normal text-muted-foreground">
-                  {date(r.periodStart)} – {date(r.periodEnd)}
-                </span>
-              </th>
-              <td className="p-1 tabular-nums">{r.participants}</td>
-              <td className="p-1 tabular-nums">{percent(r.selfRate)}</td>
-              <td className="p-1 tabular-nums">{percent(r.managerRate)}</td>
-              <td className="p-1 tabular-nums">{mean(r.valued)}</td>
-              <td className="p-1 tabular-nums">{mean(r.retention)}</td>
-              <td className="p-1 tabular-nums">{mean(r.engagement)}</td>
-              <td className="p-1 tabular-nums">
-                {r.goalsCompletedPct === null
-                  ? empty
-                  : format.number(r.goalsCompletedPct / 100, {
-                      style: "percent",
-                    })}
-                {r.goals ? (
-                  <span className="text-xs text-muted-foreground">
-                    {" "}
-                    {t("goalsOf", { n: r.goals })}
-                  </span>
-                ) : null}
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+          </div>
+          <dl className="record-facts">
+            {(
+              [
+                ["valued", r.valued],
+                ["retention", r.retention],
+                ["engagement", r.engagement],
+              ] as const
+            ).map(([key, value]) => (
+              <div key={key}>
+                <dt>{t(`columns.${key}`)}</dt>
+                <dd>{mean(value)}</dd>
+              </div>
+            ))}
+          </dl>
+          {r.goals ? (
+            <p className="text-xs text-muted-foreground">
+              {t("goalsOf", { n: r.goals })}
+            </p>
+          ) : null}
+        </article>
+      ))}
+    </CardCollection>
   );
 }

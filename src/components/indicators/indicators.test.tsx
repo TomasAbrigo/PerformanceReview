@@ -228,7 +228,7 @@ describe("RiskMatrixView", () => {
       expect(
         within(list).getByRole("link", { name: "Fabio Luna" }),
       ).toHaveAttribute("href", "/insights/indicators/trend?person=p1");
-      expect(within(list).getByText("Marta Quiroga")).toBeInTheDocument();
+      expect(within(list).getByText(/Marta Quiroga/)).toBeInTheDocument();
     },
   );
 
@@ -334,23 +334,23 @@ describe("AlertsView", () => {
           : "People with a fall: 1 · People at risk: 1",
       );
       const rows = within(screen.getByTestId("alerts-table")).getAllByRole(
-        "row",
+        "article",
       );
-      expect(rows).toHaveLength(3);
-      expect(rows[1]).toHaveTextContent(locale === "es" ? "Riesgo" : "Risk");
-      expect(rows[1]).toHaveTextContent(
+      expect(rows).toHaveLength(2);
+      expect(rows[0]).toHaveTextContent(locale === "es" ? "Riesgo" : "Risk");
+      expect(rows[0]).toHaveTextContent(
         locale === "es"
           ? "Retención 1, compromiso 1"
           : "Retention 1, engagement 1",
       );
-      expect(rows[2]).toHaveTextContent(locale === "es" ? "Caída" : "Fall");
-      expect(rows[2]).toHaveTextContent(
+      expect(rows[1]).toHaveTextContent(locale === "es" ? "Caída" : "Fall");
+      expect(rows[1]).toHaveTextContent(
         locale === "es"
           ? "Compromiso: 4 → 1 (−3) desde H1 2024"
           : "Engagement: 4 → 1 (−3) since H1 2024",
       );
       expect(
-        within(rows[1]).getByRole("link", { name: "Fabio Luna" }),
+        within(rows[0]).getByRole("link", { name: "Fabio Luna" }),
       ).toHaveAttribute("href", "/insights/indicators/trend?person=p1");
     },
   );

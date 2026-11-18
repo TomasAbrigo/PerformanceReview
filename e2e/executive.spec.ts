@@ -65,6 +65,6 @@ test("self-assessment report page renders", async ({ page }) => {
     page.getByRole("heading", { level: 1, name: /Reporte de autoevaluación/ }),
   ).toBeVisible();
   await expect(
-    page.getByRole("table", { name: "Completitud por grupo" }),
+    page.getByRole("group", { name: "Completitud por grupo" }),
   ).toBeVisible();
 });

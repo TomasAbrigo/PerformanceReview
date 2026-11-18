@@ -37,10 +37,12 @@ test("importing the employee performance report creates the historical cycles an
     timeout: 150_000,
   });
 
-  const cycles = page.getByRole("table", { name: "Ciclos detectados" });
-  await expect(cycles.getByRole("row")).toHaveCount(1 + company.cycles.length);
+  const cycles = page.getByRole("group", { name: "Ciclos detectados" });
+  await expect(cycles.getByRole("article")).toHaveCount(company.cycles.length);
   for (const cycle of company.cycles) {
-    await expect(cycles.getByRole("cell", { name: cycle.name })).toBeVisible();
+    await expect(
+      cycles.getByRole("heading", { name: cycle.name }),
+    ).toBeVisible();
   }
 
   // People the HRIS does not know wait in the identity queue.
@@ -64,8 +66,8 @@ test("importing the assessment progress report fills the completion of the semi-
     "bamboo-assessment-progress",
   );
 
-  const cycles = page.getByRole("table", { name: "Ciclos detectados" });
-  await expect(cycles.getByRole("row")).toHaveCount(1 + company.cycles.length);
+  const cycles = page.getByRole("group", { name: "Ciclos detectados" });
+  await expect(cycles.getByRole("article")).toHaveCount(company.cycles.length);
   await expect(page.getByRole("heading", { name: decision.title })).toHaveCount(
     0,
   );
@@ -106,8 +108,8 @@ test("a row whose semester is ambiguous waits for a cycle, and the run finishes 
   );
   await expect(
     page
-      .getByRole("table", { name: "Ciclos detectados" })
-      .getByRole("cell", { name: "2023-H2" }),
+      .getByRole("group", { name: "Ciclos detectados" })
+      .getByRole("heading", { name: "2023-H2" }),
   ).toBeVisible();
 });
 
@@ -122,11 +124,13 @@ test("Bamboo's real reports: the raw assessments report and the grouped Assessme
     ["assessments-report.csv", "bamboo-assessments-report"],
   ] as const) {
     await importFile(page, path.join(REPORTS, file), profile);
-    const cycles = page.getByRole("table", { name: "Ciclos detectados" });
-    await expect(cycles.getByRole("row")).toHaveCount(
-      1 + company.cycles.length,
+    const cycles = page.getByRole("group", { name: "Ciclos detectados" });
+    await expect(cycles.getByRole("article")).toHaveCount(
+      company.cycles.length,
     );
-    await expect(cycles.getByRole("cell", { name: firstPeriod })).toBeVisible();
+    await expect(
+      cycles.getByRole("heading", { name: firstPeriod }),
+    ).toBeVisible();
     await expect(
       page.getByRole("heading", { name: decision.title }),
     ).toHaveCount(0);

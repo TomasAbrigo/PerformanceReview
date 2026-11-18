@@ -1,3 +1,5 @@
+import { EmptyState } from "@/components/experience";
+import { PageSkeleton } from "@/components/experience";
 import { localizeCycles } from "@/modules/review-core/cycle-name";
 import { hasLocale } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
@@ -41,7 +43,7 @@ async function Indicators({
   const scope = insightsScope(actor);
   if (scope.kind === "none") return <p>{t("forbidden")}</p>;
   const cycles = localizeCycles(await indicatorCycles(db), locale);
-  if (!cycles.length) return <p>{t("noCycles")}</p>;
+  if (!cycles.length) return <EmptyState>{t("noCycles")}</EmptyState>;
   // Direction does not filter by the people who lead a team (a DM, a Santex Lead).
   const p = withoutPersonFilters(
     parseIndicatorParams(await searchParams),
@@ -172,7 +174,7 @@ export default function IndicatorsPage(
 ) {
   return (
     <main className="mx-auto w-full max-w-6xl p-6 lg:p-10">
-      <Suspense fallback={<div aria-busy="true" className="h-40" />}>
+      <Suspense fallback={<PageSkeleton />}>
         <Indicators {...props} />
       </Suspense>
     </main>

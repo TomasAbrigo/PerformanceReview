@@ -1,13 +1,8 @@
+import { CardCollection } from "@/components/card-collection";
 import { useTranslations } from "next-intl";
 import { buttonVariants } from "@/components/ui/button";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { CalendarRange } from "lucide-react";
+import { IconTile } from "@/components/experience";
 import { Link } from "@/i18n/navigation";
 import type { HistoryImportResult } from "@/modules/import-history/results";
 import { CycleDecisionForm, type ResumeOutcome } from "./cycle-decision";
@@ -54,61 +49,58 @@ export function HistoryResult({
         </p>
       ) : null}
 
-      <Table aria-label={t("cycles")}>
-        <TableHeader>
-          <TableRow>
-            <TableHead>{t("columns.cycle")}</TableHead>
-            <TableHead>{t("columns.period")}</TableHead>
-            <TableHead className="text-right">{t("columns.rows")}</TableHead>
-            <TableHead className="text-right">
-              {t("columns.participants")}
-            </TableHead>
-            <TableHead>{t("columns.requests")}</TableHead>
-            <TableHead>{t("columns.answers")}</TableHead>
-            <TableHead className="text-right">{t("columns.issues")}</TableHead>
-            <TableHead className="text-right">
-              {t("columns.mismatches")}
-            </TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {result.cycles.map((c) => (
-            <TableRow key={c.cycleId}>
-              <TableCell>{c.name}</TableCell>
-              <TableCell className="tabular-nums">
-                {t("period", { start: c.periodStart, end: c.periodEnd })}
-              </TableCell>
-              <TableCell className="text-right tabular-nums">
-                {c.rows}
-              </TableCell>
-              <TableCell className="text-right tabular-nums">
-                {c.participantsCreated}
-              </TableCell>
-              <TableCell>
-                {both(c.requestsCreated, c.requestsUnchanged)}
-              </TableCell>
-              <TableCell>
-                {both(c.answersCreated, c.answersUnchanged)}
-              </TableCell>
-              <TableCell className="text-right tabular-nums">
-                {c.issues > 0 ? (
-                  <Link
-                    href="/imports/identity"
-                    className="font-medium text-destructive hover:underline"
-                  >
-                    {c.issues}
-                  </Link>
-                ) : (
-                  0
-                )}
-              </TableCell>
-              <TableCell className="text-right tabular-nums">
-                {c.mismatches}
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+      <CardCollection
+        role="group"
+        aria-label={t("cycles")}
+        gridClassName="record-grid"
+      >
+        {result.cycles.map((c) => (
+          <article key={c.cycleId} className="record-card">
+            <header className="flex items-start gap-3">
+              <IconTile>
+                <CalendarRange className="size-5" />
+              </IconTile>
+              <div>
+                <h2 className="text-xl">{c.name}</h2>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  {t("period", { start: c.periodStart, end: c.periodEnd })}
+                </p>
+              </div>
+            </header>
+            <dl className="record-facts">
+              {(
+                [
+                  ["rows", c.rows],
+                  ["participants", c.participantsCreated],
+                  ["requests", both(c.requestsCreated, c.requestsUnchanged)],
+                  ["answers", both(c.answersCreated, c.answersUnchanged)],
+                  ["mismatches", c.mismatches],
+                ] as const
+              ).map(([key, value]) => (
+                <div key={key}>
+                  <dt>{t(`columns.${key}`)}</dt>
+                  <dd>{value}</dd>
+                </div>
+              ))}
+              <div>
+                <dt>{t("columns.issues")}</dt>
+                <dd>
+                  {c.issues > 0 ? (
+                    <Link
+                      href="/imports/identity"
+                      className="text-destructive underline"
+                    >
+                      {c.issues}
+                    </Link>
+                  ) : (
+                    0
+                  )}
+                </dd>
+              </div>
+            </dl>
+          </article>
+        ))}
+      </CardCollection>
       <p className="text-sm text-muted-foreground">{t("mismatchHint")}</p>
 
       <div className="flex flex-wrap gap-2">

@@ -1,13 +1,17 @@
+import { PageSkeleton } from "@/components/experience";
 import { hasLocale } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { connection } from "next/server";
 import { Suspense } from "react";
-import { GoalStateChips, GoalsTable } from "@/components/goals/goals-table";
+import {
+  GoalStateChips,
+  GoalsTable,
+  GoalsOverview,
+} from "@/components/goals/goals-table";
 import { GoalsFilters } from "@/components/goals/goals-filters";
 import { parseGoalsParams } from "@/components/goals/url-state";
 import { GoalFormDialog } from "@/components/goals/goal-form-dialog";
-import { Panel } from "@/components/insights/parts";
 import { orgFiltersOf } from "@/components/org/params";
 import { PageHeader } from "@/components/page-header";
 import { listHref } from "@/components/query-string";
@@ -99,23 +103,24 @@ async function GoalsList({
           ownOnly={ownOnly}
         />
       </PageHeader>
-      <Panel
-        id="goals-list"
-        title={t("count", { n: page.total })}
-        actions={
-          <GoalStateChips
-            counts={page.counts}
-            current={p.state}
-            hrefFor={(state) => hrefFor({ state })}
-          />
-        }
+      <GoalsOverview counts={page.counts} />
+      <section
+        aria-label={t("count", { n: page.total })}
+        className="space-y-6"
+        data-testid="goals-list"
       >
+        <h2 className="text-xl">{t("count", { n: page.total })}</h2>
+        <GoalStateChips
+          counts={page.counts}
+          current={p.state}
+          hrefFor={(state) => hrefFor({ state })}
+        />
         <GoalsTable
           page={page}
           showPerson={!ownOnly}
           hrefForPage={(n) => hrefFor({ page: n })}
         />
-      </Panel>
+      </section>
     </div>
   );
 }
@@ -123,7 +128,7 @@ async function GoalsList({
 export default function GoalsPage(props: PageProps<"/[locale]/goals">) {
   return (
     <main className="mx-auto w-full max-w-6xl p-6 lg:p-10">
-      <Suspense fallback={<div aria-busy="true" className="h-40" />}>
+      <Suspense fallback={<PageSkeleton />}>
         <GoalsList {...props} />
       </Suspense>
     </main>

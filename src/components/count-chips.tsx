@@ -24,7 +24,7 @@ export function CountChips<T extends string>({
       aria-label={label}
       className="flex flex-wrap items-center gap-2 text-sm"
     >
-      <span className="segmented">
+      <span className="segmented max-w-full flex-wrap">
         <Link
           href={hrefFor(undefined)}
           aria-current={current === undefined ? "true" : undefined}

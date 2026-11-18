@@ -1,5 +1,7 @@
 "use client";
 
+import { UploadCloud } from "lucide-react";
+import { UploadSteps, IconTile } from "@/components/experience";
 import { useTranslations } from "next-intl";
 import { useId, useMemo, useState, useTransition } from "react";
 import { Button } from "@/components/ui/button";
@@ -120,13 +122,16 @@ export function UploadForm({
 
   if (phase.step === "done") {
     return (
-      <UploadResult
-        result={phase.result}
-        onReset={() => {
-          setError(null);
-          setPhase({ step: "choose" });
-        }}
-      />
+      <>
+        <UploadSteps step={2} />
+        <UploadResult
+          result={phase.result}
+          onReset={() => {
+            setError(null);
+            setPhase({ step: "choose" });
+          }}
+        />
+      </>
     );
   }
 
@@ -180,9 +185,10 @@ export function UploadForm({
 
   return (
     <div className="flex flex-col gap-4">
+      <UploadSteps step={0} />
       <form
         aria-label={t("choose.title")}
-        className="flex max-w-xl flex-col gap-4"
+        className="upload-zone"
         onSubmit={(e) => {
           e.preventDefault();
           preview(
@@ -191,6 +197,9 @@ export function UploadForm({
           );
         }}
       >
+        <IconTile>
+          <UploadCloud className="size-6" />
+        </IconTile>
         <Field>
           <FieldLabel htmlFor={fileId}>{t("choose.fileLabel")}</FieldLabel>
           <Input
@@ -293,7 +302,11 @@ function Preview({
         : { saved: profile.name };
 
   return (
-    <section aria-labelledby="upload-preview" className="flex flex-col gap-6">
+    <section
+      aria-labelledby="upload-preview"
+      className="admin-surface flex flex-col gap-6"
+    >
+      <UploadSteps step={1} />
       <div className="flex flex-col gap-1">
         <h2 id="upload-preview">{t("preview.title")}</h2>
         <p className="text-sm">

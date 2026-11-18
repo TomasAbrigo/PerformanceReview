@@ -92,13 +92,13 @@ describe("KpisTable", () => {
   it.each(locales)("shows the shares of each group in %s", (locale) => {
     renderIn(locale, <KpisTable kpis={kpis()} />);
     const table = screen.getByTestId("kpis-table");
-    const ing = within(table).getByRole("row", { name: /Ingeniería/ });
+    const ing = within(table).getByRole("article", { name: /Ingeniería/ });
     // 14 of 26 completed = 54 %, 12 in progress = 46 %, 2 overdue = 8 %.
     expect(ing).toHaveTextContent("14 (54 %)");
     expect(ing).toHaveTextContent("12 (46 %)");
     expect(ing).toHaveTextContent("2 (8 %)");
     expect(
-      within(ing).getByRole("img", {
+      within(ing).getByRole("progressbar", {
         name:
           locale === "es"
             ? /54 % de objetivos completados/
@@ -106,12 +106,12 @@ describe("KpisTable", () => {
       }),
     ).toBeInTheDocument();
     // A group without goals has no shares (not 0 %).
-    const prod = within(table).getByRole("row", { name: /Producto/ });
+    const prod = within(table).getByRole("article", { name: /Producto/ });
     expect(prod).toHaveTextContent(
       locale === "es" ? "Sin objetivos" : "No goals",
     );
     expect(
-      within(table).getByRole("row", { name: /Total/ }),
+      within(table).getByRole("article", { name: /Total/ }),
     ).toBeInTheDocument();
   });
 
@@ -130,12 +130,12 @@ describe("KpisTable", () => {
         })}
       />,
     );
-    expect(screen.getByRole("row", { name: /Otros/ })).toBeInTheDocument();
+    expect(screen.getByRole("article", { name: /Otros/ })).toBeInTheDocument();
     expect(
       screen.getByText(/3 personas en grupos chicos no se muestran/),
     ).toBeInTheDocument();
     // No total: it would give the hidden groups away.
-    expect(screen.queryByRole("row", { name: /^Total/ })).toBeNull();
+    expect(screen.queryByRole("article", { name: /^Total/ })).toBeNull();
     expect(screen.getByText(/El total se oculta/)).toBeInTheDocument();
   });
 
@@ -155,9 +155,9 @@ describe("KpisTable", () => {
         })}
       />,
     );
-    expect(screen.getByRole("row", { name: /Team 1/ })).toBeInTheDocument();
-    expect(screen.getByRole("row", { name: /Team 2/ })).toBeInTheDocument();
-    expect(screen.getByRole("row", { name: /Others/ })).toBeInTheDocument();
+    expect(screen.getByRole("article", { name: /Team 1/ })).toBeInTheDocument();
+    expect(screen.getByRole("article", { name: /Team 2/ })).toBeInTheDocument();
+    expect(screen.getByRole("article", { name: /Others/ })).toBeInTheDocument();
     expect(screen.queryByText("Unassigned")).toBeNull();
   });
 
@@ -171,7 +171,7 @@ describe("KpisTable", () => {
       />,
     );
     expect(
-      screen.getByRole("row", { name: /Sin asignar/ }),
+      screen.getByRole("article", { name: /Sin asignar/ }),
     ).toBeInTheDocument();
     unmount();
     renderIn("en", <KpisTable kpis={kpis({ groups: [], total: null })} />);
@@ -486,11 +486,14 @@ describe("PeopleTable", () => {
       />,
     );
     const table = screen.getByTestId("people-table");
-    const ana = within(table).getByRole("row", { name: /Ana/ });
-    expect(ana).toHaveTextContent("80 %");
+    const ana = within(table).getByRole("article", { name: /Ana/ });
+    expect(within(ana).getByRole("progressbar")).toHaveAttribute(
+      "aria-valuenow",
+      "80",
+    );
     expect(ana).toHaveTextContent("92 %");
     expect(ana).toHaveTextContent("50 %");
-    const dario = within(table).getByRole("row", { name: /Dario/ });
+    const dario = within(table).getByRole("article", { name: /Dario/ });
     expect(dario).toHaveTextContent("–");
   });
 });

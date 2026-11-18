@@ -1,3 +1,13 @@
+import { CardCollection } from "@/components/card-collection";
+import {
+  MessagesSquare,
+  ThumbsUp,
+  Lightbulb,
+  Scale,
+  ThumbsDown,
+  Minus,
+} from "lucide-react";
+import { IconTile } from "@/components/experience";
 import { useLocale, useTranslations } from "next-intl";
 import type {
   DimensionSentiment,
@@ -31,17 +41,34 @@ export function Kpis({ counts }: { counts: SentimentCounts | null }) {
   return (
     <ul
       aria-label={t("title")}
-      className="grid grid-cols-3 gap-2 sm:grid-cols-6"
+      className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-6"
     >
-      {KPI_ORDER.map((k) => (
-        <li
-          key={k}
-          className="flex flex-col gap-1 rounded-xl border border-border bg-card p-4"
-        >
-          <span className="text-xs text-muted-foreground">{t(k)}</span>
-          <span className="stat-value-sm">{counts[k]}</span>
-        </li>
-      ))}
+      {KPI_ORDER.map((k) => {
+        const Icon = {
+          total: MessagesSquare,
+          positive: ThumbsUp,
+          constructive: Lightbulb,
+          mixed: Scale,
+          negative: ThumbsDown,
+          neutral: Minus,
+        }[k];
+        return (
+          <li
+            key={k}
+            className={`flex flex-col gap-3 rounded-xl border border-border p-4 ${k === "total" ? "bg-brand-900 text-white" : "bg-card"}`}
+          >
+            <IconTile
+              className={
+                k === "total" ? "bg-white/10 text-brand-200" : undefined
+              }
+            >
+              <Icon className="size-5" />
+            </IconTile>
+            <span className="text-xs">{t(k)}</span>
+            <span className="stat-value">{counts[k]}</span>
+          </li>
+        );
+      })}
     </ul>
   );
 }
@@ -208,32 +235,36 @@ export function Indicators({ rows }: { rows: IndicatorSentiment[] }) {
       {rows.length === 0 ? (
         <p className="text-sm text-muted-foreground">{t("empty")}</p>
       ) : (
-        <table aria-label={t("title")} className="text-sm">
-          <thead>
-            <tr className="text-left">
-              <th className="pr-4">{t("indicator")}</th>
-              <th className="pr-4">{t("answer")}</th>
-              {sentiments.map((s) => (
-                <th key={s} className="pr-4">
-                  {ts(s)}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {rows.map((r) => (
-              <tr key={`${r.role}-${r.option}`}>
-                <td className="pr-4">{role(r.role)}</td>
-                <td className="pr-4">{r.label?.[locale] ?? r.option}</td>
-                {sentiments.map((s) => (
-                  <td key={s} className="pr-4 tabular-nums">
-                    {r[s]}
-                  </td>
+        <CardCollection
+          role="group"
+          aria-label={t("title")}
+          gridClassName="record-grid"
+        >
+          {rows.map((r) => (
+            <article key={`${r.role}-${r.option}`} className="record-card">
+              <header>
+                <h3 className="text-lg">{role(r.role)}</h3>
+                <p className="mt-2 text-sm text-muted-foreground">
+                  {t("answer")}: {r.label?.[locale] ?? r.option}
+                </p>
+              </header>
+              <MiniBar
+                counts={r}
+                label={`${role(r.role)} · ${r.label?.[locale] ?? r.option}`}
+              />
+              <dl className="record-facts">
+                {sentiments.map((key) => (
+                  <div key={key}>
+                    <dt>{ts(key)}</dt>
+                    <dd>
+                      <span className="stat-value-sm">{r[key]}</span>
+                    </dd>
+                  </div>
                 ))}
-              </tr>
-            ))}
-          </tbody>
-        </table>
+              </dl>
+            </article>
+          ))}
+        </CardCollection>
       )}
     </section>
   );

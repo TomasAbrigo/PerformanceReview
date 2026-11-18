@@ -1,16 +1,11 @@
+import { CardCollection } from "@/components/card-collection";
 import { useTranslations } from "next-intl";
 import type { ReactNode } from "react";
 import { ReasonBadge } from "@/components/identity/reason-badge";
 import { useRunFormat } from "@/components/ingest/use-run-format";
 import { Badge } from "@/components/ui/badge";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { FileSearch } from "lucide-react";
+import { IconTile } from "@/components/experience";
 import { Link } from "@/i18n/navigation";
 import type es from "@/messages/es.json";
 import type {
@@ -35,24 +30,38 @@ function CaseTable({
 }) {
   const t = useTranslations("DataQuality.columns");
   return (
-    <Table>
-      <TableHeader>
-        <TableRow>
-          {columns.map((c) => (
-            <TableHead key={c}>{t(c)}</TableHead>
-          ))}
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {rows.map((row) => (
-          <TableRow key={row.key}>
-            {row.cells.map((cell, i) => (
-              <TableCell key={columns[i]}>{cell ?? "—"}</TableCell>
+    <CardCollection gridClassName="record-grid" role="group">
+      {rows.map((row) => (
+        <article
+          key={row.key}
+          className="record-card"
+          aria-labelledby={`case-${row.key}`}
+        >
+          <header className="flex items-start gap-3">
+            <IconTile>
+              <FileSearch className="size-5" />
+            </IconTile>
+            <div className="min-w-0 break-words">
+              <p className="text-xs text-muted-foreground">{t(columns[0])}</p>
+              <div
+                id={`case-${row.key}`}
+                className="mt-1 text-base font-medium"
+              >
+                {row.cells[0] ?? "—"}
+              </div>
+            </div>
+          </header>
+          <dl className="record-facts">
+            {row.cells.slice(1).map((cell, i) => (
+              <div key={columns[i + 1]}>
+                <dt>{t(columns[i + 1])}</dt>
+                <dd>{cell ?? "—"}</dd>
+              </div>
             ))}
-          </TableRow>
-        ))}
-      </TableBody>
-    </Table>
+          </dl>
+        </article>
+      ))}
+    </CardCollection>
   );
 }
 

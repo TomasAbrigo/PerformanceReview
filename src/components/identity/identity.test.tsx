@@ -117,12 +117,12 @@ describe("IdentityQueue", () => {
       expect(
         screen.getByRole("heading", { level: 1, name: heading }),
       ).toBeInTheDocument();
-      const rows = screen.getAllByRole("row").slice(1);
+      const rows = screen.getAllByRole("article");
       expect(rows).toHaveLength(2);
       expect(
         within(rows[0]).getByRole("link", { name: "Carla Romero" }),
       ).toHaveAttribute("href", "/imports/identity/i1");
-      expect(within(rows[0]).getByText("201")).toBeInTheDocument();
+      expect(within(rows[0]).getByText(/201/)).toBeInTheDocument();
       expect(within(rows[0]).getByText(reason)).toBeInTheDocument();
       expect(within(rows[0]).getByText(candidates)).toBeInTheDocument();
       expect(
@@ -169,7 +169,7 @@ describe("IdentityQueue", () => {
       />,
     );
 
-    const rows = screen.getAllByRole("row").slice(1);
+    const rows = screen.getAllByRole("article");
     expect(within(rows[0]).getByText("Linked")).toBeInTheDocument();
     expect(within(rows[1]).getByText("Ignored")).toBeInTheDocument();
   });

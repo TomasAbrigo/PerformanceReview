@@ -33,6 +33,7 @@ function useMonthLabel() {
  */
 export function EngagementView({ data }: { data: EngagementEvolution }) {
   const t = useTranslations("Engagement");
+  const tc = useTranslations("Charts");
   const format = useFormatter();
   const label = useMonthLabel();
   const f = useChartFormat();
@@ -182,68 +183,71 @@ export function EngagementView({ data }: { data: EngagementEvolution }) {
       </Panel>
 
       <Panel id="engagement-table" title={t("table.title")}>
-        <div className="overflow-x-auto">
-          <table className="text-sm" aria-label={t("table.title")}>
-            <thead>
-              <tr>
-                {[
-                  t("table.month"),
-                  t("table.people"),
-                  t("table.respondents"),
-                  t("table.participation"),
-                  t("table.mean"),
-                  ...engagementSegments.map((s) => t(`segment.${s}`)),
-                ].map((h) => (
-                  <th key={h} className="p-1 text-left font-medium">
-                    {h}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {data.months.map((m) => (
-                <tr key={m.month} className="border-t" data-month={m.month}>
-                  <td className="p-1">{label(m.month)}</td>
-                  {m.hidden ? (
-                    <td
-                      className="p-1 text-muted-foreground"
-                      colSpan={4 + engagementSegments.length}
-                    >
-                      {t("table.under", { min: data.minGroupSize ?? 0 })}
-                    </td>
-                  ) : (
-                    <>
-                      <td className="p-1 tabular-nums">{m.people}</td>
-                      <td className="p-1 tabular-nums">
-                        {m.respondents ?? t("hidden")}
-                      </td>
-                      <td className="p-1 tabular-nums">
-                        {m.participation === null
-                          ? t("hidden")
-                          : format.number(m.participation, {
-                              style: "percent",
-                            })}
-                      </td>
-                      <td className="p-1 tabular-nums">
-                        {m.mean === null
-                          ? t("hidden")
-                          : format.number(m.mean, {
-                              minimumFractionDigits: 2,
-                              maximumFractionDigits: 2,
-                            })}
-                      </td>
-                      {engagementSegments.map((s) => (
-                        <td key={s} className="p-1 tabular-nums">
-                          {cell(m, s) ?? t("hidden")}
-                        </td>
-                      ))}
-                    </>
-                  )}
+        <details>
+          <summary className="button-outline">{tc("tableView")}</summary>
+          <div className="mt-4 overflow-x-auto">
+            <table className="text-sm" aria-label={t("table.title")}>
+              <thead>
+                <tr>
+                  {[
+                    t("table.month"),
+                    t("table.people"),
+                    t("table.respondents"),
+                    t("table.participation"),
+                    t("table.mean"),
+                    ...engagementSegments.map((s) => t(`segment.${s}`)),
+                  ].map((h) => (
+                    <th key={h} className="p-1 text-left font-medium">
+                      {h}
+                    </th>
+                  ))}
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody>
+                {data.months.map((m) => (
+                  <tr key={m.month} className="border-t" data-month={m.month}>
+                    <td className="p-1">{label(m.month)}</td>
+                    {m.hidden ? (
+                      <td
+                        className="p-1 text-muted-foreground"
+                        colSpan={4 + engagementSegments.length}
+                      >
+                        {t("table.under", { min: data.minGroupSize ?? 0 })}
+                      </td>
+                    ) : (
+                      <>
+                        <td className="p-1 tabular-nums">{m.people}</td>
+                        <td className="p-1 tabular-nums">
+                          {m.respondents ?? t("hidden")}
+                        </td>
+                        <td className="p-1 tabular-nums">
+                          {m.participation === null
+                            ? t("hidden")
+                            : format.number(m.participation, {
+                                style: "percent",
+                              })}
+                        </td>
+                        <td className="p-1 tabular-nums">
+                          {m.mean === null
+                            ? t("hidden")
+                            : format.number(m.mean, {
+                                minimumFractionDigits: 2,
+                                maximumFractionDigits: 2,
+                              })}
+                        </td>
+                        {engagementSegments.map((s) => (
+                          <td key={s} className="p-1 tabular-nums">
+                            {cell(m, s) ?? t("hidden")}
+                          </td>
+                        ))}
+                      </>
+                    )}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </details>
         {data.hiddenMonths > 0 ? (
           <p className="text-sm text-muted-foreground" role="status">
             {t("table.hiddenMonths", {
