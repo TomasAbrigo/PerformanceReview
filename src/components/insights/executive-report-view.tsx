@@ -1,3 +1,5 @@
+import { ChartNoAxesCombined } from "lucide-react";
+import { IconTile } from "@/components/experience";
 import { useFormatter, useTranslations } from "next-intl";
 import { Meter } from "@/components/insights/parts";
 import {
@@ -61,12 +63,13 @@ function Tile({
   children: React.ReactNode;
 }) {
   return (
-    <section
-      aria-label={title}
-      data-testid={testId}
-      className="flex min-w-0 flex-col gap-3 rounded-xl border border-border bg-card p-5"
-    >
-      <h2 className="kicker text-muted-foreground">{title}</h2>
+    <section aria-label={title} data-testid={testId} className="metric-card">
+      <div className="flex items-center gap-3">
+        <IconTile>
+          <ChartNoAxesCombined className="size-5" />
+        </IconTile>
+        <h2 className="text-xl">{title}</h2>
+      </div>
       {children}
     </section>
   );

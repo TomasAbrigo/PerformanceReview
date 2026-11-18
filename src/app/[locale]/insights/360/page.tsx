@@ -1,3 +1,5 @@
+import { EmptyState } from "@/components/experience";
+import { PageSkeleton } from "@/components/experience";
 import { hasLocale } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
@@ -38,7 +40,7 @@ async function Insights360({
     );
   }
   const cycles = localizeCycles(await indicatorCycles(db), locale);
-  if (!cycles.length) return <p>{t("noCycles")}</p>;
+  if (!cycles.length) return <EmptyState>{t("noCycles")}</EmptyState>;
   const p = parseDm360Params(await searchParams);
   const cycle = cycles.find((c) => c.id === p.cycle) ?? cycles[0];
   const data = await dm360(db, actor, { cycleId: cycle.id, scope: p.scope });
@@ -109,7 +111,7 @@ export default function Insights360Page(
 ) {
   return (
     <main className="mx-auto w-full max-w-6xl p-6 lg:p-10">
-      <Suspense fallback={<div aria-busy="true" className="h-40" />}>
+      <Suspense fallback={<PageSkeleton />}>
         <Insights360 {...props} />
       </Suspense>
     </main>

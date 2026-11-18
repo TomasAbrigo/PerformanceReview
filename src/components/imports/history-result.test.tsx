@@ -70,10 +70,10 @@ describe.each(["es", "en"] as const)("HistoryResult (%s)", (locale) => {
     expect(
       screen.getByRole("heading", { level: 1, name: t.title }),
     ).toBeInTheDocument();
-    const table = screen.getByRole("table", { name: t.cycles });
-    const rows = within(table).getAllByRole("row");
-    expect(rows).toHaveLength(3);
-    const first = rows[1];
+    const table = screen.getByRole("group", { name: t.cycles });
+    const rows = within(table).getAllByRole("article");
+    expect(rows).toHaveLength(2);
+    const first = rows[0];
     expect(
       within(first).getByText("Evaluación de desempeño 2023"),
     ).toBeInTheDocument();
@@ -93,7 +93,7 @@ describe.each(["es", "en"] as const)("HistoryResult (%s)", (locale) => {
       "/imports/identity",
     );
     expect(first).toHaveTextContent("4");
-    expect(rows[2]).toHaveTextContent(
+    expect(rows[1]).toHaveTextContent(
       t.createdUnchanged
         .replace("{created}", "0")
         .replace("{unchanged}", "320"),

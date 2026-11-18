@@ -28,7 +28,7 @@ export function AssessmentView({
   const name = participant.person.name;
   return (
     <div className="flex flex-col gap-6">
-      <dl className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+      <dl className="admin-surface grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
         <Fact label={t("cycle")}>{cycleName}</Fact>
         <Fact label={t("manager")}>
           {participant.manager?.name ?? t("noManager")}

@@ -37,52 +37,43 @@ export function GoalsOfPeriod({
       {goals.length === 0 ? (
         <p className="text-sm text-muted-foreground">{t("empty")}</p>
       ) : (
-        <div className="overflow-x-auto">
-          <table aria-label={t("title")}>
-            <thead>
-              <tr>
-                <th className="pr-4 text-left">{t("goal")}</th>
-                <th className="pr-4 text-left">{t("state")}</th>
-                <th className="pr-4 text-left">{t("progress")}</th>
-                <th className="text-left">{t("due")}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {goals.map((g) => (
-                <tr key={g.id}>
-                  <th
-                    scope="row"
-                    className={`pr-4 text-left ${g.noLongerApplicable ? "text-muted-foreground" : ""}`}
+        <div className="grid gap-4 md:grid-cols-2">
+          {goals.map((g) => (
+            <article
+              key={g.id}
+              className="flex min-w-0 flex-col gap-4 rounded-xl bg-brand-fog/70 p-5"
+            >
+              <GoalStateBadge state={g.status} />
+              <h3
+                className={`text-lg ${g.noLongerApplicable ? "text-muted-foreground" : ""}`}
+              >
+                {g.openable && g.goalId ? (
+                  <Link
+                    href={`/goals/${g.goalId}`}
+                    className="underline decoration-brand-200 underline-offset-4 hover:text-primary"
                   >
-                    {g.openable && g.goalId ? (
-                      <Link href={`/goals/${g.goalId}`} className="underline">
-                        {g.title}
-                      </Link>
-                    ) : (
-                      g.title
-                    )}
-                    {g.noLongerApplicable ? (
-                      <span className="block text-xs font-normal">
-                        {t("noLongerApplicable")}
-                      </span>
-                    ) : null}
-                  </th>
-                  <td className="pr-4">
-                    <GoalStateBadge state={g.status} />
-                  </td>
-                  <td className="pr-4">
-                    <ProgressBar
-                      percent={g.percentComplete}
-                      label={t("progressLabel", { percent: g.percentComplete })}
-                    />
-                  </td>
-                  <td className="whitespace-nowrap tabular-nums">
-                    {g.dueDate ? d.day(g.dueDate) : t("noDate")}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                    {g.title}
+                  </Link>
+                ) : (
+                  g.title
+                )}
+              </h3>
+              {g.noLongerApplicable ? (
+                <p className="text-xs text-muted-foreground">
+                  {t("noLongerApplicable")}
+                </p>
+              ) : null}
+              <div className="mt-auto">
+                <ProgressBar
+                  percent={g.percentComplete}
+                  label={t("progressLabel", { percent: g.percentComplete })}
+                />
+              </div>
+              <p className="text-xs text-muted-foreground">
+                {t("due")}: {g.dueDate ? d.day(g.dueDate) : t("noDate")}
+              </p>
+            </article>
+          ))}
         </div>
       )}
     </Panel>

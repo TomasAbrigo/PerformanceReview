@@ -1,5 +1,8 @@
 "use client";
 
+import { CardCollection } from "@/components/card-collection";
+import { Quote } from "lucide-react";
+import { IconTile } from "@/components/experience";
 import { useFormatter, useTranslations } from "next-intl";
 import { useState, useTransition } from "react";
 import { Button } from "@/components/ui/button";
@@ -28,27 +31,20 @@ export function CommentsTable({
   if (rows.length === 0)
     return <p className="text-sm text-muted-foreground">{t("empty")}</p>;
   return (
-    <table aria-label={t("comments.table")} className="w-full text-sm">
-      <thead>
-        <tr className="text-left">
-          <th className="pr-3">{t("comments.person")}</th>
-          <th className="pr-3">{t("comments.period")}</th>
-          <th className="pr-3">{t("filters.dimension")}</th>
-          <th className="pr-3">{t("comments.text")}</th>
-          <th className="pr-3">{t("comments.label")}</th>
-        </tr>
-      </thead>
-      <tbody>
-        {rows.map((r) => (
-          <Row
-            key={r.answerId}
-            row={r}
-            dimension={dimensionLabel[r.dimension] ?? r.dimension}
-            correct={correct}
-          />
-        ))}
-      </tbody>
-    </table>
+    <CardCollection
+      role="group"
+      aria-label={t("comments.table")}
+      gridClassName="record-grid"
+    >
+      {rows.map((r) => (
+        <Row
+          key={r.answerId}
+          row={r}
+          dimension={dimensionLabel[r.dimension] ?? r.dimension}
+          correct={correct}
+        />
+      ))}
+    </CardCollection>
   );
 }
 
@@ -75,22 +71,27 @@ function Row({
       timeZone: "UTC",
     });
   return (
-    <tr className="border-t align-top">
-      <td className="py-1 pr-3">
-        <div>{row.personName}</div>
+    <article className="record-card" aria-label={row.personName}>
+      <div className="flex flex-wrap items-center gap-2">
+        <IconTile>
+          <Quote className="size-5" />
+        </IconTile>
+        <h3 className="text-xl">{row.personName}</h3>
         <span className="rounded border px-1 text-[10px] font-semibold tracking-wide">
           {t(`comments.tags.${row.relationship}` as "comments.tags.self")}
         </span>
-      </td>
-      <td className="py-1 pr-3">
+      </div>
+      <div className="text-xs text-muted-foreground">
         <div>{row.cycleName}</div>
         <div className="text-xs text-muted-foreground">
           {day(row.periodStart)} – {day(row.periodEnd)}
         </div>
-      </td>
-      <td className="py-1 pr-3">{dimension}</td>
-      <td className="py-1 pr-3 whitespace-pre-line">{row.text}</td>
-      <td className="py-1 pr-3">
+      </div>
+      <p className="kicker text-primary">{dimension}</p>
+      <blockquote className="rounded-lg border-l-4 border-brand-600 bg-brand-fog p-4 text-sm leading-relaxed whitespace-pre-line">
+        {row.text}
+      </blockquote>
+      <div className="flex flex-col items-start gap-3">
         <div>
           <strong>{t(`sentiment.${row.sentiment}`)}</strong>
           {row.source === "human" ? ` (${t("comments.human")})` : null}
@@ -119,7 +120,7 @@ function Row({
         ) : null}
         {correct && editing ? (
           <form
-            className="mt-1 flex flex-col gap-1"
+            className="flex w-full flex-col gap-3 rounded-lg bg-brand-fog p-4"
             onSubmit={(e) => {
               e.preventDefault();
               const f = new FormData(e.currentTarget);
@@ -142,7 +143,7 @@ function Row({
               <select
                 name="sentiment"
                 defaultValue={row.sentiment}
-                className="rounded border px-1"
+                className="control"
               >
                 {sentiments.map((s) => (
                   <option key={s} value={s}>
@@ -156,12 +157,12 @@ function Row({
               <input
                 name="themes"
                 defaultValue={row.themes.join("; ")}
-                className="rounded border px-1"
+                className="control"
               />
             </label>
             <label className="flex flex-col text-xs">
               {t("comments.reason")}
-              <input name="reason" className="rounded border px-1" />
+              <input name="reason" className="control" />
             </label>
             <div className="flex gap-1">
               <Button size="sm" type="submit" disabled={pending}>
@@ -183,7 +184,7 @@ function Row({
             ) : null}
           </form>
         ) : null}
-      </td>
-    </tr>
+      </div>
+    </article>
   );
 }

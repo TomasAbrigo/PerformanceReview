@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import { expect, test, type Page } from "@playwright/test";
+import { countValue as count } from "./cards";
 
 const REPORTS = path.resolve("fixtures/bamboo-reports/small");
 
@@ -39,7 +40,7 @@ async function importEmployeePerformance(page: Page) {
   await page.getByRole("checkbox", { name: "Only land the rows" }).check();
   await page.getByRole("button", { name: "Import" }).click();
   await expect(page).toHaveURL(/\/en\/imports\/runs\/[0-9a-f-]{36}$/);
-  return page.getByRole("table", { name: "Counts" });
+  return page.getByRole("group", { name: "Counts" });
 }
 
 test("uploads the employee performance report, previews it and imports it", async ({
@@ -71,9 +72,9 @@ test("uploads the employee performance report, previews it and imports it", asyn
   await expect(
     page.getByText("El archivo tiene todas las columnas que pide el perfil."),
   ).toBeVisible();
-  const columns = page.getByRole("table", { name: "Columnas detectadas" });
+  const columns = page.getByRole("group", { name: "Columnas detectadas" });
   await expect(
-    columns.getByRole("row", { name: /^Review Cycle/ }),
+    columns.getByRole("heading", { name: "Review Cycle", exact: true }),
   ).toBeVisible();
   const rows = page.getByRole("table", { name: "Primeras filas" });
   await expect(rows.getByRole("row")).toHaveCount(1 + 20);
@@ -87,10 +88,8 @@ test("uploads the employee performance report, previews it and imports it", asyn
     page.getByRole("heading", { level: 1, name: "Corrida de importación" }),
   ).toBeVisible();
   await expect(
-    page
-      .getByRole("table", { name: "Conteos" })
-      .getByRole("row", { name: `Leídos ${total}`, exact: true }),
-  ).toBeVisible();
+    count(page.getByRole("group", { name: "Conteos" }), "Leídos"),
+  ).toHaveText(String(total));
   await expect(
     page.getByText(/"profile": "bamboo-employee-performance"/),
   ).toBeVisible();
@@ -106,15 +105,9 @@ test("importing the same file again creates no new records", async ({
 
   const counts = await importEmployeePerformance(page);
 
-  await expect(
-    counts.getByRole("row", { name: `Read ${total}`, exact: true }),
-  ).toBeVisible();
-  await expect(
-    counts.getByRole("row", { name: "Inserted 0", exact: true }),
-  ).toBeVisible();
-  await expect(
-    counts.getByRole("row", { name: `Unchanged ${total}`, exact: true }),
-  ).toBeVisible();
+  await expect(count(counts, "Read")).toHaveText(String(total));
+  await expect(count(counts, "Inserted")).toHaveText("0");
+  await expect(count(counts, "Unchanged")).toHaveText(String(total));
 });
 
 test("a file missing a column of the profile is flagged and cannot be imported", async ({
@@ -141,8 +134,8 @@ test("a file missing a column of the profile is flagged and cannot be imported",
   await expect(alert).toContainText("Review Cycle");
   await expect(
     page
-      .getByRole("table", { name: "Detected columns" })
-      .locator('tr[data-issue="missing_column"]')
+      .getByRole("group", { name: "Detected columns" })
+      .locator('[data-issue="missing_column"]')
       .first(),
   ).toBeVisible();
   await expect(page.getByRole("button", { name: "Import" })).toBeDisabled();

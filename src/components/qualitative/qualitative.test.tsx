@@ -202,10 +202,10 @@ describe("CommentsTable list", () => {
         dimensionLabel={{ strengths: "Fortalezas" }}
       />,
     );
-    const table = screen.getByRole("table", {
+    const table = screen.getByRole("group", {
       name: "Comentarios etiquetados",
     });
-    const [self, manager] = within(table).getAllByRole("row").slice(1);
+    const [self, manager] = within(table).getAllByRole("article");
     expect(within(self).getByText("PROPIO")).toBeInTheDocument();
     expect(within(manager).getByText("MANAGER")).toBeInTheDocument();
     expect(within(self).getByText("Ana Ejemplo")).toBeInTheDocument();
@@ -323,7 +323,7 @@ describe("CommentsTable", () => {
       />,
     );
     expect(
-      screen.getByRole("table", { name: "Comentarios etiquetados" }),
+      screen.getByRole("group", { name: "Comentarios etiquetados" }),
     ).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Corregir" })).toBeNull();
   });
@@ -386,7 +386,7 @@ describe("RunButton / ImportLabelsForm / params", () => {
     fireEvent.submit(
       screen.getByRole("button", { name: "Import labels" }).closest("form")!,
     );
-    const table = await screen.findByRole("table", { name: "Unmatched rows" });
+    const table = await screen.findByRole("group", { name: "Unmatched rows" });
     expect(within(table).getByText("Unknown person")).toBeInTheDocument();
   });
 

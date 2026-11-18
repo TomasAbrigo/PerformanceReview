@@ -17,7 +17,7 @@ function Figure({
   testId: string;
 }) {
   return (
-    <div className="flex flex-col">
+    <div className="flex flex-col gap-2 rounded-lg bg-brand-fog/60 p-3">
       <dt className="text-xs text-muted-foreground">{label}</dt>
       <dd className="font-heading text-xl tabular-nums" data-testid={testId}>
         {value}
@@ -45,7 +45,7 @@ function CardView({ card, team }: { card: Dm360Card; team: number }) {
   const s = card.sentiment;
   return (
     <article
-      className="flex flex-col gap-3 rounded-xl border border-border bg-card p-5"
+      className="metric-card"
       aria-labelledby={`dm-${card.key}`}
       data-testid="dm-card"
     >

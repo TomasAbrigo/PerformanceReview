@@ -152,7 +152,7 @@ describe("IndicatorDetail", () => {
         "href",
         "/data-quality",
       );
-      const rows = screen.getAllByRole("row").slice(1);
+      const rows = screen.getAllByRole("article");
       expect(rows).toHaveLength(2);
       expect(within(rows[0]).getByText("Ana García")).toBeInTheDocument();
       expect(within(rows[0]).getByText(top)).toBeInTheDocument();
@@ -196,9 +196,9 @@ describe("IndicatorDetail", () => {
     );
     expect(screen.getByText("Ciclo A")).toBeInTheDocument();
     expect(screen.getByText("Ciclo B")).toBeInTheDocument();
-    const tables = screen.getAllByRole("table");
+    const tables = screen.getAllByRole("group");
     expect(tables).toHaveLength(2);
-    expect(within(tables[0]).getAllByRole("row")).toHaveLength(3);
+    expect(within(tables[0]).getAllByRole("article")).toHaveLength(2);
     expect(within(tables[1]).getByText("Carla Romero")).toBeInTheDocument();
     expect(screen.getByText("2 participantes")).toBeInTheDocument();
   });
@@ -236,7 +236,7 @@ describe("IndicatorDetail", () => {
           }}
         />,
       );
-      const rows = screen.getAllByRole("row").slice(1);
+      const rows = screen.getAllByRole("article");
       expect(within(rows[0]).getByText(overlap)).toBeInTheDocument();
       expect(within(rows[0]).getByText("2021-06-01")).toBeInTheDocument();
       expect(within(rows[0]).getByText(openEnd)).toBeInTheDocument();
@@ -264,7 +264,7 @@ describe("IndicatorDetail", () => {
         }}
       />,
     );
-    const row = screen.getAllByRole("row")[1];
+    const row = screen.getAllByRole("article")[0];
     expect(within(row).getByRole("link")).toHaveAttribute(
       "href",
       "/imports/runs/r1",
@@ -296,13 +296,11 @@ describe("IndicatorDetail", () => {
         }}
       />,
     );
-    const row = screen.getAllByRole("row")[1];
+    const row = screen.getAllByRole("article")[0];
     expect(within(row).getByText("Carla Romero")).toBeInTheDocument();
     expect(within(row).getByText("Bruno Pérez")).toBeInTheDocument();
     expect(within(row).getByText("Ana García")).toBeInTheDocument();
-    expect(
-      screen.getByRole("columnheader", { name: "Snapshot manager" }),
-    ).toBeInTheDocument();
+    expect(screen.getByText("Snapshot manager")).toBeInTheDocument();
   });
 
   it("lists unmapped answers by cycle, column and raw value", () => {
@@ -331,7 +329,7 @@ describe("IndicatorDetail", () => {
         name: "Respuestas sin equivalencia Likert",
       }),
     ).toBeInTheDocument();
-    const row = screen.getAllByRole("row")[1];
+    const row = screen.getAllByRole("article")[0];
     expect(within(row).getByText("Ciclo 2023")).toBeInTheDocument();
     expect(within(row).getByText("manager:q1")).toBeInTheDocument();
     expect(within(row).getByText("Z")).toBeInTheDocument();
@@ -358,7 +356,7 @@ describe("IndicatorDetail", () => {
         }}
       />,
     );
-    const row = screen.getAllByRole("row")[1];
+    const row = screen.getAllByRole("article")[0];
     expect(within(row).getByText("Meta")).toBeInTheDocument();
     expect(within(row).getByText("Inés Mora")).toBeInTheDocument();
   });

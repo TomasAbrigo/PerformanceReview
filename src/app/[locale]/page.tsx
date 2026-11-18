@@ -1,3 +1,4 @@
+import { PageSkeleton } from "@/components/experience";
 import { hasLocale } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
@@ -101,7 +102,7 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
           {tHome("welcome")}
         </p>
       </section>
-      <Suspense fallback={<div aria-busy="true" className="h-64" />}>
+      <Suspense fallback={<PageSkeleton />}>
         <HomeNav />
       </Suspense>
     </main>
