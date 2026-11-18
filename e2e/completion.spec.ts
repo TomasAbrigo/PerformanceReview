@@ -1,5 +1,6 @@
 import path from "node:path";
 import { expect, type Page, test } from "@playwright/test";
+import { fact, showAllCards } from "./cards";
 import { actAs, actAsRole } from "./act-as";
 import { chooseCycle } from "./filters";
 import { importFile } from "./upload";
@@ -66,13 +67,11 @@ async function openCycle(page: Page) {
 }
 
 const missingTable = (page: Page) =>
-  page.getByRole("table", { name: "Quién falta" });
+  page.getByRole("group", { name: "Quién falta" });
 
-/** The row of a person (named by its header cell: a manager's name also shows in the rows of their team). */
+/** The card of a person (named by the person: a manager's name also shows in the cards of their team). */
 const rowOf = (page: Page, name: string) =>
-  missingTable(page)
-    .getByRole("row")
-    .filter({ has: page.getByRole("rowheader", { name, exact: true }) });
+  missingTable(page).getByRole("article", { name, exact: true });
 
 test("People import the assessment progress and read the completion of a cycle", async ({
   page,
@@ -101,12 +100,12 @@ test("People import the assessment progress and read the completion of a cycle",
   // The whole cycle first, then the areas of the snapshot.
   expect(await groups.count()).toBeGreaterThan(2);
   await expect(
-    summary.getByRole("img", {
+    summary.getByRole("progressbar", {
       name: /^Autoevaluación, Total del ciclo: [1-9]\d* de [1-9]\d* enviadas$/,
     }),
   ).toBeVisible();
   await expect(
-    summary.getByRole("img", {
+    summary.getByRole("progressbar", {
       name: /^Evaluación del manager, Total del ciclo: [1-9]\d* de [1-9]\d* enviadas$/,
     }),
   ).toBeVisible();
@@ -127,22 +126,22 @@ test("People import the assessment progress and read the completion of a cycle",
 
   // Who is missing: everybody the report says has not submitted a side.
   const table = missingTable(page);
+  await showAllCards(table);
   for (const m of missing) {
     const row = rowOf(page, fullName(m.person));
     await expect(row).toBeVisible();
-    // Columns: person, area, manager, self status, manager status, notes.
-    await expect(row.locator("td:nth-child(4)")).toContainText(
+    await expect(fact(row, "Autoevaluación")).toContainText(
       STATUS_ES[m.selfStatus],
     );
-    await expect(row.locator("td:nth-child(5)")).toContainText(
+    await expect(fact(row, "Evaluación del manager")).toContainText(
       STATUS_ES[m.managerStatus],
     );
   }
-  // The rows are the number the page announces, and there is no email.
-  const rows = await table.getByRole("row").count();
+  // The cards are the number the page announces, and there is no email.
+  const rows = await table.getByRole("article").count();
   await expect(
     page.getByRole("status").filter({ hasText: /Falta/ }),
-  ).toContainText(`${rows - 1} persona`);
+  ).toContainText(`${rows} persona`);
   await expect(page.getByText("@")).toHaveCount(0);
 
   // The side that is missing narrows the list.
@@ -195,16 +194,19 @@ test("a manager only sees their direct reports", async ({ page }) => {
     page.getByText("Solo tus reportes directos.", { exact: false }),
   ).toBeVisible();
   const table = missingTable(page);
+  await showAllCards(table);
   for (const m of team) {
     await expect(rowOf(page, fullName(m.person))).toBeVisible();
   }
   // Somebody missing in another team is not theirs to see.
   await expect(rowOf(page, fullName(outsider.person))).toHaveCount(0);
-  // Every row has them as the manager, and no CSV for managers.
-  const managerCells = table.locator("tbody tr td:nth-child(3)");
-  const names = await managerCells.allTextContents();
+  // Every card has them as the manager, and no CSV for managers.
+  const managerLines = table
+    .getByRole("article")
+    .locator("p", { hasText: /^Manager: / });
+  const names = await managerLines.allTextContents();
   expect(names.length).toBeGreaterThanOrEqual(team.length);
-  expect(new Set(names)).toEqual(new Set([fullName(manager)]));
+  expect(new Set(names)).toEqual(new Set([`Manager: ${fullName(manager)}`]));
   await expect(page.getByRole("link", { name: /Exportar CSV/ })).toHaveCount(0);
 });
 
@@ -216,8 +218,11 @@ test("direction reads aggregates only; employees have no access", async ({
   await actAsRole(page, "Dirección", "Dirección");
   await openCycle(page);
   await expect(page.getByTestId("completion-group").first()).toBeVisible();
-  // No names, no managers and no list of people.
-  await expect(page.getByText(fullName(outsider.person))).toHaveCount(0);
+  // No names, no managers and no list of people (the "act as" list in the
+  // banner names everybody: look at the content).
+  await expect(
+    page.getByRole("main").getByText(fullName(outsider.person)),
+  ).toHaveCount(0);
   await expect(missingTable(page)).toHaveCount(0);
   await expect(
     page.getByText("Dirección solo ve agregados", { exact: false }),

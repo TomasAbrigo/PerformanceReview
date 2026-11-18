@@ -1,12 +1,5 @@
 import { useTranslations } from "next-intl";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { ProgressBar } from "@/components/progress-bar";
 import type {
   GoalOutlier,
   GoalOutliers,
@@ -31,19 +24,37 @@ function Group({
   const t = useTranslations("GoalsInsights.outliers");
   const pct = usePct();
   const person = (p: GoalOutlier) => (
-    <TableRow key={p.participantId}>
-      <TableCell>{p.name}</TableCell>
-      <TableCell>{p.managerName ?? "–"}</TableCell>
-      <TableCell className="tabular-nums">
+    <article key={p.participantId} className="record-card" aria-label={p.name}>
+      <h4 className="text-lg">{p.name}</h4>
+      <p className="text-xs text-muted-foreground">
+        {t("columns.manager")}: {p.managerName ?? "–"}
+      </p>
+      <ProgressBar
+        percent={p.completedPct}
+        label={t("completed", {
+          completed: p.completed,
+          goals: p.goals,
+          pct: pct(p.completedPct) ?? 0,
+        })}
+      />
+      <p className="text-xs">
         {t("completed", {
           completed: p.completed,
           goals: p.goals,
           pct: pct(p.completedPct) ?? 0,
         })}
-      </TableCell>
-      <TableCell className="tabular-nums">{p.retention ?? "–"}</TableCell>
-      <TableCell className="tabular-nums">{p.engagement ?? "–"}</TableCell>
-    </TableRow>
+      </p>
+      <dl className="record-facts">
+        <div>
+          <dt>{t("columns.retention")}</dt>
+          <dd>{p.retention ?? "–"}</dd>
+        </div>
+        <div>
+          <dt>{t("columns.engagement")}</dt>
+          <dd>{p.engagement ?? "–"}</dd>
+        </div>
+      </dl>
+    </article>
   );
   return (
     <section
@@ -61,18 +72,7 @@ function Group({
           : t("count", { n: group.count })}
       </p>
       {group.people.length > 0 ? (
-        <Table aria-label={title}>
-          <TableHeader>
-            <TableRow>
-              <TableHead>{t("columns.person")}</TableHead>
-              <TableHead>{t("columns.manager")}</TableHead>
-              <TableHead>{t("columns.completed")}</TableHead>
-              <TableHead>{t("columns.retention")}</TableHead>
-              <TableHead>{t("columns.engagement")}</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>{group.people.map(person)}</TableBody>
-        </Table>
+        <div className="grid gap-4">{group.people.map(person)}</div>
       ) : group.count === 0 ? (
         <p className="text-sm text-muted-foreground">{t("none")}</p>
       ) : null}

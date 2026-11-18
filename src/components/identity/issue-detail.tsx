@@ -31,8 +31,8 @@ export type IssueActions = {
 function Section({ title, children }: { title: string; children: ReactNode }) {
   const id = useId();
   return (
-    <section aria-labelledby={id} className="flex flex-col gap-2">
-      <h2 id={id} className="text-lg font-medium">
+    <section aria-labelledby={id} className="admin-surface flex flex-col gap-5">
+      <h2 id={id} className="text-xl">
         {title}
       </h2>
       {children}

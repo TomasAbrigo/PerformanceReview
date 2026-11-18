@@ -1,15 +1,11 @@
+import { CardCollection } from "@/components/card-collection";
+import { EmptyState } from "@/components/experience";
 import { useTranslations } from "next-intl";
 import { ExportCsvLink } from "@/components/data-quality/export-csv-link";
 import { PageHeader } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { Database } from "lucide-react";
+import { IconTile } from "@/components/experience";
 import { INGEST_COUNT_KEYS } from "@/db/schema/ingest";
 import { Link } from "@/i18n/navigation";
 import { RUN_STATUSES } from "@/modules/ingest/run-status";
@@ -93,7 +89,7 @@ export function RunsList({
         role="search"
         method="get"
         aria-label={t("filters.label")}
-        className="flex flex-wrap items-end gap-3"
+        className="filter-toolbar flex flex-wrap items-end gap-3"
       >
         <FilterSelect
           name="source"
@@ -126,59 +122,52 @@ export function RunsList({
       </form>
 
       {runs.length === 0 ? (
-        <p>{hasFilters ? t("emptyFiltered") : t("empty")}</p>
+        <EmptyState>{hasFilters ? t("emptyFiltered") : t("empty")}</EmptyState>
       ) : (
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>{t("columns.started")}</TableHead>
-              <TableHead>{t("columns.source")}</TableHead>
-              <TableHead>{t("columns.adapter")}</TableHead>
-              <TableHead>{t("columns.entity")}</TableHead>
-              <TableHead>{t("columns.status")}</TableHead>
-              {INGEST_COUNT_KEYS.map((k) => (
-                <TableHead key={k} className="text-right">
-                  {t(`columns.${k}`)}
-                </TableHead>
-              ))}
-              <TableHead className="text-right">{t("columns.log")}</TableHead>
-              <TableHead className="text-right">
-                {t("columns.duration")}
-              </TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {runs.map((run) => (
-              <TableRow key={run.id}>
-                <TableCell>
-                  <Link
-                    href={`/imports/runs/${run.id}`}
-                    className="hover:underline"
-                  >
-                    {dateTime(run.startedAt)}
-                  </Link>
-                </TableCell>
-                <TableCell>{run.sourceSystem ?? "—"}</TableCell>
-                <TableCell>{run.adapter ?? "—"}</TableCell>
-                <TableCell>{run.entity}</TableCell>
-                <TableCell>
-                  <RunStatusBadge status={run.status} />
-                </TableCell>
+        <CardCollection gridClassName="record-grid">
+          {runs.map((run) => (
+            <article key={run.id} className="record-card">
+              <header className="flex items-center justify-between gap-3">
+                <IconTile>
+                  <Database className="size-5" />
+                </IconTile>
+                <RunStatusBadge status={run.status} />
+              </header>
+              <h2 className="text-xl">
+                <Link
+                  href={`/imports/runs/${run.id}`}
+                  className="underline decoration-brand-200 underline-offset-4"
+                >
+                  {dateTime(run.startedAt)}
+                </Link>
+              </h2>
+              <p className="text-xs text-muted-foreground">
+                {run.sourceSystem ?? "—"} · {run.entity} · {run.adapter ?? "—"}
+              </p>
+              <dl className="record-facts">
                 {INGEST_COUNT_KEYS.map((k) => (
-                  <TableCell key={k} className="text-right tabular-nums">
-                    {run.counts[k] ?? "—"}
-                  </TableCell>
+                  <div key={k}>
+                    <dt>{t(`columns.${k}`)}</dt>
+                    <dd>
+                      <span className="stat-value-sm">
+                        {run.counts[k] ?? "—"}
+                      </span>
+                    </dd>
+                  </div>
                 ))}
-                <TableCell className="text-right tabular-nums">
-                  {run.issues}
-                </TableCell>
-                <TableCell className="text-right tabular-nums">
+              </dl>
+              <div className="flex flex-wrap justify-between gap-3 border-t pt-4 text-xs text-muted-foreground">
+                <span>
+                  {t("columns.log")}: {run.issues}
+                </span>
+                <span>
+                  {t("columns.duration")}:{" "}
                   {duration(run.startedAt, run.finishedAt)}
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+                </span>
+              </div>
+            </article>
+          ))}
+        </CardCollection>
       )}
 
       {nextHref ? (

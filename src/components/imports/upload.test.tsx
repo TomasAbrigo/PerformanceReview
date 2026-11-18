@@ -9,6 +9,11 @@ import { builtinProfiles, type SourceProfile } from "@/modules/lake/profiles";
 import type { ImportResult, InspectResult } from "@/modules/lake/upload-shared";
 import { UploadForm, type UploadActions } from "./upload-form";
 
+/** The card of one column in the detected-columns collection. */
+function card(group: HTMLElement, name: string) {
+  return within(group).getByRole("heading", { name }).closest("article")!;
+}
+
 const push = vi.fn();
 vi.mock("@/i18n/navigation", () => ({
   Link: ({ href, children }: { href: string; children: ReactNode }) => (
@@ -225,7 +230,7 @@ describe.each(["es", "en"] as const)("UploadForm (%s)", (locale) => {
       const sent = actions.inspect.mock.calls[0][0];
       expect((sent.get("file") as File).name).toBe("goal-status.csv");
 
-      const columns = screen.getByRole("table", { name: t.preview.columns });
+      const columns = screen.getByRole("group", { name: t.preview.columns });
       expect(within(columns).getByText("Due Date")).toBeInTheDocument();
       expect(within(columns).getByText("DATE")).toBeInTheDocument();
       const rows = screen.getByRole("table", { name: t.preview.rows });
@@ -243,8 +248,8 @@ describe.each(["es", "en"] as const)("UploadForm (%s)", (locale) => {
       expect(select).toHaveValue("bamboo-goal-status");
       expect(screen.getByText(t.preview.matches)).toBeInTheDocument();
       expect(screen.queryByText(t.issues.title)).toBeNull();
-      const columns = screen.getByRole("table", { name: t.preview.columns });
-      const goal = within(columns).getByRole("row", { name: /^Goal\b/ });
+      const columns = screen.getByRole("group", { name: t.preview.columns });
+      const goal = card(columns, "Goal");
       expect(within(goal).getByText(t.roles.key)).toBeInTheDocument();
       expect(
         screen.getByRole("button", { name: t.preview.import }),
@@ -263,15 +268,12 @@ describe.each(["es", "en"] as const)("UploadForm (%s)", (locale) => {
       expect(alert).toHaveTextContent(t.issues.title);
       expect(alert).toHaveTextContent(/Review Cycle/);
       expect(alert).toHaveTextContent(/Assessment Date/);
-      const columns = screen.getByRole("table", { name: t.preview.columns });
-      const missing = within(columns).getByRole("row", {
-        name: new RegExp(`Review Cycle.*${t.preview.missingInFile}`),
-      });
+      const columns = screen.getByRole("group", { name: t.preview.columns });
+      const missing = card(columns, "Review Cycle");
+      expect(missing).toHaveTextContent(t.preview.missingInFile);
       expect(missing).toHaveAttribute("data-issue", "missing_column");
       // Columns the file does have are not flagged.
-      expect(
-        within(columns).getByRole("row", { name: /^Employee Name\b/ }),
-      ).not.toHaveAttribute("data-issue");
+      expect(card(columns, "Employee Name")).not.toHaveAttribute("data-issue");
       expect(
         screen.getByRole("button", { name: t.preview.import }),
       ).toBeDisabled();
@@ -323,10 +325,11 @@ describe.each(["es", "en"] as const)("UploadForm (%s)", (locale) => {
       expect(screen.getByRole("alert")).toHaveTextContent(
         /_fivetran_synced.*VARCHAR/,
       );
-      const columns = screen.getByRole("table", { name: t.preview.columns });
-      expect(
-        within(columns).getByRole("row", { name: /^_fivetran_synced\b/ }),
-      ).toHaveAttribute("data-issue", "type_mismatch");
+      const columns = screen.getByRole("group", { name: t.preview.columns });
+      expect(card(columns, "_fivetran_synced")).toHaveAttribute(
+        "data-issue",
+        "type_mismatch",
+      );
       const header = screen.getByRole("columnheader", {
         name: "_fivetran_synced",
       });
@@ -664,7 +667,7 @@ describe.each(["es", "en"] as const)("UploadForm (%s)", (locale) => {
       );
       await userEvent.type(screen.getByLabelText(t.custom.name), "perf-cuenta");
 
-      const questions = screen.getByRole("table", {
+      const questions = screen.getByRole("group", {
         name: t.custom.questions.title,
       });
       // The built-in's mapping for the columns this file has.

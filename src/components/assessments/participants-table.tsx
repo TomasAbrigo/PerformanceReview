@@ -1,3 +1,5 @@
+import { ArrowUpRight, ClipboardCheck, UserRound, Users } from "lucide-react";
+import { EmptyState, IconTile } from "@/components/experience";
 import { useTranslations } from "next-intl";
 import { CountChips } from "@/components/count-chips";
 import { Pagination } from "@/components/pagination";
@@ -55,67 +57,99 @@ export function ParticipantsTable({
   const t = useTranslations("Assessments");
   const pages = Math.max(1, Math.ceil(page.total / page.pageSize));
   if (page.items.length === 0) {
-    return (
-      <p className="text-sm text-muted-foreground" role="status">
-        {t("empty")}
-      </p>
-    );
+    return <EmptyState>{t("empty")}</EmptyState>;
   }
   return (
     <div className="flex flex-col gap-2">
-      <div className="overflow-x-auto">
-        <table aria-label={t("table.label")}>
-          <thead>
-            <tr>
-              <th className="pr-4 text-left">{t("table.person")}</th>
-              {showPeople ? (
-                <>
-                  <th className="pr-4 text-left">{t("table.manager")}</th>
-                  <th className="pr-4 text-left">{t("table.department")}</th>
-                </>
-              ) : null}
-              <th className="pr-4 text-left">{t("table.self")}</th>
-              <th className="pr-4 text-left">{t("table.managerReview")}</th>
-              <th className="text-left">{t("table.progress")}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {page.items.map((r) => (
-              <tr key={r.participantId}>
-                <th scope="row" className="pr-4 text-left">
-                  <Link
-                    href={`/assessments/${cycleId}/${r.participantId}`}
-                    className="underline"
-                  >
-                    {r.person.name}
-                  </Link>
+      <div
+        role="group"
+        className={showPeople ? "goal-grid" : "grid gap-6"}
+        aria-label={t("table.label")}
+      >
+        {page.items.map((r) => (
+          <article
+            key={r.participantId}
+            className="assessment-card"
+            aria-labelledby={`participant-${r.participantId}`}
+          >
+            <header className="flex items-start justify-between gap-4">
+              <div className="flex items-center gap-4">
+                <span className="person-avatar" aria-hidden="true">
+                  {r.person.name
+                    .split(" ")
+                    .map((n) => n[0])
+                    .slice(0, 2)
+                    .join("")}
+                </span>
+                <div>
+                  <h2 id={`participant-${r.participantId}`} className="text-xl">
+                    <Link
+                      className="card-link"
+                      href={`/assessments/${cycleId}/${r.participantId}`}
+                    >
+                      {r.person.name}
+                    </Link>
+                  </h2>
                   {r.jobTitle ? (
-                    <span className="block text-xs font-normal text-muted-foreground">
+                    <p className="mt-1 text-xs text-muted-foreground">
                       {r.jobTitle}
-                    </span>
+                    </p>
                   ) : null}
-                </th>
-                {showPeople ? (
-                  <>
-                    <td className="pr-4">
-                      {r.manager?.name ?? t("table.noManager")}
-                    </td>
-                    <td className="pr-4">
-                      {r.department ?? t("table.noDepartment")}
-                    </td>
-                  </>
-                ) : null}
-                <td className="pr-4">
-                  <RequestStateChip state={r.self.state} />
-                </td>
-                <td className="pr-4">
-                  <RequestStateChip state={r.managerReview.state} />
-                </td>
-                <td>{t(`progress.${r.progress}`)}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+                </div>
+              </div>
+              <ArrowUpRight
+                className="size-5 shrink-0 text-primary"
+                aria-hidden="true"
+              />
+            </header>
+            {showPeople ? (
+              <p className="text-xs text-muted-foreground">
+                {r.department ?? t("table.noDepartment")} ·{" "}
+                {r.manager?.name ?? t("table.noManager")}
+              </p>
+            ) : null}
+            <div
+              className={
+                showPeople ? "flex flex-col gap-3" : "grid gap-5 sm:grid-cols-2"
+              }
+            >
+              {(
+                [
+                  {
+                    label: t("table.self"),
+                    side: r.self,
+                    icon: <UserRound className="size-5" />,
+                  },
+                  {
+                    label: t("table.managerReview"),
+                    side: r.managerReview,
+                    icon: <Users className="size-5" />,
+                  },
+                ] as const
+              ).map(({ label, side, icon }) => (
+                <div key={label} className="assessment-perspective">
+                  <div className="flex items-center justify-between gap-3">
+                    <IconTile>{icon}</IconTile>
+                    <RequestStateChip state={side.state} />
+                  </div>
+                  <h3>{label}</h3>
+                  <div className="flex gap-2" aria-hidden="true">
+                    {[0, 1, 2].map((i) => (
+                      <span
+                        key={i}
+                        className={`h-1.5 flex-1 rounded-full ${side.state === "submitted" ? "bg-brand-600" : side.state === "draft" && i === 0 ? "bg-brand-400" : "bg-brand-200/50"}`}
+                      />
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+            <p className="mt-auto inline-flex items-center gap-2 text-sm text-primary">
+              <ClipboardCheck className="size-4" aria-hidden="true" />
+              {t(`progress.${r.progress}`)}
+            </p>
+          </article>
+        ))}
       </div>
       <Pagination
         page={page.page}

@@ -1,3 +1,10 @@
+import { ArrowUpRight, CalendarDays, Flag, Target } from "lucide-react";
+import {
+  EmptyState,
+  IconTile,
+  MetricCard,
+  ProgressRing,
+} from "@/components/experience";
 import { useTranslations } from "next-intl";
 import { CountChips } from "@/components/count-chips";
 import { useDates } from "@/components/dates";
@@ -55,70 +62,66 @@ export function GoalsTable({
   const d = useDates();
   const pages = Math.max(1, Math.ceil(page.total / page.pageSize));
   if (page.items.length === 0) {
-    return (
-      <p className="text-sm text-muted-foreground" role="status">
-        {t("empty")}
-      </p>
-    );
+    return <EmptyState>{t("empty")}</EmptyState>;
   }
   return (
     <div className="flex flex-col gap-2">
-      <div className="overflow-x-auto">
-        <table aria-label={t("table.label")}>
-          <thead>
-            <tr>
-              <th className="pr-4 text-left">{t("table.goal")}</th>
-              {showPerson ? (
-                <th className="pr-4 text-left">{t("table.person")}</th>
-              ) : null}
-              <th className="pr-4 text-left">{t("table.state")}</th>
-              <th className="pr-4 text-left">{t("table.progress")}</th>
-              <th className="pr-4 text-left">{t("table.due")}</th>
-              <th className="text-left">{t("table.milestones")}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {page.items.map((g) => (
-              <tr key={g.id}>
-                <th scope="row" className="pr-4 text-left">
-                  <Link href={`/goals/${g.id}`} className="underline">
-                    {g.title}
-                  </Link>
-                </th>
-                {showPerson ? (
-                  <td className="pr-4">
-                    {g.person.name}
-                    {g.department ? (
-                      <span className="block text-xs text-muted-foreground">
-                        {g.department}
-                      </span>
-                    ) : null}
-                  </td>
+      <div role="group" className="goal-grid" aria-label={t("table.label")}>
+        {page.items.map((g) => (
+          <article
+            key={g.id}
+            className="goal-card"
+            aria-labelledby={`goal-${g.id}`}
+          >
+            <div className="flex items-center justify-between gap-3">
+              <IconTile>
+                <Target className="size-5" />
+              </IconTile>
+              <GoalStateBadge state={g.state} />
+            </div>
+            <h2 id={`goal-${g.id}`} className="text-xl leading-snug">
+              <Link href={`/goals/${g.id}`} className="card-link">
+                {g.title}
+              </Link>
+            </h2>
+            {showPerson ? (
+              <p className="text-sm text-muted-foreground">
+                {g.person.name}
+                {g.department ? (
+                  <span className="block text-xs">{g.department}</span>
                 ) : null}
-                <td className="pr-4">
-                  <GoalStateBadge state={g.state} />
-                </td>
-                <td className="pr-4">
-                  <ProgressBar
-                    percent={g.percentComplete}
-                    label={t("progress", { percent: g.percentComplete })}
-                  />
-                </td>
-                <td className="pr-4 whitespace-nowrap tabular-nums">
-                  {g.dueDate ? d.day(g.dueDate) : t("table.noDate")}
-                </td>
-                <td className="tabular-nums">
-                  {g.milestonesTotal > 0
-                    ? t("table.milestonesOf", {
-                        done: g.milestonesDone,
-                        total: g.milestonesTotal,
-                      })
-                    : t("table.noMilestones")}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+              </p>
+            ) : null}
+            <div className="mt-auto space-y-2 pt-2">
+              <span className="text-xs text-muted-foreground">
+                {t("table.progress")}
+              </span>
+              <ProgressBar
+                percent={g.percentComplete}
+                label={t("progress", { percent: g.percentComplete })}
+              />
+            </div>
+            <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border/60 pt-4 text-xs text-muted-foreground">
+              <span className="inline-flex items-center gap-2">
+                <CalendarDays className="size-4" aria-hidden="true" />
+                {g.dueDate ? d.day(g.dueDate) : t("table.noDate")}
+              </span>
+              <span className="inline-flex items-center gap-2">
+                <Flag className="size-3.5" aria-hidden="true" />
+                {g.milestonesTotal > 0
+                  ? t("table.milestonesOf", {
+                      done: g.milestonesDone,
+                      total: g.milestonesTotal,
+                    })
+                  : t("table.noMilestones")}
+              </span>
+              <ArrowUpRight
+                className="size-4 text-primary"
+                aria-hidden="true"
+              />
+            </div>
+          </article>
+        ))}
       </div>
       <Pagination
         page={page.page}
@@ -130,6 +133,40 @@ export function GoalsTable({
           next: t("pagination.next"),
           position: t("pagination.page", { page: page.page, pages }),
         }}
+      />
+    </div>
+  );
+}
+
+export function GoalsOverview({ counts }: { counts: GoalListPage["counts"] }) {
+  const t = useTranslations("Goals");
+  const x = useTranslations("Experience");
+  const total = goalStates.reduce((sum, state) => sum + counts[state], 0);
+  return (
+    <div className="overview-grid">
+      <section className="overview-hero">
+        <ProgressRing
+          percent={total ? (counts.completed / total) * 100 : 0}
+          label={t("states.completed")}
+        >
+          {counts.completed}/{total}
+        </ProgressRing>
+        <div>
+          <h2 className="text-2xl">{t("states.completed")}</h2>
+          <p className="mt-2 text-sm text-brand-200">
+            {x("completedOf", { done: counts.completed, total })}
+          </p>
+        </div>
+      </section>
+      <MetricCard
+        label={t("states.in_progress")}
+        value={counts.in_progress}
+        icon={<Target className="size-5" />}
+      />
+      <MetricCard
+        label={t("states.overdue")}
+        value={counts.overdue}
+        icon={<CalendarDays className="size-5" />}
       />
     </div>
   );

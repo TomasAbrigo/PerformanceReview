@@ -412,7 +412,9 @@
       "direction": "Direction"
     },
     "apply": "Apply",
-    "error": "Could not change the actor."
+    "error": "Could not change the actor.",
+    "examples": "Examples:",
+    "example": "{role}: {name}"
   },
   "Access": {
     "title": "No access",
@@ -2055,5 +2057,22 @@
       }
     },
     "forbidden": "You do not have access to this assessment: everyone sees their own and, for a manager, their team's."
+  },
+  "Experience": {
+    "moreFilters": "More filters",
+    "open": "View details",
+    "cycle": "Current period",
+    "overview": "Your progress",
+    "completedOf": "{done} of {total} completed",
+    "account": "Switch identity",
+    "accountHint": "Preview tools · Choose the person and role for this session.",
+    "loadError": "We could not load this information.",
+    "retry": "Try again",
+    "notFound": "We could not find this page.",
+    "back": "Back to home",
+    "upload": "Choose a file",
+    "review": "Review and configure",
+    "result": "Result",
+    "moreRecords": "Show {count} more records"
   }
 }

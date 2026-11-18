@@ -45,62 +45,37 @@ const data = (
   rows,
   minGroupSize: min,
 });
-const norm = (s: string | null) => s?.replace(/\s/g, " ");
-
 describe("PeriodDetailTable", () => {
-  it("shows N, completion, the three means with their people, and goals completed per cycle (es)", () => {
-    renderIn(
-      "es",
-      <PeriodDetailTable
-        data={data([
-          row(),
-          row({ cycleId: "c2", cycleName: "H2 2024", participants: 42 }),
-        ])}
-      />,
-    );
-
-    const table = screen.getByRole("table", { name: "Detalle por período" });
-    const rows = within(table).getAllByRole("row");
-    expect(rows).toHaveLength(3);
-    expect(
-      within(rows[0])
-        .getAllByRole("columnheader")
-        .map((c) => c.textContent),
-    ).toEqual([
-      "Ciclo",
-      "Personas",
-      "Autoevaluación",
-      "Evaluación del manager",
-      "Valoración propia (1-4)",
-      "Retención (1-5)",
-      "Compromiso Bamboo (1-5)",
-      "Goals completados",
-    ]);
-    const first = within(rows[1]);
-    expect(first.getByRole("rowheader")).toHaveTextContent("H1 2024");
-    const cells = first.getAllByRole("cell").map((c) => norm(c.textContent));
-    expect(cells).toEqual([
-      "40",
-      "85 %",
-      "90 %",
-      "3,20 (30 personas)",
-      "3,75 (38 personas)",
-      "3,90 (38 personas)",
-      "0 % de 120",
-    ]);
-    expect(within(rows[2]).getAllByRole("cell")[0]).toHaveTextContent("42");
-  });
-
-  it("reads in English", () => {
-    renderIn("en", <PeriodDetailTable data={data([row()])} />);
-    const table = screen.getByRole("table", { name: "Detail by period" });
-    expect(norm(within(table).getAllByRole("cell")[3].textContent)).toBe(
-      "3.20 (30 people)",
-    );
-    expect(norm(within(table).getAllByRole("cell")[1].textContent)).toBe("85%");
-  });
-
-  it("People see a dash where there is nothing to average, and no goals total without goals", () => {
+  it.each(["es", "en"] as const)(
+    "shows each period with completion meters, localized means and sample counts (%s)",
+    (locale) => {
+      renderIn(
+        locale,
+        <PeriodDetailTable
+          data={data([
+            row(),
+            row({ cycleId: "c2", cycleName: "H2 2024", participants: 42 }),
+          ])}
+        />,
+      );
+      const cards = screen.getAllByRole("article");
+      expect(cards).toHaveLength(2);
+      expect(cards[0]).toHaveAccessibleName("H1 2024");
+      expect(
+        within(cards[0])
+          .getAllByRole("progressbar")
+          .map((x) => x.getAttribute("aria-valuenow")),
+      ).toEqual(["85", "90", "0"]);
+      expect(cards[0]).toHaveTextContent(locale === "es" ? "3,20" : "3.20");
+      expect(cards[0]).toHaveTextContent(locale === "es" ? "3,75" : "3.75");
+      expect(cards[0]).toHaveTextContent(locale === "es" ? "3,90" : "3.90");
+      expect(cards[0]).toHaveTextContent("30");
+      expect(cards[0]).toHaveTextContent("38");
+      expect(cards[0]).toHaveTextContent("120");
+      expect(cards[1]).toHaveTextContent("42");
+    },
+  );
+  it("distinguishes missing measurements from zero", () => {
     renderIn(
       "es",
       <PeriodDetailTable
@@ -115,21 +90,15 @@ describe("PeriodDetailTable", () => {
         ])}
       />,
     );
-    const cells = within(screen.getByTestId("period-detail"))
-      .getAllByRole("row")[1]
-      .querySelectorAll("td");
-    expect([...cells].map((c) => c.textContent)).toEqual([
-      "40",
-      "—",
-      expect.stringContaining("90"),
-      "—",
-      "—",
-      expect.stringContaining("3,90"),
-      "—",
-    ]);
+    expect(screen.getAllByText("—")).toHaveLength(4);
+    expect(screen.getAllByRole("progressbar")).toHaveLength(1);
+    expect(screen.getByRole("progressbar")).toHaveAttribute(
+      "aria-valuenow",
+      "90",
+    );
+    expect(screen.getByRole("article")).not.toHaveTextContent("de 0");
   });
-
-  it("direction sees 'Oculto' instead of a figure under the minimum, and the head count stays", () => {
+  it("keeps suppressed values hidden for direction", () => {
     renderIn(
       "es",
       <PeriodDetailTable
@@ -150,14 +119,10 @@ describe("PeriodDetailTable", () => {
         )}
       />,
     );
-    const row1 = within(screen.getByTestId("period-detail")).getAllByRole(
-      "row",
-    )[1];
-    const cells = [...row1.querySelectorAll("td")].map((c) => c.textContent);
-    expect(cells[0]).toBe("3");
-    expect(cells.slice(1)).toEqual(Array(6).fill("Oculto"));
+    expect(screen.getAllByText("Oculto")).toHaveLength(6);
+    expect(screen.queryByRole("progressbar")).not.toBeInTheDocument();
+    expect(screen.getByRole("article")).toHaveTextContent("3");
   });
-
   it("says there are no cycles", () => {
     renderIn("es", <PeriodDetailTable data={data([])} />);
     expect(screen.getByText("Todavía no hay ciclos lanzados.")).toBeVisible();

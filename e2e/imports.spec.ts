@@ -1,4 +1,5 @@
-import { expect, test } from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
+import { countValue as count, fact } from "./cards";
 import { employees, queuedRecords, records } from "./seed-data";
 
 // The runs these specs look at are made once by e2e/global-setup.ts (through
@@ -20,9 +21,10 @@ test.beforeAll(() => {
   );
 });
 
-const rowOf = (page: import("@playwright/test").Page, runId: string) =>
+/** The card of one run in the list. */
+const rowOf = (page: Page, runId: string) =>
   page
-    .getByRole("row")
+    .getByRole("article")
     .filter({ has: page.locator(`a[href$="/imports/runs/${runId}"]`) });
 
 test("the home page links to the runs log", async ({ page }) => {
@@ -49,10 +51,9 @@ test("the list shows the run the CLI just made, with its counts", async ({
   await expect(row).toContainText("fixture");
   await expect(row).toContainText("employee");
   await expect(row).toContainText("Exitosa");
-  // read, inserted, updated, unchanged, deleted, rejected, issues
-  await expect(row.getByRole("cell").nth(5)).toHaveText(READ);
-  await expect(row.getByRole("cell").nth(8)).toHaveText(UNCHANGED);
-  await expect(row.getByRole("cell").nth(11)).toHaveText(QUEUED);
+  await expect(fact(row, "Leídos")).toHaveText(READ);
+  await expect(fact(row, "Sin cambios")).toHaveText(UNCHANGED);
+  await expect(fact(row, "En cola")).toHaveText(QUEUED);
 });
 
 test("a failed run is listed as failed and shows its error", async ({
@@ -81,7 +82,7 @@ test("opening a run shows its exact counts and rejects", async ({ page }) => {
   ).toBeVisible();
   await expect(page.getByText(okRun)).toBeVisible();
 
-  const counts = page.getByRole("table", { name: "Conteos" });
+  const counts = page.getByRole("group", { name: "Conteos" });
   for (const [label, value] of [
     ["Leídos", READ],
     ["Insertados", "0"],
@@ -90,9 +91,7 @@ test("opening a run shows its exact counts and rejects", async ({ page }) => {
     ["Eliminados", "0"],
     ["Rechazados", "0"],
   ]) {
-    await expect(
-      counts.getByRole("row", { name: `${label} ${value}`, exact: true }),
-    ).toBeVisible();
+    await expect(count(counts, label)).toHaveText(value);
   }
   await expect(
     page.getByText("Esta corrida no tuvo rechazos ni incidencias."),
@@ -107,10 +106,8 @@ test("the detail is available in English too", async ({ page }) => {
     page.getByRole("heading", { level: 1, name: "Import run" }),
   ).toBeVisible();
   await expect(
-    page
-      .getByRole("table", { name: "Counts" })
-      .getByRole("row", { name: `Read ${READ}`, exact: true }),
-  ).toBeVisible();
+    count(page.getByRole("group", { name: "Counts" }), "Read"),
+  ).toHaveText(READ);
   await page.getByRole("link", { name: "← Back to runs" }).click();
   await expect(page).toHaveURL(/\/en\/imports\/runs$/);
 });
@@ -121,6 +118,6 @@ test("the detail is available in English too", async ({ page }) => {
 test("an unknown run renders not-found", async ({ page }) => {
   for (const id of ["not-a-uuid", "00000000-0000-4000-8000-000000000000"]) {
     await page.goto(`/es/imports/runs/${id}`);
-    await expect(page.getByText("This page could not be found.")).toBeVisible();
+    await expect(page.getByText("No encontramos esta página.")).toBeVisible();
   }
 });

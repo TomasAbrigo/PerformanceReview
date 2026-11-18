@@ -328,3 +328,224 @@
     @apply inline-flex h-9 items-center justify-center rounded-lg border border-input bg-card px-3 text-sm font-medium whitespace-nowrap text-foreground transition-colors outline-none hover:bg-brand-fog focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/40 disabled:pointer-events-none disabled:opacity-50;
   }
 }
+
+/* Approved canvas: shared, responsive Santex surfaces. */
+@layer components {
+  .app-toolbar {
+    @apply flex min-h-19 items-center justify-between gap-4 border-b border-border/60 bg-card px-4 py-3 sm:px-6 lg:px-10;
+  }
+  .page-header {
+    @apply flex min-w-0 flex-col gap-6;
+  }
+  .filter-toolbar {
+    @apply rounded-xl bg-brand-fog/55 p-4;
+  }
+  .icon-tile {
+    @apply inline-flex size-11 shrink-0 items-center justify-center rounded-xl bg-brand-fog text-primary;
+  }
+  .metric-card {
+    @apply flex min-w-0 flex-col gap-4 rounded-xl border border-border/70 bg-card p-6;
+  }
+  .metric-note {
+    @apply text-muted-foreground;
+  }
+  .metric-card-featured {
+    @apply border-brand-900 bg-brand-900 text-primary-foreground;
+  }
+  .metric-card-featured .metric-note {
+    @apply text-brand-200;
+  }
+  .metric-card-featured .icon-tile,
+  .overview-hero .icon-tile {
+    @apply bg-white/10 text-brand-200;
+  }
+  .overview-grid {
+    @apply grid gap-5 sm:grid-cols-2 lg:grid-cols-[2fr_1fr_1fr];
+  }
+  .overview-hero {
+    @apply flex min-w-0 flex-wrap items-center gap-6 rounded-xl bg-brand-900 p-6 text-primary-foreground sm:col-span-2 lg:col-span-1;
+  }
+  .progress-ring {
+    @apply relative grid size-28 shrink-0 place-items-center;
+  }
+  .progress-ring svg {
+    @apply absolute inset-0 size-full;
+  }
+  .progress-ring circle {
+    fill: none;
+    stroke-width: 7;
+  }
+  .ring-track {
+    stroke: currentColor;
+    opacity: 0.14;
+  }
+  .ring-value {
+    stroke: var(--brand-600);
+    stroke-linecap: round;
+  }
+  .goal-grid {
+    @apply grid gap-5 md:grid-cols-2 xl:grid-cols-3;
+  }
+  .goal-card,
+  .assessment-card {
+    @apply relative flex min-w-0 flex-col gap-5 rounded-xl border border-border/70 bg-card p-6 transition-[border-color,box-shadow] hover:border-brand-400 hover:shadow-sm;
+  }
+  .goal-card h2 {
+    @apply min-h-14;
+    overflow-wrap: anywhere;
+  }
+  .card-link {
+    @apply outline-none hover:text-primary;
+  }
+  .card-link::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: var(--radius);
+  }
+  .goal-card:has(a:focus-visible),
+  .assessment-card:has(a:focus-visible) {
+    outline: 2px solid var(--primary);
+    outline-offset: 3px;
+  }
+  .assessment-perspective {
+    @apply flex min-w-0 flex-col gap-4 rounded-xl bg-brand-fog/65 p-5;
+  }
+  .person-avatar {
+    @apply flex size-12 shrink-0 items-center justify-center rounded-full bg-brand-200 font-medium text-brand-900;
+  }
+  .chart-panel {
+    @apply flex min-w-0 flex-col gap-6 rounded-xl border border-border/70 bg-card p-5 sm:p-7;
+  }
+  .insight-callout {
+    @apply rounded-lg border-l-4 border-brand-600 bg-brand-fog p-4 text-sm leading-relaxed text-foreground-secondary;
+  }
+  .empty-state {
+    @apply flex min-h-40 flex-col items-center justify-center gap-5 rounded-xl border border-dashed border-border bg-brand-fog/50 p-8 text-center;
+  }
+  .page-skeleton {
+    @apply flex animate-pulse flex-col gap-6 py-4;
+  }
+  .advanced-filters {
+    @apply min-w-0;
+  }
+  .advanced-filters[open] {
+    @apply basis-full rounded-xl border border-border bg-card p-4;
+  }
+  .actor-menu {
+    @apply relative min-w-0 text-sm;
+  }
+  .actor-trigger {
+    @apply flex cursor-pointer list-none items-center gap-2 rounded-lg bg-brand-fog px-3 py-2.5 text-brand-900;
+  }
+  .actor-trigger::-webkit-details-marker {
+    display: none;
+  }
+  .actor-trigger > span {
+    overflow-wrap: anywhere;
+  }
+  .actor-popover {
+    @apply absolute top-full right-0 z-40 mt-3 rounded-xl border border-border bg-card p-6 shadow-xl;
+    width: min(36rem, calc(100vw - 2rem));
+  }
+  .skip-link {
+    @apply sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-50 focus:rounded-lg focus:bg-primary focus:p-3 focus:text-primary-foreground;
+  }
+  .upload-steps {
+    @apply grid grid-cols-3 gap-3;
+  }
+  .upload-step {
+    @apply flex min-w-0 flex-col gap-2 rounded-xl bg-brand-fog p-4 text-sm text-foreground-secondary;
+  }
+  .upload-step[aria-current="step"] {
+    @apply bg-brand-900 text-primary-foreground;
+  }
+  .upload-zone {
+    @apply flex flex-col items-center gap-5 rounded-xl border-2 border-dashed border-brand-200 bg-card px-6 py-12 text-center;
+  }
+  .admin-surface {
+    @apply rounded-xl border border-border/70 bg-card p-6;
+  }
+}
+@layer base {
+  main {
+    min-width: 0;
+  }
+  main h1,
+  main h2,
+  main h3 {
+    overflow-wrap: anywhere;
+  }
+  main tbody td,
+  main tbody th {
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+  }
+  main tbody tr:hover {
+    background: var(--brand-fog);
+  }
+  main input,
+  main select,
+  main textarea {
+    max-width: 100%;
+  }
+  main summary {
+    cursor: pointer;
+  }
+  summary:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 4px;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+.goal-detail-layout {
+  display: grid;
+  gap: 1.5rem;
+  align-items: start;
+}
+@media (min-width: 1100px) {
+  .goal-detail-layout {
+    grid-template-columns: minmax(280px, 0.85fr) minmax(0, 1.6fr);
+  }
+  .goal-detail-layout > :first-child {
+    grid-row: span 4;
+  }
+  .goal-detail-layout > :not(:first-child) {
+    grid-column: 2;
+  }
+}
+.goal-detail-layout .progress-ring {
+  color: var(--brand-700);
+}
+
+.upload-zone > [data-slot="field"] {
+  width: min(100%, 36rem);
+}
+.upload-zone input[type="file"] {
+  height: auto;
+  min-height: 3rem;
+  padding: 0.75rem;
+}
+
+.settings-grid {
+  display: grid;
+  gap: 1.5rem;
+  align-items: start;
+}
+@media (min-width: 1280px) {
+  .settings-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .settings-grid > :last-child,
+  .settings-grid > [role="alert"] {
+    grid-column: 1 / -1;
+  }
+}

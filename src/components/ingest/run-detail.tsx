@@ -1,13 +1,8 @@
+import { CardCollection } from "@/components/card-collection";
+import { MetricCard } from "@/components/experience";
 import { useTranslations } from "next-intl";
 import type { ReactNode } from "react";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+
 import { INGEST_COUNT_KEYS, INGEST_EXTRA_COUNT_KEYS } from "@/db/schema/ingest";
 import { Link } from "@/i18n/navigation";
 import type { RunDetail } from "@/modules/ingest/runs-queries";
@@ -44,11 +39,11 @@ export function RunDetailView({ run }: { run: RunDetail }) {
       </Link>
       <h1>{t("detail.title")}</h1>
 
-      <dl className="grid grid-cols-[max-content_1fr] items-center gap-x-6 gap-y-2">
+      <dl className="admin-surface grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
         {summary.map(({ label, value }) => (
-          <div key={label} className="contents">
+          <div key={label} className="flex min-w-0 flex-col gap-2 text-sm">
             <dt className="text-muted-foreground">{label}</dt>
-            <dd>{value}</dd>
+            <dd className="break-all">{value}</dd>
           </div>
         ))}
       </dl>
@@ -65,31 +60,24 @@ export function RunDetailView({ run }: { run: RunDetail }) {
 
       <section className="flex flex-col gap-2">
         <h2>{t("detail.counts")}</h2>
-        <Table aria-label={t("detail.counts")} className="max-w-sm">
-          <TableHeader>
-            <TableRow>
-              <TableHead>{t("detail.metric")}</TableHead>
-              <TableHead className="text-right">{t("detail.count")}</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {[
-              ...INGEST_COUNT_KEYS,
-              ...INGEST_EXTRA_COUNT_KEYS.filter(
-                (k) => run.counts[k] !== undefined,
-              ),
-            ].map((k) => (
-              <TableRow key={k}>
-                <TableHead scope="row" className="font-normal">
-                  {t(`columns.${k}`)}
-                </TableHead>
-                <TableCell className="text-right tabular-nums">
-                  {run.counts[k] ?? "—"}
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+        <div
+          role="group"
+          aria-label={t("detail.counts")}
+          className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4"
+        >
+          {[
+            ...INGEST_COUNT_KEYS,
+            ...INGEST_EXTRA_COUNT_KEYS.filter(
+              (k) => run.counts[k] !== undefined,
+            ),
+          ].map((k) => (
+            <MetricCard
+              key={k}
+              label={t(`columns.${k}`)}
+              value={run.counts[k] ?? "—"}
+            />
+          ))}
+        </div>
         <p className="text-sm text-muted-foreground">
           {t("detail.rawRecords", { count: run.rawRecordCount })}
         </p>
@@ -100,30 +88,20 @@ export function RunDetailView({ run }: { run: RunDetail }) {
         {run.rejects.length === 0 ? (
           <p>{t("detail.noRejects")}</p>
         ) : (
-          <Table aria-label={t("detail.rejects")}>
-            <TableHeader>
-              <TableRow>
-                <TableHead>{t("detail.rejectSourceId")}</TableHead>
-                <TableHead>{t("detail.rejectReason")}</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {run.rejects.map((r, i) => (
-                <TableRow key={i}>
-                  <TableCell className="font-mono">
-                    {r.sourceId ?? (
-                      <span className="text-muted-foreground">
-                        {t("detail.noSourceId")}
-                      </span>
-                    )}
-                  </TableCell>
-                  <TableCell className="whitespace-normal">
-                    {r.reason}
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+          <CardCollection
+            role="group"
+            aria-label={t("detail.rejects")}
+            gridClassName="record-grid"
+          >
+            {run.rejects.map((r, i) => (
+              <article key={i} className="record-card">
+                <p className="font-mono text-sm break-all">
+                  {r.sourceId ?? t("detail.noSourceId")}
+                </p>
+                <p className="insight-callout">{r.reason}</p>
+              </article>
+            ))}
+          </CardCollection>
         )}
       </section>
 

@@ -1,3 +1,6 @@
+import { CardCollection } from "@/components/card-collection";
+import { UserRound, MessageSquare } from "lucide-react";
+import { IconTile, EmptyState } from "@/components/experience";
 import { useTranslations } from "next-intl";
 import {
   isMissing,
@@ -21,9 +24,9 @@ export function StatusChip({ status }: { status: SideStatus }) {
       data-status={status}
       className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs whitespace-nowrap ${
         missing
-          ? "bg-status-progress-bg font-medium text-status-progress"
+          ? "bg-status-progress-bg font-medium text-foreground"
           : status === "submitted"
-            ? "bg-status-done-bg text-status-done"
+            ? "bg-status-done-bg text-foreground"
             : "bg-brand-fog text-muted-foreground"
       }`}
     >
@@ -46,50 +49,56 @@ export function MissingTable({ rows }: { rows: MissingPerson[] }) {
         {t("count", { n: rows.length })}
       </p>
       {rows.length === 0 ? (
-        <p className="text-sm text-muted-foreground">{t("empty")}</p>
+        <EmptyState>{t("empty")}</EmptyState>
       ) : (
-        <div className="overflow-x-auto">
-          <table aria-label={t("title")} className="w-full text-sm">
-            <thead>
-              <tr>
-                {(
-                  [
-                    "person",
-                    "department",
-                    "manager",
-                    "self",
-                    "managerReview",
-                    "notes",
-                  ] as const
-                ).map((c) => (
-                  <th key={c} className="p-1 text-left font-medium">
-                    {t(`columns.${c}`)}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {rows.map((r) => (
-                <tr key={r.participantId} className="border-t">
-                  <th scope="row" className="p-1 text-left font-medium">
-                    {r.name}
-                  </th>
-                  <td className="p-1">{r.department ?? t("none")}</td>
-                  <td className="p-1">{r.managerName ?? t("none")}</td>
-                  <td className="p-1">
+        <CardCollection
+          gridClassName="record-grid"
+          role="group"
+          aria-label={t("title")}
+        >
+          {rows.map((r) => (
+            <article
+              key={r.participantId}
+              className="record-card"
+              aria-label={r.name}
+            >
+              <header className="flex items-center gap-3">
+                <IconTile>
+                  <UserRound className="size-5" />
+                </IconTile>
+                <div>
+                  <h3 className="text-xl">{r.name}</h3>
+                  <p className="text-xs text-muted-foreground">
+                    {r.department ?? t("none")}
+                  </p>
+                </div>
+              </header>
+              <p className="text-sm text-muted-foreground">
+                {t("columns.manager")}: {r.managerName ?? t("none")}
+              </p>
+              <dl className="record-facts">
+                <div>
+                  <dt>{t("columns.self")}</dt>
+                  <dd>
                     <StatusChip status={r.selfStatus} />
-                  </td>
-                  <td className="p-1">
+                  </dd>
+                </div>
+                <div>
+                  <dt>{t("columns.managerReview")}</dt>
+                  <dd>
                     <StatusChip status={r.managerStatus} />
-                  </td>
-                  <td className="p-1">
-                    {r.hasFollowUpNotes ? t("notes") : "–"}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+                  </dd>
+                </div>
+              </dl>
+              {r.hasFollowUpNotes ? (
+                <p className="flex items-center gap-2 text-xs text-muted-foreground">
+                  <MessageSquare className="size-4" aria-hidden="true" />
+                  {t("notes")}
+                </p>
+              ) : null}
+            </article>
+          ))}
+        </CardCollection>
       )}
     </div>
   );

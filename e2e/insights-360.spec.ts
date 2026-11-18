@@ -1,5 +1,6 @@
 import path from "node:path";
 import { expect, type Page, test } from "@playwright/test";
+import { countValue } from "./cards";
 import { actAsCookie } from "./act-as";
 import { chooseCycle } from "./filters";
 import {
@@ -50,21 +51,15 @@ test("People import the org attributes file once: the same file again changes no
   // The end state, not who brought it: a retry (or an earlier run on the same
   // database) finds the file's attributes already in, and that is fine.
   await importOrgAttributes(page);
-  const counts = page.getByRole("table", { name: "Conteos" });
+  const counts = page.getByRole("group", { name: "Conteos" });
   await expect(page.getByText("org_attribute").first()).toBeVisible();
   expect((await peoplePerDm(cycleName)).size).toBeGreaterThan(0);
 
   // The same file again changes nothing: it is idempotent and, being the
   // whole list, drops nothing either.
   await importOrgAttributes(page);
-  for (const [metric, row] of [
-    ["Insertados", /^Insertados/],
-    ["Actualizados", /^Actualizados/],
-    ["Eliminados", /^Eliminados/],
-  ] as const) {
-    await expect(counts.getByRole("row", { name: row })).toHaveText(
-      `${metric}0`,
-    );
+  for (const metric of ["Insertados", "Actualizados", "Eliminados"]) {
+    await expect(countValue(counts, metric)).toHaveText("0");
   }
 });
 
@@ -134,6 +129,7 @@ test("the org cuts filter and group the completion view", async ({ page }) => {
 
   // Narrowing to one account leaves only its group.
   const filters = page.getByRole("form", { name: "Filtros" });
+  await filters.getByText("Más filtros", { exact: true }).click();
   await filters.locator('select[name="account"]').selectOption("Cuenta A");
   await filters.getByRole("button", { name: "Aplicar" }).click();
   await expect(page).toHaveURL(/account=Cuenta\+A|account=Cuenta%20A/);

@@ -412,7 +412,9 @@
       "direction": "Dirección"
     },
     "apply": "Aplicar",
-    "error": "No se pudo cambiar el actor."
+    "error": "No se pudo cambiar el actor.",
+    "examples": "Ejemplos:",
+    "example": "{role}: {name}"
   },
   "Access": {
     "title": "Sin acceso",
@@ -2055,5 +2057,22 @@
       }
     },
     "forbidden": "No tenés acceso a este assessment: cada persona ve los suyos y, si es manager, los de su equipo."
+  },
+  "Experience": {
+    "moreFilters": "Más filtros",
+    "open": "Ver detalle",
+    "cycle": "Período actual",
+    "overview": "Tu recorrido",
+    "completedOf": "{done} de {total} completados",
+    "account": "Cambiar identidad",
+    "accountHint": "Herramientas de prueba · Elegí la persona y el rol de esta sesión.",
+    "loadError": "No pudimos cargar esta información.",
+    "retry": "Volver a intentar",
+    "notFound": "No encontramos esta página.",
+    "back": "Volver al inicio",
+    "upload": "Elegir archivo",
+    "review": "Revisar y configurar",
+    "result": "Resultado",
+    "moreRecords": "Ver {count} registros más"
   }
 }

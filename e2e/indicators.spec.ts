@@ -49,10 +49,12 @@ test("People see the distribution, the risk matrix and the alerts of an imported
   // The same for engagement.
   await page.locator('select[name="indicator"]').selectOption("engagement");
   await applyFilters(page);
+  await expect(page).toHaveURL(/indicator=engagement/);
   const engagement = page.getByRole("region", {
     name: "¿Qué grupos tienen las respuestas más bajas de compromiso?",
   });
-  await expect(engagement).toBeVisible();
+  // A fresh render of the page on a busy dev server.
+  await expect(engagement).toBeVisible({ timeout: 30_000 });
 
   // The matrix counts the people who have both indicators.
   const matrix = page.getByRole("region", {

@@ -17,9 +17,9 @@ test("People runs the Mock analysis on an imported cycle and sees sentiment and 
   await expect(page).toHaveURL(/cycle=[0-9a-f-]{36}/);
 
   await page.getByRole("button", { name: "Correr análisis" }).click();
-  await expect(page.getByRole("status")).toContainText("Proveedor: mock", {
-    timeout: 60_000,
-  });
+  await expect(
+    page.getByRole("status").filter({ hasText: "Proveedor" }),
+  ).toContainText("Proveedor: mock", { timeout: 60_000 });
 
   const bars = page.getByRole("group", {
     name: "Barras apiladas de sentimiento por dimensión",
@@ -31,7 +31,7 @@ test("People runs the Mock analysis on an imported cycle and sees sentiment and 
   const themes = page.getByRole("list", { name: "Temas más frecuentes" });
   await expect(themes.getByRole("listitem").first()).toBeVisible();
 
-  const comments = page.getByRole("table", { name: "Comentarios etiquetados" });
+  const comments = page.getByRole("group", { name: "Comentarios etiquetados" });
   await expect(comments).toBeVisible();
 
   // Five sentiments: the legend, the KPIs and the sentiment filter.

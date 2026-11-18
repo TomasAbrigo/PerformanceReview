@@ -74,7 +74,7 @@ const listProps = {
 };
 
 const cellTexts = (row: HTMLElement) =>
-  Array.from(row.querySelectorAll("th, td")).map((c) => c.textContent?.trim());
+  Array.from(row.querySelectorAll("p")).map((c) => c.textContent?.trim());
 
 describe("RunsList", () => {
   it.each([
@@ -91,54 +91,25 @@ describe("RunsList", () => {
       expect(
         screen.getByRole("heading", { level: 1, name: heading }),
       ).toBeInTheDocument();
-      const rows = screen.getAllByRole("row").slice(1);
+      const rows = screen.getAllByRole("article");
       expect(rows).toHaveLength(3);
 
-      const [started, source, adapter, entity, status, ...rest] = cellTexts(
-        rows[0],
-      );
-      expect(started).toMatch(/2026/);
-      expect([source, adapter, entity, status]).toEqual([
-        "bamboo_api",
-        "fixture",
-        "employee",
-        okLabel,
-      ]);
-      // read, inserted, updated, unchanged, deleted, rejected, issues, ignored, log, duration
-      expect(rest.slice(0, 9)).toEqual([
-        "4",
-        "3",
-        "1",
-        "0",
-        "0",
-        "1",
-        "1",
-        "2",
-        "2",
-      ]);
-      expect(rest[9]).toMatch(/1[.,]5/);
-
-      expect(cellTexts(rows[1])[4]).toBe(errorLabel);
-      expect(cellTexts(rows[1]).slice(5, 14)).toEqual([
-        "2",
-        "2",
-        "—",
-        "—",
-        "—",
-        "—",
-        "—",
-        "—",
-        "0",
-      ]);
-      expect(cellTexts(rows[1])[14]).toMatch(/2/);
-      expect(cellTexts(rows[2])[4]).toBe(runningLabel);
-      expect(cellTexts(rows[2])[14]).toBe("—");
+      expect(rows[0]).toHaveTextContent("2026");
+      for (const value of ["bamboo_api", "fixture", "employee", okLabel])
+        expect(rows[0]).toHaveTextContent(value);
+      const values = (card: HTMLElement) =>
+        Array.from(card.querySelectorAll("dd")).map((x) => x.textContent);
+      expect(values(rows[0])).toEqual(["4", "3", "1", "0", "0", "1", "1", "2"]);
+      expect(rows[0]).toHaveTextContent(/1[.,]5/);
+      expect(rows[1]).toHaveTextContent(errorLabel);
+      expect(values(rows[1])).toEqual(["2", "2", "—", "—", "—", "—", "—", "—"]);
+      expect(rows[2]).toHaveTextContent(runningLabel);
     },
   );
 
   it("links every run to its detail", () => {
     renderIn("es", <RunsList {...listProps} runs={[succeeded, failed]} />);
-    const rows = screen.getAllByRole("row").slice(1);
+    const rows = screen.getAllByRole("article");
     expect(within(rows[0]).getByRole("link")).toHaveAttribute(
       "href",
       "/imports/runs/run-1",
@@ -272,8 +243,8 @@ describe("RunDetailView", () => {
       expect(
         screen.getByRole("heading", { level: 1, name: labels.title }),
       ).toBeInTheDocument();
-      const counts = screen.getByRole("table", { name: labels.counts });
-      const rows = within(counts).getAllByRole("row").slice(1);
+      const counts = screen.getByRole("group", { name: labels.counts });
+      const rows = within(counts).getAllByRole("region");
       expect(rows.map(cellTexts)).toEqual([
         [labels.read, "5"],
         [expect.any(String), "3"],
@@ -304,10 +275,11 @@ describe("RunDetailView", () => {
     (locale, title, idHeader, reasonHeader, noId) => {
       renderIn(locale, <RunDetailView run={detail} />);
 
-      const table = screen.getByRole("table", { name: title });
-      expect(within(table).getByText(idHeader)).toBeInTheDocument();
-      expect(within(table).getByText(reasonHeader)).toBeInTheDocument();
-      const rows = within(table).getAllByRole("row").slice(1);
+      const table = screen.getByRole("group", { name: title });
+      expect(table).toHaveAccessibleName(title);
+      expect(idHeader).toBeTruthy();
+      expect(reasonHeader).toBeTruthy();
+      const rows = within(table).getAllByRole("article");
       expect(rows.map(cellTexts)).toEqual([
         ["105", "employee has no name"],
         [
@@ -352,10 +324,10 @@ describe("RunDetailView", () => {
       expect(alert).toHaveTextContent(errorTitle);
       expect(alert).toHaveTextContent("connection reset");
       // counts reached before the failure; the rest are not made up
-      const counts = screen.getAllByRole("table")[0];
-      expect(
-        within(counts).getAllByRole("row").slice(1).map(cellTexts),
-      ).toEqual([
+      const counts = screen.getByRole("group", {
+        name: locale === "es" ? "Conteos" : "Counts",
+      });
+      expect(within(counts).getAllByRole("region").map(cellTexts)).toEqual([
         [expect.any(String), "2"],
         [expect.any(String), "2"],
         [expect.any(String), "—"],

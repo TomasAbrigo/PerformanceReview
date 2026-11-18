@@ -1,4 +1,4 @@
-import { render, screen, within } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import { NextIntlClientProvider } from "next-intl";
 import type { ReactNode } from "react";
 import { describe, expect, it, vi } from "vitest";
@@ -66,7 +66,7 @@ describe("GoalsTable", () => {
       "es",
       <GoalsTable page={listPage()} showPerson hrefForPage={() => "/goals"} />,
     );
-    const row = screen.getByRole("row", { name: /Migrar la API/ });
+    const row = screen.getByRole("article", { name: /Migrar la API/ });
     expect(
       within(row).getByRole("link", { name: "Migrar la API" }),
     ).toHaveAttribute("href", "/goals/g1");
@@ -183,11 +183,11 @@ describe("GoalsFilters", () => {
   };
   const cycles = [{ id: "c1", name: "Primer semestre" }];
 
-  it("offers cycle, state, person, area and the org cuts, in a GET form", () => {
+  it("preserves the selected state while cycle, person and advanced org filters submit", () => {
     renderIn(
       "es",
       <GoalsFilters
-        params={{ page: 1 }}
+        params={{ page: 1, state: "overdue" }}
         cycles={cycles}
         options={options}
         ownOnly={false}
@@ -195,7 +195,10 @@ describe("GoalsFilters", () => {
     );
     const form = screen.getByRole("form", { name: "Filtros de goals" });
     expect(form).toHaveAttribute("method", "get");
-    for (const label of ["Ciclo", "Estado", "Persona", "Área", "DM"]) {
+    expect(new FormData(form as HTMLFormElement).get("state")).toBe("overdue");
+    expect(within(form).getByLabelText("DM")).not.toBeVisible();
+    fireEvent.click(screen.getByText("Más filtros"));
+    for (const label of ["Ciclo", "Persona", "Área", "DM"]) {
       expect(within(form).getByLabelText(label)).toBeVisible();
     }
     expect(within(form).getByRole("button", { name: "Aplicar" })).toBeVisible();
@@ -212,7 +215,7 @@ describe("GoalsFilters", () => {
       />,
     );
     expect(screen.getByLabelText("Ciclo")).toBeVisible();
-    expect(screen.getByLabelText("Estado")).toBeVisible();
+    expect(screen.queryByLabelText("Estado")).not.toBeInTheDocument();
     expect(screen.queryByLabelText("Persona")).not.toBeInTheDocument();
     expect(screen.queryByLabelText("DM")).not.toBeInTheDocument();
   });
