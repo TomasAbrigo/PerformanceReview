@@ -212,7 +212,8 @@
       "semester_order": "El segundo semestre tiene que empezar después del primero.",
       "unknown_key": "Configuración desconocida.",
       "invalid": "Valor inválido.",
-      "cutoff_order": "Los cortes tienen que bajar de Alto a Medio y de Medio a Regular."
+      "cutoff_order": "Los cortes tienen que bajar de Alto a Medio y de Medio a Regular.",
+      "target_order": "La meta tiene que ser mayor que el umbral de atención."
     },
     "engagement": {
       "title": "Engagement mensual",
@@ -221,7 +222,13 @@
       "cutoffRegular": "Segmento Regular desde (% del score)",
       "hint": "Solo se usan cuando el archivo no trae la columna Segmento: por debajo de Regular el segmento es Bajo."
     },
-    "nav": "Configuración"
+    "nav": "Configuración",
+    "targets": {
+      "title": "Metas de los KPIs",
+      "goodPct": "En meta desde (%)",
+      "watchPct": "Atención desde (%)",
+      "hint": "Colorean los porcentajes (completitud, objetivos completados): desde la meta en verde, desde atención en ámbar, por debajo en rojo."
+    }
   },
   "Common": {
     "exportCsv": "Exportar CSV"
@@ -1351,11 +1358,29 @@
       "sentimentChart": "Sentimiento por dimensión del ciclo",
       "themes": "Top 5 temas",
       "themeCount": "{n, plural, one {# mención} other {# menciones}}",
-      "ratings": "Calificaciones",
       "goals": "Objetivos",
       "goalsCompleted": "Objetivos completados",
       "goalsCount": "Objetivos del período",
-      "goalsOverdue": "Vencidos"
+      "goalsOverdue": "Vencidos",
+      "distributionTitle": "Retención y compromiso (respuestas 1 a 5)",
+      "distributionHint": "Cada barra suma 100 %: rojo es 1, verde es 5. Elegí un segmento para ver quiénes son.",
+      "hiddenShort": "Oculto: menos de {min} personas",
+      "scaleOf": "{label}: {value} de {max}",
+      "vsPrevious": "{delta} vs. ciclo anterior",
+      "vsPreviousPoints": "{delta} pts vs. ciclo anterior",
+      "ofParticipants": "{submitted} de {total} · {participants} participantes",
+      "pending": "{n, plural, one {# pendiente} other {# pendientes}}",
+      "riskHint": "Retención y compromiso de cada persona en tres franjas; la celda marcada es el riesgo. Elegí una celda para ver quiénes son.",
+      "sentimentHint": "Elegí un segmento para leer esos comentarios.",
+      "themesHint": "Los temas más mencionados en los comentarios. Elegí uno para leerlos.",
+      "drill": {
+        "indicator": "Ver las {n, plural, one {# persona} other {# personas}} con {label}",
+        "submitted": "Ver quiénes enviaron ({label}: {n})",
+        "pending": "Ver {n, plural, one {la # pendiente} other {las # pendientes}}",
+        "goals": "Ver las {n, plural, one {# persona} other {# personas}} con objetivos",
+        "overdue": "Ver {n, plural, one {el # objetivo vencido} other {los # objetivos vencidos}}",
+        "theme": "{theme}: {n, plural, one {# mención} other {# menciones}}. Ver los comentarios"
+      }
     }
   },
   "Arturia": {
@@ -2211,6 +2236,92 @@
     "upload": "Elegir archivo",
     "review": "Revisar y configurar",
     "result": "Resultado",
-    "moreRecords": "Ver {count} registros más"
+    "moreRecords": "Ver {count} registros más",
+    "tone": {
+      "good": "En meta",
+      "watch": "Atención",
+      "risk": "En riesgo"
+    }
+  },
+  "Drill": {
+    "kicker": "Datos detrás del gráfico",
+    "close": "Cerrar",
+    "others": "Otros",
+    "none": "Sin dato",
+    "manager": "Manager",
+    "empty": "No hay registros.",
+    "hidden": "El total no se muestra: revelaría grupos de menos de {min} personas.",
+    "aggregatesOnly": "Vista de Dirección: solo conteos de grupos de al menos {min} personas, nunca nombres.",
+    "unit": {
+      "people": "{n, plural, one {persona} other {personas}}",
+      "comments": "{n, plural, one {comentario} other {comentarios}}"
+    },
+    "by": {
+      "department": "Por área",
+      "sentiment": "Por sentimiento"
+    },
+    "fact": {
+      "retention": "Retención",
+      "engagement": "Compromiso",
+      "selfStatus": "Autoevaluación",
+      "managerStatus": "Evaluación del manager",
+      "goals": "Objetivos",
+      "completed": "Completados",
+      "overdue": "Vencidos"
+    },
+    "csv": {
+      "name": "Nombre",
+      "department": "Área",
+      "manager": "Manager",
+      "dimension": "Dimensión",
+      "sentiment": "Sentimiento",
+      "text": "Comentario",
+      "group": "Grupo",
+      "count": "Cantidad",
+      "download": "Descargar CSV"
+    },
+    "more": "Abrir la vista completa",
+    "title": {
+      "indicator": "{indicator}: respuesta {value}",
+      "indicatorAll": "{indicator}: todas las respuestas",
+      "risk": "Cuadrante: {quadrant}",
+      "theme": "Comentarios sobre {theme}",
+      "sentiment": "{dimension} · comentarios: {sentiment}",
+      "completion": {
+        "self": {
+          "submitted": "Autoevaluaciones enviadas",
+          "pending": "Autoevaluaciones pendientes"
+        },
+        "manager": {
+          "submitted": "Evaluaciones del manager enviadas",
+          "pending": "Evaluaciones del manager pendientes"
+        }
+      },
+      "goals": {
+        "all": "Personas con objetivos en el período",
+        "completed": "Personas con objetivos completados",
+        "overdue": "Personas con objetivos vencidos"
+      }
+    },
+    "truncated": "Se muestran los primeros {n}; la vista completa tiene todos."
+  },
+  "Themes": {
+    "proyecto": "Proyecto",
+    "equipo": "Equipo",
+    "comunicacion": "Comunicación",
+    "crecimiento": "Crecimiento",
+    "cultura": "Cultura",
+    "procesos": "Procesos",
+    "bienestar": "Bienestar",
+    "reconocimiento": "Reconocimiento",
+    "planificacion": "Planificación",
+    "calidad": "Calidad",
+    "liderazgo": "Liderazgo",
+    "colaboracion": "Colaboración",
+    "tecnica": "Técnica",
+    "documentacion": "Documentación",
+    "proactividad": "Proactividad",
+    "negocio": "Negocio",
+    "aprendizaje": "Aprendizaje"
   }
 }

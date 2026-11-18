@@ -60,6 +60,15 @@
 .delta-down {
   background: var(--status-progress-bg);
 }
+/* DeltaPill: the change went the good / the bad way. */
+.delta-pill.delta-good {
+  background: var(--status-done-bg);
+  color: var(--status-done);
+}
+.delta-pill.delta-bad {
+  background: var(--status-pending-bg);
+  color: var(--status-pending);
+}
 .delta-up {
   background: var(--status-done-bg);
 }

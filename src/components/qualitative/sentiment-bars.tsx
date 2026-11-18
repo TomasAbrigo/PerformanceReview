@@ -4,6 +4,7 @@ import {
   ChartTableToggle,
   SENTIMENT_COLORS,
   StackedBar100,
+  type MarkDrill,
   orderRows,
   useChartFormat,
   type StackSeries,
@@ -41,11 +42,14 @@ export function SentimentBars({
   label,
   firstColumn,
   sorted = false,
+  drillOf,
 }: {
   rows: StackedRow[];
   label: string;
   firstColumn?: string;
   sorted?: boolean;
+  /** A segment opens its comments: (row key, sentiment) -> drill. */
+  drillOf?: (rowKey: string, sentiment: string) => MarkDrill | undefined;
 }) {
   const t = useTranslations("Qualitative");
   const f = useChartFormat();
@@ -89,6 +93,7 @@ export function SentimentBars({
         series={series}
         sortBy={sorted ? RISK_SENTIMENTS : undefined}
         label={label}
+        drillOf={drillOf}
       />
       <ChartTableToggle
         caption={label}

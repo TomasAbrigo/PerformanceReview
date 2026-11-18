@@ -212,7 +212,8 @@
       "semester_order": "The second semester must start after the first.",
       "unknown_key": "Unknown setting.",
       "invalid": "Invalid value.",
-      "cutoff_order": "The cutoffs must go down from High to Medium and from Medium to Regular."
+      "cutoff_order": "The cutoffs must go down from High to Medium and from Medium to Regular.",
+      "target_order": "The target has to be higher than the watch threshold."
     },
     "engagement": {
       "title": "Monthly engagement",
@@ -221,7 +222,13 @@
       "cutoffRegular": "Regular segment from (% of the score)",
       "hint": "Only used when the file has no Segmento column: below Regular the segment is Low."
     },
-    "nav": "Settings"
+    "nav": "Settings",
+    "targets": {
+      "title": "KPI targets",
+      "goodPct": "On target from (%)",
+      "watchPct": "Watch from (%)",
+      "hint": "They colour the percentages (completion, goals completed): from the target green, from watch amber, below it red."
+    }
   },
   "Common": {
     "exportCsv": "Export CSV"
@@ -1351,11 +1358,29 @@
       "sentimentChart": "Sentiment by dimension of the cycle",
       "themes": "Top 5 themes",
       "themeCount": "{n, plural, one {# mention} other {# mentions}}",
-      "ratings": "Ratings",
       "goals": "Goals",
       "goalsCompleted": "Goals completed",
       "goalsCount": "Goals of the period",
-      "goalsOverdue": "Overdue"
+      "goalsOverdue": "Overdue",
+      "distributionTitle": "Retention and engagement (answers 1 to 5)",
+      "distributionHint": "Each bar adds up to 100%: red is 1, green is 5. Pick a segment to see who they are.",
+      "hiddenShort": "Hidden: fewer than {min} people",
+      "scaleOf": "{label}: {value} of {max}",
+      "vsPrevious": "{delta} vs. previous cycle",
+      "vsPreviousPoints": "{delta} pts vs. previous cycle",
+      "ofParticipants": "{submitted} of {total} · {participants} participants",
+      "pending": "{n} pending",
+      "riskHint": "Each person's retention and engagement in three bands; the outlined cell is the risk. Pick a cell to see who they are.",
+      "sentimentHint": "Pick a segment to read those comments.",
+      "themesHint": "The themes comments mention most. Pick one to read them.",
+      "drill": {
+        "indicator": "See the {n, plural, one {# person} other {# people}} with {label}",
+        "submitted": "See who submitted ({label}: {n})",
+        "pending": "See the {n} pending",
+        "goals": "See the {n, plural, one {# person} other {# people}} with goals",
+        "overdue": "See the {n, plural, one {# overdue goal} other {# overdue goals}}",
+        "theme": "{theme}: {n, plural, one {# mention} other {# mentions}}. See the comments"
+      }
     }
   },
   "Arturia": {
@@ -2211,6 +2236,92 @@
     "upload": "Choose a file",
     "review": "Review and configure",
     "result": "Result",
-    "moreRecords": "Show {count} more records"
+    "moreRecords": "Show {count} more records",
+    "tone": {
+      "good": "On target",
+      "watch": "Watch",
+      "risk": "At risk"
+    }
+  },
+  "Drill": {
+    "kicker": "Data behind the chart",
+    "close": "Close",
+    "others": "Others",
+    "none": "No data",
+    "manager": "Manager",
+    "empty": "No records.",
+    "hidden": "The total is not shown: it would give away groups of fewer than {min} people.",
+    "aggregatesOnly": "Leadership view: only counts of groups of at least {min} people, never names.",
+    "unit": {
+      "people": "{n, plural, one {person} other {people}}",
+      "comments": "{n, plural, one {comment} other {comments}}"
+    },
+    "by": {
+      "department": "By area",
+      "sentiment": "By sentiment"
+    },
+    "fact": {
+      "retention": "Retention",
+      "engagement": "Engagement",
+      "selfStatus": "Self assessment",
+      "managerStatus": "Manager review",
+      "goals": "Goals",
+      "completed": "Completed",
+      "overdue": "Overdue"
+    },
+    "csv": {
+      "name": "Name",
+      "department": "Area",
+      "manager": "Manager",
+      "dimension": "Dimension",
+      "sentiment": "Sentiment",
+      "text": "Comment",
+      "group": "Group",
+      "count": "Count",
+      "download": "Download CSV"
+    },
+    "more": "Open the full view",
+    "title": {
+      "indicator": "{indicator}: answer {value}",
+      "indicatorAll": "{indicator}: every answer",
+      "risk": "Quadrant: {quadrant}",
+      "theme": "Comments about {theme}",
+      "sentiment": "{dimension} · comments: {sentiment}",
+      "completion": {
+        "self": {
+          "submitted": "Self assessments submitted",
+          "pending": "Self assessments pending"
+        },
+        "manager": {
+          "submitted": "Manager reviews submitted",
+          "pending": "Manager reviews pending"
+        }
+      },
+      "goals": {
+        "all": "People with goals in the period",
+        "completed": "People with completed goals",
+        "overdue": "People with overdue goals"
+      }
+    },
+    "truncated": "Showing the first {n}; the full view has them all."
+  },
+  "Themes": {
+    "proyecto": "Project",
+    "equipo": "Team",
+    "comunicacion": "Communication",
+    "crecimiento": "Growth",
+    "cultura": "Culture",
+    "procesos": "Processes",
+    "bienestar": "Wellbeing",
+    "reconocimiento": "Recognition",
+    "planificacion": "Planning",
+    "calidad": "Quality",
+    "liderazgo": "Leadership",
+    "colaboracion": "Collaboration",
+    "tecnica": "Technical",
+    "documentacion": "Documentation",
+    "proactividad": "Proactivity",
+    "negocio": "Business",
+    "aprendizaje": "Learning"
   }
 }

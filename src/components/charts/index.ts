@@ -11,3 +11,4 @@ export * from "./chart-tooltip";
 export * from "./histogram";
 export * from "./grouped-bars";
 export * from "./scatter";
+export * from "./panel-icons";

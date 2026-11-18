@@ -24,6 +24,9 @@ export default defineConfig({
           include: ["src/**/*.test.{ts,tsx}"],
           exclude: ["src/**/*.db.test.ts"],
           setupFiles: ["./vitest.setup.ts"],
+          // next-intl's navigation imports "next/navigation" without an
+          // extension: let Vite resolve it (components link through it).
+          server: { deps: { inline: ["next-intl"] } },
         },
       },
       {

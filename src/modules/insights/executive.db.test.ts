@@ -41,7 +41,8 @@ describe("executiveReport", () => {
     expect(r.engagement).toMatchObject({ n: 8, counts: [1, 3, 1, 2, 1] });
     expect(r.engagement?.mean).toBeCloseTo(23 / 8);
     // Both at or under 2: Bruno, Fabio, Gina.
-    expect(r.risk).toEqual({ riskCount: 3, total: 8 });
+    expect(r.risk).toMatchObject({ riskCount: 3, total: 8, atRisk: null });
+    expect(r.risk?.cells).toHaveLength(9);
     expect(r.sentiment).toEqual([
       {
         dimension: "strengths",

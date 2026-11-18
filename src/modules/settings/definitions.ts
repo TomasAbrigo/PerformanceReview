@@ -12,6 +12,8 @@ export const settingRanges = {
   "engagement.cutoffAlto": { min: 1, max: 99 },
   "engagement.cutoffMedio": { min: 1, max: 99 },
   "engagement.cutoffRegular": { min: 1, max: 99 },
+  "targets.goodPct": { min: 1, max: 100 },
+  "targets.watchPct": { min: 0, max: 99 },
 } as const;
 
 /** An integer in the key's range; issue codes the UI translates. */
@@ -93,6 +95,13 @@ export const settingDefinitions = {
     schema: int("engagement.cutoffRegular"),
     default: 40,
   },
+  /**
+   * The status tone of a percent KPI (completion, goals completed): from
+   * `goodPct` up it is good, from `watchPct` up it needs watching, below it
+   * is a risk (see `percentTone` in modules/insights/tone).
+   */
+  "targets.goodPct": { schema: int("targets.goodPct"), default: 80 },
+  "targets.watchPct": { schema: int("targets.watchPct"), default: 50 },
 } as const;
 
 export type SettingDefinitions = typeof settingDefinitions;
@@ -143,6 +152,9 @@ export function checkSettings(settings: Settings): FieldIssue[] {
     settings["engagement.cutoffRegular"] >= settings["engagement.cutoffMedio"]
   ) {
     issues.push({ path: "engagement.cutoffRegular", message: "cutoff_order" });
+  }
+  if (settings["targets.watchPct"] >= settings["targets.goodPct"]) {
+    issues.push({ path: "targets.watchPct", message: "target_order" });
   }
   return issues;
 }

@@ -1,7 +1,16 @@
 import type { ReactNode } from "react";
-import { CircleDot, Search, SlidersHorizontal } from "lucide-react";
+import {
+  ArrowDownRight,
+  ArrowUpRight,
+  CircleDot,
+  Search,
+  SlidersHorizontal,
+} from "lucide-react";
 import { useTranslations } from "next-intl";
+import { type DrillBase, DrillLink } from "@/components/drill/drill-link";
 import { cn } from "@/lib/utils";
+import type { Drill } from "@/modules/insights/drill-spec";
+import type { Tone } from "@/modules/insights/tone";
 
 /** Shared visual vocabulary from the approved Santex canvas. */
 export function IconTile({
@@ -18,6 +27,90 @@ export function IconTile({
   );
 }
 
+/**
+ * A value on its scale (1–5, 0–100 %): a track with the value filled in the
+ * tone's colour and the ends written, so no number floats without an anchor.
+ * `role="meter"` with min, max and value for assistive tech.
+ */
+export function ScaleBar({
+  value,
+  min,
+  max,
+  label,
+  tone,
+  minLabel = String(min),
+  maxLabel = String(max),
+}: {
+  value: number;
+  min: number;
+  max: number;
+  /** Accessible name, value included ("Retención: 3,4 de 5"). */
+  label: string;
+  tone?: Tone;
+  minLabel?: string;
+  maxLabel?: string;
+}) {
+  const share =
+    max > min && Number.isFinite(value)
+      ? Math.min(1, Math.max(0, (value - min) / (max - min)))
+      : 0;
+  return (
+    <div className="scale-bar" data-tone={tone}>
+      <div
+        role="meter"
+        aria-label={label}
+        aria-valuemin={min}
+        aria-valuemax={max}
+        aria-valuenow={value}
+        title={label}
+        className="scale-track"
+      >
+        <span className="scale-fill" style={{ width: `${share * 100}%` }} />
+      </div>
+      <div className="scale-ends" aria-hidden="true">
+        <span>{minLabel}</span>
+        <span>{maxLabel}</span>
+      </div>
+    </div>
+  );
+}
+
+/** A change against the previous cycle, green when it goes the good way. */
+export function DeltaPill({
+  value,
+  text,
+  better = "up",
+}: {
+  /** Signed change; 0 is flat. */
+  value: number;
+  /** The change as written ("+0,3 vs. 2025-H1"). */
+  text: string;
+  better?: "up" | "down";
+}) {
+  const good = value === 0 ? null : value > 0 === (better === "up");
+  const Arrow = value >= 0 ? ArrowUpRight : ArrowDownRight;
+  return (
+    <span
+      className={cn(
+        "delta-pill items-center gap-1",
+        good === true && "delta-good",
+        good === false && "delta-bad",
+      )}
+      data-testid="delta"
+    >
+      <Arrow className="size-3.5" aria-hidden="true" />
+      {text}
+    </span>
+  );
+}
+
+/**
+ * A KPI. Besides label and value it can carry its context: `scale` draws the
+ * value on its range (ScaleBar), `status` the tone from the settings'
+ * thresholds (`likertTone` / `percentTone` of modules/insights/tone) as a
+ * coloured edge plus a written word, `delta` the change vs. the previous
+ * cycle, and `drill` makes the value open the records behind it.
+ */
 export function MetricCard({
   label,
   value,
@@ -25,6 +118,11 @@ export function MetricCard({
   icon,
   featured = false,
   tone = featured ? "featured" : "default",
+  status,
+  scale,
+  delta,
+  drill,
+  testId,
   children,
 }: {
   label: string;
@@ -34,8 +132,23 @@ export function MetricCard({
   featured?: boolean;
   /** `featured`: the dark card; `soft`: fog; `warm`: the "to review" amber. */
   tone?: "default" | "featured" | "soft" | "warm";
+  /** good / watch / risk, from the thresholds of /settings/insights. */
+  status?: Tone;
+  scale?: {
+    value: number;
+    min: number;
+    max: number;
+    label: string;
+    minLabel?: string;
+    maxLabel?: string;
+  };
+  delta?: { value: number; text: string; better?: "up" | "down" };
+  /** The value becomes a DrillLink to these records. */
+  drill?: { base: DrillBase; drill: Drill; label: string };
+  testId?: string;
   children?: ReactNode;
 }) {
+  const t = useTranslations("Experience");
   return (
     <section
       className={cn(
@@ -43,14 +156,37 @@ export function MetricCard({
         tone === "featured" && "metric-card-featured",
         tone === "soft" && "metric-card-soft",
         tone === "warm" && "metric-card-warm",
+        status && "metric-card-status",
       )}
+      data-tone={status}
+      data-testid={testId}
       aria-label={label}
     >
       <div className="flex items-center justify-between gap-4">
         <p className="text-sm">{label}</p>
         <IconTile>{icon ?? <CircleDot className="size-5" />}</IconTile>
       </div>
-      <p className="stat-value">{value}</p>
+      <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+        {drill ? (
+          <DrillLink
+            base={drill.base}
+            drill={drill.drill}
+            label={drill.label}
+            className="stat-value"
+          >
+            {value}
+          </DrillLink>
+        ) : (
+          <p className="stat-value">{value}</p>
+        )}
+        {status ? (
+          <span className="tone-pill" data-tone={status}>
+            {t(`tone.${status}`)}
+          </span>
+        ) : null}
+        {delta ? <DeltaPill {...delta} /> : null}
+      </div>
+      {scale ? <ScaleBar {...scale} tone={status} /> : null}
       {note ? <p className="metric-note text-xs">{note}</p> : null}
       {children}
     </section>

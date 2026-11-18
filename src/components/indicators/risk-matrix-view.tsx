@@ -1,6 +1,7 @@
 import { CardCollection } from "@/components/card-collection";
 import { useTranslations } from "next-intl";
 import { Matrix } from "@/components/charts";
+import type { DrillBase } from "@/components/drill/drill-link";
 import { Empty, TableView } from "@/components/insights/parts";
 import { Link } from "@/i18n/navigation";
 import {
@@ -14,9 +15,16 @@ import {
  * Retention × engagement in three bands per axis (retention left to right,
  * engagement bottom to top), the people of each cell counted; the risk cell
  * (both low) is outlined and labelled, not just coloured. People also gets
- * the list of the people in it.
+ * the list of the people in it. With `drill`, every cell with people opens
+ * them (direction: their counts by area) in the drill sheet.
  */
-export function RiskMatrixView({ matrix }: { matrix: RiskMatrix }) {
+export function RiskMatrixView({
+  matrix,
+  drill,
+}: {
+  matrix: RiskMatrix;
+  drill?: DrillBase;
+}) {
   const t = useTranslations("Indicators");
   const cellOf = (retention: Band, engagement: Band) =>
     matrix.cells.find(
@@ -69,6 +77,17 @@ export function RiskMatrixView({ matrix }: { matrix: RiskMatrix }) {
                 name: t(`matrix.quadrant.${retention}.${engagement}`),
                 tip: cellText(retention, engagement),
                 highlight: c.risk,
+                drill:
+                  drill && c.count
+                    ? {
+                        base: drill,
+                        drill: {
+                          kind: "risk" as const,
+                          retention,
+                          engagement,
+                        },
+                      }
+                    : undefined,
               };
             }),
           )}

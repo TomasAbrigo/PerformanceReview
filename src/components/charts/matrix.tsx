@@ -1,3 +1,6 @@
+import { DrillLink } from "@/components/drill/drill-link";
+import type { MarkDrill } from "./stacked-bar-100";
+
 export type MatrixCell = {
   key: string;
   count: number | null;
@@ -5,6 +8,8 @@ export type MatrixCell = {
   name: string;
   tip: string;
   highlight?: boolean;
+  /** The cell opens the people in it (DrillLink). */
+  drill?: MarkDrill;
 };
 
 /**
@@ -47,33 +52,50 @@ export function Matrix({
               <span>{r.name}</span>
               <span className="tabular-nums">{r.range}</span>
             </div>
-            {cells[ri].map((c) => (
-              <div
-                key={c.key}
-                tabIndex={0}
-                role="img"
-                aria-label={c.tip}
-                data-tip={c.tip}
-                data-testid="matrix-cell"
-                className={`relative flex h-20 flex-col items-center justify-center rounded-md border outline-offset-1 focus-visible:outline-2 focus-visible:outline-ring ${
-                  c.highlight
-                    ? "border-2 border-chart-div-neg"
-                    : "border-border"
-                }`}
-              >
-                <span
-                  aria-hidden="true"
-                  className={`absolute inset-0 rounded-md ${c.highlight ? "bg-chart-div-neg" : "bg-chart-seq"}`}
-                  style={{ opacity: 0.08 + 0.42 * ((c.count ?? 0) / max) }}
-                />
-                <span className="relative text-xs text-foreground-secondary">
-                  {c.name}
-                </span>
-                <span className="relative text-xl font-semibold tabular-nums">
-                  {c.count === null ? hiddenText : c.count}
-                </span>
-              </div>
-            ))}
+            {cells[ri].map((c) => {
+              const cls = `relative flex h-20 flex-col items-center justify-center rounded-md border outline-offset-1 focus-visible:outline-2 focus-visible:outline-ring ${
+                c.highlight ? "border-2 border-chart-div-neg" : "border-border"
+              }`;
+              const inner = (
+                <>
+                  <span
+                    aria-hidden="true"
+                    className={`absolute inset-0 rounded-md ${c.highlight ? "bg-chart-div-neg" : "bg-chart-seq"}`}
+                    style={{ opacity: 0.08 + 0.42 * ((c.count ?? 0) / max) }}
+                  />
+                  <span className="relative text-xs text-foreground-secondary">
+                    {c.name}
+                  </span>
+                  <span className="relative text-xl font-semibold tabular-nums">
+                    {c.count === null ? hiddenText : c.count}
+                  </span>
+                </>
+              );
+              return c.drill ? (
+                <DrillLink
+                  key={c.key}
+                  base={c.drill.base}
+                  drill={c.drill.drill}
+                  label={c.tip}
+                  testId="matrix-cell"
+                  className={cls}
+                >
+                  {inner}
+                </DrillLink>
+              ) : (
+                <div
+                  key={c.key}
+                  tabIndex={0}
+                  role="img"
+                  aria-label={c.tip}
+                  data-tip={c.tip}
+                  data-testid="matrix-cell"
+                  className={cls}
+                >
+                  {inner}
+                </div>
+              );
+            })}
           </div>
         ))}
         <div />

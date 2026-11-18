@@ -1,5 +1,10 @@
 import { useTranslations } from "next-intl";
+import { type DrillBase, DrillLink } from "@/components/drill/drill-link";
+import type { Drill } from "@/modules/insights/drill-spec";
 import { useChartFormat } from "./format";
+
+/** What a mark opens: the drill and the page it rides on (see DrillLink). */
+export type MarkDrill = { base: DrillBase; drill: Drill };
 
 export type StackSeries = {
   key: string;
@@ -59,10 +64,13 @@ export function StackedBar100({
   sortBy,
   label,
   compact = false,
+  drillOf,
 }: {
   rows: StackRow[];
   series: StackSeries[];
   sortBy?: string[];
+  /** Makes a segment open the records behind it (row key, series key). */
+  drillOf?: (rowKey: string, seriesKey: string) => MarkDrill | undefined;
   /** Accessible name of the chart. */
   label: string;
   /** One thin bar, no row label nor n (a list row). */
@@ -119,6 +127,24 @@ export function StackedBar100({
                     count: v,
                     share: f.share(share),
                   });
+                  const cls = `flex min-w-0 items-center justify-center text-xs font-medium tabular-nums outline-offset-1 focus-visible:outline-2 focus-visible:outline-ring ${s.fill} ${s.ink}`;
+                  const text =
+                    !compact && share >= LABEL_MIN ? f.share(share) : null;
+                  const d = drillOf?.(r.key, s.key);
+                  if (d) {
+                    return (
+                      <DrillLink
+                        key={s.key}
+                        base={d.base}
+                        drill={d.drill}
+                        label={tip}
+                        className={cls}
+                        style={{ width: `${share * 100}%` }}
+                      >
+                        {text}
+                      </DrillLink>
+                    );
+                  }
                   return (
                     <span
                       key={s.key}
@@ -128,9 +154,9 @@ export function StackedBar100({
                       role="img"
                       tabIndex={compact ? undefined : 0}
                       style={{ width: `${share * 100}%` }}
-                      className={`flex min-w-0 items-center justify-center text-xs font-medium tabular-nums outline-offset-1 focus-visible:outline-2 focus-visible:outline-ring ${s.fill} ${s.ink}`}
+                      className={cls}
                     >
-                      {!compact && share >= LABEL_MIN ? f.share(share) : null}
+                      {text}
                     </span>
                   );
                 })}

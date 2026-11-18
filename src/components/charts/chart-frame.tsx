@@ -1,8 +1,8 @@
-import { ChartNoAxesCombined } from "lucide-react";
 import { EmptyState, IconTile } from "@/components/experience";
 import type { ReactNode } from "react";
 import { useTranslations } from "next-intl";
 import { ChartTooltip } from "./chart-tooltip";
+import { type PanelKind, PanelIcon } from "./panel-icons";
 
 export type LegendItem = {
   key: string;
@@ -115,7 +115,9 @@ export function ChartTableToggle({
  * Every chart's frame: the question it answers as title, a one-line "how to
  * read it", n and period, the takeaway, the legend (stack order), the chart
  * with hover/focus tooltips, an explained empty/masked state and the table.
- * `level` 2 renders a card section (replaces Panel); 3 a nested figure.
+ * `level` 2 renders a card section (replaces Panel) with a header band
+ * (icon by `kind`, title, how to read, meta, actions) over a white body;
+ * `tone="highlight"` tints it for the panel to read first. 3: a nested figure.
  */
 export function ChartFrame({
   id,
@@ -128,13 +130,19 @@ export function ChartFrame({
   empty,
   actions,
   icon,
+  kind = "chart",
+  tone = "default",
   level = 2,
   children,
 }: {
   id: string;
   title: string;
-  /** The tile's icon; a chart by default. */
+  /** The tile's icon; by default the icon of `kind`. */
   icon?: ReactNode;
+  /** What the panel holds (distribution, trend, people…): picks the icon. */
+  kind?: PanelKind;
+  /** `highlight`: the tonal surface of the panel to read first. */
+  tone?: "default" | "highlight";
   howToRead?: string;
   /** n and period, already formatted ("n = 277 · Evaluación 2026"). */
   meta?: string;
@@ -148,18 +156,22 @@ export function ChartFrame({
   children?: ReactNode;
 }) {
   const Heading = level === 2 ? "h2" : "h3";
-  const body = (
-    <>
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div className="flex min-w-0 flex-1 flex-col gap-2">
-          {level === 2 ? (
-            <IconTile>
-              {icon ?? <ChartNoAxesCombined className="size-5" />}
-            </IconTile>
-          ) : null}
+  const head = (
+    <div
+      className={
+        level === 2
+          ? "chart-panel-head"
+          : "flex flex-wrap items-start justify-between gap-3"
+      }
+    >
+      <div className="flex min-w-0 flex-1 items-start gap-3">
+        {level === 2 ? (
+          <IconTile>{icon ?? <PanelIcon kind={kind} />}</IconTile>
+        ) : null}
+        <div className="flex min-w-0 flex-1 flex-col gap-1.5">
           <Heading
             id={`${id}-title`}
-            className={level === 3 ? "text-lg" : undefined}
+            className={level === 3 ? "text-lg" : "text-xl"}
           >
             {title}
           </Heading>
@@ -180,33 +192,35 @@ export function ChartFrame({
             </p>
           ) : null}
         </div>
-        {actions}
       </div>
-      {empty ? (
-        <div data-testid="chart-empty">
-          <EmptyState>{empty}</EmptyState>
-        </div>
-      ) : (
-        <>
-          {takeaway ? (
-            <p className="insight-callout" data-testid="chart-takeaway">
-              {takeaway}
-            </p>
-          ) : null}
-          {legend && legend.length > 1 ? <ChartLegend items={legend} /> : null}
-          <ChartTooltip>{children}</ChartTooltip>
-          {table ? <ChartTableToggle table={table} caption={title} /> : null}
-        </>
-      )}
+      {actions}
+    </div>
+  );
+  const content = empty ? (
+    <div data-testid="chart-empty">
+      <EmptyState>{empty}</EmptyState>
+    </div>
+  ) : (
+    <>
+      {takeaway ? (
+        <p className="insight-callout" data-testid="chart-takeaway">
+          {takeaway}
+        </p>
+      ) : null}
+      {legend && legend.length > 1 ? <ChartLegend items={legend} /> : null}
+      <ChartTooltip>{children}</ChartTooltip>
+      {table ? <ChartTableToggle table={table} caption={title} /> : null}
     </>
   );
   return level === 2 ? (
     <section
       aria-labelledby={`${id}-title`}
       className="chart-panel"
+      data-tone={tone}
       data-testid={id}
     >
-      {body}
+      {head}
+      <div className="chart-panel-body">{content}</div>
     </section>
   ) : (
     <figure
@@ -214,7 +228,8 @@ export function ChartFrame({
       className="flex min-w-0 flex-col gap-3"
       data-testid={id}
     >
-      {body}
+      {head}
+      {content}
     </figure>
   );
 }

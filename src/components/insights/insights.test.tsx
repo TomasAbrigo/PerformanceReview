@@ -175,6 +175,25 @@ describe("SelfAssessmentView", () => {
   });
 });
 
+/** A risk matrix with only its counts (the view reads the rest). */
+const riskOf = (riskCount: number | null, total: number | null) => ({
+  cycleId: "c1",
+  riskThreshold: 2,
+  cells: (["low", "mid", "high"] as const).flatMap((retention) =>
+    (["low", "mid", "high"] as const).map((engagement) => ({
+      retention,
+      engagement,
+      count: retention === "low" && engagement === "low" ? riskCount : 0,
+      risk: retention === "low" && engagement === "low",
+    })),
+  ),
+  total,
+  riskCount,
+  atRisk: null,
+  suppressed: riskCount === null,
+  minGroupSize: riskCount === null ? 5 : null,
+});
+
 describe("ExecutiveReportView", () => {
   const full: ExecutiveReport = {
     cycleId: "c1",
@@ -183,7 +202,7 @@ describe("ExecutiveReportView", () => {
     completion: { ...completion, minGroupSize: null },
     retention: { n: 9, mean: 28 / 9, counts: [1, 3, 1, 2, 2] },
     engagement: { n: 8, mean: 2.875, counts: [1, 3, 1, 2, 1] },
-    risk: { riskCount: 3, total: 8 },
+    risk: riskOf(3, 8),
     goals: {
       key: null,
       label: null,
@@ -252,7 +271,12 @@ describe("ExecutiveReportView", () => {
           );
         }
         if (qual) {
-          expect(screen.getByText("colaboracion")).toBeVisible();
+          // Themes read through their message: casing and accents.
+          expect(
+            screen.getByText(
+              locale === "es" ? "Colaboración" : "Collaboration",
+            ),
+          ).toBeVisible();
         }
         const toggle = screen.getByRole("navigation", {
           name: locale === "es" ? "Modo" : "Mode",
@@ -371,7 +395,7 @@ describe("ExecutiveReportView", () => {
           ...full,
           minGroupSize: 5,
           retention: null,
-          risk: { riskCount: null, total: null },
+          risk: riskOf(null, null),
           sentiment: [],
           themes: [],
         }}
@@ -381,7 +405,10 @@ describe("ExecutiveReportView", () => {
     expect(screen.getByTestId("exec-retention")).toHaveTextContent(
       "Oculto: menos de 5 personas.",
     );
-    expect(screen.getByTestId("exec-risk")).toHaveTextContent("Oculto");
+    expect(screen.getByTestId("exec-risk-kpi")).toHaveTextContent("Oculto");
+    expect(screen.getByTestId("exec-risk")).toHaveTextContent(
+      "Las celdas con menos de 5 personas no se muestran",
+    );
     expect(screen.getByText(/grupos de menos de 5 personas/)).toBeVisible();
   });
 });
@@ -398,7 +425,7 @@ describe("unavailable data and suppressed groups", () => {
           completion: { ...completion, total: null, minGroupSize: null },
           retention: null,
           engagement: null,
-          risk: { riskCount: null, total: null },
+          risk: riskOf(null, null),
         }}
         dimensionLabel={{}}
       />,
