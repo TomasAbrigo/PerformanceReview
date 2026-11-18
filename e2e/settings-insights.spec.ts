@@ -44,6 +44,7 @@ test("People edit the insights settings, the server validates, and the change st
 });
 
 const peopleOnly = [
+  ["/es/settings/cycles", /Ciclos de evaluación/],
   ["/es/settings/insights", /Configuración de insights/],
   ["/es/imports/upload", /Subir archivo/],
   ["/es/imports/runs", /Corridas de importación/],
