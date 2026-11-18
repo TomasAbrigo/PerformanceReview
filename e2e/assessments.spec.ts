@@ -41,9 +41,11 @@ test("People open a cycle, open a participant and read the self-assessment, the 
   ).toBeVisible();
 
   // The list: one participant, with where each side stands.
-  const list = page.getByRole("table", { name: "Participantes del ciclo" });
-  await expect(list.getByRole("row")).toHaveCount(2);
-  const row = list.getByRole("row", { name: new RegExp(subject.personName) });
+  const list = page.getByRole("group", { name: "Participantes del ciclo" });
+  await expect(list.getByRole("article")).toHaveCount(1);
+  const row = list.getByRole("article", {
+    name: new RegExp(subject.personName),
+  });
   await expect(row.getByText("Enviada")).toHaveCount(2);
   await row.getByRole("link", { name: subject.personName }).click();
   await expect(page).toHaveURL(DETAIL);
@@ -76,8 +78,8 @@ test("People open a cycle, open a participant and read the self-assessment, the 
 
   // The goals of the period next to the form.
   const goals = page.getByTestId("assessment-goals");
-  await expect(goals.getByRole("row")).toHaveCount(
-    1 + subject.goalTitles.length,
+  await expect(goals.getByRole("article")).toHaveCount(
+    subject.goalTitles.length,
   );
   for (const title of new Set(subject.goalTitles)) {
     await expect(goals.getByText(title).first()).toBeVisible();
@@ -153,8 +155,8 @@ test("an employee reads only their own assessment, never retention or engagement
     .locator('select[name="cycle"]')
     .selectOption({ label: subject.cycleName });
   await filters.getByRole("button", { name: "Aplicar" }).click();
-  const list = page.getByRole("table", { name: "Participantes del ciclo" });
-  await expect(list.getByRole("row")).toHaveCount(2);
+  const list = page.getByRole("group", { name: "Participantes del ciclo" });
+  await expect(list.getByRole("article")).toHaveCount(1);
   await list.getByRole("link", { name: subject.personName }).click();
   await expect(page).toHaveURL(DETAIL);
 
@@ -183,7 +185,10 @@ test("an employee reads only their own assessment, never retention or engagement
   await expect(
     page.getByText(/No tenés acceso a este assessment/),
   ).toBeVisible();
-  await expect(page.getByText(other.personName)).toHaveCount(0);
+  // (The "act as" people list in the banner names everybody: look at the content.)
+  await expect(page.getByRole("main").getByText(other.personName)).toHaveCount(
+    0,
+  );
 });
 
 test("a manager reads their reports' assessments in full, and nobody else's", async ({
@@ -194,7 +199,7 @@ test("a manager reads their reports' assessments in full, and nobody else's", as
   await page.goto("/es");
   await actAsCookie(page, { personId: subject.managerId, role: "manager" });
   await page.goto(`/es/assessments?cycle=${subject.cycleId}`);
-  const list = page.getByRole("table", { name: "Participantes del ciclo" });
+  const list = page.getByRole("group", { name: "Participantes del ciclo" });
   await expect(
     list.getByRole("link", { name: subject.personName }),
   ).toBeVisible();

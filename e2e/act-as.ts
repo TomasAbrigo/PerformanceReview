@@ -15,11 +15,12 @@ async function applyActor(
 ) {
   const bar = page.getByRole("form", { name: "Actuar como" });
   await expect(async () => {
+    if (!(await bar.isVisible())) await page.locator(".actor-trigger").click();
     await steps(bar);
     await bar
       .getByRole("button", { name: "Aplicar" })
       .click({ timeout: 4_000 });
-    await expect(bar.getByText(/Actuando como:/)).toContainText(shown, {
+    await expect(page.locator(".actor-trigger")).toContainText(shown, {
       timeout: 4_000,
     });
   }).toPass({ timeout: 30_000 });

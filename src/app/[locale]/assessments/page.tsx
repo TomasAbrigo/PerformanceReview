@@ -1,3 +1,5 @@
+import { EmptyState } from "@/components/experience";
+import { PageSkeleton } from "@/components/experience";
 import { hasLocale } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
@@ -9,7 +11,8 @@ import {
   ProgressChips,
 } from "@/components/assessments/participants-table";
 import { parseAssessmentsParams } from "@/components/assessments/url-state";
-import { Panel } from "@/components/insights/parts";
+import { CalendarDays } from "lucide-react";
+import { IconTile } from "@/components/experience";
 import { orgFiltersOf } from "@/components/org/params";
 import { PageHeader } from "@/components/page-header";
 import { listHref } from "@/components/query-string";
@@ -68,8 +71,9 @@ async function AssessmentsList({
   const cycles = localizeCycles(await listAssessmentCycles(db, actor), locale);
   if (cycles.length === 0) {
     return (
-      <div className="flex flex-col gap-8">
-        {header(ownOnly ? t("noParticipants") : t("noCycles"))}
+      <div className="flex flex-col gap-6">
+        {header("")}
+        <EmptyState>{ownOnly ? t("noParticipants") : t("noCycles")}</EmptyState>
         <PendingReviews items={pending} />
       </div>
     );
@@ -110,24 +114,32 @@ async function AssessmentsList({
         />
       </PageHeader>
       <PendingReviews items={pending} />
-      <Panel
-        id="assessments-list"
-        title={`${cycle.name} · ${t("count", { n: page.total })}`}
-        actions={
+      <section className="space-y-6" data-testid="assessments-list">
+        <div className="overview-hero">
+          <IconTile>
+            <CalendarDays className="size-7" />
+          </IconTile>
+          <div>
+            <h2 className="text-2xl">{cycle.name}</h2>
+            <p className="mt-2 text-brand-200">
+              {t("count", { n: page.total })}
+            </p>
+          </div>
+        </div>
+        {!ownOnly ? (
           <ProgressChips
             counts={page.counts}
             current={p.progress}
             hrefFor={(progress) => hrefFor({ progress })}
           />
-        }
-      >
+        ) : null}
         <ParticipantsTable
           cycleId={cycle.id}
           page={page}
           showPeople={!ownOnly}
           hrefForPage={(n) => hrefFor({ page: n })}
         />
-      </Panel>
+      </section>
     </div>
   );
 }
@@ -137,7 +149,7 @@ export default function AssessmentsPage(
 ) {
   return (
     <main className="mx-auto w-full max-w-6xl p-6 lg:p-10">
-      <Suspense fallback={<div aria-busy="true" className="h-40" />}>
+      <Suspense fallback={<PageSkeleton />}>
         <AssessmentsList {...props} />
       </Suspense>
     </main>

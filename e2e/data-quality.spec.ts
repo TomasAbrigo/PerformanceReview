@@ -47,12 +47,12 @@ test("the panel flags the CEO without a manager and opens the case list", async 
   await expect(
     page.getByRole("heading", { level: 1, name: "Personas sin manager" }),
   ).toBeVisible();
-  const rows = page.getByRole("row");
-  await expect(rows).toHaveCount(withoutManager.length + 1); // + header
-  const row = rows.filter({ hasText: fullName(ceo) });
-  await expect(row.getByText(fullName(ceo), { exact: true })).toBeVisible();
+  const cases = page.getByRole("group").getByRole("article");
+  await expect(cases).toHaveCount(withoutManager.length);
+  const ceoCase = cases.filter({ hasText: fullName(ceo) });
+  await expect(ceoCase.getByText(fullName(ceo), { exact: true })).toBeVisible();
   // The top of the org has reports: not having a manager is expected, so it is badged.
-  await expect(row.getByText("Tope")).toBeVisible();
+  await expect(ceoCase.getByText("Tope")).toBeVisible();
 
   await page.getByRole("link", { name: "← Volver al panel" }).click();
   await expect(page).toHaveURL(/\/es\/data-quality$/);
@@ -83,7 +83,7 @@ test("the failed import of the setup shows up in the panel and links to the run"
 // instead of a 404 status.
 test("an unknown indicator renders the not-found page", async ({ page }) => {
   await page.goto("/es/data-quality/nope");
-  await expect(page.getByText("This page could not be found.")).toBeVisible();
+  await expect(page.getByText("No encontramos esta página.")).toBeVisible();
 });
 
 test("the people CSV export: header and one row per person, with ids", async ({

@@ -1,3 +1,4 @@
+import { PageSkeleton } from "@/components/experience";
 import { hasLocale } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
@@ -58,7 +59,7 @@ async function RequestPage({ params }: Props) {
   } catch (error) {
     if (!(error instanceof ReviewError)) throw error;
   }
-  const mayWrite = canAnswer(actor, request) || review.isAuthor;
+  const mayWrite = canAnswer(actor, request);
   const writable =
     mayWrite && request.status === "draft" && cycle.status !== "closed";
   const note = writable
@@ -134,7 +135,7 @@ async function RequestPage({ params }: Props) {
 export default function ReviewRequestPage(props: Props) {
   return (
     <main className="mx-auto w-full max-w-6xl p-6 lg:p-10">
-      <Suspense fallback={<div aria-busy="true" className="h-40" />}>
+      <Suspense fallback={<PageSkeleton />}>
         <RequestPage {...props} />
       </Suspense>
     </main>

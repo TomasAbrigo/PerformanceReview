@@ -8,7 +8,7 @@ import {
   reviewRequest,
 } from "@/db/schema";
 import type { ActorContext } from "@/modules/actor/types";
-import { questionsFor } from "@/modules/review-core/answers";
+import { getReview, questionsFor } from "@/modules/review-core/answers";
 import {
   createTestCycle,
   loadPeople,
@@ -238,6 +238,14 @@ describe("share", () => {
     await expectError(share(db, bruno(), selfId), "not_shareable");
     await submitManager();
     await expectError(share(db, bruno(), managerId), "forbidden");
+  });
+
+  it("keeps a submitted manager review from the reviewee until shared", async () => {
+    expect(await getReview(db, bruno(), managerId)).toBeNull();
+    await submitManager();
+    expect(await getReview(db, bruno(), managerId)).toBeNull();
+    await share(db, carla(), managerId);
+    expect(await getReview(db, bruno(), managerId)).not.toBeNull();
   });
 
   it("keeps the first share date when shared again", async () => {

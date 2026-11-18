@@ -1,7 +1,7 @@
-import { expect, test } from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
+import { queueCard, showAllCards } from "./cards";
 import { actAsRole } from "./act-as";
 import {
-  escapeRegExp,
   find,
   fullName,
   hasUniqueName,
@@ -26,7 +26,7 @@ const rehire = find(
   "rehire with the same legajo and email, and a unique name",
 );
 const name = fullName(rehire.later);
-const queueRow = new RegExp(`${escapeRegExp(name)}.*\\b${rehire.later.id}\\b`);
+const queueRow = (page: Page) => queueCard(page, name, rehire.later.id);
 
 test("the queue holds the ambiguous row and suggests the person", async ({
   page,
@@ -38,7 +38,7 @@ test("the queue holds the ambiguous row and suggests the person", async ({
   ).toBeVisible();
 
   await page.goto("/en/imports/identity");
-  const row = page.getByRole("row", { name: queueRow });
+  const row = queueRow(page);
   await expect(row.getByText("Possible match")).toBeVisible();
   await expect(row.getByText("1 candidate")).toBeVisible();
 
@@ -55,10 +55,7 @@ test("the queue holds the ambiguous row and suggests the person", async ({
 test("the candidate's email is shown to People only", async ({ page }) => {
   // In Spanish: the "Actuar como" bar helpers use its Spanish labels.
   await page.goto("/es/imports/identity");
-  await page
-    .getByRole("row", { name: queueRow })
-    .getByRole("link", { name })
-    .click();
+  await queueRow(page).getByRole("link", { name }).click();
   const candidate = page.getByRole("listitem", { name });
   await expect(
     candidate.getByText(rehire.earlier.workEmail, { exact: true }),
@@ -75,19 +72,17 @@ test("linking the case adds the new employment to the same person", async ({
   page,
 }) => {
   await page.goto("/en/imports/identity");
-  await page
-    .getByRole("row", { name: queueRow })
-    .getByRole("link", { name })
-    .click();
+  await queueRow(page).getByRole("link", { name }).click();
 
   await page.getByLabel("Note (optional)").fill("Rehire, same person");
   await page.getByRole("button", { name: `Link to ${name}` }).click();
 
   await expect(page).toHaveURL(/\/en\/imports\/identity$/);
-  await expect(page.getByRole("row", { name: queueRow })).toHaveCount(0);
+  await expect(queueRow(page)).toHaveCount(0);
 
   await page.getByRole("link", { name: "History" }).click();
-  const done = page.getByRole("row", { name: queueRow });
+  await showAllCards(page.getByRole("main"));
+  const done = queueRow(page);
   await expect(done.getByText("Linked")).toBeVisible();
 });
 

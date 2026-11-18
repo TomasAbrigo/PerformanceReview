@@ -1,6 +1,7 @@
 import { useTranslations } from "next-intl";
 import { PageHeader } from "@/components/page-header";
-import { Badge } from "@/components/ui/badge";
+import { CheckCheck, ShieldAlert } from "lucide-react";
+import { IconTile, EmptyState } from "@/components/experience";
 import { Link } from "@/i18n/navigation";
 import type {
   DataQualityIndicator,
@@ -28,26 +29,29 @@ export function DataQualityPanel({
         description={t("description")}
       />
 
-      {clear ? <p role="status">{t("allClear")}</p> : null}
+      {clear ? (
+        <EmptyState icon={<CheckCheck />}>{t("allClear")}</EmptyState>
+      ) : null}
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {indicators.map((indicator) => {
           const title = t(`indicators.${indicator.key}.title`);
           return (
-            <article
-              key={indicator.key}
-              className="flex flex-col gap-2 rounded-xl border border-border bg-card p-5"
-            >
+            <article key={indicator.key} className="metric-card">
+              <div className="flex items-center justify-between">
+                <IconTile>
+                  {indicator.count > 0 ? <ShieldAlert /> : <CheckCheck />}
+                </IconTile>
+                <span className="stat-value">{indicator.count}</span>
+              </div>
               <h2 className="text-lg">{title}</h2>
               <p className="text-sm text-muted-foreground">
                 {t(`indicators.${indicator.key}.description`)}
               </p>
               <div className="mt-auto flex items-center justify-between gap-2 pt-2">
-                <Badge
-                  variant={indicator.count > 0 ? "destructive" : "success"}
-                >
+                <span className="text-sm text-muted-foreground">
                   {t("count", { count: indicator.count })}
-                </Badge>
+                </span>
                 {indicator.count > 0 ? (
                   <Link
                     href={indicatorHref(indicator.key)}

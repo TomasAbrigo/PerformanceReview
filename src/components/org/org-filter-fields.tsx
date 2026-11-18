@@ -1,3 +1,4 @@
+import { AdvancedFilters } from "@/components/experience";
 import { useTranslations } from "next-intl";
 import type { OrgOptions } from "@/modules/org-attributes/kinds";
 import type { OrgParams } from "./params";
@@ -24,9 +25,13 @@ export function OrgFilterFields({
   options: OrgOptions | null;
 }) {
   const t = useTranslations("OrgFilters");
-  if (!options) return null;
+  if (
+    !options ||
+    !FIELDS.some(([name, list]) => options[list].length || params[name])
+  )
+    return null;
   return (
-    <>
+    <AdvancedFilters active={FIELDS.some(([name]) => Boolean(params[name]))}>
       {FIELDS.map(([name, list]) => {
         const values = options[list];
         // A value in the URL that is not on offer (an old link) is still shown.
@@ -52,6 +57,6 @@ export function OrgFilterFields({
           </label>
         );
       })}
-    </>
+    </AdvancedFilters>
   );
 }

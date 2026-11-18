@@ -9,6 +9,7 @@ import { LocaleSwitcher } from "@/components/locale-switcher";
 import { SideNav } from "@/components/nav/side-nav";
 import { routing } from "@/i18n/routing";
 import "../globals.css";
+import "../visual-data.css";
 
 // Brand type: Chakra Petch Light for headings, Inter for body and UI.
 const inter = Inter({
@@ -61,13 +62,25 @@ export default async function LocaleLayout({
               <SideNav />
             </Suspense>
             <div className="flex min-w-0 flex-1 flex-col">
-              <header className="sticky top-0 z-20 flex flex-wrap items-center justify-between gap-3 border-b border-border bg-background/90 px-6 py-2.5 backdrop-blur lg:px-10">
-                <Suspense fallback={<div aria-busy="true" className="h-9" />}>
-                  <ActorBar />
-                </Suspense>
-                <LocaleSwitcher />
+              <header className="app-toolbar">
+                <span className="hidden text-sm text-muted-foreground xl:block">
+                  Performance review
+                </span>
+                <div className="flex min-w-0 flex-1 flex-wrap items-center justify-end gap-4">
+                  <Suspense fallback={<div aria-busy="true" className="h-9" />}>
+                    <ActorBar />
+                  </Suspense>
+                  <Suspense fallback={null}>
+                    <LocaleSwitcher />
+                  </Suspense>
+                </div>
               </header>
-              {children}
+              <a href="#main-content" className="skip-link">
+                {locale === "es" ? "Ir al contenido" : "Skip to content"}
+              </a>
+              <div id="main-content" className="min-w-0">
+                {children}
+              </div>
             </div>
           </div>
         </NextIntlClientProvider>

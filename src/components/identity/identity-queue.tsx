@@ -1,13 +1,9 @@
+import { CardCollection } from "@/components/card-collection";
+import { IconTile, EmptyState } from "@/components/experience";
+import { UserRound, ArrowUpRight } from "lucide-react";
 import { useFormatter, useTranslations } from "next-intl";
 import { buttonVariants } from "@/components/ui/button";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+
 import { Link } from "@/i18n/navigation";
 import type { IssueListItem } from "@/modules/identity";
 import { ReasonBadge } from "./reason-badge";
@@ -70,74 +66,91 @@ export function IdentityQueue({
         ))}
       </nav>
       {issues.length === 0 ? (
-        <p>{t(history ? "empty.history" : "empty.open")}</p>
+        <EmptyState>{t(history ? "empty.history" : "empty.open")}</EmptyState>
+      ) : !history ? (
+        <div className="goal-grid">
+          {issues.map((issue) => (
+            <article key={issue.id} className="goal-card">
+              <div className="flex items-center justify-between gap-3">
+                <IconTile>
+                  <UserRound />
+                </IconTile>
+                <ReasonBadge reason={issue.reason} />
+              </div>
+              <h2 className="text-xl">
+                <Link
+                  className="card-link"
+                  href={`/imports/identity/${issue.id}`}
+                >
+                  {issue.summary.displayName ?? t("unnamed")}
+                </Link>
+              </h2>
+              {issue.summary.role ? (
+                <p className="text-sm text-muted-foreground">
+                  {t(`roles.${issue.summary.role as "employee"}`)}
+                </p>
+              ) : null}
+              <p className="text-xs break-all text-muted-foreground">
+                {t("columns.sourceId")}: {issue.sourceId}
+              </p>
+              <p className="rounded-lg bg-brand-fog p-3 text-sm">
+                {t("candidatesCount", { count: issue.candidateCount })}
+              </p>
+              <div className="mt-auto flex items-center justify-between border-t pt-4 text-sm">
+                <span>{fmt(issue.createdAt)}</span>
+                <span className="flex items-center gap-2 text-primary">
+                  {t("review")}
+                  <ArrowUpRight className="size-4" />
+                </span>
+              </div>
+            </article>
+          ))}
+        </div>
       ) : (
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>{t("columns.name")}</TableHead>
-              <TableHead>{t("columns.sourceId")}</TableHead>
-              <TableHead>{t("columns.reason")}</TableHead>
-              <TableHead>
-                {t(history ? "columns.resolution" : "columns.candidates")}
-              </TableHead>
-              <TableHead>
-                {t(history ? "columns.resolved" : "columns.detected")}
-              </TableHead>
-              {history ? null : (
-                <TableHead>
-                  <span className="sr-only">{t("review")}</span>
-                </TableHead>
-              )}
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {issues.map((issue) => (
-              <TableRow key={issue.id}>
-                <TableCell>
-                  <Link
-                    href={`/imports/identity/${issue.id}`}
-                    className="font-medium hover:underline"
-                  >
-                    {issue.summary.displayName ?? t("unnamed")}
-                  </Link>
-                  {issue.summary.role ? (
-                    <span className="ml-2 text-sm text-muted-foreground">
-                      ({t(`roles.${issue.summary.role as "employee"}`)})
-                    </span>
-                  ) : null}
-                </TableCell>
-                <TableCell className="font-mono">{issue.sourceId}</TableCell>
-                <TableCell>
-                  <ReasonBadge reason={issue.reason} />
-                </TableCell>
-                <TableCell>
-                  {history
-                    ? issue.resolution
-                      ? t(`resolution.short.${issue.resolution.action}`)
-                      : "—"
-                    : t("candidatesCount", { count: issue.candidateCount })}
-                </TableCell>
-                <TableCell>
-                  {fmt(history ? issue.resolvedAt : issue.createdAt)}
-                </TableCell>
-                {history ? null : (
-                  <TableCell className="text-right">
-                    <Link
-                      href={`/imports/identity/${issue.id}`}
-                      className={buttonVariants({
-                        variant: "outline",
-                        size: "sm",
-                      })}
-                    >
-                      {t("review")}
-                    </Link>
-                  </TableCell>
-                )}
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+        <CardCollection gridClassName="record-grid">
+          {issues.map((issue) => (
+            <article
+              key={issue.id}
+              className="record-card"
+              aria-label={issue.summary.displayName ?? t("unnamed")}
+            >
+              <header className="flex items-center justify-between gap-3">
+                <IconTile>
+                  <UserRound />
+                </IconTile>
+                <ReasonBadge reason={issue.reason} />
+              </header>
+              <h2 className="text-xl">
+                <Link
+                  href={`/imports/identity/${issue.id}`}
+                  className="underline decoration-brand-200 underline-offset-4"
+                >
+                  {issue.summary.displayName ?? t("unnamed")}
+                </Link>
+              </h2>
+              {issue.summary.role ? (
+                <p className="text-xs text-muted-foreground">
+                  {t(`roles.${issue.summary.role as "employee"}`)}
+                </p>
+              ) : null}
+              <dl className="record-facts">
+                <div>
+                  <dt>{t("columns.sourceId")}</dt>
+                  <dd>{issue.sourceId}</dd>
+                </div>
+                <div>
+                  <dt>{t("columns.resolved")}</dt>
+                  <dd>{fmt(issue.resolvedAt)}</dd>
+                </div>
+              </dl>
+              <p className="insight-callout">
+                {issue.resolution
+                  ? t(`resolution.short.${issue.resolution.action}`)
+                  : "—"}
+              </p>
+            </article>
+          ))}
+        </CardCollection>
       )}
       {history && (paged || nextCursor) ? (
         <nav aria-label={t("pagination.label")} className="flex gap-2">

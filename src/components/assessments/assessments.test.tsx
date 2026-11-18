@@ -1,4 +1,4 @@
-import { render, screen, within } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import { NextIntlClientProvider } from "next-intl";
 import type { ReactNode } from "react";
 import { describe, expect, it, vi } from "vitest";
@@ -80,13 +80,13 @@ describe("ParticipantsTable", () => {
         hrefForPage={() => "/assessments"}
       />,
     );
-    const r = screen.getByRole("row", { name: /Dora Díaz/ });
+    const r = screen.getByRole("article", { name: /Dora Díaz/ });
     expect(within(r).getByRole("link", { name: "Dora Díaz" })).toHaveAttribute(
       "href",
       "/assessments/c1/pa1",
     );
-    expect(within(r).getByText("Bruno Gil")).toBeVisible();
-    expect(within(r).getByText("Producto")).toBeVisible();
+    expect(within(r).getByText(/Bruno Gil/)).toBeVisible();
+    expect(within(r).getByText(/Producto/)).toBeVisible();
     expect(within(r).getByText("Enviada")).toBeVisible();
     // A side the reader may not read yet is said so, never its status.
     expect(within(r).getByText("Reservada")).toBeVisible();
@@ -167,7 +167,8 @@ describe("AssessmentsFilters", () => {
     );
     const form = screen.getByRole("form", { name: "Filtros de assessments" });
     expect(within(form).getByLabelText("Ciclo")).toHaveValue("c2");
-    for (const label of ["Estado", "Persona", "Área", "DM"]) {
+    fireEvent.click(screen.getByText("Más filtros"));
+    for (const label of ["Persona", "Área", "DM"]) {
       expect(within(form).getByLabelText(label)).toBeVisible();
     }
   });

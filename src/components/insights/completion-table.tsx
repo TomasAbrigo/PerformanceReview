@@ -1,5 +1,6 @@
+import { CardCollection } from "@/components/card-collection";
 import { useTranslations } from "next-intl";
-import { Meter } from "@/components/insights/parts";
+import { ProgressRing } from "@/components/experience";
 import type {
   CompletionGroup,
   CompletionGroupBy,
@@ -65,42 +66,49 @@ export function CompletionTable({
   const cell = (r: (typeof rows)[number], side: Side) => {
     const v = sideOf(r, side);
     return (
-      <div className="flex items-center gap-2">
-        <Meter
-          width={100}
-          value={v.total ? v.submitted / v.total : 0}
-          label={t("meter", {
-            label: `${r.name} · ${t(side)}`,
-            submitted: v.submitted,
-            total: v.total,
-          })}
-        />
-        <span className="tabular-nums">{ti("percent", { value: pct(v) })}</span>
+      <div className="completion-side">
+        <p className="text-sm">{t(side)}</p>
+        <div className="flex items-center gap-4">
+          <ProgressRing
+            percent={pct(v)}
+            label={t("meter", {
+              label: `${r.name} · ${t(side)}`,
+              submitted: v.submitted,
+              total: v.total,
+            })}
+          />
+          <span className="text-sm tabular-nums">
+            {v.submitted}/{v.total}
+          </span>
+        </div>
       </div>
     );
   };
   return (
     <div className="flex flex-col gap-2">
-      <table aria-label={t("table")} className="text-sm">
-        <thead>
-          <tr className="text-left">
-            <th className="pr-4">{t("group")}</th>
-            <th className="pr-4">{t("n")}</th>
-            <th className="pr-4">{t("self")}</th>
-            <th className="pr-4">{t("manager")}</th>
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map((r) => (
-            <tr key={r.id}>
-              <td className="pr-4">{r.name}</td>
-              <td className="pr-4 tabular-nums">{r.participants}</td>
-              <td className="pr-4">{cell(r, "self")}</td>
-              <td className="pr-4">{cell(r, "manager")}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      <CardCollection
+        role="group"
+        aria-label={t("table")}
+        gridClassName="comparison-grid"
+      >
+        {rows.map((r) => (
+          <article
+            key={r.id}
+            className={`comparison-card ${r.id === "total" ? "comparison-featured" : ""}`}
+          >
+            <header>
+              <h3 className="text-xl">{r.name}</h3>
+              <p className="mt-1 text-xs text-muted-foreground">
+                {t("n")}: {r.participants}
+              </p>
+            </header>
+            <div className="comparison-metrics">
+              {cell(r, "self")}
+              {cell(r, "manager")}
+            </div>
+          </article>
+        ))}
+      </CardCollection>
       {suppressed}
     </div>
   );

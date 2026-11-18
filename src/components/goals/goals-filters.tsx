@@ -2,7 +2,6 @@ import { useTranslations } from "next-intl";
 import { OrgFilterFields } from "@/components/org/org-filter-fields";
 import { Link } from "@/i18n/navigation";
 import type { GoalFilterOptions } from "@/modules/goals/browse";
-import { goalStates } from "@/modules/goals/state";
 import type { GoalsParams } from "./url-state";
 
 /**
@@ -21,7 +20,6 @@ export function GoalsFilters({
   options: GoalFilterOptions;
   ownOnly: boolean;
 }) {
-  const t = useTranslations("Goals");
   const f = useTranslations("Goals.filters");
   return (
     <form
@@ -44,21 +42,7 @@ export function GoalsFilters({
           ))}
         </select>
       </label>
-      <label className="control-label max-w-full">
-        {f("state")}
-        <select
-          name="state"
-          defaultValue={params.state ?? ""}
-          className="control max-w-full"
-        >
-          <option value="">{f("anyState")}</option>
-          {goalStates.map((s) => (
-            <option key={s} value={s}>
-              {t(`states.${s}`)}
-            </option>
-          ))}
-        </select>
-      </label>
+      <input type="hidden" name="state" value={params.state ?? ""} />
       {ownOnly ? null : (
         <>
           <label className="control-label max-w-full">

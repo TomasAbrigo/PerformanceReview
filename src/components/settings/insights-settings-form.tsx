@@ -1,5 +1,7 @@
 "use client";
 
+import { SlidersHorizontal } from "lucide-react";
+import { IconTile } from "@/components/experience";
 import { useTranslations } from "next-intl";
 import { type ReactNode, useId, useState } from "react";
 import { NativeSelect } from "@/components/imports/native-select";
@@ -132,7 +134,7 @@ export function InsightsSettingsForm({
   return (
     <form
       aria-label={t("title")}
-      className="flex flex-col gap-6"
+      className="settings-grid"
       onSubmit={(e) => {
         e.preventDefault();
         run(
@@ -223,7 +225,7 @@ export function InsightsSettingsForm({
             <input
               {...props}
               type="checkbox"
-              className="size-4"
+              className="size-4 self-start"
               checked={draft["analysis.includeClosed"] === "true"}
               onChange={(e) =>
                 set("analysis.includeClosed", String(e.target.checked))
@@ -250,9 +252,14 @@ export function InsightsSettingsForm({
 function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
     <Card>
-      <CardHeader>
+      <CardHeader className="border-b border-border bg-brand-fog/50">
         <CardTitle>
-          <h2>{title}</h2>
+          <h2 className="flex items-center gap-3">
+            <IconTile>
+              <SlidersHorizontal className="size-5" />
+            </IconTile>
+            {title}
+          </h2>
         </CardTitle>
       </CardHeader>
       <CardContent className="flex flex-col gap-4">{children}</CardContent>
