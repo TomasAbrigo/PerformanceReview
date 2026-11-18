@@ -11,26 +11,19 @@ import type {
   GoalKpiGroup,
   GoalKpis,
 } from "@/modules/analytics/goals-insights/types";
+import { BulletBar } from "@/components/charts";
 import { Empty, useDecimal, usePct } from "./shared";
 
-const METER_W = 96;
-
-/** Share of the goals completed, as a bar (single sequential hue, rounded data end). */
+/** Share of the goals completed, as the kit's bullet bar. */
 function CompletedMeter({ pct, label }: { pct: number; label: string }) {
-  const w = (Math.max(0, Math.min(100, pct)) / 100) * METER_W;
   return (
-    <svg width={METER_W} height={8} role="img" aria-label={label}>
-      <title>{label}</title>
-      <rect width={METER_W} height={8} rx={4} className="fill-muted" />
-      {w > 0 ? (
-        <rect
-          width={Math.max(w, 8)}
-          height={8}
-          rx={4}
-          className="fill-chart-seq"
-        />
-      ) : null}
-    </svg>
+    <BulletBar
+      value={pct / 100}
+      label={label}
+      width={96}
+      showValue={false}
+      fullLabel
+    />
   );
 }
 

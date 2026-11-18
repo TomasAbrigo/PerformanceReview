@@ -112,13 +112,17 @@ test("People walk the whole insights module and export for Arturía", async ({
   await chooseCycle(page, "/es/insights/indicators", cycleName);
   await expect(
     page
-      .getByRole("region", { name: "Distribución de Retención" })
+      .getByRole("region", {
+        name: "¿Qué grupos tienen las respuestas más bajas de retención?",
+      })
       .getByTestId("indicator-histogram")
       .first(),
   ).toBeVisible();
   await expect(
     page
-      .getByRole("region", { name: "Matriz de retención y compromiso" })
+      .getByRole("region", {
+        name: "¿Cuántas personas tienen retención y compromiso bajos a la vez?",
+      })
       .getByTestId("matrix-summary"),
   ).toBeVisible();
 
@@ -130,7 +134,7 @@ test("People walk the whole insights module and export for Arturía", async ({
   });
   await expect(
     page
-      .getByRole("img", {
+      .getByRole("group", {
         name: "Barras apiladas de sentimiento por dimensión",
       })
       .getByTestId("sentiment-bar")
@@ -159,10 +163,10 @@ test("People walk the whole insights module and export for Arturía", async ({
   ).toBeVisible();
   await expect(page.getByTestId("engagement-view")).toBeVisible();
   await expect(
-    page.getByRole("img", { name: /Score promedio y participación por mes/ }),
+    page.getByRole("group", { name: /Score promedio y participación por mes/ }),
   ).toBeVisible();
   await expect(
-    page.getByRole("img", { name: /Personas por segmento y por mes/ }),
+    page.getByRole("group", { name: /Personas por segmento y por mes/ }),
   ).toBeVisible();
   const months = page.getByRole("table", { name: "Detalle por mes" });
   expect(await months.getByRole("row").count()).toBeGreaterThan(6);

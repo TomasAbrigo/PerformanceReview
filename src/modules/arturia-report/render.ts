@@ -102,12 +102,16 @@ export function svgStacked(
       const rects = r.parts
         .map((p, k) => {
           const w = total ? (p / total) * span : 0;
-          const rect = `<rect x="${x.toFixed(1)}" y="${y + 5}" width="${w.toFixed(1)}" height="16" class="${prefix}${k}"><title>${esc(legend[k] ?? "")}: ${p}</title></rect>`;
+          const label =
+            w >= 34
+              ? `<text x="${(x + w / 2).toFixed(1)}" y="${y + 17}" text-anchor="middle" class="in">${pct(p, total)}</text>`
+              : "";
+          const rect = `<rect x="${x.toFixed(1)}" y="${y + 5}" width="${w.toFixed(1)}" height="16" class="${prefix}${k} seg"><title>${esc(r.label)} · ${esc(legend[k] ?? "")}: ${p} (${pct(p, total)})</title></rect>${label}`;
           x += w;
           return rect;
         })
         .join("");
-      return `${labelText(r.label, labelW - 8, y + 17)}${rects}<text x="${labelW + span + 6}" y="${y + 17}">${total}</text>`;
+      return `${labelText(r.label, labelW - 8, y + 17)}${rects}<text x="${labelW + span + 6}" y="${y + 17}" class="n">n = ${total}</text>`;
     })
     .join("");
   const keys = legend
@@ -116,7 +120,7 @@ export function svgStacked(
         `<span class="key"><i class="${prefix}${k}"></i>${esc(l)}</span>`,
     )
     .join("");
-  return `<svg viewBox="0 0 ${W} ${rows.length * ROW}" role="img" class="chart">${body}</svg><div class="legend">${keys}</div>`;
+  return `<div class="legend">${keys}</div><svg viewBox="0 0 ${W} ${rows.length * ROW}" role="img" class="chart">${body}</svg>`;
 }
 
 /** Simple line (values 0-1) over labelled points. */
@@ -130,13 +134,20 @@ export function svgLine(points: { label: string; value: number }[]): string {
     H - pad - p.value * (H - 2 * pad),
   ]);
   const path = xy.map(([x, y]) => `${x.toFixed(1)},${y.toFixed(1)}`).join(" ");
+  const last = points.length - 1;
   const marks = xy
     .map(
       ([x, y], i) =>
-        `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="4" class="c0"/><text x="${x.toFixed(1)}" y="${H - 8}" text-anchor="middle">${esc(points[i].label)}</text><text x="${x.toFixed(1)}" y="${(y - 8).toFixed(1)}" text-anchor="middle">${pct(points[i].value, 1)}</text>`,
+        `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="4" class="c0"><title>${esc(points[i].label)}: ${pct(points[i].value, 1)}</title></circle><text x="${x.toFixed(1)}" y="${H - 8}" text-anchor="middle" class="n">${esc(points[i].label)}</text><text x="${x.toFixed(1)}" y="${(y - 8).toFixed(1)}" text-anchor="middle"${i === last ? ' class="last"' : ' class="n"'}>${pct(points[i].value, 1)}</text>`,
     )
     .join("");
-  return `<svg viewBox="0 0 ${W} ${H}" role="img" class="chart"><polyline points="${path}" class="line"/>${marks}</svg>`;
+  const grid = [0, 0.5, 1]
+    .map((g) => {
+      const y = (H - pad - g * (H - 2 * pad)).toFixed(1);
+      return `<line x1="${pad}" x2="${W - pad}" y1="${y}" y2="${y}" class="grid"/><text x="${pad - 4}" y="${y}" text-anchor="end" class="n">${pct(g, 1)}</text>`;
+    })
+    .join("");
+  return `<svg viewBox="0 0 ${W} ${H}" role="img" class="chart">${grid}<polyline points="${path}" class="line"/>${marks}</svg>`;
 }
 
 /** 3x3 matrix, retention (rows, high on top) × engagement (columns). */
@@ -154,7 +165,7 @@ export function svgMatrix(
         );
         const x = off + c * S;
         const y = (2 - r) * S;
-        return `<rect x="${x}" y="${y}" width="${S - 4}" height="${S - 4}" class="${cell?.risk ? "risk" : "cell"}"/><text x="${x + S / 2 - 2}" y="${y + S / 2 + 4}" text-anchor="middle">${cell?.count ?? "–"}</text>`;
+        return `<rect x="${x}" y="${y}" width="${S - 4}" height="${S - 4}" class="${cell?.risk ? "risk" : "cell"}"/>${cell?.risk ? `<text x="${x + S / 2 - 2}" y="${y + 16}" text-anchor="middle" class="n">${esc(L.indicators.riskLabel)}</text>` : ""}<text x="${x + S / 2 - 2}" y="${y + S / 2 + 6}" text-anchor="middle" class="count">${cell?.count ?? "–"}</text>`;
       }),
     )
     .join("");
@@ -170,7 +181,7 @@ export function svgMatrix(
         `<text x="${off + c * S + S / 2 - 2}" y="${3 * S + 14}" text-anchor="middle">${esc(L.indicators.bands[b])}</text>`,
     )
     .join("");
-  return `<svg viewBox="0 0 ${off + 3 * S + 10} ${3 * S + 40}" role="img" class="chart matrix">${body}${rowLabels}${colLabels}<text x="${off + 1.5 * S}" y="${3 * S + 34}" text-anchor="middle">${esc(L.indicators.engagement)}</text><text x="10" y="12">${esc(L.indicators.retention)}</text></svg>`;
+  return `<svg viewBox="0 0 ${off + 3 * S + 10} ${3 * S + 40}" role="img" class="chart matrix">${body}${rowLabels}${colLabels}<text x="${off + 1.5 * S}" y="${3 * S + 34}" text-anchor="middle" class="axis">${esc(L.indicators.engagement)} →</text><text x="10" y="12" class="axis">↑ ${esc(L.indicators.retention)}</text></svg>`;
 }
 
 // ---------------------------------------------------------------- sections
@@ -489,8 +500,8 @@ function peopleHtml(people: ArturiaReport["sections"]["people"]): string {
 }
 
 const CSS = `
-:root{--bg:#fff;--fg:#1d2329;--muted:#66707a;--line:#d9dee3;--c0:#2f6fb3;--c1:#e0a43a;--c2:#c8553d;--c3:#6a9f58;--c4:#7d5ba6;--s0:#5d9e2f;--s1:#0b7f95;--s2:#b4b4b0;--s3:#e5a100;--s4:#d4393a}
-@media (prefers-color-scheme:dark){:root{--bg:#15191d;--fg:#e8ecef;--muted:#9aa4ad;--line:#333b42;--s2:#a8a8a4}}
+:root{--bg:#fff;--fg:#0f2826;--muted:#5a706e;--line:#c3e1e0;--c0:#006060;--c1:#c7892a;--c2:#a13a3a;--c3:#1e7a4c;--c4:#76b3b4;--s0:#1e7a4c;--s1:#27a7a7;--s2:#d9dcdc;--s3:#c7892a;--s4:#a13a3a}
+@media (prefers-color-scheme:dark){:root{--bg:#000d0e;--fg:#f4f9f9;--muted:#b2b6b6;--line:#1b3a3a;--c0:#27a7a7}}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif}
 main{max-width:960px;margin:0 auto;padding:16px}header{border-bottom:1px solid var(--line);margin-bottom:16px}
 h1{font-size:1.5rem;margin:.2em 0}h2{font-size:1.2rem;margin-top:2em;border-bottom:1px solid var(--line)}h3{font-size:1rem;margin-bottom:.3em}
@@ -502,7 +513,8 @@ nav.toggle button[aria-pressed=true]{background:var(--c0);color:#fff;border-colo
 svg.chart{width:100%;height:auto;font-size:12px;fill:var(--fg)}svg.matrix{max-width:340px}
 .c0{fill:var(--c0);background:var(--c0)}.c1{fill:var(--c1);background:var(--c1)}.c2{fill:var(--c2);background:var(--c2)}.c3{fill:var(--c3);background:var(--c3)}.c4{fill:var(--c4);background:var(--c4)}
 .s0{fill:var(--s0);background:var(--s0)}.s1{fill:var(--s1);background:var(--s1)}.s2{fill:var(--s2);background:var(--s2)}.s3{fill:var(--s3);background:var(--s3)}.s4{fill:var(--s4);background:var(--s4)}
-.line{fill:none;stroke:var(--c0);stroke-width:2}.cell{fill:var(--line)}.risk{fill:var(--c2)}
+.line{fill:none;stroke:var(--c0);stroke-width:2}.cell{fill:var(--line)}.risk{fill:var(--c2);fill-opacity:.25;stroke:var(--c2);stroke-width:2}
+.seg{stroke:var(--bg);stroke-width:2}.in{fill:#fff;font-weight:600}.s1+.in,.s2+.in,.c4+.in{fill:#0f2826}.n{fill:var(--muted)}.last{font-weight:700}.grid{stroke:var(--line);stroke-opacity:.6}.count{font-size:18px;font-weight:600}.axis{font-weight:600}
 .legend{display:flex;flex-wrap:wrap;gap:12px;font-size:.85em}.key i{display:inline-block;width:10px;height:10px;margin-right:4px;border-radius:2px}
 table{border-collapse:collapse;width:100%;font-size:.9em}th,td{border-bottom:1px solid var(--line);padding:4px 6px;text-align:left}
 .scroll{overflow-x:auto}.quotes{color:var(--muted);font-style:italic}[hidden]{display:none!important}

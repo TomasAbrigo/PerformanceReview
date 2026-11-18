@@ -107,7 +107,10 @@ async function Indicators({
       </PageHeader>
       <Panel
         id="distribution"
-        title={t("distribution.title", { indicator })}
+        title={t("distribution.title", {
+          indicator: indicator.toLowerCase(),
+        })}
+        meta={cycle.name}
         hint={t("distribution.hint")}
         actions={
           isHr ? (
@@ -128,7 +131,12 @@ async function Indicators({
       >
         <DistributionView data={distribution} />
       </Panel>
-      <Panel id="matrix" title={t("matrix.title")} hint={t("matrix.hint")}>
+      <Panel
+        id="matrix"
+        title={t("matrix.title")}
+        hint={t("matrix.hint")}
+        meta={cycle.name}
+      >
         <RiskMatrixView matrix={matrix} />
       </Panel>
       <Panel

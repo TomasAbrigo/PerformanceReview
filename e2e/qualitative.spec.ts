@@ -21,7 +21,7 @@ test("People runs the Mock analysis on an imported cycle and sees sentiment and 
     timeout: 60_000,
   });
 
-  const bars = page.getByRole("img", {
+  const bars = page.getByRole("group", {
     name: "Barras apiladas de sentimiento por dimensión",
   });
   await expect(bars).toBeVisible();

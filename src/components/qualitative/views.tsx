@@ -11,6 +11,7 @@ import {
   type Sentiment,
 } from "@/modules/qualitative-analysis/constants";
 import type { SentimentCounts } from "@/modules/qualitative-analysis/types";
+import { ChartFrame } from "@/components/charts";
 import { MiniBar, SentimentBars } from "./sentiment-bars";
 
 /** Order of the KPI tiles: total first, then People's order of the dashboard. */
@@ -45,6 +46,10 @@ export function Kpis({ counts }: { counts: SentimentCounts | null }) {
   );
 }
 
+/** n of a chart: comments behind every bar. */
+const totalOf = (rows: SentimentCounts[]) =>
+  rows.reduce((n, r) => n + r.total, 0);
+
 export function ByDimension({
   rows,
   dimensionLabel,
@@ -54,24 +59,27 @@ export function ByDimension({
   dimensionLabel: Record<string, string>;
 }) {
   const t = useTranslations("Qualitative");
+  const tc = useTranslations("Charts");
   const dim = (d: string) => dimensionLabel[d] ?? d;
   return (
-    <section className="flex flex-col gap-2">
-      <h2>{t("byDimension.title")}</h2>
-      {rows.length === 0 ? (
-        <p className="text-sm text-muted-foreground">{t("empty")}</p>
-      ) : (
-        <SentimentBars
-          label={t("byDimension.chart")}
-          firstColumn={t("byDimension.label")}
-          rows={rows.map((r) => ({
-            ...r,
-            key: r.dimension,
-            label: dim(r.dimension),
-          }))}
-        />
-      )}
-    </section>
+    <ChartFrame
+      id="sentiment-by-dimension"
+      title={t("byDimension.title")}
+      howToRead={t("byDimension.how")}
+      meta={tc("metaN", { n: totalOf(rows) })}
+      empty={rows.length === 0 ? t("empty") : null}
+    >
+      <SentimentBars
+        sorted
+        label={t("byDimension.chart")}
+        firstColumn={t("byDimension.label")}
+        rows={rows.map((r) => ({
+          ...r,
+          key: r.dimension,
+          label: dim(r.dimension),
+        }))}
+      />
+    </ChartFrame>
   );
 }
 
@@ -89,52 +97,57 @@ export function ByGroup({
 }) {
   const t = useTranslations("Qualitative.byGroup");
   const tq = useTranslations("Qualitative");
+  const tc = useTranslations("Charts");
   let team = 0;
   return (
-    <section className="flex flex-col gap-2" data-testid="sentiment-by-group">
-      <h2>{t("title")}</h2>
-      {children}
-      {rows.length === 0 ? (
-        <p className="text-sm text-muted-foreground">{tq("empty")}</p>
-      ) : (
-        <SentimentBars
-          label={t("chart")}
-          firstColumn={t("label")}
-          rows={rows.map((r) => {
-            const name =
-              r.label ??
-              (r.key === null ? t("unassigned") : t("team", { n: ++team }));
-            return {
-              ...r,
-              key: r.key ?? "unassigned",
-              label: `${name} · ${t("people", { n: r.participants })}`,
-            };
-          })}
-        />
-      )}
-    </section>
+    <ChartFrame
+      id="sentiment-by-group"
+      title={t("title")}
+      howToRead={t("how")}
+      meta={tc("metaN", { n: totalOf(rows) })}
+      actions={children}
+      empty={rows.length === 0 ? tq("empty") : null}
+    >
+      <SentimentBars
+        sorted
+        label={t("chart")}
+        firstColumn={t("label")}
+        rows={rows.map((r) => {
+          const name =
+            r.label ??
+            (r.key === null ? t("unassigned") : t("team", { n: ++team }));
+          return {
+            ...r,
+            key: r.key ?? "unassigned",
+            label: `${name} · ${t("people", { n: r.participants })}`,
+          };
+        })}
+      />
+    </ChartFrame>
   );
 }
 
 export function Trend({ points }: { points: TrendPoint[] }) {
   const t = useTranslations("Qualitative");
+  const tc = useTranslations("Charts");
   return (
-    <section className="flex flex-col gap-2">
-      <h2>{t("trend.title")}</h2>
-      {points.length === 0 ? (
-        <p className="text-sm text-muted-foreground">{t("empty")}</p>
-      ) : (
-        <SentimentBars
-          label={t("trend.chart")}
-          firstColumn={t("trend.label")}
-          rows={points.map((p) => ({
-            ...p,
-            key: p.cycleId,
-            label: p.cycleName,
-          }))}
-        />
-      )}
-    </section>
+    <ChartFrame
+      id="sentiment-trend"
+      title={t("trend.title")}
+      howToRead={t("trend.how")}
+      meta={tc("metaN", { n: totalOf(points) })}
+      empty={points.length === 0 ? t("empty") : null}
+    >
+      <SentimentBars
+        label={t("trend.chart")}
+        firstColumn={t("trend.label")}
+        rows={points.map((p) => ({
+          ...p,
+          key: p.cycleId,
+          label: p.cycleName,
+        }))}
+      />
+    </ChartFrame>
   );
 }
 

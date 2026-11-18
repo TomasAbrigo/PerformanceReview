@@ -32,7 +32,7 @@ test("People see the distribution, the risk matrix and the alerts of an imported
 
   // Distribution of retention by area: a histogram per group and the total.
   const distribution = page.getByRole("region", {
-    name: "Distribución de Retención",
+    name: "¿Qué grupos tienen las respuestas más bajas de retención?",
   });
   await expect(
     distribution.getByTestId("indicator-histogram").first(),
@@ -41,26 +41,28 @@ test("People see the distribution, the risk matrix and the alerts of an imported
     await distribution.getByTestId("indicator-histogram").count(),
   ).toBeGreaterThan(1);
   await expect(
-    distribution.getByRole("img", { name: /^Todos: valor 1: \d+, valor 2/ }),
+    distribution
+      .getByRole("img", { name: /^Todos · valor \d: \d+ \(/ })
+      .first(),
   ).toBeVisible();
 
   // The same for engagement.
   await page.locator('select[name="indicator"]').selectOption("engagement");
   await applyFilters(page);
   const engagement = page.getByRole("region", {
-    name: "Distribución de Compromiso",
+    name: "¿Qué grupos tienen las respuestas más bajas de compromiso?",
   });
   await expect(engagement).toBeVisible();
 
   // The matrix counts the people who have both indicators.
   const matrix = page.getByRole("region", {
-    name: "Matriz de retención y compromiso",
+    name: "¿Cuántas personas tienen retención y compromiso bajos a la vez?",
   });
   await expect(matrix.getByTestId("matrix-summary")).toContainText(
     /[1-9]\d* personas? con ambos indicadores/,
   );
   await expect(
-    matrix.getByRole("img", { name: /^Matriz de retención y compromiso: / }),
+    matrix.getByRole("group", { name: "Matriz de retención y compromiso" }),
   ).toBeVisible();
   await expect(matrix.getByTestId("risk-list")).toBeVisible();
 
@@ -95,7 +97,7 @@ test("People see the distribution, the risk matrix and the alerts of an imported
     }),
   ).toBeVisible();
   await expect(
-    page.getByRole("img", {
+    page.getByRole("group", {
       name: /^Compromiso por ciclo, toda la organización: /,
     }),
   ).toBeVisible();
@@ -129,7 +131,7 @@ test("a manager sees only their direct reports; an employee is forbidden", async
     ),
   ).toBeVisible();
   const distribution = page.getByRole("region", {
-    name: "Distribución de Retención",
+    name: "¿Qué grupos tienen las respuestas más bajas de retención?",
   });
   await expect(
     distribution.getByTestId("indicator-histogram").first(),
@@ -158,7 +160,9 @@ test("direction reads aggregates only: no people anywhere", async ({
     ),
   ).toBeVisible();
   await expect(
-    page.getByRole("region", { name: "Distribución de Retención" }),
+    page.getByRole("region", {
+      name: "¿Qué grupos tienen las respuestas más bajas de retención?",
+    }),
   ).toBeVisible();
   await expect(
     page.getByText(

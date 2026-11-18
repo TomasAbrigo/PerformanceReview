@@ -42,6 +42,8 @@
   --color-chart-div-pos: var(--chart-div-pos);
   --color-chart-div-neg: var(--chart-div-neg);
   --color-chart-div-mid: var(--chart-div-mid);
+  --color-chart-div-pos-2: var(--chart-div-pos-2);
+  --color-chart-div-neg-2: var(--chart-div-neg-2);
   --color-chart-sent-positive: var(--chart-sent-positive);
   --color-chart-sent-constructive: var(--chart-sent-constructive);
   --color-chart-sent-neutral: var(--chart-sent-neutral);
@@ -98,10 +100,12 @@
   --chart-div-pos: #006060;
   --chart-div-neg: #a13a3a;
   --chart-div-mid: #ecf6f5;
+  --chart-div-pos-2: #4fb0b0;
+  --chart-div-neg-2: #e0907f;
   --chart-sent-positive: #1e7a4c;
   --chart-sent-constructive: #27a7a7;
-  --chart-sent-neutral: #b2b6b6;
-  --chart-sent-mixed: #a9701b;
+  --chart-sent-neutral: #d9dcdc;
+  --chart-sent-mixed: #c7892a;
   --chart-sent-negative: #a13a3a;
   --background: #fafbfb;
   --foreground: #0f2826;
@@ -143,7 +147,7 @@
 /* Brand dark mode (decks, heroes): kept in step with the kit, no toggle yet. */
 .dark {
   --chart-div-mid: #1b2a2a;
-  --chart-sent-neutral: #b2b6b6;
+  --chart-sent-neutral: #d9dcdc;
   --background: #000d0e;
   --foreground: #f4f9f9;
   --foreground-secondary: #cccccc;

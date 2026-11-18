@@ -1,5 +1,12 @@
 import { useFormatter, useTranslations } from "next-intl";
 import { Meter } from "@/components/insights/parts";
+import {
+  highShare,
+  LIKERT_SWATCH,
+  lowShare,
+  StackedBar100,
+  useChartFormat,
+} from "@/components/charts";
 import { SEGMENT_SWATCH } from "@/components/engagement/segments";
 import { engagementSegments } from "@/modules/engagement/kinds";
 import { SentimentBars } from "@/components/qualitative/sentiment-bars";
@@ -65,46 +72,38 @@ function Tile({
   );
 }
 
-const BAR_W = 28;
-const BAR_H = 60;
-
-/** Counts per value 1-5 as small inline SVG bars. */
+/** Answers 1-5 as one 100% bar (low red to high teal) with the low/high shares written. */
 function CountBars({ counts, label }: { counts: number[]; label: string }) {
-  const max = Math.max(1, ...counts);
+  const tc = useTranslations("Charts");
+  const f = useChartFormat();
+  const n = counts.reduce((a, b) => a + b, 0);
+  const values = ["1", "2", "3", "4", "5"];
   return (
-    <svg
-      role="img"
-      aria-label={label}
-      width={counts.length * (BAR_W + 4)}
-      height={BAR_H + 16}
-    >
-      <title>{label}</title>
-      {counts.map((c, i) => {
-        const h = (c / max) * BAR_H;
-        return (
-          <g key={i}>
-            <rect
-              x={i * (BAR_W + 4)}
-              y={BAR_H - h}
-              width={BAR_W}
-              height={h}
-              rx={3}
-              className="fill-chart-seq"
-            >
-              <title>{`${i + 1}: ${c}`}</title>
-            </rect>
-            <text
-              x={i * (BAR_W + 4) + BAR_W / 2}
-              y={BAR_H + 12}
-              textAnchor="middle"
-              className="fill-muted-foreground text-[10px]"
-            >
-              {i + 1}
-            </text>
-          </g>
-        );
-      })}
-    </svg>
+    <div className="flex flex-col gap-1">
+      <StackedBar100
+        compact
+        label={label}
+        series={values.map((v, i) => ({
+          key: v,
+          label: v,
+          fill: LIKERT_SWATCH[i],
+          ink: "",
+        }))}
+        rows={[
+          {
+            key: "all",
+            label,
+            values: Object.fromEntries(values.map((v, i) => [v, counts[i]])),
+          },
+        ]}
+      />
+      {n ? (
+        <p className="text-xs text-muted-foreground tabular-nums">
+          {tc("likert.low")} {f.share(lowShare(counts))} · {tc("likert.high")}{" "}
+          {f.share(highShare(counts))}
+        </p>
+      ) : null}
+    </div>
   );
 }
 
@@ -118,12 +117,13 @@ function IndicatorTile({
   min: number | null;
 }) {
   const t = useTranslations("Insights.Executive");
+  const f = useChartFormat();
   return (
     <Tile title={t(which)} testId={`exec-${which}`}>
       {data ? (
         <>
           <div className="stat-value">
-            {data.mean === null ? "—" : data.mean.toFixed(2)}
+            {data.mean === null ? "—" : f.decimal(data.mean)}
           </div>
           <div className="text-sm text-muted-foreground">
             {t("n", { n: data.n })}
