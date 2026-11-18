@@ -23,11 +23,24 @@ test.beforeAll(async () => {
 
 const plural = (n: number) => (n === 1 ? "1 goal" : `${n} goals`);
 
+test("the list opens on the latest cycle, most urgent first, and its KPIs filter it", async ({
+  page,
+}) => {
+  await page.goto("/es/goals");
+  const filters = page.getByRole("form", { name: "Filtros de goals" });
+  await expect(filters.locator('select[name="cycle"]')).not.toHaveValue("all");
+  await page
+    .getByRole("region", { name: "Para revisar" })
+    .getByRole("link")
+    .click();
+  await expect(page).toHaveURL(/state=overdue/);
+});
+
 test("People list every goal, filter them and page through them", async ({
   page,
 }) => {
   test.setTimeout(120_000);
-  await page.goto("/es/goals");
+  await page.goto("/es/goals?cycle=all");
   await expect(
     page.getByRole("heading", { level: 1, name: "Objetivos" }),
   ).toBeVisible();
@@ -54,7 +67,7 @@ test("People list every goal, filter them and page through them", async ({
   ).toHaveAttribute("aria-current", "true");
 
   // By the goals of a cycle's snapshot.
-  await page.goto("/es/goals");
+  await page.goto("/es/goals?cycle=all");
   await filters
     .locator('select[name="cycle"]')
     .selectOption({ label: subject.cycleName });
@@ -65,9 +78,8 @@ test("People list every goal, filter them and page through them", async ({
   ).toHaveText(plural(await cycleGoalCount(subject.cycleId)));
 
   // By person.
-  await page.goto("/es/goals");
-  await filters.getByText("Más filtros", { exact: true }).click();
-  await filters.getByLabel("Persona").fill(subject.personName);
+  await page.goto("/es/goals?cycle=all");
+  await filters.getByLabel("Buscar").fill(subject.personName);
   await filters.getByRole("button", { name: "Aplicar" }).click();
   await expect(page).toHaveURL(/q=/);
   const own = await goalCount(subject.personId);
@@ -77,7 +89,7 @@ test("People list every goal, filter them and page through them", async ({
   await expect(rows.getByText(subject.personName)).toHaveCount(own);
 
   // Paging: the first page is full, the next one has others.
-  await page.goto("/es/goals");
+  await page.goto("/es/goals?cycle=all");
   await expect(page.getByText(/^Página 1 de \d+$/)).toBeVisible();
   const first = await rows.getByRole("article").first().innerText();
   await page.getByRole("link", { name: "Siguiente" }).click();
@@ -109,10 +121,9 @@ test("a goal's page shows its summary, milestones and comments, and leads to the
   page,
 }) => {
   test.setTimeout(120_000);
-  await page.goto("/es/goals");
+  await page.goto("/es/goals?cycle=all");
   const filters = page.getByRole("form", { name: "Filtros de goals" });
-  await filters.getByText("Más filtros", { exact: true }).click();
-  await filters.getByLabel("Persona").fill(goal.personName);
+  await filters.getByLabel("Buscar").fill(goal.personName);
   await filters.getByRole("button", { name: "Aplicar" }).click();
   await page
     .getByRole("group", { name: "Lista de goals" })
@@ -148,14 +159,15 @@ test("an employee only sees their own goals", async ({ page }) => {
   test.setTimeout(120_000);
   await page.goto("/es");
   await actAsCookie(page, { personId: subject.personId, role: "employee" });
-  await page.goto("/es/goals");
+  await page.goto("/es/goals?cycle=all");
   const own = await goalCount(subject.personId);
   await expect(
     page.getByTestId("goals-list").getByRole("heading", { level: 2 }).first(),
   ).toHaveText(plural(own));
-  // Themself only: no person search.
+  // Themself only: the search is by title, no team cuts.
   const filters = page.getByRole("form", { name: "Filtros de goals" });
-  await expect(filters.getByLabel("Persona")).toHaveCount(0);
+  await expect(filters.getByPlaceholder("Título del objetivo")).toBeVisible();
+  await expect(filters.getByText("Más filtros")).toHaveCount(0);
   const rows = page.getByRole("group", { name: "Lista de goals" });
   await expect(rows.getByRole("article")).toHaveCount(own);
 
@@ -180,17 +192,16 @@ test("a manager sees their team's goals and not other people's", async ({
   expect(subject.managerId).not.toBeNull();
   await page.goto("/es");
   await actAsCookie(page, { personId: subject.managerId, role: "manager" });
-  await page.goto("/es/goals");
+  await page.goto("/es/goals?cycle=all");
   const filters = page.getByRole("form", { name: "Filtros de goals" });
-  await filters.getByText("Más filtros", { exact: true }).click();
-  await filters.getByLabel("Persona").fill(subject.personName);
+  await filters.getByLabel("Buscar").fill(subject.personName);
   await filters.getByRole("button", { name: "Aplicar" }).click();
   const rows = page.getByRole("group", { name: "Lista de goals" });
   await expect(rows.getByRole("article").first()).toContainText(
     subject.personName,
   );
   // The whole company's goals are not theirs.
-  await page.goto("/es/goals");
+  await page.goto("/es/goals?cycle=all");
   const total = await allGoalCount();
   await expect(
     page.getByTestId("goals-list").getByRole("heading", { level: 2 }).first(),

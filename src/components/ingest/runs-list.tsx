@@ -125,7 +125,8 @@ export function RunsList({
       {runs.length === 0 ? (
         <EmptyState>{hasFilters ? t("emptyFiltered") : t("empty")}</EmptyState>
       ) : (
-        <CardCollection gridClassName="record-grid">
+        // The page is already paged (25): every run of it is shown.
+        <CardCollection gridClassName="record-grid" initialCount={runs.length}>
           {runs.map((run) => (
             <article key={run.id} className="record-card">
               <header className="flex items-center justify-between gap-3">

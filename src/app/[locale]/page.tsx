@@ -37,7 +37,10 @@ async function HomeNav() {
           className="flex flex-col gap-2"
         >
           <h2 id={`home-group-${group.key}`} className="kicker">
-            {group.title}
+            {/* A primary group is its one entry ("Mis objetivos" for an employee). */}
+            {group.primary && group.items.length === 1
+              ? group.items[0].label
+              : group.title}
           </h2>
           <ul className="flex flex-col">
             {group.items.map((item) => (
