@@ -4,9 +4,7 @@ export {
   cloneTemplate,
   createScale,
   createTemplate,
-  deleteQuestion,
   deleteScale,
-  deleteSection,
   deleteTemplate,
   getTemplate,
   listScales,
@@ -14,7 +12,6 @@ export {
   normalizeValues,
   reorder,
   updateQuestion,
-  updateSection,
   updateTemplate,
   type ScaleWithOptions,
   type SectionWithQuestions,
@@ -24,7 +21,6 @@ export { seedSystemTemplates, SYSTEM_SCALES } from "./seed";
 export { TemplatesError, type FieldIssue } from "./errors";
 export type {
   QuestionInput,
-  ScaleInput,
   SectionInput,
   TemplateInput,
   TemplateUpdateInput,

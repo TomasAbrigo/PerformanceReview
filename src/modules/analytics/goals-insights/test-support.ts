@@ -41,7 +41,7 @@ export type TestCycle = {
 };
 
 /** A closed cycle with the two indicator questions (manager) and a text one (both). */
-export async function insertCycle(c: {
+async function insertCycle(c: {
   name: string;
   periodStart: string;
   periodEnd: string;

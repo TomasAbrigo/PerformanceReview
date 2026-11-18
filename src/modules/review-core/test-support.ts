@@ -2,10 +2,9 @@
  * Test-only builders of review data (db tests). The app no longer runs the
  * review flow (#54): cycles, requests and answers arrive through the
  * historical import. These helpers write the same rows directly, so the
- * read side (visibility, history, dashboards, API, exports) can be tested on
+ * read side (visibility, dashboards, API, exports) can be tested on
  * native-looking cycles too.
  */
-import { randomUUID } from "node:crypto";
 import { cp, mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
@@ -26,7 +25,6 @@ import {
   reviewTemplate,
   templateSection,
 } from "@/db/schema";
-import type { ActorContext } from "@/modules/actor/types";
 import { FixtureAdapter, runIngest } from "@/modules/ingest";
 import { listTemplates, seedSystemTemplates } from "@/modules/templates";
 import type { Relationship } from "@/modules/templates/constants";
@@ -49,14 +47,6 @@ const FIXTURES = path.resolve("src/modules/bamboo-client/__fixtures__");
  * and Ana to nobody; from 2023 Bruno reports to Ana.
  */
 export const people = { ana: "", bruno: "", carla: "" };
-
-export const hr: ActorContext = { personId: null, role: "hr" };
-export const as = (
-  personId: string,
-  role: ActorContext["role"] = "employee",
-): ActorContext => ({ personId, role });
-/** Someone with no relation to anybody's reviews. */
-export const outsider = () => as(randomUUID());
 
 export async function resetDb() {
   await db.execute(
@@ -288,29 +278,6 @@ export async function addRequest(
   return row.id;
 }
 
-/** The revisions of a cycle (every relationship), in order. */
-export const revisions = (cycleId: string) =>
-  db
-    .select()
-    .from(questionRevision)
-    .where(eq(questionRevision.cycleId, cycleId))
-    .orderBy(questionRevision.sort);
-
-/** Makes the cycle's revisions matching `pick` apply to both self and manager. */
-export async function askBoth(
-  cycleId: string,
-  pick: (q: QuestionRevision) => boolean,
-) {
-  const matching = (await revisions(cycleId)).filter(pick);
-  for (const q of matching) {
-    await db
-      .update(questionRevision)
-      .set({ appliesTo: ["self", "manager"] })
-      .where(eq(questionRevision.id, q.id));
-  }
-  return matching;
-}
-
 /** Default valid answer of a question (the first option / a text). */
 export function defaultAnswer(q: QuestionRevision): AnswerValue {
   if (q.kind === "rating") return q.scale!.options[0].value;
@@ -423,69 +390,4 @@ export async function setStatus(cycleId: string, status: CycleStatus) {
     .update(reviewCycle)
     .set({ status })
     .where(eq(reviewCycle.id, cycleId));
-}
-
-/** Shares a manager review with the reviewee. */
-export async function share(requestId: string, at: Date = new Date()) {
-  await db
-    .update(reviewRequest)
-    .set({ sharedAt: at })
-    .where(eq(reviewRequest.id, requestId));
-}
-
-/** Marks a cycle's calibration as published. */
-export async function publish(cycleId: string, at: Date = new Date()) {
-  await db
-    .update(reviewCycle)
-    .set({ calibrationPublishedAt: at })
-    .where(eq(reviewCycle.id, cycleId));
-}
-
-/** Bruno's cycle (collecting) with a template: his self and Carla's manager request. */
-export const collectingCycle = (
-  templateId: string,
-  overrides: Partial<TestCycleInput> = {},
-) =>
-  createTestCycle({
-    templateId,
-    dueDates: { self: "2022-07-15", manager: "2022-07-30" },
-    personIds: [people.bruno],
-    ...overrides,
-  });
-
-export async function submitSelf(
-  cycleId: string,
-  pick?: (q: QuestionRevision) => AnswerValue | undefined,
-) {
-  const p = await participantOf(cycleId, people.bruno);
-  const id = await requestIdOf(p.id, "self");
-  await answerRequest(id, pick);
-  return id;
-}
-
-export async function submitManager(
-  cycleId: string,
-  pick?: (q: QuestionRevision) => AnswerValue | undefined,
-) {
-  const p = await participantOf(cycleId, people.bruno);
-  const id = await requestIdOf(p.id, "manager");
-  await answerRequest(id, pick);
-  return { requestId: id, participantId: p.id };
-}
-
-/** Both of Bruno's reviews submitted, the cycle in sharing and the manager review shared. */
-export async function sharedCycle(
-  templateId: string,
-  overrides: Partial<TestCycleInput> = {},
-  pick?: {
-    self?: (q: QuestionRevision) => AnswerValue | undefined;
-    manager?: (q: QuestionRevision) => AnswerValue | undefined;
-  },
-) {
-  const cycle = await collectingCycle(templateId, overrides);
-  await submitSelf(cycle.id, pick?.self);
-  const manager = await submitManager(cycle.id, pick?.manager);
-  await setStatus(cycle.id, "sharing");
-  await share(manager.requestId);
-  return { cycle, ...manager };
 }

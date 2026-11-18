@@ -18,10 +18,8 @@ import {
   addRating,
   answerRequest,
   createTestCycle,
-  publish,
   requestIdOf,
   setStatus,
-  share,
   type TestCycleInput,
 } from "@/modules/review-core/test-support";
 import { setSetting } from "@/modules/settings";
@@ -38,8 +36,6 @@ import {
   dashboardFilterOptions,
   executiveSummary,
   goalsVsRating,
-  managerTeam,
-  personTrajectory,
   ratingDistribution,
   selfManagerGap,
 } from ".";
@@ -445,119 +441,6 @@ describe("ratingDistribution", () => {
   });
 });
 
-describe("personTrajectory", () => {
-  it("lists each cycle with the normalized rating, manager and title of the moment", async () => {
-    const { cycle } = await h1();
-    const c2 = await h2024();
-    const t = await personTrajectory(db, hr, bruno);
-    expect(t.personName).toBe("Bruno Pérez");
-    expect(
-      t.points.map((p) => [
-        p.cycleId,
-        close(p.normalized),
-        p.stage,
-        p.managerName,
-        p.jobTitle,
-      ]),
-    ).toEqual([
-      [cycle.id, close(2 / 3), "calibrated", "Carla Romero", "Developer"],
-      [c2.id, close(1), "manager", "Ana García", "Senior Developer"],
-    ]);
-  });
-
-  it("applies visibility: own (published only), manager by team, others forbidden", async () => {
-    const { cycle } = await h1();
-    const c2 = await h2024();
-    const own = await personTrajectory(db, as(bruno), bruno);
-    expect(own.points.map((p) => p.normalized)).toEqual([null, null]);
-    const carlaView = await personTrajectory(db, as(carla, "manager"), bruno);
-    expect(carlaView.points.map((p) => p.cycleId)).toEqual([cycle.id]);
-    const anaView = await personTrajectory(db, as(ana, "manager"), bruno);
-    expect(anaView.points.map((p) => p.cycleId)).toEqual([cycle.id, c2.id]);
-    await expect(personTrajectory(db, as(carla), bruno)).rejects.toMatchObject({
-      code: "forbidden",
-    });
-  });
-});
-
-describe("personTrajectory (own view)", () => {
-  it("shows the own rating only once published AND shared, never the stage", async () => {
-    const { cycle } = await h1();
-    await publish(cycle.id);
-    let own = await personTrajectory(db, as(bruno), bruno);
-    expect(own.points[0].normalized).toBeNull();
-    await setStatus(cycle.id, "sharing");
-    for (const p of [bruno, carla]) {
-      const { id } = await participantOf(cycle.id, p);
-      await share(await requestIdOf(id, "manager"));
-    }
-    own = await personTrajectory(db, as(bruno), bruno);
-    expect(close(own.points[0].normalized)).toBe(close(2 / 3));
-    expect(own.points[0].stage).toBeNull();
-  });
-});
-
-describe("managerTeam", () => {
-  it("as-of vs current changes the subtree (recursive)", async () => {
-    const { cycle } = await h1();
-    const asOf = await managerTeam(db, hr, {
-      managerId: carla,
-      cycleId: cycle.id,
-      hierarchy: "asOf",
-    });
-    expect(
-      asOf.members.map((m) => [m.name, m.depth, close(m.normalized)]),
-    ).toEqual([["Bruno Pérez", 1, close(2 / 3)]]);
-    const now = await managerTeam(db, hr, {
-      managerId: carla,
-      cycleId: cycle.id,
-      hierarchy: "current",
-    });
-    expect(now.members).toEqual([]);
-    const ana1 = await managerTeam(db, hr, {
-      managerId: ana,
-      cycleId: cycle.id,
-      hierarchy: "asOf",
-    });
-    expect(ana1.members.map((m) => [m.name, m.depth])).toEqual([
-      ["Carla Romero", 1],
-      ["Bruno Pérez", 2],
-    ]);
-    const ana2 = await managerTeam(db, hr, {
-      managerId: ana,
-      cycleId: cycle.id,
-      hierarchy: "current",
-    });
-    expect(ana2.members.map((m) => [m.name, m.depth])).toEqual([
-      ["Bruno Pérez", 1],
-    ]);
-  });
-
-  it("a manager can only open their own team, not a sub-team", async () => {
-    const { cycle } = await h1();
-    await expect(
-      managerTeam(db, as(carla, "manager"), {
-        managerId: ana,
-        cycleId: cycle.id,
-        hierarchy: "asOf",
-      }),
-    ).rejects.toMatchObject({ code: "forbidden" });
-    // Ana manages Carla, who manages Bruno: Carla's team is closed to Ana.
-    await expect(
-      managerTeam(db, as(ana, "manager"), {
-        managerId: carla,
-        cycleId: cycle.id,
-        hierarchy: "asOf",
-      }),
-    ).rejects.toMatchObject({ code: "forbidden" });
-    const own = await managerTeam(db, as(carla, "manager"), {
-      cycleId: cycle.id,
-      hierarchy: "asOf",
-    });
-    expect(own.members.map((m) => m.name)).toEqual(["Bruno Pérez"]);
-  });
-});
-
 describe("goalsVsRating", () => {
   it("joins the goal snapshot of the period with the final rating", async () => {
     const { cycle, pb } = await h1();
@@ -798,44 +681,6 @@ describe("manager scope: direct reports of the snapshot", () => {
     });
     expect(options.managers).toEqual([{ id: carla, name: "Carla Romero" }]);
   });
-
-  it("the team of a manager is their direct reports; People see the whole subtree", async () => {
-    const { cycle } = await h1WithDora();
-    const mgr = await managerTeam(db, as(ana, "manager"), {
-      cycleId: cycle.id,
-      hierarchy: "asOf",
-    });
-    expect(mgr.members.map((m) => [m.name, m.depth])).toEqual([
-      ["Carla Romero", 1],
-      ["Dora Díaz", 1],
-    ]);
-    const all = await managerTeam(db, hr, {
-      managerId: ana,
-      cycleId: cycle.id,
-      hierarchy: "asOf",
-    });
-    expect(all.members.map((m) => [m.name, m.depth])).toEqual([
-      ["Carla Romero", 1],
-      ["Dora Díaz", 1],
-      ["Bruno Pérez", 2],
-    ]);
-  });
-
-  it("a trajectory is open to the manager of the person at the snapshot or today, not to a skip-level", async () => {
-    await h1WithDora();
-    const dora = await idOf("Dora Díaz");
-    // Carla managed Bruno in 2022; Dora reported to Ana: Carla sees only
-    // the first.
-    expect(
-      (await personTrajectory(db, as(carla, "manager"), bruno)).points,
-    ).toHaveLength(1);
-    await expect(
-      personTrajectory(db, as(carla, "manager"), dora),
-    ).rejects.toMatchObject({ code: "forbidden" });
-    expect(
-      (await personTrajectory(db, as(ana, "manager"), dora)).points,
-    ).toHaveLength(1);
-  });
 });
 
 describe("authorization by role", () => {
@@ -890,19 +735,6 @@ describe("authorization by role", () => {
         dashboardFilterOptions(db, a, { cycleId, hierarchy: "asOf" }),
     },
     {
-      query: "managerTeam (own team)",
-      run: (cycleId) => (a) =>
-        managerTeam(db, a, {
-          managerId: a.personId ?? carla,
-          cycleId,
-          hierarchy: "asOf",
-        }),
-    },
-    {
-      query: "personTrajectory (a report)",
-      run: () => (a) => personTrajectory(db, a, bruno),
-    },
-    {
       query: "executiveSummary",
       run: (cycleId) => (a) => executiveSummary(db, a, { cycleId }),
     },
@@ -930,21 +762,6 @@ describe("authorization by role", () => {
         });
       }
     }
-  });
-
-  it("an employee reads their own trajectory (never the stage), nobody else's", async () => {
-    await h1();
-    expect(
-      (await personTrajectory(db, as(bruno), bruno)).points.every(
-        (p) => p.stage === null,
-      ),
-    ).toBe(true);
-    await expect(personTrajectory(db, as(ana), bruno)).rejects.toMatchObject({
-      code: "forbidden",
-    });
-    await expect(personTrajectory(db, direction, bruno)).rejects.toMatchObject({
-      code: "forbidden",
-    });
   });
 });
 

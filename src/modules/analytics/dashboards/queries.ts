@@ -13,14 +13,7 @@ import {
 import { ReviewError } from "@/modules/review-core/review-errors";
 import { getSetting } from "@/modules/settings/service";
 import type { Relationship } from "@/modules/templates/constants";
-import {
-  ALL_PEOPLE,
-  isHr,
-  ratingCte,
-  requirePeopleScope,
-  scopedCtes,
-  subtree,
-} from "./scope";
+import { ALL_PEOPLE, ratingCte, requirePeopleScope, scopedCtes } from "./scope";
 import {
   BIN_COUNT,
   binOf,
@@ -30,9 +23,6 @@ import {
   type ExecutiveSummary,
   type GoalsVsRatingRow,
   type GroupBy,
-  type Hierarchy,
-  type ManagerTeam,
-  type PersonTrajectory,
   type RatingDistribution,
   type RatingStage,
   type SelfManagerGap,
@@ -164,158 +154,6 @@ export async function ratingDistribution(
     series.set(id, s);
   }
   return { bins, series: [...series.values()], total };
-}
-
-/**
- * One person's trajectory across cycles: normalized current rating, with
- * the manager, title and area frozen at each cycle's snapshot. HR: all;
- * managers: the cycles where the person was their direct report at the
- * snapshot, or is now (never a skip-level report); direction: nobody (it only
- * reads aggregates); the person themself: every cycle, rating only once their
- * manager review is shared and calibration published (the result page's
- * gate), never the stage.
- */
-export async function personTrajectory(
-  db: DbOrTx,
-  actor: ActorContext,
-  personId: string,
-): Promise<PersonTrajectory> {
-  if (!isUuid(personId)) throw new ReviewError("not_found");
-  const [p] = await db.execute<{ name: string }>(
-    sql`select display_name as name from person where id = ${personId}::uuid`,
-  );
-  if (!p) throw new ReviewError("not_found");
-  const own = actor.personId === personId;
-  let scope = sql`true`;
-  if (!isHr(actor) && !own) {
-    const people = requirePeopleScope(actor);
-    if (people.kind === "directReports") {
-      const manager = people.managerPersonId;
-      scope = sql`(cp.snap_manager_person_id = ${manager}::uuid
-        or (select h.manager_person_id from employee_job_history h
-            where h.person_id = cp.reviewee_person_id and h.deleted_at is null
-              and h.valid_to is null order by h.valid_from desc limit 1)
-           = ${manager}::uuid)`;
-    }
-  }
-  const hide = !isHr(actor) && own;
-  const rows = await db.execute<{
-    cycle_id: string;
-    cycle_name: string;
-    period_end: string;
-    normalized: number | null;
-    option_label: string | null;
-    stage: string | null;
-    manager_name: string | null;
-    job_title: string | null;
-    department: string | null;
-    published: boolean;
-  }>(sql`
-    select c.id as cycle_id, c.name as cycle_name, c.period_end::text as period_end,
-           v.normalized::float8 as normalized, v.option_label, v.stage::text as stage,
-           m.display_name as manager_name, cp.snap_job_title as job_title,
-           cp.snap_department as department,
-           (c.calibration_published_at is not null and exists (
-             select 1 from review_request r where r.participant_id = cp.id
-               and r.relationship = 'manager' and r.status = 'submitted'
-               and r.deleted_at is null and r.shared_at is not null)) as published
-    from cycle_participant cp
-    join review_cycle c on c.id = cp.cycle_id
-    left join person m on m.id = cp.snap_manager_person_id
-    left join v_current_rating v on v.participant_id = cp.id
-    where cp.reviewee_person_id = ${personId}::uuid and cp.removed_at is null
-      and c.status <> 'draft' and ${scope}
-    order by c.period_end, c.name`);
-  if (!rows.length && !isHr(actor) && !own) throw new ReviewError("forbidden");
-  return {
-    personId,
-    personName: p.name,
-    points: rows.map((r) => {
-      const visible = !hide || r.published;
-      return {
-        cycleId: r.cycle_id,
-        cycleName: r.cycle_name,
-        periodEnd: r.period_end,
-        normalized: visible ? r.normalized : null,
-        optionLabel: visible ? r.option_label : null,
-        // The stage (manager / calibrated / override) is internal.
-        stage: hide ? null : r.stage,
-        managerName: r.manager_name,
-        jobTitle: r.job_title,
-        department: r.department,
-      };
-    }),
-  };
-}
-
-/**
- * A manager's team on the cycle snapshot date (asOf) or today (current), with
- * each member's current rating in the cycle. People read the whole subtree of
- * any manager (recursive CTE over job history); a manager only their own
- * direct reports.
- */
-export async function managerTeam(
-  db: DbOrTx,
-  actor: ActorContext,
-  f: { managerId?: string; cycleId?: string; hierarchy: Hierarchy },
-): Promise<ManagerTeam> {
-  const scope = requirePeopleScope(actor);
-  const managerId = f.managerId ?? actor.personId;
-  if (!managerId || !isUuid(managerId)) throw new ReviewError("not_found");
-  let date = sql`current_date`;
-  let cycleId: string | null = null;
-  if (f.cycleId) {
-    cycleId = requireCycle(f.cycleId);
-    if (f.hierarchy === "asOf") {
-      date = sql`(select snapshot_date from review_cycle where id = ${cycleId}::uuid)`;
-    }
-  } else if (f.hierarchy === "asOf") {
-    throw new ReviewError("not_found");
-  }
-  if (scope.kind === "directReports" && managerId !== scope.managerPersonId) {
-    throw new ReviewError("forbidden");
-  }
-  const maxDepth = scope.kind === "all" ? 50 : 1;
-  const rows = await db.execute<{
-    person_id: string;
-    name: string;
-    depth: number;
-    job_title: string | null;
-    department: string | null;
-    participant_id: string | null;
-    normalized: number | null;
-  }>(sql`
-    with recursive sub as (${subtree(managerId, date, maxDepth)}),
-    members as (select person_id, min(depth) as depth from sub group by person_id)
-    select m.person_id, p.display_name as name, m.depth::int as depth,
-           h.job_title, h.department, cp.id as participant_id,
-           v.normalized::float8 as normalized
-    from members m
-    join person p on p.id = m.person_id
-    left join lateral (
-      select h.job_title, h.department from employee_job_history h
-      where h.person_id = m.person_id and h.deleted_at is null
-        and h.valid_from <= ${date} and (h.valid_to is null or h.valid_to > ${date})
-      order by h.valid_from desc limit 1
-    ) h on true
-    left join cycle_participant cp on cp.reviewee_person_id = m.person_id
-      and cp.removed_at is null
-      and ${cycleId ? sql`cp.cycle_id = ${cycleId}::uuid` : sql`false`}
-    left join v_current_rating v on v.participant_id = cp.id
-    order by m.depth, p.display_name`);
-  return {
-    managerId,
-    hierarchy: f.hierarchy,
-    members: rows.map((r) => ({
-      personId: r.person_id,
-      name: r.name,
-      depth: r.depth,
-      jobTitle: r.job_title,
-      department: r.department,
-      participantId: r.participant_id,
-      normalized: r.normalized,
-    })),
-  };
 }
 
 /** Goals of the period (the cycle's goal snapshot) vs the current rating. */

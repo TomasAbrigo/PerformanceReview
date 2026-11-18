@@ -76,38 +76,6 @@ export type RatingDistribution = {
   total: number[];
 };
 
-export type TrajectoryPoint = {
-  cycleId: string;
-  cycleName: string;
-  periodEnd: string;
-  normalized: number | null;
-  optionLabel: string | null;
-  stage: string | null;
-  managerName: string | null;
-  jobTitle: string | null;
-  department: string | null;
-};
-export type PersonTrajectory = {
-  personId: string;
-  personName: string;
-  points: TrajectoryPoint[];
-};
-
-export type TeamMember = {
-  personId: string;
-  name: string;
-  depth: number;
-  jobTitle: string | null;
-  department: string | null;
-  participantId: string | null;
-  normalized: number | null;
-};
-export type ManagerTeam = {
-  managerId: string;
-  hierarchy: Hierarchy;
-  members: TeamMember[];
-};
-
 export type GoalsVsRatingRow = {
   participantId: string;
   personId: string;

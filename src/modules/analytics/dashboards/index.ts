@@ -4,8 +4,6 @@ export {
   type FilterOptions,
   executiveSummary,
   goalsVsRating,
-  managerTeam,
-  personTrajectory,
   ratingDistribution,
   selfManagerGap,
 } from "./queries";

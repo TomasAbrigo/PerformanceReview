@@ -34,7 +34,7 @@ export const activeEmploymentCteOn = (date?: string) => {
 };
 
 /** The same, as of today in the database. */
-export const activeEmploymentCte = activeEmploymentCteOn();
+const activeEmploymentCte = activeEmploymentCteOn();
 
 /** Bamboo ids of the employees that are active today in `source`, ascending. */
 export async function listActiveEmployeeIds(
