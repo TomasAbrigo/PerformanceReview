@@ -13,6 +13,7 @@ import type {
   RunListFilters,
   RunListItem,
 } from "@/modules/ingest/runs-queries";
+import { RunOutcome } from "./run-outcome";
 import { RunStatusBadge } from "./run-status-badge";
 import { useRunFormat } from "./use-run-format";
 
@@ -144,6 +145,7 @@ export function RunsList({
               <p className="text-xs text-muted-foreground">
                 {run.sourceSystem ?? "—"} · {run.entity} · {run.adapter ?? "—"}
               </p>
+              <RunOutcome counts={run.counts} compact />
               <dl className="record-facts">
                 {INGEST_COUNT_KEYS.map((k) => (
                   <div key={k}>

@@ -319,6 +319,15 @@
         "rejectReason": "Motivo",
         "noRejects": "Esta corrida no tuvo rechazos ni incidencias.",
         "noSourceId": "Sin ID de origen"
+      },
+      "outcome": {
+        "label": "{read} filas leídas: {parts}",
+        "nothing": "No leyó filas."
+      },
+      "recent": {
+        "title": "Últimas importaciones",
+        "all": "Ver todas",
+        "read": "{n} filas leídas"
       }
     }
   },
@@ -941,7 +950,17 @@
         "unknown": "No se pudo reanudar la importación."
       }
     },
-    "periodCycleName": "Evaluación semestral {start} – {end}"
+    "periodCycleName": "Evaluación semestral {start} – {end}",
+    "totals": {
+      "label": "Totales de la corrida",
+      "rows": "Filas importadas",
+      "cycles": "{count, plural, one {en # ciclo} other {en # ciclos}}",
+      "requests": "Solicitudes nuevas",
+      "answers": "Respuestas nuevas",
+      "unchanged": "{n} sin cambios",
+      "issues": "Casos de identidad",
+      "mismatches": "{n, plural, =0 {Sin evaluador distinto} one {# con evaluador distinto} other {# con evaluador distinto}}"
+    }
   },
   "Charts": {
     "empty": "No hay datos para estos filtros.",

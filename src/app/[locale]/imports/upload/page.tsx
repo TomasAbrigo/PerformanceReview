@@ -10,6 +10,9 @@ import { UploadForm } from "@/components/imports/upload-form";
 import { Link } from "@/i18n/navigation";
 import { routing } from "@/i18n/routing";
 import { listProfiles } from "@/modules/lake/upload-store";
+import { RecentRuns } from "@/components/ingest/recent-runs";
+import { db } from "@/db/client";
+import { listRuns } from "@/modules/ingest/runs-queries";
 import { importUploadAction, inspectUploadAction } from "./actions";
 
 /** Built-in profiles plus the custom ones saved so far (read per request). */
@@ -22,6 +25,13 @@ async function UploadData() {
       actions={{ inspect: inspectUploadAction, importFile: importUploadAction }}
     />
   );
+}
+
+/** What was imported last, beside the form: the page is never a lone box. */
+async function LatestRuns() {
+  await connection();
+  const { runs } = await listRuns(db, { limit: 6 });
+  return <RecentRuns runs={runs} />;
 }
 
 export default function UploadPage(
@@ -55,9 +65,14 @@ async function UploadBody({ params }: PageProps<"/[locale]/imports/upload">) {
           </Link>
         }
       />
-      <Suspense>
-        <UploadData />
-      </Suspense>
+      <div className="grid items-start gap-8 xl:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
+        <Suspense>
+          <UploadData />
+        </Suspense>
+        <Suspense>
+          <LatestRuns />
+        </Suspense>
+      </div>
     </main>
   );
 }

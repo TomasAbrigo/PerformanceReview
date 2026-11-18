@@ -319,6 +319,15 @@
         "rejectReason": "Reason",
         "noRejects": "This run had no rejects or issues.",
         "noSourceId": "No source ID"
+      },
+      "outcome": {
+        "label": "{read} rows read: {parts}",
+        "nothing": "Read no rows."
+      },
+      "recent": {
+        "title": "Latest imports",
+        "all": "See all",
+        "read": "{n} rows read"
       }
     }
   },
@@ -941,7 +950,17 @@
         "unknown": "The import could not be resumed."
       }
     },
-    "periodCycleName": "Semi-annual review {start} – {end}"
+    "periodCycleName": "Semi-annual review {start} – {end}",
+    "totals": {
+      "label": "Run totals",
+      "rows": "Rows imported",
+      "cycles": "{count, plural, one {in # cycle} other {in # cycles}}",
+      "requests": "New requests",
+      "answers": "New answers",
+      "unchanged": "{n} unchanged",
+      "issues": "Identity cases",
+      "mismatches": "{n, plural, =0 {No reviewer mismatch} one {# with a different reviewer} other {# with a different reviewer}}"
+    }
   },
   "Charts": {
     "empty": "No data for these filters.",
