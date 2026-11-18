@@ -8,6 +8,7 @@ import { insertJob, insertPerson, resetAll } from "../test-support";
 import {
   engagementEvolution,
   engagementFilterOptions,
+  engagementPeople,
   engagementTile,
 } from "./queries";
 
@@ -457,5 +458,48 @@ describe("engagementFilterOptions", () => {
     });
     expect(mgr.org.accounts).toEqual(["Cuenta A"]);
     expect(mgr.departments).toEqual(["Ingeniería"]);
+  });
+});
+
+// ---- quant (#117): the people behind a month (drill-down) ----
+describe("engagementPeople", () => {
+  it("People: the people of a month, of a segment, by name", async () => {
+    await seedData();
+    const all = await engagementPeople(db, hr, { month: JAN, segment: null });
+    expect(all.map((p) => p.name)).toEqual([
+      "Ana Prieto",
+      "Bruno Soler",
+      "Carla Rey",
+      "Diego Paz",
+    ]);
+    expect(all[0]).toMatchObject({
+      department: "Ingeniería",
+      managerName: "Marta Quiroga",
+      score: 0.9,
+      segment: "alto",
+    });
+    const low = await engagementPeople(db, hr, { month: JAN, segment: "bajo" });
+    expect(low.map((p) => p.name)).toEqual(["Diego Paz"]);
+  });
+
+  it("a manager: only their direct reports of that month", async () => {
+    await seedData();
+    const r = await engagementPeople(
+      db,
+      { personId: nora, role: "manager" },
+      { month: JAN, segment: null },
+    );
+    expect(r.map((p) => p.name)).toEqual(["Diego Paz"]);
+  });
+
+  it("an employee is forbidden", async () => {
+    await seedData();
+    await expect(
+      engagementPeople(
+        db,
+        { personId: ana, role: "employee" },
+        { month: JAN, segment: null },
+      ),
+    ).rejects.toBeInstanceOf(ReviewError);
   });
 });

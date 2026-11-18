@@ -65,6 +65,33 @@ test("self-assessment report page renders", async ({ page }) => {
     page.getByRole("heading", { level: 1, name: /Reporte de autoevaluación/ }),
   ).toBeVisible();
   await expect(
-    page.getByRole("group", { name: "Completitud por grupo" }),
+    page.getByRole("list", { name: "Completitud por grupo" }),
   ).toBeVisible();
+});
+
+test("a chart mark opens the records behind it; direction gets no names (#117)", async ({
+  page,
+}) => {
+  await page.goto("/es");
+  await actAs(page, null, "People (RR. HH.)");
+  await page.goto("/es/insights/executive?mode=quantitative");
+  const mark = page.locator('[data-drill^="indicator:"]').first();
+  await mark.click();
+  await expect(page).toHaveURL(/drill=indicator/);
+  const sheet = page.getByRole("dialog");
+  await expect(sheet).toBeVisible();
+  await expect(sheet.getByText("Datos detrás del gráfico")).toBeVisible();
+  await expect(sheet.getByTestId("drill-person").first()).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(page).not.toHaveURL(/drill=/);
+  await expect(page.getByRole("dialog")).toHaveCount(0);
+
+  await actAsRole(page, "Dirección", "Dirección");
+  await page.goto(
+    "/es/insights/executive?mode=quantitative&drill=completion:manager:submitted",
+  );
+  const masked = page.getByRole("dialog");
+  await expect(masked).toBeVisible();
+  await expect(masked.getByText(/nunca nombres/)).toBeVisible();
+  await expect(masked.getByTestId("drill-person")).toHaveCount(0);
 });

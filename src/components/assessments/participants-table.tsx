@@ -1,5 +1,6 @@
 import { ArrowUpRight, ClipboardCheck, UserRound, Users } from "lucide-react";
-import { EmptyState, IconTile } from "@/components/experience";
+import { EmptyState, MetricCard, ProgressRing } from "@/components/experience";
+import { type KpiThresholds, percentTone } from "@/modules/insights/tone";
 import { useTranslations } from "next-intl";
 import { CountChips } from "@/components/count-chips";
 import { Pagination } from "@/components/pagination";
@@ -110,7 +111,7 @@ export function ParticipantsTable({
             ) : null}
             <div
               className={
-                showPeople ? "flex flex-col gap-3" : "grid gap-5 sm:grid-cols-2"
+                showPeople ? "flex flex-col gap-2" : "grid gap-3 sm:grid-cols-2"
               }
             >
               {(
@@ -118,29 +119,26 @@ export function ParticipantsTable({
                   {
                     label: t("table.self"),
                     side: r.self,
-                    icon: <UserRound className="size-5" />,
+                    icon: <UserRound className="size-4" />,
                   },
                   {
                     label: t("table.managerReview"),
                     side: r.managerReview,
-                    icon: <Users className="size-5" />,
+                    icon: <Users className="size-4" />,
                   },
                 ] as const
               ).map(({ label, side, icon }) => (
-                <div key={label} className="assessment-perspective">
-                  <div className="flex items-center justify-between gap-3">
-                    <IconTile>{icon}</IconTile>
-                    <RequestStateChip state={side.state} />
-                  </div>
-                  <h3>{label}</h3>
-                  <div className="flex gap-2" aria-hidden="true">
-                    {[0, 1, 2].map((i) => (
-                      <span
-                        key={i}
-                        className={`h-1.5 flex-1 rounded-full ${side.state === "submitted" ? "bg-brand-600" : side.state === "draft" && i === 0 ? "bg-brand-400" : "bg-brand-200/50"}`}
-                      />
-                    ))}
-                  </div>
+                <div
+                  key={label}
+                  className="flex items-center justify-between gap-3 rounded-lg bg-brand-fog/60 px-3 py-2 text-sm"
+                >
+                  <span className="inline-flex items-center gap-2">
+                    <span className="text-brand-700" aria-hidden="true">
+                      {icon}
+                    </span>
+                    {label}
+                  </span>
+                  <RequestStateChip state={side.state} />
                 </div>
               ))}
             </div>
@@ -161,6 +159,95 @@ export function ParticipantsTable({
           next: t("pagination.next"),
           position: t("pagination.page", { page: page.page, pages }),
         }}
+      />
+    </div>
+  );
+}
+
+/**
+ * The head of the list: the share of participants with both perspectives in
+ * (on its ring, with its tone) and the partial and pending ones as KPIs, each
+ * filtering the list by that progress.
+ */
+export function ProgressOverview({
+  cycleName,
+  counts,
+  thresholds,
+  hrefFor,
+}: {
+  cycleName: string;
+  counts: AssessmentListPage["counts"];
+  thresholds: KpiThresholds;
+  hrefFor: (progress: Progress) => string;
+}) {
+  const t = useTranslations("Assessments");
+  const x = useTranslations("Experience");
+  const total = counts.complete + counts.partial + counts.pending;
+  const pct = (n: number) => (total ? Math.round((n / total) * 100) : 0);
+  const scale = (n: number, label: string) => ({
+    value: pct(n),
+    min: 0,
+    max: 100,
+    label,
+    minLabel: "0 %",
+    maxLabel: "100 %",
+  });
+  const completeTone = total
+    ? percentTone(pct(counts.complete), thresholds)
+    : undefined;
+  return (
+    <div className="overview-grid">
+      <section className="overview-hero" data-tone={completeTone}>
+        <ProgressRing
+          percent={pct(counts.complete)}
+          label={t("overview.complete", { pct: pct(counts.complete) })}
+        />
+        <div className="min-w-0">
+          <h2 className="text-xl">{cycleName}</h2>
+          <p className="mt-2 text-sm text-brand-200">
+            <Link
+              href={hrefFor("complete")}
+              className="text-white underline decoration-dotted underline-offset-4"
+            >
+              {t("overview.completeOf", { done: counts.complete, total })}
+            </Link>
+          </p>
+          {completeTone ? (
+            <span
+              className="tone-pill mt-3 inline-flex"
+              data-tone={completeTone}
+            >
+              {x(`tone.${completeTone}`)}
+            </span>
+          ) : null}
+        </div>
+      </section>
+      <MetricCard
+        label={t("progress.partial")}
+        value={counts.partial}
+        href={hrefFor("partial")}
+        note={t("overview.partialNote", { pct: pct(counts.partial) })}
+        scale={scale(
+          counts.partial,
+          t("overview.partialNote", { pct: pct(counts.partial) }),
+        )}
+        icon={<ClipboardCheck className="size-5" />}
+      />
+      <MetricCard
+        label={t("progress.pending")}
+        value={counts.pending}
+        href={hrefFor("pending")}
+        status={
+          total
+            ? percentTone(pct(counts.pending), thresholds, "down")
+            : undefined
+        }
+        note={t("overview.pendingNote", { pct: pct(counts.pending) })}
+        scale={scale(
+          counts.pending,
+          t("overview.pendingNote", { pct: pct(counts.pending) }),
+        )}
+        icon={<Users className="size-5" />}
       />
     </div>
   );

@@ -40,11 +40,15 @@ test("People see the distribution, the risk matrix and the alerts of an imported
   expect(
     await distribution.getByTestId("indicator-histogram").count(),
   ).toBeGreaterThan(1);
-  await expect(
-    distribution
-      .getByRole("img", { name: /^Todos · valor \d: \d+ \(/ })
-      .first(),
-  ).toBeVisible();
+  // Each segment opens the people behind it (#117).
+  const segment = distribution
+    .getByRole("link", { name: /^Todos · valor \d: \d+ \(/ })
+    .first();
+  await expect(segment).toBeVisible();
+  await segment.click();
+  await expect(page).toHaveURL(/drill=indicator%3Aretention%3A\d/);
+  await expect(page.getByTestId("drill-total")).toBeVisible();
+  await page.goBack();
 
   // The same for engagement.
   await page.locator('select[name="indicator"]').selectOption("engagement");
@@ -66,7 +70,8 @@ test("People see the distribution, the risk matrix and the alerts of an imported
   await expect(
     matrix.getByRole("group", { name: "Matriz de retención y compromiso" }),
   ).toBeVisible();
-  await expect(matrix.getByTestId("risk-list")).toBeVisible();
+  // The list of the people at risk is behind a disclosure (#117).
+  await expect(matrix.getByTestId("risk-list")).toBeAttached();
 
   // Alerts, with the summary of falls and risks.
   const alerts = page.getByRole("region", { name: "Alertas" });

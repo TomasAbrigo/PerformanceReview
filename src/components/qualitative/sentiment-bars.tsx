@@ -4,6 +4,7 @@ import {
   ChartTableToggle,
   SENTIMENT_COLORS,
   StackedBar100,
+  type MarkDrill,
   orderRows,
   useChartFormat,
   type StackSeries,
@@ -41,11 +42,14 @@ export function SentimentBars({
   label,
   firstColumn,
   sorted = false,
+  drillOf,
 }: {
   rows: StackedRow[];
   label: string;
   firstColumn?: string;
   sorted?: boolean;
+  /** A segment opens its comments: (row key, sentiment) -> drill. */
+  drillOf?: (rowKey: string, sentiment: string) => MarkDrill | undefined;
 }) {
   const t = useTranslations("Qualitative");
   const f = useChartFormat();
@@ -89,6 +93,7 @@ export function SentimentBars({
         series={series}
         sortBy={sorted ? RISK_SENTIMENTS : undefined}
         label={label}
+        drillOf={drillOf}
       />
       <ChartTableToggle
         caption={label}
@@ -129,15 +134,19 @@ export function Legend() {
 export function MiniBar({
   counts,
   label,
+  drillOf,
 }: {
   counts: SentimentCounts;
   label: string;
+  /** A segment opens its comments: sentiment -> drill. */
+  drillOf?: (sentiment: string) => MarkDrill | undefined;
 }) {
   const series = useSentimentSeries();
   return (
-    <div data-testid="theme-sentiment" className="w-full max-w-xs">
+    <div data-testid="theme-sentiment" className="w-full">
       <StackedBar100
         compact
+        drillOf={drillOf ? (_row, sentiment) => drillOf(sentiment) : undefined}
         label={label}
         series={series}
         rows={[

@@ -110,6 +110,24 @@ function labeledCtes({ scope, f, includeClosed }: Resolved): SQL {
   if (f.sentiment) where.push(sql`eff.sentiment = ${f.sentiment}`);
   if (f.theme) where.push(sql`${f.theme} = any(eff.themes)`);
   if (f.relationship) where.push(sql`r.relationship = ${f.relationship}`);
+  if (f.indicator) {
+    const value = Number(f.indicator.value);
+    if (!Number.isInteger(value) || value < 1 || value > 5) {
+      throw new AnalysisError("not_found");
+    }
+    where.push(sql`(
+      select ia.option_value::int
+      from answer ia
+      join review_request ir on ir.id = ia.request_id
+      join question_revision iq on iq.id = ia.question_revision_id
+      where ir.participant_id = cp.id and iq.role::text = ${f.indicator.role}
+        and ia.option_value in (1, 2, 3, 4, 5)
+        and ir.relationship = 'manager' and ir.status = 'submitted'
+        and ir.deleted_at is null
+      order by ir.submitted_at desc nulls last, ir.id
+      limit 1
+    ) = ${value}`);
+  }
   if (scope.kind === "directReports") {
     where.push(
       sql`cp.snap_manager_person_id = ${scope.managerPersonId}::uuid`,
@@ -271,7 +289,7 @@ export async function sentimentTrend(
   }));
 }
 
-/** Most frequent themes, each with up to 3 pseudonymized example quotes. */
+/** Most frequent themes, each with up to 3 distinct pseudonymized example quotes. */
 export async function topThemes(
   db: DbOrTx,
   actor: ActorContext,
@@ -286,7 +304,7 @@ export async function topThemes(
     with ${labeledCtes(r)},
     t as (select unnest(themes) as theme, text, answer_id, participant_id, sentiment from labeled)
     select theme, count(*)::int as count, ${countCols}, count(*)::int as total,
-           (array_agg(text order by length(text), answer_id))[1:3] as quotes
+           (array_agg(text order by length(text), answer_id))[1:${QUOTE_POOL}] as quotes
     from t group by theme ${minGroup(r.min)}
     order by count desc, theme limit ${limit}`);
   const sources = r.f.aggregateOnly ? null : await pseudonymSources(db);
@@ -294,8 +312,27 @@ export async function topThemes(
     theme: row.theme,
     count: row.count,
     sentiment: counts(row),
-    quotes: sources ? pseudonymize(row.quotes, sources).texts : [],
+    quotes: sources
+      ? distinctQuotes(pseudonymize(row.quotes, sources).texts)
+      : [],
   }));
+}
+
+/** Shortest comments read to find 3 different quotes (many repeat). */
+const QUOTE_POOL = 40;
+
+/** The first 3 different quotes (ignoring case and spaces at the ends). */
+export function distinctQuotes(texts: readonly string[], n = 3): string[] {
+  const seen = new Set<string>();
+  const out: string[] = [];
+  for (const t of texts) {
+    const k = t.trim().toLowerCase();
+    if (!k || seen.has(k)) continue;
+    seen.add(k);
+    out.push(t.trim());
+    if (out.length === n) break;
+  }
+  return out;
 }
 
 /**
@@ -312,6 +349,7 @@ export async function sentimentVsIndicators(
   const rows = await db.execute<
     SentimentCounts & {
       role: string;
+      value: number;
       option: string;
       choices: { value: string; label: LocalizedText }[] | null;
     }
@@ -322,21 +360,27 @@ export async function sentimentVsIndicators(
       -- manager review's answer (so each comment is counted once).
       select distinct on (r.participant_id, q.role)
              r.participant_id, r.cycle_id, q.role::text as role,
-             a.option_label as option, q.choices
+             a.option_value::int as value, a.option_label as option,
+             q.choices, c.period_end
       from answer a
       join review_request r on r.id = a.request_id
+      join review_cycle c on c.id = r.cycle_id
       join question_revision q on q.id = a.question_revision_id
-      where q.role::text in ('retention', 'engagement') and a.option_label is not null
+      where q.role::text in ('retention', 'engagement')
+        and a.option_value in (1, 2, 3, 4, 5)
         and r.relationship = 'manager' and r.status = 'submitted' and r.deleted_at is null
       order by r.participant_id, q.role, r.submitted_at desc nulls last, r.id
     )
-    select ind.role, ind.option, (array_agg(ind.choices))[1] as choices,
+    select ind.role, ind.value,
+           (array_agg(ind.option order by ind.period_end desc))[1] as option,
+           (array_agg(ind.choices order by ind.period_end desc))[1] as choices,
            ${countCols}, count(*)::int as total
     from labeled l
     join ind on ind.participant_id = l.participant_id and ind.cycle_id = l.cycle_id
-    group by 1, 2 ${minGroup(r.min, sql`l.participant_id`)} order by 1, 2`);
+    group by 1, 2 ${minGroup(r.min, sql`l.participant_id`)} order by 1, 2 desc`);
   return rows.map((r) => ({
     role: r.role,
+    value: r.value,
     option: r.option,
     label: r.choices?.find((c) => c.value === r.option)?.label ?? null,
     ...counts(r),

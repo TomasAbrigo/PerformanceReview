@@ -12,6 +12,18 @@ import {
   useChartFormat,
 } from "@/components/charts";
 import { SEGMENT_COLORS } from "./segments";
+import { Activity, Users } from "lucide-react";
+import { MetricCard } from "@/components/experience";
+import {
+  type DrillBase,
+  DrillLink,
+  drillHref,
+} from "@/components/drill/drill-link";
+import type { Drill } from "@/modules/insights/drill-spec";
+import { type KpiThresholds, percentTone } from "@/modules/insights/tone";
+
+/** #117: months and segments open their people; KPIs toned. */
+export type EngagementContext = { base: DrillBase; targets: KpiThresholds };
 
 /** Month label: "mar 26" (the month is a first of month, read as UTC). */
 function useMonthLabel() {
@@ -31,7 +43,13 @@ function useMonthLabel() {
  * A month direction cannot see (under the minimum) leaves a gap in the lines
  * and an empty bar.
  */
-export function EngagementView({ data }: { data: EngagementEvolution }) {
+export function EngagementView({
+  data,
+  context,
+}: {
+  data: EngagementEvolution;
+  context?: EngagementContext;
+}) {
   const t = useTranslations("Engagement");
   const tc = useTranslations("Charts");
   const format = useFormatter();
@@ -93,8 +111,132 @@ export function EngagementView({ data }: { data: EngagementEvolution }) {
             .map((s) => `${t(`segment.${s}`)} ${m.segments![s]}`)
             .join(", ")}`
         : t("segments.hiddenCells", { month: label(m.month) });
+  const monthDrill = (
+    month: string,
+    segment: (typeof engagementSegments)[number] | null = null,
+  ): Drill => ({ kind: "engagement", month, segment });
+  const shown = data.months.filter((m) => !m.hidden && m.mean !== null);
+  const latest = shown.at(-1);
+  const prior = shown.at(-2);
+  const signedPoints = (v: number) =>
+    format.number(Math.round(v * 100), { signDisplay: "exceptZero" });
   return (
     <div className="flex flex-col gap-4" data-testid="engagement-view">
+      {latest ? (
+        <section
+          className="grid gap-5 sm:grid-cols-2"
+          aria-label={t("kpi.label")}
+        >
+          <MetricCard
+            featured
+            testId="engagement-kpi-score"
+            label={t("kpi.score", { month: label(latest.month) })}
+            icon={<Activity className="size-5" />}
+            value={percent(Math.round(latest.mean! * 100))}
+            status={
+              context
+                ? percentTone(latest.mean! * 100, context.targets)
+                : undefined
+            }
+            scale={{
+              value: Math.round(latest.mean! * 100),
+              min: 0,
+              max: 100,
+              label: t("kpi.score", { month: label(latest.month) }),
+              minLabel: "0 %",
+              maxLabel: "100 %",
+            }}
+            delta={
+              prior
+                ? {
+                    value: latest.mean! - prior.mean!,
+                    text: t("kpi.vs", {
+                      delta: signedPoints(latest.mean! - prior.mean!),
+                      month: label(prior.month),
+                    }),
+                  }
+                : undefined
+            }
+            drill={
+              context
+                ? {
+                    base: context.base,
+                    drill: monthDrill(latest.month),
+                    label: t("kpi.drill", { month: label(latest.month) }),
+                  }
+                : undefined
+            }
+            note={
+              latest.people == null
+                ? undefined
+                : t("line.lastPeople", { n: latest.people })
+            }
+          />
+          <MetricCard
+            testId="engagement-kpi-participation"
+            label={t("kpi.participation", { month: label(latest.month) })}
+            icon={<Users className="size-5" />}
+            value={
+              latest.participation === null
+                ? t("hidden")
+                : percent(Math.round(latest.participation * 100))
+            }
+            status={
+              context && latest.participation !== null
+                ? percentTone(latest.participation * 100, context.targets)
+                : undefined
+            }
+            scale={
+              latest.participation === null
+                ? undefined
+                : {
+                    value: Math.round(latest.participation * 100),
+                    min: 0,
+                    max: 100,
+                    label: t("kpi.participation", {
+                      month: label(latest.month),
+                    }),
+                    minLabel: "0 %",
+                    maxLabel: "100 %",
+                  }
+            }
+            delta={
+              prior &&
+              latest.participation !== null &&
+              prior.participation !== null
+                ? {
+                    value: latest.participation - prior.participation,
+                    text: t("kpi.vs", {
+                      delta: signedPoints(
+                        latest.participation - prior.participation,
+                      ),
+                      month: label(prior.month),
+                    }),
+                  }
+                : undefined
+            }
+            drill={
+              context && latest.segments?.falta
+                ? {
+                    base: context.base,
+                    drill: monthDrill(latest.month, "falta"),
+                    label: t("kpi.drillMissing", {
+                      n: latest.segments.falta,
+                    }),
+                  }
+                : undefined
+            }
+            note={
+              latest.respondents == null || latest.people == null
+                ? undefined
+                : t("kpi.respondents", {
+                    n: latest.respondents,
+                    total: latest.people,
+                  })
+            }
+          />
+        </section>
+      ) : null}
       <Panel
         id="engagement-line"
         title={t("line.title")}
@@ -132,6 +274,23 @@ export function EngagementView({ data }: { data: EngagementEvolution }) {
           ticks={[0, 25, 50, 75, 100]}
           fmt={(v) => f.percent(v)}
           yTitle={t("line.yTitle")}
+          endLabels="series"
+          pointHref={
+            context
+              ? (_key, i) =>
+                  data.months[i].hidden
+                    ? null
+                    : {
+                        href: drillHref(
+                          context.base,
+                          monthDrill(data.months[i].month),
+                        ),
+                        label: t("kpi.drill", {
+                          month: label(data.months[i].month),
+                        }),
+                      }
+              : undefined
+          }
           hiddenTip={(i) =>
             data.months[i].hidden
               ? t("segments.hiddenMonth", {
@@ -158,6 +317,17 @@ export function EngagementView({ data }: { data: EngagementEvolution }) {
         />
         <StackedBar100
           label={t("segments.chartLabel")}
+          drillOf={
+            context
+              ? (month, segment) => ({
+                  base: context.base,
+                  drill: monthDrill(
+                    month,
+                    segment as (typeof engagementSegments)[number],
+                  ),
+                })
+              : undefined
+          }
           series={engagementSegments.map((s) => ({
             key: s,
             label: t(`segment.${s}`),
@@ -183,7 +353,7 @@ export function EngagementView({ data }: { data: EngagementEvolution }) {
       </Panel>
 
       <Panel id="engagement-table" title={t("table.title")}>
-        <details>
+        <details open>
           <summary className="button-outline">{tc("tableView")}</summary>
           <div className="mt-4 overflow-x-auto">
             <table className="text-sm" aria-label={t("table.title")}>
@@ -206,7 +376,20 @@ export function EngagementView({ data }: { data: EngagementEvolution }) {
               <tbody>
                 {data.months.map((m) => (
                   <tr key={m.month} className="border-t" data-month={m.month}>
-                    <td className="p-1">{label(m.month)}</td>
+                    <td className="p-1">
+                      {context && !m.hidden ? (
+                        <DrillLink
+                          base={context.base}
+                          drill={monthDrill(m.month)}
+                          label={t("kpi.drill", { month: label(m.month) })}
+                          className="underline decoration-dotted underline-offset-4"
+                        >
+                          {label(m.month)}
+                        </DrillLink>
+                      ) : (
+                        label(m.month)
+                      )}
+                    </td>
                     {m.hidden ? (
                       <td
                         className="p-1 text-muted-foreground"

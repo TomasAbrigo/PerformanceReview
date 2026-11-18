@@ -126,33 +126,38 @@ describe.each(locales)("qualitative views (%s)", (locale) => {
     expect(within(table).getByText("8")).toBeInTheDocument();
   });
 
-  it("shows the six KPIs", () => {
-    renderIn(locale, <Kpis counts={counts} />);
-    const kpis = screen.getByRole("list", {
-      name: locale === "es" ? "Indicadores" : "KPIs",
-    });
-    const text = within(kpis)
-      .getAllByRole("listitem")
-      .map((li) => li.textContent);
-    expect(text).toEqual(
-      locale === "es"
-        ? [
-            "Total8",
-            "Positivos3",
-            "Constructivos1",
-            "Mixtos1",
-            "Negativos1",
-            "Neutrales2",
-          ]
-        : [
-            "Total8",
-            "Positive3",
-            "Constructive1",
-            "Mixed1",
-            "Negative1",
-            "Neutral2",
-          ],
+  it("shows the total and each sentiment's share, count and scale; values open their comments", () => {
+    renderIn(
+      locale,
+      <Kpis
+        counts={counts}
+        drills={{
+          base: { pathname: "/insights/qualitative", query: {} },
+          scope: {},
+        }}
+        thresholds={{ goodPct: 80, watchPct: 60 }}
+      />,
     );
+    const kpis = screen.getByTestId("qualitative-kpis");
+    const total = within(kpis).getByRole("region", { name: "Total" });
+    expect(within(total).getByText("8")).toBeInTheDocument();
+    const positive = within(kpis).getByRole("region", {
+      name: locale === "es" ? "Positivos" : "Positive",
+    });
+    expect(positive).toHaveTextContent(locale === "es" ? "38 %" : "38%");
+    expect(positive).toHaveTextContent(
+      locale === "es" ? "3 comentarios" : "3 comments",
+    );
+    expect(within(positive).getByRole("meter")).toBeInTheDocument();
+    expect(within(positive).getByRole("link").getAttribute("data-drill")).toBe(
+      "comments:sentiment=positive",
+    );
+    // Negative and mixed shares carry a tone.
+    const negative = within(kpis).getByRole("region", {
+      name: locale === "es" ? "Negativos" : "Negative",
+    });
+    expect(negative.getAttribute("data-tone")).toBe("good");
+    expect(within(kpis).getAllByRole("region")).toHaveLength(6);
   });
 
   it("themes with quotes, indicators and empty states", () => {
@@ -172,7 +177,9 @@ describe.each(locales)("qualitative views (%s)", (locale) => {
         <Indicators rows={[]} />
       </>,
     );
-    expect(screen.getByText("comunicacion")).toBeInTheDocument();
+    expect(
+      screen.getByText(/^(comunicaci[oó]n|communication)$/i),
+    ).toBeInTheDocument();
     expect(screen.getByText("[P1] avisa antes")).toBeInTheDocument();
     // Each theme carries its stacked sentiment.
     expect(screen.getByTestId("theme-sentiment")).toBeInTheDocument();
@@ -210,7 +217,7 @@ describe("CommentsTable list", () => {
     expect(within(manager).getByText("MANAGER")).toBeInTheDocument();
     expect(within(self).getByText("Ana Ejemplo")).toBeInTheDocument();
     expect(within(self).getByText("Fortalezas")).toBeInTheDocument();
-    expect(within(self).getByText(/29 mar 2023/)).toBeInTheDocument();
+    expect(within(self).getByTitle(/29 mar 2023/)).toBeInTheDocument();
     expect(within(self).getByText("Positivo")).toBeInTheDocument();
     expect(within(manager).getByText("Mixto")).toBeInTheDocument();
     expect(

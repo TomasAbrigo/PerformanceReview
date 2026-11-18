@@ -11,7 +11,6 @@ import { EmptyState, IconTile, PageSkeleton } from "@/components/experience";
 import { Panel } from "@/components/insights/parts";
 import { PageHeader } from "@/components/page-header";
 import { groupKicker } from "@/components/page-kicker";
-import { Badge } from "@/components/ui/badge";
 import { db } from "@/db/client";
 import { Link } from "@/i18n/navigation";
 import { routing } from "@/i18n/routing";
@@ -26,6 +25,13 @@ import { cycleName } from "@/modules/review-core/cycle-name";
 import { createCycleAction } from "./actions";
 import { statusKey } from "./status-key";
 
+import { getActor } from "@/modules/actor/server";
+import {
+  type AssessmentListPage,
+  listAssessmentParticipants,
+} from "@/modules/assessments";
+import { ProgressBar } from "@/components/progress-bar";
+
 async function Cycles({ params }: PageProps<"/[locale]/settings/cycles">) {
   const { locale } = await params;
   if (!hasLocale(routing.locales, locale)) notFound();
@@ -33,7 +39,24 @@ async function Cycles({ params }: PageProps<"/[locale]/settings/cycles">) {
   await connection();
   const t = await getTranslations("Cycles");
   const kicker = await groupKicker("settings");
-  const cycles = await listCycles(db);
+  // Latest period first, each with where its assessments stand.
+  const cycles = (await listCycles(db)).sort((a, b) =>
+    b.periodEnd.localeCompare(a.periodEnd),
+  );
+  const actor = await getActor();
+  const progress = new Map(
+    await Promise.all(
+      cycles
+        .filter((c) => c.status !== "draft")
+        .map(
+          async (c) =>
+            [
+              c.id,
+              (await listAssessmentParticipants(db, actor, c.id)).counts,
+            ] as const,
+        ),
+    ),
+  );
   // The suggested period: the semester of today, from the configured cuts.
   const semester = semesterOf(todayLocal(), await semesterConfig(db));
   const defaults = {
@@ -62,9 +85,18 @@ async function Cycles({ params }: PageProps<"/[locale]/settings/cycles">) {
                   <IconTile>
                     <RefreshCw className="size-5" />
                   </IconTile>
-                  <Badge variant="outline">
+                  <span
+                    className="tone-pill"
+                    data-tone={
+                      c.status === "draft"
+                        ? "watch"
+                        : c.status === "closed"
+                          ? undefined
+                          : "good"
+                    }
+                  >
                     {t(`status.${statusKey(c.status)}`)}
-                  </Badge>
+                  </span>
                 </header>
                 <h3 className="text-xl">
                   <Link
@@ -90,12 +122,36 @@ async function Cycles({ params }: PageProps<"/[locale]/settings/cycles">) {
                     </dd>
                   </div>
                 </dl>
+                <CycleProgress counts={progress.get(c.id)} />
               </article>
             ))}
           </CardCollection>
         )}
       </Panel>
     </>
+  );
+}
+
+/** How many participants have both assessments in, as a bar with the count. */
+async function CycleProgress({
+  counts,
+}: {
+  counts: AssessmentListPage["counts"] | undefined;
+}) {
+  const t = await getTranslations("Cycles.list");
+  if (!counts) return null;
+  const total = counts.complete + counts.partial + counts.pending;
+  const pct = total ? Math.round((counts.complete / total) * 100) : 0;
+  return (
+    <div className="mt-auto flex flex-col gap-1 pt-2">
+      <ProgressBar
+        percent={pct}
+        label={t("complete", { done: counts.complete, total, pct })}
+      />
+      <p className="text-xs text-muted-foreground">
+        {t("complete", { done: counts.complete, total, pct })}
+      </p>
+    </div>
   );
 }
 

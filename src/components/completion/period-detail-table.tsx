@@ -7,6 +7,23 @@ import type {
   MeanOf,
   PeriodDetail,
 } from "@/modules/analytics/period-detail/types";
+import { type DrillBase, DrillLink } from "@/components/drill/drill-link";
+import type { Drill } from "@/modules/insights/drill-spec";
+import {
+  type KpiThresholds,
+  likertTone,
+  percentTone,
+} from "@/modules/insights/tone";
+
+/**
+ * #117: what makes each period's figures open their records (the page's
+ * drill base: the drill switches the page to that cycle) and toned.
+ */
+export type PeriodContext = {
+  base: DrillBase;
+  targets: KpiThresholds;
+  riskThreshold: number;
+};
 
 /**
  * "Detalle por período": one row per cycle, oldest first, with the head count,
@@ -15,12 +32,41 @@ import type {
  * mean, and the share of goals completed. A figure direction cannot see
  * (under the minimum group size) is "Oculto"; one with nothing behind it "—".
  */
-export function PeriodDetailTable({ data }: { data: PeriodDetail }) {
+export function PeriodDetailTable({
+  data,
+  context,
+}: {
+  data: PeriodDetail;
+  context?: PeriodContext;
+}) {
   const t = useTranslations("Completion.period");
   const format = useFormatter();
+  const tx = useTranslations("Experience");
+  /** A figure of a period as a drill into that cycle (when it has records). */
+  const drillOf = (
+    cycleId: string,
+    drill: Drill,
+    label: string,
+    children: React.ReactNode,
+  ) =>
+    context ? (
+      <DrillLink
+        base={{
+          pathname: context.base.pathname,
+          query: { ...context.base.query, cycle: cycleId },
+        }}
+        drill={drill}
+        label={label}
+        className="underline decoration-dotted underline-offset-4"
+      >
+        {children}
+      </DrillLink>
+    ) : (
+      children
+    );
   const hidden = data.minGroupSize !== null;
   const empty = hidden ? t("hidden") : "—";
-  const mean = (m: MeanOf | null) =>
+  const mean = (m: MeanOf | null, likert: boolean) =>
     m === null ? (
       empty
     ) : (
@@ -33,6 +79,14 @@ export function PeriodDetailTable({ data }: { data: PeriodDetail }) {
           {" "}
           {t("people", { n: m.n })}
         </span>
+        {likert && context ? (
+          <span
+            className="tone-pill ml-2"
+            data-tone={likertTone(m.mean, context.riskThreshold)}
+          >
+            {tx(`tone.${likertTone(m.mean, context.riskThreshold)}`)}
+          </span>
+        ) : null}
       </>
     );
   const date = (iso: string) =>
@@ -92,6 +146,22 @@ export function PeriodDetailTable({ data }: { data: PeriodDetail }) {
                   <ProgressBar
                     percent={rate * 100}
                     label={t(`columns.${key}`)}
+                    tone={
+                      context
+                        ? percentTone(rate * 100, context.targets)
+                        : undefined
+                    }
+                    figure={drillOf(
+                      r.cycleId,
+                      key === "goals"
+                        ? { kind: "goals", state: "completed" }
+                        : { kind: "completion", side: key, state: "submitted" },
+                      t("drill", {
+                        cycle: r.cycleName,
+                        what: t(`columns.${key}`),
+                      }),
+                      `${Math.round(rate * 100)}%`,
+                    )}
                   />
                 )}
               </div>
@@ -107,7 +177,19 @@ export function PeriodDetailTable({ data }: { data: PeriodDetail }) {
             ).map(([key, value]) => (
               <div key={key}>
                 <dt>{t(`columns.${key}`)}</dt>
-                <dd>{mean(value)}</dd>
+                <dd>
+                  {key === "valued" || value === null
+                    ? mean(value, false)
+                    : drillOf(
+                        r.cycleId,
+                        { kind: "indicator", indicator: key, value: null },
+                        t("drill", {
+                          cycle: r.cycleName,
+                          what: t(`columns.${key}`),
+                        }),
+                        mean(value, true),
+                      )}
+                </dd>
               </div>
             ))}
           </dl>

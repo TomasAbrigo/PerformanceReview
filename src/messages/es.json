@@ -45,18 +45,33 @@
       "noCycle": "Todavía no hay ciclos: cuando haya uno, acá vas a ver sus avances.",
       "cta": "Explorar el ciclo"
     },
-    "access": {
-      "title": "Accesos principales",
-      "goals": "Seguimiento de los compromisos de cada persona.",
-      "assessments": "Las dos perspectivas de cada período.",
-      "insights": "Indicadores para entender el ciclo.",
-      "explore": "Explorar"
-    },
-    "before": {
-      "title": "Antes de analizar",
-      "text": "Revisá las importaciones y los casos pendientes de calidad de datos."
-    },
-    "all": "Todas las secciones"
+    "all": "Todas las secciones",
+    "signal": {
+      "kpis": "{cycle}",
+      "scope": {
+        "all": "Toda la compañía",
+        "team": "Tu equipo y vos"
+      },
+      "complete": "Evaluaciones completas",
+      "completeNote": "{done} de {total} con las dos evaluaciones enviadas",
+      "pending": "Sin empezar",
+      "ofParticipants": "{pct} % de los participantes",
+      "goalsCompleted": "Objetivos completados",
+      "goalsNote": "{done} de {total} objetivos del ciclo",
+      "goalsOverdue": "Objetivos vencidos",
+      "ofGoals": "{pct} % de los objetivos del ciclo",
+      "analysis": "Ver el análisis del ciclo",
+      "attention": {
+        "title": "Para atender",
+        "none": "Nada pendiente por ahora.",
+        "self": "Tu autoevaluación de {cycle} está por completar",
+        "team": "{n, plural, one {# evaluación de tu equipo por escribir} other {# evaluaciones de tu equipo por escribir}}",
+        "overdue": "{n, plural, one {# objetivo vencido} other {# objetivos vencidos}} en el ciclo",
+        "identity": "{n, plural, one {# registro espera} other {# registros esperan}} una persona en la cola de identidades",
+        "failedRuns": "{n, plural, one {# importación falló} other {# importaciones fallaron}}",
+        "quality": "{n, plural, one {# caso} other {# casos}} de calidad de datos en {kinds, plural, one {# indicador} other {# indicadores}}"
+      }
+    }
   },
   "LocaleSwitcher": {
     "label": "Idioma",
@@ -80,7 +95,8 @@
         "period": "Período",
         "participants": "Participantes"
       },
-      "participants": "{count, plural, one {# participante} other {# participantes}}"
+      "participants": "{count, plural, one {# participante} other {# participantes}}",
+      "complete": "{done} de {total} completas ({pct} %)"
     },
     "create": {
       "title": "Nuevo ciclo",
@@ -137,7 +153,8 @@
       "empty": "Todavía no hay solicitudes: se generan al abrir el ciclo.",
       "columns": {
         "kind": "Tipo",
-        "reviewer": "Evaluador"
+        "reviewer": "Evaluador",
+        "status": "Estado"
       },
       "kind": {
         "self": "Autoevaluación",
@@ -212,7 +229,8 @@
       "semester_order": "El segundo semestre tiene que empezar después del primero.",
       "unknown_key": "Configuración desconocida.",
       "invalid": "Valor inválido.",
-      "cutoff_order": "Los cortes tienen que bajar de Alto a Medio y de Medio a Regular."
+      "cutoff_order": "Los cortes tienen que bajar de Alto a Medio y de Medio a Regular.",
+      "target_order": "La meta tiene que ser mayor que el umbral de atención."
     },
     "engagement": {
       "title": "Engagement mensual",
@@ -221,7 +239,13 @@
       "cutoffRegular": "Segmento Regular desde (% del score)",
       "hint": "Solo se usan cuando el archivo no trae la columna Segmento: por debajo de Regular el segmento es Bajo."
     },
-    "nav": "Configuración"
+    "nav": "Configuración",
+    "targets": {
+      "title": "Metas de los KPIs",
+      "goodPct": "En meta desde (%)",
+      "watchPct": "Atención desde (%)",
+      "hint": "Colorean los porcentajes (completitud, objetivos completados): desde la meta en verde, desde atención en ámbar, por debajo en rojo."
+    }
   },
   "Common": {
     "exportCsv": "Exportar CSV"
@@ -297,6 +321,15 @@
         "rejectReason": "Motivo",
         "noRejects": "Esta corrida no tuvo rechazos ni incidencias.",
         "noSourceId": "Sin ID de origen"
+      },
+      "outcome": {
+        "label": "{read} filas leídas: {parts}",
+        "nothing": "No leyó filas."
+      },
+      "recent": {
+        "title": "Últimas importaciones",
+        "all": "Ver todas",
+        "read": "{n} filas leídas"
       }
     }
   },
@@ -919,7 +952,17 @@
         "unknown": "No se pudo reanudar la importación."
       }
     },
-    "periodCycleName": "Evaluación semestral {start} – {end}"
+    "periodCycleName": "Evaluación semestral {start} – {end}",
+    "totals": {
+      "label": "Totales de la corrida",
+      "rows": "Filas importadas",
+      "cycles": "{count, plural, one {en # ciclo} other {en # ciclos}}",
+      "requests": "Solicitudes nuevas",
+      "answers": "Respuestas nuevas",
+      "unchanged": "{n} sin cambios",
+      "issues": "Casos de identidad",
+      "mismatches": "{n, plural, =0 {Sin evaluador distinto} one {# con evaluador distinto} other {# con evaluador distinto}}"
+    }
   },
   "Charts": {
     "empty": "No hay datos para estos filtros.",
@@ -1026,7 +1069,8 @@
       "value": "valor {value}",
       "takeaway": "Más respuestas bajas: {group} ({share} con 1 o 2).",
       "lowest": "{value} (más bajo)",
-      "highest": "{value} (más alto)"
+      "highest": "{value} (más alto)",
+      "faint": "{count, plural, one {# grupo tiene} other {# grupos tienen}} menos de {n} personas: atenuados y al final, sus porcentajes no son comparables."
     },
     "matrix": {
       "title": "¿Cuántas personas tienen retención y compromiso bajos a la vez?",
@@ -1085,7 +1129,11 @@
       "department": "Área",
       "detail": "Detalle",
       "dropDetail": "{indicator}: {previous} → {value} (−{delta}) desde {cycle}",
-      "riskDetail": "Retención {retention}, compromiso {engagement}"
+      "riskDetail": "Retención {retention}, compromiso {engagement}",
+      "dropNote": "Bajaron {drop} puntos o más desde el ciclo anterior",
+      "riskNote": "Retención y compromiso en {risk} o menos",
+      "riskDrill": "Ver las {n} personas en riesgo",
+      "list": "Ver las {n} alertas"
     },
     "trend": {
       "title": "Evolución de retención y compromiso",
@@ -1114,7 +1162,19 @@
         "apply": "Ver"
       },
       "yTitle": "Promedio (1–5)",
-      "how": "Promedio de las respuestas 1 a 5 de cada ciclo; un hueco es un ciclo oculto por tener menos personas que el mínimo."
+      "how": "Promedio de las respuestas 1 a 5 de cada ciclo; un hueco es un ciclo oculto por tener menos personas que el mínimo.",
+      "latest": "Último ciclo: {cycle}",
+      "drill": "ver las personas de ese ciclo"
+    },
+    "kpi": {
+      "mean": "Promedio de {indicator}",
+      "answered": "{n} personas respondieron",
+      "risk": "Cuadrante de riesgo",
+      "riskOf": "de {total} con ambos indicadores",
+      "vs": "{delta} vs. {cycle}",
+      "scale": "{indicator}: {value} de 5",
+      "riskScale": "{n} de {total} en riesgo",
+      "drillAll": "Ver las {n} personas"
     }
   },
   "Qualitative": {
@@ -1155,7 +1215,13 @@
       "constructive": "Constructivos",
       "mixed": "Mixtos",
       "negative": "Negativos",
-      "neutral": "Neutrales"
+      "neutral": "Neutrales",
+      "totalNote": "Comentarios etiquetados con los filtros actuales",
+      "count": "{n, plural, one {# comentario} other {# comentarios}}",
+      "scale": "{label}: {share} de los comentarios",
+      "delta": "{delta} pp vs. {cycle}",
+      "open": "Ver {n, plural, one {el comentario} other {los # comentarios}}: {label}",
+      "openAll": "Ver {n, plural, one {el comentario} other {los # comentarios}}"
     },
     "dimensions": {
       "strengths": "Fortalezas",
@@ -1184,7 +1250,9 @@
       "title": "Temas más frecuentes",
       "count": "{n, plural, one {# comentario} other {# comentarios}}",
       "sentiment": "Sentimiento de los comentarios de {theme}",
-      "quotesNote": "Citas con nombres, emails y legajos reemplazados."
+      "quotesNote": "Citas con nombres, emails y legajos reemplazados.",
+      "how": "Cuántos comentarios tocan cada tema, su parte del total y su sentimiento; el tema y cada segmento abren esos comentarios.",
+      "open": "Ver {n, plural, one {el comentario} other {los # comentarios}} sobre {theme}"
     },
     "indicators": {
       "title": "Sentimiento vs. retención y compromiso",
@@ -1192,7 +1260,10 @@
       "indicator": "Indicador",
       "answer": "Respuesta",
       "retention": "Retención",
-      "engagement": "Compromiso"
+      "engagement": "Compromiso",
+      "how": "Sentimiento de los comentarios de cada persona según la respuesta que le dio su manager (5, la más alta, arriba). Cada segmento abre esos comentarios.",
+      "chart": "{indicator}: sentimiento por respuesta del manager",
+      "row": "{value} · {answer}"
     },
     "comments": {
       "title": "Comentarios",
@@ -1217,7 +1288,8 @@
       "save": "Guardar corrección",
       "themes": "Temas (separados por ;)",
       "reason": "Motivo",
-      "saved": "Corrección guardada."
+      "saved": "Corrección guardada.",
+      "count": "{n, plural, one {# comentario} other {# comentarios}} (los más recientes primero)"
     },
     "run": {
       "button": "Correr análisis",
@@ -1241,7 +1313,8 @@
         "unknown_cycle": "Ciclo desconocido",
         "no_match": "Sin comentario que coincida",
         "ambiguous": "Más de un comentario posible"
-      }
+      },
+      "hint": "Herramienta de People: cargá etiquetas corregidas desde un CSV (ver docs/qualitative-labels.md)."
     },
     "errors": {
       "forbidden": "No tenés permiso para esto.",
@@ -1325,7 +1398,18 @@
       "sentimentGapHint": "Para ciclos solo de texto: proporción de sentimiento de cada lado por dimensión.",
       "sentimentGapChart": "Sentimiento de autoevaluación y manager por dimensión",
       "rowSelf": "{dimension} · autoevaluación",
-      "rowManager": "{dimension} · manager"
+      "rowManager": "{dimension} · manager",
+      "sentimentHow": "Cada barra suma el 100 % de los comentarios propios de una dimensión; arriba, los de mayor proporción negativa y mixta. Cada segmento abre esos comentarios.",
+      "completionHow": "Autoevaluación y evaluación del manager enviadas por grupo; arriba, los grupos con menos autoevaluaciones.",
+      "kpi": {
+        "title": "Indicadores de autoevaluación",
+        "submitted": "{submitted} de {total} enviadas",
+        "openPending": "Ver {n, plural, one {la persona} other {las # personas}} con {side} pendiente",
+        "negative": "Comentarios propios negativos",
+        "negativeNote": "{n} de {total} comentarios propios",
+        "negativeScale": "Negativos: {share} de los comentarios propios",
+        "openNegative": "Ver {n, plural, one {el comentario negativo} other {los # comentarios negativos}}"
+      }
     },
     "Executive": {
       "nav": "Resumen",
@@ -1351,11 +1435,29 @@
       "sentimentChart": "Sentimiento por dimensión del ciclo",
       "themes": "Top 5 temas",
       "themeCount": "{n, plural, one {# mención} other {# menciones}}",
-      "ratings": "Calificaciones",
       "goals": "Objetivos",
       "goalsCompleted": "Objetivos completados",
       "goalsCount": "Objetivos del período",
-      "goalsOverdue": "Vencidos"
+      "goalsOverdue": "Vencidos",
+      "distributionTitle": "Retención y compromiso (respuestas 1 a 5)",
+      "distributionHint": "Cada barra suma 100 %: rojo es 1, verde es 5. Elegí un segmento para ver quiénes son.",
+      "hiddenShort": "Oculto: menos de {min} personas",
+      "scaleOf": "{label}: {value} de {max}",
+      "vsPrevious": "{delta} vs. ciclo anterior",
+      "vsPreviousPoints": "{delta} pts vs. ciclo anterior",
+      "ofParticipants": "{submitted} de {total} · {participants} participantes",
+      "pending": "{n, plural, one {# pendiente} other {# pendientes}}",
+      "riskHint": "Retención y compromiso de cada persona en tres franjas; la celda marcada es el riesgo. Elegí una celda para ver quiénes son.",
+      "sentimentHint": "Elegí un segmento para leer esos comentarios.",
+      "themesHint": "Los temas más mencionados en los comentarios. Elegí uno para leerlos.",
+      "drill": {
+        "indicator": "Ver las {n, plural, one {# persona} other {# personas}} con {label}",
+        "submitted": "Ver quiénes enviaron ({label}: {n})",
+        "pending": "Ver {n, plural, one {la # pendiente} other {las # pendientes}}",
+        "goals": "Ver las {n, plural, one {# persona} other {# personas}} con objetivos",
+        "overdue": "Ver {n, plural, one {el # objetivo vencido} other {los # objetivos vencidos}}",
+        "theme": "{theme}: {n, plural, one {# mención} other {# menciones}}. Ver los comentarios"
+      }
     }
   },
   "Arturia": {
@@ -1555,7 +1657,14 @@
       "pendingValue": "{self} / {manager}",
       "pendingNote": "Propias / manager · bases independientes",
       "sent": "{submitted} de {applicable} enviadas",
-      "byGroup": "Avance por grupo"
+      "byGroup": "Avance por grupo",
+      "drillSubmitted": "Ver las {n} personas con {side} enviada",
+      "drillGroupSubmitted": "{group}: ver las {n} personas con {side} enviada",
+      "drillGroupPending": "{group}: ver las {n} personas con {side} pendiente",
+      "drillPending": "Ver las {n} personas con {side} pendiente",
+      "pendingCount": "{n, plural, one {# pendiente} other {# pendientes}}",
+      "pendingOf": "{side}: {n} de {applicable}",
+      "whoMissing": "Ver quién falta"
     },
     "delta": {
       "title": "Comparación con {cycle}",
@@ -1617,7 +1726,8 @@
         "retention": "Retención (1-5)",
         "engagement": "Compromiso Bamboo (1-5)",
         "goals": "Goals completados"
-      }
+      },
+      "drill": "{cycle} · {what}: ver las personas"
     }
   },
   "GoalsInsights": {
@@ -1680,7 +1790,10 @@
       "suppressed": "{n, plural, one {# persona en grupos chicos no se muestra} other {# personas en grupos chicos no se muestran}}",
       "totalHidden": "El total se oculta para no revelar los grupos chicos.",
       "unassigned": "Sin asignar",
-      "team": "Equipo {n}"
+      "team": "Equipo {n}",
+      "withoutGoals": "Sin objetivos en el período:",
+      "legendOnTime": "En curso, a tiempo",
+      "legendClosed": "Cerrados"
     },
     "scatter": {
       "title": "¿Quienes cumplen más objetivos tienen mejor {indicator}?",
@@ -1690,7 +1803,8 @@
       "point": "{name}: {completed} % de objetivos completados, {indicator} {value}",
       "missing": "{n, plural, one {# persona no aparece} other {# personas no aparecen}} por no tener objetivos o esa respuesta.",
       "riskLine": "Riesgo: {max} o menos",
-      "goalsLine": "Cumplidos: {min} % o más"
+      "goalsLine": "Cumplidos: {min} % o más",
+      "open": "Cada punto abre la evaluación de esa persona, con sus objetivos del período."
     },
     "buckets": {
       "title": "¿Cambian retención y compromiso según el cumplimiento de objetivos?",
@@ -1725,7 +1839,11 @@
         "engagement": "Compromiso",
         "positive": "Comentarios positivos"
       },
-      "noValue": "–"
+      "noValue": "–",
+      "search": "Buscar persona o manager",
+      "searchLabel": "Buscar en personas",
+      "shown": "{n, plural, one {# persona} other {# personas}} de {total}",
+      "clear": "Ver todas"
     },
     "outliers": {
       "title": "Casos que no cuadran",
@@ -1794,14 +1912,17 @@
       "reading": "Lectura",
       "none": "–",
       "meanOf": "sobre {n}",
-      "riskOf": "({people} de {of})"
+      "riskOf": "({people} de {of})",
+      "commentsLabel": "Comentarios",
+      "commentsOf": "de {people, plural, one {# persona} other {# personas}}"
     },
     "spark": {
       "label": "Retención y compromiso por ciclo",
       "retention": "Retención",
       "engagement": "Compromiso",
       "noData": "sin datos",
-      "point": "{cycle}: {value}"
+      "point": "{cycle}: {value}",
+      "axis": "Escala 1 a 5"
     },
     "insight": {
       "retentionDrop": "La retención media cayó {delta} puntos desde {cycle} (de {previous} a {current}).",
@@ -1817,6 +1938,14 @@
     "suppressed": "{n, plural, one {# persona queda fuera} other {# personas quedan fuera}}: sus DM tienen menos de {min} personas.",
     "export": {
       "csv": "Exportar CSV"
+    },
+    "drill": {
+      "retention": "Ver la retención de las personas de {dm}",
+      "engagement": "Ver el compromiso de las personas de {dm}",
+      "risk": "Ver las personas en riesgo de {dm}",
+      "self": "Ver las autoevaluaciones pendientes del equipo de {dm}",
+      "manager": "Ver las evaluaciones del manager pendientes del equipo de {dm}",
+      "comments": "Ver los comentarios del equipo de {dm}"
     }
   },
   "OrgFilters": {
@@ -1890,6 +2019,15 @@
       "hidden": "Menos de {min} personas: no se muestra.",
       "segments": "Segmentos",
       "link": "Ver la evolución"
+    },
+    "kpi": {
+      "label": "Último mes",
+      "score": "Puntaje medio · {month}",
+      "participation": "Participación · {month}",
+      "vs": "{delta} pp vs. {month}",
+      "drill": "Ver las personas de {month}",
+      "drillMissing": "Ver las {n} personas que no respondieron",
+      "respondents": "{n} de {total} respondieron"
     }
   },
   "Nav": {
@@ -1925,7 +2063,10 @@
       "department": "Área",
       "anyDepartment": "Todas",
       "apply": "Aplicar",
-      "clear": "Limpiar"
+      "clear": "Limpiar",
+      "search": "Buscar",
+      "searchPlaceholder": "Persona u objetivo",
+      "titlePlaceholder": "Título del objetivo"
     },
     "states": {
       "in_progress": "En curso",
@@ -1993,7 +2134,9 @@
       "moving": "En movimiento",
       "movingNote": "{n, plural, one {Objetivo en curso} other {Objetivos en curso}}",
       "review": "Para revisar",
-      "reviewNote": "{n, plural, one {Objetivo vencido} other {Objetivos vencidos}}"
+      "reviewNote": "{n, plural, one {Objetivo vencido} other {Objetivos vencidos}}",
+      "share": "{pct} % de los objetivos de la lista",
+      "overdueShare": "{pct} % vencidos: en curso con la fecha pasada"
     },
     "form": {
       "new": "Nuevo goal",
@@ -2137,7 +2280,13 @@
     "forbidden": "No tenés acceso a este assessment: cada persona ve los suyos y, si es manager, los de su equipo.",
     "navOwn": "Mis evaluaciones",
     "titleOwn": "Mis evaluaciones",
-    "back": "Volver a Evaluaciones"
+    "back": "Volver a Evaluaciones",
+    "overview": {
+      "complete": "{pct} % completas",
+      "completeOf": "{done} de {total} con las dos evaluaciones enviadas",
+      "partialNote": "{pct} %: falta una de las dos",
+      "pendingNote": "{pct} %: ninguna enviada todavía"
+    }
   },
   "Capture": {
     "back": "Volver a Assessments",
@@ -2194,7 +2343,8 @@
       "hint": "La persona lee tu evaluación recién cuando la compartís.",
       "done": "Compartida con la persona.",
       "notShared": "Todavía no está compartida con la persona."
-    }
+    },
+    "answered": "{done} de {total} preguntas obligatorias respondidas"
   },
   "Experience": {
     "moreFilters": "Más filtros",
@@ -2211,6 +2361,108 @@
     "upload": "Elegir archivo",
     "review": "Revisar y configurar",
     "result": "Resultado",
-    "moreRecords": "Ver {count} registros más"
+    "moreRecords": "Ver {count} registros más",
+    "tone": {
+      "good": "En meta",
+      "watch": "Atención",
+      "risk": "En riesgo"
+    }
+  },
+  "Drill": {
+    "kicker": "Datos detrás del gráfico",
+    "close": "Cerrar",
+    "others": "Otros",
+    "none": "Sin dato",
+    "manager": "Manager",
+    "empty": "No hay registros.",
+    "hidden": "El total no se muestra: revelaría grupos de menos de {min} personas.",
+    "aggregatesOnly": "Vista de Dirección: solo conteos de grupos de al menos {min} personas, nunca nombres.",
+    "unit": {
+      "people": "{n, plural, one {persona} other {personas}}",
+      "comments": "{n, plural, one {comentario} other {comentarios}}"
+    },
+    "by": {
+      "department": "Por área",
+      "sentiment": "Por sentimiento"
+    },
+    "fact": {
+      "retention": "Retención",
+      "engagement": "Compromiso",
+      "selfStatus": "Autoevaluación",
+      "managerStatus": "Evaluación del manager",
+      "goals": "Objetivos",
+      "completed": "Completados",
+      "overdue": "Vencidos",
+      "score": "Puntaje (%)",
+      "segment": "Segmento"
+    },
+    "csv": {
+      "name": "Nombre",
+      "department": "Área",
+      "manager": "Manager",
+      "dimension": "Dimensión",
+      "sentiment": "Sentimiento",
+      "text": "Comentario",
+      "group": "Grupo",
+      "count": "Cantidad",
+      "download": "Descargar CSV"
+    },
+    "more": "Abrir la vista completa",
+    "title": {
+      "indicator": "{indicator}: respuesta {value}",
+      "indicatorAll": "{indicator}: todas las respuestas",
+      "risk": "Cuadrante: {quadrant}",
+      "theme": "Comentarios sobre {theme}",
+      "sentiment": "{dimension} · comentarios: {sentiment}",
+      "completion": {
+        "self": {
+          "submitted": "Autoevaluaciones enviadas",
+          "pending": "Autoevaluaciones pendientes"
+        },
+        "manager": {
+          "submitted": "Evaluaciones del manager enviadas",
+          "pending": "Evaluaciones del manager pendientes"
+        }
+      },
+      "goals": {
+        "all": "Personas con objetivos en el período",
+        "completed": "Personas con objetivos completados",
+        "overdue": "Personas con objetivos vencidos"
+      },
+      "group": "{title} · {group}",
+      "engagement": "Compromiso mensual · {month}",
+      "engagementSegment": "Compromiso mensual · {month} · {segment}",
+      "comments": "Comentarios · {detail}",
+      "commentsAll": "Todos los comentarios",
+      "indicatorValue": "{indicator} {value}",
+      "dm": {
+        "retention": "{dm} · retención de su equipo",
+        "engagement": "{dm} · compromiso de su equipo",
+        "risk": "{dm} · personas en riesgo",
+        "self": "{dm} · autoevaluaciones pendientes",
+        "manager": "{dm} · evaluaciones del manager pendientes",
+        "comments": "{dm} · comentarios de su equipo"
+      }
+    },
+    "truncated": "Se muestran los primeros {n}; la vista completa tiene todos."
+  },
+  "Themes": {
+    "proyecto": "Proyecto",
+    "equipo": "Equipo",
+    "comunicacion": "Comunicación",
+    "crecimiento": "Crecimiento",
+    "cultura": "Cultura",
+    "procesos": "Procesos",
+    "bienestar": "Bienestar",
+    "reconocimiento": "Reconocimiento",
+    "planificacion": "Planificación",
+    "calidad": "Calidad",
+    "liderazgo": "Liderazgo",
+    "colaboracion": "Colaboración",
+    "tecnica": "Técnica",
+    "documentacion": "Documentación",
+    "proactividad": "Proactividad",
+    "negocio": "Negocio",
+    "aprendizaje": "Aprendizaje"
   }
 }

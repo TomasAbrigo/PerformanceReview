@@ -165,13 +165,11 @@ test("People walk the whole insights module and export for Arturía", async ({
   await expect(
     page.getByRole("group", { name: /Personas por segmento y por mes/ }),
   ).toBeVisible();
-  // The month table sits behind "Ver como tabla".
+  // The month table is open by default (#117); open it if a viewer closed it.
   const months = page.locator('table[aria-label="Detalle por mes"]');
-  await page
-    .locator("details")
-    .filter({ has: months })
-    .locator("summary")
-    .click();
+  const monthsDetails = page.locator("details").filter({ has: months });
+  if (!(await monthsDetails.evaluate((d) => (d as HTMLDetailsElement).open)))
+    await monthsDetails.locator("summary").click();
   await expect(months).toBeVisible();
   expect(await months.getByRole("row").count()).toBeGreaterThan(6);
 

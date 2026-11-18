@@ -1,4 +1,11 @@
-export type ScatterPoint = { key: string; x: number; y: number; tip: string };
+export type ScatterPoint = {
+  key: string;
+  x: number;
+  y: number;
+  tip: string;
+  /** When set, the dot is a link (the records behind it). */
+  href?: string;
+};
 
 export type ScatterRef = {
   axis: "x" | "y";
@@ -155,27 +162,44 @@ export function Scatter({
           </g>
         ),
       )}
-      {placed.map(({ p, cx, cy }) => (
-        <g
-          key={p.key}
-          tabIndex={0}
-          role="img"
-          aria-label={p.tip}
-          data-tip={p.tip}
-          className="outline-none [&:focus-visible>circle:last-child]:stroke-ring"
-        >
-          <title>{p.tip}</title>
-          <circle cx={cx} cy={cy} r={10} fill="transparent" />
-          <circle
-            cx={cx}
-            cy={cy}
-            r={4.5}
-            strokeWidth={1.5}
-            fillOpacity={0.55}
-            className="fill-chart-seq stroke-background"
-          />
-        </g>
-      ))}
+      {placed.map(({ p, cx, cy }) => {
+        const dot = (
+          <>
+            <title>{p.tip}</title>
+            <circle cx={cx} cy={cy} r={10} fill="transparent" />
+            <circle
+              cx={cx}
+              cy={cy}
+              r={4.5}
+              strokeWidth={1.5}
+              fillOpacity={0.55}
+              className="fill-chart-seq stroke-background"
+            />
+          </>
+        );
+        return p.href ? (
+          <a
+            key={p.key}
+            href={p.href}
+            aria-label={p.tip}
+            data-tip={p.tip}
+            className="hover:[&>circle:last-child]:fill-opacity-100 cursor-pointer outline-none [&:focus-visible>circle:last-child]:stroke-ring"
+          >
+            {dot}
+          </a>
+        ) : (
+          <g
+            key={p.key}
+            tabIndex={0}
+            role="img"
+            aria-label={p.tip}
+            data-tip={p.tip}
+            className="outline-none [&:focus-visible>circle:last-child]:stroke-ring"
+          >
+            {dot}
+          </g>
+        );
+      })}
     </svg>
   );
 }

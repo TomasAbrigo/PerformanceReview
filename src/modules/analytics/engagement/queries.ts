@@ -4,6 +4,7 @@ import { isUuid } from "@/lib/uuid";
 import type { ActorContext } from "@/modules/actor/types";
 import { insightsScope, type InsightsScope } from "@/modules/insights/authz";
 import {
+  type EngagementSegment,
   engagementSegments,
   parseEngagementMonth,
   shiftMonth,
@@ -285,4 +286,64 @@ export async function engagementFilterOptions(
     firstMonth: first,
     lastMonth: last,
   };
+}
+
+// ---- quant (#117): the people behind a month (drill-down) ----
+
+/** A person of a month of the monthly engagement. */
+export type EngagementPerson = {
+  personId: string;
+  name: string;
+  department: string | null;
+  managerName: string | null;
+  /** 0-1; null for `falta`. */
+  score: number | null;
+  segment: EngagementSegment;
+};
+
+/**
+ * The people of one month (of one segment, or all) with their score and
+ * segment, under the same authorization and filters as the evolution: People
+ * everybody, a manager their direct reports of that month, direction
+ * everybody but without the filters that name a person (the caller masks
+ * direction's result to counts: `drillRecords`). By name.
+ */
+export async function engagementPeople(
+  db: DbOrTx,
+  actor: ActorContext,
+  f: {
+    month: string;
+    segment: EngagementSegment | null;
+    filters?: EngagementFilters;
+    minGroupSize?: number;
+  },
+): Promise<EngagementPerson[]> {
+  const a = await authorize(db, actor, f.minGroupSize);
+  const filters = f.filters ?? {};
+  checkFilters(filters);
+  const m = month(f.month)!;
+  const rows = await db.execute<{
+    person_id: string;
+    name: string;
+    department: string | null;
+    manager_name: string | null;
+    score: number | null;
+    segment: EngagementSegment;
+  }>(sql`
+    with ${rowsCte(a, filters, { from: m, to: m })}
+    select r.person_id, p.display_name as name, r.department,
+           mp.display_name as manager_name, r.score, r.segment
+    from rows r
+    join person p on p.id = r.person_id
+    left join person mp on mp.id = r.manager_person_id
+    ${f.segment ? sql`where r.segment = ${f.segment}` : sql``}
+    order by p.display_name, r.person_id`);
+  return rows.map((r) => ({
+    personId: r.person_id,
+    name: r.name,
+    department: r.department,
+    managerName: r.manager_name,
+    score: r.score,
+    segment: r.segment,
+  }));
 }

@@ -1,8 +1,14 @@
 import { CardCollection } from "@/components/card-collection";
 import { useTranslations } from "next-intl";
 import { buttonVariants } from "@/components/ui/button";
-import { CalendarRange } from "lucide-react";
-import { IconTile } from "@/components/experience";
+import {
+  CalendarRange,
+  ClipboardCheck,
+  FileSpreadsheet,
+  Fingerprint,
+  MessageSquareText,
+} from "lucide-react";
+import { IconTile, MetricCard } from "@/components/experience";
 import { Link } from "@/i18n/navigation";
 import type { HistoryImportResult } from "@/modules/import-history/results";
 import { CycleDecisionForm, type ResumeOutcome } from "./cycle-decision";
@@ -23,6 +29,17 @@ export function HistoryResult({
   const t = useTranslations("ImportHistory");
   const both = (created: number, unchanged: number) =>
     t("createdUnchanged", { created, unchanged });
+
+  const sumOf = (
+    key:
+      | "rows"
+      | "requestsCreated"
+      | "requestsUnchanged"
+      | "answersCreated"
+      | "answersUnchanged"
+      | "issues"
+      | "mismatches",
+  ) => result.cycles.reduce((n, c) => n + c[key], 0);
 
   return (
     <div className="flex flex-col gap-6">
@@ -48,6 +65,39 @@ export function HistoryResult({
           {t("decision.resolved")}
         </p>
       ) : null}
+
+      <div
+        role="group"
+        aria-label={t("totals.label")}
+        className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4"
+      >
+        <MetricCard
+          label={t("totals.rows")}
+          value={sumOf("rows")}
+          note={t("totals.cycles", { count: result.cycles.length })}
+          icon={<FileSpreadsheet className="size-5" />}
+        />
+        <MetricCard
+          label={t("totals.requests")}
+          value={sumOf("requestsCreated")}
+          note={t("totals.unchanged", { n: sumOf("requestsUnchanged") })}
+          icon={<ClipboardCheck className="size-5" />}
+        />
+        <MetricCard
+          label={t("totals.answers")}
+          value={sumOf("answersCreated")}
+          note={t("totals.unchanged", { n: sumOf("answersUnchanged") })}
+          icon={<MessageSquareText className="size-5" />}
+        />
+        <MetricCard
+          label={t("totals.issues")}
+          value={sumOf("issues")}
+          href={sumOf("issues") > 0 ? "/imports/identity" : undefined}
+          status={sumOf("issues") > 0 ? "watch" : "good"}
+          note={t("totals.mismatches", { n: sumOf("mismatches") })}
+          icon={<Fingerprint className="size-5" />}
+        />
+      </div>
 
       <CardCollection
         role="group"

@@ -1,5 +1,6 @@
 import { CardCollection } from "@/components/card-collection";
-import { MetricCard } from "@/components/experience";
+import { cn } from "@/lib/utils";
+import { RunOutcome } from "./run-outcome";
 import { useTranslations } from "next-intl";
 import type { ReactNode } from "react";
 
@@ -58,32 +59,45 @@ export function RunDetailView({ run }: { run: RunDetail }) {
         </div>
       ) : null}
 
-      <section className="flex flex-col gap-2">
+      <section className="admin-surface flex flex-col gap-4">
         <h2>{t("detail.counts")}</h2>
+        <RunOutcome counts={run.counts} rejectsHref="#run-rejects" />
         <div
           role="group"
           aria-label={t("detail.counts")}
-          className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4"
+          className="grid grid-cols-2 gap-3 sm:grid-cols-4 xl:grid-cols-8"
         >
           {[
             ...INGEST_COUNT_KEYS,
             ...INGEST_EXTRA_COUNT_KEYS.filter(
               (k) => run.counts[k] !== undefined,
             ),
-          ].map((k) => (
-            <MetricCard
-              key={k}
-              label={t(`columns.${k}`)}
-              value={run.counts[k] ?? "—"}
-            />
-          ))}
+          ].map((k) => {
+            const n = run.counts[k];
+            const bad = (k === "rejected" || k === "issues") && (n ?? 0) > 0;
+            return (
+              <section
+                key={k}
+                aria-label={t(`columns.${k}`)}
+                data-tone={bad ? "risk" : undefined}
+                className={cn(
+                  "flex flex-col gap-1 rounded-lg border border-border px-3 py-2",
+                  bad && "border-status-pending/40 bg-status-pending-bg",
+                  !n && "text-muted-foreground",
+                )}
+              >
+                <p className="text-xs">{t(`columns.${k}`)}</p>
+                <p className="stat-value !text-2xl tabular-nums">{n ?? "—"}</p>
+              </section>
+            );
+          })}
         </div>
         <p className="text-sm text-muted-foreground">
           {t("detail.rawRecords", { count: run.rawRecordCount })}
         </p>
       </section>
 
-      <section className="flex flex-col gap-2">
+      <section id="run-rejects" className="flex flex-col gap-2">
         <h2>{t("detail.rejects")}</h2>
         {run.rejects.length === 0 ? (
           <p>{t("detail.noRejects")}</p>

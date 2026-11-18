@@ -11,6 +11,11 @@ export type QualitativeFilters = OrgFilters & {
   dimension?: string;
   sentiment?: Sentiment;
   theme?: string;
+  /**
+   * Only the comments of people whose manager gave `value` (1-5) to this
+   * indicator in that cycle (the latest submitted manager review).
+   */
+  indicator?: { role: "retention" | "engagement"; value: number };
   /** Only the answers of reviews of this relationship (self, manager...). */
   relationship?: "self" | "manager" | "peer" | "upward";
   /**
@@ -81,6 +86,9 @@ export type ThemeRank = {
 };
 export type IndicatorSentiment = SentimentCounts & {
   role: string;
+  /** The manager's answer, 1-5. */
+  value: number;
+  /** The answer's text (the latest one seen for that value). */
   option: string;
   label: LocalizedText | null;
 };

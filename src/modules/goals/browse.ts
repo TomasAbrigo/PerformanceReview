@@ -42,7 +42,7 @@ export type GoalListFilters = OrgFilters & {
   /** Goals in the participants' snapshot of this cycle (the "goals of the period"). */
   cycleId?: string;
   state?: GoalState;
-  /** Part of the owner's name. */
+  /** Part of the owner's name or of the goal's title. */
   q?: string;
   /** The owner's area today. */
   department?: string;
@@ -125,8 +125,12 @@ function filterConditions(f: GoalListFilters): SQL[] {
         : sql`false`,
     );
   }
-  if (f.q?.trim())
-    where.push(sql`p.display_name ilike ${containsPattern(f.q.trim())}`);
+  if (f.q?.trim()) {
+    const pattern = containsPattern(f.q.trim());
+    where.push(
+      sql`(p.display_name ilike ${pattern} or g.title ilike ${pattern})`,
+    );
+  }
   if (f.department) where.push(sql`j.department = ${f.department}`);
   where.push(...orgAttributeFilters(f));
   return where;
@@ -147,8 +151,9 @@ type ListRow = {
 };
 
 /**
- * A page of the goals `actor` may read, most urgent first (due date, then
- * owner and title), with the counts per state of the filtered set.
+ * A page of the goals `actor` may read, most urgent first (state: overdue,
+ * in progress, completed, closed; then due date, owner and title), with the
+ * counts per state of the filtered set.
  */
 export async function listGoals(
   db: DbOrTx,
@@ -183,7 +188,9 @@ export async function listGoals(
               and m.completed_at is not null) as "milestonesDone"
         ${goalsFrom(today)}
         where ${where}
-        order by g.due_date nulls last, p.display_name, g.title, g.id
+        order by (case ${state} when 'overdue' then 0 when 'in_progress' then 1
+            when 'completed' then 2 else 3 end),
+          g.due_date nulls last, p.display_name, g.title, g.id
         limit ${pageSize} offset ${(page - 1) * pageSize}`),
     );
 

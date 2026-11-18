@@ -16,6 +16,11 @@ import { dm360, dm360Scopes } from "@/modules/analytics/dm-360";
 import { indicatorCycles } from "@/modules/analytics/indicators";
 import { insightsScope } from "@/modules/insights/authz";
 import { localizeCycles } from "@/modules/review-core/cycle-name";
+import { drillBase } from "@/components/drill/drill-link";
+import { parseDrill } from "@/modules/insights/drill-spec";
+import { kpiThresholds } from "@/modules/insights/tone";
+import { getSettings } from "@/modules/settings";
+import { DrillSection } from "../drill-section";
 
 async function Insights360({
   params,
@@ -41,10 +46,20 @@ async function Insights360({
   }
   const cycles = localizeCycles(await indicatorCycles(db), locale);
   if (!cycles.length) return <EmptyState>{t("noCycles")}</EmptyState>;
-  const p = parseDm360Params(await searchParams);
+  const sp = await searchParams;
+  const p = parseDm360Params(sp);
+  const settings = await getSettings(db);
   const cycle = cycles.find((c) => c.id === p.cycle) ?? cycles[0];
   const data = await dm360(db, actor, { cycleId: cycle.id, scope: p.scope });
   const own = scope.kind === "directReports";
+  // Drill-down (drill-section.tsx): the figures of a card open its people or
+  // comments; only with names (not direction) and in the direct scope, the
+  // one the drills read.
+  const base = drillBase("/insights/360", sp, actor);
+  const canDrill = scope.kind !== "aggregatesOnly" && data.scope === "direct";
+  const parsed = canDrill ? parseDrill(sp.drill) : null;
+  const drill =
+    parsed?.kind === "dm" || parsed?.kind === "comments" ? parsed : null;
   const hint =
     scope.kind === "aggregatesOnly"
       ? t("hint.aggregates", { min: scope.minGroupSize })
@@ -101,7 +116,22 @@ async function Insights360({
           </p>
         )}
       </PageHeader>
-      <Dm360View data={data} />
+      <Dm360View
+        data={data}
+        base={canDrill ? base : undefined}
+        thresholds={kpiThresholds(settings)}
+      />
+      {drill ? (
+        <Suspense fallback={null}>
+          <DrillSection
+            actor={actor}
+            cycleId={cycle.id}
+            drill={drill}
+            base={base}
+            minGroupSize={settings["aggregation.minGroupSize"]}
+          />
+        </Suspense>
+      ) : null}
     </div>
   );
 }

@@ -39,7 +39,7 @@ export function GoalsOfPeriod({
       {goals.length === 0 ? (
         <p className="text-sm text-muted-foreground">{t("empty")}</p>
       ) : (
-        <div className="grid gap-4 md:grid-cols-2">
+        <div className="grid grid-cols-[repeat(auto-fill,minmax(15rem,1fr))] gap-4">
           {goals.map((g) => (
             <article
               key={g.id}

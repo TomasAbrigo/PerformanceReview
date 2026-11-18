@@ -1,3 +1,5 @@
+import { Link } from "@/i18n/navigation";
+
 export type LineSeries = {
   key: string;
   label: string;
@@ -10,6 +12,8 @@ export type LineSeries = {
 const W = 640;
 const H = 256;
 const PAD = { l: 44, r: 64, t: 30, b: 36 };
+/** #117: the least room an x label gets, in viewBox units; fewer labels otherwise. */
+const MIN_LABEL_SLOT = 64;
 const LABEL_LINE = 13;
 
 /**
@@ -67,7 +71,16 @@ export function LineTrend({
   yTitle,
   hiddenTip,
   testId = "line-trend",
+  pointHref,
+  endLabels = "value",
 }: {
+  /** #117: a point opens this (app path, no locale) with this name; null: not. */
+  pointHref?: (
+    seriesKey: string,
+    i: number,
+  ) => { href: string; label: string } | null;
+  /** #117: "series" writes the series name beside the last value. */
+  endLabels?: "value" | "series";
   /** Labels of the x positions (cycles, months). */
   x: string[];
   series: LineSeries[];
@@ -83,7 +96,8 @@ export function LineTrend({
   testId?: string;
 }) {
   const n = x.length;
-  const plotW = W - PAD.l - PAD.r;
+  const padR = endLabels === "series" ? 150 : PAD.r;
+  const plotW = W - PAD.l - padR;
   const xOf = (i: number) =>
     PAD.l + (n === 1 ? plotW / 2 : (i * plotW) / (n - 1));
   const yOf = (v: number) =>
@@ -99,11 +113,15 @@ export function LineTrend({
     .sort((a, b) => a.y - b.y);
   for (let k = 1; k < ends.length; k++)
     if (ends[k].y - ends[k - 1].y < 14) ends[k].y = ends[k - 1].y + 14;
-  const step = n > 12 ? Math.ceil(n / 12) : 1;
-  // Characters that fit between two x positions at 11px, at least a word.
-  const slot = n <= 1 ? plotW : plotW / (n - 1);
+  // Every `step`-th label (and the last), so that each has room.
+  const gap = n <= 1 ? plotW : plotW / (n - 1);
+  const step = Math.max(1, Math.ceil(MIN_LABEL_SLOT / gap));
+  // Characters that fit between two shown labels at 11px, at least a word.
+  const slot = gap * step;
   const maxChars = Math.max(8, Math.floor(slot / 6.2));
   const labels = x.map((lbl) => wrapLabel(lbl, maxChars));
+  // The first label starts at its point, so it never runs off the left edge.
+  const labelX = (i: number) => (i === 0 && n > 1 ? xOf(0) - 8 : xOf(i));
   const labelLines = Math.max(1, ...labels.map((l) => l.length));
   const height = H + (labelLines - 1) * LABEL_LINE;
   return (
@@ -121,7 +139,7 @@ export function LineTrend({
         <g key={g} aria-hidden="true">
           <line
             x1={PAD.l}
-            x2={W - PAD.r}
+            x2={W - padR}
             y1={yOf(g)}
             y2={yOf(g)}
             className="stroke-border"
@@ -154,16 +172,17 @@ export function LineTrend({
                 aria-label={tip}
               />
             ) : null}
-            {i % step === 0 || i === n - 1 ? (
+            {(i % step === 0 && (i === n - 1 || n - 1 - i >= step)) ||
+            i === n - 1 ? (
               <text
-                x={xOf(i)}
+                x={labelX(i)}
                 y={H - 12}
-                textAnchor="middle"
+                textAnchor={i === 0 && n > 1 ? "start" : "middle"}
                 className="fill-muted-foreground text-[11px]"
                 aria-hidden="true"
               >
                 {labels[i].map((line, k) => (
-                  <tspan key={k} x={xOf(i)} dy={k === 0 ? 0 : LABEL_LINE}>
+                  <tspan key={k} x={labelX(i)} dy={k === 0 ? 0 : LABEL_LINE}>
                     {line}
                   </tspan>
                 ))}
@@ -181,8 +200,44 @@ export function LineTrend({
             strokeDasharray={s.dash}
             data-testid={`${testId}-path`}
           />
-          {s.values.map((v, i) =>
-            v === null ? null : (
+          {s.values.map((v, i) => {
+            if (v === null) return null;
+            const link = pointHref?.(s.key, i);
+            const dot = (
+              <>
+                <circle
+                  cx={xOf(i)}
+                  cy={yOf(v)}
+                  r={10}
+                  fill="transparent"
+                  stroke="none"
+                />
+                <circle
+                  cx={xOf(i)}
+                  cy={yOf(v)}
+                  r={link ? 5 : 4}
+                  strokeWidth={2}
+                  className="stroke-background"
+                />
+              </>
+            );
+            if (link) {
+              return (
+                <Link
+                  key={i}
+                  href={link.href}
+                  scroll={false}
+                  aria-haspopup="dialog"
+                  aria-label={`${s.label} · ${x[i]}: ${fmt(v)} · ${link.label}`}
+                  data-tip={`${s.label} · ${x[i]}: ${fmt(v)} · ${link.label}`}
+                  data-testid={`${testId}-point`}
+                  className="cursor-pointer outline-none [&:focus-visible>circle:last-child]:stroke-ring"
+                >
+                  {dot}
+                </Link>
+              );
+            }
+            return (
               <g
                 key={i}
                 tabIndex={0}
@@ -206,8 +261,8 @@ export function LineTrend({
                   className="stroke-background"
                 />
               </g>
-            ),
-          )}
+            );
+          })}
         </g>
       ))}
       {ends.map((e) => (
@@ -218,7 +273,7 @@ export function LineTrend({
           className="fill-foreground text-[12px] font-semibold tabular-nums"
           data-testid={`${testId}-last`}
         >
-          {fmt(e.v)}
+          {endLabels === "series" ? `${e.s.label} ${fmt(e.v)}` : fmt(e.v)}
         </text>
       ))}
     </svg>

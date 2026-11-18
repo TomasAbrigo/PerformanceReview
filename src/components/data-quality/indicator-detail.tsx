@@ -4,8 +4,6 @@ import type { ReactNode } from "react";
 import { ReasonBadge } from "@/components/identity/reason-badge";
 import { useRunFormat } from "@/components/ingest/use-run-format";
 import { Badge } from "@/components/ui/badge";
-import { FileSearch } from "lucide-react";
-import { IconTile } from "@/components/experience";
 import { Link } from "@/i18n/navigation";
 import type es from "@/messages/es.json";
 import type {
@@ -30,30 +28,22 @@ function CaseTable({
 }) {
   const t = useTranslations("DataQuality.columns");
   return (
-    <CardCollection gridClassName="record-grid" role="group">
+    <CardCollection gridClassName="dense-list" role="group" initialCount={20}>
       {rows.map((row) => (
         <article
           key={row.key}
-          className="record-card"
+          className="dense-row md:!grid-cols-[minmax(0,1fr)_minmax(0,2.5fr)]"
           aria-labelledby={`case-${row.key}`}
         >
-          <header className="flex items-start gap-3">
-            <IconTile>
-              <FileSearch className="size-5" />
-            </IconTile>
-            <div className="min-w-0 break-words">
-              <p className="text-xs text-muted-foreground">{t(columns[0])}</p>
-              <div
-                id={`case-${row.key}`}
-                className="mt-1 text-base font-medium"
-              >
-                {row.cells[0] ?? "—"}
-              </div>
+          <div className="dense-name min-w-0 break-words">
+            <small>{t(columns[0])}</small>
+            <div id={`case-${row.key}`} className="font-medium">
+              {row.cells[0] ?? "—"}
             </div>
-          </header>
-          <dl className="record-facts">
+          </div>
+          <dl className="dense-facts">
             {row.cells.slice(1).map((cell, i) => (
-              <div key={columns[i + 1]}>
+              <div key={columns[i + 1]} className="min-w-0 break-words">
                 <dt>{t(columns[i + 1])}</dt>
                 <dd>{cell ?? "—"}</dd>
               </div>

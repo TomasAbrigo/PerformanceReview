@@ -20,6 +20,8 @@ describe("DEFAULT_SETTINGS", () => {
       "engagement.cutoffAlto": 80,
       "engagement.cutoffMedio": 60,
       "engagement.cutoffRegular": 40,
+      "targets.goodPct": 80,
+      "targets.watchPct": 50,
     });
   });
 
@@ -125,6 +127,9 @@ describe("checkSettings (rules across keys)", () => {
     expect(
       checkSettings({ ...DEFAULT_SETTINGS, "engagement.cutoffRegular": 70 }),
     ).toEqual([{ path: "engagement.cutoffRegular", message: "cutoff_order" }]);
+    expect(
+      checkSettings({ ...DEFAULT_SETTINGS, "targets.watchPct": 80 }),
+    ).toEqual([{ path: "targets.watchPct", message: "target_order" }]);
     expect(
       checkSettings({
         ...DEFAULT_SETTINGS,

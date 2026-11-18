@@ -28,6 +28,19 @@ import {
 } from "@/modules/analytics/indicators";
 import { insightsScope } from "@/modules/insights";
 import { withoutPersonFilters } from "@/modules/org-attributes/kinds";
+import { Gauge, ShieldAlert } from "lucide-react";
+import { getFormatter } from "next-intl/server";
+import { MetricCard } from "@/components/experience";
+import { drillBase } from "@/components/drill/drill-link";
+import { parseDrill } from "@/modules/insights/drill-spec";
+import { atRiskTone, kpiThresholds, likertTone } from "@/modules/insights/tone";
+import type { IndicatorDistribution } from "@/modules/analytics/indicators/types";
+import { getSettings } from "@/modules/settings";
+import { DrillSection } from "../drill-section";
+
+/** The mean of everybody in a distribution (the total row, or the only one). */
+const overallOf = (d: IndicatorDistribution) =>
+  d.groupBy === "none" ? (d.series[0] ?? null) : d.total;
 
 async function Indicators({
   params,
@@ -45,8 +58,9 @@ async function Indicators({
   const cycles = localizeCycles(await indicatorCycles(db), locale);
   if (!cycles.length) return <EmptyState>{t("noCycles")}</EmptyState>;
   // Direction does not filter by the people who lead a team (a DM, a Santex Lead).
+  const sp = await searchParams;
   const p = withoutPersonFilters(
-    parseIndicatorParams(await searchParams),
+    parseIndicatorParams(sp),
     scope.kind === "aggregatesOnly",
   );
   const cycle = cycles.find((c) => c.id === p.cycle) ?? cycles[0];
@@ -58,21 +72,46 @@ async function Indicators({
   const groupBy = groupBys.includes(p.groupBy) ? p.groupBy : "department";
   const shown = { ...p, groupBy, cycle: cycle.id };
   // One read of the rows, one authorization: the panels and the selects.
-  const { options, distribution, matrix, alerts } = await indicatorOverview(
-    db,
-    actor,
-    {
-      cycleId: cycle.id,
-      indicator: p.indicator,
-      groupBy,
-      hierarchy: p.hierarchy,
-      filters: {
-        department: p.department,
-        managerId: p.manager,
-        ...orgFiltersOf(p),
-      },
+  const input = {
+    indicator: p.indicator,
+    groupBy,
+    hierarchy: p.hierarchy,
+    filters: {
+      department: p.department,
+      managerId: p.manager,
+      ...orgFiltersOf(p),
     },
-  );
+  };
+  // The cycle before (cycles come newest first), for the delta of the mean.
+  const previousCycle = cycles[cycles.findIndex((c) => c.id === cycle.id) + 1];
+  const [{ options, distribution, matrix, alerts }, previous, settings] =
+    await Promise.all([
+      indicatorOverview(db, actor, { cycleId: cycle.id, ...input }),
+      previousCycle
+        ? indicatorOverview(db, actor, { cycleId: previousCycle.id, ...input })
+        : null,
+      getSettings(db),
+    ]);
+  const masked = scope.kind === "aggregatesOnly";
+  const targets = kpiThresholds(settings);
+  const riskThreshold = settings["alerts.riskThreshold"];
+  const minGroupSize = settings["aggregation.minGroupSize"];
+  // Drill-down: `?drill=` opens the records behind a mark (drill-section.tsx).
+  const base = drillBase("/insights/indicators", sp, actor);
+  const drill = parseDrill(sp.drill);
+  const format = await getFormatter();
+  const dec = (v: number, signed = false) =>
+    format.number(v, {
+      minimumFractionDigits: 1,
+      maximumFractionDigits: 1,
+      ...(signed ? { signDisplay: "exceptZero" as const } : {}),
+    });
+  const overall = overallOf(distribution);
+  const before = previous ? overallOf(previous.distribution) : null;
+  const meanDelta =
+    overall?.mean != null && before?.mean != null
+      ? overall.mean - before.mean
+      : null;
   // CSV exports go through the API (People's visibility): offered to People only.
   const isHr = actor.role === "hr";
   const indicator = t(`indicator.${p.indicator}`);
@@ -107,6 +146,99 @@ async function Indicators({
           groupBys={groupBys}
         />
       </PageHeader>
+      <section
+        className="grid gap-5 sm:grid-cols-2"
+        aria-label={t("kpi.mean", { indicator })}
+      >
+        <MetricCard
+          featured
+          testId="indicators-kpi-mean"
+          label={t("kpi.mean", { indicator })}
+          icon={<Gauge className="size-5" />}
+          value={overall?.mean == null ? "—" : dec(overall.mean)}
+          status={
+            overall?.mean == null
+              ? undefined
+              : likertTone(overall.mean, riskThreshold)
+          }
+          scale={
+            overall?.mean == null
+              ? undefined
+              : {
+                  value: overall.mean,
+                  min: 1,
+                  max: 5,
+                  label: t("kpi.scale", {
+                    indicator,
+                    value: dec(overall.mean),
+                  }),
+                }
+          }
+          delta={
+            meanDelta === null || !previousCycle
+              ? undefined
+              : {
+                  value: meanDelta,
+                  text: t("kpi.vs", {
+                    delta: dec(meanDelta, true),
+                    cycle: previousCycle.name,
+                  }),
+                }
+          }
+          drill={
+            overall?.n
+              ? {
+                  base,
+                  drill: {
+                    kind: "indicator",
+                    indicator: p.indicator,
+                    value: null,
+                  },
+                  label: t("kpi.drillAll", { n: overall.n }),
+                }
+              : undefined
+          }
+          note={overall ? t("kpi.answered", { n: overall.n }) : undefined}
+        />
+        <MetricCard
+          testId="indicators-kpi-risk"
+          label={t("kpi.risk")}
+          icon={<ShieldAlert className="size-5" />}
+          value={matrix.riskCount ?? "—"}
+          status={
+            matrix.riskCount === null || matrix.total === null
+              ? undefined
+              : atRiskTone(matrix.riskCount, matrix.total, targets)
+          }
+          scale={
+            matrix.riskCount === null || !matrix.total
+              ? undefined
+              : {
+                  value: matrix.riskCount,
+                  min: 0,
+                  max: matrix.total,
+                  label: t("kpi.riskScale", {
+                    n: matrix.riskCount,
+                    total: matrix.total,
+                  }),
+                }
+          }
+          drill={
+            matrix.riskCount
+              ? {
+                  base,
+                  drill: { kind: "risk", retention: "low", engagement: "low" },
+                  label: t("alerts.riskDrill", { n: matrix.riskCount }),
+                }
+              : undefined
+          }
+          note={
+            matrix.total === null
+              ? undefined
+              : t("kpi.riskOf", { total: matrix.total })
+          }
+        />
+      </section>
       <Panel
         id="distribution"
         title={t("distribution.title", {
@@ -131,7 +263,10 @@ async function Indicators({
           ) : undefined
         }
       >
-        <DistributionView data={distribution} />
+        <DistributionView
+          data={distribution}
+          context={{ base, masked, smallN: minGroupSize }}
+        />
       </Panel>
       <Panel
         id="matrix"
@@ -139,7 +274,7 @@ async function Indicators({
         hint={t("matrix.hint")}
         meta={cycle.name}
       >
-        <RiskMatrixView matrix={matrix} />
+        <RiskMatrixView matrix={matrix} drill={base} />
       </Panel>
       <Panel
         id="alerts"
@@ -163,8 +298,23 @@ async function Indicators({
           ) : undefined
         }
       >
-        <AlertsView data={alerts} />
+        <AlertsView
+          data={alerts}
+          context={{ base, targets, total: matrix.total }}
+        />
       </Panel>
+      {drill ? (
+        <Suspense fallback={null}>
+          <DrillSection
+            actor={actor}
+            cycleId={cycle.id}
+            drill={drill}
+            base={base}
+            minGroupSize={minGroupSize}
+            filters={masked ? {} : { ...orgFiltersOf(p) }}
+          />
+        </Suspense>
+      ) : null}
     </div>
   );
 }

@@ -5,7 +5,10 @@ import type { EngagementTile } from "@/modules/analytics/engagement/types";
 import { goalKpis } from "@/modules/analytics/goals-insights/queries";
 import type { GoalKpiGroup } from "@/modules/analytics/goals-insights/types";
 import { indicatorSnapshot } from "@/modules/analytics/indicators/queries";
-import type { IndicatorDistribution } from "@/modules/analytics/indicators/types";
+import type {
+  IndicatorDistribution,
+  RiskMatrix,
+} from "@/modules/analytics/indicators/types";
 import {
   sentimentByDimension,
   topThemes,
@@ -40,8 +43,12 @@ export type ExecutiveSections = {
   completion: CompletionSummary;
   retention?: IndicatorSummary;
   engagement?: IndicatorSummary;
-  /** People in the risk quadrant and with both indicators (null: masked). */
-  risk?: { riskCount: number | null; total: number | null };
+  /**
+   * The risk matrix (retention × engagement bands): people in the risk
+   * quadrant and with both indicators (null: masked) and the nine cells.
+   * Never the names (`atRisk` is always null here).
+   */
+  risk?: RiskMatrix;
   sentiment?: DimensionSentiment[];
   /** Goal KPIs of everybody in reach (#62); null when direction cannot see them. */
   goals?: GoalKpiGroup | null;
@@ -122,7 +129,7 @@ export const COLLECTORS: readonly Collector[] = [
     modes: QUANT,
     collect: async (ctx) => {
       const { matrix } = await ctx.indicators();
-      return { riskCount: matrix.riskCount, total: matrix.total };
+      return { ...matrix, atRisk: null };
     },
   },
   {

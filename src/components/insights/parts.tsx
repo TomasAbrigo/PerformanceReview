@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { useTranslations } from "next-intl";
-import { BulletBar, ChartFrame } from "@/components/charts";
+import { BulletBar, ChartFrame, type PanelKind } from "@/components/charts";
 
 /** 0-1 -> whole percent. */
 export const pct = (n: number | null | undefined) =>
@@ -9,7 +9,9 @@ export const pct = (n: number | null | undefined) =>
 /**
  * A titled dashboard section: a white card on the fog background. It is the
  * chart kit's ChartFrame (title as the question, `hint` as how to read it,
- * `meta` with n and period) so every panel looks and behaves the same.
+ * `meta` with n and period) so every panel looks and behaves the same: a
+ * header band over a white body, the icon of its `kind`, and `tone=
+ * "highlight"` for the one to read first.
  */
 export function Panel({
   id,
@@ -18,6 +20,8 @@ export function Panel({
   meta,
   actions,
   icon,
+  kind,
+  tone,
   children,
 }: {
   id: string;
@@ -27,6 +31,9 @@ export function Panel({
   actions?: ReactNode;
   /** The tile's icon: say what the panel holds when it is not a chart. */
   icon?: ReactNode;
+  /** What it holds (distribution, trend, people, comments…): its icon. */
+  kind?: PanelKind;
+  tone?: "default" | "highlight";
   children: ReactNode;
 }) {
   return (
@@ -36,6 +43,8 @@ export function Panel({
       howToRead={hint}
       meta={meta}
       icon={icon}
+      kind={kind}
+      tone={tone}
       actions={actions}
     >
       <div className="flex flex-col gap-4">{children}</div>

@@ -1,41 +1,106 @@
 import { useFormatter, useTranslations } from "next-intl";
+import type { ReactNode } from "react";
+import { type DrillBase, DrillLink } from "@/components/drill/drill-link";
+import { ScaleBar } from "@/components/experience";
 import { MiniBar } from "@/components/qualitative/sentiment-bars";
 import type { Dm360, Dm360Card } from "@/modules/analytics/dm-360/types";
+import type { DmMetric, Drill } from "@/modules/insights/drill-spec";
+import {
+  type KpiThresholds,
+  likertTone,
+  percentTone,
+  type Tone,
+} from "@/modules/insights/tone";
 import { sentiments } from "@/modules/qualitative-analysis/constants";
 import { Sparkline } from "./sparkline";
 
-/** One figure of a card: a label, its value and, beside it, what it is over. */
+/**
+ * One figure of a card: its label, its value (a link to the people behind
+ * it when the card can be drilled), what it is over, its scale and tone.
+ */
 function Figure({
   label,
   value,
   note,
   testId,
+  scale,
+  tone,
+  drill,
 }: {
   label: string;
   value: string;
   note?: string;
   testId: string;
+  scale?: { value: number; min: number; max: number; label: string };
+  tone?: Tone;
+  drill?: { base: DrillBase; drill: Drill; label: string };
 }) {
+  const t = useTranslations("Experience");
+  const shown: ReactNode = drill ? (
+    <DrillLink {...drill} className="font-heading text-2xl tabular-nums">
+      {value}
+    </DrillLink>
+  ) : (
+    <span className="font-heading text-2xl tabular-nums">{value}</span>
+  );
   return (
-    <div className="dm-figure">
-      <dt className="text-xs text-muted-foreground">{label}</dt>
-      <dd
-        className="flex flex-wrap items-baseline gap-x-1.5"
-        data-testid={testId}
-      >
-        <span className="font-heading text-2xl tabular-nums">{value}</span>
-        {note ? (
-          <>
-            {" "}
-            <span className="text-xs text-muted-foreground">{note}</span>
-          </>
+    <div
+      className="flex min-w-0 flex-col gap-1.5 rounded-lg border border-border/70 bg-card p-3"
+      data-tone={tone}
+    >
+      <dt className="text-xs leading-tight text-muted-foreground">{label}</dt>
+      <dd className="flex flex-col gap-1.5">
+        <span className="flex flex-wrap items-center justify-between gap-1">
+          <span
+            className="flex flex-wrap items-baseline gap-x-1.5"
+            data-testid={testId}
+          >
+            {shown}
+            {note ? (
+              <>
+                {" "}
+                <span className="text-xs text-muted-foreground">{note}</span>
+              </>
+            ) : null}
+          </span>
+          {tone ? (
+            <span
+              className="tone-pill shrink-0 px-1.5 text-[10px]"
+              data-tone={tone}
+            >
+              {t(`tone.${tone}`)}
+            </span>
+          ) : null}
+        </span>
+        {scale ? (
+          <ScaleBar
+            {...scale}
+            tone={tone}
+            minLabel={String(scale.min)}
+            maxLabel={scale.max === 100 ? "100 %" : String(scale.max)}
+          />
         ) : null}
       </dd>
     </div>
   );
 }
 
-function CardView({ card, team }: { card: Dm360Card; team: number }) {
+function CardView({
+  card,
+  team,
+  riskThreshold,
+  thresholds,
+  base,
+  cycleId,
+}: {
+  card: Dm360Card;
+  team: number;
+  riskThreshold: number;
+  thresholds?: KpiThresholds;
+  /** Set when the card can be drilled (People or a manager, direct scope). */
+  base?: DrillBase;
+  cycleId: string;
+}) {
   const t = useTranslations("Insights360");
   const ts = useTranslations("Qualitative.sentiment");
   const format = useFormatter();
@@ -47,24 +112,87 @@ function CardView({ card, team }: { card: Dm360Card; team: number }) {
     ? t("card.others")
     : (card.label ?? t("card.team", { n: team }));
   const s = card.sentiment;
+  const canDrill = base && card.label !== null && !card.others;
+  const drillOf = (metric: DmMetric, n: number | null) =>
+    canDrill && n !== 0
+      ? {
+          base: base!,
+          drill: { kind: "dm" as const, dm: card.key, metric },
+          label: t(`drill.${metric}`, { dm: name }),
+        }
+      : undefined;
+  const alerts = card.insights.filter((i) => i.code !== "stable");
+  const rate = (key: "self" | "manager", r: number | null) => (
+    <Figure
+      label={t(`card.${key}`)}
+      testId={`dm-${key}`}
+      value={r === null ? none : t("card.completion", { percent: percent(r) })}
+      tone={
+        r !== null && thresholds
+          ? percentTone(percent(r), thresholds)
+          : undefined
+      }
+      scale={
+        r === null
+          ? undefined
+          : {
+              value: percent(r),
+              min: 0,
+              max: 100,
+              label: `${t(`card.${key}`)}: ${percent(r)} %`,
+            }
+      }
+      drill={r !== null && r < 1 ? drillOf(key, null) : undefined}
+    />
+  );
   return (
     <article
-      className="metric-card gap-5"
+      className="metric-card gap-4"
       aria-labelledby={`dm-${card.key}`}
       data-testid="dm-card"
     >
-      <header className="flex flex-wrap items-baseline justify-between gap-2">
+      <header className="flex flex-wrap items-center justify-between gap-2">
         <h2 id={`dm-${card.key}`} className="text-xl">
           {name}
         </h2>
-        <span
-          className="text-sm text-muted-foreground"
-          data-testid="dm-card-people"
-        >
-          {t("card.people", { n: card.people })}
-        </span>
+        <div className="flex items-center gap-2">
+          {alerts.length === 0 ? (
+            <ul data-testid="dm-insights" className="flex">
+              {card.insights.map((i) => (
+                <li
+                  key={i.code}
+                  data-insight={i.code}
+                  className="tone-pill"
+                  data-tone={i.code === "stable" ? "good" : undefined}
+                >
+                  {t(`insight.${i.code}`)}
+                </li>
+              ))}
+            </ul>
+          ) : null}
+          <span
+            className="text-sm text-muted-foreground"
+            data-testid="dm-card-people"
+          >
+            {t("card.people", { n: card.people })}
+          </span>
+        </div>
       </header>
-      <dl className="dm-figures">
+      {alerts.length > 0 ? (
+        <ul
+          className="insight-callout flex flex-col gap-1 text-sm"
+          data-testid="dm-insights"
+        >
+          {alerts.map((i) => (
+            <li key={i.code} data-insight={i.code}>
+              {"params" in i
+                ? t(`insight.${i.code}`, i.params)
+                : t(`insight.${i.code}`)}
+            </li>
+          ))}
+        </ul>
+      ) : null}
+      <dl className="grid grid-cols-2 gap-2 sm:grid-cols-3">
         <Figure
           label={t("card.retention")}
           testId="dm-retention"
@@ -74,6 +202,22 @@ function CardView({ card, team }: { card: Dm360Card; team: number }) {
               ? t("card.meanOf", { n: card.retention.n })
               : undefined
           }
+          tone={
+            card.retention
+              ? likertTone(card.retention.mean, riskThreshold)
+              : undefined
+          }
+          scale={
+            card.retention
+              ? {
+                  value: card.retention.mean,
+                  min: 1,
+                  max: 5,
+                  label: `${t("card.retention")}: ${one(card.retention.mean)}`,
+                }
+              : undefined
+          }
+          drill={card.retention ? drillOf("retention", null) : undefined}
         />
         <Figure
           label={t("card.engagement")}
@@ -84,6 +228,22 @@ function CardView({ card, team }: { card: Dm360Card; team: number }) {
               ? t("card.meanOf", { n: card.engagement.n })
               : undefined
           }
+          tone={
+            card.engagement
+              ? likertTone(card.engagement.mean, riskThreshold)
+              : undefined
+          }
+          scale={
+            card.engagement
+              ? {
+                  value: card.engagement.mean,
+                  min: 1,
+                  max: 5,
+                  label: `${t("card.engagement")}: ${one(card.engagement.mean)}`,
+                }
+              : undefined
+          }
+          drill={card.engagement ? drillOf("engagement", null) : undefined}
         />
         <Figure
           label={t("card.risk")}
@@ -98,81 +258,97 @@ function CardView({ card, team }: { card: Dm360Card; team: number }) {
               ? t("card.riskOf", { people: card.risk.people, of: card.risk.of })
               : undefined
           }
-        />
-        <Figure
-          label={t("card.self")}
-          testId="dm-self"
-          value={
-            card.selfRate === null
-              ? none
-              : t("card.completion", { percent: percent(card.selfRate) })
+          tone={
+            card.risk && thresholds
+              ? percentTone(percent(card.risk.share), thresholds, "down")
+              : undefined
           }
-        />
-        <Figure
-          label={t("card.manager")}
-          testId="dm-manager"
-          value={
-            card.managerRate === null
-              ? none
-              : t("card.completion", { percent: percent(card.managerRate) })
+          scale={
+            card.risk
+              ? {
+                  value: percent(card.risk.share),
+                  min: 0,
+                  max: 100,
+                  label: `${t("card.risk")}: ${percent(card.risk.share)} %`,
+                }
+              : undefined
           }
+          drill={card.risk ? drillOf("risk", card.risk.people) : undefined}
+        />
+        {rate("self", card.selfRate)}
+        {rate("manager", card.managerRate)}
+        <Figure
+          label={t("card.commentsLabel")}
+          testId="dm-comments"
+          value={s ? String(s.comments) : none}
+          note={
+            s
+              ? t("card.commentsOf", { people: s.people })
+              : t("card.noComments")
+          }
+          drill={s ? drillOf("comments", s.comments) : undefined}
         />
       </dl>
-      <div className="dm-block">
-        <p className="flex flex-wrap justify-between gap-x-3 text-sm">
-          <span>{t("card.sentiment")}</span>
-          <span className="text-muted-foreground" data-testid="dm-comments">
-            {s
-              ? t("card.comments", { n: s.comments, people: s.people })
-              : t("card.noComments")}
-          </span>
-        </p>
-        {s ? (
-          <div className="flex flex-col gap-2" data-testid="dm-sentiment">
-            <MiniBar
-              counts={{ ...s.counts, total: s.comments }}
-              label={sentiments
-                .map((k) => `${ts(k)} ${percent(s.share[k])} %`)
-                .join(", ")}
-            />
-            <p className="flex flex-wrap gap-x-3 text-xs text-muted-foreground">
-              {sentiments
-                .filter((k) => s.counts[k] > 0)
-                .map((k) => (
-                  <span key={k}>
-                    {ts(k)} {percent(s.share[k])} %
-                  </span>
-                ))}
-            </p>
-          </div>
-        ) : null}
-      </div>
-      <div className="dm-block">
-        <p className="text-sm">{t("card.trend")}</p>
+      {s ? (
+        <div className="flex flex-col gap-1.5" data-testid="dm-sentiment">
+          <p className="text-xs text-muted-foreground">{t("card.sentiment")}</p>
+          <MiniBar
+            counts={{ ...s.counts, total: s.comments }}
+            label={sentiments
+              .map((k) => `${ts(k)} ${percent(s.share[k])} %`)
+              .join(", ")}
+            drillOf={
+              canDrill
+                ? (sentiment) => ({
+                    base: base!,
+                    drill: {
+                      kind: "comments",
+                      scope: {
+                        cycle: cycleId,
+                        dm: card.key,
+                        sentiment: sentiment as "positive",
+                      },
+                    },
+                  })
+                : undefined
+            }
+          />
+          <p className="flex flex-wrap gap-x-3 text-xs text-muted-foreground">
+            {sentiments
+              .filter((k) => s.counts[k] > 0)
+              .map((k) => (
+                <span key={k}>
+                  {ts(k)} {percent(s.share[k])} %
+                </span>
+              ))}
+          </p>
+        </div>
+      ) : null}
+      <div className="flex flex-col gap-1.5">
+        <p className="text-xs text-muted-foreground">{t("card.trend")}</p>
         <Sparkline points={card.trend} />
-      </div>
-      <div className="flex flex-col gap-1">
-        <h3 className="text-sm font-medium">{t("card.reading")}</h3>
-        <ul
-          className="flex list-disc flex-col gap-1 pl-5 text-sm"
-          data-testid="dm-insights"
-        >
-          {card.insights.map((i) => (
-            <li key={i.code} data-insight={i.code}>
-              {"params" in i
-                ? t(`insight.${i.code}`, i.params)
-                : t(`insight.${i.code}`)}
-            </li>
-          ))}
-        </ul>
       </div>
     </article>
   );
 }
 
 /** The DM cards of a cycle, with the people left out of them said, never hidden silently. */
-export function Dm360View({ data }: { data: Dm360 }) {
+export function Dm360View({
+  data,
+  base,
+  thresholds,
+}: {
+  data: Dm360;
+  /** Where the drills open; only used in the direct scope and with names. */
+  base?: DrillBase;
+  thresholds?: KpiThresholds;
+}) {
   const t = useTranslations("Insights360");
+  // The drills read the DM attribute itself: only the direct scope matches them.
+  const drillBase =
+    base && data.scope === "direct" && data.minGroupSize === null
+      ? base
+      : undefined;
   // Direction's teams have no name: they are numbered in the order shown.
   let team = 0;
   return (
@@ -188,6 +364,10 @@ export function Dm360View({ data }: { data: Dm360 }) {
               key={card.key}
               card={card}
               team={card.label === null && !card.others ? ++team : 0}
+              riskThreshold={data.thresholds.riskThreshold}
+              thresholds={thresholds}
+              base={drillBase}
+              cycleId={data.cycleId}
             />
           ))}
         </div>

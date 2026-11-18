@@ -91,113 +91,115 @@ export function SideNavClient({
 
   return (
     <nav aria-label={label} className="side-nav">
-      <div className="flex items-center justify-between pr-4 lg:block lg:pr-0">
-        <Link
-          href="/"
-          aria-label={company}
-          className="flex flex-col gap-2 px-5 pt-8 pb-5 outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring"
-        >
-          <Image
-            src="/brand/santex-wordmark-white.png"
-            alt={company}
-            width={588}
-            height={126}
-            priority
-            className="h-6 w-auto self-start"
-          />
-          <span className="side-nav-kicker">{product}</span>
-        </Link>
-        <button
-          type="button"
-          aria-expanded={menuOpen}
-          aria-controls="side-nav-sections"
-          onClick={() => setOpened(menuOpen ? null : pathname)}
-          className="mt-2 flex items-center gap-2 rounded-lg px-3 py-2 text-sm outline-none hover:bg-sidebar-accent focus-visible:ring-2 focus-visible:ring-sidebar-ring lg:hidden"
-        >
-          {menuOpen ? (
-            <X className="size-4" aria-hidden="true" />
-          ) : (
-            <Menu className="size-4" aria-hidden="true" />
-          )}
-          {menu}
-        </button>
-      </div>
-      <div
-        id="side-nav-sections"
-        className={cn(
-          "flex-col gap-1 px-5 pb-4 lg:flex lg:pb-0",
-          menuOpen ? "flex" : "hidden",
-        )}
-      >
-        <NavLink
-          href="/"
-          active={pathname === "/"}
-          icon={
-            <House
-              strokeWidth={1.6}
-              aria-hidden="true"
-              className="size-4 shrink-0 text-brand-200"
+      <div className="side-nav-inner">
+        <div className="flex items-center justify-between pr-4 lg:block lg:pr-0">
+          <Link
+            href="/"
+            aria-label={company}
+            className="flex flex-col gap-2 px-5 pt-8 pb-5 outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring"
+          >
+            <Image
+              src="/brand/santex-wordmark-white.png"
+              alt={company}
+              width={588}
+              height={126}
+              priority
+              className="h-6 w-auto self-start"
             />
-          }
+            <span className="side-nav-kicker">{product}</span>
+          </Link>
+          <button
+            type="button"
+            aria-expanded={menuOpen}
+            aria-controls="side-nav-sections"
+            onClick={() => setOpened(menuOpen ? null : pathname)}
+            className="mt-2 flex items-center gap-2 rounded-lg px-3 py-2 text-sm outline-none hover:bg-sidebar-accent focus-visible:ring-2 focus-visible:ring-sidebar-ring lg:hidden"
+          >
+            {menuOpen ? (
+              <X className="size-4" aria-hidden="true" />
+            ) : (
+              <Menu className="size-4" aria-hidden="true" />
+            )}
+            {menu}
+          </button>
+        </div>
+        <div
+          id="side-nav-sections"
+          className={cn(
+            "flex-col gap-1 px-5 pb-4 lg:flex lg:pb-0",
+            menuOpen ? "flex" : "hidden",
+          )}
         >
-          {home}
-        </NavLink>
-        {sections.map((section) => {
-          const open = expanded(section);
-          const listId = `side-nav-${section.key}`;
-          return (
-            <div key={section.key} className="flex flex-col gap-0.5 pt-2">
-              <p className="side-nav-kicker hidden px-2 pb-1.5 lg:block">
-                {section.title}
-              </p>
-              <button
-                type="button"
-                aria-expanded={open}
-                aria-controls={listId}
-                onClick={() =>
-                  setCollapsed((c) => ({ ...c, [section.key]: open }))
-                }
-                className="side-nav-kicker flex items-center justify-between rounded-lg px-2 py-2 outline-none hover:bg-sidebar-accent focus-visible:ring-2 focus-visible:ring-sidebar-ring lg:hidden"
-              >
-                {section.title}
-                <ChevronDown
+          <NavLink
+            href="/"
+            active={pathname === "/"}
+            icon={
+              <House
+                strokeWidth={1.6}
+                aria-hidden="true"
+                className="size-4 shrink-0 text-brand-200"
+              />
+            }
+          >
+            {home}
+          </NavLink>
+          {sections.map((section) => {
+            const open = expanded(section);
+            const listId = `side-nav-${section.key}`;
+            return (
+              <div key={section.key} className="flex flex-col gap-0.5 pt-2">
+                <p className="side-nav-kicker hidden px-2 pb-1.5 lg:block">
+                  {section.title}
+                </p>
+                <button
+                  type="button"
+                  aria-expanded={open}
+                  aria-controls={listId}
+                  onClick={() =>
+                    setCollapsed((c) => ({ ...c, [section.key]: open }))
+                  }
+                  className="side-nav-kicker flex items-center justify-between rounded-lg px-2 py-2 outline-none hover:bg-sidebar-accent focus-visible:ring-2 focus-visible:ring-sidebar-ring lg:hidden"
+                >
+                  {section.title}
+                  <ChevronDown
+                    className={cn(
+                      "size-4 transition-transform",
+                      open && "rotate-180",
+                    )}
+                    aria-hidden="true"
+                  />
+                </button>
+                <div
+                  id={listId}
                   className={cn(
-                    "size-4 transition-transform",
-                    open && "rotate-180",
+                    "flex-col gap-0.5 lg:flex",
+                    open ? "flex" : "hidden",
                   )}
-                  aria-hidden="true"
-                />
-              </button>
-              <div
-                id={listId}
-                className={cn(
-                  "flex-col gap-0.5 lg:flex",
-                  open ? "flex" : "hidden",
-                )}
-              >
-                {section.items.map((item) => (
-                  <NavLink
-                    key={item.key}
-                    href={item.href}
-                    active={isActive(pathname, item.href)}
-                    icon={
-                      <NavIcon
-                        icon={item.key}
-                        className="size-4 shrink-0 text-brand-200"
-                      />
-                    }
-                  >
-                    {item.label}
-                  </NavLink>
-                ))}
+                >
+                  {section.items.map((item) => (
+                    <NavLink
+                      key={item.key}
+                      href={item.href}
+                      active={isActive(pathname, item.href)}
+                      icon={
+                        <NavIcon
+                          icon={item.key}
+                          className="size-4 shrink-0 text-brand-200"
+                        />
+                      }
+                    >
+                      {item.label}
+                    </NavLink>
+                  ))}
+                </div>
               </div>
-            </div>
-          );
-        })}
-      </div>
-      <div className="mt-auto hidden flex-col gap-1 px-5 pt-5 pb-10 text-xs text-brand-200 lg:flex">
-        <p>{company}</p>
-        <p>{tagline}</p>
+            );
+          })}
+        </div>
+        <div className="mt-auto hidden flex-col gap-1 px-5 pt-5 pb-10 text-xs text-brand-200 lg:flex">
+          <p>{company}</p>
+          <p>{tagline}</p>
+        </div>
       </div>
     </nav>
   );

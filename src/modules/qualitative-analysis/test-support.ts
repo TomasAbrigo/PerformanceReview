@@ -85,7 +85,13 @@ export async function insertAnswer(
   participantId: string,
   reviewerId: string | null,
   relationship: "self" | "manager",
-  answers: { questionId: string; text?: string; option?: string }[],
+  answers: {
+    questionId: string;
+    text?: string;
+    option?: string;
+    /** The option's 1-5 value (the indicator questions). */
+    value?: number;
+  }[],
 ): Promise<string[]> {
   const [r] = await db.execute<{ id: string }>(sql`
     insert into review_request (cycle_id, participant_id, reviewer_person_id, relationship, status, submitted_at)
@@ -95,8 +101,8 @@ export async function insertAnswer(
   const ids: string[] = [];
   for (const a of answers) {
     const [row] = await db.execute<{ id: string }>(sql`
-      insert into answer (request_id, question_revision_id, text_value, option_label)
-      values (${r.id}::uuid, ${a.questionId}::uuid, ${a.text ?? null}, ${a.option ?? null})
+      insert into answer (request_id, question_revision_id, text_value, option_label, option_value)
+      values (${r.id}::uuid, ${a.questionId}::uuid, ${a.text ?? null}, ${a.option ?? null}, ${a.value ?? null})
       returning id`);
     ids.push(row.id);
   }

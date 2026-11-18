@@ -8,7 +8,6 @@ import { connection } from "next/server";
 import { Suspense } from "react";
 import { PageHeader } from "@/components/page-header";
 import { groupKicker } from "@/components/page-kicker";
-import { ExecutiveView } from "@/components/insights/executive-view";
 import { CycleForm } from "@/components/insights/cycle-form";
 import { OrgFilterFields } from "@/components/org/org-filter-fields";
 import { orgFiltersOf, parseOrgParams } from "@/components/org/params";
@@ -20,7 +19,6 @@ import { db } from "@/db/client";
 import { routing } from "@/i18n/routing";
 import { isHr } from "@/modules/actor/access";
 import { getActor } from "@/modules/actor/server";
-import { executiveSummary } from "@/modules/analytics/dashboards";
 import { canSeeExecutiveView } from "@/modules/insights";
 import { orgFilterOptions } from "@/modules/org-attributes";
 import {
@@ -29,8 +27,11 @@ import {
   type ExecutiveMode,
 } from "@/modules/insights/executive";
 import { listCycles } from "@/modules/review-core";
-import { getSetting } from "@/modules/settings";
+import { getSettings } from "@/modules/settings";
+import { parseDrill } from "@/modules/insights/drill-spec";
+import { drillBase } from "@/components/drill/drill-link";
 import { dimensionLabels } from "../dimension-labels";
+import { DrillSection } from "../drill-section";
 
 async function Executive({
   params,
@@ -53,26 +54,35 @@ async function Executive({
   );
   const cycle = cycles.find((c) => c.id === sp.cycle) ?? cycles[0];
   if (!cycle) return <EmptyState>{t("noCycles")}</EmptyState>;
-  const minGroupSize = await getSetting(db, "aggregation.minGroupSize");
+  const settings = await getSettings(db);
+  const minGroupSize = settings["aggregation.minGroupSize"];
   // The org cuts are People's: direction reads the whole cycle.
   const hr = isHr(actor);
   const filters = hr ? orgFiltersOf(parseOrgParams(sp)) : {};
-  const [report, summary, org] = await Promise.all([
+  // The cycle before (by period), for the deltas of the KPIs.
+  const previousCycle = cycles
+    .filter((c) => c.periodStart < cycle.periodStart)
+    .sort((a, b) => (a.periodStart < b.periodStart ? 1 : -1))[0];
+  const [report, previous, org] = await Promise.all([
     executiveReport(db, actor, {
       cycleId: cycle.id,
       mode,
       minGroupSize,
       filters,
     }),
-    mode === "qualitative"
-      ? null
-      : executiveSummary(db, actor, {
-          cycleId: cycle.id,
+    previousCycle && mode !== "qualitative"
+      ? executiveReport(db, actor, {
+          cycleId: previousCycle.id,
+          mode: "quantitative",
           minGroupSize,
           filters,
-        }),
+        })
+      : null,
     hr ? orgFilterOptions(db, actor, { cycleId: cycle.id }) : null,
   ]);
+  // Drill-down: `?drill=` opens the records behind a mark (drill-section.tsx).
+  const base = drillBase("/insights/executive", sp, actor);
+  const drill = parseDrill(sp.drill);
   const dimensionLabel = await dimensionLabels(
     report.sentiment?.map((r) => r.dimension) ?? [],
   );
@@ -97,12 +107,24 @@ async function Executive({
           <ModeToggle mode={mode} cycleId={cycle.id} filters={filters} />
         </div>
       </PageHeader>
-      <ExecutiveReportView report={report} dimensionLabel={dimensionLabel} />
-      {summary ? (
-        <section className="flex flex-col gap-4">
-          <h2 className="text-2xl">{t("Executive.ratings")}</h2>
-          <ExecutiveView data={summary} showProgress={false} />
-        </section>
+      <ExecutiveReportView
+        report={report}
+        previous={previous}
+        dimensionLabel={dimensionLabel}
+        base={base}
+        settings={settings}
+      />
+      {drill ? (
+        <Suspense fallback={null}>
+          <DrillSection
+            actor={actor}
+            cycleId={cycle.id}
+            drill={drill}
+            base={base}
+            minGroupSize={minGroupSize}
+            filters={filters}
+          />
+        </Suspense>
       ) : null}
     </div>
   );
