@@ -24,10 +24,7 @@ export type AnswerColumns = {
 
 /** Why an answer was rejected (the `message` of its issue). */
 export type CaptureIssue =
-  | "required"
-  | "out_of_scale"
-  | "invalid_choice"
-  | "unknown_question";
+  "required" | "out_of_scale" | "invalid_choice" | "unknown_question";
 
 /**
  * The single rule of who may write a request's answers (and submit or share

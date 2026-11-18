@@ -27,7 +27,10 @@ let selfId: string;
 let managerId: string;
 let questions: QuestionRevision[];
 const hr: ActorContext = { personId: null, role: "hr" };
-const bruno = (): ActorContext => ({ personId: people.bruno, role: "employee" });
+const bruno = (): ActorContext => ({
+  personId: people.bruno,
+  role: "employee",
+});
 const carla = (): ActorContext => ({ personId: people.carla, role: "manager" });
 
 /** A valid answer for every self question. */
@@ -86,9 +89,10 @@ describe("saveDraft", () => {
     ]);
     const rows = await answersOf(managerId);
     expect(rows).toHaveLength(2);
-    expect(rows.find((r) => r.questionRevisionId === rating.id)).toMatchObject(
-      { optionValue: max.value, normalized: max.normalized },
-    );
+    expect(rows.find((r) => r.questionRevisionId === rating.id)).toMatchObject({
+      optionValue: max.value,
+      normalized: max.normalized,
+    });
     expect(rows.find((r) => r.questionRevisionId === text.id)?.textValue).toBe(
       "Aprendí mucho",
     );

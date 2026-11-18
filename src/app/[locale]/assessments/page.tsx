@@ -24,7 +24,9 @@ import {
   listAssessmentParticipants,
 } from "@/modules/assessments";
 import { noOrgOptions } from "@/modules/org-attributes/kinds";
-import { localizeCycles } from "@/modules/review-core/cycle-name";
+import { cycleName, localizeCycles } from "@/modules/review-core/cycle-name";
+import { listPendingSelfReviews } from "@/modules/review-capture";
+import { PendingReviews } from "@/components/assessments/pending-reviews";
 
 const HERE = "/assessments";
 
@@ -53,10 +55,24 @@ async function AssessmentsList({
   if (scope.kind === "none") return header(t("noPerson"));
   const ownOnly = scope.kind === "own";
   const p = parseAssessmentsParams(await searchParams);
+  // The actor's own self assessments to complete, above the list.
+  const pending = (await listPendingSelfReviews(db, actor)).map((r) => ({
+    requestId: r.requestId,
+    dueDate: r.dueDate,
+    cycleName: cycleName(
+      { name: r.cycleName, localizedName: r.localizedName },
+      locale,
+    ),
+  }));
   // Latest cycle by default (the list comes latest period first).
   const cycles = localizeCycles(await listAssessmentCycles(db, actor), locale);
   if (cycles.length === 0) {
-    return header(ownOnly ? t("noParticipants") : t("noCycles"));
+    return (
+      <div className="flex flex-col gap-8">
+        {header(ownOnly ? t("noParticipants") : t("noCycles"))}
+        <PendingReviews items={pending} />
+      </div>
+    );
   }
   const cycle = cycles.find((c) => c.id === p.cycle) ?? cycles[0];
   const [page, options] = await Promise.all([
@@ -93,6 +109,7 @@ async function AssessmentsList({
           ownOnly={ownOnly}
         />
       </PageHeader>
+      <PendingReviews items={pending} />
       <Panel
         id="assessments-list"
         title={`${cycle.name} · ${t("count", { n: page.total })}`}

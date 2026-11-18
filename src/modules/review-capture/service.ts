@@ -6,6 +6,7 @@ import {
   reviewCycle,
   reviewRequest,
 } from "@/db/schema";
+import type { LocalizedText } from "@/db/schema/rating-scales";
 import { isUuid } from "@/lib/uuid";
 import type { ActorContext } from "@/modules/actor/types";
 import { questionsFor } from "@/modules/review-core/answers";
@@ -171,6 +172,8 @@ export type PendingSelfReview = {
   requestId: string;
   cycleId: string;
   cycleName: string;
+  /** The cycle's name per language, when it has one (see cycleName). */
+  localizedName: LocalizedText | null;
   periodStart: string;
   periodEnd: string;
   dueDate: string | null;
@@ -190,6 +193,7 @@ export async function listPendingSelfReviews(
       requestId: reviewRequest.id,
       cycleId: reviewCycle.id,
       cycleName: reviewCycle.name,
+      localizedName: reviewCycle.localizedName,
       periodStart: reviewCycle.periodStart,
       periodEnd: reviewCycle.periodEnd,
       dueDates: reviewCycle.dueDates,
