@@ -1,5 +1,6 @@
 import postgres from "postgres";
 import { assertLocalDatabase } from "../src/db/local";
+import { cycleName } from "../src/modules/review-core/cycle-name";
 import { e2eDatabaseUrl } from "./database";
 
 /** What the specs need to know of what the import left (read only). */
@@ -73,7 +74,12 @@ export async function assessmentSubject(): Promise<AssessmentSubject> {
     throw new Error(
       "the import left no participant with both reviews answered and goals",
     );
-  return { ...row, goalTitles: row.goalTitles ?? [] };
+  return {
+    ...row,
+    // As the screens write it (a period of ISO days reads as months, #119).
+    cycleName: cycleName({ name: row.cycleName }, "es"),
+    goalTitles: row.goalTitles ?? [],
+  };
 }
 
 /**
