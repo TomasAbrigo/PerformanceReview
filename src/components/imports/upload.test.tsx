@@ -429,6 +429,33 @@ describe.each(["es", "en"] as const)("UploadForm (%s)", (locale) => {
       expect(await screen.findByText(t.result.noNew)).toBeInTheDocument();
     });
 
+    it("counts the records entered in the app that the import overwrote (#106)", async () => {
+      await previewFile(locale, csv(), {
+        importResult: {
+          ok: true,
+          runId: "run-4",
+          counts: { ...counts, nativeOverwritten: 3 },
+          rejects: [],
+        },
+      });
+
+      await userEvent.click(
+        screen.getByRole("button", { name: t.preview.import }),
+      );
+
+      const label = await screen.findByText(t.result.nativeOverwritten);
+      expect(label.nextElementSibling).toHaveTextContent("3");
+    });
+
+    it("does not mention overwritten records when there were none", async () => {
+      await previewFile(locale);
+      await userEvent.click(
+        screen.getByRole("button", { name: t.preview.import }),
+      );
+      await screen.findByRole("heading", { name: t.result.title });
+      expect(screen.queryByText(t.result.nativeOverwritten)).toBeNull();
+    });
+
     it("does not claim the file was imported before when every row was rejected", async () => {
       await previewFile(locale, csv(), {
         importResult: {

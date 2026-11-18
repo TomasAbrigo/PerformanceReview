@@ -34,6 +34,16 @@ export function UploadResult({
     ["inserted", t("inserted"), counts.inserted],
     ["unchanged", t("unchanged"), counts.unchanged],
     ["rejected", t("rejected"), counts.rejected],
+    // Only when the import overwrote something written in the app (#106).
+    ...(counts.nativeOverwritten
+      ? ([
+          [
+            "nativeOverwritten",
+            t("nativeOverwritten"),
+            counts.nativeOverwritten,
+          ],
+        ] as const)
+      : []),
   ] as const;
 
   return (

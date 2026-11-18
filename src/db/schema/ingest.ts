@@ -30,6 +30,8 @@ export type IngestCounts = {
   mismatches?: number;
   /** Report rows held back until someone picks their cycle (needs_decision). */
   deferred?: number;
+  /** goal, assessment: records written in the app that Bamboo's overwrote ("pisados", #106). */
+  nativeOverwritten?: number;
 };
 
 /** The counters every run shows (the optional ones are entity-specific extras). */
@@ -37,6 +39,7 @@ export type IngestCounts = {
 export const INGEST_EXTRA_COUNT_KEYS = [
   "mismatches",
   "deferred",
+  "nativeOverwritten",
 ] as const satisfies readonly (keyof IngestCounts)[];
 
 export const INGEST_COUNT_KEYS = [

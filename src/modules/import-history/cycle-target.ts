@@ -1,4 +1,4 @@
-import { and, eq, ilike } from "drizzle-orm";
+import { and, eq, gte, ilike, isNull, lte, ne } from "drizzle-orm";
 import type { DbOrTx } from "@/db/client";
 import { reviewCycle, type ReviewCycle } from "@/db/schema";
 import type { Deferral, HandlerContext } from "@/modules/ingest/handlers";
@@ -221,6 +221,12 @@ export async function cycleForPeriod(
   const key = `cycle:${sourceId}`;
   const cached = ctx.cache.get(key) as ReviewCycle | undefined;
   if (cached) return cached;
+  // A cycle run in the app over this period takes Bamboo's reviews (#106).
+  const native = await nativeCycleCovering(tx, periodStart);
+  if (native) {
+    ctx.cache.set(key, native);
+    return native;
+  }
   let [cycle] = await tx
     .select()
     .from(reviewCycle)
@@ -261,4 +267,28 @@ export async function cycleForPeriod(
   }
   ctx.cache.set(key, cycle);
   return cycle;
+}
+
+/**
+ * The cycle launched in the app (not a draft, not deleted) whose period holds
+ * `date`, when exactly one does: Bamboo's reviews of that period overwrite
+ * the ones written there instead of opening a cycle of their own.
+ */
+async function nativeCycleCovering(
+  tx: DbOrTx,
+  date: string,
+): Promise<ReviewCycle | undefined> {
+  const found = await tx
+    .select()
+    .from(reviewCycle)
+    .where(
+      and(
+        eq(reviewCycle.sourceSystem, "native"),
+        ne(reviewCycle.status, "draft"),
+        isNull(reviewCycle.deletedAt),
+        lte(reviewCycle.periodStart, date),
+        gte(reviewCycle.periodEnd, date),
+      ),
+    );
+  return found.length === 1 ? found[0] : undefined;
 }
