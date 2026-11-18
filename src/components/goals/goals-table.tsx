@@ -147,25 +147,27 @@ export function GoalsOverview({ counts }: { counts: GoalListPage["counts"] }) {
       <section className="overview-hero">
         <ProgressRing
           percent={total ? (counts.completed / total) * 100 : 0}
-          label={t("states.completed")}
-        >
-          {counts.completed}/{total}
-        </ProgressRing>
-        <div>
-          <h2 className="text-2xl">{t("states.completed")}</h2>
+          label={t("overview.completed")}
+        />
+        <div className="min-w-0">
+          <h2 className="text-2xl">{t("overview.completed")}</h2>
           <p className="mt-2 text-sm text-brand-200">
             {x("completedOf", { done: counts.completed, total })}
           </p>
         </div>
       </section>
       <MetricCard
-        label={t("states.in_progress")}
+        tone="soft"
+        label={t("overview.moving")}
         value={counts.in_progress}
+        note={t("overview.movingNote", { n: counts.in_progress })}
         icon={<Target className="size-5" />}
       />
       <MetricCard
-        label={t("states.overdue")}
+        tone="warm"
+        label={t("overview.review")}
         value={counts.overdue}
+        note={t("overview.reviewNote", { n: counts.overdue })}
         icon={<CalendarDays className="size-5" />}
       />
     </div>

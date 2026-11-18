@@ -41,6 +41,7 @@ export function Sparkline({ points }: { points: Dm360Point[] }) {
   return (
     <figure className="flex flex-col gap-1" data-testid="dm-sparkline">
       <KitSparkline
+        size="md"
         label={`${t("label")}. ${text}`}
         domain={[1, 5]}
         fmt={(v) => num(v)}

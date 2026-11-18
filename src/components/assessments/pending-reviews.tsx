@@ -1,3 +1,4 @@
+import { ClipboardCheck } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { CardCollection } from "@/components/card-collection";
 import { useDates } from "@/components/dates";
@@ -16,7 +17,12 @@ export function PendingReviews({ items }: { items: PendingItem[] }) {
   const d = useDates();
   if (items.length === 0) return null;
   return (
-    <Panel id="assessments-pending" title={t("title")} hint={t("hint")}>
+    <Panel
+      id="assessments-pending"
+      title={t("title")}
+      hint={t("hint")}
+      icon={<ClipboardCheck className="size-5" />}
+    >
       <CardCollection>
         {items.map((item) => (
           <article key={item.requestId} className="assessment-card">

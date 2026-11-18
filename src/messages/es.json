@@ -9,10 +9,10 @@
     "navigation": "Navegación",
     "groups": {
       "insights": "Análisis",
-      "data": "Datos",
+      "data": "Administración",
       "settings": "Configuración",
-      "goals": "Goals",
-      "assessments": "Assessments"
+      "goals": "Objetivos",
+      "assessments": "Evaluaciones"
     },
     "descriptions": {
       "executive": "Completitud, retención, compromiso, riesgo y sentimiento del ciclo en una sola vista.",
@@ -31,7 +31,32 @@
       "goalsArea": "Los goals de cada persona: progreso, hitos, vencimientos y comentarios, con filtros por ciclo, estado y equipo.",
       "assessmentsArea": "Las preguntas y respuestas de cada ciclo: autoevaluación y evaluación del manager, junto a los goals del período.",
       "goalsInsights": "Cumplimiento de goals junto a la retención y el compromiso de cada persona."
-    }
+    },
+    "greeting": {
+      "hr": "Buen día, equipo People",
+      "direction": "Buen día, Dirección",
+      "person": "Buen día, {name}",
+      "noPerson": "Buen día"
+    },
+    "intro": "Un punto de partida para acompañar el desarrollo de las personas.",
+    "focus": {
+      "headline": "El desarrollo se construye todos los días.",
+      "line": "{cycle} · Consultá avances, escuchá al equipo y detectá oportunidades.",
+      "noCycle": "Todavía no hay ciclos: cuando haya uno, acá vas a ver sus avances.",
+      "cta": "Explorar el ciclo"
+    },
+    "access": {
+      "title": "Accesos principales",
+      "goals": "Seguimiento de los compromisos de cada persona.",
+      "assessments": "Las dos perspectivas de cada período.",
+      "insights": "Indicadores para entender el ciclo.",
+      "explore": "Explorar"
+    },
+    "before": {
+      "title": "Antes de analizar",
+      "text": "Revisá las importaciones y los casos pendientes de calidad de datos."
+    },
+    "all": "Todas las secciones"
   },
   "LocaleSwitcher": {
     "label": "Idioma",
@@ -196,7 +221,7 @@
       "cutoffRegular": "Segmento Regular desde (% del score)",
       "hint": "Solo se usan cuando el archivo no trae la columna Segmento: por debajo de Regular el segmento es Bajo."
     },
-    "nav": "Ajustes de insights"
+    "nav": "Configuración"
   },
   "Common": {
     "exportCsv": "Exportar CSV"
@@ -277,7 +302,7 @@
   },
   "Identity": {
     "title": "Cola de identidad",
-    "nav": "Cola de identidad",
+    "nav": "Identidades",
     "description": "Registros que la importación no pudo asignar sola a una persona. Revisá cada caso: vinculalo a una persona existente, creá una persona nueva o ignoralo.",
     "tabs": {
       "label": "Vistas de la cola",
@@ -695,7 +720,13 @@
     },
     "reapply": "Reaplicar equivalencias",
     "reapplyDone": "{count, plural, =0 {Ninguna respuesta cambió.} =1 {1 respuesta remapeada.} other {# respuestas remapeadas.}}",
-    "reapplyHelp": "Vuelve a calcular las respuestas de retención y compromiso con la tabla likert_mapping actual."
+    "reapplyHelp": "Vuelve a calcular las respuestas de retención y compromiso con la tabla likert_mapping actual.",
+    "pending": "{n, plural, one {Hay # caso para revisar} other {Hay # casos para revisar}}",
+    "pendingHint": "Los conteos abren la lista exacta de registros afectados.",
+    "needsReview": "Requiere revisión",
+    "ok": "✓ Todo en orden",
+    "showAll": "{n, plural, one {Ver el indicador sin casos} other {Ver los # indicadores sin casos}}",
+    "noCases": "Sin casos"
   },
   "Exports": {
     "columns": {
@@ -941,7 +972,7 @@
     "metaN": "n = {n}"
   },
   "Indicators": {
-    "nav": "Retención y compromiso",
+    "nav": "Indicadores",
     "title": "Indicadores de retención y compromiso",
     "forbidden": "No tenés acceso a estos indicadores.",
     "noCycles": "Todavía no hay ciclos lanzados.",
@@ -1087,7 +1118,7 @@
     }
   },
   "Qualitative": {
-    "nav": "Análisis cualitativo",
+    "nav": "Feedback",
     "title": "Análisis cualitativo de comentarios",
     "forbidden": "No tenés acceso al análisis cualitativo.",
     "empty": "Todavía no hay comentarios analizados.",
@@ -1278,7 +1309,7 @@
       "team": "Equipo {n}"
     },
     "SelfAssessment": {
-      "nav": "Autoevaluación",
+      "nav": "Autoevaluaciones",
       "title": "Reporte de autoevaluación",
       "sentimentTitle": "Sentimiento de las autoevaluaciones",
       "sentimentChart": "Sentimiento de las autoevaluaciones por dimensión",
@@ -1297,7 +1328,7 @@
       "rowManager": "{dimension} · manager"
     },
     "Executive": {
-      "nav": "Vista ejecutiva",
+      "nav": "Resumen",
       "title": "Vista ejecutiva",
       "mode": "Modo",
       "modes": {
@@ -1468,7 +1499,7 @@
     }
   },
   "Completion": {
-    "nav": "Completitud",
+    "nav": "Participación",
     "title": "Completitud de evaluaciones",
     "forbidden": "No tenés acceso a esta pantalla.",
     "noCycles": "Todavía no hay ciclos con evaluaciones.",
@@ -1519,7 +1550,12 @@
         "participants": "Participantes",
         "self": "Autoevaluación enviada",
         "manager": "Evaluación del manager enviada"
-      }
+      },
+      "pending": "Pendientes",
+      "pendingValue": "{self} / {manager}",
+      "pendingNote": "Propias / manager · bases independientes",
+      "sent": "{submitted} de {applicable} enviadas",
+      "byGroup": "Avance por grupo"
     },
     "delta": {
       "title": "Comparación con {cycle}",
@@ -1585,7 +1621,7 @@
     }
   },
   "GoalsInsights": {
-    "nav": "Goals vs. assessments",
+    "nav": "Avance de objetivos",
     "title": "Goals y assessments",
     "heading": "Goals y assessments · {cycle}",
     "forbidden": "No tenés acceso a esta vista.",
@@ -1747,7 +1783,7 @@
       "retention": "Retención media",
       "engagement": "Compromiso medio",
       "risk": "En riesgo",
-      "riskValue": "{percent} % ({people} de {of})",
+      "riskValue": "{percent} %",
       "sentiment": "Sentimiento de los comentarios",
       "comments": "{n, plural, one {# comentario} other {# comentarios}} de {people, plural, one {# persona} other {# personas}}",
       "noComments": "Sin comentarios",
@@ -1757,7 +1793,8 @@
       "trend": "Evolución por ciclo",
       "reading": "Lectura",
       "none": "–",
-      "meanOf": "sobre {n}"
+      "meanOf": "sobre {n}",
+      "riskOf": "({people} de {of})"
     },
     "spark": {
       "label": "Retención y compromiso por ciclo",
@@ -1790,7 +1827,7 @@
     "santexLead": "Santex Lead"
   },
   "Engagement": {
-    "nav": "Engagement mensual",
+    "nav": "Engagement",
     "title": "Engagement mensual",
     "forbidden": "No tenés acceso al engagement mensual.",
     "noData": "Todavía no hay engagement mensual: importá el archivo con el perfil engagement-monthly en Importar archivo.",
@@ -1858,16 +1895,19 @@
   "Nav": {
     "label": "Secciones",
     "home": "Inicio",
-    "menu": "Menú"
+    "menu": "Menú",
+    "product": "Performance",
+    "people": "Personas",
+    "all": "Todas las secciones"
   },
   "Brand": {
     "company": "Santex Group",
     "tagline": "yes, it's possible"
   },
   "Goals": {
-    "nav": "Goals",
-    "title": "Goals",
-    "kicker": "Goals",
+    "nav": "Objetivos",
+    "title": "Objetivos",
+    "kicker": "Personas",
     "scope": {
       "all": "Todos los goals de la compañía.",
       "team": "Tus goals y los de las personas que reportan a vos.",
@@ -1917,7 +1957,7 @@
     },
     "progress": "{percent}% completado",
     "detail": {
-      "back": "Volver a Goals",
+      "back": "Volver a Objetivos",
       "summary": "Resumen",
       "owner": "Persona",
       "department": "Área",
@@ -1945,6 +1985,16 @@
       "manage": "Actualizar el goal"
     },
     "forbidden": "No tenés acceso a este goal: cada persona ve los suyos y, si es manager, los de su equipo.",
+    "navOwn": "Mis objetivos",
+    "titleOwn": "Mis objetivos",
+    "overview": {
+      "completed": "Objetivos completados",
+      "hint": "Según los filtros aplicados.",
+      "moving": "En movimiento",
+      "movingNote": "{n, plural, one {Objetivo en curso} other {Objetivos en curso}}",
+      "review": "Para revisar",
+      "reviewNote": "{n, plural, one {Objetivo vencido} other {Objetivos vencidos}}"
+    },
     "form": {
       "new": "Nuevo goal",
       "edit": "Editar",
@@ -1979,9 +2029,9 @@
     }
   },
   "Assessments": {
-    "nav": "Assessments",
-    "title": "Assessments",
-    "kicker": "Assessments",
+    "nav": "Evaluaciones",
+    "title": "Evaluaciones",
+    "kicker": "Personas",
     "scope": {
       "all": "Las preguntas y respuestas de cada ciclo, de toda la compañía.",
       "team": "Tus evaluaciones y las de las personas que reportan a vos.",
@@ -2084,7 +2134,10 @@
         "progressLabel": "{percent}% completado"
       }
     },
-    "forbidden": "No tenés acceso a este assessment: cada persona ve los suyos y, si es manager, los de su equipo."
+    "forbidden": "No tenés acceso a este assessment: cada persona ve los suyos y, si es manager, los de su equipo.",
+    "navOwn": "Mis evaluaciones",
+    "titleOwn": "Mis evaluaciones",
+    "back": "Volver a Evaluaciones"
   },
   "Capture": {
     "back": "Volver a Assessments",

@@ -9,55 +9,56 @@ test("home page renders in Spanish at /es", async ({ page }) => {
 
   await expect(page.locator("html")).toHaveAttribute("lang", "es");
   await expect(
-    page.getByRole("heading", { level: 1, name: "Performance Review" }),
+    page.getByRole("heading", { level: 1, name: "Buen día, equipo People" }),
   ).toBeVisible();
-  await expect(page.getByText("Evaluaciones de desempeño")).toBeVisible();
+  await expect(
+    page.getByText("Un punto de partida para acompañar el desarrollo"),
+  ).toBeVisible();
 });
 
 const ANALYSIS = [
-  "Vista ejecutiva",
-  "Completitud",
-  "Retención y compromiso",
-  "Análisis cualitativo",
-  "Autoevaluación",
-  "Goals vs. assessments",
+  "Resumen",
+  "Participación",
+  "Indicadores",
+  "Feedback",
+  "Autoevaluaciones",
+  "Avance de objetivos",
   "Análisis 360",
-  "Engagement mensual",
+  "Engagement",
 ];
 const DATA = [
   "Subir archivo",
   "Importaciones",
-  "Cola de identidad",
+  "Identidades",
   "Calidad de datos",
+  "Ciclos",
+  "Configuración",
 ];
 
-test("home navigation puts Goals and Assessments first, then the Análisis, Datos and Configuración", async ({
+test("home navigation puts Objetivos and Evaluaciones first, then the Análisis and the Administración", async ({
   page,
 }) => {
   await page.goto("/es");
   const nav = page.getByRole("navigation", { name: "Navegación" });
   await expect(nav.getByRole("heading", { level: 2 })).toHaveText([
-    "Goals",
-    "Assessments",
+    "Objetivos",
+    "Evaluaciones",
     "Análisis",
-    "Datos",
-    "Configuración",
+    "Administración",
   ]);
   await expect(nav.getByRole("link")).toHaveText([
-    "Goals",
-    "Assessments",
+    "Objetivos",
+    "Evaluaciones",
     ...ANALYSIS,
     ...DATA,
-    "Ciclos",
-    "Ajustes de insights",
   ]);
   // Every link has a short description under it.
   await expect(nav.getByRole("listitem")).toHaveCount(16);
   await expect(
-    nav.getByRole("listitem").filter({ hasText: "Vista ejecutiva" }),
+    nav.getByRole("listitem").filter({ hasText: "Resumen" }),
   ).toContainText("Completitud, retención, compromiso");
   await expect(
-    nav.getByRole("listitem").filter({ hasText: "Assessments" }).first(),
+    nav.getByRole("listitem").filter({ hasText: "Evaluaciones" }).first(),
   ).toContainText("Las preguntas y respuestas de cada ciclo");
 });
 
@@ -67,25 +68,24 @@ test("the sidebar lists the same sections in the same order and marks the curren
   await page.goto("/es");
   const side = page.getByRole("navigation", { name: "Secciones" });
   await expect(side.getByRole("link")).toHaveText([
-    "", // the logo, named by its aria-label
-    "Goals",
-    "Assessments",
+    "Performance", // the wordmark (named by its aria-label) and the product kicker
+    "Inicio",
+    "Objetivos",
+    "Evaluaciones",
     ...ANALYSIS,
     ...DATA,
-    "Ciclos",
-    "Ajustes de insights",
   ]);
-  await side.getByRole("link", { name: "Assessments", exact: true }).click();
+  await side.getByRole("link", { name: "Evaluaciones", exact: true }).click();
   await expect(page).toHaveURL(/\/es\/assessments$/);
   await expect(
     page.getByRole("navigation", { name: "Secciones" }).getByRole("link", {
-      name: "Assessments",
+      name: "Evaluaciones",
       exact: true,
     }),
   ).toHaveAttribute("aria-current", "page");
   await expect(
     page.getByRole("navigation", { name: "Secciones" }).getByRole("link", {
-      name: "Goals",
+      name: "Objetivos",
       exact: true,
     }),
   ).not.toHaveAttribute("aria-current", "page");
@@ -107,16 +107,19 @@ test("each role only gets the sections it may open", async ({ page }) => {
   await actAsRole(page, "Empleado", "Sin persona");
   await actAs(page, somebody, "Empleado");
   await expect(nav.getByRole("heading", { level: 2 })).toHaveText([
-    "Goals",
-    "Assessments",
+    "Mis objetivos",
+    "Mis evaluaciones",
   ]);
-  await expect(nav.getByRole("link")).toHaveText(["Goals", "Assessments"]);
+  await expect(nav.getByRole("link")).toHaveText([
+    "Mis objetivos",
+    "Mis evaluaciones",
+  ]);
 
-  // A manager: those two and the Análisis, still no Datos or Configuración.
+  // A manager: those two and the Análisis, still no Administración.
   await actAs(page, somebody, "Manager");
   await expect(nav.getByRole("heading", { level: 2 })).toHaveText([
-    "Goals",
-    "Assessments",
+    "Objetivos",
+    "Evaluaciones",
     "Análisis",
   ]);
 });

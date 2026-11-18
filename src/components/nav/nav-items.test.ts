@@ -8,27 +8,44 @@ const groupsOf = (actor: ActorContext) => navGroups(t, actor);
 const keysOf = (actor: ActorContext) => groupsOf(actor).map((g) => g.key);
 
 describe("navGroups", () => {
-  it("gives People Goals, Assessments, the Analysis, Data and Settings, in that order", () => {
+  it("gives People Goals, Assessments, the Analysis and the Administration, in that order", () => {
     expect(keysOf({ personId: null, role: "hr" })).toEqual([
       "goals",
       "assessments",
       "insights",
       "data",
-      "settings",
     ]);
   });
 
-  it("lists the cycles screen under Settings, for People only", () => {
-    const settings = groupsOf({ personId: null, role: "hr" }).find(
-      (g) => g.key === "settings",
-    );
-    expect(settings?.items.map((i) => i.href)).toEqual([
+  it("the Administration holds the data screens and the settings, People only", () => {
+    const admin = groupsOf({ personId: null, role: "hr" })[3];
+    expect(admin.items.map((i) => i.href)).toEqual([
+      "/imports/upload",
+      "/imports/runs",
+      "/imports/identity",
+      "/data-quality",
       "/settings/cycles",
       "/settings/insights",
     ]);
-    expect(keysOf({ personId: person, role: "manager" })).not.toContain(
-      "settings",
-    );
+  });
+
+  it("calls Goals and Assessments «mine» for somebody who only sees their own", () => {
+    const labels = (actor: ActorContext) =>
+      groupsOf(actor)
+        .slice(0, 2)
+        .map((g) => g.items[0].label);
+    expect(labels({ personId: person, role: "employee" })).toEqual([
+      "Goals.navOwn",
+      "Assessments.navOwn",
+    ]);
+    expect(labels({ personId: person, role: "manager" })).toEqual([
+      "Goals.nav",
+      "Assessments.nav",
+    ]);
+    expect(labels({ personId: null, role: "hr" })).toEqual([
+      "Goals.nav",
+      "Assessments.nav",
+    ]);
   });
 
   it("puts Goals and Assessments first, as primary entries, apart from the analysis", () => {
@@ -38,7 +55,6 @@ describe("navGroups", () => {
       ["assessments", true],
       ["insights", false],
       ["data", false],
-      ["settings", false],
     ]);
     expect(groups[0].items.map((i) => i.href)).toEqual(["/goals"]);
     expect(groups[1].items.map((i) => i.href)).toEqual(["/assessments"]);
@@ -72,7 +88,7 @@ describe("navGroups", () => {
     ]);
   });
 
-  it("gives a manager Goals, Assessments and the analysis, but no Data or Settings", () => {
+  it("gives a manager Goals, Assessments and the analysis, but no Administration", () => {
     expect(keysOf({ personId: person, role: "manager" })).toEqual([
       "goals",
       "assessments",

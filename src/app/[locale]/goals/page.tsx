@@ -84,7 +84,7 @@ async function GoalsList({
     <div className="flex flex-col gap-8">
       <PageHeader
         kicker={t("kicker")}
-        title={t("title")}
+        title={ownOnly ? t("titleOwn") : t("title")}
         description={t(`scope.${scope.kind}`)}
         actions={
           owners.length > 0 ? (
@@ -95,26 +95,27 @@ async function GoalsList({
             />
           ) : undefined
         }
-      >
-        <GoalsFilters
-          params={p}
-          cycles={cycles.map((c) => ({ id: c.id, name: c.name }))}
-          options={options}
-          ownOnly={ownOnly}
-        />
-      </PageHeader>
+      />
       <GoalsOverview counts={page.counts} />
       <section
         aria-label={t("count", { n: page.total })}
         className="space-y-6"
         data-testid="goals-list"
       >
-        <h2 className="text-xl">{t("count", { n: page.total })}</h2>
-        <GoalStateChips
-          counts={page.counts}
-          current={p.state}
-          hrefFor={(state) => hrefFor({ state })}
-        />
+        <h2 className="sr-only">{t("count", { n: page.total })}</h2>
+        <div className="list-controls">
+          <GoalStateChips
+            counts={page.counts}
+            current={p.state}
+            hrefFor={(state) => hrefFor({ state })}
+          />
+          <GoalsFilters
+            params={p}
+            cycles={cycles.map((c) => ({ id: c.id, name: c.name }))}
+            options={options}
+            ownOnly={ownOnly}
+          />
+        </div>
         <GoalsTable
           page={page}
           showPerson={!ownOnly}

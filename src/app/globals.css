@@ -355,6 +355,18 @@
   .metric-card-featured .metric-note {
     @apply text-brand-200;
   }
+  .metric-card-soft {
+    @apply border-transparent bg-brand-fog;
+  }
+  .metric-card-warm {
+    @apply border-transparent bg-status-progress-bg text-status-pending;
+  }
+  .metric-card-warm .metric-note {
+    @apply text-status-pending;
+  }
+  .metric-card-warm .icon-tile {
+    @apply bg-white/60 text-status-pending;
+  }
   .metric-card-featured .icon-tile,
   .overview-hero .icon-tile {
     @apply bg-white/10 text-brand-200;
@@ -447,6 +459,45 @@
   .actor-popover {
     @apply absolute top-full right-0 z-40 mt-3 rounded-xl border border-border bg-card p-6 shadow-xl;
     width: min(36rem, calc(100vw - 2rem));
+  }
+  .side-nav {
+    @apply flex shrink-0 flex-col bg-sidebar text-sidebar-foreground lg:sticky lg:top-0 lg:h-dvh lg:w-[220px] lg:overflow-y-auto;
+  }
+  .side-nav-kicker {
+    @apply text-[10px] font-medium tracking-[0.14em] text-brand-200 uppercase;
+  }
+  .side-nav-item {
+    @apply flex items-center gap-2.5 rounded-md px-2 py-2 text-[13px] whitespace-nowrap text-white transition-colors outline-none hover:bg-sidebar-accent focus-visible:ring-2 focus-visible:ring-sidebar-ring;
+  }
+  .home-focus {
+    @apply flex flex-col gap-5 rounded-xl bg-brand-900 p-6 text-primary-foreground;
+  }
+  .home-focus .icon-tile {
+    @apply bg-white/10 text-brand-200;
+  }
+  .home-focus .button-outline {
+    @apply border-transparent bg-card text-foreground hover:bg-brand-fog;
+  }
+  .home-access {
+    @apply grid gap-5 md:grid-cols-3;
+  }
+  .home-before {
+    @apply flex flex-wrap items-center gap-4 rounded-xl bg-brand-fog p-5;
+  }
+  .dq-notice {
+    @apply flex items-center gap-4 rounded-xl bg-status-progress-bg p-5;
+  }
+  .dq-notice .icon-tile {
+    @apply bg-white/70 text-status-pending;
+  }
+  .completion-row {
+    @apply flex flex-col gap-2;
+  }
+  .list-controls {
+    @apply flex flex-wrap items-end justify-between gap-4;
+  }
+  .list-controls form {
+    @apply justify-end;
   }
   .skip-link {
     @apply sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-50 focus:rounded-lg focus:bg-primary focus:p-3 focus:text-primary-foreground;

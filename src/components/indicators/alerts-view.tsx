@@ -29,44 +29,42 @@ export function AlertsView({ data }: { data: IndicatorAlerts }) {
       ) : data.alerts.length === 0 ? (
         <Empty />
       ) : (
-        <CardCollection gridClassName="record-grid" data-testid="alerts-table">
+        <CardCollection
+          gridClassName="dense-list"
+          data-testid="alerts-table"
+          initialCount={10}
+        >
           {data.alerts.map((a) => (
             <article
               key={`${a.kind}-${a.person.personId}-${a.kind === "drop" ? a.indicator : ""}`}
-              className="record-card"
+              className="dense-row dense-row-wide"
               aria-label={a.person.name}
             >
-              <header className="flex items-center justify-between gap-3">
-                <IconTile className="bg-status-progress-bg text-foreground">
+              <div className="flex items-center gap-3">
+                <IconTile className="size-9 bg-status-progress-bg text-foreground">
                   {a.kind === "drop" ? (
-                    <TrendingDown className="size-5" />
+                    <TrendingDown className="size-4" />
                   ) : (
-                    <ShieldAlert className="size-5" />
+                    <ShieldAlert className="size-4" />
                   )}
                 </IconTile>
-                <span className="delta-pill delta-down">
-                  {t(`alerts.kind.${a.kind}`)}
-                </span>
-              </header>
-              <h3 className="text-xl">
-                <Link
-                  href={`/insights/indicators/trend?person=${a.person.personId}`}
-                  className="underline decoration-brand-200 underline-offset-4"
-                >
-                  {a.person.name}
-                </Link>
-              </h3>
-              <dl className="record-facts">
-                <div>
-                  <dt>{t("alerts.manager")}</dt>
-                  <dd>{a.person.managerName ?? t("none")}</dd>
+                <div className="dense-name">
+                  <Link
+                    href={`/insights/indicators/trend?person=${a.person.personId}`}
+                    className="font-medium"
+                  >
+                    {a.person.name}
+                  </Link>
+                  <small>
+                    {a.person.department ?? t("none")} · {t("alerts.manager")}:{" "}
+                    {a.person.managerName ?? t("none")}
+                  </small>
                 </div>
-                <div>
-                  <dt>{t("alerts.department")}</dt>
-                  <dd>{a.person.department ?? t("none")}</dd>
-                </div>
-              </dl>
-              <p className="rounded-lg border-l-4 border-brand-warm bg-status-progress-bg p-4 text-sm leading-relaxed">
+              </div>
+              <span className="delta-pill delta-down self-start">
+                {t(`alerts.kind.${a.kind}`)}
+              </span>
+              <p className="text-sm">
                 {a.kind === "drop"
                   ? t("alerts.dropDetail", {
                       indicator: t(`indicator.${a.indicator}`),

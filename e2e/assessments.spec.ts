@@ -37,7 +37,7 @@ test("People open a cycle, open a participant and read the self-assessment, the 
   test.setTimeout(120_000);
   await findSubject(page);
   await expect(
-    page.getByRole("heading", { level: 1, name: "Assessments" }),
+    page.getByRole("heading", { level: 1, name: "Evaluaciones" }),
   ).toBeVisible();
 
   // The list: one participant, with where each side stands.

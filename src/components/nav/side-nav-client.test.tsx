@@ -64,7 +64,9 @@ const renderNav = (path: string) => {
     <SideNavClient
       groups={groups}
       label="Secciones"
+      product="Performance"
       home="Inicio"
+      people="Personas"
       menu="Menú"
       company="Santex Group"
       tagline="yes, it's possible"
@@ -74,14 +76,15 @@ const renderNav = (path: string) => {
 const nav = () => screen.getByRole("navigation", { name: "Secciones" });
 
 describe("SideNavClient", () => {
-  it("lists Goals and Assessments first, then the sections in order", () => {
+  it("lists Inicio, then Goals and Assessments, then the sections in order", () => {
     renderNav("/");
     expect(
       within(nav())
         .getAllByRole("link")
         .map((a) => a.textContent),
     ).toEqual([
-      "", // the logo (named by its aria-label)
+      "Performance", // the wordmark (named by its aria-label) and the product kicker
+      "Inicio",
       "Goals",
       "Assessments",
       "Vista ejecutiva",
@@ -90,14 +93,14 @@ describe("SideNavClient", () => {
     ]);
   });
 
-  it("labels each section (the analysis apart from Goals and Assessments)", () => {
+  it("labels each section: Personas holds Goals and Assessments, apart from the analysis", () => {
     renderNav("/");
     expect(
       within(nav())
-        .getAllByText(/^(Análisis|Datos)$/)
+        .getAllByText(/^(Personas|Análisis|Datos)$/)
         .filter((el) => el.tagName === "P")
         .map((el) => el.textContent),
-    ).toEqual(["Análisis", "Datos"]);
+    ).toEqual(["Personas", "Análisis", "Datos"]);
   });
 
   it("marks the current section, nested pages included, and only it", () => {
@@ -108,7 +111,7 @@ describe("SideNavClient", () => {
     expect(current.map((a) => a.textContent)).toEqual(["Assessments"]);
   });
 
-  it("marks the home logo on the home", () => {
+  it("marks Inicio on the home", () => {
     renderNav("/");
     expect(screen.getByRole("link", { name: "Inicio" })).toHaveAttribute(
       "aria-current",

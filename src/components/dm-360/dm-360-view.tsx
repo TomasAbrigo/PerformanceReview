@@ -4,7 +4,7 @@ import type { Dm360, Dm360Card } from "@/modules/analytics/dm-360/types";
 import { sentiments } from "@/modules/qualitative-analysis/constants";
 import { Sparkline } from "./sparkline";
 
-/** One figure of a card: a label, its value and what it is over. */
+/** One figure of a card: a label, its value and, beside it, what it is over. */
 function Figure({
   label,
   value,
@@ -17,14 +17,18 @@ function Figure({
   testId: string;
 }) {
   return (
-    <div className="flex flex-col gap-2 rounded-lg bg-brand-fog/60 p-3">
+    <div className="dm-figure">
       <dt className="text-xs text-muted-foreground">{label}</dt>
-      <dd className="font-heading text-xl tabular-nums" data-testid={testId}>
-        {value}
+      <dd
+        className="flex flex-wrap items-baseline gap-x-1.5"
+        data-testid={testId}
+      >
+        <span className="font-heading text-2xl tabular-nums">{value}</span>
         {note ? (
-          <span className="ml-1 text-xs font-normal text-muted-foreground">
-            {note}
-          </span>
+          <>
+            {" "}
+            <span className="text-xs text-muted-foreground">{note}</span>
+          </>
         ) : null}
       </dd>
     </div>
@@ -45,12 +49,14 @@ function CardView({ card, team }: { card: Dm360Card; team: number }) {
   const s = card.sentiment;
   return (
     <article
-      className="metric-card"
+      className="metric-card gap-5"
       aria-labelledby={`dm-${card.key}`}
       data-testid="dm-card"
     >
       <header className="flex flex-wrap items-baseline justify-between gap-2">
-        <h2 id={`dm-${card.key}`}>{name}</h2>
+        <h2 id={`dm-${card.key}`} className="text-xl">
+          {name}
+        </h2>
         <span
           className="text-sm text-muted-foreground"
           data-testid="dm-card-people"
@@ -58,7 +64,7 @@ function CardView({ card, team }: { card: Dm360Card; team: number }) {
           {t("card.people", { n: card.people })}
         </span>
       </header>
-      <dl className="grid grid-cols-2 gap-x-4 gap-y-2 sm:grid-cols-3">
+      <dl className="dm-figures">
         <Figure
           label={t("card.retention")}
           testId="dm-retention"
@@ -84,12 +90,13 @@ function CardView({ card, team }: { card: Dm360Card; team: number }) {
           testId="dm-risk"
           value={
             card.risk
-              ? t("card.riskValue", {
-                  percent: percent(card.risk.share),
-                  people: card.risk.people,
-                  of: card.risk.of,
-                })
+              ? t("card.riskValue", { percent: percent(card.risk.share) })
               : none
+          }
+          note={
+            card.risk
+              ? t("card.riskOf", { people: card.risk.people, of: card.risk.of })
+              : undefined
           }
         />
         <Figure
@@ -110,37 +117,38 @@ function CardView({ card, team }: { card: Dm360Card; team: number }) {
               : t("card.completion", { percent: percent(card.managerRate) })
           }
         />
-        <Figure
-          label={t("card.sentiment")}
-          testId="dm-comments"
-          value={
-            s
-              ? t("card.comments", { n: s.comments, people: s.people })
-              : t("card.noComments")
-          }
-        />
       </dl>
-      {s ? (
-        <div className="flex flex-col gap-1" data-testid="dm-sentiment">
-          <MiniBar
-            counts={{ ...s.counts, total: s.comments }}
-            label={sentiments
-              .map((k) => `${ts(k)} ${percent(s.share[k])} %`)
-              .join(", ")}
-          />
-          <p className="flex flex-wrap gap-x-3 text-xs text-muted-foreground">
-            {sentiments
-              .filter((k) => s.counts[k] > 0)
-              .map((k) => (
-                <span key={k}>
-                  {ts(k)} {percent(s.share[k])} %
-                </span>
-              ))}
-          </p>
-        </div>
-      ) : null}
-      <div className="flex flex-col gap-1">
-        <span className="text-xs text-muted-foreground">{t("card.trend")}</span>
+      <div className="dm-block">
+        <p className="flex flex-wrap justify-between gap-x-3 text-sm">
+          <span>{t("card.sentiment")}</span>
+          <span className="text-muted-foreground" data-testid="dm-comments">
+            {s
+              ? t("card.comments", { n: s.comments, people: s.people })
+              : t("card.noComments")}
+          </span>
+        </p>
+        {s ? (
+          <div className="flex flex-col gap-2" data-testid="dm-sentiment">
+            <MiniBar
+              counts={{ ...s.counts, total: s.comments }}
+              label={sentiments
+                .map((k) => `${ts(k)} ${percent(s.share[k])} %`)
+                .join(", ")}
+            />
+            <p className="flex flex-wrap gap-x-3 text-xs text-muted-foreground">
+              {sentiments
+                .filter((k) => s.counts[k] > 0)
+                .map((k) => (
+                  <span key={k}>
+                    {ts(k)} {percent(s.share[k])} %
+                  </span>
+                ))}
+            </p>
+          </div>
+        ) : null}
+      </div>
+      <div className="dm-block">
+        <p className="text-sm">{t("card.trend")}</p>
         <Sparkline points={card.trend} />
       </div>
       <div className="flex flex-col gap-1">

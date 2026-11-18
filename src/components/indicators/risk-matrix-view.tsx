@@ -106,33 +106,33 @@ export function RiskMatrixView({ matrix }: { matrix: RiskMatrix }) {
               {t("matrix.risk.empty")}
             </p>
           ) : (
-            <CardCollection gridClassName="record-grid">
+            <CardCollection gridClassName="dense-list" initialCount={10}>
               {matrix.atRisk.map((p) => (
-                <article key={p.personId} className="record-card">
-                  <h4 className="text-lg">
+                <article
+                  key={p.personId}
+                  className="dense-row"
+                  aria-label={p.name}
+                >
+                  <div className="dense-name">
                     <Link
                       href={`/insights/indicators/trend?person=${p.personId}`}
-                      className="underline decoration-brand-200 underline-offset-4"
+                      className="font-medium"
                     >
                       {p.name}
                     </Link>
-                  </h4>
-                  <p className="text-xs text-muted-foreground">
-                    {p.department ?? t("none")} · {t("matrix.risk.manager")}:{" "}
-                    {p.managerName ?? t("none")}
-                  </p>
-                  <dl className="record-facts">
+                    <small>
+                      {p.department ?? t("none")} · {t("matrix.risk.manager")}:{" "}
+                      {p.managerName ?? t("none")}
+                    </small>
+                  </div>
+                  <dl className="dense-facts">
                     <div>
                       <dt>{t("indicator.retention")}</dt>
-                      <dd>
-                        <span className="stat-value-sm">{p.retention}</span>
-                      </dd>
+                      <dd>{p.retention}</dd>
                     </div>
                     <div>
                       <dt>{t("indicator.engagement")}</dt>
-                      <dd>
-                        <span className="stat-value-sm">{p.engagement}</span>
-                      </dd>
+                      <dd>{p.engagement}</dd>
                     </div>
                   </dl>
                 </article>

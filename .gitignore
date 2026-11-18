@@ -59,3 +59,6 @@ next-env.d.ts
 
 # real Bamboo exports and other private data (never commit; see README "Datos sensibles")
 /data/
+
+# pen.dev browser snapshots
+.playwright-mcp/

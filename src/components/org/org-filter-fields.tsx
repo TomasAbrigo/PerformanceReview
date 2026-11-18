@@ -20,9 +20,12 @@ const FIELDS = [
 export function OrgFilterFields({
   params,
   options,
+  bare = false,
 }: {
   params: OrgParams;
   options: OrgOptions | null;
+  /** Just the selects, for a form that already has its own "Más filtros". */
+  bare?: boolean;
 }) {
   const t = useTranslations("OrgFilters");
   if (
@@ -30,8 +33,8 @@ export function OrgFilterFields({
     !FIELDS.some(([name, list]) => options[list].length || params[name])
   )
     return null;
-  return (
-    <AdvancedFilters active={FIELDS.some(([name]) => Boolean(params[name]))}>
+  const fields = (
+    <>
       {FIELDS.map(([name, list]) => {
         const values = options[list];
         // A value in the URL that is not on offer (an old link) is still shown.
@@ -57,6 +60,13 @@ export function OrgFilterFields({
           </label>
         );
       })}
+    </>
+  );
+  return bare ? (
+    fields
+  ) : (
+    <AdvancedFilters active={FIELDS.some(([name]) => Boolean(params[name]))}>
+      {fields}
     </AdvancedFilters>
   );
 }

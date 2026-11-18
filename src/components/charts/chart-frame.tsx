@@ -127,11 +127,14 @@ export function ChartFrame({
   table,
   empty,
   actions,
+  icon,
   level = 2,
   children,
 }: {
   id: string;
   title: string;
+  /** The tile's icon; a chart by default. */
+  icon?: ReactNode;
   howToRead?: string;
   /** n and period, already formatted ("n = 277 · Evaluación 2026"). */
   meta?: string;
@@ -151,7 +154,7 @@ export function ChartFrame({
         <div className="flex min-w-0 flex-1 flex-col gap-2">
           {level === 2 ? (
             <IconTile>
-              <ChartNoAxesCombined className="size-5" />
+              {icon ?? <ChartNoAxesCombined className="size-5" />}
             </IconTile>
           ) : null}
           <Heading

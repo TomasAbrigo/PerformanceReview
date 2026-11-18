@@ -96,6 +96,7 @@ test("People see the goal KPIs, the indicators by completion, the outliers and t
     await expect(count).toHaveText(/^(Ninguna persona|\d+ personas?)$/);
     const n = (await count.innerText()).match(/^(\d+)/)?.[1];
     if (n) {
+      await showAllCards(outliers.getByTestId(group));
       expect(
         await outliers.getByTestId(group).getByRole("article").count(),
       ).toBe(Number(n));

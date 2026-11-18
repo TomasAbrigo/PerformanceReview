@@ -1,4 +1,13 @@
-import { Check, Circle } from "lucide-react";
+import {
+  Check,
+  Circle,
+  ClipboardCheck,
+  ClipboardList,
+  FileText,
+  Flag,
+  MessageSquare,
+  SlidersHorizontal,
+} from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { useDates } from "@/components/dates";
 import { Fact } from "@/components/fact";
@@ -56,6 +65,7 @@ export function GoalDetailView({
       <Panel
         id="goal-summary"
         title={t("summary")}
+        icon={<ClipboardList className="size-5" />}
         actions={
           editing ? (
             <GoalFormDialog
@@ -95,7 +105,11 @@ export function GoalDetailView({
         </dl>
       </Panel>
       {editing ? (
-        <Panel id="goal-controls" title={t("manage")}>
+        <Panel
+          id="goal-controls"
+          title={t("manage")}
+          icon={<SlidersHorizontal className="size-5" />}
+        >
           <GoalControls
             key={`${goal.status}-${goal.percentComplete}`}
             status={goal.status}
@@ -104,7 +118,11 @@ export function GoalDetailView({
           />
         </Panel>
       ) : null}
-      <Panel id="goal-description" title={t("description")}>
+      <Panel
+        id="goal-description"
+        title={t("description")}
+        icon={<FileText className="size-5" />}
+      >
         {goal.description ? (
           <p className="max-w-3xl text-sm whitespace-pre-line">
             {goal.description}
@@ -116,6 +134,7 @@ export function GoalDetailView({
       <Panel
         id="goal-milestones"
         title={t("milestones")}
+        icon={<Flag className="size-5" />}
         hint={
           goal.milestones.length > 0
             ? t("milestonesDone", {
@@ -165,7 +184,11 @@ export function GoalDetailView({
           </ol>
         )}
       </Panel>
-      <Panel id="goal-comments" title={t("comments")}>
+      <Panel
+        id="goal-comments"
+        title={t("comments")}
+        icon={<MessageSquare className="size-5" />}
+      >
         {goal.comments.length === 0 ? (
           <p className="text-sm text-muted-foreground">{t("noComments")}</p>
         ) : (
@@ -190,6 +213,7 @@ export function GoalDetailView({
       <Panel
         id="goal-assessments"
         title={t("assessments")}
+        icon={<ClipboardCheck className="size-5" />}
         hint={t("assessmentsHint")}
       >
         {goal.appearances.length === 0 ? (

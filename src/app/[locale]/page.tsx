@@ -1,4 +1,13 @@
-import { PageSkeleton } from "@/components/experience";
+import { IconTile, PageSkeleton } from "@/components/experience";
+import {
+  ArrowRight,
+  ArrowUpRight,
+  ChartNoAxesCombined,
+  ClipboardCheck,
+  Database,
+  Sprout,
+  Target,
+} from "lucide-react";
 import { hasLocale } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
@@ -7,7 +16,12 @@ import { NavIcon } from "@/components/nav/nav-icon";
 import { navGroups } from "@/components/nav/nav-items";
 import { Link } from "@/i18n/navigation";
 import { routing } from "@/i18n/routing";
+import { connection } from "next/server";
+import { db } from "@/db/client";
 import { getActor } from "@/modules/actor/server";
+import { insightsScope } from "@/modules/insights/authz";
+import { listCycles, personName } from "@/modules/review-core";
+import { localizeCycles } from "@/modules/review-core/cycle-name";
 
 /** The stretched link of a card: the whole card is its target. */
 const CARD =
@@ -40,7 +54,7 @@ async function HomeNav() {
                 </span>
                 <h2 className="text-3xl">
                   <Link href={item.href} className={STRETCHED}>
-                    {group.title}
+                    {item.label}
                   </Link>
                 </h2>
                 <p className="text-sm text-muted-foreground">
@@ -81,30 +95,157 @@ async function HomeNav() {
   );
 }
 
+/**
+ * The head of the home, as the canvas draws it: a greeting by role, the
+ * cycle in focus with one call to action, the three main entries (Goals,
+ * Assessments, the Analysis) the actor may open and, for People, a reminder
+ * to check the data before analysing.
+ */
+async function HomeHead({ locale }: { locale: string }) {
+  await connection();
+  const [t, actor] = await Promise.all([getTranslations("Home"), getActor()]);
+  const [name, cycles] = await Promise.all([
+    actor.personId ? personName(db, actor.personId) : null,
+    listCycles(db),
+  ]);
+  const cycle = localizeCycles(cycles, locale)[0];
+  const groups = navGroups(await getTranslations(), actor);
+  const has = (key: string) => groups.some((g) => g.key === key);
+  const analysis = insightsScope(actor).kind !== "none";
+  const greeting =
+    actor.role === "hr"
+      ? t("greeting.hr")
+      : actor.role === "direction"
+        ? t("greeting.direction")
+        : name
+          ? t("greeting.person", { name })
+          : t("greeting.noPerson");
+  const cycleHref = cycle
+    ? analysis
+      ? `/insights/executive?cycle=${cycle.id}`
+      : `/assessments?cycle=${cycle.id}`
+    : "/assessments";
+  const entries = [
+    has("goals")
+      ? {
+          key: "goals",
+          href: "/goals",
+          title: t("groups.goals"),
+          text: t("access.goals"),
+          icon: <Target className="size-5" />,
+        }
+      : null,
+    has("assessments")
+      ? {
+          key: "assessments",
+          href: "/assessments",
+          title: t("groups.assessments"),
+          text: t("access.assessments"),
+          icon: <ClipboardCheck className="size-5" />,
+        }
+      : null,
+    analysis
+      ? {
+          key: "insights",
+          href: "/insights/executive",
+          title: t("groups.insights"),
+          text: t("access.insights"),
+          icon: <ChartNoAxesCombined className="size-5" />,
+        }
+      : null,
+  ].filter((e) => e !== null);
+  return (
+    <div className="flex flex-col gap-7">
+      <div className="flex flex-col gap-2">
+        <h1 className="text-3xl lg:text-4xl">{greeting}</h1>
+        <p className="text-sm text-muted-foreground">{t("intro")}</p>
+      </div>
+      <section className="home-focus" aria-label={t("focus.headline")}>
+        <div className="flex items-start gap-5">
+          <IconTile>
+            <Sprout className="size-5" />
+          </IconTile>
+          <div className="flex min-w-0 flex-col gap-2">
+            <h2 className="text-2xl text-white lg:text-3xl">
+              {t("focus.headline")}
+            </h2>
+            <p className="text-sm text-brand-200">
+              {cycle
+                ? t("focus.line", { cycle: cycle.name })
+                : t("focus.noCycle")}
+            </p>
+          </div>
+        </div>
+        {cycle ? (
+          <Link href={cycleHref} className="button-outline self-start">
+            {t("focus.cta")}
+            <ArrowRight className="ml-2 size-4" aria-hidden="true" />
+          </Link>
+        ) : null}
+      </section>
+      {entries.length > 0 ? (
+        <ul aria-label={t("access.title")} className="home-access">
+          {entries.map((e) => (
+            <li key={e.key} className={`${CARD} p-6`}>
+              <IconTile>{e.icon}</IconTile>
+              <h2 className="text-2xl">
+                <Link href={e.href} className={STRETCHED}>
+                  {e.title}
+                </Link>
+              </h2>
+              <p className="text-sm text-muted-foreground">{e.text}</p>
+              <span className="mt-auto inline-flex items-center gap-1 pt-2 text-sm text-foreground">
+                {t("access.explore")}
+                <ArrowUpRight className="size-4" aria-hidden="true" />
+              </span>
+            </li>
+          ))}
+        </ul>
+      ) : null}
+      {actor.role === "hr" ? (
+        <aside className="home-before" aria-label={t("before.title")}>
+          <IconTile>
+            <Database className="size-5" />
+          </IconTile>
+          <div className="flex min-w-0 flex-col gap-1">
+            <p className="font-medium">{t("before.title")}</p>
+            <p className="text-sm text-muted-foreground">{t("before.text")}</p>
+          </div>
+          <div className="ml-auto flex flex-wrap gap-2">
+            <Link href="/imports/runs" className="button-outline">
+              {t("groups.data")}
+            </Link>
+            <Link href="/data-quality" className="button-outline">
+              {t("descriptions.dataQuality").split(" ")[0] === "Casos"
+                ? "Calidad de datos"
+                : "Data quality"}
+            </Link>
+          </div>
+        </aside>
+      ) : null}
+    </div>
+  );
+}
+
 export default async function HomePage({ params }: PageProps<"/[locale]">) {
   const { locale } = await params;
   if (!hasLocale(routing.locales, locale)) notFound();
   setRequestLocale(locale);
-
-  const tApp = await getTranslations("App");
   const tHome = await getTranslations("Home");
-  const tBrand = await getTranslations("Brand");
 
   return (
     <main className="flex flex-1 flex-col gap-10 p-6 lg:p-10">
-      <section className="brand-hero overflow-hidden rounded-2xl px-8 py-12 lg:px-14 lg:py-16">
-        <p className="kicker text-brand-200">{tBrand("company")}</p>
-        <h1 className="mt-4 text-5xl lg:text-6xl">{tApp("title")}</h1>
-        <p className="mt-4 font-heading text-2xl text-white/90">
-          {tHome("heading")}
-        </p>
-        <p className="mt-3 max-w-xl text-base text-white/75">
-          {tHome("welcome")}
-        </p>
-      </section>
       <Suspense fallback={<PageSkeleton />}>
-        <HomeNav />
+        <HomeHead locale={locale} />
       </Suspense>
+      <section aria-labelledby="home-all" className="flex flex-col gap-6">
+        <h2 id="home-all" className="text-2xl">
+          {tHome("all")}
+        </h2>
+        <Suspense fallback={<PageSkeleton />}>
+          <HomeNav />
+        </Suspense>
+      </section>
     </main>
   );
 }
