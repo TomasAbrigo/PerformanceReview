@@ -63,3 +63,32 @@ export async function actAsRole(page: Page, role: string, shown: string) {
     shown,
   );
 }
+
+/** The cookie the "Actuar como" selector's action sets (src/modules/actor/types.ts). */
+const ACTOR_COOKIE = "pr_actor";
+
+/**
+ * Acts as `personId` with `role` by setting the cookie the selector's server
+ * action sets, without going through the header selector. For specs whose
+ * subject is not the selector: that one is a client component and, on a slow
+ * dev server, hydrates late (see `applyActor`), which makes any spec that
+ * leans on it flaky under load. Null person with `hr` is the default actor.
+ */
+export async function actAsCookie(
+  page: Page,
+  actor: {
+    personId: string | null;
+    role: "hr" | "manager" | "employee" | "direction";
+  },
+) {
+  const port = process.env.E2E_PORT ?? 3100;
+  await page.context().addCookies([
+    {
+      name: ACTOR_COOKIE,
+      value: encodeURIComponent(JSON.stringify(actor)),
+      url: `http://localhost:${port}`,
+      httpOnly: true,
+      sameSite: "Lax",
+    },
+  ]);
+}

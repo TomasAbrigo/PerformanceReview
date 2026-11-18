@@ -1,8 +1,13 @@
 import path from "node:path";
 import { expect, type Page, test } from "@playwright/test";
-import { actAs, actAsRole } from "./act-as";
+import { actAsCookie } from "./act-as";
 import { chooseCycle } from "./filters";
-import { dmWithReports, managerWhoIsNoDm, peoplePerDm } from "./org-data";
+import {
+  dmWithReports,
+  managerWhoIsNoDm,
+  peoplePerDm,
+  personIdOf,
+} from "./org-data";
 import { assessedFirstCycle, company, fullName } from "./seed-data";
 
 // Runs after the historical import (project "insights" depends on
@@ -10,6 +15,9 @@ import { assessedFirstCycle, company, fullName } from "./seed-data";
 // create the cycles). People load their org attributes file (account,
 // project, DM, Santex Lead per person: fixtures/org/small) and every insights
 // view can then be cut by it: the first test does the import, the rest read.
+// Who the specs act as is set with the selector's own cookie (`actAsCookie`),
+// not through the header selector: that one hydrates late on a slow dev server
+// and is not what these specs are about.
 const cycleName = company.cycles[1].name;
 const FILE = path.resolve("fixtures/org/small/org-attributes.csv");
 
@@ -37,32 +45,34 @@ test("People import the org attributes file once: the same file again changes no
   page,
 }) => {
   test.setTimeout(240_000);
-  await page.goto("/es");
-  await actAs(page, null, "People (RR. HH.)");
+  await actAsCookie(page, { personId: null, role: "hr" });
 
+  // The end state, not who brought it: a retry (or an earlier run on the same
+  // database) finds the file's attributes already in, and that is fine.
   await importOrgAttributes(page);
   const counts = page.getByRole("table", { name: "Conteos" });
   await expect(page.getByText("org_attribute").first()).toBeVisible();
-  // Every row of the file is new (the number of attributes is not the point).
-  await expect(counts.getByRole("row", { name: /^Insertados/ })).toHaveText(
-    /^Insertados[1-9]\d*$/,
-  );
+  expect((await peoplePerDm(cycleName)).size).toBeGreaterThan(0);
 
+  // The same file again changes nothing: it is idempotent and, being the
+  // whole list, drops nothing either.
   await importOrgAttributes(page);
-  await expect(counts.getByRole("row", { name: /^Insertados/ })).toHaveText(
-    "Insertados0",
-  );
-  await expect(counts.getByRole("row", { name: /^Actualizados/ })).toHaveText(
-    "Actualizados0",
-  );
+  for (const [metric, row] of [
+    ["Insertados", /^Insertados/],
+    ["Actualizados", /^Actualizados/],
+    ["Eliminados", /^Eliminados/],
+  ] as const) {
+    await expect(counts.getByRole("row", { name: row })).toHaveText(
+      `${metric}0`,
+    );
+  }
 });
 
 test("People read one card per DM with the people under them, and the whole tree adds the chart below", async ({
   page,
 }) => {
   test.setTimeout(120_000);
-  await page.goto("/es");
-  await actAs(page, null, "People (RR. HH.)");
+  await actAsCookie(page, { personId: null, role: "hr" });
   const perDm = await peoplePerDm(cycleName);
   expect(perDm.size).toBeGreaterThan(0);
 
@@ -112,8 +122,7 @@ test("People read one card per DM with the people under them, and the whole tree
 
 test("the org cuts filter and group the completion view", async ({ page }) => {
   test.setTimeout(120_000);
-  await page.goto("/es");
-  await actAs(page, null, "People (RR. HH.)");
+  await actAsCookie(page, { personId: null, role: "hr" });
   await chooseCycle(page, "/es/insights/completion", cycleName);
 
   const groupBy = page.getByRole("group", { name: "Agrupar por" });
@@ -137,8 +146,7 @@ test("direction reads the DMs as numbered teams, never by name", async ({
 }) => {
   test.setTimeout(120_000);
   const perDm = await peoplePerDm(cycleName);
-  await page.goto("/es");
-  await actAsRole(page, "Dirección", "Dirección");
+  await actAsCookie(page, { personId: null, role: "direction" });
   await chooseCycle(page, "/es/insights/360", cycleName);
 
   await expect(
@@ -160,8 +168,7 @@ test("direction does not filter by a DM or a Santex Lead, even from the URL", as
 }) => {
   test.setTimeout(120_000);
   const [dm] = [...(await peoplePerDm(cycleName)).keys()];
-  await page.goto("/es");
-  await actAsRole(page, "Dirección", "Dirección");
+  await actAsCookie(page, { personId: null, role: "direction" });
 
   for (const view of ["indicators", "goals", "qualitative"]) {
     await chooseCycle(page, `/es/insights/${view}`, cycleName);
@@ -188,8 +195,7 @@ test("a manager who is a DM reads only their own card; one who is not has none",
 }) => {
   test.setTimeout(120_000);
   const dm = await dmWithReports(cycleName);
-  await page.goto("/es");
-  await actAs(page, dm.name, "Manager");
+  await actAsCookie(page, { personId: dm.id, role: "manager" });
   await chooseCycle(page, "/es/insights/360", cycleName);
 
   await expect(page.getByText("Tu tarjeta como DM")).toBeVisible();
@@ -203,15 +209,17 @@ test("a manager who is a DM reads only their own card; one who is not has none",
   await expect(page.getByLabel("Alcance")).toHaveCount(0);
 
   const other = await managerWhoIsNoDm(cycleName);
-  await actAs(page, other, "Manager");
+  await actAsCookie(page, { personId: other.id, role: "manager" });
   await chooseCycle(page, "/es/insights/360", cycleName);
   await expect(page.getByTestId("dm-card")).toHaveCount(0);
   await expect(page.getByText(/No figurás como DM/)).toBeVisible();
 });
 
 test("an employee has no access to the 360 analysis", async ({ page }) => {
-  await page.goto("/es");
-  await actAs(page, fullName(assessedFirstCycle), "Empleado");
+  await actAsCookie(page, {
+    personId: await personIdOf(fullName(assessedFirstCycle)),
+    role: "employee",
+  });
   await page.goto("/es/insights/360");
   await expect(page.getByTestId("no-access")).toContainText(
     "No tenés acceso al Análisis 360.",
