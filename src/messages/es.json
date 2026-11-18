@@ -27,6 +27,7 @@
       "identity": "Registros que no se pudieron asignar solos a una persona.",
       "dataQuality": "Casos a corregir antes de analizar o reportar.",
       "insightsSettings": "Umbrales de alerta, tamaño mínimo de grupo, cortes de semestre y proveedor de análisis.",
+      "cycles": "Creá y abrí ciclos de evaluación, elegí participantes y seguí el avance.",
       "goalsArea": "Los goals de cada persona: progreso, hitos, vencimientos y comentarios, con filtros por ciclo, estado y equipo.",
       "assessmentsArea": "Las preguntas y respuestas de cada ciclo: autoevaluación y evaluación del manager, junto a los goals del período.",
       "goalsInsights": "Cumplimiento de goals junto a la retención y el compromiso de cada persona."
@@ -36,6 +37,118 @@
     "label": "Idioma",
     "es": "Español",
     "en": "English"
+  },
+  "Cycles": {
+    "nav": "Ciclos",
+    "title": "Ciclos de evaluación",
+    "description": "Creá un ciclo, elegí quién participa y abrilo: se genera la autoevaluación de cada persona y la evaluación de su manager. Solo People.",
+    "back": "← Volver a los ciclos",
+    "status": {
+      "draft": "Borrador",
+      "open": "Abierto",
+      "closed": "Cerrado"
+    },
+    "list": {
+      "title": "Ciclos",
+      "empty": "Todavía no hay ciclos.",
+      "columns": {
+        "name": "Ciclo",
+        "period": "Período",
+        "status": "Estado",
+        "participants": "Participantes"
+      }
+    },
+    "create": {
+      "title": "Nuevo ciclo",
+      "hint": "Las fechas sugeridas siguen los cortes semestrales de Ajustes de insights.",
+      "name": "Nombre",
+      "periodStart": "Inicio del período",
+      "periodEnd": "Fin del período",
+      "template": "Template",
+      "templateValue": "Evaluación semestral Santex",
+      "submit": "Crear ciclo"
+    },
+    "detail": {
+      "period": "Período {start} – {end}",
+      "snapshot": "Snapshot de la organización al {date}"
+    },
+    "progress": {
+      "title": "Avance",
+      "hint": "Solicitudes enviadas sobre el total de los participantes activos.",
+      "self": "Autoevaluaciones",
+      "manager": "Evaluaciones de manager",
+      "of": "{submitted} de {total} enviadas"
+    },
+    "participants": {
+      "title": "Participantes",
+      "hintDraft": "Elegí a quién se evalúa. Podés sumar a todos los activos, a un área o a mano; al abrir se toma el snapshot de manager, área y puesto.",
+      "hintOpen": "Podés sumar o sacar personas mientras el ciclo está abierto.",
+      "empty": "No hay participantes.",
+      "all": "Todos los activos",
+      "area": "Sumar un área",
+      "areaPlaceholder": "Elegí un área",
+      "noArea": "Sin área",
+      "addArea": "Sumar",
+      "clear": "Vaciar",
+      "selected": "{count} elegidos",
+      "save": "Guardar participantes",
+      "saved": "Participantes guardados.",
+      "searchLabel": "Participantes disponibles",
+      "columns": {
+        "person": "Persona",
+        "area": "Área",
+        "manager": "Manager",
+        "state": "Estado"
+      },
+      "removed": "Quitado",
+      "active": "Activo",
+      "remove": "Quitar",
+      "add": "Sumar",
+      "addLabel": "Sumar una persona"
+    },
+    "withoutManager": {
+      "title": "Sin manager vigente",
+      "hint": "Estas personas no tienen manager en el snapshot: su evaluación de manager queda marcada como sin evaluador. Resolvelo en Bamboo antes de abrir o después.",
+      "none": "Todos los participantes tienen manager."
+    },
+    "requests": {
+      "title": "Solicitudes",
+      "empty": "Todavía no hay solicitudes: se generan al abrir el ciclo.",
+      "columns": {
+        "person": "Evaluado",
+        "kind": "Tipo",
+        "reviewer": "Evaluador",
+        "status": "Estado",
+        "actions": "Acciones"
+      },
+      "kind": {
+        "self": "Autoevaluación",
+        "manager": "Manager",
+        "peer": "Par",
+        "upward": "Ascendente"
+      },
+      "status": {
+        "draft": "Borrador",
+        "submitted": "Enviada",
+        "declined": "Rechazada",
+        "superseded": "Reemplazada"
+      },
+      "reviewerMissing": "Sin evaluador",
+      "reopen": "Reabrir"
+    },
+    "actions": {
+      "launch": "Abrir ciclo",
+      "launchHint": "Genera las solicitudes y toma el snapshot de cada participante.",
+      "close": "Cerrar ciclo",
+      "closeHint": "Un ciclo cerrado no recibe más envíos."
+    },
+    "errors": {
+      "required": "Es obligatorio.",
+      "invalid_date": "Fecha inválida (AAAA-MM-DD).",
+      "before_start": "El fin no puede ser anterior al inicio.",
+      "not_found": "No existe.",
+      "invalid": "Valor inválido."
+    }
   },
   "InsightsSettings": {
     "title": "Configuración de insights",
@@ -99,6 +212,7 @@
     "validation": "Revisá los campos marcados.",
     "not_found": "El elemento ya no existe.",
     "forbidden": "Solo People (RR. HH.) puede hacer esto.",
+    "invalid_state": "El ciclo o la solicitud no está en un estado que lo permita.",
     "unknown": "Ocurrió un error inesperado."
   },
   "Imports": {

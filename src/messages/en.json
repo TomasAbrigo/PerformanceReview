@@ -27,6 +27,7 @@
       "identity": "Records that could not be matched to a person automatically.",
       "dataQuality": "Cases to fix before analysing or reporting.",
       "insightsSettings": "Alert thresholds, minimum group size, semester cuts and analysis provider.",
+      "cycles": "Create and open review cycles, choose participants and follow progress.",
       "goalsArea": "Each person's goals: progress, milestones, due dates and comments, filtered by cycle, status and team.",
       "assessmentsArea": "The questions and answers of each cycle: self-assessment and manager review, next to the goals of the period.",
       "goalsInsights": "Goal completion next to each person's retention and engagement."
@@ -36,6 +37,118 @@
     "label": "Language",
     "es": "Español",
     "en": "English"
+  },
+  "Cycles": {
+    "nav": "Cycles",
+    "title": "Review cycles",
+    "description": "Create a cycle, choose who takes part and open it: each person's self-assessment and their manager's review are generated. People only.",
+    "back": "← Back to cycles",
+    "status": {
+      "draft": "Draft",
+      "open": "Open",
+      "closed": "Closed"
+    },
+    "list": {
+      "title": "Cycles",
+      "empty": "There are no cycles yet.",
+      "columns": {
+        "name": "Cycle",
+        "period": "Period",
+        "status": "Status",
+        "participants": "Participants"
+      }
+    },
+    "create": {
+      "title": "New cycle",
+      "hint": "Suggested dates follow the semester cuts of Insights settings.",
+      "name": "Name",
+      "periodStart": "Period start",
+      "periodEnd": "Period end",
+      "template": "Template",
+      "templateValue": "Santex semi-annual review",
+      "submit": "Create cycle"
+    },
+    "detail": {
+      "period": "Period {start} – {end}",
+      "snapshot": "Organization snapshot as of {date}"
+    },
+    "progress": {
+      "title": "Progress",
+      "hint": "Submitted requests out of the active participants' total.",
+      "self": "Self-assessments",
+      "manager": "Manager reviews",
+      "of": "{submitted} of {total} submitted"
+    },
+    "participants": {
+      "title": "Participants",
+      "hintDraft": "Choose who is reviewed. Add every active person, an area or people by hand; opening the cycle takes the snapshot of manager, area and job.",
+      "hintOpen": "You can add or remove people while the cycle is open.",
+      "empty": "There are no participants.",
+      "all": "All active people",
+      "area": "Add an area",
+      "areaPlaceholder": "Choose an area",
+      "noArea": "No area",
+      "addArea": "Add",
+      "clear": "Clear",
+      "selected": "{count} selected",
+      "save": "Save participants",
+      "saved": "Participants saved.",
+      "searchLabel": "Available participants",
+      "columns": {
+        "person": "Person",
+        "area": "Area",
+        "manager": "Manager",
+        "state": "State"
+      },
+      "removed": "Removed",
+      "active": "Active",
+      "remove": "Remove",
+      "add": "Add",
+      "addLabel": "Add a person"
+    },
+    "withoutManager": {
+      "title": "Without a current manager",
+      "hint": "These people have no manager in the snapshot: their manager review is flagged as having no reviewer. Fix it in Bamboo before or after opening.",
+      "none": "Every participant has a manager."
+    },
+    "requests": {
+      "title": "Requests",
+      "empty": "There are no requests yet: they are generated when the cycle opens.",
+      "columns": {
+        "person": "Reviewee",
+        "kind": "Type",
+        "reviewer": "Reviewer",
+        "status": "Status",
+        "actions": "Actions"
+      },
+      "kind": {
+        "self": "Self-assessment",
+        "manager": "Manager",
+        "peer": "Peer",
+        "upward": "Upward"
+      },
+      "status": {
+        "draft": "Draft",
+        "submitted": "Submitted",
+        "declined": "Declined",
+        "superseded": "Superseded"
+      },
+      "reviewerMissing": "No reviewer",
+      "reopen": "Reopen"
+    },
+    "actions": {
+      "launch": "Open cycle",
+      "launchHint": "Generates the requests and takes each participant's snapshot.",
+      "close": "Close cycle",
+      "closeHint": "A closed cycle accepts no more submissions."
+    },
+    "errors": {
+      "required": "This is required.",
+      "invalid_date": "Invalid date (YYYY-MM-DD).",
+      "before_start": "The end cannot be before the start.",
+      "not_found": "Not found.",
+      "invalid": "Invalid value."
+    }
   },
   "InsightsSettings": {
     "title": "Insights settings",
@@ -99,6 +212,7 @@
     "validation": "Check the highlighted fields.",
     "not_found": "The item no longer exists.",
     "forbidden": "Only People (HR) can do this.",
+    "invalid_state": "The cycle or request is not in a state that allows this.",
     "unknown": "Something went wrong."
   },
   "Imports": {

@@ -2,6 +2,7 @@ import {
   Activity,
   ClipboardCheck,
   ClipboardList,
+  RefreshCw,
   GitCompareArrows,
   HeartPulse,
   History,
@@ -34,6 +35,7 @@ const ICONS = {
   identity: UserSearch,
   dataQuality: ShieldCheck,
   insightsSettings: SlidersHorizontal,
+  cycles: RefreshCw,
 } satisfies Record<NavIconKey, React.ComponentType<LucideProps>>;
 
 /** Thin line icon of a section (brand: simple, white on dark, teal on light). */
