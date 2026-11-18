@@ -27,9 +27,9 @@ export type GoalTotals = {
 /**
  * The goal figures of the cycle worked out straight from the goal snapshot
  * the import leaves (one per participant, when the run finishes): what the
- * KPIs' total row must say. Overdue: in progress and due before the period
- * ended. Participants removed from the cycle and goals that no longer apply
- * do not count.
+ * KPIs' total row must say. Overdue: in progress and due before today, the
+ * app's one rule. Participants removed from the cycle and goals that no
+ * longer apply do not count.
  */
 export async function goalTotals(cycleName: string): Promise<GoalTotals> {
   const [row] = await query<GoalTotals>(
@@ -39,7 +39,7 @@ export async function goalTotals(cycleName: string): Promise<GoalTotals> {
              count(g.id) filter (where g.status = 'completed')::int as completed,
              count(g.id) filter (where g.status = 'in_progress')::int as "inProgress",
              count(g.id) filter (
-               where g.status = 'in_progress' and g.due_date < c.period_end
+               where g.status = 'in_progress' and g.due_date < current_date
              )::int as overdue
       from cycle_participant cp
       join review_cycle c on c.id = cp.cycle_id and c.name = ${cycleName}

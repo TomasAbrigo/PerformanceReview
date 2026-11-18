@@ -254,7 +254,8 @@ export async function reset() {
  * Two teams and two semesters. In H1 2024 (period 2024-01-01 .. 2024-06-30)
  * every row is: goals "completed/total (in progress, closed, overdue)",
  * retention R, engagement E (the manager's, Likert 1-5; "-" = unanswered).
- * Overdue: in progress and due before 2024-06-30 (due ON it is not overdue).
+ * Overdue: in progress and due before "today", which the tests pin to
+ * 2024-06-30 (due ON it is not overdue).
  *
  *   Ingeniería, manager Marta
  *     Ana     4/5 (1 ip, 0 cl, 0 od)    sum 460    R2 E4

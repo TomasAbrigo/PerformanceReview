@@ -28,9 +28,9 @@
       "dataQuality": "Casos a corregir antes de analizar o reportar.",
       "insightsSettings": "Umbrales de alerta, tamaño mínimo de grupo, cortes de semestre y proveedor de análisis.",
       "cycles": "Creá y abrí ciclos de evaluación, elegí participantes y seguí el avance.",
-      "goalsArea": "Los goals de cada persona: progreso, hitos, vencimientos y comentarios, con filtros por ciclo, estado y equipo.",
-      "assessmentsArea": "Las preguntas y respuestas de cada ciclo: autoevaluación y evaluación del manager, junto a los goals del período.",
-      "goalsInsights": "Cumplimiento de goals junto a la retención y el compromiso de cada persona."
+      "goalsArea": "Los objetivos de cada persona: progreso, hitos, vencimientos y comentarios, con filtros por ciclo, estado y equipo.",
+      "assessmentsArea": "Las preguntas y respuestas de cada ciclo: autoevaluación y evaluación del manager, junto a los objetivos del período.",
+      "goalsInsights": "Cumplimiento de objetivos junto a la retención y el compromiso de cada persona."
     },
     "greeting": {
       "hr": "Buen día, equipo People",
@@ -38,7 +38,12 @@
       "person": "Buen día, {name}",
       "noPerson": "Buen día"
     },
-    "intro": "Un punto de partida para acompañar el desarrollo de las personas.",
+    "intro": {
+      "hr": "Un punto de partida para acompañar el desarrollo de las personas.",
+      "manager": "Tu equipo y vos: objetivos, evaluaciones y el análisis del ciclo.",
+      "employee": "Tus objetivos y tus evaluaciones del ciclo.",
+      "direction": "El análisis agregado de la compañía, ciclo por ciclo."
+    },
     "focus": {
       "kicker": "Ciclo en foco",
       "noCycle": "Todavía no hay ciclos: cuando haya uno, acá vas a ver sus avances.",
@@ -600,8 +605,8 @@
           "best_work": "Qué me ayudaría"
         },
         "roles": {
-          "goals_rating": "Rating de goals",
-          "goals_comment": "Comentario de goals",
+          "goals_rating": "Rating de objetivos",
+          "goals_comment": "Comentario de objetivos",
           "overall_rating": "Rating general",
           "retention": "Retención",
           "engagement": "Engagement",
@@ -691,7 +696,7 @@
       "to": "Hasta",
       "openSince": "Puesto abierto desde",
       "terminationDate": "Egreso",
-      "goal": "Goal",
+      "goal": "Objetivo",
       "owner": "Dueño",
       "duplicates": "Comparten nombre",
       "started": "Inicio",
@@ -735,8 +740,8 @@
         "description": "Personas activas sin ninguna fila de historial de puesto."
       },
       "goals_without_employment": {
-        "title": "Goals de personas sin empleo vigente",
-        "description": "Goals cuyo dueño no tiene ningún empleo vigente."
+        "title": "Objetivos de personas sin empleo vigente",
+        "description": "Objetivos cuyo dueño no tiene ningún empleo vigente."
       },
       "duplicate_names": {
         "title": "Nombres duplicados entre activos",
@@ -861,7 +866,7 @@
       "count": "cantidad",
       "n": "personas",
       "mean_normalized": "promedio normalizado",
-      "goals": "goals",
+      "goals": "objetivos",
       "completed": "completados",
       "avg_progress": "avance promedio",
       "normalized": "rating normalizado",
@@ -913,7 +918,7 @@
       "retention_n": "retención (personas)",
       "engagement_mean": "compromiso Bamboo (promedio 1-5)",
       "engagement_n": "compromiso Bamboo (personas)",
-      "goals_completed_pct": "goals completados (%)"
+      "goals_completed_pct": "objetivos completados (%)"
     }
   },
   "ImportHistory": {
@@ -1718,7 +1723,7 @@
     },
     "period": {
       "title": "Detalle por período",
-      "hint": "Un renglón por ciclo, del más viejo al más nuevo, con los mismos filtros de cuenta, proyecto, DM, Santex Lead, área y manager de la vista (no con el agrupar por). Las medias de valoración propia (1 a 4), retención y compromiso de Bamboo (1 a 5) llevan las personas detrás. Los goals completados son el estado en Bamboo.",
+      "hint": "Un renglón por ciclo, del más viejo al más nuevo, con los mismos filtros de cuenta, proyecto, DM, Santex Lead, área y manager de la vista (no con el agrupar por). Las medias de valoración propia (1 a 4), retención y compromiso de Bamboo (1 a 5) llevan las personas detrás. Los objetivos completados son el estado en Bamboo.",
       "hintAggregates": "Un renglón por ciclo, del más viejo al más nuevo, solo agregados: la cifra de un ciclo con menos personas que el mínimo no se muestra.",
       "label": "Detalle por período",
       "empty": "Todavía no hay ciclos lanzados.",
@@ -1733,15 +1738,15 @@
         "valued": "Valoración propia (1-4)",
         "retention": "Retención (1-5)",
         "engagement": "Compromiso Bamboo (1-5)",
-        "goals": "Goals completados"
+        "goals": "Objetivos completados"
       },
       "drill": "{cycle} · {what}: ver las personas"
     }
   },
   "GoalsInsights": {
     "nav": "Avance de objetivos",
-    "title": "Goals y assessments",
-    "heading": "Goals y assessments · {cycle}",
+    "title": "Objetivos y evaluaciones",
+    "heading": "Objetivos y evaluaciones · {cycle}",
     "forbidden": "No tenés acceso a esta vista.",
     "noCycles": "Todavía no hay ciclos lanzados.",
     "tableView": "Ver como tabla",
@@ -2055,13 +2060,13 @@
     "title": "Objetivos",
     "kicker": "Personas",
     "scope": {
-      "all": "Todos los goals de la compañía.",
-      "team": "Tus goals y los de las personas que reportan a vos.",
-      "own": "Tus goals."
+      "all": "Todos los objetivos de la compañía.",
+      "team": "Tus objetivos y los de las personas que reportan a vos.",
+      "own": "Tus objetivos."
     },
-    "noPerson": "Elegí una persona en «Actuar como» para ver sus goals.",
+    "noPerson": "Elegí una persona en «Actuar como» para ver sus objetivos.",
     "filters": {
-      "label": "Filtros de goals",
+      "label": "Filtros de objetivos",
       "cycle": "Ciclo",
       "anyCycle": "Todos los ciclos",
       "state": "Estado",
@@ -2082,11 +2087,11 @@
       "closed": "Cerrado",
       "overdue": "Vencido"
     },
-    "count": "{n, plural, =0 {Ningún goal} one {# goal} other {# goals}}",
-    "summary": "Goals por estado",
+    "count": "{n, plural, =0 {Ningún objetivo} one {# objetivo} other {# objetivos}}",
+    "summary": "Objetivos por estado",
     "table": {
-      "label": "Lista de goals",
-      "goal": "Goal",
+      "label": "Lista de objetivos",
+      "goal": "Objetivo",
       "person": "Persona",
       "department": "Área",
       "state": "Estado",
@@ -2097,7 +2102,7 @@
       "noMilestones": "–",
       "milestonesOf": "{done} de {total}"
     },
-    "empty": "No hay goals con estos filtros.",
+    "empty": "No hay objetivos con estos filtros.",
     "pagination": {
       "label": "Páginas",
       "previous": "Anterior",
@@ -2118,22 +2123,22 @@
       "updated": "Última actualización",
       "noDate": "Sin fecha",
       "description": "Descripción",
-      "noDescription": "Este goal no tiene descripción.",
+      "noDescription": "Este objetivo no tiene descripción.",
       "milestones": "Hitos",
       "milestonesDone": "{done} de {total} completados",
-      "noMilestones": "Este goal no tiene hitos.",
+      "noMilestones": "Este objetivo no tiene hitos.",
       "milestoneDone": "Completado el {date}",
       "milestoneOpen": "Pendiente",
       "comments": "Comentarios",
       "noComments": "Todavía no hay comentarios.",
       "unknownAuthor": "Autor desconocido",
       "assessments": "En los assessments",
-      "assessmentsHint": "Ciclos cuya evaluación lista este goal entre los goals del período.",
+      "assessmentsHint": "Ciclos cuya evaluación lista este objetivo entre los objetivos del período.",
       "openAssessment": "Ver el assessment de {cycle}",
       "notInAssessments": "Todavía no aparece en ningún assessment.",
-      "manage": "Actualizar el goal"
+      "manage": "Actualizar el objetivo"
     },
-    "forbidden": "No tenés acceso a este goal: cada persona ve los suyos y, si es manager, los de su equipo.",
+    "forbidden": "No tenés acceso a este objetivo: cada persona ve los suyos y, si es manager, los de su equipo.",
     "navOwn": "Mis objetivos",
     "titleOwn": "Mis objetivos",
     "overview": {
@@ -2147,16 +2152,16 @@
       "overdueShare": "{pct} % vencidos: en curso con la fecha pasada"
     },
     "form": {
-      "new": "Nuevo goal",
+      "new": "Nuevo objetivo",
       "edit": "Editar",
-      "newTitle": "Nuevo goal",
-      "editTitle": "Editar goal",
+      "newTitle": "Nuevo objetivo",
+      "editTitle": "Editar objetivo",
       "description": "Título, descripción y fecha límite.",
       "owner": "Persona",
       "title": "Título",
       "descriptionLabel": "Descripción",
       "dueDate": "Fecha límite",
-      "dueDateHint": "Opcional. Un goal en curso que pasó esta fecha se ve como vencido.",
+      "dueDateHint": "Opcional. Un objetivo en curso que pasó esta fecha se ve como vencido.",
       "cancel": "Cancelar",
       "save": "Guardar",
       "errors": {
@@ -2172,7 +2177,7 @@
       "progressInvalid": "Ingresá un número entero de 0 a 100.",
       "saveProgress": "Guardar avance",
       "complete": "Marcar como completo",
-      "close": "Cerrar goal",
+      "close": "Cerrar objetivo",
       "reopen": "Reabrir",
       "addMilestone": "Agregar un hito",
       "add": "Agregar",
@@ -2271,17 +2276,17 @@
       "hiddenFromEmployee": "Oculta al empleado",
       "scaleOf": "{value} de {max}",
       "goals": {
-        "title": "Goals del período",
-        "hint": "Los goals de {name} cuando se armó el ciclo ({date}). Quedan fijos aunque el goal cambie después.",
-        "hintNoDate": "Los goals de {name} cuando se armó el ciclo. Quedan fijos aunque el goal cambie después.",
-        "empty": "No tenía goals en este período.",
-        "goal": "Goal",
+        "title": "Objetivos del período",
+        "hint": "Los objetivos de {name} cuando se armó el ciclo ({date}). Quedan fijos aunque el objetivo cambie después.",
+        "hintNoDate": "Los objetivos de {name} cuando se armó el ciclo. Quedan fijos aunque el objetivo cambie después.",
+        "empty": "No tenía objetivos en este período.",
+        "goal": "Objetivo",
         "state": "Estado",
         "progress": "Progreso",
         "due": "Vence",
         "noDate": "Sin fecha",
         "noLongerApplicable": "Ya no aplica",
-        "open": "Abrir el goal",
+        "open": "Abrir el objetivo",
         "progressLabel": "{percent}% completado"
       }
     },

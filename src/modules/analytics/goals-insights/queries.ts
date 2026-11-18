@@ -116,8 +116,8 @@ function outliersView(
 /**
  * Goal indicators of a cycle per person, manager or area: how many goals the
  * group's people had in the period (the cycle's goal snapshot), the share that
- * is completed, in progress and overdue (in progress and due before the period
- * ended; a closed goal never is) and the mean progress. The manager and the
+ * is completed, in progress and overdue (in progress and due before today, as
+ * in the goals list; a closed goal never is) and the mean progress. The manager and the
  * area are the snapshot's, or today's with `hierarchy: "current"`.
  *
  * People: everything. A manager: their direct reports of the snapshot.

@@ -427,7 +427,7 @@ describe("AssessmentView", () => {
     const goals = screen.getByTestId("assessment-goals");
     expect(
       within(goals).getByText(
-        /Los goals de Dora Díaz cuando se armó el ciclo \(2 jun 2026\)/,
+        /Los objetivos de Dora Díaz cuando se armó el ciclo \(2 jun 2026\)/,
       ),
     ).toBeVisible();
     expect(
@@ -453,7 +453,9 @@ describe("AssessmentView", () => {
         toggle={toggle}
       />,
     );
-    expect(screen.getByText("No tenía goals en este período.")).toBeVisible();
+    expect(
+      screen.getByText("No tenía objetivos en este período."),
+    ).toBeVisible();
   });
 
   it("explains a side that is not for the reader yet, without any question", () => {

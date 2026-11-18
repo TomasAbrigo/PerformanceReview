@@ -78,7 +78,9 @@ async function HomeHead() {
   return (
     <div className="flex flex-col gap-2">
       <h1 className="text-3xl lg:text-4xl">{greeting}</h1>
-      <p className="text-sm text-muted-foreground">{t("intro")}</p>
+      <p className="text-sm text-muted-foreground">
+        {t(`intro.${actor.role}`)}
+      </p>
     </div>
   );
 }

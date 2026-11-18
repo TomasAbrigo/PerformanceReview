@@ -21,13 +21,13 @@ test.beforeAll(async () => {
   goal = await goalOf(subject.personId);
 });
 
-const plural = (n: number) => (n === 1 ? "1 goal" : `${n} goals`);
+const plural = (n: number) => (n === 1 ? "1 objetivo" : `${n} objetivos`);
 
 test("the list opens on the latest cycle, most urgent first, and its KPIs filter it", async ({
   page,
 }) => {
   await page.goto("/es/goals");
-  const filters = page.getByRole("form", { name: "Filtros de goals" });
+  const filters = page.getByRole("form", { name: "Filtros de objetivos" });
   await expect(filters.locator('select[name="cycle"]')).not.toHaveValue("all");
   await page
     .getByRole("region", { name: "Para revisar" })
@@ -48,16 +48,16 @@ test("People list every goal, filter them and page through them", async ({
   await expect(
     page.getByTestId("goals-list").getByRole("heading", { level: 2 }).first(),
   ).toHaveText(plural(total));
-  const states = page.getByRole("group", { name: "Goals por estado" });
+  const states = page.getByRole("group", { name: "Objetivos por estado" });
   await expect(
     states.getByRole("link", { name: `Todos ${total}` }),
   ).toHaveAttribute("aria-current", "true");
 
   // By state: every row of the list is in it.
-  const filters = page.getByRole("form", { name: "Filtros de goals" });
+  const filters = page.getByRole("form", { name: "Filtros de objetivos" });
   await states.getByRole("link", { name: /^Completado \d+$/ }).click();
   await expect(page).toHaveURL(/state=completed/);
-  const rows = page.getByRole("group", { name: "Lista de goals" });
+  const rows = page.getByRole("group", { name: "Lista de objetivos" });
   await expect(rows.locator("[data-state]").first()).toBeVisible();
   await expect(
     rows.locator('[data-state]:not([data-state="completed"])'),
@@ -102,7 +102,7 @@ test("a page past the last one shows the last page, not an empty list", async ({
   page,
 }) => {
   await page.goto("/es/goals?page=99999");
-  const rows = page.getByRole("group", { name: "Lista de goals" });
+  const rows = page.getByRole("group", { name: "Lista de objetivos" });
   await expect(rows.getByRole("article").first()).toBeVisible();
   const position = page.getByText(/^Página (\d+) de (\d+)$/);
   await expect(position).toBeVisible();
@@ -122,11 +122,11 @@ test("a goal's page shows its summary, milestones and comments, and leads to the
 }) => {
   test.setTimeout(120_000);
   await page.goto("/es/goals?cycle=all");
-  const filters = page.getByRole("form", { name: "Filtros de goals" });
+  const filters = page.getByRole("form", { name: "Filtros de objetivos" });
   await filters.getByLabel("Buscar").fill(goal.personName);
   await filters.getByRole("button", { name: "Aplicar" }).click();
   await page
-    .getByRole("group", { name: "Lista de goals" })
+    .getByRole("group", { name: "Lista de objetivos" })
     .getByRole("link", { name: goal.title })
     .first()
     .click();
@@ -165,16 +165,16 @@ test("an employee only sees their own goals", async ({ page }) => {
     page.getByTestId("goals-list").getByRole("heading", { level: 2 }).first(),
   ).toHaveText(plural(own));
   // Themself only: the search is by title, no team cuts.
-  const filters = page.getByRole("form", { name: "Filtros de goals" });
+  const filters = page.getByRole("form", { name: "Filtros de objetivos" });
   await expect(filters.getByPlaceholder("Título del objetivo")).toBeVisible();
   await expect(filters.getByText("Más filtros")).toHaveCount(0);
-  const rows = page.getByRole("group", { name: "Lista de goals" });
+  const rows = page.getByRole("group", { name: "Lista de objetivos" });
   await expect(rows.getByRole("article")).toHaveCount(own);
 
   // Somebody else's goal: no access, and nothing of it on the page.
   const other = await goalOfSomeoneElse(subject.personId);
   await page.goto(`/es/goals/${other.goalId}`);
-  await expect(page.getByText(/No tenés acceso a este goal/)).toBeVisible();
+  await expect(page.getByText(/No tenés acceso a este objetivo/)).toBeVisible();
   await expect(page.getByText(other.title)).toHaveCount(0);
 
   // And, as the employee, no analysis in the navigation.
@@ -193,10 +193,10 @@ test("a manager sees their team's goals and not other people's", async ({
   await page.goto("/es");
   await actAsCookie(page, { personId: subject.managerId, role: "manager" });
   await page.goto("/es/goals?cycle=all");
-  const filters = page.getByRole("form", { name: "Filtros de goals" });
+  const filters = page.getByRole("form", { name: "Filtros de objetivos" });
   await filters.getByLabel("Buscar").fill(subject.personName);
   await filters.getByRole("button", { name: "Aplicar" }).click();
-  const rows = page.getByRole("group", { name: "Lista de goals" });
+  const rows = page.getByRole("group", { name: "Lista de objetivos" });
   await expect(rows.getByRole("article").first()).toContainText(
     subject.personName,
   );

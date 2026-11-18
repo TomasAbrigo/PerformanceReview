@@ -38,11 +38,13 @@ export default function UploadPage(
   props: PageProps<"/[locale]/imports/upload">,
 ) {
   return (
-    <Suspense>
-      <HrOnly>
-        <UploadBody {...props} />
-      </HrOnly>
-    </Suspense>
+    <main className="mx-auto flex w-full max-w-6xl flex-col gap-8 p-6 lg:p-10">
+      <Suspense>
+        <HrOnly>
+          <UploadBody {...props} />
+        </HrOnly>
+      </Suspense>
+    </main>
   );
 }
 
@@ -54,7 +56,7 @@ async function UploadBody({ params }: PageProps<"/[locale]/imports/upload">) {
   const kicker = await groupKicker("data");
 
   return (
-    <main className="mx-auto flex w-full max-w-6xl flex-col gap-8 p-6 lg:p-10">
+    <>
       <PageHeader
         kicker={kicker}
         title={t("title")}
@@ -73,6 +75,6 @@ async function UploadBody({ params }: PageProps<"/[locale]/imports/upload">) {
           <LatestRuns />
         </Suspense>
       </div>
-    </main>
+    </>
   );
 }
