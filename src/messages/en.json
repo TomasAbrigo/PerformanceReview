@@ -243,7 +243,8 @@
         "log": "Log entries",
         "duration": "Duration",
         "mismatches": "Reviewer mismatches",
-        "deferred": "Deferred"
+        "deferred": "Deferred",
+        "nativeOverwritten": "Native overwritten"
       },
       "status": {
         "running": "Running",
@@ -558,6 +559,7 @@
       "inserted": "New records",
       "unchanged": "Unchanged",
       "rejected": "Rejected",
+      "nativeOverwritten": "Entered in the app and overwritten by Bamboo",
       "noNew": "No new records were created: this file had already been imported.",
       "rejects": "Rejected rows",
       "viewRun": "View the run",

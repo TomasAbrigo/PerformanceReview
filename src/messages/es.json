@@ -243,7 +243,8 @@
         "log": "Entradas del log",
         "duration": "Duración",
         "mismatches": "Evaluador distinto",
-        "deferred": "En espera"
+        "deferred": "En espera",
+        "nativeOverwritten": "Nativos pisados"
       },
       "status": {
         "running": "En curso",
@@ -558,6 +559,7 @@
       "inserted": "Registros nuevos",
       "unchanged": "Sin cambios",
       "rejected": "Rechazadas",
+      "nativeOverwritten": "Cargados en la app y pisados por Bamboo",
       "noNew": "No se crearon registros nuevos: este archivo ya estaba importado.",
       "rejects": "Filas rechazadas",
       "viewRun": "Ver la corrida",

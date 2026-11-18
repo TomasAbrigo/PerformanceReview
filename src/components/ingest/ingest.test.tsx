@@ -262,6 +262,29 @@ describe("RunDetailView", () => {
   );
 
   it.each([
+    ["es", "Nativos pisados"],
+    ["en", "Native overwritten"],
+  ] as const)(
+    "shows the native records the run overwrote in %s (#106)",
+    (locale, label) => {
+      renderIn(
+        locale,
+        <RunDetailView
+          run={{
+            ...detail,
+            counts: { ...detail.counts, nativeOverwritten: 2 },
+          }}
+        />,
+      );
+      const counts = within(
+        screen.getByRole("group", { name: /Conteos|Counts/ }),
+      );
+      const last = counts.getAllByRole("region").at(-1)!;
+      expect(cellTexts(last)).toEqual([label, "2"]);
+    },
+  );
+
+  it.each([
     [
       "es",
       "Rechazos e incidencias",
