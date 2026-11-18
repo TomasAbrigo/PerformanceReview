@@ -23,7 +23,7 @@ export function OrgFilterFields({
   params: OrgParams;
   options: OrgOptions | null;
 }) {
-  const t = useTranslations("Org.filters");
+  const t = useTranslations("OrgFilters");
   if (!options) return null;
   return (
     <>

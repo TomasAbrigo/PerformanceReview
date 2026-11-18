@@ -75,7 +75,14 @@ export const stagedOrgAttributeSchema = z
     };
     const from = date("Desde", fields.valid_from);
     const to = date("Hasta", fields.valid_to);
-    const { valid_from: _from, valid_to: _to, ...rest } = fields;
+    const rest = {
+      employee_bamboo_id: fields.employee_bamboo_id,
+      employee_name: fields.employee_name,
+      account: fields.account,
+      project: fields.project,
+      dm: fields.dm,
+      santex_lead: fields.santex_lead,
+    };
     const validFrom = from ?? ORG_ATTRIBUTE_EPOCH;
     if (to && to < validFrom) {
       ctx.addIssue({

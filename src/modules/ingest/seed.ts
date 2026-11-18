@@ -84,7 +84,11 @@ export async function resetDomainTables(
   db: DbOrTx,
   registry: ReadonlyMap<string, unknown> = REGISTRY,
   /** Entities outside the registry the seed also writes under a lock (the reports). */
-  extraLocks: readonly string[] = ["assessment", "assessment_progress"],
+  extraLocks: readonly string[] = [
+    "assessment",
+    "assessment_progress",
+    "org_attribute",
+  ],
 ): Promise<void> {
   await db.transaction(async (tx) => {
     for (const entity of [...registry.keys(), ...extraLocks]) {

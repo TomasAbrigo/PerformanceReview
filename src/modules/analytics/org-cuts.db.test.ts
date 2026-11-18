@@ -367,6 +367,12 @@ describe("qualitative analysis", () => {
     ]);
   });
 
+  it("only groups by what it knows (the column is part of the statement)", async () => {
+    await expect(
+      sentimentByGroup(db, hr, { cycleId }, "1; drop table person" as never),
+    ).rejects.toMatchObject({ code: "not_found" });
+  });
+
   it("filters the totals by an attribute", async () => {
     expect(
       (await sentimentTotals(db, hr, { cycleId, account: "Cuenta A" }))?.total,

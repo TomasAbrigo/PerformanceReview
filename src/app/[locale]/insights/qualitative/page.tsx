@@ -160,6 +160,7 @@ async function Qualitative({
             {hr ? (
               <ExportCsvLink
                 file="insights-sentiment-by"
+                label={t("byGroup.export")}
                 params={{
                   cycle: cycleId,
                   groupBy,

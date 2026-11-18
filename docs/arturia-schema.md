@@ -16,12 +16,14 @@ Contrato del JSON que genera `pnpm export:arturia` (zod: `arturiaReportV1` en `s
 
 - **2**: el cualitativo pasa a **cinco sentimientos** y se parte por quién escribe (#84). Agrega `neutral` y `mixed` a todo conteo de sentimiento (`sentimentByDimension[]`, `trend[]`, y los nuevos `totals` y `sentiment`; un informe anterior sin ellos se lee con 0, que es correcto porque entonces solo había tres), `qualitative.totals`, `topThemes[].sentiment` y `qualitative.bySide` (`{self, manager}`, cada uno con `totals`, `sentimentByDimension`, `topThemes` y `suppressed`). Las respuestas a preguntas cerradas con dimensión también cuentan como comentarios cuando el setting `analysis.includeClosed` está activo. No cambia ningún campo existente. `people[].positiveShare` y `goals[].positiveShare` siguen contando solo comentarios abiertos.
 
+- **3**: cortes organizacionales (#85): cuenta y DM, de los atributos que People carga por archivo (ver [org-attributes.md](org-attributes.md)). Agrega `completion.byAccount` / `completion.byDm` (mismas filas que `byDepartment`), `completion.suppressed.byAccount` / `byDm`, `goals.byAccount` / `goals.byDm` (mismas filas que `goals.byDepartment`), `goals.suppressed.byAccount` / `byDm`, y en cada `indicators.distribution[]` `byAccount`, `byDm` (mismos grupos que `groups`) y `suppressedBy: {account, dm}`. Todos opcionales: un informe de un minor anterior sigue siendo válido. No cambia ningún campo existente. Sin atributos cargados los desgloses salen con un solo grupo "Otros" (las personas sin cuenta ni DM).
+
 ## Raíz
 
 | Campo           | Tipo                                 | Descripción                                                                                          |
 | --------------- | ------------------------------------ | ---------------------------------------------------------------------------------------------------- |
 | `schemaVersion` | `"arturia-report.v1"`                | Versión mayor del formato.                                                                           |
-| `schemaMinor`   | entero ≥ 0                           | Versión menor (cambios aditivos). Hoy `2`.                                                           |
+| `schemaMinor`   | entero ≥ 0                           | Versión menor (cambios aditivos). Hoy `3`.                                                           |
 | `generatedAt`   | ISO 8601 (UTC)                       | Momento de generación.                                                                               |
 | `cycle`         | `{id, name, periodStart, periodEnd}` | Ciclo: uuid, nombre, fechas `YYYY-MM-DD`.                                                            |
 | `anonymized`    | boolean                              | `true`: versión anonimizada (sin `people`, sin emails ni nombres, sin personas en `goals.outliers`). |
@@ -55,18 +57,21 @@ Quién envió su autoevaluación y la evaluación de su manager, según el módu
 | `byRelationship` | `[{relationship, total, submitted, draft, declined}]` o null | `self` y `manager`: `total` = participantes a los que aplica, `submitted` = enviadas. `draft` y `declined` siempre `null`.  |
 | `byDepartment`   | `[{label, relationship, n, total, submitted, other}]`        | Por área y lado (`self`/`manager`, solo los que aplican); `n` = participantes del grupo, `total` y `submitted` como arriba. |
 | `byManager`      | idem                                                         | Por equipo (manager del snapshot); "Equipo N" si anonimizado.                                                               |
-| `suppressed`     | `{byDepartment, byManager}`                                  | Participantes fuera de cada desglose.                                                                                       |
+| `byAccount`      | idem (minor 3, opcional)                                     | Por cuenta (atributo organizacional a la fecha del snapshot); sin cuenta: "Otros".                                          |
+| `byDm`           | idem (minor 3, opcional)                                     | Por DM; "DM N" si anonimizado (un DM es una persona: equipo sin nombre, orden estable por clave dentro del informe).        |
+| `suppressed`     | `{byDepartment, byManager, byAccount?, byDm?}`               | Participantes fuera de cada desglose.                                                                                       |
 | `delta`          | `{previousCycleName, total, byDepartment[]}` o null          | Cambio en puntos porcentuales de la tasa de enviadas contra el semestre anterior; null si no hay ciclo anterior.            |
 
 `delta.total` es `{self, manager}` (null si anonimizado y hay un grupo suprimido) y `delta.byDepartment` `[{label, other, self, manager}]`; un valor es `null` cuando el otro ciclo no tiene ese grupo o no hay tasa que comparar.
 
 ## `sections.indicators` (nullable)
 
-| Campo          | Tipo                                                                             | Descripción                                                                                |
-| -------------- | -------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
-| `distribution` | `[{indicator, groups: [{label, n, mean, counts[5], other}], total, suppressed}]` | Retención y compromiso (Likert 1-5) por área; `total` null bajo el mínimo.                 |
-| `riskMatrix`   | `{cells: [{retention, engagement, count, risk}], total, riskCount}` o null       | 9 celdas, bandas `low/mid/high`; `count` null bajo el mínimo.                              |
-| `alerts`       | `[{kind, indicator, count}]`                                                     | Alertas contadas (`drop` por indicador, `risk`); nunca personas. Bajo el mínimo se omiten. |
+| Campo                                                                            | Tipo                                                                             | Descripción                                                                                                                                                                                              |
+| -------------------------------------------------------------------------------- | -------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `distribution`                                                                   | `[{indicator, groups: [{label, n, mean, counts[5], other}], total, suppressed}]` | Retención y compromiso (Likert 1-5) por área; `total` null bajo el mínimo.                                                                                                                               |
+| `distribution[].byAccount`, `distribution[].byDm`, `distribution[].suppressedBy` | mismos grupos que `groups`; `{account, dm}`                                      | Minor 3, opcionales. La misma distribución por cuenta y por DM ("DM N" si anonimizado); `suppressedBy` son las personas fuera de cada corte. Con un grupo suprimido en cualquier corte, `total` es null. |
+| `riskMatrix`                                                                     | `{cells: [{retention, engagement, count, risk}], total, riskCount}` o null       | 9 celdas, bandas `low/mid/high`; `count` null bajo el mínimo.                                                                                                                                            |
+| `alerts`                                                                         | `[{kind, indicator, count}]`                                                     | Alertas contadas (`drop` por indicador, `risk`); nunca personas. Bajo el mínimo se omiten.                                                                                                               |
 
 ## `sections.qualitative` (nullable)
 
@@ -92,10 +97,12 @@ Los objetivos del período del ciclo (la foto de objetivos del ciclo, sin los "y
 | `avgProgress`           | número (0-100) o null                                                            | Avance promedio de los objetivos (un decimal).                                                                                                                                          |
 | `byDepartment`          | `[goalRow]`                                                                      | Por área (manager y área del snapshot).                                                                                                                                                 |
 | `byManager`             | `[goalRow]`                                                                      | Por equipo; "Equipo N" si anonimizado (mismo número que en `completion.byManager`).                                                                                                     |
+| `byAccount`             | `[goalRow]`                                                                      | Minor 3, opcional. Por cuenta.                                                                                                                                                          |
+| `byDm`                  | `[goalRow]`                                                                      | Minor 3, opcional. Por DM; "DM N" si anonimizado (mismo número que en `completion.byDm`).                                                                                               |
 | `buckets`               | `[{from, to, people, meanRetention, meanEngagement, meanPositiveShare, hidden}]` | Cinco tramos de 20 puntos del porcentaje de objetivos completados; promedio de retención y compromiso (1-5, dos decimales) y de la proporción de comentarios positivos de sus personas. |
 | `withoutGoals`          | entero o null                                                                    | Personas sin objetivos en el período (no tienen tramo). `null` si anonimizado.                                                                                                          |
 | `outliers`              | `{thresholds, doneButLow, behindButHigh}`                                        | Casos donde objetivos e indicadores no coinciden (ver abajo).                                                                                                                           |
-| `suppressed`            | `{byDepartment, byManager, buckets}`                                             | Personas fuera de cada desglose (sus grupos o tramos quedan bajo el mínimo).                                                                                                            |
+| `suppressed`            | `{byDepartment, byManager, byAccount?, byDm?, buckets}`                          | Personas fuera de cada desglose (sus grupos o tramos quedan bajo el mínimo).                                                                                                            |
 
 Los cuatro totales (`participantsWithGoals`, `goals`, `completed`, `avgProgress`) son `null` cuando la versión es anonimizada y algún desglose (`suppressed.*` > 0) tiene un grupo oculto.
 

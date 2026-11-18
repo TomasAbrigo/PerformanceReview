@@ -28,6 +28,7 @@ import {
   type QualitativeFilterOptions,
   type QualitativeGroupBy,
   type QualitativeFilters,
+  qualitativeGroupBys,
   type SentimentCounts,
   type ThemeRank,
   type TrendPoint,
@@ -184,9 +185,13 @@ export async function sentimentByGroup(
   f: QualitativeFilters,
   groupBy: QualitativeGroupBy,
 ): Promise<GroupSentiment[]> {
+  // The column is part of the statement: only the known groupings.
+  if (!(qualitativeGroupBys as readonly string[]).includes(groupBy)) {
+    throw new AnalysisError("not_found");
+  }
   const r = await resolve(db, actor, f);
   if (!r) return [];
-  const column = sql.raw(groupBy === "department" ? "department" : groupBy);
+  const column = sql.raw(groupBy);
   const rows = await db.execute<
     SentimentCounts & { value: string | null; participants: number }
   >(sql`

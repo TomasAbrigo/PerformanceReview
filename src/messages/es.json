@@ -320,13 +320,6 @@
       "current": "Actual",
       "unresolved": "{name} (sin resolver)",
       "empty": "Sin historial de puesto."
-    },
-    "filters": {
-      "any": "Todas",
-      "account": "Cuenta",
-      "project": "Proyecto",
-      "dm": "DM",
-      "santexLead": "Santex Lead"
     }
   },
   "Goals": {
@@ -574,7 +567,8 @@
       "landingOnly": "Solo aterrizar",
       "historyHint": "Las filas se importan como ciclos de evaluación históricos, con sus participantes, solicitudes y respuestas.",
       "landingHint": "Las filas se guardan tal cual (crudas), sin crear ciclos.",
-      "legacy": "(formato anterior)"
+      "legacy": "(formato anterior)",
+      "orgHint": "Las filas se importan como atributos organizacionales de cada persona (cuenta, proyecto, DM y Santex Lead, con su vigencia) por EEID; los EEID que no coinciden con nadie esperan en la cola de identidad."
     },
     "roles": {
       "key": "Clave",
@@ -1424,7 +1418,8 @@
       },
       "unassigned": "Sin asignar",
       "team": "Equipo {n}",
-      "people": "{n, plural, one {# persona} other {# personas}}"
+      "people": "{n, plural, one {# persona} other {# personas}}",
+      "export": "Descargar por grupo (CSV)"
     }
   },
   "Insights": {
@@ -1975,5 +1970,12 @@
     "export": {
       "csv": "Exportar CSV"
     }
+  },
+  "OrgFilters": {
+    "any": "Todas",
+    "account": "Cuenta",
+    "project": "Proyecto",
+    "dm": "DM",
+    "santexLead": "Santex Lead"
   }
 }

@@ -320,13 +320,6 @@
       "current": "Current",
       "unresolved": "{name} (unresolved)",
       "empty": "No job history."
-    },
-    "filters": {
-      "any": "All",
-      "account": "Account",
-      "project": "Project",
-      "dm": "DM",
-      "santexLead": "Santex Lead"
     }
   },
   "Goals": {
@@ -574,7 +567,8 @@
       "landingOnly": "Only land the rows",
       "historyHint": "The rows become historical review cycles, with their participants, requests and answers.",
       "landingHint": "The rows are kept as they are (raw), without creating cycles.",
-      "legacy": "(legacy format)"
+      "legacy": "(legacy format)",
+      "orgHint": "Rows are imported as each person's organizational attributes (account, project, DM and Santex Lead, with their validity) by EEID; EEIDs that match nobody wait in the identity queue."
     },
     "roles": {
       "key": "Key",
@@ -1424,7 +1418,8 @@
       },
       "unassigned": "Unassigned",
       "team": "Team {n}",
-      "people": "{n, plural, one {# person} other {# people}}"
+      "people": "{n, plural, one {# person} other {# people}}",
+      "export": "Download by group (CSV)"
     }
   },
   "Insights": {
@@ -1975,5 +1970,12 @@
     "export": {
       "csv": "Export CSV"
     }
+  },
+  "OrgFilters": {
+    "any": "All",
+    "account": "Account",
+    "project": "Project",
+    "dm": "DM",
+    "santexLead": "Santex Lead"
   }
 }

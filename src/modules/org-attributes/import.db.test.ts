@@ -1,10 +1,18 @@
+import { mkdtemp, rm } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import path from "node:path";
 import { and, asc, eq, isNull } from "drizzle-orm";
 import { afterAll, beforeEach, describe, expect, it } from "vitest";
 import { closeDb, db } from "@/db/client";
 import { identityMatchIssue, ingestRun, personOrgAttribute } from "@/db/schema";
 import { resolveIssue } from "@/modules/identity";
 import { writeCsv } from "@/modules/import-history/test-support";
-import { importReportFile } from "@/modules/lake/upload";
+import { xlsxFromRows } from "@/modules/lake/test-xlsx";
+import {
+  importReportFile,
+  importUpload,
+  storeUpload,
+} from "@/modules/lake/upload";
 import { insertPerson } from "@/modules/analytics/test-support";
 import { resetAll } from "@/modules/analytics/test-support";
 
@@ -203,5 +211,72 @@ describe("importing the org attributes file", () => {
     expect(reasons).toMatch(/Desde "mañana" is not a date/);
     expect(reasons).toMatch(/no Cuenta, Proyecto, DM or Santex Lead/);
     expect(reasons).toMatch(/EEID/);
+  });
+});
+
+describe("importing the org attributes file as a workbook", () => {
+  it("reads an .xlsx the same, dates as Excel dates, and tells the upload it mapped attributes", async () => {
+    const root = await mkdtemp(path.join(tmpdir(), "org-xlsx-"));
+    try {
+      const store = {
+        uploadsDir: path.join(root, "uploads"),
+        profilesDir: path.join(root, "profiles"),
+      };
+      const stored = await storeUpload(
+        {
+          name: "atributos.xlsx",
+          bytes: Buffer.from(
+            xlsxFromRows([
+              HEADER.split(","),
+              [
+                "11",
+                "Ana Prieto",
+                "Cuenta A",
+                "Proyecto A1",
+                "Marta Quiroga",
+                "Nora Salas",
+                "2024-01-01",
+                "2024-12-31",
+              ],
+              ["12", "Bruno Soler", "Cuenta B", "", "", "", "", ""],
+            ]),
+          ),
+        },
+        store,
+      );
+
+      const result = await importUpload({
+        uploadId: stored.id,
+        fileName: "atributos.xlsx",
+        profile: { builtin: "org-attributes" },
+        db,
+        store,
+      });
+
+      expect(result.mode).toBe("attributes");
+      expect(result.counts).toMatchObject({
+        read: 2,
+        inserted: 2,
+        rejected: 0,
+      });
+      expect(
+        (await attrs(ana)).map((r) => [
+          r.kind,
+          r.value,
+          r.validFrom,
+          r.validTo,
+        ]),
+      ).toEqual([
+        ["account", "Cuenta A", "2024-01-01", "2024-12-31"],
+        ["project", "Proyecto A1", "2024-01-01", "2024-12-31"],
+        ["dm", "Marta Quiroga", "2024-01-01", "2024-12-31"],
+        ["santex_lead", "Nora Salas", "2024-01-01", "2024-12-31"],
+      ]);
+      expect((await attrs(bruno)).map((r) => [r.kind, r.value])).toEqual([
+        ["account", "Cuenta B"],
+      ]);
+    } finally {
+      await rm(root, { recursive: true, force: true });
+    }
   });
 });

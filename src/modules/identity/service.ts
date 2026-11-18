@@ -48,7 +48,14 @@ export function summarizePayload(payload: unknown): PayloadSummary {
     failedName?: unknown;
     failedRole?: unknown;
   } | null;
-  const name = row?.failedName ?? row?.fields?.employee_name;
+  // A row of the org attributes file may name nobody but its EEID.
+  const eeid = row?.fields?.employee_bamboo_id;
+  const name =
+    row?.failedName ??
+    row?.fields?.employee_name ??
+    (typeof eeid === "string" || typeof eeid === "number"
+      ? `EEID ${eeid}`
+      : undefined);
   return {
     displayName: typeof name === "string" ? name : null,
     role: typeof row?.failedRole === "string" ? row.failedRole : null,

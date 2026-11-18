@@ -40,9 +40,10 @@ type Account = {
  * People's org attributes file (docs/org-attributes.md) for the synthetic
  * company, deterministic from its seed: a few accounts, each with two
  * projects, one DM (a manager of the company) and a Santex Lead (one of the
- * managers' managers). Everybody has the account of their department's turn;
- * about one in six moves to another account (and project) at the start of a
- * cycle, so the same EEID has two rows with a `Hasta`. The DM and the Santex
+ * managers' managers). People work on their DM's account when their manager
+ * is a DM, else on any account; about one in six moves to another account
+ * (and project) at the start of a cycle, so the same EEID has two rows with a
+ * `Hasta`. The DM and the Santex
  * Lead are written by name ("First Last"), as People type them.
  */
 export function serializeOrgAttributes(company: CompanyFixture): FixtureFile[] {
@@ -80,9 +81,15 @@ export function serializeOrgAttributes(company: CompanyFixture): FixtureFile[] {
     };
   });
 
-  const employees = [...company.employees].sort((a, b) =>
-    a.id.localeCompare(b.id, "en", { numeric: true }),
+  // A rehire's later Bamboo ids wait in the identity queue (nobody links them
+  // on their own): the file lists each person once, under the id that became
+  // them, so importing it leaves nothing unmatched.
+  const later = new Set(
+    company.identity.persons.flatMap((p) => p.employeeIds.slice(1)),
   );
+  const employees = company.employees
+    .filter((e) => !later.has(e.id))
+    .sort((a, b) => a.id.localeCompare(b.id, "en", { numeric: true }));
   const row = (
     e: FixtureEmployee,
     account: Account,
@@ -104,9 +111,12 @@ export function serializeOrgAttributes(company: CompanyFixture): FixtureFile[] {
   };
   const rows: string[][] = [];
   employees.forEach((e, i) => {
+    const dmIndex = dms.indexOf(e.managerId ?? "");
     const home = dmSet.has(e.id)
       ? accounts[dms.indexOf(e.id)]
-      : accounts[(i + rng.int(0, accounts.length - 1)) % accounts.length];
+      : dmIndex >= 0
+        ? accounts[dmIndex]
+        : accounts[(i + rng.int(0, accounts.length - 1)) % accounts.length];
     const project = rng.pick(home.projects);
     const moves = !dmSet.has(e.id) && accounts.length > 1 && rng.chance(0.17);
     if (!moves) {

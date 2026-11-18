@@ -14,6 +14,7 @@ import {
 } from "@/modules/lake/profiles";
 import {
   isHistoryProfile,
+  isOrgAttributesProfile,
   UPLOAD_EXTENSIONS,
   UPLOAD_MAX_BYTES,
   type ImportResult,
@@ -355,6 +356,12 @@ function Preview({
             {landingOnly ? t("preview.landingHint") : t("preview.historyHint")}
           </p>
         </div>
+      ) : null}
+
+      {profile && isOrgAttributesProfile(profile) ? (
+        <p className="max-w-xl text-sm text-muted-foreground">
+          {t("preview.orgHint")}
+        </p>
       ) : null}
 
       <IssueList issues={issues} />
