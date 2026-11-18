@@ -29,15 +29,25 @@ export type CaptureIssue =
 /**
  * The single rule of who may write a request's answers (and submit or share
  * it): its reviewer, or People. Direction never writes; an actor without a
- * person is only ever People.
+ * person is only ever People. A manager review is only for a reviewer who
+ * still manages the reviewee today (`revieweeManagerToday`, from the org
+ * history): someone who stopped managing them, or whose manager is unknown,
+ * does not write it.
  */
 export function canAnswer(
   actor: ActorContext,
-  request: { reviewerPersonId: string | null },
+  request: { reviewerPersonId: string | null; relationship: string },
+  revieweeManagerToday?: string | null,
 ): boolean {
   if (actor.role === "hr") return true;
   if (actor.role === "direction") return false;
-  return actor.personId !== null && actor.personId === request.reviewerPersonId;
+  if (actor.personId === null || actor.personId !== request.reviewerPersonId) {
+    return false;
+  }
+  return (
+    request.relationship !== "manager" ||
+    revieweeManagerToday === actor.personId
+  );
 }
 
 const none = {

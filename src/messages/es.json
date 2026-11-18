@@ -2110,6 +2110,8 @@
       "forbidden": "No podés responder esta evaluación.",
       "cycle_closed": "El ciclo está cerrado: ya no se puede responder.",
       "not_editable": "Ya se envió: no se puede cambiar.",
+      "not_submitted": "Enviá la evaluación antes de compartirla.",
+      "not_shareable": "Solo la evaluación del manager se puede compartir.",
       "not_found": "Esta evaluación ya no existe.",
       "validation": "Revisá las respuestas marcadas.",
       "unknown": "Ocurrió un error inesperado."
@@ -2120,6 +2122,23 @@
       "open": "Completar",
       "due": "Vence el {date}",
       "noDue": "Sin fecha límite"
+    },
+    "team": {
+      "title": "Tu equipo",
+      "hint": "Tus reportes directos en ciclos abiertos: su autoevaluación y tu evaluación de cada uno.",
+      "open": "Evaluar",
+      "view": "Ver evaluación",
+      "due": "Vence el {date}",
+      "noDue": "Sin fecha límite",
+      "shared": "Compartida",
+      "notShared": "Sin compartir"
+    },
+    "share": {
+      "button": "Compartir con la persona",
+      "sharing": "Compartiendo…",
+      "hint": "La persona lee tu evaluación recién cuando la compartís.",
+      "done": "Compartida con la persona.",
+      "notShared": "Todavía no está compartida con la persona."
     }
   },
   "Experience": {
