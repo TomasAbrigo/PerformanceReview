@@ -146,15 +146,21 @@ export function GoalControls({
   );
 }
 
-/** A milestone's check: a button that toggles done / pending. */
+/**
+ * A milestone's check: a button that toggles done / pending. `toggle` is the
+ * server action itself (the page cannot hand a client component a function it
+ * wrote), so the milestone comes as its own prop.
+ */
 export function MilestoneToggle({
+  milestoneId,
   done,
   label,
   toggle,
 }: {
+  milestoneId: string;
   done: boolean;
   label: string;
-  toggle: (done: boolean) => Promise<ActionResult>;
+  toggle: (milestoneId: string, done: boolean) => Promise<ActionResult>;
 }) {
   const t = useTranslations("Goals.controls");
   const { pending, error, run } = useAction();
@@ -167,7 +173,7 @@ export function MilestoneToggle({
         aria-label={t("toggleMilestone", { title: label })}
         disabled={pending}
         className="mt-0.5 shrink-0 rounded-sm outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
-        onClick={() => run(() => toggle(!done))}
+        onClick={() => run(() => toggle(milestoneId, !done))}
       >
         {done ? (
           <Check className="size-4 text-status-done" aria-hidden="true" />

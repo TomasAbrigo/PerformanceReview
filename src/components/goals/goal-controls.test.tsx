@@ -3,7 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { NextIntlClientProvider } from "next-intl";
 import { describe, expect, it, vi } from "vitest";
 import en from "@/messages/en.json";
-import { GoalControls } from "./goal-controls";
+import { GoalControls, MilestoneToggle } from "./goal-controls";
 
 const ok = { ok: true } as const;
 const actions = () => ({
@@ -72,5 +72,25 @@ describe("GoalControls", () => {
         (screen.getByLabelText("Add a milestone") as HTMLInputElement).value,
       ).toBe(""),
     );
+  });
+});
+
+describe("MilestoneToggle", () => {
+  it("hands the server action the milestone and the new state", async () => {
+    const toggle = vi.fn().mockResolvedValue(ok);
+    render(
+      <NextIntlClientProvider locale="en" messages={en} timeZone="UTC">
+        <MilestoneToggle
+          milestoneId="m1"
+          done={false}
+          label="Paso 1"
+          toggle={toggle}
+        />
+      </NextIntlClientProvider>,
+    );
+    const check = screen.getByRole("checkbox", { name: /Paso 1/ });
+    expect(check.getAttribute("aria-checked")).toBe("false");
+    await userEvent.click(check);
+    await waitFor(() => expect(toggle).toHaveBeenCalledWith("m1", true));
   });
 });

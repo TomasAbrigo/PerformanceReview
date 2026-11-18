@@ -39,23 +39,68 @@ export type SaveGoal = (values: GoalFormValues) => Promise<ActionResult>;
 /**
  * The "New goal" and "Edit goal" dialog: title, description and due date;
  * when creating, also the owner when the actor may pick more than themself.
+ * The form lives inside the dialog, so closing it (cancel or saved) throws
+ * away what was typed and any error, and opening it starts again from the
+ * goal's own values.
  */
 export function GoalFormDialog({
   mode,
   owners = [],
   initial,
   save,
-  onSaved,
 }: {
   mode: "create" | "edit";
   owners?: GoalOwnerOption[];
   initial?: Omit<GoalFormValues, "personId">;
   save: SaveGoal;
-  onSaved?: (result: { ok: true } & Record<string, unknown>) => void;
+}) {
+  const t = useTranslations("Goals.form");
+  const [open, setOpen] = useState(false);
+  return (
+    <>
+      <Button
+        type="button"
+        variant={mode === "create" ? "default" : "outline"}
+        onClick={() => setOpen(true)}
+      >
+        {t(mode === "create" ? "new" : "edit")}
+      </Button>
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>
+              {t(mode === "create" ? "newTitle" : "editTitle")}
+            </DialogTitle>
+            <DialogDescription>{t("description")}</DialogDescription>
+          </DialogHeader>
+          <GoalForm
+            mode={mode}
+            owners={owners}
+            initial={initial}
+            save={save}
+            close={() => setOpen(false)}
+          />
+        </DialogContent>
+      </Dialog>
+    </>
+  );
+}
+
+function GoalForm({
+  mode,
+  owners,
+  initial,
+  save,
+  close,
+}: {
+  mode: "create" | "edit";
+  owners: GoalOwnerOption[];
+  initial?: Omit<GoalFormValues, "personId">;
+  save: SaveGoal;
+  close: () => void;
 }) {
   const t = useTranslations("Goals.form");
   const id = useId();
-  const [open, setOpen] = useState(false);
   const [values, setValues] = useState<GoalFormValues>(() => ({
     personId: owners[0]?.id,
     title: initial?.title ?? "",
@@ -77,123 +122,82 @@ export function GoalFormDialog({
   const showOwner = mode === "create" && owners.length > 1;
 
   return (
-    <>
-      <Button
-        type="button"
-        variant={mode === "create" ? "default" : "outline"}
-        onClick={() => setOpen(true)}
-      >
-        {t(mode === "create" ? "new" : "edit")}
-      </Button>
-      <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>
-              {t(mode === "create" ? "newTitle" : "editTitle")}
-            </DialogTitle>
-            <DialogDescription>{t("description")}</DialogDescription>
-          </DialogHeader>
-          <form
-            aria-label={t(mode === "create" ? "newTitle" : "editTitle")}
-            className="flex flex-col gap-4"
-            onSubmit={(e) => {
-              e.preventDefault();
-              run(
-                () => save(values),
-                (result) => {
-                  setOpen(false);
-                  if (mode === "create") {
-                    setValues((v) => ({
-                      ...v,
-                      title: "",
-                      description: "",
-                      dueDate: "",
-                    }));
-                  }
-                  onSaved?.(result);
-                },
-              );
-            }}
+    <form
+      aria-label={t(mode === "create" ? "newTitle" : "editTitle")}
+      className="flex flex-col gap-4"
+      onSubmit={(e) => {
+        e.preventDefault();
+        run(() => save(values), close);
+      }}
+    >
+      {showOwner ? (
+        <Field data-invalid={issue("personId") ? true : undefined}>
+          <FieldLabel htmlFor={`${id}-owner`}>{t("owner")}</FieldLabel>
+          <NativeSelect
+            id={`${id}-owner`}
+            value={values.personId ?? ""}
+            onChange={(e) => set({ personId: e.target.value })}
           >
-            {showOwner ? (
-              <Field data-invalid={issue("personId") ? true : undefined}>
-                <FieldLabel htmlFor={`${id}-owner`}>{t("owner")}</FieldLabel>
-                <NativeSelect
-                  id={`${id}-owner`}
-                  value={values.personId ?? ""}
-                  onChange={(e) => set({ personId: e.target.value })}
-                >
-                  {owners.map((o) => (
-                    <option key={o.id} value={o.id}>
-                      {o.name}
-                    </option>
-                  ))}
-                </NativeSelect>
-                {issue("personId") ? (
-                  <FieldError>{issue("personId")}</FieldError>
-                ) : null}
-              </Field>
-            ) : null}
-            <Field data-invalid={issue("title") ? true : undefined}>
-              <FieldLabel htmlFor={`${id}-title`}>{t("title")}</FieldLabel>
-              <Input
-                id={`${id}-title`}
-                value={values.title}
-                maxLength={300}
-                aria-invalid={issue("title") !== null}
-                onChange={(e) => set({ title: e.target.value })}
-              />
-              {issue("title") ? (
-                <FieldError>{issue("title")}</FieldError>
-              ) : null}
-            </Field>
-            <Field data-invalid={issue("description") ? true : undefined}>
-              <FieldLabel htmlFor={`${id}-description`}>
-                {t("descriptionLabel")}
-              </FieldLabel>
-              <textarea
-                id={`${id}-description`}
-                rows={4}
-                value={values.description}
-                aria-invalid={issue("description") !== null}
-                className="w-full min-w-0 rounded-lg border border-input bg-transparent px-2.5 py-1.5 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 aria-invalid:border-destructive"
-                onChange={(e) => set({ description: e.target.value })}
-              />
-              {issue("description") ? (
-                <FieldError>{issue("description")}</FieldError>
-              ) : null}
-            </Field>
-            <Field data-invalid={issue("dueDate") ? true : undefined}>
-              <FieldLabel htmlFor={`${id}-due`}>{t("dueDate")}</FieldLabel>
-              <Input
-                id={`${id}-due`}
-                type="date"
-                className="max-w-48"
-                value={values.dueDate}
-                aria-invalid={issue("dueDate") !== null}
-                onChange={(e) => set({ dueDate: e.target.value })}
-              />
-              <FieldDescription>{t("dueDateHint")}</FieldDescription>
-              {issue("dueDate") ? (
-                <FieldError>{issue("dueDate")}</FieldError>
-              ) : null}
-            </Field>
-            <ErrorAlert error={error} />
-            <DialogFooter>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setOpen(false)}
-              >
-                {t("cancel")}
-              </Button>
-              <Button type="submit" disabled={pending}>
-                {t("save")}
-              </Button>
-            </DialogFooter>
-          </form>
-        </DialogContent>
-      </Dialog>
-    </>
+            {owners.map((o) => (
+              <option key={o.id} value={o.id}>
+                {o.name}
+              </option>
+            ))}
+          </NativeSelect>
+          {issue("personId") ? (
+            <FieldError>{issue("personId")}</FieldError>
+          ) : null}
+        </Field>
+      ) : null}
+      <Field data-invalid={issue("title") ? true : undefined}>
+        <FieldLabel htmlFor={`${id}-title`}>{t("title")}</FieldLabel>
+        <Input
+          id={`${id}-title`}
+          value={values.title}
+          maxLength={300}
+          aria-invalid={issue("title") !== null}
+          onChange={(e) => set({ title: e.target.value })}
+        />
+        {issue("title") ? <FieldError>{issue("title")}</FieldError> : null}
+      </Field>
+      <Field data-invalid={issue("description") ? true : undefined}>
+        <FieldLabel htmlFor={`${id}-description`}>
+          {t("descriptionLabel")}
+        </FieldLabel>
+        <textarea
+          id={`${id}-description`}
+          rows={4}
+          value={values.description}
+          aria-invalid={issue("description") !== null}
+          className="w-full min-w-0 rounded-lg border border-input bg-transparent px-2.5 py-1.5 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 aria-invalid:border-destructive"
+          onChange={(e) => set({ description: e.target.value })}
+        />
+        {issue("description") ? (
+          <FieldError>{issue("description")}</FieldError>
+        ) : null}
+      </Field>
+      <Field data-invalid={issue("dueDate") ? true : undefined}>
+        <FieldLabel htmlFor={`${id}-due`}>{t("dueDate")}</FieldLabel>
+        <Input
+          id={`${id}-due`}
+          type="date"
+          className="max-w-48"
+          value={values.dueDate}
+          aria-invalid={issue("dueDate") !== null}
+          onChange={(e) => set({ dueDate: e.target.value })}
+        />
+        <FieldDescription>{t("dueDateHint")}</FieldDescription>
+        {issue("dueDate") ? <FieldError>{issue("dueDate")}</FieldError> : null}
+      </Field>
+      <ErrorAlert error={error} />
+      <DialogFooter>
+        <Button type="button" variant="outline" onClick={close}>
+          {t("cancel")}
+        </Button>
+        <Button type="submit" disabled={pending}>
+          {t("save")}
+        </Button>
+      </DialogFooter>
+    </form>
   );
 }

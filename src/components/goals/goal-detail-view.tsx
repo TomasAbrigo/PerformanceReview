@@ -15,7 +15,11 @@ import {
 import { GoalFormDialog, type SaveGoal } from "./goal-form-dialog";
 import { GoalStateBadge } from "./goal-state-badge";
 
-/** What the page hands the view when the actor may edit the goal. */
+/**
+ * What the page hands the view when the actor may edit the goal: server
+ * actions only (already bound to the goal), which are the one kind of
+ * function a server component may pass to a client component.
+ */
 export type GoalEditing = {
   save: SaveGoal;
   actions: GoalControlActions;
@@ -93,6 +97,7 @@ export function GoalDetailView({
       {editing ? (
         <Panel id="goal-controls" title={t("manage")}>
           <GoalControls
+            key={`${goal.status}-${goal.percentComplete}`}
             status={goal.status}
             percent={goal.percentComplete}
             actions={editing.actions}
@@ -131,9 +136,10 @@ export function GoalDetailView({
               >
                 {editing ? (
                   <MilestoneToggle
+                    milestoneId={m.id}
                     done={m.completedAt !== null}
                     label={m.title}
-                    toggle={(done) => editing.toggleMilestone(m.id, done)}
+                    toggle={editing.toggleMilestone}
                   />
                 ) : m.completedAt ? (
                   <Check
