@@ -40,6 +40,8 @@ const errorKeys = [
   "cycle_closed",
   "not_editable",
   "not_found",
+  "not_submitted",
+  "not_shareable",
   "validation",
 ] as const;
 

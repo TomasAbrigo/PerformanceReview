@@ -280,6 +280,8 @@ export async function upsertRequest(
 ): Promise<{
   id: string;
   result: "inserted" | "updated" | "unchanged" | "superseded";
+  /** It took over a review written in the app (#106: Bamboo wins). */
+  overwroteNative?: boolean;
 }> {
   const [found] = await tx
     .select({ id: reviewRequest.id, hash: reviewRequest.payloadHash })
@@ -313,12 +315,22 @@ export async function upsertRequest(
   };
   let id: string;
   let result: "inserted" | "updated" = found ? "updated" : "inserted";
+  let native: string | undefined;
   if (found) {
     await tx
       .update(reviewRequest)
       .set(values)
       .where(eq(reviewRequest.id, found.id));
     id = found.id;
+  } else if ((native = await nativeTwin(tx, input))) {
+    // Bamboo wins (#106): the app's review becomes Bamboo's, its answers go.
+    await tx.delete(answer).where(eq(answer.requestId, native));
+    await tx
+      .update(reviewRequest)
+      .set({ ...values, sharedAt: null, declineReason: null })
+      .where(eq(reviewRequest.id, native));
+    id = native;
+    result = "updated";
   } else {
     const [same] = await tx
       .select({
@@ -366,7 +378,34 @@ export async function upsertRequest(
         reviewerMismatch: input.reviewerMismatch,
       },
     });
-  return { id, result };
+  return { id, result, ...(native ? { overwroteNative: true } : {}) };
+}
+
+/**
+ * The review written in the app that an imported one stands for: same
+ * participant and side (the reviewer may differ: Bamboo's manager at the
+ * time wins).
+ */
+async function nativeTwin(
+  tx: DbOrTx,
+  input: RequestInput,
+): Promise<string | undefined> {
+  const [row] = await tx
+    .select({ id: reviewRequest.id })
+    .from(reviewRequest)
+    .where(
+      and(
+        eq(reviewRequest.participantId, input.participantId),
+        eq(reviewRequest.relationship, input.relationship),
+        eq(reviewRequest.sourceSystem, "native"),
+        ...(input.relationship === "self" || input.relationship === "manager"
+          ? []
+          : [eq(reviewRequest.reviewerPersonId, input.reviewerPersonId)]),
+      ),
+    )
+    .orderBy(reviewRequest.requestedAt)
+    .limit(1);
+  return row?.id;
 }
 
 /** The likert_mapping table as overrides, read once per run. */

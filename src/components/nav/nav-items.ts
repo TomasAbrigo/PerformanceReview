@@ -18,7 +18,8 @@ export type NavIcon =
   | "imports"
   | "identity"
   | "dataQuality"
-  | "insightsSettings";
+  | "insightsSettings"
+  | "cycles";
 
 export type NavItem = {
   key: NavIcon;
@@ -60,7 +61,8 @@ export type NavMessageKey =
   | "Imports.nav"
   | "Identity.nav"
   | "DataQuality.nav"
-  | "InsightsSettings.nav";
+  | "InsightsSettings.nav"
+  | "Cycles.nav";
 
 type Translate = (key: NavMessageKey) => string;
 
@@ -135,6 +137,7 @@ export function navGroups(t: Translate, actor: ActorContext): NavGroup[] {
         item("imports", "/imports/runs", "Imports.nav"),
         item("identity", "/imports/identity", "Identity.nav"),
         item("dataQuality", "/data-quality", "DataQuality.nav"),
+        item("cycles", "/settings/cycles", "Cycles.nav"),
         item("insightsSettings", "/settings/insights", "InsightsSettings.nav"),
       ]),
     );

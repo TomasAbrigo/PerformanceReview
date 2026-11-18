@@ -1,5 +1,14 @@
 import { eq } from "drizzle-orm";
-import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
+import {
+  afterAll,
+  afterEach,
+  beforeAll,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+} from "vitest";
 import { closeDb, db } from "@/db/client";
 import {
   answer,
@@ -20,8 +29,13 @@ import {
 import { CaptureError } from "./errors";
 import type { CaptureAnswer } from "./rules";
 import { listPendingSelfReviews, saveDraft, share, submit } from "./service";
+import { listTeamReviews } from "./team";
 
-// As of 2022-06-01 Bruno reports to Carla and Carla to Ana.
+// As of 2022-06-01 Bruno reports to Carla and Carla to Ana; from 2023 Bruno
+// reports to Ana. "Today" is mid 2022 unless a test moves it (only Date is
+// faked: who manages the reviewee today decides who writes a manager review).
+const MID_2022 = new Date("2022-06-15T12:00:00Z");
+const MID_2023 = new Date("2023-06-15T12:00:00Z");
 let cycleId: string;
 let selfId: string;
 let managerId: string;
@@ -60,6 +74,7 @@ beforeAll(async () => {
 });
 
 beforeEach(async () => {
+  vi.useFakeTimers({ toFake: ["Date"], now: MID_2022 });
   await db.delete(reviewCycle);
   const cycle = await createTestCycle({
     templateId: await systemTemplateId(),
@@ -70,6 +85,10 @@ beforeEach(async () => {
   selfId = await requestIdOf(p.id, "self");
   managerId = await requestIdOf(p.id, "manager");
   questions = await questionsFor(db, cycleId, null, "self");
+});
+
+afterEach(() => {
+  vi.useRealTimers();
 });
 
 afterAll(async () => {
@@ -248,6 +267,21 @@ describe("share", () => {
     expect(await getReview(db, bruno(), managerId)).not.toBeNull();
   });
 
+  it("lets People read it, and not direction nor an unrelated employee", async () => {
+    await submitManager();
+    expect(await getReview(db, hr, managerId)).not.toBeNull();
+    const direction: ActorContext = { personId: null, role: "direction" };
+    const stranger: ActorContext = {
+      personId: "00000000-0000-4000-8000-0000000000ff",
+      role: "employee",
+    };
+    await share(db, carla(), managerId);
+    expect(await getReview(db, direction, managerId)).toBeNull();
+    expect(await getReview(db, stranger, managerId)).toBeNull();
+    await expectError(share(db, direction, managerId), "forbidden");
+    await expectError(share(db, stranger, managerId), "forbidden");
+  });
+
   it("keeps the first share date when shared again", async () => {
     await submitManager();
     await share(db, hr, managerId);
@@ -271,5 +305,68 @@ describe("listPendingSelfReviews", () => {
     await saveDraft(db, bruno(), selfId, fullAnswers());
     await submit(db, bruno(), selfId);
     expect(await listPendingSelfReviews(db, bruno())).toEqual([]);
+  });
+});
+
+describe("listTeamReviews", () => {
+  it("lists the manager's direct reports with both states", async () => {
+    const [row] = await listTeamReviews(db, carla());
+    expect(row).toMatchObject({
+      managerRequestId: managerId,
+      selfRequestId: selfId,
+      managerStatus: "draft",
+      shared: false,
+      // A draft self assessment is not the manager's to read yet.
+      selfState: "locked",
+    });
+    expect(row.person.id).toBe(people.bruno);
+    await saveDraft(db, bruno(), selfId, fullAnswers());
+    await submit(db, bruno(), selfId);
+    // Double blind (the default): the self stays closed until the manager's own.
+    expect((await listTeamReviews(db, carla()))[0].selfState).toBe("locked");
+    const [{ components }] = await db
+      .select()
+      .from(reviewCycle)
+      .where(eq(reviewCycle.id, cycleId));
+    await db
+      .update(reviewCycle)
+      .set({ components: { ...components, doubleBlind: false } })
+      .where(eq(reviewCycle.id, cycleId));
+    expect((await listTeamReviews(db, carla()))[0].selfState).toBe("submitted");
+  });
+
+  it("is empty for people who manage no one and for direction", async () => {
+    expect(await listTeamReviews(db, bruno())).toEqual([]);
+    expect(
+      await listTeamReviews(db, { personId: null, role: "direction" }),
+    ).toEqual([]);
+    expect(
+      await listTeamReviews(db, { personId: people.ana, role: "manager" }),
+    ).toEqual([]);
+  });
+
+  it("only lists and lets write the reports the manager has today", async () => {
+    vi.setSystemTime(MID_2023);
+    // Bruno reports to Ana now: Carla, still the request's reviewer, is out.
+    expect(await listTeamReviews(db, carla())).toEqual([]);
+    const mq = await questionsFor(db, cycleId, null, "manager");
+    const one = [{ questionRevisionId: mq[0].id, value: null }];
+    await expectError(saveDraft(db, carla(), managerId, one), "forbidden");
+    await expectError(submit(db, carla(), managerId), "forbidden");
+    await expectError(share(db, carla(), managerId), "forbidden");
+    // Ana manages Bruno today but is not the reviewer: she does not write it.
+    const ana: ActorContext = { personId: people.ana, role: "manager" };
+    expect(await listTeamReviews(db, ana)).toEqual([]);
+    await expectError(saveDraft(db, ana, managerId, one), "forbidden");
+    // People still can.
+    await saveDraft(db, hr, managerId, one);
+  });
+
+  it("leaves out closed cycles and removed participants", async () => {
+    await db
+      .update(reviewCycle)
+      .set({ status: "closed" })
+      .where(eq(reviewCycle.id, cycleId));
+    expect(await listTeamReviews(db, carla())).toEqual([]);
   });
 });

@@ -27,6 +27,7 @@
       "identity": "Records that could not be matched to a person automatically.",
       "dataQuality": "Cases to fix before analysing or reporting.",
       "insightsSettings": "Alert thresholds, minimum group size, semester cuts and analysis provider.",
+      "cycles": "Create and open review cycles, choose participants and follow progress.",
       "goalsArea": "Each person's goals: progress, milestones, due dates and comments, filtered by cycle, status and team.",
       "assessmentsArea": "The questions and answers of each cycle: self-assessment and manager review, next to the goals of the period.",
       "goalsInsights": "Goal completion next to each person's retention and engagement."
@@ -61,6 +62,111 @@
     "label": "Language",
     "es": "Español",
     "en": "English"
+  },
+  "Cycles": {
+    "nav": "Cycles",
+    "title": "Review cycles",
+    "description": "Create a cycle, choose who takes part and open it: each person's self-assessment and their manager's review are generated. People only.",
+    "back": "← Back to cycles",
+    "status": {
+      "draft": "Draft",
+      "open": "Open",
+      "closed": "Closed"
+    },
+    "list": {
+      "title": "Cycles",
+      "empty": "There are no cycles yet.",
+      "columns": {
+        "period": "Period",
+        "participants": "Participants"
+      },
+      "participants": "{count, plural, one {# participant} other {# participants}}"
+    },
+    "create": {
+      "title": "New cycle",
+      "hint": "Suggested dates follow the semester cuts of Insights settings.",
+      "name": "Name",
+      "periodStart": "Period start",
+      "periodEnd": "Period end",
+      "template": "Template",
+      "templateValue": "Santex semi-annual review",
+      "submit": "Create cycle"
+    },
+    "detail": {
+      "period": "Period {start} – {end}",
+      "snapshot": "Organization snapshot as of {date}"
+    },
+    "progress": {
+      "title": "Progress",
+      "hint": "Submitted requests out of the active participants' total.",
+      "self": "Self-assessments",
+      "manager": "Manager reviews",
+      "of": "{submitted} of {total} submitted"
+    },
+    "participants": {
+      "title": "Participants",
+      "hintDraft": "Choose who is reviewed. Add every active person, an area or people by hand; opening the cycle takes the snapshot of manager, area and job.",
+      "hintOpen": "You can add or remove people while the cycle is open.",
+      "all": "All active people",
+      "area": "Add an area",
+      "areaPlaceholder": "Choose an area",
+      "noArea": "No area",
+      "addArea": "Add",
+      "clear": "Clear",
+      "selected": "{count} selected",
+      "save": "Save participants",
+      "saved": "Participants saved.",
+      "searchLabel": "Available participants",
+      "columns": {
+        "area": "Area",
+        "manager": "Manager"
+      },
+      "removed": "Removed",
+      "active": "Active",
+      "remove": "Remove",
+      "add": "Add",
+      "addLabel": "Add a person"
+    },
+    "withoutManager": {
+      "title": "Without a current manager",
+      "hint": "These people have no manager in the snapshot: their manager review is flagged as having no reviewer. Fix it in Bamboo before or after opening.",
+      "none": "Every participant has a manager."
+    },
+    "requests": {
+      "title": "Requests",
+      "empty": "There are no requests yet: they are generated when the cycle opens.",
+      "columns": {
+        "kind": "Type",
+        "reviewer": "Reviewer"
+      },
+      "kind": {
+        "self": "Self-assessment",
+        "manager": "Manager",
+        "peer": "Peer",
+        "upward": "Upward"
+      },
+      "status": {
+        "draft": "Draft",
+        "submitted": "Submitted",
+        "declined": "Declined",
+        "superseded": "Superseded"
+      },
+      "reviewerMissing": "No reviewer",
+      "reopen": "Reopen"
+    },
+    "actions": {
+      "launch": "Open cycle",
+      "launchHint": "Generates the requests and takes each participant's snapshot.",
+      "close": "Close cycle",
+      "closeHint": "A closed cycle accepts no more submissions."
+    },
+    "errors": {
+      "required": "This is required.",
+      "invalid_date": "Invalid date (YYYY-MM-DD).",
+      "before_start": "The end cannot be before the start.",
+      "not_found": "Not found.",
+      "invalid": "Invalid value."
+    }
   },
   "InsightsSettings": {
     "title": "Insights settings",
@@ -123,7 +229,8 @@
   "Errors": {
     "validation": "Check the highlighted fields.",
     "not_found": "The item no longer exists.",
-    "forbidden": "Only People (HR) can do this.",
+    "forbidden": "You are not allowed to do this.",
+    "invalid_state": "The cycle or request is not in a state that allows this.",
     "unknown": "Something went wrong."
   },
   "Imports": {
@@ -161,7 +268,8 @@
         "log": "Log entries",
         "duration": "Duration",
         "mismatches": "Reviewer mismatches",
-        "deferred": "Deferred"
+        "deferred": "Deferred",
+        "nativeOverwritten": "Native overwritten"
       },
       "status": {
         "running": "Running",
@@ -476,6 +584,7 @@
       "inserted": "New records",
       "unchanged": "Unchanged",
       "rejected": "Rejected",
+      "nativeOverwritten": "Entered in the app and overwritten by Bamboo",
       "noNew": "No new records were created: this file had already been imported.",
       "rejects": "Rejected rows",
       "viewRun": "View the run",
@@ -1872,7 +1981,8 @@
       "assessments": "In the assessments",
       "assessmentsHint": "Cycles whose assessment lists this goal among the goals of the period.",
       "openAssessment": "See the {cycle} assessment",
-      "notInAssessments": "It does not appear in any assessment yet."
+      "notInAssessments": "It does not appear in any assessment yet.",
+      "manage": "Update the goal"
     },
     "forbidden": "You do not have access to this goal: everyone sees their own and, for a manager, their team's.",
     "navOwn": "My goals",
@@ -1884,6 +1994,38 @@
       "movingNote": "{n, plural, one {Goal in progress} other {Goals in progress}}",
       "review": "To review",
       "reviewNote": "{n, plural, one {Overdue goal} other {Overdue goals}}"
+    },
+    "form": {
+      "new": "New goal",
+      "edit": "Edit",
+      "newTitle": "New goal",
+      "editTitle": "Edit goal",
+      "description": "Title, description and due date.",
+      "owner": "Person",
+      "title": "Title",
+      "descriptionLabel": "Description",
+      "dueDate": "Due date",
+      "dueDateHint": "Optional. A goal in progress past this date shows as overdue.",
+      "cancel": "Cancel",
+      "save": "Save",
+      "errors": {
+        "required": "This field is required.",
+        "too_long": "This text is too long.",
+        "invalid_date": "Enter a valid date.",
+        "unknown_person": "That person does not exist.",
+        "invalid": "This value is not valid."
+      }
+    },
+    "controls": {
+      "progress": "Progress (%)",
+      "progressInvalid": "Enter a whole number from 0 to 100.",
+      "saveProgress": "Save progress",
+      "complete": "Mark as completed",
+      "close": "Close goal",
+      "reopen": "Reopen",
+      "addMilestone": "Add a milestone",
+      "add": "Add",
+      "toggleMilestone": "Mark milestone as done or pending: {title}"
     }
   },
   "Assessments": {
@@ -2023,6 +2165,8 @@
       "forbidden": "You cannot answer this assessment.",
       "cycle_closed": "The cycle is closed: it can no longer be answered.",
       "not_editable": "Already submitted: it cannot be changed.",
+      "not_submitted": "Submit the review before sharing it.",
+      "not_shareable": "Only the manager review can be shared.",
       "not_found": "This assessment no longer exists.",
       "validation": "Check the highlighted answers.",
       "unknown": "Something unexpected went wrong."
@@ -2033,6 +2177,23 @@
       "open": "Complete",
       "due": "Due {date}",
       "noDue": "No due date"
+    },
+    "team": {
+      "title": "Your team",
+      "hint": "Your direct reports in open cycles: their self assessment and your review of each.",
+      "open": "Write review",
+      "view": "View review",
+      "due": "Due {date}",
+      "noDue": "No due date",
+      "shared": "Shared",
+      "notShared": "Not shared yet"
+    },
+    "share": {
+      "button": "Share with the employee",
+      "sharing": "Sharing…",
+      "hint": "The employee reads your review only once you share it.",
+      "done": "Shared with the employee.",
+      "notShared": "Not shared with the employee yet."
     }
   },
   "Experience": {

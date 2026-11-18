@@ -11,6 +11,24 @@ export * from "./request-status";
 export * from "./rating-constants";
 export { personName } from "./requests";
 export {
+  addParticipant,
+  assertCycleOpen,
+  closeCycle,
+  createCycle,
+  cycleProgress,
+  DEFAULT_TEMPLATE_KEY,
+  launchCycle,
+  listCandidates,
+  listCycleRequests,
+  removeParticipant,
+  reopenRequest,
+  setParticipants,
+  type Candidate,
+  type CycleRequestItem,
+  type CreateCycleInput,
+  type CycleProgress,
+} from "./cycle-admin";
+export {
   getReview,
   questionsFor,
   type AnswerInput,
@@ -39,6 +57,7 @@ export {
   overallRatingQuestion,
   snapshotGoalsForParticipant,
   snapshotGoalsForParticipants,
+  syncGoalToOpenCycles,
   type GoalsScope,
   type GoalWindow,
 } from "./goal-snapshot";

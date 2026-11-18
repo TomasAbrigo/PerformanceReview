@@ -27,6 +27,7 @@
       "identity": "Registros que no se pudieron asignar solos a una persona.",
       "dataQuality": "Casos a corregir antes de analizar o reportar.",
       "insightsSettings": "Umbrales de alerta, tamaño mínimo de grupo, cortes de semestre y proveedor de análisis.",
+      "cycles": "Creá y abrí ciclos de evaluación, elegí participantes y seguí el avance.",
       "goalsArea": "Los goals de cada persona: progreso, hitos, vencimientos y comentarios, con filtros por ciclo, estado y equipo.",
       "assessmentsArea": "Las preguntas y respuestas de cada ciclo: autoevaluación y evaluación del manager, junto a los goals del período.",
       "goalsInsights": "Cumplimiento de goals junto a la retención y el compromiso de cada persona."
@@ -61,6 +62,111 @@
     "label": "Idioma",
     "es": "Español",
     "en": "English"
+  },
+  "Cycles": {
+    "nav": "Ciclos",
+    "title": "Ciclos de evaluación",
+    "description": "Creá un ciclo, elegí quién participa y abrilo: se genera la autoevaluación de cada persona y la evaluación de su manager. Solo People.",
+    "back": "← Volver a los ciclos",
+    "status": {
+      "draft": "Borrador",
+      "open": "Abierto",
+      "closed": "Cerrado"
+    },
+    "list": {
+      "title": "Ciclos",
+      "empty": "Todavía no hay ciclos.",
+      "columns": {
+        "period": "Período",
+        "participants": "Participantes"
+      },
+      "participants": "{count, plural, one {# participante} other {# participantes}}"
+    },
+    "create": {
+      "title": "Nuevo ciclo",
+      "hint": "Las fechas sugeridas siguen los cortes semestrales de Ajustes de insights.",
+      "name": "Nombre",
+      "periodStart": "Inicio del período",
+      "periodEnd": "Fin del período",
+      "template": "Template",
+      "templateValue": "Evaluación semestral Santex",
+      "submit": "Crear ciclo"
+    },
+    "detail": {
+      "period": "Período {start} – {end}",
+      "snapshot": "Snapshot de la organización al {date}"
+    },
+    "progress": {
+      "title": "Avance",
+      "hint": "Solicitudes enviadas sobre el total de los participantes activos.",
+      "self": "Autoevaluaciones",
+      "manager": "Evaluaciones de manager",
+      "of": "{submitted} de {total} enviadas"
+    },
+    "participants": {
+      "title": "Participantes",
+      "hintDraft": "Elegí a quién se evalúa. Podés sumar a todos los activos, a un área o a mano; al abrir se toma el snapshot de manager, área y puesto.",
+      "hintOpen": "Podés sumar o sacar personas mientras el ciclo está abierto.",
+      "all": "Todos los activos",
+      "area": "Sumar un área",
+      "areaPlaceholder": "Elegí un área",
+      "noArea": "Sin área",
+      "addArea": "Sumar",
+      "clear": "Vaciar",
+      "selected": "{count} elegidos",
+      "save": "Guardar participantes",
+      "saved": "Participantes guardados.",
+      "searchLabel": "Participantes disponibles",
+      "columns": {
+        "area": "Área",
+        "manager": "Manager"
+      },
+      "removed": "Quitado",
+      "active": "Activo",
+      "remove": "Quitar",
+      "add": "Sumar",
+      "addLabel": "Sumar una persona"
+    },
+    "withoutManager": {
+      "title": "Sin manager vigente",
+      "hint": "Estas personas no tienen manager en el snapshot: su evaluación de manager queda marcada como sin evaluador. Resolvelo en Bamboo antes de abrir o después.",
+      "none": "Todos los participantes tienen manager."
+    },
+    "requests": {
+      "title": "Solicitudes",
+      "empty": "Todavía no hay solicitudes: se generan al abrir el ciclo.",
+      "columns": {
+        "kind": "Tipo",
+        "reviewer": "Evaluador"
+      },
+      "kind": {
+        "self": "Autoevaluación",
+        "manager": "Manager",
+        "peer": "Par",
+        "upward": "Ascendente"
+      },
+      "status": {
+        "draft": "Borrador",
+        "submitted": "Enviada",
+        "declined": "Rechazada",
+        "superseded": "Reemplazada"
+      },
+      "reviewerMissing": "Sin evaluador",
+      "reopen": "Reabrir"
+    },
+    "actions": {
+      "launch": "Abrir ciclo",
+      "launchHint": "Genera las solicitudes y toma el snapshot de cada participante.",
+      "close": "Cerrar ciclo",
+      "closeHint": "Un ciclo cerrado no recibe más envíos."
+    },
+    "errors": {
+      "required": "Es obligatorio.",
+      "invalid_date": "Fecha inválida (AAAA-MM-DD).",
+      "before_start": "El fin no puede ser anterior al inicio.",
+      "not_found": "No existe.",
+      "invalid": "Valor inválido."
+    }
   },
   "InsightsSettings": {
     "title": "Configuración de insights",
@@ -123,7 +229,8 @@
   "Errors": {
     "validation": "Revisá los campos marcados.",
     "not_found": "El elemento ya no existe.",
-    "forbidden": "Solo People (RR. HH.) puede hacer esto.",
+    "forbidden": "No tenés permiso para hacer esto.",
+    "invalid_state": "El ciclo o la solicitud no está en un estado que lo permita.",
     "unknown": "Ocurrió un error inesperado."
   },
   "Imports": {
@@ -161,7 +268,8 @@
         "log": "Entradas del log",
         "duration": "Duración",
         "mismatches": "Evaluador distinto",
-        "deferred": "En espera"
+        "deferred": "En espera",
+        "nativeOverwritten": "Nativos pisados"
       },
       "status": {
         "running": "En curso",
@@ -476,6 +584,7 @@
       "inserted": "Registros nuevos",
       "unchanged": "Sin cambios",
       "rejected": "Rechazadas",
+      "nativeOverwritten": "Cargados en la app y pisados por Bamboo",
       "noNew": "No se crearon registros nuevos: este archivo ya estaba importado.",
       "rejects": "Filas rechazadas",
       "viewRun": "Ver la corrida",
@@ -1872,7 +1981,8 @@
       "assessments": "En los assessments",
       "assessmentsHint": "Ciclos cuya evaluación lista este goal entre los goals del período.",
       "openAssessment": "Ver el assessment de {cycle}",
-      "notInAssessments": "Todavía no aparece en ningún assessment."
+      "notInAssessments": "Todavía no aparece en ningún assessment.",
+      "manage": "Actualizar el goal"
     },
     "forbidden": "No tenés acceso a este goal: cada persona ve los suyos y, si es manager, los de su equipo.",
     "navOwn": "Mis objetivos",
@@ -1884,6 +1994,38 @@
       "movingNote": "{n, plural, one {Objetivo en curso} other {Objetivos en curso}}",
       "review": "Para revisar",
       "reviewNote": "{n, plural, one {Objetivo vencido} other {Objetivos vencidos}}"
+    },
+    "form": {
+      "new": "Nuevo goal",
+      "edit": "Editar",
+      "newTitle": "Nuevo goal",
+      "editTitle": "Editar goal",
+      "description": "Título, descripción y fecha límite.",
+      "owner": "Persona",
+      "title": "Título",
+      "descriptionLabel": "Descripción",
+      "dueDate": "Fecha límite",
+      "dueDateHint": "Opcional. Un goal en curso que pasó esta fecha se ve como vencido.",
+      "cancel": "Cancelar",
+      "save": "Guardar",
+      "errors": {
+        "required": "Este campo es obligatorio.",
+        "too_long": "El texto es demasiado largo.",
+        "invalid_date": "Ingresá una fecha válida.",
+        "unknown_person": "Esa persona no existe.",
+        "invalid": "El valor no es válido."
+      }
+    },
+    "controls": {
+      "progress": "Avance (%)",
+      "progressInvalid": "Ingresá un número entero de 0 a 100.",
+      "saveProgress": "Guardar avance",
+      "complete": "Marcar como completo",
+      "close": "Cerrar goal",
+      "reopen": "Reabrir",
+      "addMilestone": "Agregar un hito",
+      "add": "Agregar",
+      "toggleMilestone": "Marcar el hito como hecho o pendiente: {title}"
     }
   },
   "Assessments": {
@@ -2023,6 +2165,8 @@
       "forbidden": "No podés responder esta evaluación.",
       "cycle_closed": "El ciclo está cerrado: ya no se puede responder.",
       "not_editable": "Ya se envió: no se puede cambiar.",
+      "not_submitted": "Enviá la evaluación antes de compartirla.",
+      "not_shareable": "Solo la evaluación del manager se puede compartir.",
       "not_found": "Esta evaluación ya no existe.",
       "validation": "Revisá las respuestas marcadas.",
       "unknown": "Ocurrió un error inesperado."
@@ -2033,6 +2177,23 @@
       "open": "Completar",
       "due": "Vence el {date}",
       "noDue": "Sin fecha límite"
+    },
+    "team": {
+      "title": "Tu equipo",
+      "hint": "Tus reportes directos en ciclos abiertos: su autoevaluación y tu evaluación de cada uno.",
+      "open": "Evaluar",
+      "view": "Ver evaluación",
+      "due": "Vence el {date}",
+      "noDue": "Sin fecha límite",
+      "shared": "Compartida",
+      "notShared": "Sin compartir"
+    },
+    "share": {
+      "button": "Compartir con la persona",
+      "sharing": "Compartiendo…",
+      "hint": "La persona lee tu evaluación recién cuando la compartís.",
+      "done": "Compartida con la persona.",
+      "notShared": "Todavía no está compartida con la persona."
     }
   },
   "Experience": {

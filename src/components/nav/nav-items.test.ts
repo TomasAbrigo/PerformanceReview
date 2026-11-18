@@ -24,6 +24,7 @@ describe("navGroups", () => {
       "/imports/runs",
       "/imports/identity",
       "/data-quality",
+      "/settings/cycles",
       "/settings/insights",
     ]);
   });

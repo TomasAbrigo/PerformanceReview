@@ -31,6 +31,7 @@ const DATA = [
   "Importaciones",
   "Identidades",
   "Calidad de datos",
+  "Ciclos",
   "Configuración",
 ];
 
@@ -52,7 +53,7 @@ test("home navigation puts Objetivos and Evaluaciones first, then the Análisis 
     ...DATA,
   ]);
   // Every link has a short description under it.
-  await expect(nav.getByRole("listitem")).toHaveCount(15);
+  await expect(nav.getByRole("listitem")).toHaveCount(16);
   await expect(
     nav.getByRole("listitem").filter({ hasText: "Resumen" }),
   ).toContainText("Completitud, retención, compromiso");

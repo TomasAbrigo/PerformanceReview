@@ -1,5 +1,5 @@
 import { errorMessage } from "@/lib/log";
-import { and, eq, isNull, notInArray } from "drizzle-orm";
+import { and, asc, eq, isNull, notInArray, sql } from "drizzle-orm";
 import type { DbOrTx } from "@/db/client";
 import {
   goal,
@@ -7,6 +7,7 @@ import {
   goalMilestone,
   goalShare,
   ingestRun,
+  participantGoalSnapshot,
   rawRecord,
   sourceIdentity,
   type Goal,
@@ -23,6 +24,8 @@ import {
   type SourceAdapter,
 } from "@/modules/ingest";
 import { listActiveEmployeeIds } from "@/modules/people/employment";
+import { syncGoalToOpenCycles } from "@/modules/review-core/goal-snapshot";
+import { goalTitleKey } from "./title-key";
 import {
   stagedCommentSchema,
   stagedGoalSchema,
@@ -111,9 +114,18 @@ async function upsertGoal(
   };
 
   let goalId: string;
+  const overwrite = existing?.sourceSystem === "native";
   if (existing) {
     goalId = existing.id;
-    await tx.update(goal).set(values).where(eq(goal.id, goalId));
+    await tx
+      .update(goal)
+      .set(
+        overwrite
+          ? { ...values, sourceSystem: source, sourceId: staged.sourceId }
+          : values,
+      )
+      .where(eq(goal.id, goalId));
+    if (overwrite) await dropNativeParts(tx, goalId, now, runId);
   } else {
     const [created] = await tx
       .insert(goal)
@@ -209,7 +221,80 @@ async function upsertGoal(
       );
   }
 
+  if (overwrite)
+    await rekeySnapshots(tx, existing, `${source}:${staged.sourceId}`);
   return existing ? "updated" : "inserted";
+}
+
+/**
+ * Bamboo wins (#106): what the app added to an overwritten goal (its
+ * milestones and comments) goes, Bamboo's take their place.
+ */
+async function dropNativeParts(
+  tx: DbOrTx,
+  goalId: string,
+  now: Date,
+  runId: string,
+) {
+  for (const table of [goalMilestone, goalComment]) {
+    await tx
+      .update(table)
+      .set({ deletedAt: now, updatedAt: now, ingestRunId: runId })
+      .where(
+        and(
+          eq(table.goalId, goalId),
+          eq(table.sourceSystem, "native"),
+          isNull(table.deletedAt),
+        ),
+      );
+  }
+}
+
+/**
+ * The cycle snapshots of an overwritten native goal: the same goal under its
+ * Bamboo key (so a later snapshot does not add it twice), refreshed with
+ * Bamboo's figures in the cycles still running. Closed cycles are history and
+ * keep their figures.
+ */
+async function rekeySnapshots(tx: DbOrTx, native: Goal, key: string) {
+  const oldKey = `native:${native.sourceId ?? native.id}`;
+  // A participant that somehow has both keys keeps the Bamboo one.
+  await tx.execute(sql`
+    delete from participant_goal_snapshot old
+    where old.goal_source_key = ${oldKey}
+      and exists (
+        select 1 from participant_goal_snapshot b
+        where b.participant_id = old.participant_id and b.goal_source_key = ${key}
+      )`);
+  await tx
+    .update(participantGoalSnapshot)
+    .set({ goalSourceKey: key, goalId: native.id })
+    .where(eq(participantGoalSnapshot.goalSourceKey, oldKey));
+  await syncGoalToOpenCycles(tx, native.id);
+}
+
+/**
+ * The oldest live native goal of `personId` whose title matches `title`
+ * (goalTitleKey): the app's copy of a goal Bamboo also has.
+ */
+async function findNativeTwin(
+  db: DbOrTx,
+  personId: string,
+  title: string,
+): Promise<Goal | undefined> {
+  const key = goalTitleKey(title);
+  const candidates = await db
+    .select()
+    .from(goal)
+    .where(
+      and(
+        eq(goal.personId, personId),
+        eq(goal.sourceSystem, "native"),
+        isNull(goal.deletedAt),
+      ),
+    )
+    .orderBy(asc(goal.createdAt), asc(goal.id));
+  return candidates.find((g) => goalTitleKey(g.title) === key);
 }
 
 /** Ids as Bamboo numbers them: 2 before 10. */
@@ -351,7 +436,7 @@ export async function runGoalIngest({
       hash,
       record.extractedAt,
     );
-    const [existing] = await db
+    const [bySource] = await db
       .select()
       .from(goal)
       .where(
@@ -367,6 +452,9 @@ export async function runGoalIngest({
       });
       return;
     }
+    // Not seen before: the app may already have it (#106, Bamboo wins).
+    const existing =
+      bySource ?? (await findNativeTwin(db, ownerPersonId, staged.title));
 
     const commentsChanged =
       !!record.loadComments &&
@@ -431,6 +519,9 @@ export async function runGoalIngest({
       }),
     );
     counts[result]++;
+    if (existing?.sourceSystem === "native") {
+      counts.nativeOverwritten = (counts.nativeOverwritten ?? 0) + 1;
+    }
     for (const reason of issues) {
       rejects.push({ sourceId: record.sourceId, reason });
     }
