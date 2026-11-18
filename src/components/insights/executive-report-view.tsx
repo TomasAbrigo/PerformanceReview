@@ -24,6 +24,7 @@ import {
   type IndicatorSummary,
 } from "@/modules/insights/executive";
 import {
+  atRiskTone,
   kpiThresholds,
   likertTone,
   percentTone,
@@ -474,9 +475,9 @@ export function ExecutiveReportView({
             icon={<PanelIcon kind="matrix" />}
             value={risk.riskCount === null ? "—" : risk.riskCount}
             status={
-              riskShare === null
+              risk.riskCount === null || risk.total === null
                 ? undefined
-                : percentTone(riskShare, targets, "down")
+                : atRiskTone(risk.riskCount, risk.total, targets)
             }
             scale={
               riskShare === null || risk.total === null

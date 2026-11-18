@@ -75,3 +75,54 @@ describe("maskBreakdown", () => {
     });
   });
 });
+
+// ---- quant (#117): group- and month-scoped drills ----
+describe("parseDrill / formatDrill: group and month drills", () => {
+  const valid: Drill[] = [
+    {
+      kind: "completionGroup",
+      side: "self",
+      state: "pending",
+      groupBy: "department",
+      key: "Ingeniería: plataforma",
+    },
+    {
+      kind: "completionGroup",
+      side: "manager",
+      state: "submitted",
+      groupBy: "manager",
+      key: null,
+    },
+    {
+      kind: "indicatorGroup",
+      indicator: "retention",
+      value: 2,
+      groupBy: "account",
+      key: "Acme / Retail",
+    },
+    {
+      kind: "indicatorGroup",
+      indicator: "engagement",
+      value: null,
+      groupBy: "department",
+      key: "Producto",
+    },
+    { kind: "engagement", month: "2026-03-01", segment: null },
+    { kind: "engagement", month: "2026-03-01", segment: "bajo" },
+  ];
+  it.each(valid)("round-trips %o", (d) => {
+    expect(parseDrill(formatDrill(d))).toEqual(d);
+  });
+  it.each([
+    "cgroup:self:pending:none:x",
+    "cgroup:self:late:department:x",
+    "cgroup:self:pending:department:%E0%A4%A",
+    "igroup:retention:7:department:x",
+    "igroup:mood:all:department:x",
+    "engagement:2026-13-01",
+    "engagement:2026-03-01:angry",
+    "engagement:march",
+  ])("rejects %o", (raw) => {
+    expect(parseDrill(raw)).toBeNull();
+  });
+});

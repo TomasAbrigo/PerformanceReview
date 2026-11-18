@@ -7,7 +7,15 @@ import { Suspense } from "react";
 import { PageHeader } from "@/components/page-header";
 import { groupKicker } from "@/components/page-kicker";
 import { Panel } from "@/components/insights/parts";
-import { TrendChart } from "@/components/indicators/trend-chart";
+import {
+  DRILL_CYCLE_PARAM,
+  TrendChart,
+} from "@/components/indicators/trend-chart";
+import type { DrillBase } from "@/components/drill/drill-link";
+import { parseDrill } from "@/modules/insights/drill-spec";
+import { isUuid } from "@/lib/uuid";
+import { getSettings } from "@/modules/settings";
+import { DrillSection } from "../../drill-section";
 import { TrendPicker } from "@/components/indicators/trend-picker";
 import { parseTrendParams } from "@/components/indicators/url-state";
 import { db } from "@/db/client";
@@ -30,7 +38,20 @@ async function Trend({
   const t = await getTranslations("Indicators");
   const kicker = await groupKicker("insights");
   if (insightsScope(actor).kind === "none") return <p>{t("forbidden")}</p>;
-  const p = parseTrendParams(await searchParams);
+  const sp = await searchParams;
+  const p = parseTrendParams(sp);
+  const settings = await getSettings(db);
+  // Drill-down (#117): a point opens the people of that cycle (`dcycle`).
+  const base: DrillBase = {
+    pathname: "/insights/indicators/trend",
+    query: sp,
+  };
+  const drill = parseDrill(sp.drill);
+  const drillCycle =
+    typeof sp[DRILL_CYCLE_PARAM] === "string" &&
+    isUuid(sp[DRILL_CYCLE_PARAM] as string)
+      ? (sp[DRILL_CYCLE_PARAM] as string)
+      : null;
   // One subject: a person, else a team, else an area, else the actor's reach.
   const subject = p.person
     ? { personId: p.person }
@@ -83,9 +104,25 @@ async function Trend({
             subject: subjectLabel,
           })}
         >
-          <TrendChart data={trend} subject={subjectLabel} />
+          <TrendChart
+            data={trend}
+            subject={subjectLabel}
+            drillBase={base}
+            riskThreshold={settings["alerts.riskThreshold"]}
+          />
         </Panel>
       ))}
+      {drill && drillCycle ? (
+        <Suspense fallback={null}>
+          <DrillSection
+            actor={actor}
+            cycleId={drillCycle}
+            drill={drill}
+            base={base}
+            minGroupSize={settings["aggregation.minGroupSize"]}
+          />
+        </Suspense>
+      ) : null}
     </div>
   );
 }

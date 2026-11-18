@@ -25,7 +25,18 @@ import {
 } from "@/modules/qualitative-analysis/constants";
 import { ReviewError } from "@/modules/review-core/review-errors";
 import { insightsScope } from "./authz";
-import { type Drill, type DrillGroup, maskBreakdown } from "./drill-spec";
+import {
+  type Drill,
+  type DrillGroup,
+  type DrillGroupBy,
+  maskBreakdown,
+} from "./drill-spec";
+import { engagementPeople } from "@/modules/analytics/engagement/queries";
+import {
+  isPersonKind,
+  type OrgDims,
+  orgDimOf,
+} from "@/modules/org-attributes/kinds";
 
 /** The figures a person row can carry (message keys of `Drill.fact`). */
 export type DrillFact =
@@ -35,7 +46,10 @@ export type DrillFact =
   | "managerStatus"
   | "goals"
   | "completed"
-  | "overdue";
+  | "overdue"
+  // quant (#117): the monthly engagement.
+  | "score"
+  | "segment";
 
 /** A person behind a mark: who, where, and the figures that put them there. */
 export type DrillPerson = {
@@ -127,7 +141,7 @@ function peopleResult(
 
 async function indicatorPeople(
   ctx: Ctx,
-  drill: Extract<Drill, { kind: "indicator" | "risk" }>,
+  drill: Extract<Drill, { kind: "indicator" | "risk" | "indicatorGroup" }>,
 ) {
   const ictx = await indicatorContext(ctx.db, ctx.actor, {
     minGroupSize: ctx.minGroupSize,
@@ -135,7 +149,12 @@ async function indicatorPeople(
   await requireCycle(ctx.db, ctx.cycleId);
   const rows = (
     await loadRows(ctx.db, ictx, { cycleId: ctx.cycleId, hierarchy: "asOf" })
-  ).filter((r) => r.cycleId === ctx.cycleId && matches(r, ctx.filters));
+  ).filter(
+    (r) =>
+      r.cycleId === ctx.cycleId &&
+      matches(r, ctx.filters) &&
+      (drill.kind !== "indicatorGroup" || inGroup(r, drill)),
+  );
   const byPerson = new Map<
     string,
     { row: (typeof rows)[number]; values: Record<string, number> }
@@ -150,7 +169,7 @@ async function indicatorPeople(
   for (const { row, values } of byPerson.values()) {
     const { retention, engagement } = values;
     const inMark =
-      drill.kind === "indicator"
+      drill.kind === "indicator" || drill.kind === "indicatorGroup"
         ? drill.value === null
           ? values[drill.indicator] !== undefined
           : values[drill.indicator] === drill.value
@@ -180,7 +199,7 @@ async function indicatorPeople(
 
 async function completionPeople(
   ctx: Ctx,
-  drill: Extract<Drill, { kind: "completion" }>,
+  drill: Extract<Drill, { kind: "completion" | "completionGroup" }>,
 ) {
   await requireCycle(ctx.db, ctx.cycleId);
   // Authorized by the caller: direction reads everybody, masked afterwards.
@@ -191,6 +210,7 @@ async function completionPeople(
     { email: false },
   );
   const people = rows
+    .filter((r) => drill.kind !== "completionGroup" || inGroup(r, drill))
     .filter((r) => {
       const status = drill.side === "self" ? r.selfStatus : r.managerStatus;
       return drill.state === "submitted"
@@ -323,6 +343,55 @@ async function commentRecords(
   };
 }
 
+// ---- quant (#117): group- and month-scoped drills ----
+
+type GroupedRow = OrgDims & {
+  department: string | null;
+  managerId: string | null;
+};
+
+/** Whether a row is in the group a group drill names (raw values, never keys). */
+function inGroup(
+  r: GroupedRow,
+  d: { groupBy: DrillGroupBy; key: string | null },
+): boolean {
+  const value =
+    d.groupBy === "department"
+      ? r.department
+      : d.groupBy === "manager"
+        ? r.managerId
+        : orgDimOf(r, d.groupBy);
+  return value === d.key;
+}
+
+async function engagementRecords(
+  ctx: Ctx,
+  drill: Extract<Drill, { kind: "engagement" }>,
+): Promise<DrillResult> {
+  const rows = await engagementPeople(ctx.db, ctx.actor, {
+    month: drill.month,
+    segment: drill.segment,
+    filters: ctx.filters,
+    minGroupSize: ctx.minGroupSize,
+  });
+  const people = rows.map((r): DrillPerson => ({
+    personId: r.personId,
+    name: r.name,
+    department: r.department,
+    managerName: r.managerName,
+    facts: [
+      {
+        key: "score",
+        value: r.score === null ? "–" : Math.round(r.score * 100),
+      },
+      { key: "segment", value: r.segment },
+    ],
+    href: null,
+  }));
+  const q = new URLSearchParams({ from: drill.month, to: drill.month });
+  return peopleResult(ctx, byName(people), `/insights/engagement?${q}`);
+}
+
 /** The most comments a drill lists (the full view has them all). */
 export const COMMENT_LIMIT = 200;
 
@@ -366,5 +435,18 @@ export async function drillRecords(
     case "theme":
     case "sentiment":
       return commentRecords(ctx, drill);
+    // quant (#117): direction reads teams by an opaque key, never a person's.
+    case "completionGroup":
+    case "indicatorGroup":
+      if (
+        masked &&
+        (drill.groupBy === "manager" || isPersonKind(drill.groupBy))
+      )
+        throw new ReviewError("forbidden");
+      return drill.kind === "completionGroup"
+        ? completionPeople(ctx, drill)
+        : indicatorPeople(ctx, drill);
+    case "engagement":
+      return engagementRecords(ctx, drill);
   }
 }

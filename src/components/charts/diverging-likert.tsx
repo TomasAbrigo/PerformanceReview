@@ -1,5 +1,7 @@
 import { useTranslations } from "next-intl";
+import { DrillLink } from "@/components/drill/drill-link";
 import { useChartFormat } from "./format";
+import type { MarkDrill } from "./stacked-bar-100";
 
 export type LikertRow = {
   key: string;
@@ -10,6 +12,8 @@ export type LikertRow = {
   /** Emphasised (e.g. the "Todos" total row). */
   strong?: boolean;
   testId?: string;
+  /** #117: too few people to read as a share; muted and listed last. */
+  faint?: boolean;
 };
 
 /** Low (1-2) to high (4-5), neutral gray at 3: two hues and a gray midpoint. */
@@ -42,6 +46,7 @@ export function orderLikert(rows: LikertRow[]): LikertRow[] {
     .sort(
       (a, b) =>
         Number(!!b.r.strong) - Number(!!a.r.strong) ||
+        Number(!!a.r.faint) - Number(!!b.r.faint) ||
         lowShare(b.r.counts) - lowShare(a.r.counts) ||
         a.i - b.i,
     )
@@ -57,8 +62,11 @@ export function DivergingLikert({
   rows,
   label,
   valueLabels,
+  drillOf,
 }: {
   rows: LikertRow[];
+  /** #117: makes a segment open its records (row key, value 1-5). */
+  drillOf?: (rowKey: string, value: number) => MarkDrill | undefined;
   label: string;
   /** Names of 1..5 for tooltips (e.g. "1"..."5" or words). */
   valueLabels: string[];
@@ -94,7 +102,8 @@ export function DivergingLikert({
           <div
             key={r.key}
             data-testid={r.testId ?? "likert-row"}
-            className="grid grid-cols-[minmax(8rem,16rem)_4.5rem_1fr_4.5rem_6.5rem] items-center gap-2"
+            data-faint={r.faint ? "" : undefined}
+            className={`${r.faint ? "opacity-55" : ""} grid grid-cols-[minmax(8rem,16rem)_4.5rem_1fr_4.5rem_6.5rem] items-center gap-2`}
           >
             <span
               className={`line-clamp-2 text-sm leading-tight ${r.strong ? "font-semibold" : ""}`}
@@ -129,6 +138,22 @@ export function DivergingLikert({
                     count: c,
                     share: f.share(s),
                   });
+                  const cls = `flex min-w-0 items-center justify-center rounded-[2px] text-xs tabular-nums outline-offset-1 focus-visible:outline-2 focus-visible:outline-ring ${FILL[i]}`;
+                  const d = drillOf?.(r.key, i + 1);
+                  if (d) {
+                    return (
+                      <DrillLink
+                        key={i}
+                        base={d.base}
+                        drill={d.drill}
+                        label={tip}
+                        className={cls}
+                        style={{ width: `${s * 100}%` }}
+                      >
+                        {s >= 0.12 ? f.share(s) : null}
+                      </DrillLink>
+                    );
+                  }
                   return (
                     <span
                       key={i}

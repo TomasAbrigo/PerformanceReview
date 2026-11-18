@@ -1,5 +1,4 @@
 import { render, screen, within } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
 import { NextIntlClientProvider } from "next-intl";
 import type { ReactNode } from "react";
 import { describe, expect, it } from "vitest";
@@ -133,8 +132,8 @@ describe("EngagementView", () => {
       />,
     );
 
+    // The month detail is open by default (#117: months are drillable).
     const table = screen.getByRole("table", { name: "Detalle por mes" });
-    await userEvent.click(screen.getByText("Ver como tabla"));
     expect(
       within(table).getByText("Menos de 5 personas: no se muestra."),
     ).toBeVisible();

@@ -13,7 +13,10 @@
 //
 // The records come from `drillRecords` (authz.ts scope, minimum group size,
 // direction never gets names); the sheet closes back to `base` without it.
-import { getTranslations } from "next-intl/server";
+import { eq } from "drizzle-orm";
+import { getFormatter, getTranslations } from "next-intl/server";
+import { person } from "@/db/schema";
+import { isUuid } from "@/lib/uuid";
 import { type DrillBase, drillHref } from "@/components/drill/drill-link";
 import { DrillSheet } from "@/components/drill/drill-sheet";
 import { DrillView } from "@/components/drill/drill-view";
@@ -60,7 +63,51 @@ async function drillTitle(drill: Drill): Promise<string> {
       return t(`completion.${drill.side}.${drill.state}`);
     case "goals":
       return t(`goals.${drill.state}`);
+    // ---- quant (#117): group- and month-scoped drills ----
+    case "completionGroup":
+      return t("group", {
+        title: t(`completion.${drill.side}.${drill.state}`),
+        group: await groupName(drill),
+      });
+    case "indicatorGroup":
+      return t("group", {
+        title:
+          drill.value === null
+            ? t("indicatorAll", {
+                indicator: ti(`indicator.${drill.indicator}`),
+              })
+            : t("indicator", {
+                indicator: ti(`indicator.${drill.indicator}`),
+                value: drill.value,
+              }),
+        group: await groupName(drill),
+      });
+    case "engagement": {
+      const format = await getFormatter();
+      const month = format.dateTime(new Date(`${drill.month}T00:00:00Z`), {
+        month: "long",
+        year: "numeric",
+        timeZone: "UTC",
+      });
+      if (!drill.segment) return t("engagement", { month });
+      const tseg = await getTranslations("Engagement.segment");
+      return t("engagementSegment", { month, segment: tseg(drill.segment) });
+    }
   }
+}
+
+/** The name of a group drill's group: a manager by name, else its value. */
+async function groupName(drill: {
+  groupBy: string;
+  key: string | null;
+}): Promise<string> {
+  if (drill.key === null) return (await getTranslations("Drill"))("none");
+  if (drill.groupBy !== "manager" || !isUuid(drill.key)) return drill.key;
+  const [row] = await db
+    .select({ name: person.displayName })
+    .from(person)
+    .where(eq(person.id, drill.key));
+  return row?.name ?? drill.key;
 }
 
 export async function DrillSection({

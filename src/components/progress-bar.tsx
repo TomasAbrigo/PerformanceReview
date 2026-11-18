@@ -5,8 +5,11 @@ export function ProgressBar({
   percent,
   label,
   figure,
+  tone,
 }: {
   percent: number;
+  /** The status tone (#117): the fill takes its colour; default the brand's. */
+  tone?: "good" | "watch" | "risk";
   label: string;
   /** What to write beside the bar; default the rounded percentage. */
   figure?: ReactNode;
@@ -23,7 +26,16 @@ export function ProgressBar({
         className="h-2 min-w-16 flex-1 overflow-hidden rounded-full bg-brand-fog"
       >
         <div
-          className="h-full rounded-full bg-brand-600"
+          className={`h-full rounded-full ${
+            tone === "good"
+              ? "bg-status-done"
+              : tone === "watch"
+                ? "bg-status-progress"
+                : tone === "risk"
+                  ? "bg-status-pending"
+                  : "bg-brand-600"
+          }`}
+          data-tone={tone}
           style={{ width: `${value}%` }}
         />
       </div>

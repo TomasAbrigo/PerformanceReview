@@ -32,8 +32,13 @@ export function DrillView({ result }: { result: DrillResult }) {
         : result.breakdownBy === "sentiment"
           ? ts(key as "positive")
           : key;
+  const tseg = useTranslations("Engagement.segment");
   const factValue = (f: DrillPerson["facts"][number]) =>
-    STATUS_FACTS.has(f.key) ? tst(String(f.value) as "submitted") : f.value;
+    STATUS_FACTS.has(f.key)
+      ? tst(String(f.value) as "submitted")
+      : f.key === "segment"
+        ? tseg(String(f.value) as "alto")
+        : f.value;
   const max = Math.max(1, ...result.breakdown.map((g) => g.n));
   const csv = result.people
     ? csvOf([

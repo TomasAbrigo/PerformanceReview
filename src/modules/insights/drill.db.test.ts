@@ -144,4 +144,80 @@ describe("drillRecords", () => {
       drillAs(as(s.id.ana, "employee"), { kind: "goals", state: "all" }),
     ).rejects.toThrow();
   });
+
+  // ---- quant (#117): group- and month-scoped drills ----
+  it("People: an indicator answer within one area", async () => {
+    // Retention 2 in C2: Ana and Bruno in Ingeniería, Gina in Producto.
+    const r = await drillAs(hr, {
+      kind: "indicatorGroup",
+      indicator: "retention",
+      value: 2,
+      groupBy: "department",
+      key: "Ingeniería",
+    });
+    expect(namesOf(r)).toEqual([names.ana, names.bruno]);
+    const team = await drillAs(hr, {
+      kind: "indicatorGroup",
+      indicator: "retention",
+      value: null,
+      groupBy: "manager",
+      key: s.id.nora,
+    });
+    expect(namesOf(team)).toContain(names.gina);
+    expect(namesOf(team)).not.toContain(names.ana);
+  });
+
+  it("People: completion of one group; a manager stays in their reports", async () => {
+    const r = await drillAs(hr, {
+      kind: "completionGroup",
+      side: "manager",
+      state: "submitted",
+      groupBy: "department",
+      key: "Producto",
+    });
+    expect(r.total).toBe(3);
+    expect(r.breakdown).toEqual([{ key: "Producto", others: false, n: 3 }]);
+    const mine = await drillAs(as(s.id.nora, "manager"), {
+      kind: "completionGroup",
+      side: "manager",
+      state: "submitted",
+      groupBy: "department",
+      key: "Ingeniería",
+    });
+    for (const p of mine.people ?? []) expect(p.managerName).toBe(names.nora);
+  });
+
+  it("direction: a group drill by area is masked; by a person, forbidden", async () => {
+    const r = await drillAs(direction, {
+      kind: "completionGroup",
+      side: "manager",
+      state: "submitted",
+      groupBy: "department",
+      key: "Ingeniería",
+    });
+    expect(r.people).toBeNull();
+    expect(r.total).toBe(6);
+    await expect(
+      drillAs(direction, {
+        kind: "indicatorGroup",
+        indicator: "retention",
+        value: null,
+        groupBy: "manager",
+        key: s.id.nora,
+      }),
+    ).rejects.toThrow();
+  });
+
+  it("engagement month: People get the people, direction never names", async () => {
+    const drill: Drill = {
+      kind: "engagement",
+      month: "2026-01-01",
+      segment: null,
+    };
+    const r = await drillAs(hr, drill);
+    expect(r.people).toEqual([]);
+    const masked = await drillAs(direction, drill);
+    expect(masked.people).toBeNull();
+    expect(masked.total).toBeNull();
+  });
 });

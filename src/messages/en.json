@@ -1033,7 +1033,8 @@
       "value": "value {value}",
       "takeaway": "Most low answers: {group} ({share} with 1 or 2).",
       "lowest": "{value} (lowest)",
-      "highest": "{value} (highest)"
+      "highest": "{value} (highest)",
+      "faint": "{count, plural, one {# group has} other {# groups have}} fewer than {n} people: muted and last, their shares are not comparable."
     },
     "matrix": {
       "title": "How many people have both low retention and low engagement?",
@@ -1092,7 +1093,11 @@
       "department": "Area",
       "detail": "Detail",
       "dropDetail": "{indicator}: {previous} → {value} (−{delta}) since {cycle}",
-      "riskDetail": "Retention {retention}, engagement {engagement}"
+      "riskDetail": "Retention {retention}, engagement {engagement}",
+      "dropNote": "Fell {drop} points or more since the previous cycle",
+      "riskNote": "Retention and engagement at {risk} or below",
+      "riskDrill": "See the {n} people at risk",
+      "list": "See the {n} alerts"
     },
     "trend": {
       "title": "Retention and engagement over time",
@@ -1121,7 +1126,19 @@
         "apply": "Show"
       },
       "yTitle": "Mean (1–5)",
-      "how": "Mean of the 1 to 5 answers of each cycle; a gap is a cycle hidden for having fewer people than the minimum."
+      "how": "Mean of the 1 to 5 answers of each cycle; a gap is a cycle hidden for having fewer people than the minimum.",
+      "latest": "Latest cycle: {cycle}",
+      "drill": "see the people of that cycle"
+    },
+    "kpi": {
+      "mean": "{indicator} mean",
+      "answered": "{n} people answered",
+      "risk": "Risk quadrant",
+      "riskOf": "of {total} with both indicators",
+      "vs": "{delta} vs. {cycle}",
+      "scale": "{indicator}: {value} of 5",
+      "riskScale": "{n} of {total} at risk",
+      "drillAll": "See the {n} people"
     }
   },
   "Qualitative": {
@@ -1580,7 +1597,14 @@
       "pendingValue": "{self} / {manager}",
       "pendingNote": "Self / manager · independent bases",
       "sent": "{submitted} of {applicable} submitted",
-      "byGroup": "Progress by group"
+      "byGroup": "Progress by group",
+      "drillSubmitted": "See the {n} people with {side} submitted",
+      "drillGroupSubmitted": "{group}: see the {n} people with {side} submitted",
+      "drillGroupPending": "{group}: see the {n} people with {side} pending",
+      "drillPending": "See the {n} people with {side} pending",
+      "pendingCount": "{n} pending",
+      "pendingOf": "{side}: {n} of {applicable}",
+      "whoMissing": "See who is missing"
     },
     "delta": {
       "title": "Compared with {cycle}",
@@ -1642,7 +1666,8 @@
         "retention": "Retention (1-5)",
         "engagement": "Bamboo engagement (1-5)",
         "goals": "Goals completed"
-      }
+      },
+      "drill": "{cycle} · {what}: see the people"
     }
   },
   "GoalsInsights": {
@@ -1915,6 +1940,15 @@
       "hidden": "Fewer than {min} people: not shown.",
       "segments": "Segments",
       "link": "See the evolution"
+    },
+    "kpi": {
+      "label": "Latest month",
+      "score": "Mean score · {month}",
+      "participation": "Participation · {month}",
+      "vs": "{delta} pp vs. {month}",
+      "drill": "See the people of {month}",
+      "drillMissing": "See the {n} people who did not answer",
+      "respondents": "{n} of {total} answered"
     }
   },
   "Nav": {
@@ -2267,7 +2301,9 @@
       "managerStatus": "Manager review",
       "goals": "Goals",
       "completed": "Completed",
-      "overdue": "Overdue"
+      "overdue": "Overdue",
+      "score": "Score (%)",
+      "segment": "Segment"
     },
     "csv": {
       "name": "Name",
@@ -2301,7 +2337,10 @@
         "all": "People with goals in the period",
         "completed": "People with completed goals",
         "overdue": "People with overdue goals"
-      }
+      },
+      "group": "{title} · {group}",
+      "engagement": "Monthly engagement · {month}",
+      "engagementSegment": "Monthly engagement · {month} · {segment}"
     },
     "truncated": "Showing the first {n}; the full view has them all."
   },

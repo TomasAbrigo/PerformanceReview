@@ -116,10 +116,10 @@ export function RiskMatrixView({
         />
       ) : null}
       {matrix.atRisk ? (
-        <div className="flex flex-col gap-2" data-testid="risk-list">
-          <h3 className="font-sans text-sm font-medium">
-            {t("matrix.risk.title")}
-          </h3>
+        <details className="flex flex-col gap-2" data-testid="risk-list">
+          <summary className="button-outline w-fit cursor-pointer">
+            {t("matrix.risk.title")} ({matrix.atRisk.length})
+          </summary>
           {matrix.atRisk.length === 0 ? (
             <p className="text-sm text-muted-foreground">
               {t("matrix.risk.empty")}
@@ -158,7 +158,7 @@ export function RiskMatrixView({
               ))}
             </CardCollection>
           )}
-        </div>
+        </details>
       ) : null}
     </div>
   );

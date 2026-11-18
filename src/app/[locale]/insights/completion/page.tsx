@@ -32,7 +32,11 @@ import {
 import { dashboardFilterOptions } from "@/modules/analytics/dashboards";
 import { periodDetail } from "@/modules/analytics/period-detail";
 import { insightsScope } from "@/modules/insights";
-import { getSetting } from "@/modules/settings";
+import { getSettings } from "@/modules/settings";
+import { parseDrill } from "@/modules/insights/drill-spec";
+import { kpiThresholds } from "@/modules/insights/tone";
+import type { DrillBase } from "@/components/drill/drill-link";
+import { DrillSection } from "../drill-section";
 
 async function Completion({
   params,
@@ -58,13 +62,28 @@ async function Completion({
   }
   const cycles = localizeCycles(await completionCycles(db), locale);
   if (!cycles.length) return <EmptyState>{t("noCycles")}</EmptyState>;
-  const p = parseCompletionParams(await searchParams);
+  const sp = await searchParams;
+  const p = parseCompletionParams(sp);
   const cycle = cycles.find((c) => c.id === p.cycle) ?? cycles[0];
   const masked = scope.kind === "aggregatesOnly";
-  // The minimum group size is read once per request (it only masks direction).
+  // The settings are read once per request: the minimum group size (it only
+  // masks direction) and the thresholds of the tones.
+  const settings = await getSettings(db);
   const minGroupSize = masked
-    ? await getSetting(db, "aggregation.minGroupSize")
+    ? settings["aggregation.minGroupSize"]
     : undefined;
+  // Drill-down: `?drill=` opens the records behind a mark (drill-section.tsx).
+  // Direction never carries the filters that name a person (a DM, a Santex Lead).
+  const base: DrillBase = {
+    pathname: "/insights/completion",
+    query: Object.fromEntries(
+      Object.entries(sp).filter(
+        ([k]) => !masked || (k !== "dm" && k !== "santexLead"),
+      ),
+    ),
+  };
+  const drill = parseDrill(sp.drill);
+  const targets = kpiThresholds(settings);
   // Direction reads areas, accounts and projects (a manager or DM is a person).
   const groupBys: CompletionGroupBy[] = masked
     ? ["none", "department", "account", "project"]
@@ -149,7 +168,10 @@ async function Completion({
           ) : undefined
         }
       >
-        <CompletionSummaryView data={delta} />
+        <CompletionSummaryView
+          data={delta}
+          context={{ base, groupBy, masked, targets }}
+        />
       </Panel>
       <Panel
         id="completion-period-detail"
@@ -176,6 +198,11 @@ async function Completion({
               detail.rows.map((r) => ({ ...r, name: r.cycleName })),
               locale,
             ).map(({ name, ...r }) => ({ ...r, cycleName: name })),
+          }}
+          context={{
+            base,
+            targets,
+            riskThreshold: settings["alerts.riskThreshold"],
           }}
         />
       </Panel>
@@ -217,6 +244,18 @@ async function Completion({
           </p>
         )}
       </Panel>
+      {drill ? (
+        <Suspense fallback={null}>
+          <DrillSection
+            actor={actor}
+            cycleId={cycle.id}
+            drill={drill}
+            base={base}
+            minGroupSize={settings["aggregation.minGroupSize"]}
+            filters={masked ? {} : orgFiltersOf(p)}
+          />
+        </Suspense>
+      ) : null}
     </div>
   );
 }

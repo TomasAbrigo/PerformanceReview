@@ -21,7 +21,11 @@ import {
   engagementFilterOptions,
 } from "@/modules/analytics/engagement";
 import { insightsScope } from "@/modules/insights/authz";
-import { getSetting } from "@/modules/settings";
+import { getSettings } from "@/modules/settings";
+import { kpiThresholds } from "@/modules/insights/tone";
+import { parseDrill } from "@/modules/insights/drill-spec";
+import type { DrillBase } from "@/components/drill/drill-link";
+import { DrillSection } from "../drill-section";
 
 async function Engagement({
   params,
@@ -34,7 +38,8 @@ async function Engagement({
   const actor = await getActor();
   const t = await getTranslations("Engagement");
   const kicker = await groupKicker("insights");
-  const minGroupSize = await getSetting(db, "aggregation.minGroupSize");
+  const settings = await getSettings(db);
+  const minGroupSize = settings["aggregation.minGroupSize"];
   // The scope decides what is shown: People everything, a manager their
   // direct reports, direction aggregates; anybody else nothing.
   const scope = insightsScope(actor, minGroupSize);
@@ -46,7 +51,20 @@ async function Engagement({
       </section>
     );
   }
-  const p = parseEngagementParams(await searchParams);
+  const sp = await searchParams;
+  const p = parseEngagementParams(sp);
+  // Drill-down (#117): a month or a segment opens its people.
+  const masked = scope.kind === "aggregatesOnly";
+  // Direction never carries the filters that name a person (a DM, a Santex Lead).
+  const base: DrillBase = {
+    pathname: "/insights/engagement",
+    query: Object.fromEntries(
+      Object.entries(sp).filter(
+        ([k]) => !masked || (k !== "dm" && k !== "santexLead"),
+      ),
+    ),
+  };
+  const drill = parseDrill(sp.drill);
   const [data, options] = await Promise.all([
     engagementEvolution(db, actor, {
       from: monthStart(p.from),
@@ -75,8 +93,25 @@ async function Engagement({
       {options.lastMonth === null ? (
         <p data-testid="engagement-empty">{t("noData")}</p>
       ) : (
-        <EngagementView data={data} />
+        <EngagementView
+          data={data}
+          context={{ base, targets: kpiThresholds(settings) }}
+        />
       )}
+      {drill?.kind === "engagement" ? (
+        <Suspense fallback={null}>
+          <DrillSection
+            actor={actor}
+            cycleId=""
+            drill={drill}
+            base={base}
+            minGroupSize={minGroupSize}
+            filters={
+              scope.kind === "aggregatesOnly" ? {} : { ...orgFiltersOf(p) }
+            }
+          />
+        </Suspense>
+      ) : null}
     </div>
   );
 }

@@ -17,6 +17,11 @@ import {
   type Sentiment,
   sentiments,
 } from "@/modules/qualitative-analysis/constants";
+import {
+  type EngagementSegment,
+  engagementSegments,
+  parseEngagementMonth,
+} from "@/modules/engagement/kinds";
 
 export const DRILL_PARAM = "drill";
 
@@ -40,7 +45,96 @@ export type Drill =
       state: (typeof completionStates)[number];
     }
   /** People with goals in the period (any, completed, overdue). */
-  | { kind: "goals"; state: (typeof goalStates)[number] };
+  | { kind: "goals"; state: (typeof goalStates)[number] }
+  // ---- quant (#117): group- and month-scoped drills ----
+  /** Completion of one group of the breakdown (key null: unassigned). */
+  | {
+      kind: "completionGroup";
+      side: (typeof completionSides)[number];
+      state: (typeof completionStates)[number];
+      groupBy: DrillGroupBy;
+      key: string | null;
+    }
+  /** An indicator answer (null: any) within one group of the breakdown. */
+  | {
+      kind: "indicatorGroup";
+      indicator: Indicator;
+      value: number | null;
+      groupBy: DrillGroupBy;
+      key: string | null;
+    }
+  /** People of one month of the monthly engagement (a segment, or all). */
+  | {
+      kind: "engagement";
+      month: string;
+      segment: EngagementSegment | null;
+    };
+
+// ---- quant (#117): group- and month-scoped drills ----
+/** What a group drill groups by (a breakdown of completion or indicators). */
+export const drillGroupBys = [
+  "department",
+  "manager",
+  "account",
+  "project",
+  "dm",
+  "santex_lead",
+] as const;
+export type DrillGroupBy = (typeof drillGroupBys)[number];
+
+/** A group key in the URL: encoded (no ":"), empty for "no group". */
+const encodeKey = (key: string | null) =>
+  key === null ? "" : encodeURIComponent(key);
+function decodeKey(raw: string): string | null | undefined {
+  if (raw === "") return null;
+  try {
+    return decodeURIComponent(raw);
+  } catch {
+    return undefined;
+  }
+}
+const likertValue = (raw: string): number | null | undefined => {
+  if (raw === "all") return null;
+  const v = Number(raw);
+  return Number.isInteger(v) && v >= 1 && v <= 5 ? v : undefined;
+};
+
+function parseQuantDrill(kind: string, args: string[]): Drill | null {
+  const [a = "", b = "", c = "", d = ""] = args;
+  switch (kind) {
+    case "cgroup": {
+      const key = decodeKey(d);
+      return args.length === 4 &&
+        isOneOf(completionSides, a) &&
+        isOneOf(completionStates, b) &&
+        isOneOf(drillGroupBys, c) &&
+        key !== undefined
+        ? { kind: "completionGroup", side: a, state: b, groupBy: c, key }
+        : null;
+    }
+    case "igroup": {
+      const key = decodeKey(d);
+      const value = likertValue(b);
+      return args.length === 4 &&
+        isOneOf(indicators, a) &&
+        value !== undefined &&
+        isOneOf(drillGroupBys, c) &&
+        key !== undefined
+        ? { kind: "indicatorGroup", indicator: a, value, groupBy: c, key }
+        : null;
+    }
+    case "engagement": {
+      const month = /^\d{4}-\d{2}-01$/.test(a) ? parseEngagementMonth(a) : null;
+      if (!month || args.length > 2) return null;
+      if (args.length === 1) return { kind, month, segment: null };
+      return isOneOf(engagementSegments, b)
+        ? { kind, month, segment: b }
+        : null;
+    }
+    default:
+      return null;
+  }
+}
 
 export type DrillKind = Drill["kind"];
 
@@ -91,7 +185,7 @@ export function parseDrill(raw: unknown): Drill | null {
         ? { kind, state: a }
         : null;
     default:
-      return null;
+      return parseQuantDrill(kind, args);
   }
 }
 
@@ -112,6 +206,14 @@ export function formatDrill(d: Drill): string {
       return `completion:${d.side}:${d.state}`;
     case "goals":
       return `goals:${d.state}`;
+    case "completionGroup":
+      return `cgroup:${d.side}:${d.state}:${d.groupBy}:${encodeKey(d.key)}`;
+    case "indicatorGroup":
+      return `igroup:${d.indicator}:${d.value ?? "all"}:${d.groupBy}:${encodeKey(d.key)}`;
+    case "engagement":
+      return d.segment
+        ? `engagement:${d.month}:${d.segment}`
+        : `engagement:${d.month}`;
   }
 }
 

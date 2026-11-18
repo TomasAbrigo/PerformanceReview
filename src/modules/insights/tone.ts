@@ -39,3 +39,18 @@ export function percentTone(
   const v = better === "up" ? pct : 100 - pct;
   return v >= t.goodPct ? "good" : v >= t.watchPct ? "watch" : "risk";
 }
+
+/**
+ * quant (#117): a count of people at risk, where more is worse. Nobody at
+ * risk is good; anybody is at least watch; a share of `100 - goodPct` percent
+ * or more of the people counted is risk (20 % with the defaults).
+ */
+export function atRiskTone(
+  count: number,
+  total: number,
+  t: KpiThresholds,
+): Tone {
+  if (count <= 0) return "good";
+  const pct = total > 0 ? (count / total) * 100 : 100;
+  return pct >= 100 - t.goodPct ? "risk" : "watch";
+}

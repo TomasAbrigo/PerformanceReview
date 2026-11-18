@@ -1033,7 +1033,8 @@
       "value": "valor {value}",
       "takeaway": "Más respuestas bajas: {group} ({share} con 1 o 2).",
       "lowest": "{value} (más bajo)",
-      "highest": "{value} (más alto)"
+      "highest": "{value} (más alto)",
+      "faint": "{count, plural, one {# grupo tiene} other {# grupos tienen}} menos de {n} personas: atenuados y al final, sus porcentajes no son comparables."
     },
     "matrix": {
       "title": "¿Cuántas personas tienen retención y compromiso bajos a la vez?",
@@ -1092,7 +1093,11 @@
       "department": "Área",
       "detail": "Detalle",
       "dropDetail": "{indicator}: {previous} → {value} (−{delta}) desde {cycle}",
-      "riskDetail": "Retención {retention}, compromiso {engagement}"
+      "riskDetail": "Retención {retention}, compromiso {engagement}",
+      "dropNote": "Bajaron {drop} puntos o más desde el ciclo anterior",
+      "riskNote": "Retención y compromiso en {risk} o menos",
+      "riskDrill": "Ver las {n} personas en riesgo",
+      "list": "Ver las {n} alertas"
     },
     "trend": {
       "title": "Evolución de retención y compromiso",
@@ -1121,7 +1126,19 @@
         "apply": "Ver"
       },
       "yTitle": "Promedio (1–5)",
-      "how": "Promedio de las respuestas 1 a 5 de cada ciclo; un hueco es un ciclo oculto por tener menos personas que el mínimo."
+      "how": "Promedio de las respuestas 1 a 5 de cada ciclo; un hueco es un ciclo oculto por tener menos personas que el mínimo.",
+      "latest": "Último ciclo: {cycle}",
+      "drill": "ver las personas de ese ciclo"
+    },
+    "kpi": {
+      "mean": "Promedio de {indicator}",
+      "answered": "{n} personas respondieron",
+      "risk": "Cuadrante de riesgo",
+      "riskOf": "de {total} con ambos indicadores",
+      "vs": "{delta} vs. {cycle}",
+      "scale": "{indicator}: {value} de 5",
+      "riskScale": "{n} de {total} en riesgo",
+      "drillAll": "Ver las {n} personas"
     }
   },
   "Qualitative": {
@@ -1580,7 +1597,14 @@
       "pendingValue": "{self} / {manager}",
       "pendingNote": "Propias / manager · bases independientes",
       "sent": "{submitted} de {applicable} enviadas",
-      "byGroup": "Avance por grupo"
+      "byGroup": "Avance por grupo",
+      "drillSubmitted": "Ver las {n} personas con {side} enviada",
+      "drillGroupSubmitted": "{group}: ver las {n} personas con {side} enviada",
+      "drillGroupPending": "{group}: ver las {n} personas con {side} pendiente",
+      "drillPending": "Ver las {n} personas con {side} pendiente",
+      "pendingCount": "{n, plural, one {# pendiente} other {# pendientes}}",
+      "pendingOf": "{side}: {n} de {applicable}",
+      "whoMissing": "Ver quién falta"
     },
     "delta": {
       "title": "Comparación con {cycle}",
@@ -1642,7 +1666,8 @@
         "retention": "Retención (1-5)",
         "engagement": "Compromiso Bamboo (1-5)",
         "goals": "Goals completados"
-      }
+      },
+      "drill": "{cycle} · {what}: ver las personas"
     }
   },
   "GoalsInsights": {
@@ -1915,6 +1940,15 @@
       "hidden": "Menos de {min} personas: no se muestra.",
       "segments": "Segmentos",
       "link": "Ver la evolución"
+    },
+    "kpi": {
+      "label": "Último mes",
+      "score": "Puntaje medio · {month}",
+      "participation": "Participación · {month}",
+      "vs": "{delta} pp vs. {month}",
+      "drill": "Ver las personas de {month}",
+      "drillMissing": "Ver las {n} personas que no respondieron",
+      "respondents": "{n} de {total} respondieron"
     }
   },
   "Nav": {
@@ -2267,7 +2301,9 @@
       "managerStatus": "Evaluación del manager",
       "goals": "Objetivos",
       "completed": "Completados",
-      "overdue": "Vencidos"
+      "overdue": "Vencidos",
+      "score": "Puntaje (%)",
+      "segment": "Segmento"
     },
     "csv": {
       "name": "Nombre",
@@ -2301,7 +2337,10 @@
         "all": "Personas con objetivos en el período",
         "completed": "Personas con objetivos completados",
         "overdue": "Personas con objetivos vencidos"
-      }
+      },
+      "group": "{title} · {group}",
+      "engagement": "Compromiso mensual · {month}",
+      "engagementSegment": "Compromiso mensual · {month} · {segment}"
     },
     "truncated": "Se muestran los primeros {n}; la vista completa tiene todos."
   },
