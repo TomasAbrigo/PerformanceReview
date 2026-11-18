@@ -30,16 +30,23 @@ const EMPLOYEE_PERFORMANCE = resolve(
 );
 
 /** An UploadStore with both folders set. */
-type TestStore = UploadStore & { uploadsDir: string; profilesDir: string };
+type TestStore = UploadStore & {
+  uploadsDir: string;
+  profilesDir: string;
+  tmpDir: string;
+};
 
 let root: string;
 let store: TestStore;
 beforeEach(async () => {
   root = await mkdtemp(join(tmpdir(), "upload-test-"));
+  // Its own temp folder too: what is left in it is this test's doing alone.
   store = {
     uploadsDir: join(root, "uploads"),
     profilesDir: join(root, "profiles"),
+    tmpDir: join(root, "tmp"),
   };
+  await mkdir(store.tmpDir, { recursive: true });
 });
 afterEach(async () => {
   vi.unstubAllEnvs();
@@ -265,16 +272,11 @@ describe("inspectUpload", () => {
       { name: "bad.parquet", bytes: text("this is not parquet") },
       store,
     );
-    const before = (await readdir(tmpdir())).filter((f) =>
-      f.startsWith("upload-lake-"),
-    );
+    expect(await readdir(store.tmpDir)).toEqual([]);
 
     expect(await codeOf(inspectUpload(bad.id, store))).toBe("unreadable_file");
 
-    const after = (await readdir(tmpdir())).filter((f) =>
-      f.startsWith("upload-lake-"),
-    );
-    expect(after).toEqual(before);
+    expect(await readdir(store.tmpDir)).toEqual([]);
   });
 });
 

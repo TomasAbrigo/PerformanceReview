@@ -85,9 +85,9 @@ const UPLOAD_TABLE = "upload";
 async function withUploadLake<T>(
   upload: StoredUpload,
   fn: (lake: LakeAdapter, table: string) => Promise<T>,
-  options: { allText?: boolean } = {},
+  options: { allText?: boolean; tmpDir?: string } = {},
 ): Promise<T> {
-  const dir = await mkdtemp(join(tmpdir(), "upload-lake-"));
+  const dir = await mkdtemp(join(options.tmpDir ?? tmpdir(), "upload-lake-"));
   try {
     const link = join(dir, `${UPLOAD_TABLE}${upload.ext}`);
     // Absolute: a relative target would be read from the link's own folder.
@@ -117,6 +117,7 @@ async function ingestUploaded({
   signal,
   landing = false,
   partial = false,
+  tmpDir,
 }: {
   upload: StoredUpload;
   fileName: string;
@@ -127,6 +128,8 @@ async function ingestUploaded({
   landing?: boolean;
   /** Org attributes file: it lists only some rows (stored on the run). */
   partial?: boolean;
+  /** Base folder of the temporary files (see `UploadStore.tmpDir`). */
+  tmpDir?: string;
 }) {
   return withUploadLake(
     upload,
@@ -163,7 +166,7 @@ async function ingestUploaded({
         },
       });
     },
-    { allText: readsAsText(profile) },
+    { allText: readsAsText(profile), tmpDir },
   );
 }
 
@@ -227,22 +230,26 @@ export async function inspectUpload(
 ): Promise<UploadInspection> {
   const upload = await resolveUpload(id, store);
   return readable(() =>
-    withUploadLake(upload, async (lake, table) => {
-      const columns = await lake.describeTable(table);
-      if (columns.length === 0) {
-        throw new UploadError("unreadable_file", "The file has no columns");
-      }
-      const rows: LakeRow[] = [];
-      // The lake pages by key; any column will do for a look at the file.
-      for await (const batch of lake.readBatches(table, {
-        keyColumns: [columns[0].name],
-        batchSize: sampleSize,
-      })) {
-        rows.push(...batch.rows);
-        break;
-      }
-      return { columns, rows };
-    }),
+    withUploadLake(
+      upload,
+      async (lake, table) => {
+        const columns = await lake.describeTable(table);
+        if (columns.length === 0) {
+          throw new UploadError("unreadable_file", "The file has no columns");
+        }
+        const rows: LakeRow[] = [];
+        // The lake pages by key; any column will do for a look at the file.
+        for await (const batch of lake.readBatches(table, {
+          keyColumns: [columns[0].name],
+          batchSize: sampleSize,
+        })) {
+          rows.push(...batch.rows);
+          break;
+        }
+        return { columns, rows };
+      },
+      { tmpDir: store.tmpDir },
+    ),
   );
 }
 
@@ -339,6 +346,7 @@ export async function importUpload({
     signal,
     landing: !domain && !attributes && !engagement,
     partial: attributes && partial,
+    tmpDir: store.tmpDir,
   });
 
   // Only now: a failed import leaves no profile behind.
