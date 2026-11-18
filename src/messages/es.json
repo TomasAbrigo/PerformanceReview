@@ -95,7 +95,8 @@
         "period": "Período",
         "participants": "Participantes"
       },
-      "participants": "{count, plural, one {# participante} other {# participantes}}"
+      "participants": "{count, plural, one {# participante} other {# participantes}}",
+      "complete": "{done} de {total} completas ({pct} %)"
     },
     "create": {
       "title": "Nuevo ciclo",
