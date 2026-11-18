@@ -153,7 +153,8 @@
       "empty": "There are no requests yet: they are generated when the cycle opens.",
       "columns": {
         "kind": "Type",
-        "reviewer": "Reviewer"
+        "reviewer": "Reviewer",
+        "status": "Status"
       },
       "kind": {
         "self": "Self-assessment",
@@ -2273,7 +2274,8 @@
       "hint": "The employee reads your review only once you share it.",
       "done": "Shared with the employee.",
       "notShared": "Not shared with the employee yet."
-    }
+    },
+    "answered": "{done} of {total} required questions answered"
   },
   "Experience": {
     "moreFilters": "More filters",

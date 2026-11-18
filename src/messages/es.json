@@ -153,7 +153,8 @@
       "empty": "Todavía no hay solicitudes: se generan al abrir el ciclo.",
       "columns": {
         "kind": "Tipo",
-        "reviewer": "Evaluador"
+        "reviewer": "Evaluador",
+        "status": "Estado"
       },
       "kind": {
         "self": "Autoevaluación",
@@ -2273,7 +2274,8 @@
       "hint": "La persona lee tu evaluación recién cuando la compartís.",
       "done": "Compartida con la persona.",
       "notShared": "Todavía no está compartida con la persona."
-    }
+    },
+    "answered": "{done} de {total} preguntas obligatorias respondidas"
   },
   "Experience": {
     "moreFilters": "Más filtros",

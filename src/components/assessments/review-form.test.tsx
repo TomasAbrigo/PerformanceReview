@@ -51,6 +51,26 @@ const questions: FormQuestion[] = [
 const ok = () => vi.fn().mockResolvedValue({ ok: true });
 
 describe("ReviewForm", () => {
+  it("shows how many required questions are answered as the form fills", () => {
+    renderIn(
+      "es",
+      <ReviewForm
+        questions={questions}
+        initial={{}}
+        readOnly={false}
+        save={ok()}
+        submit={ok()}
+      />,
+    );
+    expect(
+      screen.getByText("0 de 2 preguntas obligatorias respondidas"),
+    ).toBeTruthy();
+    fireEvent.click(screen.getByLabelText(/Alto/));
+    expect(
+      screen.getByText("1 de 2 preguntas obligatorias respondidas"),
+    ).toBeTruthy();
+  });
+
   it("saves a draft with what was typed, required or not", async () => {
     const save = ok();
     const submit = ok();
