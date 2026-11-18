@@ -373,3 +373,36 @@ describe("raw report keys without an EEID (#83)", () => {
     expect(rejected).toHaveLength(1);
   });
 });
+
+describe("FileSourceAdapter: org attributes file", () => {
+  it("keys each row by EEID and the ISO date it starts, whatever the date is written like", async () => {
+    const profile = profileNamed("org-attributes");
+    const adapter = new FileSourceAdapter(
+      profile,
+      await open(fixtureDir("org")),
+      "org-attributes",
+    );
+
+    const { records, rejected } = await collect(adapter);
+
+    expect(rejected).toEqual([]);
+    expect(records.map((r) => r.sourceId)).toEqual([
+      JSON.stringify(["11", "2024-01-01"]),
+      JSON.stringify(["11", "2025-01-01"]),
+      JSON.stringify(["12", ""]),
+      JSON.stringify(["99", "2024-01-01"]),
+    ]);
+    expect(records[0].payload).toMatchObject({
+      format: "org_attributes",
+      dateFormat: "dmy",
+      fields: {
+        employee_bamboo_id: "11",
+        employee_name: "Ana Prieto",
+        account: "Cuenta A",
+        project: "Proyecto A1",
+        dm: "Marta Quiroga",
+        santex_lead: "Nora Salas",
+      },
+    });
+  });
+});

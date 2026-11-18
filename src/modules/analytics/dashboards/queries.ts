@@ -5,6 +5,7 @@ import { isUuid } from "@/lib/uuid";
 import type { ActorContext } from "@/modules/actor/types";
 import { foldSmallGroups } from "@/modules/insights/aggregation";
 import { insightsScope } from "@/modules/insights/authz";
+import { type OrgOptions, orgOptionsOf } from "@/modules/org-attributes/kinds";
 import { ReviewError } from "@/modules/review-core/review-errors";
 import { getSetting } from "@/modules/settings/service";
 import type { Relationship } from "@/modules/templates/constants";
@@ -515,6 +516,8 @@ export type FilterOptions = {
   managers: { id: string; name: string }[];
   locations: string[];
   jobTitles: string[];
+  /** Accounts, projects, DMs and Santex Leads of the participants in view. */
+  org: OrgOptions;
 };
 
 /** Values for the filter selects: what the actor's participants carry. */
@@ -530,9 +533,14 @@ export async function dashboardFilterOptions(
     manager_name: string | null;
     location: string | null;
     job_title: string | null;
+    account: string | null;
+    project: string | null;
+    dm: string | null;
+    santex_lead: string | null;
   }>(sql`
     with recursive ${scopedCtes(actor, f)}
-    select distinct department, manager_id, manager_name, location, job_title
+    select distinct department, manager_id, manager_name, location, job_title,
+           account, project, dm, santex_lead
     from scoped`);
   const uniq = (xs: (string | null)[]) =>
     [...new Set(xs.filter((x): x is string => !!x))].sort();
@@ -548,5 +556,13 @@ export async function dashboardFilterOptions(
       .sort((a, b) => a.name.localeCompare(b.name)),
     locations: uniq(rows.map((r) => r.location)),
     jobTitles: uniq(rows.map((r) => r.job_title)),
+    org: orgOptionsOf(
+      rows.map((r) => ({
+        account: r.account,
+        project: r.project,
+        dm: r.dm,
+        santexLead: r.santex_lead,
+      })),
+    ),
   };
 }

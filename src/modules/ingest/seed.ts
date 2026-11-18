@@ -29,6 +29,7 @@ export const RESET_TABLES = [
   "theme",
   "answer_quality_issue",
   "history_import_row",
+  "person_org_attribute",
   "assessment_progress",
   "imported_request",
   "imported_question",

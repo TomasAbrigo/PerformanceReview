@@ -1,8 +1,9 @@
 // Drizzle- and server-free: shared by the queries and client components.
 import type { LocalizedText } from "@/db/schema/rating-scales";
+import type { OrgFilters } from "@/modules/org-attributes/kinds";
 import { sentiments, type Sentiment } from "./constants";
 
-export type QualitativeFilters = {
+export type QualitativeFilters = OrgFilters & {
   cycleId?: string;
   department?: string;
   dimension?: string;
@@ -40,6 +41,24 @@ export function pickCounts(
 }
 
 export type DimensionSentiment = SentimentCounts & { dimension: string };
+
+/** What the comments can be cut by besides their dimension: area or an org attribute. */
+export const qualitativeGroupBys = [
+  "department",
+  "account",
+  "project",
+  "dm",
+  "santex_lead",
+] as const;
+export type QualitativeGroupBy = (typeof qualitativeGroupBys)[number];
+
+/** Sentiment of the comments of a group of people (`participants` of them). */
+export type GroupSentiment = SentimentCounts & {
+  /** The area or attribute value; for direction, a DM / Santex Lead has an opaque key. Null: no value. */
+  key: string | null;
+  label: string | null;
+  participants: number;
+};
 export type TrendPoint = SentimentCounts & {
   cycleId: string;
   cycleName: string;

@@ -18,15 +18,30 @@ import type { SeedSize } from "./seed";
 export const seedReportsDir = (size: SeedSize) =>
   path.join("fixtures", "bamboo-reports", size);
 
+/** Where the synthetic org attributes file of a size lives (from the repo root). */
+export const seedOrgDir = (size: SeedSize) =>
+  path.join("fixtures", "org", size);
+
 /**
- * The reports the seed imports, in the real shapes (#83): the raw
- * assessments report creates the cycles of its review periods, then
- * Assessment Progress fills their completion.
+ * The files the seed imports, in the real shapes (#83): the raw assessments
+ * report creates the cycles of its review periods, then Assessment Progress
+ * fills their completion, then People's org attributes file (accounts,
+ * projects, DMs, Santex Leads per person). `dir` overrides the folder of a
+ * size's own (`seedReportsDir` by default).
  */
 export const SEED_REPORTS = [
   { file: "assessments-report.csv", profile: "bamboo-assessments-report" },
   { file: "assessment-status.csv", profile: "bamboo-assessment-status" },
-] as const;
+  {
+    file: "org-attributes.csv",
+    profile: "org-attributes",
+    dir: seedOrgDir,
+  },
+] as const satisfies readonly {
+  file: string;
+  profile: string;
+  dir?: (size: SeedSize) => string;
+}[];
 
 /** The ingest entities the reports write: the seed holds their locks, and a reset refuses while they are held. */
 export const REPORT_ENTITIES = SEED_REPORTS.map(
@@ -47,12 +62,12 @@ type Lock = <T>(key: string, fn: () => Promise<T>) => Promise<T>;
  * Imports the report exports of `size` in-process exactly as an upload of
  * them (`importReportFile`), each under its entity's lock. A report that
  * fails stops the next one (it needs the cycles of the first) but what was
- * imported is still returned. Idempotent: a re-run leaves every row unchanged.
+ * imported is still returned. `dir` puts every file in one folder (tests). Idempotent: a re-run leaves every row unchanged.
  */
 export async function seedReports({
   size,
   db,
-  dir = seedReportsDir(size),
+  dir,
   lock = (_key, fn) => fn(),
 }: {
   size: SeedSize;
@@ -66,7 +81,10 @@ export async function seedReports({
     try {
       const result = await lock(ingestLockKey(profile.entity), () =>
         importReportFile(db, {
-          path: path.resolve(dir, report.file),
+          path: path.resolve(
+            dir ?? ("dir" in report ? report.dir(size) : seedReportsDir(size)),
+            report.file,
+          ),
           profile,
         }),
       );

@@ -1,6 +1,11 @@
 // Pure: the indicator figures out of the rows `loadRows` reads. No database,
 // no actor: the callers decide who reads what (see queries.ts).
 import { foldSmallGroups } from "@/modules/insights";
+import {
+  groupIdentity,
+  orgDimOf,
+  orgOptionsOf,
+} from "@/modules/org-attributes/kinds";
 import type { IndicatorRow } from "./rows";
 import {
   type AlertPerson,
@@ -43,7 +48,11 @@ function seriesOf(
 export function matches(row: IndicatorRow, filters: IndicatorFilters = {}) {
   return (
     (!filters.department || row.department === filters.department) &&
-    (!filters.managerId || row.managerId === filters.managerId)
+    (!filters.managerId || row.managerId === filters.managerId) &&
+    (!filters.account || row.account === filters.account) &&
+    (!filters.project || row.project === filters.project) &&
+    (!filters.dm || row.dm === filters.dm) &&
+    (!filters.santexLead || row.santexLead === filters.santexLead)
   );
 }
 
@@ -96,13 +105,19 @@ export function buildDistribution(
   const all = emptyCounts();
   for (const r of rows) {
     if (r.indicator !== input.indicator) continue;
-    const key =
+    const { key, label } =
       input.groupBy === "department"
-        ? r.department
+        ? { key: r.department, label: r.department }
         : input.groupBy === "manager"
-          ? r.managerId
-          : null;
-    const label = input.groupBy === "manager" ? r.managerName : key;
+          ? { key: r.managerId, label: r.managerName }
+          : input.groupBy === "none"
+            ? { key: null, label: null }
+            : // Direction reads the teams of a DM or Santex Lead, not their names.
+              groupIdentity(
+                input.groupBy,
+                orgDimOf(r, input.groupBy),
+                minGroupSize !== null,
+              );
     const g = groups.get(key ?? "") ?? { key, label, counts: emptyCounts() };
     g.counts[r.value - 1]++;
     all[r.value - 1]++;
@@ -375,8 +390,11 @@ export function buildAlerts(
 
 // ----------------------------------------------------------------- pickers
 
-/** Areas and managers of `rows`, by name. */
-export function optionsOf(rows: IndicatorRow[]) {
+/**
+ * Areas, managers and org attributes of `rows`, by name. `named` false
+ * (direction): no DMs or Santex Leads, they are people.
+ */
+export function optionsOf(rows: IndicatorRow[], named = true) {
   const departments = new Set<string>();
   const managers = new Map<string, string>();
   const people = new Map<string, string>();
@@ -393,5 +411,6 @@ export function optionsOf(rows: IndicatorRow[]) {
     departments: [...departments].sort((a, b) => a.localeCompare(b, "es")),
     managers: listOf(managers),
     people: listOf(people),
+    org: orgOptionsOf(rows, named),
   };
 }

@@ -660,7 +660,8 @@
       "assessment": "Evaluaciones",
       "feedback": "Feedback",
       "assessment_progress": "Progreso de evaluaciones",
-      "health_check": "Health check (CAP)"
+      "health_check": "Health check (CAP)",
+      "org_attribute": "Atributos organizacionales"
     },
     "result": {
       "title": "Importación terminada",

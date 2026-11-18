@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { noOrgDims } from "@/modules/org-attributes/kinds";
 import { countsOf, missingOf, type SideRow, summarize } from "./derive";
 import type { SideStatus } from "./types";
 
@@ -20,6 +21,7 @@ const row = (
   selfStatus: self,
   managerStatus: managerSide,
   hasNotes: false,
+  ...noOrgDims,
 });
 
 const rows = [
@@ -143,5 +145,56 @@ describe("missingOf", () => {
     ]);
     expect(missingOf(rows, "self_missing")).toEqual([rows[2], rows[5]]);
     expect(missingOf(rows, "manager_missing")).toEqual([rows[1], rows[4]]);
+  });
+});
+
+describe("summarize by an org attribute", () => {
+  const org = (account: string | null, dm: string | null, n = 1): SideRow[] =>
+    Array.from({ length: n }, () => ({
+      ...row("Ventas", "Nico", "submitted", "submitted"),
+      account,
+      dm,
+    }));
+  const orgRows = [
+    ...org("Cuenta A", "Ana Prieto", 3),
+    ...org("Cuenta B", "Bruno Soler", 2),
+    ...org(null, null, 1),
+  ];
+
+  it("groups by account in order, with the value as key and label, the unassigned one last", () => {
+    const s = summarize(orgRows, { groupBy: "account", minGroupSize: null });
+
+    expect(s.groups.map((g) => [g.key, g.label, g.participants])).toEqual([
+      ["Cuenta A", "Cuenta A", 3],
+      ["Cuenta B", "Cuenta B", 2],
+      [null, null, 1],
+    ]);
+  });
+
+  it("names DMs to People, but gives direction teams with an opaque key and no name", () => {
+    const people = summarize(orgRows, { groupBy: "dm", minGroupSize: null });
+    const direction = summarize(orgRows, { groupBy: "dm", minGroupSize: 2 });
+
+    expect(people.groups.map((g) => g.label)).toEqual([
+      "Ana Prieto",
+      "Bruno Soler",
+      null,
+    ]);
+    expect(direction.groups.map((g) => [g.label, g.participants])).toEqual([
+      [null, 3],
+      [null, 2],
+    ]);
+    const keys = direction.groups.map((g) => g.key);
+    expect(new Set(keys).size).toBe(2);
+    expect(JSON.stringify(direction)).not.toMatch(/Ana|Bruno/);
+    // Teams under the minimum and the unassigned one are folded or hidden.
+    expect(direction.suppressed).toBe(1);
+  });
+
+  it("folds small accounts into Otros for direction, like areas", () => {
+    const s = summarize(orgRows, { groupBy: "account", minGroupSize: 3 });
+
+    expect(s.groups.map((g) => g.label)).toEqual(["Cuenta A"]);
+    expect(s.others?.participants).toBe(3);
   });
 });

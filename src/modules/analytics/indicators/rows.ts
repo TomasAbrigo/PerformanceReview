@@ -6,6 +6,7 @@ import type { Hierarchy } from "@/modules/analytics/dashboards/types";
 import { ALL_PEOPLE, scopedCtes } from "@/modules/analytics/dashboards/scope";
 import { type InsightsScope, insightsScope } from "@/modules/insights";
 import { ReviewError } from "@/modules/review-core/review-errors";
+import type { OrgDims } from "@/modules/org-attributes/kinds";
 import { indicatorConfig } from "./config";
 import type { Indicator, IndicatorConfig } from "./types";
 
@@ -47,8 +48,11 @@ export async function requireCycle(db: DbOrTx, cycleId: string): Promise<void> {
   if (found.length === 0) throw new ReviewError("not_found");
 }
 
-/** One value (1-5) a manager gave a participant, with the participant's org dimensions. */
-export type IndicatorRow = {
+/**
+ * One value (1-5) a manager gave a participant, with the participant's org
+ * dimensions (and the org attributes People keep, as of the cycle snapshot).
+ */
+export type IndicatorRow = OrgDims & {
   participantId: string;
   cycleId: string;
   cycleName: string;
@@ -79,6 +83,10 @@ type RawRow = {
   department: string | null;
   manager_id: string | null;
   manager_name: string | null;
+  account: string | null;
+  project: string | null;
+  dm: string | null;
+  santex_lead: string | null;
   indicator: Indicator;
   value: number;
 };
@@ -115,6 +123,7 @@ export async function loadRows(
              s.participant_id, s.cycle_id, s.cycle_name, s.period_start,
              s.period_end, s.cycle_created_at, s.person_id, s.name,
              s.department, s.manager_id, s.manager_name,
+             s.account, s.project, s.dm, s.santex_lead,
              q.role as indicator, a.option_value::int as value
       from scoped s
       join review_request r on r.participant_id = s.participant_id
@@ -141,6 +150,10 @@ export async function loadRows(
     department: r.department,
     managerId: r.manager_id,
     managerName: r.manager_name,
+    account: r.account,
+    project: r.project,
+    dm: r.dm,
+    santexLead: r.santex_lead,
     indicator: r.indicator,
     value: r.value,
   }));

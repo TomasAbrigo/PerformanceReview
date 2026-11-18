@@ -1,5 +1,6 @@
 // Drizzle- and server-free: shared by the queries and client components.
 import type { LocalizedText } from "@/db/schema/rating-scales";
+import type { OrgFilters } from "@/modules/org-attributes/kinds";
 import type { Relationship } from "@/modules/templates/constants";
 
 /** Org hierarchy a dashboard reads: frozen at the cycle snapshot, or today's. */
@@ -17,7 +18,12 @@ export type GroupBy = (typeof groupBys)[number];
 export const ratingStages = ["manager", "current"] as const;
 export type RatingStage = (typeof ratingStages)[number];
 
-export type DashboardFilters = {
+/**
+ * What a view filters participants by: area, manager, place, title and the
+ * org attributes People keep (account, project, DM, Santex Lead), as of the
+ * cycle snapshot.
+ */
+export type DashboardFilters = OrgFilters & {
   cycleId?: string;
   hierarchy: Hierarchy;
   department?: string;

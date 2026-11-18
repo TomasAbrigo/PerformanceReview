@@ -2,6 +2,7 @@ import { sql } from "drizzle-orm";
 import type { DbOrTx } from "@/db/client";
 import type { ActorContext } from "@/modules/actor/types";
 import type { Hierarchy } from "@/modules/analytics/dashboards/types";
+import type { OrgOptions } from "@/modules/org-attributes/kinds";
 import { ReviewError } from "@/modules/review-core/review-errors";
 import {
   buildAlerts,
@@ -285,6 +286,8 @@ export async function indicatorAlerts(
 export type IndicatorFilterOptions = {
   departments: string[];
   managers: { id: string; name: string }[];
+  /** Accounts, projects, DMs and Santex Leads (the last two not for direction). */
+  org: OrgOptions;
 };
 
 /**
@@ -311,9 +314,12 @@ export async function indicatorOverview(
   });
   const inCycle = rows.filter((r) => r.cycleId === input.cycleId);
   const filtered = inCycle.filter((r) => matches(r, filters));
-  const { departments, managers } = optionsOf(inCycle);
+  const { departments, managers, org } = optionsOf(
+    inCycle,
+    minOf(ctx) === null,
+  );
   return {
-    options: { departments, managers },
+    options: { departments, managers, org },
     distribution: buildDistribution(filtered, input, minOf(ctx)),
     matrix: buildMatrix(filtered, input.cycleId, ctx.config, reachOf(ctx)),
     alerts: buildAlerts(rows, input.cycleId, filters, ctx.config, reachOf(ctx)),
@@ -328,19 +334,22 @@ export async function indicatorOverview(
 export async function indicatorSnapshot(
   db: DbOrTx,
   actor: ActorContext,
-  input: Pick<Common, "config"> & { cycleId: string },
+  input: Pick<Common, "config" | "filters"> & { cycleId: string },
 ): Promise<{
   retention: IndicatorDistribution;
   engagement: IndicatorDistribution;
   matrix: RiskMatrix;
 }> {
   const ctx = await indicatorContext(db, actor, input.config);
+  const filters = checkFilters(input.filters);
   await requireCycle(db, input.cycleId);
   const rows = await loadRows(db, ctx, {
     cycleId: input.cycleId,
     hierarchy: "asOf",
   });
-  const inCycle = rows.filter((r) => r.cycleId === input.cycleId);
+  const inCycle = rows.filter(
+    (r) => r.cycleId === input.cycleId && matches(r, filters),
+  );
   const dist = (indicator: Indicator) =>
     buildDistribution(
       inCycle,
@@ -362,13 +371,14 @@ export async function indicatorFilterOptions(
 ): Promise<IndicatorFilterOptions> {
   const ctx = await indicatorContext(db, actor);
   await requireCycle(db, input.cycleId);
-  const { departments, managers } = optionsOf(
+  const { departments, managers, org } = optionsOf(
     await loadRows(db, ctx, {
       cycleId: input.cycleId,
       hierarchy: input.hierarchy ?? "asOf",
     }),
+    minOf(ctx) === null,
   );
-  return { departments, managers };
+  return { departments, managers, org };
 }
 
 // ------------------------------------------------------------------ cycles

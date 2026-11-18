@@ -8,6 +8,12 @@ import { analysisTextSql } from "./analysis-text";
 import { effectiveCte } from "./effective";
 import { INITIAL_THEMES } from "./themes";
 import { insightsScope, type InsightsScope } from "@/modules/insights/authz";
+import { groupIdentity } from "@/modules/org-attributes/kinds";
+import {
+  orgAttributeColumns,
+  orgAttributeFilters,
+  orgAttributeJoins,
+} from "@/modules/org-attributes/sql";
 import { getSetting } from "@/modules/settings/service";
 import { AnalysisError } from "./errors";
 import { pseudonymize } from "./pseudonymize";
@@ -15,9 +21,11 @@ import { pseudonymSources } from "./service";
 import {
   type CommentRow,
   type DimensionSentiment,
+  type GroupSentiment,
   type IndicatorSentiment,
   pickCounts,
   type QualitativeFilterOptions,
+  type QualitativeGroupBy,
   type QualitativeFilters,
   type SentimentCounts,
   type ThemeRank,
@@ -80,6 +88,7 @@ function labeledCtes({ scope, f, includeClosed }: Resolved): SQL {
     where.push(sql`r.cycle_id = ${f.cycleId}::uuid`);
   }
   if (f.department) where.push(sql`cp.snap_department = ${f.department}`);
+  where.push(...orgAttributeFilters(f));
   if (f.dimension) where.push(sql`eff.dimension = ${f.dimension}`);
   if (f.sentiment) where.push(sql`eff.sentiment = ${f.sentiment}`);
   if (f.theme) where.push(sql`${f.theme} = any(eff.themes)`);
@@ -97,7 +106,7 @@ function labeledCtes({ scope, f, includeClosed }: Resolved): SQL {
              c.name as cycle_name, c.period_start::text as period_start,
              c.period_end::text as period_end,
              cp.id as participant_id, p.display_name as person_name,
-             cp.snap_department as department
+             cp.snap_department as department, ${orgAttributeColumns}
       from eff
       join answer a on a.id = eff.answer_id
       join question_revision q on q.id = a.question_revision_id
@@ -105,6 +114,7 @@ function labeledCtes({ scope, f, includeClosed }: Resolved): SQL {
       join cycle_participant cp on cp.id = r.participant_id
       join review_cycle c on c.id = r.cycle_id
       join person p on p.id = cp.reviewee_person_id
+      ${orgAttributeJoins("cp", sql`cp.snapshot_as_of`)}
       where ${sql.join(where, sql` and `)}
     )`;
 }
@@ -129,6 +139,41 @@ export async function sentimentByDimension(
     select dimension, ${countCols}, count(*)::int as total
     from labeled group by dimension ${minGroup(r.min)} order by dimension`);
   return rows.map((r) => ({ dimension: r.dimension, ...counts(r) }));
+}
+
+/**
+ * Sentiment counts per group of people: their area or an org attribute
+ * (account, project, DM, Santex Lead, as of each cycle's snapshot), with how
+ * many people are behind each. People see every label and name the groups; a
+ * manager the labels about their direct reports; direction groups of at least
+ * `aggregation.minGroupSize` people, and a DM or Santex Lead is a team (an
+ * opaque key, no label), never a name.
+ */
+export async function sentimentByGroup(
+  db: DbOrTx,
+  actor: ActorContext,
+  f: QualitativeFilters,
+  groupBy: QualitativeGroupBy,
+): Promise<GroupSentiment[]> {
+  const r = await resolve(db, actor, f);
+  if (!r) return [];
+  const column = sql.raw(groupBy === "department" ? "department" : groupBy);
+  const rows = await db.execute<
+    SentimentCounts & { value: string | null; participants: number }
+  >(sql`
+    with ${labeledCtes(r)}
+    select ${column} as value, ${countCols}, count(*)::int as total,
+           count(distinct participant_id)::int as participants
+    from labeled group by 1 ${minGroup(r.min)}
+    order by (${column} is null), 1`);
+  const masked = r.scope.kind === "aggregatesOnly";
+  return rows.map((row) => ({
+    ...(groupBy === "department"
+      ? { key: row.value, label: row.value }
+      : groupIdentity(groupBy, row.value, masked)),
+    participants: row.participants,
+    ...counts(row),
+  }));
 }
 
 /**

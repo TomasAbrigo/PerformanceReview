@@ -19,6 +19,8 @@ export type LandingEntity =
   | "assessment"
   | "assessment_progress"
   | "feedback"
+  /** People's org attributes file (account, project, DM, Santex Lead). */
+  | "org_attribute"
   /** CAP's health check (format to be defined): only ever landed. */
   | "health_check";
 

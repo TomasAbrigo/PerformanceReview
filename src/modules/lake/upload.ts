@@ -26,6 +26,7 @@ import {
 } from "./upload-store";
 import {
   isHistoryProfile,
+  isOrgAttributesProfile,
   PREVIEW_ROWS,
   type ImportUploadResult,
   type ProfileChoice,
@@ -193,7 +194,7 @@ export async function importReportFile(
     profile: resolved,
     source: source ?? builtinSourceSystem(resolved),
     db,
-    landing: !isHistoryProfile(resolved),
+    landing: !isHistoryProfile(resolved) && !isOrgAttributesProfile(resolved),
   });
 }
 
@@ -310,6 +311,7 @@ export async function importUpload({
   const { profile, source, isNew } = await chosenProfile(choice, store);
   // Bamboo's performance reports become historical cycles (import-history);
   // anything else, or when asked, is only landed in raw_record.
+  const attributes = isOrgAttributesProfile(profile);
   const domain = isHistoryProfile(profile) && !landing;
   const upload = await resolveUpload(uploadId, store);
 
@@ -320,7 +322,7 @@ export async function importUpload({
     source,
     db,
     signal,
-    landing: !domain,
+    landing: !domain && !attributes,
   });
 
   // Only now: a failed import leaves no profile behind.
@@ -333,6 +335,6 @@ export async function importUpload({
   return {
     ...result,
     rejects: (run?.rejects ?? []).slice(0, RESULT_REJECTS),
-    mode: domain ? "domain" : "landing",
+    mode: domain ? "domain" : attributes ? "attributes" : "landing",
   };
 }

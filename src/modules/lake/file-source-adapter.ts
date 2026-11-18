@@ -134,6 +134,9 @@ export class FileSourceAdapter implements SourceAdapter<IngestEntity> {
           row,
           () => `row:${payloadHash({ file: fileKey, row: index })}`,
         );
+        if (profile.format === "org_attributes") {
+          record.sourceId = orgAttributeKey(profile, record.fields);
+        }
         if (profile.format === "assessments_report") {
           const key = rawReportKey(profile, record.fields);
           if (!key) {
@@ -286,5 +289,21 @@ function rawReportKey(
   return JSON.stringify([
     who,
     parseReportDate(start, profile.dateFormat) ?? start ?? "",
+  ]);
+}
+
+/**
+ * The key of a row of the org attributes file: EEID and the date it starts
+ * (ISO; empty when the row has none), so a person's rows of different periods
+ * are different records and the same row again is the same one.
+ */
+function orgAttributeKey(
+  profile: SourceProfile,
+  fields: Record<string, JsonValue>,
+): string {
+  const from = textOf(fields.valid_from);
+  return JSON.stringify([
+    textOf(fields.employee_bamboo_id) ?? "",
+    parseReportDate(from, profile.dateFormat) ?? from ?? "",
   ]);
 }

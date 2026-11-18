@@ -7,6 +7,7 @@ import {
   outlierRows,
   outlierThresholds,
 } from "./derive";
+import { noOrgDims } from "@/modules/org-attributes/kinds";
 import type { GoalIndicatorRow } from "./types";
 
 const M1 = "00000000-0000-4000-8000-0000000000a1";
@@ -28,6 +29,7 @@ const row = (
     managerId: M1,
     managerName: "Marta",
     department: "Ingeniería",
+    ...noOrgDims,
     goals,
     completed,
     inProgress: goals - completed,
@@ -70,7 +72,7 @@ describe("filterRows / filterOptionsOf", () => {
   });
 
   it("lists the areas, and the managers only for readers that may name people", () => {
-    expect(filterOptionsOf(rows, true)).toEqual({
+    expect(filterOptionsOf(rows, true)).toMatchObject({
       departments: ["Ingeniería", "Producto"],
       managers: [
         { id: M1, name: "Marta" },
@@ -207,5 +209,89 @@ describe("outlierRows", () => {
     const loose = outlierRows(rows, thresholds, 2);
     expect(loose.doneButLow).toEqual({ count: 2, people: [] });
     expect(loose.behindButHigh).toEqual({ count: null, people: [] });
+  });
+});
+
+describe("org attributes", () => {
+  const org = [
+    row("Ana", 4, 2, {
+      account: "Cuenta A",
+      project: "P1",
+      dm: "Diego",
+      santexLead: "Lía",
+    }),
+    row("Bruno", 4, 4, {
+      account: "Cuenta A",
+      project: "P2",
+      dm: "Diego",
+      santexLead: "Lía",
+    }),
+    row("Carla", 2, 0, {
+      account: "Cuenta B",
+      project: "P3",
+      dm: "Dora",
+      santexLead: "Lía",
+    }),
+    row("Dario", 1, 1, { account: "Cuenta B", dm: "Dora" }),
+    row("Elena", 2, 1),
+  ];
+
+  it("filters by account, project, DM and Santex Lead, alone or together", () => {
+    const names = (f: Parameters<typeof filterRows>[1]) =>
+      filterRows(org, f).map((r) => r.name);
+
+    expect(names({ account: "Cuenta A" })).toEqual(["Ana", "Bruno"]);
+    expect(names({ project: "P3" })).toEqual(["Carla"]);
+    expect(names({ dm: "Dora" })).toEqual(["Carla", "Dario"]);
+    expect(names({ santexLead: "Lía" })).toEqual(["Ana", "Bruno", "Carla"]);
+    expect(names({ account: "Cuenta B", santexLead: "Lía" })).toEqual([
+      "Carla",
+    ]);
+  });
+
+  it("offers the values as select options, and leaves the people out for direction", () => {
+    expect(filterOptionsOf(org, true).org).toEqual({
+      accounts: ["Cuenta A", "Cuenta B"],
+      projects: ["P1", "P2", "P3"],
+      dms: ["Diego", "Dora"],
+      santexLeads: ["Lía"],
+    });
+    expect(filterOptionsOf(org, false).org).toMatchObject({
+      accounts: ["Cuenta A", "Cuenta B"],
+      dms: [],
+      santexLeads: [],
+    });
+  });
+
+  it("groups the goal figures by account and by DM", () => {
+    const byAccount = kpisOf(org, "account", null);
+    const byDm = kpisOf(org, "dm", null);
+
+    expect(
+      byAccount.groups.map((g) => [g.label, g.people, g.completed]),
+    ).toEqual([
+      ["Cuenta A", 2, 6],
+      ["Cuenta B", 2, 1],
+      [null, 1, 1],
+    ]);
+    expect(byDm.groups.map((g) => [g.key, g.label, g.people])).toEqual([
+      ["Diego", "Diego", 2],
+      ["Dora", "Dora", 2],
+      [null, null, 1],
+    ]);
+  });
+
+  it("gives direction teams, not the names of DMs, and folds the small ones", () => {
+    const k = kpisOf(org, "dm", 2);
+
+    expect(k.groups.map((g) => g.label)).toEqual([null, null]);
+    expect(JSON.stringify(k)).not.toMatch(/Diego|Dora/);
+    expect(k.groups.map((g) => g.people)).toEqual([2, 2]);
+    expect(k.suppressed).toBe(1);
+    // An account is not a person.
+    expect(kpisOf(org, "account", 2).groups.map((g) => g.label)).toEqual([
+      "Cuenta A",
+      "Cuenta B",
+    ]);
   });
 });

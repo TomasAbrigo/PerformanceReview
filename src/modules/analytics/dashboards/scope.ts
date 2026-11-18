@@ -3,6 +3,11 @@ import { isUuid } from "@/lib/uuid";
 import { isHr } from "@/modules/actor/access";
 import type { ActorContext } from "@/modules/actor/types";
 import { type InsightsScope, insightsScope } from "@/modules/insights/authz";
+import {
+  orgAttributeColumns,
+  orgAttributeFilters,
+  orgAttributeJoins,
+} from "@/modules/org-attributes/sql";
 import { ReviewError } from "@/modules/review-core/review-errors";
 import type { DashboardFilters } from "./types";
 
@@ -58,7 +63,11 @@ export const subtree = (rootId: string, date: SQL, maxDepth = 50) => sql`
  * Columns: participant_id, cycle_id, cycle_name, period_start, period_end,
  * cycle_created_at (epoch seconds; with the period, the order of cycles),
  * person_id, name, department, manager_id, manager_name, location, job_title,
- * published.
+ * published, and the org attributes People keep (account, project, dm,
+ * santex_lead, dm_ref_person_id, santex_lead_ref_person_id: the values held
+ * on the cycle's snapshot date, or today with `current`; see
+ * `orgAttributeJoins`), which `f.account`, `f.project`, `f.dm` and
+ * `f.santexLead` filter by.
  *
  * A manager's reach is the direct reports of the dimension the view reads
  * (the snapshot manager with `asOf`, today's with `current`); with
@@ -89,6 +98,7 @@ export function scopedCtes(
   if (f.department) where.push(sql`${department} = ${f.department}`);
   if (f.location) where.push(sql`${location} = ${f.location}`);
   if (f.jobTitle) where.push(sql`${jobTitle} = ${f.jobTitle}`);
+  where.push(...orgAttributeFilters(f));
   if (f.managerId && isUuid(f.managerId)) {
     where.push(sql`${manager} = ${f.managerId}::uuid`);
   }
@@ -121,12 +131,14 @@ export function scopedCtes(
              rp.display_name as name, ${department} as department,
              ${manager} as manager_id, mp.display_name as manager_name,
              ${location} as location, ${jobTitle} as job_title,
-             c.calibration_published_at is not null as published
+             c.calibration_published_at is not null as published,
+             ${orgAttributeColumns}
       from cycle_participant cp
       join review_cycle c on c.id = cp.cycle_id
       join person rp on rp.id = cp.reviewee_person_id
       left join cur on cur.person_id = cp.reviewee_person_id
       left join person mp on mp.id = ${manager}
+      ${orgAttributeJoins("cp", asOf ? sql`cp.snapshot_as_of` : sql`current_date`)}
       where ${sql.join(where, sql` and `)}
     )`;
 }

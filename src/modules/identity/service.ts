@@ -325,6 +325,25 @@ export async function resolveIssue(
     if (input.action === "ignore") return settle(resolution);
     if (issue.reason === "conflict") throw new IdentityError("invalid_action");
 
+    // Rows of People's org attributes file name people by EEID: link only.
+    if (issue.entity === "org_attribute") {
+      if (input.action !== "link") throw new IdentityError("invalid_action");
+      if (!input.personId) throw new IdentityError("person_required");
+      if (!isUuid(input.personId)) throw new IdentityError("not_found");
+      const [target] = await tx
+        .select({ id: person.id })
+        .from(person)
+        .where(eq(person.id, input.personId));
+      if (!target) throw new IdentityError("not_found");
+      const settled = await settle(resolution);
+      const { reprocessOrgAttributeRow } =
+        await import("@/modules/org-attributes");
+      if (!(await reprocessOrgAttributeRow(tx, settled))) {
+        throw new IdentityError("invalid_payload");
+      }
+      return settled;
+    }
+
     // Report rows (historical import) name people, they never create them.
     const report = await import("@/modules/import-history/reprocess");
     if (report.isReportEntity(issue.entity)) {

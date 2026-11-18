@@ -73,6 +73,14 @@ export const HISTORY_ENTITIES: readonly string[] = [
 ];
 
 /**
+ * Whether a profile's rows are mapped to the domain on import and always
+ * so (no "only land" choice): People's org attributes file.
+ */
+export const isOrgAttributesProfile = (
+  profile: Pick<SourceProfile, "entity">,
+) => profile.entity === "org_attribute";
+
+/**
  * Whether a profile's rows can be imported as historical review cycles
  * (domain mode) instead of only landed: Bamboo's performance reports, and
  * custom profiles of the same entities (e.g. one with its own question
@@ -106,8 +114,11 @@ export type ImportUploadResult = {
   counts: IngestCounts;
   /** The first rejected rows; all of them stay on the run. */
   rejects: IngestReject[];
-  /** `domain`: imported as historical cycles; `landing`: rows only landed. */
-  mode?: "domain" | "landing";
+  /**
+   * `domain`: imported as historical cycles; `landing`: rows only landed;
+   * `attributes`: rows mapped to people's org attributes.
+   */
+  mode?: "domain" | "landing" | "attributes";
   /** `needs_decision`: some rows wait for someone to choose their cycle. */
   status?: "succeeded" | "needs_decision";
 };

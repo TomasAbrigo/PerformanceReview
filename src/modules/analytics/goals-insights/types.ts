@@ -1,5 +1,11 @@
 // Drizzle- and server-free: shared by the queries and client components.
 import type { Hierarchy } from "@/modules/analytics/dashboards/types";
+import {
+  type OrgDims,
+  type OrgFilters,
+  type OrgOptions,
+  orgGroupBys,
+} from "@/modules/org-attributes/kinds";
 
 export type { Hierarchy };
 
@@ -7,11 +13,16 @@ export type { Hierarchy };
 export const indicators = ["retention", "engagement"] as const;
 export type Indicator = (typeof indicators)[number];
 
-/** Who the goal figures are grouped by. */
-export const goalGroupBys = ["person", "manager", "department"] as const;
+/** Who the goal figures are grouped by: a person, manager, area or org attribute. */
+export const goalGroupBys = [
+  "person",
+  "manager",
+  "department",
+  ...orgGroupBys,
+] as const;
 export type GoalGroupBy = (typeof goalGroupBys)[number];
 
-export type GoalInsightsFilters = {
+export type GoalInsightsFilters = OrgFilters & {
   department?: string;
   managerId?: string;
 };
@@ -92,8 +103,11 @@ export type GoalKpis = {
 
 // ------------------------------------------------------ goals vs indicators
 
-/** One participant: goals of the period next to their assessment indicators. */
-export type GoalIndicatorRow = {
+/**
+ * One participant: goals of the period next to their assessment indicators,
+ * with their org attributes as of the cycle snapshot.
+ */
+export type GoalIndicatorRow = OrgDims & {
   participantId: string;
   personId: string;
   name: string;
@@ -196,4 +210,6 @@ export type GoalInsightsFilterOptions = {
   departments: string[];
   /** Empty for direction (it does not see people's names). */
   managers: { id: string; name: string }[];
+  /** Accounts, projects, DMs and Santex Leads (the last two not for direction). */
+  org: OrgOptions;
 };

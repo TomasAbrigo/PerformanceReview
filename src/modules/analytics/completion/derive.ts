@@ -3,6 +3,11 @@
 // summary and the "quién falta" list are both read off the same rows.
 import { foldSmallGroups } from "@/modules/insights/aggregation";
 import {
+  groupIdentity,
+  type OrgDims,
+  orgDimOf,
+} from "@/modules/org-attributes/kinds";
+import {
   type CompletionCounts,
   type CompletionGroupBy,
   type CompletionSource,
@@ -13,8 +18,11 @@ import {
   withRates,
 } from "./types";
 
-/** One participant of a cycle with the standing of both sides of their assessment. */
-export type SideRow = {
+/**
+ * One participant of a cycle with the standing of both sides of their
+ * assessment, and their org attributes as of the cycle snapshot.
+ */
+export type SideRow = OrgDims & {
   participantId: string;
   personId: string;
   name: string;
@@ -58,15 +66,24 @@ type Keyed = { key: string | null; label: string | null; rows: SideRow[] };
 
 const collator = new Intl.Collator("es");
 
-/** Groups by department or manager, named ones in order and the unassigned one last. */
+/**
+ * Groups by area, manager or an org attribute, named ones in order and the
+ * unassigned one last. `masked` (direction): a group that names a person (a
+ * DM, a Santex Lead) has an opaque key and no label.
+ */
 function groupRows(
   rows: readonly SideRow[],
-  groupBy: "department" | "manager",
+  groupBy: Exclude<CompletionGroupBy, "none">,
+  masked: boolean,
 ) {
   const groups = new Map<string, Keyed>();
   for (const r of rows) {
-    const key = groupBy === "department" ? r.department : r.managerId;
-    const label = groupBy === "department" ? r.department : r.managerName;
+    const { key, label } =
+      groupBy === "department"
+        ? { key: r.department, label: r.department }
+        : groupBy === "manager"
+          ? { key: r.managerId, label: r.managerName }
+          : groupIdentity(groupBy, orgDimOf(r, groupBy), masked);
     const id = key ?? "";
     const group = groups.get(id) ?? { key, label, rows: [] };
     group.rows.push(r);
@@ -102,8 +119,8 @@ type Summary = Omit<CompletionSummary, "cycleId" | "cycleName" | "hierarchy">;
  * masked (People, a manager). A number (direction): groups under it, and the
  * unassigned one, are folded into "Otros" (hidden if that is under it too),
  * and with fewer participants than that only the head count is given. A
- * manager is a person: grouped by manager, direction's teams keep their key
- * (to tell them apart) but have no label.
+ * manager is a person: grouped by manager (or by DM or Santex Lead),
+ * direction's teams keep a key (to tell them apart) but have no label.
  */
 export function summarize(
   rows: readonly SideRow[],
@@ -122,7 +139,7 @@ export function summarize(
   const groups =
     groupBy === "none"
       ? []
-      : groupRows(rows, groupBy).map((g) => ({
+      : groupRows(rows, groupBy, minGroupSize !== null).map((g) => ({
           ...g,
           counts: countsOf(g.rows),
         }));

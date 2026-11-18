@@ -20,6 +20,10 @@ import {
   upsertFeedback,
 } from "@/modules/import-history";
 import type { DeferredRow } from "@/modules/import-history/decision";
+import {
+  stagedOrgAttributeSchema,
+  upsertOrgAttributes,
+} from "@/modules/org-attributes";
 import { upsertEmployee } from "./employee";
 import {
   stagedJobHistorySchema,
@@ -225,6 +229,12 @@ export const entityHandlers: Partial<
       return {};
     },
     decide: buildCycleDecision,
+  }),
+  // People's org attributes file (files only): see org-attributes.
+  org_attribute: defineHandler({
+    schema: stagedOrgAttributeSchema,
+    counts: { issues: 0, ignored: 0 },
+    upsert: upsertOrgAttributes,
   }),
   feedback: defineHandler({
     schema: stagedFeedbackSchema,

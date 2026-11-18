@@ -3,6 +3,11 @@
 // minimum group size is `null` for readers that see everything (People, a
 // manager) and the setting's value for direction.
 import { isUuid } from "@/lib/uuid";
+import {
+  groupIdentity,
+  orgDimOf,
+  orgOptionsOf,
+} from "@/modules/org-attributes/kinds";
 import { foldKpiGroups, kpiGroup, type KpiCounts, sumGroups } from "./kpi";
 import {
   bucketOf,
@@ -36,7 +41,11 @@ export function filterRows(
   return rows.filter(
     (r) =>
       (!filters.department || r.department === filters.department) &&
-      (!manager || r.managerId === manager),
+      (!manager || r.managerId === manager) &&
+      (!filters.account || r.account === filters.account) &&
+      (!filters.project || r.project === filters.project) &&
+      (!filters.dm || r.dm === filters.dm) &&
+      (!filters.santexLead || r.santexLead === filters.santexLead),
   );
 }
 
@@ -65,19 +74,33 @@ export function filterOptionsOf(
     managers: [...managers]
       .map(([id, name]) => ({ id, name }))
       .sort((a, b) => collator(a.name, b.name)),
+    org: orgOptionsOf(rows, named),
   };
 }
 
 // ---------------------------------------------------------------------- KPIs
 
-const dimensions: Record<
-  GoalGroupBy,
-  (r: GoalIndicatorRow) => { key: string | null; label: string | null }
-> = {
-  person: (r) => ({ key: r.personId, label: r.name }),
-  manager: (r) => ({ key: r.managerId, label: r.managerName }),
-  department: (r) => ({ key: r.department, label: r.department }),
-};
+/**
+ * The group of a row: a person, manager, area or org attribute. `masked`
+ * (direction): a DM or Santex Lead is a person, so the team has an opaque
+ * key and no label.
+ */
+function dimension(
+  r: GoalIndicatorRow,
+  groupBy: GoalGroupBy,
+  masked: boolean,
+): { key: string | null; label: string | null } {
+  switch (groupBy) {
+    case "person":
+      return { key: r.personId, label: r.name };
+    case "manager":
+      return { key: r.managerId, label: r.managerName };
+    case "department":
+      return { key: r.department, label: r.department };
+    default:
+      return groupIdentity(groupBy, orgDimOf(r, groupBy), masked);
+  }
+}
 
 /** Collator order of the labels, the unlabelled last (by key among themselves). */
 const byLabel = (a: GoalKpiGroup, b: GoalKpiGroup) =>
@@ -107,7 +130,7 @@ export function kpisOf(
 } {
   const sums = new Map<string, KpiCounts>();
   for (const r of rows) {
-    const d = dimensions[groupBy](r);
+    const d = dimension(r, groupBy, minGroupSize !== null);
     // Direction reads teams, not the people who lead them.
     if (minGroupSize !== null && groupBy === "manager") d.label = null;
     const id = d.key ?? "\u0000";

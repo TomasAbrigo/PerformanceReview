@@ -29,6 +29,7 @@ export {
   listComments,
   qualitativeFilterOptions,
   sentimentByDimension,
+  sentimentByGroup,
   sentimentTotals,
   sentimentTrend,
   sentimentVsIndicators,
