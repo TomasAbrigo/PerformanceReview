@@ -1977,6 +1977,44 @@
     },
     "forbidden": "No tenés acceso a este assessment: cada persona ve los suyos y, si es manager, los de su equipo."
   },
+  "Capture": {
+    "back": "Volver a Assessments",
+    "required": "obligatoria",
+    "save": "Guardar borrador",
+    "submit": "Enviar",
+    "saving": "Guardando…",
+    "saved": "Borrador guardado.",
+    "submitted": "Enviada.",
+    "noAnswer": "Sin respuesta",
+    "notFound": "Esta evaluación no existe o no la podés ver.",
+    "state": {
+      "submitted": "Ya se envió: se ve en modo lectura.",
+      "closed": "El ciclo está cerrado: ya no se puede responder.",
+      "notYours": "Podés leerla, pero solo quien la escribe (o People) puede responderla.",
+      "notDraft": "Esta evaluación no admite cambios."
+    },
+    "issues": {
+      "required": "Esta respuesta es obligatoria.",
+      "out_of_scale": "Elegí un valor de la escala.",
+      "invalid_choice": "Elegí una de las opciones.",
+      "unknown_question": "Esta pregunta ya no es parte del formulario."
+    },
+    "errors": {
+      "forbidden": "No podés responder esta evaluación.",
+      "cycle_closed": "El ciclo está cerrado: ya no se puede responder.",
+      "not_editable": "Ya se envió: no se puede cambiar.",
+      "not_found": "Esta evaluación ya no existe.",
+      "validation": "Revisá las respuestas marcadas.",
+      "unknown": "Ocurrió un error inesperado."
+    },
+    "pending": {
+      "title": "Pendientes de completar",
+      "hint": "Tus autoevaluaciones de ciclos abiertos que todavía no enviaste.",
+      "open": "Completar",
+      "due": "Vence el {date}",
+      "noDue": "Sin fecha límite"
+    }
+  },
   "Experience": {
     "moreFilters": "Más filtros",
     "open": "Ver detalle",
