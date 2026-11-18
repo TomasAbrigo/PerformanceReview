@@ -37,10 +37,18 @@ test("People edit the insights settings, the server validates, and the change st
     changed,
   );
 
-  // Put it back for the other specs.
+  // Put it back for the other specs: the form hides "saved" while it submits
+  // and shows it again when the server has written, so wait for that cycle
+  // (the previous save's message would otherwise pass at once and the test
+  // could end before the value is back).
   await page.getByLabel("Tamaño mínimo de grupo (n)").fill(original);
   await page.getByRole("button", { name: "Guardar cambios" }).click();
+  await expect(page.getByText("Cambios guardados.")).toBeHidden();
   await expect(page.getByText("Cambios guardados.")).toBeVisible();
+  await page.reload();
+  await expect(page.getByLabel("Tamaño mínimo de grupo (n)")).toHaveValue(
+    original,
+  );
 });
 
 const peopleOnly = [
