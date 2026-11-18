@@ -63,18 +63,18 @@ describe("cycle actions", () => {
       { personId: null, role: "direction" },
     ]) {
       actAs(actor);
-      expect(await actions.createCycleAction(input)).toMatchObject({
-        ok: false,
-        code: "forbidden",
-      });
-      expect(await actions.launchCycleAction(ID)).toMatchObject({
-        ok: false,
-        code: "forbidden",
-      });
-      expect(await actions.reopenRequestAction(ID)).toMatchObject({
-        ok: false,
-        code: "forbidden",
-      });
+      const results = [
+        await actions.createCycleAction(input),
+        await actions.setParticipantsAction(ID, [ID]),
+        await actions.launchCycleAction(ID),
+        await actions.closeCycleAction(ID),
+        await actions.addParticipantAction(ID, ID),
+        await actions.removeParticipantAction(ID, ID),
+        await actions.reopenRequestAction(ID),
+      ];
+      for (const result of results) {
+        expect(result).toMatchObject({ ok: false, code: "forbidden" });
+      }
     }
     expect(createCycle).not.toHaveBeenCalled();
     expect(launchCycle).not.toHaveBeenCalled();

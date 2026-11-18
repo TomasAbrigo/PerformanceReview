@@ -225,6 +225,69 @@ describe("participants and launch", () => {
   });
 });
 
+describe("what each state allows", () => {
+  it("a draft cycle accepts no submissions and no changes of an open cycle", async () => {
+    const cycle = await createCycle(db, hr, input());
+    await expect(assertCycleOpen(db, cycle.id)).rejects.toMatchObject({
+      code: "invalid_state",
+    });
+    await expect(
+      addParticipant(db, hr, cycle.id, people.bruno),
+    ).rejects.toMatchObject({ code: "invalid_state" });
+    await expect(closeCycle(db, hr, cycle.id)).rejects.toMatchObject({
+      code: "invalid_state",
+    });
+  });
+
+  it("an open cycle keeps its participants: they change one by one", async () => {
+    const cycle = await createCycle(db, hr, input());
+    await setParticipants(db, hr, cycle.id, [people.bruno]);
+    await launchCycle(db, hr, cycle.id);
+    await expect(
+      setParticipants(db, hr, cycle.id, [people.carla]),
+    ).rejects.toMatchObject({ code: "invalid_state" });
+  });
+
+  it("a closed cycle takes no more participants and gives none up", async () => {
+    const cycle = await createCycle(db, hr, input());
+    await setParticipants(db, hr, cycle.id, [people.bruno]);
+    await launchCycle(db, hr, cycle.id);
+    await closeCycle(db, hr, cycle.id);
+    await expect(
+      addParticipant(db, hr, cycle.id, people.carla),
+    ).rejects.toMatchObject({ code: "invalid_state" });
+    await expect(
+      removeParticipant(db, hr, cycle.id, people.bruno),
+    ).rejects.toMatchObject({ code: "invalid_state" });
+  });
+
+  it("only People add and remove participants, close and reopen", async () => {
+    const cycle = await createCycle(db, hr, input());
+    await setParticipants(db, hr, cycle.id, [people.bruno]);
+    await launchCycle(db, hr, cycle.id);
+    const self = await selfRequestOf(cycle.id, people.bruno);
+    for (const actor of [
+      manager(people.carla),
+      { personId: people.bruno, role: "employee" as const },
+      { personId: null, role: "direction" as const },
+    ]) {
+      await expect(
+        addParticipant(db, actor, cycle.id, people.carla),
+      ).rejects.toMatchObject({ code: "forbidden" });
+      await expect(
+        removeParticipant(db, actor, cycle.id, people.bruno),
+      ).rejects.toMatchObject({ code: "forbidden" });
+      await expect(closeCycle(db, actor, cycle.id)).rejects.toMatchObject({
+        code: "forbidden",
+      });
+      await expect(reopenRequest(db, actor, self.id)).rejects.toMatchObject({
+        code: "forbidden",
+      });
+    }
+    expect((await getCycle(db, cycle.id))!.status).toBe("collecting");
+  });
+});
+
 describe("close, reopen and progress", () => {
   async function opened() {
     const cycle = await createCycle(db, hr, input());

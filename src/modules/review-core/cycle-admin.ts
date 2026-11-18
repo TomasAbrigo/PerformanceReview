@@ -261,14 +261,6 @@ async function copyTemplateQuestions(
   );
 }
 
-/** Takes the org snapshot of `personIds` (rows ready to insert). */
-const snapshotRows = (
-  db: DbOrTx,
-  cycle: ReviewCycle,
-  personIds: string[],
-  date: string,
-) => snapshots(db, cycle.id, personIds, date);
-
 /**
  * Replaces the participants of a draft cycle with `personIds`, each with the
  * org snapshot as of the cycle's snapshot date, so People see before opening
@@ -306,7 +298,7 @@ export async function setParticipants(
     }
     await tx
       .insert(cycleParticipant)
-      .values(await snapshotRows(tx, cycle, unique, cycle.snapshotDate));
+      .values(await snapshots(tx, cycleId, unique, cycle.snapshotDate));
   });
 }
 
