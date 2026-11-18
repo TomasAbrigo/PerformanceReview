@@ -85,7 +85,7 @@ test("People see the goal KPIs, the indicators by completion, the outliers and t
   await expect(page.getByTestId("buckets-chart")).toBeVisible();
   await expect(
     page.getByRole("img", {
-      name: /^Indicadores según el cumplimiento de objetivos: /,
+      name: /^¿Cambian retención y compromiso según el cumplimiento de objetivos\?: /,
     }),
   ).toBeVisible();
 

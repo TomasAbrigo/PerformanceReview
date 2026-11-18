@@ -789,8 +789,8 @@
       "meter": "{relationship}: {submitted} de {total} enviadas"
     },
     "distribution": {
-      "title": "Distribución de ratings",
-      "hint": "Rating normalizado de 0 a 100 %, comparable entre escalas.",
+      "title": "¿Cómo se reparten los ratings?",
+      "hint": "Rating normalizado de 0 a 100 %, comparable entre escalas: cada barra cuenta las personas en ese tramo; arriba de cada barra, cuántas son.",
       "bin": "{from}–{to} %",
       "n": "{n, plural, one {# persona} other {# personas}}",
       "mean": "Promedio {value} %",
@@ -804,7 +804,24 @@
       "belowMinimum": "Hay menos de {min} participantes: no se muestran datos para proteger a las personas.",
       "others": "Otros",
       "suppressed": "{n, plural, =0 {Ninguna persona en grupos chicos} one {# persona en áreas chicas (no se desglosa)} other {# personas en áreas chicas (no se desglosan)}}"
-    }
+    },
+    "legend": "Leyenda",
+    "noData": "Sin datos",
+    "nShort": "n = {n}",
+    "segmentTip": "{row} · {series}: {count} ({share})",
+    "likert": {
+      "low": "Bajo (1–2)",
+      "center": "← neutral (3) →",
+      "high": "Alto (4–5)",
+      "tip": "{row} · {value}: {count} ({share})"
+    },
+    "bullet": {
+      "tip": "{label}: {value}",
+      "tipTarget": "{label}: {value} (meta {target})"
+    },
+    "masked": "Menos de {min} personas: oculto para Dirección.",
+    "meta": "n = {n} · {period}",
+    "metaN": "n = {n}"
   },
   "Indicators": {
     "nav": "Retención y compromiso",
@@ -845,8 +862,8 @@
       "apply": "Aplicar"
     },
     "distribution": {
-      "title": "Distribución de {indicator}",
-      "hint": "Cuántas personas recibieron cada valor, de 1 a 5, en la evaluación del manager.",
+      "title": "¿Qué grupos tienen las respuestas más bajas de {indicator}?",
+      "hint": "Respuestas del manager de 1 a 5: a la izquierda de la línea, bajas (1–2); a la derecha, altas (4–5); el 3 queda centrado. Arriba, los grupos con más respuestas bajas.",
       "n": "{n, plural, one {# persona} other {# personas}}",
       "mean": "Promedio {value}",
       "all": "Todos",
@@ -856,11 +873,16 @@
       "average": "Promedio",
       "valueCount": "valor {value}: {count}",
       "barLabel": "{group}, valor {value}: {count}",
-      "suppressed": "{n, plural, one {# persona está en un grupo de menos de {min} y no se muestra} other {# personas están en grupos de menos de {min} y no se muestran}}"
+      "suppressed": "{n, plural, one {# persona está en un grupo de menos de {min} y no se muestra} other {# personas están en grupos de menos de {min} y no se muestran}}",
+      "chart": "Barras divergentes de respuestas 1 a 5 por grupo",
+      "value": "valor {value}",
+      "takeaway": "Más respuestas bajas: {group} ({share} con 1 o 2).",
+      "lowest": "{value} (más bajo)",
+      "highest": "{value} (más alto)"
     },
     "matrix": {
-      "title": "Matriz de retención y compromiso",
-      "hint": "Cuántas personas hay en cada cruce de bandas; el cuadrante de riesgo es el de retención y compromiso bajos a la vez.",
+      "title": "¿Cuántas personas tienen retención y compromiso bajos a la vez?",
+      "hint": "Cada celda cruza la banda de retención (→) con la de compromiso (↑) y cuenta personas; abajo a la izquierda, el cuadrante de riesgo.",
       "band": {
         "low": "Bajo",
         "mid": "Medio",
@@ -879,6 +901,24 @@
         "person": "Persona",
         "manager": "Manager",
         "department": "Área"
+      },
+      "chart": "Matriz de retención y compromiso",
+      "quadrant": {
+        "low": {
+          "low": "En riesgo",
+          "mid": "Poco retenidos",
+          "high": "Comprometidos, con riesgo de irse"
+        },
+        "mid": {
+          "low": "Poco comprometidos",
+          "mid": "Estables",
+          "high": "Comprometidos"
+        },
+        "high": {
+          "low": "Se quedan, poco comprometidos",
+          "mid": "Retenidos",
+          "high": "Referentes"
+        }
       }
     },
     "alerts": {
@@ -924,7 +964,9 @@
         "department": "Área",
         "any": "—",
         "apply": "Ver"
-      }
+      },
+      "yTitle": "Promedio (1–5)",
+      "how": "Promedio de las respuestas 1 a 5 de cada ciclo; un hueco es un ciclo oculto por tener menos personas que el mínimo."
     }
   },
   "Qualitative": {
@@ -976,17 +1018,19 @@
     },
     "customDimension": "Pregunta personalizada {n}",
     "byDimension": {
-      "title": "Sentimiento por dimensión",
+      "title": "¿En qué dimensiones hay más comentarios negativos?",
       "chart": "Barras apiladas de sentimiento por dimensión",
       "table": "Sentimiento por dimensión (tabla)",
       "label": "Dimensión",
-      "bar": "{label}: {positive} positivos, {constructive} constructivos, {neutral} neutrales, {mixed} mixtos, {negative} negativos"
+      "bar": "{label}: {positive} positivos, {constructive} constructivos, {neutral} neutrales, {mixed} mixtos, {negative} negativos",
+      "how": "Cada barra suma el 100 % de los comentarios de una dimensión; arriba, las de mayor proporción negativa y mixta."
     },
     "trend": {
-      "title": "Evolución entre ciclos",
+      "title": "¿Cómo cambia el tono de los comentarios entre ciclos?",
       "chart": "Barras apiladas de sentimiento por ciclo",
       "table": "Sentimiento por ciclo (tabla)",
-      "label": "Ciclo"
+      "label": "Ciclo",
+      "how": "Cada barra es un ciclo (100 % de sus comentarios), en orden cronológico."
     },
     "themes": {
       "title": "Temas más frecuentes",
@@ -1064,7 +1108,7 @@
       "not_labeled": "Este comentario todavía no tiene etiqueta."
     },
     "byGroup": {
-      "title": "Sentimiento por grupo",
+      "title": "¿Qué equipos reciben comentarios más negativos?",
       "chart": "Sentimiento de los comentarios por grupo de personas",
       "label": "Grupo",
       "groupBy": "Agrupar por",
@@ -1078,7 +1122,11 @@
       "unassigned": "Sin asignar",
       "team": "Equipo {n}",
       "people": "{n, plural, one {# persona} other {# personas}}",
-      "export": "Descargar por grupo (CSV)"
+      "export": "Descargar por grupo (CSV)",
+      "how": "Cada barra suma el 100 % de los comentarios del grupo; arriba, los de mayor proporción negativa y mixta."
+    },
+    "takeaway": {
+      "worst": "Más crítico: {label} ({share} negativos o mixtos)."
     }
   },
   "Insights": {
@@ -1216,7 +1264,8 @@
         "high": "Alto"
       },
       "byAccount": "Por cuenta",
-      "byDm": "Por DM"
+      "byDm": "Por DM",
+      "riskLabel": "En riesgo"
     },
     "qualitative": {
       "title": "Análisis cualitativo",
@@ -1481,16 +1530,16 @@
       "team": "Equipo {n}"
     },
     "scatter": {
-      "title": "Cumplimiento de objetivos vs {indicator}",
-      "hint": "Una persona por punto: horizontal, % de objetivos completados; vertical, el valor que dio el manager (1 a 5). Solo aparecen quienes tienen objetivos y esa respuesta.",
+      "title": "¿Quienes cumplen más objetivos tienen mejor {indicator}?",
+      "hint": "Una persona por punto: más a la derecha, más objetivos completados (%); más arriba, mejor respuesta del manager (1 a 5). Solo aparecen quienes tienen objetivos y esa respuesta.",
       "xAxis": "Objetivos completados (%)",
       "yAxis": "{indicator} (1 a 5)",
       "point": "{name}: {completed} % de objetivos completados, {indicator} {value}",
       "missing": "{n, plural, one {# persona no aparece} other {# personas no aparecen}} por no tener objetivos o esa respuesta."
     },
     "buckets": {
-      "title": "Indicadores según el cumplimiento de objetivos",
-      "hint": "Promedio de retención y compromiso de las personas, según el % de objetivos que completaron.",
+      "title": "¿Cambian retención y compromiso según el cumplimiento de objetivos?",
+      "hint": "Cada par de barras es un tramo de % de objetivos completados; la altura es el promedio (1 a 5) de retención y de compromiso de sus personas, y n cuántas son.",
       "bucket": "{from}–{to} %",
       "people": "{n, plural, one {# persona} other {# personas}}",
       "positive": "Comentarios positivos",
@@ -1639,19 +1688,23 @@
       "apply": "Aplicar"
     },
     "line": {
-      "title": "Evolución",
-      "hint": "Score promedio de quienes respondieron (0 a 100) y participación: el porcentaje de las personas del mes que respondieron.",
+      "title": "¿Sube o baja el compromiso mes a mes?",
+      "hint": "Línea llena: score promedio de quienes respondieron (0–100 %). Línea punteada: participación, el % de personas que respondió. El valor del último mes queda escrito al final.",
       "chartLabel": "Score promedio y participación por mes",
       "score": "Score promedio",
       "participation": "Participación",
-      "point": "{month}: {value}"
+      "point": "{month}: {value}",
+      "yTitle": "% (0–100)",
+      "lastPeople": "n = {n} personas en el último mes"
     },
     "segments": {
-      "title": "Segmentos por mes",
-      "hint": "Cada barra es el 100 % de las personas del mes repartido por segmento; Falta son quienes no respondieron.",
+      "title": "¿Cuántas personas están en cada nivel de compromiso?",
+      "hint": "Cada barra es un mes y suma el 100 % de sus personas, de Alto a Bajo; Falta son quienes no respondieron.",
       "chartLabel": "Personas por segmento y por mes",
       "hiddenMonth": "{month}: mes oculto por tamaño de grupo",
-      "hiddenCells": "{month}: segmentos ocultos por tamaño de grupo"
+      "hiddenCells": "{month}: segmentos ocultos por tamaño de grupo",
+      "masked": "Menos de {min} personas: oculto para Dirección.",
+      "maskedCells": "Segmentos con menos de {min} personas: ocultos para Dirección."
     },
     "segment": {
       "alto": "Alto",

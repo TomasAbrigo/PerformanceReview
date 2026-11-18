@@ -2,11 +2,11 @@ import { useTranslations } from "next-intl";
 import type { GoalsVsIndicators } from "@/modules/analytics/goals-insights/types";
 import { Empty, TableView, useDecimal, usePct } from "./shared";
 
-const GROUP_W = 64;
-const BAR_W = 22;
+const GROUP_W = 76;
+const BAR_W = 26;
 const H = 120;
 const TOP = 16;
-const LEFT = 24;
+const LEFT = 28;
 const W = LEFT + GROUP_W * 5 + 8;
 
 /**
@@ -83,7 +83,7 @@ export function BucketsChart({ data }: { data: GoalsVsIndicators }) {
               x={LEFT - 4}
               y={y(v) + 3}
               textAnchor="end"
-              className="fill-muted-foreground text-[9px]"
+              className="fill-muted-foreground text-[12px]"
             >
               {v}
             </text>
@@ -116,7 +116,7 @@ export function BucketsChart({ data }: { data: GoalsVsIndicators }) {
                       x={x + BAR_W / 2}
                       y={TOP + H - h - 3}
                       textAnchor="middle"
-                      className="fill-foreground text-[9px] tabular-nums"
+                      className="fill-foreground text-[12px] tabular-nums"
                     >
                       {decimal(value)}
                     </text>
@@ -128,7 +128,7 @@ export function BucketsChart({ data }: { data: GoalsVsIndicators }) {
                   x={gx + BAR_W}
                   y={TOP + H - 6}
                   textAnchor="middle"
-                  className="fill-muted-foreground text-[11px]"
+                  className="fill-muted-foreground text-[12px]"
                 >
                   –
                 </text>
@@ -137,7 +137,7 @@ export function BucketsChart({ data }: { data: GoalsVsIndicators }) {
                 x={gx + BAR_W}
                 y={TOP + H + 14}
                 textAnchor="middle"
-                className="fill-muted-foreground text-[9px]"
+                className="fill-muted-foreground text-[12px]"
               >
                 {bucketName(b)}
               </text>
@@ -145,7 +145,7 @@ export function BucketsChart({ data }: { data: GoalsVsIndicators }) {
                 x={gx + BAR_W}
                 y={TOP + H + 27}
                 textAnchor="middle"
-                className="fill-muted-foreground text-[9px]"
+                className="fill-muted-foreground text-[12px]"
               >
                 {b.people === null
                   ? "n < " + (data.minGroupSize ?? 0)

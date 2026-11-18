@@ -285,8 +285,8 @@ describe("BucketsChart", () => {
       const chart = screen.getByRole("img", {
         name:
           locale === "es"
-            ? /Indicadores según el cumplimiento de objetivos/
-            : /Indicators by goals completion/,
+            ? /¿Cambian retención y compromiso según el cumplimiento de objetivos/
+            : /Do retention and engagement change with goal completion/,
       });
       expect(chart).toHaveAccessibleName(/20–40 %/);
       expect(chart).toHaveAccessibleName(

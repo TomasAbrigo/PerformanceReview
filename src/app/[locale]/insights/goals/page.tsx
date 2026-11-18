@@ -147,7 +147,7 @@ async function GoalsInsights({
         <Panel
           id="goals-scatter"
           title={t("scatter.title", {
-            indicator: t(`indicator.${p.indicator}`),
+            indicator: t(`indicator.${p.indicator}`).toLowerCase(),
           })}
           hint={t("scatter.hint")}
         >

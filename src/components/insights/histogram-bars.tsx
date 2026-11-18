@@ -1,4 +1,4 @@
-const BAR_W = 28;
+const BAR_W = 30;
 const GAP = 8;
 const H = 96;
 
@@ -60,7 +60,7 @@ export function HistogramBars({
               x={x + BAR_W / 2}
               y={H + 10 - (b.count > 0 ? bar : 0)}
               textAnchor="middle"
-              className="fill-foreground text-[11px] tabular-nums"
+              className="fill-foreground text-[12px] tabular-nums"
             >
               {b.count}
             </text>
@@ -68,7 +68,7 @@ export function HistogramBars({
               x={x + BAR_W / 2}
               y={H + 28}
               textAnchor="middle"
-              className="fill-muted-foreground text-[10px]"
+              className="fill-muted-foreground text-[12px]"
             >
               {b.tick}
             </text>

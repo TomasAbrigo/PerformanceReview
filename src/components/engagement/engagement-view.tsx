@@ -5,30 +5,13 @@ import type {
   EngagementMonth,
 } from "@/modules/analytics/engagement/types";
 import { engagementSegments } from "@/modules/engagement/kinds";
-import { SEGMENT_FILL, SEGMENT_SWATCH } from "./segments";
-
-const W = 560;
-const H = 220;
-const PAD = { l: 36, r: 16, t: 12, b: 34 };
-const plotW = W - PAD.l - PAD.r;
-const plotH = H - PAD.t - PAD.b;
-
-/** x of the i-th of n months, spread over the width. */
-const xOf = (i: number, n: number) =>
-  PAD.l + (n === 1 ? plotW / 2 : (i * plotW) / (n - 1));
-/** y of a 0-100 value: 100 at the top. */
-const yOf = (value: number) => PAD.t + ((100 - value) / 100) * plotH;
-
-/** `M x y L x y ...`: one stroke per run of months with a value, a hidden month is a gap. */
-function runs(values: (number | null)[]) {
-  const parts: string[] = [];
-  values.forEach((v, i) => {
-    if (v === null) return;
-    const joined = i > 0 && values[i - 1] !== null;
-    parts.push(`${joined ? "L" : "M"}${xOf(i, values.length)},${yOf(v)}`);
-  });
-  return parts.join(" ");
-}
+import {
+  ChartLegend,
+  LineTrend,
+  StackedBar100,
+  useChartFormat,
+} from "@/components/charts";
+import { SEGMENT_COLORS } from "./segments";
 
 /** Month label: "mar 26" (the month is a first of month, read as UTC). */
 function useMonthLabel() {
@@ -52,6 +35,7 @@ export function EngagementView({ data }: { data: EngagementEvolution }) {
   const t = useTranslations("Engagement");
   const format = useFormatter();
   const label = useMonthLabel();
+  const f = useChartFormat();
   if (!data.months.length) return <Empty />;
   const n = data.months.length;
   const score = data.months.map((m) =>
@@ -89,7 +73,13 @@ export function EngagementView({ data }: { data: EngagementEvolution }) {
           .join(", ")}`,
     )
     .join(". ");
-  const barW = Math.min(36, (plotW / n) * 0.7);
+  const people = data.months.at(-1)?.people;
+  const meta = [
+    `${label(data.months[0].month)} – ${label(data.months[n - 1].month)}`,
+    people != null ? t("line.lastPeople", { n: people }) : null,
+  ]
+    .filter(Boolean)
+    .join(" · ");
   const cell = (
     m: EngagementMonth,
     segment: (typeof engagementSegments)[number],
@@ -104,167 +94,91 @@ export function EngagementView({ data }: { data: EngagementEvolution }) {
         : t("segments.hiddenCells", { month: label(m.month) });
   return (
     <div className="flex flex-col gap-4" data-testid="engagement-view">
-      <Panel id="engagement-line" title={t("line.title")} hint={t("line.hint")}>
-        <svg
-          viewBox={`0 0 ${W} ${H}`}
-          className="w-full max-w-2xl"
-          role="img"
-          aria-label={`${t("line.chartLabel")}. ${lineText}`}
-        >
-          {[0, 25, 50, 75, 100].map((g) => (
-            <g key={g}>
-              <line
-                x1={PAD.l}
-                x2={W - PAD.r}
-                y1={yOf(g)}
-                y2={yOf(g)}
-                className="stroke-border"
-              />
-              <text
-                x={PAD.l - 6}
-                y={yOf(g) + 4}
-                textAnchor="end"
-                className="fill-muted-foreground text-[10px]"
-              >
-                {g}
-              </text>
-            </g>
-          ))}
-          {lines.map(({ key, values, className, dash }) => (
-            <g key={key} className={className} data-series={key}>
-              <path
-                d={runs(values)}
-                fill="none"
-                strokeWidth={2}
-                strokeDasharray={dash}
-              />
-              {values.map((v, i) =>
-                v === null ? null : (
-                  <circle
-                    key={data.months[i].month}
-                    cx={xOf(i, n)}
-                    cy={yOf(v)}
-                    r={3.5}
-                    strokeWidth={0}
-                  >
-                    <title>
-                      {`${t(`line.${key}`)} · ${t("line.point", {
-                        month: label(data.months[i].month),
-                        value: percent(v),
-                      })}`}
-                    </title>
-                  </circle>
-                ),
-              )}
-            </g>
-          ))}
-          {data.months.map((m, i) => (
-            <text
-              key={m.month}
-              x={xOf(i, n)}
-              y={H - 12}
-              textAnchor="middle"
-              className="fill-muted-foreground text-[10px]"
-            >
-              {label(m.month)}
-            </text>
-          ))}
-        </svg>
-        <ul className="flex flex-wrap gap-4 text-sm">
-          <li className="flex items-center gap-2">
-            <span className="h-0.5 w-6 bg-chart-seq" aria-hidden="true" />
-            {t("line.score")}
-          </li>
-          <li className="flex items-center gap-2">
-            <span
-              className="h-0 w-6 border-t-2 border-dashed border-chart-sent-mixed"
-              aria-hidden="true"
-            />
-            {t("line.participation")}
-          </li>
-        </ul>
+      <Panel
+        id="engagement-line"
+        title={t("line.title")}
+        hint={t("line.hint")}
+        meta={meta}
+      >
+        <ChartLegend
+          items={[
+            {
+              key: "score",
+              label: t("line.score"),
+              swatch: "border-chart-seq",
+              line: true,
+            },
+            {
+              key: "participation",
+              label: t("line.participation"),
+              swatch: "border-chart-sent-mixed",
+              line: true,
+              dashed: true,
+            },
+          ]}
+        />
+        <LineTrend
+          testId="engagement-line-chart"
+          x={data.months.map((m) => label(m.month))}
+          series={lines.map((l) => ({
+            key: l.key,
+            label: t(`line.${l.key}`),
+            values: l.values,
+            color: l.className,
+            dash: l.dash,
+          }))}
+          domain={[0, 100]}
+          ticks={[0, 25, 50, 75, 100]}
+          fmt={(v) => f.percent(v)}
+          yTitle={t("line.yTitle")}
+          hiddenTip={(i) =>
+            data.months[i].hidden
+              ? t("segments.hiddenMonth", {
+                  month: label(data.months[i].month),
+                })
+              : null
+          }
+          label={`${t("line.chartLabel")}. ${lineText}`}
+        />
       </Panel>
 
       <Panel
         id="engagement-segments"
         title={t("segments.title")}
         hint={t("segments.hint")}
+        meta={meta}
       >
-        <svg
-          viewBox={`0 0 ${W} ${H}`}
-          className="w-full max-w-2xl"
-          role="img"
-          aria-label={`${t("segments.chartLabel")}. ${data.months
-            .map(barText)
-            .join(". ")}`}
-        >
-          {[0, 25, 50, 75, 100].map((g) => (
-            <g key={g}>
-              <line
-                x1={PAD.l}
-                x2={W - PAD.r}
-                y1={yOf(g)}
-                y2={yOf(g)}
-                className="stroke-border"
-              />
-              <text
-                x={PAD.l - 6}
-                y={yOf(g) + 4}
-                textAnchor="end"
-                className="fill-muted-foreground text-[10px]"
-              >
-                {g}%
-              </text>
-            </g>
-          ))}
-          {data.months.map((m, i) => {
-            const total = m.people ?? 0;
-            let acc = 0;
-            return (
-              <g key={m.month} data-month={m.month}>
-                <title>{barText(m)}</title>
-                {m.segments && total > 0
-                  ? engagementSegments.map((s) => {
-                      const share = (m.segments![s] / total) * 100;
-                      const top = yOf(acc + share);
-                      const height = yOf(acc) - top;
-                      acc += share;
-                      return height > 0 ? (
-                        <rect
-                          key={s}
-                          x={xOf(i, n) - barW / 2}
-                          y={top}
-                          width={barW}
-                          height={height}
-                          className={SEGMENT_FILL[s]}
-                          data-segment={s}
-                        />
-                      ) : null;
-                    })
-                  : null}
-                <text
-                  x={xOf(i, n)}
-                  y={H - 12}
-                  textAnchor="middle"
-                  className="fill-muted-foreground text-[10px]"
-                >
-                  {label(m.month)}
-                </text>
-              </g>
-            );
-          })}
-        </svg>
-        <ul className="flex flex-wrap gap-4 text-sm">
-          {engagementSegments.map((s) => (
-            <li key={s} className="flex items-center gap-2">
-              <span
-                className={`size-3 rounded-sm ${SEGMENT_SWATCH[s]}`}
-                aria-hidden="true"
-              />
-              {t(`segment.${s}`)}
-            </li>
-          ))}
-        </ul>
+        <ChartLegend
+          items={engagementSegments.map((s) => ({
+            key: s,
+            label: t(`segment.${s}`),
+            swatch: SEGMENT_COLORS[s].fill,
+          }))}
+        />
+        <StackedBar100
+          label={t("segments.chartLabel")}
+          series={engagementSegments.map((s) => ({
+            key: s,
+            label: t(`segment.${s}`),
+            ...SEGMENT_COLORS[s],
+          }))}
+          rows={data.months.map((m) => ({
+            key: m.month,
+            label: label(m.month),
+            testId: "segment-row",
+            title: barText(m),
+            masked: m.hidden
+              ? t("segments.masked", { min: data.minGroupSize ?? 0 })
+              : !m.segments
+                ? t("segments.maskedCells", { min: data.minGroupSize ?? 0 })
+                : undefined,
+            values: m.segments
+              ? Object.fromEntries(
+                  engagementSegments.map((s) => [s, m.segments![s]]),
+                )
+              : {},
+          }))}
+        />
       </Panel>
 
       <Panel id="engagement-table" title={t("table.title")}>

@@ -62,7 +62,7 @@ export function GoalsScatter({
               x={PAD.l - 6}
               y={y(v) + 4}
               textAnchor="end"
-              className="fill-muted-foreground text-[10px]"
+              className="fill-muted-foreground text-[12px]"
             >
               {v}
             </text>
@@ -74,7 +74,7 @@ export function GoalsScatter({
             x={x(v)}
             y={H - PAD.b + 14}
             textAnchor="middle"
-            className="fill-muted-foreground text-[10px]"
+            className="fill-muted-foreground text-[12px]"
           >
             {v}
           </text>
@@ -83,7 +83,7 @@ export function GoalsScatter({
           x={(W + PAD.l) / 2}
           y={H - 6}
           textAnchor="middle"
-          className="fill-muted-foreground text-[10px]"
+          className="fill-muted-foreground text-[12px]"
         >
           {t("scatter.xAxis")}
         </text>
@@ -92,7 +92,7 @@ export function GoalsScatter({
           y={(H - PAD.b + PAD.t) / 2}
           textAnchor="middle"
           transform={`rotate(-90 10 ${(H - PAD.b + PAD.t) / 2})`}
-          className="fill-muted-foreground text-[10px]"
+          className="fill-muted-foreground text-[12px]"
         >
           {t("scatter.yAxis", { indicator: name })}
         </text>
