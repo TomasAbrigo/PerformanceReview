@@ -227,12 +227,15 @@ export async function HomeSignal({ locale }: { locale: string }) {
           </h2>
           {showKpis ? (
             <p className="flex flex-wrap items-center gap-x-3 gap-y-2 text-sm text-brand-200">
-              <span>
+              <Link
+                href={`/assessments?cycle=${cycle.id}&progress=complete`}
+                className="text-white underline decoration-brand-400/60 decoration-dotted underline-offset-4 hover:text-brand-200"
+              >
                 {tf("progressNote", {
                   done: participants.counts.complete,
                   total,
                 })}
-              </span>
+              </Link>
               {completeTone ? (
                 <span className="tone-pill" data-tone={completeTone}>
                   {tx(`tone.${completeTone}`)}
