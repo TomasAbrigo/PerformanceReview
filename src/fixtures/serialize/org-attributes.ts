@@ -126,8 +126,16 @@ export function serializeOrgAttributes(company: CompanyFixture): FixtureFile[] {
     const cycle = company.cycles[rng.int(1, company.cycles.length - 1)];
     const from = addDays(cycle.periodStart, 20);
     const next = accounts[(accounts.indexOf(home) + 1) % accounts.length];
+    const nextProject = rng.pick(next.projects);
+    // Somebody hired after that cycle started has nothing to move from: one
+    // row from their hire date (the draws above are kept, so everyone else's
+    // rows are the same as ever).
+    if (from <= e.hireDate) {
+      rows.push(row(e, home, project, e.hireDate, ""));
+      return;
+    }
     rows.push(row(e, home, project, e.hireDate, addDays(from, -1)));
-    rows.push(row(e, next, rng.pick(next.projects), from, ""));
+    rows.push(row(e, next, nextProject, from, ""));
   });
   return [
     {
