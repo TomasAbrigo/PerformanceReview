@@ -18,7 +18,7 @@ import { getActor } from "@/modules/actor/server";
 import { getAssessment, pickLocalized } from "@/modules/assessments";
 import { getReview, ReviewError } from "@/modules/review-core";
 import { cycleName } from "@/modules/review-core/cycle-name";
-import { canAnswer } from "@/modules/review-capture";
+import { mayAnswer } from "@/modules/review-capture";
 import { AssessmentSideView } from "@/components/assessments/assessment-side-view";
 import { ShareButton } from "@/components/assessments/share-button";
 import { saveDraftAction, shareAction, submitAction } from "./actions";
@@ -61,7 +61,7 @@ async function RequestPage({ params }: Props) {
   } catch (error) {
     if (!(error instanceof ReviewError)) throw error;
   }
-  const mayWrite = canAnswer(actor, request);
+  const mayWrite = await mayAnswer(db, actor, request, participant);
   const writable =
     mayWrite && request.status === "draft" && cycle.status !== "closed";
   const note = writable

@@ -14,6 +14,8 @@ import {
   goalsQuestionsOptional,
   isGoalsQuestion,
 } from "@/modules/review-core/goal-snapshot";
+import { managerAsOf } from "@/modules/org-history/queries";
+import { todayLocal } from "@/modules/org-history/dates";
 import { CaptureError } from "./errors";
 import {
   type CaptureAnswer,
@@ -22,6 +24,28 @@ import {
   checkAnswers,
   missingRequired,
 } from "./rules";
+
+/**
+ * canAnswer with what it needs from the org history: for a manager review
+ * written by someone other than People, who manages the reviewee today. The
+ * service and the request page both ask this (one rule, one query).
+ */
+export async function mayAnswer(
+  db: DbOrTx,
+  actor: ActorContext,
+  request: { reviewerPersonId: string | null; relationship: string },
+  participant: { revieweePersonId: string },
+): Promise<boolean> {
+  if (request.relationship !== "manager" || actor.role === "hr") {
+    return canAnswer(actor, request);
+  }
+  const today = await managerAsOf(
+    db,
+    participant.revieweePersonId,
+    todayLocal(new Date()),
+  );
+  return canAnswer(actor, request, today);
+}
 
 /**
  * The request to write, checked: it exists, the actor may answer it and its
@@ -44,7 +68,9 @@ async function loadWritable(db: DbOrTx, actor: ActorContext, id: string) {
     .where(and(eq(reviewRequest.id, id), isNull(reviewRequest.deletedAt)))
     .for("update", { of: reviewRequest });
   if (!row || row.cycle.deletedAt) throw new CaptureError("not_found");
-  if (!canAnswer(actor, row.request)) throw new CaptureError("forbidden");
+  if (!(await mayAnswer(db, actor, row.request, row.participant))) {
+    throw new CaptureError("forbidden");
+  }
   if (row.cycle.status === "closed") throw new CaptureError("cycle_closed");
   return row;
 }

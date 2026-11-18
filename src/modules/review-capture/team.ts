@@ -11,6 +11,7 @@ import type { ActorContext } from "@/modules/actor/types";
 import { type RequestState, requestState } from "@/modules/assessments/state";
 import type { RequestStatus } from "@/modules/review-core/request-status";
 import { visibilityContexts } from "@/modules/review-core/requests";
+import { currentManagerOf } from "@/modules/review-core/org-relations";
 import { canRead } from "@/modules/review-core/visibility";
 
 export type TeamReview = {
@@ -31,7 +32,7 @@ export type TeamReview = {
 };
 
 /**
- * The manager reviews the actor writes today: one per direct report still in
+ * The manager reviews the actor writes today: one per current direct report still in
  * a cycle not closed (the request is the actor's, superseded ones never
  * count), with where the person's self assessment stands as far as canRead
  * lets the actor know. Latest period first, then by name.
@@ -41,7 +42,7 @@ export async function listTeamReviews(
   actor: ActorContext,
 ): Promise<TeamReview[]> {
   if (actor.personId === null || actor.role === "direction") return [];
-  const rows = await db
+  const allRows = await db
     .select({
       request: reviewRequest,
       participant: cycleParticipant,
@@ -68,6 +69,16 @@ export async function listTeamReviews(
       ),
     )
     .orderBy(desc(reviewCycle.periodEnd), asc(person.displayName));
+  // Only the reports the actor manages today (the rule of canAnswer): a
+  // reviewer who stopped managing someone no longer sees them here.
+  const managedToday = await currentManagerOf(
+    db,
+    actor,
+    allRows.map((r) => r.participant.revieweePersonId),
+  );
+  const rows = allRows.filter((r) =>
+    managedToday.has(r.participant.revieweePersonId),
+  );
   if (rows.length === 0) return [];
   const selves = await db
     .select()
