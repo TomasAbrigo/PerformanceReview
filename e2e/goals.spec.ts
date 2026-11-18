@@ -151,13 +151,10 @@ test("an employee only sees their own goals", async ({ page }) => {
   await expect(
     page.getByTestId("goals-list").getByRole("heading", { level: 2 }).first(),
   ).toHaveText(plural(own));
-  // Themself only: no person column, no person search.
+  // Themself only: no person search.
   const filters = page.getByRole("form", { name: "Filtros de goals" });
   await expect(filters.getByLabel("Persona")).toHaveCount(0);
   const rows = page.getByRole("group", { name: "Lista de goals" });
-  await expect(rows.getByRole("columnheader", { name: "Persona" })).toHaveCount(
-    0,
-  );
   await expect(rows.getByRole("article")).toHaveCount(own);
 
   // Somebody else's goal: no access, and nothing of it on the page.

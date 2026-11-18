@@ -1,4 +1,5 @@
 import { expect, type Page, test } from "@playwright/test";
+import { fact, showAllCards } from "./cards";
 import { parseCsv } from "../src/modules/exports/csv-parse";
 import { actAs, actAsRole } from "./act-as";
 import { goalTotals } from "./goals-data";
@@ -45,21 +46,22 @@ test("People see the goal KPIs, the indicators by completion, the outliers and t
   const kpis = page.getByRole("region", { name: "Indicadores de objetivos" });
   const table = kpis.getByTestId("kpis-table");
   await expect(table).toBeVisible();
-  const total = table.getByRole("row", { name: /^Total/ });
-  const cells = total.getByRole("cell");
-  await expect(cells.nth(1)).toHaveText(String(totals.people));
-  await expect(cells.nth(2)).toHaveText(String(totals.goals));
-  await expect(cells.nth(3)).toHaveText(
+  await showAllCards(table);
+  const total = table.getByRole("article", { name: "Total", exact: true });
+  await expect(total).toContainText(
+    `Personas: ${totals.people} · Objetivos: ${totals.goals}`,
+  );
+  await expect(fact(total, "Completados")).toHaveText(
     new RegExp(`^${share(totals.completed)}`),
   );
-  await expect(cells.nth(4)).toHaveText(
+  await expect(fact(total, "En curso")).toHaveText(
     new RegExp(`^${share(totals.inProgress)}$`),
   );
-  await expect(cells.nth(5)).toHaveText(
+  await expect(fact(total, "Vencidos")).toHaveText(
     new RegExp(`^${share(totals.overdue)}$`),
   );
-  // At least the header, a group and the total.
-  expect(await table.getByRole("row").count()).toBeGreaterThanOrEqual(3);
+  // At least a group and the total.
+  expect(await table.getByRole("article").count()).toBeGreaterThanOrEqual(2);
 
   // Grouping lives in the URL; the total stays.
   await kpis.getByRole("link", { name: "Manager", exact: true }).click();
@@ -73,10 +75,8 @@ test("People see the goal KPIs, the indicators by completion, the outliers and t
   await expect(
     byManager
       .getByTestId("kpis-table")
-      .getByRole("row", { name: /^Total/ })
-      .getByRole("cell")
-      .nth(2),
-  ).toHaveText(String(totals.goals));
+      .getByRole("article", { name: "Total", exact: true }),
+  ).toContainText(`Objetivos: ${totals.goals}`);
 
   // Goals completion against retention: dots, and the indicators by bucket.
   const scatter = page.getByTestId("scatter-chart");
@@ -96,18 +96,19 @@ test("People see the goal KPIs, the indicators by completion, the outliers and t
     await expect(count).toHaveText(/^(Ninguna persona|\d+ personas?)$/);
     const n = (await count.innerText()).match(/^(\d+)/)?.[1];
     if (n) {
-      expect(await outliers.getByTestId(group).getByRole("row").count()).toBe(
-        Number(n) + 1,
-      );
+      expect(
+        await outliers.getByTestId(group).getByRole("article").count(),
+      ).toBe(Number(n));
     }
   }
 
   // The people of the cycle, with their goals and indicators side by side.
   const people = page.getByTestId("people-table");
   await expect(people).toBeVisible();
+  await showAllCards(people);
   // The name also shows up as the manager of the people who report to them.
   await expect(
-    people.getByRole("cell", { name: personName, exact: true }).first(),
+    people.getByRole("article", { name: personName, exact: true }).first(),
   ).toBeVisible();
 
   // The CSVs follow the filters; the headers are the file's language.
@@ -159,7 +160,10 @@ test("direction only sees aggregates; employees are forbidden", async ({
   await expect(
     page.getByRole("link", { name: "Persona", exact: true }),
   ).toHaveCount(0);
-  await expect(page.getByText(fullName(assessedFirstCycle))).toHaveCount(0);
+  // (The "act as" people list in the banner names everybody: look at the content.)
+  await expect(
+    page.getByRole("main").getByText(fullName(assessedFirstCycle)),
+  ).toHaveCount(0);
   await expect(page.getByRole("link", { name: "Exportar CSV" })).toHaveCount(0);
 
   // The person picker is off while acting as direction: leave it first.

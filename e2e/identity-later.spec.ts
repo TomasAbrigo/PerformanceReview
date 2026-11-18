@@ -1,5 +1,6 @@
 import { expect, test } from "@playwright/test";
-import { employees, escapeRegExp, fullName, laterRehire } from "./seed-data";
+import { queueCard } from "./cards";
+import { employees, fullName, laterRehire } from "./seed-data";
 
 // identity.setup.ts ran one more `pnpm ingest employee` over the seeded
 // database: someone who left comes back under a new Bamboo id (same legajo and
@@ -13,9 +14,7 @@ test("a rehire that arrives in a later run waits in the queue", async ({
 }) => {
   await page.goto("/en/imports/identity");
 
-  const row = page.getByRole("article").filter({
-    hasText: new RegExp(`${escapeRegExp(name)}.*\\b${later.id}\\b`),
-  });
+  const row = queueCard(page, name, later.id);
   await expect(row.getByText("Possible match")).toBeVisible();
   await expect(row.getByText("1 candidate")).toBeVisible();
 

@@ -185,7 +185,10 @@ test("an employee reads only their own assessment, never retention or engagement
   await expect(
     page.getByText(/No tenés acceso a este assessment/),
   ).toBeVisible();
-  await expect(page.getByText(other.personName)).toHaveCount(0);
+  // (The "act as" people list in the banner names everybody: look at the content.)
+  await expect(page.getByRole("main").getByText(other.personName)).toHaveCount(
+    0,
+  );
 });
 
 test("a manager reads their reports' assessments in full, and nobody else's", async ({

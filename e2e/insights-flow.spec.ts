@@ -3,6 +3,7 @@ import { mkdtempSync, readdirSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { expect, type Page, test } from "@playwright/test";
+import { countValue, showAllCards } from "./cards";
 import { actAs, actAsRole } from "./act-as";
 import { chooseCycle } from "./filters";
 import { importFile } from "./upload";
@@ -48,14 +49,9 @@ async function importPlainFile(page: Page, file: string, profile: string) {
       timeout: 240_000,
     });
   }
-  const counts = page.getByRole("table", { name: "Conteos" });
-  for (const [metric, row] of [
-    ["Insertados", /^Insertados/],
-    ["Actualizados", /^Actualizados/],
-  ] as const) {
-    await expect(counts.getByRole("row", { name: row })).toHaveText(
-      `${metric}0`,
-    );
+  const counts = page.getByRole("group", { name: "Conteos" });
+  for (const metric of ["Insertados", "Actualizados"]) {
+    await expect(countValue(counts, metric)).toHaveText("0");
   }
 }
 
@@ -74,9 +70,9 @@ test("People walk the whole insights module and export for Arturía", async ({
     ["assessment-status.csv", "bamboo-assessment-status"],
   ]) {
     await importFile(page, path.join(REPORTS, file), profile);
-    const cycles = page.getByRole("table", { name: "Ciclos detectados" });
-    await expect(cycles.getByRole("row")).toHaveCount(
-      1 + company.cycles.length,
+    const cycles = page.getByRole("group", { name: "Ciclos detectados" });
+    await expect(cycles.getByRole("article")).toHaveCount(
+      company.cycles.length,
     );
     await expect(
       page.getByRole("heading", { name: "Hay filas esperando un ciclo" }),
@@ -90,18 +86,19 @@ test("People walk the whole insights module and export for Arturía", async ({
 
   // Completion, with the period detail: one row per cycle, oldest first.
   await chooseCycle(page, "/es/insights/completion", cycleName);
-  await expect(page.getByRole("table", { name: "Quién falta" })).toBeVisible();
-  const periods = page.getByRole("table", { name: "Detalle por período" });
+  await expect(page.getByRole("group", { name: "Quién falta" })).toBeVisible();
+  const periods = page.getByRole("group", { name: "Detalle por período" });
+  await showAllCards(periods);
   // The legacy and the real-shape imports each left their cycles: at least one
-  // row per cycle of the company, and the cycle chosen above is one of them.
-  expect(await periods.getByRole("row").count()).toBeGreaterThan(
+  // card per cycle of the company, and the cycle chosen above is one of them.
+  expect(await periods.getByRole("article").count()).toBeGreaterThan(
     company.cycles.length,
   );
   await expect(
-    periods.getByRole("rowheader", { name: cycleName }),
+    periods.getByRole("article", { name: cycleName, exact: true }),
   ).toBeVisible();
   await expect(
-    periods.getByRole("columnheader", { name: "Valoración propia (1-4)" }),
+    periods.getByText("Valoración propia (1-4)").first(),
   ).toBeVisible();
   await expect(
     page
@@ -168,7 +165,14 @@ test("People walk the whole insights module and export for Arturía", async ({
   await expect(
     page.getByRole("group", { name: /Personas por segmento y por mes/ }),
   ).toBeVisible();
-  const months = page.getByRole("table", { name: "Detalle por mes" });
+  // The month table sits behind "Ver como tabla".
+  const months = page.locator('table[aria-label="Detalle por mes"]');
+  await page
+    .locator("details")
+    .filter({ has: months })
+    .locator("summary")
+    .click();
+  await expect(months).toBeVisible();
   expect(await months.getByRole("row").count()).toBeGreaterThan(6);
 
   // The executive view carries the latest month of it in the quantitative blocks.

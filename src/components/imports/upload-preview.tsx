@@ -84,7 +84,22 @@ export function ColumnsTable({
   const missing = issues.filter((i) => i.kind === "missing_column");
 
   return (
-    <CardCollection role="group" aria-label={t("preview.columns")}>
+    <CardCollection
+      role="group"
+      aria-label={t("preview.columns")}
+      initialCount={12}
+    >
+      {missing.map((issue) => (
+        <article
+          key={`missing-${issue.column}`}
+          data-issue="missing_column"
+          className={`record-card ${FLAGGED}`}
+        >
+          <h4 className="text-lg">{issue.column}</h4>
+          <div className="text-sm">—</div>
+          <div className="text-sm">{t("preview.missingInFile")}</div>
+        </article>
+      ))}
       {columns.map((column) => {
         const uses = usesOf(profile, column.name);
         const flagged = typeIssues.has(column.name);
@@ -125,17 +140,6 @@ export function ColumnsTable({
           </article>
         );
       })}
-      {missing.map((issue) => (
-        <article
-          key={`missing-${issue.column}`}
-          data-issue="missing_column"
-          className={`record-card ${FLAGGED}`}
-        >
-          <h4 className="text-lg">{issue.column}</h4>
-          <div className="text-sm">—</div>
-          <div className="text-sm">{t("preview.missingInFile")}</div>
-        </article>
-      ))}
     </CardCollection>
   );
 }
