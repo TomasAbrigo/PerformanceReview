@@ -1046,6 +1046,7 @@ describe("dashboardFilterOptions", () => {
       ],
       locations: ["Córdoba", "Rosario"],
       jobTitles: ["Developer", "Engineering Manager"],
+      org: { accounts: [], projects: [], dms: [], santexLeads: [] },
     });
     const now = await dashboardFilterOptions(db, as(carla, "manager"), {
       cycleId: cycle.id,

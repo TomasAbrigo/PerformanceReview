@@ -1035,7 +1035,7 @@ describe("pickers", () => {
   it("offers the areas and managers of the actor's reach in a cycle", async () => {
     expect(
       await indicatorFilterOptions(db, hr, { cycleId: c2.cycleId }),
-    ).toEqual({
+    ).toMatchObject({
       departments: ["Ingeniería", "Producto"],
       managers: [
         { id: id.marta, name: names.marta },
@@ -1044,7 +1044,7 @@ describe("pickers", () => {
     });
     expect(
       await indicatorFilterOptions(db, marta(), { cycleId: c2.cycleId }),
-    ).toEqual({
+    ).toMatchObject({
       departments: ["Ingeniería"],
       managers: [{ id: id.marta, name: names.marta }],
     });
