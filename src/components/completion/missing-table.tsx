@@ -19,8 +19,12 @@ export function StatusChip({ status }: { status: SideStatus }) {
   return (
     <span
       data-status={status}
-      className={`inline-flex items-center gap-1 rounded-md border px-2 py-0.5 text-xs whitespace-nowrap ${
-        missing ? "border-foreground font-medium" : "text-muted-foreground"
+      className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs whitespace-nowrap ${
+        missing
+          ? "bg-status-progress-bg font-medium text-status-progress"
+          : status === "submitted"
+            ? "bg-status-done-bg text-status-done"
+            : "bg-brand-fog text-muted-foreground"
       }`}
     >
       <span aria-hidden="true">{GLYPH[status]}</span>

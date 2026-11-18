@@ -34,13 +34,9 @@ export function CompletionFilters({
     values: { value: string; label: string }[],
     anyLabel: string | null = t("filters.any"),
   ) => (
-    <label className="flex flex-col gap-1 text-sm">
+    <label className="control-label">
       {label}
-      <select
-        name={name}
-        defaultValue={params[name] ?? ""}
-        className="rounded-md border bg-background px-2 py-1"
-      >
+      <select name={name} defaultValue={params[name] ?? ""} className="control">
         {anyLabel === null ? null : <option value="">{anyLabel}</option>}
         {values.map((v) => (
           <option key={v.value} value={v.value}>
@@ -81,7 +77,7 @@ export function CompletionFilters({
             )
           : null}
         <OrgFilterFields params={params} options={options?.org ?? null} />
-        <button type="submit" className="rounded-md border px-3 py-1 text-sm">
+        <button type="submit" className="button-outline">
           {t("filters.apply")}
         </button>
       </form>

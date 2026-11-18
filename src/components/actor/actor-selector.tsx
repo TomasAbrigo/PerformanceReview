@@ -1,18 +1,15 @@
 "use client";
 
+import { UserRound } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useId, useState, useTransition } from "react";
 import type { ActionResult } from "@/components/form-helpers";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import {
   type ActorContext,
   type ActorRole,
   actorRoles,
 } from "@/modules/actor/types";
-
-const selectClass =
-  "h-8 rounded-md border bg-transparent px-2 text-sm dark:bg-input/30";
 
 /** Header control: pick the person and role the app acts as (no login). */
 export function ActorSelector({
@@ -71,14 +68,21 @@ export function ActorSelector({
         apply();
       }}
     >
-      <span className="font-medium">{t("current", { name: current })}</span>
+      <span className="mr-1 inline-flex h-9 items-center gap-2 rounded-lg bg-brand-fog px-3 text-brand-900">
+        <UserRound
+          className="size-4 text-brand-700"
+          strokeWidth={1.6}
+          aria-hidden="true"
+        />
+        <span className="font-medium">{t("current", { name: current })}</span>
+      </span>
       <label htmlFor={`${id}-q`} className="sr-only">
         {t("search")}
       </label>
-      <Input
+      <input
         id={`${id}-q`}
         type="text"
-        className="h-8 w-36"
+        className="control w-40 placeholder:text-muted-foreground"
         placeholder={t("search")}
         value={query}
         onChange={(e) => setQuery(e.target.value)}
@@ -88,7 +92,7 @@ export function ActorSelector({
       </label>
       <select
         id={`${id}-person`}
-        className={selectClass}
+        className="control max-w-48"
         value={noPerson ? "" : personId}
         disabled={noPerson}
         onChange={(e) => setPersonId(e.target.value)}
@@ -105,7 +109,7 @@ export function ActorSelector({
       </label>
       <select
         id={`${id}-role`}
-        className={selectClass}
+        className="control"
         value={role}
         onChange={(e) => setRole(e.target.value as ActorRole)}
       >
@@ -115,7 +119,7 @@ export function ActorSelector({
           </option>
         ))}
       </select>
-      <Button type="submit" size="sm" disabled={pending}>
+      <Button type="submit" size="lg" disabled={pending}>
         {t("apply")}
       </Button>
       {error ? (

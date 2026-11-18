@@ -3,6 +3,8 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { connection } from "next/server";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
+import { PageHeader } from "@/components/page-header";
+import { groupKicker } from "@/components/page-kicker";
 import { HrOnly } from "@/components/access/hr-only";
 import { UploadForm } from "@/components/imports/upload-form";
 import { Link } from "@/i18n/navigation";
@@ -39,18 +41,20 @@ async function UploadBody({ params }: PageProps<"/[locale]/imports/upload">) {
   if (!hasLocale(routing.locales, locale)) notFound();
   setRequestLocale(locale);
   const t = await getTranslations("Upload");
+  const kicker = await groupKicker("data");
 
   return (
-    <main className="mx-auto flex w-full max-w-5xl flex-col gap-6 p-8">
-      <Link href="/" className="text-sm underline">
-        {t("back")}
-      </Link>
-      <div className="flex flex-col gap-2">
-        <h1 className="text-2xl font-semibold">{t("title")}</h1>
-        <p className="max-w-2xl text-sm text-muted-foreground">
-          {t("description")}
-        </p>
-      </div>
+    <main className="mx-auto flex w-full max-w-6xl flex-col gap-8 p-6 lg:p-10">
+      <PageHeader
+        kicker={kicker}
+        title={t("title")}
+        description={t("description")}
+        actions={
+          <Link href="/" className="text-sm underline">
+            {t("back")}
+          </Link>
+        }
+      />
       <Suspense>
         <UploadData />
       </Suspense>

@@ -5,7 +5,7 @@
   },
   "Home": {
     "heading": "Evaluaciones de desempeño",
-    "welcome": "Bienvenido a Performance Review.",
+    "welcome": "Lo que dicen las evaluaciones semestrales, en un solo lugar: completitud, retención, compromiso y lo que la gente escribe.",
     "navigation": "Navegación",
     "groups": {
       "insights": "Insights",
@@ -1680,5 +1680,13 @@
       "segments": "Segmentos",
       "link": "Ver la evolución"
     }
+  },
+  "Nav": {
+    "label": "Secciones",
+    "home": "Inicio"
+  },
+  "Brand": {
+    "company": "Santex Group",
+    "tagline": "yes, it's possible"
   }
 }

@@ -89,14 +89,12 @@ export function IssueDetail({
 
   return (
     <div className="flex flex-col gap-6">
-      <Link href="/imports/identity" className="text-sm hover:underline">
+      <Link href="/imports/identity" className="text-sm underline">
         {t("detail.back")}
       </Link>
       <header className="flex flex-col gap-2">
         <div className="flex flex-wrap items-center gap-3">
-          <h1 className="text-2xl font-semibold">
-            {summary.displayName ?? t("unnamed")}
-          </h1>
+          <h1>{summary.displayName ?? t("unnamed")}</h1>
           <ReasonBadge reason={issue.reason} />
         </div>
         <p className="text-sm text-muted-foreground">
@@ -198,7 +196,7 @@ function CandidateItem({
   return (
     <li
       aria-label={candidate.displayName}
-      className="flex flex-col gap-2 rounded-lg border p-3"
+      className="flex flex-col gap-2 rounded-xl border border-border bg-card p-4"
     >
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div>

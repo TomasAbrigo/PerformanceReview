@@ -39,10 +39,10 @@ export function RunDetailView({ run }: { run: RunDetail }) {
 
   return (
     <div className="flex flex-col gap-6">
-      <Link href="/imports/runs" className="text-sm hover:underline">
+      <Link href="/imports/runs" className="text-sm underline">
         {t("back")}
       </Link>
-      <h1 className="text-2xl font-semibold">{t("detail.title")}</h1>
+      <h1>{t("detail.title")}</h1>
 
       <dl className="grid grid-cols-[max-content_1fr] items-center gap-x-6 gap-y-2">
         {summary.map(({ label, value }) => (
@@ -58,13 +58,13 @@ export function RunDetailView({ run }: { run: RunDetail }) {
           role="alert"
           className="rounded-lg border border-destructive/30 bg-destructive/10 p-3 text-destructive"
         >
-          <h2 className="font-medium">{t("detail.error")}</h2>
+          <h2 className="text-lg">{t("detail.error")}</h2>
           <p className="font-mono text-sm break-words">{run.error}</p>
         </div>
       ) : null}
 
       <section className="flex flex-col gap-2">
-        <h2 className="text-lg font-medium">{t("detail.counts")}</h2>
+        <h2>{t("detail.counts")}</h2>
         <Table aria-label={t("detail.counts")} className="max-w-sm">
           <TableHeader>
             <TableRow>
@@ -96,7 +96,7 @@ export function RunDetailView({ run }: { run: RunDetail }) {
       </section>
 
       <section className="flex flex-col gap-2">
-        <h2 className="text-lg font-medium">{t("detail.rejects")}</h2>
+        <h2>{t("detail.rejects")}</h2>
         {run.rejects.length === 0 ? (
           <p>{t("detail.noRejects")}</p>
         ) : (
@@ -128,7 +128,7 @@ export function RunDetailView({ run }: { run: RunDetail }) {
       </section>
 
       <section className="flex flex-col gap-2">
-        <h2 className="text-lg font-medium">{t("detail.params")}</h2>
+        <h2>{t("detail.params")}</h2>
         {Object.keys(run.params).length === 0 ? (
           <p>{t("detail.noParams")}</p>
         ) : (

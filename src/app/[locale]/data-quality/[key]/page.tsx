@@ -36,7 +36,7 @@ export default function IndicatorPage(
   props: PageProps<"/[locale]/data-quality/[key]">,
 ) {
   return (
-    <main className="mx-auto w-full max-w-5xl p-8">
+    <main className="mx-auto w-full max-w-6xl p-6 lg:p-10">
       <Suspense>
         <HrOnly>
           <IndicatorData {...props} />

@@ -33,11 +33,12 @@ export function Kpis({ counts }: { counts: SentimentCounts | null }) {
       className="grid grid-cols-3 gap-2 sm:grid-cols-6"
     >
       {KPI_ORDER.map((k) => (
-        <li key={k} className="rounded-md border p-2">
-          <span className="block text-xs text-muted-foreground">{t(k)}</span>
-          <span className="text-xl font-semibold tabular-nums">
-            {counts[k]}
-          </span>
+        <li
+          key={k}
+          className="flex flex-col gap-1 rounded-xl border border-border bg-card p-4"
+        >
+          <span className="text-xs text-muted-foreground">{t(k)}</span>
+          <span className="stat-value-sm">{counts[k]}</span>
         </li>
       ))}
     </ul>
@@ -56,7 +57,7 @@ export function ByDimension({
   const dim = (d: string) => dimensionLabel[d] ?? d;
   return (
     <section className="flex flex-col gap-2">
-      <h2 className="text-lg font-semibold">{t("byDimension.title")}</h2>
+      <h2>{t("byDimension.title")}</h2>
       {rows.length === 0 ? (
         <p className="text-sm text-muted-foreground">{t("empty")}</p>
       ) : (
@@ -91,7 +92,7 @@ export function ByGroup({
   let team = 0;
   return (
     <section className="flex flex-col gap-2" data-testid="sentiment-by-group">
-      <h2 className="text-lg font-semibold">{t("title")}</h2>
+      <h2>{t("title")}</h2>
       {children}
       {rows.length === 0 ? (
         <p className="text-sm text-muted-foreground">{tq("empty")}</p>
@@ -119,7 +120,7 @@ export function Trend({ points }: { points: TrendPoint[] }) {
   const t = useTranslations("Qualitative");
   return (
     <section className="flex flex-col gap-2">
-      <h2 className="text-lg font-semibold">{t("trend.title")}</h2>
+      <h2>{t("trend.title")}</h2>
       {points.length === 0 ? (
         <p className="text-sm text-muted-foreground">{t("empty")}</p>
       ) : (
@@ -142,14 +143,17 @@ export function Themes({ themes }: { themes: ThemeRank[] }) {
   const tq = useTranslations("Qualitative");
   return (
     <section className="flex flex-col gap-2">
-      <h2 className="text-lg font-semibold">{t("title")}</h2>
+      <h2>{t("title")}</h2>
       {themes.length === 0 ? (
         <p className="text-sm text-muted-foreground">{tq("empty")}</p>
       ) : (
         <>
           <ol aria-label={t("title")} className="flex flex-col gap-2">
             {themes.map((th) => (
-              <li key={th.theme} className="rounded-md border p-2">
+              <li
+                key={th.theme}
+                className="flex flex-col gap-1.5 rounded-xl border border-border bg-card p-4"
+              >
                 <div className="flex justify-between gap-2">
                   <span className="font-medium">{th.theme}</span>
                   <span className="text-sm text-muted-foreground tabular-nums">
@@ -187,7 +191,7 @@ export function Indicators({ rows }: { rows: IndicatorSentiment[] }) {
     t.has(r as "retention") ? t(r as "retention") : r;
   return (
     <section className="flex flex-col gap-2">
-      <h2 className="text-lg font-semibold">{t("title")}</h2>
+      <h2>{t("title")}</h2>
       {rows.length === 0 ? (
         <p className="text-sm text-muted-foreground">{t("empty")}</p>
       ) : (

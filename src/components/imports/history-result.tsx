@@ -31,11 +31,11 @@ export function HistoryResult({
 
   return (
     <div className="flex flex-col gap-6">
-      <Link href="/imports/runs" className="text-sm hover:underline">
+      <Link href="/imports/runs" className="text-sm underline">
         {t("back")}
       </Link>
       <div className="flex flex-col gap-1">
-        <h1 className="text-2xl font-semibold">{t("title")}</h1>
+        <h1>{t("title")}</h1>
         <p className="text-sm text-muted-foreground">
           {t("summary", { count: result.cycles.length })}
         </p>

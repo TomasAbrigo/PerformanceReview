@@ -1,4 +1,5 @@
 import { useTranslations } from "next-intl";
+import { PageHeader } from "@/components/page-header";
 import { Badge } from "@/components/ui/badge";
 import { Link } from "@/i18n/navigation";
 import type {
@@ -16,14 +17,16 @@ export function DataQualityPanel({
   indicators: DataQualityIndicator[];
 }) {
   const t = useTranslations("DataQuality");
+  const tHome = useTranslations("Home");
   const clear = indicators.every((i) => i.count === 0);
 
   return (
-    <div className="flex flex-col gap-6">
-      <div>
-        <h1 className="text-2xl font-semibold">{t("title")}</h1>
-        <p className="text-muted-foreground">{t("description")}</p>
-      </div>
+    <div className="flex flex-col gap-8">
+      <PageHeader
+        kicker={tHome("groups.data")}
+        title={t("title")}
+        description={t("description")}
+      />
 
       {clear ? <p role="status">{t("allClear")}</p> : null}
 
@@ -33,15 +36,15 @@ export function DataQualityPanel({
           return (
             <article
               key={indicator.key}
-              className="flex flex-col gap-2 rounded-lg border p-4"
+              className="flex flex-col gap-2 rounded-xl border border-border bg-card p-5"
             >
-              <h2 className="font-medium">{title}</h2>
+              <h2 className="text-lg">{title}</h2>
               <p className="text-sm text-muted-foreground">
                 {t(`indicators.${indicator.key}.description`)}
               </p>
               <div className="mt-auto flex items-center justify-between gap-2 pt-2">
                 <Badge
-                  variant={indicator.count > 0 ? "destructive" : "secondary"}
+                  variant={indicator.count > 0 ? "destructive" : "success"}
                 >
                   {t("count", { count: indicator.count })}
                 </Badge>

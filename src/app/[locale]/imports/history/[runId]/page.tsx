@@ -32,7 +32,7 @@ export default function HistoryImportPage(
   props: PageProps<"/[locale]/imports/history/[runId]">,
 ) {
   return (
-    <main className="mx-auto w-full max-w-5xl p-8">
+    <main className="mx-auto w-full max-w-6xl p-6 lg:p-10">
       <Suspense>
         <HrOnly>
           <HistoryData {...props} />

@@ -4,6 +4,8 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { connection } from "next/server";
 import { Suspense } from "react";
+import { PageHeader } from "@/components/page-header";
+import { groupKicker } from "@/components/page-kicker";
 import { CompletionSummaryView } from "@/components/completion/completion-view";
 import {
   CompletionFilters,
@@ -40,13 +42,14 @@ async function Completion({
   await connection();
   const actor = await getActor();
   const t = await getTranslations("Completion");
+  const kicker = await groupKicker("insights");
   // The scope decides what is shown: People everything, a manager their
   // direct reports, direction aggregates; anybody else nothing.
   const scope = insightsScope(actor);
   if (scope.kind === "none") {
     return (
       <section className="flex flex-col gap-2" data-testid="no-access">
-        <h1 className="text-2xl font-semibold">{t("title")}</h1>
+        <h1>{t("title")}</h1>
         <p>{t("forbidden")}</p>
       </section>
     );
@@ -114,17 +117,23 @@ async function Completion({
       ? t("hint.directReports")
       : t("hint.all");
   return (
-    <div className="flex flex-col gap-4">
-      <h1 className="text-2xl font-semibold">
-        {t("title")} · {cycle.name}
-      </h1>
-      <p className="text-sm text-muted-foreground">{hint}</p>
-      <CompletionFilters
-        params={shown}
-        cycles={cycles.map((c) => ({ id: c.id, name: c.name }))}
-        options={options}
-        groupBys={groupBys}
-      />
+    <div className="flex flex-col gap-8">
+      <PageHeader
+        kicker={kicker}
+        title={
+          <>
+            {t("title")} · {cycle.name}
+          </>
+        }
+        description={hint}
+      >
+        <CompletionFilters
+          params={shown}
+          cycles={cycles.map((c) => ({ id: c.id, name: c.name }))}
+          options={options}
+          groupBys={groupBys}
+        />
+      </PageHeader>
       <Panel
         id="completion-summary"
         title={t("summary.title")}
@@ -214,7 +223,7 @@ export default function CompletionPage(
   props: PageProps<"/[locale]/insights/completion">,
 ) {
   return (
-    <main className="mx-auto w-full max-w-6xl p-8">
+    <main className="mx-auto w-full max-w-6xl p-6 lg:p-10">
       <Suspense fallback={<div aria-busy="true" className="h-40" />}>
         <Completion {...props} />
       </Suspense>

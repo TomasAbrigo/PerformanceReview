@@ -1,20 +1,24 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Chakra_Petch, Inter } from "next/font/google";
 import { hasLocale, NextIntlClientProvider } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { ActorBar } from "@/components/actor/actor-bar";
+import { LocaleSwitcher } from "@/components/locale-switcher";
+import { SideNav } from "@/components/nav/side-nav";
 import { routing } from "@/i18n/routing";
 import "../globals.css";
 
-const geistSans = Geist({
+// Brand type: Chakra Petch Light for headings, Inter for body and UI.
+const inter = Inter({
   variable: "--font-sans",
   subsets: ["latin"],
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const chakraPetch = Chakra_Petch({
+  variable: "--font-heading",
+  weight: ["300", "400"],
   subsets: ["latin"],
 });
 
@@ -46,16 +50,26 @@ export default async function LocaleLayout({
   return (
     <html
       lang={locale}
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${inter.variable} ${chakraPetch.variable} h-full antialiased`}
     >
-      <body className="flex min-h-full flex-col">
+      <body className="min-h-full">
         <NextIntlClientProvider>
-          <header className="flex flex-wrap items-center justify-between gap-2 border-b px-8 py-2">
-            <Suspense fallback={<div aria-busy="true" className="h-8" />}>
-              <ActorBar />
+          <div className="flex min-h-dvh flex-col lg:flex-row">
+            <Suspense
+              fallback={<div aria-busy="true" className="bg-sidebar lg:w-64" />}
+            >
+              <SideNav />
             </Suspense>
-          </header>
-          {children}
+            <div className="flex min-w-0 flex-1 flex-col">
+              <header className="sticky top-0 z-20 flex flex-wrap items-center justify-between gap-3 border-b border-border bg-background/90 px-6 py-2.5 backdrop-blur lg:px-10">
+                <Suspense fallback={<div aria-busy="true" className="h-9" />}>
+                  <ActorBar />
+                </Suspense>
+                <LocaleSwitcher />
+              </header>
+              {children}
+            </div>
+          </div>
         </NextIntlClientProvider>
       </body>
     </html>

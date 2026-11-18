@@ -27,7 +27,10 @@ test("the panel flags the CEO without a manager and opens the case list", async 
     "CEO with a unique name",
   );
   await page.goto("/es");
-  await page.getByRole("link", { name: "Calidad de datos" }).click();
+  await page
+    .getByRole("navigation", { name: "Navegación" })
+    .getByRole("link", { name: "Calidad de datos" })
+    .click();
 
   await expect(page).toHaveURL(/\/es\/data-quality$/);
   await expect(

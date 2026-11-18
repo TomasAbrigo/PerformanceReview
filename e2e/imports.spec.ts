@@ -27,7 +27,10 @@ const rowOf = (page: import("@playwright/test").Page, runId: string) =>
 
 test("the home page links to the runs log", async ({ page }) => {
   await page.goto("/es");
-  await page.getByRole("link", { name: "Importaciones" }).click();
+  await page
+    .getByRole("navigation", { name: "Navegación" })
+    .getByRole("link", { name: "Importaciones" })
+    .click();
 
   await expect(page).toHaveURL(/\/es\/imports\/runs$/);
   await expect(

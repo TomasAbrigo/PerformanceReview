@@ -4,6 +4,8 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { connection } from "next/server";
 import { Suspense } from "react";
+import { PageHeader } from "@/components/page-header";
+import { groupKicker } from "@/components/page-kicker";
 import { Toggle } from "@/components/insights/controls";
 import { Panel } from "@/components/insights/parts";
 import { ExportCsvLink } from "@/components/data-quality/export-csv-link";
@@ -43,6 +45,7 @@ async function GoalsInsights({
   await connection();
   const actor = await getActor();
   const t = await getTranslations("GoalsInsights");
+  const kicker = await groupKicker("insights");
   const scope = insightsScope(actor);
   if (scope.kind === "none") return <p role="alert">{t("forbidden")}</p>;
   const aggregates = scope.kind === "aggregatesOnly";
@@ -104,27 +107,27 @@ async function GoalsInsights({
         ? t("scope.aggregatesOnly", { min: scope.minGroupSize })
         : null;
   return (
-    <div className="flex flex-col gap-4">
-      <h1 className="text-2xl font-semibold">
-        {t("heading", { cycle: cycle.name })}
-      </h1>
-      {scopeNote ? (
-        <p className="text-sm text-muted-foreground">{scopeNote}</p>
-      ) : null}
-      <GoalsFilters
-        params={shown}
-        cycles={cycles.map((c) => ({ id: c.id, name: c.name }))}
-        options={options}
-      />
-      <div className="flex flex-wrap gap-4">
-        <Toggle
-          label={t("hierarchy.label")}
-          options={hierarchies}
-          current={p.hierarchy}
-          hrefFor={(h) => hrefWith(here, shown, { hierarchy: h })}
-          text={(h) => t(`hierarchy.${h}`)}
+    <div className="flex flex-col gap-8">
+      <PageHeader
+        kicker={kicker}
+        title={t("heading", { cycle: cycle.name })}
+        description={scopeNote ?? undefined}
+      >
+        <GoalsFilters
+          params={shown}
+          cycles={cycles.map((c) => ({ id: c.id, name: c.name }))}
+          options={options}
         />
-      </div>
+        <div className="flex flex-wrap gap-4">
+          <Toggle
+            label={t("hierarchy.label")}
+            options={hierarchies}
+            current={p.hierarchy}
+            hrefFor={(h) => hrefWith(here, shown, { hierarchy: h })}
+            text={(h) => t(`hierarchy.${h}`)}
+          />
+        </div>
+      </PageHeader>
       <Panel
         id="goal-kpis"
         title={t("kpis.title")}
@@ -185,7 +188,7 @@ export default function GoalsInsightsPage(
   props: PageProps<"/[locale]/insights/goals">,
 ) {
   return (
-    <main className="mx-auto w-full max-w-6xl p-8">
+    <main className="mx-auto w-full max-w-6xl p-6 lg:p-10">
       <Suspense fallback={<div aria-busy="true" className="h-40" />}>
         <GoalsInsights {...props} />
       </Suspense>

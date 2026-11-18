@@ -49,11 +49,11 @@ export function SelfAssessmentView({
           : ti("maskedHint", { min: report.minGroupSize })}
       </p>
       <section className="flex flex-col gap-2">
-        <h2 className="text-lg font-semibold">{ti("completion.title")}</h2>
+        <h2>{ti("completion.title")}</h2>
         <CompletionTable data={report.completion} groupBy={groupBy} />
       </section>
       <section className="flex flex-col gap-2">
-        <h2 className="text-lg font-semibold">{t("sentimentTitle")}</h2>
+        <h2>{t("sentimentTitle")}</h2>
         {report.sentiment.length === 0 ? (
           <p className="text-sm text-muted-foreground">{ti("empty")}</p>
         ) : (
@@ -69,7 +69,7 @@ export function SelfAssessmentView({
       </section>
       <Themes themes={report.themes} />
       <section className="flex flex-col gap-2">
-        <h2 className="text-lg font-semibold">{t("gapTitle")}</h2>
+        <h2>{t("gapTitle")}</h2>
         {report.gap.length === 0 ? (
           <p className="text-sm text-muted-foreground">{ti("empty")}</p>
         ) : (
@@ -102,7 +102,7 @@ export function SelfAssessmentView({
       </section>
       {gapRows.length > 0 ? (
         <section className="flex flex-col gap-2">
-          <h2 className="text-lg font-semibold">{t("sentimentGapTitle")}</h2>
+          <h2>{t("sentimentGapTitle")}</h2>
           <p className="text-sm text-muted-foreground">
             {t("sentimentGapHint")}
           </p>

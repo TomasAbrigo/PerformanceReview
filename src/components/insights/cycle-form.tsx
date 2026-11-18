@@ -22,13 +22,9 @@ export function CycleForm({
   const t = useTranslations("Insights");
   return (
     <form aria-label={t("filters")} className="flex flex-wrap items-end gap-3">
-      <label className="flex flex-col gap-1 text-sm">
+      <label className="control-label">
         {t("cycle")}
-        <select
-          name="cycle"
-          defaultValue={cycleId}
-          className="rounded-md border px-2 py-1"
-        >
+        <select name="cycle" defaultValue={cycleId} className="control">
           {cycles.map((c) => (
             <option key={c.id} value={c.id}>
               {c.name}
@@ -37,13 +33,9 @@ export function CycleForm({
         </select>
       </label>
       {groupBy ? (
-        <label className="flex flex-col gap-1 text-sm">
+        <label className="control-label">
           {t("groupBy.label")}
-          <select
-            name="groupBy"
-            defaultValue={groupBy}
-            className="rounded-md border px-2 py-1"
-          >
+          <select name="groupBy" defaultValue={groupBy} className="control">
             <option value="department">{t("groupBy.department")}</option>
             <option value="manager">{t("groupBy.manager")}</option>
           </select>
@@ -53,7 +45,7 @@ export function CycleForm({
       {Object.entries(hidden).map(([k, v]) => (
         <input key={k} type="hidden" name={k} value={v} />
       ))}
-      <Button type="submit" variant="outline">
+      <Button type="submit" variant="outline" size="lg">
         {t("apply")}
       </Button>
     </form>

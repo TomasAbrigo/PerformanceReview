@@ -19,7 +19,7 @@ function Figure({
   return (
     <div className="flex flex-col">
       <dt className="text-xs text-muted-foreground">{label}</dt>
-      <dd className="text-lg font-semibold tabular-nums" data-testid={testId}>
+      <dd className="font-heading text-xl tabular-nums" data-testid={testId}>
         {value}
         {note ? (
           <span className="ml-1 text-xs font-normal text-muted-foreground">
@@ -45,14 +45,12 @@ function CardView({ card, team }: { card: Dm360Card; team: number }) {
   const s = card.sentiment;
   return (
     <article
-      className="flex flex-col gap-3 rounded-lg border p-4"
+      className="flex flex-col gap-3 rounded-xl border border-border bg-card p-5"
       aria-labelledby={`dm-${card.key}`}
       data-testid="dm-card"
     >
       <header className="flex flex-wrap items-baseline justify-between gap-2">
-        <h2 id={`dm-${card.key}`} className="text-lg font-semibold">
-          {name}
-        </h2>
+        <h2 id={`dm-${card.key}`}>{name}</h2>
         <span
           className="text-sm text-muted-foreground"
           data-testid="dm-card-people"
