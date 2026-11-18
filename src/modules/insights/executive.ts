@@ -12,6 +12,7 @@ import type {
   DimensionSentiment,
   ThemeRank,
 } from "@/modules/qualitative-analysis/types";
+import type { OrgFilters } from "@/modules/org-attributes/kinds";
 import { ReviewError } from "@/modules/review-core/review-errors";
 import { getSetting } from "@/modules/settings/service";
 import { type InsightsScope, insightsScope } from "./authz";
@@ -60,6 +61,8 @@ type Ctx = {
   cycleId: string;
   /** The `aggregation.minGroupSize` setting, read once per request. */
   minGroupSize: number;
+  /** The org cuts the view narrows to (People only; direction reads everything). */
+  filters: OrgFilters;
   /** Shared by the indicator blocks: one row load for all of them. */
   indicators: () => ReturnType<typeof indicatorSnapshot>;
 };
@@ -89,8 +92,13 @@ export const COLLECTORS: readonly Collector[] = [
   {
     key: "completion",
     modes: ALL,
-    collect: ({ db, actor, cycleId, minGroupSize }) =>
-      completionSummary(db, actor, { cycleId, groupBy: "none", minGroupSize }),
+    collect: ({ db, actor, cycleId, minGroupSize, filters }) =>
+      completionSummary(db, actor, {
+        cycleId,
+        groupBy: "none",
+        minGroupSize,
+        ...filters,
+      }),
   },
   {
     key: "retention",
@@ -113,24 +121,31 @@ export const COLLECTORS: readonly Collector[] = [
   {
     key: "goals",
     modes: QUANT,
-    collect: async ({ db, actor, cycleId }) =>
-      (await goalKpis(db, actor, { cycleId, groupBy: "department" })).total,
+    collect: async ({ db, actor, cycleId, filters }) =>
+      (await goalKpis(db, actor, { cycleId, groupBy: "department", filters }))
+        .total,
   },
   {
     key: "sentiment",
     modes: QUAL,
-    collect: ({ db, actor, cycleId, minGroupSize }) =>
+    collect: ({ db, actor, cycleId, minGroupSize, filters }) =>
       sentimentByDimension(db, actor, {
         cycleId,
         aggregateOnly: true,
         minGroupSize,
+        ...filters,
       }),
   },
   {
     key: "themes",
     modes: QUAL,
-    collect: ({ db, actor, cycleId, minGroupSize }) =>
-      topThemes(db, actor, { cycleId, aggregateOnly: true, minGroupSize }, 5),
+    collect: ({ db, actor, cycleId, minGroupSize, filters }) =>
+      topThemes(
+        db,
+        actor,
+        { cycleId, aggregateOnly: true, minGroupSize, ...filters },
+        5,
+      ),
   },
 ];
 
@@ -138,13 +153,24 @@ export const COLLECTORS: readonly Collector[] = [
  * The one-page executive view of a cycle: completion always, plus the
  * qualitative blocks (sentiment per dimension, top themes) and/or the
  * quantitative ones (retention, engagement, risk quadrant, goal KPIs) per `mode`.
- * People see everything unmasked; direction only aggregates of at least the
+ * People see everything unmasked (and may cut it by account, project, DM or
+ * Santex Lead); direction only aggregates of at least the
  * `aggregation.minGroupSize` setting; managers and employees are forbidden.
  */
 export async function executiveReport(
   db: DbOrTx,
   actor: ActorContext,
-  f: { cycleId: string; mode: ExecutiveMode; minGroupSize?: number },
+  f: {
+    cycleId: string;
+    mode: ExecutiveMode;
+    minGroupSize?: number;
+    /**
+     * Narrow every block to an account, project, DM or Santex Lead (as of the
+     * cycle snapshot). People only: direction reads the whole cycle, as its
+     * completion view does, so no two cuts can be told apart.
+     */
+    filters?: OrgFilters;
+  },
   collectors: readonly Collector[] = COLLECTORS,
 ): Promise<ExecutiveReport> {
   // Read once per request (the page passes it) and handed to every block.
@@ -155,16 +181,19 @@ export async function executiveReport(
     throw new ReviewError("forbidden");
   }
   let snapshot: ReturnType<typeof indicatorSnapshot> | undefined;
+  const filters = scope.kind === "all" ? (f.filters ?? {}) : {};
   const ctx: Ctx = {
     db,
     actor,
     scope,
     cycleId: f.cycleId,
     minGroupSize,
+    filters,
     indicators: () =>
       (snapshot ??= indicatorSnapshot(db, actor, {
         cycleId: f.cycleId,
         config: { minGroupSize },
+        filters,
       })),
   };
   const picked = collectors.filter((c) => c.modes.includes(f.mode));

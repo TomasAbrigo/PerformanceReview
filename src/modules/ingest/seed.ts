@@ -29,6 +29,7 @@ export const RESET_TABLES = [
   "theme",
   "answer_quality_issue",
   "history_import_row",
+  "person_org_attribute",
   "assessment_progress",
   "imported_request",
   "imported_question",
@@ -83,7 +84,11 @@ export async function resetDomainTables(
   db: DbOrTx,
   registry: ReadonlyMap<string, unknown> = REGISTRY,
   /** Entities outside the registry the seed also writes under a lock (the reports). */
-  extraLocks: readonly string[] = ["assessment", "assessment_progress"],
+  extraLocks: readonly string[] = [
+    "assessment",
+    "assessment_progress",
+    "org_attribute",
+  ],
 ): Promise<void> {
   await db.transaction(async (tx) => {
     for (const entity of [...registry.keys(), ...extraLocks]) {

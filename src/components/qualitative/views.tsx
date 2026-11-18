@@ -1,6 +1,7 @@
 import { useLocale, useTranslations } from "next-intl";
 import type {
   DimensionSentiment,
+  GroupSentiment,
   IndicatorSentiment,
   ThemeRank,
   TrendPoint,
@@ -67,6 +68,47 @@ export function ByDimension({
             key: r.dimension,
             label: dim(r.dimension),
           }))}
+        />
+      )}
+    </section>
+  );
+}
+
+/**
+ * Sentiment of the comments per group of people (area, account, project, DM
+ * or Santex Lead), with how many people are behind each. `children` is the
+ * toggle of the grouping.
+ */
+export function ByGroup({
+  rows,
+  children,
+}: {
+  rows: GroupSentiment[];
+  children?: React.ReactNode;
+}) {
+  const t = useTranslations("Qualitative.byGroup");
+  const tq = useTranslations("Qualitative");
+  let team = 0;
+  return (
+    <section className="flex flex-col gap-2" data-testid="sentiment-by-group">
+      <h2 className="text-lg font-semibold">{t("title")}</h2>
+      {children}
+      {rows.length === 0 ? (
+        <p className="text-sm text-muted-foreground">{tq("empty")}</p>
+      ) : (
+        <SentimentBars
+          label={t("chart")}
+          firstColumn={t("label")}
+          rows={rows.map((r) => {
+            const name =
+              r.label ??
+              (r.key === null ? t("unassigned") : t("team", { n: ++team }));
+            return {
+              ...r,
+              key: r.key ?? "unassigned",
+              label: `${name} · ${t("people", { n: r.participants })}`,
+            };
+          })}
         />
       )}
     </section>

@@ -4,7 +4,9 @@ import { closeDb, db, type Database } from "@/db/client";
 import {
   assessmentProgress,
   cycleParticipant,
+  identityMatchIssue,
   ingestRun,
+  personOrgAttribute,
   qualitativeAnalysis,
   reviewCycle,
 } from "@/db/schema";
@@ -19,6 +21,9 @@ async function snapshot() {
   const [participants] = await db.select({ n: count() }).from(cycleParticipant);
   const [progress] = await db.select({ n: count() }).from(assessmentProgress);
   const [labels] = await db.select({ n: count() }).from(qualitativeAnalysis);
+  const [orgAttributes] = await db
+    .select({ n: count() })
+    .from(personOrgAttribute);
   const [answers] = await db.execute<{ n: number }>(
     sql`select count(*)::int as n from answer`,
   );
@@ -27,6 +32,7 @@ async function snapshot() {
     participants: participants.n,
     progress: progress.n,
     labels: labels.n,
+    orgAttributes: orgAttributes.n,
     answers: answers.n,
   };
 }
@@ -69,6 +75,17 @@ describe("seed with reports and analysis (small)", () => {
     expect(first.answers).toBeGreaterThan(0);
     expect(first.progress).toBeGreaterThan(0);
     expect(first.labels).toBeGreaterThan(0);
+  });
+
+  it("loads the org attributes of the people (accounts, projects, DMs, Santex Leads) and leaves no EEID unmatched", async () => {
+    expect(first.orgAttributes).toBeGreaterThan(0);
+    const org = firstRun.reports.find((r) => r.profile === "org-attributes")!;
+    expect(org.counts).toMatchObject({ rejected: 0, issues: 0 });
+    // The rehires' later ids still wait in the queue for their employee row, not for this file.
+    const queued = await db
+      .select({ entity: identityMatchIssue.entity })
+      .from(identityMatchIssue);
+    expect(queued.some((i) => i.entity === "org_attribute")).toBe(false);
   });
 
   it("records the runs like an upload: profile, file and hash in params (reprocess and resume read them)", async () => {

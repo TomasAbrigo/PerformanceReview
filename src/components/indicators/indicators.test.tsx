@@ -1,6 +1,7 @@
 import { render, screen, within } from "@testing-library/react";
+import { noOrgOptions } from "@/modules/org-attributes/kinds";
 import { NextIntlClientProvider } from "next-intl";
-import type { ReactNode } from "react";
+import type { ComponentProps, ReactNode } from "react";
 import { describe, expect, it, vi } from "vitest";
 import en from "@/messages/en.json";
 import es from "@/messages/es.json";
@@ -505,6 +506,7 @@ describe("filters and pickers", () => {
           options={{
             departments: ["Ingeniería", "Producto"],
             managers: [{ id: "m1", name: "Marta Quiroga" }],
+            org: noOrgOptions,
           }}
         />,
       );
@@ -599,5 +601,67 @@ describe("parseIndicatorParams / parseTrendParams", () => {
       manager: undefined,
       department: "Producto",
     });
+  });
+});
+
+describe("org cuts in the indicator filters", () => {
+  const options = {
+    departments: ["Ingeniería"],
+    managers: [],
+    org: {
+      accounts: ["Cuenta A"],
+      projects: [],
+      dms: ["Diego"],
+      santexLeads: [],
+    },
+  };
+  const form = (
+    groupBys?: ComponentProps<typeof IndicatorFiltersForm>["groupBys"],
+  ) => (
+    <IndicatorFiltersForm
+      params={parseIndicatorParams({
+        cycle: "c1",
+        groupBy: "account",
+        dm: "Diego",
+      })}
+      cycles={[{ id: "c1", name: "H1 2024" }]}
+      options={options}
+      groupBys={groupBys}
+    />
+  );
+
+  it("offers the cuts that have values, the grouping by them, and keeps what the URL says", () => {
+    renderIn("es", form());
+
+    expect(screen.getByLabelText("Cuenta")).toBeInTheDocument();
+    expect(screen.getByLabelText("DM")).toHaveValue("Diego");
+    expect(screen.queryByLabelText("Proyecto")).toBeNull();
+    const groupBy = screen.getByLabelText("Agrupar por") as HTMLSelectElement;
+    expect(groupBy).toHaveValue("account");
+    expect([...groupBy.options].map((o) => o.text)).toEqual([
+      "Área",
+      "Manager",
+      "Cuenta",
+      "Proyecto",
+      "DM",
+      "Santex Lead",
+      "Sin agrupar",
+    ]);
+  });
+
+  it("direction is not offered the people", () => {
+    renderIn(
+      "en",
+      form(["department", "manager", "account", "project", "none"]),
+    );
+
+    const groupBy = screen.getByLabelText("Group by") as HTMLSelectElement;
+    expect([...groupBy.options].map((o) => o.text)).toEqual([
+      "Area",
+      "Manager",
+      "Account",
+      "Project",
+      "No grouping",
+    ]);
   });
 });

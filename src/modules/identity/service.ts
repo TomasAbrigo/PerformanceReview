@@ -48,7 +48,14 @@ export function summarizePayload(payload: unknown): PayloadSummary {
     failedName?: unknown;
     failedRole?: unknown;
   } | null;
-  const name = row?.failedName ?? row?.fields?.employee_name;
+  // A row of the org attributes file may name nobody but its EEID.
+  const eeid = row?.fields?.employee_bamboo_id;
+  const name =
+    row?.failedName ??
+    row?.fields?.employee_name ??
+    (typeof eeid === "string" || typeof eeid === "number"
+      ? `EEID ${eeid}`
+      : undefined);
   return {
     displayName: typeof name === "string" ? name : null,
     role: typeof row?.failedRole === "string" ? row.failedRole : null,
@@ -324,6 +331,25 @@ export async function resolveIssue(
 
     if (input.action === "ignore") return settle(resolution);
     if (issue.reason === "conflict") throw new IdentityError("invalid_action");
+
+    // Rows of People's org attributes file name people by EEID: link only.
+    if (issue.entity === "org_attribute") {
+      if (input.action !== "link") throw new IdentityError("invalid_action");
+      if (!input.personId) throw new IdentityError("person_required");
+      if (!isUuid(input.personId)) throw new IdentityError("not_found");
+      const [target] = await tx
+        .select({ id: person.id })
+        .from(person)
+        .where(eq(person.id, input.personId));
+      if (!target) throw new IdentityError("not_found");
+      const settled = await settle(resolution);
+      const { reprocessOrgAttributeRow } =
+        await import("@/modules/org-attributes");
+      if (!(await reprocessOrgAttributeRow(tx, settled))) {
+        throw new IdentityError("invalid_payload");
+      }
+      return settled;
+    }
 
     // Report rows (historical import) name people, they never create them.
     const report = await import("@/modules/import-history/reprocess");

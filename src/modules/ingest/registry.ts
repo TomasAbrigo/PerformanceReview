@@ -11,7 +11,8 @@ import type { Entity, IngestEntity, SourceAdapter } from "./types";
 const isCliEntity = (entity: IngestEntity): entity is Entity =>
   entity !== "assessment" &&
   entity !== "assessment_progress" &&
-  entity !== "feedback";
+  entity !== "feedback" &&
+  entity !== "org_attribute";
 
 /** Where the saved Bamboo API responses used by the `fixture` source live. */
 export const DEFAULT_FIXTURES_DIR = "src/modules/bamboo-client/__fixtures__";

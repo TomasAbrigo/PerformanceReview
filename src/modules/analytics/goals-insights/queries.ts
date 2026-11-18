@@ -1,6 +1,12 @@
 import type { DbOrTx } from "@/db/client";
 import type { ActorContext } from "@/modules/actor/types";
 import type { IndicatorConfig } from "@/modules/analytics/indicators/types";
+import { groupKeyer } from "@/modules/org-attributes/group-key";
+import {
+  type GroupKeyer,
+  needsKeyer,
+  withoutPersonFilters,
+} from "@/modules/org-attributes/kinds";
 import { ReviewError } from "@/modules/review-core/review-errors";
 import {
   bucketRows,
@@ -47,17 +53,32 @@ function requireGroupable(ctx: GoalContext, groupBy: GoalGroupBy) {
   }
 }
 
+/** The filters a reader may use: direction none that names a person (DM, Santex Lead). */
+const filtersOf = (
+  ctx: GoalContext,
+  filters: GoalInsightsFilters = {},
+): GoalInsightsFilters =>
+  withoutPersonFilters(filters, ctx.reach.kind === "aggregatesOnly");
+
+/** The keyer direction groups a DM or Santex Lead by (their teams have no name); none for anybody else. */
+async function keyerFor(ctx: GoalContext, db: DbOrTx, groupBys: GoalGroupBy[]) {
+  return ctx.reach.kind === "aggregatesOnly" && groupBys.some(needsKeyer)
+    ? groupKeyer(db)
+    : undefined;
+}
+
 function kpisView(
   ctx: GoalContext,
   hierarchy: Hierarchy,
   groupBy: GoalGroupBy,
   rows: Parameters<typeof kpisOf>[0],
+  keyOf?: GroupKeyer,
 ): GoalKpis {
   return {
     cycleId: ctx.cycleId,
     groupBy,
     hierarchy,
-    ...kpisOf(rows, groupBy, minOf(ctx)),
+    ...kpisOf(rows, groupBy, minOf(ctx), keyOf),
   };
 }
 
@@ -122,7 +143,8 @@ export async function goalKpis(
     ctx,
     hierarchy,
     input.groupBy,
-    filterRows(all, input.filters),
+    filterRows(all, filtersOf(ctx, input.filters)),
+    await keyerFor(ctx, db, [input.groupBy]),
   );
 }
 
@@ -149,7 +171,7 @@ export async function goalsVsIndicators(
     hierarchy: input.hierarchy ?? "asOf",
     sentiment: true,
   });
-  return vsView(ctx, filterRows(all, input.filters));
+  return vsView(ctx, filterRows(all, filtersOf(ctx, input.filters)));
 }
 
 /**
@@ -174,7 +196,11 @@ export async function goalOutliers(
     hierarchy: input.hierarchy ?? "asOf",
     sentiment: false,
   });
-  return outliersView(ctx, filterRows(all, input.filters), input.thresholds);
+  return outliersView(
+    ctx,
+    filterRows(all, filtersOf(ctx, input.filters)),
+    input.thresholds,
+  );
 }
 
 /**
@@ -225,9 +251,10 @@ export async function goalInsights(
     hierarchy,
     sentiment: true,
   });
-  const rows = filterRows(all, input.filters);
+  const rows = filterRows(all, filtersOf(ctx, input.filters));
+  const keyOf = await keyerFor(ctx, db, groupBys);
   const kpisBy = Object.fromEntries(
-    groupBys.map((g) => [g, kpisView(ctx, hierarchy, g, rows)]),
+    groupBys.map((g) => [g, kpisView(ctx, hierarchy, g, rows, keyOf)]),
   ) as Record<GoalGroupBy, GoalKpis>;
   return {
     kpis: kpisBy[input.groupBy],

@@ -20,6 +20,11 @@ import {
   upsertFeedback,
 } from "@/modules/import-history";
 import type { DeferredRow } from "@/modules/import-history/decision";
+import {
+  reconcileOrgAttributes,
+  stagedOrgAttributeSchema,
+  upsertOrgAttributes,
+} from "@/modules/org-attributes";
 import { upsertEmployee } from "./employee";
 import {
   stagedJobHistorySchema,
@@ -107,6 +112,8 @@ export type EntityHandler<S> = {
       source: SourceSystem;
       runId: string;
       seen: Set<string>;
+      /** The run's scratch space, as the handler's `upsert` left it. */
+      cache: Map<string, unknown>;
       /** Adds an entry to the run's reject log (does not count as rejected). */
       reject: (reject: IngestReject) => void;
     },
@@ -225,6 +232,14 @@ export const entityHandlers: Partial<
       return {};
     },
     decide: buildCycleDecision,
+  }),
+  // People's org attributes file (files only): see org-attributes.
+  org_attribute: defineHandler({
+    schema: stagedOrgAttributeSchema,
+    counts: { issues: 0, ignored: 0 },
+    upsert: upsertOrgAttributes,
+    // The file is the whole list: what it no longer has is dropped.
+    finish: (db, run) => reconcileOrgAttributes(db, run),
   }),
   feedback: defineHandler({
     schema: stagedFeedbackSchema,

@@ -1,4 +1,5 @@
 // Drizzle- and server-free: shared by the queries and client components.
+import { type OrgFilters, orgGroupBys } from "@/modules/org-attributes/kinds";
 
 /**
  * The two closed questions of the assessment, answered by the manager (Likert
@@ -7,8 +8,16 @@
 export const indicators = ["retention", "engagement"] as const;
 export type Indicator = (typeof indicators)[number];
 
-/** Dimension of the distribution: the snapshot's area or manager, or no grouping. */
-export const indicatorGroupBys = ["department", "manager", "none"] as const;
+/**
+ * Dimension of the distribution: the snapshot's area or manager, an org
+ * attribute (account, project, DM, Santex Lead), or no grouping.
+ */
+export const indicatorGroupBys = [
+  "department",
+  "manager",
+  ...orgGroupBys,
+  "none",
+] as const;
 export type IndicatorGroupBy = (typeof indicatorGroupBys)[number];
 
 /** Likert values; `counts[i]` of a series is the count of value `i + 1`. */
@@ -25,7 +34,7 @@ export type IndicatorConfig = {
   minGroupSize: number;
 };
 
-export type IndicatorFilters = {
+export type IndicatorFilters = OrgFilters & {
   department?: string;
   managerId?: string;
 };

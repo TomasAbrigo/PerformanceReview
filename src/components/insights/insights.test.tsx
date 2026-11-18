@@ -423,3 +423,27 @@ describe("unavailable data and suppressed groups", () => {
     expect(screen.getByText("No department")).toBeVisible();
   });
 });
+
+describe("the mode toggle keeps the org cuts", () => {
+  it("every mode's link carries the cuts of the page", () => {
+    renderIn(
+      "es",
+      <ModeToggle
+        mode="both"
+        cycleId="c1"
+        filters={{ account: "Cuenta A", dm: undefined, santexLead: "Lía" }}
+      />,
+    );
+
+    const hrefs = screen
+      .getAllByRole("link")
+      .map((a) => a.getAttribute("href") ?? "");
+    expect(hrefs).toHaveLength(3);
+    for (const href of hrefs) {
+      expect(href).toContain("account=Cuenta+A");
+      expect(href).toContain("santexLead=L%C3%ADa");
+      expect(href).not.toContain("dm=");
+    }
+    expect(hrefs[0]).toContain("mode=");
+  });
+});

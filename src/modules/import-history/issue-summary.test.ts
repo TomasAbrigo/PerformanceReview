@@ -14,3 +14,16 @@ describe("summarizePayload of a report row", () => {
     });
   });
 });
+
+describe("summarizePayload of a row of the org attributes file", () => {
+  it("names the person by the Nombre column, or by the EEID when the file has none", () => {
+    expect(
+      summarizePayload({
+        fields: { employee_bamboo_id: "99", employee_name: "Zoe Nadie" },
+      }).displayName,
+    ).toBe("Zoe Nadie");
+    expect(
+      summarizePayload({ fields: { employee_bamboo_id: "99" } }).displayName,
+    ).toBe("EEID 99");
+  });
+});

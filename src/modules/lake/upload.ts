@@ -26,6 +26,7 @@ import {
 } from "./upload-store";
 import {
   isHistoryProfile,
+  isOrgAttributesProfile,
   PREVIEW_ROWS,
   type ImportUploadResult,
   type ProfileChoice,
@@ -114,6 +115,7 @@ async function ingestUploaded({
   db,
   signal,
   landing = false,
+  partial = false,
 }: {
   upload: StoredUpload;
   fileName: string;
@@ -122,6 +124,8 @@ async function ingestUploaded({
   db: DbOrTx;
   signal?: AbortSignal;
   landing?: boolean;
+  /** Org attributes file: it lists only some rows (stored on the run). */
+  partial?: boolean;
 }) {
   return withUploadLake(
     upload,
@@ -154,6 +158,7 @@ async function ingestUploaded({
           profile: profile.name,
           size: upload.size,
           sha256: upload.sha256,
+          ...(partial ? { partial: true } : {}),
         },
       });
     },
@@ -193,7 +198,7 @@ export async function importReportFile(
     profile: resolved,
     source: source ?? builtinSourceSystem(resolved),
     db,
-    landing: !isHistoryProfile(resolved),
+    landing: !isHistoryProfile(resolved) && !isOrgAttributesProfile(resolved),
   });
 }
 
@@ -250,6 +255,11 @@ export type ImportUploadInput = {
   signal?: AbortSignal;
   /** History profiles (see isHistoryProfile): only land the rows. */
   landing?: boolean;
+  /**
+   * Org attributes file (see isOrgAttributesProfile): it lists only some of
+   * the rows, so what it does not mention is not dropped.
+   */
+  partial?: boolean;
 };
 
 /** The profile a choice means, and whether it is new (saved after the import). */
@@ -306,10 +316,12 @@ export async function importUpload({
   store = {},
   signal,
   landing = false,
+  partial = false,
 }: ImportUploadInput): Promise<ImportUploadResult> {
   const { profile, source, isNew } = await chosenProfile(choice, store);
   // Bamboo's performance reports become historical cycles (import-history);
   // anything else, or when asked, is only landed in raw_record.
+  const attributes = isOrgAttributesProfile(profile);
   const domain = isHistoryProfile(profile) && !landing;
   const upload = await resolveUpload(uploadId, store);
 
@@ -320,7 +332,8 @@ export async function importUpload({
     source,
     db,
     signal,
-    landing: !domain,
+    landing: !domain && !attributes,
+    partial: attributes && partial,
   });
 
   // Only now: a failed import leaves no profile behind.
@@ -333,6 +346,6 @@ export async function importUpload({
   return {
     ...result,
     rejects: (run?.rejects ?? []).slice(0, RESULT_REJECTS),
-    mode: domain ? "domain" : "landing",
+    mode: domain ? "domain" : attributes ? "attributes" : "landing",
   };
 }

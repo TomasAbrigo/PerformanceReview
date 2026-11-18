@@ -16,3 +16,4 @@ export * from "./import-history";
 export * from "./qualitative";
 export * from "./app-setting";
 export * from "./likert";
+export * from "./org-attributes";

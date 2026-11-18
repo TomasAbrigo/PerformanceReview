@@ -1,4 +1,5 @@
 import { useTranslations } from "next-intl";
+import { OrgFilterFields } from "@/components/org/org-filter-fields";
 import type { GoalInsightsFilterOptions } from "@/modules/analytics/goals-insights/types";
 import type { GoalsInsightsParams } from "./url-state";
 
@@ -64,6 +65,7 @@ export function GoalsFilters({
             true,
           )
         : null}
+      <OrgFilterFields params={params} options={options.org} />
       <button type="submit" className="rounded-md border px-3 py-1 text-sm">
         {t("apply")}
       </button>

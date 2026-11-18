@@ -152,6 +152,7 @@ export async function resumeImportRun(
           source,
           runId,
           seen: new Set(),
+          cache,
           reject: (reject) => rejects.push(reject),
         })
       : {};

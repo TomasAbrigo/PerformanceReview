@@ -12,6 +12,10 @@ type Raw = {
   manager_id: string | null;
   manager_name: string | null;
   department: string | null;
+  account: string | null;
+  project: string | null;
+  dm: string | null;
+  santex_lead: string | null;
   goals: number;
   completed: number;
   in_progress: number;
@@ -63,7 +67,8 @@ export async function loadParticipantRows(
   const rows = await db.execute<Raw>(sql`
     with recursive ${goalCtes(ctx, input.hierarchy)}${sentiment}
     select b.participant_id, b.person_id, b.name, b.manager_id, b.manager_name,
-           b.department, g.goals, g.completed, g.in_progress, g.closed,
+           b.department, b.account, b.project, b.dm, b.santex_lead,
+           g.goals, g.completed, g.in_progress, g.closed,
            g.overdue, g.progress_sum,
            ${input.sentiment ? sql`coalesce(se.labeled, 0)::int` : sql`0`} as labeled,
            ${input.sentiment ? sql`coalesce(se.positive, 0)::int` : sql`0`} as positive
@@ -86,6 +91,10 @@ export async function loadParticipantRows(
       managerId: r.manager_id,
       managerName: r.manager_name,
       department: r.department,
+      account: r.account,
+      project: r.project,
+      dm: r.dm,
+      santexLead: r.santex_lead,
       goals: r.goals,
       completed: r.completed,
       inProgress: r.in_progress,

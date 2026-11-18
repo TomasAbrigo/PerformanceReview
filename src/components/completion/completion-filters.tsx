@@ -1,5 +1,6 @@
 import { useTranslations } from "next-intl";
 import { Toggle } from "@/components/dashboards/controls";
+import { OrgFilterFields } from "@/components/org/org-filter-fields";
 import type { FilterOptions } from "@/modules/analytics/dashboards";
 import {
   type CompletionGroupBy,
@@ -79,6 +80,7 @@ export function CompletionFilters({
               options.managers.map((m) => ({ value: m.id, label: m.name })),
             )
           : null}
+        <OrgFilterFields params={params} options={options?.org ?? null} />
         <button type="submit" className="rounded-md border px-3 py-1 text-sm">
           {t("filters.apply")}
         </button>

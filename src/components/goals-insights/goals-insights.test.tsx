@@ -1,4 +1,5 @@
 import { render, screen, within } from "@testing-library/react";
+import { noOrgDims, noOrgOptions } from "@/modules/org-attributes/kinds";
 import { NextIntlClientProvider } from "next-intl";
 import type { ReactNode } from "react";
 import { describe, expect, it, vi } from "vitest";
@@ -184,6 +185,7 @@ const row = (
   name: string,
   over: Partial<GoalIndicatorRow> = {},
 ): GoalIndicatorRow => ({
+  ...noOrgDims,
   participantId: `p-${name}`,
   personId: `person-${name}`,
   name,
@@ -483,6 +485,7 @@ describe("GoalsFilters", () => {
         options={{
           departments: ["Ingeniería"],
           managers: [{ id: "m1", name: "Marta" }],
+          org: noOrgOptions,
         }}
       />,
     );
@@ -511,7 +514,11 @@ describe("GoalsFilters", () => {
       <GoalsFilters
         params={parseGoalsInsightsParams({ groupBy: "manager" })}
         cycles={cycles}
-        options={{ departments: ["Ingeniería"], managers: [] }}
+        options={{
+          departments: ["Ingeniería"],
+          managers: [],
+          org: noOrgOptions,
+        }}
       />,
     );
     expect(screen.queryByLabelText("Manager")).toBeNull();
@@ -519,5 +526,67 @@ describe("GoalsFilters", () => {
       "manager",
     );
     expect(screen.getByRole("button", { name: "Aplicar" })).toBeInTheDocument();
+  });
+});
+
+describe("org cuts in the goals filters", () => {
+  it("offers the cuts with values and the grouping by them", () => {
+    renderIn(
+      "en",
+      <GoalsFilters
+        params={parseGoalsInsightsParams({ cycle: "c1", santexLead: "Lía" })}
+        cycles={[{ id: "c1", name: "H1" }]}
+        options={{
+          departments: ["Ingeniería"],
+          managers: [],
+          org: {
+            accounts: ["Cuenta A"],
+            projects: ["Proyecto A1"],
+            dms: [],
+            santexLeads: ["Lía"],
+          },
+        }}
+      />,
+    );
+
+    expect(screen.getByLabelText("Account")).toBeInTheDocument();
+    expect(screen.getByLabelText("Project")).toBeInTheDocument();
+    expect(screen.queryByLabelText("DM")).toBeNull();
+    expect(screen.getByLabelText("Santex Lead")).toHaveValue("Lía");
+  });
+
+  it("the KPI table groups by account", () => {
+    const groups = [
+      {
+        ...kpiGroup({
+          key: "Cuenta A",
+          label: "Cuenta A",
+          people: 3,
+          peopleWithGoals: 3,
+          goals: 6,
+          completed: 3,
+          inProgress: 3,
+          closed: 0,
+          overdue: 0,
+          progressSum: 300,
+        }),
+      },
+    ];
+    renderIn(
+      "es",
+      <KpisTable
+        kpis={{
+          cycleId: "c1",
+          groupBy: "account",
+          hierarchy: "asOf",
+          groups,
+          total: groups[0],
+          suppressed: 0,
+          minGroupSize: null,
+        }}
+      />,
+    );
+
+    expect(screen.getByTestId("kpis-table")).toHaveTextContent("Cuenta A");
   });
 });

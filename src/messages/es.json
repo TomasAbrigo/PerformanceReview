@@ -567,7 +567,11 @@
       "landingOnly": "Solo aterrizar",
       "historyHint": "Las filas se importan como ciclos de evaluación históricos, con sus participantes, solicitudes y respuestas.",
       "landingHint": "Las filas se guardan tal cual (crudas), sin crear ciclos.",
-      "legacy": "(formato anterior)"
+      "legacy": "(formato anterior)",
+      "orgHint": "Las filas se importan como atributos organizacionales de cada persona (cuenta, proyecto, DM y Santex Lead, con su vigencia) por EEID; los EEID que no coinciden con nadie esperan en la cola de identidad.",
+      "partialFile": "Archivo parcial (no dar de baja lo que no viene en el archivo)",
+      "partialHint": "Solo se agregan y actualizan los atributos del archivo; lo que el archivo no menciona se conserva.",
+      "completeHint": "El archivo es la lista completa: los atributos de esta fuente que ya no vienen en él se dan de baja (solo de las columnas que trae)."
     },
     "roles": {
       "key": "Clave",
@@ -660,7 +664,8 @@
       "assessment": "Evaluaciones",
       "feedback": "Feedback",
       "assessment_progress": "Progreso de evaluaciones",
-      "health_check": "Health check (CAP)"
+      "health_check": "Health check (CAP)",
+      "org_attribute": "Atributos organizacionales"
     },
     "result": {
       "title": "Importación terminada",
@@ -1164,7 +1169,11 @@
       "label": "Agrupar por",
       "department": "Área",
       "manager": "Manager",
-      "none": "Sin agrupar"
+      "none": "Sin agrupar",
+      "account": "Cuenta",
+      "project": "Proyecto",
+      "dm": "DM",
+      "santex_lead": "Santex Lead"
     },
     "hierarchy": {
       "label": "Jerarquía",
@@ -1397,6 +1406,23 @@
       "no_file": "Elegí un archivo.",
       "unknown": "Algo salió mal.",
       "not_labeled": "Este comentario todavía no tiene etiqueta."
+    },
+    "byGroup": {
+      "title": "Sentimiento por grupo",
+      "chart": "Sentimiento de los comentarios por grupo de personas",
+      "label": "Grupo",
+      "groupBy": "Agrupar por",
+      "groups": {
+        "department": "Área",
+        "account": "Cuenta",
+        "project": "Proyecto",
+        "dm": "DM",
+        "santex_lead": "Santex Lead"
+      },
+      "unassigned": "Sin asignar",
+      "team": "Equipo {n}",
+      "people": "{n, plural, one {# persona} other {# personas}}",
+      "export": "Descargar por grupo (CSV)"
     }
   },
   "Insights": {
@@ -1535,7 +1561,9 @@
       "delta": "Cambio contra el ciclo anterior",
       "points": "puntos porcentuales",
       "rate": "% enviadas",
-      "notApplicable": "No aplica"
+      "notApplicable": "No aplica",
+      "byAccount": "Por cuenta",
+      "byDm": "Por DM"
     },
     "indicators": {
       "title": "Indicadores de retención y compromiso",
@@ -1550,7 +1578,9 @@
         "low": "Bajo",
         "mid": "Medio",
         "high": "Alto"
-      }
+      },
+      "byAccount": "Por cuenta",
+      "byDm": "Por DM"
     },
     "qualitative": {
       "title": "Análisis cualitativo",
@@ -1593,7 +1623,9 @@
       "doneButLow": "Objetivos cumplidos con retención o compromiso bajo",
       "behindButHigh": "Objetivos atrasados con retención y compromiso altos",
       "completedPct": "% completado",
-      "underMinimum": "Menos personas que el grupo mínimo: no se publica"
+      "underMinimum": "Menos personas que el grupo mínimo: no se publica",
+      "byAccount": "Por cuenta",
+      "byDm": "Por DM"
     },
     "people": {
       "title": "Personas",
@@ -1612,7 +1644,8 @@
       "manager": "Manager",
       "peer": "Pares",
       "upward": "Ascendente"
-    }
+    },
+    "dm": "DM"
   },
   "Completion": {
     "nav": "Completitud",
@@ -1636,7 +1669,11 @@
       "label": "Agrupar por",
       "none": "Sin agrupar",
       "department": "Área",
-      "manager": "Manager"
+      "manager": "Manager",
+      "account": "Cuenta",
+      "project": "Proyecto",
+      "dm": "DM",
+      "santex_lead": "Santex Lead"
     },
     "hierarchy": {
       "label": "Jerarquía",
@@ -1732,7 +1769,11 @@
       "label": "Agrupar por",
       "person": "Persona",
       "manager": "Manager",
-      "department": "Área"
+      "department": "Área",
+      "account": "Cuenta",
+      "project": "Proyecto",
+      "dm": "DM",
+      "santex_lead": "Santex Lead"
     },
     "hierarchy": {
       "label": "Jerarquía",
@@ -1864,5 +1905,80 @@
         "closed": "Cerrado"
       }
     }
+  },
+  "Insights360": {
+    "nav": "Análisis 360 por DM",
+    "title": "Análisis 360",
+    "heading": "Análisis 360 · {cycle}",
+    "forbidden": "No tenés acceso al Análisis 360.",
+    "noCycles": "Todavía no hay ciclos lanzados.",
+    "hint": {
+      "all": "Una tarjeta por DM (delivery manager) con las personas a su cargo en el ciclo, según el archivo de atributos organizacionales.",
+      "own": "Tu tarjeta como DM, con tus reportes directos del ciclo.",
+      "aggregates": "Solo agregados: DM con al menos {min} personas, sin nombre; el resto se agrupa en «Otros».",
+      "notDm": "No figurás como DM en el archivo de atributos organizacionales: no hay tarjeta para mostrar."
+    },
+    "filters": {
+      "label": "Filtros",
+      "cycle": "Ciclo",
+      "scope": "Alcance",
+      "apply": "Aplicar"
+    },
+    "scope": {
+      "direct": "Reportes directos",
+      "tree": "Todo el árbol"
+    },
+    "scopeHint": {
+      "direct": "Personas cuyo DM es el de la tarjeta según el archivo.",
+      "tree": "Además, todas las personas debajo del DM en el organigrama del snapshot del ciclo."
+    },
+    "card": {
+      "team": "Equipo {n}",
+      "others": "Otros",
+      "people": "{n, plural, one {# persona} other {# personas}}",
+      "retention": "Retención media",
+      "engagement": "Compromiso medio",
+      "risk": "En riesgo",
+      "riskValue": "{percent} % ({people} de {of})",
+      "sentiment": "Sentimiento de los comentarios",
+      "comments": "{n, plural, one {# comentario} other {# comentarios}} de {people, plural, one {# persona} other {# personas}}",
+      "noComments": "Sin comentarios",
+      "self": "Autoevaluación completa",
+      "manager": "Evaluación del manager completa",
+      "completion": "{percent} %",
+      "trend": "Evolución por ciclo",
+      "reading": "Lectura",
+      "none": "–",
+      "meanOf": "sobre {n}"
+    },
+    "spark": {
+      "label": "Retención y compromiso por ciclo",
+      "retention": "Retención",
+      "engagement": "Compromiso",
+      "noData": "sin datos",
+      "point": "{cycle}: {value}"
+    },
+    "insight": {
+      "retentionDrop": "La retención media cayó {delta} puntos desde {cycle} (de {previous} a {current}).",
+      "engagementDrop": "El compromiso medio cayó {delta} puntos desde {cycle} (de {previous} a {current}).",
+      "negativeSentiment": "El {percent} % de los {comments} comentarios es negativo.",
+      "riskHigh": "El {percent} % de las personas con ambos indicadores ({people}) está en riesgo: retención y compromiso bajos.",
+      "completionLow": "Solo el {percent} % de las evaluaciones del manager está completo.",
+      "stable": "Sin alertas en este ciclo.",
+      "noData": "Todavía no hay datos suficientes para leer este equipo."
+    },
+    "empty": "Ningún DM tiene personas en este ciclo. Cargá el archivo de atributos organizacionales en Importar.",
+    "withoutDm": "{n, plural, one {# persona} other {# personas}} sin DM en el archivo.",
+    "suppressed": "{n, plural, one {# persona queda fuera} other {# personas quedan fuera}}: sus DM tienen menos de {min} personas.",
+    "export": {
+      "csv": "Exportar CSV"
+    }
+  },
+  "OrgFilters": {
+    "any": "Todas",
+    "account": "Cuenta",
+    "project": "Proyecto",
+    "dm": "DM",
+    "santexLead": "Santex Lead"
   }
 }

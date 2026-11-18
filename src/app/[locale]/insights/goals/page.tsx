@@ -12,6 +12,7 @@ import { GoalsFilters } from "@/components/goals-insights/filters";
 import { GoalsScatter } from "@/components/goals-insights/goals-scatter";
 import { KpisTable } from "@/components/goals-insights/kpis-table";
 import { OutliersView } from "@/components/goals-insights/outliers";
+import { orgFiltersOf } from "@/components/org/params";
 import { PeopleTable } from "@/components/goals-insights/people-table";
 import {
   hrefWith,
@@ -29,6 +30,7 @@ import {
   indicators,
 } from "@/modules/analytics/goals-insights";
 import { insightsScope } from "@/modules/insights/authz";
+import { withoutPersonFilters } from "@/modules/org-attributes/kinds";
 import { listCycles } from "@/modules/review-core";
 
 async function GoalsInsights({
@@ -43,8 +45,12 @@ async function GoalsInsights({
   const t = await getTranslations("GoalsInsights");
   const scope = insightsScope(actor);
   if (scope.kind === "none") return <p role="alert">{t("forbidden")}</p>;
-  const p = parseGoalsInsightsParams(await searchParams);
   const aggregates = scope.kind === "aggregatesOnly";
+  // Direction does not filter by the people who lead a team (a DM, a Santex Lead).
+  const p = withoutPersonFilters(
+    parseGoalsInsightsParams(await searchParams),
+    aggregates,
+  );
   // Direction never sees a person: its grouping is the area or the manager.
   const groupBy: GoalGroupBy =
     aggregates && p.groupBy === "person" ? "department" : p.groupBy;
@@ -69,7 +75,11 @@ async function GoalsInsights({
     cycleId: cycle.id,
     hierarchy: p.hierarchy,
     groupBy,
-    filters: { department: p.department, managerId: p.manager },
+    filters: {
+      department: p.department,
+      managerId: p.manager,
+      ...orgFiltersOf(p),
+    },
   });
   const here = "/insights/goals";
   // CSV exports go through the API (People's visibility): offered to People only.
@@ -82,6 +92,7 @@ async function GoalsInsights({
           hierarchy: p.hierarchy,
           department: p.department,
           manager: p.manager,
+          ...orgFiltersOf(p),
           ...extra,
         }}
       />

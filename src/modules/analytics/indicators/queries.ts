@@ -2,6 +2,12 @@ import { sql } from "drizzle-orm";
 import type { DbOrTx } from "@/db/client";
 import type { ActorContext } from "@/modules/actor/types";
 import type { Hierarchy } from "@/modules/analytics/dashboards/types";
+import { groupKeyer } from "@/modules/org-attributes/group-key";
+import {
+  needsKeyer,
+  type OrgOptions,
+  withoutPersonFilters,
+} from "@/modules/org-attributes/kinds";
 import { ReviewError } from "@/modules/review-core/review-errors";
 import {
   buildAlerts,
@@ -50,10 +56,25 @@ const reachOf = (ctx: IndicatorContext): Reach => ctx.scope.kind;
 const minOf = (ctx: IndicatorContext) =>
   ctx.scope.kind === "aggregatesOnly" ? ctx.scope.minGroupSize : null;
 
+/** The keyer direction groups a DM or Santex Lead by (their teams have no name); none for anybody else. */
+async function keyerFor(
+  db: DbOrTx,
+  ctx: IndicatorContext,
+  groupBy: IndicatorGroupBy,
+) {
+  return ctx.scope.kind === "aggregatesOnly" && needsKeyer(groupBy)
+    ? groupKeyer(db)
+    : undefined;
+}
+
 /** Validates the filters (ids are ids) and returns them. */
-function checkFilters(filters: IndicatorFilters = {}): IndicatorFilters {
+function checkFilters(
+  filters: IndicatorFilters = {},
+  ctx: IndicatorContext,
+): IndicatorFilters {
   if (filters.managerId) requireUuid(filters.managerId);
-  return filters;
+  // Direction does not filter by the people who lead a team (DM, Santex Lead).
+  return withoutPersonFilters(filters, ctx.scope.kind === "aggregatesOnly");
 }
 
 type Cycle = { cycleId: string; indicator: Indicator };
@@ -74,7 +95,7 @@ export async function indicatorDistribution(
     },
 ): Promise<IndicatorDistribution> {
   const ctx = await indicatorContext(db, actor, input.config);
-  const filters = checkFilters(input.filters);
+  const filters = checkFilters(input.filters, ctx);
   await requireCycle(db, input.cycleId);
   const rows = await loadRows(db, ctx, {
     cycleId: input.cycleId,
@@ -84,6 +105,7 @@ export async function indicatorDistribution(
     rows.filter((r) => matches(r, filters)),
     input,
     minOf(ctx),
+    await keyerFor(db, ctx, input.groupBy),
   );
 }
 
@@ -240,7 +262,7 @@ export async function riskMatrix(
   input: Common & { cycleId: string },
 ): Promise<RiskMatrix> {
   const ctx = await indicatorContext(db, actor, input.config);
-  const filters = checkFilters(input.filters);
+  const filters = checkFilters(input.filters, ctx);
   await requireCycle(db, input.cycleId);
   const rows = await loadRows(db, ctx, {
     cycleId: input.cycleId,
@@ -272,7 +294,7 @@ export async function indicatorAlerts(
   input: Common & { cycleId: string },
 ): Promise<IndicatorAlerts> {
   const ctx = await indicatorContext(db, actor, input.config);
-  const filters = checkFilters(input.filters);
+  const filters = checkFilters(input.filters, ctx);
   await requireCycle(db, input.cycleId);
   const rows = await loadRows(db, ctx, {
     hierarchy: input.hierarchy ?? "asOf",
@@ -285,6 +307,8 @@ export async function indicatorAlerts(
 export type IndicatorFilterOptions = {
   departments: string[];
   managers: { id: string; name: string }[];
+  /** Accounts, projects, DMs and Santex Leads (the last two not for direction). */
+  org: OrgOptions;
 };
 
 /**
@@ -304,17 +328,25 @@ export async function indicatorOverview(
   alerts: IndicatorAlerts;
 }> {
   const ctx = await indicatorContext(db, actor, input.config);
-  const filters = checkFilters(input.filters);
+  const filters = checkFilters(input.filters, ctx);
   await requireCycle(db, input.cycleId);
   const rows = await loadRows(db, ctx, {
     hierarchy: input.hierarchy ?? "asOf",
   });
   const inCycle = rows.filter((r) => r.cycleId === input.cycleId);
   const filtered = inCycle.filter((r) => matches(r, filters));
-  const { departments, managers } = optionsOf(inCycle);
+  const { departments, managers, org } = optionsOf(
+    inCycle,
+    minOf(ctx) === null,
+  );
   return {
-    options: { departments, managers },
-    distribution: buildDistribution(filtered, input, minOf(ctx)),
+    options: { departments, managers, org },
+    distribution: buildDistribution(
+      filtered,
+      input,
+      minOf(ctx),
+      await keyerFor(db, ctx, input.groupBy),
+    ),
     matrix: buildMatrix(filtered, input.cycleId, ctx.config, reachOf(ctx)),
     alerts: buildAlerts(rows, input.cycleId, filters, ctx.config, reachOf(ctx)),
   };
@@ -328,19 +360,22 @@ export async function indicatorOverview(
 export async function indicatorSnapshot(
   db: DbOrTx,
   actor: ActorContext,
-  input: Pick<Common, "config"> & { cycleId: string },
+  input: Pick<Common, "config" | "filters"> & { cycleId: string },
 ): Promise<{
   retention: IndicatorDistribution;
   engagement: IndicatorDistribution;
   matrix: RiskMatrix;
 }> {
   const ctx = await indicatorContext(db, actor, input.config);
+  const filters = checkFilters(input.filters, ctx);
   await requireCycle(db, input.cycleId);
   const rows = await loadRows(db, ctx, {
     cycleId: input.cycleId,
     hierarchy: "asOf",
   });
-  const inCycle = rows.filter((r) => r.cycleId === input.cycleId);
+  const inCycle = rows.filter(
+    (r) => r.cycleId === input.cycleId && matches(r, filters),
+  );
   const dist = (indicator: Indicator) =>
     buildDistribution(
       inCycle,
@@ -362,13 +397,14 @@ export async function indicatorFilterOptions(
 ): Promise<IndicatorFilterOptions> {
   const ctx = await indicatorContext(db, actor);
   await requireCycle(db, input.cycleId);
-  const { departments, managers } = optionsOf(
+  const { departments, managers, org } = optionsOf(
     await loadRows(db, ctx, {
       cycleId: input.cycleId,
       hierarchy: input.hierarchy ?? "asOf",
     }),
+    minOf(ctx) === null,
   );
-  return { departments, managers };
+  return { departments, managers, org };
 }
 
 // ------------------------------------------------------------------ cycles

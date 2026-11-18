@@ -9,10 +9,11 @@ import {
   type Hierarchy,
   hierarchies,
 } from "@/modules/analytics/dashboards/types";
+import { type OrgParams, parseOrgParams } from "@/components/org/params";
 
 export const COMPLETION_PATH = "/insights/completion";
 
-export type CompletionParams = {
+export type CompletionParams = OrgParams & {
   cycle?: string;
   groupBy: CompletionGroupBy;
   hierarchy: Hierarchy;
@@ -32,6 +33,7 @@ const pick = <T extends string>(
 
 export function parseCompletionParams(sp: Raw): CompletionParams {
   return {
+    ...parseOrgParams(sp),
     cycle: one(sp.cycle),
     groupBy: pick(one(sp.groupBy), completionGroupBys, "department"),
     hierarchy: pick(one(sp.hierarchy), hierarchies, "asOf"),

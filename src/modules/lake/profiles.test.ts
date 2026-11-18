@@ -315,7 +315,9 @@ const scenarioFor = (profile: SourceProfile) =>
       ? "airbyte"
       : profile.name.startsWith("cap-")
         ? "cap"
-        : "bamboo-reports";
+        : profile.name === "org-attributes"
+          ? "org"
+          : "bamboo-reports";
 
 async function readAll(
   scenario: string,
@@ -342,6 +344,7 @@ describe("built-in profiles", () => {
     expect(builtinProfiles.map((p) => p.name)).toEqual([
       "bamboo-assessments-report",
       "bamboo-assessment-status",
+      "org-attributes",
       "fivetran-bamboohr-employee",
       "fivetran-bamboohr-goal",
       "fivetran-bamboohr-employee-goal",

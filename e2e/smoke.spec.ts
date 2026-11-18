@@ -26,6 +26,7 @@ test("home navigation lists only the remaining sections", async ({ page }) => {
     "Vista ejecutiva",
     "Health check (CAP)",
     "Goals y assessments",
+    "Análisis 360 por DM",
     "Importaciones",
     "Subir archivo",
     "Cola de identidad",

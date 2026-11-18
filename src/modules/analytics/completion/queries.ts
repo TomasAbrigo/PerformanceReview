@@ -10,6 +10,12 @@ import {
 } from "@/modules/analytics/dashboards/scope";
 import type { DashboardFilters } from "@/modules/analytics/dashboards/types";
 import { insightsScope } from "@/modules/insights/authz";
+import { groupKeyer } from "@/modules/org-attributes/group-key";
+import {
+  type GroupKeyer,
+  needsKeyer,
+  type OrgFilters,
+} from "@/modules/org-attributes/kinds";
 import { ReviewError } from "@/modules/review-core/review-errors";
 import { getSetting } from "@/modules/settings/service";
 import { missingOf, type SideRow, summarize } from "./derive";
@@ -28,7 +34,7 @@ import {
   type SideStatus,
 } from "./types";
 
-export type CompletionFilters = {
+export type CompletionFilters = OrgFilters & {
   cycleId: string;
   /** Default: department. */
   groupBy?: CompletionGroupBy;
@@ -88,6 +94,7 @@ const sidesCte = sql`
   sides as (
     select s.participant_id, s.person_id, s.name, s.department,
            s.manager_id, s.manager_name,
+           s.account, s.project, s.dm, s.santex_lead,
            case when ap.id is null then 'requests' else 'progress' end as source,
            coalesce(ap.self_status::text, rs.status) as self_status,
            coalesce(ap.manager_status::text, rm.status) as manager_status,
@@ -103,7 +110,7 @@ const sidesCte = sql`
  * their assessment, by manager (named ones first) and name. Authorization is
  * the caller's: `actor` is who `scopedCtes` restricts to.
  */
-async function loadSides(
+export async function loadSides(
   db: DbOrTx,
   actor: ActorContext,
   filters: DashboardFilters,
@@ -116,6 +123,10 @@ async function loadSides(
     department: string | null;
     manager_id: string | null;
     manager_name: string | null;
+    account: string | null;
+    project: string | null;
+    dm: string | null;
+    santex_lead: string | null;
     self_status: SideStatus;
     manager_status: SideStatus;
     has_notes: boolean;
@@ -124,7 +135,8 @@ async function loadSides(
   }>(sql`
     with recursive ${scopedCtes(actor, filters)}, ${sidesCte}
     select sides.person_id, sides.participant_id, sides.name, sides.department,
-           sides.manager_id, sides.manager_name, sides.self_status,
+           sides.manager_id, sides.manager_name, sides.account, sides.project,
+           sides.dm, sides.santex_lead, sides.self_status,
            sides.manager_status, sides.has_notes, sides.source,
            ${email ? sql`pe.work_email` : sql`null::text`} as email
     from sides
@@ -137,6 +149,10 @@ async function loadSides(
     department: r.department,
     managerId: r.manager_id,
     managerName: r.manager_name,
+    account: r.account,
+    project: r.project,
+    dm: r.dm,
+    santexLead: r.santex_lead,
     source: r.source,
     selfStatus: r.self_status,
     managerStatus: r.manager_status,
@@ -144,6 +160,18 @@ async function loadSides(
     ...(email ? { email: r.email } : {}),
   }));
 }
+
+/** The filters People and managers may narrow by (direction has none). */
+const orgScope = (
+  f: OrgFilters & { department?: string; managerId?: string },
+) => ({
+  department: f.department,
+  managerId: f.managerId,
+  account: f.account,
+  project: f.project,
+  dm: f.dm,
+  santexLead: f.santexLead,
+});
 
 /** A request, authorized and with its cycle looked up. */
 type Resolved = {
@@ -154,6 +182,8 @@ type Resolved = {
   groupBy: CompletionGroupBy;
   hierarchy: Hierarchy;
   filters: DashboardFilters;
+  /** Direction grouping by a DM or Santex Lead: teams get an opaque key. */
+  keyOf?: GroupKeyer;
 };
 
 /** Direction's minimum group size: the override, else the setting. */
@@ -180,17 +210,19 @@ async function resolve(
   const cycle = await requireCycle(db, f.cycleId);
   const masked = scope.kind === "aggregatesOnly";
   const hierarchy = f.hierarchy ?? "asOf";
+  const groupBy = f.groupBy ?? "department";
   return {
     cycle,
     masked,
+    ...(masked && needsKeyer(groupBy) ? { keyOf: await groupKeyer(db) } : {}),
     minGroupSize: scope.kind === "aggregatesOnly" ? scope.minGroupSize : null,
     // Direction may group by manager too: a team, never a name (`summarize`).
-    groupBy: f.groupBy ?? "department",
+    groupBy,
     hierarchy,
     filters: {
       cycleId: cycle.id,
       hierarchy,
-      ...(masked ? {} : { department: f.department, managerId: f.managerId }),
+      ...(masked ? {} : orgScope(f)),
     },
   };
 }
@@ -200,7 +232,11 @@ function summaryOf(r: Resolved, rows: SideRow[]): CompletionSummary {
     cycleId: r.cycle.id,
     cycleName: r.cycle.name,
     hierarchy: r.hierarchy,
-    ...summarize(rows, { groupBy: r.groupBy, minGroupSize: r.minGroupSize }),
+    ...summarize(rows, {
+      groupBy: r.groupBy,
+      minGroupSize: r.minGroupSize,
+      keyOf: r.keyOf,
+    }),
   };
 }
 
@@ -233,7 +269,7 @@ export async function completionSummary(
   return summaryOf(r, rows);
 }
 
-export type MissingFilters = {
+export type MissingFilters = OrgFilters & {
   cycleId: string;
   department?: string;
   managerId?: string;
@@ -279,8 +315,7 @@ export async function missingAssessments(
     {
       cycleId: cycle.id,
       hierarchy: f.hierarchy ?? "asOf",
-      department: f.department,
-      managerId: f.managerId,
+      ...orgScope(f),
     },
     { email: !!f.includeEmail && canSeeEmail(actor.role) },
   );

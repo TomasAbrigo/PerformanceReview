@@ -6,15 +6,19 @@ import { connection } from "next/server";
 import { Suspense } from "react";
 import { ExecutiveView } from "@/components/dashboards/executive-view";
 import { CycleForm } from "@/components/insights/cycle-form";
+import { OrgFilterFields } from "@/components/org/org-filter-fields";
+import { orgFiltersOf, parseOrgParams } from "@/components/org/params";
 import {
   ExecutiveReportView,
   ModeToggle,
 } from "@/components/insights/executive-report-view";
 import { db } from "@/db/client";
 import { routing } from "@/i18n/routing";
+import { isHr } from "@/modules/actor/access";
 import { getActor } from "@/modules/actor/server";
 import { executiveSummary } from "@/modules/analytics/dashboards";
 import { canSeeExecutiveView } from "@/modules/insights";
+import { orgFilterOptions } from "@/modules/org-attributes";
 import {
   executiveModes,
   executiveReport,
@@ -45,11 +49,24 @@ async function Executive({
   const cycle = cycles.find((c) => c.id === sp.cycle) ?? cycles[0];
   if (!cycle) return <p>{t("noCycles")}</p>;
   const minGroupSize = await getSetting(db, "aggregation.minGroupSize");
-  const [report, summary] = await Promise.all([
-    executiveReport(db, actor, { cycleId: cycle.id, mode, minGroupSize }),
+  // The org cuts are People's: direction reads the whole cycle.
+  const hr = isHr(actor);
+  const filters = hr ? orgFiltersOf(parseOrgParams(sp)) : {};
+  const [report, summary, org] = await Promise.all([
+    executiveReport(db, actor, {
+      cycleId: cycle.id,
+      mode,
+      minGroupSize,
+      filters,
+    }),
     mode === "qualitative"
       ? null
-      : executiveSummary(db, actor, { cycleId: cycle.id, minGroupSize }),
+      : executiveSummary(db, actor, {
+          cycleId: cycle.id,
+          minGroupSize,
+          filters,
+        }),
+    hr ? orgFilterOptions(db, actor, { cycleId: cycle.id }) : null,
   ]);
   const dimensionLabel = await dimensionLabels(
     report.sentiment?.map((r) => r.dimension) ?? [],
@@ -64,8 +81,10 @@ async function Executive({
           cycles={cycles.map((c) => ({ id: c.id, name: c.name }))}
           cycleId={cycle.id}
           hidden={{ mode }}
-        />
-        <ModeToggle mode={mode} cycleId={cycle.id} />
+        >
+          <OrgFilterFields params={filters} options={org} />
+        </CycleForm>
+        <ModeToggle mode={mode} cycleId={cycle.id} filters={filters} />
       </div>
       <ExecutiveReportView report={report} dimensionLabel={dimensionLabel} />
       {summary ? (

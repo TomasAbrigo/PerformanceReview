@@ -210,6 +210,7 @@ export async function runIngest<E extends IngestEntity = Entity>({
           source,
           runId: run.id,
           seen,
+          cache,
           reject: (reject) => rejects.push(reject),
         }),
       );

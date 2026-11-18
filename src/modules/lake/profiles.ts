@@ -13,6 +13,8 @@ export const PROFILE_ENTITIES = [
   "assessment",
   "assessment_progress",
   "feedback",
+  // People's file of accounts, projects, DMs and Santex leads per person.
+  "org_attribute",
   // CAP's health check: landed only, its format is still to be defined.
   "health_check",
 ] as const;
@@ -81,11 +83,14 @@ export type CustomQuestionMapping = z.infer<typeof customQuestionSchema>;
  * Bamboo reports). `assessments_report`: Bamboo's raw assessments report
  * (EEID, Review Period Start, labels, custom question pairs).
  * `assessment_status`: the Assessment Progress export grouped by person (a
- * "<name> <employee number>" row, then one row per period).
+ * "<name> <employee number>" row, then one row per period). `org_attributes`:
+ * People's file of account / project / DM / Santex Lead per person and
+ * validity, one record per row keyed by EEID and `Desde`.
  */
 export const PROFILE_FORMATS = [
   "assessments_report",
   "assessment_status",
+  "org_attributes",
 ] as const;
 export type ProfileFormat = (typeof PROFILE_FORMATS)[number];
 
@@ -147,6 +152,12 @@ export const sourceProfileSchema = z.object({
   customQuestions: z.array(customQuestionSchema).optional(),
   /** A superseded shape kept for old exports (shown as legacy). */
   legacy: z.boolean().optional(),
+  /**
+   * Org attributes file: it lists only some of the rows, so what it does not
+   * mention is not dropped. Without it the file is the whole list and an
+   * attribute this source wrote that is not in it is removed.
+   */
+  partial: z.boolean().optional(),
 });
 export type SourceProfile = z.infer<typeof sourceProfileSchema>;
 
@@ -589,6 +600,28 @@ export const ASSESSMENT_STATUS_COLUMNS = {
   notes: "Notas de seguimiento",
 } as const;
 
+/**
+ * The columns of People's org attributes file (docs/org-attributes.md), by
+ * the canonical field each feeds. The profile maps them by exact header and
+ * a saved profile can map any other headers onto the same fields.
+ */
+export const ORG_ATTRIBUTE_COLUMNS = {
+  employee_bamboo_id: ["EEID"],
+  employee_name: ["Nombre", "Name"],
+  account: ["Cuenta", "Account"],
+  project: ["Proyecto", "Project"],
+  dm: ["DM"],
+  santex_lead: ["Santex Lead"],
+  valid_from: ["Desde", "From"],
+  valid_to: ["Hasta", "To"],
+} as const;
+
+const ORG_ATTRIBUTE_MAP: Record<string, string> = Object.fromEntries(
+  Object.entries(ORG_ATTRIBUTE_COLUMNS).flatMap(([field, headers]) =>
+    headers.map((header) => [header, field]),
+  ),
+);
+
 export const builtinProfiles: SourceProfile[] = [
   // Bamboo's raw assessments report (custom report, PRD iteration 3): one row
   // per person and review period, people by EEID (Bamboo employee id) and
@@ -639,6 +672,24 @@ export const builtinProfiles: SourceProfile[] = [
       [ASSESSMENT_STATUS_COLUMNS.notes]: "follow_up_notes",
     },
     optionalColumns: [ASSESSMENT_STATUS_COLUMNS.notes],
+  },
+  // People's file of organizational attributes (issue #85): who is on which
+  // account / project, and whose delivery manager and Santex lead they have,
+  // from which date. Only EEID is required; the other headers are optional
+  // (and have an English alias), so a file may carry just some of the cuts.
+  {
+    name: "org-attributes",
+    table: "org-attributes",
+    // The key is EEID + Desde, built in FileSourceAdapter.
+    keyColumns: ["EEID"],
+    entity: "org_attribute",
+    format: "org_attributes",
+    // Spanish headers, Argentine dates (ISO dates and days above 12 never need it).
+    dateFormat: "dmy",
+    columnMap: ORG_ATTRIBUTE_MAP,
+    optionalColumns: Object.keys(ORG_ATTRIBUTE_MAP).filter(
+      (header) => header !== "EEID",
+    ),
   },
   {
     name: "fivetran-bamboohr-employee",

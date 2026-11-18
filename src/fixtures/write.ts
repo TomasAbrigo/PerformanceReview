@@ -9,6 +9,7 @@ import { SIZE_CONFIG } from "./company/config";
 import { countManagerChanges, groupJobRows } from "./company/job-history";
 import { serializeBambooApi } from "./serialize/bamboo-api";
 import { serializeBambooReports } from "./serialize/bamboo-reports";
+import { serializeOrgAttributes } from "./serialize/org-attributes";
 import { jsonFile, type FixtureFile } from "./serialize/files";
 
 /** Fixed seeds: the committed fixtures are the output of exactly these. */
@@ -56,10 +57,12 @@ export function fixtureFiles(
   const company = generateCompany({ size, seed });
   const api = serializeBambooApi(company);
   const reports = serializeBambooReports(company);
+  const org = serializeOrgAttributes(company);
   return [
     ...api.map((f) => ({ ...f, path: `bamboo/${size}/${f.path}` })),
     manifest(company, api.length),
     ...reports.map((f) => ({ ...f, path: `bamboo-reports/${size}/${f.path}` })),
+    ...org.map((f) => ({ ...f, path: `org/${size}/${f.path}` })),
   ];
 }
 
@@ -78,6 +81,7 @@ export function writeFixtures(
       recursive: true,
       force: true,
     });
+    rmSync(join(rootDir, "org", size), { recursive: true, force: true });
     const files = fixtureFiles(size);
     for (const file of files) {
       const target = join(rootDir, file.path);

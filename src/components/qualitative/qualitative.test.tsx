@@ -13,12 +13,12 @@ import es from "@/messages/es.json";
 import type { CommentRow } from "@/modules/qualitative-analysis/types";
 import { CommentsTable } from "./comments-table";
 import { ImportLabelsForm } from "./import-form";
-import { parseQualitativeParams, withSide } from "./params";
+import { parseQualitativeParams, withGroupBy, withSide } from "./params";
 import { RunButton } from "./run-button";
 import { dimensionLabels } from "./dimension-labels";
 import { QualitativeFilters } from "./filters";
 import { SideToggle } from "./side-toggle";
-import { ByDimension, Indicators, Kpis, Themes, Trend } from "./views";
+import { ByDimension, ByGroup, Indicators, Kpis, Themes, Trend } from "./views";
 
 vi.mock("@/i18n/navigation", () => ({
   Link: ({ href, children, ...rest }: ComponentProps<"a">) => (
@@ -424,5 +424,92 @@ describe("RunButton / ImportLabelsForm / params", () => {
       parseQualitativeParams({ side: "self", sentiment: "mixed" }),
     ).toMatchObject({ side: "self", sentiment: "mixed" });
     expect(parseQualitativeParams({ side: "peer" }).side).toBeUndefined();
+  });
+});
+
+describe("org cuts in the qualitative view", () => {
+  const sentiment = {
+    positive: 2,
+    constructive: 1,
+    neutral: 0,
+    mixed: 0,
+    negative: 1,
+    total: 4,
+  };
+
+  it("the by-group panel names each group with its people, numbering the teams that come without a name", () => {
+    renderIn(
+      "es",
+      <ByGroup
+        rows={[
+          { key: "Cuenta A", label: "Cuenta A", participants: 3, ...sentiment },
+          { key: "g1", label: null, participants: 5, ...sentiment },
+          { key: "g2", label: null, participants: 5, ...sentiment },
+          { key: null, label: null, participants: 1, ...sentiment },
+        ]}
+      />,
+    );
+
+    const panel = screen.getByTestId("sentiment-by-group");
+    expect(
+      within(panel).getByRole("heading", { name: "Sentimiento por grupo" }),
+    ).toBeInTheDocument();
+    const labels = [
+      ...panel.querySelectorAll("table.sr-only tbody th, svg text"),
+    ]
+      .map((n) => n.textContent)
+      .filter((t) => t?.includes("·"));
+    expect(labels).toEqual(
+      expect.arrayContaining([
+        "Cuenta A · 3 personas",
+        "Equipo 1 · 5 personas",
+        "Equipo 2 · 5 personas",
+        "Sin asignar · 1 persona",
+      ]),
+    );
+  });
+
+  it("says there is nothing to show without groups", () => {
+    renderIn("en", <ByGroup rows={[]} />);
+
+    expect(screen.getByTestId("sentiment-by-group")).toBeInTheDocument();
+    expect(screen.getByText(/No/)).toBeInTheDocument();
+  });
+
+  it("the filters offer the org selects and the links keep them", () => {
+    renderIn(
+      "es",
+      <QualitativeFilters
+        params={parseQualitativeParams({ account: "Cuenta A", groupBy: "dm" })}
+        cycles={[]}
+        departments={[]}
+        dimensions={[]}
+        themes={[]}
+        dimensionLabel={{}}
+        showAggregate={false}
+        org={{
+          accounts: ["Cuenta A"],
+          projects: [],
+          dms: ["Diego"],
+          santexLeads: [],
+        }}
+      />,
+    );
+
+    expect(screen.getByLabelText("Cuenta")).toHaveValue("Cuenta A");
+    expect(screen.getByLabelText("DM")).toBeInTheDocument();
+    expect(
+      parseQualitativeParams({ account: "A", groupBy: "dm" }),
+    ).toMatchObject({
+      account: "A",
+      groupBy: "dm",
+    });
+    expect(parseQualitativeParams({ groupBy: "nope" }).groupBy).toBeUndefined();
+    expect(
+      withGroupBy(
+        parseQualitativeParams({ account: "Cuenta A", side: "self" }),
+        "project",
+      ),
+    ).toBe("/insights/qualitative?account=Cuenta+A&groupBy=project&side=self");
   });
 });

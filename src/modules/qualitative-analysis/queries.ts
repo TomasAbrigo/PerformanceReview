@@ -8,6 +8,17 @@ import { analysisTextSql } from "./analysis-text";
 import { effectiveCte } from "./effective";
 import { INITIAL_THEMES } from "./themes";
 import { insightsScope, type InsightsScope } from "@/modules/insights/authz";
+import { groupKeyer } from "@/modules/org-attributes/group-key";
+import {
+  groupIdentity,
+  needsKeyer,
+  withoutPersonFilters,
+} from "@/modules/org-attributes/kinds";
+import {
+  orgAttributeColumns,
+  orgAttributeFilters,
+  orgAttributeJoins,
+} from "@/modules/org-attributes/sql";
 import { getSetting } from "@/modules/settings/service";
 import { AnalysisError } from "./errors";
 import { pseudonymize } from "./pseudonymize";
@@ -15,10 +26,14 @@ import { pseudonymSources } from "./service";
 import {
   type CommentRow,
   type DimensionSentiment,
+  type GroupSentiment,
   type IndicatorSentiment,
+  type ParticipantSentiment,
   pickCounts,
   type QualitativeFilterOptions,
+  type QualitativeGroupBy,
   type QualitativeFilters,
+  qualitativeGroupBys,
   type SentimentCounts,
   type ThemeRank,
   type TrendPoint,
@@ -55,7 +70,8 @@ async function resolve(
   if (scope.kind === "aggregatesOnly") {
     return {
       scope,
-      f: { ...f, aggregateOnly: true },
+      // Direction does not filter by the people who lead a team (DM, Santex Lead).
+      f: { ...withoutPersonFilters(f, true), aggregateOnly: true },
       min: scope.minGroupSize,
       includeClosed,
     };
@@ -79,7 +95,17 @@ function labeledCtes({ scope, f, includeClosed }: Resolved): SQL {
     if (!isUuid(f.cycleId)) throw new AnalysisError("not_found");
     where.push(sql`r.cycle_id = ${f.cycleId}::uuid`);
   }
+  if (f.cycleIds) {
+    const ids = f.cycleIds.map((id) => {
+      if (!isUuid(id)) throw new AnalysisError("not_found");
+      return sql`${id}::uuid`;
+    });
+    where.push(
+      ids.length ? sql`r.cycle_id in (${sql.join(ids, sql`, `)})` : sql`false`,
+    );
+  }
   if (f.department) where.push(sql`cp.snap_department = ${f.department}`);
+  where.push(...orgAttributeFilters(f));
   if (f.dimension) where.push(sql`eff.dimension = ${f.dimension}`);
   if (f.sentiment) where.push(sql`eff.sentiment = ${f.sentiment}`);
   if (f.theme) where.push(sql`${f.theme} = any(eff.themes)`);
@@ -97,7 +123,7 @@ function labeledCtes({ scope, f, includeClosed }: Resolved): SQL {
              c.name as cycle_name, c.period_start::text as period_start,
              c.period_end::text as period_end,
              cp.id as participant_id, p.display_name as person_name,
-             cp.snap_department as department
+             cp.snap_department as department, ${orgAttributeColumns}
       from eff
       join answer a on a.id = eff.answer_id
       join question_revision q on q.id = a.question_revision_id
@@ -105,6 +131,7 @@ function labeledCtes({ scope, f, includeClosed }: Resolved): SQL {
       join cycle_participant cp on cp.id = r.participant_id
       join review_cycle c on c.id = r.cycle_id
       join person p on p.id = cp.reviewee_person_id
+      ${orgAttributeJoins("cp", sql`cp.snapshot_as_of`)}
       where ${sql.join(where, sql` and `)}
     )`;
 }
@@ -129,6 +156,75 @@ export async function sentimentByDimension(
     select dimension, ${countCols}, count(*)::int as total
     from labeled group by dimension ${minGroup(r.min)} order by dimension`);
   return rows.map((r) => ({ dimension: r.dimension, ...counts(r) }));
+}
+
+/**
+ * The sentiment of the comments (open text only, whatever the
+ * `analysis.includeClosed` setting says) of each participant in scope, in
+ * every cycle, for views that build their own groups out of people (the DM
+ * cards, `dm360`). The rows are people: whoever reads them aggregates and
+ * masks. Direction is authorized like everywhere (it reads aggregates), so
+ * its callers must never show a row; People: every participant; a manager:
+ * their direct reports of the snapshot; an employee: nothing.
+ */
+export async function sentimentByParticipant(
+  db: DbOrTx,
+  actor: ActorContext,
+  f: Pick<QualitativeFilters, "cycleId" | "cycleIds" | "relationship"> = {},
+): Promise<ParticipantSentiment[]> {
+  const r = await resolve(db, actor, { ...f, includeClosed: false });
+  if (!r) return [];
+  const rows = await db.execute<SentimentCounts & { participant_id: string }>(
+    sql`
+    with ${labeledCtes(r)}
+    select participant_id, ${countCols}, count(*)::int as total
+    from labeled group by participant_id`,
+  );
+  return rows.map((row) => ({
+    participantId: row.participant_id,
+    ...counts(row),
+  }));
+}
+
+/**
+ * Sentiment counts per group of people: their area or an org attribute
+ * (account, project, DM, Santex Lead, as of each cycle's snapshot), with how
+ * many people are behind each. People see every label and name the groups; a
+ * manager the labels about their direct reports; direction groups of at least
+ * `aggregation.minGroupSize` people, and a DM or Santex Lead is a team (an
+ * opaque key, no label), never a name.
+ */
+export async function sentimentByGroup(
+  db: DbOrTx,
+  actor: ActorContext,
+  f: QualitativeFilters,
+  groupBy: QualitativeGroupBy,
+): Promise<GroupSentiment[]> {
+  // The column is part of the statement: only the known groupings.
+  if (!(qualitativeGroupBys as readonly string[]).includes(groupBy)) {
+    throw new AnalysisError("not_found");
+  }
+  const r = await resolve(db, actor, f);
+  if (!r) return [];
+  const column = sql.raw(groupBy);
+  const rows = await db.execute<
+    SentimentCounts & { value: string | null; participants: number }
+  >(sql`
+    with ${labeledCtes(r)}
+    select ${column} as value, ${countCols}, count(*)::int as total,
+           count(distinct participant_id)::int as participants
+    from labeled group by 1 ${minGroup(r.min)}
+    order by (${column} is null), 1`);
+  const masked = r.scope.kind === "aggregatesOnly";
+  const keyOf =
+    masked && needsKeyer(groupBy) ? await groupKeyer(db) : undefined;
+  return rows.map((row) => ({
+    ...(groupBy === "department"
+      ? { key: row.value, label: row.value }
+      : groupIdentity(groupBy, row.value, masked, keyOf)),
+    participants: row.participants,
+    ...counts(row),
+  }));
 }
 
 /**

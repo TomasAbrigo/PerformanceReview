@@ -1,11 +1,20 @@
 // Drizzle- and server-free: shared by the queries and client components.
 import type { ProgressStatus } from "@/db/schema/import-history";
 import type { Hierarchy } from "@/modules/analytics/dashboards/types";
+import { orgGroupBys } from "@/modules/org-attributes/kinds";
 
 export type { Hierarchy };
 
-/** How the summary splits the participants of a cycle. */
-export const completionGroupBys = ["none", "department", "manager"] as const;
+/**
+ * How the summary splits the participants of a cycle: no split, by area or
+ * manager, or by an org attribute (account, project, DM, Santex Lead).
+ */
+export const completionGroupBys = [
+  "none",
+  "department",
+  "manager",
+  ...orgGroupBys,
+] as const;
 export type CompletionGroupBy = (typeof completionGroupBys)[number];
 
 /** Which side of an assessment is missing, for the "quién falta" list. */
@@ -50,7 +59,11 @@ export type CompletionCounts = {
 };
 
 export type CompletionGroup = CompletionCounts & {
-  /** Department name or manager person id; null: nobody / unassigned / all. */
+  /**
+   * Department name, manager person id or the org attribute's value (for a
+   * DM or Santex Lead, to direction, an opaque key); null: nobody /
+   * unassigned / all.
+   */
   key: string | null;
   label: string | null;
   selfRate: number | null;

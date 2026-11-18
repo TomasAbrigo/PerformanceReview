@@ -40,7 +40,7 @@ afterAll(() => {
 });
 
 describe("fixture layout", () => {
-  it("puts API JSON under bamboo/<size> and report CSVs under bamboo-reports/<size>", () => {
+  it("puts API JSON under bamboo/<size>, report CSVs under bamboo-reports/<size> and the org attributes file under org/<size>", () => {
     for (const size of ["small", "demo"] as const) {
       const paths = fixtureFiles(size).map((f) => f.path);
       expect(paths).toContain(`bamboo/${size}/employees/changed.json`);
@@ -48,6 +48,7 @@ describe("fixture layout", () => {
         `bamboo/${size}/employees/tables/jobInfo/all.json`,
       );
       expect(paths).toContain(`bamboo/${size}/manifest.json`);
+      expect(paths).toContain(`org/${size}/org-attributes.csv`);
       for (const report of [
         "employee-performance",
         "feedback-status",
@@ -101,7 +102,8 @@ describe("committed fixtures", () => {
         Object.entries(tree(repoFixtures)).filter(
           ([path]) =>
             path.startsWith(`bamboo/${size}/`) ||
-            path.startsWith(`bamboo-reports/${size}/`),
+            path.startsWith(`bamboo-reports/${size}/`) ||
+            path.startsWith(`org/${size}/`),
         ),
       );
       expect(Object.keys(onDisk).sort()).toEqual(Object.keys(expected).sort());
