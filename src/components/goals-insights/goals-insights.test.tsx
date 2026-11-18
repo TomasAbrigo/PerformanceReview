@@ -18,7 +18,7 @@ import { GoalsFilters } from "./filters";
 import { GoalsScatter } from "./goals-scatter";
 import { KpisTable } from "./kpis-table";
 import { OutliersView } from "./outliers";
-import { PeopleTable } from "./people-table";
+import { matchesPerson, PeopleTable } from "./people-table";
 import { parseGoalsInsightsParams } from "./url-state";
 
 vi.mock("@/i18n/navigation", () => ({
@@ -619,5 +619,36 @@ describe("org cuts in the goals filters", () => {
     );
 
     expect(screen.getByTestId("kpis-table")).toHaveTextContent("Cuenta A");
+  });
+});
+
+describe("goals insights drills", () => {
+  it("makes each scatter dot a link to the person's assessment", () => {
+    renderIn(
+      "es",
+      <GoalsScatter
+        rows={[row("Ana")]}
+        indicator="retention"
+        hrefFor={(r) => `/es/assessments/c1/${r.participantId}`}
+      />,
+    );
+    const dot = screen.getByRole("link", { name: /Ana/ });
+    expect(dot.getAttribute("href")).toMatch(/^\/es\/assessments\/c1\//);
+  });
+
+  it("links the people list's names and finds a person or a manager, accents ignored", () => {
+    renderIn(
+      "es",
+      <PeopleTable rows={[row("Ana")]} hrefFor={() => "/assessments/c1/p"} />,
+    );
+    expect(screen.getByRole("link", { name: "Ana" })).toHaveAttribute(
+      "href",
+      "/assessments/c1/p",
+    );
+    const r = row("Martín Pérez", { managerName: "Lucía" });
+    expect(matchesPerson(r, "martin")).toBe(true);
+    expect(matchesPerson(r, "lucia")).toBe(true);
+    expect(matchesPerson(r, "zoe")).toBe(false);
+    expect(matchesPerson(r, undefined)).toBe(true);
   });
 });

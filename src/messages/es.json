@@ -1720,7 +1720,10 @@
       "suppressed": "{n, plural, one {# persona en grupos chicos no se muestra} other {# personas en grupos chicos no se muestran}}",
       "totalHidden": "El total se oculta para no revelar los grupos chicos.",
       "unassigned": "Sin asignar",
-      "team": "Equipo {n}"
+      "team": "Equipo {n}",
+      "withoutGoals": "Sin objetivos en el período:",
+      "legendOnTime": "En curso, a tiempo",
+      "legendClosed": "Cerrados"
     },
     "scatter": {
       "title": "¿Quienes cumplen más objetivos tienen mejor {indicator}?",
@@ -1730,7 +1733,8 @@
       "point": "{name}: {completed} % de objetivos completados, {indicator} {value}",
       "missing": "{n, plural, one {# persona no aparece} other {# personas no aparecen}} por no tener objetivos o esa respuesta.",
       "riskLine": "Riesgo: {max} o menos",
-      "goalsLine": "Cumplidos: {min} % o más"
+      "goalsLine": "Cumplidos: {min} % o más",
+      "open": "Cada punto abre la evaluación de esa persona, con sus objetivos del período."
     },
     "buckets": {
       "title": "¿Cambian retención y compromiso según el cumplimiento de objetivos?",
@@ -1765,7 +1769,11 @@
         "engagement": "Compromiso",
         "positive": "Comentarios positivos"
       },
-      "noValue": "–"
+      "noValue": "–",
+      "search": "Buscar persona o manager",
+      "searchLabel": "Buscar en personas",
+      "shown": "{n, plural, one {# persona} other {# personas}} de {total}",
+      "clear": "Ver todas"
     },
     "outliers": {
       "title": "Casos que no cuadran",

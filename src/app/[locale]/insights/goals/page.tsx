@@ -17,7 +17,11 @@ import { GoalsScatter } from "@/components/goals-insights/goals-scatter";
 import { KpisTable } from "@/components/goals-insights/kpis-table";
 import { OutliersView } from "@/components/goals-insights/outliers";
 import { orgFiltersOf } from "@/components/org/params";
-import { PeopleTable } from "@/components/goals-insights/people-table";
+import {
+  matchesPerson,
+  PeopleSearch,
+  PeopleTable,
+} from "@/components/goals-insights/people-table";
 import {
   hrefWith,
   parseGoalsInsightsParams,
@@ -52,10 +56,9 @@ async function GoalsInsights({
   if (scope.kind === "none") return <p role="alert">{t("forbidden")}</p>;
   const aggregates = scope.kind === "aggregatesOnly";
   // Direction does not filter by the people who lead a team (a DM, a Santex Lead).
-  const p = withoutPersonFilters(
-    parseGoalsInsightsParams(await searchParams),
-    aggregates,
-  );
+  const sp = await searchParams;
+  const p = withoutPersonFilters(parseGoalsInsightsParams(sp), aggregates);
+  const who = typeof sp.who === "string" ? sp.who : undefined;
   // Direction never sees a person: its grouping is the area or the manager.
   const groupBy: GoalGroupBy =
     aggregates && p.groupBy === "person" ? "department" : p.groupBy;
@@ -87,6 +90,10 @@ async function GoalsInsights({
     },
   });
   const here = "/insights/goals";
+  // A person's drill: their assessment of the cycle, goals of the period beside.
+  const assessmentOf = (participantId: string) =>
+    `/assessments/${cycle.id}/${participantId}`;
+  const people = vs.rows.filter((r) => matchesPerson(r, who));
   // CSV exports go through the API (People's visibility): offered to People only.
   const csv = (file: string, extra: Record<string, string> = {}) =>
     actor.role === "hr" ? (
@@ -164,6 +171,7 @@ async function GoalsInsights({
             rows={vs.rows}
             indicator={p.indicator}
             thresholds={outliers.thresholds}
+            hrefFor={(r) => `/${locale}${assessmentOf(r.participantId)}`}
           />
         </Panel>
       ) : null}
@@ -183,7 +191,17 @@ async function GoalsInsights({
       </Panel>
       {vs.rows.length > 0 ? (
         <Panel id="goal-people" title={t("people.title")}>
-          <PeopleTable rows={vs.rows} />
+          <PeopleSearch
+            value={who}
+            shown={people.length}
+            total={vs.rows.length}
+            hidden={{ ...shown, groupBy, indicator: p.indicator }}
+            clearHref={`${hrefWith(here, shown)}#goal-people`}
+          />
+          <PeopleTable
+            rows={people}
+            hrefFor={(r) => assessmentOf(r.participantId)}
+          />
         </Panel>
       ) : null}
     </div>

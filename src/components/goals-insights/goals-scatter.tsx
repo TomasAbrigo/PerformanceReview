@@ -17,11 +17,14 @@ export function GoalsScatter({
   rows,
   indicator,
   thresholds,
+  hrefFor,
 }: {
   rows: GoalIndicatorRow[];
   indicator: Indicator;
   /** Reference lines: the risk threshold and the goals "done" share. */
   thresholds?: GoalOutlierThresholds;
+  /** Where a dot leads (the person's assessment); none, no links. */
+  hrefFor?: (row: GoalIndicatorRow) => string;
 }) {
   const f = useChartFormat();
   const t = useTranslations("GoalsInsights");
@@ -64,6 +67,7 @@ export function GoalsScatter({
           x: d.x,
           y: d.y,
           tip: pointLabel(d),
+          href: hrefFor?.(d.row),
         }))}
         xDomain={[0, 100]}
         yDomain={[0.5, 5.5]}
@@ -75,6 +79,9 @@ export function GoalsScatter({
         yTitle={t("scatter.yAxis", { indicator: name })}
         refs={refs}
       />
+      {hrefFor ? (
+        <p className="text-sm text-muted-foreground">{t("scatter.open")}</p>
+      ) : null}
       {missing > 0 ? (
         <p className="text-sm text-muted-foreground">
           {t("scatter.missing", { n: missing })}

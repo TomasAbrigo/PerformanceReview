@@ -83,7 +83,7 @@ function Group({
           : t("count", { n: group.count })}
       </p>
       {group.people.length > 0 ? (
-        <CardCollection gridClassName="dense-list" initialCount={8}>
+        <CardCollection gridClassName="dense-list" initialCount={5}>
           {group.people.map(person)}
         </CardCollection>
       ) : group.count === 0 ? (
