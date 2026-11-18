@@ -9,6 +9,9 @@ export const settingRanges = {
   "alerts.riskThreshold": { min: 1, max: 4 },
   "aggregation.minGroupSize": { min: 2, max: 100 },
   "semester.ambiguityDays": { min: 0, max: 60 },
+  "engagement.cutoffAlto": { min: 1, max: 99 },
+  "engagement.cutoffMedio": { min: 1, max: 99 },
+  "engagement.cutoffRegular": { min: 1, max: 99 },
 } as const;
 
 /** An integer in the key's range; issue codes the UI translates. */
@@ -73,6 +76,23 @@ export const settingDefinitions = {
     schema: z.boolean({ error: "invalid_choice" }),
     default: true,
   },
+  /**
+   * Monthly engagement (docs/engagement-monthly.md): where a 0-1 score becomes
+   * a segment when the file has none, in percent: from `Alto` up is alto, from
+   * `Medio` up medio, from `Regular` up regular, below it bajo.
+   */
+  "engagement.cutoffAlto": {
+    schema: int("engagement.cutoffAlto"),
+    default: 80,
+  },
+  "engagement.cutoffMedio": {
+    schema: int("engagement.cutoffMedio"),
+    default: 60,
+  },
+  "engagement.cutoffRegular": {
+    schema: int("engagement.cutoffRegular"),
+    default: 40,
+  },
 } as const;
 
 export type SettingDefinitions = typeof settingDefinitions;
@@ -115,6 +135,14 @@ export function checkSettings(settings: Settings): FieldIssue[] {
   const issues: FieldIssue[] = [];
   if (settings["semester.h1Start"] >= settings["semester.h2Start"]) {
     issues.push({ path: "semester.h2Start", message: "semester_order" });
+  }
+  if (settings["engagement.cutoffMedio"] >= settings["engagement.cutoffAlto"]) {
+    issues.push({ path: "engagement.cutoffMedio", message: "cutoff_order" });
+  }
+  if (
+    settings["engagement.cutoffRegular"] >= settings["engagement.cutoffMedio"]
+  ) {
+    issues.push({ path: "engagement.cutoffRegular", message: "cutoff_order" });
   }
   return issues;
 }

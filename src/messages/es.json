@@ -25,7 +25,7 @@
   },
   "InsightsSettings": {
     "title": "Configuración de insights",
-    "description": "Umbrales de alerta, tamaño mínimo de grupo, cortes de semestre y proveedor de análisis. Solo People puede cambiarlos y cada cambio queda en el registro de auditoría.",
+    "description": "Umbrales de alerta, tamaño mínimo de grupo, cortes de semestre, cortes de engagement mensual y proveedor de análisis. Solo People puede cambiarlos y cada cambio queda en el registro de auditoría.",
     "alerts": {
       "title": "Alertas",
       "dropThreshold": "Caída mínima entre ciclos (puntos)",
@@ -66,7 +66,15 @@
       "invalid_choice": "Elegí una opción de la lista.",
       "semester_order": "El segundo semestre tiene que empezar después del primero.",
       "unknown_key": "Configuración desconocida.",
-      "invalid": "Valor inválido."
+      "invalid": "Valor inválido.",
+      "cutoff_order": "Los cortes tienen que bajar de Alto a Medio y de Medio a Regular."
+    },
+    "engagement": {
+      "title": "Engagement mensual",
+      "cutoffAlto": "Segmento Alto desde (% del score)",
+      "cutoffMedio": "Segmento Medio desde (% del score)",
+      "cutoffRegular": "Segmento Regular desde (% del score)",
+      "hint": "Solo se usan cuando el archivo no trae la columna Segmento: por debajo de Regular el segmento es Bajo."
     }
   },
   "Common": {
@@ -571,7 +579,8 @@
       "orgHint": "Las filas se importan como atributos organizacionales de cada persona (cuenta, proyecto, DM y Santex Lead, con su vigencia) por EEID; los EEID que no coinciden con nadie esperan en la cola de identidad.",
       "partialFile": "Archivo parcial (no dar de baja lo que no viene en el archivo)",
       "partialHint": "Solo se agregan y actualizan los atributos del archivo; lo que el archivo no menciona se conserva.",
-      "completeHint": "El archivo es la lista completa: los atributos de esta fuente que ya no vienen en él se dan de baja (solo de las columnas que trae)."
+      "completeHint": "El archivo es la lista completa: los atributos de esta fuente que ya no vienen en él se dan de baja (solo de las columnas que trae).",
+      "engagementHint": "Las filas se importan como engagement mensual de cada persona (score de 0 a 1 y segmento por mes) por EEID; si el archivo no trae segmento se calcula con los cortes de la configuración de insights, y los EEID que no coinciden con nadie esperan en la cola de identidad. Un archivo agrega y corrige meses, nunca borra los que no lista."
     },
     "roles": {
       "key": "Clave",
@@ -664,8 +673,8 @@
       "assessment": "Evaluaciones",
       "feedback": "Feedback",
       "assessment_progress": "Progreso de evaluaciones",
-      "health_check": "Health check (CAP)",
-      "org_attribute": "Atributos organizacionales"
+      "org_attribute": "Atributos organizacionales",
+      "engagement_monthly": "Engagement mensual"
     },
     "result": {
       "title": "Importación terminada",
@@ -975,7 +984,16 @@
       "completed_pct": "% completados",
       "in_progress_pct": "% en curso",
       "overdue_pct": "% vencidos",
-      "outlier_kind": "tipo"
+      "outlier_kind": "tipo",
+      "period_start": "inicio del período",
+      "period_end": "fin del período",
+      "valued_mean": "valoración propia (promedio 1-4)",
+      "valued_n": "valoración propia (personas)",
+      "retention_mean": "retención (promedio 1-5)",
+      "retention_n": "retención (personas)",
+      "engagement_mean": "compromiso Bamboo (promedio 1-5)",
+      "engagement_n": "compromiso Bamboo (personas)",
+      "goals_completed_pct": "goals completados (%)"
     }
   },
   "ImportHistory": {
@@ -1475,26 +1493,6 @@
       "rowSelf": "{dimension} · autoevaluación",
       "rowManager": "{dimension} · manager"
     },
-    "HealthCheck": {
-      "nav": "Health check (CAP)",
-      "title": "Health check (CAP)",
-      "pending": "Formato pendiente de definir",
-      "pendingHint": "Los archivos de health check se importan con el perfil cap-health-check y quedan guardados tal cual (aterrizados), sin interpretar columnas, hasta que se defina el formato.",
-      "files": "Archivos importados",
-      "runs": "Importaciones",
-      "rows": "Filas aterrizadas",
-      "lastLanded": "Última importación",
-      "never": "Nunca",
-      "upload": "Subir un archivo de health check",
-      "questionsTitle": "Preguntas abiertas",
-      "questions": {
-        "format": "Formato: ¿qué columnas trae el archivo y en qué tipo de archivo llega (CSV, Excel, export de una encuesta)?",
-        "period": "Período: ¿cada cuánto se hace y cómo se asocia a un ciclo o semestre?",
-        "personKey": "Clave de persona: ¿las respuestas son anónimas, por equipo o por persona (email, legajo)?",
-        "scale": "Escala: ¿qué escala usan las respuestas (1 a 5, semáforo, texto libre) y cómo se interpreta?"
-      },
-      "versionNote": "Cada fila se identifica por el archivo y su posición: subir el mismo archivo otra vez no cambia nada, y un archivo editado se guarda como una versión nueva (las filas anteriores no se reconcilian)."
-    },
     "Executive": {
       "nav": "Vista ejecutiva",
       "title": "Vista ejecutiva",
@@ -1645,7 +1643,25 @@
       "peer": "Pares",
       "upward": "Ascendente"
     },
-    "dm": "DM"
+    "dm": "DM",
+    "engagement": {
+      "title": "Engagement mensual",
+      "evolution": "Score promedio por mes",
+      "bySegment": "Personas por segmento y por mes",
+      "month": "Mes",
+      "people": "Personas",
+      "respondents": "Respondieron",
+      "participation": "Participación",
+      "meanScore": "Score promedio",
+      "underMinimum": "Menos que el grupo mínimo: no se muestra.",
+      "segments": {
+        "alto": "Alto",
+        "medio": "Medio",
+        "regular": "Regular",
+        "bajo": "Bajo",
+        "falta": "Falta"
+      }
+    }
   },
   "Completion": {
     "nav": "Completitud",
@@ -1742,6 +1758,26 @@
     "export": {
       "csv": "Exportar CSV",
       "csvEmail": "Exportar CSV con email"
+    },
+    "period": {
+      "title": "Detalle por período",
+      "hint": "Un renglón por ciclo, del más viejo al más nuevo, con los mismos filtros de cuenta, proyecto, DM, Santex Lead, área y manager de la vista (no con el agrupar por). Las medias de valoración propia (1 a 4), retención y compromiso de Bamboo (1 a 5) llevan las personas detrás. Los goals completados son el estado en Bamboo.",
+      "hintAggregates": "Un renglón por ciclo, del más viejo al más nuevo, solo agregados: la cifra de un ciclo con menos personas que el mínimo no se muestra.",
+      "label": "Detalle por período",
+      "empty": "Todavía no hay ciclos lanzados.",
+      "hidden": "Oculto",
+      "people": "({n, plural, one {# persona} other {# personas}})",
+      "goalsOf": "de {n}",
+      "columns": {
+        "cycle": "Ciclo",
+        "n": "Personas",
+        "self": "Autoevaluación",
+        "manager": "Evaluación del manager",
+        "valued": "Valoración propia (1-4)",
+        "retention": "Retención (1-5)",
+        "engagement": "Compromiso Bamboo (1-5)",
+        "goals": "Goals completados"
+      }
     }
   },
   "GoalsInsights": {
@@ -1980,5 +2016,67 @@
     "project": "Proyecto",
     "dm": "DM",
     "santexLead": "Santex Lead"
+  },
+  "Engagement": {
+    "nav": "Engagement mensual",
+    "title": "Engagement mensual",
+    "forbidden": "No tenés acceso al engagement mensual.",
+    "noData": "Todavía no hay engagement mensual: importá el archivo con el perfil engagement-monthly en Importar archivo.",
+    "hidden": "Oculto",
+    "hint": {
+      "all": "Score promedio, participación y segmentos por mes de todas las personas del archivo, con los cortes organizacionales como se tenían al final de cada mes.",
+      "reports": "Tus reportes directos de cada mes.",
+      "aggregates": "Solo agregados: los meses con menos de {min} personas (o menos de {min} scores) no se muestran, ni los segmentos con menos de {min} personas; sin cortes por DM ni Santex Lead."
+    },
+    "filters": {
+      "label": "Filtros de engagement mensual",
+      "from": "Desde",
+      "to": "Hasta",
+      "department": "Área",
+      "any": "Todas",
+      "apply": "Aplicar"
+    },
+    "line": {
+      "title": "Evolución",
+      "hint": "Score promedio de quienes respondieron (0 a 100) y participación: el porcentaje de las personas del mes que respondieron.",
+      "chartLabel": "Score promedio y participación por mes",
+      "score": "Score promedio",
+      "participation": "Participación",
+      "point": "{month}: {value}"
+    },
+    "segments": {
+      "title": "Segmentos por mes",
+      "hint": "Cada barra es el 100 % de las personas del mes repartido por segmento; Falta son quienes no respondieron.",
+      "chartLabel": "Personas por segmento y por mes",
+      "hiddenMonth": "{month}: mes oculto por tamaño de grupo",
+      "hiddenCells": "{month}: segmentos ocultos por tamaño de grupo"
+    },
+    "segment": {
+      "alto": "Alto",
+      "medio": "Medio",
+      "regular": "Regular",
+      "bajo": "Bajo",
+      "falta": "Falta"
+    },
+    "table": {
+      "title": "Detalle por mes",
+      "month": "Mes",
+      "people": "Personas",
+      "respondents": "Respondieron",
+      "participation": "Participación",
+      "mean": "Score promedio",
+      "under": "Menos de {min} personas: no se muestra.",
+      "hiddenMonths": "{count, plural, one {# mes} other {# meses}} sin mostrar por tener menos de {min} personas."
+    },
+    "tile": {
+      "title": "Engagement mensual",
+      "month": "Último mes con datos: {month}",
+      "mean": "Score promedio",
+      "participation": "Participación",
+      "vsPrevious": "{delta} puntos frente al mes anterior",
+      "hidden": "Menos de {min} personas: no se muestra.",
+      "segments": "Segmentos",
+      "link": "Ver la evolución"
+    }
   }
 }

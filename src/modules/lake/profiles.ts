@@ -15,8 +15,8 @@ export const PROFILE_ENTITIES = [
   "feedback",
   // People's file of accounts, projects, DMs and Santex leads per person.
   "org_attribute",
-  // CAP's health check: landed only, its format is still to be defined.
-  "health_check",
+  // The monthly engagement file: score 0-1 and segment per person and month.
+  "engagement_monthly",
 ] as const;
 export type ProfileEntity = (typeof PROFILE_ENTITIES)[number];
 
@@ -85,12 +85,15 @@ export type CustomQuestionMapping = z.infer<typeof customQuestionSchema>;
  * `assessment_status`: the Assessment Progress export grouped by person (a
  * "<name> <employee number>" row, then one row per period). `org_attributes`:
  * People's file of account / project / DM / Santex Lead per person and
- * validity, one record per row keyed by EEID and `Desde`.
+ * validity, one record per row keyed by EEID and `Desde`. `engagement_monthly`:
+ * the monthly engagement file (EEID, Mes, Score, Segmento), keyed by EEID and
+ * month.
  */
 export const PROFILE_FORMATS = [
   "assessments_report",
   "assessment_status",
   "org_attributes",
+  "engagement_monthly",
 ] as const;
 export type ProfileFormat = (typeof PROFILE_FORMATS)[number];
 
@@ -111,7 +114,7 @@ export const sourceProfileSchema = z.object({
    * ordinal (`row:<sha256(file sha256 + row index)>`): identical rows are
    * kept, the same file lands unchanged, and an edited file lands as a new
    * version (its old rows are not reconciled).
-   * For files whose format is not defined yet (CAP's health check).
+   * For files whose format is not defined yet.
    */
   syntheticKey: z.boolean().optional(),
   /** Change-tracking column for incremental reads (e.g. _fivetran_synced). */
@@ -622,6 +625,26 @@ const ORG_ATTRIBUTE_MAP: Record<string, string> = Object.fromEntries(
   ),
 );
 
+/**
+ * The columns of the monthly engagement file (docs/engagement-monthly.md), by
+ * the canonical field each feeds. EEID and Mes identify the row; Score (0-1)
+ * and Segmento are each optional (the segment is derived from the score when
+ * missing), and a saved profile can map any other headers onto the fields.
+ */
+export const ENGAGEMENT_COLUMNS = {
+  employee_bamboo_id: ["EEID"],
+  employee_name: ["Nombre", "Name"],
+  month: ["Mes"],
+  score: ["Score"],
+  segment: ["Segmento"],
+} as const;
+
+const ENGAGEMENT_MAP: Record<string, string> = Object.fromEntries(
+  Object.entries(ENGAGEMENT_COLUMNS).flatMap(([field, headers]) =>
+    headers.map((header) => [header, field]),
+  ),
+);
+
 export const builtinProfiles: SourceProfile[] = [
   // Bamboo's raw assessments report (custom report, PRD iteration 3): one row
   // per person and review period, people by EEID (Bamboo employee id) and
@@ -672,6 +695,23 @@ export const builtinProfiles: SourceProfile[] = [
       [ASSESSMENT_STATUS_COLUMNS.notes]: "follow_up_notes",
     },
     optionalColumns: [ASSESSMENT_STATUS_COLUMNS.notes],
+  },
+  // The monthly engagement file (issue #86): score 0-1 and segment per person
+  // and month, from another source than Bamboo. One row per EEID and month.
+  // Before the org attributes file on purpose: that one only needs an EEID, so
+  // the upload (which starts on the first profile a file satisfies) would take
+  // an engagement file for it.
+  {
+    name: "engagement-monthly",
+    table: "engagement-monthly",
+    // The key is EEID + month, built in FileSourceAdapter.
+    keyColumns: ["EEID", "Mes"],
+    entity: "engagement_monthly",
+    format: "engagement_monthly",
+    columnMap: ENGAGEMENT_MAP,
+    optionalColumns: Object.keys(ENGAGEMENT_MAP).filter(
+      (header) => header !== "EEID" && header !== "Mes",
+    ),
   },
   // People's file of organizational attributes (issue #85): who is on which
   // account / project, and whose delivery manager and Santex lead they have,
@@ -858,19 +898,6 @@ export const builtinProfiles: SourceProfile[] = [
       "Manager Status": "manager_status",
       "Follow-up Notes": "follow_up_notes",
     },
-  },
-  {
-    // CAP's health check: its format, period, person key and scale are still
-    // open questions (see /insights/health-check), so the profile assumes no
-    // columns. Rows are landed in raw_record as they come (every column in
-    // `extra`), keyed by an "id" column if the file has one, else by the
-    // file's hash and the row's ordinal. Mapping them to people and a period is a later step.
-    name: "cap-health-check",
-    table: "health-check",
-    keyColumns: ["id"],
-    syntheticKey: true,
-    entity: "health_check",
-    columnMap: {},
   },
 ];
 

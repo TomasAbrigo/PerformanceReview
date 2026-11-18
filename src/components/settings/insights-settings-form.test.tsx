@@ -50,6 +50,15 @@ describe("InsightsSettingsForm", () => {
     expect(screen.getByLabelText("Margen de ambigüedad (días)")).toHaveValue(
       15,
     );
+    expect(
+      screen.getByLabelText("Segmento Alto desde (% del score)"),
+    ).toHaveValue(80);
+    expect(
+      screen.getByLabelText("Segmento Medio desde (% del score)"),
+    ).toHaveValue(60);
+    expect(
+      screen.getByLabelText("Segmento Regular desde (% del score)"),
+    ).toHaveValue(40);
     expect(screen.getByLabelText("Proveedor")).toHaveValue("mock");
     expect(
       screen.getByLabelText("Analizar también las preguntas cerradas"),

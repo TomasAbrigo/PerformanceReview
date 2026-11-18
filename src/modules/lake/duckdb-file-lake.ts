@@ -107,8 +107,11 @@ export class DuckDbFileLake implements LakeAdapter {
      * DuckDB would guess a date format per column, and a column whose days
      * are all <= 12 could be read day-first). Dates are then parsed by the
      * importer with the profile's dateFormat.
+     * `tmpDir`: where the temporary folder of the `.xlsx` conversions is made
+     * (default the OS temp folder); give each lake its own to know exactly
+     * which files are its own.
      */
-    options: { allText?: boolean } = {},
+    options: { allText?: boolean; tmpDir?: string } = {},
   ): Promise<DuckDbFileLake> {
     const listing = new Map<string, string>(); // table -> file name
     for (const file of await readdir(dir)) {
@@ -143,7 +146,9 @@ export class DuckDbFileLake implements LakeAdapter {
           files.set(table, { path, textOnly: options.allText === true });
           continue;
         }
-        conversions ??= await mkdtemp(join(tmpdir(), "lake-xlsx-conv-"));
+        conversions ??= await mkdtemp(
+          join(options.tmpDir ?? tmpdir(), "lake-xlsx-conv-"),
+        );
         const csvPath = join(conversions, `${table}.csv`);
         await writeFile(csvPath, await xlsxToCsv(path));
         files.set(table, { path: csvPath, textOnly: true });

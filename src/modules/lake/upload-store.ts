@@ -48,6 +48,11 @@ export type UploadStore = {
   profilesDir?: string;
   /** Size limit in bytes, default {@link UPLOAD_MAX_BYTES}. */
   maxBytes?: number;
+  /**
+   * Where the temporary folders of an inspection or import are made (default
+   * the OS temp folder): tests give each store its own.
+   */
+  tmpDir?: string;
 };
 
 // Always absolute: a relative UPLOADS_DIR (the usual way to write it) would

@@ -5,7 +5,7 @@ import { eq, sql } from "drizzle-orm";
 import { afterAll, afterEach, beforeEach, describe, expect, it } from "vitest";
 import { closeDb, db } from "@/db/client";
 import { ingestRun, rawRecord } from "@/db/schema";
-import { type SourceProfile } from "./profiles";
+import { type SourceProfile, sourceProfileSchema } from "./profiles";
 import {
   importUpload,
   listProfiles,
@@ -446,17 +446,27 @@ describe("importUpload of a Bamboo performance report (domain mode)", () => {
     await db.execute(sql`TRUNCATE review_cycle, identity_match_issue CASCADE`);
   }, 60_000);
 
-  it("lands a CAP health check with any headers, keyed by a row hash", async () => {
+  it("lands a file with any headers (syntheticKey profile), keyed by a row hash", async () => {
     const csv =
       "Equipo,Pregunta libre,Puntaje\nPlataforma,Todo bien,4\nDatos,Falta foco,2\nDatos,Falta foco,2\n";
     const stored = await storeUpload(
-      { name: "health-check.csv", bytes: Buffer.from(csv) },
+      { name: "any-columns.csv", bytes: Buffer.from(csv) },
       store,
     );
     const input = {
       uploadId: stored.id,
-      fileName: "health-check.csv",
-      profile: builtin("cap-health-check"),
+      fileName: "any-columns.csv",
+      profile: {
+        custom: sourceProfileSchema.parse({
+          name: "any-columns",
+          table: "any-columns",
+          keyColumns: ["id"],
+          syntheticKey: true,
+          entity: "goal",
+          columnMap: {},
+        }),
+        replace: true,
+      } satisfies ProfileChoice,
       db,
       store,
     };
@@ -465,7 +475,7 @@ describe("importUpload of a Bamboo performance report (domain mode)", () => {
     // Two identical rows: both kept (keyed by file and ordinal).
     expect(counts).toMatchObject({ read: 3, inserted: 3, rejected: 0 });
     const records = await db.select().from(rawRecord);
-    expect(records.map((r) => r.entity)).toEqual(Array(3).fill("health_check"));
+    expect(records.map((r) => r.entity)).toEqual(Array(3).fill("goal"));
     expect(records.every((r) => r.sourceId.startsWith("row:"))).toBe(true);
     expect(new Set(records.map((r) => r.sourceId)).size).toBe(3);
     // Landing the same rows again writes nothing new.

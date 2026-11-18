@@ -20,6 +20,7 @@ import {
   upsertFeedback,
 } from "@/modules/import-history";
 import type { DeferredRow } from "@/modules/import-history/decision";
+import { stagedEngagementSchema, upsertEngagement } from "@/modules/engagement";
 import {
   reconcileOrgAttributes,
   stagedOrgAttributeSchema,
@@ -240,6 +241,12 @@ export const entityHandlers: Partial<
     upsert: upsertOrgAttributes,
     // The file is the whole list: what it no longer has is dropped.
     finish: (db, run) => reconcileOrgAttributes(db, run),
+  }),
+  // The monthly engagement file (files only): see engagement.
+  engagement_monthly: defineHandler({
+    schema: stagedEngagementSchema,
+    counts: { issues: 0, ignored: 0 },
+    upsert: upsertEngagement,
   }),
   feedback: defineHandler({
     schema: stagedFeedbackSchema,

@@ -15,7 +15,6 @@ import type {
 import type { SelfAssessmentReport } from "@/modules/insights/self-assessment";
 import { CompletionTable } from "./completion-table";
 import { ExecutiveReportView, ModeToggle } from "./executive-report-view";
-import { HealthCheckView } from "./health-check-view";
 import { SelfAssessmentView } from "./self-assessment-view";
 
 vi.mock("@/i18n/navigation", () => ({
@@ -178,47 +177,6 @@ describe("SelfAssessmentView", () => {
   });
 });
 
-describe("HealthCheckView", () => {
-  it.each(locales)(
-    "shows the landed counts and the open questions (%s)",
-    (locale) => {
-      renderIn(
-        locale,
-        <HealthCheckView
-          data={{
-            runs: 3,
-            files: 2,
-            rows: 5,
-            lastLandedAt: new Date("2026-05-02T10:00:00Z"),
-          }}
-        />,
-      );
-      expect(screen.getByRole("status")).toHaveTextContent(
-        locale === "es"
-          ? "Formato pendiente de definir"
-          : "Format to be defined",
-      );
-      expect(screen.getByTestId("health-check-files")).toHaveTextContent("2");
-      expect(screen.getByTestId("health-check-runs")).toHaveTextContent("3");
-      expect(screen.getByTestId("health-check-rows")).toHaveTextContent("5");
-      const questions = screen.getByRole("list", {
-        name: locale === "es" ? "Preguntas abiertas" : "Open questions",
-      });
-      expect(within(questions).getAllByRole("listitem")).toHaveLength(4);
-    },
-  );
-
-  it("nothing landed yet", () => {
-    renderIn(
-      "es",
-      <HealthCheckView
-        data={{ runs: 0, files: 0, rows: 0, lastLandedAt: null }}
-      />,
-    );
-    expect(screen.getByText("Nunca")).toBeVisible();
-  });
-});
-
 describe("ExecutiveReportView", () => {
   const full: ExecutiveReport = {
     cycleId: "c1",
@@ -323,6 +281,89 @@ describe("ExecutiveReportView", () => {
       });
     }
   }
+
+  it.each(locales)(
+    "shows the latest month of the monthly engagement with its segments and a link (%s)",
+    (locale) => {
+      renderIn(
+        locale,
+        <ExecutiveReportView
+          report={{
+            ...full,
+            engagementMonthly: {
+              minGroupSize: null,
+              previous: null,
+              latest: {
+                month: "2026-02-01",
+                hidden: false,
+                people: 10,
+                respondents: 8,
+                participation: 0.8,
+                mean: 0.62,
+                segments: { alto: 2, medio: 3, regular: 2, bajo: 1, falta: 2 },
+              },
+            },
+          }}
+          dimensionLabel={dims(locale)}
+        />,
+      );
+      const tile = screen.getByTestId("exec-engagement-monthly");
+      expect(tile).toHaveTextContent(locale === "es" ? "0,62" : "0.62");
+      expect(tile).toHaveTextContent(locale === "es" ? "80 %" : "80%");
+      expect(tile).toHaveTextContent(
+        locale === "es" ? /febrero de 2026/ : /February 2026/,
+      );
+      const segments = within(tile).getByRole("list", {
+        name: locale === "es" ? "Segmentos" : "Segments",
+      });
+      expect(within(segments).getAllByRole("listitem")).toHaveLength(5);
+      expect(within(tile).getByRole("link")).toHaveAttribute(
+        "href",
+        "/insights/engagement",
+      );
+    },
+  );
+
+  it("the monthly engagement tile is hidden for direction under the minimum, empty without data", () => {
+    const hidden = {
+      month: "2026-02-01",
+      hidden: true,
+      people: null,
+      respondents: null,
+      participation: null,
+      mean: null,
+      segments: null,
+    };
+    const { unmount } = renderIn(
+      "es",
+      <ExecutiveReportView
+        report={{
+          ...full,
+          minGroupSize: 5,
+          engagementMonthly: {
+            latest: hidden,
+            previous: null,
+            minGroupSize: 5,
+          },
+        }}
+        dimensionLabel={dims("es")}
+      />,
+    );
+    expect(screen.getByTestId("exec-engagement-monthly")).toHaveTextContent(
+      "Menos de 5 personas: no se muestra.",
+    );
+    unmount();
+    renderIn(
+      "es",
+      <ExecutiveReportView
+        report={{ ...full, engagementMonthly: null }}
+        dimensionLabel={dims("es")}
+      />,
+    );
+    expect(screen.getByTestId("exec-engagement-monthly")).toHaveTextContent(
+      "Sin datos para mostrar.",
+    );
+  });
 
   it("direction: masked tiles say they are hidden", () => {
     renderIn(

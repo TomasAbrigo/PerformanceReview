@@ -4,6 +4,7 @@ import { closeDb, db, type Database } from "@/db/client";
 import {
   assessmentProgress,
   cycleParticipant,
+  engagementMonthly,
   identityMatchIssue,
   ingestRun,
   personOrgAttribute,
@@ -24,6 +25,7 @@ async function snapshot() {
   const [orgAttributes] = await db
     .select({ n: count() })
     .from(personOrgAttribute);
+  const [engagement] = await db.select({ n: count() }).from(engagementMonthly);
   const [answers] = await db.execute<{ n: number }>(
     sql`select count(*)::int as n from answer`,
   );
@@ -33,6 +35,7 @@ async function snapshot() {
     progress: progress.n,
     labels: labels.n,
     orgAttributes: orgAttributes.n,
+    engagement: engagement.n,
     answers: answers.n,
   };
 }
@@ -86,6 +89,24 @@ describe("seed with reports and analysis (small)", () => {
       .select({ entity: identityMatchIssue.entity })
       .from(identityMatchIssue);
     expect(queued.some((i) => i.entity === "org_attribute")).toBe(false);
+  });
+
+  it("loads the monthly engagement of the people, every segment included, and leaves no EEID unmatched", async () => {
+    expect(first.engagement).toBeGreaterThan(200);
+    const file = firstRun.reports.find(
+      (r) => r.profile === "engagement-monthly",
+    )!;
+    expect(file.counts).toMatchObject({ rejected: 0, issues: 0 });
+    const segments = await db.execute<{ segment: string }>(
+      sql`select distinct segment::text from engagement_monthly`,
+    );
+    expect(segments.map((s) => s.segment).sort()).toEqual([
+      "alto",
+      "bajo",
+      "falta",
+      "medio",
+      "regular",
+    ]);
   });
 
   it("records the runs like an upload: profile, file and hash in params (reprocess and resume read them)", async () => {

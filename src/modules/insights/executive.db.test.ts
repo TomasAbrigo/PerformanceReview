@@ -7,6 +7,7 @@ import {
   reset,
   type Scenario,
 } from "@/modules/analytics/indicators/test-support";
+import { insertEngagement } from "@/modules/engagement/test-support";
 import { executiveReport } from "./executive";
 import { buildReportScenario } from "./test-support";
 
@@ -99,6 +100,65 @@ describe("executiveReport", () => {
     // Comments of only 3 people: nothing qualitative shows.
     expect(r.sentiment).toEqual([]);
     expect(r.themes).toEqual([]);
+  });
+
+  it("shows the latest month of the monthly engagement in the quantitative blocks only", async () => {
+    const quantSection = async (actor = hr) =>
+      executiveReport(db, actor, {
+        cycleId: s.c2.cycleId,
+        mode: "quantitative",
+      });
+    expect((await quantSection()).engagementMonthly).toBeNull();
+
+    const people = [
+      s.id.ana,
+      s.id.bruno,
+      s.id.carla,
+      s.id.dario,
+      s.id.elena,
+      s.id.fabio,
+    ];
+    for (const [i, personId] of people.entries()) {
+      await insertEngagement({
+        personId,
+        month: "2026-01-01",
+        score: 0.5,
+        segment: "regular",
+      });
+      await insertEngagement({
+        personId,
+        month: "2026-02-01",
+        score: i < 3 ? 0.9 : 0.7,
+        segment: i < 3 ? "alto" : "medio",
+      });
+    }
+
+    const r = await quantSection();
+    expect(r.engagementMonthly?.latest).toMatchObject({
+      month: "2026-02-01",
+      people: 6,
+      segments: { alto: 3, medio: 3 },
+    });
+    expect(r.engagementMonthly?.latest.mean).toBeCloseTo(0.8);
+    expect(r.engagementMonthly?.previous?.mean).toBeCloseTo(0.5);
+    const qual = await executiveReport(db, hr, {
+      cycleId: s.c2.cycleId,
+      mode: "qualitative",
+    });
+    expect(qual.engagementMonthly).toBeUndefined();
+    // Direction: six people reach the minimum of 5, the cells of 3 do not need to.
+    const masked = await quantSection(direction);
+    expect(masked.engagementMonthly?.latest).toMatchObject({
+      hidden: false,
+      people: 6,
+    });
+    // ... but under it the month is hidden.
+    const strict = await executiveReport(db, direction, {
+      cycleId: s.c2.cycleId,
+      mode: "quantitative",
+      minGroupSize: 7,
+    });
+    expect(strict.engagementMonthly?.latest.hidden).toBe(true);
   });
 
   it("managers and employees: forbidden", async () => {

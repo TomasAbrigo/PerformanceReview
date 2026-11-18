@@ -177,6 +177,24 @@ export function InsightsSettingsForm({
           t("semester.ambiguityDaysHint"),
         )}
       </Section>
+      <Section title={t("engagement.title")}>
+        <p className="text-sm text-muted-foreground">{t("engagement.hint")}</p>
+        {number(
+          "engagement.cutoffAlto",
+          t("engagement.cutoffAlto"),
+          t("engagement.hint"),
+        )}
+        {number(
+          "engagement.cutoffMedio",
+          t("engagement.cutoffMedio"),
+          t("engagement.hint"),
+        )}
+        {number(
+          "engagement.cutoffRegular",
+          t("engagement.cutoffRegular"),
+          t("engagement.hint"),
+        )}
+      </Section>
       <Section title={t("analysis.title")}>
         {field(
           "analysis.provider",

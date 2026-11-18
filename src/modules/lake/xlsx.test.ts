@@ -99,8 +99,13 @@ async function dirWith(files: Record<string, Uint8Array | string>) {
   }
   return dir;
 }
-const conversions = async () =>
-  (await readdir(tmpdir())).filter((name) => name.startsWith("lake-xlsx-conv"));
+/** A folder of its own for one lake's conversions: nothing else writes there. */
+async function scratchDir() {
+  const dir = await mkdtemp(join(tmpdir(), "lake-xlsx-scratch-"));
+  tempDirs.push(dir);
+  return dir;
+}
+const conversionsIn = (scratch: string) => readdir(scratch);
 
 // 46023 = 2026-01-01 (Excel serial); .5 = noon.
 const REPORT: Cell[][] = [
@@ -210,13 +215,16 @@ describe("DuckDbFileLake over xlsx files", () => {
 
   it("removes its temporary csv conversions on close", async () => {
     const dir = await dirWith({ "report.xlsx": buildXlsx(REPORT) });
-    const before = await conversions();
+    const scratch = await scratchDir();
+    expect(await conversionsIn(scratch)).toEqual([]);
 
-    const lake = await DuckDbFileLake.open(dir);
-    expect(await conversions()).toHaveLength(before.length + 1);
+    const lake = await DuckDbFileLake.open(dir, { tmpDir: scratch });
+    const [conversion] = await conversionsIn(scratch);
+    expect(conversion).toMatch(/^lake-xlsx-conv-/);
+    expect(await conversionsIn(scratch)).toHaveLength(1);
     await lake.close();
 
-    expect(await conversions()).toEqual(before);
+    expect(await conversionsIn(scratch)).toEqual([]);
   });
 
   it("refuses an .xlsx and a .csv that claim the same table", async () => {

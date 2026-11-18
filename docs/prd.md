@@ -376,14 +376,14 @@ Entregado por bloque (todo local y con datos sintéticos):
 5. **Retención y compromiso** (#60): `/insights/indicators` con distribución, matriz, alertas por caída y riesgo.
 6. **Análisis cualitativo** (#61): `/insights/qualitative`, `MockProvider` determinista y `AnthropicProvider` (apagado por defecto), seudonimización, correcciones a mano, `analysis:run` y `analysis:import-labels`.
 7. **Goals ↔ assessments** (#62): `/insights/goals` con KPIs de goals y cruce con indicadores.
-8. **Reportes y vista ejecutiva** (#56, #63): roles con Dirección y reglas de autorización, `/settings/insights`, `/insights/executive` (cualitativo, cuantitativo, ambos; enmascarada para Dirección), `/insights/self-assessment` y `/insights/health-check` (formato provisorio).
+8. **Reportes y vista ejecutiva** (#56, #63): roles con Dirección y reglas de autorización, `/settings/insights`, `/insights/executive` (cualitativo, cuantitativo, ambos; enmascarada para Dirección), `/insights/self-assessment` y `/insights/health-check` (formato provisorio; retirado en la iteración 3, #86).
 9. **Export para Arturía y demo** (#64, #65): `pnpm export:arturia` (HTML y JSON autocontenidos, modo anonimizado), seed demo con reportes y análisis (~40 s), e2e `insights-flow` de punta a punta, README y este estado.
 
 Pendiente:
 
 - Validar todo contra exports reales de Bamboo (hoy las columnas de los reportes son supuestas) y acceso a la API (#23).
 - Activar el `AnthropicProvider` sobre datos reales, tras aprobación de People.
-- Formato real del health check de CAP y empaquetado definitivo para Arturía.
+- Formato real del health check de CAP (desde la iteración 3 queda fuera de alcance: vive en CAP) y empaquetado definitivo para Arturía.
 - Login real, roles y RLS; deploy (fuera de alcance).
 
 Preguntas abiertas para People:
@@ -419,3 +419,36 @@ Fecha: 2026-11-17. Fuente: grabación y transcripción de la reunión de relevam
 4. Engagement mensual por archivo, detalle por período en la vista de completitud/indicadores, remoción del placeholder de health check, seed demo, e2e, README y PRD.
 
 Fuera de alcance: health check, conectar fuentes en vivo, NPS/eNPS y asistencia.
+
+## Iteración 3 — Estado al cierre
+
+Fecha: 2026-11-18. Issue padre [#82](https://github.com/TomasAbrigo/PerformanceReview/issues/82); bloques #83 a #86. Todo local y con datos sintéticos; las reglas de autorización y el mínimo n de las vistas de Dirección se mantienen en cada vista nueva.
+
+### Entregado por bloque
+
+1. **Importación de los reportes reales de Bamboo** (#83): perfiles `bamboo-assessments-report` (reporte crudo custom: EEID y email para la identidad, ciclo por `Review Period Start`, pares `Custom Question N` / `Custom Answer N` por ciclo, cerradas como etiqueta en inglés mapeada a la escala: valoración propia 1-4, retención 1-5, compromiso 1-5, "Other" con texto, `Manager At Time Of Assessment` para el mismatch, fechas de completitud) y `bamboo-assessment-status` (Assessment Progress agrupado por persona, "Completed by X" / "No iniciado por X"). Los perfiles de la iteración 2 quedan marcados `legacy`. `pnpm reports:inspect --values` lista los valores distintos solo de las columnas cerradas y de estado. Cortes semestrales por defecto 29/3 y 29/9. Fixtures sintéticos con la forma real. Doc: [likert-mapping.md](likert-mapping.md).
+2. **Análisis cualitativo** (#84): cinco sentimientos (positivo, constructivo, neutral, mixto, negativo) en la base, el Mock, el Anthropic provider y la importación de etiquetas; una dimensión por pregunta (las cerradas incluidas, con el setting `analysis.includeClosed`); filtro Propios / Manager en las vistas y los CSV; vocabulario inicial de temas; lista de comentarios con período, dimensión, sentimiento y temas; informe para Arturía en `schemaMinor` 2. Doc: [qualitative-labels.md](qualitative-labels.md).
+3. **Atributos organizacionales y Análisis 360** (#85): archivo de People con cuenta, proyecto, DM y Santex Lead por persona y vigencia (perfil `org-attributes`, clave EEID, migración 0026), usados como filtro y agrupación en completitud, indicadores, cualitativo, goals, vista ejecutiva y exports CSV; `/insights/360` con una tarjeta por DM; Dirección lee los DM como equipos numerados, sin nombre; informe para Arturía en `schemaMinor` 3. Doc: [org-attributes.md](org-attributes.md).
+4. **Engagement mensual, detalle por período, limpieza y cierre** (#86):
+   - **Engagement mensual** (por archivo, no viene de Bamboo): tabla `engagement_monthly` (migración 0027), perfil `engagement-monthly` (EEID, Mes, Score 0-1, Segmento; el segmento falta se calcula con los cortes del setting `engagement.cutoff*`, 80/60/40), idempotente, EEID sin cruzar a la cola de identidad. Vista `/insights/engagement` (score promedio y participación por mes, segmentos apilados, filtros de rango, área y cortes organizacionales a fin de cada mes), bloque en la vista ejecutiva y sección `engagementMonthly` del informe para Arturía (`schemaMinor` 4). Doc: [engagement-monthly.md](engagement-monthly.md).
+   - **Detalle por período** en `/insights/completion`: por ciclo, N, autoevaluación %, manager %, valoración propia (1-4), retención y compromiso de Bamboo (1-5) promedio y goals completados %, con export CSV y enmascarado para Dirección.
+   - **Health check retirado** (perfil `cap-health-check`, entidad `health_check`, página, mensajes, tests y docs); las migraciones aplicadas no se tocaron y ningún dato de otras entidades se pierde.
+   - **Seed demo y e2e**: `pnpm db:seed --size demo --reset` carga los reportes con la forma real, los atributos organizacionales, el engagement mensual y el análisis Mock (54 s medidos; volver a correrlo, 21 s y no cambia nada); el e2e `insights-flow` recorre completitud, indicadores, cualitativo (cinco sentimientos, propio/manager), 360, engagement, vista ejecutiva y el export anonimizado para Arturía (sin emails, nombres ni URLs externas).
+   - README y este estado.
+
+### Pendiente
+
+- **Validar contra exports reales.** Todo corre con fixtures sintéticos hechos a partir de la descripción del relevamiento: falta correr `pnpm reports:inspect --values` sobre el reporte crudo real para confirmar los textos reales de las etiquetas cerradas (y ajustar el mapeo a la escala si difieren), las columnas y el formato de `Manager At Time Of Assessment`, y cargar los archivos reales de atributos organizacionales y de engagement.
+- **Acceso real a la API de Bamboo** ([#23](https://github.com/TomasAbrigo/PerformanceReview/issues/23)).
+- **Anthropic provider sobre datos reales**, tras la aprobación de People.
+- **Login real, roles y RLS; deploy**: fuera de alcance, sigue el selector "Actuar como".
+- Fuera de alcance de la iteración: health check (vive en CAP), fuentes en vivo, NPS/eNPS y asistencia.
+
+### Preguntas abiertas
+
+- **Textos de las preguntas custom del manager (Q2 y Q3):** el crudo trae el texto de cada pregunta en la celda y cambia entre ciclos; hace falta confirmar cuáles son, qué dimensión corresponde a cada una (hoy `custom_1`, `custom_2`) y si alguna es cerrada.
+- **Textos reales de las etiquetas cerradas:** verificar con `pnpm reports:inspect --values` los valores reales de valoración propia, retención, compromiso y "best work" (incluida la opción "Other").
+- **Fuente del archivo de atributos organizacionales:** quién lo mantiene y con qué cadencia, si el DM y el Santex Lead se escriben por nombre o por EEID, y si el archivo es siempre la lista completa (se puede marcar "Archivo parcial").
+- **Fuente del engagement mensual:** quién genera el archivo, si trae un mes o toda la historia, si trae el segmento o solo el score (los cortes 80/60/40 son un supuesto, editables en `/settings/insights`) y de dónde sale el denominador de la participación (hoy, las personas del archivo ese mes y no el padrón activo).
+- **Restricciones de Arturía:** tamaño máximo, scripts permitidos y autenticación de las mini apps; hoy el informe es un HTML y un JSON autocontenidos sin requests externos (`schemaMinor` 4, ver [arturia-schema.md](arturia-schema.md)).
+- Preferencia de People por el enfoque cualitativo, cuantitativo o ambos en la vista ejecutiva.

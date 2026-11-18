@@ -6,6 +6,7 @@ import { groupKeyer } from "@/modules/org-attributes/group-key";
 import { getSetting } from "@/modules/settings/service";
 import {
   collectCompletion,
+  collectEngagementMonthly,
   collectExecutive,
   collectGoals,
   collectIndicators,
@@ -84,21 +85,30 @@ export async function buildReport(
   const labels = labelsFor(locale);
   const ctx: CollectContext = {
     cycleId: cycle.id,
+    period: { start: cycle.periodStart, end: cycle.periodEnd },
     anonymized: opts.anonymized,
     min: opts.anonymized ? minGroupSize : 1,
     labels,
     teams: await cycleTeams(db, cycle.id, labels.team),
     dms: await cycleDms(db, cycle.id, labels.dm, await groupKeyer(db)),
   };
-  const [executive, completion, indicators, qualitative, goals, people] =
-    await Promise.all([
-      collectExecutive(db, ctx),
-      collectCompletion(db, ctx),
-      collectIndicators(db, ctx),
-      collectQualitative(db, ctx),
-      collectGoals(db, ctx),
-      collectPeople(db, ctx),
-    ]);
+  const [
+    executive,
+    completion,
+    indicators,
+    qualitative,
+    goals,
+    engagementMonthly,
+    people,
+  ] = await Promise.all([
+    collectExecutive(db, ctx),
+    collectCompletion(db, ctx),
+    collectIndicators(db, ctx),
+    collectQualitative(db, ctx),
+    collectGoals(db, ctx),
+    collectEngagementMonthly(db, ctx),
+    collectPeople(db, ctx),
+  ]);
   return arturiaReportV1.parse({
     schemaVersion: SCHEMA_VERSION,
     schemaMinor: SCHEMA_MINOR,
@@ -107,6 +117,14 @@ export async function buildReport(
     cycle,
     anonymized: opts.anonymized,
     minGroupSize,
-    sections: { executive, completion, indicators, qualitative, goals, people },
+    sections: {
+      executive,
+      completion,
+      indicators,
+      qualitative,
+      goals,
+      engagementMonthly,
+      people,
+    },
   });
 }

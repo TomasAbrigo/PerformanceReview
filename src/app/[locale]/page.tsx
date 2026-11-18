@@ -31,6 +31,7 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
   const tDashboards = await getTranslations("Dashboards");
   const tGoalsInsights = await getTranslations("GoalsInsights");
   const tInsights360 = await getTranslations("Insights360");
+  const tEngagement = await getTranslations("Engagement");
   const tCompletion = await getTranslations("Completion");
   const tIndicators = await getTranslations("Indicators");
   const tQualitative = await getTranslations("Qualitative");
@@ -78,14 +79,14 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
             <Link href="/insights/executive" className="underline">
               {tInsights("Executive.nav")}
             </Link>
-            <Link href="/insights/health-check" className="underline">
-              {tInsights("HealthCheck.nav")}
-            </Link>
             <Link href="/insights/goals" className="underline">
               {tGoalsInsights("nav")}
             </Link>
             <Link href="/insights/360" className="underline">
               {tInsights360("nav")}
+            </Link>
+            <Link href="/insights/engagement" className="underline">
+              {tEngagement("nav")}
             </Link>
             <Link href="/imports/runs" className="underline">
               {tImports("nav")}

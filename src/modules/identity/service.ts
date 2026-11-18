@@ -48,7 +48,7 @@ export function summarizePayload(payload: unknown): PayloadSummary {
     failedName?: unknown;
     failedRole?: unknown;
   } | null;
-  // A row of the org attributes file may name nobody but its EEID.
+  // A row of the org attributes or engagement file may name nobody but its EEID.
   const eeid = row?.fields?.employee_bamboo_id;
   const name =
     row?.failedName ??
@@ -332,8 +332,12 @@ export async function resolveIssue(
     if (input.action === "ignore") return settle(resolution);
     if (issue.reason === "conflict") throw new IdentityError("invalid_action");
 
-    // Rows of People's org attributes file name people by EEID: link only.
-    if (issue.entity === "org_attribute") {
+    // Rows of People's org attributes file and of the monthly engagement file
+    // name people by EEID: link only.
+    if (
+      issue.entity === "org_attribute" ||
+      issue.entity === "engagement_monthly"
+    ) {
       if (input.action !== "link") throw new IdentityError("invalid_action");
       if (!input.personId) throw new IdentityError("person_required");
       if (!isUuid(input.personId)) throw new IdentityError("not_found");
@@ -343,9 +347,11 @@ export async function resolveIssue(
         .where(eq(person.id, input.personId));
       if (!target) throw new IdentityError("not_found");
       const settled = await settle(resolution);
-      const { reprocessOrgAttributeRow } =
-        await import("@/modules/org-attributes");
-      if (!(await reprocessOrgAttributeRow(tx, settled))) {
+      const reprocess =
+        issue.entity === "org_attribute"
+          ? (await import("@/modules/org-attributes")).reprocessOrgAttributeRow
+          : (await import("@/modules/engagement")).reprocessEngagementRow;
+      if (!(await reprocess(tx, settled))) {
         throw new IdentityError("invalid_payload");
       }
       return settled;

@@ -25,7 +25,7 @@
   },
   "InsightsSettings": {
     "title": "Insights settings",
-    "description": "Alert thresholds, minimum group size, semester cuts and analysis provider. Only People can change them and every change goes to the audit log.",
+    "description": "Alert thresholds, minimum group size, semester cuts, monthly engagement cutoffs and analysis provider. Only People can change them and every change goes to the audit log.",
     "alerts": {
       "title": "Alerts",
       "dropThreshold": "Minimum drop between cycles (points)",
@@ -66,7 +66,15 @@
       "invalid_choice": "Pick an option from the list.",
       "semester_order": "The second semester must start after the first.",
       "unknown_key": "Unknown setting.",
-      "invalid": "Invalid value."
+      "invalid": "Invalid value.",
+      "cutoff_order": "The cutoffs must go down from High to Medium and from Medium to Regular."
+    },
+    "engagement": {
+      "title": "Monthly engagement",
+      "cutoffAlto": "High segment from (% of the score)",
+      "cutoffMedio": "Medium segment from (% of the score)",
+      "cutoffRegular": "Regular segment from (% of the score)",
+      "hint": "Only used when the file has no Segmento column: below Regular the segment is Low."
     }
   },
   "Common": {
@@ -571,7 +579,8 @@
       "orgHint": "Rows are imported as each person's organizational attributes (account, project, DM and Santex Lead, with their validity) by EEID; EEIDs that match nobody wait in the identity queue.",
       "partialFile": "Partial file (do not drop what the file does not list)",
       "partialHint": "Only the attributes in the file are added and updated; whatever the file does not mention is kept.",
-      "completeHint": "The file is the whole list: attributes of this source that it no longer lists are dropped (only for the columns it has)."
+      "completeHint": "The file is the whole list: attributes of this source that it no longer lists are dropped (only for the columns it has).",
+      "engagementHint": "Rows are imported as each person's monthly engagement (a 0-1 score and a segment per month) by EEID; if the file has no segment it is derived with the cutoffs of the insights settings, and EEIDs that match nobody wait in the identity queue. A file adds and corrects months, it never deletes the ones it does not list."
     },
     "roles": {
       "key": "Key",
@@ -664,8 +673,8 @@
       "assessment": "Assessments",
       "feedback": "Feedback",
       "assessment_progress": "Assessment progress",
-      "health_check": "Health check (CAP)",
-      "org_attribute": "Organizational attributes"
+      "org_attribute": "Organizational attributes",
+      "engagement_monthly": "Monthly engagement"
     },
     "result": {
       "title": "Import finished",
@@ -975,7 +984,16 @@
       "completed_pct": "completed_pct",
       "in_progress_pct": "in_progress_pct",
       "overdue_pct": "overdue_pct",
-      "outlier_kind": "kind"
+      "outlier_kind": "kind",
+      "period_start": "period start",
+      "period_end": "period end",
+      "valued_mean": "valued by the company (mean 1-4)",
+      "valued_n": "valued by the company (people)",
+      "retention_mean": "retention (mean 1-5)",
+      "retention_n": "retention (people)",
+      "engagement_mean": "Bamboo engagement (mean 1-5)",
+      "engagement_n": "Bamboo engagement (people)",
+      "goals_completed_pct": "goals completed (%)"
     }
   },
   "ImportHistory": {
@@ -1475,26 +1493,6 @@
       "rowSelf": "{dimension} · self",
       "rowManager": "{dimension} · manager"
     },
-    "HealthCheck": {
-      "nav": "Health check (CAP)",
-      "title": "Health check (CAP)",
-      "pending": "Format to be defined",
-      "pendingHint": "Health check files are imported with the cap-health-check profile and stored as they are (landed), without interpreting columns, until the format is defined.",
-      "files": "Files imported",
-      "runs": "Imports",
-      "rows": "Rows landed",
-      "lastLanded": "Last import",
-      "never": "Never",
-      "upload": "Upload a health check file",
-      "questionsTitle": "Open questions",
-      "questions": {
-        "format": "Format: which columns does the file have and what kind of file is it (CSV, Excel, a survey export)?",
-        "period": "Period: how often is it run and how does it map to a cycle or semester?",
-        "personKey": "Person key: are answers anonymous, per team or per person (email, employee number)?",
-        "scale": "Scale: which scale do answers use (1 to 5, traffic light, free text) and how is it read?"
-      },
-      "versionNote": "Each row is identified by its file and position: uploading the same file again changes nothing, and an edited file is stored as a new version (earlier rows are not reconciled)."
-    },
     "Executive": {
       "nav": "Executive view",
       "title": "Executive view",
@@ -1645,7 +1643,25 @@
       "peer": "Peers",
       "upward": "Upward"
     },
-    "dm": "DM"
+    "dm": "DM",
+    "engagement": {
+      "title": "Monthly engagement",
+      "evolution": "Mean score by month",
+      "bySegment": "People by segment and month",
+      "month": "Month",
+      "people": "People",
+      "respondents": "Answered",
+      "participation": "Participation",
+      "meanScore": "Mean score",
+      "underMinimum": "Under the minimum group size: not shown.",
+      "segments": {
+        "alto": "High",
+        "medio": "Medium",
+        "regular": "Regular",
+        "bajo": "Low",
+        "falta": "Missing"
+      }
+    }
   },
   "Completion": {
     "nav": "Completion",
@@ -1742,6 +1758,26 @@
     "export": {
       "csv": "Export CSV",
       "csvEmail": "Export CSV with email"
+    },
+    "period": {
+      "title": "Detail by period",
+      "hint": "One row per cycle, oldest first, with the same account, project, DM, Santex Lead, area and manager filters as the view (not the group by). The means of valued by the company (1 to 4), retention and Bamboo engagement (1 to 5) carry the people behind them. Goals completed is the status in Bamboo.",
+      "hintAggregates": "One row per cycle, oldest first, aggregates only: a cycle with fewer people than the minimum shows no figure.",
+      "label": "Detail by period",
+      "empty": "There are no launched cycles yet.",
+      "hidden": "Hidden",
+      "people": "({n, plural, one {# person} other {# people}})",
+      "goalsOf": "of {n}",
+      "columns": {
+        "cycle": "Cycle",
+        "n": "People",
+        "self": "Self assessment",
+        "manager": "Manager assessment",
+        "valued": "Valued by the company (1-4)",
+        "retention": "Retention (1-5)",
+        "engagement": "Bamboo engagement (1-5)",
+        "goals": "Goals completed"
+      }
     }
   },
   "GoalsInsights": {
@@ -1980,5 +2016,67 @@
     "project": "Project",
     "dm": "DM",
     "santexLead": "Santex Lead"
+  },
+  "Engagement": {
+    "nav": "Monthly engagement",
+    "title": "Monthly engagement",
+    "forbidden": "You do not have access to the monthly engagement.",
+    "noData": "There is no monthly engagement yet: import the file with the engagement-monthly profile in Upload a file.",
+    "hidden": "Hidden",
+    "hint": {
+      "all": "Mean score, participation and segments per month of everybody in the file, cut by the org attributes as they were at the end of each month.",
+      "reports": "Your direct reports of each month.",
+      "aggregates": "Aggregates only: months with fewer than {min} people (or fewer than {min} scores) are not shown, nor are segments with fewer than {min} people; no cuts by DM or Santex Lead."
+    },
+    "filters": {
+      "label": "Monthly engagement filters",
+      "from": "From",
+      "to": "To",
+      "department": "Area",
+      "any": "All",
+      "apply": "Apply"
+    },
+    "line": {
+      "title": "Evolution",
+      "hint": "Mean score of those who answered (0 to 100) and participation: the percentage of the month's people who answered.",
+      "chartLabel": "Mean score and participation per month",
+      "score": "Mean score",
+      "participation": "Participation",
+      "point": "{month}: {value}"
+    },
+    "segments": {
+      "title": "Segments per month",
+      "hint": "Each bar is 100 % of the month's people split by segment; Missing are those who did not answer.",
+      "chartLabel": "People per segment and per month",
+      "hiddenMonth": "{month}: month hidden because of the group size",
+      "hiddenCells": "{month}: segments hidden because of the group size"
+    },
+    "segment": {
+      "alto": "High",
+      "medio": "Medium",
+      "regular": "Regular",
+      "bajo": "Low",
+      "falta": "Missing"
+    },
+    "table": {
+      "title": "Detail by month",
+      "month": "Month",
+      "people": "People",
+      "respondents": "Answered",
+      "participation": "Participation",
+      "mean": "Mean score",
+      "under": "Fewer than {min} people: not shown.",
+      "hiddenMonths": "{count, plural, one {# month} other {# months}} not shown for having fewer than {min} people."
+    },
+    "tile": {
+      "title": "Monthly engagement",
+      "month": "Latest month with data: {month}",
+      "mean": "Mean score",
+      "participation": "Participation",
+      "vsPrevious": "{delta} points against the previous month",
+      "hidden": "Fewer than {min} people: not shown.",
+      "segments": "Segments",
+      "link": "See the evolution"
+    }
   }
 }

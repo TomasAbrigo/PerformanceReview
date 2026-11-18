@@ -5,6 +5,7 @@ import type {
   IngestEntity,
   SourceAdapter,
 } from "@/modules/ingest/types";
+import { parseEngagementMonth } from "@/modules/engagement/kinds";
 import { payloadHash } from "@/modules/ingest/canonical";
 import {
   parseReportDate,
@@ -136,6 +137,9 @@ export class FileSourceAdapter implements SourceAdapter<IngestEntity> {
         );
         if (profile.format === "org_attributes") {
           record.sourceId = orgAttributeKey(profile, record.fields);
+        }
+        if (profile.format === "engagement_monthly") {
+          record.sourceId = engagementKey(record.fields);
         }
         if (profile.format === "assessments_report") {
           const key = rawReportKey(profile, record.fields);
@@ -305,5 +309,18 @@ function orgAttributeKey(
   return JSON.stringify([
     textOf(fields.employee_bamboo_id) ?? "",
     parseReportDate(from, profile.dateFormat) ?? from ?? "",
+  ]);
+}
+
+/**
+ * The key of a row of the monthly engagement file: EEID and the month (the
+ * first of it, ISO), however the file writes it (`2026-03`, `03/2026`), so the
+ * same person and month is one record across files.
+ */
+function engagementKey(fields: Record<string, JsonValue>): string {
+  const month = textOf(fields.month);
+  return JSON.stringify([
+    textOf(fields.employee_bamboo_id) ?? "",
+    parseEngagementMonth(month) ?? month ?? "",
   ]);
 }

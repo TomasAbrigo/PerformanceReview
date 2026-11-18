@@ -73,6 +73,11 @@ beforeAll(async () => {
     path: path.resolve("fixtures/org/small/org-attributes.csv"),
     profile: "org-attributes",
   });
+  // The monthly engagement file.
+  await importReportFile(db, {
+    path: path.resolve("fixtures/engagement/small/engagement-monthly.csv"),
+    profile: "engagement-monthly",
+  });
   await importReport(path.join(REPORTS, "employee-performance.csv"));
   await importReport(
     path.join(REPORTS, "assessment-progress.csv"),
@@ -109,10 +114,54 @@ describe("buildReport over the seed small company", () => {
     expect(names.some((n) => renderJson(r).includes(n))).toBe(true);
   });
 
+  it("the monthly engagement section lists the months of the cycle's period (named: everything)", async () => {
+    const r = await buildReport(db, { cycle: cycleId, anonymized: false });
+    const e = r.sections.engagementMonthly!;
+    expect(e).not.toBeNull();
+    expect(e.months.length).toBeGreaterThan(0);
+    expect(e.suppressedMonths).toBe(0);
+    for (const m of e.months) {
+      expect(m.month).toMatch(/^\d{4}-\d{2}$/);
+      expect(m.month >= r.cycle.periodStart.slice(0, 7)).toBe(true);
+      expect(m.month <= r.cycle.periodEnd.slice(0, 7)).toBe(true);
+      expect(m.hidden).toBe(false);
+      expect(m.people).toBeGreaterThan(0);
+      expect(m.segments).not.toBeNull();
+      const s = m.segments!;
+      expect(s.alto + s.medio + s.regular + s.bajo + s.falta).toBe(m.people);
+      expect(m.participation).toBeCloseTo((m.people! - s.falta) / m.people!, 3);
+    }
+  });
+
+  it("the anonymized engagement hides the months and the cells under the minimum", async () => {
+    const r = await buildReport(db, { cycle: cycleId, anonymized: true });
+    const e = r.sections.engagementMonthly!;
+    expect(e.months.length).toBeGreaterThan(0);
+    expect(e.suppressedMonths).toBe(e.months.filter((m) => m.hidden).length);
+    for (const m of e.months) {
+      if (m.hidden) {
+        expect([
+          m.people,
+          m.respondents,
+          m.participation,
+          m.meanScore,
+          m.segments,
+        ]).toEqual([null, null, null, null, null]);
+        continue;
+      }
+      expect(m.people).toBeGreaterThanOrEqual(MIN);
+      if (m.segments) {
+        for (const n of Object.values(m.segments)) {
+          expect(n === 0 || n >= MIN).toBe(true);
+        }
+      }
+    }
+  });
+
   it("the qualitative section has five sentiments and the cut by side", async () => {
     const r = await buildReport(db, { cycle: cycleId, anonymized: false });
     const q = r.sections.qualitative!;
-    expect(r.schemaMinor).toBe(3);
+    expect(r.schemaMinor).toBe(4);
     const t = q.totals!;
     expect(t.positive + t.constructive + t.neutral + t.mixed + t.negative).toBe(
       t.total,
