@@ -66,14 +66,15 @@ beforeAll(async () => {
   });
   cycleId = cycle.id;
   const p = await participantOf(cycleId, people.bruno);
-  const carla: ActorContext = { personId: people.carla, role: "manager" };
   const bruno: ActorContext = { personId: people.bruno, role: "employee" };
   const selfId = await requestIdOf(p.id, "self");
   const managerId = await requestIdOf(p.id, "manager");
   await saveDraft(db, bruno, selfId, await fullAnswers("self"));
   await submit(db, bruno, selfId);
-  await saveDraft(db, carla, managerId, await fullAnswers("manager"));
-  await submit(db, carla, managerId);
+  // Carla is no longer Bruno's manager today, so she may not answer (#104):
+  // People complete the manager review.
+  await saveDraft(db, hr, managerId, await fullAnswers("manager"));
+  await submit(db, hr, managerId);
   // A goal created in the app while the cycle runs reaches its snapshot.
   await createGoal(db, hr, {
     personId: people.bruno,
