@@ -45,18 +45,33 @@
       "noCycle": "Todavía no hay ciclos: cuando haya uno, acá vas a ver sus avances.",
       "cta": "Explorar el ciclo"
     },
-    "access": {
-      "title": "Accesos principales",
-      "goals": "Seguimiento de los compromisos de cada persona.",
-      "assessments": "Las dos perspectivas de cada período.",
-      "insights": "Indicadores para entender el ciclo.",
-      "explore": "Explorar"
-    },
-    "before": {
-      "title": "Antes de analizar",
-      "text": "Revisá las importaciones y los casos pendientes de calidad de datos."
-    },
-    "all": "Todas las secciones"
+    "all": "Todas las secciones",
+    "signal": {
+      "kpis": "{cycle}",
+      "scope": {
+        "all": "Toda la compañía",
+        "team": "Tu equipo y vos"
+      },
+      "complete": "Evaluaciones completas",
+      "completeNote": "{done} de {total} con las dos evaluaciones enviadas",
+      "pending": "Sin empezar",
+      "ofParticipants": "{pct} % de los participantes",
+      "goalsCompleted": "Objetivos completados",
+      "goalsNote": "{done} de {total} objetivos del ciclo",
+      "goalsOverdue": "Objetivos vencidos",
+      "ofGoals": "{pct} % de los objetivos del ciclo",
+      "analysis": "Ver el análisis del ciclo",
+      "attention": {
+        "title": "Para atender",
+        "none": "Nada pendiente por ahora.",
+        "self": "Tu autoevaluación de {cycle} está por completar",
+        "team": "{n, plural, one {# evaluación de tu equipo por escribir} other {# evaluaciones de tu equipo por escribir}}",
+        "overdue": "{n, plural, one {# objetivo vencido} other {# objetivos vencidos}} en el ciclo",
+        "identity": "{n, plural, one {# registro espera} other {# registros esperan}} una persona en la cola de identidades",
+        "failedRuns": "{n, plural, one {# importación falló} other {# importaciones fallaron}}",
+        "quality": "{n, plural, one {# caso} other {# casos}} de calidad de datos en {kinds, plural, one {# indicador} other {# indicadores}}"
+      }
+    }
   },
   "LocaleSwitcher": {
     "label": "Idioma",
@@ -80,7 +95,8 @@
         "period": "Período",
         "participants": "Participantes"
       },
-      "participants": "{count, plural, one {# participante} other {# participantes}}"
+      "participants": "{count, plural, one {# participante} other {# participantes}}",
+      "complete": "{done} de {total} completas ({pct} %)"
     },
     "create": {
       "title": "Nuevo ciclo",
@@ -137,7 +153,8 @@
       "empty": "Todavía no hay solicitudes: se generan al abrir el ciclo.",
       "columns": {
         "kind": "Tipo",
-        "reviewer": "Evaluador"
+        "reviewer": "Evaluador",
+        "status": "Estado"
       },
       "kind": {
         "self": "Autoevaluación",
@@ -304,6 +321,15 @@
         "rejectReason": "Motivo",
         "noRejects": "Esta corrida no tuvo rechazos ni incidencias.",
         "noSourceId": "Sin ID de origen"
+      },
+      "outcome": {
+        "label": "{read} filas leídas: {parts}",
+        "nothing": "No leyó filas."
+      },
+      "recent": {
+        "title": "Últimas importaciones",
+        "all": "Ver todas",
+        "read": "{n} filas leídas"
       }
     }
   },
@@ -926,7 +952,17 @@
         "unknown": "No se pudo reanudar la importación."
       }
     },
-    "periodCycleName": "Evaluación semestral {start} – {end}"
+    "periodCycleName": "Evaluación semestral {start} – {end}",
+    "totals": {
+      "label": "Totales de la corrida",
+      "rows": "Filas importadas",
+      "cycles": "{count, plural, one {en # ciclo} other {en # ciclos}}",
+      "requests": "Solicitudes nuevas",
+      "answers": "Respuestas nuevas",
+      "unchanged": "{n} sin cambios",
+      "issues": "Casos de identidad",
+      "mismatches": "{n, plural, =0 {Sin evaluador distinto} one {# con evaluador distinto} other {# con evaluador distinto}}"
+    }
   },
   "Charts": {
     "empty": "No hay datos para estos filtros.",
@@ -1754,7 +1790,10 @@
       "suppressed": "{n, plural, one {# persona en grupos chicos no se muestra} other {# personas en grupos chicos no se muestran}}",
       "totalHidden": "El total se oculta para no revelar los grupos chicos.",
       "unassigned": "Sin asignar",
-      "team": "Equipo {n}"
+      "team": "Equipo {n}",
+      "withoutGoals": "Sin objetivos en el período:",
+      "legendOnTime": "En curso, a tiempo",
+      "legendClosed": "Cerrados"
     },
     "scatter": {
       "title": "¿Quienes cumplen más objetivos tienen mejor {indicator}?",
@@ -1764,7 +1803,8 @@
       "point": "{name}: {completed} % de objetivos completados, {indicator} {value}",
       "missing": "{n, plural, one {# persona no aparece} other {# personas no aparecen}} por no tener objetivos o esa respuesta.",
       "riskLine": "Riesgo: {max} o menos",
-      "goalsLine": "Cumplidos: {min} % o más"
+      "goalsLine": "Cumplidos: {min} % o más",
+      "open": "Cada punto abre la evaluación de esa persona, con sus objetivos del período."
     },
     "buckets": {
       "title": "¿Cambian retención y compromiso según el cumplimiento de objetivos?",
@@ -1799,7 +1839,11 @@
         "engagement": "Compromiso",
         "positive": "Comentarios positivos"
       },
-      "noValue": "–"
+      "noValue": "–",
+      "search": "Buscar persona o manager",
+      "searchLabel": "Buscar en personas",
+      "shown": "{n, plural, one {# persona} other {# personas}} de {total}",
+      "clear": "Ver todas"
     },
     "outliers": {
       "title": "Casos que no cuadran",
@@ -2019,7 +2063,10 @@
       "department": "Área",
       "anyDepartment": "Todas",
       "apply": "Aplicar",
-      "clear": "Limpiar"
+      "clear": "Limpiar",
+      "search": "Buscar",
+      "searchPlaceholder": "Persona u objetivo",
+      "titlePlaceholder": "Título del objetivo"
     },
     "states": {
       "in_progress": "En curso",
@@ -2087,7 +2134,9 @@
       "moving": "En movimiento",
       "movingNote": "{n, plural, one {Objetivo en curso} other {Objetivos en curso}}",
       "review": "Para revisar",
-      "reviewNote": "{n, plural, one {Objetivo vencido} other {Objetivos vencidos}}"
+      "reviewNote": "{n, plural, one {Objetivo vencido} other {Objetivos vencidos}}",
+      "share": "{pct} % de los objetivos de la lista",
+      "overdueShare": "{pct} % vencidos: en curso con la fecha pasada"
     },
     "form": {
       "new": "Nuevo goal",
@@ -2231,7 +2280,13 @@
     "forbidden": "No tenés acceso a este assessment: cada persona ve los suyos y, si es manager, los de su equipo.",
     "navOwn": "Mis evaluaciones",
     "titleOwn": "Mis evaluaciones",
-    "back": "Volver a Evaluaciones"
+    "back": "Volver a Evaluaciones",
+    "overview": {
+      "complete": "{pct} % completas",
+      "completeOf": "{done} de {total} con las dos evaluaciones enviadas",
+      "partialNote": "{pct} %: falta una de las dos",
+      "pendingNote": "{pct} %: ninguna enviada todavía"
+    }
   },
   "Capture": {
     "back": "Volver a Assessments",
@@ -2288,7 +2343,8 @@
       "hint": "La persona lee tu evaluación recién cuando la compartís.",
       "done": "Compartida con la persona.",
       "notShared": "Todavía no está compartida con la persona."
-    }
+    },
+    "answered": "{done} de {total} preguntas obligatorias respondidas"
   },
   "Experience": {
     "moreFilters": "Más filtros",

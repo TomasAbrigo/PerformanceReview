@@ -2,6 +2,10 @@
 
 import { useTranslations } from "next-intl";
 import { useId, useState } from "react";
+import { ProgressBar } from "@/components/progress-bar";
+
+/** Each question as its own block, so a long form reads one step at a time. */
+const BLOCK = "rounded-xl border border-border bg-card p-4";
 import { type ActionResult, useAction } from "@/components/form-helpers";
 import { Button } from "@/components/ui/button";
 import {
@@ -118,6 +122,9 @@ export function ReviewForm({
   };
 
   const sections = [...new Set(questions.map((q) => q.section))];
+  // How far the form is: the required questions with an answer.
+  const required = questions.filter((q) => q.required);
+  const answered = required.filter((q) => (values[q.id] ?? "").trim()).length;
   return (
     <form
       className="flex flex-col gap-8"
@@ -149,7 +156,7 @@ export function ReviewForm({
                 const v = values[q.id];
                 const option = q.options.find((o) => o.value === v);
                 return (
-                  <Field key={q.id}>
+                  <Field key={q.id} className={BLOCK}>
                     <FieldLabel>{label}</FieldLabel>
                     <p className="text-sm whitespace-pre-wrap">
                       {v ? (
@@ -169,7 +176,11 @@ export function ReviewForm({
               }
               if (q.kind === "text") {
                 return (
-                  <Field key={q.id} data-invalid={message ? true : undefined}>
+                  <Field
+                    key={q.id}
+                    className={BLOCK}
+                    data-invalid={message ? true : undefined}
+                  >
                     <FieldLabel htmlFor={fieldId}>{label}</FieldLabel>
                     <textarea
                       id={fieldId}
@@ -183,18 +194,22 @@ export function ReviewForm({
                 );
               }
               return (
-                <Field key={q.id} data-invalid={message ? true : undefined}>
+                <Field
+                  key={q.id}
+                  className={BLOCK}
+                  data-invalid={message ? true : undefined}
+                >
                   <FieldLabel id={`${fieldId}-label`}>{label}</FieldLabel>
                   <div
                     role="radiogroup"
                     aria-labelledby={`${fieldId}-label`}
                     aria-invalid={message !== null}
-                    className="flex flex-col gap-1.5"
+                    className="grid gap-2 sm:grid-cols-[repeat(auto-fill,minmax(11rem,1fr))]"
                   >
                     {q.options.map((o) => (
                       <label
                         key={o.value}
-                        className="flex items-center gap-2 text-sm"
+                        className="flex cursor-pointer items-center gap-2 rounded-lg border border-border bg-background px-3 py-2 text-sm has-[:checked]:border-brand-600 has-[:checked]:bg-brand-fog has-[:focus-visible]:ring-3 has-[:focus-visible]:ring-ring/40"
                       >
                         <input
                           type="radio"
@@ -214,30 +229,46 @@ export function ReviewForm({
         </FieldSet>
       ))}
       {readOnly ? null : (
-        <div className="flex flex-wrap items-center gap-3">
-          <Button
-            type="button"
-            variant="outline"
-            disabled={pending}
-            onClick={() => send(save, "saved")}
-          >
-            {t("save")}
-          </Button>
-          <Button type="submit" disabled={pending}>
-            {t("submit")}
-          </Button>
-          <p aria-live="polite" className="text-sm text-muted-foreground">
-            {pending ? t("saving") : done ? t(done) : null}
-          </p>
-          {error ? (
-            <p role="alert" className="text-sm text-destructive">
-              {errorText(error.code)}
-            </p>
-          ) : issues.length > 0 ? (
-            <p role="alert" className="text-sm text-destructive">
-              {t("errors.validation")}
-            </p>
+        <div className="flex flex-col gap-4">
+          {required.length > 0 ? (
+            <div className="flex flex-col gap-1.5" data-testid="form-progress">
+              <ProgressBar
+                percent={(answered / required.length) * 100}
+                label={t("answered", {
+                  done: answered,
+                  total: required.length,
+                })}
+              />
+              <p className="text-xs text-muted-foreground">
+                {t("answered", { done: answered, total: required.length })}
+              </p>
+            </div>
           ) : null}
+          <div className="flex flex-wrap items-center gap-3">
+            <Button
+              type="button"
+              variant="outline"
+              disabled={pending}
+              onClick={() => send(save, "saved")}
+            >
+              {t("save")}
+            </Button>
+            <Button type="submit" disabled={pending}>
+              {t("submit")}
+            </Button>
+            <p aria-live="polite" className="text-sm text-muted-foreground">
+              {pending ? t("saving") : done ? t(done) : null}
+            </p>
+            {error ? (
+              <p role="alert" className="text-sm text-destructive">
+                {errorText(error.code)}
+              </p>
+            ) : issues.length > 0 ? (
+              <p role="alert" className="text-sm text-destructive">
+                {t("errors.validation")}
+              </p>
+            ) : null}
+          </div>
         </div>
       )}
     </form>

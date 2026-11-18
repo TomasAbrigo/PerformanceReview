@@ -1,5 +1,6 @@
 import { CardCollection } from "@/components/card-collection";
 import { useTranslations } from "next-intl";
+import { Link } from "@/i18n/navigation";
 import { ProgressBar } from "@/components/progress-bar";
 import type { GoalIndicatorRow } from "@/modules/analytics/goals-insights/types";
 import { Empty, useDecimal, usePct } from "./shared";
@@ -9,7 +10,14 @@ import { Empty, useDecimal, usePct } from "./shared";
  * many goals and how many are done (a bar), then the average progress, the
  * two indicators and the share of positive comments side by side.
  */
-export function PeopleTable({ rows }: { rows: GoalIndicatorRow[] }) {
+export function PeopleTable({
+  rows,
+  hrefFor,
+}: {
+  rows: GoalIndicatorRow[];
+  /** The person's assessment, when the actor may open it. */
+  hrefFor?: (row: GoalIndicatorRow) => string;
+}) {
   const t = useTranslations("GoalsInsights.people");
   const pct = usePct();
   const decimal = useDecimal();
@@ -21,7 +29,7 @@ export function PeopleTable({ rows }: { rows: GoalIndicatorRow[] }) {
       aria-label={t("title")}
       data-testid="people-table"
       gridClassName="dense-list"
-      initialCount={12}
+      initialCount={10}
     >
       {rows.map((r) => (
         <article
@@ -30,7 +38,13 @@ export function PeopleTable({ rows }: { rows: GoalIndicatorRow[] }) {
           aria-label={r.name}
         >
           <div className="dense-name">
-            <span className="font-medium">{r.name}</span>
+            {hrefFor ? (
+              <Link href={hrefFor(r)} className="font-medium">
+                {r.name}
+              </Link>
+            ) : (
+              <span className="font-medium">{r.name}</span>
+            )}
             <small>
               {t("columns.manager")}: {r.managerName ?? dash}
             </small>
@@ -76,5 +90,69 @@ export function PeopleTable({ rows }: { rows: GoalIndicatorRow[] }) {
         </article>
       ))}
     </CardCollection>
+  );
+}
+
+/**
+ * The search of the people list: a GET form (`who`), matched on the person's
+ * or their manager's name, with how many it shows.
+ */
+export function PeopleSearch({
+  value,
+  shown,
+  total,
+  hidden,
+  clearHref,
+}: {
+  value: string | undefined;
+  shown: number;
+  total: number;
+  /** The other params of the page, kept by the form. */
+  hidden: Record<string, string | undefined>;
+  clearHref: string;
+}) {
+  const t = useTranslations("GoalsInsights.people");
+  return (
+    <form
+      method="get"
+      action="#goal-people"
+      role="search"
+      aria-label={t("searchLabel")}
+      className="flex flex-wrap items-center gap-3"
+    >
+      {Object.entries(hidden).map(([k, v]) =>
+        v ? <input key={k} type="hidden" name={k} value={v} /> : null,
+      )}
+      <input
+        type="search"
+        name="who"
+        defaultValue={value ?? ""}
+        placeholder={t("search")}
+        aria-label={t("search")}
+        className="control w-72 max-w-full"
+      />
+      <span className="text-sm text-muted-foreground" aria-live="polite">
+        {t("shown", { n: shown, total })}
+      </span>
+      {value ? (
+        <Link href={clearHref} className="text-sm text-primary underline">
+          {t("clear")}
+        </Link>
+      ) : null}
+    </form>
+  );
+}
+
+/** Whether a row matches the search (person or manager, accents ignored). */
+export function matchesPerson(row: GoalIndicatorRow, q: string | undefined) {
+  if (!q?.trim()) return true;
+  const norm = (s: string) =>
+    s
+      .normalize("NFD")
+      .replace(/\p{Diacritic}/gu, "")
+      .toLowerCase();
+  const needle = norm(q.trim());
+  return [row.name, row.managerName ?? ""].some((s) =>
+    norm(s).includes(needle),
   );
 }

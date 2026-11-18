@@ -68,40 +68,54 @@ export function IdentityQueue({
       {issues.length === 0 ? (
         <EmptyState>{t(history ? "empty.history" : "empty.open")}</EmptyState>
       ) : !history ? (
-        <div className="goal-grid">
+        <div
+          className="dense-list"
+          role="group"
+          aria-label={t("tabs.open", { count: openCount })}
+        >
           {issues.map((issue) => (
-            <article key={issue.id} className="goal-card">
-              <div className="flex items-center justify-between gap-3">
-                <IconTile>
-                  <UserRound />
-                </IconTile>
+            <article
+              key={issue.id}
+              className="dense-row grid-cols-1 md:!grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)_minmax(0,1fr)_auto]"
+            >
+              <div className="dense-name">
+                <h2 className="text-base font-medium">
+                  <Link href={`/imports/identity/${issue.id}`}>
+                    {issue.summary.displayName ?? t("unnamed")}
+                  </Link>
+                </h2>
+                <small className="break-all">
+                  {issue.summary.role
+                    ? `${t(`roles.${issue.summary.role as "employee"}`)} · `
+                    : ""}
+                  {t("columns.sourceId")}: {issue.sourceId}
+                </small>
+              </div>
+              <div>
                 <ReasonBadge reason={issue.reason} />
               </div>
-              <h2 className="text-xl">
-                <Link
-                  className="card-link"
-                  href={`/imports/identity/${issue.id}`}
-                >
-                  {issue.summary.displayName ?? t("unnamed")}
-                </Link>
-              </h2>
-              {issue.summary.role ? (
-                <p className="text-sm text-muted-foreground">
-                  {t(`roles.${issue.summary.role as "employee"}`)}
-                </p>
-              ) : null}
-              <p className="text-xs break-all text-muted-foreground">
-                {t("columns.sourceId")}: {issue.sourceId}
-              </p>
-              <p className="rounded-lg bg-brand-fog p-3 text-sm">
+              <p
+                className={
+                  issue.candidateCount > 0
+                    ? "text-sm"
+                    : "text-sm text-muted-foreground"
+                }
+              >
                 {t("candidatesCount", { count: issue.candidateCount })}
               </p>
-              <div className="mt-auto flex items-center justify-between border-t pt-4 text-sm">
-                <span>{fmt(issue.createdAt)}</span>
-                <span className="flex items-center gap-2 text-primary">
+              <div className="flex items-center gap-4 text-sm">
+                <span className="text-muted-foreground">
+                  {fmt(issue.createdAt)}
+                </span>
+                <Link
+                  href={`/imports/identity/${issue.id}`}
+                  className="flex items-center gap-1 text-primary"
+                  aria-hidden="true"
+                  tabIndex={-1}
+                >
                   {t("review")}
                   <ArrowUpRight className="size-4" />
-                </span>
+                </Link>
               </div>
             </article>
           ))}

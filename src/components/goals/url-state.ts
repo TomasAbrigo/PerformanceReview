@@ -4,6 +4,9 @@ import { type GoalState, isGoalStateFilter } from "@/modules/goals/state";
 
 type Raw = Record<string, string | string[] | undefined>;
 
+/** The `cycle` value that lifts the default (the latest cycle): every cycle. */
+export const ALL_CYCLES = "all";
+
 /** The filters of the goals list, as they live in the URL. */
 export type GoalsParams = OrgParams & {
   cycle?: string;

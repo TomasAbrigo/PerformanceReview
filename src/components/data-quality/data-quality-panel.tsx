@@ -66,7 +66,10 @@ export function DataQualityPanel({
 }) {
   const t = useTranslations("DataQuality");
   const tHome = useTranslations("Home");
-  const open = indicators.filter((i) => i.count > 0);
+  // The biggest problems first.
+  const open = indicators
+    .filter((i) => i.count > 0)
+    .sort((a, b) => b.count - a.count);
   const clear = indicators.filter((i) => i.count === 0);
   const cases = open.reduce((sum, i) => sum + i.count, 0);
 

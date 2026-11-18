@@ -45,18 +45,33 @@
       "noCycle": "No cycles yet: once there is one, its progress shows here.",
       "cta": "Explore the cycle"
     },
-    "access": {
-      "title": "Main entries",
-      "goals": "Each person's commitments, followed up.",
-      "assessments": "The two perspectives of each period.",
-      "insights": "Indicators to understand the cycle.",
-      "explore": "Explore"
-    },
-    "before": {
-      "title": "Before analysing",
-      "text": "Check the imports and the pending data-quality cases."
-    },
-    "all": "All sections"
+    "all": "All sections",
+    "signal": {
+      "kpis": "{cycle}",
+      "scope": {
+        "all": "The whole company",
+        "team": "Your team and you"
+      },
+      "complete": "Reviews complete",
+      "completeNote": "{done} of {total} with both reviews submitted",
+      "pending": "Not started",
+      "ofParticipants": "{pct}% of participants",
+      "goalsCompleted": "Goals completed",
+      "goalsNote": "{done} of {total} goals of the cycle",
+      "goalsOverdue": "Goals overdue",
+      "ofGoals": "{pct}% of the cycle's goals",
+      "analysis": "See the cycle's analysis",
+      "attention": {
+        "title": "Needs attention",
+        "none": "Nothing pending for now.",
+        "self": "Your self review for {cycle} is waiting",
+        "team": "{n, plural, one {# review of your team to write} other {# reviews of your team to write}}",
+        "overdue": "{n, plural, one {# goal overdue} other {# goals overdue}} in the cycle",
+        "identity": "{n, plural, one {# record waits} other {# records wait}} for a person in the identity queue",
+        "failedRuns": "{n, plural, one {# import failed} other {# imports failed}}",
+        "quality": "{n, plural, one {# data-quality case} other {# data-quality cases}} across {kinds, plural, one {# indicator} other {# indicators}}"
+      }
+    }
   },
   "LocaleSwitcher": {
     "label": "Language",
@@ -80,7 +95,8 @@
         "period": "Period",
         "participants": "Participants"
       },
-      "participants": "{count, plural, one {# participant} other {# participants}}"
+      "participants": "{count, plural, one {# participant} other {# participants}}",
+      "complete": "{done} of {total} complete ({pct}%)"
     },
     "create": {
       "title": "New cycle",
@@ -137,7 +153,8 @@
       "empty": "There are no requests yet: they are generated when the cycle opens.",
       "columns": {
         "kind": "Type",
-        "reviewer": "Reviewer"
+        "reviewer": "Reviewer",
+        "status": "Status"
       },
       "kind": {
         "self": "Self-assessment",
@@ -304,6 +321,15 @@
         "rejectReason": "Reason",
         "noRejects": "This run had no rejects or issues.",
         "noSourceId": "No source ID"
+      },
+      "outcome": {
+        "label": "{read} rows read: {parts}",
+        "nothing": "Read no rows."
+      },
+      "recent": {
+        "title": "Latest imports",
+        "all": "See all",
+        "read": "{n} rows read"
       }
     }
   },
@@ -926,7 +952,17 @@
         "unknown": "The import could not be resumed."
       }
     },
-    "periodCycleName": "Semi-annual review {start} – {end}"
+    "periodCycleName": "Semi-annual review {start} – {end}",
+    "totals": {
+      "label": "Run totals",
+      "rows": "Rows imported",
+      "cycles": "{count, plural, one {in # cycle} other {in # cycles}}",
+      "requests": "New requests",
+      "answers": "New answers",
+      "unchanged": "{n} unchanged",
+      "issues": "Identity cases",
+      "mismatches": "{n, plural, =0 {No reviewer mismatch} one {# with a different reviewer} other {# with a different reviewer}}"
+    }
   },
   "Charts": {
     "empty": "No data for these filters.",
@@ -1754,7 +1790,10 @@
       "suppressed": "{n, plural, one {# person in small groups is not shown} other {# people in small groups are not shown}}",
       "totalHidden": "The total is hidden so it does not reveal the small groups.",
       "unassigned": "Unassigned",
-      "team": "Team {n}"
+      "team": "Team {n}",
+      "withoutGoals": "No goals in the period:",
+      "legendOnTime": "In progress, on time",
+      "legendClosed": "Closed"
     },
     "scatter": {
       "title": "Do people who complete more goals have better {indicator}?",
@@ -1764,7 +1803,8 @@
       "point": "{name}: {completed} % of goals completed, {indicator} {value}",
       "missing": "{n, plural, one {# person does not appear} other {# people do not appear}} for lack of goals or that answer.",
       "riskLine": "Risk: {max} or less",
-      "goalsLine": "Done: {min}% or more"
+      "goalsLine": "Done: {min}% or more",
+      "open": "Each dot opens that person's assessment, with their goals of the period."
     },
     "buckets": {
       "title": "Do retention and engagement change with goal completion?",
@@ -1799,7 +1839,11 @@
         "engagement": "Engagement",
         "positive": "Positive comments"
       },
-      "noValue": "–"
+      "noValue": "–",
+      "search": "Search person or manager",
+      "searchLabel": "Search people",
+      "shown": "{n, plural, one {# person} other {# people}} of {total}",
+      "clear": "Show all"
     },
     "outliers": {
       "title": "Cases that do not add up",
@@ -2019,7 +2063,10 @@
       "department": "Department",
       "anyDepartment": "All",
       "apply": "Apply",
-      "clear": "Clear"
+      "clear": "Clear",
+      "search": "Search",
+      "searchPlaceholder": "Person or goal",
+      "titlePlaceholder": "Goal title"
     },
     "states": {
       "in_progress": "In progress",
@@ -2087,7 +2134,9 @@
       "moving": "In motion",
       "movingNote": "{n, plural, one {Goal in progress} other {Goals in progress}}",
       "review": "To review",
-      "reviewNote": "{n, plural, one {Overdue goal} other {Overdue goals}}"
+      "reviewNote": "{n, plural, one {Overdue goal} other {Overdue goals}}",
+      "share": "{pct}% of the goals listed",
+      "overdueShare": "{pct}% overdue: in progress past their due date"
     },
     "form": {
       "new": "New goal",
@@ -2231,7 +2280,13 @@
     "forbidden": "You do not have access to this assessment: everyone sees their own and, for a manager, their team's.",
     "navOwn": "My assessments",
     "titleOwn": "My assessments",
-    "back": "Back to Assessments"
+    "back": "Back to Assessments",
+    "overview": {
+      "complete": "{pct}% complete",
+      "completeOf": "{done} of {total} with both reviews submitted",
+      "partialNote": "{pct}%: one of the two is missing",
+      "pendingNote": "{pct}%: none submitted yet"
+    }
   },
   "Capture": {
     "back": "Back to Assessments",
@@ -2288,7 +2343,8 @@
       "hint": "The employee reads your review only once you share it.",
       "done": "Shared with the employee.",
       "notShared": "Not shared with the employee yet."
-    }
+    },
+    "answered": "{done} of {total} required questions answered"
   },
   "Experience": {
     "moreFilters": "More filters",

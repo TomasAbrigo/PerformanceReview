@@ -13,6 +13,7 @@ import type {
   RunListFilters,
   RunListItem,
 } from "@/modules/ingest/runs-queries";
+import { RunOutcome } from "./run-outcome";
 import { RunStatusBadge } from "./run-status-badge";
 import { useRunFormat } from "./use-run-format";
 
@@ -124,7 +125,8 @@ export function RunsList({
       {runs.length === 0 ? (
         <EmptyState>{hasFilters ? t("emptyFiltered") : t("empty")}</EmptyState>
       ) : (
-        <CardCollection gridClassName="record-grid">
+        // The page is already paged (25): every run of it is shown.
+        <CardCollection gridClassName="record-grid" initialCount={runs.length}>
           {runs.map((run) => (
             <article key={run.id} className="record-card">
               <header className="flex items-center justify-between gap-3">
@@ -144,6 +146,7 @@ export function RunsList({
               <p className="text-xs text-muted-foreground">
                 {run.sourceSystem ?? "—"} · {run.entity} · {run.adapter ?? "—"}
               </p>
+              <RunOutcome counts={run.counts} compact />
               <dl className="record-facts">
                 {INGEST_COUNT_KEYS.map((k) => (
                   <div key={k}>

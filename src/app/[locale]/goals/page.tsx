@@ -28,6 +28,9 @@ import {
 import { listGoalOwnerOptions } from "@/modules/goals/write";
 import { noOrgOptions } from "@/modules/org-attributes/kinds";
 import { localizeCycles } from "@/modules/review-core/cycle-name";
+import { getSettings } from "@/modules/settings";
+import { kpiThresholds } from "@/modules/insights/tone";
+import { ALL_CYCLES } from "@/components/goals/url-state";
 import { createGoalAction } from "./actions";
 
 const HERE = "/goals";
@@ -59,11 +62,14 @@ async function GoalsList({
   const ownOnly = scope.kind === "own";
   const p = parseGoalsParams(await searchParams);
   const cycles = localizeCycles(await listGoalCycles(db, actor), locale);
-  const [page, options, owners] = await Promise.all([
+  // The latest cycle by default (what is being followed now); `all` lifts it.
+  const cycleId =
+    p.cycle === ALL_CYCLES ? undefined : (p.cycle ?? cycles[0]?.id);
+  const [page, options, owners, settings] = await Promise.all([
     listGoals(db, actor, {
-      cycleId: p.cycle,
+      cycleId,
       state: p.state,
-      q: ownOnly ? undefined : p.q,
+      q: p.q,
       department: ownOnly ? undefined : p.department,
       ...(ownOnly ? {} : orgFiltersOf(p)),
       page: p.page,
@@ -72,6 +78,7 @@ async function GoalsList({
       ? { departments: [], org: noOrgOptions }
       : goalFilterOptions(db, actor),
     listGoalOwnerOptions(db, actor),
+    getSettings(db),
   ]);
   const hrefFor = listHref(HERE, {
     cycle: p.cycle,
@@ -96,7 +103,11 @@ async function GoalsList({
           ) : undefined
         }
       />
-      <GoalsOverview counts={page.counts} />
+      <GoalsOverview
+        counts={page.counts}
+        thresholds={kpiThresholds(settings)}
+        hrefFor={(state) => hrefFor({ state })}
+      />
       <section
         aria-label={t("count", { n: page.total })}
         className="space-y-6"
@@ -111,6 +122,7 @@ async function GoalsList({
           />
           <GoalsFilters
             params={p}
+            cycleId={cycleId}
             cycles={cycles.map((c) => ({ id: c.id, name: c.name }))}
             options={options}
             ownOnly={ownOnly}

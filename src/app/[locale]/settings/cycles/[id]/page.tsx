@@ -9,12 +9,7 @@ import { ActionButton } from "@/components/cycles/action-button";
 import { AddParticipant } from "@/components/cycles/add-participant";
 import { ParticipantPicker } from "@/components/cycles/participant-picker";
 import { CardCollection } from "@/components/card-collection";
-import {
-  EmptyState,
-  IconTile,
-  MetricCard,
-  PageSkeleton,
-} from "@/components/experience";
+import { EmptyState, MetricCard, PageSkeleton } from "@/components/experience";
 import { Panel } from "@/components/insights/parts";
 import { PageHeader } from "@/components/page-header";
 import { groupKicker } from "@/components/page-kicker";
@@ -39,6 +34,8 @@ import {
   setParticipantsAction,
 } from "../actions";
 import { statusKey } from "../status-key";
+import { getSettings } from "@/modules/settings";
+import { kpiThresholds, percentTone } from "@/modules/insights/tone";
 
 const percentOf = ({
   submitted,
@@ -68,6 +65,7 @@ async function CycleDetail({
   const candidates = await listCandidates(db, actor);
   const inCycle = new Set(active.map((p) => p.revieweePersonId));
   const progress = await cycleProgress(db, id);
+  const thresholds = kpiThresholds(await getSettings(db));
   const requests = draft ? [] : await listCycleRequests(db, actor, id);
 
   return (
@@ -129,8 +127,21 @@ async function CycleDetail({
               <MetricCard
                 key={kind}
                 label={t(`progress.${kind}`)}
-                value={`${percentOf(progress[kind])}%`}
+                value={`${percentOf(progress[kind])} %`}
                 note={t("progress.of", progress[kind])}
+                status={
+                  progress[kind].total > 0
+                    ? percentTone(percentOf(progress[kind]), thresholds)
+                    : undefined
+                }
+                scale={{
+                  value: percentOf(progress[kind]),
+                  min: 0,
+                  max: 100,
+                  label: t("progress.of", progress[kind]),
+                  minLabel: "0 %",
+                  maxLabel: "100 %",
+                }}
                 icon={
                   kind === "self" ? (
                     <UserRound className="size-5" />
@@ -186,48 +197,45 @@ async function CycleDetail({
                 add={addParticipantAction.bind(null, id)}
               />
             ) : null}
-            <CardCollection>
+            <CardCollection gridClassName="dense-list" initialCount={15}>
               {cycle.participants.map((p) => (
-                <article key={p.id} className="record-card">
-                  <header className="flex items-center justify-between gap-3">
-                    <IconTile>
-                      <UserRound className="size-5" />
-                    </IconTile>
-                    <Badge variant="outline">
+                <article
+                  key={p.id}
+                  aria-label={p.displayName}
+                  className="dense-row md:!grid-cols-[minmax(0,1.4fr)_minmax(0,2fr)_auto]"
+                >
+                  <div className="dense-name">
+                    <h3 className="text-base font-medium">{p.displayName}</h3>
+                    <small>
                       {p.removedAt
                         ? t("participants.removed")
                         : t("participants.active")}
-                    </Badge>
-                  </header>
-                  <h3 className="text-xl">{p.displayName}</h3>
-                  <dl className="flex flex-col gap-1 text-sm text-muted-foreground">
+                    </small>
+                  </div>
+                  <dl className="dense-facts !grid-cols-2">
                     <div>
-                      <dt className="inline">
-                        {t("participants.columns.area")}:{" "}
-                      </dt>
-                      <dd className="inline">{p.snapDepartment ?? "—"}</dd>
+                      <dt>{t("participants.columns.area")}</dt>
+                      <dd>{p.snapDepartment ?? "—"}</dd>
                     </div>
                     <div>
-                      <dt className="inline">
-                        {t("participants.columns.manager")}:{" "}
-                      </dt>
-                      <dd className="inline">{p.snapManagerName ?? "—"}</dd>
+                      <dt>{t("participants.columns.manager")}</dt>
+                      <dd>{p.snapManagerName ?? "—"}</dd>
                     </div>
                   </dl>
                   {open && !p.removedAt ? (
-                    <div>
-                      <ActionButton
-                        size="sm"
-                        action={removeParticipantAction.bind(
-                          null,
-                          id,
-                          p.revieweePersonId,
-                        )}
-                      >
-                        {t("participants.remove")}
-                      </ActionButton>
-                    </div>
-                  ) : null}
+                    <ActionButton
+                      size="sm"
+                      action={removeParticipantAction.bind(
+                        null,
+                        id,
+                        p.revieweePersonId,
+                      )}
+                    >
+                      {t("participants.remove")}
+                    </ActionButton>
+                  ) : (
+                    <span />
+                  )}
                 </article>
               ))}
             </CardCollection>
@@ -240,50 +248,54 @@ async function CycleDetail({
           {requests.length === 0 ? (
             <EmptyState>{t("requests.empty")}</EmptyState>
           ) : (
-            <CardCollection>
+            <CardCollection gridClassName="dense-list" initialCount={15}>
               {requests.map((r) => (
-                <article key={r.id} className="record-card">
-                  <header className="flex items-center justify-between gap-3">
-                    <IconTile>
-                      {r.relationship === "self" ? (
-                        <UserRound className="size-5" />
-                      ) : (
-                        <UserRoundCheck className="size-5" />
-                      )}
-                    </IconTile>
-                    <Badge variant="outline">
-                      {t(`requests.status.${r.status}`)}
-                    </Badge>
-                  </header>
-                  <h3 className="text-xl">{r.revieweeName}</h3>
-                  <dl className="flex flex-col gap-1 text-sm text-muted-foreground">
+                <article
+                  key={r.id}
+                  aria-label={r.revieweeName}
+                  className="dense-row md:!grid-cols-[minmax(0,1.4fr)_minmax(0,2fr)_auto]"
+                >
+                  <div className="dense-name">
+                    <h3 className="text-base font-medium">{r.revieweeName}</h3>
+                    <small>{t(`requests.kind.${r.relationship}`)}</small>
+                  </div>
+                  <dl className="dense-facts !grid-cols-2">
                     <div>
-                      <dt className="inline">{t("requests.columns.kind")}: </dt>
-                      <dd className="inline">
-                        {t(`requests.kind.${r.relationship}`)}
-                      </dd>
-                    </div>
-                    <div>
-                      <dt className="inline">
-                        {t("requests.columns.reviewer")}:{" "}
-                      </dt>
-                      <dd className="inline">
+                      <dt>{t("requests.columns.reviewer")}</dt>
+                      <dd>
                         {r.reviewerMissing
                           ? t("requests.reviewerMissing")
                           : (r.reviewerName ?? "—")}
                       </dd>
                     </div>
+                    <div>
+                      <dt>{t("requests.columns.status")}</dt>
+                      <dd>
+                        <span
+                          className="tone-pill"
+                          data-tone={
+                            r.status === "submitted"
+                              ? "good"
+                              : r.status === "draft"
+                                ? "watch"
+                                : undefined
+                          }
+                        >
+                          {t(`requests.status.${r.status}`)}
+                        </span>
+                      </dd>
+                    </div>
                   </dl>
                   {open && !r.removed && r.status === "submitted" ? (
-                    <div>
-                      <ActionButton
-                        size="sm"
-                        action={reopenRequestAction.bind(null, r.id)}
-                      >
-                        {t("requests.reopen")}
-                      </ActionButton>
-                    </div>
-                  ) : null}
+                    <ActionButton
+                      size="sm"
+                      action={reopenRequestAction.bind(null, r.id)}
+                    >
+                      {t("requests.reopen")}
+                    </ActionButton>
+                  ) : (
+                    <span />
+                  )}
                 </article>
               ))}
             </CardCollection>

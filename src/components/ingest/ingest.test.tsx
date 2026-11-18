@@ -6,6 +6,7 @@ import en from "@/messages/en.json";
 import es from "@/messages/es.json";
 import type { RunDetail, RunListItem } from "@/modules/ingest/runs-queries";
 import { RunDetailView } from "./run-detail";
+import { RunOutcome } from "./run-outcome";
 import { RunsList } from "./runs-list";
 
 vi.mock("@/i18n/navigation", () => ({
@@ -383,5 +384,27 @@ describe("RunDetailView", () => {
     expect(
       screen.getByRole("link", { name: "← Back to runs" }),
     ).toHaveAttribute("href", "/imports/runs");
+  });
+});
+
+describe("RunOutcome", () => {
+  it("splits the rows read into their parts and links the rejected ones to the log", () => {
+    renderIn(
+      "es",
+      <RunOutcome
+        counts={{ read: 10, inserted: 6, unchanged: 2, rejected: 2 }}
+        rejectsHref="#run-rejects"
+      />,
+    );
+    expect(
+      screen.getByRole("img", {
+        name: "10 filas leídas: Insertados 6, Sin cambios 2, Rechazados 2",
+      }),
+    ).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Rechazados" })).toHaveAttribute(
+      "href",
+      "#run-rejects",
+    );
+    expect(screen.getByText("6 (60 %)")).toBeInTheDocument();
   });
 });
