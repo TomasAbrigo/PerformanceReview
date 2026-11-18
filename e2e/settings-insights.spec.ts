@@ -45,7 +45,6 @@ test("People edit the insights settings, the server validates, and the change st
 
 const peopleOnly = [
   ["/es/settings/insights", /Configuración de insights/],
-  ["/es/settings/scales", /Escalas de rating/],
   ["/es/imports/upload", /Subir archivo/],
   ["/es/imports/runs", /Corridas de importación/],
   ["/es/imports/identity", /Cola de identidad/],
@@ -83,13 +82,4 @@ test("People reach the People-only screens", async ({ page }) => {
       0,
     );
   }
-});
-
-test("direction lands on the leadership view from /dashboards", async ({
-  page,
-}) => {
-  await page.goto("/es");
-  await actAsRole(page, "Dirección", "Dirección");
-  await page.goto("/es/dashboards");
-  await expect(page).toHaveURL(/\/es\/insights\/executive/);
 });

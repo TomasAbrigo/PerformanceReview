@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { actAsRole } from "./act-as";
 import {
   escapeRegExp,
   find,
@@ -51,6 +52,25 @@ test("the queue holds the ambiguous row and suggests the person", async ({
   ).toBeVisible();
 });
 
+test("the candidate's email is shown to People only", async ({ page }) => {
+  // In Spanish: the "Actuar como" bar helpers use its Spanish labels.
+  await page.goto("/es/imports/identity");
+  await page
+    .getByRole("row", { name: queueRow })
+    .getByRole("link", { name })
+    .click();
+  const candidate = page.getByRole("listitem", { name });
+  await expect(
+    candidate.getByText(rehire.earlier.workEmail, { exact: true }),
+  ).toBeVisible();
+
+  // The default actor is People (hr). Anyone else gets no access, and no email.
+  await actAsRole(page, "Empleado", "Sin persona");
+  await expect(page.getByTestId("no-access")).toBeVisible();
+  await expect(page.getByText(rehire.earlier.workEmail)).toHaveCount(0);
+  await expect(page.getByText(/@/)).toHaveCount(0);
+});
+
 test("linking the case adds the new employment to the same person", async ({
   page,
 }) => {
@@ -69,16 +89,29 @@ test("linking the case adds the new employment to the same person", async ({
   await page.getByRole("link", { name: "History" }).click();
   const done = page.getByRole("row", { name: queueRow });
   await expect(done.getByText("Linked")).toBeVisible();
+});
 
-  await page.goto("/en/people");
-  await page.getByRole("link", { name, exact: true }).click();
-  const periods = page.getByRole("table", { name: "Employment periods" });
-  await expect(periods.getByRole("row")).toHaveCount(3);
-  await expect(
-    periods.getByText(rehire.earlier.terminationDate!),
-  ).toBeVisible();
-  await expect(periods.getByText(rehire.later.hireDate)).toBeVisible();
-  const ids = page.getByRole("table", { name: "Source identifiers" });
-  await expect(ids.getByText(rehire.earlier.id, { exact: true })).toBeVisible();
-  await expect(ids.getByText(rehire.later.id, { exact: true })).toBeVisible();
+test("the linked person has both employments and both Bamboo ids", async ({
+  request,
+}) => {
+  const found = await request.get(
+    `/api/v1/people?q=${encodeURIComponent(name)}&limit=10`,
+  );
+  const people: { id: string; display_name: string }[] = (await found.json())
+    .data;
+  const named = people.filter((p) => p.display_name === name);
+  expect(named).toHaveLength(1);
+
+  const detail = (
+    await (await request.get(`/api/v1/people/${named[0].id}`)).json()
+  ).data;
+  const hires = detail.employments.map(
+    (e: { hire_date: string }) => e.hire_date,
+  );
+  expect(detail.employments).toHaveLength(2);
+  expect(hires).toContain(rehire.earlier.hireDate);
+  expect(hires).toContain(rehire.later.hireDate);
+  const ids = detail.source_identities.map((i: { value: string }) => i.value);
+  expect(ids).toContain(rehire.earlier.id);
+  expect(ids).toContain(rehire.later.id);
 });

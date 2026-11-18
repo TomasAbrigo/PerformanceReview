@@ -15,7 +15,7 @@ export function RatingHistogram({
   data: RatingDistribution;
   aggregateOnly?: boolean;
 }) {
-  const t = useTranslations("Dashboards");
+  const t = useTranslations("Charts");
   if (!data.series.length) return <Empty />;
   const binLabel = (i: number) =>
     t("distribution.bin", {

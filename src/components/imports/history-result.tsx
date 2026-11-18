@@ -74,11 +74,7 @@ export function HistoryResult({
         <TableBody>
           {result.cycles.map((c) => (
             <TableRow key={c.cycleId}>
-              <TableCell>
-                <Link href={`/cycles/${c.cycleId}`} className="hover:underline">
-                  {c.name}
-                </Link>
-              </TableCell>
+              <TableCell>{c.name}</TableCell>
               <TableCell className="tabular-nums">
                 {t("period", { start: c.periodStart, end: c.periodEnd })}
               </TableCell>

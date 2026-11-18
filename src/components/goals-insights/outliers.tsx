@@ -7,7 +7,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Link } from "@/i18n/navigation";
 import type {
   GoalOutlier,
   GoalOutliers,
@@ -21,30 +20,19 @@ function Group({
   title,
   description,
   group,
-  cycleId,
   minGroupSize,
 }: {
   testId: string;
   title: string;
   description: string;
   group: OutlierGroup;
-  cycleId: string;
   minGroupSize: number | null;
 }) {
   const t = useTranslations("GoalsInsights.outliers");
-  const tAll = useTranslations("GoalsInsights");
   const pct = usePct();
   const person = (p: GoalOutlier) => (
     <TableRow key={p.participantId}>
-      <TableCell>
-        <Link
-          href={`/cycles/${cycleId}/participants/${p.participantId}`}
-          className="underline"
-          aria-label={tAll("personLink", { name: p.name })}
-        >
-          {p.name}
-        </Link>
-      </TableCell>
+      <TableCell>{p.name}</TableCell>
       <TableCell>{p.managerName ?? "–"}</TableCell>
       <TableCell className="tabular-nums">
         {t("completed", {
@@ -110,7 +98,6 @@ export function OutliersView({ data }: { data: GoalOutliers }) {
           risk: th.riskThreshold,
         })}
         group={data.doneButLow}
-        cycleId={data.cycleId}
         minGroupSize={data.minGroupSize}
       />
       <Group
@@ -121,7 +108,6 @@ export function OutliersView({ data }: { data: GoalOutliers }) {
           high: th.indicatorHigh,
         })}
         group={data.behindButHigh}
-        cycleId={data.cycleId}
         minGroupSize={data.minGroupSize}
       />
     </div>

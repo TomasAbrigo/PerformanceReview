@@ -3,7 +3,7 @@ import { Badge } from "@/components/ui/badge";
 
 /** Bamboo status ("Active"/"Inactive"/…) as a localized badge. */
 export function StatusBadge({ status }: { status: string | null }) {
-  const t = useTranslations("People.status");
+  const t = useTranslations("Identity.status");
   const active = status?.toLowerCase() === "active";
   if (!status) return <Badge variant="outline">{t("unknown")}</Badge>;
   return (

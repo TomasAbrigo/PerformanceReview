@@ -7,7 +7,7 @@ import {
   type ActionResult,
   ErrorAlert,
   useAction,
-} from "@/components/templates/shared";
+} from "@/components/form-helpers";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {

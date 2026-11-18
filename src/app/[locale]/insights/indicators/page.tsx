@@ -4,7 +4,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { connection } from "next/server";
 import { Suspense } from "react";
-import { Panel } from "@/components/dashboards/parts";
+import { Panel } from "@/components/insights/parts";
 import { ExportCsvLink } from "@/components/data-quality/export-csv-link";
 import { AlertsView } from "@/components/indicators/alerts-view";
 import { DistributionView } from "@/components/indicators/distribution-view";

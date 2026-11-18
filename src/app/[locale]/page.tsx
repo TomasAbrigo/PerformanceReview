@@ -1,6 +1,7 @@
 import { hasLocale } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
+import { Suspense } from "react";
 import { LocaleSwitcher } from "@/components/locale-switcher";
 import {
   Card,
@@ -11,6 +12,144 @@ import {
 } from "@/components/ui/card";
 import { Link } from "@/i18n/navigation";
 import { routing } from "@/i18n/routing";
+import { actorIsHr } from "@/modules/actor/server";
+
+type NavGroup = {
+  key: string;
+  title: string;
+  links: { href: string; label: string; description: string }[];
+};
+
+/**
+ * Navigation grouped by purpose. Data and Settings are People-only screens, so
+ * the other roles do not see them (the screens themselves are gated too).
+ */
+async function HomeNav() {
+  const t = await getTranslations();
+  const hr = await actorIsHr();
+
+  const groups: NavGroup[] = [
+    {
+      key: "insights",
+      title: t("Home.groups.insights"),
+      links: [
+        {
+          href: "/insights/executive",
+          label: t("Insights.Executive.nav"),
+          description: t("Home.descriptions.executive"),
+        },
+        {
+          href: "/insights/completion",
+          label: t("Completion.nav"),
+          description: t("Home.descriptions.completion"),
+        },
+        {
+          href: "/insights/indicators",
+          label: t("Indicators.nav"),
+          description: t("Home.descriptions.indicators"),
+        },
+        {
+          href: "/insights/qualitative",
+          label: t("Qualitative.nav"),
+          description: t("Home.descriptions.qualitative"),
+        },
+        {
+          href: "/insights/self-assessment",
+          label: t("Insights.SelfAssessment.nav"),
+          description: t("Home.descriptions.selfAssessment"),
+        },
+        {
+          href: "/insights/goals",
+          label: t("GoalsInsights.nav"),
+          description: t("Home.descriptions.goals"),
+        },
+        {
+          href: "/insights/360",
+          label: t("Insights360.nav"),
+          description: t("Home.descriptions.dm360"),
+        },
+        {
+          href: "/insights/engagement",
+          label: t("Engagement.nav"),
+          description: t("Home.descriptions.engagement"),
+        },
+      ],
+    },
+  ];
+
+  if (hr) {
+    groups.push(
+      {
+        key: "data",
+        title: t("Home.groups.data"),
+        links: [
+          {
+            href: "/imports/upload",
+            label: t("Upload.nav"),
+            description: t("Home.descriptions.upload"),
+          },
+          {
+            href: "/imports/runs",
+            label: t("Imports.nav"),
+            description: t("Home.descriptions.imports"),
+          },
+          {
+            href: "/imports/identity",
+            label: t("Identity.nav"),
+            description: t("Home.descriptions.identity"),
+          },
+          {
+            href: "/data-quality",
+            label: t("DataQuality.nav"),
+            description: t("Home.descriptions.dataQuality"),
+          },
+        ],
+      },
+      {
+        key: "settings",
+        title: t("Home.groups.settings"),
+        links: [
+          {
+            href: "/settings/insights",
+            label: t("InsightsSettings.nav"),
+            description: t("Home.descriptions.insightsSettings"),
+          },
+        ],
+      },
+    );
+  }
+
+  return (
+    <nav aria-label={t("Home.navigation")} className="flex flex-col gap-6">
+      {groups.map((group) => (
+        <section
+          key={group.key}
+          aria-labelledby={`home-group-${group.key}`}
+          className="flex flex-col gap-2"
+        >
+          <h2
+            id={`home-group-${group.key}`}
+            className="text-sm font-semibold tracking-wide text-muted-foreground uppercase"
+          >
+            {group.title}
+          </h2>
+          <ul className="flex flex-col gap-3">
+            {group.links.map((link) => (
+              <li key={link.href} className="flex flex-col">
+                <Link href={link.href} className="font-medium underline">
+                  {link.label}
+                </Link>
+                <p className="text-sm text-muted-foreground">
+                  {link.description}
+                </p>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ))}
+    </nav>
+  );
+}
 
 export default async function HomePage({ params }: PageProps<"/[locale]">) {
   const { locale } = await params;
@@ -19,97 +158,21 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
 
   const tApp = await getTranslations("App");
   const tHome = await getTranslations("Home");
-  const tSettings = await getTranslations("Settings.nav");
-  const tPeople = await getTranslations("People");
-  const tImports = await getTranslations("Imports");
-  const tIdentity = await getTranslations("Identity");
-  const tOrg = await getTranslations("Org");
-  const tCycles = await getTranslations("Cycles");
-  const tGoals = await getTranslations("Goals");
-  const tDataQuality = await getTranslations("DataQuality");
-  const tUpload = await getTranslations("Upload");
-  const tDashboards = await getTranslations("Dashboards");
-  const tGoalsInsights = await getTranslations("GoalsInsights");
-  const tInsights360 = await getTranslations("Insights360");
-  const tEngagement = await getTranslations("Engagement");
-  const tCompletion = await getTranslations("Completion");
-  const tIndicators = await getTranslations("Indicators");
-  const tQualitative = await getTranslations("Qualitative");
-  const tInsights = await getTranslations("Insights");
 
   return (
     <main className="flex flex-1 items-center justify-center p-8">
-      <Card className="w-full max-w-md">
+      <Card className="w-full max-w-xl">
         <CardHeader>
           <CardTitle>
             <h1 className="text-2xl font-semibold">{tApp("title")}</h1>
           </CardTitle>
           <CardDescription>{tHome("heading")}</CardDescription>
         </CardHeader>
-        <CardContent className="flex flex-col gap-4">
+        <CardContent className="flex flex-col gap-6">
           <p>{tHome("welcome")}</p>
-          <nav aria-label={tHome("settings")} className="flex flex-col gap-1">
-            <Link href="/people" className="underline">
-              {tPeople("nav")}
-            </Link>
-            <Link href="/org" className="underline">
-              {tOrg("nav")}
-            </Link>
-            <Link href="/cycles" className="underline">
-              {tCycles("nav")}
-            </Link>
-            <Link href="/team/goals" className="underline">
-              {tGoals("nav")}
-            </Link>
-            <Link href="/dashboards" className="underline">
-              {tDashboards("nav")}
-            </Link>
-            <Link href="/insights/completion" className="underline">
-              {tCompletion("nav")}
-            </Link>
-            <Link href="/insights/indicators" className="underline">
-              {tIndicators("nav")}
-            </Link>
-            <Link href="/insights/qualitative" className="underline">
-              {tQualitative("nav")}
-            </Link>
-            <Link href="/insights/self-assessment" className="underline">
-              {tInsights("SelfAssessment.nav")}
-            </Link>
-            <Link href="/insights/executive" className="underline">
-              {tInsights("Executive.nav")}
-            </Link>
-            <Link href="/insights/goals" className="underline">
-              {tGoalsInsights("nav")}
-            </Link>
-            <Link href="/insights/360" className="underline">
-              {tInsights360("nav")}
-            </Link>
-            <Link href="/insights/engagement" className="underline">
-              {tEngagement("nav")}
-            </Link>
-            <Link href="/imports/runs" className="underline">
-              {tImports("nav")}
-            </Link>
-            <Link href="/imports/upload" className="underline">
-              {tUpload("nav")}
-            </Link>
-            <Link href="/imports/identity" className="underline">
-              {tIdentity("nav")}
-            </Link>
-            <Link href="/data-quality" className="underline">
-              {tDataQuality("nav")}
-            </Link>
-            <Link href="/settings/insights" className="underline">
-              {tSettings("insights")}
-            </Link>
-            <Link href="/settings/templates" className="underline">
-              {tSettings("templates")}
-            </Link>
-            <Link href="/settings/scales" className="underline">
-              {tSettings("scales")}
-            </Link>
-          </nav>
+          <Suspense fallback={<div aria-busy="true" className="h-64" />}>
+            <HomeNav />
+          </Suspense>
           <LocaleSwitcher />
         </CardContent>
       </Card>

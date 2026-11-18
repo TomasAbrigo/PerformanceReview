@@ -14,7 +14,7 @@ import { PeriodDetailTable } from "@/components/completion/period-detail-table";
 import { parseCompletionParams } from "@/components/completion/params";
 import { orgFiltersOf } from "@/components/org/params";
 import { ExportCsvLink } from "@/components/data-quality/export-csv-link";
-import { Panel } from "@/components/dashboards/parts";
+import { Panel } from "@/components/insights/parts";
 import { db } from "@/db/client";
 import { routing } from "@/i18n/routing";
 import { isHr } from "@/modules/actor/access";

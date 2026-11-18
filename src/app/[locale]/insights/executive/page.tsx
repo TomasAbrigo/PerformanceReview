@@ -4,7 +4,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { connection } from "next/server";
 import { Suspense } from "react";
-import { ExecutiveView } from "@/components/dashboards/executive-view";
+import { ExecutiveView } from "@/components/insights/executive-view";
 import { CycleForm } from "@/components/insights/cycle-form";
 import { OrgFilterFields } from "@/components/org/org-filter-fields";
 import { orgFiltersOf, parseOrgParams } from "@/components/org/params";

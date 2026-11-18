@@ -11,7 +11,7 @@
  */
 import { generateCompany } from "../src/fixtures/company";
 import { orderedName } from "../src/modules/identity/normalize";
-import type { FixtureEmployee, FixtureGoal } from "../src/fixtures/company";
+import type { FixtureEmployee } from "../src/fixtures/company";
 import { FIXTURE_SEEDS } from "../src/fixtures/write";
 
 export const company = generateCompany({
@@ -60,29 +60,6 @@ export const hasUniqueName = (e: FixtureEmployee) =>
 export const isActive = (e: FixtureEmployee) => e.status === "Active";
 
 export const byId = new Map(employees.map((e) => [e.id, e]));
-
-/** Goals of an employee, as the app orders them (by due date; dates are distinct per owner). */
-export function goalsOf(e: FixtureEmployee): FixtureGoal[] {
-  return company.goals
-    .filter((g) => g.employeeId === e.id)
-    .sort((a, b) => a.dueDate.localeCompare(b.dueDate));
-}
-
-/** Active employees whose manager is `manager` (a direct report today). */
-export const directReports = (manager: FixtureEmployee) =>
-  employees.filter((e) => isActive(e) && e.managerId === manager.id);
-
-/** Job history rows of an employee (the app stores them one to one here). */
-export const jobRowsOf = (e: FixtureEmployee) =>
-  company.jobHistory.filter((r) => r.employeeId === e.id);
-
-/** Employed on `date`: hired by then and not terminated before it. */
-export const employedOn = (date: string) =>
-  employees.filter(
-    (e) =>
-      e.hireDate <= date &&
-      (e.terminationDate === null || e.terminationDate >= date),
-  );
 
 /** First that satisfies `pick`, or a clear failure if the fixtures changed. */
 export function find<T>(

@@ -75,10 +75,8 @@ describe.each(["es", "en"] as const)("HistoryResult (%s)", (locale) => {
     expect(rows).toHaveLength(3);
     const first = rows[1];
     expect(
-      within(first).getByRole("link", {
-        name: "Evaluación de desempeño 2023",
-      }),
-    ).toHaveAttribute("href", "/cycles/c-2023");
+      within(first).getByText("Evaluación de desempeño 2023"),
+    ).toBeInTheDocument();
     expect(first).toHaveTextContent("2023-11-28");
     expect(first).toHaveTextContent("2023-12-15");
     expect(first).toHaveTextContent(

@@ -27,14 +27,24 @@ test("a rehire that arrives in a later run waits in the queue", async ({
 });
 
 test("nobody was created for it: still one person per human", async ({
-  page,
+  request,
 }) => {
-  await page.goto("/en/people");
+  // One row per person in the export (+ header, + the empty tail).
+  const csv = await (await request.get("/api/v1/export/people.csv")).text();
+  expect(csv.slice(1).split("\r\n")).toHaveLength(employees.length + 2);
 
-  await expect(page.getByText(`${employees.length} people`)).toBeVisible();
-  await expect(page.getByRole("link", { name, exact: true })).toHaveCount(1);
-  await page.getByRole("link", { name, exact: true }).click();
-  const ids = page.getByRole("table", { name: "Source identifiers" });
-  await expect(ids.getByText(earlier.id, { exact: true })).toBeVisible();
-  await expect(ids.getByText(later.id, { exact: true })).toHaveCount(0);
+  const found = await request.get(
+    `/api/v1/people?q=${encodeURIComponent(name)}&limit=10`,
+  );
+  const people: { id: string; display_name: string }[] = (await found.json())
+    .data;
+  const named = people.filter((p) => p.display_name === name);
+  expect(named).toHaveLength(1);
+
+  const detail = (
+    await (await request.get(`/api/v1/people/${named[0].id}`)).json()
+  ).data;
+  const ids = detail.source_identities.map((i: { value: string }) => i.value);
+  expect(ids).toContain(earlier.id);
+  expect(ids).not.toContain(later.id);
 });

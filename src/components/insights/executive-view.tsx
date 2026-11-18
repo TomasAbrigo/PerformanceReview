@@ -20,7 +20,7 @@ export function ExecutiveView({
   /** False where completion is shown elsewhere (the executive view's tile). */
   showProgress?: boolean;
 }) {
-  const t = useTranslations("Dashboards");
+  const t = useTranslations("Charts");
   const min = data.minGroupSize;
   const belowMinimum = min !== null && data.participants < min;
   return (

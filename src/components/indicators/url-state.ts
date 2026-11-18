@@ -1,6 +1,6 @@
 // URL params of the indicator pages (filters live in the URL, never in state).
 import { isUuid } from "@/lib/uuid";
-import { one, pick } from "@/components/dashboards/url-state";
+import { one, pick } from "@/components/insights/url-state";
 import { type OrgParams, parseOrgParams } from "@/components/org/params";
 import {
   hierarchies,

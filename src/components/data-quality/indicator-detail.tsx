@@ -21,12 +21,8 @@ import type {
 
 type Column = keyof (typeof es)["DataQuality"]["columns"];
 
-function PersonLink({ id, name }: { id: string; name: string }) {
-  return (
-    <Link href={`/people/${id}`} className="hover:underline">
-      {name}
-    </Link>
-  );
+function PersonName({ name }: { name: string }) {
+  return <span>{name}</span>;
 }
 
 /** A table with a localized header row; `rows` are keyed cells. */
@@ -80,9 +76,7 @@ function ByCycle<T extends ParticipantItem>({
       {[...groups].map(([cycleId, group]) => (
         <section key={cycleId} className="flex flex-col gap-2">
           <h2 className="font-medium">
-            <Link href={`/cycles/${cycleId}`} className="hover:underline">
-              {group.name}
-            </Link>{" "}
+            {group.name}{" "}
             <span className="text-sm font-normal text-muted-foreground">
               {t("participantsCount", { count: group.items.length })}
             </span>
@@ -92,11 +86,7 @@ function ByCycle<T extends ParticipantItem>({
             rows={group.items.map((item) => ({
               key: item.id,
               cells: [
-                <PersonLink
-                  key="p"
-                  id={item.personId}
-                  name={item.displayName}
-                />,
+                <PersonName key="p" name={item.displayName} />,
                 ...extras.map((e) => e.cell(item)),
               ],
             }))}
@@ -141,7 +131,7 @@ function Cases({ indicator }: { indicator: DataQualityIndicator }) {
             key: i.id,
             cells: [
               <span key="n" className="flex items-center gap-2">
-                <PersonLink id={i.id} name={i.displayName} />
+                <PersonName name={i.displayName} />
                 {i.isTop ? (
                   <Badge variant="secondary" title={t("topHelp")}>
                     {t("badges.top")}
@@ -176,7 +166,7 @@ function Cases({ indicator }: { indicator: DataQualityIndicator }) {
           rows={indicator.items.map((i) => ({
             key: i.id,
             cells: [
-              <PersonLink key="p" id={i.personId} name={i.displayName} />,
+              <PersonName key="p" name={i.displayName} />,
               t(`kinds.${i.kind}`),
               i.from,
               i.to ?? t("noEnd"),
@@ -191,7 +181,7 @@ function Cases({ indicator }: { indicator: DataQualityIndicator }) {
           rows={indicator.items.map((i) => ({
             key: i.id,
             cells: [
-              <PersonLink key="p" id={i.personId} name={i.displayName} />,
+              <PersonName key="p" name={i.displayName} />,
               i.validFrom,
               i.terminationDate,
             ],
@@ -204,10 +194,7 @@ function Cases({ indicator }: { indicator: DataQualityIndicator }) {
           columns={["name", "email"]}
           rows={indicator.items.map((i) => ({
             key: i.id,
-            cells: [
-              <PersonLink key="p" id={i.id} name={i.displayName} />,
-              i.workEmail,
-            ],
+            cells: [<PersonName key="p" name={i.displayName} />, i.workEmail],
           }))}
         />
       );
@@ -217,10 +204,7 @@ function Cases({ indicator }: { indicator: DataQualityIndicator }) {
           columns={["goal", "owner"]}
           rows={indicator.items.map((i) => ({
             key: i.id,
-            cells: [
-              i.title,
-              <PersonLink key="p" id={i.personId} name={i.displayName} />,
-            ],
+            cells: [i.title, <PersonName key="p" name={i.displayName} />],
           }))}
         />
       );
@@ -231,7 +215,7 @@ function Cases({ indicator }: { indicator: DataQualityIndicator }) {
           rows={indicator.items.map((i) => ({
             key: i.id,
             cells: [
-              <PersonLink key="p" id={i.id} name={i.displayName} />,
+              <PersonName key="p" name={i.displayName} />,
               i.workEmail,
               t("duplicatesCount", { count: i.duplicates }),
             ],
@@ -268,22 +252,14 @@ function Cases({ indicator }: { indicator: DataQualityIndicator }) {
               column: "reviewer",
               cell: (item) =>
                 item.reviewerPersonId && item.reviewerName ? (
-                  <PersonLink
-                    key="r"
-                    id={item.reviewerPersonId}
-                    name={item.reviewerName}
-                  />
+                  <PersonName key="r" name={item.reviewerName} />
                 ) : null,
             },
             {
               column: "snapshotManager",
               cell: (item) =>
                 item.snapManagerId && item.snapManagerName ? (
-                  <PersonLink
-                    key="m"
-                    id={item.snapManagerId}
-                    name={item.snapManagerName}
-                  />
+                  <PersonName key="m" name={item.snapManagerName} />
                 ) : null,
             },
           ]}
@@ -296,13 +272,7 @@ function Cases({ indicator }: { indicator: DataQualityIndicator }) {
           rows={indicator.items.map((i) => ({
             key: i.id,
             cells: [
-              <Link
-                key="c"
-                href={`/cycles/${i.cycleId}`}
-                className="hover:underline"
-              >
-                {i.cycleName}
-              </Link>,
+              i.cycleName,
               <code key="k">{i.columnKey}</code>,
               i.rawValue,
               t(`answerReasons.${i.reason}`),

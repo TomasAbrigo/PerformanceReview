@@ -400,9 +400,7 @@ describe("OutliersView", () => {
       expect(
         within(done).getByTestId("outliers-done-low-count"),
       ).toHaveTextContent(locale === "es" ? "1 persona" : "1 person");
-      expect(
-        within(done).getByRole("link", { name: /Ana Prieto/ }),
-      ).toHaveAttribute("href", "/cycles/c1/participants/pa");
+      expect(within(done).getByText("Ana Prieto")).toBeInTheDocument();
       expect(done).toHaveTextContent(
         locale === "es" ? "4 de 5 (80 %)" : "4 of 5 (80 %)",
       );
@@ -440,7 +438,6 @@ describe("PeopleTable", () => {
     renderIn(
       "es",
       <PeopleTable
-        cycleId="c1"
         rows={[
           row("Ana"),
           row("Dario", {
@@ -461,9 +458,6 @@ describe("PeopleTable", () => {
     expect(ana).toHaveTextContent("50 %");
     const dario = within(table).getByRole("row", { name: /Dario/ });
     expect(dario).toHaveTextContent("–");
-    expect(
-      within(table).getByRole("link", { name: "Ver assessment de Ana" }),
-    ).toHaveAttribute("href", "/cycles/c1/participants/p-Ana");
   });
 });
 

@@ -287,9 +287,8 @@ describe("IssueDetail", () => {
 
       expect(screen.getByText(suggested)).toBeInTheDocument();
       const candidate = screen.getByRole("listitem", { name: "Carla Romero" });
-      expect(
-        within(candidate).getByRole("link", { name: "Carla Romero" }),
-      ).toHaveAttribute("href", "/people/p-carla");
+      expect(within(candidate).getByText("Carla Romero")).toBeInTheDocument();
+      expect(within(candidate).queryByRole("link")).not.toBeInTheDocument();
       expect(within(candidate).getByText(matched)).toBeInTheDocument();
       expect(within(candidate).getByText(legajo)).toBeInTheDocument();
       expect(within(candidate).getByText(score)).toBeInTheDocument();
