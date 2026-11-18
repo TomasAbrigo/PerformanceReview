@@ -39,6 +39,7 @@ export {
   overallRatingQuestion,
   snapshotGoalsForParticipant,
   snapshotGoalsForParticipants,
+  syncGoalToOpenCycles,
   type GoalsScope,
   type GoalWindow,
 } from "./goal-snapshot";

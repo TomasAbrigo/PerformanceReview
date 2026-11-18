@@ -7,6 +7,7 @@ import { jobValidOn, rowsOf } from "@/lib/sql";
 import { isUuid } from "@/lib/uuid";
 import type { ActorContext } from "@/modules/actor/types";
 import { todayLocal } from "@/modules/org-history/dates";
+import { syncGoalToOpenCycles } from "@/modules/review-core/goal-snapshot";
 import { canEditGoal } from "./permissions";
 
 export class GoalError extends DomainError<
@@ -106,6 +107,25 @@ async function loadEditable(
 
 const touch = (now: Date) => ({ lastChangedAt: now, updatedAt: now });
 
+/**
+ * Updates a goal and carries the change to the snapshots of the cycles still
+ * running (what /insights/goals and the assessments read), as one write.
+ */
+async function updateGoalRow(
+  db: DbOrTx,
+  goalId: string,
+  set: Partial<typeof goal.$inferInsert>,
+): Promise<void> {
+  const now = new Date();
+  await db.transaction(async (tx) => {
+    await tx
+      .update(goal)
+      .set({ ...set, ...touch(now) })
+      .where(eq(goal.id, goalId));
+    await syncGoalToOpenCycles(tx, goalId, now);
+  });
+}
+
 /** Creates a goal (`native`) for `personId` (default: the actor). */
 export async function createGoal(
   db: DbOrTx,
@@ -129,18 +149,22 @@ export async function createGoal(
       { path: "personId", message: "unknown_person" },
     ]);
   }
-  const [row] = await db
-    .insert(goal)
-    .values({
-      personId,
-      title: v.title,
-      description: v.description ?? null,
-      dueDate: v.dueDate ?? null,
-      sourceSystem: "native",
-      ...touch(new Date()),
-    })
-    .returning({ id: goal.id });
-  return row;
+  const now = new Date();
+  return db.transaction(async (tx) => {
+    const [row] = await tx
+      .insert(goal)
+      .values({
+        personId,
+        title: v.title,
+        description: v.description ?? null,
+        dueDate: v.dueDate ?? null,
+        sourceSystem: "native",
+        ...touch(now),
+      })
+      .returning({ id: goal.id });
+    await syncGoalToOpenCycles(tx, row.id, now);
+    return row;
+  });
 }
 
 export async function updateGoal(
@@ -152,15 +176,11 @@ export async function updateGoal(
 ): Promise<void> {
   const v = parse(updateGoalSchema, input, GoalError);
   await loadEditable(db, actor, goalId, today);
-  await db
-    .update(goal)
-    .set({
-      title: v.title,
-      description: v.description ?? null,
-      dueDate: v.dueDate ?? null,
-      ...touch(new Date()),
-    })
-    .where(eq(goal.id, goalId));
+  await updateGoalRow(db, goalId, {
+    title: v.title,
+    description: v.description ?? null,
+    dueDate: v.dueDate ?? null,
+  });
 }
 
 export async function setProgress(
@@ -176,10 +196,7 @@ export async function setProgress(
     GoalError,
   );
   await loadEditable(db, actor, goalId, today);
-  await db
-    .update(goal)
-    .set({ percentComplete: v.percent, ...touch(new Date()) })
-    .where(eq(goal.id, goalId));
+  await updateGoalRow(db, goalId, { percentComplete: v.percent });
 }
 
 /**
@@ -199,15 +216,11 @@ export async function setStatus(
     GoalError,
   );
   await loadEditable(db, actor, goalId, today);
-  await db
-    .update(goal)
-    .set({
-      status: v.status,
-      completionDate: v.status === "completed" ? today : null,
-      ...(v.status === "completed" ? { percentComplete: 100 } : {}),
-      ...touch(new Date()),
-    })
-    .where(eq(goal.id, goalId));
+  await updateGoalRow(db, goalId, {
+    status: v.status,
+    completionDate: v.status === "completed" ? today : null,
+    ...(v.status === "completed" ? { percentComplete: 100 } : {}),
+  });
 }
 
 export async function addMilestone(

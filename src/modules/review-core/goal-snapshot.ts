@@ -1,4 +1,4 @@
-import { and, asc, eq, inArray, isNull } from "drizzle-orm";
+import { and, asc, eq, inArray, isNull, notInArray, sql } from "drizzle-orm";
 import type { DbOrTx } from "@/db/client";
 import {
   cycleGoalLink,
@@ -19,10 +19,11 @@ import type { CycleStatus } from "./status";
  *
  * - A participant's goals are copied into `participant_goal_snapshot` once,
  *   when the cycle launches (or when the participant is added): title, status,
- *   progress and due date "as of" that moment. Goals created later never
- *   appear. (Refreshing progress and linking goals by hand were UI flows,
- *   removed in #54; `refreshed_at`, `no_longer_applicable` and
- *   `cycle_goal_link` stay as data.)
+ *   progress and due date "as of" that moment. A goal that someone later
+ *   writes in the app reaches the snapshots of the cycles still running
+ *   (`syncGoalToOpenCycles`); imports and closed cycles never change it.
+ *   (Linking goals by hand was a UI flow, removed in #54; `no_longer_applicable`
+ *   and `cycle_goal_link` stay as data.)
  * - The goals rating (one rating for all goals) and its comment are ordinary
  *   questions of the manager template marked with a `role`. They are stored
  *   like any answer but apart from the overall rating, and they NEVER feed the
@@ -101,12 +102,14 @@ const windowOf = (g: Goal): GoalWindow => ({
   startDate: g.sourceSystem === "native" ? todayLocal(g.createdAt) : null,
 });
 
+const sourceKeyOf = (g: Goal) => `${g.sourceSystem}:${g.sourceId ?? g.id}`;
+
 /** The snapshot row of a goal as of `capturedAt`. */
 function snapshotRow(participantId: string, g: Goal, capturedAt: Date) {
   return {
     participantId,
     goalId: g.id,
-    goalSourceKey: `${g.sourceSystem}:${g.sourceId ?? g.id}`,
+    goalSourceKey: sourceKeyOf(g),
     title: g.title,
     status: g.status,
     percentComplete: g.percentComplete,
@@ -179,6 +182,97 @@ export async function snapshotGoalsForParticipants(
   for (let i = 0; i < rows.length; i += 1000) {
     await db.insert(participantGoalSnapshot).values(rows.slice(i, i + 1000));
   }
+}
+
+/**
+ * Carries a goal written in the app to the snapshots of the cycles still
+ * running (not a draft, not closed) where its owner is an active participant:
+ * the figures of /insights/goals and the goals of an assessment read the
+ * snapshot, so completing, closing or editing a goal has to reach it.
+ *
+ * - A goal that is already in a snapshot is refreshed (title, status,
+ *   progress, due date) and stamped `refreshed_at`.
+ * - A goal that is not yet there joins when it belongs to the cycle (it is
+ *   linked to it or overlaps its period, `goalOverlapsPeriod`), so a goal
+ *   created in the app while the cycle runs shows up.
+ * - Closed cycles are history and stay as they were.
+ */
+export async function syncGoalToOpenCycles(
+  db: DbOrTx,
+  goalId: string,
+  asOf: Date = new Date(),
+): Promise<void> {
+  const [g] = await db
+    .select()
+    .from(goal)
+    .where(and(eq(goal.id, goalId), isNull(goal.deletedAt)));
+  if (!g) return;
+  const participants = await db
+    .select({
+      id: cycleParticipant.id,
+      cycleId: cycleParticipant.cycleId,
+      periodStart: reviewCycle.periodStart,
+      periodEnd: reviewCycle.periodEnd,
+    })
+    .from(cycleParticipant)
+    .innerJoin(reviewCycle, eq(reviewCycle.id, cycleParticipant.cycleId))
+    .where(
+      and(
+        eq(cycleParticipant.revieweePersonId, g.personId),
+        isNull(cycleParticipant.removedAt),
+        isNull(reviewCycle.deletedAt),
+        notInArray(reviewCycle.status, ["draft", "closed"]),
+      ),
+    );
+  if (participants.length === 0) return;
+  const present = new Set(
+    (
+      await db
+        .select({ participantId: participantGoalSnapshot.participantId })
+        .from(participantGoalSnapshot)
+        .where(
+          and(
+            inArray(
+              participantGoalSnapshot.participantId,
+              participants.map((p) => p.id),
+            ),
+            eq(participantGoalSnapshot.goalSourceKey, sourceKeyOf(g)),
+          ),
+        )
+    ).map((r) => r.participantId),
+  );
+  const links = await db
+    .select({ cycleId: cycleGoalLink.cycleId })
+    .from(cycleGoalLink)
+    .where(eq(cycleGoalLink.goalId, g.id));
+  const linked = new Set(links.map((l) => l.cycleId));
+  const rows = participants
+    .filter(
+      (p) =>
+        present.has(p.id) ||
+        linked.has(p.cycleId) ||
+        goalOverlapsPeriod(windowOf(g), p),
+    )
+    .map((p) => snapshotRow(p.id, g, asOf));
+  if (rows.length === 0) return;
+  await db
+    .insert(participantGoalSnapshot)
+    .values(rows)
+    .onConflictDoUpdate({
+      target: [
+        participantGoalSnapshot.participantId,
+        participantGoalSnapshot.goalSourceKey,
+      ],
+      set: {
+        goalId: sql`excluded.goal_id`,
+        title: sql`excluded.title`,
+        status: sql`excluded.status`,
+        percentComplete: sql`excluded.percent_complete`,
+        dueDate: sql`excluded.due_date`,
+        refreshedAt: asOf,
+        noLongerApplicable: false,
+      },
+    });
 }
 
 export const snapshotGoalsForParticipant = (
