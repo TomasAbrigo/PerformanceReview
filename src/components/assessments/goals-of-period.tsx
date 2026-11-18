@@ -73,7 +73,7 @@ export function GoalsOfPeriod({
                   <td className="pr-4">
                     <ProgressBar
                       percent={g.percentComplete}
-                      label={`${g.percentComplete}%`}
+                      label={t("progressLabel", { percent: g.percentComplete })}
                     />
                   </td>
                   <td className="whitespace-nowrap tabular-nums">

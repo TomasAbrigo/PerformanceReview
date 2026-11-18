@@ -75,11 +75,7 @@ export function AssessmentView({
       <GoalsOfPeriod goals={detail.goals} name={name} asOf={detail.goalsAsOf} />
       <div className="grid items-start gap-6 lg:grid-cols-2">
         {detail.sides.map((side) => (
-          <AssessmentSideView
-            key={side.relationship}
-            side={side}
-            employeeView={detail.employeeView || !toggle}
-          />
+          <AssessmentSideView key={side.relationship} side={side} />
         ))}
       </div>
     </div>

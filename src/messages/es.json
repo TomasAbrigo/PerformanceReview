@@ -1864,7 +1864,7 @@
       "noSections": "No hay preguntas para mostrar.",
       "noAnswer": "Sin respuesta",
       "custom": "Pregunta propia",
-      "hiddenFromEmployee": "No la ve el empleado",
+      "hiddenFromEmployee": "Oculta al empleado",
       "scaleOf": "{value} de {max}",
       "goals": {
         "title": "Goals del período",
@@ -1877,7 +1877,8 @@
         "due": "Vence",
         "noDate": "Sin fecha",
         "noLongerApplicable": "Ya no aplica",
-        "open": "Abrir el goal"
+        "open": "Abrir el goal",
+        "progressLabel": "{percent}% completado"
       }
     },
     "forbidden": "No tenés acceso a este assessment: cada persona ve los suyos y, si es manager, los de su equipo."

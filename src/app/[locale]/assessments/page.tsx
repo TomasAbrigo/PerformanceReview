@@ -8,14 +8,11 @@ import {
   ParticipantsTable,
   ProgressChips,
 } from "@/components/assessments/participants-table";
-import {
-  type AssessmentsParams,
-  parseAssessmentsParams,
-} from "@/components/assessments/url-state";
+import { parseAssessmentsParams } from "@/components/assessments/url-state";
 import { Panel } from "@/components/insights/parts";
 import { orgFiltersOf } from "@/components/org/params";
 import { PageHeader } from "@/components/page-header";
-import { queryString } from "@/components/query-string";
+import { listHref } from "@/components/query-string";
 import { db } from "@/db/client";
 import { redirect } from "@/i18n/navigation";
 import { routing } from "@/i18n/routing";
@@ -30,18 +27,6 @@ import { noOrgOptions } from "@/modules/org-attributes/kinds";
 import { localizeCycles } from "@/modules/review-core/cycle-name";
 
 const HERE = "/assessments";
-
-/** The filters of the list as a query string, without the page. */
-const filtersQuery = (p: AssessmentsParams, cycle: string) => ({
-  cycle,
-  progress: p.progress,
-  q: p.q,
-  department: p.department,
-  account: p.account,
-  project: p.project,
-  dm: p.dm,
-  santexLead: p.santexLead,
-});
 
 async function AssessmentsList({
   params,
@@ -86,8 +71,13 @@ async function AssessmentsList({
       ? { departments: [], org: noOrgOptions }
       : assessmentFilterOptions(db, actor, cycle.id),
   ]);
-  const hrefFor = (extra: Record<string, string | number | undefined>) =>
-    `${HERE}${queryString({ ...filtersQuery(p, cycle.id), ...extra })}`;
+  const hrefFor = listHref(HERE, {
+    cycle: cycle.id,
+    progress: p.progress,
+    q: p.q,
+    department: p.department,
+    ...orgFiltersOf(p),
+  });
   return (
     <div className="flex flex-col gap-8">
       <PageHeader
@@ -110,7 +100,7 @@ async function AssessmentsList({
           <ProgressChips
             counts={page.counts}
             current={p.progress}
-            hrefFor={(progress) => hrefFor({ progress, page: undefined })}
+            hrefFor={(progress) => hrefFor({ progress })}
           />
         }
       >

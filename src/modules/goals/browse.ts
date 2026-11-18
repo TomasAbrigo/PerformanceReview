@@ -3,7 +3,8 @@ import type { DbOrTx } from "@/db/client";
 import type { LocalizedText } from "@/db/schema/rating-scales";
 import type { GoalStatus } from "@/db/schema/goals";
 import { iso } from "@/modules/api/queries/shared";
-import { jobValidOn, rowsOf } from "@/lib/sql";
+import { clampPage, MAX_PAGE } from "@/lib/paging";
+import { allOf, containsPattern, jobValidOn, rowsOf } from "@/lib/sql";
 import { isUuid } from "@/lib/uuid";
 import {
   type IndividualScope,
@@ -79,11 +80,6 @@ export type GoalFilterOptions = {
   org: OrgOptions;
 };
 
-const and = (parts: SQL[]): SQL => sql.join(parts, sql` and `);
-
-/** Escapes `%`, `_` and `\` so a name is searched as typed. */
-const likePattern = (q: string) => `%${q.replace(/[\\%_]/g, "\\$&")}%`;
-
 /** The condition that limits the goals `g` (with its owner's current job `j`) to the scope. */
 function scopeCondition(scope: IndividualScope): SQL {
   switch (scope.kind) {
@@ -130,7 +126,7 @@ function filterConditions(f: GoalListFilters): SQL[] {
     );
   }
   if (f.q?.trim())
-    where.push(sql`p.display_name ilike ${likePattern(f.q.trim())}`);
+    where.push(sql`p.display_name ilike ${containsPattern(f.q.trim())}`);
   if (f.department) where.push(sql`j.department = ${f.department}`);
   where.push(...orgAttributeFilters(f));
   return where;
@@ -161,49 +157,61 @@ export async function listGoals(
   today: string = todayLocal(),
 ): Promise<GoalListPage> {
   const scope = individualScope(actor);
-  const base = and([
+  const base = allOf([
     sql`g.deleted_at is null`,
     scopeCondition(scope),
     ...filterConditions(filters),
   ]);
   const state = sql`${stateExpr(today)}`;
-  const counted = rowsOf<{ state: GoalState; n: number }>(
-    await db.execute(sql`
+  const where = allOf([
+    base,
+    filters.state ? sql`${state} = ${filters.state}` : sql`true`,
+  ]);
+  const pageSize = GOALS_PAGE_SIZE;
+  const readPage = async (page: number) =>
+    rowsOf<ListRow>(
+      await db.execute(sql`
+        select g.id, g.title, g.status::text as status,
+          g.percent_complete as "percentComplete",
+          g.due_date::text as "dueDate", g.completion_date::text as "completionDate",
+          g.person_id as "personId", p.display_name as "personName",
+          j.department,
+          (select count(*)::int from goal_milestone m
+            where m.goal_id = g.id and m.deleted_at is null) as "milestonesTotal",
+          (select count(*)::int from goal_milestone m
+            where m.goal_id = g.id and m.deleted_at is null
+              and m.completed_at is not null) as "milestonesDone"
+        ${goalsFrom(today)}
+        where ${where}
+        order by g.due_date nulls last, p.display_name, g.title, g.id
+        limit ${pageSize} offset ${(page - 1) * pageSize}`),
+    );
+
+  // The counts and the page read together; a page past the last one is
+  // clamped to it (read again, the rare case).
+  const requested = clampPage(filters.page, MAX_PAGE * pageSize, pageSize);
+  const [counted, firstTry] = await Promise.all([
+    db.execute(sql`
       select ${state} as state, count(*)::int as n
       ${goalsFrom(today)}
       where ${base}
       group by 1`),
-  );
+    readPage(requested),
+  ]);
   const counts: Record<GoalState, number> = {
     in_progress: 0,
     completed: 0,
     closed: 0,
     overdue: 0,
   };
-  for (const row of counted) counts[row.state] = row.n;
+  for (const row of rowsOf<{ state: GoalState; n: number }>(counted)) {
+    counts[row.state] = row.n;
+  }
   const total = filters.state
     ? counts[filters.state]
     : Object.values(counts).reduce((a, b) => a + b, 0);
-
-  const pageSize = GOALS_PAGE_SIZE;
-  const page = Math.max(1, Math.floor(filters.page ?? 1));
-  const rows = rowsOf<ListRow>(
-    await db.execute(sql`
-      select g.id, g.title, g.status::text as status,
-        g.percent_complete as "percentComplete",
-        g.due_date::text as "dueDate", g.completion_date::text as "completionDate",
-        g.person_id as "personId", p.display_name as "personName",
-        j.department,
-        (select count(*)::int from goal_milestone m
-          where m.goal_id = g.id and m.deleted_at is null) as "milestonesTotal",
-        (select count(*)::int from goal_milestone m
-          where m.goal_id = g.id and m.deleted_at is null
-            and m.completed_at is not null) as "milestonesDone"
-      ${goalsFrom(today)}
-      where ${and([base, filters.state ? sql`${state} = ${filters.state}` : sql`true`])}
-      order by g.due_date nulls last, p.display_name, g.title, g.id
-      limit ${pageSize} offset ${(page - 1) * pageSize}`),
-  );
+  const page = clampPage(requested, total, pageSize);
+  const rows = page === requested ? firstTry : await readPage(page);
   return {
     items: rows.map((r) => ({
       id: r.id,
@@ -225,6 +233,38 @@ export async function listGoals(
   };
 }
 
+/** A cycle that has goals in the actor's scope, for the cycle filter. */
+export type GoalCycle = {
+  id: string;
+  name: string;
+  localizedName: LocalizedText | null;
+  periodEnd: string;
+};
+
+/**
+ * The launched cycles whose snapshot holds goals `actor` may read, latest
+ * period first: the options of the cycle filter, by the same scope rule as the
+ * list itself (a cycle never offers a filter that comes back empty for them).
+ */
+export async function listGoalCycles(
+  db: DbOrTx,
+  actor: ActorContext,
+  today: string = todayLocal(),
+): Promise<GoalCycle[]> {
+  return rowsOf<GoalCycle>(
+    await db.execute(sql`
+      select distinct c.id, c.name, c.localized_name as "localizedName",
+        c.period_end::text as "periodEnd"
+      ${goalsFrom(today)}
+      join participant_goal_snapshot s on s.goal_id = g.id and not s.no_longer_applicable
+      join cycle_participant cp on cp.id = s.participant_id and cp.removed_at is null
+      join review_cycle c on c.id = cp.cycle_id and c.deleted_at is null
+        and c.status <> 'draft'
+      where ${allOf([sql`g.deleted_at is null`, scopeCondition(individualScope(actor))])}
+      order by "periodEnd" desc, c.name, c.id`),
+  );
+}
+
 /** The values of the area and org selects: what the owners of the goals in scope carry. */
 export async function goalFilterOptions(
   db: DbOrTx,
@@ -241,7 +281,7 @@ export async function goalFilterOptions(
     await db.execute(sql`
       select distinct j.department, ${orgAttributeColumns}
       ${goalsFrom(today)}
-      where ${and([sql`g.deleted_at is null`, scopeCondition(individualScope(actor))])}`),
+      where ${allOf([sql`g.deleted_at is null`, scopeCondition(individualScope(actor))])}`),
   );
   const collator = new Intl.Collator("es");
   return {

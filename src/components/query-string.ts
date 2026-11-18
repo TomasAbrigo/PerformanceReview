@@ -1,3 +1,5 @@
+import { MAX_PAGE } from "@/lib/paging";
+
 /** A query string (`?a=1&b=2`, or empty) from the params that have a value. */
 export function queryString(
   params: Record<string, string | number | undefined | null>,
@@ -20,8 +22,23 @@ export const firstParam = (sp: Raw, key: string): string | undefined => {
   return (Array.isArray(value) ? value[0] : value)?.trim() || undefined;
 };
 
-/** A positive page number from the `page` param (1 when missing or not a number). */
+/**
+ * A page number from the `page` param: 1 when it is missing or not a whole
+ * number, never past `MAX_PAGE`. The query clamps it to the last page there is.
+ */
 export function pageParam(sp: Raw): number {
   const n = Number(firstParam(sp, "page"));
-  return Number.isInteger(n) && n >= 1 ? n : 1;
+  return Number.isInteger(n) && n >= 1 ? Math.min(n, MAX_PAGE) : 1;
+}
+
+/**
+ * The href builder of a list: `base` plus the filters in the query string,
+ * with `extra` (the page, a state to filter by...) laid over them. An
+ * undefined value drops that param.
+ */
+export function listHref(
+  base: string,
+  filters: Record<string, string | number | undefined | null>,
+): (extra?: Record<string, string | number | undefined | null>) => string {
+  return (extra = {}) => `${base}${queryString({ ...filters, ...extra })}`;
 }

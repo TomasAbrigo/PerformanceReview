@@ -86,6 +86,25 @@ test("People list every goal, filter them and page through them", async ({
   expect(await rows.locator("tbody tr").first().innerText()).not.toBe(first);
 });
 
+test("a page past the last one shows the last page, not an empty list", async ({
+  page,
+}) => {
+  await page.goto("/es/goals?page=99999");
+  const rows = page.getByRole("table", { name: "Lista de goals" });
+  await expect(rows.locator("tbody tr").first()).toBeVisible();
+  const position = page.getByText(/^Página (\d+) de (\d+)$/);
+  await expect(position).toBeVisible();
+  const [, current, pages] = (await position.innerText()).match(
+    /^Página (\d+) de (\d+)$/,
+  )!;
+  expect(current).toBe(pages);
+  await expect(page.getByRole("link", { name: "Anterior" })).toBeVisible();
+  await page.goto("/es/assessments?page=99999999999999");
+  await expect(
+    page.getByRole("table", { name: "Participantes del ciclo" }),
+  ).toBeVisible();
+});
+
 test("a goal's page shows its summary, milestones and comments, and leads to the assessments that list it", async ({
   page,
 }) => {

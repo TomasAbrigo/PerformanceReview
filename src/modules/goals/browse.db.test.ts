@@ -1,4 +1,4 @@
-import { eq } from "drizzle-orm";
+import { eq, inArray } from "drizzle-orm";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { closeDb, db } from "@/db/client";
 import {
@@ -19,7 +19,12 @@ import {
 } from "@/modules/analytics/test-support";
 import { setOrgAttributes } from "@/modules/org-attributes/test-support";
 import { ReviewError } from "@/modules/review-core/review-errors";
-import { getGoalDetail, goalFilterOptions, listGoals } from "./browse";
+import {
+  getGoalDetail,
+  goalFilterOptions,
+  listGoalCycles,
+  listGoals,
+} from "./browse";
 
 const TODAY = "2026-11-18";
 
@@ -293,10 +298,11 @@ describe("listGoals: filters", () => {
     ).toBe(3);
   });
 
-  it("pages the list", async () => {
-    const page2 = await listGoals(db, hr, { page: 2 }, TODAY);
-    expect(page2.items).toEqual([]);
-    expect(page2.total).toBe(6);
+  it("is the last page for a page past it, never an empty one", async () => {
+    const wild = await listGoals(db, hr, { page: 10 ** 12 }, TODAY);
+    expect(wild.page).toBe(1);
+    expect(wild.items).toHaveLength(6);
+    expect(wild.total).toBe(6);
   });
 
   it("carries the milestone counts and the owner", async () => {
@@ -394,5 +400,92 @@ describe("getGoalDetail", () => {
         TODAY,
       ),
     ).toBeNull();
+  });
+});
+
+describe("listGoalCycles", () => {
+  it("offers the cycles whose snapshot holds goals the actor may read", async () => {
+    expect((await listGoalCycles(db, hr, TODAY)).map((c) => c.name)).toEqual([
+      "Primer semestre",
+    ]);
+    // Dora's goals are in the snapshot: her manager and herself read them.
+    for (const actor of [as("manager", ids.bruno), as("employee", ids.dora)]) {
+      expect((await listGoalCycles(db, actor, TODAY)).map((c) => c.id)).toEqual(
+        [ids.cycleId],
+      );
+    }
+  });
+
+  it("offers nothing to someone who cannot read those goals, so the filter never comes back empty", async () => {
+    for (const actor of [as("employee", ids.eli), as("manager", ids.zoe)]) {
+      expect(await listGoalCycles(db, actor, TODAY)).toEqual([]);
+    }
+    await expect(
+      listGoalCycles(db, { personId: null, role: "direction" }, TODAY),
+    ).rejects.toMatchObject({ code: "forbidden" });
+  });
+
+  it("agrees with the list: every offered cycle lists goals for that actor", async () => {
+    for (const actor of [
+      hr,
+      as("manager", ids.bruno),
+      as("employee", ids.dora),
+    ]) {
+      for (const c of await listGoalCycles(db, actor, TODAY)) {
+        expect(
+          (await listGoals(db, actor, { cycleId: c.id }, TODAY)).total,
+        ).toBeGreaterThan(0);
+      }
+    }
+  });
+});
+
+describe("listGoals: paging", () => {
+  it("pages 25 at a time, reads the counts whole and clamps an out-of-range page", async () => {
+    const extra = await db
+      .insert(goal)
+      .values(
+        Array.from({ length: 30 }, (_, i) => ({
+          personId: ids.zoe,
+          title: `Extra ${String(i).padStart(2, "0")}`,
+          sourceSystem: "native" as const,
+          dueDate: `2030-01-${String((i % 28) + 1).padStart(2, "0")}`,
+        })),
+      )
+      .returning({ id: goal.id });
+    try {
+      const first = await listGoals(db, as("employee", ids.zoe), {}, TODAY);
+      expect(first.total).toBe(31);
+      expect(first.items).toHaveLength(25);
+      expect(first.page).toBe(1);
+      const second = await listGoals(
+        db,
+        as("employee", ids.zoe),
+        { page: 2 },
+        TODAY,
+      );
+      expect(second.items).toHaveLength(6);
+      const clamped = await listGoals(
+        db,
+        as("employee", ids.zoe),
+        { page: 9 },
+        TODAY,
+      );
+      expect(clamped.page).toBe(2);
+      expect(clamped.items.map((g) => g.id)).toEqual(
+        second.items.map((g) => g.id),
+      );
+      // No page repeats a goal of another.
+      expect(
+        new Set([...first.items, ...second.items].map((g) => g.id)).size,
+      ).toBe(31);
+    } finally {
+      await db.delete(goal).where(
+        inArray(
+          goal.id,
+          extra.map((e) => e.id),
+        ),
+      );
+    }
   });
 });

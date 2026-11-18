@@ -1877,7 +1877,8 @@
         "due": "Due",
         "noDate": "No date",
         "noLongerApplicable": "No longer applies",
-        "open": "Open the goal"
+        "open": "Open the goal",
+        "progressLabel": "{percent}% complete"
       }
     },
     "forbidden": "You do not have access to this assessment: everyone sees their own and, for a manager, their team's."

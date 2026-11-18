@@ -35,7 +35,8 @@ export type AnswerDisplay =
       label: string | null;
     };
 
-const pick = (text: LocalizedText, locale: string) =>
+/** A text in the reader's language (Spanish, the default, when the other is empty). */
+export const pickLocalized = (text: LocalizedText, locale: string): string =>
   (locale === "en" ? text.en : text.es) || text.es || text.en;
 
 export function answerDisplay(
@@ -61,7 +62,7 @@ export function answerDisplay(
       value: optionValue,
       max: options.length ? Math.max(...options.map((o) => o.value)) : null,
       code: null,
-      label: option ? pick(option.label, locale) : optionLabel,
+      label: option ? pickLocalized(option.label, locale) : optionLabel,
     };
   }
 
@@ -80,6 +81,6 @@ export function answerDisplay(
     max,
     // A letter (A, B...) is worth showing; a slug of the label is not.
     code: choice && choice.value.length <= 2 ? choice.value : null,
-    label: choice ? pick(choice.label, locale) : optionLabel,
+    label: choice ? pickLocalized(choice.label, locale) : optionLabel,
   };
 }

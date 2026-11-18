@@ -495,12 +495,79 @@ describe("listAssessmentParticipants: filters", () => {
     ).toEqual(["Eli Roca"]);
   });
 
-  it("pages the list", async () => {
+  it("pages the list, and a page past the last one is the last one", async () => {
     const page2 = await listAssessmentParticipants(db, hr, w.cycleA, {
       page: 2,
     });
-    expect(page2.items).toEqual([]);
+    expect(page2.page).toBe(1);
     expect(page2.total).toBe(4);
+    expect(names(page2)).toHaveLength(4);
+    const wild = await listAssessmentParticipants(db, hr, w.cycleA, {
+      page: 10 ** 12,
+    });
+    expect(wild.page).toBe(1);
+    expect(wild.items).toHaveLength(4);
+  });
+
+  it("pages a long cycle in the database: full pages, the counts whole, an out-of-range page clamped", async () => {
+    const cycleId = await insertReviewCycle({
+      name: "Ciclo largo",
+      status: "closed",
+    });
+    const ids: string[] = [];
+    for (let i = 0; i < 30; i++) {
+      const personId = await insertPerson({
+        displayName: `Persona ${String(i).padStart(2, "0")}`,
+        bambooId: `9${i}`,
+      });
+      ids.push(
+        await insertParticipant({
+          cycleId,
+          personId,
+          snapManagerPersonId: w.ana,
+        }),
+      );
+    }
+    // The first five have submitted their self-assessment only.
+    for (const [i, participantId] of ids.slice(0, 5).entries()) {
+      await insertRequest({
+        cycleId,
+        participantId,
+        reviewerPersonId: null,
+        relationship: "self",
+      });
+      expect(i).toBeLessThan(5);
+    }
+    const first = await listAssessmentParticipants(db, hr, cycleId);
+    expect(first.items).toHaveLength(25);
+    expect(first.total).toBe(30);
+    expect(first.counts).toEqual({ complete: 0, partial: 5, pending: 25 });
+    expect(first.items[0].person.name).toBe("Persona 00");
+    const second = await listAssessmentParticipants(db, hr, cycleId, {
+      page: 2,
+    });
+    expect(second.items.map((r) => r.person.name)).toEqual([
+      "Persona 25",
+      "Persona 26",
+      "Persona 27",
+      "Persona 28",
+      "Persona 29",
+    ]);
+    const clamped = await listAssessmentParticipants(db, hr, cycleId, {
+      page: 7,
+    });
+    expect(clamped.page).toBe(2);
+    expect(clamped.items).toHaveLength(5);
+    const partial = await listAssessmentParticipants(db, hr, cycleId, {
+      progress: "partial",
+    });
+    expect(partial.total).toBe(5);
+    expect(partial.items).toHaveLength(5);
+    expect(
+      partial.items.every(
+        (r) => r.self.state === "none" || r.self.state === "submitted",
+      ),
+    ).toBe(true);
   });
 
   it("offers the area and org values of the participants in scope", async () => {

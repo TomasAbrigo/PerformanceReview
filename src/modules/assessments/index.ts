@@ -19,12 +19,12 @@ export {
 export { canOpenParticipant } from "./authz";
 export {
   answerDisplay,
+  pickLocalized,
   type AnswerDisplay,
   type DisplayQuestion,
 } from "./display";
 export {
   isProgressFilter,
-  participantProgress,
   progressValues,
   requestState,
   type Progress,

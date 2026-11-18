@@ -24,18 +24,13 @@ export function requestState(
       : "draft";
 }
 
+/**
+ * Where a participant stands: both sides submitted, one, or none. Worked out
+ * in SQL (`progressExpr` in queries.ts) so the counts and pages come from the
+ * database.
+ */
 export const progressValues = ["complete", "partial", "pending"] as const;
 export type Progress = (typeof progressValues)[number];
 
 export const isProgressFilter = (value: unknown): value is Progress =>
   (progressValues as readonly unknown[]).includes(value);
-
-/** Both sides submitted, one, or none. */
-export function participantProgress(
-  self: RequestState,
-  manager: RequestState,
-): Progress {
-  const submitted =
-    Number(self === "submitted") + Number(manager === "submitted");
-  return submitted === 2 ? "complete" : submitted === 1 ? "partial" : "pending";
-}

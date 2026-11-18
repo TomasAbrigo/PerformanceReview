@@ -403,7 +403,7 @@ describe("AssessmentView", () => {
     );
     const manager = screen.getByTestId("assessment-manager");
     const [retention, , custom] = within(manager).getAllByTestId("question");
-    expect(within(retention).getByText("No la ve el empleado")).toBeVisible();
+    expect(within(retention).getByText("Oculta al empleado")).toBeVisible();
     expect(
       within(custom).getByText("Pregunta propia", { selector: ".kicker" }),
     ).toBeVisible();
@@ -434,6 +434,9 @@ describe("AssessmentView", () => {
     expect(within(goals).getByText("Documentar")).toBeVisible();
     expect(within(goals).getByText("Ya no aplica")).toBeVisible();
     expect(within(goals).getAllByRole("progressbar")).toHaveLength(3);
+    expect(
+      within(goals).getByRole("progressbar", { name: "10% completado" }),
+    ).toBeVisible();
   });
 
   it("says there were no goals when the snapshot is empty", () => {
@@ -529,8 +532,6 @@ describe("AssessmentView", () => {
       screen.getByRole("link", { name: "Vista de empleado" }),
     ).toHaveAttribute("aria-current", "true");
     expect(screen.getByText(/Así lo lee Dora Díaz/)).toBeVisible();
-    // Reading as the employee, the "hidden from the employee" tag is moot.
-    expect(screen.queryByText("No la ve el empleado")).not.toBeInTheDocument();
   });
 
   it("offers no toggle to the employee themself", () => {
@@ -541,7 +542,24 @@ describe("AssessmentView", () => {
     expect(
       screen.queryByRole("group", { name: "Vista" }),
     ).not.toBeInTheDocument();
-    expect(screen.queryByText("No la ve el empleado")).not.toBeInTheDocument();
+  });
+
+  it("tags a question hidden from the employee by the question itself, with or without the toggle", () => {
+    const { unmount } = renderIn(
+      "es",
+      <AssessmentView
+        detail={detail()}
+        cycleName="Primer semestre"
+        toggle={toggle}
+      />,
+    );
+    expect(screen.getAllByText("Oculta al empleado")).toHaveLength(1);
+    unmount();
+    renderIn(
+      "es",
+      <AssessmentView detail={detail()} cycleName="Primer semestre" />,
+    );
+    expect(screen.getAllByText("Oculta al empleado")).toHaveLength(1);
   });
 
   it("reads in English", () => {

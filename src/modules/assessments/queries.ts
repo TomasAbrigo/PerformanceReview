@@ -12,7 +12,8 @@ import {
   type ReviewRequest,
   type ScaleSnapshot,
 } from "@/db/schema";
-import { rowsOf } from "@/lib/sql";
+import { clampPage, MAX_PAGE } from "@/lib/paging";
+import { allOf, containsPattern, rowsOf } from "@/lib/sql";
 import { isUuid } from "@/lib/uuid";
 import {
   type IndividualScope,
@@ -40,12 +41,7 @@ import {
 import type { QuestionKind, QuestionRole } from "@/modules/templates/constants";
 import { canOpenParticipant } from "./authz";
 import type { DisplayAnswer } from "./display";
-import {
-  type Progress,
-  participantProgress,
-  type RequestState,
-  requestState,
-} from "./state";
+import { type Progress, type RequestState, requestState } from "./state";
 
 /**
  * The Assessments area: a cycle's participants with where their self and
@@ -65,8 +61,6 @@ export const ASSESSMENTS_PAGE_SIZE = 25;
 
 const SIDES = ["self", "manager"] as const;
 type Side = (typeof SIDES)[number];
-
-const and2 = (parts: SQL[]): SQL => sql.join(parts, sql` and `);
 
 /** The condition that limits participants `cp` to the scope. */
 function participantScope(scope: IndividualScope): SQL {
@@ -188,8 +182,6 @@ const participantsFrom = sql`
   left join person mp on mp.id = cp.snap_manager_person_id
   ${orgAttributeJoins("cp", sql`cp.snapshot_as_of`)}`;
 
-const likePattern = (q: string) => `%${q.replace(/[\\%_]/g, "\\$&")}%`;
-
 /** The request of each side to show: the submitted one, else the latest. */
 function sideRequests(requests: ReviewRequest[]): Map<string, ReviewRequest> {
   const chosen = new Map<string, ReviewRequest>();
@@ -205,10 +197,31 @@ function sideRequests(requests: ReviewRequest[]): Map<string, ReviewRequest> {
 }
 
 /**
+ * Whether a side (`self` or `manager`) of the participant `cp` has a
+ * submitted, live request. Where each participant stands, in SQL, so the
+ * counts and the pages come from the database: complete (both submitted),
+ * partial (one) or pending. It is process metadata, as in the completion
+ * view; what each side says, and whether the reader may read it yet, is
+ * decided by `canRead` for the rows that are shown.
+ */
+const sideSubmitted = (side: Side): SQL =>
+  sql`exists (
+    select 1 from review_request r
+    where r.participant_id = cp.id and r.relationship = ${side}::review_relationship
+      and r.status = 'submitted' and r.deleted_at is null)`;
+
+const progressExpr: SQL = sql`(case
+  when ${sideSubmitted("self")} and ${sideSubmitted("manager")} then 'complete'
+  when ${sideSubmitted("self")} or ${sideSubmitted("manager")} then 'partial'
+  else 'pending' end)`;
+
+/**
  * The participants of a cycle in the actor's scope, with where each side
- * stands (as far as `canRead` lets the actor know), by name. The progress
- * counts ignore the progress filter, so the chips above the list keep their
- * meaning when one is chosen.
+ * stands (as far as `canRead` lets the actor know), by name. Counts, filter
+ * and pages are SQL (`group by`, `limit`/`offset`); `canRead` is asked only
+ * for the requests of the rows of the page. The progress counts ignore the
+ * progress filter, so the chips above the list keep their meaning when one
+ * is chosen. A page past the last one is the last one.
  */
 export async function listAssessmentParticipants(
   db: DbOrTx,
@@ -224,21 +237,55 @@ export async function listAssessmentParticipants(
     participantScope(scope),
   ];
   if (filters.q?.trim()) {
-    where.push(sql`p.display_name ilike ${likePattern(filters.q.trim())}`);
+    where.push(sql`p.display_name ilike ${containsPattern(filters.q.trim())}`);
   }
   if (filters.department)
     where.push(sql`cp.snap_department = ${filters.department}`);
   where.push(...orgAttributeFilters(filters));
-  const participants = rowsOf<ParticipantRow>(
-    await db.execute(sql`
-      select cp.id as "participantId", cp.reviewee_person_id as "personId",
-        p.display_name as "personName", cp.snap_manager_person_id as "managerId",
-        mp.display_name as "managerName", cp.snap_department as department,
-        cp.snap_job_title as "jobTitle", cp.snapshot_as_of::text as "snapshotAsOf"
+  const base = allOf(where);
+  const matching = allOf([
+    base,
+    filters.progress ? sql`${progressExpr} = ${filters.progress}` : sql`true`,
+  ]);
+  const pageSize = ASSESSMENTS_PAGE_SIZE;
+  const readPage = async (page: number) =>
+    rowsOf<ParticipantRow & { progress: Progress }>(
+      await db.execute(sql`
+        select cp.id as "participantId", cp.reviewee_person_id as "personId",
+          p.display_name as "personName", cp.snap_manager_person_id as "managerId",
+          mp.display_name as "managerName", cp.snap_department as department,
+          cp.snap_job_title as "jobTitle", cp.snapshot_as_of::text as "snapshotAsOf",
+          ${progressExpr} as progress
+        ${participantsFrom}
+        where ${matching}
+        order by p.display_name, cp.id
+        limit ${pageSize} offset ${(page - 1) * pageSize}`),
+    );
+
+  // The counts and the page read together; a page past the last one is
+  // clamped to it (read again, the rare case).
+  const requested = clampPage(filters.page, MAX_PAGE * pageSize, pageSize);
+  const [counted, firstTry] = await Promise.all([
+    db.execute(sql`
+      select ${progressExpr} as progress, count(*)::int as n
       ${participantsFrom}
-      where ${and2(where)}
-      order by p.display_name, cp.id`),
-  );
+      where ${base}
+      group by 1`),
+    readPage(requested),
+  ]);
+  const counts: Record<Progress, number> = {
+    complete: 0,
+    partial: 0,
+    pending: 0,
+  };
+  for (const row of rowsOf<{ progress: Progress; n: number }>(counted)) {
+    counts[row.progress] = row.n;
+  }
+  const total = filters.progress
+    ? counts[filters.progress]
+    : counts.complete + counts.partial + counts.pending;
+  const page = clampPage(requested, total, pageSize);
+  const participants = page === requested ? firstTry : await readPage(page);
 
   const requests = participants.length
     ? await db
@@ -276,10 +323,8 @@ export async function listAssessmentParticipants(
       submittedAt: request?.submittedAt?.toISOString() ?? null,
     };
   };
-  const all: AssessmentRow[] = participants.map((p) => {
-    const self = summary(p.participantId, "self");
-    const managerReview = summary(p.participantId, "manager");
-    return {
+  return {
+    items: participants.map((p) => ({
       participantId: p.participantId,
       person: { id: p.personId, name: p.personName },
       manager:
@@ -288,25 +333,11 @@ export async function listAssessmentParticipants(
           : null,
       department: p.department,
       jobTitle: p.jobTitle,
-      self,
-      managerReview,
-      progress: participantProgress(self.state, managerReview.state),
-    };
-  });
-  const counts: Record<Progress, number> = {
-    complete: 0,
-    partial: 0,
-    pending: 0,
-  };
-  for (const row of all) counts[row.progress]++;
-  const matching = filters.progress
-    ? all.filter((r) => r.progress === filters.progress)
-    : all;
-  const pageSize = ASSESSMENTS_PAGE_SIZE;
-  const page = Math.max(1, Math.floor(filters.page ?? 1));
-  return {
-    items: matching.slice((page - 1) * pageSize, page * pageSize),
-    total: matching.length,
+      self: summary(p.participantId, "self"),
+      managerReview: summary(p.participantId, "manager"),
+      progress: p.progress,
+    })),
+    total,
     counts,
     page,
     pageSize,
