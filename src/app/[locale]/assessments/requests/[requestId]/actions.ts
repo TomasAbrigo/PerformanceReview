@@ -8,6 +8,7 @@ import { getActor } from "@/modules/actor/server";
 import {
   CaptureError,
   saveDraft,
+  share,
   submit,
   type CaptureAnswer,
 } from "@/modules/review-capture";
@@ -38,6 +39,16 @@ export async function saveDraftAction(
       String(requestId),
       parse(answersSchema, answers, CaptureError),
     );
+  });
+}
+
+/**
+ * Shares a submitted manager review with the reviewee. Only its reviewer (or
+ * People) may, and only once submitted: review-capture checks both.
+ */
+export async function shareAction(requestId: string) {
+  return actionResult(async () => {
+    await share(db, await getActor(), String(requestId));
   });
 }
 

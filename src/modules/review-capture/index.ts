@@ -1,10 +1,12 @@
 export {
   listPendingSelfReviews,
+  mayAnswer,
   saveDraft,
   share,
   submit,
   type PendingSelfReview,
 } from "./service";
+export { listTeamReviews, type TeamReview } from "./team";
 export {
   canAnswer,
   checkAnswers,

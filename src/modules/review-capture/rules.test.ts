@@ -9,7 +9,7 @@ import {
 
 const ME = "00000000-0000-4000-8000-000000000001";
 const OTHER = "00000000-0000-4000-8000-000000000002";
-const request = { reviewerPersonId: ME };
+const request = { reviewerPersonId: ME, relationship: "self" };
 
 describe("canAnswer", () => {
   it("lets the reviewer of the request answer", () => {
@@ -36,11 +36,38 @@ describe("canAnswer", () => {
   });
 
   it("refuses everyone but People when the reviewer is missing", () => {
-    const missing = { reviewerPersonId: null };
+    const missing = { reviewerPersonId: null, relationship: "self" };
     expect(canAnswer({ personId: null, role: "employee" }, missing)).toBe(
       false,
     );
     expect(canAnswer({ personId: null, role: "hr" }, missing)).toBe(true);
+  });
+
+  describe("a manager review", () => {
+    const managerReview = { reviewerPersonId: ME, relationship: "manager" };
+    const manager: ActorContext = { personId: ME, role: "manager" };
+
+    it("is for its reviewer while still the reviewee's manager today", () => {
+      expect(canAnswer(manager, managerReview, ME)).toBe(true);
+    });
+
+    it("is closed to a reviewer who no longer manages the reviewee", () => {
+      expect(canAnswer(manager, managerReview, OTHER)).toBe(false);
+      expect(canAnswer(manager, managerReview, null)).toBe(false);
+      // Unknown today's manager: closed (never assumed).
+      expect(canAnswer(manager, managerReview)).toBe(false);
+    });
+
+    it("is closed to the reviewee's current manager who is not its reviewer", () => {
+      const other: ActorContext = { personId: OTHER, role: "manager" };
+      expect(canAnswer(other, managerReview, OTHER)).toBe(false);
+    });
+
+    it("stays open to People", () => {
+      expect(canAnswer({ personId: null, role: "hr" }, managerReview)).toBe(
+        true,
+      );
+    });
   });
 });
 
