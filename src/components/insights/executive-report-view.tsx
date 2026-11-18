@@ -1,5 +1,7 @@
-import { useTranslations } from "next-intl";
+import { useFormatter, useTranslations } from "next-intl";
 import { Meter } from "@/components/dashboards/parts";
+import { SEGMENT_SWATCH } from "@/components/engagement/segments";
+import { engagementSegments } from "@/modules/engagement/kinds";
 import { SentimentBars } from "@/components/qualitative/sentiment-bars";
 import { Link } from "@/i18n/navigation";
 import {
@@ -151,6 +153,90 @@ function Unavailable({ min }: { min: number | null }) {
   );
 }
 
+/** The latest month of the monthly engagement: mean score, participation and segments. */
+function EngagementMonthlyTile({
+  data,
+  min,
+}: {
+  data: NonNullable<ExecutiveReport["engagementMonthly"]>;
+  min: number | null;
+}) {
+  const t = useTranslations("Engagement.tile");
+  const ts = useTranslations("Engagement.segment");
+  const format = useFormatter();
+  const { latest, previous } = data;
+  const label = format.dateTime(new Date(`${latest.month}T00:00:00Z`), {
+    month: "long",
+    year: "numeric",
+    timeZone: "UTC",
+  });
+  const delta =
+    latest.mean !== null && previous?.mean != null
+      ? Math.round((latest.mean - previous.mean) * 100)
+      : null;
+  return (
+    <>
+      <p className="text-xs text-muted-foreground">
+        {t("month", { month: label })}
+      </p>
+      {latest.hidden ? (
+        <p className="text-sm text-muted-foreground">
+          {t("hidden", { min: min ?? 0 })}
+        </p>
+      ) : (
+        <dl className="flex flex-col gap-1 text-sm">
+          <div>
+            <dt>{t("mean")}</dt>
+            <dd className="text-3xl font-semibold tabular-nums">
+              {latest.mean === null
+                ? "—"
+                : format.number(latest.mean, {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                  })}
+            </dd>
+            {delta !== null ? (
+              <dd className="text-xs text-muted-foreground tabular-nums">
+                {t("vsPrevious", { delta: delta > 0 ? `+${delta}` : delta })}
+              </dd>
+            ) : null}
+          </div>
+          <div className="flex gap-4">
+            <dt>{t("participation")}</dt>
+            <dd className="tabular-nums">
+              {latest.participation === null
+                ? "—"
+                : format.number(latest.participation, { style: "percent" })}
+            </dd>
+          </div>
+        </dl>
+      )}
+      {latest.segments ? (
+        <ul
+          aria-label={t("segments")}
+          className="flex flex-col gap-0.5 text-sm"
+        >
+          {engagementSegments.map((s) => (
+            <li key={s} className="flex items-center gap-2">
+              <span
+                className={`size-2.5 rounded-sm ${SEGMENT_SWATCH[s]}`}
+                aria-hidden="true"
+              />
+              <span>{ts(s)}</span>
+              <span className="ml-auto tabular-nums">
+                {latest.segments![s]}
+              </span>
+            </li>
+          ))}
+        </ul>
+      ) : null}
+      <Link href="/insights/engagement" className="text-sm underline">
+        {t("link")}
+      </Link>
+    </>
+  );
+}
+
 /** The executive view's tiles; which ones show depends on the mode. */
 export function ExecutiveReportView({
   report,
@@ -161,6 +247,7 @@ export function ExecutiveReportView({
 }) {
   const t = useTranslations("Insights.Executive");
   const ti = useTranslations("Insights");
+  const tEngagement = useTranslations("Engagement.tile");
   const min = report.minGroupSize;
   const total = report.completion.total;
   return (
@@ -238,6 +325,18 @@ export function ExecutiveReportView({
                   </p>
                 ) : null}
               </>
+            )}
+          </Tile>
+        ) : null}
+        {report.engagementMonthly !== undefined ? (
+          <Tile title={tEngagement("title")} testId="exec-engagement-monthly">
+            {report.engagementMonthly ? (
+              <EngagementMonthlyTile
+                data={report.engagementMonthly}
+                min={min}
+              />
+            ) : (
+              <Unavailable min={min} />
             )}
           </Tile>
         ) : null}

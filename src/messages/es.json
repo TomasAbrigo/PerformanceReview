@@ -1969,5 +1969,67 @@
     "project": "Proyecto",
     "dm": "DM",
     "santexLead": "Santex Lead"
+  },
+  "Engagement": {
+    "nav": "Engagement mensual",
+    "title": "Engagement mensual",
+    "forbidden": "No tenés acceso al engagement mensual.",
+    "noData": "Todavía no hay engagement mensual: importá el archivo con el perfil engagement-monthly en Importar archivo.",
+    "hidden": "Oculto",
+    "hint": {
+      "all": "Score promedio, participación y segmentos por mes de todas las personas del archivo, con los cortes organizacionales como se tenían al final de cada mes.",
+      "reports": "Tus reportes directos de cada mes.",
+      "aggregates": "Solo agregados: los meses con menos de {min} personas (o menos de {min} scores) no se muestran, ni los segmentos con menos de {min} personas; sin cortes por DM ni Santex Lead."
+    },
+    "filters": {
+      "label": "Filtros de engagement mensual",
+      "from": "Desde",
+      "to": "Hasta",
+      "department": "Área",
+      "any": "Todas",
+      "apply": "Aplicar"
+    },
+    "line": {
+      "title": "Evolución",
+      "hint": "Score promedio de quienes respondieron (0 a 100) y participación: el porcentaje de las personas del mes que respondieron.",
+      "chartLabel": "Score promedio y participación por mes",
+      "score": "Score promedio",
+      "participation": "Participación",
+      "point": "{month}: {value}"
+    },
+    "segments": {
+      "title": "Segmentos por mes",
+      "hint": "Cada barra es el 100 % de las personas del mes repartido por segmento; Falta son quienes no respondieron.",
+      "chartLabel": "Personas por segmento y por mes",
+      "hiddenMonth": "{month}: mes oculto por tamaño de grupo",
+      "hiddenCells": "{month}: segmentos ocultos por tamaño de grupo"
+    },
+    "segment": {
+      "alto": "Alto",
+      "medio": "Medio",
+      "regular": "Regular",
+      "bajo": "Bajo",
+      "falta": "Falta"
+    },
+    "table": {
+      "title": "Detalle por mes",
+      "month": "Mes",
+      "people": "Personas",
+      "respondents": "Respondieron",
+      "participation": "Participación",
+      "mean": "Score promedio",
+      "under": "Menos de {min} personas: no se muestra.",
+      "hiddenMonths": "{count, plural, one {# mes} other {# meses}} sin mostrar por tener menos de {min} personas."
+    },
+    "tile": {
+      "title": "Engagement mensual",
+      "month": "Último mes con datos: {month}",
+      "mean": "Score promedio",
+      "participation": "Participación",
+      "vsPrevious": "{delta} puntos frente al mes anterior",
+      "hidden": "Menos de {min} personas: no se muestra.",
+      "segments": "Segmentos",
+      "link": "Ver la evolución"
+    }
   }
 }

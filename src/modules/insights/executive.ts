@@ -1,5 +1,7 @@
 import type { DbOrTx } from "@/db/client";
 import type { ActorContext } from "@/modules/actor/types";
+import { engagementTile } from "@/modules/analytics/engagement/queries";
+import type { EngagementTile } from "@/modules/analytics/engagement/types";
 import { goalKpis } from "@/modules/analytics/goals-insights/queries";
 import type { GoalKpiGroup } from "@/modules/analytics/goals-insights/types";
 import { indicatorSnapshot } from "@/modules/analytics/indicators/queries";
@@ -45,6 +47,11 @@ export type ExecutiveSections = {
   goals?: GoalKpiGroup | null;
   /** Top 5 themes, counts only. */
   themes?: ThemeRank[];
+  /**
+   * The monthly engagement file (#86): the latest month with data next to the
+   * one before, masked for direction; null when nothing was imported.
+   */
+  engagementMonthly?: EngagementTile | null;
 };
 
 export type ExecutiveReport = ExecutiveSections & {
@@ -124,6 +131,12 @@ export const COLLECTORS: readonly Collector[] = [
     collect: async ({ db, actor, cycleId, filters }) =>
       (await goalKpis(db, actor, { cycleId, groupBy: "department", filters }))
         .total,
+  },
+  {
+    key: "engagementMonthly",
+    modes: QUANT,
+    collect: ({ db, actor, minGroupSize, filters }) =>
+      engagementTile(db, actor, { ...filters, minGroupSize }),
   },
   {
     key: "sentiment",

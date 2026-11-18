@@ -1969,5 +1969,67 @@
     "project": "Project",
     "dm": "DM",
     "santexLead": "Santex Lead"
+  },
+  "Engagement": {
+    "nav": "Monthly engagement",
+    "title": "Monthly engagement",
+    "forbidden": "You do not have access to the monthly engagement.",
+    "noData": "There is no monthly engagement yet: import the file with the engagement-monthly profile in Upload a file.",
+    "hidden": "Hidden",
+    "hint": {
+      "all": "Mean score, participation and segments per month of everybody in the file, cut by the org attributes as they were at the end of each month.",
+      "reports": "Your direct reports of each month.",
+      "aggregates": "Aggregates only: months with fewer than {min} people (or fewer than {min} scores) are not shown, nor are segments with fewer than {min} people; no cuts by DM or Santex Lead."
+    },
+    "filters": {
+      "label": "Monthly engagement filters",
+      "from": "From",
+      "to": "To",
+      "department": "Area",
+      "any": "All",
+      "apply": "Apply"
+    },
+    "line": {
+      "title": "Evolution",
+      "hint": "Mean score of those who answered (0 to 100) and participation: the percentage of the month's people who answered.",
+      "chartLabel": "Mean score and participation per month",
+      "score": "Mean score",
+      "participation": "Participation",
+      "point": "{month}: {value}"
+    },
+    "segments": {
+      "title": "Segments per month",
+      "hint": "Each bar is 100 % of the month's people split by segment; Missing are those who did not answer.",
+      "chartLabel": "People per segment and per month",
+      "hiddenMonth": "{month}: month hidden because of the group size",
+      "hiddenCells": "{month}: segments hidden because of the group size"
+    },
+    "segment": {
+      "alto": "High",
+      "medio": "Medium",
+      "regular": "Regular",
+      "bajo": "Low",
+      "falta": "Missing"
+    },
+    "table": {
+      "title": "Detail by month",
+      "month": "Month",
+      "people": "People",
+      "respondents": "Answered",
+      "participation": "Participation",
+      "mean": "Mean score",
+      "under": "Fewer than {min} people: not shown.",
+      "hiddenMonths": "{count, plural, one {# month} other {# months}} not shown for having fewer than {min} people."
+    },
+    "tile": {
+      "title": "Monthly engagement",
+      "month": "Latest month with data: {month}",
+      "mean": "Mean score",
+      "participation": "Participation",
+      "vsPrevious": "{delta} points against the previous month",
+      "hidden": "Fewer than {min} people: not shown.",
+      "segments": "Segments",
+      "link": "See the evolution"
+    }
   }
 }
