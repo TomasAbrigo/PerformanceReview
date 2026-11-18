@@ -11,7 +11,7 @@ import {
   DRILL_CYCLE_PARAM,
   TrendChart,
 } from "@/components/indicators/trend-chart";
-import type { DrillBase } from "@/components/drill/drill-link";
+import { drillBase } from "@/components/drill/drill-link";
 import { parseDrill } from "@/modules/insights/drill-spec";
 import { isUuid } from "@/lib/uuid";
 import { getSettings } from "@/modules/settings";
@@ -42,10 +42,7 @@ async function Trend({
   const p = parseTrendParams(sp);
   const settings = await getSettings(db);
   // Drill-down (#117): a point opens the people of that cycle (`dcycle`).
-  const base: DrillBase = {
-    pathname: "/insights/indicators/trend",
-    query: sp,
-  };
+  const base = drillBase("/insights/indicators/trend", sp, actor);
   const drill = parseDrill(sp.drill);
   const drillCycle =
     typeof sp[DRILL_CYCLE_PARAM] === "string" &&

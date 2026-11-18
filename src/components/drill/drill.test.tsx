@@ -6,7 +6,7 @@ import es from "@/messages/es.json";
 import type { DrillResult } from "@/modules/insights/drill";
 import { MetricCard } from "@/components/experience";
 import { StackedBar100 } from "@/components/charts";
-import { type DrillBase, DrillLink, drillHref } from "./drill-link";
+import { type DrillBase, DrillLink, drillBase, drillHref } from "./drill-link";
 import { DrillView } from "./drill-view";
 
 vi.mock("@/i18n/navigation", () => ({
@@ -51,6 +51,23 @@ describe("drillHref", () => {
     expect(drillHref({ pathname: "/x", query: { drill: "a" } }, null)).toBe(
       "/x",
     );
+  });
+});
+
+describe("drillBase", () => {
+  const sp = { cycle: "c1", dm: "Ana", santexLead: "Ana", drill: "goals:all" };
+  it("keeps every param of the page for People", () => {
+    expect(
+      drillBase("/insights/360", sp, { personId: null, role: "hr" }),
+    ).toEqual({ pathname: "/insights/360", query: sp });
+  });
+  it("never carries a DM or a Santex Lead for direction", () => {
+    expect(
+      drillBase("/insights/360", sp, { personId: null, role: "direction" }),
+    ).toEqual({
+      pathname: "/insights/360",
+      query: { cycle: "c1", drill: "goals:all" },
+    });
   });
 });
 

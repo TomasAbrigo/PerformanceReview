@@ -24,7 +24,7 @@ import { insightsScope } from "@/modules/insights/authz";
 import { getSettings } from "@/modules/settings";
 import { kpiThresholds } from "@/modules/insights/tone";
 import { parseDrill } from "@/modules/insights/drill-spec";
-import type { DrillBase } from "@/components/drill/drill-link";
+import { drillBase } from "@/components/drill/drill-link";
 import { DrillSection } from "../drill-section";
 
 async function Engagement({
@@ -54,16 +54,7 @@ async function Engagement({
   const sp = await searchParams;
   const p = parseEngagementParams(sp);
   // Drill-down (#117): a month or a segment opens its people.
-  const masked = scope.kind === "aggregatesOnly";
-  // Direction never carries the filters that name a person (a DM, a Santex Lead).
-  const base: DrillBase = {
-    pathname: "/insights/engagement",
-    query: Object.fromEntries(
-      Object.entries(sp).filter(
-        ([k]) => !masked || (k !== "dm" && k !== "santexLead"),
-      ),
-    ),
-  };
+  const base = drillBase("/insights/engagement", sp, actor);
   const drill = parseDrill(sp.drill);
   const [data, options] = await Promise.all([
     engagementEvolution(db, actor, {

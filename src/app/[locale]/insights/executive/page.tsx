@@ -29,7 +29,7 @@ import {
 import { listCycles } from "@/modules/review-core";
 import { getSettings } from "@/modules/settings";
 import { parseDrill } from "@/modules/insights/drill-spec";
-import type { DrillBase } from "@/components/drill/drill-link";
+import { drillBase } from "@/components/drill/drill-link";
 import { dimensionLabels } from "../dimension-labels";
 import { DrillSection } from "../drill-section";
 
@@ -81,7 +81,7 @@ async function Executive({
     hr ? orgFilterOptions(db, actor, { cycleId: cycle.id }) : null,
   ]);
   // Drill-down: `?drill=` opens the records behind a mark (drill-section.tsx).
-  const base: DrillBase = { pathname: "/insights/executive", query: sp };
+  const base = drillBase("/insights/executive", sp, actor);
   const drill = parseDrill(sp.drill);
   const dimensionLabel = await dimensionLabels(
     report.sentiment?.map((r) => r.dimension) ?? [],

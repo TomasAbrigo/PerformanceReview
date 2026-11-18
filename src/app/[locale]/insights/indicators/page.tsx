@@ -31,7 +31,7 @@ import { withoutPersonFilters } from "@/modules/org-attributes/kinds";
 import { Gauge, ShieldAlert } from "lucide-react";
 import { getFormatter } from "next-intl/server";
 import { MetricCard } from "@/components/experience";
-import type { DrillBase } from "@/components/drill/drill-link";
+import { drillBase } from "@/components/drill/drill-link";
 import { parseDrill } from "@/modules/insights/drill-spec";
 import { atRiskTone, kpiThresholds, likertTone } from "@/modules/insights/tone";
 import type { IndicatorDistribution } from "@/modules/analytics/indicators/types";
@@ -97,15 +97,7 @@ async function Indicators({
   const riskThreshold = settings["alerts.riskThreshold"];
   const minGroupSize = settings["aggregation.minGroupSize"];
   // Drill-down: `?drill=` opens the records behind a mark (drill-section.tsx).
-  // Direction never carries the filters that name a person (a DM, a Santex Lead).
-  const base: DrillBase = {
-    pathname: "/insights/indicators",
-    query: Object.fromEntries(
-      Object.entries(sp).filter(
-        ([k]) => !masked || (k !== "dm" && k !== "santexLead"),
-      ),
-    ),
-  };
+  const base = drillBase("/insights/indicators", sp, actor);
   const drill = parseDrill(sp.drill);
   const format = await getFormatter();
   const dec = (v: number, signed = false) =>

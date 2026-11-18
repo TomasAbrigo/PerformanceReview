@@ -16,7 +16,7 @@ import { dm360, dm360Scopes } from "@/modules/analytics/dm-360";
 import { indicatorCycles } from "@/modules/analytics/indicators";
 import { insightsScope } from "@/modules/insights/authz";
 import { localizeCycles } from "@/modules/review-core/cycle-name";
-import type { DrillBase } from "@/components/drill/drill-link";
+import { drillBase } from "@/components/drill/drill-link";
 import { parseDrill } from "@/modules/insights/drill-spec";
 import { kpiThresholds } from "@/modules/insights/tone";
 import { getSettings } from "@/modules/settings";
@@ -55,7 +55,7 @@ async function Insights360({
   // Drill-down (drill-section.tsx): the figures of a card open its people or
   // comments; only with names (not direction) and in the direct scope, the
   // one the drills read.
-  const base: DrillBase = { pathname: "/insights/360", query: sp };
+  const base = drillBase("/insights/360", sp, actor);
   const canDrill = scope.kind !== "aggregatesOnly" && data.scope === "direct";
   const parsed = canDrill ? parseDrill(sp.drill) : null;
   const drill =

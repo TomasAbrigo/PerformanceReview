@@ -1,6 +1,8 @@
 import type { ReactNode } from "react";
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
+import type { ActorContext } from "@/modules/actor/types";
+import { insightsScope } from "@/modules/insights/authz";
 import {
   DRILL_PARAM,
   type Drill,
@@ -15,6 +17,27 @@ export type DrillBase = {
   pathname: string;
   query: Record<string, string | string[] | undefined>;
 };
+
+/**
+ * The drill base of a page: its path and the search params it received.
+ * Direction (aggregates only) never carries the filters that name a person
+ * (a DM, a Santex Lead), so no link of the page carries them either.
+ */
+export function drillBase(
+  pathname: string,
+  sp: DrillBase["query"],
+  actor: ActorContext,
+): DrillBase {
+  const masked = insightsScope(actor).kind === "aggregatesOnly";
+  return {
+    pathname,
+    query: Object.fromEntries(
+      Object.entries(sp).filter(
+        ([k]) => !masked || (k !== "dm" && k !== "santexLead"),
+      ),
+    ),
+  };
+}
 
 /** The page's URL with `drill` set (or removed with null), other params kept. */
 export function drillHref(base: DrillBase, drill: Drill | null): string {

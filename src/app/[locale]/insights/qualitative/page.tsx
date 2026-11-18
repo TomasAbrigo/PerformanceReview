@@ -50,7 +50,7 @@ import {
 } from "@/modules/qualitative-analysis";
 import { listCycles } from "@/modules/review-core";
 import { getSettings } from "@/modules/settings";
-import type { DrillBase } from "@/components/drill/drill-link";
+import { drillBase } from "@/components/drill/drill-link";
 import type { CommentDrills } from "@/components/qualitative/views";
 import { type CommentScope, parseDrill } from "@/modules/insights/drill-spec";
 import { kpiThresholds } from "@/modules/insights/tone";
@@ -130,7 +130,7 @@ async function Qualitative({
   // Drill-down (drill-section.tsx): every mark opens its comments, narrowed
   // by the page's filters plus what the mark stands for. Not in the
   // aggregate view, which never lists comments.
-  const base: DrillBase = { pathname: "/insights/qualitative", query: sp };
+  const base = drillBase("/insights/qualitative", sp, actor);
   const pageScope: CommentScope = {
     cycle: cycleId,
     dimension: p.dimension,

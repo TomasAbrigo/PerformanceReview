@@ -19,7 +19,7 @@ import { selfAssessmentReport } from "@/modules/insights/self-assessment";
 import { listCycles } from "@/modules/review-core";
 import { dimensionLabels } from "../dimension-labels";
 import { DrillSection } from "../drill-section";
-import type { DrillBase } from "@/components/drill/drill-link";
+import { drillBase } from "@/components/drill/drill-link";
 import { parseDrill } from "@/modules/insights/drill-spec";
 import { kpiThresholds } from "@/modules/insights/tone";
 import { getSettings } from "@/modules/settings";
@@ -49,7 +49,7 @@ async function SelfAssessment({
   });
   const settings = await getSettings(db);
   // Drill-down (drill-section.tsx): completion and comment marks.
-  const base: DrillBase = { pathname: "/insights/self-assessment", query: sp };
+  const base = drillBase("/insights/self-assessment", sp, actor);
   const parsed = parseDrill(sp.drill);
   const drill =
     parsed?.kind === "completion" || parsed?.kind === "comments"

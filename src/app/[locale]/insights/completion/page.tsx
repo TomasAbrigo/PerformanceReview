@@ -35,7 +35,7 @@ import { insightsScope } from "@/modules/insights";
 import { getSettings } from "@/modules/settings";
 import { parseDrill } from "@/modules/insights/drill-spec";
 import { kpiThresholds } from "@/modules/insights/tone";
-import type { DrillBase } from "@/components/drill/drill-link";
+import { drillBase } from "@/components/drill/drill-link";
 import { DrillSection } from "../drill-section";
 
 async function Completion({
@@ -73,15 +73,7 @@ async function Completion({
     ? settings["aggregation.minGroupSize"]
     : undefined;
   // Drill-down: `?drill=` opens the records behind a mark (drill-section.tsx).
-  // Direction never carries the filters that name a person (a DM, a Santex Lead).
-  const base: DrillBase = {
-    pathname: "/insights/completion",
-    query: Object.fromEntries(
-      Object.entries(sp).filter(
-        ([k]) => !masked || (k !== "dm" && k !== "santexLead"),
-      ),
-    ),
-  };
+  const base = drillBase("/insights/completion", sp, actor);
   const drill = parseDrill(sp.drill);
   const targets = kpiThresholds(settings);
   // Direction reads areas, accounts and projects (a manager or DM is a person).
