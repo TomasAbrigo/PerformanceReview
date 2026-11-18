@@ -1,0 +1,30 @@
+/** A progress bar with its figure beside it (the figure is the text, the bar its picture). */
+export function ProgressBar({
+  percent,
+  label,
+}: {
+  percent: number;
+  label: string;
+}) {
+  const value = Math.min(100, Math.max(0, Math.round(percent)));
+  return (
+    <div className="flex items-center gap-2">
+      <div
+        role="progressbar"
+        aria-label={label}
+        aria-valuemin={0}
+        aria-valuemax={100}
+        aria-valuenow={value}
+        className="h-1.5 w-20 shrink-0 overflow-hidden rounded-full bg-brand-fog"
+      >
+        <div
+          className="h-full rounded-full bg-brand-600"
+          style={{ width: `${value}%` }}
+        />
+      </div>
+      <span className="text-xs text-muted-foreground tabular-nums">
+        {value}%
+      </span>
+    </div>
+  );
+}
