@@ -38,7 +38,7 @@ export default defineConfig({
       name: "chromium",
       use: { ...devices["Desktop Chrome"] },
       testIgnore:
-        /(identity(-later)?|completion|indicators|review-api|qualitative|goals-insights|goals|assessments|executive|insights-360|insights-flow)\.spec\.ts/,
+        /(identity(-later)?|completion|indicators|review-api|qualitative|goals-insights|goals|goals-write|assessments|executive|insights-360|insights-flow)\.spec\.ts/,
     },
     // These read the review data of the historical import, which
     // e2e/historical-import.spec.ts (project chromium) brings in: they run
@@ -59,13 +59,21 @@ export default defineConfig({
       testMatch: /insights-flow\.spec\.ts/,
       dependencies: ["insights"],
     },
+    // Goals written in the app: they add goals, which the specs that count
+    // them must not see move, so they run once those are done.
+    {
+      name: "goals-write",
+      use: { ...devices["Desktop Chrome"] },
+      testMatch: /goals-write\.spec\.ts/,
+      dependencies: ["insights-flow"],
+    },
     // The identity specs resolve and queue cases (they link a seeded rehire to
     // the person who left, and one more run brings a rehire in), so they run on
     // their own, once every spec that only reads is done.
     {
       name: "identity-setup",
       testMatch: /identity\.setup\.ts/,
-      dependencies: ["insights-flow"],
+      dependencies: ["goals-write"],
     },
     {
       name: "identity",
