@@ -568,7 +568,10 @@
       "historyHint": "Las filas se importan como ciclos de evaluación históricos, con sus participantes, solicitudes y respuestas.",
       "landingHint": "Las filas se guardan tal cual (crudas), sin crear ciclos.",
       "legacy": "(formato anterior)",
-      "orgHint": "Las filas se importan como atributos organizacionales de cada persona (cuenta, proyecto, DM y Santex Lead, con su vigencia) por EEID; los EEID que no coinciden con nadie esperan en la cola de identidad."
+      "orgHint": "Las filas se importan como atributos organizacionales de cada persona (cuenta, proyecto, DM y Santex Lead, con su vigencia) por EEID; los EEID que no coinciden con nadie esperan en la cola de identidad.",
+      "partialFile": "Archivo parcial (no dar de baja lo que no viene en el archivo)",
+      "partialHint": "Solo se agregan y actualizan los atributos del archivo; lo que el archivo no menciona se conserva.",
+      "completeHint": "El archivo es la lista completa: los atributos de esta fuente que ya no vienen en él se dan de baja (solo de las columnas que trae)."
     },
     "roles": {
       "key": "Clave",

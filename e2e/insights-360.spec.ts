@@ -23,6 +23,10 @@ async function importOrgAttributes(page: Page) {
   await expect(page.getByLabel("Perfil de fuente")).toHaveValue(
     "org-attributes",
   );
+  // The file is the whole list unless People say it is partial.
+  await expect(
+    page.getByRole("checkbox", { name: /^Archivo parcial/ }),
+  ).not.toBeChecked();
   await page.getByRole("button", { name: "Importar" }).click();
   await expect(page).toHaveURL(/\/es\/imports\/runs\/[0-9a-f-]{36}$/, {
     timeout: 120_000,

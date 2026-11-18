@@ -41,6 +41,8 @@ export type UploadActions = {
     profile: ProfileChoice;
     /** History profiles only: land the rows instead of creating cycles. */
     landing?: boolean;
+    /** Org attributes only: the file lists only some rows, drop nothing. */
+    partial?: boolean;
   }) => Promise<ImportResult>;
 };
 
@@ -138,7 +140,7 @@ export function UploadForm({
           setError(null);
           setPhase({ step: "choose" });
         }}
-        onImport={(choice, created, landing) => {
+        onImport={(choice, created, landing, partial) => {
           setError(null);
           startImport(async () => {
             const result = await actions.importFile({
@@ -146,6 +148,7 @@ export function UploadForm({
               fileName: phase.file.fileName,
               profile: choice,
               ...(landing === undefined ? {} : { landing }),
+              ...(partial ? { partial: true } : {}),
             });
             if (!result.ok) {
               setError(result.code);
@@ -237,12 +240,15 @@ function Preview({
     choice: ProfileChoice,
     created: SourceProfile | null,
     landing?: boolean,
+    partial?: boolean,
   ) => void;
 }) {
   const t = useTranslations("Upload");
   const selectId = useId();
   const landingId = useId();
   const [landingOnly, setLandingOnly] = useState(false);
+  const partialId = useId();
+  const [partialFile, setPartialFile] = useState(false);
   const issuesOf = (profile: SourceProfile) =>
     validateAgainstSchema(profile, file.columns);
 
@@ -359,9 +365,26 @@ function Preview({
       ) : null}
 
       {profile && isOrgAttributesProfile(profile) ? (
-        <p className="max-w-xl text-sm text-muted-foreground">
-          {t("preview.orgHint")}
-        </p>
+        <div className="flex max-w-xl flex-col gap-1">
+          <p className="text-sm text-muted-foreground">
+            {t("preview.orgHint")}
+          </p>
+          <div className="flex items-center gap-2">
+            <input
+              id={partialId}
+              type="checkbox"
+              className="size-4"
+              checked={partialFile}
+              onChange={(e) => setPartialFile(e.target.checked)}
+            />
+            <label htmlFor={partialId} className="text-sm font-medium">
+              {t("preview.partialFile")}
+            </label>
+          </div>
+          <p className="text-sm text-muted-foreground">
+            {partialFile ? t("preview.partialHint") : t("preview.completeHint")}
+          </p>
+        </div>
       ) : null}
 
       <IssueList issues={issues} />
@@ -399,6 +422,9 @@ function Preview({
               choice,
               isNew ? profile : null,
               profile && isHistoryProfile(profile) ? landingOnly : undefined,
+              profile && isOrgAttributesProfile(profile)
+                ? partialFile
+                : undefined,
             )
           }
         >

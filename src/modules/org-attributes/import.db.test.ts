@@ -425,6 +425,63 @@ describe("the file is the whole list", () => {
     expect((await attrs(bruno)).map((r) => r.value)).toEqual(["A mano"]);
   });
 
+  it("a file uploaded as partial drops nothing, and says so on the run; the same file as complete does", async () => {
+    const root = await mkdtemp(path.join(tmpdir(), "org-partial-run-"));
+    try {
+      const store = {
+        uploadsDir: path.join(root, "uploads"),
+        profilesDir: path.join(root, "profiles"),
+      };
+      await importFile([ROW("2024-01-01"), "12,Bruno Soler,Cuenta B,,,,,"]);
+      const upload = async () =>
+        (
+          await storeUpload(
+            {
+              name: "una-cuenta.xlsx",
+              bytes: Buffer.from(
+                xlsxFromRows([HEADER.split(","), ROW("2024-01-01").split(",")]),
+              ),
+            },
+            store,
+          )
+        ).id;
+      const params = async (runId: string) =>
+        (
+          await db
+            .select({ params: ingestRun.params })
+            .from(ingestRun)
+            .where(eq(ingestRun.id, runId))
+        )[0].params;
+
+      const partial = await importUpload({
+        uploadId: await upload(),
+        fileName: "una-cuenta.xlsx",
+        profile: { builtin: "org-attributes" },
+        partial: true,
+        db,
+        store,
+      });
+
+      expect(partial.counts.deleted).toBe(0);
+      expect(await params(partial.runId)).toMatchObject({ partial: true });
+      expect((await attrs(bruno)).map((r) => r.value)).toEqual(["Cuenta B"]);
+
+      const whole = await importUpload({
+        uploadId: await upload(),
+        fileName: "una-cuenta.xlsx",
+        profile: { builtin: "org-attributes" },
+        db,
+        store,
+      });
+
+      expect(whole.counts.deleted).toBe(1);
+      expect(await params(whole.runId)).not.toHaveProperty("partial");
+      expect(await attrs(bruno)).toEqual([]);
+    } finally {
+      await rm(root, { recursive: true, force: true });
+    }
+  });
+
   it("a profile marked partial drops nothing: its file lists only some rows", async () => {
     const root = await mkdtemp(path.join(tmpdir(), "org-partial-"));
     const previous = process.env.PROFILES_DIR;

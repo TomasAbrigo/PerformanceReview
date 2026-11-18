@@ -414,12 +414,16 @@ export async function reconcileOrgAttributes(
   return { deleted: dropped.length };
 }
 
-/** Whether the profile the run imported with lists only some rows (`partial`). */
+/**
+ * Whether the file lists only some rows: the upload said so (`partial` in the
+ * run's params) or the profile it imported with does.
+ */
 async function isPartialRun(db: DbOrTx, runId: string): Promise<boolean> {
   const [run] = await db
     .select({ params: ingestRun.params })
     .from(ingestRun)
     .where(eq(ingestRun.id, runId));
+  if (run?.params?.partial === true) return true;
   const name = run?.params?.profile;
   if (typeof name !== "string") return false;
   const profile =

@@ -568,7 +568,10 @@
       "historyHint": "The rows become historical review cycles, with their participants, requests and answers.",
       "landingHint": "The rows are kept as they are (raw), without creating cycles.",
       "legacy": "(legacy format)",
-      "orgHint": "Rows are imported as each person's organizational attributes (account, project, DM and Santex Lead, with their validity) by EEID; EEIDs that match nobody wait in the identity queue."
+      "orgHint": "Rows are imported as each person's organizational attributes (account, project, DM and Santex Lead, with their validity) by EEID; EEIDs that match nobody wait in the identity queue.",
+      "partialFile": "Partial file (do not drop what the file does not list)",
+      "partialHint": "Only the attributes in the file are added and updated; whatever the file does not mention is kept.",
+      "completeHint": "The file is the whole list: attributes of this source that it no longer lists are dropped (only for the columns it has)."
     },
     "roles": {
       "key": "Key",

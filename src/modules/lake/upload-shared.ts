@@ -99,6 +99,12 @@ export const importInputSchema = z.object({
    * cycles. Every other profile is always landed.
    */
   landing: z.boolean().optional(),
+  /**
+   * Org attributes file only: it lists only some of the rows, so what it does
+   * not mention is not dropped (see `reconcileOrgAttributes`). Recorded in the
+   * run's params.
+   */
+  partial: z.boolean().optional(),
 });
 
 /** What is inside an upload: detected columns (with types) and a few rows. */
