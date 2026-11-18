@@ -151,6 +151,34 @@ test("direction reads the DMs as numbered teams, never by name", async ({
   await expect(page.getByTestId("dm-without")).toHaveCount(0);
 });
 
+test("direction does not filter by a DM or a Santex Lead, even from the URL", async ({
+  page,
+}) => {
+  test.setTimeout(120_000);
+  const [dm] = [...(await peoplePerDm(cycleName)).keys()];
+  await page.goto("/es");
+  await actAsRole(page, "Dirección", "Dirección");
+
+  for (const view of ["indicators", "goals", "qualitative"]) {
+    await chooseCycle(page, `/es/insights/${view}`, cycleName);
+    await expect(page.locator("main h1").first()).toBeVisible();
+    const whole = await page.locator("main").innerText();
+    const withDm = new URL(page.url());
+    withDm.searchParams.set("dm", dm);
+    withDm.searchParams.set("santexLead", dm);
+
+    await page.goto(withDm.toString());
+
+    await expect(page.locator("main h1").first()).toBeVisible();
+    // No select for them, no link that carries them, and the numbers are the whole cycle's.
+    await expect(page.locator('select[name="dm"]')).toHaveCount(0);
+    await expect(page.locator('select[name="santexLead"]')).toHaveCount(0);
+    await expect(page.locator('main a[href*="dm="]')).toHaveCount(0);
+    await expect(page.locator('main a[href*="santexLead="]')).toHaveCount(0);
+    expect(await page.locator("main").innerText()).toBe(whole);
+  }
+});
+
 test("a manager who is a DM reads only their own card; one who is not has none", async ({
   page,
 }) => {

@@ -10,70 +10,85 @@ import {
 } from "@/modules/analytics/indicators/rows";
 import type { IndicatorConfig } from "@/modules/analytics/indicators/types";
 import { sentimentByParticipant } from "@/modules/qualitative-analysis/queries";
+import { groupKeyer } from "@/modules/org-attributes/group-key";
 import { ReviewError } from "@/modules/review-core/review-errors";
 import {
   buildDm360,
+  byCycleOrder,
   type Dm360Cycle,
   type Dm360Participant,
   treeKey,
 } from "./derive";
-import type { Dm360, Dm360Scope } from "./types";
+import { type Dm360, type Dm360Scope, SPARK_CYCLES } from "./types";
 
 type Row = {
   participant_id: string;
   person_id: string;
   cycle_id: string;
-  cycle_name: string;
-  period_start: string;
-  period_end: string;
-  cycle_created_at: number;
   dm: string | null;
   dm_ref_person_id: string | null;
 };
 
+type CycleRow = {
+  id: string;
+  name: string;
+  period_start: string;
+  period_end: string;
+  created_at: number;
+};
+
 /**
- * The people below each DM in the organization chart of each cycle's snapshot
- * date: `treeKey(cycle, dm)` -> person ids, for the DMs the file names that
- * resolve to a person. One recursion over the job history for all of them.
+ * The participants below each DM in the organization chart, each as of their
+ * own snapshot date (`cycle_participant.snapshot_as_of`, the same date their
+ * DM attribute is read on): `treeKey(cycle, dm)` -> participant ids, for the
+ * DMs the file names that resolve to a person. Walks up from each participant
+ * through the job history, so it reads their chain, not the DM's whole subtree.
  */
-async function peopleBelow(
+async function participantsBelow(
   db: DbOrTx,
   runAs: ActorContext,
+  cycleIds: readonly string[],
 ): Promise<Map<string, Set<string>>> {
   const rows = await db.execute<{
     cycle_id: string;
     dm: string;
-    person_id: string;
+    participant_id: string;
   }>(sql`
-    with recursive ${scopedCtes(runAs, { hierarchy: "asOf" }, { snapshotScope: true })},
+    with recursive ${scopedCtes(runAs, { hierarchy: "asOf", cycleIds }, { snapshotScope: true })},
     roots as (
-      select distinct s.cycle_id, s.dm, s.dm_ref_person_id as root,
-             c.snapshot_date as snap
-      from scoped s join review_cycle c on c.id = s.cycle_id
-      where s.dm is not null and s.dm_ref_person_id is not null
+      select distinct cycle_id, dm, dm_ref_person_id as root
+      from scoped
+      where dm is not null and dm_ref_person_id is not null
     ),
-    sub as (
-      select r.cycle_id, r.dm, r.snap, h.person_id,
-             array[h.person_id] as ids, 1 as depth
-      from roots r
-      join employee_job_history h on h.manager_person_id = r.root
-        and h.deleted_at is null and h.valid_from <= r.snap
-        and (h.valid_to is null or h.valid_to > r.snap)
+    mine as (
+      select s.participant_id, s.cycle_id, s.person_id, cp.snapshot_as_of as snap
+      from scoped s join cycle_participant cp on cp.id = s.participant_id
+    ),
+    up as (
+      select m.participant_id, m.cycle_id, m.snap, h.manager_person_id as ancestor,
+             array[m.person_id, h.manager_person_id] as ids, 1 as depth
+      from mine m
+      join employee_job_history h on h.person_id = m.person_id
+        and h.deleted_at is null and h.valid_from <= m.snap
+        and (h.valid_to is null or h.valid_to > m.snap)
+      where h.manager_person_id is not null
       union all
-      select s.cycle_id, s.dm, s.snap, h.person_id,
-             s.ids || h.person_id, s.depth + 1
-      from sub s
-      join employee_job_history h on h.manager_person_id = s.person_id
-        and h.deleted_at is null and h.valid_from <= s.snap
-        and (h.valid_to is null or h.valid_to > s.snap)
-      where not h.person_id = any(s.ids) and s.depth < 50
+      select u.participant_id, u.cycle_id, u.snap, h.manager_person_id,
+             u.ids || h.manager_person_id, u.depth + 1
+      from up u
+      join employee_job_history h on h.person_id = u.ancestor
+        and h.deleted_at is null and h.valid_from <= u.snap
+        and (h.valid_to is null or h.valid_to > u.snap)
+      where h.manager_person_id is not null
+        and not h.manager_person_id = any(u.ids) and u.depth < 50
     )
-    select distinct cycle_id, dm, person_id from sub`);
+    select distinct u.cycle_id, r.dm, u.participant_id
+    from up u join roots r on r.cycle_id = u.cycle_id and r.root = u.ancestor`);
   const below = new Map<string, Set<string>>();
   for (const r of rows) {
     const key = treeKey(r.cycle_id, r.dm);
     const set = below.get(key) ?? new Set<string>();
-    set.add(r.person_id);
+    set.add(r.participant_id);
     below.set(key, set);
   }
   return below;
@@ -115,31 +130,33 @@ export async function dm360(
   const scope: Dm360Scope =
     ctx.scope.kind === "directReports" ? "direct" : (input.scope ?? "direct");
 
-  const rows = await db.execute<Row>(sql`
-    with recursive ${scopedCtes(runAs, { hierarchy: "asOf" }, { snapshotScope: true })}
-    select participant_id, person_id, cycle_id, cycle_name, period_start,
-           period_end, cycle_created_at, dm, dm_ref_person_id
-    from scoped`);
-  const cycleRow = rows.find((r) => r.cycle_id === input.cycleId);
-  const cycleName =
-    cycleRow?.cycle_name ??
-    (
-      await db.execute<{ name: string }>(sql`
-        select name from review_cycle
-        where id = ${input.cycleId}::uuid and deleted_at is null and status <> 'draft'`)
-    )[0]?.name;
-  if (!cycleName) throw new ReviewError("not_found");
+  // The cycle asked for and the ones before it that the evolution draws: every
+  // read below is bounded to them, whatever the history holds.
+  const launched = await db.execute<CycleRow>(sql`
+    select id, name, period_start::text as period_start,
+           period_end::text as period_end,
+           extract(epoch from created_at)::float8 as created_at
+    from review_cycle
+    where deleted_at is null and status <> 'draft'`);
+  const ordered = launched
+    .map((c): Dm360Cycle => ({
+      id: c.id,
+      name: c.name,
+      periodStart: c.period_start,
+      periodEnd: c.period_end,
+      createdAt: c.created_at,
+    }))
+    .sort(byCycleOrder);
+  const at = ordered.findIndex((c) => c.id === input.cycleId);
+  if (at < 0) throw new ReviewError("not_found");
+  const cycles = ordered.slice(Math.max(0, at + 1 - SPARK_CYCLES), at + 1);
+  const cycleIds = cycles.map((c) => c.id);
+  const cycleName = ordered[at].name;
 
-  const cycles = new Map<string, Dm360Cycle>();
-  for (const r of rows) {
-    cycles.set(r.cycle_id, {
-      id: r.cycle_id,
-      name: r.cycle_name,
-      periodStart: r.period_start,
-      periodEnd: r.period_end,
-      createdAt: r.cycle_created_at,
-    });
-  }
+  const rows = await db.execute<Row>(sql`
+    with recursive ${scopedCtes(runAs, { hierarchy: "asOf", cycleIds }, { snapshotScope: true })}
+    select participant_id, person_id, cycle_id, dm, dm_ref_person_id
+    from scoped`);
   const participants: Dm360Participant[] = rows.map((r) => ({
     participantId: r.participant_id,
     personId: r.person_id,
@@ -157,11 +174,12 @@ export async function dm360(
         )
       : null;
 
-  const [indicatorRows, sides, sentiments, below] = await Promise.all([
-    loadRows(db, ctx, { hierarchy: "asOf" }),
-    loadSides(db, runAs, { hierarchy: "asOf" }, { email: false }),
-    sentimentByParticipant(db, actor, {}),
-    scope === "tree" ? peopleBelow(db, runAs) : undefined,
+  const [indicatorRows, sides, sentiments, below, keyOf] = await Promise.all([
+    loadRows(db, ctx, { hierarchy: "asOf", cycleIds }),
+    loadSides(db, runAs, { hierarchy: "asOf", cycleIds }, { email: false }),
+    sentimentByParticipant(db, actor, { cycleIds }),
+    scope === "tree" ? participantsBelow(db, runAs, cycleIds) : undefined,
+    masked ? groupKeyer(db) : undefined,
   ]);
   const retention = new Map<string, number>();
   const engagement = new Map<string, number>();
@@ -173,7 +191,7 @@ export async function dm360(
   }
 
   const built = buildDm360({
-    cycles: [...cycles.values()],
+    cycles,
     cycleId: input.cycleId,
     participants,
     scope,
@@ -195,6 +213,7 @@ export async function dm360(
       riskThreshold: ctx.config.riskThreshold,
     },
     minGroupSize: masked ? ctx.config.minGroupSize : null,
+    keyOf,
   });
   return { ...built, cycleName };
 }

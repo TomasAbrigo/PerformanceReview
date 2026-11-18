@@ -2,6 +2,7 @@ import { sql } from "drizzle-orm";
 import type { DbOrTx } from "@/db/client";
 import { DomainError } from "@/lib/domain-error";
 import { isUuid } from "@/lib/uuid";
+import { groupKeyer } from "@/modules/org-attributes/group-key";
 import { getSetting } from "@/modules/settings/service";
 import {
   collectCompletion,
@@ -87,7 +88,7 @@ export async function buildReport(
     min: opts.anonymized ? minGroupSize : 1,
     labels,
     teams: await cycleTeams(db, cycle.id, labels.team),
-    dms: await cycleDms(db, cycle.id, labels.dm),
+    dms: await cycleDms(db, cycle.id, labels.dm, await groupKeyer(db)),
   };
   const [executive, completion, indicators, qualitative, goals, people] =
     await Promise.all([

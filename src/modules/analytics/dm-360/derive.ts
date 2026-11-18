@@ -1,7 +1,7 @@
 // Pure and server-free: the DM cards out of the rows the queries load (see
 // queries.ts). No database, no actor: who reads what is decided before, and
 // the minimum group size (`null`: nothing is masked) is the only masking here.
-import { opaqueKey } from "@/modules/org-attributes/kinds";
+import type { GroupKeyer } from "@/modules/org-attributes/kinds";
 import { sentiments } from "@/modules/qualitative-analysis/constants";
 import type { SentimentCounts } from "@/modules/qualitative-analysis/types";
 import type { SideStatus } from "@/modules/analytics/completion/types";
@@ -54,8 +54,9 @@ export type Dm360Input = {
   participants: readonly Dm360Participant[];
   scope: Dm360Scope;
   /**
-   * `tree`: the people below each DM in the cycle's organization chart, by
-   * `treeKey(cycleId, dm)`; the DMs that resolve to nobody have none.
+   * `tree`: the participants below each DM in the organization chart (each as
+   * of their own snapshot date), by `treeKey(cycleId, dm)`; the DMs that
+   * resolve to nobody have none.
    */
   below?: ReadonlyMap<string, ReadonlySet<string>>;
   /** Only these DMs get a card (a manager reads their own); null: all of them. */
@@ -64,6 +65,8 @@ export type Dm360Input = {
   thresholds: Dm360Thresholds;
   /** Direction's minimum group size; null when nothing is masked. */
   minGroupSize: number | null;
+  /** The opaque key of a DM's name: required with a minimum (direction never gets a name). */
+  keyOf?: GroupKeyer;
 };
 
 export const treeKey = (cycleId: string, dm: string) => `${cycleId}\u0000${dm}`;
@@ -272,7 +275,8 @@ export function buildDm360(input: Dm360Input): Omit<Dm360, "cycleName"> {
       (p) =>
         p.dm === dm ||
         (input.scope === "tree" &&
-          input.below?.get(treeKey(cycleId, dm))?.has(p.personId) === true),
+          input.below?.get(treeKey(cycleId, dm))?.has(p.participantId) ===
+            true),
     );
 
   const inCycle = byCycle.get(input.cycleId) ?? [];
@@ -335,10 +339,12 @@ export function buildDm360(input: Dm360Input): Omit<Dm360, "cycleName"> {
     };
   }
 
+  const keyOf = input.keyOf;
+  if (!keyOf) throw new Error("Masked DM cards need a group keyer");
   const big = groups.filter((g) => sizeOf(g) >= min);
   const small = groups.filter((g) => sizeOf(g) < min);
   const cards = big
-    .map((g) => cardOf(opaqueKey(g.dm), null, false, g.members))
+    .map((g) => cardOf(keyOf(g.dm), null, false, g.members))
     .sort((a, b) => b.people - a.people || a.key.localeCompare(b.key));
   let suppressed = 0;
   if (small.length > 0) {

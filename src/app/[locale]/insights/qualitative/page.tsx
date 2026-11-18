@@ -30,6 +30,7 @@ import { isUuid } from "@/lib/uuid";
 import { getActor } from "@/modules/actor/server";
 import { canSeeIndividuals, insightsScope } from "@/modules/insights/authz";
 import { orgFilterOptions } from "@/modules/org-attributes";
+import { withoutPersonFilters } from "@/modules/org-attributes/kinds";
 import {
   listComments,
   qualitativeFilterOptions,
@@ -66,7 +67,11 @@ async function Qualitative({
   if (scope.kind === "none") return <p>{t("forbidden")}</p>;
   const individuals = canSeeIndividuals(actor);
   const hr = actor.role === "hr";
-  const p = parseQualitativeParams(await searchParams);
+  // Direction does not filter by the people who lead a team (a DM, a Santex Lead).
+  const p = withoutPersonFilters(
+    parseQualitativeParams(await searchParams),
+    scope.kind === "aggregatesOnly",
+  );
   const cycles = (await listCycles(db))
     .filter((c) => c.status !== "draft")
     .map((c) => ({ id: c.id, name: c.name }));

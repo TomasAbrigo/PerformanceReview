@@ -9,17 +9,26 @@ import {
 } from "@/modules/analytics/indicators/test-support";
 import { executiveReport } from "@/modules/insights/executive";
 import { buildReportScenario } from "@/modules/insights/test-support";
-import { opaqueKey } from "@/modules/org-attributes/kinds";
+import { groupKeyer } from "@/modules/org-attributes/group-key";
+import type { GroupKeyer } from "@/modules/org-attributes/kinds";
 import { orgFilterOptions } from "@/modules/org-attributes/options";
 import { setOrgAttributes } from "@/modules/org-attributes/test-support";
 import {
+  sentimentByDimension,
   sentimentByGroup,
   sentimentTotals,
+  topThemes,
 } from "@/modules/qualitative-analysis";
 import { ReviewError } from "@/modules/review-core/review-errors";
 import { completionSummary } from "./completion";
-import { goalInsights, goalKpis } from "./goals-insights";
 import {
+  goalInsights,
+  goalKpis,
+  goalOutliers,
+  goalsVsIndicators,
+} from "./goals-insights";
+import {
+  indicatorAlerts,
   indicatorDistribution,
   indicatorOverview,
   riskMatrix,
@@ -38,10 +47,12 @@ import { indicatorSnapshot } from "./indicators/queries";
  */
 let s: Scenario;
 let cycleId: string;
+let keyOf: GroupKeyer;
 
 beforeAll(async () => {
   s = await buildReportScenario();
   cycleId = s.c2.cycleId;
+  keyOf = await groupKeyer(db);
   const set = (
     who: keyof Scenario["id"],
     attrs: Parameters<typeof setOrgAttributes>[1],
@@ -158,7 +169,7 @@ describe("completion", () => {
       minGroupSize: 4,
     });
     expect(labels(byDm.groups)).toEqual([null]);
-    expect(byDm.groups[0].key).toBe(opaqueKey("Diego"));
+    expect(byDm.groups[0].key).toBe(keyOf("Diego"));
     // Dora's 3 and Iris' 1 fold together into 4.
     expect(byDm.others?.participants).toBe(4);
     expect(JSON.stringify(byDm)).not.toMatch(/Diego|Dora/);
@@ -261,7 +272,7 @@ describe("indicators", () => {
       [null, false, 5],
       [null, true, 4],
     ]);
-    expect(byDm.series[0].key).toBe(opaqueKey("Diego"));
+    expect(byDm.series[0].key).toBe(keyOf("Diego"));
     expect(JSON.stringify(byDm)).not.toMatch(/Diego|Dora/);
     // Nothing is hidden: the total stays.
     expect(byDm.total?.n).toBe(9);
@@ -412,7 +423,7 @@ describe("qualitative analysis", () => {
     expect(visible).toHaveLength(1);
     expect(visible[0]).toMatchObject({
       label: null,
-      key: opaqueKey("Diego"),
+      key: keyOf("Diego"),
       participants: 3,
     });
     expect(JSON.stringify(visible)).not.toContain("Diego");
@@ -455,6 +466,137 @@ describe("executive report", () => {
 
     expect(r.completion.participants).toBe(9);
     expect(r.retention?.n).toBe(9);
+  });
+});
+
+describe("direction does not filter by the people who lead a team", () => {
+  // A filter by a DM or a Santex Lead would single out a team: direction's
+  // queries read it as no filter at all. Account and project stay.
+  const dm = { dm: "Dora" };
+  const lead = { santexLead: "Lía" };
+
+  it("indicators: the distribution, the matrix, the alerts and the snapshot are the whole cycle's", async () => {
+    const config = { minGroupSize: 3 };
+    const whole = await indicatorDistribution(db, direction, {
+      cycleId,
+      indicator: "retention",
+      groupBy: "none",
+      config,
+    });
+
+    for (const filters of [dm, lead, { ...dm, ...lead }]) {
+      const filtered = await indicatorDistribution(db, direction, {
+        cycleId,
+        indicator: "retention",
+        groupBy: "none",
+        filters,
+        config,
+      });
+      expect(filtered).toEqual(whole);
+      expect(filtered.total?.n).toBe(9);
+    }
+    expect(
+      await riskMatrix(db, direction, { cycleId, filters: dm, config }),
+    ).toEqual(await riskMatrix(db, direction, { cycleId, config }));
+    expect(
+      await indicatorAlerts(db, direction, { cycleId, filters: dm, config }),
+    ).toEqual(await indicatorAlerts(db, direction, { cycleId, config }));
+    expect(
+      await indicatorSnapshot(db, direction, { cycleId, filters: dm, config }),
+    ).toEqual(await indicatorSnapshot(db, direction, { cycleId, config }));
+    const overview = await indicatorOverview(db, direction, {
+      cycleId,
+      indicator: "retention",
+      groupBy: "none",
+      filters: dm,
+      config,
+    });
+    expect(overview.distribution.total?.n).toBe(9);
+    // People do get the cut.
+    expect(
+      (
+        await indicatorDistribution(db, hr, {
+          cycleId,
+          indicator: "retention",
+          groupBy: "none",
+          filters: dm,
+        })
+      ).total?.n,
+    ).toBe(3);
+  });
+
+  it("indicators: an account is not a person: direction does filter by it", async () => {
+    const cuenta = await indicatorDistribution(db, direction, {
+      cycleId,
+      indicator: "retention",
+      groupBy: "none",
+      filters: { account: "Cuenta A" },
+      config: { minGroupSize: 3 },
+    });
+
+    expect(cuenta.total?.n).toBe(4);
+  });
+
+  it("goals: the KPIs, the buckets, the outliers and the page are the whole cycle's", async () => {
+    const config = { minGroupSize: 3 };
+    const whole = await goalKpis(db, direction, {
+      cycleId,
+      groupBy: "account",
+      config,
+    });
+
+    expect(
+      await goalKpis(db, direction, {
+        cycleId,
+        groupBy: "account",
+        filters: { ...dm, ...lead },
+        config,
+      }),
+    ).toEqual(whole);
+    expect(
+      await goalsVsIndicators(db, direction, { cycleId, filters: dm, config }),
+    ).toEqual(await goalsVsIndicators(db, direction, { cycleId, config }));
+    expect(
+      await goalOutliers(db, direction, { cycleId, filters: lead, config }),
+    ).toEqual(await goalOutliers(db, direction, { cycleId, config }));
+    const page = await goalInsights(db, direction, {
+      cycleId,
+      groupBy: "department",
+      filters: dm,
+      config,
+    });
+    expect(page.kpis.total?.people).toBe(9);
+    // An account filter is kept.
+    const cuenta = await goalKpis(db, direction, {
+      cycleId,
+      groupBy: "account",
+      filters: { account: "Cuenta A" },
+      config,
+    });
+    expect(cuenta.total?.people).toBe(4);
+  });
+
+  it("qualitative: the totals, the dimensions, the themes and the groups are the whole cycle's", async () => {
+    const f = { cycleId, minGroupSize: 3 };
+
+    expect(await sentimentTotals(db, direction, { ...f, ...dm })).toEqual(
+      await sentimentTotals(db, direction, f),
+    );
+    expect(await sentimentTotals(db, direction, { ...f, ...lead })).toEqual(
+      await sentimentTotals(db, direction, f),
+    );
+    expect(await sentimentByDimension(db, direction, { ...f, ...dm })).toEqual(
+      await sentimentByDimension(db, direction, f),
+    );
+    expect(await topThemes(db, direction, { ...f, ...dm })).toEqual(
+      await topThemes(db, direction, f),
+    );
+    expect(
+      await sentimentByGroup(db, direction, { ...f, ...dm }, "account"),
+    ).toEqual(await sentimentByGroup(db, direction, f, "account"));
+    // The whole is not nothing: Dora's team has no comments, the cycle does.
+    expect((await sentimentTotals(db, direction, f))?.total).toBe(5);
+    expect((await sentimentTotals(db, hr, { cycleId, ...dm }))?.total).toBe(0);
   });
 });
 

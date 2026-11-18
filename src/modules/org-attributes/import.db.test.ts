@@ -8,19 +8,23 @@ import { identityMatchIssue, ingestRun, personOrgAttribute } from "@/db/schema";
 import { resolveIssue } from "@/modules/identity";
 import { writeCsv } from "@/modules/import-history/test-support";
 import { xlsxFromRows } from "@/modules/lake/test-xlsx";
+import { getBuiltinProfile } from "@/modules/lake/profiles";
 import {
   importReportFile,
   importUpload,
+  saveProfile,
   storeUpload,
 } from "@/modules/lake/upload";
+import { insertOrgAttribute } from "./test-support";
 import { insertPerson } from "@/modules/analytics/test-support";
 import { resetAll } from "@/modules/analytics/test-support";
 
 const HEADER = "EEID,Nombre,Cuenta,Proyecto,DM,Santex Lead,Desde,Hasta";
-const importFile = (lines: string[]) =>
-  writeCsv([HEADER, ...lines]).then((path) =>
+const importWith = (header: string, lines: string[]) =>
+  writeCsv([header, ...lines]).then((path) =>
     importReportFile(db, { path, profile: "org-attributes" }),
   );
+const importFile = (lines: string[]) => importWith(HEADER, lines);
 
 let ana: string;
 let bruno: string;
@@ -38,6 +42,14 @@ afterAll(async () => {
   await resetAll();
   await closeDb();
 });
+
+/** Every row of a person, the dropped ones too. */
+const allAttrs = (personId: string) =>
+  db
+    .select()
+    .from(personOrgAttribute)
+    .where(eq(personOrgAttribute.personId, personId))
+    .orderBy(asc(personOrgAttribute.validFrom), asc(personOrgAttribute.kind));
 
 const attrs = (personId: string) =>
   db
@@ -276,6 +288,184 @@ describe("importing the org attributes file as a workbook", () => {
         ["account", "Cuenta B"],
       ]);
     } finally {
+      await rm(root, { recursive: true, force: true });
+    }
+  });
+});
+
+describe("a file with only some of the columns", () => {
+  const FULL =
+    "11,Ana Prieto,Cuenta A,Proyecto A1,Marta Quiroga,Nora Salas,2024-01-01,";
+
+  it("only touches the kinds it has a column for: the rest stays as it was", async () => {
+    await importFile([FULL]);
+
+    const result = await importWith("EEID,DM,Desde", [
+      "11,Nora Salas,2024-01-01",
+    ]);
+
+    expect(result.counts).toMatchObject({ updated: 1, deleted: 0 });
+    expect(
+      (await attrs(ana)).map((r) => [r.kind, r.value, r.refPersonId]),
+    ).toEqual([
+      ["account", "Cuenta A", null],
+      ["project", "Proyecto A1", null],
+      ["dm", "Nora Salas", nora],
+      ["santex_lead", "Nora Salas", nora],
+    ]);
+  });
+
+  it("an empty cell in a column it has drops only that attribute", async () => {
+    await importFile([FULL]);
+
+    await importWith("EEID,Proyecto,DM,Desde", [
+      "11,,Marta Quiroga,2024-01-01",
+    ]);
+
+    expect((await attrs(ana)).map((r) => r.kind)).toEqual([
+      "account",
+      "dm",
+      "santex_lead",
+    ]);
+  });
+
+  it("is the list of only the kinds it has a column for: the other kinds of people it does not mention stay", async () => {
+    await importFile([
+      FULL,
+      "12,Bruno Soler,Cuenta B,Proyecto B1,Nora Salas,Marta Quiroga,2024-01-01,",
+    ]);
+
+    const result = await importWith("EEID,DM,Desde", [
+      "11,Marta Quiroga,2024-01-01",
+    ]);
+
+    // Bruno is not in the file and it has no Cuenta, Proyecto or Santex Lead
+    // column: those stay. It does list DMs, and his is not among them.
+    expect(result.counts).toMatchObject({ deleted: 1 });
+    expect((await attrs(bruno)).map((r) => r.kind)).toEqual([
+      "account",
+      "project",
+      "santex_lead",
+    ]);
+    expect((await attrs(ana)).map((r) => r.kind)).toContain("account");
+  });
+});
+
+describe("the file is the whole list", () => {
+  const ROW = (from: string, account = "Cuenta A") =>
+    `11,Ana Prieto,${account},Proyecto A1,Marta Quiroga,Nora Salas,${from},`;
+
+  it("a corrected Desde leaves no stale tramo behind", async () => {
+    await importFile([ROW("2024-01-01")]);
+
+    const fixed = await importFile([ROW("2024-02-01")]);
+
+    expect(fixed.counts).toMatchObject({ inserted: 1, deleted: 4 });
+    expect((await attrs(ana)).map((r) => r.validFrom)).toEqual([
+      "2024-02-01",
+      "2024-02-01",
+      "2024-02-01",
+      "2024-02-01",
+    ]);
+    // The old ones are dropped, not erased.
+    expect(
+      (await allAttrs(ana)).filter((r) => r.deletedAt !== null),
+    ).toHaveLength(4);
+  });
+
+  it("drops what a later file no longer lists, and reinstates it when it comes back", async () => {
+    await importFile([ROW("2024-01-01"), ROW("2025-01-01", "Cuenta B")]);
+
+    const smaller = await importFile([ROW("2024-01-01")]);
+
+    expect(smaller.counts).toMatchObject({ unchanged: 1, deleted: 4 });
+    expect((await attrs(ana)).map((r) => r.validFrom)).not.toContain(
+      "2025-01-01",
+    );
+
+    const back = await importFile([
+      ROW("2024-01-01"),
+      ROW("2025-01-01", "Cuenta B"),
+    ]);
+
+    expect(back.counts).toMatchObject({ updated: 1, deleted: 0 });
+    expect((await attrs(ana)).filter((r) => r.kind === "account")).toHaveLength(
+      2,
+    );
+  });
+
+  it("people the file no longer mentions are dropped too: the file is the list", async () => {
+    await importFile([ROW("2024-01-01"), "12,Bruno Soler,Cuenta B,,,,,"]);
+
+    await importFile([ROW("2024-01-01")]);
+
+    expect(await attrs(bruno)).toEqual([]);
+    expect(await attrs(ana)).toHaveLength(4);
+  });
+
+  it("never drops from an empty file, from one nobody could read, or what another source wrote", async () => {
+    await importFile([ROW("2024-01-01")]);
+    await insertOrgAttribute({
+      personId: bruno,
+      kind: "account",
+      value: "A mano",
+    });
+
+    const empty = await importFile([]);
+    const unreadable = await importFile([
+      ",Sin Id,Cuenta A,,,,,",
+      "11,Ana,,,,,,",
+    ]);
+
+    expect(empty.counts.deleted).toBe(0);
+    expect(unreadable.counts.deleted).toBe(0);
+    expect(await attrs(ana)).toHaveLength(4);
+    // A row the app (not the file) wrote is not the file's to drop.
+    await importFile([ROW("2024-01-01")]);
+    expect((await attrs(bruno)).map((r) => r.value)).toEqual(["A mano"]);
+  });
+
+  it("a profile marked partial drops nothing: its file lists only some rows", async () => {
+    const root = await mkdtemp(path.join(tmpdir(), "org-partial-"));
+    const previous = process.env.PROFILES_DIR;
+    process.env.PROFILES_DIR = path.join(root, "profiles");
+    try {
+      const store = {
+        uploadsDir: path.join(root, "uploads"),
+        profilesDir: path.join(root, "profiles"),
+      };
+      await saveProfile(
+        {
+          ...getBuiltinProfile("org-attributes")!,
+          name: "org-partial",
+          partial: true,
+        },
+        store,
+      );
+      await importFile([ROW("2024-01-01"), "12,Bruno Soler,Cuenta B,,,,,"]);
+      const stored = await storeUpload(
+        {
+          name: "parcial.xlsx",
+          bytes: Buffer.from(
+            xlsxFromRows([HEADER.split(","), ROW("2024-01-01").split(",")]),
+          ),
+        },
+        store,
+      );
+
+      const result = await importUpload({
+        uploadId: stored.id,
+        fileName: "parcial.xlsx",
+        profile: { saved: "org-partial" },
+        db,
+        store,
+      });
+
+      expect(result.counts.deleted).toBe(0);
+      expect((await attrs(bruno)).map((r) => r.value)).toEqual(["Cuenta B"]);
+    } finally {
+      if (previous === undefined) delete process.env.PROFILES_DIR;
+      else process.env.PROFILES_DIR = previous;
       await rm(root, { recursive: true, force: true });
     }
   });

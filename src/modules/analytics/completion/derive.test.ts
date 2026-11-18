@@ -173,7 +173,11 @@ describe("summarize by an org attribute", () => {
 
   it("names DMs to People, but gives direction teams with an opaque key and no name", () => {
     const people = summarize(orgRows, { groupBy: "dm", minGroupSize: null });
-    const direction = summarize(orgRows, { groupBy: "dm", minGroupSize: 2 });
+    const direction = summarize(orgRows, {
+      groupBy: "dm",
+      minGroupSize: 2,
+      keyOf: (name) => `g${name.length}${name.charCodeAt(0)}`,
+    });
 
     expect(people.groups.map((g) => g.label)).toEqual([
       "Ana Prieto",
@@ -189,6 +193,12 @@ describe("summarize by an org attribute", () => {
     expect(JSON.stringify(direction)).not.toMatch(/Ana|Bruno/);
     // Teams under the minimum and the unassigned one are folded or hidden.
     expect(direction.suppressed).toBe(1);
+  });
+
+  it("refuses to give direction a DM without a keyer: no name leaks as a key", () => {
+    expect(() =>
+      summarize(orgRows, { groupBy: "dm", minGroupSize: 2 }),
+    ).toThrow(/keyer/);
   });
 
   it("folds small accounts into Otros for direction, like areas", () => {

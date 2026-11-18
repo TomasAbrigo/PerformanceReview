@@ -8,7 +8,12 @@ import { analysisTextSql } from "./analysis-text";
 import { effectiveCte } from "./effective";
 import { INITIAL_THEMES } from "./themes";
 import { insightsScope, type InsightsScope } from "@/modules/insights/authz";
-import { groupIdentity } from "@/modules/org-attributes/kinds";
+import { groupKeyer } from "@/modules/org-attributes/group-key";
+import {
+  groupIdentity,
+  needsKeyer,
+  withoutPersonFilters,
+} from "@/modules/org-attributes/kinds";
 import {
   orgAttributeColumns,
   orgAttributeFilters,
@@ -65,7 +70,8 @@ async function resolve(
   if (scope.kind === "aggregatesOnly") {
     return {
       scope,
-      f: { ...f, aggregateOnly: true },
+      // Direction does not filter by the people who lead a team (DM, Santex Lead).
+      f: { ...withoutPersonFilters(f, true), aggregateOnly: true },
       min: scope.minGroupSize,
       includeClosed,
     };
@@ -88,6 +94,15 @@ function labeledCtes({ scope, f, includeClosed }: Resolved): SQL {
   if (f.cycleId) {
     if (!isUuid(f.cycleId)) throw new AnalysisError("not_found");
     where.push(sql`r.cycle_id = ${f.cycleId}::uuid`);
+  }
+  if (f.cycleIds) {
+    const ids = f.cycleIds.map((id) => {
+      if (!isUuid(id)) throw new AnalysisError("not_found");
+      return sql`${id}::uuid`;
+    });
+    where.push(
+      ids.length ? sql`r.cycle_id in (${sql.join(ids, sql`, `)})` : sql`false`,
+    );
   }
   if (f.department) where.push(sql`cp.snap_department = ${f.department}`);
   where.push(...orgAttributeFilters(f));
@@ -155,7 +170,7 @@ export async function sentimentByDimension(
 export async function sentimentByParticipant(
   db: DbOrTx,
   actor: ActorContext,
-  f: Pick<QualitativeFilters, "cycleId" | "relationship"> = {},
+  f: Pick<QualitativeFilters, "cycleId" | "cycleIds" | "relationship"> = {},
 ): Promise<ParticipantSentiment[]> {
   const r = await resolve(db, actor, { ...f, includeClosed: false });
   if (!r) return [];
@@ -201,10 +216,12 @@ export async function sentimentByGroup(
     from labeled group by 1 ${minGroup(r.min)}
     order by (${column} is null), 1`);
   const masked = r.scope.kind === "aggregatesOnly";
+  const keyOf =
+    masked && needsKeyer(groupBy) ? await groupKeyer(db) : undefined;
   return rows.map((row) => ({
     ...(groupBy === "department"
       ? { key: row.value, label: row.value }
-      : groupIdentity(groupBy, row.value, masked)),
+      : groupIdentity(groupBy, row.value, masked, keyOf)),
     participants: row.participants,
     ...counts(row),
   }));

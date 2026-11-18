@@ -25,6 +25,8 @@ export type RatingStage = (typeof ratingStages)[number];
  */
 export type DashboardFilters = OrgFilters & {
   cycleId?: string;
+  /** Several cycles (the 360 view reads the latest few): `cycleId` narrows further. */
+  cycleIds?: readonly string[];
   hierarchy: Hierarchy;
   department?: string;
   managerId?: string;

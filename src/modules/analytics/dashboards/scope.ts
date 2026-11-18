@@ -95,6 +95,15 @@ export function scopedCtes(
     if (!isUuid(f.cycleId)) throw new ReviewError("not_found");
     where.push(sql`cp.cycle_id = ${f.cycleId}::uuid`);
   }
+  if (f.cycleIds) {
+    const ids = f.cycleIds.map((id) => {
+      if (!isUuid(id)) throw new ReviewError("not_found");
+      return sql`${id}::uuid`;
+    });
+    where.push(
+      ids.length ? sql`cp.cycle_id in (${sql.join(ids, sql`, `)})` : sql`false`,
+    );
+  }
   if (f.department) where.push(sql`${department} = ${f.department}`);
   if (f.location) where.push(sql`${location} = ${f.location}`);
   if (f.jobTitle) where.push(sql`${jobTitle} = ${f.jobTitle}`);

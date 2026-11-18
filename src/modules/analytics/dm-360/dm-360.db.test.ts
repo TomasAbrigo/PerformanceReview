@@ -1,14 +1,18 @@
+import { like } from "drizzle-orm";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { closeDb, db } from "@/db/client";
+import { reviewCycle } from "@/db/schema";
 import {
   as,
   direction,
   hr,
+  insertIndicatorCycle,
   reset,
   type Scenario,
 } from "@/modules/analytics/indicators/test-support";
 import { buildReportScenario } from "@/modules/insights/test-support";
-import { opaqueKey } from "@/modules/org-attributes/kinds";
+import { groupKeyer } from "@/modules/org-attributes/group-key";
+import type { GroupKeyer } from "@/modules/org-attributes/kinds";
 import { setOrgAttributes } from "@/modules/org-attributes/test-support";
 import { ReviewError } from "@/modules/review-core/review-errors";
 import { dm360 } from ".";
@@ -22,10 +26,12 @@ import { dm360 } from ".";
  */
 let s: Scenario;
 let cycleId: string;
+let keyOf: GroupKeyer;
 
 beforeAll(async () => {
   s = await buildReportScenario();
   cycleId = s.c2.cycleId;
+  keyOf = await groupKeyer(db);
   for (const who of ["ana", "bruno", "carla", "dario", "elena"] as const) {
     await setOrgAttributes(
       s.id[who],
@@ -122,13 +128,50 @@ describe("dm360 as People", () => {
   it("tree: adds everybody below the DM in the chart of the snapshot", async () => {
     const r = await dm360(db, hr, { cycleId, scope: "tree" });
 
-    // Marta manages Ana..Fabio (Fabio is Nora's by the file); Nora manages
-    // Gina, Hugo and Iris (and the file gives her Fabio).
+    // Each participant is read on their own snapshot date (here 2025-06-01,
+    // the date their DM attribute is read on too): Marta manages Bruno..Fabio
+    // by then, Nora Gina, Hugo, Iris and, since 2025-01-01, Ana. The file
+    // gives Marta Ana..Elena and Nora Fabio, Gina and Hugo.
     expect(r.scope).toBe("tree");
     expect(r.cards.map((c) => [c.key, c.people])).toEqual([
       ["Marta Quiroga", 6],
-      ["Nora Salas", 4],
+      ["Nora Salas", 5],
     ]);
+    // Ana is Marta's by the file and Nora's by the chart: in both cards.
+  });
+
+  it("reads only the cycle asked for and the latest few before it, whatever the history holds", async () => {
+    const old = [];
+    for (let year = 2010; year < 2019; year++) {
+      old.push(
+        await insertIndicatorCycle({
+          name: `Old ${year}`,
+          periodStart: `${year}-01-01`,
+          periodEnd: `${year}-12-31`,
+        }),
+      );
+    }
+    try {
+      const r = await dm360(db, hr, { cycleId });
+
+      // Eight points, the most recent: six of the nine old cycles, H1 and H2.
+      expect(r.cards[0].trend.map((p) => p.cycleName)).toEqual([
+        "Old 2013",
+        "Old 2014",
+        "Old 2015",
+        "Old 2016",
+        "Old 2017",
+        "Old 2018",
+        "H1 2024",
+        "H2 2024",
+      ]);
+      // An old cycle is a cycle like any other: it can be read on its own.
+      expect((await dm360(db, hr, { cycleId: old[0].cycleId })).cards).toEqual(
+        [],
+      );
+    } finally {
+      await db.delete(reviewCycle).where(like(reviewCycle.name, "Old %"));
+    }
   });
 
   it("is forbidden to employees and a cycle that does not exist is not found", async () => {
@@ -183,7 +226,7 @@ describe("dm360 as direction", () => {
     expect(r.minGroupSize).toBe(5);
     expect(r.withoutDm).toBeNull();
     expect(r.cards.map((c) => [c.key, c.label, c.others, c.people])).toEqual([
-      [opaqueKey("Marta Quiroga"), null, false, 5],
+      [keyOf("Marta Quiroga"), null, false, 5],
     ]);
     // Nora's 3 are under the minimum, even alone as Otros: only counted.
     expect(r.suppressed).toBe(3);

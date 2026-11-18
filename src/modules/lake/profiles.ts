@@ -152,6 +152,12 @@ export const sourceProfileSchema = z.object({
   customQuestions: z.array(customQuestionSchema).optional(),
   /** A superseded shape kept for old exports (shown as legacy). */
   legacy: z.boolean().optional(),
+  /**
+   * Org attributes file: it lists only some of the rows, so what it does not
+   * mention is not dropped. Without it the file is the whole list and an
+   * attribute this source wrote that is not in it is removed.
+   */
+  partial: z.boolean().optional(),
 });
 export type SourceProfile = z.infer<typeof sourceProfileSchema>;
 

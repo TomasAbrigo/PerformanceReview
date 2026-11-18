@@ -14,6 +14,7 @@ import {
 } from "@/components/insights/executive-report-view";
 import { db } from "@/db/client";
 import { routing } from "@/i18n/routing";
+import { isHr } from "@/modules/actor/access";
 import { getActor } from "@/modules/actor/server";
 import { executiveSummary } from "@/modules/analytics/dashboards";
 import { canSeeExecutiveView } from "@/modules/insights";
@@ -49,7 +50,7 @@ async function Executive({
   if (!cycle) return <p>{t("noCycles")}</p>;
   const minGroupSize = await getSetting(db, "aggregation.minGroupSize");
   // The org cuts are People's: direction reads the whole cycle.
-  const hr = actor.role === "hr";
+  const hr = isHr(actor);
   const filters = hr ? orgFiltersOf(parseOrgParams(sp)) : {};
   const [report, summary, org] = await Promise.all([
     executiveReport(db, actor, {

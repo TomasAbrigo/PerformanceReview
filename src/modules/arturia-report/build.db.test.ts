@@ -354,13 +354,16 @@ describe("buildReport over the seed small company", () => {
       byAccount: account.suppressed,
       byDm: dm.suppressed,
     });
+    // The totals above are the area and team cuts': account and DM have their own.
     const anySuppressed =
-      c.suppressed.byDepartment +
-        c.suppressed.byManager +
-        account.suppressed +
-        dm.suppressed >
-      0;
-    expect(c.byRelationship === null).toBe(anySuppressed || dir.total === null);
+      c.suppressed.byDepartment + c.suppressed.byManager > 0;
+    expect(c.byRelationship === null).toBe(
+      anySuppressed || dir.total === null || team.total === null,
+    );
+    expect(c.byAccountTotal === null).toBe(
+      account.suppressed > 0 || account.total === null,
+    );
+    expect(c.byDmTotal === null).toBe(dm.suppressed > 0 || dm.total === null);
   });
 
   it("org cuts: named, by account and by DM with their names, in completion, indicators and goals", async () => {
@@ -424,18 +427,39 @@ describe("buildReport over the seed small company", () => {
       }
       for (const g of groupSizes(r)) expect(g.n).toBeGreaterThanOrEqual(min);
       const c = s.completion!;
-      if ((c.suppressed.byAccount ?? 0) + (c.suppressed.byDm ?? 0) > 0) {
-        expect(c.byRelationship).toBeNull();
-      }
       const g = s.goals!;
-      if ((g.suppressed.byAccount ?? 0) + (g.suppressed.byDm ?? 0) > 0) {
-        expect(g.goals).toBeNull();
-        expect(g.participantsWithGoals).toBeNull();
+      // No total next to a suppressed group, within each cut; one cut's
+      // suppression never takes the totals of the others (the area and team
+      // cuts decide the totals above, account and DM have their own).
+      const cuts: [unknown, unknown, number | undefined][] = [
+        [c.byAccount, c.byAccountTotal, c.suppressed.byAccount],
+        [c.byDm, c.byDmTotal, c.suppressed.byDm],
+        [g.byAccount, g.byAccountTotal, g.suppressed.byAccount],
+        [g.byDm, g.byDmTotal, g.suppressed.byDm],
+        ...s.indicators!.distribution.flatMap(
+          (d): [unknown, unknown, number | undefined][] => [
+            [d.byAccount, d.byAccountTotal, d.suppressedBy!.account],
+            [d.byDm, d.byDmTotal, d.suppressedBy!.dm],
+          ],
+        ),
+      ];
+      for (const [rows, total, left] of cuts) {
+        expect(rows).toBeDefined();
+        if ((left ?? 0) > 0) expect(total).toBeNull();
+      }
+      if (c.suppressed.byDepartment + c.suppressed.byManager === 0) {
+        expect(c.byRelationship).not.toBeNull();
+      }
+      if (
+        g.suppressed.byDepartment +
+          g.suppressed.byManager +
+          g.suppressed.buckets ===
+        0
+      ) {
+        expect(g.goals).not.toBeNull();
       }
       for (const d of s.indicators!.distribution) {
-        if (d.suppressedBy!.account + d.suppressedBy!.dm > 0) {
-          expect(d.total).toBeNull();
-        }
+        if (d.suppressed === 0) expect(d.total).not.toBeNull();
       }
       // The same DM has the same number in every section.
       const numbered = new Map<string, number>();

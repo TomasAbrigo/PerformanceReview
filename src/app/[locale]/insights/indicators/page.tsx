@@ -23,6 +23,7 @@ import {
   indicatorOverview,
 } from "@/modules/analytics/indicators";
 import { insightsScope } from "@/modules/insights";
+import { withoutPersonFilters } from "@/modules/org-attributes/kinds";
 
 async function Indicators({
   params,
@@ -38,7 +39,11 @@ async function Indicators({
   if (scope.kind === "none") return <p>{t("forbidden")}</p>;
   const cycles = localizeCycles(await indicatorCycles(db), locale);
   if (!cycles.length) return <p>{t("noCycles")}</p>;
-  const p = parseIndicatorParams(await searchParams);
+  // Direction does not filter by the people who lead a team (a DM, a Santex Lead).
+  const p = withoutPersonFilters(
+    parseIndicatorParams(await searchParams),
+    scope.kind === "aggregatesOnly",
+  );
   const cycle = cycles.find((c) => c.id === p.cycle) ?? cycles[0];
   // Direction reads teams, not the people who lead them (a DM, a Santex Lead).
   const groupBys: readonly IndicatorGroupBy[] =

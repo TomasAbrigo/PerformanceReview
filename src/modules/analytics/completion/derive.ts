@@ -3,6 +3,7 @@
 // summary and the "quién falta" list are both read off the same rows.
 import { foldSmallGroups } from "@/modules/insights/aggregation";
 import {
+  type GroupKeyer,
   groupIdentity,
   type OrgDims,
   orgDimOf,
@@ -69,12 +70,13 @@ const collator = new Intl.Collator("es");
 /**
  * Groups by area, manager or an org attribute, named ones in order and the
  * unassigned one last. `masked` (direction): a group that names a person (a
- * DM, a Santex Lead) has an opaque key and no label.
+ * DM, a Santex Lead) has an opaque key (`keyOf`) and no label.
  */
 function groupRows(
   rows: readonly SideRow[],
   groupBy: Exclude<CompletionGroupBy, "none">,
   masked: boolean,
+  keyOf?: GroupKeyer,
 ) {
   const groups = new Map<string, Keyed>();
   for (const r of rows) {
@@ -83,7 +85,7 @@ function groupRows(
         ? { key: r.department, label: r.department }
         : groupBy === "manager"
           ? { key: r.managerId, label: r.managerName }
-          : groupIdentity(groupBy, orgDimOf(r, groupBy), masked);
+          : groupIdentity(groupBy, orgDimOf(r, groupBy), masked, keyOf);
     const id = key ?? "";
     const group = groups.get(id) ?? { key, label, rows: [] };
     group.rows.push(r);
@@ -127,7 +129,13 @@ export function summarize(
   {
     groupBy,
     minGroupSize,
-  }: { groupBy: CompletionGroupBy; minGroupSize: number | null },
+    keyOf,
+  }: {
+    groupBy: CompletionGroupBy;
+    minGroupSize: number | null;
+    /** Direction grouping by a DM or Santex Lead: the opaque key of a name. */
+    keyOf?: GroupKeyer;
+  },
 ): Summary {
   const all = countsOf(rows);
   const fromProgress = rows.filter((r) => r.source === "progress").length;
@@ -139,7 +147,7 @@ export function summarize(
   const groups =
     groupBy === "none"
       ? []
-      : groupRows(rows, groupBy, minGroupSize !== null).map((g) => ({
+      : groupRows(rows, groupBy, minGroupSize !== null, keyOf).map((g) => ({
           ...g,
           counts: countsOf(g.rows),
         }));

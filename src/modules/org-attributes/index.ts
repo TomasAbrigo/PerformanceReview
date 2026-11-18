@@ -2,6 +2,7 @@ export * from "./kinds";
 export {
   ORG_ATTRIBUTE_ENTITY,
   ORG_ATTRIBUTE_EPOCH,
+  reconcileOrgAttributes,
   reprocessOrgAttributeRow,
   stagedOrgAttributeSchema,
   upsertOrgAttributes,

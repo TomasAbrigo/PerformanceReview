@@ -1,8 +1,9 @@
-import { and, eq } from "drizzle-orm";
+import { and, eq, inArray, isNotNull, isNull, notInArray } from "drizzle-orm";
 import { z } from "zod";
 import type { DbOrTx } from "@/db/client";
 import {
   identityMatchIssue,
+  ingestRun,
   personOrgAttribute,
   type IdentityCandidate,
 } from "@/db/schema";
@@ -11,6 +12,8 @@ import {
   openIssueSourceIds,
   raiseIssue,
 } from "@/modules/identity/raise";
+import { getBuiltinProfile } from "@/modules/lake/profiles";
+import { loadSavedProfile } from "@/modules/lake/upload-store";
 import { parseReportDate } from "@/modules/import-history/dates";
 import { nameIndexOf } from "@/modules/import-history/assessment";
 import { matchName } from "@/modules/import-history/names";
@@ -31,19 +34,29 @@ export const ORG_ATTRIBUTE_ENTITY = "org_attribute" as const;
  */
 export const ORG_ATTRIBUTE_EPOCH = "1900-01-01";
 
+const text = (v: string | number | boolean | null) =>
+  v === null || String(v).trim() === "" ? null : String(v).trim();
+
 const cell = z
   .union([z.string(), z.number(), z.boolean(), z.null()])
   .optional()
-  .transform((v) =>
-    v === null || v === undefined || String(v).trim() === ""
-      ? null
-      : String(v).trim(),
-  );
+  .transform((v) => (v === undefined ? null : text(v)));
+
+/**
+ * A value column of the file: `undefined` when the file has no such column
+ * (this import says nothing about it and leaves what is there), `null` when
+ * the cell is empty (the file says there is none: the attribute is dropped).
+ */
+const column = z
+  .union([z.string(), z.number(), z.boolean(), z.null()])
+  .optional()
+  .transform((v) => (v === undefined ? undefined : text(v)));
 
 /**
  * A row of People's org attributes file (profile `org-attributes`) as
  * FileSourceAdapter hands it over: mapped fields only. Needs the EEID, and at
- * least one of the four values; `Desde` defaults to "since ever", `Hasta`
+ * least one of the four values (a column the file does not have is `undefined`,
+ * an empty cell `null`: see `column`); `Desde` defaults to "since ever", `Hasta`
  * to open. Dates are ISO, or day/month with the profile's `dateFormat`.
  */
 export const stagedOrgAttributeSchema = z
@@ -51,10 +64,10 @@ export const stagedOrgAttributeSchema = z
     fields: z.object({
       employee_bamboo_id: cell.pipe(z.string({ message: "EEID is empty" })),
       employee_name: cell,
-      account: cell,
-      project: cell,
-      dm: cell,
-      santex_lead: cell,
+      account: column,
+      project: column,
+      dm: column,
+      santex_lead: column,
       valid_from: z.unknown().optional(),
       valid_to: z.unknown().optional(),
     }),
@@ -100,11 +113,14 @@ export const stagedOrgAttributeSchema = z
   });
 export type StagedOrgAttribute = z.infer<typeof stagedOrgAttributeSchema>;
 
-/** The value of each kind in a staged row. */
+/** The value of each kind in a staged row: undefined, the file has no such column. */
 const valueOf = (
   fields: StagedOrgAttribute["fields"],
   kind: OrgAttributeKind,
 ) => fields[kind];
+
+/** Kinds some row of the run carried a column for: the only ones the run may reconcile. */
+const KINDS_KEY = "orgKinds";
 
 /** "Apellido, Nombre" as "Nombre Apellido": the way a DM may be written. */
 const asPersonName = (value: string) => {
@@ -120,6 +136,19 @@ const asPersonName = (value: string) => {
  * when it cannot be told: the value still groups and filters, unresolved.
  */
 async function refPersonOf(
+  tx: DbOrTx,
+  cache: Map<string, unknown>,
+  value: string,
+): Promise<string | null> {
+  // The same DM or lead is on hundreds of rows: resolve each name once per run.
+  const key = `orgRef:${value}`;
+  if (cache.has(key)) return cache.get(key) as string | null;
+  const found = await resolveRef(tx, cache, value);
+  cache.set(key, found);
+  return found;
+}
+
+async function resolveRef(
   tx: DbOrTx,
   cache: Map<string, unknown>,
   value: string,
@@ -244,18 +273,30 @@ export async function upsertOrgAttributes(
 
   let inserted = 0;
   let changed = 0;
+  // Every attribute this row can say something about, in one read.
+  const existingByKind = new Map(
+    (
+      await tx
+        .select()
+        .from(personOrgAttribute)
+        .where(
+          and(
+            eq(personOrgAttribute.personId, personId),
+            eq(personOrgAttribute.validFrom, validFrom),
+          ),
+        )
+    ).map((row) => [row.kind, row]),
+  );
+  const kinds =
+    (ctx.cache.get(KINDS_KEY) as Set<OrgAttributeKind> | undefined) ??
+    new Set<OrgAttributeKind>();
+  ctx.cache.set(KINDS_KEY, kinds);
   for (const kind of orgAttributeKinds) {
     const value = valueOf(fields, kind);
-    const [existing] = await tx
-      .select()
-      .from(personOrgAttribute)
-      .where(
-        and(
-          eq(personOrgAttribute.personId, personId),
-          eq(personOrgAttribute.kind, kind),
-          eq(personOrgAttribute.validFrom, validFrom),
-        ),
-      );
+    // No such column in the file: not this import's to touch.
+    if (value === undefined) continue;
+    kinds.add(kind);
+    const existing = existingByKind.get(kind);
     if (value === null) {
       if (existing && existing.deletedAt === null) {
         await tx
@@ -274,7 +315,8 @@ export async function upsertOrgAttributes(
       validTo,
       refPersonId,
       sourceSystem: ctx.source,
-      sourceId: `${ctx.sourceId}#${kind}`,
+      // The row of the file it came from: what reconciliation looks for.
+      sourceId: ctx.sourceId,
       ingestRunId: ctx.runId,
       payloadHash: ctx.hash,
       deletedAt: null,
@@ -288,7 +330,8 @@ export async function upsertOrgAttributes(
       existing.deletedAt !== null ||
       existing.value !== value ||
       existing.validTo !== validTo ||
-      existing.refPersonId !== refPersonId
+      existing.refPersonId !== refPersonId ||
+      existing.sourceId !== ctx.sourceId
     ) {
       await tx
         .update(personOrgAttribute)
@@ -329,4 +372,57 @@ export async function reprocessOrgAttributeRow(
     cache: new Map(),
   });
   return true;
+}
+
+/**
+ * After a full read of the file (not an incremental one): the attributes
+ * this source wrote that the file no longer has are dropped (soft-deleted).
+ * The file is the whole list, so a corrected `Desde` (a new row) or a row that
+ * was removed leaves no stale tramo behind. Careful on purpose:
+ * - an empty extraction (a broken file) never drops anything;
+ * - only the kinds whose column the file has (a file with just `DM` leaves
+ *   accounts and projects alone);
+ * - a profile marked `partial` (a file that lists only some rows) drops nothing;
+ * - rows other sources wrote are never touched, and a dropped row that comes
+ *   back in a later file is reinstated.
+ */
+export async function reconcileOrgAttributes(
+  db: DbOrTx,
+  run: {
+    source: HandlerContext["source"];
+    runId: string;
+    seen: Set<string>;
+    cache: Map<string, unknown>;
+  },
+): Promise<{ deleted: number }> {
+  const kinds = run.cache.get(KINDS_KEY) as Set<OrgAttributeKind> | undefined;
+  if (run.seen.size === 0 || !kinds || kinds.size === 0) return { deleted: 0 };
+  if (await isPartialRun(db, run.runId)) return { deleted: 0 };
+  const dropped = await db
+    .update(personOrgAttribute)
+    .set({ deletedAt: new Date(), ingestRunId: run.runId })
+    .where(
+      and(
+        eq(personOrgAttribute.sourceSystem, run.source),
+        isNull(personOrgAttribute.deletedAt),
+        inArray(personOrgAttribute.kind, [...kinds]),
+        isNotNull(personOrgAttribute.sourceId),
+        notInArray(personOrgAttribute.sourceId, [...run.seen]),
+      ),
+    )
+    .returning({ id: personOrgAttribute.id });
+  return { deleted: dropped.length };
+}
+
+/** Whether the profile the run imported with lists only some rows (`partial`). */
+async function isPartialRun(db: DbOrTx, runId: string): Promise<boolean> {
+  const [run] = await db
+    .select({ params: ingestRun.params })
+    .from(ingestRun)
+    .where(eq(ingestRun.id, runId));
+  const name = run?.params?.profile;
+  if (typeof name !== "string") return false;
+  const profile =
+    getBuiltinProfile(name) ?? (await loadSavedProfile(name).catch(() => null));
+  return profile?.partial === true;
 }

@@ -61,32 +61,48 @@ export function orgDimOf(dims: OrgDims, groupBy: OrgGroupBy): string | null {
 }
 
 /**
- * An opaque, stable key for a group whose value names a person, so direction
- * can tell two teams apart (and match them across cycles) without a name.
- * FNV-1a, two lanes; not a secret, a name that was never shown stays unshown.
+ * Turns the value of a group that names a person (a DM, a Santex Lead) into
+ * the opaque key direction reads instead of the name: a keyed hash with a
+ * secret of the install (`groupKeyer`, server only: this module is shared with
+ * the client, the secret never is).
  */
-export function opaqueKey(value: string): string {
-  let a = 0x811c9dc5;
-  let b = 0x01000193;
-  for (let i = 0; i < value.length; i++) {
-    const c = value.charCodeAt(i);
-    a = Math.imul(a ^ c, 0x01000193) >>> 0;
-    b = Math.imul(b + c, 0x85ebca6b) >>> 0;
-  }
-  return `g${a.toString(16).padStart(8, "0")}${b.toString(16).padStart(8, "0")}`;
-}
+export type GroupKeyer = (value: string) => string;
 
-/** The value a group exposes: its own for most kinds, an opaque key for people when masked. */
+/**
+ * The key and label of a group of an org attribute. `masked` (direction): a
+ * group that names a person has an opaque key (`keyOf`, required then: no
+ * masking without a secret) and no label; the rest keep their value.
+ */
 export function groupIdentity(
   kind: OrgGroupBy,
   value: string | null,
   masked: boolean,
+  keyOf?: GroupKeyer,
 ): { key: string | null; label: string | null } {
   if (value === null) return { key: null, label: null };
   if (masked && isPersonKind(kind)) {
-    return { key: opaqueKey(value), label: null };
+    if (!keyOf) throw new Error(`Grouping by ${kind} needs a group keyer`);
+    return { key: keyOf(value), label: null };
   }
   return { key: value, label: value };
+}
+
+/** Whether a grouping names people, so direction reads it through a keyer. */
+export const needsKeyer = (kind: string) => isPersonKind(kind);
+
+/**
+ * The filters direction may use: not the ones that name a person (a DM, a
+ * Santex Lead). Filtering by one would single out a team, and the selects do
+ * not offer them; a URL or a call that carries them is read without them.
+ * Anybody else keeps theirs. One place, asked by every view and every query.
+ */
+export function withoutPersonFilters<T extends OrgFilters>(
+  filters: T,
+  masked: boolean,
+): T {
+  return masked
+    ? { ...filters, dm: undefined, santexLead: undefined }
+    : filters;
 }
 
 export const hasOrgFilter = (f: OrgFilters) =>

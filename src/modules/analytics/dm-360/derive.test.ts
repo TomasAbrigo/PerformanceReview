@@ -1,5 +1,4 @@
 import { describe, expect, it } from "vitest";
-import { opaqueKey } from "@/modules/org-attributes/kinds";
 import type { SentimentCounts } from "@/modules/qualitative-analysis/types";
 import {
   buildDm360,
@@ -36,6 +35,9 @@ const cycles: Dm360Cycle[] = [
   },
 ];
 const thresholds = { dropThreshold: 2, riskThreshold: 2 };
+/** A stand-in for the install's keyed hash: opaque, stable, distinct per name. */
+const keyOf = (value: string) =>
+  `g${[...value].reduce((h, c) => (h * 31 + c.charCodeAt(0)) % 1_000_003, 7)}`;
 
 const sentiment = (o: Partial<SentimentCounts> = {}): SentimentCounts => ({
   positive: 0,
@@ -105,6 +107,7 @@ const run = (
     facts,
     thresholds,
     minGroupSize: null,
+    keyOf,
     ...over,
   });
 };
@@ -246,7 +249,7 @@ describe("buildDm360", () => {
   });
 
   it("tree: counts everybody below the DM in the chart as well as the people assigned to them", () => {
-    const below = new Map([[treeKey("c3", "Dora"), new Set(["a", "g"])]]);
+    const below = new Map([[treeKey("c3", "Dora"), new Set(["a@c3", "g@c3"])]]);
 
     const { cards } = run(specs, { scope: "tree", below });
 
@@ -302,13 +305,19 @@ describe("buildDm360, masked (direction)", () => {
 
     expect(r.minGroupSize).toBe(5);
     expect(r.cards.map((c) => [c.key, c.label, c.others, c.people])).toEqual([
-      [opaqueKey("Diego"), null, false, 5],
+      [keyOf("Diego"), null, false, 5],
       // Dora's 3 and Elisa's 2 together make 5.
       ["others", null, true, 5],
     ]);
     expect(JSON.stringify(r)).not.toMatch(/Diego|Dora|Elisa/);
     expect(r.withoutDm).toBeNull();
     expect(r.suppressed).toBe(0);
+  });
+
+  it("refuses to mask without a keyer: no key, no names", () => {
+    expect(() => run(big, { minGroupSize: 5, keyOf: undefined })).toThrow(
+      /keyer/,
+    );
   });
 
   it("drops Otros, counting its people, when it is under the minimum too", () => {

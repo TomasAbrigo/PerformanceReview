@@ -56,6 +56,13 @@ const completionRow = group.extend({
 });
 /** Percentage points against the previous cycle; null without a rate to compare. */
 const points = z.number().nullable();
+/** One side of the assessment of a whole cut (no draft / declined: the module does not tell them). */
+const sideTotal = z.object({
+  relationship: z.string(),
+  total: int,
+  submitted: int,
+  applicable: z.boolean(),
+});
 const completion = z.object({
   /** Participants of the cycle (the head count, shown even when groups are not). */
   participants: int,
@@ -86,6 +93,14 @@ const completion = z.object({
    */
   byAccount: z.array(completionRow).optional(),
   byDm: z.array(completionRow).optional(),
+  /**
+   * The totals of those cuts (`self` and `manager`, as `byRelationship`):
+   * null when anonymized and any group of that cut is suppressed (no
+   * differencing within the cut). They never hide the totals above, which
+   * only the area and team cuts decide.
+   */
+  byAccountTotal: z.array(sideTotal).nullable().optional(),
+  byDmTotal: z.array(sideTotal).nullable().optional(),
   /** Participants left out of each breakdown. */
   suppressed: z.object({
     byDepartment: int,
@@ -113,6 +128,11 @@ const completion = z.object({
 
 const band = z.enum(["low", "mid", "high"]);
 const indicatorGroup = group.extend({ mean: z.number().nullable(), counts });
+const indicatorTotal = z.object({
+  n: int,
+  mean: z.number().nullable(),
+  counts,
+});
 const indicators = z.object({
   distribution: z.array(
     z.object({
@@ -121,6 +141,12 @@ const indicators = z.object({
       /** Minor 3: the same distribution by account and by DM ("DM N" when anonymized). */
       byAccount: z.array(indicatorGroup).optional(),
       byDm: z.array(indicatorGroup).optional(),
+      /**
+       * Everybody of that cut together; null when anonymized and any of its
+       * groups is suppressed. Never hides `total`, which only the area cut decides.
+       */
+      byAccountTotal: indicatorTotal.nullable().optional(),
+      byDmTotal: indicatorTotal.nullable().optional(),
       /** People left out of `byAccount` / `byDm` (groups under the minimum). */
       suppressedBy: z.object({ account: int, dm: int }).optional(),
       total: z
@@ -231,6 +257,12 @@ const outlierGroup = z.object({
   /** Empty when anonymized (the schema requires it). */
   people: z.array(goalOutlier),
 });
+const goalTotal = z.object({
+  participantsWithGoals: int,
+  goals: int,
+  completed: int,
+  avgProgress: z.number().nullable(),
+});
 const goals = z.object({
   /**
    * The four totals are null when anonymized and any breakdown (areas,
@@ -245,6 +277,9 @@ const goals = z.object({
   /** Minor 3: the same by account and by DM ("DM N" when anonymized). */
   byAccount: z.array(goalRow).optional(),
   byDm: z.array(goalRow).optional(),
+  /** Everybody of that cut together; null when anonymized and any of its groups is suppressed. Never hides the four totals above. */
+  byAccountTotal: goalTotal.nullable().optional(),
+  byDmTotal: goalTotal.nullable().optional(),
   /** Slices of the share of goals completed (`from`-`to`, 0-100) with the indicators of their people. */
   buckets: z.array(
     z.object({

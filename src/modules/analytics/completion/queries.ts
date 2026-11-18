@@ -10,7 +10,12 @@ import {
 } from "@/modules/analytics/dashboards/scope";
 import type { DashboardFilters } from "@/modules/analytics/dashboards/types";
 import { insightsScope } from "@/modules/insights/authz";
-import type { OrgFilters } from "@/modules/org-attributes/kinds";
+import { groupKeyer } from "@/modules/org-attributes/group-key";
+import {
+  type GroupKeyer,
+  needsKeyer,
+  type OrgFilters,
+} from "@/modules/org-attributes/kinds";
 import { ReviewError } from "@/modules/review-core/review-errors";
 import { getSetting } from "@/modules/settings/service";
 import { missingOf, type SideRow, summarize } from "./derive";
@@ -177,6 +182,8 @@ type Resolved = {
   groupBy: CompletionGroupBy;
   hierarchy: Hierarchy;
   filters: DashboardFilters;
+  /** Direction grouping by a DM or Santex Lead: teams get an opaque key. */
+  keyOf?: GroupKeyer;
 };
 
 /** Direction's minimum group size: the override, else the setting. */
@@ -203,12 +210,14 @@ async function resolve(
   const cycle = await requireCycle(db, f.cycleId);
   const masked = scope.kind === "aggregatesOnly";
   const hierarchy = f.hierarchy ?? "asOf";
+  const groupBy = f.groupBy ?? "department";
   return {
     cycle,
     masked,
+    ...(masked && needsKeyer(groupBy) ? { keyOf: await groupKeyer(db) } : {}),
     minGroupSize: scope.kind === "aggregatesOnly" ? scope.minGroupSize : null,
     // Direction may group by manager too: a team, never a name (`summarize`).
-    groupBy: f.groupBy ?? "department",
+    groupBy,
     hierarchy,
     filters: {
       cycleId: cycle.id,
@@ -223,7 +232,11 @@ function summaryOf(r: Resolved, rows: SideRow[]): CompletionSummary {
     cycleId: r.cycle.id,
     cycleName: r.cycle.name,
     hierarchy: r.hierarchy,
-    ...summarize(rows, { groupBy: r.groupBy, minGroupSize: r.minGroupSize }),
+    ...summarize(rows, {
+      groupBy: r.groupBy,
+      minGroupSize: r.minGroupSize,
+      keyOf: r.keyOf,
+    }),
   };
 }
 

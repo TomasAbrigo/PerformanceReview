@@ -282,7 +282,13 @@ describe("org attributes", () => {
   });
 
   it("gives direction teams, not the names of DMs, and folds the small ones", () => {
-    const k = kpisOf(org, "dm", 2);
+    const k = kpisOf(
+      org,
+      "dm",
+      2,
+      (name) => `g${name.length}${name.charCodeAt(0)}`,
+    );
+    expect(() => kpisOf(org, "dm", 2)).toThrow(/keyer/);
 
     expect(k.groups.map((g) => g.label)).toEqual([null, null]);
     expect(JSON.stringify(k)).not.toMatch(/Diego|Dora/);

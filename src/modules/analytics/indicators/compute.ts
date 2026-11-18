@@ -2,6 +2,7 @@
 // no actor: the callers decide who reads what (see queries.ts).
 import { foldSmallGroups } from "@/modules/insights";
 import {
+  type GroupKeyer,
   groupIdentity,
   orgDimOf,
   orgOptionsOf,
@@ -91,12 +92,15 @@ const byLabel = (a: IndicatorSeries, b: IndicatorSeries) =>
  * Direction (`minGroupSize`) only gets groups of at least that many people:
  * the smaller ones (and people without a group) fold into "others" when that
  * is itself big enough, and are hidden otherwise; the total goes with them
- * when anything is hidden, since it would give a hidden group away.
+ * when anything is hidden, since it would give a hidden group away. A DM or
+ * Santex Lead is a person: direction gets their team under the opaque key
+ * `keyOf` makes of the name, never the name.
  */
 export function buildDistribution(
   rows: IndicatorRow[],
   input: { cycleId: string; indicator: Indicator; groupBy: IndicatorGroupBy },
   minGroupSize: number | null,
+  keyOf?: GroupKeyer,
 ): IndicatorDistribution {
   const groups = new Map<
     string,
@@ -117,6 +121,7 @@ export function buildDistribution(
                 input.groupBy,
                 orgDimOf(r, input.groupBy),
                 minGroupSize !== null,
+                keyOf,
               );
     const g = groups.get(key ?? "") ?? { key, label, counts: emptyCounts() };
     g.counts[r.value - 1]++;

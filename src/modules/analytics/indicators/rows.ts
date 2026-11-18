@@ -109,13 +109,18 @@ type RawRow = {
 export async function loadRows(
   db: DbOrTx,
   ctx: IndicatorContext,
-  f: { cycleId?: string; hierarchy: Hierarchy },
+  f: {
+    cycleId?: string;
+    /** Only these cycles (the 360 view reads the latest few). */
+    cycleIds?: readonly string[];
+    hierarchy: Hierarchy;
+  },
 ): Promise<IndicatorRow[]> {
   const runAs = ctx.scope.kind === "aggregatesOnly" ? ALL_PEOPLE : ctx.actor;
   const rows = await db.execute<RawRow>(sql`
     with recursive ${scopedCtes(
       runAs,
-      { cycleId: f.cycleId, hierarchy: f.hierarchy },
+      { cycleId: f.cycleId, cycleIds: f.cycleIds, hierarchy: f.hierarchy },
       { snapshotScope: true },
     )},
     ind as (

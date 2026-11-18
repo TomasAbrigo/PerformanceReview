@@ -4,6 +4,7 @@
 // manager) and the setting's value for direction.
 import { isUuid } from "@/lib/uuid";
 import {
+  type GroupKeyer,
   groupIdentity,
   orgDimOf,
   orgOptionsOf,
@@ -89,6 +90,7 @@ function dimension(
   r: GoalIndicatorRow,
   groupBy: GoalGroupBy,
   masked: boolean,
+  keyOf?: GroupKeyer,
 ): { key: string | null; label: string | null } {
   switch (groupBy) {
     case "person":
@@ -98,7 +100,7 @@ function dimension(
     case "department":
       return { key: r.department, label: r.department };
     default:
-      return groupIdentity(groupBy, orgDimOf(r, groupBy), masked);
+      return groupIdentity(groupBy, orgDimOf(r, groupBy), masked, keyOf);
   }
 }
 
@@ -122,6 +124,8 @@ export function kpisOf(
   rows: readonly GoalIndicatorRow[],
   groupBy: GoalGroupBy,
   minGroupSize: number | null,
+  /** Direction grouping by a DM or Santex Lead: the opaque key of a name. */
+  keyOf?: GroupKeyer,
 ): {
   groups: GoalKpiGroup[];
   total: GoalKpiGroup | null;
@@ -130,7 +134,7 @@ export function kpisOf(
 } {
   const sums = new Map<string, KpiCounts>();
   for (const r of rows) {
-    const d = dimension(r, groupBy, minGroupSize !== null);
+    const d = dimension(r, groupBy, minGroupSize !== null, keyOf);
     // Direction reads teams, not the people who lead them.
     if (minGroupSize !== null && groupBy === "manager") d.label = null;
     const id = d.key ?? "\u0000";

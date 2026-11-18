@@ -5,6 +5,8 @@ import { sentiments, type Sentiment } from "./constants";
 
 export type QualitativeFilters = OrgFilters & {
   cycleId?: string;
+  /** Only these cycles (the 360 view reads the latest few). */
+  cycleIds?: readonly string[];
   department?: string;
   dimension?: string;
   sentiment?: Sentiment;
