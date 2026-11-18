@@ -598,7 +598,7 @@ describe("ProgressOverview", () => {
         hrefFor={(p) => `/assessments?progress=${p}`}
       />,
     );
-    expect(screen.getByText("Atrasado")).toBeInTheDocument();
+    expect(screen.getByText("En riesgo")).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "30" })).toHaveAttribute(
       "href",
       "/assessments?progress=pending",

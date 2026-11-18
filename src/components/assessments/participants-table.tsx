@@ -181,6 +181,7 @@ export function ProgressOverview({
   hrefFor: (progress: Progress) => string;
 }) {
   const t = useTranslations("Assessments");
+  const x = useTranslations("Experience");
   const total = counts.complete + counts.partial + counts.pending;
   const pct = (n: number) => (total ? Math.round((n / total) * 100) : 0);
   const scale = (n: number, label: string) => ({
@@ -202,7 +203,7 @@ export function ProgressOverview({
           label={t("overview.complete", { pct: pct(counts.complete) })}
         />
         <div className="min-w-0">
-          <h2 className="text-2xl">{cycleName}</h2>
+          <h2 className="text-xl">{cycleName}</h2>
           <p className="mt-2 text-sm text-brand-200">
             <Link
               href={hrefFor("complete")}
@@ -216,7 +217,7 @@ export function ProgressOverview({
               className="tone-pill mt-3 inline-flex"
               data-tone={completeTone}
             >
-              {t(`overview.tone.${completeTone}`)}
+              {x(`tone.${completeTone}`)}
             </span>
           ) : null}
         </div>

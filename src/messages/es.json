@@ -45,18 +45,33 @@
       "noCycle": "Todavía no hay ciclos: cuando haya uno, acá vas a ver sus avances.",
       "cta": "Explorar el ciclo"
     },
-    "access": {
-      "title": "Accesos principales",
-      "goals": "Seguimiento de los compromisos de cada persona.",
-      "assessments": "Las dos perspectivas de cada período.",
-      "insights": "Indicadores para entender el ciclo.",
-      "explore": "Explorar"
-    },
-    "before": {
-      "title": "Antes de analizar",
-      "text": "Revisá las importaciones y los casos pendientes de calidad de datos."
-    },
-    "all": "Todas las secciones"
+    "all": "Todas las secciones",
+    "signal": {
+      "kpis": "{cycle}",
+      "scope": {
+        "all": "Toda la compañía",
+        "team": "Tu equipo y vos"
+      },
+      "complete": "Evaluaciones completas",
+      "completeNote": "{done} de {total} con las dos evaluaciones enviadas",
+      "pending": "Sin empezar",
+      "ofParticipants": "{pct} % de los participantes",
+      "goalsCompleted": "Objetivos completados",
+      "goalsNote": "{done} de {total} objetivos del ciclo",
+      "goalsOverdue": "Objetivos vencidos",
+      "ofGoals": "{pct} % de los objetivos del ciclo",
+      "analysis": "Ver el análisis del ciclo",
+      "attention": {
+        "title": "Para atender",
+        "none": "Nada pendiente por ahora.",
+        "self": "Tu autoevaluación de {cycle} está por completar",
+        "team": "{n, plural, one {# evaluación de tu equipo por escribir} other {# evaluaciones de tu equipo por escribir}}",
+        "overdue": "{n, plural, one {# objetivo vencido} other {# objetivos vencidos}} en el ciclo",
+        "identity": "{n, plural, one {# registro espera} other {# registros esperan}} una persona en la cola de identidades",
+        "failedRuns": "{n, plural, one {# importación falló} other {# importaciones fallaron}}",
+        "quality": "{n, plural, one {# caso} other {# casos}} de calidad de datos en {kinds, plural, one {# indicador} other {# indicadores}}"
+      }
+    }
   },
   "LocaleSwitcher": {
     "label": "Idioma",
@@ -2172,12 +2187,7 @@
       "complete": "{pct} % completas",
       "completeOf": "{done} de {total} con las dos evaluaciones enviadas",
       "partialNote": "{pct} %: falta una de las dos",
-      "pendingNote": "{pct} %: ninguna enviada todavía",
-      "tone": {
-        "good": "En buen ritmo",
-        "watch": "A seguir",
-        "risk": "Atrasado"
-      }
+      "pendingNote": "{pct} %: ninguna enviada todavía"
     }
   },
   "Capture": {

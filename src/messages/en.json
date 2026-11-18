@@ -45,18 +45,33 @@
       "noCycle": "No cycles yet: once there is one, its progress shows here.",
       "cta": "Explore the cycle"
     },
-    "access": {
-      "title": "Main entries",
-      "goals": "Each person's commitments, followed up.",
-      "assessments": "The two perspectives of each period.",
-      "insights": "Indicators to understand the cycle.",
-      "explore": "Explore"
-    },
-    "before": {
-      "title": "Before analysing",
-      "text": "Check the imports and the pending data-quality cases."
-    },
-    "all": "All sections"
+    "all": "All sections",
+    "signal": {
+      "kpis": "{cycle}",
+      "scope": {
+        "all": "The whole company",
+        "team": "Your team and you"
+      },
+      "complete": "Reviews complete",
+      "completeNote": "{done} of {total} with both reviews submitted",
+      "pending": "Not started",
+      "ofParticipants": "{pct}% of participants",
+      "goalsCompleted": "Goals completed",
+      "goalsNote": "{done} of {total} goals of the cycle",
+      "goalsOverdue": "Goals overdue",
+      "ofGoals": "{pct}% of the cycle's goals",
+      "analysis": "See the cycle's analysis",
+      "attention": {
+        "title": "Needs attention",
+        "none": "Nothing pending for now.",
+        "self": "Your self review for {cycle} is waiting",
+        "team": "{n, plural, one {# review of your team to write} other {# reviews of your team to write}}",
+        "overdue": "{n, plural, one {# goal overdue} other {# goals overdue}} in the cycle",
+        "identity": "{n, plural, one {# record waits} other {# records wait}} for a person in the identity queue",
+        "failedRuns": "{n, plural, one {# import failed} other {# imports failed}}",
+        "quality": "{n, plural, one {# data-quality case} other {# data-quality cases}} across {kinds, plural, one {# indicator} other {# indicators}}"
+      }
+    }
   },
   "LocaleSwitcher": {
     "label": "Language",
@@ -2172,12 +2187,7 @@
       "complete": "{pct}% complete",
       "completeOf": "{done} of {total} with both reviews submitted",
       "partialNote": "{pct}%: one of the two is missing",
-      "pendingNote": "{pct}%: none submitted yet",
-      "tone": {
-        "good": "On track",
-        "watch": "To watch",
-        "risk": "Behind"
-      }
+      "pendingNote": "{pct}%: none submitted yet"
     }
   },
   "Capture": {

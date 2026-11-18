@@ -52,14 +52,12 @@ test("home navigation puts Objetivos and Evaluaciones first, then the Análisis 
     ...ANALYSIS,
     ...DATA,
   ]);
-  // Every link has a short description under it.
+  // A compact directory: each link carries its description as its title.
   await expect(nav.getByRole("listitem")).toHaveCount(16);
-  await expect(
-    nav.getByRole("listitem").filter({ hasText: "Resumen" }),
-  ).toContainText("Completitud, retención, compromiso");
-  await expect(
-    nav.getByRole("listitem").filter({ hasText: "Evaluaciones" }).first(),
-  ).toContainText("Las preguntas y respuestas de cada ciclo");
+  await expect(nav.getByRole("link", { name: "Resumen" })).toHaveAttribute(
+    "title",
+    /Completitud, retención, compromiso/,
+  );
 });
 
 test("the sidebar lists the same sections in the same order and marks the current one", async ({
