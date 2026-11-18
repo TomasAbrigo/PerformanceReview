@@ -12,7 +12,11 @@ import type {
 } from "@/modules/assessments";
 import { AssessmentView } from "./assessment-view";
 import { AssessmentsFilters } from "./assessments-filters";
-import { ParticipantsTable, ProgressChips } from "./participants-table";
+import {
+  ParticipantsTable,
+  ProgressChips,
+  ProgressOverview,
+} from "./participants-table";
 import { noOrgOptions } from "@/modules/org-attributes/kinds";
 
 vi.mock("@/i18n/navigation", () => ({
@@ -580,5 +584,28 @@ describe("AssessmentView", () => {
     ).toBeVisible();
     expect(screen.getByText("I would convince them")).toBeVisible();
     expect(screen.getByRole("link", { name: "Employee view" })).toBeVisible();
+  });
+});
+
+describe("ProgressOverview", () => {
+  it("shows the complete share with its tone and links partial and pending to the filtered list", () => {
+    renderIn(
+      "es",
+      <ProgressOverview
+        cycleName="2026-H1"
+        counts={{ complete: 50, partial: 20, pending: 30 }}
+        thresholds={{ goodPct: 80, watchPct: 60 }}
+        hrefFor={(p) => `/assessments?progress=${p}`}
+      />,
+    );
+    expect(screen.getByText("Atrasado")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "30" })).toHaveAttribute(
+      "href",
+      "/assessments?progress=pending",
+    );
+    expect(screen.getByRole("link", { name: "20" })).toHaveAttribute(
+      "href",
+      "/assessments?progress=partial",
+    );
   });
 });

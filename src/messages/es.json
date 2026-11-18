@@ -1950,7 +1950,10 @@
       "department": "Área",
       "anyDepartment": "Todas",
       "apply": "Aplicar",
-      "clear": "Limpiar"
+      "clear": "Limpiar",
+      "search": "Buscar",
+      "searchPlaceholder": "Persona u objetivo",
+      "titlePlaceholder": "Título del objetivo"
     },
     "states": {
       "in_progress": "En curso",
@@ -2018,7 +2021,9 @@
       "moving": "En movimiento",
       "movingNote": "{n, plural, one {Objetivo en curso} other {Objetivos en curso}}",
       "review": "Para revisar",
-      "reviewNote": "{n, plural, one {Objetivo vencido} other {Objetivos vencidos}}"
+      "reviewNote": "{n, plural, one {Objetivo vencido} other {Objetivos vencidos}}",
+      "share": "{pct} % de los objetivos de la lista",
+      "overdueShare": "{pct} % vencidos: en curso con la fecha pasada"
     },
     "form": {
       "new": "Nuevo goal",
@@ -2162,7 +2167,18 @@
     "forbidden": "No tenés acceso a este assessment: cada persona ve los suyos y, si es manager, los de su equipo.",
     "navOwn": "Mis evaluaciones",
     "titleOwn": "Mis evaluaciones",
-    "back": "Volver a Evaluaciones"
+    "back": "Volver a Evaluaciones",
+    "overview": {
+      "complete": "{pct} % completas",
+      "completeOf": "{done} de {total} con las dos evaluaciones enviadas",
+      "partialNote": "{pct} %: falta una de las dos",
+      "pendingNote": "{pct} %: ninguna enviada todavía",
+      "tone": {
+        "good": "En buen ritmo",
+        "watch": "A seguir",
+        "risk": "Atrasado"
+      }
+    }
   },
   "Capture": {
     "back": "Volver a Assessments",

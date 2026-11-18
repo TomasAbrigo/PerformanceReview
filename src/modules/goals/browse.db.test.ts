@@ -204,14 +204,14 @@ describe("listGoals: who reads which goals", () => {
     expect(titles(page)).not.toContain("Borrado");
   });
 
-  it("orders by due date, the ones without one last", async () => {
+  it("orders by state (overdue, in progress, completed, closed), then due date, the ones without one last", async () => {
     const page = await listGoals(db, hr, {}, TODAY);
     expect(titles(page)).toEqual([
       "Capacitar al equipo",
-      "Documentar",
       "Migrar la API",
       "Cerrar el trimestre",
       "Armar el plan",
+      "Documentar",
       "Mejorar el onboarding",
     ]);
   });
@@ -277,6 +277,12 @@ describe("listGoals: filters", () => {
       3,
     );
     expect((await listGoals(db, hr, { q: "%" }, TODAY)).total).toBe(0);
+  });
+
+  it("searches the goal title too", async () => {
+    expect(titles(await listGoals(db, hr, { q: "trimestre" }, TODAY))).toEqual([
+      "Cerrar el trimestre",
+    ]);
   });
 
   it("filters by the goals of a cycle's snapshot", async () => {

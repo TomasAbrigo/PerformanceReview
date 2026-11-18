@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { type DrillBase, DrillLink } from "@/components/drill/drill-link";
+import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
 import type { Drill } from "@/modules/insights/drill-spec";
 import type { Tone } from "@/modules/insights/tone";
@@ -122,6 +123,7 @@ export function MetricCard({
   scale,
   delta,
   drill,
+  href,
   testId,
   children,
 }: {
@@ -145,6 +147,8 @@ export function MetricCard({
   delta?: { value: number; text: string; better?: "up" | "down" };
   /** The value becomes a DrillLink to these records. */
   drill?: { base: DrillBase; drill: Drill; label: string };
+  /** Without `drill`: the value links here (a list filtered by this KPI). */
+  href?: string;
   testId?: string;
   children?: ReactNode;
 }) {
@@ -176,6 +180,10 @@ export function MetricCard({
           >
             {value}
           </DrillLink>
+        ) : href ? (
+          <Link href={href} className="stat-value drill-target">
+            {value}
+          </Link>
         ) : (
           <p className="stat-value">{value}</p>
         )}

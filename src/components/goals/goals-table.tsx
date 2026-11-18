@@ -13,6 +13,7 @@ import { ProgressBar } from "@/components/progress-bar";
 import { Link } from "@/i18n/navigation";
 import type { GoalListPage } from "@/modules/goals/browse";
 import { goalStates, type GoalState } from "@/modules/goals/state";
+import { type KpiThresholds, percentTone } from "@/modules/insights/tone";
 import { GoalStateBadge } from "./goal-state-badge";
 
 /** The counts per state, each a link that filters the list by it. */
@@ -138,19 +139,41 @@ export function GoalsTable({
   );
 }
 
-export function GoalsOverview({ counts }: { counts: GoalListPage["counts"] }) {
+/**
+ * The head of the list: completed on its ring, in progress and overdue as
+ * KPIs. Each value filters the list by its state; overdue carries its tone
+ * (a share where less is better, by the thresholds of /settings/insights).
+ */
+export function GoalsOverview({
+  counts,
+  thresholds,
+  hrefFor,
+}: {
+  counts: GoalListPage["counts"];
+  thresholds: KpiThresholds;
+  hrefFor: (state: GoalState) => string;
+}) {
   const t = useTranslations("Goals");
   const x = useTranslations("Experience");
   const total = goalStates.reduce((sum, state) => sum + counts[state], 0);
+  const pct = (n: number) => (total ? (n / total) * 100 : 0);
+  const overduePct = pct(counts.overdue);
   return (
     <div className="overview-grid">
       <section className="overview-hero">
         <ProgressRing
-          percent={total ? (counts.completed / total) * 100 : 0}
+          percent={pct(counts.completed)}
           label={t("overview.completed")}
         />
         <div className="min-w-0">
-          <h2 className="text-2xl">{t("overview.completed")}</h2>
+          <h2 className="text-2xl">
+            <Link
+              href={hrefFor("completed")}
+              className="text-white underline decoration-brand-400/60 decoration-dotted underline-offset-8 hover:text-brand-200"
+            >
+              {t("overview.completed")}
+            </Link>
+          </h2>
           <p className="mt-2 text-sm text-brand-200">
             {x("completedOf", { done: counts.completed, total })}
           </p>
@@ -160,14 +183,34 @@ export function GoalsOverview({ counts }: { counts: GoalListPage["counts"] }) {
         tone="soft"
         label={t("overview.moving")}
         value={counts.in_progress}
-        note={t("overview.movingNote", { n: counts.in_progress })}
+        href={hrefFor("in_progress")}
+        note={t("overview.share", { pct: Math.round(pct(counts.in_progress)) })}
+        scale={{
+          value: pct(counts.in_progress),
+          min: 0,
+          max: 100,
+          label: t("overview.share", {
+            pct: Math.round(pct(counts.in_progress)),
+          }),
+          minLabel: "0 %",
+          maxLabel: "100 %",
+        }}
         icon={<Target className="size-5" />}
       />
       <MetricCard
-        tone="warm"
         label={t("overview.review")}
         value={counts.overdue}
-        note={t("overview.reviewNote", { n: counts.overdue })}
+        href={hrefFor("overdue")}
+        status={total ? percentTone(overduePct, thresholds, "down") : undefined}
+        note={t("overview.overdueShare", { pct: Math.round(overduePct) })}
+        scale={{
+          value: overduePct,
+          min: 0,
+          max: 100,
+          label: t("overview.overdueShare", { pct: Math.round(overduePct) }),
+          minLabel: "0 %",
+          maxLabel: "100 %",
+        }}
         icon={<CalendarDays className="size-5" />}
       />
     </div>

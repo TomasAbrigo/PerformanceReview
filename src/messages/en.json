@@ -1950,7 +1950,10 @@
       "department": "Department",
       "anyDepartment": "All",
       "apply": "Apply",
-      "clear": "Clear"
+      "clear": "Clear",
+      "search": "Search",
+      "searchPlaceholder": "Person or goal",
+      "titlePlaceholder": "Goal title"
     },
     "states": {
       "in_progress": "In progress",
@@ -2018,7 +2021,9 @@
       "moving": "In motion",
       "movingNote": "{n, plural, one {Goal in progress} other {Goals in progress}}",
       "review": "To review",
-      "reviewNote": "{n, plural, one {Overdue goal} other {Overdue goals}}"
+      "reviewNote": "{n, plural, one {Overdue goal} other {Overdue goals}}",
+      "share": "{pct}% of the goals listed",
+      "overdueShare": "{pct}% overdue: in progress past their due date"
     },
     "form": {
       "new": "New goal",
@@ -2162,7 +2167,18 @@
     "forbidden": "You do not have access to this assessment: everyone sees their own and, for a manager, their team's.",
     "navOwn": "My assessments",
     "titleOwn": "My assessments",
-    "back": "Back to Assessments"
+    "back": "Back to Assessments",
+    "overview": {
+      "complete": "{pct}% complete",
+      "completeOf": "{done} of {total} with both reviews submitted",
+      "partialNote": "{pct}%: one of the two is missing",
+      "pendingNote": "{pct}%: none submitted yet",
+      "tone": {
+        "good": "On track",
+        "watch": "To watch",
+        "risk": "Behind"
+      }
+    }
   },
   "Capture": {
     "back": "Back to Assessments",

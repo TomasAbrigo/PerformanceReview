@@ -8,7 +8,7 @@ import type { GoalDetail, GoalListPage } from "@/modules/goals/browse";
 import { noOrgOptions } from "@/modules/org-attributes/kinds";
 import { GoalDetailView } from "./goal-detail-view";
 import { GoalsFilters } from "./goals-filters";
-import { GoalStateChips, GoalsTable } from "./goals-table";
+import { GoalStateChips, GoalsOverview, GoalsTable } from "./goals-table";
 
 vi.mock("@/i18n/navigation", () => ({
   Link: ({
@@ -188,6 +188,7 @@ describe("GoalsFilters", () => {
       "es",
       <GoalsFilters
         params={{ page: 1, state: "overdue" }}
+        cycleId="c1"
         cycles={cycles}
         options={options}
         ownOnly={false}
@@ -198,17 +199,20 @@ describe("GoalsFilters", () => {
     expect(new FormData(form as HTMLFormElement).get("state")).toBe("overdue");
     expect(within(form).getByLabelText("DM")).not.toBeVisible();
     fireEvent.click(screen.getByText("Más filtros"));
-    for (const label of ["Ciclo", "Persona", "Área", "DM"]) {
+    expect(within(form).getByLabelText("Buscar")).toBeVisible();
+    expect(within(form).getByLabelText("Ciclo")).toHaveValue("c1");
+    for (const label of ["Ciclo", "Área", "DM"]) {
       expect(within(form).getByLabelText(label)).toBeVisible();
     }
     expect(within(form).getByRole("button", { name: "Aplicar" })).toBeVisible();
   });
 
-  it("offers only cycle and state to someone who sees only their own goals", () => {
+  it("offers only cycle, state and a title search to someone who sees only their own goals", () => {
     renderIn(
       "es",
       <GoalsFilters
         params={{ page: 1 }}
+        cycleId={undefined}
         cycles={cycles}
         options={options}
         ownOnly
@@ -216,7 +220,8 @@ describe("GoalsFilters", () => {
     );
     expect(screen.getByLabelText("Ciclo")).toBeVisible();
     expect(screen.queryByLabelText("Estado")).not.toBeInTheDocument();
-    expect(screen.queryByLabelText("Persona")).not.toBeInTheDocument();
+    expect(screen.getByLabelText("Ciclo")).toHaveValue("all");
+    expect(screen.getByPlaceholderText("Título del objetivo")).toBeVisible();
     expect(screen.queryByLabelText("DM")).not.toBeInTheDocument();
   });
 });
@@ -348,5 +353,31 @@ describe("GoalDetailView", () => {
     expect(
       within(panel).queryByRole("link", { name: /Segundo semestre/ }),
     ).not.toBeInTheDocument();
+  });
+});
+
+describe("GoalsOverview", () => {
+  it("links each KPI to the list filtered by its state, with the overdue tone", () => {
+    renderIn(
+      "es",
+      <GoalsOverview
+        counts={{ in_progress: 50, completed: 30, closed: 0, overdue: 20 }}
+        thresholds={{ goodPct: 80, watchPct: 60 }}
+        hrefFor={(state) => `/goals?state=${state}`}
+      />,
+    );
+    expect(screen.getByRole("link", { name: "20" })).toHaveAttribute(
+      "href",
+      "/goals?state=overdue",
+    );
+    expect(screen.getByRole("link", { name: "50" })).toHaveAttribute(
+      "href",
+      "/goals?state=in_progress",
+    );
+    expect(
+      screen.getByRole("link", { name: "Objetivos completados" }),
+    ).toHaveAttribute("href", "/goals?state=completed");
+    // 20 % overdue: 80 % on time, at the good threshold.
+    expect(screen.getByText("En meta")).toBeInTheDocument();
   });
 });

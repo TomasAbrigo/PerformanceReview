@@ -9,10 +9,9 @@ import { AssessmentsFilters } from "@/components/assessments/assessments-filters
 import {
   ParticipantsTable,
   ProgressChips,
+  ProgressOverview,
 } from "@/components/assessments/participants-table";
 import { parseAssessmentsParams } from "@/components/assessments/url-state";
-import { CalendarDays } from "lucide-react";
-import { IconTile } from "@/components/experience";
 import { orgFiltersOf } from "@/components/org/params";
 import { PageHeader } from "@/components/page-header";
 import { listHref } from "@/components/query-string";
@@ -32,6 +31,8 @@ import {
   listPendingSelfReviews,
   listTeamReviews,
 } from "@/modules/review-capture";
+import { getSettings } from "@/modules/settings";
+import { kpiThresholds } from "@/modules/insights/tone";
 import { TeamReviews } from "@/components/assessments/team-reviews";
 import { PendingReviews } from "@/components/assessments/pending-reviews";
 
@@ -87,7 +88,7 @@ async function AssessmentsList({
     );
   }
   const cycle = cycles.find((c) => c.id === p.cycle) ?? cycles[0];
-  const [page, options] = await Promise.all([
+  const [page, options, settings] = await Promise.all([
     listAssessmentParticipants(db, actor, cycle.id, {
       progress: p.progress,
       q: ownOnly ? undefined : p.q,
@@ -98,6 +99,7 @@ async function AssessmentsList({
     ownOnly
       ? { departments: [], org: noOrgOptions }
       : assessmentFilterOptions(db, actor, cycle.id),
+    getSettings(db),
   ]);
   const hrefFor = listHref(HERE, {
     cycle: cycle.id,
@@ -124,17 +126,16 @@ async function AssessmentsList({
       <PendingReviews items={pending} />
       <TeamReviews items={team} />
       <section className="space-y-6" data-testid="assessments-list">
-        <div className="overview-hero">
-          <IconTile>
-            <CalendarDays className="size-7" />
-          </IconTile>
-          <div>
-            <h2 className="text-2xl">{cycle.name}</h2>
-            <p className="mt-2 text-brand-200">
-              {t("count", { n: page.total })}
-            </p>
-          </div>
-        </div>
+        {ownOnly ? (
+          <h2 className="text-2xl">{cycle.name}</h2>
+        ) : (
+          <ProgressOverview
+            cycleName={cycle.name}
+            counts={page.counts}
+            thresholds={kpiThresholds(settings)}
+            hrefFor={(progress) => hrefFor({ progress })}
+          />
+        )}
         {!ownOnly ? (
           <ProgressChips
             counts={page.counts}
