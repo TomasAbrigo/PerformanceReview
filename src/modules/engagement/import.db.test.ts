@@ -20,10 +20,7 @@ let bruno: string;
 
 beforeEach(async () => {
   await resetAll();
-  await db.execute(
-    (await import("drizzle-orm"))
-      .sql`delete from app_setting where key like 'engagement.%'`,
-  );
+  await db.execute(sql`delete from app_setting where key like 'engagement.%'`);
   ana = await insertPerson({ displayName: "Ana Prieto", bambooId: "11" });
   bruno = await insertPerson({ displayName: "Bruno Soler", bambooId: "12" });
 });

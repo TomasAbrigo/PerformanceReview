@@ -1,7 +1,7 @@
 import { and, eq } from "drizzle-orm";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { closeDb, db } from "@/db/client";
-import { answer, questionRevision, reviewRequest } from "@/db/schema";
+import { answer, questionRevision } from "@/db/schema";
 import {
   as,
   buildScenario,
