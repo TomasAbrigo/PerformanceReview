@@ -13,6 +13,7 @@ import {
   type SourceProfile,
 } from "@/modules/lake/profiles";
 import {
+  isEngagementProfile,
   isHistoryProfile,
   isOrgAttributesProfile,
   UPLOAD_EXTENSIONS,
@@ -362,6 +363,12 @@ function Preview({
             {landingOnly ? t("preview.landingHint") : t("preview.historyHint")}
           </p>
         </div>
+      ) : null}
+
+      {profile && isEngagementProfile(profile) ? (
+        <p className="max-w-xl text-sm text-muted-foreground">
+          {t("preview.engagementHint")}
+        </p>
       ) : null}
 
       {profile && isOrgAttributesProfile(profile) ? (

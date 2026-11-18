@@ -81,6 +81,13 @@ export const isOrgAttributesProfile = (
 ) => profile.entity === "org_attribute";
 
 /**
+ * Whether a profile's rows are mapped to the domain on import and always so:
+ * the monthly engagement file.
+ */
+export const isEngagementProfile = (profile: Pick<SourceProfile, "entity">) =>
+  profile.entity === "engagement_monthly";
+
+/**
  * Whether a profile's rows can be imported as historical review cycles
  * (domain mode) instead of only landed: Bamboo's performance reports, and
  * custom profiles of the same entities (e.g. one with its own question
@@ -122,9 +129,10 @@ export type ImportUploadResult = {
   rejects: IngestReject[];
   /**
    * `domain`: imported as historical cycles; `landing`: rows only landed;
-   * `attributes`: rows mapped to people's org attributes.
+   * `attributes`: rows mapped to people's org attributes; `engagement`: rows
+   * mapped to people's monthly engagement.
    */
-  mode?: "domain" | "landing" | "attributes";
+  mode?: "domain" | "landing" | "attributes" | "engagement";
   /** `needs_decision`: some rows wait for someone to choose their cycle. */
   status?: "succeeded" | "needs_decision";
 };

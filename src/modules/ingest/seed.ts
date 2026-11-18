@@ -30,6 +30,7 @@ export const RESET_TABLES = [
   "answer_quality_issue",
   "history_import_row",
   "person_org_attribute",
+  "engagement_monthly",
   "assessment_progress",
   "imported_request",
   "imported_question",
@@ -88,6 +89,7 @@ export async function resetDomainTables(
     "assessment",
     "assessment_progress",
     "org_attribute",
+    "engagement_monthly",
   ],
 ): Promise<void> {
   await db.transaction(async (tx) => {

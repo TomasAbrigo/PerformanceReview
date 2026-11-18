@@ -25,7 +25,7 @@
   },
   "InsightsSettings": {
     "title": "Configuración de insights",
-    "description": "Umbrales de alerta, tamaño mínimo de grupo, cortes de semestre y proveedor de análisis. Solo People puede cambiarlos y cada cambio queda en el registro de auditoría.",
+    "description": "Umbrales de alerta, tamaño mínimo de grupo, cortes de semestre, cortes de engagement mensual y proveedor de análisis. Solo People puede cambiarlos y cada cambio queda en el registro de auditoría.",
     "alerts": {
       "title": "Alertas",
       "dropThreshold": "Caída mínima entre ciclos (puntos)",
@@ -66,7 +66,15 @@
       "invalid_choice": "Elegí una opción de la lista.",
       "semester_order": "El segundo semestre tiene que empezar después del primero.",
       "unknown_key": "Configuración desconocida.",
-      "invalid": "Valor inválido."
+      "invalid": "Valor inválido.",
+      "cutoff_order": "Los cortes tienen que bajar de Alto a Medio y de Medio a Regular."
+    },
+    "engagement": {
+      "title": "Engagement mensual",
+      "cutoffAlto": "Segmento Alto desde (% del score)",
+      "cutoffMedio": "Segmento Medio desde (% del score)",
+      "cutoffRegular": "Segmento Regular desde (% del score)",
+      "hint": "Solo se usan cuando el archivo no trae la columna Segmento: por debajo de Regular el segmento es Bajo."
     }
   },
   "Common": {
@@ -571,7 +579,8 @@
       "orgHint": "Las filas se importan como atributos organizacionales de cada persona (cuenta, proyecto, DM y Santex Lead, con su vigencia) por EEID; los EEID que no coinciden con nadie esperan en la cola de identidad.",
       "partialFile": "Archivo parcial (no dar de baja lo que no viene en el archivo)",
       "partialHint": "Solo se agregan y actualizan los atributos del archivo; lo que el archivo no menciona se conserva.",
-      "completeHint": "El archivo es la lista completa: los atributos de esta fuente que ya no vienen en él se dan de baja (solo de las columnas que trae)."
+      "completeHint": "El archivo es la lista completa: los atributos de esta fuente que ya no vienen en él se dan de baja (solo de las columnas que trae).",
+      "engagementHint": "Las filas se importan como engagement mensual de cada persona (score de 0 a 1 y segmento por mes) por EEID; si el archivo no trae segmento se calcula con los cortes de la configuración de insights, y los EEID que no coinciden con nadie esperan en la cola de identidad. Un archivo agrega y corrige meses, nunca borra los que no lista."
     },
     "roles": {
       "key": "Clave",
@@ -664,7 +673,8 @@
       "assessment": "Evaluaciones",
       "feedback": "Feedback",
       "assessment_progress": "Progreso de evaluaciones",
-      "org_attribute": "Atributos organizacionales"
+      "org_attribute": "Atributos organizacionales",
+      "engagement_monthly": "Engagement mensual"
     },
     "result": {
       "title": "Importación terminada",

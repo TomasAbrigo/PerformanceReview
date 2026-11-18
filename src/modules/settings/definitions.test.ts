@@ -17,6 +17,9 @@ describe("DEFAULT_SETTINGS", () => {
       "semester.ambiguityDays": 15,
       "analysis.provider": "mock",
       "analysis.includeClosed": true,
+      "engagement.cutoffAlto": 80,
+      "engagement.cutoffMedio": 60,
+      "engagement.cutoffRegular": 40,
     });
   });
 
@@ -115,6 +118,23 @@ describe("parseSettingValue", () => {
 });
 
 describe("checkSettings (rules across keys)", () => {
+  it("the engagement cutoffs must be strictly decreasing", () => {
+    expect(
+      checkSettings({ ...DEFAULT_SETTINGS, "engagement.cutoffMedio": 80 }),
+    ).toEqual([{ path: "engagement.cutoffMedio", message: "cutoff_order" }]);
+    expect(
+      checkSettings({ ...DEFAULT_SETTINGS, "engagement.cutoffRegular": 70 }),
+    ).toEqual([{ path: "engagement.cutoffRegular", message: "cutoff_order" }]);
+    expect(
+      checkSettings({
+        ...DEFAULT_SETTINGS,
+        "engagement.cutoffAlto": 90,
+        "engagement.cutoffMedio": 70,
+        "engagement.cutoffRegular": 50,
+      }),
+    ).toEqual([]);
+  });
+
   it("H1 must start before H2", () => {
     expect(checkSettings(DEFAULT_SETTINGS)).toEqual([]);
     expect(

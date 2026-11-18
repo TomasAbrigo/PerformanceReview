@@ -20,7 +20,9 @@ export type LandingEntity =
   | "assessment_progress"
   | "feedback"
   /** People's org attributes file (account, project, DM, Santex Lead). */
-  | "org_attribute";
+  | "org_attribute"
+  /** The monthly engagement file (score 0-1 and segment per person and month). */
+  | "engagement_monthly";
 
 /** Everything an ingest run can be about. */
 export type IngestEntity = Entity | LandingEntity;

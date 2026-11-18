@@ -15,6 +15,8 @@ export const PROFILE_ENTITIES = [
   "feedback",
   // People's file of accounts, projects, DMs and Santex leads per person.
   "org_attribute",
+  // The monthly engagement file: score 0-1 and segment per person and month.
+  "engagement_monthly",
 ] as const;
 export type ProfileEntity = (typeof PROFILE_ENTITIES)[number];
 
@@ -83,12 +85,15 @@ export type CustomQuestionMapping = z.infer<typeof customQuestionSchema>;
  * `assessment_status`: the Assessment Progress export grouped by person (a
  * "<name> <employee number>" row, then one row per period). `org_attributes`:
  * People's file of account / project / DM / Santex Lead per person and
- * validity, one record per row keyed by EEID and `Desde`.
+ * validity, one record per row keyed by EEID and `Desde`. `engagement_monthly`:
+ * the monthly engagement file (EEID, Mes, Score, Segmento), keyed by EEID and
+ * month.
  */
 export const PROFILE_FORMATS = [
   "assessments_report",
   "assessment_status",
   "org_attributes",
+  "engagement_monthly",
 ] as const;
 export type ProfileFormat = (typeof PROFILE_FORMATS)[number];
 
@@ -620,6 +625,26 @@ const ORG_ATTRIBUTE_MAP: Record<string, string> = Object.fromEntries(
   ),
 );
 
+/**
+ * The columns of the monthly engagement file (docs/engagement-monthly.md), by
+ * the canonical field each feeds. EEID and Mes identify the row; Score (0-1)
+ * and Segmento are each optional (the segment is derived from the score when
+ * missing), and a saved profile can map any other headers onto the fields.
+ */
+export const ENGAGEMENT_COLUMNS = {
+  employee_bamboo_id: ["EEID"],
+  employee_name: ["Nombre", "Name"],
+  month: ["Mes"],
+  score: ["Score"],
+  segment: ["Segmento"],
+} as const;
+
+const ENGAGEMENT_MAP: Record<string, string> = Object.fromEntries(
+  Object.entries(ENGAGEMENT_COLUMNS).flatMap(([field, headers]) =>
+    headers.map((header) => [header, field]),
+  ),
+);
+
 export const builtinProfiles: SourceProfile[] = [
   // Bamboo's raw assessments report (custom report, PRD iteration 3): one row
   // per person and review period, people by EEID (Bamboo employee id) and
@@ -687,6 +712,20 @@ export const builtinProfiles: SourceProfile[] = [
     columnMap: ORG_ATTRIBUTE_MAP,
     optionalColumns: Object.keys(ORG_ATTRIBUTE_MAP).filter(
       (header) => header !== "EEID",
+    ),
+  },
+  // The monthly engagement file (issue #86): score 0-1 and segment per person
+  // and month, from another source than Bamboo. One row per EEID and month.
+  {
+    name: "engagement-monthly",
+    table: "engagement-monthly",
+    // The key is EEID + month, built in FileSourceAdapter.
+    keyColumns: ["EEID", "Mes"],
+    entity: "engagement_monthly",
+    format: "engagement_monthly",
+    columnMap: ENGAGEMENT_MAP,
+    optionalColumns: Object.keys(ENGAGEMENT_MAP).filter(
+      (header) => header !== "EEID" && header !== "Mes",
     ),
   },
   {
