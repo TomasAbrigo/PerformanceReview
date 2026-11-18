@@ -149,6 +149,7 @@ export async function upsertReportAssessment(
   );
 
   const results: ("inserted" | "updated" | "unchanged" | "superseded")[] = [];
+  let overwritten = 0;
   if (revieweeId) {
     const participant = await ensureParticipant(tx, cycle, revieweeId);
     if (participant.created) tally.participantsCreated++;
@@ -196,6 +197,7 @@ export async function upsertReportAssessment(
           side === "manager" && reviewer !== participant.snapManagerPersonId,
       });
       results.push(request.result);
+      if (request.overwroteNative) overwritten++;
       if (request.result === "superseded") {
         rejects.push(
           `A later assessment of ${fields.employee_bamboo_id ?? fields.work_email ?? sourceId} in "${cycle.name}" replaces this ${side} review (one per cycle)`,
@@ -244,5 +246,9 @@ export async function upsertReportAssessment(
     tally,
     issueId: issue && "issueId" in issue ? issue.issueId : null,
   });
-  return { result, rejects };
+  return {
+    result,
+    rejects,
+    ...(overwritten ? { counts: { nativeOverwritten: overwritten } } : {}),
+  };
 }
