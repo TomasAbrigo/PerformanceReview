@@ -27,7 +27,9 @@ import {
   listAssessmentParticipants,
 } from "@/modules/assessments";
 import { noOrgOptions } from "@/modules/org-attributes/kinds";
-import { localizeCycles } from "@/modules/review-core/cycle-name";
+import { cycleName, localizeCycles } from "@/modules/review-core/cycle-name";
+import { listPendingSelfReviews } from "@/modules/review-capture";
+import { PendingReviews } from "@/components/assessments/pending-reviews";
 
 const HERE = "/assessments";
 
@@ -56,6 +58,15 @@ async function AssessmentsList({
   if (scope.kind === "none") return header(t("noPerson"));
   const ownOnly = scope.kind === "own";
   const p = parseAssessmentsParams(await searchParams);
+  // The actor's own self assessments to complete, above the list.
+  const pending = (await listPendingSelfReviews(db, actor)).map((r) => ({
+    requestId: r.requestId,
+    dueDate: r.dueDate,
+    cycleName: cycleName(
+      { name: r.cycleName, localizedName: r.localizedName },
+      locale,
+    ),
+  }));
   // Latest cycle by default (the list comes latest period first).
   const cycles = localizeCycles(await listAssessmentCycles(db, actor), locale);
   if (cycles.length === 0) {
@@ -63,6 +74,7 @@ async function AssessmentsList({
       <div className="flex flex-col gap-6">
         {header("")}
         <EmptyState>{ownOnly ? t("noParticipants") : t("noCycles")}</EmptyState>
+        <PendingReviews items={pending} />
       </div>
     );
   }
@@ -101,6 +113,7 @@ async function AssessmentsList({
           ownOnly={ownOnly}
         />
       </PageHeader>
+      <PendingReviews items={pending} />
       <section className="space-y-6" data-testid="assessments-list">
         <div className="overview-hero">
           <IconTile>

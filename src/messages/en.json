@@ -1944,6 +1944,44 @@
     },
     "forbidden": "You do not have access to this assessment: everyone sees their own and, for a manager, their team's."
   },
+  "Capture": {
+    "back": "Back to Assessments",
+    "required": "required",
+    "save": "Save draft",
+    "submit": "Submit",
+    "saving": "Saving…",
+    "saved": "Draft saved.",
+    "submitted": "Submitted.",
+    "noAnswer": "No answer",
+    "notFound": "This assessment does not exist or you cannot see it.",
+    "state": {
+      "submitted": "Already submitted: shown read-only.",
+      "closed": "The cycle is closed: it can no longer be answered.",
+      "notYours": "You can read it, but only its author (or People) can answer it.",
+      "notDraft": "This assessment cannot be changed."
+    },
+    "issues": {
+      "required": "This answer is required.",
+      "out_of_scale": "Pick a value of the scale.",
+      "invalid_choice": "Pick one of the options.",
+      "unknown_question": "This question is no longer part of the form."
+    },
+    "errors": {
+      "forbidden": "You cannot answer this assessment.",
+      "cycle_closed": "The cycle is closed: it can no longer be answered.",
+      "not_editable": "Already submitted: it cannot be changed.",
+      "not_found": "This assessment no longer exists.",
+      "validation": "Check the highlighted answers.",
+      "unknown": "Something unexpected went wrong."
+    },
+    "pending": {
+      "title": "To complete",
+      "hint": "Your self assessments of open cycles not submitted yet.",
+      "open": "Complete",
+      "due": "Due {date}",
+      "noDue": "No due date"
+    }
+  },
   "Experience": {
     "moreFilters": "More filters",
     "open": "View details",
