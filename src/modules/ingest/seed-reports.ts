@@ -22,11 +22,16 @@ export const seedReportsDir = (size: SeedSize) =>
 export const seedOrgDir = (size: SeedSize) =>
   path.join("fixtures", "org", size);
 
+/** Where the synthetic monthly engagement file of a size lives (from the repo root). */
+export const seedEngagementDir = (size: SeedSize) =>
+  path.join("fixtures", "engagement", size);
+
 /**
  * The files the seed imports, in the real shapes (#83): the raw assessments
  * report creates the cycles of its review periods, then Assessment Progress
  * fills their completion, then People's org attributes file (accounts,
- * projects, DMs, Santex Leads per person). `dir` overrides the folder of a
+ * projects, DMs, Santex Leads per person) and the monthly engagement file.
+ * `dir` overrides the folder of a
  * size's own (`seedReportsDir` by default).
  */
 export const SEED_REPORTS = [
@@ -36,6 +41,11 @@ export const SEED_REPORTS = [
     file: "org-attributes.csv",
     profile: "org-attributes",
     dir: seedOrgDir,
+  },
+  {
+    file: "engagement-monthly.csv",
+    profile: "engagement-monthly",
+    dir: seedEngagementDir,
   },
 ] as const satisfies readonly {
   file: string;
