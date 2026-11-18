@@ -38,6 +38,7 @@ import {
   canRead,
   type VisibilityContext,
 } from "@/modules/review-core/visibility";
+import { isDoubleBlind } from "@/modules/review-core/status";
 import type { QuestionKind, QuestionRole } from "@/modules/templates/constants";
 import { canOpenParticipant } from "./authz";
 import type { DisplayAnswer } from "./display";
@@ -198,22 +199,56 @@ function sideRequests(requests: ReviewRequest[]): Map<string, ReviewRequest> {
 
 /**
  * Whether a side (`self` or `manager`) of the participant `cp` has a
- * submitted, live request. Where each participant stands, in SQL, so the
- * counts and the pages come from the database: complete (both submitted),
- * partial (one) or pending. It is process metadata, as in the completion
- * view; what each side says, and whether the reader may read it yet, is
- * decided by `canRead` for the rows that are shown.
+ * submitted, live request THAT THE ACTOR MAY READ. Where each participant
+ * stands is worked out in SQL, so the counts and the pages come from the
+ * database, but it only counts what `canRead` would let the actor read, so a
+ * label or a count never tells what the actor may not know (an employee that
+ * their manager review is submitted before it is shared; a manager under
+ * double blind that the self review is in before theirs). The conditions
+ * mirror `canRead` for the participants a scope lists (the actor is the
+ * reviewee or the snapshot manager); a db test checks the two agree for every
+ * actor.
+ *
+ * - People read everything.
+ * - Manager side: the snapshot manager and its reviewer read it; the reviewee
+ *   only once it is shared (`shared_at`).
+ * - Self side: the reviewee and its reviewer read it; the snapshot manager
+ *   once the manager review is submitted when the cycle is double blind
+ *   (always otherwise).
  */
-const sideSubmitted = (side: Side): SQL =>
-  sql`exists (
+function sideSubmitted(
+  side: Side,
+  scope: IndividualScope,
+  doubleBlind: boolean,
+): SQL {
+  const visible = (): SQL => {
+    if (scope.kind === "all" || scope.kind === "none") return sql`true`;
+    const me = sql`${scope.personId}::uuid`;
+    if (side === "manager") {
+      return sql`(cp.snap_manager_person_id = ${me} or r.reviewer_person_id = ${me}
+        or r.shared_at is not null)`;
+    }
+    return sql`(cp.reviewee_person_id = ${me} or r.reviewer_person_id = ${me}
+      or (cp.snap_manager_person_id = ${me} and (${!doubleBlind} or exists (
+        select 1 from review_request m
+        where m.participant_id = cp.id and m.relationship = 'manager'
+          and m.status = 'submitted' and m.deleted_at is null))))`;
+  };
+  return sql`exists (
     select 1 from review_request r
     where r.participant_id = cp.id and r.relationship = ${side}::review_relationship
-      and r.status = 'submitted' and r.deleted_at is null)`;
+      and r.status = 'submitted' and r.deleted_at is null and ${visible()})`;
+}
 
-const progressExpr: SQL = sql`(case
-  when ${sideSubmitted("self")} and ${sideSubmitted("manager")} then 'complete'
-  when ${sideSubmitted("self")} or ${sideSubmitted("manager")} then 'partial'
-  else 'pending' end)`;
+/** Complete (both sides submitted), partial (one) or pending, as far as the actor may know. */
+function progressSql(scope: IndividualScope, doubleBlind: boolean): SQL {
+  const self = sideSubmitted("self", scope, doubleBlind);
+  const manager = sideSubmitted("manager", scope, doubleBlind);
+  return sql`(case
+    when ${self} and ${manager} then 'complete'
+    when ${self} or ${manager} then 'partial'
+    else 'pending' end)`;
+}
 
 /**
  * The participants of a cycle in the actor's scope, with where each side
@@ -243,6 +278,7 @@ export async function listAssessmentParticipants(
     where.push(sql`cp.snap_department = ${filters.department}`);
   where.push(...orgAttributeFilters(filters));
   const base = allOf(where);
+  const progressExpr = progressSql(scope, isDoubleBlind(cycle.components));
   const matching = allOf([
     base,
     filters.progress ? sql`${progressExpr} = ${filters.progress}` : sql`true`,

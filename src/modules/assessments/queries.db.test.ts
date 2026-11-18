@@ -464,6 +464,112 @@ describe("listAssessmentParticipants: canRead decides what each state says", () 
   });
 });
 
+describe("listAssessmentParticipants: progress never tells what the actor may not read", () => {
+  it("does not tell an employee that their manager review is submitted before it is shared", async () => {
+    // Zoe's manager review is submitted but not shared with her: People see
+    // a complete assessment, she sees her own side only.
+    const hrPage = await listAssessmentParticipants(db, hr, w.cycleA);
+    expect(rowOf(hrPage, "Zoe Luna").progress).toBe("complete");
+    const zoe = await listAssessmentParticipants(
+      db,
+      as("employee", w.zoe),
+      w.cycleA,
+    );
+    expect(rowOf(zoe, "Zoe Luna")).toMatchObject({
+      progress: "partial",
+      self: { state: "submitted" },
+      managerReview: { state: "locked" },
+    });
+    expect(zoe.counts).toEqual({ complete: 0, partial: 1, pending: 0 });
+    // Neither the filter nor the counts can tell.
+    expect(
+      (
+        await listAssessmentParticipants(db, as("employee", w.zoe), w.cycleA, {
+          progress: "complete",
+        })
+      ).total,
+    ).toBe(0);
+    expect(
+      (
+        await listAssessmentParticipants(db, as("employee", w.zoe), w.cycleA, {
+          progress: "partial",
+        })
+      ).total,
+    ).toBe(1);
+    // Once it is shared (Dora's was) it is hers to know.
+    const dora = await listAssessmentParticipants(
+      db,
+      as("employee", w.dora),
+      w.cycleA,
+    );
+    expect(rowOf(dora, "Dora Díaz").progress).toBe("complete");
+  });
+
+  it("does not tell a manager under double blind that the self review is in before theirs", async () => {
+    // Cycle B: Dora's self review is submitted, Bruno's review of her is a draft.
+    const bruno = await listAssessmentParticipants(
+      db,
+      as("manager", w.bruno),
+      w.cycleB,
+    );
+    expect(rowOf(bruno, "Dora Díaz")).toMatchObject({
+      progress: "pending",
+      self: { state: "locked" },
+    });
+    expect(bruno.counts).toEqual({ complete: 0, partial: 0, pending: 1 });
+    // People, who read both, see her self review in.
+    expect((await listAssessmentParticipants(db, hr, w.cycleB)).counts).toEqual(
+      {
+        complete: 0,
+        partial: 1,
+        pending: 0,
+      },
+    );
+  });
+
+  it("agrees with canRead for every actor: the progress is what the shown states add up to", async () => {
+    // The oracle: the sides the actor may read and that are submitted.
+    const oracle = (self: string, manager: string) => {
+      const submitted =
+        Number(self === "submitted") + Number(manager === "submitted");
+      return submitted === 2
+        ? "complete"
+        : submitted === 1
+          ? "partial"
+          : "pending";
+    };
+    const actors: ActorContext[] = [
+      hr,
+      as("manager", w.ana),
+      as("manager", w.bruno),
+      as("manager", w.dora),
+      as("manager", w.zoe),
+      as("employee", w.bruno),
+      as("employee", w.dora),
+      as("employee", w.eli),
+      as("employee", w.zoe),
+    ];
+    let checked = 0;
+    for (const actor of actors) {
+      for (const cycleId of [w.cycleA, w.cycleB]) {
+        const page = await listAssessmentParticipants(db, actor, cycleId);
+        const counts = { complete: 0, partial: 0, pending: 0 };
+        for (const row of page.items) {
+          // A side that is "locked" exists but is not readable, so it is not counted.
+          expect(
+            row.progress,
+            `${actor.role} ${actor.personId} / ${row.person.name}`,
+          ).toBe(oracle(row.self.state, row.managerReview.state));
+          counts[row.progress]++;
+          checked++;
+        }
+        expect(page.counts).toEqual(counts);
+      }
+    }
+    expect(checked).toBeGreaterThan(15);
+  });
+});
+
 describe("listAssessmentParticipants: filters", () => {
   it("filters by progress, the counts staying whole", async () => {
     const page = await listAssessmentParticipants(db, hr, w.cycleA, {

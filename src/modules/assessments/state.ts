@@ -25,8 +25,9 @@ export function requestState(
 }
 
 /**
- * Where a participant stands: both sides submitted, one, or none. Worked out
- * in SQL (`progressExpr` in queries.ts) so the counts and pages come from the
+ * Where a participant stands for the actor: both sides submitted, one, or
+ * none, counting only what the actor may read. Worked out in SQL
+ * (`progressSql` in queries.ts) so the counts and pages come from the
  * database.
  */
 export const progressValues = ["complete", "partial", "pending"] as const;
