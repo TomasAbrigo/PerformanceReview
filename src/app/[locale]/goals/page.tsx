@@ -28,6 +28,8 @@ import {
 import { listGoalOwnerOptions } from "@/modules/goals/write";
 import { noOrgOptions } from "@/modules/org-attributes/kinds";
 import { localizeCycles } from "@/modules/review-core/cycle-name";
+import { rememberedCycle } from "@/modules/review-core/remembered-cycle";
+import { pickCycle } from "@/modules/review-core/current-cycle";
 import { getSettings } from "@/modules/settings";
 import { kpiThresholds } from "@/modules/insights/tone";
 import { ALL_CYCLES } from "@/components/goals/url-state";
@@ -64,7 +66,9 @@ async function GoalsList({
   const cycles = localizeCycles(await listGoalCycles(db, actor), locale);
   // The latest cycle by default (what is being followed now); `all` lifts it.
   const cycleId =
-    p.cycle === ALL_CYCLES ? undefined : (p.cycle ?? cycles[0]?.id);
+    p.cycle === ALL_CYCLES
+      ? undefined
+      : (p.cycle ?? pickCycle(cycles, undefined, await rememberedCycle())?.id);
   const [page, options, owners, settings] = await Promise.all([
     listGoals(db, actor, {
       cycleId,

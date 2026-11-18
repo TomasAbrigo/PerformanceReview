@@ -5,6 +5,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { ActorBar } from "@/components/actor/actor-bar";
+import { CycleMemory } from "@/components/cycle-memory";
 import { LocaleSwitcher } from "@/components/locale-switcher";
 import { SideNav } from "@/components/nav/side-nav";
 import { routing } from "@/i18n/routing";
@@ -55,6 +56,9 @@ export default async function LocaleLayout({
     >
       <body className="min-h-full">
         <NextIntlClientProvider>
+          <Suspense fallback={null}>
+            <CycleMemory />
+          </Suspense>
           <div className="flex min-h-dvh flex-col lg:flex-row">
             <Suspense
               fallback={

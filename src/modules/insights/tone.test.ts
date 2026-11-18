@@ -1,6 +1,13 @@
 import { describe, expect, it } from "vitest";
 import { DEFAULT_SETTINGS } from "@/modules/settings/definitions";
-import { atRiskTone, kpiThresholds, likertTone, percentTone } from "./tone";
+import {
+  atRiskTone,
+  kpiThresholds,
+  likertTarget,
+  likertTone,
+  percentTarget,
+  percentTone,
+} from "./tone";
 
 describe("likertTone", () => {
   // Default risk threshold 2: 1-2 risk, 3 watch, 4-5 good (bands of the matrix).
@@ -48,5 +55,22 @@ describe("atRiskTone", () => {
   it("a share of 100 - goodPct or more is risk", () => {
     expect(atRiskTone(17, 88, t)).toBe("watch");
     expect(atRiskTone(22, 88, t)).toBe("risk");
+  });
+});
+
+describe("targets", () => {
+  it("the Likert target is where the good band starts", () => {
+    expect(likertTarget(2)).toBe(4);
+    expect(likertTone(likertTarget(2), 2)).toBe("good");
+    expect(likertTone(likertTarget(2) - 0.1, 2)).toBe("watch");
+    expect(likertTarget(1)).toBe(5);
+  });
+
+  it("the percent target is the good threshold, mirrored when less is better", () => {
+    const t = { goodPct: 80, watchPct: 60 };
+    expect(percentTarget(t)).toBe(80);
+    expect(percentTone(percentTarget(t), t)).toBe("good");
+    expect(percentTarget(t, "down")).toBe(20);
+    expect(percentTone(percentTarget(t, "down"), t, "down")).toBe("good");
   });
 });

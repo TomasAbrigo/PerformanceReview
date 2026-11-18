@@ -117,7 +117,7 @@ test("Bamboo's real reports: the raw assessments report and the grouped Assessme
   page,
 }) => {
   test.setTimeout(480_000);
-  const firstPeriod = "Evaluación semestral 2024-04-15 – 2024-09-28";
+  const firstPeriod = "Evaluación semestral abr – sept 2024";
   for (const [file, profile] of [
     ["assessments-report.csv", "bamboo-assessments-report"],
     ["assessment-status.csv", "bamboo-assessment-status"],

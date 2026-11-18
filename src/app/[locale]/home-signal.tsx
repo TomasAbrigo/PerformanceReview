@@ -1,4 +1,5 @@
 import {
+  ArrowRight,
   CalendarDays,
   ChartNoAxesCombined,
   CircleCheck,
@@ -12,7 +13,7 @@ import {
 import { getTranslations } from "next-intl/server";
 import type { ReactNode } from "react";
 import { connection } from "next/server";
-import { IconTile, MetricCard } from "@/components/experience";
+import { MetricCard, ProgressRing } from "@/components/experience";
 import { db } from "@/db/client";
 import { Link } from "@/i18n/navigation";
 import { individualScope } from "@/modules/actor/individual-scope";
@@ -25,19 +26,27 @@ import {
 import { listGoals } from "@/modules/goals/browse";
 import { countOpenIssues } from "@/modules/identity";
 import { insightsScope } from "@/modules/insights/authz";
-import { kpiThresholds, percentTone } from "@/modules/insights/tone";
+import {
+  kpiThresholds,
+  percentTarget,
+  percentTone,
+} from "@/modules/insights/tone";
 import {
   listPendingSelfReviews,
   listTeamReviews,
 } from "@/modules/review-capture";
+import { listCycles } from "@/modules/review-core";
 import { cycleName, localizeCycles } from "@/modules/review-core/cycle-name";
+import { latestFirst, pickCycle } from "@/modules/review-core/current-cycle";
+import { rememberedCycle } from "@/modules/review-core/remembered-cycle";
 import { getSettings } from "@/modules/settings";
 
 type Attention = {
   key: string;
   href: string;
   text: string;
-  count?: number;
+  /** What the reader does there ("Resolver", "Completar"). */
+  action: string;
   icon: ReactNode;
   tone: "risk" | "watch";
 };
@@ -46,32 +55,53 @@ const pct = (n: number, total: number) =>
   total ? Math.round((n / total) * 100) : 0;
 
 /**
- * The signal of the home: the current cycle's KPIs in the actor's own scope
- * (assessments complete and pending, goals completed and overdue, each with
- * its scale and tone and a link to the list filtered by it), and what needs
- * the actor's attention: their own self review, their team's reviews, and
- * for People the identity queue and the data-quality cases. Every count
- * comes from the same queries the lists use, so they agree.
+ * The signal of the home (#119): the cycle in focus with its progress and
+ * one or two things to do about it, the cycle's KPIs in the actor's own
+ * scope (each a link to the list filtered by it; a percent sits on its scale
+ * with the target marked, a count is just the count), and what needs the
+ * actor's attention, each row with its action: their own self review, their
+ * team's reviews, and for People the identity queue and the data-quality
+ * cases. One cycle for the whole page: the one last chosen in any screen
+ * when the actor has it, else the latest period. Every count comes from the
+ * same queries the lists use, so they agree.
  */
 export async function HomeSignal({ locale }: { locale: string }) {
   await connection();
-  const [t, actor, settings] = await Promise.all([
+  const [t, tf, tx, actor, settings, remembered] = await Promise.all([
     getTranslations("Home.signal"),
+    getTranslations("Home.focus"),
+    getTranslations("Experience"),
     getActor(),
     getSettings(db),
+    rememberedCycle(),
   ]);
   const thresholds = kpiThresholds(settings);
   const scope = individualScope(actor);
   const individual = scope.kind !== "none" && actor.role !== "direction";
+  const analysis = insightsScope(actor).kind !== "none";
 
+  // Who reads people opens on the cycles they have assessments in; who only
+  // reads aggregates (direction), on the cycles of the analysis.
   const cycles = individual
     ? localizeCycles(await listAssessmentCycles(db, actor), locale)
-    : [];
-  const cycle = cycles[0];
+    : analysis
+      ? latestFirst(
+          localizeCycles(await listCycles(db), locale).filter(
+            (c) => c.status !== "draft",
+          ),
+        )
+      : [];
+  const cycle = pickCycle<{ id: string; name: string }>(
+    cycles,
+    undefined,
+    remembered,
+  );
   const [participants, goals, pendingSelf, team, identityOpen, quality] =
     await Promise.all([
-      cycle ? listAssessmentParticipants(db, actor, cycle.id) : null,
-      cycle ? listGoals(db, actor, { cycleId: cycle.id }) : null,
+      cycle && individual
+        ? listAssessmentParticipants(db, actor, cycle.id)
+        : null,
+      cycle && individual ? listGoals(db, actor, { cycleId: cycle.id }) : null,
       listPendingSelfReviews(db, actor),
       actor.role === "manager" ? listTeamReviews(db, actor) : [],
       actor.role === "hr" ? countOpenIssues(db) : 0,
@@ -89,6 +119,7 @@ export async function HomeSignal({ locale }: { locale: string }) {
           locale,
         ),
       }),
+      action: t("attention.action.self"),
       icon: <ClipboardCheck className="size-5" />,
       tone: "watch",
     });
@@ -99,7 +130,7 @@ export async function HomeSignal({ locale }: { locale: string }) {
       key: "team",
       href: "/assessments",
       text: t("attention.team", { n: teamToWrite }),
-      count: teamToWrite,
+      action: t("attention.action.team"),
       icon: <Users className="size-5" />,
       tone: "watch",
     });
@@ -109,7 +140,7 @@ export async function HomeSignal({ locale }: { locale: string }) {
       key: "overdue",
       href: `/goals?state=overdue`,
       text: t("attention.overdue", { n: goals.counts.overdue }),
-      count: goals.counts.overdue,
+      action: t("attention.action.overdue"),
       icon: <CalendarDays className="size-5" />,
       tone: "risk",
     });
@@ -119,7 +150,7 @@ export async function HomeSignal({ locale }: { locale: string }) {
       key: "identity",
       href: "/imports/identity",
       text: t("attention.identity", { n: identityOpen }),
-      count: identityOpen,
+      action: t("attention.action.identity"),
       icon: <Fingerprint className="size-5" />,
       tone: "risk",
     });
@@ -130,7 +161,7 @@ export async function HomeSignal({ locale }: { locale: string }) {
       key: "runs",
       href: "/imports/runs",
       text: t("attention.failedRuns", { n: failedRuns }),
-      count: failedRuns,
+      action: t("attention.action.failedRuns"),
       icon: <TriangleAlert className="size-5" />,
       tone: "risk",
     });
@@ -144,13 +175,17 @@ export async function HomeSignal({ locale }: { locale: string }) {
       key: "quality",
       href: "/data-quality",
       text: t("attention.quality", { n: cases, kinds: qualityOpen.length }),
-      count: cases,
+      action: t("attention.action.quality"),
       icon: <Database className="size-5" />,
       tone: "watch",
     });
   }
 
-  const analysis = insightsScope(actor).kind !== "none";
+  // What is at risk first, then what to watch; the order within each is kept.
+  attention.sort(
+    (a, b) => Number(b.tone === "risk") - Number(a.tone === "risk"),
+  );
+
   const total = participants
     ? participants.counts.complete +
       participants.counts.partial +
@@ -159,126 +194,88 @@ export async function HomeSignal({ locale }: { locale: string }) {
   const goalsTotal = goals
     ? Object.values(goals.counts).reduce((a, b) => a + b, 0)
     : 0;
-  const scale = (value: number, label: string) => ({
-    value,
-    min: 0,
-    max: 100,
-    label,
-    minLabel: "0 %",
-    maxLabel: "100 %",
-  });
   const showKpis = participants && cycle && scope.kind !== "own";
+  const completePct = participants
+    ? pct(participants.counts.complete, total)
+    : 0;
+  const completeTone =
+    showKpis && total ? percentTone(completePct, thresholds) : undefined;
+  const goalsPct = goals ? pct(goals.counts.completed, goalsTotal) : 0;
+  const target = percentTarget(thresholds);
 
   return (
     <div className="flex flex-col gap-8">
-      {showKpis ? (
-        <section aria-labelledby="home-kpis" className="flex flex-col gap-4">
-          <div className="flex flex-wrap items-baseline justify-between gap-2">
-            <h2 id="home-kpis" className="text-2xl">
-              {t("kpis", { cycle: cycle.name })}
-            </h2>
-            <p className="text-sm text-muted-foreground">
-              {t(scope.kind === "team" ? "scope.team" : "scope.all")}
-            </p>
-          </div>
-          <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
-            <MetricCard
-              label={t("complete")}
-              value={`${pct(participants.counts.complete, total)} %`}
-              href={`/assessments?cycle=${cycle.id}&progress=complete`}
-              status={
-                total
-                  ? percentTone(
-                      pct(participants.counts.complete, total),
-                      thresholds,
-                    )
-                  : undefined
-              }
-              scale={scale(
-                pct(participants.counts.complete, total),
-                t("completeNote", {
-                  done: participants.counts.complete,
-                  total,
-                }),
-              )}
-              note={t("completeNote", {
-                done: participants.counts.complete,
-                total,
-              })}
-              icon={<ClipboardCheck className="size-5" />}
-            />
-            <MetricCard
-              label={t("pending")}
-              value={participants.counts.pending}
-              href={`/assessments?cycle=${cycle.id}&progress=pending`}
-              status={
-                total
-                  ? percentTone(
-                      pct(participants.counts.pending, total),
-                      thresholds,
-                      "down",
-                    )
-                  : undefined
-              }
-              scale={scale(
-                pct(participants.counts.pending, total),
-                t("ofParticipants", {
-                  pct: pct(participants.counts.pending, total),
-                }),
-              )}
-              note={t("ofParticipants", {
-                pct: pct(participants.counts.pending, total),
-              })}
-              icon={<Users className="size-5" />}
-            />
-            {goals ? (
-              <>
-                <MetricCard
-                  label={t("goalsCompleted")}
-                  value={`${pct(goals.counts.completed, goalsTotal)} %`}
-                  href={`/goals?cycle=${cycle.id}&state=completed`}
-                  scale={scale(
-                    pct(goals.counts.completed, goalsTotal),
-                    t("goalsNote", {
-                      done: goals.counts.completed,
-                      total: goalsTotal,
-                    }),
-                  )}
-                  note={t("goalsNote", {
-                    done: goals.counts.completed,
-                    total: goalsTotal,
-                  })}
-                  icon={<Target className="size-5" />}
-                />
-                <MetricCard
-                  label={t("goalsOverdue")}
-                  value={goals.counts.overdue}
-                  href={`/goals?cycle=${cycle.id}&state=overdue`}
-                  status={
-                    goalsTotal
-                      ? percentTone(
-                          pct(goals.counts.overdue, goalsTotal),
-                          thresholds,
-                          "down",
-                        )
-                      : undefined
-                  }
-                  scale={scale(
-                    pct(goals.counts.overdue, goalsTotal),
-                    t("ofGoals", {
-                      pct: pct(goals.counts.overdue, goalsTotal),
-                    }),
-                  )}
-                  note={t("ofGoals", {
-                    pct: pct(goals.counts.overdue, goalsTotal),
-                  })}
-                  icon={<CalendarDays className="size-5" />}
-                />
-              </>
+      <section
+        className="home-focus"
+        aria-labelledby="home-cycle"
+        data-testid="home-focus"
+      >
+        {showKpis ? (
+          <ProgressRing percent={completePct} label={tf("progress")} />
+        ) : null}
+        <div className="flex min-w-0 flex-1 flex-col gap-3">
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+            <p className="kicker text-brand-200">{tf("kicker")}</p>
+            {showKpis ? (
+              <p className="text-xs text-brand-200">
+                {t(scope.kind === "team" ? "scope.team" : "scope.all")}
+              </p>
             ) : null}
           </div>
-        </section>
-      ) : null}
+          <h2 id="home-cycle" className="text-2xl text-white lg:text-3xl">
+            {cycle ? cycle.name : tf("noCycle")}
+          </h2>
+          {showKpis ? (
+            <p className="flex flex-wrap items-center gap-x-3 gap-y-2 text-sm text-brand-200">
+              <span>
+                {tf("progressNote", {
+                  done: participants.counts.complete,
+                  total,
+                })}
+              </span>
+              {completeTone ? (
+                <span className="tone-pill" data-tone={completeTone}>
+                  {tx(`tone.${completeTone}`)}
+                </span>
+              ) : null}
+              <span>{tf("target", { value: target })}</span>
+            </p>
+          ) : null}
+          {cycle ? (
+            <div className="flex flex-wrap gap-3 pt-1">
+              {showKpis && total > participants.counts.complete ? (
+                <Link
+                  href={`/assessments?cycle=${cycle.id}&progress=pending`}
+                  className="button-outline"
+                >
+                  {tf("missing")}
+                  <ArrowRight className="ml-2 size-4" aria-hidden="true" />
+                </Link>
+              ) : null}
+              {analysis ? (
+                <Link
+                  href={`/insights/executive?cycle=${cycle.id}`}
+                  className="button-outline home-focus-quiet"
+                >
+                  <ChartNoAxesCombined
+                    className="mr-2 size-4"
+                    aria-hidden="true"
+                  />
+                  {tf("analysis")}
+                </Link>
+              ) : individual ? (
+                <Link
+                  href={`/assessments?cycle=${cycle.id}`}
+                  className="button-outline"
+                >
+                  {tf("assessments")}
+                  <ArrowRight className="ml-2 size-4" aria-hidden="true" />
+                </Link>
+              ) : null}
+            </div>
+          ) : null}
+        </div>
+      </section>
       <section
         aria-labelledby="home-attention"
         className="flex flex-col gap-4"
@@ -291,17 +288,19 @@ export async function HomeSignal({ locale }: { locale: string }) {
           <ul className="flex flex-col divide-y divide-border rounded-xl border border-border bg-card">
             {attention.map((a) => (
               <li key={a.key}>
-                <Link
-                  href={a.href}
-                  className="flex items-center gap-4 px-5 py-4 hover:bg-brand-fog/60"
-                >
-                  <IconTile>{a.icon}</IconTile>
+                <Link href={a.href} className="home-attention-row group">
+                  <span
+                    aria-hidden="true"
+                    className="icon-tile"
+                    data-tone={a.tone}
+                  >
+                    {a.icon}
+                  </span>
                   <span className="min-w-0 flex-1 text-sm">{a.text}</span>
-                  {a.count !== undefined ? (
-                    <span className="tone-pill tabular-nums" data-tone={a.tone}>
-                      {a.count}
-                    </span>
-                  ) : null}
+                  <span className="home-attention-action">
+                    {a.action}
+                    <ArrowRight className="size-4" aria-hidden="true" />
+                  </span>
                 </Link>
               </li>
             ))}
@@ -312,16 +311,76 @@ export async function HomeSignal({ locale }: { locale: string }) {
             {t("attention.none")}
           </p>
         )}
-        {analysis ? (
-          <Link
-            href="/insights/executive"
-            className="inline-flex items-center gap-2 self-start text-sm text-primary underline-offset-4 hover:underline"
-          >
-            <ChartNoAxesCombined className="size-4" aria-hidden="true" />
-            {t("analysis")}
-          </Link>
-        ) : null}
       </section>
+      {showKpis ? (
+        <section aria-label={cycle.name} className="home-kpis">
+          <MetricCard
+            label={t("pending")}
+            value={participants.counts.pending}
+            href={`/assessments?cycle=${cycle.id}&progress=pending`}
+            status={
+              total
+                ? percentTone(
+                    pct(participants.counts.pending, total),
+                    thresholds,
+                    "down",
+                  )
+                : undefined
+            }
+            note={t("ofParticipants", {
+              pct: pct(participants.counts.pending, total),
+            })}
+            icon={<Users className="size-5" />}
+          />
+          {goals ? (
+            <>
+              <MetricCard
+                label={t("goalsCompleted")}
+                value={`${goalsPct} %`}
+                href={`/goals?cycle=${cycle.id}&state=completed`}
+                status={
+                  goalsTotal ? percentTone(goalsPct, thresholds) : undefined
+                }
+                scale={{
+                  value: goalsPct,
+                  min: 0,
+                  max: 100,
+                  label: t("goalsNote", {
+                    done: goals.counts.completed,
+                    total: goalsTotal,
+                  }),
+                  minLabel: "0 %",
+                  maxLabel: "100 %",
+                  target: { value: target, text: `${target} %` },
+                }}
+                note={t("goalsNote", {
+                  done: goals.counts.completed,
+                  total: goalsTotal,
+                })}
+                icon={<Target className="size-5" />}
+              />
+              <MetricCard
+                label={t("goalsOverdue")}
+                value={goals.counts.overdue}
+                href={`/goals?cycle=${cycle.id}&state=overdue`}
+                status={
+                  goalsTotal
+                    ? percentTone(
+                        pct(goals.counts.overdue, goalsTotal),
+                        thresholds,
+                        "down",
+                      )
+                    : undefined
+                }
+                note={t("ofGoals", {
+                  pct: pct(goals.counts.overdue, goalsTotal),
+                })}
+                icon={<CalendarDays className="size-5" />}
+              />
+            </>
+          ) : null}
+        </section>
+      ) : null}
     </div>
   );
 }

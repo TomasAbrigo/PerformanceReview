@@ -16,6 +16,14 @@ export function likertTone(mean: number, riskThreshold: number): Tone {
   return band === "low" ? "risk" : band === "high" ? "good" : "watch";
 }
 
+/**
+ * The value on 1-5 where the good band starts (`bandOf`'s high band): the
+ * target a ScaleBar marks. 4 with the default threshold of 2.
+ */
+export function likertTarget(riskThreshold: number): number {
+  return Math.max(riskThreshold + 1, 5 + 1 - riskThreshold);
+}
+
 /** The percent thresholds of the KPIs (`targets.goodPct`, `targets.watchPct`). */
 export type KpiThresholds = { goodPct: number; watchPct: number };
 
@@ -38,6 +46,17 @@ export function percentTone(
 ): Tone {
   const v = better === "up" ? pct : 100 - pct;
   return v >= t.goodPct ? "good" : v >= t.watchPct ? "watch" : "risk";
+}
+
+/**
+ * The percent where good starts: `goodPct`, or its mirror for a share where
+ * less is better. The target a ScaleBar marks.
+ */
+export function percentTarget(
+  t: KpiThresholds,
+  better: "up" | "down" = "up",
+): number {
+  return better === "up" ? t.goodPct : 100 - t.goodPct;
 }
 
 /**

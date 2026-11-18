@@ -31,6 +31,8 @@ export function IconTile({
 /**
  * A value on its scale (1–5, 0–100 %): a track with the value filled in the
  * tone's colour and the ends written, so no number floats without an anchor.
+ * `target` marks where "on target" starts (a tick on the track and its text
+ * between the ends), so the tone is read against something (#119).
  * `role="meter"` with min, max and value for assistive tech.
  */
 export function ScaleBar({
@@ -41,6 +43,7 @@ export function ScaleBar({
   tone,
   minLabel = String(min),
   maxLabel = String(max),
+  target,
 }: {
   value: number;
   min: number;
@@ -50,26 +53,57 @@ export function ScaleBar({
   tone?: Tone;
   minLabel?: string;
   maxLabel?: string;
+  /** Where good starts, on the same scale, and how it is written ("Meta 80 %"). */
+  target?: { value: number; label: string };
 }) {
-  const share =
-    max > min && Number.isFinite(value)
-      ? Math.min(1, Math.max(0, (value - min) / (max - min)))
+  const shareOf = (v: number) =>
+    max > min && Number.isFinite(v)
+      ? Math.min(1, Math.max(0, (v - min) / (max - min)))
       : 0;
+  const share = shareOf(value);
+  const mark =
+    target && target.value >= min && target.value <= max ? target : undefined;
+  const name = mark ? `${label} · ${mark.label}` : label;
   return (
     <div className="scale-bar" data-tone={tone}>
-      <div
-        role="meter"
-        aria-label={label}
-        aria-valuemin={min}
-        aria-valuemax={max}
-        aria-valuenow={value}
-        title={label}
-        className="scale-track"
-      >
-        <span className="scale-fill" style={{ width: `${share * 100}%` }} />
+      <div className="scale-rail">
+        <div
+          role="meter"
+          aria-label={name}
+          aria-valuemin={min}
+          aria-valuemax={max}
+          aria-valuenow={value}
+          title={name}
+          className="scale-track"
+        >
+          <span className="scale-fill" style={{ width: `${share * 100}%` }} />
+        </div>
+        {mark ? (
+          <span
+            aria-hidden="true"
+            className="scale-target"
+            style={{ left: `${shareOf(mark.value) * 100}%` }}
+          />
+        ) : null}
       </div>
       <div className="scale-ends" aria-hidden="true">
         <span>{minLabel}</span>
+        {mark ? (
+          <span
+            className="scale-target-label"
+            // Near an end the text leans away from it, clear of that end's label.
+            data-align={
+              shareOf(mark.value) > 0.7
+                ? "end"
+                : shareOf(mark.value) < 0.3
+                  ? "start"
+                  : "center"
+            }
+            style={{ left: `${shareOf(mark.value) * 100}%` }}
+          >
+            {mark.label}
+          </span>
+        ) : null}
         <span>{maxLabel}</span>
       </div>
     </div>
@@ -143,6 +177,8 @@ export function MetricCard({
     label: string;
     minLabel?: string;
     maxLabel?: string;
+    /** Where good starts on this scale, as written ("80 %", "4"). */
+    target?: { value: number; text: string };
   };
   delta?: { value: number; text: string; better?: "up" | "down" };
   /** The value becomes a DrillLink to these records. */
@@ -194,7 +230,20 @@ export function MetricCard({
         ) : null}
         {delta ? <DeltaPill {...delta} /> : null}
       </div>
-      {scale ? <ScaleBar {...scale} tone={status} /> : null}
+      {scale ? (
+        <ScaleBar
+          {...scale}
+          tone={status}
+          target={
+            scale.target
+              ? {
+                  value: scale.target.value,
+                  label: t("target", { value: scale.target.text }),
+                }
+              : undefined
+          }
+        />
+      ) : null}
       {note ? <p className="metric-note text-xs">{note}</p> : null}
       {children}
     </section>

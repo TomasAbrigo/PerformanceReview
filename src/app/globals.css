@@ -350,16 +350,10 @@
     @apply text-muted-foreground;
   }
   /* #117 numbers with context: status edge, tone pill, scale, delta. */
-  .metric-card-status {
-    @apply border-l-4;
-  }
-  .metric-card-status[data-tone="good"] {
-    border-left-color: var(--status-done);
-  }
-  .metric-card-status[data-tone="watch"] {
-    border-left-color: var(--status-progress);
-  }
+  /* #119: the edge marks only what is at risk; good and watch say it with
+     their pill and the bar against its target. */
   .metric-card-status[data-tone="risk"] {
+    @apply border-l-4;
     border-left-color: var(--status-pending);
   }
   .tone-pill {
@@ -377,8 +371,34 @@
   .scale-bar {
     @apply flex w-full flex-col gap-1;
   }
+  .scale-rail {
+    @apply relative w-full;
+  }
   .scale-track {
     @apply relative h-2.5 w-full overflow-hidden rounded-full bg-brand-200/55;
+  }
+  /* #119: where "on target" starts, a tick that crosses the track. */
+  .scale-target {
+    @apply pointer-events-none absolute -top-1 -bottom-1 w-0.5 -translate-x-1/2 rounded-full bg-foreground/70;
+  }
+  /* Written right under its tick. */
+  .scale-target-label {
+    @apply absolute top-0 whitespace-nowrap text-foreground-secondary;
+    translate: -50% 0;
+  }
+  .scale-target-label[data-align="end"] {
+    @apply pr-1.5;
+    translate: -100% 0;
+  }
+  .scale-target-label[data-align="start"] {
+    @apply pl-1.5;
+    translate: 0 0;
+  }
+  .metric-card-featured .scale-target {
+    @apply bg-white/80;
+  }
+  .metric-card-featured .scale-target-label {
+    @apply text-brand-200;
   }
   .scale-fill {
     @apply absolute inset-y-0 left-0 rounded-full bg-chart-seq;
@@ -393,7 +413,7 @@
     background: var(--status-pending);
   }
   .scale-ends {
-    @apply flex justify-between text-[11px] text-muted-foreground tabular-nums;
+    @apply relative flex justify-between text-[11px] text-muted-foreground tabular-nums;
   }
   /* A mark that opens the records behind it (DrillLink). */
   .drill-target {
@@ -543,14 +563,30 @@
   .side-nav-item {
     @apply flex items-center gap-2.5 rounded-md px-2 py-2 text-[13px] whitespace-nowrap text-white transition-colors outline-none hover:bg-sidebar-accent focus-visible:ring-2 focus-visible:ring-sidebar-ring;
   }
+  /* #119: the cycle in focus, its progress ring and what to do about it. */
   .home-focus {
-    @apply flex flex-col gap-5 rounded-xl bg-brand-900 p-6 text-primary-foreground;
-  }
-  .home-focus .icon-tile {
-    @apply bg-white/10 text-brand-200;
+    @apply flex flex-wrap items-center gap-6 rounded-xl bg-brand-900 p-6 text-primary-foreground lg:gap-8 lg:p-8;
   }
   .home-focus .button-outline {
     @apply border-transparent bg-card text-foreground hover:bg-brand-fog;
+  }
+  .home-focus .button-outline.home-focus-quiet {
+    @apply border-white/25 bg-transparent text-primary-foreground hover:bg-white/10;
+  }
+  .home-kpis {
+    @apply grid gap-5 sm:grid-cols-2 xl:grid-cols-3;
+  }
+  .home-attention-row {
+    @apply flex items-center gap-4 px-5 py-4 transition-colors outline-none hover:bg-brand-fog/60 focus-visible:bg-brand-fog/60;
+  }
+  .home-attention-row .icon-tile[data-tone="risk"] {
+    @apply bg-status-pending-bg text-status-pending;
+  }
+  .home-attention-row .icon-tile[data-tone="watch"] {
+    @apply bg-status-progress-bg text-status-progress;
+  }
+  .home-attention-action {
+    @apply inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-input bg-card px-3 py-1.5 text-sm font-medium text-foreground transition-colors group-hover:border-primary group-hover:bg-primary group-hover:text-primary-foreground;
   }
   .home-access {
     @apply grid gap-5 md:grid-cols-3;

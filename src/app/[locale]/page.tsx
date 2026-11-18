@@ -1,5 +1,4 @@
-import { IconTile, PageSkeleton } from "@/components/experience";
-import { ArrowRight, Sprout } from "lucide-react";
+import { PageSkeleton } from "@/components/experience";
 import { HomeSignal } from "./home-signal";
 import { hasLocale } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
@@ -12,9 +11,7 @@ import { routing } from "@/i18n/routing";
 import { connection } from "next/server";
 import { db } from "@/db/client";
 import { getActor } from "@/modules/actor/server";
-import { insightsScope } from "@/modules/insights/authz";
-import { listCycles, personName } from "@/modules/review-core";
-import { localizeCycles } from "@/modules/review-core/cycle-name";
+import { personName } from "@/modules/review-core";
 
 /**
  * Every section the actor may open, as a compact directory at the foot of the
@@ -63,20 +60,13 @@ async function HomeNav() {
 }
 
 /**
- * The head of the home, as the canvas draws it: a greeting by role, the
- * cycle in focus with one call to action, the three main entries (Goals,
- * Assessments, the Analysis) the actor may open and, for People, a reminder
- * to check the data before analysing.
+ * The head of the home: a greeting by role. The cycle in focus, its
+ * progress and what needs attention come right under it (`HomeSignal`).
  */
-async function HomeHead({ locale }: { locale: string }) {
+async function HomeHead() {
   await connection();
   const [t, actor] = await Promise.all([getTranslations("Home"), getActor()]);
-  const [name, cycles] = await Promise.all([
-    actor.personId ? personName(db, actor.personId) : null,
-    listCycles(db),
-  ]);
-  const cycle = localizeCycles(cycles, locale)[0];
-  const analysis = insightsScope(actor).kind !== "none";
+  const name = actor.personId ? await personName(db, actor.personId) : null;
   const greeting =
     actor.role === "hr"
       ? t("greeting.hr")
@@ -85,40 +75,10 @@ async function HomeHead({ locale }: { locale: string }) {
         : name
           ? t("greeting.person", { name })
           : t("greeting.noPerson");
-  const cycleHref = cycle
-    ? analysis
-      ? `/insights/executive?cycle=${cycle.id}`
-      : `/assessments?cycle=${cycle.id}`
-    : "/assessments";
   return (
-    <div className="flex flex-col gap-7">
-      <div className="flex flex-col gap-2">
-        <h1 className="text-3xl lg:text-4xl">{greeting}</h1>
-        <p className="text-sm text-muted-foreground">{t("intro")}</p>
-      </div>
-      <section className="home-focus" aria-label={t("focus.headline")}>
-        <div className="flex items-start gap-5">
-          <IconTile>
-            <Sprout className="size-5" />
-          </IconTile>
-          <div className="flex min-w-0 flex-col gap-2">
-            <h2 className="text-2xl text-white lg:text-3xl">
-              {t("focus.headline")}
-            </h2>
-            <p className="text-sm text-brand-200">
-              {cycle
-                ? t("focus.line", { cycle: cycle.name })
-                : t("focus.noCycle")}
-            </p>
-          </div>
-        </div>
-        {cycle ? (
-          <Link href={cycleHref} className="button-outline self-start">
-            {t("focus.cta")}
-            <ArrowRight className="ml-2 size-4" aria-hidden="true" />
-          </Link>
-        ) : null}
-      </section>
+    <div className="flex flex-col gap-2">
+      <h1 className="text-3xl lg:text-4xl">{greeting}</h1>
+      <p className="text-sm text-muted-foreground">{t("intro")}</p>
     </div>
   );
 }
@@ -130,15 +90,15 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
   const tHome = await getTranslations("Home");
 
   return (
-    <main className="flex flex-1 flex-col gap-10 p-6 lg:p-10">
+    <main className="flex flex-1 flex-col gap-8 p-6 lg:p-10">
       <Suspense fallback={<PageSkeleton />}>
-        <HomeHead locale={locale} />
+        <HomeHead />
       </Suspense>
       <Suspense fallback={<PageSkeleton />}>
         <HomeSignal locale={locale} />
       </Suspense>
       <section aria-labelledby="home-all" className="flex flex-col gap-4">
-        <h2 id="home-all" className="text-2xl">
+        <h2 id="home-all" className="kicker text-muted-foreground">
           {tHome("all")}
         </h2>
         <Suspense fallback={null}>

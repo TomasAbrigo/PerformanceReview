@@ -1,6 +1,8 @@
 import { EmptyState } from "@/components/experience";
 import { PageSkeleton } from "@/components/experience";
 import { localizeCycles } from "@/modules/review-core/cycle-name";
+import { rememberedCycle } from "@/modules/review-core/remembered-cycle";
+import { pickCycle } from "@/modules/review-core/current-cycle";
 import { hasLocale } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
@@ -64,7 +66,8 @@ async function Completion({
   if (!cycles.length) return <EmptyState>{t("noCycles")}</EmptyState>;
   const sp = await searchParams;
   const p = parseCompletionParams(sp);
-  const cycle = cycles.find((c) => c.id === p.cycle) ?? cycles[0];
+  const cycle =
+    pickCycle(cycles, p.cycle, await rememberedCycle()) ?? cycles[0];
   const masked = scope.kind === "aggregatesOnly";
   // The settings are read once per request: the minimum group size (it only
   // masks direction) and the thresholds of the tones.

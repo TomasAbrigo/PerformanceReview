@@ -40,27 +40,27 @@
     },
     "intro": "A starting point to support people's development.",
     "focus": {
-      "headline": "Development is built every day.",
-      "line": "{cycle} · Check progress, listen to the team and spot opportunities.",
+      "kicker": "Cycle in focus",
       "noCycle": "No cycles yet: once there is one, its progress shows here.",
-      "cta": "Explore the cycle"
+      "progress": "Complete assessments",
+      "progressNote": "{done} of {total} people with both assessments submitted",
+      "target": "Target {value} %",
+      "missing": "See who is missing",
+      "analysis": "See the analysis",
+      "assessments": "See the assessments"
     },
     "all": "All sections",
     "signal": {
-      "kpis": "{cycle}",
       "scope": {
         "all": "The whole company",
         "team": "Your team and you"
       },
-      "complete": "Reviews complete",
-      "completeNote": "{done} of {total} with both reviews submitted",
       "pending": "Not started",
       "ofParticipants": "{pct}% of participants",
       "goalsCompleted": "Goals completed",
       "goalsNote": "{done} of {total} goals of the cycle",
       "goalsOverdue": "Goals overdue",
       "ofGoals": "{pct}% of the cycle's goals",
-      "analysis": "See the cycle's analysis",
       "attention": {
         "title": "Needs attention",
         "none": "Nothing pending for now.",
@@ -69,7 +69,15 @@
         "overdue": "{n, plural, one {# goal overdue} other {# goals overdue}} in the cycle",
         "identity": "{n, plural, one {# record waits} other {# records wait}} for a person in the identity queue",
         "failedRuns": "{n, plural, one {# import failed} other {# imports failed}}",
-        "quality": "{n, plural, one {# data-quality case} other {# data-quality cases}} across {kinds, plural, one {# indicator} other {# indicators}}"
+        "quality": "{n, plural, one {# data-quality case} other {# data-quality cases}} across {kinds, plural, one {# indicator} other {# indicators}}",
+        "action": {
+          "self": "Complete",
+          "team": "Write",
+          "overdue": "Review",
+          "identity": "Resolve",
+          "failedRuns": "Review",
+          "quality": "Fix"
+        }
       }
     }
   },
@@ -2361,6 +2369,7 @@
     "upload": "Choose a file",
     "review": "Review and configure",
     "result": "Result",
+    "target": "Target {value}",
     "moreRecords": "Show {count} more records",
     "tone": {
       "good": "On target",
