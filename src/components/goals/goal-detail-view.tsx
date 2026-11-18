@@ -7,7 +7,23 @@ import { Panel } from "@/components/insights/parts";
 import { ProgressBar } from "@/components/progress-bar";
 import { Link } from "@/i18n/navigation";
 import type { GoalDetail } from "@/modules/goals/browse";
+import {
+  GoalControls,
+  type GoalControlActions,
+  MilestoneToggle,
+} from "./goal-controls";
+import { GoalFormDialog, type SaveGoal } from "./goal-form-dialog";
 import { GoalStateBadge } from "./goal-state-badge";
+
+/** What the page hands the view when the actor may edit the goal. */
+export type GoalEditing = {
+  save: SaveGoal;
+  actions: GoalControlActions;
+  toggleMilestone: (
+    milestoneId: string,
+    done: boolean,
+  ) => ReturnType<GoalControlActions["setProgress"]>;
+};
 
 /**
  * A goal's page body: the summary (state, progress, the three dates), its
@@ -18,8 +34,11 @@ import { GoalStateBadge } from "./goal-state-badge";
 export function GoalDetailView({
   goal,
   openableParticipants,
+  editing,
 }: {
   goal: GoalDetail;
+  /** Present only when the actor may edit this goal (the actions check again). */
+  editing?: GoalEditing;
   /** Participant ids whose assessment page the reader may open. */
   openableParticipants: ReadonlySet<string>;
 }) {
@@ -30,7 +49,23 @@ export function GoalDetailView({
   const doneMilestones = goal.milestones.filter((m) => m.completedAt).length;
   return (
     <div className="flex flex-col gap-6">
-      <Panel id="goal-summary" title={t("summary")}>
+      <Panel
+        id="goal-summary"
+        title={t("summary")}
+        actions={
+          editing ? (
+            <GoalFormDialog
+              mode="edit"
+              initial={{
+                title: goal.title,
+                description: goal.description ?? "",
+                dueDate: goal.dueDate ?? "",
+              }}
+              save={editing.save}
+            />
+          ) : undefined
+        }
+      >
         <dl className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
           <Fact label={t("owner")}>{goal.person.name}</Fact>
           <Fact label={t("department")}>{goal.department ?? "–"}</Fact>
@@ -55,6 +90,15 @@ export function GoalDetailView({
           </Fact>
         </dl>
       </Panel>
+      {editing ? (
+        <Panel id="goal-controls" title={t("manage")}>
+          <GoalControls
+            status={goal.status}
+            percent={goal.percentComplete}
+            actions={editing.actions}
+          />
+        </Panel>
+      ) : null}
       <Panel id="goal-description" title={t("description")}>
         {goal.description ? (
           <p className="max-w-3xl text-sm whitespace-pre-line">
@@ -82,7 +126,13 @@ export function GoalDetailView({
           <ol className="flex flex-col gap-2 text-sm">
             {goal.milestones.map((m) => (
               <li key={m.id} className="flex items-start gap-3">
-                {m.completedAt ? (
+                {editing ? (
+                  <MilestoneToggle
+                    done={m.completedAt !== null}
+                    label={m.title}
+                    toggle={(done) => editing.toggleMilestone(m.id, done)}
+                  />
+                ) : m.completedAt ? (
                   <Check
                     className="mt-0.5 size-4 shrink-0 text-status-done"
                     aria-hidden="true"

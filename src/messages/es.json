@@ -98,7 +98,7 @@
   "Errors": {
     "validation": "Revisá los campos marcados.",
     "not_found": "El elemento ya no existe.",
-    "forbidden": "Solo People (RR. HH.) puede hacer esto.",
+    "forbidden": "No tenés permiso para hacer esto.",
     "unknown": "Ocurrió un error inesperado."
   },
   "Imports": {
@@ -1830,9 +1830,42 @@
       "assessments": "En los assessments",
       "assessmentsHint": "Ciclos cuya evaluación lista este goal entre los goals del período.",
       "openAssessment": "Ver el assessment de {cycle}",
-      "notInAssessments": "Todavía no aparece en ningún assessment."
+      "notInAssessments": "Todavía no aparece en ningún assessment.",
+      "manage": "Actualizar el goal"
     },
-    "forbidden": "No tenés acceso a este goal: cada persona ve los suyos y, si es manager, los de su equipo."
+    "forbidden": "No tenés acceso a este goal: cada persona ve los suyos y, si es manager, los de su equipo.",
+    "form": {
+      "new": "Nuevo goal",
+      "edit": "Editar",
+      "newTitle": "Nuevo goal",
+      "editTitle": "Editar goal",
+      "description": "Título, descripción y fecha límite.",
+      "owner": "Persona",
+      "title": "Título",
+      "descriptionLabel": "Descripción",
+      "dueDate": "Fecha límite",
+      "dueDateHint": "Opcional. Un goal en curso que pasó esta fecha se ve como vencido.",
+      "cancel": "Cancelar",
+      "save": "Guardar",
+      "errors": {
+        "required": "Este campo es obligatorio.",
+        "too_long": "El texto es demasiado largo.",
+        "invalid_date": "Ingresá una fecha válida.",
+        "unknown_person": "Esa persona no existe.",
+        "invalid": "El valor no es válido."
+      }
+    },
+    "controls": {
+      "progress": "Avance (%)",
+      "progressInvalid": "Ingresá un número entero de 0 a 100.",
+      "saveProgress": "Guardar avance",
+      "complete": "Marcar como completo",
+      "close": "Cerrar goal",
+      "reopen": "Reabrir",
+      "addMilestone": "Agregar un hito",
+      "add": "Agregar",
+      "toggleMilestone": "Marcar el hito como hecho o pendiente: {title}"
+    }
   },
   "Assessments": {
     "nav": "Assessments",

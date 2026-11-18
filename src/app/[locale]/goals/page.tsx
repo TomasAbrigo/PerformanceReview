@@ -6,6 +6,7 @@ import { Suspense } from "react";
 import { GoalStateChips, GoalsTable } from "@/components/goals/goals-table";
 import { GoalsFilters } from "@/components/goals/goals-filters";
 import { parseGoalsParams } from "@/components/goals/url-state";
+import { GoalFormDialog } from "@/components/goals/goal-form-dialog";
 import { Panel } from "@/components/insights/parts";
 import { orgFiltersOf } from "@/components/org/params";
 import { PageHeader } from "@/components/page-header";
@@ -20,8 +21,10 @@ import {
   listGoalCycles,
   listGoals,
 } from "@/modules/goals/browse";
+import { listGoalOwnerOptions } from "@/modules/goals/write";
 import { noOrgOptions } from "@/modules/org-attributes/kinds";
 import { localizeCycles } from "@/modules/review-core/cycle-name";
+import { createGoalAction } from "./actions";
 
 const HERE = "/goals";
 
@@ -52,7 +55,7 @@ async function GoalsList({
   const ownOnly = scope.kind === "own";
   const p = parseGoalsParams(await searchParams);
   const cycles = localizeCycles(await listGoalCycles(db, actor), locale);
-  const [page, options] = await Promise.all([
+  const [page, options, owners] = await Promise.all([
     listGoals(db, actor, {
       cycleId: p.cycle,
       state: p.state,
@@ -64,6 +67,7 @@ async function GoalsList({
     ownOnly
       ? { departments: [], org: noOrgOptions }
       : goalFilterOptions(db, actor),
+    listGoalOwnerOptions(db, actor),
   ]);
   const hrefFor = listHref(HERE, {
     cycle: p.cycle,
@@ -78,6 +82,15 @@ async function GoalsList({
         kicker={t("kicker")}
         title={t("title")}
         description={t(`scope.${scope.kind}`)}
+        actions={
+          owners.length > 0 ? (
+            <GoalFormDialog
+              mode="create"
+              owners={owners}
+              save={createGoalAction}
+            />
+          ) : undefined
+        }
       >
         <GoalsFilters
           params={p}

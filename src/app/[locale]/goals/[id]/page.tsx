@@ -12,7 +12,15 @@ import { individualScope } from "@/modules/actor/individual-scope";
 import { getActor } from "@/modules/actor/server";
 import { canOpenParticipant } from "@/modules/assessments";
 import { getGoalDetail } from "@/modules/goals/browse";
+import { canEditGoalsOf } from "@/modules/goals/write";
 import { ReviewError } from "@/modules/review-core";
+import {
+  addMilestoneAction,
+  setMilestoneDoneAction,
+  setProgressAction,
+  setStatusAction,
+  updateGoalAction,
+} from "../actions";
 
 async function GoalPage({ params }: PageProps<"/[locale]/goals/[id]">) {
   const { locale, id } = await params;
@@ -61,6 +69,7 @@ async function GoalPage({ params }: PageProps<"/[locale]/goals/[id]">) {
       .filter((a) => canOpenParticipant(actor, a))
       .map((a) => a.participantId),
   );
+  const canEdit = await canEditGoalsOf(db, actor, goal.person.id);
   return (
     <div className="flex flex-col gap-8">
       <PageHeader
@@ -69,7 +78,23 @@ async function GoalPage({ params }: PageProps<"/[locale]/goals/[id]">) {
         description={goal.person.name}
         actions={back}
       />
-      <GoalDetailView goal={goal} openableParticipants={openable} />
+      <GoalDetailView
+        goal={goal}
+        openableParticipants={openable}
+        editing={
+          canEdit
+            ? {
+                save: updateGoalAction.bind(null, goal.id),
+                actions: {
+                  setProgress: setProgressAction.bind(null, goal.id),
+                  setStatus: setStatusAction.bind(null, goal.id),
+                  addMilestone: addMilestoneAction.bind(null, goal.id),
+                },
+                toggleMilestone: setMilestoneDoneAction,
+              }
+            : undefined
+        }
+      />
     </div>
   );
 }
