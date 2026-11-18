@@ -149,7 +149,7 @@ describe("InsightsSettingsForm", () => {
     renderIn("es", save);
     await user.click(screen.getByRole("button", { name: "Guardar cambios" }));
     expect(
-      await screen.findByText("Solo People (RR. HH.) puede hacer esto."),
+      await screen.findByText("No tenés permiso para hacer esto."),
     ).toBeVisible();
   });
 });

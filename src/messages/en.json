@@ -204,7 +204,7 @@
   "Errors": {
     "validation": "Check the highlighted fields.",
     "not_found": "The item no longer exists.",
-    "forbidden": "Only People (HR) can do this.",
+    "forbidden": "You are not allowed to do this.",
     "invalid_state": "The cycle or request is not in a state that allows this.",
     "unknown": "Something went wrong."
   },
@@ -1939,9 +1939,42 @@
       "assessments": "In the assessments",
       "assessmentsHint": "Cycles whose assessment lists this goal among the goals of the period.",
       "openAssessment": "See the {cycle} assessment",
-      "notInAssessments": "It does not appear in any assessment yet."
+      "notInAssessments": "It does not appear in any assessment yet.",
+      "manage": "Update the goal"
     },
-    "forbidden": "You do not have access to this goal: everyone sees their own and, for a manager, their team's."
+    "forbidden": "You do not have access to this goal: everyone sees their own and, for a manager, their team's.",
+    "form": {
+      "new": "New goal",
+      "edit": "Edit",
+      "newTitle": "New goal",
+      "editTitle": "Edit goal",
+      "description": "Title, description and due date.",
+      "owner": "Person",
+      "title": "Title",
+      "descriptionLabel": "Description",
+      "dueDate": "Due date",
+      "dueDateHint": "Optional. A goal in progress past this date shows as overdue.",
+      "cancel": "Cancel",
+      "save": "Save",
+      "errors": {
+        "required": "This field is required.",
+        "too_long": "This text is too long.",
+        "invalid_date": "Enter a valid date.",
+        "unknown_person": "That person does not exist.",
+        "invalid": "This value is not valid."
+      }
+    },
+    "controls": {
+      "progress": "Progress (%)",
+      "progressInvalid": "Enter a whole number from 0 to 100.",
+      "saveProgress": "Save progress",
+      "complete": "Mark as completed",
+      "close": "Close goal",
+      "reopen": "Reopen",
+      "addMilestone": "Add a milestone",
+      "add": "Add",
+      "toggleMilestone": "Mark milestone as done or pending: {title}"
+    }
   },
   "Assessments": {
     "nav": "Assessments",
