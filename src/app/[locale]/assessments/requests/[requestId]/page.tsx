@@ -19,7 +19,9 @@ import { getAssessment, pickLocalized } from "@/modules/assessments";
 import { getReview, ReviewError } from "@/modules/review-core";
 import { cycleName } from "@/modules/review-core/cycle-name";
 import { canAnswer } from "@/modules/review-capture";
-import { saveDraftAction, submitAction } from "./actions";
+import { AssessmentSideView } from "@/components/assessments/assessment-side-view";
+import { ShareButton } from "@/components/assessments/share-button";
+import { saveDraftAction, shareAction, submitAction } from "./actions";
 
 type Props = PageProps<"/[locale]/assessments/requests/[requestId]">;
 
@@ -100,6 +102,18 @@ async function RequestPage({ params }: Props) {
     request.relationship === "self" || request.relationship === "manager"
       ? ta(`detail.sides.${request.relationship}`)
       : ta("title");
+  const isManagerReview = request.relationship === "manager";
+  // Writing the manager review: the submitted self assessment goes beside it
+  // (as far as canRead lets this reader; under double blind it stays closed).
+  const selfSide = isManagerReview
+    ? detail?.sides.find((s) => s.relationship === "self")
+    : undefined;
+  const canShare =
+    isManagerReview &&
+    mayWrite &&
+    request.status === "submitted" &&
+    cycle.status !== "closed" &&
+    !request.sharedAt;
   const name = detail?.participant.person.name ?? "";
   const cycleLabel = detail ? cycleName(detail.cycle, locale) : cycle.name;
   return (
@@ -111,22 +125,42 @@ async function RequestPage({ params }: Props) {
         actions={back}
       />
       <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
-        <Panel id="review-form" title={side} hint={note ?? undefined}>
-          <ReviewForm
-            questions={questions}
-            initial={initial}
-            readOnly={!writable}
-            save={saveDraftAction.bind(null, request.id)}
-            submit={submitAction.bind(null, request.id)}
-          />
-        </Panel>
-        {detail ? (
-          <GoalsOfPeriod
-            goals={detail.goals}
-            name={name}
-            asOf={detail.goalsAsOf}
-          />
-        ) : null}
+        <div className="flex flex-col gap-6">
+          <Panel id="review-form" title={side} hint={note ?? undefined}>
+            <ReviewForm
+              questions={questions}
+              initial={initial}
+              readOnly={!writable}
+              save={saveDraftAction.bind(null, request.id)}
+              submit={submitAction.bind(null, request.id)}
+            />
+            {isManagerReview && request.status === "submitted" ? (
+              <div className="mt-6 border-t pt-4">
+                {request.sharedAt ? (
+                  <p role="status" className="text-sm text-muted-foreground">
+                    {t("share.done")}
+                  </p>
+                ) : canShare ? (
+                  <ShareButton share={shareAction.bind(null, request.id)} />
+                ) : (
+                  <p role="status" className="text-sm text-muted-foreground">
+                    {t("share.notShared")}
+                  </p>
+                )}
+              </div>
+            ) : null}
+          </Panel>
+        </div>
+        <div className="flex flex-col gap-6">
+          {selfSide ? <AssessmentSideView side={selfSide} /> : null}
+          {detail ? (
+            <GoalsOfPeriod
+              goals={detail.goals}
+              name={name}
+              asOf={detail.goalsAsOf}
+            />
+          ) : null}
+        </div>
       </div>
     </div>
   );

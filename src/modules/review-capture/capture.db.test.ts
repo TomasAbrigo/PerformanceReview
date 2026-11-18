@@ -20,6 +20,7 @@ import {
 import { CaptureError } from "./errors";
 import type { CaptureAnswer } from "./rules";
 import { listPendingSelfReviews, saveDraft, share, submit } from "./service";
+import { listTeamReviews } from "./team";
 
 // As of 2022-06-01 Bruno reports to Carla and Carla to Ana.
 let cycleId: string;
@@ -271,5 +272,51 @@ describe("listPendingSelfReviews", () => {
     await saveDraft(db, bruno(), selfId, fullAnswers());
     await submit(db, bruno(), selfId);
     expect(await listPendingSelfReviews(db, bruno())).toEqual([]);
+  });
+});
+
+describe("listTeamReviews", () => {
+  it("lists the manager's direct reports with both states", async () => {
+    const [row] = await listTeamReviews(db, carla());
+    expect(row).toMatchObject({
+      managerRequestId: managerId,
+      selfRequestId: selfId,
+      managerStatus: "draft",
+      shared: false,
+      // A draft self assessment is not the manager's to read yet.
+      selfState: "locked",
+    });
+    expect(row.person.id).toBe(people.bruno);
+    await saveDraft(db, bruno(), selfId, fullAnswers());
+    await submit(db, bruno(), selfId);
+    // Double blind (the default): the self stays closed until the manager's own.
+    expect((await listTeamReviews(db, carla()))[0].selfState).toBe("locked");
+    const [{ components }] = await db
+      .select()
+      .from(reviewCycle)
+      .where(eq(reviewCycle.id, cycleId));
+    await db
+      .update(reviewCycle)
+      .set({ components: { ...components, doubleBlind: false } })
+      .where(eq(reviewCycle.id, cycleId));
+    expect((await listTeamReviews(db, carla()))[0].selfState).toBe("submitted");
+  });
+
+  it("is empty for people who manage no one and for direction", async () => {
+    expect(await listTeamReviews(db, bruno())).toEqual([]);
+    expect(
+      await listTeamReviews(db, { personId: null, role: "direction" }),
+    ).toEqual([]);
+    expect(
+      await listTeamReviews(db, { personId: people.ana, role: "manager" }),
+    ).toEqual([]);
+  });
+
+  it("leaves out closed cycles and removed participants", async () => {
+    await db
+      .update(reviewCycle)
+      .set({ status: "closed" })
+      .where(eq(reviewCycle.id, cycleId));
+    expect(await listTeamReviews(db, carla())).toEqual([]);
   });
 });

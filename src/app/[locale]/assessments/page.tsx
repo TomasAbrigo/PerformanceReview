@@ -28,7 +28,11 @@ import {
 } from "@/modules/assessments";
 import { noOrgOptions } from "@/modules/org-attributes/kinds";
 import { cycleName, localizeCycles } from "@/modules/review-core/cycle-name";
-import { listPendingSelfReviews } from "@/modules/review-capture";
+import {
+  listPendingSelfReviews,
+  listTeamReviews,
+} from "@/modules/review-capture";
+import { TeamReviews } from "@/components/assessments/team-reviews";
 import { PendingReviews } from "@/components/assessments/pending-reviews";
 
 const HERE = "/assessments";
@@ -67,6 +71,9 @@ async function AssessmentsList({
       locale,
     ),
   }));
+  // The manager reviews of their direct reports, above the list (a manager
+  // acting as themself; People write theirs through the cycle's own list).
+  const team = actor.role === "manager" ? await listTeamReviews(db, actor) : [];
   // Latest cycle by default (the list comes latest period first).
   const cycles = localizeCycles(await listAssessmentCycles(db, actor), locale);
   if (cycles.length === 0) {
@@ -75,6 +82,7 @@ async function AssessmentsList({
         {header("")}
         <EmptyState>{ownOnly ? t("noParticipants") : t("noCycles")}</EmptyState>
         <PendingReviews items={pending} />
+        <TeamReviews items={team} />
       </div>
     );
   }
@@ -114,6 +122,7 @@ async function AssessmentsList({
         />
       </PageHeader>
       <PendingReviews items={pending} />
+      <TeamReviews items={team} />
       <section className="space-y-6" data-testid="assessments-list">
         <div className="overview-hero">
           <IconTile>

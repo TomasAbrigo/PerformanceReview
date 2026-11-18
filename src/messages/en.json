@@ -1970,6 +1970,8 @@
       "forbidden": "You cannot answer this assessment.",
       "cycle_closed": "The cycle is closed: it can no longer be answered.",
       "not_editable": "Already submitted: it cannot be changed.",
+      "not_submitted": "Submit the review before sharing it.",
+      "not_shareable": "Only the manager review can be shared.",
       "not_found": "This assessment no longer exists.",
       "validation": "Check the highlighted answers.",
       "unknown": "Something unexpected went wrong."
@@ -1980,6 +1982,23 @@
       "open": "Complete",
       "due": "Due {date}",
       "noDue": "No due date"
+    },
+    "team": {
+      "title": "Your team",
+      "hint": "Your direct reports in open cycles: their self assessment and your review of each.",
+      "open": "Write review",
+      "view": "View review",
+      "due": "Due {date}",
+      "noDue": "No due date",
+      "shared": "Shared",
+      "notShared": "Not shared yet"
+    },
+    "share": {
+      "button": "Share with the employee",
+      "sharing": "Sharing…",
+      "hint": "The employee reads your review only once you share it.",
+      "done": "Shared with the employee.",
+      "notShared": "Not shared with the employee yet."
     }
   },
   "Experience": {
