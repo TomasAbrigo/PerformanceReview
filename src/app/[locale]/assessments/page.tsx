@@ -27,6 +27,8 @@ import {
 } from "@/modules/assessments";
 import { noOrgOptions } from "@/modules/org-attributes/kinds";
 import { cycleName, localizeCycles } from "@/modules/review-core/cycle-name";
+import { rememberedCycle } from "@/modules/review-core/remembered-cycle";
+import { pickCycle } from "@/modules/review-core/current-cycle";
 import {
   listPendingSelfReviews,
   listTeamReviews,
@@ -87,7 +89,8 @@ async function AssessmentsList({
       </div>
     );
   }
-  const cycle = cycles.find((c) => c.id === p.cycle) ?? cycles[0];
+  const cycle =
+    pickCycle(cycles, p.cycle, await rememberedCycle()) ?? cycles[0];
   const [page, options, settings] = await Promise.all([
     listAssessmentParticipants(db, actor, cycle.id, {
       progress: p.progress,

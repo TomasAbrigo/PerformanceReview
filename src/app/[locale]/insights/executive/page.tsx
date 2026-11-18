@@ -1,6 +1,8 @@
 import { EmptyState } from "@/components/experience";
 import { PageSkeleton } from "@/components/experience";
 import { localizeCycles } from "@/modules/review-core/cycle-name";
+import { rememberedCycle } from "@/modules/review-core/remembered-cycle";
+import { latestFirst, pickCycle } from "@/modules/review-core/current-cycle";
 import { hasLocale } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
@@ -49,10 +51,17 @@ async function Executive({
   const mode: ExecutiveMode = executiveModes.includes(sp.mode as ExecutiveMode)
     ? (sp.mode as ExecutiveMode)
     : "both";
-  const cycles = localizeCycles(await listCycles(db), locale).filter(
-    (c) => c.status !== "draft",
+  // Latest period first, whatever order the cycles were created in.
+  const cycles = latestFirst(
+    localizeCycles(await listCycles(db), locale).filter(
+      (c) => c.status !== "draft",
+    ),
   );
-  const cycle = cycles.find((c) => c.id === sp.cycle) ?? cycles[0];
+  const cycle = pickCycle(
+    cycles,
+    typeof sp.cycle === "string" ? sp.cycle : undefined,
+    await rememberedCycle(),
+  );
   if (!cycle) return <EmptyState>{t("noCycles")}</EmptyState>;
   const settings = await getSettings(db);
   const minGroupSize = settings["aggregation.minGroupSize"];

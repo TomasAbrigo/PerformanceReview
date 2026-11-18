@@ -1,6 +1,8 @@
 import { EmptyState } from "@/components/experience";
 import { PageSkeleton } from "@/components/experience";
 import { localizeCycles } from "@/modules/review-core/cycle-name";
+import { rememberedCycle } from "@/modules/review-core/remembered-cycle";
+import { pickCycle } from "@/modules/review-core/current-cycle";
 import { hasLocale } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
@@ -33,7 +35,12 @@ import { getFormatter } from "next-intl/server";
 import { MetricCard } from "@/components/experience";
 import { drillBase } from "@/components/drill/drill-link";
 import { parseDrill } from "@/modules/insights/drill-spec";
-import { atRiskTone, kpiThresholds, likertTone } from "@/modules/insights/tone";
+import {
+  atRiskTone,
+  kpiThresholds,
+  likertTarget,
+  likertTone,
+} from "@/modules/insights/tone";
 import type { IndicatorDistribution } from "@/modules/analytics/indicators/types";
 import { getSettings } from "@/modules/settings";
 import { DrillSection } from "../drill-section";
@@ -63,7 +70,8 @@ async function Indicators({
     parseIndicatorParams(sp),
     scope.kind === "aggregatesOnly",
   );
-  const cycle = cycles.find((c) => c.id === p.cycle) ?? cycles[0];
+  const cycle =
+    pickCycle(cycles, p.cycle, await rememberedCycle()) ?? cycles[0];
   // Direction reads teams, not the people who lead them (a DM, a Santex Lead).
   const groupBys: readonly IndicatorGroupBy[] =
     scope.kind === "aggregatesOnly"
@@ -172,6 +180,10 @@ async function Indicators({
                     indicator,
                     value: dec(overall.mean),
                   }),
+                  target: {
+                    value: likertTarget(riskThreshold),
+                    text: String(likertTarget(riskThreshold)),
+                  },
                 }
           }
           delta={

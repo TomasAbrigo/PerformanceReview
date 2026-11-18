@@ -79,7 +79,7 @@ import {
   periodDetail,
   type PeriodDetailRow,
 } from "@/modules/analytics/period-detail";
-import { cycleName } from "@/modules/review-core/cycle-name";
+import { storedCycleName } from "@/modules/review-core/cycle-name";
 import { RUN_STATUSES } from "@/modules/ingest/run-status";
 import { todayLocal } from "@/modules/org-history/dates";
 import { requestStatuses } from "@/modules/review-core/request-status";
@@ -1160,7 +1160,7 @@ const periodDetailExport = defineExport({
       }).then((d) =>
         d.rows.map((r) => ({
           ...r,
-          cycleName: cycleName(
+          cycleName: storedCycleName(
             { name: r.cycleName, localizedName: r.localizedName },
             locale,
           ),

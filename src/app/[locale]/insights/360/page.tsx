@@ -16,6 +16,8 @@ import { dm360, dm360Scopes } from "@/modules/analytics/dm-360";
 import { indicatorCycles } from "@/modules/analytics/indicators";
 import { insightsScope } from "@/modules/insights/authz";
 import { localizeCycles } from "@/modules/review-core/cycle-name";
+import { rememberedCycle } from "@/modules/review-core/remembered-cycle";
+import { pickCycle } from "@/modules/review-core/current-cycle";
 import { drillBase } from "@/components/drill/drill-link";
 import { parseDrill } from "@/modules/insights/drill-spec";
 import { kpiThresholds } from "@/modules/insights/tone";
@@ -49,7 +51,8 @@ async function Insights360({
   const sp = await searchParams;
   const p = parseDm360Params(sp);
   const settings = await getSettings(db);
-  const cycle = cycles.find((c) => c.id === p.cycle) ?? cycles[0];
+  const cycle =
+    pickCycle(cycles, p.cycle, await rememberedCycle()) ?? cycles[0];
   const data = await dm360(db, actor, { cycleId: cycle.id, scope: p.scope });
   const own = scope.kind === "directReports";
   // Drill-down (drill-section.tsx): the figures of a card open its people or

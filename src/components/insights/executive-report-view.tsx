@@ -26,7 +26,9 @@ import {
 import {
   atRiskTone,
   kpiThresholds,
+  likertTarget,
   likertTone,
+  percentTarget,
   percentTone,
 } from "@/modules/insights/tone";
 import {
@@ -208,6 +210,10 @@ function IndicatorCard({
                 value: f.decimal(mean),
                 max: 5,
               }),
+              target: {
+                value: likertTarget(riskThreshold),
+                text: String(likertTarget(riskThreshold)),
+              },
             }
       }
       delta={
@@ -316,6 +322,10 @@ export function ExecutiveReportView({
                     }),
                     minLabel: "0 %",
                     maxLabel: "100 %",
+                    target: {
+                      value: percentTarget(targets),
+                      text: ti("percent", { value: percentTarget(targets) }),
+                    },
                   }}
                   delta={pointsDelta(p, before)}
                   drill={{
@@ -407,6 +417,10 @@ export function ExecutiveReportView({
                     label: `${t("goalsCompleted")}: ${ti("percent", { value: Math.round(goals.completedPct) })}`,
                     minLabel: "0 %",
                     maxLabel: "100 %",
+                    target: {
+                      value: percentTarget(targets),
+                      text: ti("percent", { value: percentTarget(targets) }),
+                    },
                   }
             }
             delta={

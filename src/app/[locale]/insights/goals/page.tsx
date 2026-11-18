@@ -1,6 +1,8 @@
 import { EmptyState } from "@/components/experience";
 import { PageSkeleton } from "@/components/experience";
 import { localizeCycles } from "@/modules/review-core/cycle-name";
+import { rememberedCycle } from "@/modules/review-core/remembered-cycle";
+import { pickCycle } from "@/modules/review-core/current-cycle";
 import { hasLocale } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
@@ -70,7 +72,11 @@ async function GoalsInsights({
     );
   if (!cycles.length) return <EmptyState>{t("noCycles")}</EmptyState>;
   const cycle =
-    cycles.find((c) => c.id === p.cycle && isUuid(c.id)) ?? cycles[0];
+    pickCycle(
+      cycles.filter((c) => isUuid(c.id)),
+      p.cycle,
+      await rememberedCycle(),
+    ) ?? cycles[0];
   const shown = { ...p, groupBy, cycle: cycle.id };
   // One load of the participants feeds the KPIs, the buckets, the outliers
   // and the filter options.

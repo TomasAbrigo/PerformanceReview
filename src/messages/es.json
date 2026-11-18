@@ -40,27 +40,27 @@
     },
     "intro": "Un punto de partida para acompañar el desarrollo de las personas.",
     "focus": {
-      "headline": "El desarrollo se construye todos los días.",
-      "line": "{cycle} · Consultá avances, escuchá al equipo y detectá oportunidades.",
+      "kicker": "Ciclo en foco",
       "noCycle": "Todavía no hay ciclos: cuando haya uno, acá vas a ver sus avances.",
-      "cta": "Explorar el ciclo"
+      "progress": "Evaluaciones completas",
+      "progressNote": "{done} de {total} personas con las dos evaluaciones enviadas",
+      "target": "Meta {value} %",
+      "missing": "Ver quién falta",
+      "analysis": "Ver el análisis",
+      "assessments": "Ver las evaluaciones"
     },
     "all": "Todas las secciones",
     "signal": {
-      "kpis": "{cycle}",
       "scope": {
         "all": "Toda la compañía",
         "team": "Tu equipo y vos"
       },
-      "complete": "Evaluaciones completas",
-      "completeNote": "{done} de {total} con las dos evaluaciones enviadas",
       "pending": "Sin empezar",
       "ofParticipants": "{pct} % de los participantes",
       "goalsCompleted": "Objetivos completados",
       "goalsNote": "{done} de {total} objetivos del ciclo",
       "goalsOverdue": "Objetivos vencidos",
       "ofGoals": "{pct} % de los objetivos del ciclo",
-      "analysis": "Ver el análisis del ciclo",
       "attention": {
         "title": "Para atender",
         "none": "Nada pendiente por ahora.",
@@ -69,7 +69,15 @@
         "overdue": "{n, plural, one {# objetivo vencido} other {# objetivos vencidos}} en el ciclo",
         "identity": "{n, plural, one {# registro espera} other {# registros esperan}} una persona en la cola de identidades",
         "failedRuns": "{n, plural, one {# importación falló} other {# importaciones fallaron}}",
-        "quality": "{n, plural, one {# caso} other {# casos}} de calidad de datos en {kinds, plural, one {# indicador} other {# indicadores}}"
+        "quality": "{n, plural, one {# caso} other {# casos}} de calidad de datos en {kinds, plural, one {# indicador} other {# indicadores}}",
+        "action": {
+          "self": "Completar",
+          "team": "Escribir",
+          "overdue": "Revisar",
+          "identity": "Resolver",
+          "failedRuns": "Revisar",
+          "quality": "Corregir"
+        }
       }
     }
   },
@@ -2361,6 +2369,7 @@
     "upload": "Elegir archivo",
     "review": "Revisar y configurar",
     "result": "Resultado",
+    "target": "Meta {value}",
     "moreRecords": "Ver {count} registros más",
     "tone": {
       "good": "En meta",
