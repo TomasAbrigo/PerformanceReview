@@ -8,9 +8,11 @@
     "welcome": "Lo que dicen las evaluaciones semestrales, en un solo lugar: completitud, retención, compromiso y lo que la gente escribe.",
     "navigation": "Navegación",
     "groups": {
-      "insights": "Insights",
+      "insights": "Análisis",
       "data": "Datos",
-      "settings": "Configuración"
+      "settings": "Configuración",
+      "goals": "Goals",
+      "assessments": "Assessments"
     },
     "descriptions": {
       "executive": "Completitud, retención, compromiso, riesgo y sentimiento del ciclo en una sola vista.",
@@ -18,14 +20,16 @@
       "indicators": "Alertas, distribución y tendencia de retención y compromiso entre ciclos.",
       "qualitative": "Sentimiento y temas de los comentarios, por dimensión, área y ciclo.",
       "selfAssessment": "Sentimiento de las autoevaluaciones y brecha frente a la evaluación del manager.",
-      "goals": "Cumplimiento de goals junto a la retención y el compromiso de cada persona.",
       "dm360": "Una tarjeta por DM (delivery manager) con las personas a su cargo en el ciclo.",
       "engagement": "Score, participación y segmentos de engagement mes a mes.",
       "upload": "Cargá un reporte de Bamboo o una tabla del data lake.",
       "imports": "Corridas de importación, su resultado y el historial.",
       "identity": "Registros que no se pudieron asignar solos a una persona.",
       "dataQuality": "Casos a corregir antes de analizar o reportar.",
-      "insightsSettings": "Umbrales de alerta, tamaño mínimo de grupo, cortes de semestre y proveedor de análisis."
+      "insightsSettings": "Umbrales de alerta, tamaño mínimo de grupo, cortes de semestre y proveedor de análisis.",
+      "goalsArea": "Los goals de cada persona: progreso, hitos, vencimientos y comentarios, con filtros por ciclo, estado y equipo.",
+      "assessmentsArea": "Las preguntas y respuestas de cada ciclo: autoevaluación y evaluación del manager, junto a los goals del período.",
+      "goalsInsights": "Cumplimiento de goals junto a la retención y el compromiso de cada persona."
     }
   },
   "LocaleSwitcher": {
@@ -1113,7 +1117,7 @@
       "team": "Equipo {n}"
     },
     "SelfAssessment": {
-      "nav": "Reporte de autoevaluación",
+      "nav": "Autoevaluación",
       "title": "Reporte de autoevaluación",
       "sentimentTitle": "Sentimiento de las autoevaluaciones",
       "sentimentChart": "Sentimiento de las autoevaluaciones por dimensión",
@@ -1419,7 +1423,7 @@
     }
   },
   "GoalsInsights": {
-    "nav": "Goals y assessments",
+    "nav": "Goals vs. assessments",
     "title": "Goals y assessments",
     "heading": "Goals y assessments · {cycle}",
     "forbidden": "No tenés acceso a esta vista.",
@@ -1545,7 +1549,7 @@
     }
   },
   "Insights360": {
-    "nav": "Análisis 360 por DM",
+    "nav": "Análisis 360",
     "title": "Análisis 360",
     "heading": "Análisis 360 · {cycle}",
     "forbidden": "No tenés acceso al Análisis 360.",
@@ -1683,10 +1687,199 @@
   },
   "Nav": {
     "label": "Secciones",
-    "home": "Inicio"
+    "home": "Inicio",
+    "menu": "Menú"
   },
   "Brand": {
     "company": "Santex Group",
     "tagline": "yes, it's possible"
+  },
+  "Goals": {
+    "nav": "Goals",
+    "title": "Goals",
+    "kicker": "Goals",
+    "scope": {
+      "all": "Todos los goals de la compañía.",
+      "team": "Tus goals y los de las personas que reportan a vos.",
+      "own": "Tus goals."
+    },
+    "noPerson": "Elegí una persona en «Actuar como» para ver sus goals.",
+    "filters": {
+      "label": "Filtros de goals",
+      "cycle": "Ciclo",
+      "anyCycle": "Todos los ciclos",
+      "state": "Estado",
+      "anyState": "Todos",
+      "person": "Persona",
+      "personPlaceholder": "Buscar por nombre",
+      "department": "Área",
+      "anyDepartment": "Todas",
+      "apply": "Aplicar",
+      "clear": "Limpiar"
+    },
+    "states": {
+      "in_progress": "En curso",
+      "completed": "Completado",
+      "closed": "Cerrado",
+      "overdue": "Vencido"
+    },
+    "count": "{n, plural, =0 {Ningún goal} one {# goal} other {# goals}}",
+    "summary": "Goals por estado",
+    "table": {
+      "label": "Lista de goals",
+      "goal": "Goal",
+      "person": "Persona",
+      "department": "Área",
+      "state": "Estado",
+      "progress": "Progreso",
+      "due": "Vence",
+      "milestones": "Hitos",
+      "noDate": "Sin fecha",
+      "noMilestones": "–",
+      "milestonesOf": "{done} de {total}"
+    },
+    "empty": "No hay goals con estos filtros.",
+    "pagination": {
+      "label": "Páginas",
+      "previous": "Anterior",
+      "next": "Siguiente",
+      "page": "Página {page} de {pages}"
+    },
+    "progress": "{percent}% completado",
+    "detail": {
+      "back": "Volver a Goals",
+      "summary": "Resumen",
+      "owner": "Persona",
+      "department": "Área",
+      "state": "Estado",
+      "progress": "Progreso",
+      "created": "Creado",
+      "due": "Vence",
+      "finished": "Finalizado",
+      "updated": "Última actualización",
+      "noDate": "Sin fecha",
+      "description": "Descripción",
+      "noDescription": "Este goal no tiene descripción.",
+      "milestones": "Hitos",
+      "milestonesDone": "{done} de {total} completados",
+      "noMilestones": "Este goal no tiene hitos.",
+      "milestoneDone": "Completado el {date}",
+      "milestoneOpen": "Pendiente",
+      "comments": "Comentarios",
+      "noComments": "Todavía no hay comentarios.",
+      "unknownAuthor": "Autor desconocido",
+      "assessments": "En los assessments",
+      "assessmentsHint": "Ciclos cuya evaluación lista este goal entre los goals del período.",
+      "openAssessment": "Ver el assessment de {cycle}",
+      "notInAssessments": "Todavía no aparece en ningún assessment."
+    },
+    "forbidden": "No tenés acceso a este goal: cada persona ve los suyos y, si es manager, los de su equipo."
+  },
+  "Assessments": {
+    "nav": "Assessments",
+    "title": "Assessments",
+    "kicker": "Assessments",
+    "scope": {
+      "all": "Las preguntas y respuestas de cada ciclo, de toda la compañía.",
+      "team": "Tus evaluaciones y las de las personas que reportan a vos.",
+      "own": "Tus evaluaciones."
+    },
+    "noPerson": "Elegí una persona en «Actuar como» para ver sus assessments.",
+    "noCycles": "Todavía no hay ciclos lanzados.",
+    "noParticipants": "Todavía no tenés assessments en ningún ciclo.",
+    "filters": {
+      "label": "Filtros de assessments",
+      "cycle": "Ciclo",
+      "progress": "Estado",
+      "anyProgress": "Todos",
+      "person": "Persona",
+      "personPlaceholder": "Buscar por nombre",
+      "department": "Área",
+      "anyDepartment": "Todas",
+      "apply": "Aplicar",
+      "clear": "Limpiar"
+    },
+    "progress": {
+      "complete": "Completo",
+      "partial": "Parcial",
+      "pending": "Pendiente"
+    },
+    "count": "{n, plural, =0 {Nadie} one {# persona} other {# personas}}",
+    "summary": "Estado de los assessments",
+    "table": {
+      "label": "Participantes del ciclo",
+      "person": "Persona",
+      "manager": "Manager",
+      "department": "Área",
+      "self": "Autoevaluación",
+      "managerReview": "Evaluación del manager",
+      "progress": "Estado",
+      "noManager": "Sin manager",
+      "noDepartment": "Sin área"
+    },
+    "states": {
+      "none": "Sin solicitud",
+      "draft": "En curso",
+      "submitted": "Enviada",
+      "declined": "Rechazada",
+      "locked": "Reservada"
+    },
+    "empty": "No hay participantes con estos filtros.",
+    "pagination": {
+      "label": "Páginas",
+      "previous": "Anterior",
+      "next": "Siguiente",
+      "page": "Página {page} de {pages}"
+    },
+    "detail": {
+      "back": "Volver a {cycle}",
+      "cycle": "Ciclo",
+      "manager": "Manager del ciclo",
+      "noManager": "Sin manager",
+      "department": "Área",
+      "jobTitle": "Puesto",
+      "snapshot": "Datos al {date}",
+      "removed": "Esta persona salió del ciclo.",
+      "analysis": "Ver el análisis de {name}",
+      "view": {
+        "label": "Vista",
+        "full": "Completa",
+        "employee": "Vista de empleado",
+        "note": "Así lo lee {name}: sin las preguntas ocultas al empleado ni lo que todavía no se le compartió."
+      },
+      "sides": {
+        "self": "Autoevaluación",
+        "manager": "Evaluación del manager"
+      },
+      "author": "Escribe: {name}",
+      "submittedAt": "Enviada el {date}",
+      "sharedAt": "Compartida con la persona el {date}",
+      "notShared": "Todavía no compartida con la persona",
+      "stateNote": {
+        "none": "No se pidió esta evaluación.",
+        "draft": "Todavía no se envió: se ve lo que hay hasta ahora.",
+        "declined": "Se rechazó: no hay respuestas.",
+        "locked": "Todavía no está disponible para vos (se habilita cuando se comparte o cuando se envían las dos evaluaciones)."
+      },
+      "noSections": "No hay preguntas para mostrar.",
+      "noAnswer": "Sin respuesta",
+      "custom": "Pregunta propia",
+      "hiddenFromEmployee": "No la ve el empleado",
+      "scaleOf": "{value} de {max}",
+      "goals": {
+        "title": "Goals del período",
+        "hint": "Los goals de {name} cuando se armó el ciclo ({date}). Quedan fijos aunque el goal cambie después.",
+        "hintNoDate": "Los goals de {name} cuando se armó el ciclo. Quedan fijos aunque el goal cambie después.",
+        "empty": "No tenía goals en este período.",
+        "goal": "Goal",
+        "state": "Estado",
+        "progress": "Progreso",
+        "due": "Vence",
+        "noDate": "Sin fecha",
+        "noLongerApplicable": "Ya no aplica",
+        "open": "Abrir el goal"
+      }
+    },
+    "forbidden": "No tenés acceso a este assessment: cada persona ve los suyos y, si es manager, los de su equipo."
   }
 }

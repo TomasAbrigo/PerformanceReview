@@ -1,6 +1,8 @@
 import {
   Activity,
   ClipboardCheck,
+  ClipboardList,
+  GitCompareArrows,
   HeartPulse,
   History,
   LayoutDashboard,
@@ -17,12 +19,14 @@ import {
 import type { NavIcon as NavIconKey } from "./nav-items";
 
 const ICONS = {
+  goalsArea: Target,
+  assessmentsArea: ClipboardList,
   executive: LayoutDashboard,
   completion: ClipboardCheck,
   indicators: Activity,
   qualitative: MessageSquareText,
   selfAssessment: UserPen,
-  goals: Target,
+  goalsInsights: GitCompareArrows,
   dm360: Users,
   engagement: HeartPulse,
   upload: Upload,

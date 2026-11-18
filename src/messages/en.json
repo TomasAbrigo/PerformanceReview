@@ -8,9 +8,11 @@
     "welcome": "What the semester reviews say, in one place: completion, retention, engagement and what people write.",
     "navigation": "Navigation",
     "groups": {
-      "insights": "Insights",
+      "insights": "Analysis",
       "data": "Data",
-      "settings": "Settings"
+      "settings": "Settings",
+      "goals": "Goals",
+      "assessments": "Assessments"
     },
     "descriptions": {
       "executive": "Completion, retention, engagement, risk and sentiment of the cycle in a single view.",
@@ -18,14 +20,16 @@
       "indicators": "Alerts, distribution and trend of retention and engagement across cycles.",
       "qualitative": "Sentiment and themes of the comments, by dimension, department and cycle.",
       "selfAssessment": "Sentiment of the self-assessments and the gap against the manager review.",
-      "goals": "Goal completion next to each person's retention and engagement.",
       "dm360": "One card per DM (delivery manager) with the people in their care for the cycle.",
       "engagement": "Engagement score, participation and segments month by month.",
       "upload": "Upload a Bamboo report or a data lake table.",
       "imports": "Import runs, their outcome and the history.",
       "identity": "Records that could not be matched to a person automatically.",
       "dataQuality": "Cases to fix before analysing or reporting.",
-      "insightsSettings": "Alert thresholds, minimum group size, semester cuts and analysis provider."
+      "insightsSettings": "Alert thresholds, minimum group size, semester cuts and analysis provider.",
+      "goalsArea": "Each person's goals: progress, milestones, due dates and comments, filtered by cycle, status and team.",
+      "assessmentsArea": "The questions and answers of each cycle: self-assessment and manager review, next to the goals of the period.",
+      "goalsInsights": "Goal completion next to each person's retention and engagement."
     }
   },
   "LocaleSwitcher": {
@@ -1113,7 +1117,7 @@
       "team": "Team {n}"
     },
     "SelfAssessment": {
-      "nav": "Self-assessment report",
+      "nav": "Self-assessment",
       "title": "Self-assessment report",
       "sentimentTitle": "Sentiment of the self assessments",
       "sentimentChart": "Sentiment of the self assessments by dimension",
@@ -1419,7 +1423,7 @@
     }
   },
   "GoalsInsights": {
-    "nav": "Goals and assessments",
+    "nav": "Goals vs. assessments",
     "title": "Goals and assessments",
     "heading": "Goals and assessments · {cycle}",
     "forbidden": "You do not have access to this view.",
@@ -1545,7 +1549,7 @@
     }
   },
   "Insights360": {
-    "nav": "360 analysis by DM",
+    "nav": "360 analysis",
     "title": "360 analysis",
     "heading": "360 analysis · {cycle}",
     "forbidden": "You do not have access to the 360 analysis.",
@@ -1683,10 +1687,199 @@
   },
   "Nav": {
     "label": "Sections",
-    "home": "Home"
+    "home": "Home",
+    "menu": "Menu"
   },
   "Brand": {
     "company": "Santex Group",
     "tagline": "yes, it's possible"
+  },
+  "Goals": {
+    "nav": "Goals",
+    "title": "Goals",
+    "kicker": "Goals",
+    "scope": {
+      "all": "Every goal in the company.",
+      "team": "Your goals and those of the people who report to you.",
+      "own": "Your goals."
+    },
+    "noPerson": "Pick a person in \"Act as\" to see their goals.",
+    "filters": {
+      "label": "Goal filters",
+      "cycle": "Cycle",
+      "anyCycle": "All cycles",
+      "state": "Status",
+      "anyState": "All",
+      "person": "Person",
+      "personPlaceholder": "Search by name",
+      "department": "Department",
+      "anyDepartment": "All",
+      "apply": "Apply",
+      "clear": "Clear"
+    },
+    "states": {
+      "in_progress": "In progress",
+      "completed": "Completed",
+      "closed": "Closed",
+      "overdue": "Overdue"
+    },
+    "count": "{n, plural, =0 {No goals} one {# goal} other {# goals}}",
+    "summary": "Goals by status",
+    "table": {
+      "label": "Goals list",
+      "goal": "Goal",
+      "person": "Person",
+      "department": "Department",
+      "state": "Status",
+      "progress": "Progress",
+      "due": "Due",
+      "milestones": "Milestones",
+      "noDate": "No date",
+      "noMilestones": "–",
+      "milestonesOf": "{done} of {total}"
+    },
+    "empty": "No goals match these filters.",
+    "pagination": {
+      "label": "Pages",
+      "previous": "Previous",
+      "next": "Next",
+      "page": "Page {page} of {pages}"
+    },
+    "progress": "{percent}% complete",
+    "detail": {
+      "back": "Back to Goals",
+      "summary": "Summary",
+      "owner": "Person",
+      "department": "Department",
+      "state": "Status",
+      "progress": "Progress",
+      "created": "Created",
+      "due": "Due",
+      "finished": "Finished",
+      "updated": "Last updated",
+      "noDate": "No date",
+      "description": "Description",
+      "noDescription": "This goal has no description.",
+      "milestones": "Milestones",
+      "milestonesDone": "{done} of {total} completed",
+      "noMilestones": "This goal has no milestones.",
+      "milestoneDone": "Completed on {date}",
+      "milestoneOpen": "Pending",
+      "comments": "Comments",
+      "noComments": "No comments yet.",
+      "unknownAuthor": "Unknown author",
+      "assessments": "In the assessments",
+      "assessmentsHint": "Cycles whose assessment lists this goal among the goals of the period.",
+      "openAssessment": "See the {cycle} assessment",
+      "notInAssessments": "It does not appear in any assessment yet."
+    },
+    "forbidden": "You do not have access to this goal: everyone sees their own and, for a manager, their team's."
+  },
+  "Assessments": {
+    "nav": "Assessments",
+    "title": "Assessments",
+    "kicker": "Assessments",
+    "scope": {
+      "all": "The questions and answers of each cycle, company-wide.",
+      "team": "Your reviews and those of the people who report to you.",
+      "own": "Your reviews."
+    },
+    "noPerson": "Pick a person in \"Act as\" to see their assessments.",
+    "noCycles": "No cycles have been launched yet.",
+    "noParticipants": "You have no assessments in any cycle yet.",
+    "filters": {
+      "label": "Assessment filters",
+      "cycle": "Cycle",
+      "progress": "Status",
+      "anyProgress": "All",
+      "person": "Person",
+      "personPlaceholder": "Search by name",
+      "department": "Department",
+      "anyDepartment": "All",
+      "apply": "Apply",
+      "clear": "Clear"
+    },
+    "progress": {
+      "complete": "Complete",
+      "partial": "Partial",
+      "pending": "Pending"
+    },
+    "count": "{n, plural, =0 {Nobody} one {# person} other {# people}}",
+    "summary": "Assessment status",
+    "table": {
+      "label": "Cycle participants",
+      "person": "Person",
+      "manager": "Manager",
+      "department": "Department",
+      "self": "Self-assessment",
+      "managerReview": "Manager review",
+      "progress": "Status",
+      "noManager": "No manager",
+      "noDepartment": "No department"
+    },
+    "states": {
+      "none": "Not requested",
+      "draft": "In progress",
+      "submitted": "Submitted",
+      "declined": "Declined",
+      "locked": "Withheld"
+    },
+    "empty": "No participants match these filters.",
+    "pagination": {
+      "label": "Pages",
+      "previous": "Previous",
+      "next": "Next",
+      "page": "Page {page} of {pages}"
+    },
+    "detail": {
+      "back": "Back to {cycle}",
+      "cycle": "Cycle",
+      "manager": "Cycle manager",
+      "noManager": "No manager",
+      "department": "Department",
+      "jobTitle": "Job title",
+      "snapshot": "Data as of {date}",
+      "removed": "This person left the cycle.",
+      "analysis": "See {name}'s analysis",
+      "view": {
+        "label": "View",
+        "full": "Full",
+        "employee": "Employee view",
+        "note": "This is what {name} reads: without the questions hidden from the employee or what has not been shared with them yet."
+      },
+      "sides": {
+        "self": "Self-assessment",
+        "manager": "Manager review"
+      },
+      "author": "Written by {name}",
+      "submittedAt": "Submitted on {date}",
+      "sharedAt": "Shared with the person on {date}",
+      "notShared": "Not shared with the person yet",
+      "stateNote": {
+        "none": "This review was not requested.",
+        "draft": "Not submitted yet: what there is so far is shown.",
+        "declined": "Declined: there are no answers.",
+        "locked": "Not available to you yet (it opens when it is shared or when both reviews are submitted)."
+      },
+      "noSections": "There are no questions to show.",
+      "noAnswer": "No answer",
+      "custom": "Custom question",
+      "hiddenFromEmployee": "Hidden from the employee",
+      "scaleOf": "{value} of {max}",
+      "goals": {
+        "title": "Goals of the period",
+        "hint": "{name}'s goals when the cycle was set up ({date}). They stay fixed even if the goal changes later.",
+        "hintNoDate": "{name}'s goals when the cycle was set up. They stay fixed even if the goal changes later.",
+        "empty": "They had no goals in this period.",
+        "goal": "Goal",
+        "state": "Status",
+        "progress": "Progress",
+        "due": "Due",
+        "noDate": "No date",
+        "noLongerApplicable": "No longer applies",
+        "open": "Open the goal"
+      }
+    },
+    "forbidden": "You do not have access to this assessment: everyone sees their own and, for a manager, their team's."
   }
 }
