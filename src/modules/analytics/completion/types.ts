@@ -1,5 +1,6 @@
 // Drizzle- and server-free: shared by the queries and client components.
 import type { ProgressStatus } from "@/db/schema/import-history";
+import type { LocalizedText } from "@/db/schema/rating-scales";
 import type { Hierarchy } from "@/modules/analytics/dashboards/types";
 import { orgGroupBys } from "@/modules/org-attributes/kinds";
 
@@ -147,6 +148,8 @@ export type MissingPerson = {
 export type CompletionCycle = {
   id: string;
   name: string;
+  /** The name in each language when the cycle was generated (see `cycleName`). */
+  localizedName: LocalizedText | null;
   periodStart: string;
   periodEnd: string;
   status: string;

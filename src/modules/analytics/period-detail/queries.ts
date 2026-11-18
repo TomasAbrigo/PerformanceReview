@@ -132,6 +132,7 @@ export async function periodDetail(
       return {
         cycleId: cycle.id,
         cycleName: cycle.name,
+        localizedName: cycle.localizedName,
         periodStart: cycle.periodStart,
         periodEnd: cycle.periodEnd,
         participants: completion.participants,

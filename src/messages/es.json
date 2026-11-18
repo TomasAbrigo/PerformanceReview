@@ -984,7 +984,16 @@
       "completed_pct": "% completados",
       "in_progress_pct": "% en curso",
       "overdue_pct": "% vencidos",
-      "outlier_kind": "tipo"
+      "outlier_kind": "tipo",
+      "period_start": "inicio del período",
+      "period_end": "fin del período",
+      "valued_mean": "valoración propia (promedio 1-4)",
+      "valued_n": "valoración propia (personas)",
+      "retention_mean": "retención (promedio 1-5)",
+      "retention_n": "retención (personas)",
+      "engagement_mean": "compromiso Bamboo (promedio 1-5)",
+      "engagement_n": "compromiso Bamboo (personas)",
+      "goals_completed_pct": "goals completados (%)"
     }
   },
   "ImportHistory": {
@@ -1749,6 +1758,26 @@
     "export": {
       "csv": "Exportar CSV",
       "csvEmail": "Exportar CSV con email"
+    },
+    "period": {
+      "title": "Detalle por período",
+      "hint": "Un renglón por ciclo, del más viejo al más nuevo, con los mismos filtros de cuenta, proyecto, DM, Santex Lead, área y manager de la vista (no con el agrupar por). Las medias de valoración propia (1 a 4), retención y compromiso de Bamboo (1 a 5) llevan las personas detrás. Los goals completados son el estado en Bamboo.",
+      "hintAggregates": "Un renglón por ciclo, del más viejo al más nuevo, solo agregados: la cifra de un ciclo con menos personas que el mínimo no se muestra.",
+      "label": "Detalle por período",
+      "empty": "Todavía no hay ciclos lanzados.",
+      "hidden": "Oculto",
+      "people": "({n, plural, one {# persona} other {# personas}})",
+      "goalsOf": "de {n}",
+      "columns": {
+        "cycle": "Ciclo",
+        "n": "Personas",
+        "self": "Autoevaluación",
+        "manager": "Evaluación del manager",
+        "valued": "Valoración propia (1-4)",
+        "retention": "Retención (1-5)",
+        "engagement": "Compromiso Bamboo (1-5)",
+        "goals": "Goals completados"
+      }
     }
   },
   "GoalsInsights": {

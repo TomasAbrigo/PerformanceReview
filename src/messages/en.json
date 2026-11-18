@@ -984,7 +984,16 @@
       "completed_pct": "completed_pct",
       "in_progress_pct": "in_progress_pct",
       "overdue_pct": "overdue_pct",
-      "outlier_kind": "kind"
+      "outlier_kind": "kind",
+      "period_start": "period start",
+      "period_end": "period end",
+      "valued_mean": "valued by the company (mean 1-4)",
+      "valued_n": "valued by the company (people)",
+      "retention_mean": "retention (mean 1-5)",
+      "retention_n": "retention (people)",
+      "engagement_mean": "Bamboo engagement (mean 1-5)",
+      "engagement_n": "Bamboo engagement (people)",
+      "goals_completed_pct": "goals completed (%)"
     }
   },
   "ImportHistory": {
@@ -1749,6 +1758,26 @@
     "export": {
       "csv": "Export CSV",
       "csvEmail": "Export CSV with email"
+    },
+    "period": {
+      "title": "Detail by period",
+      "hint": "One row per cycle, oldest first, with the same account, project, DM, Santex Lead, area and manager filters as the view (not the group by). The means of valued by the company (1 to 4), retention and Bamboo engagement (1 to 5) carry the people behind them. Goals completed is the status in Bamboo.",
+      "hintAggregates": "One row per cycle, oldest first, aggregates only: a cycle with fewer people than the minimum shows no figure.",
+      "label": "Detail by period",
+      "empty": "There are no launched cycles yet.",
+      "hidden": "Hidden",
+      "people": "({n, plural, one {# person} other {# people}})",
+      "goalsOf": "of {n}",
+      "columns": {
+        "cycle": "Cycle",
+        "n": "People",
+        "self": "Self assessment",
+        "manager": "Manager assessment",
+        "valued": "Valued by the company (1-4)",
+        "retention": "Retention (1-5)",
+        "engagement": "Bamboo engagement (1-5)",
+        "goals": "Goals completed"
+      }
     }
   },
   "GoalsInsights": {

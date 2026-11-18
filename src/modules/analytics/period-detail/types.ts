@@ -1,4 +1,5 @@
 // Drizzle- and server-free: shared by the queries, the export and client components.
+import type { LocalizedText } from "@/db/schema/rating-scales";
 
 /** A mean over `n` people. */
 export type MeanOf = { n: number; mean: number };
@@ -11,6 +12,8 @@ export type MeanOf = { n: number; mean: number };
 export type PeriodDetailRow = {
   cycleId: string;
   cycleName: string;
+  /** The name in each language when the cycle was generated (see `cycleName`). */
+  localizedName: LocalizedText | null;
   periodStart: string;
   periodEnd: string;
   /** People in the cycle (the head count is shown even under the minimum). */

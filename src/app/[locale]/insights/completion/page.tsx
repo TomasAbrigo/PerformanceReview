@@ -10,6 +10,7 @@ import {
   MissingStatusToggle,
 } from "@/components/completion/completion-filters";
 import { MissingTable } from "@/components/completion/missing-table";
+import { PeriodDetailTable } from "@/components/completion/period-detail-table";
 import { parseCompletionParams } from "@/components/completion/params";
 import { orgFiltersOf } from "@/components/org/params";
 import { ExportCsvLink } from "@/components/data-quality/export-csv-link";
@@ -25,6 +26,7 @@ import {
   completionOverview,
 } from "@/modules/analytics/completion";
 import { dashboardFilterOptions } from "@/modules/analytics/dashboards";
+import { periodDetail } from "@/modules/analytics/period-detail";
 import { insightsScope } from "@/modules/insights";
 import { getSetting } from "@/modules/settings";
 
@@ -82,8 +84,14 @@ async function Completion({
     minGroupSize,
   };
   // The summary and the list of who is missing are read off the same rows.
-  const [{ delta, missing }, options] = await Promise.all([
+  const [{ delta, missing }, detail, options] = await Promise.all([
     completionOverview(db, actor, { ...filters, missingStatus: p.status }),
+    periodDetail(db, actor, {
+      department: p.department,
+      managerId: p.manager,
+      ...orgFiltersOf(p),
+      minGroupSize,
+    }),
     masked
       ? null
       : dashboardFilterOptions(db, actor, {
@@ -131,6 +139,34 @@ async function Completion({
         }
       >
         <CompletionSummaryView data={delta} />
+      </Panel>
+      <Panel
+        id="completion-period-detail"
+        title={t("period.title")}
+        hint={masked ? t("period.hintAggregates") : t("period.hint")}
+        actions={
+          hr ? (
+            <ExportCsvLink
+              file="insights-period-detail"
+              params={{
+                department: p.department,
+                manager: p.manager,
+                ...orgFiltersOf(p),
+              }}
+              label={t("export.csv")}
+            />
+          ) : undefined
+        }
+      >
+        <PeriodDetailTable
+          data={{
+            ...detail,
+            rows: localizeCycles(
+              detail.rows.map((r) => ({ ...r, name: r.cycleName })),
+              locale,
+            ).map(({ name, ...r }) => ({ ...r, cycleName: name })),
+          }}
+        />
       </Panel>
       <Panel
         id="completion-missing"

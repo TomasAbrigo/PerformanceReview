@@ -75,6 +75,11 @@ import {
   missingStatuses,
   roundedPoints,
 } from "@/modules/analytics/completion";
+import {
+  periodDetail,
+  type PeriodDetailRow,
+} from "@/modules/analytics/period-detail";
+import { cycleName } from "@/modules/review-core/cycle-name";
 import { RUN_STATUSES } from "@/modules/ingest/run-status";
 import { todayLocal } from "@/modules/org-history/dates";
 import { requestStatuses } from "@/modules/review-core/request-status";
@@ -1135,6 +1140,57 @@ function percent(rate: number | null) {
   return rate === null ? null : roundedPoints(rate);
 }
 
+/** A mean with two decimals; empty when there is nothing to average. */
+const mean2 = (m: { mean: number } | null) =>
+  m === null ? null : Math.round(m.mean * 100) / 100;
+
+const periodDetailExport = defineExport({
+  file: () => "insights-period-detail",
+  query: z.object({
+    ...orgQuery,
+    department: z.string().optional(),
+    manager: uuid.optional(),
+  }),
+  rows: (db, q, locale) =>
+    each(
+      periodDetail(db, DEFAULT_ACTOR, {
+        department: q.department,
+        managerId: q.manager,
+        ...orgFiltersOf(q),
+      }).then((d) =>
+        d.rows.map((r) => ({
+          ...r,
+          cycleName: cycleName(
+            { name: r.cycleName, localizedName: r.localizedName },
+            locale,
+          ),
+        })),
+      ),
+    ),
+  columns: (h) => [
+    { header: h("cycle_name"), value: (r: PeriodDetailRow) => r.cycleName },
+    { header: h("period_start"), value: (r) => r.periodStart },
+    { header: h("period_end"), value: (r) => r.periodEnd },
+    { header: h("participants"), value: (r) => r.participants },
+    { header: h("self_pct"), value: (r) => percent(r.selfRate) },
+    { header: h("manager_pct"), value: (r) => percent(r.managerRate) },
+    { header: h("valued_mean"), value: (r) => mean2(r.valued) },
+    { header: h("valued_n"), value: (r) => r.valued?.n ?? null },
+    { header: h("retention_mean"), value: (r) => mean2(r.retention) },
+    { header: h("retention_n"), value: (r) => r.retention?.n ?? null },
+    { header: h("engagement_mean"), value: (r) => mean2(r.engagement) },
+    { header: h("engagement_n"), value: (r) => r.engagement?.n ?? null },
+    { header: h("goals"), value: (r) => r.goals },
+    {
+      header: h("goals_completed_pct"),
+      value: (r) =>
+        r.goalsCompletedPct === null
+          ? null
+          : Math.round(r.goalsCompletedPct * 10) / 10,
+    },
+  ],
+});
+
 const missingExport = defineExport({
   file: () => "insights-missing",
   query: z.object({
@@ -1188,6 +1244,7 @@ const EXPORTS = {
   "dashboard-goals-vs-rating": goalsVsRatingExport,
   "dashboard-self-manager-gap": gapExport,
   "insights-completion": completionExport,
+  "insights-period-detail": periodDetailExport,
   "insights-missing": missingExport,
   "insights-indicator-distribution": indicatorDistributionExport,
   "insights-alerts": indicatorAlertsExport,
