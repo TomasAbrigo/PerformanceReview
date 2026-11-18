@@ -1,5 +1,7 @@
+import { eq } from "drizzle-orm";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { closeDb, db } from "@/db/client";
+import { question } from "@/db/schema";
 import {
   addQuestion,
   addSection,
@@ -52,6 +54,7 @@ describe("templates module", () => {
       "Engagement 1-5",
       "Never…Always",
       "Retention 1-5",
+      "Valued 1-4",
     ]);
   });
 
@@ -91,26 +94,67 @@ describe("templates module", () => {
     expect(ratings).toHaveLength(2);
   });
 
-  it("Santex template: standard and custom open questions with dimensions, hidden Likert retention and engagement", async () => {
+  it("Santex template: exactly the real question set (#123), hidden Likert retention and engagement", async () => {
     const template = await systemTemplate("santex_semester");
     expect(template.name.en).toBe("Santex semi-annual review");
     const detail = await getTemplate(db, template.id);
     const questions = detail!.sections.flatMap((s) => s.questions);
-    const open = questions.filter((q) => q.kind === "text");
-    expect(open.map((q) => `${q.appliesTo.join("+")}:${q.dimension}`)).toEqual([
-      "self:strengths",
-      "self:improvement",
-      "manager:strengths",
-      "manager:improvement",
-      "self+manager:custom_1",
-      "self+manager:custom_2",
-      "self+manager:custom_3",
+    expect(
+      questions.map(
+        (q) =>
+          `${q.appliesTo.join("+")}:${q.kind}:${q.role ?? "-"}:${q.dimension ?? "-"}`,
+      ),
+    ).toEqual([
+      "self:rating:valued:valued",
+      "self:single_choice:-:best_work",
+      "self:text:-:strengths",
+      "self:text:-:improvement",
+      "self:text:-:custom_1",
+      "self:text:-:custom_2",
+      "self:single_choice:-:-",
+      "manager:text:-:strengths",
+      "manager:text:-:improvement",
+      "manager:single_choice:-:-",
+      "manager:rating:retention:-",
+      "manager:rating:engagement:-",
     ]);
-    expect(open[0].prompt.es).toBe("¿Qué hago bien?");
-    expect(open[1].prompt.es).toBe("¿En qué puedo mejorar?");
-    expect(open[4].prompt.es).toMatch(/Pregunta custom 1/);
-    expect(open[4].prompt.es).toMatch(/placeholder/i);
+    expect(questions.map((q) => q.prompt.en)).toEqual([
+      "How well does Santex recognize my value?",
+      "What would have the greatest impact on my ability to do my best work more often?",
+      "What are some things I do well?",
+      "How could I improve?",
+      'Do I contribute with initiatives related to "Social impact"? How?',
+      'Do I contribute with initiatives related to "Environmental impact"? How?',
+      "Am I following all Information Security Policies and Procedures of the Company?",
+      "What are some things [Employee] does well?",
+      "How could [Employee] improve?",
+      "Do I speak with this employee frequently enough that I consider myself to be aware of his/her needs and current situation?",
+      "Retention: if [Employee] got a job offer elsewhere, I would…",
+      "Engagement: how engaged is [Employee] at work?",
+    ]);
+    // The yes/no ones offer Sí / No; every question is required.
+    const yesNo = questions.filter(
+      (q) => q.kind === "single_choice" && !q.dimension,
+    );
+    expect(yesNo).toHaveLength(2);
+    for (const q of yesNo) {
+      expect(q.choices!.map((c) => `${c.value}:${c.label.es}`)).toEqual([
+        "yes:Sí",
+        "no:No",
+      ]);
+    }
+    expect(questions.every((q) => q.required)).toBe(true);
     const scales = await listScales(db);
+    const valued = questions.find((x) => x.role === "valued")!;
+    expect(valued.visibleToReviewee).toBe(true);
+    const valuedScale = scales.find((s) => s.systemKey === "valued_1_4")!;
+    expect(valued.scaleId).toBe(valuedScale.id);
+    expect(valuedScale.options.map((o) => `${o.value}:${o.label.es}`)).toEqual([
+      "1:No valorado",
+      "2:No estoy seguro",
+      "3:A veces valorado",
+      "4:Muy valorado",
+    ]);
     for (const [role, key] of [
       ["retention", "retention_1_5"],
       ["engagement", "engagement_1_5"],
@@ -123,6 +167,23 @@ describe("templates module", () => {
         scaleId: scales.find((s) => s.systemKey === key)!.id,
       });
     }
+  });
+
+  it("re-seeding rewrites a system template whose questions went out of date, keeping its id", async () => {
+    const template = await systemTemplate("santex_semester");
+    const before = await getTemplate(db, template.id);
+    const first = before!.sections[0].questions[0];
+    await db
+      .update(question)
+      .set({ prompt: { es: "Pregunta vieja", en: "Old question" } })
+      .where(eq(question.id, first.id));
+    await seedSystemTemplates(db);
+    const after = await getTemplate(db, template.id);
+    expect(after!.id).toBe(template.id);
+    expect(after!.sections[0].questions[0].prompt.es).toBe(
+      "¿Qué tan bien reconoce Santex mi valor?",
+    );
+    expect(after!.sections.flatMap((s) => s.questions)).toHaveLength(12);
   });
 
   it("mid-year template has no rating questions", async () => {

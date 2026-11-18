@@ -12,8 +12,8 @@ export const KNOWN_DIMENSIONS = [
 /**
  * Display label of each dimension key. The dimensions come from the data
  * (question_revision.dimension), so any key can show up: a known key has its
- * message, `custom_<n>` a pattern, and an unknown one falls back to the
- * prompt of its latest question (then to the key itself).
+ * message; `custom_<n>` and an unknown key show the prompt of their latest
+ * question, `custom_<n>` without one a pattern, and the rest the key itself.
  */
 export function dimensionLabels(
   keys: string[],
@@ -37,8 +37,8 @@ export function dimensionLabels(
       return [
         key,
         names[key] ??
-          (n ? custom(n) : null) ??
           prompts[key]?.[locale]?.trim() ??
+          (n ? custom(n) : null) ??
           key,
       ];
     }),

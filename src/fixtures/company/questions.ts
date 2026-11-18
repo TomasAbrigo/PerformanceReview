@@ -53,7 +53,38 @@ export const MANAGER_QUESTIONS = {
   q4: { text: "How could [Employee] improve?" },
 } as const;
 
-/** Two company-defined questions answered on a 1-5 rating scale. */
+/**
+ * Santex's real custom questions (issue #123), the same in every cycle: the
+ * employee answers three (two "yes/no and how", one yes/no), the manager one
+ * (yes/no). Their answers are mostly "Sí".
+ */
+export const REAL_CUSTOM_QUESTIONS = {
+  self: [
+    'Do I contribute with initiatives related to "Social impact"? How?',
+    'Do I contribute with initiatives related to "Environmental impact"? How?',
+    "Am I following all Information Security Policies and Procedures of the Company?",
+  ],
+  manager: [
+    "Do I speak with this employee frequently enough that I consider myself to be aware of his/her needs and current situation?",
+  ],
+} as const;
+
+/** How people answer the "yes/no and how" custom questions. */
+export const YES_NO_HOW_ANSWERS = [
+  "Sí",
+  "Si",
+  "Sí, participé en la campaña de donaciones de fin de año.",
+  "Sí, con el voluntariado de la escuela del barrio.",
+  "Si, separando residuos y reduciendo impresiones.",
+  "No",
+  "No por ahora.",
+  "Sí",
+] as const;
+
+/** How people answer the plain yes/no custom questions. */
+export const YES_NO_ANSWERS = ["Sí", "Si", "Sí", "Yes", "Sí", "No"] as const;
+
+/** Two company-defined questions answered on a 1-5 rating scale (the older Employee Performance export only). */
 export const CUSTOM_QUESTIONS = [
   {
     employeeText: "Mis objetivos del período están claros.",

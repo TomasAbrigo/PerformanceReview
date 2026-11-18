@@ -305,12 +305,16 @@ describe("dimensionLabels", () => {
     },
     locale: "es" as const,
   };
-  it("known keys use their message, custom_N its pattern, unknown ones the question prompt", () => {
+  it("known keys use their message, custom_N and unknown ones their question prompt, custom_N without one its pattern", () => {
     expect(
-      dimensionLabels(["strengths", "custom_1", "weird_key", "zzz"], base),
+      dimensionLabels(
+        ["strengths", "custom_1", "custom_2", "weird_key", "zzz"],
+        base,
+      ),
     ).toEqual({
       strengths: "Fortalezas",
-      custom_1: "Pregunta personalizada 1",
+      custom_1: "no se usa",
+      custom_2: "Pregunta personalizada 2",
       weird_key: "¿Algo raro?",
       zzz: "zzz",
     });
