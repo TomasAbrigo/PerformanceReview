@@ -1,8 +1,7 @@
 "use client";
 
 import { CardCollection } from "@/components/card-collection";
-import { Quote } from "lucide-react";
-import { IconTile } from "@/components/experience";
+import { SENTIMENT_COLORS } from "@/components/charts";
 import { useFormatter, useTranslations } from "next-intl";
 import { useState, useTransition } from "react";
 import { Button } from "@/components/ui/button";
@@ -34,7 +33,8 @@ export function CommentsTable({
     <CardCollection
       role="group"
       aria-label={t("comments.table")}
-      gridClassName="record-grid"
+      gridClassName="grid gap-2 md:grid-cols-2"
+      initialCount={12}
     >
       {rows.map((r) => (
         <Row
@@ -71,40 +71,45 @@ function Row({
       timeZone: "UTC",
     });
   return (
-    <article className="record-card" aria-label={row.personName}>
-      <div className="flex flex-wrap items-center gap-2">
-        <IconTile>
-          <Quote className="size-5" />
-        </IconTile>
-        <h3 className="text-xl">{row.personName}</h3>
+    <article
+      className="flex flex-col gap-2 rounded-lg border border-border bg-card p-3"
+      aria-label={row.personName}
+      data-testid="comment-row"
+    >
+      <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm">
+        <span
+          aria-hidden="true"
+          className={`size-2.5 shrink-0 rounded-full ${SENTIMENT_COLORS[row.sentiment].fill}`}
+        />
+        <strong>{t(`sentiment.${row.sentiment}`)}</strong>
+        {row.source === "human" ? (
+          <span className="text-xs text-muted-foreground">
+            ({t("comments.human")})
+          </span>
+        ) : null}
+        <span className="text-muted-foreground">·</span>
+        <h3 className="text-sm font-medium">{row.personName}</h3>
         <span className="rounded border px-1 text-[10px] font-semibold tracking-wide">
           {t(`comments.tags.${row.relationship}` as "comments.tags.self")}
         </span>
       </div>
-      <div className="text-xs text-muted-foreground">
-        <div>{row.cycleName}</div>
-        <div className="text-xs text-muted-foreground">
-          {day(row.periodStart)} – {day(row.periodEnd)}
-        </div>
-      </div>
       <p className="kicker text-primary">{dimension}</p>
-      <blockquote className="rounded-lg border-l-4 border-brand-600 bg-brand-fog p-4 text-sm leading-relaxed whitespace-pre-line">
+      <blockquote className="line-clamp-4 border-l-2 border-brand-600 pl-3 text-sm leading-snug whitespace-pre-line">
         {row.text}
       </blockquote>
-      <div className="flex flex-col items-start gap-3">
-        <div>
-          <strong>{t(`sentiment.${row.sentiment}`)}</strong>
-          {row.source === "human" ? ` (${t("comments.human")})` : null}
-        </div>
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
+        <span title={`${day(row.periodStart)} – ${day(row.periodEnd)}`}>
+          {row.cycleName}
+        </span>
         {row.confidence !== null ? (
-          <div className="text-xs text-muted-foreground">
+          <span>
             {t("comments.confidence", { value: row.confidence.toFixed(2) })}
-          </div>
+          </span>
         ) : null}
         {row.themes.length > 0 ? (
           <ul
             aria-label={t("comments.themeTags")}
-            className="mt-1 flex flex-wrap gap-1 text-xs"
+            className="flex flex-wrap gap-1"
           >
             {row.themes.map((theme) => (
               <li key={theme} className="rounded-full border px-2">
@@ -113,8 +118,10 @@ function Row({
             ))}
           </ul>
         ) : null}
+      </div>
+      <div className="flex flex-col items-start gap-2">
         {correct && !editing ? (
-          <Button size="sm" variant="outline" onClick={() => setEditing(true)}>
+          <Button size="xs" variant="ghost" onClick={() => setEditing(true)}>
             {t("comments.correct")}
           </Button>
         ) : null}

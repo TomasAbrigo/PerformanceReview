@@ -28,6 +28,13 @@ test("People runs the Mock analysis on an imported cycle and sees sentiment and 
   await expect(bars.getByTestId("sentiment-bar").first()).toBeVisible();
   await expect(bars).toContainText("Fortalezas");
 
+  // Every segment opens the comments behind it in the drill sheet.
+  await bars.getByRole("link").first().click();
+  await expect(page).toHaveURL(/drill=comments/);
+  const sheet = page.getByRole("dialog");
+  await expect(sheet).toContainText("Comentarios");
+  await page.goto(page.url().replace(/[?&]drill=[^&]*/, ""));
+
   const themes = page.getByRole("list", { name: "Temas más frecuentes" });
   await expect(themes.getByRole("listitem").first()).toBeVisible();
 
@@ -42,7 +49,7 @@ test("People runs the Mock analysis on an imported cycle and sees sentiment and 
       .getByRole("listitem"),
   ).toHaveText(["Positivo", "Constructivo", "Neutral", "Mixto", "Negativo"]);
   await expect(
-    page.getByRole("list", { name: "Indicadores" }).getByRole("listitem"),
+    page.getByTestId("qualitative-kpis").getByRole("region"),
   ).toHaveCount(6);
   await expect(
     page.getByRole("form", { name: "Filtros" }).getByLabel("Sentimiento"),

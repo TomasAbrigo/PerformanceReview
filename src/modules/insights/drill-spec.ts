@@ -22,6 +22,7 @@ import {
   engagementSegments,
   parseEngagementMonth,
 } from "@/modules/engagement/kinds";
+import { isUuid } from "@/lib/uuid";
 
 export const DRILL_PARAM = "drill";
 
@@ -68,7 +69,12 @@ export type Drill =
       kind: "engagement";
       month: string;
       segment: EngagementSegment | null;
-    };
+    }
+  // ---- qual (#117) ----
+  /** Comments narrowed by any of the Feedback filters (a bar segment, a band...). */
+  | { kind: "comments"; scope: CommentScope }
+  /** One figure of a DM card of the 360 (direct scope): its people or comments. */
+  | { kind: "dm"; dm: string; metric: DmMetric };
 
 // ---- quant (#117): group- and month-scoped drills ----
 /** What a group drill groups by (a breakdown of completion or indicators). */
@@ -136,6 +142,94 @@ function parseQuantDrill(kind: string, args: string[]): Drill | null {
   }
 }
 
+// ---- qual (#117): comments with a scope, the DM card of the 360 ----
+export const commentSides = ["self", "manager", "peer", "upward"] as const;
+export const dmMetrics = [
+  "retention",
+  "engagement",
+  "risk",
+  "self",
+  "manager",
+  "comments",
+] as const;
+export type DmMetric = (typeof dmMetrics)[number];
+
+/** What a comments drill narrows to; absent keys do not narrow. */
+export type CommentScope = {
+  cycle?: string;
+  sentiment?: Sentiment;
+  dimension?: string;
+  theme?: string;
+  side?: (typeof commentSides)[number];
+  department?: string;
+  account?: string;
+  project?: string;
+  dm?: string;
+  santexLead?: string;
+  /** The manager's answer to an indicator (both or neither). */
+  role?: Indicator;
+  value?: number;
+};
+
+const SCOPE_KEYS = [
+  "cycle",
+  "sentiment",
+  "dimension",
+  "theme",
+  "side",
+  "department",
+  "account",
+  "project",
+  "dm",
+  "santexLead",
+  "role",
+  "value",
+] as const;
+/** Free text of the org attributes and areas: any short non-empty string. */
+const TEXT = (v: string) => v.length > 0 && v.length <= 120;
+
+function parseScope(raw: string): CommentScope | null {
+  const scope: Record<string, string | number> = {};
+  if (raw !== "") {
+    for (const pair of raw.split(",")) {
+      const at = pair.indexOf("=");
+      if (at < 1) return null;
+      const k = pair.slice(0, at);
+      let v: string;
+      try {
+        v = decodeURIComponent(pair.slice(at + 1));
+      } catch {
+        return null;
+      }
+      if (!isOneOf(SCOPE_KEYS, k) || k in scope) return null;
+      const ok =
+        k === "cycle"
+          ? isUuid(v)
+          : k === "sentiment"
+            ? isOneOf(sentiments, v)
+            : k === "dimension" || k === "theme"
+              ? KEY.test(v)
+              : k === "side"
+                ? isOneOf(commentSides, v)
+                : k === "role"
+                  ? isOneOf(indicators, v)
+                  : k === "value"
+                    ? /^[1-5]$/.test(v)
+                    : TEXT(v);
+      if (!ok) return null;
+      scope[k] = k === "value" ? Number(v) : v;
+    }
+  }
+  if ("role" in scope !== "value" in scope) return null;
+  return scope as CommentScope;
+}
+
+function formatScope(scope: CommentScope): string {
+  return SCOPE_KEYS.filter((k) => scope[k] !== undefined)
+    .map((k) => `${k}=${encodeURIComponent(String(scope[k]))}`)
+    .join(",");
+}
+
 export type DrillKind = Drill["kind"];
 
 /** A key of the vocabulary (theme, dimension): letters, digits, _ and -. */
@@ -145,7 +239,7 @@ const isOneOf = <T extends string>(list: readonly T[], v: string): v is T =>
 
 /** The drill a search param asks for; null when absent or malformed. */
 export function parseDrill(raw: unknown): Drill | null {
-  if (typeof raw !== "string" || raw.length > 200) return null;
+  if (typeof raw !== "string" || raw.length > 400) return null;
   const [kind, ...args] = raw.split(":");
   const [a = "", b = ""] = args;
   switch (kind) {
@@ -184,6 +278,20 @@ export function parseDrill(raw: unknown): Drill | null {
       return args.length === 1 && isOneOf(goalStates, a)
         ? { kind, state: a }
         : null;
+    // ---- qual (#117) ----
+    case "comments":
+      if (args.length !== 1) return null;
+      return ((scope) => (scope ? { kind, scope } : null))(parseScope(a));
+    case "dm": {
+      if (args.length !== 2 || !isOneOf(dmMetrics, a)) return null;
+      let dm: string;
+      try {
+        dm = decodeURIComponent(b);
+      } catch {
+        return null;
+      }
+      return TEXT(dm) ? { kind, dm, metric: a } : null;
+    }
     default:
       return parseQuantDrill(kind, args);
   }
@@ -214,6 +322,10 @@ export function formatDrill(d: Drill): string {
       return d.segment
         ? `engagement:${d.month}:${d.segment}`
         : `engagement:${d.month}`;
+    case "comments":
+      return `comments:${formatScope(d.scope)}`;
+    case "dm":
+      return `dm:${d.metric}:${encodeURIComponent(d.dm)}`;
   }
 }
 

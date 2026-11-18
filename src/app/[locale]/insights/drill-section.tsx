@@ -93,6 +93,40 @@ async function drillTitle(drill: Drill): Promise<string> {
       const tseg = await getTranslations("Engagement.segment");
       return t("engagementSegment", { month, segment: tseg(drill.segment) });
     }
+    // ---- qual (#117) ----
+    case "comments": {
+      const sc = drill.scope;
+      const tq = await getTranslations("Qualitative");
+      const labels = sc.dimension ? await dimensionLabels([sc.dimension]) : {};
+      const parts = [
+        sc.sentiment ? ts(sc.sentiment) : null,
+        sc.dimension ? (labels[sc.dimension] ?? sc.dimension) : null,
+        sc.theme
+          ? tt.has(sc.theme as "proyecto")
+            ? tt(sc.theme as "proyecto")
+            : humanizeTheme(sc.theme)
+          : null,
+        sc.side && sc.side !== "peer" && sc.side !== "upward"
+          ? tq(`side.${sc.side}`)
+          : null,
+        sc.department ?? null,
+        sc.account ?? null,
+        sc.project ?? null,
+        sc.dm ?? null,
+        sc.santexLead ?? null,
+        sc.role && sc.value
+          ? t("indicatorValue", {
+              indicator: ti(`indicator.${sc.role}`),
+              value: sc.value,
+            })
+          : null,
+      ].filter((x): x is string => !!x);
+      return parts.length
+        ? t("comments", { detail: parts.join(" · ") })
+        : t("commentsAll");
+    }
+    case "dm":
+      return t(`dm.${drill.metric}`, { dm: drill.dm });
   }
 }
 

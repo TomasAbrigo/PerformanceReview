@@ -1179,7 +1179,13 @@
       "constructive": "Constructivos",
       "mixed": "Mixtos",
       "negative": "Negativos",
-      "neutral": "Neutrales"
+      "neutral": "Neutrales",
+      "totalNote": "Comentarios etiquetados con los filtros actuales",
+      "count": "{n, plural, one {# comentario} other {# comentarios}}",
+      "scale": "{label}: {share} de los comentarios",
+      "delta": "{delta} pp vs. {cycle}",
+      "open": "Ver {n, plural, one {el comentario} other {los # comentarios}}: {label}",
+      "openAll": "Ver {n, plural, one {el comentario} other {los # comentarios}}"
     },
     "dimensions": {
       "strengths": "Fortalezas",
@@ -1208,7 +1214,9 @@
       "title": "Temas más frecuentes",
       "count": "{n, plural, one {# comentario} other {# comentarios}}",
       "sentiment": "Sentimiento de los comentarios de {theme}",
-      "quotesNote": "Citas con nombres, emails y legajos reemplazados."
+      "quotesNote": "Citas con nombres, emails y legajos reemplazados.",
+      "how": "Cuántos comentarios tocan cada tema, su parte del total y su sentimiento; el tema y cada segmento abren esos comentarios.",
+      "open": "Ver {n, plural, one {el comentario} other {los # comentarios}} sobre {theme}"
     },
     "indicators": {
       "title": "Sentimiento vs. retención y compromiso",
@@ -1216,7 +1224,10 @@
       "indicator": "Indicador",
       "answer": "Respuesta",
       "retention": "Retención",
-      "engagement": "Compromiso"
+      "engagement": "Compromiso",
+      "how": "Sentimiento de los comentarios de cada persona según la respuesta que le dio su manager (5, la más alta, arriba). Cada segmento abre esos comentarios.",
+      "chart": "{indicator}: sentimiento por respuesta del manager",
+      "row": "{value} · {answer}"
     },
     "comments": {
       "title": "Comentarios",
@@ -1241,7 +1252,8 @@
       "save": "Guardar corrección",
       "themes": "Temas (separados por ;)",
       "reason": "Motivo",
-      "saved": "Corrección guardada."
+      "saved": "Corrección guardada.",
+      "count": "{n, plural, one {# comentario} other {# comentarios}} (los más recientes primero)"
     },
     "run": {
       "button": "Correr análisis",
@@ -1265,7 +1277,8 @@
         "unknown_cycle": "Ciclo desconocido",
         "no_match": "Sin comentario que coincida",
         "ambiguous": "Más de un comentario posible"
-      }
+      },
+      "hint": "Herramienta de People: cargá etiquetas corregidas desde un CSV (ver docs/qualitative-labels.md)."
     },
     "errors": {
       "forbidden": "No tenés permiso para esto.",
@@ -1349,7 +1362,18 @@
       "sentimentGapHint": "Para ciclos solo de texto: proporción de sentimiento de cada lado por dimensión.",
       "sentimentGapChart": "Sentimiento de autoevaluación y manager por dimensión",
       "rowSelf": "{dimension} · autoevaluación",
-      "rowManager": "{dimension} · manager"
+      "rowManager": "{dimension} · manager",
+      "sentimentHow": "Cada barra suma el 100 % de los comentarios propios de una dimensión; arriba, los de mayor proporción negativa y mixta. Cada segmento abre esos comentarios.",
+      "completionHow": "Autoevaluación y evaluación del manager enviadas por grupo; arriba, los grupos con menos autoevaluaciones.",
+      "kpi": {
+        "title": "Indicadores de autoevaluación",
+        "submitted": "{submitted} de {total} enviadas",
+        "openPending": "Ver {n, plural, one {la persona} other {las # personas}} con {side} pendiente",
+        "negative": "Comentarios propios negativos",
+        "negativeNote": "{n} de {total} comentarios propios",
+        "negativeScale": "Negativos: {share} de los comentarios propios",
+        "openNegative": "Ver {n, plural, one {el comentario negativo} other {los # comentarios negativos}}"
+      }
     },
     "Executive": {
       "nav": "Resumen",
@@ -1844,14 +1868,17 @@
       "reading": "Lectura",
       "none": "–",
       "meanOf": "sobre {n}",
-      "riskOf": "({people} de {of})"
+      "riskOf": "({people} de {of})",
+      "commentsLabel": "Comentarios",
+      "commentsOf": "de {people, plural, one {# persona} other {# personas}}"
     },
     "spark": {
       "label": "Retención y compromiso por ciclo",
       "retention": "Retención",
       "engagement": "Compromiso",
       "noData": "sin datos",
-      "point": "{cycle}: {value}"
+      "point": "{cycle}: {value}",
+      "axis": "Escala 1 a 5"
     },
     "insight": {
       "retentionDrop": "La retención media cayó {delta} puntos desde {cycle} (de {previous} a {current}).",
@@ -1867,6 +1894,14 @@
     "suppressed": "{n, plural, one {# persona queda fuera} other {# personas quedan fuera}}: sus DM tienen menos de {min} personas.",
     "export": {
       "csv": "Exportar CSV"
+    },
+    "drill": {
+      "retention": "Ver la retención de las personas de {dm}",
+      "engagement": "Ver el compromiso de las personas de {dm}",
+      "risk": "Ver las personas en riesgo de {dm}",
+      "self": "Ver las autoevaluaciones pendientes del equipo de {dm}",
+      "manager": "Ver las evaluaciones del manager pendientes del equipo de {dm}",
+      "comments": "Ver los comentarios del equipo de {dm}"
     }
   },
   "OrgFilters": {
@@ -2340,7 +2375,18 @@
       },
       "group": "{title} · {group}",
       "engagement": "Compromiso mensual · {month}",
-      "engagementSegment": "Compromiso mensual · {month} · {segment}"
+      "engagementSegment": "Compromiso mensual · {month} · {segment}",
+      "comments": "Comentarios · {detail}",
+      "commentsAll": "Todos los comentarios",
+      "indicatorValue": "{indicator} {value}",
+      "dm": {
+        "retention": "{dm} · retención de su equipo",
+        "engagement": "{dm} · compromiso de su equipo",
+        "risk": "{dm} · personas en riesgo",
+        "self": "{dm} · autoevaluaciones pendientes",
+        "manager": "{dm} · evaluaciones del manager pendientes",
+        "comments": "{dm} · comentarios de su equipo"
+      }
     },
     "truncated": "Se muestran los primeros {n}; la vista completa tiene todos."
   },

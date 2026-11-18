@@ -11,6 +11,7 @@ import { CommentsTable } from "@/components/qualitative/comments-table";
 import { QualitativeFilters } from "@/components/qualitative/filters";
 import { ImportLabelsForm } from "@/components/qualitative/import-form";
 import { Toggle } from "@/components/insights/controls";
+import { Panel } from "@/components/insights/parts";
 import { orgFiltersOf } from "@/components/org/params";
 import {
   parseQualitativeParams,
@@ -48,7 +49,12 @@ import {
   type QualitativeFilters as Filters,
 } from "@/modules/qualitative-analysis";
 import { listCycles } from "@/modules/review-core";
-import { getSetting } from "@/modules/settings/service";
+import { getSettings } from "@/modules/settings";
+import type { DrillBase } from "@/components/drill/drill-link";
+import type { CommentDrills } from "@/components/qualitative/views";
+import { type CommentScope, parseDrill } from "@/modules/insights/drill-spec";
+import { kpiThresholds } from "@/modules/insights/tone";
+import { DrillSection } from "../drill-section";
 import { dimensionLabels } from "../dimension-labels";
 import {
   correctLabelAction,
@@ -72,10 +78,12 @@ async function Qualitative({
   const individuals = canSeeIndividuals(actor);
   const hr = actor.role === "hr";
   // Direction does not filter by the people who lead a team (a DM, a Santex Lead).
+  const sp = await searchParams;
   const p = withoutPersonFilters(
-    parseQualitativeParams(await searchParams),
+    parseQualitativeParams(sp),
     scope.kind === "aggregatesOnly",
   );
+  const settings = await getSettings(db);
   const cycles = (await listCycles(db))
     .filter((c) => c.status !== "draft")
     .map((c) => ({ id: c.id, name: c.name }));
@@ -88,7 +96,7 @@ async function Qualitative({
     sentiment: p.sentiment,
     theme: p.theme,
     relationship: p.side,
-    includeClosed: await getSetting(db, "analysis.includeClosed"),
+    includeClosed: settings["analysis.includeClosed"],
     aggregateOnly: p.aggregate,
   };
   // Direction reads teams, not the people who lead them (a DM, a Santex Lead).
@@ -119,6 +127,43 @@ async function Qualitative({
     listComments(db, actor, f),
     sentimentByGroup(db, actor, f, groupBy),
   ]);
+  // Drill-down (drill-section.tsx): every mark opens its comments, narrowed
+  // by the page's filters plus what the mark stands for. Not in the
+  // aggregate view, which never lists comments.
+  const base: DrillBase = { pathname: "/insights/qualitative", query: sp };
+  const pageScope: CommentScope = {
+    cycle: cycleId,
+    dimension: p.dimension,
+    sentiment: p.sentiment,
+    theme: p.theme,
+    side: p.side,
+    department: p.department,
+    ...orgFiltersOf(p),
+  };
+  for (const k of Object.keys(pageScope) as (keyof CommentScope)[]) {
+    if (pageScope[k] === undefined) delete pageScope[k];
+  }
+  const drills: CommentDrills | undefined = p.aggregate
+    ? undefined
+    : { base, scope: pageScope };
+  // Only comment drills here: they carry their own cycle (or all of them).
+  const parsed = p.aggregate ? null : parseDrill(sp.drill);
+  const drill = parsed?.kind === "comments" ? parsed : null;
+  const groupScope = (key: string): CommentScope | null => {
+    if (key === "unassigned") return null;
+    switch (groupBy) {
+      case "department":
+        return { department: key };
+      case "santex_lead":
+        return { santexLead: key };
+      default:
+        return { [groupBy]: key };
+    }
+  };
+  // The cycle before the selected one, for the deltas of the KPIs.
+  const at = cycleId ? trend.findIndex((c) => c.cycleId === cycleId) : -1;
+  const previous =
+    at > 0 ? { name: trend[at - 1].cycleName, counts: trend[at - 1] } : null;
   // The panel only appears when People have loaded org attributes.
   const hasOrg = Object.values(org).some((values) => values.length > 0);
   const dimensionLabel = await dimensionLabels(
@@ -159,11 +204,24 @@ async function Qualitative({
           org={org}
         />
       </PageHeader>
-      <Kpis counts={totals} />
-      <ByDimension rows={byDimension} dimensionLabel={dimensionLabel} />
-      <Trend points={trend} />
+      <Kpis
+        counts={totals}
+        previous={previous}
+        drills={drills}
+        thresholds={kpiThresholds(settings)}
+      />
+      <ByDimension
+        rows={byDimension}
+        dimensionLabel={dimensionLabel}
+        drills={drills}
+      />
+      <Trend points={trend} drills={drills} />
       {hasOrg ? (
-        <ByGroup rows={byGroup}>
+        <ByGroup
+          rows={byGroup}
+          drills={scope.kind === "aggregatesOnly" ? undefined : drills}
+          drillScopeOf={groupScope}
+        >
           <div className="flex flex-wrap items-center gap-3">
             <Toggle
               label={t("byGroup.groupBy")}
@@ -188,19 +246,35 @@ async function Qualitative({
           </div>
         </ByGroup>
       ) : null}
-      <Themes themes={themes} />
-      <Indicators rows={indicators} />
+      <Themes themes={themes} total={totals?.total} drills={drills} />
+      <Indicators rows={indicators} drills={drills} />
       {individuals && !p.aggregate ? (
-        <section className="flex flex-col gap-2">
-          <h2>{t("comments.title")}</h2>
+        <Panel
+          id="comments"
+          kind="comments"
+          title={t("comments.title")}
+          meta={t("comments.count", { n: comments.length })}
+        >
           <CommentsTable
             rows={comments}
             dimensionLabel={dimensionLabel}
             correct={hr ? correctLabelAction : undefined}
           />
-        </section>
+        </Panel>
       ) : null}
       {hr ? <ImportLabelsForm importLabels={importLabelsAction} /> : null}
+      {drill ? (
+        <Suspense fallback={null}>
+          {/* A comments drill carries its own cycle; the rest need one. */}
+          <DrillSection
+            actor={actor}
+            cycleId={cycleId ?? ""}
+            drill={drill}
+            base={base}
+            minGroupSize={settings["aggregation.minGroupSize"]}
+          />
+        </Suspense>
+      ) : null}
     </div>
   );
 }

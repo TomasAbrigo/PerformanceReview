@@ -1179,7 +1179,13 @@
       "constructive": "Constructive",
       "mixed": "Mixed",
       "negative": "Negative",
-      "neutral": "Neutral"
+      "neutral": "Neutral",
+      "totalNote": "Labelled comments with the current filters",
+      "count": "{n, plural, one {# comment} other {# comments}}",
+      "scale": "{label}: {share} of the comments",
+      "delta": "{delta} pp vs. {cycle}",
+      "open": "See {n, plural, one {the comment} other {the # comments}}: {label}",
+      "openAll": "See {n, plural, one {the comment} other {the # comments}}"
     },
     "customDimension": "Custom question {n}",
     "dimensions": {
@@ -1208,7 +1214,9 @@
       "title": "Top themes",
       "count": "{n, plural, one {# comment} other {# comments}}",
       "sentiment": "Sentiment of the comments about {theme}",
-      "quotesNote": "Quotes with names, emails and employee numbers replaced."
+      "quotesNote": "Quotes with names, emails and employee numbers replaced.",
+      "how": "How many comments touch each theme, their share of the total and their sentiment; the theme and each segment open those comments.",
+      "open": "See {n, plural, one {the comment} other {the # comments}} about {theme}"
     },
     "indicators": {
       "title": "Sentiment vs. retention and engagement",
@@ -1216,7 +1224,10 @@
       "indicator": "Indicator",
       "answer": "Answer",
       "retention": "Retention",
-      "engagement": "Engagement"
+      "engagement": "Engagement",
+      "how": "Sentiment of each person's comments by the answer their manager gave (5, the highest, on top). Each segment opens those comments.",
+      "chart": "{indicator}: sentiment by the manager's answer",
+      "row": "{value} · {answer}"
     },
     "comments": {
       "title": "Comments",
@@ -1241,7 +1252,8 @@
       "save": "Save correction",
       "themes": "Themes (separated by ;)",
       "reason": "Reason",
-      "saved": "Correction saved."
+      "saved": "Correction saved.",
+      "count": "{n, plural, one {# comment} other {# comments}} (latest first)"
     },
     "run": {
       "button": "Run analysis",
@@ -1265,7 +1277,8 @@
         "unknown_cycle": "Unknown cycle",
         "no_match": "No matching comment",
         "ambiguous": "More than one possible comment"
-      }
+      },
+      "hint": "People tool: load corrected labels from a CSV (see docs/qualitative-labels.md)."
     },
     "errors": {
       "forbidden": "You are not allowed to do this.",
@@ -1349,7 +1362,18 @@
       "sentimentGapHint": "For text-only cycles: the sentiment share of each side per dimension.",
       "sentimentGapChart": "Self and manager sentiment by dimension",
       "rowSelf": "{dimension} · self",
-      "rowManager": "{dimension} · manager"
+      "rowManager": "{dimension} · manager",
+      "sentimentHow": "Each bar adds up to 100 % of the self comments of a dimension; on top, those with the largest negative and mixed share. Each segment opens those comments.",
+      "completionHow": "Self and manager assessments submitted per group; on top, the groups with the fewest self assessments.",
+      "kpi": {
+        "title": "Self-assessment indicators",
+        "submitted": "{submitted} of {total} submitted",
+        "openPending": "See {n, plural, one {the person} other {the # people}} with {side} pending",
+        "negative": "Negative self comments",
+        "negativeNote": "{n} of {total} self comments",
+        "negativeScale": "Negative: {share} of the self comments",
+        "openNegative": "See {n, plural, one {the negative comment} other {the # negative comments}}"
+      }
     },
     "Executive": {
       "nav": "Overview",
@@ -1844,14 +1868,17 @@
       "reading": "Reading",
       "none": "–",
       "meanOf": "over {n}",
-      "riskOf": "({people} of {of})"
+      "riskOf": "({people} of {of})",
+      "commentsLabel": "Comments",
+      "commentsOf": "from {people, plural, one {# person} other {# people}}"
     },
     "spark": {
       "label": "Retention and engagement by cycle",
       "retention": "Retention",
       "engagement": "Engagement",
       "noData": "no data",
-      "point": "{cycle}: {value}"
+      "point": "{cycle}: {value}",
+      "axis": "Scale 1 to 5"
     },
     "insight": {
       "retentionDrop": "Mean retention fell {delta} points since {cycle} (from {previous} to {current}).",
@@ -1867,6 +1894,14 @@
     "suppressed": "{n, plural, one {# person is} other {# people are}} left out: their DMs have fewer than {min} people.",
     "export": {
       "csv": "Export CSV"
+    },
+    "drill": {
+      "retention": "See the retention of {dm}'s people",
+      "engagement": "See the engagement of {dm}'s people",
+      "risk": "See {dm}'s people at risk",
+      "self": "See the pending self-assessments of {dm}'s team",
+      "manager": "See the pending manager assessments of {dm}'s team",
+      "comments": "See the comments of {dm}'s team"
     }
   },
   "OrgFilters": {
@@ -2340,7 +2375,18 @@
       },
       "group": "{title} · {group}",
       "engagement": "Monthly engagement · {month}",
-      "engagementSegment": "Monthly engagement · {month} · {segment}"
+      "engagementSegment": "Monthly engagement · {month} · {segment}",
+      "comments": "Comments · {detail}",
+      "commentsAll": "All comments",
+      "indicatorValue": "{indicator} {value}",
+      "dm": {
+        "retention": "{dm} · their team's retention",
+        "engagement": "{dm} · their team's engagement",
+        "risk": "{dm} · people at risk",
+        "self": "{dm} · pending self-assessments",
+        "manager": "{dm} · pending manager assessments",
+        "comments": "{dm} · their team's comments"
+      }
     },
     "truncated": "Showing the first {n}; the full view has them all."
   },
