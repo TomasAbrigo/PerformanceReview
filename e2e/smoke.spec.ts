@@ -48,10 +48,11 @@ test("home navigation puts Goals and Assessments first, then the Análisis, Dato
     "Assessments",
     ...ANALYSIS,
     ...DATA,
+    "Ciclos",
     "Ajustes de insights",
   ]);
   // Every link has a short description under it.
-  await expect(nav.getByRole("listitem")).toHaveCount(15);
+  await expect(nav.getByRole("listitem")).toHaveCount(16);
   await expect(
     nav.getByRole("listitem").filter({ hasText: "Vista ejecutiva" }),
   ).toContainText("Completitud, retención, compromiso");
@@ -71,6 +72,7 @@ test("the sidebar lists the same sections in the same order and marks the curren
     "Assessments",
     ...ANALYSIS,
     ...DATA,
+    "Ciclos",
     "Ajustes de insights",
   ]);
   await side.getByRole("link", { name: "Assessments", exact: true }).click();

@@ -18,6 +18,19 @@ describe("navGroups", () => {
     ]);
   });
 
+  it("lists the cycles screen under Settings, for People only", () => {
+    const settings = groupsOf({ personId: null, role: "hr" }).find(
+      (g) => g.key === "settings",
+    );
+    expect(settings?.items.map((i) => i.href)).toEqual([
+      "/settings/cycles",
+      "/settings/insights",
+    ]);
+    expect(keysOf({ personId: person, role: "manager" })).not.toContain(
+      "settings",
+    );
+  });
+
   it("puts Goals and Assessments first, as primary entries, apart from the analysis", () => {
     const groups = groupsOf({ personId: null, role: "hr" });
     expect(groups.map((g) => [g.key, g.primary])).toEqual([
