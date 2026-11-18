@@ -52,11 +52,10 @@
       "title": "Ciclos",
       "empty": "Todavía no hay ciclos.",
       "columns": {
-        "name": "Ciclo",
         "period": "Período",
-        "status": "Estado",
         "participants": "Participantes"
-      }
+      },
+      "participants": "{count, plural, one {# participante} other {# participantes}}"
     },
     "create": {
       "title": "Nuevo ciclo",
@@ -83,7 +82,6 @@
       "title": "Participantes",
       "hintDraft": "Elegí a quién se evalúa. Podés sumar a todos los activos, a un área o a mano; al abrir se toma el snapshot de manager, área y puesto.",
       "hintOpen": "Podés sumar o sacar personas mientras el ciclo está abierto.",
-      "empty": "No hay participantes.",
       "all": "Todos los activos",
       "area": "Sumar un área",
       "areaPlaceholder": "Elegí un área",
@@ -95,10 +93,8 @@
       "saved": "Participantes guardados.",
       "searchLabel": "Participantes disponibles",
       "columns": {
-        "person": "Persona",
         "area": "Área",
-        "manager": "Manager",
-        "state": "Estado"
+        "manager": "Manager"
       },
       "removed": "Quitado",
       "active": "Activo",
@@ -115,11 +111,8 @@
       "title": "Solicitudes",
       "empty": "Todavía no hay solicitudes: se generan al abrir el ciclo.",
       "columns": {
-        "person": "Evaluado",
         "kind": "Tipo",
-        "reviewer": "Evaluador",
-        "status": "Estado",
-        "actions": "Acciones"
+        "reviewer": "Evaluador"
       },
       "kind": {
         "self": "Autoevaluación",

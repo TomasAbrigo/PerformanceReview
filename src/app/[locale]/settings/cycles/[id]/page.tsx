@@ -1,3 +1,4 @@
+import { ClipboardCheck, UserRound, UserRoundCheck } from "lucide-react";
 import { hasLocale } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
@@ -7,19 +8,17 @@ import { HrOnly } from "@/components/access/hr-only";
 import { ActionButton } from "@/components/cycles/action-button";
 import { AddParticipant } from "@/components/cycles/add-participant";
 import { ParticipantPicker } from "@/components/cycles/participant-picker";
+import { CardCollection } from "@/components/card-collection";
+import {
+  EmptyState,
+  IconTile,
+  MetricCard,
+  PageSkeleton,
+} from "@/components/experience";
 import { Panel } from "@/components/insights/parts";
 import { PageHeader } from "@/components/page-header";
 import { groupKicker } from "@/components/page-kicker";
-import { ProgressBar } from "@/components/progress-bar";
 import { Badge } from "@/components/ui/badge";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { db } from "@/db/client";
 import { Link } from "@/i18n/navigation";
 import { routing } from "@/i18n/routing";
@@ -40,6 +39,14 @@ import {
   setParticipantsAction,
 } from "../actions";
 import { statusKey } from "../status-key";
+
+const percentOf = ({
+  submitted,
+  total,
+}: {
+  submitted: number;
+  total: number;
+}) => (total === 0 ? 0 : Math.round((submitted / total) * 100));
 
 async function CycleDetail({
   params,
@@ -62,7 +69,6 @@ async function CycleDetail({
   const inCycle = new Set(active.map((p) => p.revieweePersonId));
   const progress = await cycleProgress(db, id);
   const requests = draft ? [] : await listCycleRequests(db, actor, id);
-  const total = (kind: "self" | "manager") => progress[kind];
 
   return (
     <>
@@ -118,25 +124,23 @@ async function CycleDetail({
             ) : undefined
           }
         >
-          {(["self", "manager"] as const).map((kind) => (
-            <div key={kind} className="flex flex-col gap-1">
-              <p className="text-sm">
-                {t(`progress.${kind}`)}:{" "}
-                {t("progress.of", {
-                  submitted: total(kind).submitted,
-                  total: total(kind).total,
-                })}
-              </p>
-              <ProgressBar
-                percent={
-                  total(kind).total === 0
-                    ? 0
-                    : (total(kind).submitted / total(kind).total) * 100
-                }
+          <div className="grid gap-5 sm:grid-cols-2">
+            {(["self", "manager"] as const).map((kind) => (
+              <MetricCard
+                key={kind}
                 label={t(`progress.${kind}`)}
+                value={`${percentOf(progress[kind])}%`}
+                note={t("progress.of", progress[kind])}
+                icon={
+                  kind === "self" ? (
+                    <UserRound className="size-5" />
+                  ) : (
+                    <UserRoundCheck className="size-5" />
+                  )
+                }
               />
-            </div>
-          ))}
+            ))}
+          </div>
           {open ? (
             <p className="text-sm text-muted-foreground">
               {t("actions.closeHint")}
@@ -151,9 +155,9 @@ async function CycleDetail({
         hint={t("withoutManager.hint")}
       >
         {missing.length === 0 ? (
-          <p className="text-sm text-muted-foreground">
+          <EmptyState icon={<ClipboardCheck className="size-6" />}>
             {t("withoutManager.none")}
-          </p>
+          </EmptyState>
         ) : (
           <ul className="list-disc pl-5 text-sm">
             {missing.map((p) => (
@@ -182,45 +186,51 @@ async function CycleDetail({
                 add={addParticipantAction.bind(null, id)}
               />
             ) : null}
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>{t("participants.columns.person")}</TableHead>
-                  <TableHead>{t("participants.columns.area")}</TableHead>
-                  <TableHead>{t("participants.columns.manager")}</TableHead>
-                  <TableHead>{t("participants.columns.state")}</TableHead>
-                  <TableHead />
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {cycle.participants.map((p) => (
-                  <TableRow key={p.id}>
-                    <TableCell>{p.displayName}</TableCell>
-                    <TableCell>{p.snapDepartment ?? "—"}</TableCell>
-                    <TableCell>{p.snapManagerName ?? "—"}</TableCell>
-                    <TableCell>
+            <CardCollection>
+              {cycle.participants.map((p) => (
+                <article key={p.id} className="record-card">
+                  <header className="flex items-center justify-between gap-3">
+                    <IconTile>
+                      <UserRound className="size-5" />
+                    </IconTile>
+                    <Badge variant="outline">
                       {p.removedAt
                         ? t("participants.removed")
                         : t("participants.active")}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      {open && !p.removedAt ? (
-                        <ActionButton
-                          size="sm"
-                          action={removeParticipantAction.bind(
-                            null,
-                            id,
-                            p.revieweePersonId,
-                          )}
-                        >
-                          {t("participants.remove")}
-                        </ActionButton>
-                      ) : null}
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                    </Badge>
+                  </header>
+                  <h3 className="text-xl">{p.displayName}</h3>
+                  <dl className="flex flex-col gap-1 text-sm text-muted-foreground">
+                    <div>
+                      <dt className="inline">
+                        {t("participants.columns.area")}:{" "}
+                      </dt>
+                      <dd className="inline">{p.snapDepartment ?? "—"}</dd>
+                    </div>
+                    <div>
+                      <dt className="inline">
+                        {t("participants.columns.manager")}:{" "}
+                      </dt>
+                      <dd className="inline">{p.snapManagerName ?? "—"}</dd>
+                    </div>
+                  </dl>
+                  {open && !p.removedAt ? (
+                    <div>
+                      <ActionButton
+                        size="sm"
+                        action={removeParticipantAction.bind(
+                          null,
+                          id,
+                          p.revieweePersonId,
+                        )}
+                      >
+                        {t("participants.remove")}
+                      </ActionButton>
+                    </div>
+                  ) : null}
+                </article>
+              ))}
+            </CardCollection>
           </>
         )}
       </Panel>
@@ -228,47 +238,55 @@ async function CycleDetail({
       {draft ? null : (
         <Panel id="cycle-requests" title={t("requests.title")}>
           {requests.length === 0 ? (
-            <p className="text-sm text-muted-foreground">
-              {t("requests.empty")}
-            </p>
+            <EmptyState>{t("requests.empty")}</EmptyState>
           ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>{t("requests.columns.person")}</TableHead>
-                  <TableHead>{t("requests.columns.kind")}</TableHead>
-                  <TableHead>{t("requests.columns.reviewer")}</TableHead>
-                  <TableHead>{t("requests.columns.status")}</TableHead>
-                  <TableHead>{t("requests.columns.actions")}</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {requests.map((r) => (
-                  <TableRow key={r.id}>
-                    <TableCell>{r.revieweeName}</TableCell>
-                    <TableCell>
-                      {t(`requests.kind.${r.relationship}`)}
-                    </TableCell>
-                    <TableCell>
-                      {r.reviewerMissing
-                        ? t("requests.reviewerMissing")
-                        : (r.reviewerName ?? "—")}
-                    </TableCell>
-                    <TableCell>{t(`requests.status.${r.status}`)}</TableCell>
-                    <TableCell>
-                      {open && !r.removed && r.status === "submitted" ? (
-                        <ActionButton
-                          size="sm"
-                          action={reopenRequestAction.bind(null, r.id)}
-                        >
-                          {t("requests.reopen")}
-                        </ActionButton>
-                      ) : null}
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+            <CardCollection>
+              {requests.map((r) => (
+                <article key={r.id} className="record-card">
+                  <header className="flex items-center justify-between gap-3">
+                    <IconTile>
+                      {r.relationship === "self" ? (
+                        <UserRound className="size-5" />
+                      ) : (
+                        <UserRoundCheck className="size-5" />
+                      )}
+                    </IconTile>
+                    <Badge variant="outline">
+                      {t(`requests.status.${r.status}`)}
+                    </Badge>
+                  </header>
+                  <h3 className="text-xl">{r.revieweeName}</h3>
+                  <dl className="flex flex-col gap-1 text-sm text-muted-foreground">
+                    <div>
+                      <dt className="inline">{t("requests.columns.kind")}: </dt>
+                      <dd className="inline">
+                        {t(`requests.kind.${r.relationship}`)}
+                      </dd>
+                    </div>
+                    <div>
+                      <dt className="inline">
+                        {t("requests.columns.reviewer")}:{" "}
+                      </dt>
+                      <dd className="inline">
+                        {r.reviewerMissing
+                          ? t("requests.reviewerMissing")
+                          : (r.reviewerName ?? "—")}
+                      </dd>
+                    </div>
+                  </dl>
+                  {open && !r.removed && r.status === "submitted" ? (
+                    <div>
+                      <ActionButton
+                        size="sm"
+                        action={reopenRequestAction.bind(null, r.id)}
+                      >
+                        {t("requests.reopen")}
+                      </ActionButton>
+                    </div>
+                  ) : null}
+                </article>
+              ))}
+            </CardCollection>
           )}
         </Panel>
       )}
@@ -281,7 +299,7 @@ export default function CycleDetailPage(
 ) {
   return (
     <main className="mx-auto flex w-full max-w-6xl flex-col gap-8 p-6 lg:p-10">
-      <Suspense fallback={<div aria-busy="true" className="h-40" />}>
+      <Suspense fallback={<PageSkeleton />}>
         <HrOnly>
           <CycleDetail {...props} />
         </HrOnly>

@@ -52,11 +52,10 @@
       "title": "Cycles",
       "empty": "There are no cycles yet.",
       "columns": {
-        "name": "Cycle",
         "period": "Period",
-        "status": "Status",
         "participants": "Participants"
-      }
+      },
+      "participants": "{count, plural, one {# participant} other {# participants}}"
     },
     "create": {
       "title": "New cycle",
@@ -83,7 +82,6 @@
       "title": "Participants",
       "hintDraft": "Choose who is reviewed. Add every active person, an area or people by hand; opening the cycle takes the snapshot of manager, area and job.",
       "hintOpen": "You can add or remove people while the cycle is open.",
-      "empty": "There are no participants.",
       "all": "All active people",
       "area": "Add an area",
       "areaPlaceholder": "Choose an area",
@@ -95,10 +93,8 @@
       "saved": "Participants saved.",
       "searchLabel": "Available participants",
       "columns": {
-        "person": "Person",
         "area": "Area",
-        "manager": "Manager",
-        "state": "State"
+        "manager": "Manager"
       },
       "removed": "Removed",
       "active": "Active",
@@ -115,11 +111,8 @@
       "title": "Requests",
       "empty": "There are no requests yet: they are generated when the cycle opens.",
       "columns": {
-        "person": "Reviewee",
         "kind": "Type",
-        "reviewer": "Reviewer",
-        "status": "Status",
-        "actions": "Actions"
+        "reviewer": "Reviewer"
       },
       "kind": {
         "self": "Self-assessment",
