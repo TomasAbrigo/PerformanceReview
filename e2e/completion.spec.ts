@@ -86,7 +86,10 @@ test("People import the assessment progress and read the completion of a cycle",
 
   // Home links to the view, which opens on the latest cycle.
   await page.goto("/es");
-  await page.getByRole("link", { name: "Completitud" }).click();
+  await page
+    .getByRole("navigation", { name: "Navegación" })
+    .getByRole("link", { name: "Completitud" })
+    .click();
   await expect(page).toHaveURL(/\/es\/insights\/completion$/);
   await expect(
     page.getByRole("heading", { name: /^Completitud de evaluaciones · / }),
