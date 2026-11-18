@@ -248,7 +248,7 @@ describe("Sparkline", () => {
       '[data-series="retention"] path',
     )!;
     expect(retention.getAttribute("d")).toMatch(
-      /^M[\d.]+ [\d.]+ L[\d.]+ [\d.]+$/,
+      /^M[\d.]+,[\d.]+ L[\d.]+,[\d.]+$/,
     );
     expect(retention).not.toHaveAttribute("stroke-dasharray");
     expect(

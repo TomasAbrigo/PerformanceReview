@@ -86,8 +86,9 @@ describe.each(locales)("qualitative views (%s)", (locale) => {
         />
       </>,
     );
-    const charts = screen.getAllByRole("img");
-    expect(charts).toHaveLength(2);
+    expect(
+      screen.getAllByRole("group", { name: /Barras apiladas|Stacked bars/ }),
+    ).toHaveLength(2);
     expect(screen.getAllByTestId("sentiment-bar")).toHaveLength(2);
     expect(
       screen.getAllByText(locale === "es" ? "Fortalezas" : "Strengths").length,
@@ -108,8 +109,7 @@ describe.each(locales)("qualitative views (%s)", (locale) => {
     }
     // The bar's tooltip names the five counts.
     expect(
-      screen.getAllByTestId("sentiment-bar")[0].querySelector("title")
-        ?.textContent,
+      screen.getAllByTestId("sentiment-bar")[0].getAttribute("title"),
     ).toMatch(locale === "es" ? /2 neutrales, 1 mixtos/ : /2 neutral, 1 mixed/);
   });
 
@@ -452,10 +452,14 @@ describe("org cuts in the qualitative view", () => {
 
     const panel = screen.getByTestId("sentiment-by-group");
     expect(
-      within(panel).getByRole("heading", { name: "Sentimiento por grupo" }),
+      within(panel).getByRole("heading", {
+        name: "¿Qué equipos reciben comentarios más negativos?",
+      }),
     ).toBeInTheDocument();
     const labels = [
-      ...panel.querySelectorAll("table.sr-only tbody th, svg text"),
+      ...panel.querySelectorAll(
+        "table tbody th, [data-testid=sentiment-bar] > span",
+      ),
     ]
       .map((n) => n.textContent)
       .filter((t) => t?.includes("·"));

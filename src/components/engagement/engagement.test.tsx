@@ -64,7 +64,7 @@ describe("EngagementView", () => {
         />,
       );
 
-      const line = screen.getByRole("img", {
+      const line = screen.getByRole("group", {
         name:
           locale === "es"
             ? /Score promedio y participación por mes/
@@ -75,25 +75,28 @@ describe("EngagementView", () => {
       expect(
         line.querySelector('[data-series="participation"]'),
       ).not.toBeNull();
-      const bars = screen.getByRole("img", {
+      const bars = screen.getByRole("group", {
         name:
           locale === "es"
             ? /Personas por segmento y por mes/
             : /People per segment and per month/,
       });
-      // Five segments per month, in order, none empty.
+      // Five segments per month, in order (= legend order), none empty.
+      const jan = within(bars).getAllByTestId("segment-row")[0];
       expect(
-        bars.querySelectorAll('g[data-month="2026-01-01"] rect'),
-      ).toHaveLength(5);
+        [...jan.querySelectorAll("[data-segment]")].map((e) =>
+          e.getAttribute("data-segment"),
+        ),
+      ).toEqual(["alto", "medio", "regular", "bajo", "falta"]);
       const table = screen.getByRole("table", {
         name: locale === "es" ? "Detalle por mes" : "Detail by month",
       });
       const rows = within(table).getAllByRole("row");
       expect(rows).toHaveLength(3);
-      const jan = within(rows[1])
+      const janCells = within(rows[1])
         .getAllByRole("cell")
         .map((c) => c.textContent?.replace(/\s/g, " "));
-      expect(jan.slice(1)).toEqual([
+      expect(janCells.slice(1)).toEqual([
         "10",
         "8",
         locale === "es" ? "80 %" : "80%",
@@ -136,7 +139,7 @@ describe("EngagementView", () => {
     expect(screen.getByRole("status")).toHaveTextContent(
       "1 mes sin mostrar por tener menos de 5 personas.",
     );
-    const line = screen.getByRole("img", {
+    const line = screen.getByRole("group", {
       name: /Score promedio y participación por mes/,
     });
     // Two strokes per series: the hidden month is a gap, not a bridge.
@@ -144,6 +147,9 @@ describe("EngagementView", () => {
     expect(path.getAttribute("d")?.match(/M/g)).toHaveLength(2);
     expect(
       screen.getByRole("img", { name: /mes oculto por tamaño de grupo/ }),
+    ).toBeVisible();
+    expect(
+      screen.getByText("Menos de 5 personas: oculto para Dirección."),
     ).toBeVisible();
   });
 
@@ -168,9 +174,9 @@ describe("EngagementView", () => {
     ).getAllByRole("row")[1];
     expect(within(row).getAllByText("Oculto").length).toBeGreaterThanOrEqual(7);
     expect(
-      screen.getByRole("img", {
-        name: /segmentos ocultos por tamaño de grupo/,
-      }),
+      screen.getByText(
+        "Segmentos con menos de 5 personas: ocultos para Dirección.",
+      ),
     ).toBeVisible();
   });
 

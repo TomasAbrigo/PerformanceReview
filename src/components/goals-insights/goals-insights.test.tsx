@@ -254,6 +254,30 @@ describe("GoalsScatter", () => {
     ).toBeInTheDocument();
   });
 
+  it("draws focusable points, axis titles and the reference lines", () => {
+    renderIn(
+      "es",
+      <GoalsScatter
+        rows={rows}
+        indicator="retention"
+        thresholds={{
+          goalsHigh: 80,
+          goalsLow: 20,
+          riskThreshold: 2,
+          indicatorHigh: 4,
+        }}
+      />,
+    );
+    expect(
+      screen.getByRole("img", {
+        name: "Ana: 80 % de objetivos completados, Retención 2",
+      }),
+    ).toHaveAttribute("tabindex", "0");
+    expect(screen.getByText("Riesgo: 2 o menos")).toBeInTheDocument();
+    expect(screen.getByText(/Cumplidos: 80/)).toBeInTheDocument();
+    expect(screen.getByText("↑ Retención (1 a 5)")).toBeInTheDocument();
+  });
+
   it("has the points as a table too", () => {
     renderIn("en", <GoalsScatter rows={rows} indicator="retention" />);
     expect(screen.getByText("View as table")).toBeInTheDocument();
@@ -282,16 +306,26 @@ describe("BucketsChart", () => {
     "draws the means of each bucket and counts who is left out in %s",
     (locale) => {
       renderIn(locale, <BucketsChart data={vs()} />);
-      const chart = screen.getByRole("img", {
+      const chart = screen.getByRole("group", {
         name:
           locale === "es"
-            ? /Indicadores según el cumplimiento de objetivos/
-            : /Indicators by goals completion/,
+            ? /¿Cambian retención y compromiso según el cumplimiento de objetivos/
+            : /Do retention and engagement change with goal completion/,
       });
       expect(chart).toHaveAccessibleName(/20–40 %/);
       expect(chart).toHaveAccessibleName(
         locale === "es" ? /20–40 %, Retención: 4/ : /20–40 %, Retention: 4/,
       );
+      // Each bar writes its mean and each bucket its n.
+      expect(
+        within(chart).getByRole("img", {
+          name:
+            locale === "es"
+              ? "20–40 % · Retención: 4"
+              : "20–40 % · Retention: 4",
+        }),
+      ).toHaveAttribute("tabindex", "0");
+      expect(within(chart).getByText("n = 3")).toBeInTheDocument();
       expect(
         screen.getByText(
           locale === "es"
@@ -327,7 +361,7 @@ describe("BucketsChart", () => {
       />,
     );
     expect(
-      screen.getByRole("img", { name: /Oculto: menos de 5 personas/ }),
+      screen.getByRole("group", { name: /Oculto: menos de 5 personas/ }),
     ).toBeInTheDocument();
     expect(
       screen.getByText("3 personas en tramos chicos no se muestran."),

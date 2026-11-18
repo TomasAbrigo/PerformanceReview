@@ -1,21 +1,19 @@
 import { engagementSegments } from "@/modules/engagement/kinds";
 
-/** One color per segment, from the sentiment palette (green, teal, amber, red, grey); text always says which. */
-export const SEGMENT_FILL: Record<(typeof engagementSegments)[number], string> =
-  {
-    alto: "fill-chart-sent-positive",
-    medio: "fill-chart-sent-constructive",
-    regular: "fill-chart-sent-mixed",
-    bajo: "fill-chart-sent-negative",
-    falta: "fill-chart-sent-neutral",
-  };
-export const SEGMENT_SWATCH: Record<
+/**
+ * One color per segment, from the sentiment palette (green, teal, amber,
+ * red, gray) in stack order; labels and tooltips always say which.
+ */
+export const SEGMENT_COLORS: Record<
   (typeof engagementSegments)[number],
-  string
+  { fill: string; ink: string }
 > = {
-  alto: "bg-chart-sent-positive",
-  medio: "bg-chart-sent-constructive",
-  regular: "bg-chart-sent-mixed",
-  bajo: "bg-chart-sent-negative",
-  falta: "bg-chart-sent-neutral",
+  alto: { fill: "bg-chart-sent-positive", ink: "text-white" },
+  medio: { fill: "bg-chart-sent-constructive", ink: "text-foreground" },
+  regular: { fill: "bg-chart-sent-mixed", ink: "text-foreground" },
+  bajo: { fill: "bg-chart-sent-negative", ink: "text-white" },
+  falta: { fill: "bg-chart-sent-neutral", ink: "text-foreground" },
 };
+export const SEGMENT_SWATCH = Object.fromEntries(
+  Object.entries(SEGMENT_COLORS).map(([k, v]) => [k, v.fill]),
+) as Record<(typeof engagementSegments)[number], string>;

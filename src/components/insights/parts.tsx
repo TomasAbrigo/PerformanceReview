@@ -1,41 +1,41 @@
 import type { ReactNode } from "react";
 import { useTranslations } from "next-intl";
+import { BulletBar, ChartFrame } from "@/components/charts";
 
 /** 0-1 -> whole percent. */
 export const pct = (n: number | null | undefined) =>
   n == null ? null : Math.round(n * 100);
 
-/** A titled dashboard section: a white card on the fog background. */
+/**
+ * A titled dashboard section: a white card on the fog background. It is the
+ * chart kit's ChartFrame (title as the question, `hint` as how to read it,
+ * `meta` with n and period) so every panel looks and behaves the same.
+ */
 export function Panel({
   id,
   title,
   hint,
+  meta,
   actions,
   children,
 }: {
   id: string;
   title: string;
   hint?: string;
+  meta?: string;
   actions?: ReactNode;
   children: ReactNode;
 }) {
   return (
-    <section
-      aria-labelledby={`${id}-title`}
-      className="flex flex-col gap-4 rounded-xl border border-border bg-card p-5 lg:p-6"
-      data-testid={id}
+    <ChartFrame
+      id={id}
+      title={title}
+      howToRead={hint}
+      meta={meta}
+      actions={actions}
     >
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div className="flex flex-col gap-1">
-          <h2 id={`${id}-title`}>{title}</h2>
-          {hint ? (
-            <p className="max-w-3xl text-sm text-muted-foreground">{hint}</p>
-          ) : null}
-        </div>
-        {actions}
-      </div>
-      {children}
-    </section>
+      <div className="flex flex-col gap-4">{children}</div>
+    </ChartFrame>
   );
 }
 
@@ -84,29 +84,28 @@ export function Empty() {
   return <p className="text-sm text-muted-foreground">{t("empty")}</p>;
 }
 
-/** Horizontal meter (single sequential hue), 4px rounded data end. */
+/** A completion meter: the kit's bullet bar (percent written next to it). */
 export function Meter({
   value,
   label,
   width = 200,
+  target,
+  showValue = false,
 }: {
   value: number;
   label: string;
   width?: number;
+  target?: number | null;
+  showValue?: boolean;
 }) {
-  const w = Math.max(0, Math.min(1, value)) * width;
   return (
-    <svg width={width} height={8} role="img" aria-label={label}>
-      <title>{label}</title>
-      <rect width={width} height={8} rx={4} className="fill-brand-200/60" />
-      {w > 0 ? (
-        <rect
-          width={Math.max(w, 8)}
-          height={8}
-          rx={4}
-          className="fill-chart-seq"
-        />
-      ) : null}
-    </svg>
+    <BulletBar
+      value={value}
+      label={label}
+      width={width}
+      target={target}
+      showValue={showValue}
+      fullLabel
+    />
   );
 }

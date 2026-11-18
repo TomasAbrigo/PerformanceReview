@@ -127,7 +127,7 @@ describe("SelfAssessmentView", () => {
         within(table).getAllByText(locale === "es" ? "50 %" : "50%"),
       ).toHaveLength(1);
       expect(
-        screen.getByRole("img", {
+        screen.getByRole("group", {
           name:
             locale === "es"
               ? "Sentimiento de las autoevaluaciones por dimensión"
@@ -246,7 +246,7 @@ describe("ExecutiveReportView", () => {
         expect(screen.queryByTestId("exec-themes") !== null).toBe(qual);
         if (quant) {
           expect(screen.getByTestId("exec-retention")).toHaveTextContent(
-            "3.11",
+            locale === "es" ? "3,1" : "3.1",
           );
           expect(screen.getByTestId("exec-risk")).toHaveTextContent("3");
           expect(screen.getByTestId("exec-goals")).toHaveTextContent(

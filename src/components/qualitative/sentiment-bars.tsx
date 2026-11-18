@@ -1,158 +1,110 @@
 import { useTranslations } from "next-intl";
 import {
+  ChartLegend,
+  ChartTableToggle,
+  SENTIMENT_COLORS,
+  StackedBar100,
+  orderRows,
+  useChartFormat,
+  type StackSeries,
+} from "@/components/charts";
+import {
   sentiments,
   type Sentiment,
 } from "@/modules/qualitative-analysis/constants";
 import type { SentimentCounts } from "@/modules/qualitative-analysis/types";
 
-/**
- * Sentiment colors, in reading order: green, teal, gray, amber, red (tokens
- * in globals.css, validated for color-vision deficiency). Color is never the
- * only cue: the legend names them in the same order, each segment carries
- * its count, each bar a tooltip, and the chart has a table twin.
- */
-const FILL: Record<Sentiment, string> = {
-  positive: "fill-chart-sent-positive",
-  constructive: "fill-chart-sent-constructive",
-  neutral: "fill-chart-sent-neutral",
-  mixed: "fill-chart-sent-mixed",
-  negative: "fill-chart-sent-negative",
-};
-const SWATCH: Record<Sentiment, string> = {
-  positive: "bg-chart-sent-positive",
-  constructive: "bg-chart-sent-constructive",
-  neutral: "bg-chart-sent-neutral",
-  mixed: "bg-chart-sent-mixed",
-  negative: "bg-chart-sent-negative",
-};
-/** Count text on each fill (dark on the light fills, white on the dark ones). */
-const COUNT_TEXT: Record<Sentiment, string> = {
-  positive: "fill-white",
-  constructive: "fill-[#0f2826]",
-  neutral: "fill-[#0f2826]",
-  mixed: "fill-white",
-  negative: "fill-white",
-};
-
 export type StackedRow = SentimentCounts & { key: string; label: string };
 
-const W = 320;
-const ROW = 28;
-const LABEL_W = 160;
+/** The series of the sentiment stack, in the fixed order of the palette. */
+export function useSentimentSeries(): StackSeries[] {
+  const t = useTranslations("Qualitative");
+  return sentiments.map((s) => ({
+    key: s,
+    label: t(`sentiment.${s}`),
+    ...SENTIMENT_COLORS[s],
+  }));
+}
+
+/** What orders the rows: the share of negative and mixed comments. */
+export const RISK_SENTIMENTS: Sentiment[] = ["negative", "mixed"];
 
 /**
- * 100% stacked horizontal bars of the five sentiments, counts inside each
- * segment and a tooltip per bar. `firstColumn` names the table twin's first
- * column (what each bar is: a dimension, a cycle...).
+ * 100% stacked horizontal bars of the five sentiments (kit StackedBar100):
+ * the legend in stack order, a percent inside each wide segment, n per row,
+ * a tooltip per segment and the table twin. `sorted` orders the rows by
+ * their negative + mixed share and names the worst one (the takeaway);
+ * otherwise rows keep their order (cycles stay chronological).
  */
 export function SentimentBars({
   rows,
   label,
   firstColumn,
+  sorted = false,
 }: {
   rows: StackedRow[];
   label: string;
   firstColumn?: string;
+  sorted?: boolean;
 }) {
   const t = useTranslations("Qualitative");
+  const f = useChartFormat();
+  const series = useSentimentSeries();
+  const stackRows = rows.map((r) => ({
+    key: r.key,
+    label: r.label,
+    testId: "sentiment-bar",
+    title: t("byDimension.bar", {
+      label: r.label,
+      positive: r.positive,
+      constructive: r.constructive,
+      neutral: r.neutral,
+      mixed: r.mixed,
+      negative: r.negative,
+    }),
+    values: Object.fromEntries(sentiments.map((s) => [s, r[s]])),
+  }));
+  const worst = sorted
+    ? orderRows(stackRows, series, RISK_SENTIMENTS).find((r) =>
+        RISK_SENTIMENTS.some((s) => r.values[s] > 0),
+      )
+    : undefined;
+  const worstShare = (r: { values: Record<string, number> }) => {
+    const n = sentiments.reduce((a, s) => a + r.values[s], 0);
+    return n ? (r.values.negative + r.values.mixed) / n : 0;
+  };
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-3">
+      {worst && rows.length > 1 ? (
+        <p className="text-sm font-medium" data-testid="chart-takeaway">
+          {t("takeaway.worst", {
+            label: worst.label,
+            share: f.share(worstShare(worst)),
+          })}
+        </p>
+      ) : null}
       <Legend />
-      <svg
-        role="img"
-        aria-label={label}
-        width="100%"
-        viewBox={`0 0 ${LABEL_W + W + 40} ${rows.length * ROW + 4}`}
-        className="max-w-2xl"
-      >
-        {rows.map((r, i) => {
-          let x = LABEL_W;
-          const y = i * ROW + 2;
-          return (
-            <g key={r.key} data-testid="sentiment-bar">
-              <title>
-                {t("byDimension.bar", {
-                  label: r.label,
-                  positive: r.positive,
-                  constructive: r.constructive,
-                  neutral: r.neutral,
-                  mixed: r.mixed,
-                  negative: r.negative,
-                })}
-              </title>
-              <text
-                x={LABEL_W - 8}
-                y={y + 16}
-                textAnchor="end"
-                className="fill-foreground text-[11px]"
-              >
-                {r.label}
-              </text>
-              {sentiments.map((s) => {
-                const w = r.total ? (r[s] / r.total) * W : 0;
-                const seg = (
-                  <g key={s}>
-                    {w > 0 ? (
-                      <rect
-                        x={x}
-                        y={y}
-                        width={w}
-                        height={ROW - 8}
-                        className={`${FILL[s]} stroke-background`}
-                        strokeWidth={2}
-                      />
-                    ) : null}
-                    {w >= 18 ? (
-                      <text
-                        x={x + w / 2}
-                        y={y + 14}
-                        textAnchor="middle"
-                        className={`text-[10px] tabular-nums ${COUNT_TEXT[s]}`}
-                      >
-                        {r[s]}
-                      </text>
-                    ) : null}
-                  </g>
-                );
-                x += w;
-                return seg;
-              })}
-              <text
-                x={LABEL_W + W + 6}
-                y={y + 14}
-                className="fill-muted-foreground text-[10px] tabular-nums"
-              >
-                {r.total}
-              </text>
-            </g>
-          );
-        })}
-      </svg>
-      <table className="sr-only">
-        <caption>{label}</caption>
-        <thead>
-          <tr>
-            <th scope="col">{firstColumn ?? t("byDimension.label")}</th>
-            {sentiments.map((s) => (
-              <th key={s} scope="col">
-                {t(`sentiment.${s}`)}
-              </th>
-            ))}
-            <th scope="col">{t("kpis.total")}</th>
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map((r) => (
-            <tr key={r.key}>
-              <th scope="row">{r.label}</th>
-              {sentiments.map((s) => (
-                <td key={s}>{r[s]}</td>
-              ))}
-              <td>{r.total}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      <StackedBar100
+        rows={stackRows}
+        series={series}
+        sortBy={sorted ? RISK_SENTIMENTS : undefined}
+        label={label}
+      />
+      <ChartTableToggle
+        caption={label}
+        table={{
+          head: [
+            firstColumn ?? t("byDimension.label"),
+            ...sentiments.map((s) => t(`sentiment.${s}`)),
+            t("kpis.total"),
+          ],
+          rows: rows.map((r) => [
+            r.label,
+            ...sentiments.map((s) => r[s]),
+            r.total,
+          ]),
+        }}
+      />
     </div>
   );
 }
@@ -160,18 +112,16 @@ export function SentimentBars({
 /** The five sentiments with their colors, in the order of the bars. */
 export function Legend() {
   const t = useTranslations("Qualitative");
+  const series = useSentimentSeries();
   return (
-    <ul aria-label={t("legend")} className="flex flex-wrap gap-3 text-xs">
-      {sentiments.map((s) => (
-        <li key={s} className="flex items-center gap-1">
-          <span
-            aria-hidden="true"
-            className={`inline-block size-3 rounded-sm border ${SWATCH[s]}`}
-          />
-          {t(`sentiment.${s}`)}
-        </li>
-      ))}
-    </ul>
+    <ChartLegend
+      label={t("legend")}
+      items={series.map((s) => ({
+        key: s.key,
+        label: s.label,
+        swatch: s.fill,
+      }))}
+    />
   );
 }
 
@@ -183,37 +133,21 @@ export function MiniBar({
   counts: SentimentCounts;
   label: string;
 }) {
+  const series = useSentimentSeries();
   return (
-    <svg
-      role="img"
-      aria-label={label}
-      data-testid="theme-sentiment"
-      viewBox="0 0 100 8"
-      preserveAspectRatio="none"
-      className="h-2 w-full max-w-xs"
-    >
-      {
-        sentiments.reduce(
-          (acc, s) => {
-            const w = counts.total ? (counts[s] / counts.total) * 100 : 0;
-            if (w > 0) {
-              acc.nodes.push(
-                <rect
-                  key={s}
-                  x={acc.x}
-                  width={w}
-                  height={8}
-                  className={`${FILL[s]} stroke-background`}
-                  strokeWidth={0.5}
-                />,
-              );
-            }
-            acc.x += w;
-            return acc;
+    <div data-testid="theme-sentiment" className="w-full max-w-xs">
+      <StackedBar100
+        compact
+        label={label}
+        series={series}
+        rows={[
+          {
+            key: "theme",
+            label,
+            values: Object.fromEntries(sentiments.map((s) => [s, counts[s]])),
           },
-          { x: 0, nodes: [] as React.ReactNode[] },
-        ).nodes
-      }
-    </svg>
+        ]}
+      />
+    </div>
   );
 }

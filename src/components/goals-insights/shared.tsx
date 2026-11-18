@@ -1,4 +1,5 @@
 import { useFormatter, useTranslations } from "next-intl";
+import { ChartTableToggle } from "@/components/charts";
 
 /** A whole percentage, or a dash without a value. */
 export function usePct() {
@@ -19,7 +20,7 @@ export function Empty() {
   return <p className="text-sm text-muted-foreground">{t("empty")}</p>;
 }
 
-/** The "view as table" fallback every chart carries (dataviz: a11y). */
+/** The "view as table" fallback every chart carries: the kit's table toggle. */
 export function TableView({
   head,
   rows,
@@ -27,34 +28,5 @@ export function TableView({
   head: string[];
   rows: (string | number)[][];
 }) {
-  const t = useTranslations("GoalsInsights");
-  return (
-    <details>
-      <summary className="cursor-pointer text-sm">{t("tableView")}</summary>
-      <div className="overflow-x-auto">
-        <table className="mt-2 text-sm">
-          <thead>
-            <tr>
-              {head.map((h) => (
-                <th key={h} className="p-1 text-left font-medium">
-                  {h}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {rows.map((r, i) => (
-              <tr key={i} className="border-t">
-                {r.map((c, j) => (
-                  <td key={j} className="p-1 tabular-nums">
-                    {c}
-                  </td>
-                ))}
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </details>
-  );
+  return <ChartTableToggle caption={head.join(", ")} table={{ head, rows }} />;
 }

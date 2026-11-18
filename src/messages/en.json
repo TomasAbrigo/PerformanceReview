@@ -793,13 +793,15 @@
       "meter": "{relationship}: {submitted} of {total} submitted"
     },
     "distribution": {
-      "title": "Rating distribution",
-      "hint": "Normalized rating from 0 to 100 %, comparable across scales.",
+      "title": "How are ratings distributed?",
+      "hint": "Rating normalized from 0 to 100%, comparable across scales: each bar counts the people in that band, with the count on top.",
       "bin": "{from}–{to} %",
       "n": "{n, plural, one {# person} other {# people}}",
       "mean": "Average {value} %",
       "all": "All",
-      "barLabel": "{group}, {bin}: {count}"
+      "barLabel": "{group}, {bin}: {count}",
+      "xTitle": "Normalized rating (%)",
+      "group": "Group"
     },
     "executive": {
       "hint": "Aggregates only: no names or ids. Groups of fewer than {min} people are folded into Others or hidden.",
@@ -808,7 +810,24 @@
       "belowMinimum": "There are fewer than {min} participants: no data is shown to protect people.",
       "others": "Others",
       "suppressed": "{n, plural, =0 {Nobody in small groups} one {# person in small departments (not broken out)} other {# people in small departments (not broken out)}}"
-    }
+    },
+    "legend": "Legend",
+    "noData": "No data",
+    "nShort": "n = {n}",
+    "segmentTip": "{row} · {series}: {count} ({share})",
+    "likert": {
+      "low": "Low (1–2)",
+      "center": "← neutral (3) →",
+      "high": "High (4–5)",
+      "tip": "{row} · {value}: {count} ({share})"
+    },
+    "bullet": {
+      "tip": "{label}: {value}",
+      "tipTarget": "{label}: {value} (target {target})"
+    },
+    "masked": "Fewer than {min} people: hidden for Leadership.",
+    "meta": "n = {n} · {period}",
+    "metaN": "n = {n}"
   },
   "Indicators": {
     "nav": "Retention and engagement",
@@ -849,8 +868,8 @@
       "apply": "Apply"
     },
     "distribution": {
-      "title": "{indicator} distribution",
-      "hint": "How many people got each value, from 1 to 5, in the manager's review.",
+      "title": "Which groups have the lowest {indicator} answers?",
+      "hint": "Manager answers from 1 to 5: left of the line, low (1–2); right, high (4–5); 3 sits centered. Groups with the most low answers on top.",
       "n": "{n, plural, one {# person} other {# people}}",
       "mean": "Average {value}",
       "all": "All",
@@ -860,11 +879,16 @@
       "average": "Average",
       "valueCount": "value {value}: {count}",
       "barLabel": "{group}, value {value}: {count}",
-      "suppressed": "{n, plural, one {# person is in a group smaller than {min} and is not shown} other {# people are in groups smaller than {min} and are not shown}}"
+      "suppressed": "{n, plural, one {# person is in a group smaller than {min} and is not shown} other {# people are in groups smaller than {min} and are not shown}}",
+      "chart": "Diverging bars of answers 1 to 5 per group",
+      "value": "value {value}",
+      "takeaway": "Most low answers: {group} ({share} with 1 or 2).",
+      "lowest": "{value} (lowest)",
+      "highest": "{value} (highest)"
     },
     "matrix": {
-      "title": "Retention and engagement matrix",
-      "hint": "How many people are in each crossing of bands; the risk quadrant is low retention and low engagement at once.",
+      "title": "How many people have both low retention and low engagement?",
+      "hint": "Each cell crosses the retention band (→) with the engagement band (↑) and counts people; bottom left is the risk quadrant.",
       "band": {
         "low": "Low",
         "mid": "Mid",
@@ -883,6 +907,24 @@
         "person": "Person",
         "manager": "Manager",
         "department": "Area"
+      },
+      "chart": "Retention and engagement matrix",
+      "quadrant": {
+        "low": {
+          "low": "At risk",
+          "mid": "Low retention",
+          "high": "Engaged, may leave"
+        },
+        "mid": {
+          "low": "Low engagement",
+          "mid": "Stable",
+          "high": "Engaged"
+        },
+        "high": {
+          "low": "Staying, disengaged",
+          "mid": "Retained",
+          "high": "Role models"
+        }
       }
     },
     "alerts": {
@@ -928,7 +970,9 @@
         "department": "Area",
         "any": "—",
         "apply": "Show"
-      }
+      },
+      "yTitle": "Mean (1–5)",
+      "how": "Mean of the 1 to 5 answers of each cycle; a gap is a cycle hidden for having fewer people than the minimum."
     }
   },
   "Qualitative": {
@@ -980,17 +1024,19 @@
       "other": "Other"
     },
     "byDimension": {
-      "title": "Sentiment by dimension",
+      "title": "Which dimensions get the most negative comments?",
       "chart": "Stacked bars of sentiment by dimension",
       "table": "Sentiment by dimension (table)",
       "label": "Dimension",
-      "bar": "{label}: {positive} positive, {constructive} constructive, {neutral} neutral, {mixed} mixed, {negative} negative"
+      "bar": "{label}: {positive} positive, {constructive} constructive, {neutral} neutral, {mixed} mixed, {negative} negative",
+      "how": "Each bar adds up to 100% of a dimension's comments; the highest negative and mixed share on top."
     },
     "trend": {
-      "title": "Trend across cycles",
+      "title": "How does the tone of comments change across cycles?",
       "chart": "Stacked bars of sentiment by cycle",
       "table": "Sentiment by cycle (table)",
-      "label": "Cycle"
+      "label": "Cycle",
+      "how": "Each bar is a cycle (100% of its comments), in chronological order."
     },
     "themes": {
       "title": "Top themes",
@@ -1068,7 +1114,7 @@
       "not_labeled": "This comment has no label yet."
     },
     "byGroup": {
-      "title": "Sentiment by group",
+      "title": "Which teams get the most negative comments?",
       "chart": "Sentiment of the comments by group of people",
       "label": "Group",
       "groupBy": "Group by",
@@ -1082,7 +1128,11 @@
       "unassigned": "Unassigned",
       "team": "Team {n}",
       "people": "{n, plural, one {# person} other {# people}}",
-      "export": "Download by group (CSV)"
+      "export": "Download by group (CSV)",
+      "how": "Each bar adds up to 100% of the group's comments; the highest negative and mixed share on top."
+    },
+    "takeaway": {
+      "worst": "Most critical: {label} ({share} negative or mixed)."
     }
   },
   "Insights": {
@@ -1220,7 +1270,8 @@
         "high": "High"
       },
       "byAccount": "By account",
-      "byDm": "By DM"
+      "byDm": "By DM",
+      "riskLabel": "At risk"
     },
     "qualitative": {
       "title": "Qualitative analysis",
@@ -1485,16 +1536,18 @@
       "team": "Team {n}"
     },
     "scatter": {
-      "title": "Goals completion vs {indicator}",
-      "hint": "One person per dot: horizontal, % of goals completed; vertical, the value the manager gave (1 to 5). Only people with goals and that answer appear.",
+      "title": "Do people who complete more goals have better {indicator}?",
+      "hint": "One person per dot: further right, more goals completed (%); higher, a better manager answer (1 to 5). Only people with goals and that answer appear.",
       "xAxis": "Goals completed (%)",
       "yAxis": "{indicator} (1 to 5)",
       "point": "{name}: {completed} % of goals completed, {indicator} {value}",
-      "missing": "{n, plural, one {# person does not appear} other {# people do not appear}} for lack of goals or that answer."
+      "missing": "{n, plural, one {# person does not appear} other {# people do not appear}} for lack of goals or that answer.",
+      "riskLine": "Risk: {max} or less",
+      "goalsLine": "Done: {min}% or more"
     },
     "buckets": {
-      "title": "Indicators by goals completion",
-      "hint": "Mean retention and engagement of the people, by the % of goals they completed.",
+      "title": "Do retention and engagement change with goal completion?",
+      "hint": "Each pair of bars is a band of % goals completed; the height is the mean (1 to 5) retention and engagement of its people, and n how many they are.",
       "bucket": "{from}–{to} %",
       "people": "{n, plural, one {# person} other {# people}}",
       "positive": "Positive comments",
@@ -1509,7 +1562,9 @@
         "retention": "Retention (mean)",
         "engagement": "Engagement (mean)",
         "positive": "Positive comments"
-      }
+      },
+      "yTitle": "Mean (1–5)",
+      "xTitle": "Goals completed (%)"
     },
     "people": {
       "title": "People",
@@ -1643,19 +1698,23 @@
       "apply": "Apply"
     },
     "line": {
-      "title": "Evolution",
-      "hint": "Mean score of those who answered (0 to 100) and participation: the percentage of the month's people who answered.",
+      "title": "Is engagement going up or down month by month?",
+      "hint": "Solid line: mean score of respondents (0–100%). Dashed line: participation, the % of people who answered. The last month's value is written at the end.",
       "chartLabel": "Mean score and participation per month",
       "score": "Mean score",
       "participation": "Participation",
-      "point": "{month}: {value}"
+      "point": "{month}: {value}",
+      "yTitle": "% (0–100)",
+      "lastPeople": "n = {n} people in the last month"
     },
     "segments": {
-      "title": "Segments per month",
-      "hint": "Each bar is 100 % of the month's people split by segment; Missing are those who did not answer.",
+      "title": "How many people are at each engagement level?",
+      "hint": "Each bar is a month and adds up to 100% of its people, from High to Low; Missing are those who did not answer.",
       "chartLabel": "People per segment and per month",
       "hiddenMonth": "{month}: month hidden because of the group size",
-      "hiddenCells": "{month}: segments hidden because of the group size"
+      "hiddenCells": "{month}: segments hidden because of the group size",
+      "masked": "Fewer than {min} people: hidden for Leadership.",
+      "maskedCells": "Segments under {min} people: hidden for Leadership."
     },
     "segment": {
       "alto": "High",

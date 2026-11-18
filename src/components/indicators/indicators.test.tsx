@@ -70,23 +70,22 @@ describe("DistributionView", () => {
       renderIn(locale, <DistributionView data={distribution} />);
       // The total plus the two groups.
       expect(screen.getAllByTestId("indicator-histogram")).toHaveLength(3);
-      const group = screen.getAllByTestId("indicator-histogram")[1];
+      const group = screen
+        .getAllByTestId("indicator-histogram")
+        .find((r) => r.textContent?.includes("Ingeniería"))!;
+      // Total first, then the groups with the biggest low (1-2) share.
+      expect(screen.getAllByTestId("indicator-histogram")[0]).toHaveTextContent(
+        locale === "es" ? "Todos" : "All",
+      );
+      expect(group.textContent?.replace(/\s/g, " ")).toContain(
+        locale === "es" ? "n = 6 · x̄ 2,8" : "n = 6 · x̄ 2.8",
+      );
       expect(
-        within(group).getByText(locale === "es" ? "Ingeniería" : "Ingeniería"),
-      ).toBeInTheDocument();
-      expect(
-        within(group).getByText(
-          locale === "es"
-            ? /6 personas · Promedio 2,8/
-            : /6 people · Average 2\.8/,
-        ),
-      ).toBeInTheDocument();
-      expect(
-        screen.getByRole("img", {
+        within(group).getByRole("img", {
           name:
             locale === "es"
-              ? "Ingeniería: valor 1: 1, valor 2: 2, valor 3: 1, valor 4: 1, valor 5: 1"
-              : "Ingeniería: value 1: 1, value 2: 2, value 3: 1, value 4: 1, value 5: 1",
+              ? /^Ingeniería · valor 2: 2 \(33\s%\)$/
+              : /^Ingeniería · value 2: 2 \(33%\)$/,
         }),
       ).toBeInTheDocument();
       expect(
@@ -144,8 +143,9 @@ describe("DistributionView", () => {
       />,
     );
     const figures = screen.getAllByTestId("indicator-histogram");
-    expect(within(figures[0]).getByText("Unassigned")).toBeInTheDocument();
-    expect(within(figures[1]).getByText("Others")).toBeInTheDocument();
+    // "Others" has more low answers, so it goes first.
+    expect(within(figures[0]).getByText("Others")).toBeInTheDocument();
+    expect(within(figures[1]).getByText("Unassigned")).toBeInTheDocument();
   });
 
   it("a single series without grouping is called 'All' and not repeated", () => {
@@ -217,8 +217,13 @@ describe("RiskMatrixView", () => {
         ),
       });
       expect(chart).toBeInTheDocument();
-      // The risk cell is labelled, not just coloured.
-      expect(chart).toHaveTextContent(locale === "es" ? "Riesgo" : "Risk");
+      // The risk cell is named, not just coloured; the axes are titled.
+      expect(chart).toHaveTextContent(
+        locale === "es" ? "En riesgo" : "At risk",
+      );
+      expect(
+        screen.getByText(locale === "es" ? "Retención →" : "Retention →"),
+      ).toBeInTheDocument();
       const list = screen.getByTestId("risk-list");
       expect(
         within(list).getByRole("link", { name: "Fabio Luna" }),
@@ -259,12 +264,12 @@ describe("RiskMatrixView", () => {
       ),
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("img", {
+      screen.getAllByRole("img", {
         name: new RegExp(
           locale === "es" ? "menos de 5 personas" : "fewer than 5 people",
         ),
       }),
-    ).toBeInTheDocument();
+    ).toHaveLength(2);
   });
 
   it.each(locales)("nobody at risk and an empty cycle (%s)", (locale) => {
@@ -410,7 +415,7 @@ describe("TrendChart", () => {
   it.each(locales)("a line through the means with a table (%s)", (locale) => {
     renderIn(locale, <TrendChart data={trend} subject="Equipo" />);
     expect(
-      screen.getByRole("img", {
+      screen.getByRole("group", {
         name:
           locale === "es"
             ? "Retención por ciclo, Equipo: H1 2024: 3,5, H2 2024: 3,1"
@@ -441,7 +446,7 @@ describe("TrendChart", () => {
         subject="Producto"
       />,
     );
-    const d = screen.getByTestId("trend-line").getAttribute("d")!;
+    const d = screen.getByTestId("trend-line-path").getAttribute("d")!;
     // Two strokes: C1 alone, then C3 to C4.
     expect(d.match(/M/g)).toHaveLength(2);
     expect(d.match(/L/g)).toHaveLength(1);
@@ -479,7 +484,7 @@ describe("TrendChart", () => {
       screen.getByText(locale === "es" ? "menos de 5" : "fewer than 5"),
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("img", {
+      screen.getByRole("group", {
         name: new RegExp(locale === "es" ? "no disponible" : "not available"),
       }),
     ).toBeInTheDocument();

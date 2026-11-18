@@ -134,8 +134,10 @@ describe("renderers", () => {
       expect(html).toContain("<b>38%</b><span>Completados</span>");
       expect(html).toContain("<b>62%</b><span>Avance promedio</span>");
       // goals by status: completed 6, in progress on time 6, overdue 2, closed 1
-      expect(html).toContain("<title>Vencidos: 2</title>");
-      expect(html).toContain("<title>En curso: 6</title>");
+      expect(html).toMatch(/<title>[^<]* · Vencidos: 2 \(\d+%\)<\/title>/);
+      expect(html).toMatch(/<title>[^<]* · En curso: 6 \(\d+%\)<\/title>/);
+      // wide segments carry their percent inside
+      expect(html).toMatch(/class="in">\d+%<\/text>/);
       expect(html).toContain("Vencidos</span>");
       // buckets table: a hidden bucket shows dashes and a note
       expect(html).toContain(
