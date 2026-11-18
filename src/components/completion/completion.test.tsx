@@ -122,28 +122,38 @@ describe.each(locales)("CompletionSummaryView (%s)", (locale) => {
   it("shows the whole cycle and each group with meters, percentages and counts", () => {
     renderIn(locale, <CompletionSummaryView data={withDelta} />);
     const groups = screen.getAllByTestId("completion-group");
-    expect(groups).toHaveLength(3);
-    expect(within(groups[0]).getByText(text.total)).toBeInTheDocument();
+    // The whole cycle: a tile per side with the percentage and the count,
+    // then one row per group and side (self first, then manager).
+    expect(groups).toHaveLength(5);
+    expect(groups[0]).toHaveAccessibleName(text.total);
     expect(within(groups[0]).getByText("75 %")).toBeInTheDocument();
     expect(within(groups[0]).getByText("3/4")).toBeInTheDocument();
-    expect(within(groups[1]).getByText("Tecnología")).toBeInTheDocument();
+    expect(within(groups[0]).getByText("33 %")).toBeInTheDocument();
+    const self = groups.filter((g) => g.dataset.side === "self");
+    const manager = groups.filter((g) => g.dataset.side === "manager");
+    expect(self.map((g) => g.getAttribute("aria-label"))).toEqual([
+      "Tecnología",
+      text.unassigned,
+    ]);
     expect(
-      within(groups[1]).getByRole("progressbar", { name: text.meter }),
+      within(self[0]).getByRole("progressbar", { name: text.meter }),
     ).toBeInTheDocument();
+    expect(within(self[0]).getByText(/2\/3 · 67 %/)).toBeInTheDocument();
     expect(
-      within(groups[1]).getByRole("progressbar", { name: text.managerMeter }),
+      within(manager[0]).getByRole("progressbar", { name: text.managerMeter }),
     ).toBeInTheDocument();
-    expect(within(groups[1]).getByText("67 %")).toBeInTheDocument();
-    expect(within(groups[1]).getByText("33 %")).toBeInTheDocument();
+    expect(within(manager[0]).getByText(/1\/3 · 33 %/)).toBeInTheDocument();
     // The unassigned group's manager side does not apply to anybody.
-    expect(within(groups[2]).getByText(text.unassigned)).toBeInTheDocument();
-    expect(within(groups[2]).getByText(text.notApplicable)).toBeInTheDocument();
+    expect(
+      within(manager[1]).getByText(text.notApplicable),
+    ).toBeInTheDocument();
   });
 
   it("compares with the previous cycle with an arrow and a signed number", () => {
     renderIn(locale, <CompletionSummaryView data={withDelta} />);
     expect(screen.getByTestId("delta-hint")).toHaveTextContent(text.compared);
-    const [total, tech, unassigned] = screen.getAllByTestId("completion-group");
+    const [total, techSelf, unassignedSelf, techManager, unassignedManager] =
+      screen.getAllByTestId("completion-group");
     const deltas = (row: HTMLElement) =>
       within(row)
         .queryAllByTestId("delta")
@@ -152,12 +162,15 @@ describe.each(locales)("CompletionSummaryView (%s)", (locale) => {
       expect.stringMatching(/▼.*8[.,]3 pp/),
       expect.stringMatching(/▲.*\+12 pp/),
     ]);
-    expect(deltas(tech)).toEqual([
+    expect(deltas(techSelf)).toEqual([
       expect.stringMatching(new RegExp(`▼.*${text.down}.*33[.,]3 pp`)),
+    ]);
+    expect(deltas(techManager)).toEqual([
       expect.stringMatching(new RegExp(`▬.*${text.same}.*0 pp`)),
     ]);
     // No rate to compare: a dash, no arrow.
-    expect(deltas(unassigned)).toEqual([]);
+    expect(deltas(unassignedSelf)).toEqual([]);
+    expect(deltas(unassignedManager)).toEqual([]);
   });
 
   it("shows no delta when there is no earlier cycle", () => {
@@ -227,10 +240,11 @@ describe.each(locales)("CompletionSummaryView (%s)", (locale) => {
       />,
     );
     const groups = screen.getAllByTestId("completion-group");
-    expect(groups).toHaveLength(3);
-    expect(
-      within(groups[2]).getByText(locale === "es" ? "Otros" : "Others"),
-    ).toBeInTheDocument();
+    // The whole cycle, then Tecnología and Otros on each side.
+    expect(groups).toHaveLength(5);
+    expect(groups[2]).toHaveAccessibleName(
+      locale === "es" ? "Otros" : "Others",
+    );
     expect(
       screen.getByText(
         locale === "es"

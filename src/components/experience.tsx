@@ -24,6 +24,7 @@ export function MetricCard({
   note,
   icon,
   featured = false,
+  tone = featured ? "featured" : "default",
   children,
 }: {
   label: string;
@@ -31,11 +32,18 @@ export function MetricCard({
   note?: ReactNode;
   icon?: ReactNode;
   featured?: boolean;
+  /** `featured`: the dark card; `soft`: fog; `warm`: the "to review" amber. */
+  tone?: "default" | "featured" | "soft" | "warm";
   children?: ReactNode;
 }) {
   return (
     <section
-      className={cn("metric-card", featured && "metric-card-featured")}
+      className={cn(
+        "metric-card",
+        tone === "featured" && "metric-card-featured",
+        tone === "soft" && "metric-card-soft",
+        tone === "warm" && "metric-card-warm",
+      )}
       aria-label={label}
     >
       <div className="flex items-center justify-between gap-4">

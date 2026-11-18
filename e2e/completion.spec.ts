@@ -87,7 +87,7 @@ test("People import the assessment progress and read the completion of a cycle",
   await page.goto("/es");
   await page
     .getByRole("navigation", { name: "Navegación" })
-    .getByRole("link", { name: "Completitud" })
+    .getByRole("link", { name: "Participación" })
     .click();
   await expect(page).toHaveURL(/\/es\/insights\/completion$/);
   await expect(

@@ -29,7 +29,7 @@ test("People list every goal, filter them and page through them", async ({
   test.setTimeout(120_000);
   await page.goto("/es/goals");
   await expect(
-    page.getByRole("heading", { level: 1, name: "Goals" }),
+    page.getByRole("heading", { level: 1, name: "Objetivos" }),
   ).toBeVisible();
   const total = await allGoalCount();
   await expect(
@@ -66,6 +66,7 @@ test("People list every goal, filter them and page through them", async ({
 
   // By person.
   await page.goto("/es/goals");
+  await filters.getByText("Más filtros", { exact: true }).click();
   await filters.getByLabel("Persona").fill(subject.personName);
   await filters.getByRole("button", { name: "Aplicar" }).click();
   await expect(page).toHaveURL(/q=/);
@@ -110,6 +111,7 @@ test("a goal's page shows its summary, milestones and comments, and leads to the
   test.setTimeout(120_000);
   await page.goto("/es/goals");
   const filters = page.getByRole("form", { name: "Filtros de goals" });
+  await filters.getByText("Más filtros", { exact: true }).click();
   await filters.getByLabel("Persona").fill(goal.personName);
   await filters.getByRole("button", { name: "Aplicar" }).click();
   await page
@@ -166,7 +168,7 @@ test("an employee only sees their own goals", async ({ page }) => {
   // And, as the employee, no analysis in the navigation.
   await expect(
     page.getByRole("navigation", { name: "Secciones" }).getByRole("link", {
-      name: "Vista ejecutiva",
+      name: "Resumen",
     }),
   ).toHaveCount(0);
 });
@@ -180,6 +182,7 @@ test("a manager sees their team's goals and not other people's", async ({
   await actAsCookie(page, { personId: subject.managerId, role: "manager" });
   await page.goto("/es/goals");
   const filters = page.getByRole("form", { name: "Filtros de goals" });
+  await filters.getByText("Más filtros", { exact: true }).click();
   await filters.getByLabel("Persona").fill(subject.personName);
   await filters.getByRole("button", { name: "Aplicar" }).click();
   const rows = page.getByRole("group", { name: "Lista de goals" });

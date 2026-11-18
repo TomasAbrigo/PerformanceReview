@@ -17,6 +17,7 @@ export function Panel({
   hint,
   meta,
   actions,
+  icon,
   children,
 }: {
   id: string;
@@ -24,6 +25,8 @@ export function Panel({
   hint?: string;
   meta?: string;
   actions?: ReactNode;
+  /** The tile's icon: say what the panel holds when it is not a chart. */
+  icon?: ReactNode;
   children: ReactNode;
 }) {
   return (
@@ -32,6 +35,7 @@ export function Panel({
       title={title}
       howToRead={hint}
       meta={meta}
+      icon={icon}
       actions={actions}
     >
       <div className="flex flex-col gap-4">{children}</div>

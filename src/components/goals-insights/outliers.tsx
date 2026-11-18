@@ -1,3 +1,4 @@
+import { CardCollection } from "@/components/card-collection";
 import { useTranslations } from "next-intl";
 import { ProgressBar } from "@/components/progress-bar";
 import type {
@@ -24,27 +25,37 @@ function Group({
   const t = useTranslations("GoalsInsights.outliers");
   const pct = usePct();
   const person = (p: GoalOutlier) => (
-    <article key={p.participantId} className="record-card" aria-label={p.name}>
-      <h4 className="text-lg">{p.name}</h4>
-      <p className="text-xs text-muted-foreground">
-        {t("columns.manager")}: {p.managerName ?? "–"}
-      </p>
-      <ProgressBar
-        percent={p.completedPct}
-        label={t("completed", {
-          completed: p.completed,
-          goals: p.goals,
-          pct: pct(p.completedPct) ?? 0,
-        })}
-      />
-      <p className="text-xs">
-        {t("completed", {
-          completed: p.completed,
-          goals: p.goals,
-          pct: pct(p.completedPct) ?? 0,
-        })}
-      </p>
-      <dl className="record-facts">
+    <article
+      key={p.participantId}
+      className="dense-row dense-row-wide"
+      aria-label={p.name}
+    >
+      <div className="dense-name">
+        <span className="font-medium">{p.name}</span>
+        <small>
+          {t("columns.manager")}: {p.managerName ?? "–"}
+        </small>
+      </div>
+      <dl className="dense-bar">
+        <dt>
+          {t("completed", {
+            completed: p.completed,
+            goals: p.goals,
+            pct: pct(p.completedPct) ?? 0,
+          })}
+        </dt>
+        <dd>
+          <ProgressBar
+            percent={p.completedPct}
+            label={t("completed", {
+              completed: p.completed,
+              goals: p.goals,
+              pct: pct(p.completedPct) ?? 0,
+            })}
+          />
+        </dd>
+      </dl>
+      <dl className="dense-facts">
         <div>
           <dt>{t("columns.retention")}</dt>
           <dd>{p.retention ?? "–"}</dd>
@@ -72,7 +83,9 @@ function Group({
           : t("count", { n: group.count })}
       </p>
       {group.people.length > 0 ? (
-        <div className="grid gap-4">{group.people.map(person)}</div>
+        <CardCollection gridClassName="dense-list" initialCount={8}>
+          {group.people.map(person)}
+        </CardCollection>
       ) : group.count === 0 ? (
         <p className="text-sm text-muted-foreground">{t("none")}</p>
       ) : null}

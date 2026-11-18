@@ -1,10 +1,15 @@
+import type { ReactNode } from "react";
+
 /** A progress bar with its figure beside it (the figure is the text, the bar its picture). */
 export function ProgressBar({
   percent,
   label,
+  figure,
 }: {
   percent: number;
   label: string;
+  /** What to write beside the bar; default the rounded percentage. */
+  figure?: ReactNode;
 }) {
   const value = Math.min(100, Math.max(0, Math.round(percent)));
   return (
@@ -23,7 +28,7 @@ export function ProgressBar({
         />
       </div>
       <span className="text-xs text-muted-foreground tabular-nums">
-        {value}%
+        {figure ?? `${value}%`}
       </span>
     </div>
   );

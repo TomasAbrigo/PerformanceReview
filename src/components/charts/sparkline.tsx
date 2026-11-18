@@ -1,8 +1,14 @@
 import { linePath } from "./line-trend";
 
-const W = 160;
-const H = 44;
-const PAD = { l: 4, r: 30, t: 8, b: 8 };
+const SIZES = {
+  sm: { W: 160, H: 44, PAD: { l: 4, r: 30, t: 8, b: 8 }, cls: "h-11 w-40" },
+  md: {
+    W: 320,
+    H: 72,
+    PAD: { l: 6, r: 36, t: 10, b: 10 },
+    cls: "h-[72px] w-full max-w-80",
+  },
+};
 
 /**
  * A word-sized trend: a 1.5px line on the given domain, the min and max
@@ -14,6 +20,7 @@ export function Sparkline({
   domain,
   fmt,
   label,
+  size = "sm",
 }: {
   series: {
     key: string;
@@ -24,7 +31,10 @@ export function Sparkline({
   domain: [number, number];
   fmt: (v: number) => string;
   label: string;
+  /** `sm`: word-sized (160×44); `md`: a card-wide trend (320×72). */
+  size?: "sm" | "md";
 }) {
+  const { W, H, PAD, cls } = SIZES[size];
   const n = Math.max(...series.map((s) => s.values.length));
   const plotW = W - PAD.l - PAD.r;
   const xOf = (i: number) =>
@@ -34,7 +44,7 @@ export function Sparkline({
   return (
     <svg
       viewBox={`0 0 ${W} ${H}`}
-      className="h-11 w-40"
+      className={cls}
       role="img"
       aria-label={label}
     >
@@ -102,24 +112,32 @@ export function Sparkline({
           </g>
         );
       })}
-      {series.map((s, k) => {
-        const vals = s.values.filter((v): v is number => v !== null);
-        if (!vals.length) return null;
-        const v = vals[vals.length - 1];
-        return (
+      {(() => {
+        // The last value of each series, written beside it; nudged apart when
+        // two would collide.
+        const ends = series
+          .map((s) => {
+            const vals = s.values.filter((v): v is number => v !== null);
+            return vals.length
+              ? { key: s.key, v: vals[vals.length - 1] }
+              : null;
+          })
+          .filter((e) => e !== null)
+          .map((e) => ({ ...e, y: yOf(e.v) + 4 }))
+          .sort((a, b) => a.y - b.y);
+        for (let k = 1; k < ends.length; k++)
+          if (ends[k].y - ends[k - 1].y < 12) ends[k].y = ends[k - 1].y + 12;
+        return ends.map((e) => (
           <text
-            key={s.key}
+            key={e.key}
             x={W - PAD.r + 4}
-            y={Math.min(
-              H - 2,
-              Math.max(12, yOf(v) + 4 + k * (series.length > 1 ? 6 : 0)),
-            )}
+            y={Math.min(H - 2, Math.max(12, e.y))}
             className="fill-foreground text-[12px] tabular-nums"
           >
-            {fmt(v)}
+            {fmt(e.v)}
           </text>
-        );
-      })}
+        ));
+      })()}
     </svg>
   );
 }

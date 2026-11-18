@@ -103,3 +103,117 @@
     grid-column: 1 / -1;
   }
 }
+/* 360 cards: five figures in one row, then the sentiment and the trend as blocks. */
+.dm-figures {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+.dm-figure {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 0.375rem;
+}
+.dm-block {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 0.75rem;
+  border-radius: 0.75rem;
+  background: var(--brand-fog);
+  padding: 1rem;
+}
+@media (min-width: 640px) {
+  .dm-figures {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+@media (min-width: 1280px) {
+  .dm-figures {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+}
+/* Dense lists: one row per record, facts side by side, for long lists of people. */
+.dense-list {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  border: 1px solid var(--border);
+  border-radius: 0.875rem;
+  background: var(--card);
+}
+.dense-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.75rem 1.25rem;
+  align-items: center;
+  padding: 0.875rem 1.25rem;
+  border-top: 1px solid color-mix(in oklab, var(--border) 70%, transparent);
+}
+.dense-row:first-child {
+  border-top: 0;
+}
+.dense-row .dense-name {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 0.125rem;
+}
+.dense-row .dense-name a {
+  text-decoration: underline;
+  text-decoration-color: var(--brand-200);
+  text-underline-offset: 4px;
+}
+.dense-row .dense-name small {
+  font-size: 0.75rem;
+  color: var(--muted-foreground);
+}
+.dense-facts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.5rem 1rem;
+}
+.dense-facts > div {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 0.125rem;
+}
+.dense-facts dt {
+  font-size: 0.6875rem;
+  color: var(--muted-foreground);
+  white-space: nowrap;
+}
+.dense-facts dd {
+  font-size: 0.9375rem;
+  font-variant-numeric: tabular-nums;
+}
+.dense-bar {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+.dense-bar dt {
+  font-size: 0.6875rem;
+  color: var(--muted-foreground);
+}
+@media (min-width: 768px) {
+  .dense-row {
+    grid-template-columns: minmax(0, 1.4fr) minmax(0, 2fr);
+  }
+  .dense-facts {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+@media (min-width: 1280px) {
+  .dense-row.dense-row-wide {
+    grid-template-columns: minmax(0, 1.2fr) minmax(0, 1.3fr) minmax(0, 2fr);
+  }
+}
+@media (min-width: 768px) {
+  .dense-facts-5 {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+}

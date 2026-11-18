@@ -12,7 +12,9 @@ export async function SideNav() {
     <SideNavClient
       groups={navGroups(t, actor)}
       label={t("Nav.label")}
+      product={t("Nav.product")}
       home={t("Nav.home")}
+      people={t("Nav.people")}
       menu={t("Nav.menu")}
       company={t("Brand.company")}
       tagline={t("Brand.tagline")}

@@ -27,8 +27,7 @@ export type NavItem = {
   description: string;
 };
 
-export type NavGroupKey =
-  "goals" | "assessments" | "insights" | "data" | "settings";
+export type NavGroupKey = "goals" | "assessments" | "insights" | "data";
 
 export type NavGroup = {
   key: NavGroupKey;
@@ -46,7 +45,9 @@ export type NavMessageKey =
   | `Home.groups.${NavGroupKey}`
   | `Home.descriptions.${NavIcon}`
   | "Goals.nav"
+  | "Goals.navOwn"
   | "Assessments.nav"
+  | "Assessments.navOwn"
   | "Insights.Executive.nav"
   | "Completion.nav"
   | "Indicators.nav"
@@ -69,8 +70,8 @@ type Translate = (key: NavMessageKey) => string;
  * the Analysis (aggregated, never mixed with them), then Data and Settings.
  * Each role gets what it may open: Goals and Assessments need individual
  * access (not direction, not a manager or employee without a person), the
- * Analysis needs an analysis scope (not employees) and Data and Settings are
- * People-only. The screens themselves are gated too.
+ * Analysis needs an analysis scope (not employees) and the Administration
+ * (data and settings) is People-only. The screens themselves are gated too.
  */
 export function navGroups(t: Translate, actor: ActorContext): NavGroup[] {
   const item = (key: NavIcon, href: string, label: NavMessageKey): NavItem => ({
@@ -86,12 +87,25 @@ export function navGroups(t: Translate, actor: ActorContext): NavGroup[] {
   ): NavGroup => ({ key, title: t(`Home.groups.${key}`), primary, items });
 
   const groups: NavGroup[] = [];
-  if (individualScope(actor).kind !== "none") {
+  const scope = individualScope(actor).kind;
+  if (scope !== "none") {
+    // Somebody who only sees their own: "my goals", "my assessments".
+    const own = scope === "own";
     groups.push(
-      group("goals", [item("goalsArea", "/goals", "Goals.nav")], true),
+      group(
+        "goals",
+        [item("goalsArea", "/goals", own ? "Goals.navOwn" : "Goals.nav")],
+        true,
+      ),
       group(
         "assessments",
-        [item("assessmentsArea", "/assessments", "Assessments.nav")],
+        [
+          item(
+            "assessmentsArea",
+            "/assessments",
+            own ? "Assessments.navOwn" : "Assessments.nav",
+          ),
+        ],
         true,
       ),
     );
@@ -121,8 +135,6 @@ export function navGroups(t: Translate, actor: ActorContext): NavGroup[] {
         item("imports", "/imports/runs", "Imports.nav"),
         item("identity", "/imports/identity", "Identity.nav"),
         item("dataQuality", "/data-quality", "DataQuality.nav"),
-      ]),
-      group("settings", [
         item("insightsSettings", "/settings/insights", "InsightsSettings.nav"),
       ]),
     );

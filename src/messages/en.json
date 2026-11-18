@@ -9,7 +9,7 @@
     "navigation": "Navigation",
     "groups": {
       "insights": "Analysis",
-      "data": "Data",
+      "data": "Administration",
       "settings": "Settings",
       "goals": "Goals",
       "assessments": "Assessments"
@@ -30,7 +30,32 @@
       "goalsArea": "Each person's goals: progress, milestones, due dates and comments, filtered by cycle, status and team.",
       "assessmentsArea": "The questions and answers of each cycle: self-assessment and manager review, next to the goals of the period.",
       "goalsInsights": "Goal completion next to each person's retention and engagement."
-    }
+    },
+    "greeting": {
+      "hr": "Good morning, People team",
+      "direction": "Good morning, Leadership",
+      "person": "Good morning, {name}",
+      "noPerson": "Good morning"
+    },
+    "intro": "A starting point to support people's development.",
+    "focus": {
+      "headline": "Development is built every day.",
+      "line": "{cycle} · Check progress, listen to the team and spot opportunities.",
+      "noCycle": "No cycles yet: once there is one, its progress shows here.",
+      "cta": "Explore the cycle"
+    },
+    "access": {
+      "title": "Main entries",
+      "goals": "Each person's commitments, followed up.",
+      "assessments": "The two perspectives of each period.",
+      "insights": "Indicators to understand the cycle.",
+      "explore": "Explore"
+    },
+    "before": {
+      "title": "Before analysing",
+      "text": "Check the imports and the pending data-quality cases."
+    },
+    "all": "All sections"
   },
   "LocaleSwitcher": {
     "label": "Language",
@@ -90,7 +115,7 @@
       "cutoffRegular": "Regular segment from (% of the score)",
       "hint": "Only used when the file has no Segmento column: below Regular the segment is Low."
     },
-    "nav": "Insights settings"
+    "nav": "Settings"
   },
   "Common": {
     "exportCsv": "Export CSV"
@@ -169,7 +194,7 @@
   },
   "Identity": {
     "title": "Identity queue",
-    "nav": "Identity queue",
+    "nav": "Identities",
     "description": "Records the import could not attach to a person on its own. Review each case: link it to an existing person, create a new person or ignore it.",
     "tabs": {
       "label": "Queue views",
@@ -586,7 +611,13 @@
     },
     "reapply": "Reapply equivalences",
     "reapplyDone": "{count, plural, =0 {No answer changed.} =1 {1 answer remapped.} other {# answers remapped.}}",
-    "reapplyHelp": "Recomputes the retention and engagement answers with the current likert_mapping table."
+    "reapplyHelp": "Recomputes the retention and engagement answers with the current likert_mapping table.",
+    "pending": "{n, plural, one {There is # case to review} other {There are # cases to review}}",
+    "pendingHint": "Each count opens the exact list of affected records.",
+    "needsReview": "Needs review",
+    "ok": "✓ All clear",
+    "showAll": "{n, plural, one {Show the indicator without cases} other {Show the # indicators without cases}}",
+    "noCases": "No cases"
   },
   "Exports": {
     "columns": {
@@ -832,7 +863,7 @@
     "metaN": "n = {n}"
   },
   "Indicators": {
-    "nav": "Retention and engagement",
+    "nav": "Indicators",
     "title": "Retention and engagement indicators",
     "forbidden": "You do not have access to these indicators.",
     "noCycles": "There are no launched cycles yet.",
@@ -978,7 +1009,7 @@
     }
   },
   "Qualitative": {
-    "nav": "Qualitative analysis",
+    "nav": "Feedback",
     "title": "Qualitative analysis of comments",
     "forbidden": "You do not have access to the qualitative analysis.",
     "empty": "No analyzed comments yet.",
@@ -1169,7 +1200,7 @@
       "team": "Team {n}"
     },
     "SelfAssessment": {
-      "nav": "Self-assessment",
+      "nav": "Self-assessments",
       "title": "Self-assessment report",
       "sentimentTitle": "Sentiment of the self assessments",
       "sentimentChart": "Sentiment of the self assessments by dimension",
@@ -1188,7 +1219,7 @@
       "rowManager": "{dimension} · manager"
     },
     "Executive": {
-      "nav": "Executive view",
+      "nav": "Overview",
       "title": "Executive view",
       "mode": "Mode",
       "modes": {
@@ -1359,7 +1390,7 @@
     }
   },
   "Completion": {
-    "nav": "Completion",
+    "nav": "Participation",
     "title": "Assessment completion",
     "forbidden": "You do not have access to this screen.",
     "noCycles": "There are no cycles with assessments yet.",
@@ -1410,7 +1441,12 @@
         "participants": "Participants",
         "self": "Self assessment submitted",
         "manager": "Manager assessment submitted"
-      }
+      },
+      "pending": "Pending",
+      "pendingValue": "{self} / {manager}",
+      "pendingNote": "Self / manager · independent bases",
+      "sent": "{submitted} of {applicable} submitted",
+      "byGroup": "Progress by group"
     },
     "delta": {
       "title": "Compared with {cycle}",
@@ -1476,7 +1512,7 @@
     }
   },
   "GoalsInsights": {
-    "nav": "Goals vs. assessments",
+    "nav": "Goal progress",
     "title": "Goals and assessments",
     "heading": "Goals and assessments · {cycle}",
     "forbidden": "You do not have access to this view.",
@@ -1638,7 +1674,7 @@
       "retention": "Mean retention",
       "engagement": "Mean engagement",
       "risk": "At risk",
-      "riskValue": "{percent}% ({people} of {of})",
+      "riskValue": "{percent}%",
       "sentiment": "Sentiment of the comments",
       "comments": "{n, plural, one {# comment} other {# comments}} from {people, plural, one {# person} other {# people}}",
       "noComments": "No comments",
@@ -1648,7 +1684,8 @@
       "trend": "Evolution by cycle",
       "reading": "Reading",
       "none": "–",
-      "meanOf": "over {n}"
+      "meanOf": "over {n}",
+      "riskOf": "({people} of {of})"
     },
     "spark": {
       "label": "Retention and engagement by cycle",
@@ -1681,7 +1718,7 @@
     "santexLead": "Santex Lead"
   },
   "Engagement": {
-    "nav": "Monthly engagement",
+    "nav": "Engagement",
     "title": "Monthly engagement",
     "forbidden": "You do not have access to the monthly engagement.",
     "noData": "There is no monthly engagement yet: import the file with the engagement-monthly profile in Upload a file.",
@@ -1749,7 +1786,10 @@
   "Nav": {
     "label": "Sections",
     "home": "Home",
-    "menu": "Menu"
+    "menu": "Menu",
+    "product": "Performance",
+    "people": "People",
+    "all": "All sections"
   },
   "Brand": {
     "company": "Santex Group",
@@ -1758,7 +1798,7 @@
   "Goals": {
     "nav": "Goals",
     "title": "Goals",
-    "kicker": "Goals",
+    "kicker": "People",
     "scope": {
       "all": "Every goal in the company.",
       "team": "Your goals and those of the people who report to you.",
@@ -1834,12 +1874,22 @@
       "openAssessment": "See the {cycle} assessment",
       "notInAssessments": "It does not appear in any assessment yet."
     },
-    "forbidden": "You do not have access to this goal: everyone sees their own and, for a manager, their team's."
+    "forbidden": "You do not have access to this goal: everyone sees their own and, for a manager, their team's.",
+    "navOwn": "My goals",
+    "titleOwn": "My goals",
+    "overview": {
+      "completed": "Goals completed",
+      "hint": "With the filters applied.",
+      "moving": "In motion",
+      "movingNote": "{n, plural, one {Goal in progress} other {Goals in progress}}",
+      "review": "To review",
+      "reviewNote": "{n, plural, one {Overdue goal} other {Overdue goals}}"
+    }
   },
   "Assessments": {
     "nav": "Assessments",
     "title": "Assessments",
-    "kicker": "Assessments",
+    "kicker": "People",
     "scope": {
       "all": "The questions and answers of each cycle, company-wide.",
       "team": "Your reviews and those of the people who report to you.",
@@ -1942,7 +1992,10 @@
         "progressLabel": "{percent}% complete"
       }
     },
-    "forbidden": "You do not have access to this assessment: everyone sees their own and, for a manager, their team's."
+    "forbidden": "You do not have access to this assessment: everyone sees their own and, for a manager, their team's.",
+    "navOwn": "My assessments",
+    "titleOwn": "My assessments",
+    "back": "Back to Assessments"
   },
   "Capture": {
     "back": "Back to Assessments",

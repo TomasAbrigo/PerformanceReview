@@ -10,6 +10,30 @@ export type LineSeries = {
 const W = 640;
 const H = 256;
 const PAD = { l: 44, r: 64, t: 30, b: 36 };
+const LABEL_LINE = 13;
+
+/**
+ * Splits an x label into lines of at most `max` characters, on spaces (a
+ * word longer than `max` stays whole), so long cycle names stack instead of
+ * running into their neighbours.
+ */
+export function wrapLabel(label: string, max: number, lines = 3): string[] {
+  const out: string[] = [];
+  let line = "";
+  for (const word of label.split(/\s+/)) {
+    if (!line) line = word;
+    else if ((line + " " + word).length <= max) line += " " + word;
+    else {
+      out.push(line);
+      line = word;
+    }
+  }
+  if (line) out.push(line);
+  if (out.length <= lines) return out;
+  const kept = out.slice(0, lines);
+  kept[lines - 1] += "…";
+  return kept;
+}
 
 /** One stroke per run of non-null values: a hidden point is a real gap. */
 export function linePath(
@@ -76,9 +100,15 @@ export function LineTrend({
   for (let k = 1; k < ends.length; k++)
     if (ends[k].y - ends[k - 1].y < 14) ends[k].y = ends[k - 1].y + 14;
   const step = n > 12 ? Math.ceil(n / 12) : 1;
+  // Characters that fit between two x positions at 11px, at least a word.
+  const slot = n <= 1 ? plotW : plotW / (n - 1);
+  const maxChars = Math.max(8, Math.floor(slot / 6.2));
+  const labels = x.map((lbl) => wrapLabel(lbl, maxChars));
+  const labelLines = Math.max(1, ...labels.map((l) => l.length));
+  const height = H + (labelLines - 1) * LABEL_LINE;
   return (
     <svg
-      viewBox={`0 0 ${W} ${H}`}
+      viewBox={`0 0 ${W} ${height}`}
       className="w-full max-w-[640px]"
       role="group"
       aria-label={label}
@@ -107,7 +137,7 @@ export function LineTrend({
           </text>
         </g>
       ))}
-      {x.map((lbl, i) => {
+      {x.map((_lbl, i) => {
         const tip = hiddenTip?.(i);
         return (
           <g key={`x-${i}`}>
@@ -129,10 +159,14 @@ export function LineTrend({
                 x={xOf(i)}
                 y={H - 12}
                 textAnchor="middle"
-                className="fill-muted-foreground text-[12px]"
+                className="fill-muted-foreground text-[11px]"
                 aria-hidden="true"
               >
-                {lbl}
+                {labels[i].map((line, k) => (
+                  <tspan key={k} x={xOf(i)} dy={k === 0 ? 0 : LABEL_LINE}>
+                    {line}
+                  </tspan>
+                ))}
               </text>
             ) : null}
           </g>

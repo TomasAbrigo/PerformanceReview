@@ -1,8 +1,8 @@
-import { CardCollection } from "@/components/card-collection";
-import { Users, UserRound, ClipboardCheck } from "lucide-react";
-import { IconTile, ProgressRing } from "@/components/experience";
+import { ClipboardCheck, UserRound, Users } from "lucide-react";
 import { useFormatter, useTranslations } from "next-intl";
+import { MetricCard } from "@/components/experience";
 import { TableView, pct } from "@/components/insights/parts";
+import { ProgressBar } from "@/components/progress-bar";
 import type {
   CompletionDelta,
   CompletionDeltaRow,
@@ -10,6 +10,7 @@ import type {
 } from "@/modules/analytics/completion/types";
 
 type Deltas = Pick<CompletionDeltaRow, "selfDelta" | "managerDelta"> | null;
+type Side = "self" | "manager";
 
 /**
  * A difference in percentage points with the cycle before: an arrow, the signed
@@ -46,119 +47,125 @@ export function Delta({ value }: { value: number | null | undefined }) {
   );
 }
 
-/** One side of an assessment of a group: meter, percentage, count and delta. */
-function Side({
+const of = (group: CompletionGroup, side: Side) =>
+  side === "self"
+    ? {
+        rate: group.selfRate,
+        submitted: group.selfSubmitted,
+        applicable: group.selfApplicable,
+      }
+    : {
+        rate: group.managerRate,
+        submitted: group.managerSubmitted,
+        applicable: group.managerApplicable,
+      };
+
+/** The whole cycle, one side: the percentage, the count and the change. */
+function TotalTile({
   side,
   group,
-  groupLabel,
   delta,
+  featured,
 }: {
-  side: "self" | "manager";
+  side: Side;
   group: CompletionGroup;
-  groupLabel: string;
-  /** undefined: no earlier cycle. */
   delta: number | null | undefined;
+  featured: boolean;
 }) {
   const t = useTranslations("Completion.summary");
-  const rate = side === "self" ? group.selfRate : group.managerRate;
-  const submitted =
-    side === "self" ? group.selfSubmitted : group.managerSubmitted;
-  const applicable =
-    side === "self" ? group.selfApplicable : group.managerApplicable;
+  const { rate, submitted, applicable } = of(group, side);
   return (
-    <div className="completion-side">
-      <p className="flex items-center gap-2 text-sm">
-        {side === "self" ? (
-          <UserRound className="size-4" aria-hidden="true" />
+    <MetricCard
+      featured={featured}
+      label={t(side)}
+      icon={
+        side === "self" ? (
+          <UserRound className="size-5" />
         ) : (
-          <ClipboardCheck className="size-4" aria-hidden="true" />
-        )}
-        {t(side)}
-      </p>
-      {rate === null ? (
-        <p className="py-6 text-sm text-muted-foreground">
-          {t("notApplicable")}
-        </p>
-      ) : (
-        <div className="flex flex-wrap items-center gap-4">
-          <ProgressRing
+          <Users className="size-5" />
+        )
+      }
+      value={rate === null ? t("notApplicable") : `${pct(rate)} %`}
+      note={rate === null ? undefined : t("sent", { submitted, applicable })}
+    >
+      {rate === null ? null : (
+        <div className="flex flex-wrap items-center gap-3">
+          <ProgressBar
             percent={rate * 100}
             label={t("meter", {
               side: t(side),
-              group: groupLabel,
+              group: t("total"),
               submitted,
               applicable,
             })}
-          >
-            {pct(rate)} %
-          </ProgressRing>
-          <div className="flex flex-col items-start gap-3">
-            <span className="text-sm tabular-nums">
-              {submitted}/{applicable}
-            </span>
-            <Delta value={delta} />
-          </div>
+            figure={`${submitted}/${applicable}`}
+          />
+          <Delta value={delta} />
         </div>
       )}
-    </div>
+    </MetricCard>
   );
 }
 
-function Row({
+/** One group, one side: its bar with the count, the percentage and the change. */
+function GroupRow({
+  side,
   group,
   label,
+  people,
   delta,
-  hasPrevious,
-  featured = false,
 }: {
+  side: Side;
   group: CompletionGroup;
   label: string;
-  delta: Deltas;
-  hasPrevious: boolean;
-  featured?: boolean;
+  people: string;
+  delta: number | null | undefined;
 }) {
   const t = useTranslations("Completion.summary");
-  const change = (v: number | null | undefined) =>
-    hasPrevious ? (v ?? null) : undefined;
+  const { rate, submitted, applicable } = of(group, side);
   return (
-    <article
-      className={`comparison-card ${featured ? "comparison-featured" : ""}`}
+    <li
+      className="completion-row"
       data-testid="completion-group"
+      data-side={side}
+      aria-label={label}
     >
-      <header className="flex items-center gap-3">
-        <IconTile>
-          <Users className="size-5" />
-        </IconTile>
-        <div>
-          <h3 className="text-xl">{label}</h3>
-          <div className="text-sm text-muted-foreground">
-            {t("people", { n: group.participants })}
-          </div>
-        </div>
-      </header>
-      <div className="comparison-metrics">
-        <Side
-          side="self"
-          group={group}
-          groupLabel={label}
-          delta={change(delta?.selfDelta)}
-        />
-        <Side
-          side="manager"
-          group={group}
-          groupLabel={label}
-          delta={change(delta?.managerDelta)}
-        />
+      <div className="flex items-baseline justify-between gap-3">
+        <span className="font-medium">{label}</span>
+        <span className="text-xs text-muted-foreground">{people}</span>
       </div>
-    </article>
+      {rate === null ? (
+        <p className="text-sm text-muted-foreground">{t("notApplicable")}</p>
+      ) : (
+        <div className="flex items-center gap-3">
+          <ProgressBar
+            percent={rate * 100}
+            label={t("meter", {
+              side: t(side),
+              group: label,
+              submitted,
+              applicable,
+            })}
+            figure={
+              <span className="text-sm text-foreground">
+                {submitted}/{applicable} · {pct(rate)} %
+              </span>
+            }
+          />
+          <Delta value={delta} />
+        </div>
+      )}
+    </li>
   );
 }
 
 /**
- * Completion of a cycle: the whole cycle and each group with two meters (self
- * and manager assessments submitted), the change in percentage points since
- * the previous cycle, and the same numbers as a table. Direction's data
- * arrives with small groups folded into "Otros" or hidden.
+ * Completion of a cycle, as the canvas draws it: three figures for the whole
+ * cycle (self assessments, manager assessments, what is pending on each
+ * side), the progress of every group as horizontal bars (one card per side),
+ * the change in percentage points since the previous cycle, and the same
+ * numbers as a table. Direction's data arrives with small groups folded into
+ * "Otros" or hidden.
  */
 export function CompletionSummaryView({ data }: { data: CompletionDelta }) {
   const t = useTranslations("Completion");
@@ -179,13 +186,10 @@ export function CompletionSummaryView({ data }: { data: CompletionDelta }) {
       </p>
     );
   }
-  const rows = [
-    {
-      key: "total",
-      label: t("summary.total"),
-      group: current.total,
-      delta: data.total,
-    },
+  const change = (v: number | null | undefined) =>
+    hasPrevious ? (v ?? null) : undefined;
+  const total = current.total;
+  const groups = [
     ...current.groups.map((g, i) => ({
       key: `g:${g.key ?? ""}`,
       label: g.label ?? t("summary.unassigned"),
@@ -198,32 +202,90 @@ export function CompletionSummaryView({ data }: { data: CompletionDelta }) {
             key: "others",
             label: t("summary.others"),
             group: current.others,
-            delta: data.others,
+            delta: data.others as Deltas,
           },
         ]
       : []),
   ];
+  const rows = [
+    {
+      key: "total",
+      label: t("summary.total"),
+      group: total,
+      delta: data.total,
+    },
+    ...groups,
+  ];
   const ratio = (submitted: number, applicable: number) =>
     applicable ? `${submitted}/${applicable}` : t("summary.notApplicable");
+  const pending = (side: Side) => {
+    const { submitted, applicable } = of(total, side);
+    return applicable - submitted;
+  };
+  const sides: Side[] = ["self", "manager"];
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-col gap-5">
       <p className="text-sm text-muted-foreground" data-testid="delta-hint">
         {previous
           ? t("delta.title", { cycle: previous.cycleName })
           : t("delta.none")}
       </p>
-      <CardCollection gridClassName="comparison-grid" initialCount={7}>
-        {rows.map((r) => (
-          <Row
-            key={r.key}
-            featured={r.key === "total"}
-            group={r.group}
-            label={r.label}
-            delta={r.delta}
-            hasPrevious={hasPrevious}
-          />
-        ))}
-      </CardCollection>
+      <section
+        className="grid gap-5 sm:grid-cols-3"
+        data-testid="completion-group"
+        aria-label={t("summary.total")}
+      >
+        <TotalTile
+          side="self"
+          group={total}
+          delta={change(data.total?.selfDelta)}
+          featured
+        />
+        <TotalTile
+          side="manager"
+          group={total}
+          delta={change(data.total?.managerDelta)}
+          featured={false}
+        />
+        <MetricCard
+          label={t("summary.pending")}
+          icon={<ClipboardCheck className="size-5" />}
+          value={t("summary.pendingValue", {
+            self: pending("self"),
+            manager: pending("manager"),
+          })}
+          note={t("summary.pendingNote")}
+        />
+      </section>
+      {groups.length > 0 ? (
+        <div className="grid gap-5 lg:grid-cols-2">
+          {sides.map((side) => (
+            <section
+              key={side}
+              className="chart-panel gap-4"
+              aria-label={`${t("summary.byGroup")} · ${t(`summary.${side}`)}`}
+            >
+              <h3 className="text-lg">{t(`summary.${side}`)}</h3>
+              <ul className="flex flex-col gap-4">
+                {groups.map((r) => (
+                  <GroupRow
+                    key={r.key}
+                    side={side}
+                    group={r.group}
+                    label={r.label}
+                    people={t("summary.people", { n: r.group.participants })}
+                    delta={change(
+                      side === "self"
+                        ? r.delta?.selfDelta
+                        : r.delta?.managerDelta,
+                    )}
+                  />
+                ))}
+              </ul>
+            </section>
+          ))}
+        </div>
+      ) : null}
       {current.suppressed > 0 ? (
         <p className="text-sm text-muted-foreground">
           {t("summary.suppressed", {

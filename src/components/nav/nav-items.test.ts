@@ -8,13 +8,42 @@ const groupsOf = (actor: ActorContext) => navGroups(t, actor);
 const keysOf = (actor: ActorContext) => groupsOf(actor).map((g) => g.key);
 
 describe("navGroups", () => {
-  it("gives People Goals, Assessments, the Analysis, Data and Settings, in that order", () => {
+  it("gives People Goals, Assessments, the Analysis and the Administration, in that order", () => {
     expect(keysOf({ personId: null, role: "hr" })).toEqual([
       "goals",
       "assessments",
       "insights",
       "data",
-      "settings",
+    ]);
+  });
+
+  it("the Administration holds the data screens and the settings, People only", () => {
+    const admin = groupsOf({ personId: null, role: "hr" })[3];
+    expect(admin.items.map((i) => i.href)).toEqual([
+      "/imports/upload",
+      "/imports/runs",
+      "/imports/identity",
+      "/data-quality",
+      "/settings/insights",
+    ]);
+  });
+
+  it("calls Goals and Assessments «mine» for somebody who only sees their own", () => {
+    const labels = (actor: ActorContext) =>
+      groupsOf(actor)
+        .slice(0, 2)
+        .map((g) => g.items[0].label);
+    expect(labels({ personId: person, role: "employee" })).toEqual([
+      "Goals.navOwn",
+      "Assessments.navOwn",
+    ]);
+    expect(labels({ personId: person, role: "manager" })).toEqual([
+      "Goals.nav",
+      "Assessments.nav",
+    ]);
+    expect(labels({ personId: null, role: "hr" })).toEqual([
+      "Goals.nav",
+      "Assessments.nav",
     ]);
   });
 
@@ -25,7 +54,6 @@ describe("navGroups", () => {
       ["assessments", true],
       ["insights", false],
       ["data", false],
-      ["settings", false],
     ]);
     expect(groups[0].items.map((i) => i.href)).toEqual(["/goals"]);
     expect(groups[1].items.map((i) => i.href)).toEqual(["/assessments"]);
@@ -59,7 +87,7 @@ describe("navGroups", () => {
     ]);
   });
 
-  it("gives a manager Goals, Assessments and the analysis, but no Data or Settings", () => {
+  it("gives a manager Goals, Assessments and the analysis, but no Administration", () => {
     expect(keysOf({ personId: person, role: "manager" })).toEqual([
       "goals",
       "assessments",

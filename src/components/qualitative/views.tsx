@@ -188,15 +188,15 @@ export function Themes({ themes }: { themes: ThemeRank[] }) {
         <p className="text-sm text-muted-foreground">{tq("empty")}</p>
       ) : (
         <>
-          <ol aria-label={t("title")} className="flex flex-col gap-2">
+          <ol aria-label={t("title")} className="grid gap-3 md:grid-cols-2">
             {themes.map((th) => (
               <li
                 key={th.theme}
-                className="flex flex-col gap-1.5 rounded-xl border border-border bg-card p-4"
+                className="flex flex-col gap-2 rounded-xl border border-border bg-card p-4"
               >
-                <div className="flex justify-between gap-2">
+                <div className="flex items-baseline justify-between gap-2">
                   <span className="font-medium">{th.theme}</span>
-                  <span className="text-sm text-muted-foreground tabular-nums">
+                  <span className="text-xs text-muted-foreground tabular-nums">
                     {t("count", { n: th.count })}
                   </span>
                 </div>
@@ -205,9 +205,9 @@ export function Themes({ themes }: { themes: ThemeRank[] }) {
                   label={t("sentiment", { theme: th.theme })}
                 />
                 {th.quotes.length > 0 ? (
-                  <ul className="mt-1 flex flex-col gap-1 text-sm text-muted-foreground">
+                  <ul className="flex flex-col gap-0.5 text-xs text-muted-foreground">
                     {th.quotes.map((q, i) => (
-                      <li key={i}>
+                      <li key={i} className="truncate">
                         <q>{q}</q>
                       </li>
                     ))}
@@ -238,27 +238,30 @@ export function Indicators({ rows }: { rows: IndicatorSentiment[] }) {
         <CardCollection
           role="group"
           aria-label={t("title")}
-          gridClassName="record-grid"
+          gridClassName="dense-list"
+          initialCount={8}
         >
           {rows.map((r) => (
-            <article key={`${r.role}-${r.option}`} className="record-card">
-              <header>
-                <h3 className="text-lg">{role(r.role)}</h3>
-                <p className="mt-2 text-sm text-muted-foreground">
+            <article
+              key={`${r.role}-${r.option}`}
+              className="dense-row dense-row-wide"
+              aria-label={`${role(r.role)} · ${r.label?.[locale] ?? r.option}`}
+            >
+              <div className="dense-name">
+                <span className="font-medium">{role(r.role)}</span>
+                <small>
                   {t("answer")}: {r.label?.[locale] ?? r.option}
-                </p>
-              </header>
+                </small>
+              </div>
               <MiniBar
                 counts={r}
                 label={`${role(r.role)} · ${r.label?.[locale] ?? r.option}`}
               />
-              <dl className="record-facts">
+              <dl className="dense-facts dense-facts-5">
                 {sentiments.map((key) => (
                   <div key={key}>
                     <dt>{ts(key)}</dt>
-                    <dd>
-                      <span className="stat-value-sm">{r[key]}</span>
-                    </dd>
+                    <dd>{r[key]}</dd>
                   </div>
                 ))}
               </dl>

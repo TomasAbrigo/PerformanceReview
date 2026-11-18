@@ -1,13 +1,16 @@
 import { useTranslations } from "next-intl";
+import { AdvancedFilters } from "@/components/experience";
 import { OrgFilterFields } from "@/components/org/org-filter-fields";
 import { Link } from "@/i18n/navigation";
 import type { GoalFilterOptions } from "@/modules/goals/browse";
 import type { GoalsParams } from "./url-state";
 
 /**
- * The filters above the goals list, in one row. A GET form, so they live in
- * the URL (and a new search starts at the first page). The person search and
- * the team cuts are left out when the actor only sees their own goals.
+ * The controls of the goals list, as the canvas draws them: the cycle always
+ * visible, the person search, the area and the team cuts behind "Más
+ * filtros". A GET form, so they live in the URL (and a new search starts at
+ * the first page). The person search and the team cuts are left out when the
+ * actor only sees their own goals.
  */
 export function GoalsFilters({
   params,
@@ -21,6 +24,16 @@ export function GoalsFilters({
   ownOnly: boolean;
 }) {
   const f = useTranslations("Goals.filters");
+  const advancedActive =
+    !ownOnly &&
+    Boolean(
+      params.q ||
+      params.department ||
+      params.account ||
+      params.project ||
+      params.dm ||
+      params.santexLead,
+    );
   return (
     <form
       method="get"
@@ -44,7 +57,7 @@ export function GoalsFilters({
       </label>
       <input type="hidden" name="state" value={params.state ?? ""} />
       {ownOnly ? null : (
-        <>
+        <AdvancedFilters active={advancedActive}>
           <label className="control-label max-w-full">
             {f("person")}
             <input
@@ -72,8 +85,8 @@ export function GoalsFilters({
               </select>
             </label>
           ) : null}
-          <OrgFilterFields params={params} options={options.org} />
-        </>
+          <OrgFilterFields params={params} options={options.org} bare />
+        </AdvancedFilters>
       )}
       <span className="flex gap-2">
         <button type="submit" className="button-outline">

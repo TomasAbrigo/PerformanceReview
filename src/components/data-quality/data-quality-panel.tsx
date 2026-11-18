@@ -1,6 +1,6 @@
 import { useTranslations } from "next-intl";
 import { PageHeader } from "@/components/page-header";
-import { CheckCheck, ShieldAlert } from "lucide-react";
+import { CheckCheck, ShieldAlert, ShieldCheck } from "lucide-react";
 import { IconTile, EmptyState } from "@/components/experience";
 import { Link } from "@/i18n/navigation";
 import type {
@@ -12,6 +12,53 @@ import type {
 export const indicatorHref = (key: DataQualityKey) =>
   key === "identity_open" ? "/imports/identity" : `/data-quality/${key}`;
 
+function IndicatorCard({ indicator }: { indicator: DataQualityIndicator }) {
+  const t = useTranslations("DataQuality");
+  const title = t(`indicators.${indicator.key}.title`);
+  const open = indicator.count > 0;
+  return (
+    <article className="metric-card" data-open={open ? "true" : "false"}>
+      <IconTile>{open ? <ShieldAlert /> : <CheckCheck />}</IconTile>
+      <h2 className="text-lg">{title}</h2>
+      <p className="text-sm text-muted-foreground">
+        {t(`indicators.${indicator.key}.description`)}
+      </p>
+      <p
+        className={`stat-value ${open ? "text-status-pending" : ""}`}
+        aria-label={t("count", { count: indicator.count })}
+      >
+        {indicator.count}
+      </p>
+      <p className="text-xs text-muted-foreground">
+        {open ? t("needsReview") : t("ok")}
+        {open ? (
+          <span className="ml-2">{t("count", { count: indicator.count })}</span>
+        ) : null}
+      </p>
+      <div className="mt-auto pt-2">
+        {open ? (
+          <Link
+            href={indicatorHref(indicator.key)}
+            aria-label={t("viewCasesOf", { title })}
+            className="button-outline"
+          >
+            {t("viewCases")} →
+          </Link>
+        ) : (
+          <span className="button-outline opacity-60" aria-disabled="true">
+            {t("noCases")}
+          </span>
+        )}
+      </div>
+    </article>
+  );
+}
+
+/**
+ * The data-quality panel, as the canvas draws it: a notice with the total of
+ * cases to review, one card per indicator with cases, and the indicators
+ * without cases folded under a disclosure (still there, one click away).
+ */
 export function DataQualityPanel({
   indicators,
 }: {
@@ -19,7 +66,9 @@ export function DataQualityPanel({
 }) {
   const t = useTranslations("DataQuality");
   const tHome = useTranslations("Home");
-  const clear = indicators.every((i) => i.count === 0);
+  const open = indicators.filter((i) => i.count > 0);
+  const clear = indicators.filter((i) => i.count === 0);
+  const cases = open.reduce((sum, i) => sum + i.count, 0);
 
   return (
     <div className="flex flex-col gap-8">
@@ -29,43 +78,40 @@ export function DataQualityPanel({
         description={t("description")}
       />
 
-      {clear ? (
+      {open.length === 0 ? (
         <EmptyState icon={<CheckCheck />}>{t("allClear")}</EmptyState>
+      ) : (
+        <aside className="dq-notice" role="status">
+          <IconTile>
+            <ShieldCheck className="size-5" />
+          </IconTile>
+          <div className="flex min-w-0 flex-col gap-1">
+            <p className="font-medium">{t("pending", { n: cases })}</p>
+            <p className="text-sm text-muted-foreground">{t("pendingHint")}</p>
+          </div>
+        </aside>
+      )}
+
+      {open.length > 0 ? (
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {open.map((indicator) => (
+            <IndicatorCard key={indicator.key} indicator={indicator} />
+          ))}
+        </div>
       ) : null}
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {indicators.map((indicator) => {
-          const title = t(`indicators.${indicator.key}.title`);
-          return (
-            <article key={indicator.key} className="metric-card">
-              <div className="flex items-center justify-between">
-                <IconTile>
-                  {indicator.count > 0 ? <ShieldAlert /> : <CheckCheck />}
-                </IconTile>
-                <span className="stat-value">{indicator.count}</span>
-              </div>
-              <h2 className="text-lg">{title}</h2>
-              <p className="text-sm text-muted-foreground">
-                {t(`indicators.${indicator.key}.description`)}
-              </p>
-              <div className="mt-auto flex items-center justify-between gap-2 pt-2">
-                <span className="text-sm text-muted-foreground">
-                  {t("count", { count: indicator.count })}
-                </span>
-                {indicator.count > 0 ? (
-                  <Link
-                    href={indicatorHref(indicator.key)}
-                    aria-label={t("viewCasesOf", { title })}
-                    className="text-sm underline"
-                  >
-                    {t("viewCases")}
-                  </Link>
-                ) : null}
-              </div>
-            </article>
-          );
-        })}
-      </div>
+      {clear.length > 0 ? (
+        <details className="collection-more" open={open.length === 0}>
+          <summary className="button-outline">
+            {t("showAll", { n: clear.length })}
+          </summary>
+          <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {clear.map((indicator) => (
+              <IndicatorCard key={indicator.key} indicator={indicator} />
+            ))}
+          </div>
+        </details>
+      ) : null}
     </div>
   );
 }

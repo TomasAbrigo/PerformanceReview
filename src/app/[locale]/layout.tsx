@@ -57,7 +57,9 @@ export default async function LocaleLayout({
         <NextIntlClientProvider>
           <div className="flex min-h-dvh flex-col lg:flex-row">
             <Suspense
-              fallback={<div aria-busy="true" className="bg-sidebar lg:w-64" />}
+              fallback={
+                <div aria-busy="true" className="bg-sidebar lg:w-[220px]" />
+              }
             >
               <SideNav />
             </Suspense>

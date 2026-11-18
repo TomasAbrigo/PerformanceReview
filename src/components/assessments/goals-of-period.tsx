@@ -1,3 +1,4 @@
+import { Target } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useDates } from "@/components/dates";
 import { GoalStateBadge } from "@/components/goals/goal-state-badge";
@@ -28,6 +29,7 @@ export function GoalsOfPeriod({
     <Panel
       id="assessment-goals"
       title={t("title")}
+      icon={<Target className="size-5" />}
       hint={
         asOf
           ? t("hint", { name, date: d.moment(asOf) })
