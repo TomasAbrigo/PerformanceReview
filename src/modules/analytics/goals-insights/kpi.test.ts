@@ -19,6 +19,8 @@ const raw = (
     inProgress: goals - completed,
     closed: 0,
     overdue: 0,
+    due: completed,
+    completedDue: completed,
     progressSum: completed * 100,
     ...extra,
   });
@@ -32,18 +34,28 @@ describe("kpiGroup", () => {
       peopleWithGoals: 2,
       goals: 4,
       completed: 1,
-      inProgress: 3,
+      inProgress: 1,
       closed: 0,
       overdue: 2,
+      due: 3,
+      completedDue: 1,
       progressSum: 100 + 50 + 20 + 30,
     });
     expect(g).toMatchObject({
       completedPct: 25,
-      inProgressPct: 75,
+      inProgressPct: 25,
       overduePct: 50,
       avgProgress: 50,
       others: false,
     });
+    // Completion against a target is of the goals that were due: 1 of 3.
+    expect(g.completedDuePct).toBeCloseTo(100 / 3);
+  });
+
+  it("has no completion rate of due goals when none was due (not 0 %)", () => {
+    const g = raw("a", 1, 3, 0, { due: 0, completedDue: 0 });
+    expect(g.completedPct).toBe(0);
+    expect(g.completedDuePct).toBeNull();
   });
 
   it("has no shares without goals", () => {
@@ -53,6 +65,7 @@ describe("kpiGroup", () => {
       completedPct: null,
       inProgressPct: null,
       overduePct: null,
+      completedDuePct: null,
       avgProgress: null,
     });
   });

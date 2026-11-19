@@ -1,6 +1,10 @@
 import { sql } from "drizzle-orm";
 import { afterAll, afterEach, beforeAll, describe, expect, it } from "vitest";
 import { closeDb, db } from "@/db/client";
+import {
+  insertParticipant,
+  insertPerson,
+} from "@/modules/analytics/test-support";
 import { setSetting } from "@/modules/settings";
 import { goalsVsIndicators } from ".";
 import {
@@ -8,6 +12,7 @@ import {
   buildScenario,
   direction,
   hr,
+  insertGoals,
   insertLabeledComments,
   insertReview,
   reset,
@@ -29,6 +34,41 @@ afterAll(async () => {
 
 const rowOf = (rows: { name: string }[], name: string): (typeof rows)[number] =>
   rows.find((r) => r.name === name)!;
+
+/**
+ * More people of Marta's team in H1 with one goal in progress, none
+ * completed (the 0-20 % bucket): `withReview` of them with the manager's
+ * retention and engagement (3 and 3), `without` of them with no review.
+ */
+async function addPeopleWithGoalsInProgress(
+  scenario: Scenario,
+  n: { withReview: number; without: number },
+) {
+  for (let i = 0; i < n.withReview + n.without; i++) {
+    const personId = await insertPerson({
+      displayName: `Extra ${i + 1}`,
+      noEmployment: true,
+    });
+    const participantId = await insertParticipant({
+      cycleId: scenario.h1.cycleId,
+      personId,
+      snapManagerPersonId: scenario.id.marta,
+      snapDepartment: "Ingeniería",
+    });
+    await insertGoals(participantId, [
+      { status: "in_progress", percent: 10, due: "2025-12-31" },
+    ]);
+    if (i < n.withReview) {
+      await insertReview({
+        cycle: scenario.h1,
+        participantId,
+        reviewerPersonId: scenario.id.marta,
+        retention: 3,
+        engagement: 3,
+      });
+    }
+  }
+}
 
 describe("goalsVsIndicators (People)", () => {
   it("one row per participant with goals, indicators and sentiment, by hand", async () => {
@@ -139,12 +179,17 @@ describe("goalsVsIndicators (People)", () => {
     // Retention (3 + 4 + 5) / 3, engagement (3 + 5 + 4) / 3; sentiment: Bruno
     // 0.5 and Gina 1 (Elena has no labels): 0.75.
     expect(buckets[1]).toMatchObject({
+      retentionPeople: 3,
+      engagementPeople: 3,
       meanRetention: 4,
       meanEngagement: 4,
       meanPositiveShare: 0.75,
     });
-    // Iris answered only retention.
+    // Iris answered only retention: the n of each mean is its own.
     expect(buckets[2]).toMatchObject({
+      people: 1,
+      retentionPeople: 1,
+      engagementPeople: 0,
       meanRetention: 5,
       meanEngagement: null,
       meanPositiveShare: null,
@@ -152,10 +197,33 @@ describe("goalsVsIndicators (People)", () => {
     // Retention (2 + 5 + 3 + 4) / 4, engagement (4 + 5 + 1 + 4) / 4; only Ana
     // has labels: 0.5.
     expect(buckets[4]).toMatchObject({
+      retentionPeople: 4,
+      engagementPeople: 4,
       meanRetention: 3.5,
       meanEngagement: 3.5,
       meanPositiveShare: 0.5,
     });
+  });
+
+  it("n counts the people who have the indicator, not everybody with goals in the bucket", async () => {
+    const fresh = await buildScenario();
+    try {
+      await addPeopleWithGoalsInProgress(fresh, { withReview: 2, without: 2 });
+      const { buckets } = await goalsVsIndicators(db, hr, {
+        cycleId: fresh.h1.cycleId,
+      });
+      // Four people with goals in the 0-20 % bucket, two of them with the
+      // manager's answers (3 and 3): the means are of those two.
+      expect(buckets[0]).toMatchObject({
+        people: 4,
+        retentionPeople: 2,
+        engagementPeople: 2,
+        meanRetention: 3,
+        meanEngagement: 3,
+      });
+    } finally {
+      s = await buildScenario();
+    }
   });
 
   it("reads today's org with the current hierarchy", async () => {
@@ -278,6 +346,70 @@ describe("goalsVsIndicators (who reads)", () => {
       meanPositiveShare: null,
     });
     expect(suppressed).toBe(4);
+  });
+});
+
+describe("goalsVsIndicators (direction: the minimum is measured on the people who have the indicator)", () => {
+  it("hides the mean of an indicator whose own base is under the minimum, even when the bucket has enough people with goals", async () => {
+    const fresh = await buildScenario();
+    try {
+      await setSetting(db, hr, "aggregation.minGroupSize", 3);
+      // 4 people with goals at 0-20 %, but only 2 have retention and
+      // engagement: the bars would average 2 people.
+      await addPeopleWithGoalsInProgress(fresh, { withReview: 2, without: 2 });
+      const { buckets, suppressed } = await goalsVsIndicators(db, direction, {
+        cycleId: fresh.h1.cycleId,
+      });
+      expect(buckets[0]).toMatchObject({
+        people: 4,
+        hidden: false,
+        retentionPeople: null,
+        engagementPeople: null,
+        meanRetention: null,
+        meanEngagement: null,
+      });
+      // Iris alone (40-60 %) is under the minimum, and the people with goals
+      // are a public total: the smallest shown bucket (20-40 %, 3 people)
+      // goes with her, so hers cannot be solved by difference (#130).
+      expect(buckets.map((b) => b.hidden)).toEqual([
+        false,
+        true,
+        true,
+        false,
+        false,
+      ]);
+      expect(suppressed).toBe(4);
+      // The bucket with enough people on both indicators keeps its means.
+      expect(buckets[4]).toMatchObject({
+        retentionPeople: 4,
+        engagementPeople: 4,
+        meanRetention: 3.5,
+        meanEngagement: 3.5,
+      });
+    } finally {
+      s = await buildScenario();
+    }
+  });
+
+  it("a bucket nobody answered shows no mean, and the n is zero", async () => {
+    const fresh = await buildScenario();
+    try {
+      await setSetting(db, hr, "aggregation.minGroupSize", 3);
+      await addPeopleWithGoalsInProgress(fresh, { withReview: 0, without: 4 });
+      const { buckets } = await goalsVsIndicators(db, direction, {
+        cycleId: fresh.h1.cycleId,
+      });
+      expect(buckets[0]).toMatchObject({
+        people: 4,
+        hidden: false,
+        retentionPeople: 0,
+        engagementPeople: 0,
+        meanRetention: null,
+        meanEngagement: null,
+      });
+    } finally {
+      s = await buildScenario();
+    }
   });
 });
 

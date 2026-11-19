@@ -41,8 +41,8 @@ describe("insights-period-detail.csv", () => {
       "retention (people)",
       "Bamboo engagement (mean 1-5)",
       "Bamboo engagement (people)",
-      "goals",
-      "goals completed (%)",
+      "goals due",
+      "goals completed (%, of those due)",
     ]);
     expect(rows.map((r) => r.cycle_name)).toEqual(["H1 2024", "H2 2024"]);
     expect(rows[0]).toMatchObject({
@@ -54,8 +54,8 @@ describe("insights-period-detail.csv", () => {
       "retention (people)": "6",
       "Bamboo engagement (mean 1-5)": "3.67",
       "valued by the company (mean 1-4)": "",
-      goals: "0",
-      "goals completed (%)": "",
+      "goals due": "0",
+      "goals completed (%, of those due)": "",
     });
     expect(rows[1]).toMatchObject({
       participants: "9",

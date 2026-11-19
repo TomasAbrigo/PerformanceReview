@@ -23,6 +23,7 @@ import {
 } from "@/modules/org-attributes/sql";
 import { todayLocal } from "@/modules/org-history/dates";
 import { ReviewError } from "@/modules/review-core/review-errors";
+import { cycleGoalAsOf } from "./as-of";
 import { type GoalState, goalState } from "./state";
 
 /**
@@ -69,8 +70,22 @@ export type GoalListPage = {
   items: GoalListItem[];
   /** Goals matching every filter. */
   total: number;
-  /** Per state, ignoring the state filter (the chips above the list). */
+  /**
+   * Per state, ignoring the state filter (the chips above the list). A
+   * partition: the four add up to the goals of the filtered set.
+   */
   counts: Record<GoalState, number>;
+  /**
+   * The date "overdue" is measured at (yyyy-mm-dd): today, or, for the goals
+   * of a closed cycle (`cycleId`), the end of its period (`goalAsOf`).
+   */
+  asOf: string;
+  /**
+   * The goals of the filtered set due on or before `asOf`, and the completed
+   * ones among them: the base of a completion rate shown against a target (a
+   * goal not due yet is not a failure).
+   */
+  due: { total: number; completed: number };
   page: number;
   pageSize: number;
 };
@@ -153,7 +168,9 @@ type ListRow = {
 /**
  * A page of the goals `actor` may read, most urgent first (state: overdue,
  * in progress, completed, closed; then due date, owner and title), with the
- * counts per state of the filtered set.
+ * counts per state of the filtered set. The state of a goal is read at the
+ * cycle's reference date when the list is the goals of a cycle (`cycleId`):
+ * the same rule, and the same numbers, as the goal analytics.
  */
 export async function listGoals(
   db: DbOrTx,
@@ -162,12 +179,16 @@ export async function listGoals(
   today: string = todayLocal(),
 ): Promise<GoalListPage> {
   const scope = individualScope(actor);
+  const asOf =
+    (filters.cycleId
+      ? await cycleGoalAsOf(db, filters.cycleId, today)
+      : null) ?? today;
   const base = allOf([
     sql`g.deleted_at is null`,
     scopeCondition(scope),
     ...filterConditions(filters),
   ]);
-  const state = sql`${stateExpr(today)}`;
+  const state = sql`${stateExpr(asOf)}`;
   const where = allOf([
     base,
     filters.state ? sql`${state} = ${filters.state}` : sql`true`,
@@ -199,7 +220,8 @@ export async function listGoals(
   const requested = clampPage(filters.page, MAX_PAGE * pageSize, pageSize);
   const [counted, firstTry] = await Promise.all([
     db.execute(sql`
-      select ${state} as state, count(*)::int as n
+      select ${state} as state, count(*)::int as n,
+        count(*) filter (where g.due_date <= ${asOf}::date)::int as due
       ${goalsFrom(today)}
       where ${base}
       group by 1`),
@@ -211,8 +233,13 @@ export async function listGoals(
     closed: 0,
     overdue: 0,
   };
-  for (const row of rowsOf<{ state: GoalState; n: number }>(counted)) {
+  const due = { total: 0, completed: 0 };
+  for (const row of rowsOf<{ state: GoalState; n: number; due: number }>(
+    counted,
+  )) {
     counts[row.state] = row.n;
+    due.total += row.due;
+    if (row.state === "completed") due.completed = row.due;
   }
   const total = filters.state
     ? counts[filters.state]
@@ -224,7 +251,7 @@ export async function listGoals(
       id: r.id,
       title: r.title,
       status: r.status,
-      state: goalState(r, today),
+      state: goalState(r, asOf),
       percentComplete: r.percentComplete,
       dueDate: r.dueDate,
       completionDate: r.completionDate,
@@ -235,6 +262,8 @@ export async function listGoals(
     })),
     total,
     counts,
+    asOf,
+    due,
     page,
     pageSize,
   };

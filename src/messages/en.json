@@ -60,12 +60,13 @@
         "all": "The whole company",
         "team": "Your team and you"
       },
-      "pending": "Not started",
-      "ofParticipants": "{pct}% of participants",
-      "goalsCompleted": "Goals completed",
-      "goalsNote": "{done} of {total} goals of the cycle",
+      "pending": "Pending",
+      "ofParticipants": "{pct}% of participants, with no review submitted",
+      "goalsCompleted": "Goals completed, of those due",
+      "goalsNote": "{done} of {total} goals due by {date}",
+      "goalsNoneDue": "No goal of the cycle was due by {date}",
       "goalsOverdue": "Goals overdue",
-      "ofGoals": "{pct}% of the cycle's goals",
+      "ofGoals": "{pct}% of the cycle's goals, as of {date}",
       "attention": {
         "title": "Needs attention",
         "none": "Nothing pending for now.",
@@ -854,6 +855,7 @@
       "rating_label": "rating_label",
       "rating_normalized": "rating_normalized",
       "relationship": "relationship",
+      "requests": "requests",
       "total": "total",
       "submitted": "submitted",
       "draft": "draft",
@@ -907,6 +909,9 @@
       "completed_pct": "completed_pct",
       "in_progress_pct": "in_progress_pct",
       "overdue_pct": "overdue_pct",
+      "due": "due",
+      "completed_due": "completed_due",
+      "completed_due_pct": "completed_due_pct",
       "outlier_kind": "kind",
       "period_start": "period start",
       "period_end": "period end",
@@ -916,7 +921,8 @@
       "retention_n": "retention (people)",
       "engagement_mean": "Bamboo engagement (mean 1-5)",
       "engagement_n": "Bamboo engagement (people)",
-      "goals_completed_pct": "goals completed (%)"
+      "goals_completed_pct": "goals completed (%, of those due)",
+      "goals_due": "goals due"
     }
   },
   "ImportHistory": {
@@ -1447,7 +1453,8 @@
       "themes": "Top 5 themes",
       "themeCount": "{n, plural, one {# mention} other {# mentions}}",
       "goals": "Goals",
-      "goalsCompleted": "Goals completed",
+      "goalsCompleted": "Goals completed, of those due",
+      "goalsDueNote": "{done} of {due} due by {date}",
       "goalsCount": "Goals of the period",
       "goalsOverdue": "Overdue",
       "distributionTitle": "Retention and engagement (answers 1 to 5)",
@@ -1492,6 +1499,7 @@
       "title": "Executive summary",
       "participants": "Participants",
       "distribution": "Rating distribution",
+      "noRatings": "No data: the cycle has no final ratings.",
       "byDepartment": "By department",
       "mean": "Mean"
     },
@@ -1558,6 +1566,7 @@
       "inProgress": "In progress",
       "closed": "Closed",
       "overdue": "Overdue",
+      "asOf": "Cut-off date of the overdue goals",
       "withoutGoals": "People without goals",
       "buckets": "Goals completed vs indicators",
       "bucket": "Goals completed",
@@ -1583,7 +1592,13 @@
       "managerReview": "Manager review",
       "retention": "Retention",
       "engagement": "Engagement",
-      "positiveShare": "Positive comments"
+      "positiveShare": "Positive comments",
+      "statuses": {
+        "submitted": "Submitted",
+        "in_progress": "In progress",
+        "not_started": "Not started",
+        "not_applicable": "Does not apply"
+      }
     },
     "relationships": {
       "self": "Self review",
@@ -1721,13 +1736,13 @@
     },
     "period": {
       "title": "Detail by period",
-      "hint": "One row per cycle, oldest first, with the same account, project, DM, Santex Lead, area and manager filters as the view (not the group by). The means of valued by the company (1 to 4), retention and Bamboo engagement (1 to 5) carry the people behind them. Goals completed is the status in Bamboo.",
+      "hint": "One row per cycle, oldest first, with the same account, project, DM, Santex Lead, area and manager filters as the view (not the group by). The means of valued by the company (1 to 4), retention and Bamboo engagement (1 to 5) carry the people behind them. Goals completed is the status in Bamboo, of the goals already due at the cycle's cut-off date (today while the period runs, the last day of the period once closed): one not due yet does not count as missed.",
       "hintAggregates": "One row per cycle, oldest first, aggregates only: a cycle with fewer people than the minimum shows no figure.",
       "label": "Detail by period",
       "empty": "There are no launched cycles yet.",
       "hidden": "Hidden",
       "people": "({n, plural, one {# person} other {# people}})",
-      "goalsOf": "of {n}",
+      "goalsOf": "of {n} due",
       "columns": {
         "cycle": "Cycle",
         "n": "People",
@@ -1736,7 +1751,7 @@
         "valued": "Valued by the company (1-4)",
         "retention": "Retention (1-5)",
         "engagement": "Bamboo engagement (1-5)",
-        "goals": "Goals completed"
+        "goals": "Goals completed, of those due"
       },
       "drill": "{cycle} · {what}: see the people"
     }
@@ -1783,12 +1798,13 @@
     },
     "kpis": {
       "title": "Goal indicators",
-      "hint": "Each person's goals of the period (the cycle's snapshot). Overdue: in progress and due before the period ended; a closed goal never is.",
+      "hint": "Each person's goals of the period (the cycle's snapshot). Overdue: in progress and due before {date}{live, select, true { (today)} other { (the cycle's close)}}; a closed goal never is. Completed, in progress, overdue and closed add up to all the group's goals, and the shares are of all of them, also the ones not due yet.",
       "columns": {
         "group": "Group",
         "people": "People",
         "goals": "Goals",
         "completed": "Completed",
+        "completedDue": "Completed of those due",
         "inProgress": "In progress",
         "overdue": "Overdue",
         "avgProgress": "Average progress"
@@ -1797,13 +1813,14 @@
       "total": "Total",
       "none": "No goals",
       "share": "{count} ({pct} %)",
-      "meter": "{group}: {pct} % of goals completed",
+      "dueShare": "{done} of {due} ({pct} %)",
+      "noDue": "None was due",
+      "meter": "{group}: {pct} % of all goals completed",
       "suppressed": "{n, plural, one {# person in small groups is not shown} other {# people in small groups are not shown}}",
       "totalHidden": "The total is hidden so it does not reveal the small groups.",
       "unassigned": "Unassigned",
       "team": "Team {n}",
       "withoutGoals": "No goals in the period:",
-      "legendOnTime": "In progress, on time",
       "legendClosed": "Closed"
     },
     "scatter": {
@@ -1819,18 +1836,21 @@
     },
     "buckets": {
       "title": "Do retention and engagement change with goal completion?",
-      "hint": "Each pair of bars is a band of % goals completed; the height is the mean (1 to 5) retention and engagement of its people, and n how many they are.",
+      "hint": "Each pair of bars is a band of % goals completed; the height is the mean (1 to 5) retention and engagement of its people, and n how many people have each answer (retention / engagement).",
       "bucket": "{from}–{to} %",
       "people": "{n, plural, one {# person} other {# people}}",
       "positive": "Positive comments",
       "hidden": "Hidden: fewer than {min} people",
       "noData": "No data",
-      "bar": "{bucket}, {indicator}: {value}",
+      "bar": "{bucket}, {indicator}: {value} (n = {n})",
+      "n": "n = {retention} / {engagement}",
       "withoutGoals": "{n, plural, one {# person without goals is} other {# people without goals are}} not in this chart.",
       "suppressed": "{n, plural, one {# person in small buckets is not shown} other {# people in small buckets are not shown}}.",
       "columns": {
         "bucket": "Goals completed",
         "people": "People",
+        "retentionPeople": "People with retention",
+        "engagementPeople": "People with engagement",
         "retention": "Retention (mean)",
         "engagement": "Engagement (mean)",
         "positive": "Positive comments"
@@ -1863,11 +1883,11 @@
       "none": "Nobody.",
       "doneButLow": {
         "title": "Goals done, low indicators",
-        "description": "They completed {goals} % or more of their goals, but retention or engagement is {risk} or less."
+        "description": "They completed {goals} % or more of all their goals of the period (due or not), but retention or engagement is {risk} or less."
       },
       "behindButHigh": {
         "title": "Goals behind, high indicators",
-        "description": "They completed {goals} % or less of their goals, but retention and engagement are {high} or more."
+        "description": "They completed {goals} % or less of all their goals of the period (due or not), but retention and engagement are {high} or more."
       },
       "columns": {
         "person": "Person",
@@ -2147,7 +2167,8 @@
       "review": "To review",
       "reviewNote": "{n, plural, one {Overdue goal} other {Overdue goals}}",
       "share": "{pct}% of the goals listed",
-      "overdueShare": "{pct}% overdue: in progress past their due date"
+      "overdueShare": "{pct}% overdue: in progress past their due date",
+      "frozenNote": "This cycle's goals are measured at {date}, the end of its period: overdue means in progress with a due date before that day."
     },
     "form": {
       "new": "New goal",

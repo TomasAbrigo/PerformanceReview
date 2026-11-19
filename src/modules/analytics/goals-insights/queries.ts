@@ -76,6 +76,7 @@ function kpisView(
 ): GoalKpis {
   return {
     cycleId: ctx.cycleId,
+    asOf: ctx.asOf,
     groupBy,
     hierarchy,
     ...kpisOf(rows, groupBy, minOf(ctx), keyOf),
@@ -116,9 +117,12 @@ function outliersView(
 /**
  * Goal indicators of a cycle per person, manager or area: how many goals the
  * group's people had in the period (the cycle's goal snapshot), the share that
- * is completed, in progress and overdue (in progress and due before today, as
- * in the goals list; a closed goal never is) and the mean progress. The manager and the
- * area are the snapshot's, or today's with `hierarchy: "current"`.
+ * is completed, in progress and overdue (in progress and due before the
+ * cycle's reference date: today while it runs, the end of its period once it
+ * is closed, see `goalAsOf`; a closed goal never is; the states are a
+ * partition) and the mean progress, and the completion of the goals that were
+ * due by that date. The manager and the area are the snapshot's, or today's
+ * with `hierarchy: "current"`.
  *
  * People: everything. A manager: their direct reports of the snapshot.
  * Direction: only areas and teams with at least the

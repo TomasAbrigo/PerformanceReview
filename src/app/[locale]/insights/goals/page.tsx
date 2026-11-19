@@ -4,7 +4,11 @@ import { localizeCycles } from "@/modules/review-core/cycle-name";
 import { rememberedCycle } from "@/modules/review-core/remembered-cycle";
 import { pickCycle } from "@/modules/review-core/current-cycle";
 import { hasLocale } from "next-intl";
-import { getTranslations, setRequestLocale } from "next-intl/server";
+import {
+  getFormatter,
+  getTranslations,
+  setRequestLocale,
+} from "next-intl/server";
 import { notFound } from "next/navigation";
 import { connection } from "next/server";
 import { Suspense } from "react";
@@ -41,6 +45,7 @@ import {
 } from "@/modules/analytics/goals-insights";
 import { insightsScope } from "@/modules/insights/authz";
 import { withoutPersonFilters } from "@/modules/org-attributes/kinds";
+import { todayLocal } from "@/modules/org-history/dates";
 import { listCycles } from "@/modules/review-core";
 
 async function GoalsInsights({
@@ -53,6 +58,7 @@ async function GoalsInsights({
   await connection();
   const actor = await getActor();
   const t = await getTranslations("GoalsInsights");
+  const format = await getFormatter();
   const kicker = await groupKicker("insights");
   const scope = insightsScope(actor);
   if (scope.kind === "none") return <p role="alert">{t("forbidden")}</p>;
@@ -146,7 +152,13 @@ async function GoalsInsights({
       <Panel
         id="goal-kpis"
         title={t("kpis.title")}
-        hint={t("kpis.hint")}
+        hint={t("kpis.hint", {
+          date: format.dateTime(new Date(`${kpis.asOf}T00:00:00Z`), {
+            dateStyle: "medium",
+            timeZone: "UTC",
+          }),
+          live: String(kpis.asOf === todayLocal()),
+        })}
         actions={csv("insights-goal-kpis", { groupBy })}
       >
         <Toggle

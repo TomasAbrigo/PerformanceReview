@@ -16,6 +16,7 @@ import {
   completionDelta,
   completionSummary,
 } from "@/modules/analytics/completion";
+import { loadSides } from "@/modules/analytics/completion/queries";
 import { bins, executiveSummary } from "@/modules/analytics/dashboards";
 import { ALL_PEOPLE, scopedCtes } from "@/modules/analytics/dashboards/scope";
 import type { GroupKeyer } from "@/modules/org-attributes/kinds";
@@ -88,17 +89,56 @@ export const actorOf = (ctx: CollectContext): ActorContext =>
 
 // ------------------------------------------------------------- executive
 
+/**
+ * The executive summary: the participants, how many submitted each side of
+ * the assessment, and the final-rating distribution. The progress of `self`
+ * and `manager` is the completion module's (the participants without any
+ * request are pending, not out of the count: 83 %, not 100 % of the requests
+ * that exist); the other relationships keep their requests. The distribution
+ * is `null` (`no_data`) when nobody has a final rating, not a row of zeros.
+ */
 export const collectExecutive: Collector<"executive"> = async (db, ctx) => {
-  const s = await executiveSummary(db, actorOf(ctx), {
-    cycleId: ctx.cycleId,
-    minGroupSize: ctx.min,
-  });
-  const hidden = ctx.anonymized && s.suppressed > 0;
+  const actor = actorOf(ctx);
+  const [s, completion] = await Promise.all([
+    executiveSummary(db, actor, {
+      cycleId: ctx.cycleId,
+      minGroupSize: ctx.min,
+    }),
+    completionSummary(db, actor, {
+      cycleId: ctx.cycleId,
+      groupBy: "none",
+      ...(ctx.anonymized ? { minGroupSize: ctx.min } : {}),
+    }),
+  ]);
+  const sides = completion.total
+    ? [
+        {
+          relationship: "self",
+          total: completion.total.selfApplicable,
+          submitted: completion.total.selfSubmitted,
+        },
+        {
+          relationship: "manager",
+          total: completion.total.managerApplicable,
+          submitted: completion.total.managerSubmitted,
+        },
+      ].filter((p) => p.total > 0)
+    : [];
+  const progress = [
+    ...sides,
+    ...s.progress.filter(
+      (p) => p.relationship !== "self" && p.relationship !== "manager",
+    ),
+  ];
+  const noRatings = s.rated === 0;
+  const hidden =
+    ctx.anonymized && (s.suppressed > 0 || (s.rated > 0 && s.rated < ctx.min));
   return {
     participants: s.participants,
-    progress: s.progress,
+    progress,
     bins,
-    distribution: hidden ? null : s.distribution,
+    distribution: noRatings || hidden ? null : s.distribution,
+    distributionStatus: noRatings ? "no_data" : hidden ? "suppressed" : "ok",
     byDepartment: [
       ...s.byDepartment.map((d) => ({
         label: d.department,
@@ -504,6 +544,7 @@ export const collectGoals: Collector<"goals"> = async (db, ctx) => {
     })),
   });
   return {
+    asOf: kpis.asOf,
     participantsWithGoals: total?.peopleWithGoals ?? null,
     goals: total?.goals ?? null,
     completed: total?.completed ?? null,
@@ -742,28 +783,38 @@ export const collectEngagementMonthly: Collector<"engagementMonthly"> = async (
   };
 };
 
-/** Per-person rows: only the named report (null when anonymized). */
+/**
+ * Per-person rows: only the named report (null when anonymized). The status
+ * of each side of the assessment is the completion module's (`loadSides`:
+ * Assessment Progress first, then the review requests): `submitted`,
+ * `in_progress`, `not_started` or `not_applicable`, never null, so somebody
+ * who did not submit is not told from somebody the side does not apply to by
+ * a missing value, and the rows add up to the completion section.
+ */
 export const collectPeople: Collector<"people"> = async (db, ctx) => {
   if (ctx.anonymized) return null;
+  const sides = new Map(
+    (
+      await loadSides(
+        db,
+        ALL_PEOPLE,
+        { cycleId: ctx.cycleId, hierarchy: "asOf" },
+        { email: false },
+      )
+    ).map((r) => [r.personId, r]),
+  );
   const rows = await db.execute<{
     person_id: string;
     display_name: string;
     email: string | null;
     department: string | null;
     manager: string | null;
-    self_status: string | null;
-    manager_status: string | null;
     retention: number | null;
     engagement: number | null;
     positive: number;
     comments: number;
   }>(sql`
     with ${effectiveCte()},
-    req as (
-      select distinct on (participant_id, relationship) participant_id, relationship, status::text as status
-      from review_request where cycle_id = ${ctx.cycleId}::uuid and deleted_at is null
-      order by participant_id, relationship, requested_at desc, id
-    ),
     ind as (
       select distinct on (r.participant_id, q.role) r.participant_id, q.role::text as role,
              a.option_value as value -- labelled by value below, never by option_label (#130)
@@ -788,8 +839,6 @@ export const collectPeople: Collector<"people"> = async (db, ctx) => {
     )
     select p.id as person_id, p.display_name, p.work_email as email,
            cp.snap_department as department, mp.display_name as manager,
-           (select status from req where req.participant_id = cp.id and relationship = 'self') as self_status,
-           (select status from req where req.participant_id = cp.id and relationship = 'manager') as manager_status,
            (select value from ind where ind.participant_id = cp.id and role = 'retention') as retention,
            (select value from ind where ind.participant_id = cp.id and role = 'engagement') as engagement,
            coalesce(sen.positive, 0) as positive, coalesce(sen.comments, 0) as comments
@@ -805,8 +854,8 @@ export const collectPeople: Collector<"people"> = async (db, ctx) => {
     email: r.email,
     department: r.department,
     manager: r.manager,
-    selfStatus: r.self_status,
-    managerStatus: r.manager_status,
+    selfStatus: sides.get(r.person_id)?.selfStatus ?? null,
+    managerStatus: sides.get(r.person_id)?.managerStatus ?? null,
     retention: likertLabel("retention", r.retention, ctx.locale ?? "es"),
     engagement: likertLabel("engagement", r.engagement, ctx.locale ?? "es"),
     positiveShare: r.comments ? r.positive / r.comments : null,

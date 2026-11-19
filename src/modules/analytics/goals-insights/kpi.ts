@@ -14,6 +14,8 @@ export type KpiCounts = {
   inProgress: number;
   closed: number;
   overdue: number;
+  due: number;
+  completedDue: number;
   /** Sum of the goals' percent complete. */
   progressSum: number;
 };
@@ -34,9 +36,12 @@ export function kpiGroup(c: KpiCounts): GoalKpiGroup {
     inProgress: c.inProgress,
     closed: c.closed,
     overdue: c.overdue,
+    due: c.due,
+    completedDue: c.completedDue,
     completedPct: share(c.completed, c.goals),
     inProgressPct: share(c.inProgress, c.goals),
     overduePct: share(c.overdue, c.goals),
+    completedDuePct: share(c.completedDue, c.due),
     avgProgress: c.goals > 0 ? c.progressSum / c.goals : null,
   };
 }
@@ -56,6 +61,8 @@ const countsOf = (g: GoalKpiGroup): KpiCounts => ({
   inProgress: g.inProgress,
   closed: g.closed,
   overdue: g.overdue,
+  due: g.due,
+  completedDue: g.completedDue,
   progressSum: Math.round((g.avgProgress ?? 0) * g.goals),
 });
 
@@ -74,6 +81,8 @@ export function sumGroups(
       inProgress: sum.inProgress + c.inProgress,
       closed: sum.closed + c.closed,
       overdue: sum.overdue + c.overdue,
+      due: sum.due + c.due,
+      completedDue: sum.completedDue + c.completedDue,
       progressSum: sum.progressSum + c.progressSum,
     }),
     {
@@ -85,6 +94,8 @@ export function sumGroups(
       inProgress: 0,
       closed: 0,
       overdue: 0,
+      due: 0,
+      completedDue: 0,
       progressSum: 0,
     },
   );

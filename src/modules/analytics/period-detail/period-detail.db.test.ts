@@ -1,4 +1,4 @@
-import { and, eq } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { closeDb, db } from "@/db/client";
 import { answer, questionRevision } from "@/db/schema";
@@ -12,6 +12,7 @@ import {
   type Scenario,
   type TestCycle,
 } from "@/modules/analytics/indicators/test-support";
+import { insertGoals } from "@/modules/analytics/goals-insights/test-support";
 import { setOrgAttributes } from "@/modules/org-attributes/test-support";
 import { periodDetail } from "./queries";
 
@@ -173,6 +174,29 @@ describe("periodDetail", () => {
   it("forbids employees and a manager without a person", async () => {
     for (const actor of [as(s.id.ana, "employee"), as("", "manager")]) {
       await expect(periodDetail(db, actor)).rejects.toBeDefined();
+    }
+  });
+
+  it("goals completed is the rate of the goals that were due at the cycle's cut-off, not of all of them", async () => {
+    const participantId = s.participant(s.c1, "ana");
+    // C1 is closed and ended on 2024-06-30: that is its cut-off, whatever today is.
+    await insertGoals(participantId, [
+      { status: "completed", percent: 100, due: "2024-03-31" },
+      { status: "in_progress", percent: 50, due: "2024-05-31" }, // overdue at the cut-off
+      { status: "in_progress", percent: 10, due: "2025-01-31" }, // not due yet
+      { status: "in_progress", percent: 0, due: null }, // never due
+    ]);
+    try {
+      const { rows } = await periodDetail(db, hr);
+      // 2 of the 4 goals were due (the completed one and the overdue one):
+      // 1 of 2 = 50 %, not the 1 of 4 = 25 % of all of them.
+      expect(rows[0]).toMatchObject({ goals: 2, goalsCompletedPct: 50 });
+      // A cycle where nothing was due has no rate (not 0 %).
+      expect(rows[1]).toMatchObject({ goals: 0, goalsCompletedPct: null });
+    } finally {
+      await db.execute(
+        sql`delete from participant_goal_snapshot where participant_id = ${participantId}::uuid`,
+      );
     }
   });
 });

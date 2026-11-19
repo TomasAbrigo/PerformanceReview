@@ -8,6 +8,7 @@ import {
   requireCycle,
 } from "@/modules/analytics/indicators/rows";
 import type { IndicatorConfig } from "@/modules/analytics/indicators/types";
+import { cycleGoalAsOf } from "@/modules/goals/as-of";
 import { todayLocal } from "@/modules/org-history/dates";
 import type { Hierarchy } from "./types";
 
@@ -29,8 +30,12 @@ export type GoalContext = {
   reach: Reach;
   indicators: IndicatorContext;
   cycleId: string;
-  /** The date "overdue" is measured against (YYYY-MM-DD): today. */
-  today: string;
+  /**
+   * The reference date "overdue" and "due" are measured against (YYYY-MM-DD):
+   * today for a cycle whose period runs, the end of the period for a closed
+   * one (`goalAsOf`, src/modules/goals/state.ts: the one rule of the app).
+   */
+  asOf: string;
 };
 
 /**
@@ -51,7 +56,7 @@ export async function goalContext(
     reach: indicators.scope,
     indicators,
     cycleId,
-    today: todayLocal(),
+    asOf: (await cycleGoalAsOf(db, cycleId)) ?? todayLocal(),
   };
 }
 
@@ -65,9 +70,12 @@ export async function goalContext(
  *   authorized) and masked by the callers;
  * - `g`: per participant the figures of the goals of the period (the cycle's
  *   goal snapshot, `no_longer_applicable` ones left out): total, completed,
- *   in progress, closed, overdue (in progress and due before today: the same
- *   rule as the goals list and the home, `src/modules/goals/state.ts`) and
- *   the sum of their percent complete.
+ *   in progress (not overdue), closed, overdue (in progress and due before the
+ *   cycle's reference date, `ctx.asOf`: the same rule as the goals list and
+ *   the home, `src/modules/goals/state.ts`), so completed + in progress +
+ *   overdue + closed = goals; `due` (goals due on or before the reference
+ *   date), `completed_due` (the completed ones among them) and the sum of
+ *   their percent complete.
  */
 export function goalCtes(ctx: GoalContext, hierarchy: Hierarchy): SQL {
   const runAs = ctx.reach.kind === "aggregatesOnly" ? ALL_PEOPLE : ctx.actor;
@@ -81,11 +89,18 @@ export function goalCtes(ctx: GoalContext, hierarchy: Hierarchy): SQL {
       select b.participant_id,
              count(s.id)::int as goals,
              count(s.id) filter (where s.status = 'completed')::int as completed,
-             count(s.id) filter (where s.status = 'in_progress')::int as in_progress,
+             count(s.id) filter (
+               where s.status = 'in_progress'
+                 and (s.due_date is null or s.due_date >= ${ctx.asOf}::date)
+             )::int as in_progress,
              count(s.id) filter (where s.status = 'closed')::int as closed,
              count(s.id) filter (
-               where s.status = 'in_progress' and s.due_date < ${ctx.today}::date
+               where s.status = 'in_progress' and s.due_date < ${ctx.asOf}::date
              )::int as overdue,
+             count(s.id) filter (where s.due_date <= ${ctx.asOf}::date)::int as due,
+             count(s.id) filter (
+               where s.status = 'completed' and s.due_date <= ${ctx.asOf}::date
+             )::int as completed_due,
              coalesce(sum(s.percent_complete), 0)::int as progress_sum
       from scoped b
       left join participant_goal_snapshot s

@@ -557,8 +557,11 @@ const progressExport = defineExport({
     { header: h("department"), value: (r) => r.department },
     { header: h("manager_id"), value: (r) => r.managerId },
     { header: h("manager"), value: (r) => r.managerName },
-    { header: h("total"), value: (r) => r.total },
+    // The review REQUESTS that exist: a participant with no request at all
+    // is in no row (their pending assessment is in the completion export).
+    { header: h("requests"), value: (r) => r.total },
     { header: h("submitted"), value: (r) => r.submitted },
+    // Requests in draft (started, not submitted), not "everything pending".
     { header: h("draft"), value: (r) => r.draft },
     { header: h("declined"), value: (r) => r.declined },
   ],
@@ -972,7 +975,13 @@ const goalsInsightsQuery = z.object({
 const oneDecimal = (n: number | null) =>
   n === null ? null : Math.round(n * 10) / 10;
 
-/** One row per group (person, manager or area): goals, shares and mean progress. */
+/**
+ * One row per group (person, manager or area): goals, shares and mean
+ * progress. Overdue is measured at `as_of` (the cycle's reference date: today
+ * while it runs, the end of its period once closed), the same on every row;
+ * the states are a partition (in progress leaves the overdue out), and the
+ * shares are of all the group's goals, also the ones not due yet.
+ */
 const goalKpisExport = defineExport({
   file: ({ cycle, groupBy }) => `insights-goal-kpis-${cycle}-${groupBy}`,
   query: goalsInsightsQuery.extend({
@@ -989,10 +998,13 @@ const goalKpisExport = defineExport({
           managerId: q.manager,
           ...orgFiltersOf(q),
         },
-      }).then((k) => k.groups),
+      }).then((k) => k.groups.map((g) => ({ ...g, asOf: k.asOf }))),
     ),
   columns: (h) => [
-    { header: h("group_id"), value: (g: GoalKpiGroup) => g.key },
+    {
+      header: h("group_id"),
+      value: (g: GoalKpiGroup & { asOf: string }) => g.key,
+    },
     { header: h("group"), value: (g) => g.label },
     { header: h("people"), value: (g) => g.people },
     { header: h("goals"), value: (g) => g.goals },
@@ -1007,6 +1019,13 @@ const goalKpisExport = defineExport({
     },
     { header: h("overdue_pct"), value: (g) => oneDecimal(g.overduePct) },
     { header: h("avg_progress"), value: (g) => oneDecimal(g.avgProgress) },
+    { header: h("due"), value: (g) => g.due },
+    { header: h("completed_due"), value: (g) => g.completedDue },
+    {
+      header: h("completed_due_pct"),
+      value: (g) => oneDecimal(g.completedDuePct),
+    },
+    { header: h("as_of"), value: (g) => g.asOf },
   ],
 });
 
@@ -1180,7 +1199,7 @@ const periodDetailExport = defineExport({
     { header: h("retention_n"), value: (r) => r.retention?.n ?? null },
     { header: h("engagement_mean"), value: (r) => mean2(r.engagement) },
     { header: h("engagement_n"), value: (r) => r.engagement?.n ?? null },
-    { header: h("goals"), value: (r) => r.goals },
+    { header: h("goals_due"), value: (r) => r.goals },
     {
       header: h("goals_completed_pct"),
       value: (r) =>

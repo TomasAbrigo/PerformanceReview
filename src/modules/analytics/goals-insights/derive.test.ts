@@ -35,6 +35,8 @@ const row = (
     inProgress: goals - completed,
     closed: 0,
     overdue: 0,
+    due: completed,
+    completedDue: completed,
     progressSum: completed * 100,
     completedPct: goals ? (completed / goals) * 100 : null,
     avgProgress: goals ? (completed * 100) / goals : null,
@@ -49,6 +51,7 @@ const row = (
 const rows = [
   row("Ana", 5, 4, { retention: 2, engagement: 4, positiveShare: 0.5 }),
   row("Bruno", 4, 1, {
+    inProgress: 2,
     overdue: 1,
     managerId: M2,
     managerName: "Nora",
@@ -156,11 +159,39 @@ describe("bucketRows", () => {
     expect(suppressed).toBe(0);
     // Bucket 1: retention (3 + 5) / 2, engagement (3 + 5) / 2.
     expect(buckets[1]).toMatchObject({ meanRetention: 4, meanEngagement: 4 });
-    // Bucket 4: retention (2 + 1) / 2; engagement only Ana's 4.
+    // Bucket 4: retention (2 + 1) / 2; engagement only Ana's 4 (Elena has none).
     expect(buckets[4]).toMatchObject({
+      people: 2,
+      retentionPeople: 2,
+      engagementPeople: 1,
       meanRetention: 1.5,
       meanEngagement: 4,
       meanPositiveShare: 0.5,
+    });
+  });
+
+  it("with a minimum, each mean needs that many people who have the indicator, not who have goals", () => {
+    // Minimum 2: bucket 4 has 2 people (Ana, Elena) but engagement is
+    // Ana's alone, and the positive share too: those two are not shown.
+    const { buckets } = bucketRows(rows, 2);
+    expect(buckets[4]).toMatchObject({
+      people: 2,
+      hidden: false,
+      retentionPeople: 2,
+      meanRetention: 1.5,
+      engagementPeople: null,
+      meanEngagement: null,
+      meanPositiveShare: null,
+    });
+    // Bucket 1 (Bruno, Carla) has retention from 2 people: shown. Its
+    // engagement is the other base of a public total (the engagement n of the
+    // cycle is 3) whose only other part is hidden, so it goes with it: a lone
+    // hidden n must not be solved by difference (#130).
+    expect(buckets[1]).toMatchObject({
+      retentionPeople: 2,
+      meanRetention: 4,
+      engagementPeople: null,
+      meanEngagement: null,
     });
   });
 

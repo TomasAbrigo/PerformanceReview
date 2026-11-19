@@ -63,14 +63,17 @@ const group = (
     peopleWithGoals: c.people,
     goals: c.goals,
     completed: c.completed,
-    inProgress: c.goals - c.completed,
+    inProgress: c.goals - c.completed - (c.overdue ?? 0),
     closed: 0,
     overdue: c.overdue ?? 0,
+    due: c.completed + (c.overdue ?? 0),
+    completedDue: c.completed,
     progressSum: c.completed * 100,
   });
 
 const kpis = (over: Partial<GoalKpis> = {}): GoalKpis => ({
   cycleId: "c1",
+  asOf: "2026-09-28",
   groupBy: "department",
   hierarchy: "asOf",
   groups: [
@@ -93,18 +96,28 @@ describe("KpisTable", () => {
     renderIn(locale, <KpisTable kpis={kpis()} />);
     const table = screen.getByTestId("kpis-table");
     const ing = within(table).getByRole("article", { name: /Ingeniería/ });
-    // 14 of 26 completed = 54 %, 12 in progress = 46 %, 2 overdue = 8 %.
+    // 14 of 26 completed = 54 %, 10 in progress = 38 %, 2 overdue = 8 %, and
+    // the 12 that were not completed leave 0 closed: the four add up to 100 %.
     expect(ing).toHaveTextContent("14 (54 %)");
-    expect(ing).toHaveTextContent("12 (46 %)");
+    expect(ing).toHaveTextContent("10 (38 %)");
     expect(ing).toHaveTextContent("2 (8 %)");
-    expect(
-      within(ing).getByRole("progressbar", {
-        name:
-          locale === "es"
-            ? /54 % de objetivos completados/
-            : /54 % of goals completed/,
-      }),
-    ).toBeInTheDocument();
+    // Against the goals that were due (16 of the 26): 14 of 16 = 88 %.
+    expect(ing).toHaveTextContent(
+      locale === "es" ? "14 de 16 (88 %)" : "14 of 16 (88 %)",
+    );
+    const bar = within(ing).getByRole("progressbar", {
+      name:
+        locale === "es"
+          ? /54 % de todos los objetivos completados/
+          : /54 % of all goals completed/,
+    });
+    // The bar draws the same partition as the numbers beside it: completed,
+    // in progress (without the overdue), overdue; they fill it exactly.
+    const widths = [...bar.children].map((c) =>
+      Number.parseFloat((c as HTMLElement).style.width),
+    );
+    expect(widths.map((w) => Math.round(w))).toEqual([54, 38, 8]);
+    expect(widths.reduce((a, b) => a + b, 0)).toBeCloseTo(100);
     // A group without goals has no shares (not 0 %).
     const prod = within(table).getByRole("article", { name: /Producto/ });
     expect(prod).toHaveTextContent(
@@ -197,6 +210,8 @@ const row = (
   inProgress: 1,
   closed: 0,
   overdue: 0,
+  due: 4,
+  completedDue: 4,
   progressSum: 460,
   completedPct: 80,
   avgProgress: 92,
@@ -290,6 +305,8 @@ const vs = (over: Partial<GoalsVsIndicators> = {}): GoalsVsIndicators => ({
   buckets: buckets.map((b, i) => ({
     ...b,
     people: i === 1 ? 3 : i === 4 ? 4 : 0,
+    retentionPeople: i === 1 ? 3 : i === 4 ? 4 : 0,
+    engagementPeople: i === 1 ? 3 : i === 4 ? 4 : 0,
     meanRetention: i === 1 ? 4 : i === 4 ? 3.5 : null,
     meanEngagement: i === 1 ? 4 : i === 4 ? 3.5 : null,
     meanPositiveShare: i === 1 ? 0.75 : null,
@@ -325,7 +342,8 @@ describe("BucketsChart", () => {
               : "20–40 % · Retention: 4",
         }),
       ).toHaveAttribute("tabindex", "0");
-      expect(within(chart).getByText("n = 3")).toBeInTheDocument();
+      // The n of each bar is the people of the bucket who have that answer.
+      expect(within(chart).getByText("n = 3 / 3")).toBeInTheDocument();
       expect(
         screen.getByText(
           locale === "es"
@@ -347,6 +365,8 @@ describe("BucketsChart", () => {
                   from: b.from,
                   to: b.to,
                   people: null,
+                  retentionPeople: null,
+                  engagementPeople: null,
                   meanRetention: null,
                   meanEngagement: null,
                   meanPositiveShare: null,
@@ -428,8 +448,8 @@ describe("OutliersView", () => {
       const done = screen.getByTestId("outliers-done-low");
       expect(done).toHaveTextContent(
         locale === "es"
-          ? "Completaron 80 % o más de sus objetivos, pero retención o compromiso están en 2 o menos."
-          : "They completed 80 % or more of their goals, but retention or engagement is 2 or less.",
+          ? "Completaron 80 % o más de todos sus objetivos del período (hayan vencido o no), pero retención o compromiso están en 2 o menos."
+          : "They completed 80 % or more of all their goals of the period (due or not), but retention or engagement is 2 or less.",
       );
       expect(
         within(done).getByTestId("outliers-done-low-count"),
@@ -599,6 +619,8 @@ describe("org cuts in the goals filters", () => {
           inProgress: 3,
           closed: 0,
           overdue: 0,
+          due: 3,
+          completedDue: 3,
           progressSum: 300,
         }),
       },
@@ -608,6 +630,7 @@ describe("org cuts in the goals filters", () => {
       <KpisTable
         kpis={{
           cycleId: "c1",
+          asOf: "2026-09-28",
           groupBy: "account",
           hierarchy: "asOf",
           groups,

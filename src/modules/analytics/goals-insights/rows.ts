@@ -21,6 +21,8 @@ type Raw = {
   in_progress: number;
   closed: number;
   overdue: number;
+  due: number;
+  completed_due: number;
   progress_sum: number;
   labeled: number;
   positive: number;
@@ -69,7 +71,7 @@ export async function loadParticipantRows(
     select b.participant_id, b.person_id, b.name, b.manager_id, b.manager_name,
            b.department, b.account, b.project, b.dm, b.santex_lead,
            g.goals, g.completed, g.in_progress, g.closed,
-           g.overdue, g.progress_sum,
+           g.overdue, g.due, g.completed_due, g.progress_sum,
            ${input.sentiment ? sql`coalesce(se.labeled, 0)::int` : sql`0`} as labeled,
            ${input.sentiment ? sql`coalesce(se.positive, 0)::int` : sql`0`} as positive
     from scoped b
@@ -100,6 +102,8 @@ export async function loadParticipantRows(
       inProgress: r.in_progress,
       closed: r.closed,
       overdue: r.overdue,
+      due: r.due,
+      completedDue: r.completed_due,
       progressSum: r.progress_sum,
       completedPct: r.goals > 0 ? (r.completed / r.goals) * 100 : null,
       avgProgress: r.goals > 0 ? r.progress_sum / r.goals : null,

@@ -144,6 +144,69 @@ test("People see the goal KPIs, the indicators by completion, the outliers and t
   expect(outliersText).not.toContain("@");
 });
 
+test("the goals list, the home and the analysis agree: in progress and overdue are separate states that add up to the goals", async ({
+  page,
+}) => {
+  test.setTimeout(120_000);
+  await page.goto("/es");
+  await actAs(page, null, "People (RR. HH.)");
+  await openGoals(page);
+  const cycleId = new URL(page.url()).searchParams.get("cycle")!;
+  const totals = await goalTotals(cycleName);
+
+  // The analysis: the figures of the total row, each of its own state.
+  const table = page
+    .getByRole("region", { name: "Indicadores de objetivos" })
+    .getByTestId("kpis-table");
+  await showAllCards(table);
+  const total = table.getByRole("article", { name: "Total", exact: true });
+  const count = async (label: string) =>
+    Number(
+      (await fact(total, label).innerText()).match(/^(\d+)/)?.[1] ?? Number.NaN,
+    );
+  const analysis = {
+    completed: await count("Completados"),
+    inProgress: await count("En curso"),
+    overdue: await count("Vencidos"),
+  };
+  expect(analysis).toEqual({
+    completed: totals.completed,
+    inProgress: totals.inProgress,
+    overdue: totals.overdue,
+  });
+  // Said in the page itself: the cut-off date and that the parts add up.
+  await expect(
+    page.getByText(/Completados, en curso, vencidos y cerrados suman todos/),
+  ).toBeVisible();
+
+  // The list of the same cycle: the same numbers for the same words.
+  await page.goto(`/es/goals?cycle=${cycleId}`);
+  const states = page.getByRole("group", { name: "Objetivos por estado" });
+  const chip = async (name: RegExp) =>
+    Number(
+      (await states.getByRole("link", { name }).innerText()).match(
+        /(\d+)$/,
+      )![1],
+    );
+  expect(await chip(/^En curso \d+$/)).toBe(analysis.inProgress);
+  expect(await chip(/^Vencido \d+$/)).toBe(analysis.overdue);
+  expect(await chip(/^Completado \d+$/)).toBe(analysis.completed);
+  expect(await chip(/^Todos \d+$/)).toBe(totals.goals);
+
+  // The home (it opens on the cycle just chosen): the same overdue count, and
+  // the pending tile says "Pendientes", the word of the assessments' chip.
+  await page.goto("/es");
+  await expect(
+    page
+      .getByRole("region", { name: "Objetivos vencidos", exact: true })
+      .locator(".stat-value"),
+  ).toHaveText(String(analysis.overdue));
+  await expect(
+    page.getByRole("region", { name: "Pendientes", exact: true }),
+  ).toBeVisible();
+  await expect(page.getByText("Sin empezar", { exact: true })).toHaveCount(0);
+});
+
 test("direction only sees aggregates; employees are forbidden", async ({
   page,
 }) => {

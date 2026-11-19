@@ -256,6 +256,102 @@ describe("listGoals: who reads which goals", () => {
   });
 });
 
+describe("listGoals: the state of a cycle's goals is read at the cycle's reference date", () => {
+  /** A cycle snapshotting "Capacitar al equipo" (in progress, due 2026-01-31) and "Documentar". */
+  async function cycleWith(
+    status: "closed" | "collecting",
+    period: { start: string; end: string },
+  ) {
+    const cycleId = await insertCycle(`Cycle ${status} ${period.end}`);
+    await db
+      .update(reviewCycle)
+      .set({
+        status,
+        periodStart: period.start,
+        periodEnd: period.end,
+      })
+      .where(eq(reviewCycle.id, cycleId));
+    const participantId = await insertParticipant({
+      cycleId,
+      personId: ids.dora,
+      snapManagerPersonId: ids.bruno,
+    });
+    await db.insert(participantGoalSnapshot).values(
+      [ids.capacitar, ids.documentar].map((goalId, i) => ({
+        participantId,
+        goalId,
+        goalSourceKey: `native:${goalId}`,
+        title: i === 0 ? "Capacitar al equipo" : "Documentar",
+        status: i === 0 ? ("in_progress" as const) : ("completed" as const),
+        percentComplete: i === 0 ? 20 : 100,
+      })),
+    );
+    return cycleId;
+  }
+
+  it("a closed cycle is measured at the end of its period, not today: a goal due after it is not overdue", async () => {
+    const cycleId = await cycleWith("closed", {
+      start: "2025-07-01",
+      end: "2025-12-31",
+    });
+    try {
+      // Due 2026-01-31: after the cut-off (2025-12-31), overdue today.
+      const closed = await listGoals(db, hr, { cycleId }, TODAY);
+      expect(closed.asOf).toBe("2025-12-31");
+      expect(closed.counts).toEqual({
+        in_progress: 1,
+        completed: 1,
+        closed: 0,
+        overdue: 0,
+      });
+      expect(
+        closed.items.find((g) => g.title === "Capacitar al equipo")?.state,
+      ).toBe("in_progress");
+      // The same goals with no cycle (the live ones): against today.
+      const live = await listGoals(db, hr, { q: "Capacitar" }, TODAY);
+      expect(live.asOf).toBe(TODAY);
+      expect(live.counts.overdue).toBe(1);
+    } finally {
+      await db.delete(reviewCycle).where(eq(reviewCycle.id, cycleId));
+    }
+  });
+
+  it("a cycle whose period has not ended is measured today, closed or not", async () => {
+    const running = await cycleWith("collecting", {
+      start: "2026-07-01",
+      end: "2026-12-31",
+    });
+    const closedEarly = await cycleWith("closed", {
+      start: "2026-07-01",
+      end: "2026-12-31",
+    });
+    try {
+      for (const cycleId of [running, closedEarly]) {
+        const page = await listGoals(db, hr, { cycleId }, TODAY);
+        expect(page.asOf).toBe(TODAY);
+        expect(page.counts.overdue).toBe(1);
+      }
+    } finally {
+      await db
+        .delete(reviewCycle)
+        .where(inArray(reviewCycle.id, [running, closedEarly]));
+    }
+  });
+
+  it("counts the states as a partition and the goals due by the reference date apart", async () => {
+    const page = await listGoals(db, hr, {}, TODAY);
+    expect(
+      page.counts.in_progress +
+        page.counts.completed +
+        page.counts.closed +
+        page.counts.overdue,
+    ).toBe(page.total);
+    // Due by 2026-11-18: "Documentar" (completed, 2026-06-30) and "Capacitar
+    // al equipo" (overdue, 2026-01-31); the others are due later or never.
+    expect(page.due).toEqual({ total: 2, completed: 1 });
+  });
+});
+
 describe("listGoals: filters", () => {
   it("filters by state, overdue included", async () => {
     expect(

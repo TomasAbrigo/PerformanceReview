@@ -1,6 +1,10 @@
 import { PageSkeleton } from "@/components/experience";
 import { hasLocale } from "next-intl";
-import { getTranslations, setRequestLocale } from "next-intl/server";
+import {
+  getFormatter,
+  getTranslations,
+  setRequestLocale,
+} from "next-intl/server";
 import { notFound } from "next/navigation";
 import { connection } from "next/server";
 import { Suspense } from "react";
@@ -27,6 +31,7 @@ import {
 } from "@/modules/goals/browse";
 import { listGoalOwnerOptions } from "@/modules/goals/write";
 import { noOrgOptions } from "@/modules/org-attributes/kinds";
+import { todayLocal } from "@/modules/org-history/dates";
 import { localizeCycles } from "@/modules/review-core/cycle-name";
 import { rememberedCycle } from "@/modules/review-core/remembered-cycle";
 import { pickCycle } from "@/modules/review-core/current-cycle";
@@ -112,6 +117,17 @@ async function GoalsList({
         thresholds={kpiThresholds(settings)}
         hrefFor={(state) => hrefFor({ state })}
       />
+      {page.asOf < todayLocal() ? (
+        // The goals of a closed cycle are measured at its cut-off, not today.
+        <p className="text-sm text-muted-foreground" data-testid="goals-as-of">
+          {t("overview.frozenNote", {
+            date: (await getFormatter()).dateTime(
+              new Date(`${page.asOf}T00:00:00Z`),
+              { dateStyle: "medium", timeZone: "UTC" },
+            ),
+          })}
+        </p>
+      ) : null}
       <section
         aria-label={t("count", { n: page.total })}
         className="space-y-6"

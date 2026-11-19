@@ -113,8 +113,18 @@ export type ExecutiveSummary = {
    */
   minGroupSize: number | null;
   participants: number;
+  /**
+   * The review REQUESTS that exist per relationship: a participant with no
+   * request at all is in no count (so `self` reads 100 % when everybody who
+   * has one submitted it). The completion module counts participants.
+   */
   progress: { relationship: Relationship; total: number; submitted: number }[];
   distribution: number[];
+  /**
+   * People with a final rating in scope (before any masking): 0 means the
+   * cycle has none, whose `distribution` is a row of zeros that says nothing.
+   */
+  rated: number;
   byDepartment: {
     department: string;
     n: number;

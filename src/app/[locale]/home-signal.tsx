@@ -10,7 +10,7 @@ import {
   TriangleAlert,
   Users,
 } from "lucide-react";
-import { getTranslations } from "next-intl/server";
+import { getFormatter, getTranslations } from "next-intl/server";
 import type { ReactNode } from "react";
 import { connection } from "next/server";
 import { MetricCard, ProgressRing } from "@/components/experience";
@@ -67,10 +67,11 @@ const pct = (n: number, total: number) =>
  */
 export async function HomeSignal({ locale }: { locale: string }) {
   await connection();
-  const [t, tf, tx, actor, settings, remembered] = await Promise.all([
+  const [t, tf, tx, format, actor, settings, remembered] = await Promise.all([
     getTranslations("Home.signal"),
     getTranslations("Home.focus"),
     getTranslations("Experience"),
+    getFormatter(),
     getActor(),
     getSettings(db),
     rememberedCycle(),
@@ -200,7 +201,17 @@ export async function HomeSignal({ locale }: { locale: string }) {
     : 0;
   const completeTone =
     showKpis && total ? percentTone(completePct, thresholds) : undefined;
-  const goalsPct = goals ? pct(goals.counts.completed, goalsTotal) : 0;
+  // Completion against the target counts the goals that were due by the
+  // reference date (a goal not due yet is not a failure); overdue is measured
+  // at the same date: today, or the end of the period of a closed cycle.
+  const goalsDue = goals?.due ?? { total: 0, completed: 0 };
+  const goalsPct = pct(goalsDue.completed, goalsDue.total);
+  const asOfText = goals
+    ? format.dateTime(new Date(`${goals.asOf}T00:00:00Z`), {
+        dateStyle: "medium",
+        timeZone: "UTC",
+      })
+    : "";
   const target = percentTarget(thresholds);
 
   return (
@@ -321,15 +332,6 @@ export async function HomeSignal({ locale }: { locale: string }) {
             label={t("pending")}
             value={participants.counts.pending}
             href={`/assessments?cycle=${cycle.id}&progress=pending`}
-            status={
-              total
-                ? percentTone(
-                    pct(participants.counts.pending, total),
-                    thresholds,
-                    "down",
-                  )
-                : undefined
-            }
             note={t("ofParticipants", {
               pct: pct(participants.counts.pending, total),
             })}
@@ -339,27 +341,37 @@ export async function HomeSignal({ locale }: { locale: string }) {
             <>
               <MetricCard
                 label={t("goalsCompleted")}
-                value={`${goalsPct} %`}
+                value={goalsDue.total ? `${goalsPct} %` : "—"}
                 href={`/goals?cycle=${cycle.id}&state=completed`}
                 status={
-                  goalsTotal ? percentTone(goalsPct, thresholds) : undefined
+                  goalsDue.total ? percentTone(goalsPct, thresholds) : undefined
                 }
-                scale={{
-                  value: goalsPct,
-                  min: 0,
-                  max: 100,
-                  label: t("goalsNote", {
-                    done: goals.counts.completed,
-                    total: goalsTotal,
-                  }),
-                  minLabel: "0 %",
-                  maxLabel: "100 %",
-                  target: { value: target, text: `${target} %` },
-                }}
-                note={t("goalsNote", {
-                  done: goals.counts.completed,
-                  total: goalsTotal,
-                })}
+                scale={
+                  goalsDue.total
+                    ? {
+                        value: goalsPct,
+                        min: 0,
+                        max: 100,
+                        label: t("goalsNote", {
+                          done: goalsDue.completed,
+                          total: goalsDue.total,
+                          date: asOfText,
+                        }),
+                        minLabel: "0 %",
+                        maxLabel: "100 %",
+                        target: { value: target, text: `${target} %` },
+                      }
+                    : undefined
+                }
+                note={
+                  goalsDue.total
+                    ? t("goalsNote", {
+                        done: goalsDue.completed,
+                        total: goalsDue.total,
+                        date: asOfText,
+                      })
+                    : t("goalsNoneDue", { date: asOfText })
+                }
                 icon={<Target className="size-5" />}
               />
               <MetricCard
@@ -377,6 +389,7 @@ export async function HomeSignal({ locale }: { locale: string }) {
                 }
                 note={t("ofGoals", {
                   pct: pct(goals.counts.overdue, goalsTotal),
+                  date: asOfText,
                 })}
                 icon={<CalendarDays className="size-5" />}
               />

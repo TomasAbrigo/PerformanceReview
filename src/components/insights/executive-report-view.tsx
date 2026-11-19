@@ -261,6 +261,7 @@ export function ExecutiveReportView({
   const t = useTranslations("Insights.Executive");
   const ti = useTranslations("Insights");
   const tEngagement = useTranslations("Engagement.tile");
+  const format = useFormatter();
   const themeLabel = useThemeLabel();
   const min = report.minGroupSize;
   const total = report.completion.total;
@@ -397,24 +398,26 @@ export function ExecutiveReportView({
             testId="exec-goals"
             label={t("goalsCompleted")}
             icon={<PanelIcon kind="goals" />}
+            // The completion shown against the target counts the goals that
+            // were due by the reference date: one not due yet is not a failure.
             value={
-              goals?.completedPct == null
+              goals?.completedDuePct == null
                 ? "—"
-                : ti("percent", { value: Math.round(goals.completedPct) })
+                : ti("percent", { value: Math.round(goals.completedDuePct) })
             }
             status={
-              goals?.completedPct == null
+              goals?.completedDuePct == null
                 ? undefined
-                : percentTone(goals.completedPct, targets)
+                : percentTone(goals.completedDuePct, targets)
             }
             scale={
-              goals?.completedPct == null
+              goals?.completedDuePct == null
                 ? undefined
                 : {
-                    value: goals.completedPct,
+                    value: goals.completedDuePct,
                     min: 0,
                     max: 100,
-                    label: `${t("goalsCompleted")}: ${ti("percent", { value: Math.round(goals.completedPct) })}`,
+                    label: `${t("goalsCompleted")}: ${ti("percent", { value: Math.round(goals.completedDuePct) })}`,
                     minLabel: "0 %",
                     maxLabel: "100 %",
                     target: {
@@ -423,10 +426,25 @@ export function ExecutiveReportView({
                     },
                   }
             }
-            delta={
-              goals?.completedPct == null
+            note={
+              goals?.completedDuePct == null
                 ? undefined
-                : pointsDelta(goals.completedPct, previous?.goals?.completedPct)
+                : t("goalsDueNote", {
+                    done: goals.completedDue,
+                    due: goals.due,
+                    date: format.dateTime(new Date(`${goals.asOf}T00:00:00Z`), {
+                      dateStyle: "medium",
+                      timeZone: "UTC",
+                    }),
+                  })
+            }
+            delta={
+              goals?.completedDuePct == null
+                ? undefined
+                : pointsDelta(
+                    goals.completedDuePct,
+                    previous?.goals?.completedDuePct,
+                  )
             }
             drill={
               goals && goals.completed > 0

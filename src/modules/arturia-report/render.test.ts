@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { labelsFor } from "./labels";
 import { renderHtml, renderJson, svgBars, svgStacked } from "./render";
 import { arturiaReportV1 } from "./schema";
 import { sampleReport } from "./test-support";
@@ -160,6 +161,23 @@ describe("renderers", () => {
       expect(html).not.toContain("<th>Nombre</th>");
     });
 
+    it("says the date overdue is measured at, and draws the states as a partition", () => {
+      const r = sampleReport();
+      r.sections.goals!.asOf = "2025-12-31";
+      const html = goals(renderHtml(r));
+      expect(html).toContain("Fecha de corte de los vencidos: 2025-12-31");
+      // Ingeniería: 6 completed + 6 in progress + 2 overdue + 1 closed = 15.
+      expect(html).toMatch(
+        /<title>Ingeniería \(n=7\) · En curso: 6 \(40%\)<\/title>/,
+      );
+      expect(html).toMatch(
+        /<title>Ingeniería \(n=7\) · Vencidos: 2 \(13%\)<\/title>/,
+      );
+      // A report of an earlier minor has no date: nothing is said of it.
+      delete r.sections.goals!.asOf;
+      expect(goals(renderHtml(r))).not.toContain("Fecha de corte");
+    });
+
     it("hides the totals when the report says they would give a group away", () => {
       const r = sampleReport();
       r.sections.goals!.participantsWithGoals = null;
@@ -270,6 +288,52 @@ describe("renderers", () => {
     )![0];
     expect(html.match(/Total oculto/g)).toHaveLength(2);
     expect(html).not.toContain("<td>Total</td>");
+  });
+
+  it("a cycle without ratings says no data instead of drawing a row of zeros", () => {
+    const r = sampleReport();
+    r.sections.executive.distribution = null;
+    r.sections.executive.distributionStatus = "no_data";
+    r.sections.executive.byDepartment = [];
+    expect(arturiaReportV1.safeParse(r).success).toBe(true);
+    const html = renderHtml(r).match(
+      /<section id="executive"[\s\S]*?<\/section>/,
+    )![0];
+    expect(html).toContain(
+      "Sin datos: el ciclo no tiene calificaciones finales",
+    );
+    expect(html).not.toContain("<svg");
+    expect(html).not.toContain("Total oculto");
+    // Under the minimum is another thing: it says the total is hidden.
+    r.sections.executive.distributionStatus = "suppressed";
+    expect(renderHtml(r)).toContain("Total oculto");
+  });
+
+  it("says the progress of the sides in words, and the people's statuses too", () => {
+    const r = sampleReport({ anonymized: false });
+    r.sections.people = [
+      {
+        personId: "p1",
+        displayName: "Ana",
+        email: null,
+        department: null,
+        manager: null,
+        selfStatus: "in_progress",
+        managerStatus: "not_applicable",
+        retention: null,
+        engagement: null,
+        positiveShare: null,
+        comments: 0,
+      },
+    ];
+    const people = renderHtml(r).match(
+      /<section id="people"[\s\S]*?<\/section>/,
+    )![0];
+    expect(people).toContain("<td>En curso</td><td>No aplica</td>");
+    // The English report has its own words.
+    expect(renderHtml(r, labelsFor("en"))).toContain(
+      "<td>In progress</td><td>Does not apply</td>",
+    );
   });
 
   it("shows a note instead of totals hidden to avoid differencing", () => {

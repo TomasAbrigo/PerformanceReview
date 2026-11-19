@@ -149,6 +149,8 @@ export function kpisOf(
       inProgress: 0,
       closed: 0,
       overdue: 0,
+      due: 0,
+      completedDue: 0,
       progressSum: 0,
     };
     c.people += 1;
@@ -158,6 +160,8 @@ export function kpisOf(
     c.inProgress += r.inProgress;
     c.closed += r.closed;
     c.overdue += r.overdue;
+    c.due += r.due;
+    c.completedDue += r.completedDue;
     c.progressSum += r.progressSum;
     sums.set(id, c);
   }
@@ -192,6 +196,16 @@ const mean = (values: (number | null)[]): number | null => {
  * counted in `withoutGoals`. With a minimum (direction) a bucket under it is
  * hidden and its people counted in `suppressed`; an empty bucket gives
  * nobody away and stays; `withoutGoals` is not shown to direction.
+ *
+ * A mean is of the people who HAVE the indicator (a person without it is not
+ * in it), so that is its n (`retentionPeople`, `engagementPeople`) and the
+ * base the minimum is measured on: a bucket of 5 people with goals whose
+ * retention was answered by 3 shows no retention (the mean of 3 people would
+ * be below the minimum). The same for the positive share, whose base is the
+ * people with labeled comments. Each of those bases is a list whose sum is
+ * public (the indicator's total n), so it gets the same complementary
+ * suppression as the people of the buckets: a lone hidden n takes the
+ * smallest shown one with it.
  */
 export function bucketRows(
   rows: readonly GoalIndicatorRow[],
@@ -209,6 +223,17 @@ export function bucketRows(
     minGroupSize === null
       ? sizes.map(() => false)
       : (suppressList(sizes, minGroupSize) ?? sizes.map((n) => n > 0));
+  // The people of each bucket who have a measure, and which of those bases
+  // direction may not read (under the minimum, or the complement of one).
+  const maskedBase = (value: (r: GoalIndicatorRow) => number | null) => {
+    const ns = slices.map((s) => s.filter((r) => value(r) !== null).length);
+    return minGroupSize === null
+      ? ns.map(() => false)
+      : (suppressList(ns, minGroupSize) ?? ns.map((n) => n > 0));
+  };
+  const retentionMasked = maskedBase((r) => r.retention);
+  const engagementMasked = maskedBase((r) => r.engagement);
+  const positiveMasked = maskedBase((r) => r.positiveShare);
   const result = buckets.map((range, i): GoalBucket => {
     const people = slices[i];
     if (hide[i]) {
@@ -216,18 +241,33 @@ export function bucketRows(
       return {
         ...range,
         people: null,
+        retentionPeople: null,
+        engagementPeople: null,
         meanRetention: null,
         meanEngagement: null,
         meanPositiveShare: null,
         hidden: true,
       };
     }
+    // The mean of a measure, and the people it is of; nothing when direction
+    // may not read that base (see `maskedBase`).
+    const measure = (
+      value: (r: GoalIndicatorRow) => number | null,
+      masked: readonly boolean[],
+    ) => ({
+      n: masked[i] ? null : people.filter((r) => value(r) !== null).length,
+      mean: masked[i] ? null : mean(people.map(value)),
+    });
+    const retention = measure((r) => r.retention, retentionMasked);
+    const engagement = measure((r) => r.engagement, engagementMasked);
     return {
       ...range,
       people: people.length,
-      meanRetention: mean(people.map((p) => p.retention)),
-      meanEngagement: mean(people.map((p) => p.engagement)),
-      meanPositiveShare: mean(people.map((p) => p.positiveShare)),
+      retentionPeople: retention.n,
+      engagementPeople: engagement.n,
+      meanRetention: retention.mean,
+      meanEngagement: engagement.mean,
+      meanPositiveShare: measure((r) => r.positiveShare, positiveMasked).mean,
       hidden: false,
     };
   });

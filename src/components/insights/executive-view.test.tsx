@@ -83,6 +83,7 @@ const exec: ExecutiveSummary = {
   participants: 12,
   progress: [{ relationship: "manager", total: 4, submitted: 3 }],
   distribution: [0, 1, 2, 3, 1],
+  rated: 7,
   byDepartment: [
     { department: "Ventas", n: 5, mean: 0.5, counts: [0, 1, 1, 2, 1] },
   ],
@@ -151,6 +152,7 @@ describe("ExecutiveView", () => {
             participants: 3,
             progress: [],
             distribution: [0, 0, 0, 0, 0],
+            rated: 0,
             byDepartment: [],
             others: null,
             suppressed: 3,
@@ -178,6 +180,7 @@ describe("ExecutiveView", () => {
           participants: 0,
           progress: [],
           distribution: [0, 0, 0, 0, 0],
+          rated: 0,
           byDepartment: [],
           others: null,
           suppressed: 0,
