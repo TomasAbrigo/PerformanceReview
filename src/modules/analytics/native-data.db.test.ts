@@ -154,9 +154,9 @@ describe("native data in the insights", () => {
       expect(d.total?.n, d.indicator).toBe(1);
     }
     expect(s.qualitative?.people).toBeGreaterThan(0);
-    // The template's yes/no questions have no dimension: the report keys them by what they ask.
+    // The template's yes/no questions have no dimension: the reader keys them by their prompt.
     for (const row of s.qualitative!.yesNo.rows) {
-      expect(row.dimension).toMatch(/^yes_no_[a-z0-9_]+$/);
+      expect(row.dimension).toMatch(/^q_[0-9a-f]{10}$/);
     }
     expect(s.goals).toMatchObject({ participantsWithGoals: 1, goals: 1 });
   });
