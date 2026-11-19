@@ -15,17 +15,19 @@ Informe de desempeño de un ciclo para publicar como mini app en Arturía. Se ge
 
 De dónde sale cada sección (el informe reusa los módulos de analytics: la versión con nombres corre como People y la anonimizada como dirección con el mínimo del informe, ver [arturia-schema.md](arturia-schema.md)):
 
-| Sección       | Módulo                                                                                                                                                 |
-| ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `executive`   | `analytics/dashboards` (`executiveSummary`: participantes y distribución de calificaciones) y `analytics/completion` (el avance de `self` y `manager`) |
-| `completion`  | `analytics/completion` (`completionOverview`, `completionSummary`): Assessment Progress, si no las solicitudes                                         |
-| `indicators`  | `analytics/indicators`                                                                                                                                 |
-| `goals`       | `analytics/goals-insights` (`goalInsights`, `goalKpis`): KPIs por área y equipo, tramos, casos atípicos                                                |
-| `qualitative` | `qualitative-analysis`                                                                                                                                 |
+| Sección       | Módulo                                                                                                                                                   |
+| ------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `executive`   | `analytics/dashboards` (`executiveSummary`: participantes y distribución de calificaciones) y `analytics/completion` (el avance de `self` y `manager`)   |
+| `completion`  | `analytics/completion` (`completionOverview`, `completionSummary`): Assessment Progress, si no las solicitudes                                           |
+| `indicators`  | `analytics/indicators`                                                                                                                                   |
+| `goals`       | `analytics/goals-insights` (`goalInsights`, `goalKpis`): KPIs por área y equipo, tramos, casos atípicos                                                  |
+| `qualitative` | `qualitative-analysis/reading.ts` (las mismas funciones que `/insights/qualitative`): lectura por persona, procedencia, sustancia, temas, señales, Sí/No |
 
 **Fecha de corte de los vencidos:** "vencido" es un objetivo en curso con fecha límite anterior a `goals.asOf`: hoy mientras el período del ciclo corre, el último día del período una vez que el ciclo está cerrado (la foto de objetivos queda congelada ahí; la regla única está en `src/modules/goals/state.ts`, `goalAsOf`). El informe lleva esa fecha y el HTML la muestra.
 
-Anonimizado, los temas cualitativos no llevan citas textuales (`quotes` vacío, #129): un texto puede delatar a quien lo escribió aunque se reemplacen los nombres.
+**El cualitativo** (#129) es la lectura de las respuestas abiertas por **persona** (no por respuesta; la autoevaluación y el manager nunca se mezclan) y dice lo mismo que `/insights/qualitative` para ese ciclo: procedencia de las etiquetas (proveedor, modelo, última corrida, % corregido por personas; si son del mock, el informe dice «Lectura de demostración»), sustancia del feedback, temas de fortalezas y de mejora, coincidencia persona–manager y puntos ciegos, señales (con cortes por área, cuenta y DM), preguntas Sí/No (seguridad de la información = No y conversaciones frecuentes = No como alerta), preguntas cerradas (valoración 1–4 y «mejor trabajo») y, aparte y como secundario, el tono. Cada bloque lleva su n en personas. El HTML nombra preguntas, temas y señales en el idioma del informe; nunca muestra una clave cruda. Si el ciclo todavía no se analizó (`pnpm analysis:run`), la sección sale `null`.
+
+Anonimizado, el cualitativo trae solo agregados: ninguna cita textual (`quotes` siempre vacío, #129: un texto puede delatar a quien lo escribió aunque se reemplacen los nombres), ninguna cifra de menos personas que `minGroupSize` ni que se pueda despejar de las demás (por ejemplo, un «No» de 3 personas no se publica, ni el «Sí» que lo daría), y los grupos chicos de los cortes por área, cuenta y DM se juntan en «Otros». El detalle está en [arturia-schema.md](arturia-schema.md).
 
 Anonimizado, los casos atípicos de objetivos solo se cuentan (y solo desde el mínimo); con nombres se listan con sus valores en `goals.outliers`.
 
@@ -42,7 +44,7 @@ Por defecto en `data/private/arturia/<ciclo-slug>/` (ignorado por git):
 | `report.anonymized.json` | Sin `people`, sin emails, sin nombres; grupos con menos de `aggregation.minGroupSize` personas en "Otros"; equipos "Equipo 1..N". |
 | `report.anonymized.html` | La página de la versión anonimizada.                                                                                              |
 
-El HTML no hace ningún request externo (sin `http(s)://`, ni `src`/`href`/`url()` salvo anclas `#` y `data:`; lo verifica un test). Tiene un selector "Todo / Cuantitativo / Cualitativo" que muestra u oculta secciones con JS puro. Los textos salen del namespace `Arturia` de `src/messages/{es,en}.json`.
+El HTML no hace ningún request externo (sin `http(s)://`, ni `src`/`href`/`url()` salvo anclas `#` y `data:`; lo verifica un test). Tiene un selector "Todo / Cuantitativo / Cualitativo" que muestra u oculta secciones con JS puro. Los textos salen del namespace `Arturia` de `src/messages/{es,en}.json` y, los de la lectura cualitativa (nombres de preguntas, temas, señales, sustancia y sus títulos), de `src/modules/arturia-report/labels.ts` (es y en, con un test de paridad).
 
 El formato del JSON está documentado en [arturia-schema.md](arturia-schema.md).
 

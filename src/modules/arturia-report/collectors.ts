@@ -5,7 +5,8 @@
 // area and team: no manager name, groups under the minimum folded or hidden),
 // and this layer adds the rest: "Equipo N" labels for the teams the modules
 // leave without a name, no totals next to a suppressed group (no
-// reconstruction by difference), re-pseudonymized quotes, no people section.
+// reconstruction by difference), no people section. The qualitative section
+// has its own file (`qualitative.ts`): the open-text readers, no quotes.
 import { sql } from "drizzle-orm";
 import type { DbOrTx } from "@/db/client";
 import { likertLabel } from "@/modules/likert";
@@ -32,23 +33,15 @@ import {
   riskMatrix,
 } from "@/modules/analytics/indicators";
 import { engagementEvolution } from "@/modules/analytics/engagement/queries";
-import { foldGroups } from "@/modules/insights/aggregation";
 import { effectiveCte } from "@/modules/qualitative-analysis/effective";
-import { pseudonymize } from "@/modules/qualitative-analysis/pseudonymize";
-import {
-  sentimentByDimension,
-  sentimentTrend,
-  topThemes,
-} from "@/modules/qualitative-analysis/queries";
-import { pseudonymSources } from "@/modules/qualitative-analysis/service";
-import { sumBy, teamLabels } from "./anonymize";
+import { teamLabels } from "./anonymize";
 import type { Labels, ReportLocale } from "./labels";
+import { readQualitative } from "./qualitative";
 import type {
   ArturiaSections,
   CompletionSection,
   GoalsSection,
   PersonRow,
-  QualitativeSideSection,
 } from "./schema";
 
 export type CollectContext = {
@@ -576,183 +569,13 @@ export const collectGoals: Collector<"goals"> = async (db, ctx) => {
 
 // ----------------------------------------------------------- qualitative
 
-type Side = "self" | "manager";
-
 /**
- * Distinct participants per dimension, theme and cycle (the group sizes),
- * counting only the comments of `side` when given, as the queries that
- * produce the counts do (free text only, #128).
+ * The qualitative section: the open-text reading of the cycle, per person
+ * (#128, #129). The named report reads as People, the anonymized one as
+ * direction with the report's minimum: see `qualitative.ts`.
  */
-async function qualitativeSizes(db: DbOrTx, cycleId: string, side?: Side) {
-  const rows = await db.execute<{ kind: string; key: string; n: number }>(sql`
-    with ${effectiveCte()},
-    l as (
-      select eff.dimension, eff.themes, r.cycle_id, r.participant_id
-      from eff
-      join answer a on a.id = eff.answer_id
-      join review_request r on r.id = a.request_id
-      join cycle_participant cp on cp.id = r.participant_id
-      where r.deleted_at is null and r.status = 'submitted' and cp.removed_at is null
-        ${side ? sql`and r.relationship = ${side}` : sql``}
-    )
-    select 'dimension' as kind, dimension as key, count(distinct participant_id)::int as n
-      from l where cycle_id = ${cycleId}::uuid group by dimension
-    union all
-    select 'theme', t, count(distinct participant_id)::int
-      from l, unnest(themes) t where cycle_id = ${cycleId}::uuid group by t
-    union all
-    select 'cycle', cycle_id::text, count(distinct participant_id)::int
-      from l group by cycle_id`);
-  const of = (kind: string) =>
-    new Map(rows.filter((r) => r.kind === kind).map((r) => [r.key, r.n]));
-  return { dimension: of("dimension"), theme: of("theme"), cycle: of("cycle") };
-}
-
-const withoutN = <T extends { n: number }>(x: T): Omit<T, "n"> => {
-  const rest: Partial<T> = { ...x };
-  delete rest.n;
-  return rest as Omit<T, "n">;
-};
-
-type Counts = Pick<
-  QualitativeSideSection["sentimentByDimension"][number],
-  "positive" | "constructive" | "neutral" | "mixed" | "negative" | "total"
->;
-const sumCounts = (rows: Counts[]): Counts => ({
-  positive: sumBy(rows, (x) => x.positive),
-  constructive: sumBy(rows, (x) => x.constructive),
-  neutral: sumBy(rows, (x) => x.neutral),
-  mixed: sumBy(rows, (x) => x.mixed),
-  negative: sumBy(rows, (x) => x.negative),
-  total: sumBy(rows, (x) => x.total),
-});
-
-/**
- * Sentiment per dimension and top themes of the comments of `side` (all of
- * them without it), computed as People and folded here by distinct
- * participants. `suppressed` counts people (the dimensions and themes left
- * out; a person in several of them counts in each, so it is an upper bound).
- * Anonymized with something suppressed, no total is published (the shown
- * rows would add up to all but the hidden ones).
- */
-async function qualitativeSlice(
-  db: DbOrTx,
-  ctx: CollectContext,
-  side: Side | undefined,
-  sources: Awaited<ReturnType<typeof pseudonymSources>>,
-): Promise<QualitativeSideSection | null> {
-  const f = { cycleId: ctx.cycleId, relationship: side };
-  const [dims, themes, sizes] = await Promise.all([
-    sentimentByDimension(db, DEFAULT_ACTOR, f),
-    topThemes(db, DEFAULT_ACTOR, f),
-    qualitativeSizes(db, ctx.cycleId, side),
-  ]);
-  if (!dims.length) return null;
-  const others = ctx.labels.others;
-
-  type Dim = QualitativeSideSection["sentimentByDimension"][number] & {
-    n: number;
-  };
-  const d = foldGroups<Dim>(
-    dims.map((x) => ({
-      ...x,
-      other: false,
-      n: sizes.dimension.get(x.dimension) ?? 0,
-    })),
-    ctx.min,
-    {
-      size: (x) => x.n,
-      // overlapping groups: the largest is a safe lower bound of the union
-      merge: (rest) => ({
-        dimension: others,
-        other: true,
-        n: Math.max(...rest.map((x) => x.n)),
-        ...sumCounts(rest),
-      }),
-    },
-  );
-
-  type Theme = QualitativeSideSection["topThemes"][number] & { n: number };
-  const t = foldGroups<Theme>(
-    themes.map((x) => ({
-      theme: x.theme,
-      count: x.count,
-      sentiment: x.sentiment,
-      quotes: x.quotes,
-      other: false,
-      n: sizes.theme.get(x.theme) ?? 0,
-    })),
-    ctx.min,
-    {
-      size: (x) => x.n,
-      merge: (rest) => ({
-        theme: others,
-        count: sumBy(rest, (x) => x.count),
-        sentiment: sumCounts(rest.map((x) => x.sentiment as Counts)),
-        other: true,
-        n: Math.max(...rest.map((x) => x.n)),
-        quotes: [],
-      }),
-    },
-  );
-  const shown = [...d.shown, ...(d.others ? [d.others] : [])];
-  const suppressed = d.suppressed + t.suppressed;
-  // Quotes come pseudonymized from the qualitative module; run them (and the
-  // theme names) through the pseudonymizer again, belt and braces.
-  return {
-    totals: ctx.anonymized && suppressed > 0 ? null : sumCounts(shown),
-    sentimentByDimension: shown.map(withoutN),
-    topThemes: [...t.shown, ...(t.others ? [t.others] : [])].map((x) => ({
-      ...withoutN(x),
-      theme: x.other ? x.theme : pseudonymize([x.theme], sources).texts[0],
-      // The anonymized report carries no verbatim quote (#129): a text can
-      // tell who wrote it even with names replaced.
-      quotes: ctx.anonymized
-        ? []
-        : [...new Set(pseudonymize(x.quotes, sources).texts)],
-    })),
-    suppressed,
-  };
-}
-
-/**
- * The qualitative section: the whole cycle (sentiment per dimension, trend
- * over cycles, top themes, five sentiments) and the same cut by side that
- * wrote the comments. The trend keeps only cycles with at least the minimum
- * of people; the people of the ones left out count in `suppressed`.
- */
-export const collectQualitative: Collector<"qualitative"> = async (db, ctx) => {
-  const sources = await pseudonymSources(db);
-  const [all, self, manager, trend, sizes] = await Promise.all([
-    qualitativeSlice(db, ctx, undefined, sources),
-    qualitativeSlice(db, ctx, "self", sources),
-    qualitativeSlice(db, ctx, "manager", sources),
-    sentimentTrend(db, DEFAULT_ACTOR, {}),
-    qualitativeSizes(db, ctx.cycleId),
-  ]);
-  if (!all && !trend.length) return null;
-  const cycleSize = (id: string) => sizes.cycle.get(id) ?? 0;
-  const keptTrend = trend.filter((t) => cycleSize(t.cycleId) >= ctx.min);
-  const base = all ?? {
-    totals: null,
-    sentimentByDimension: [],
-    topThemes: [],
-    suppressed: 0,
-  };
-  return {
-    ...base,
-    trend: keptTrend,
-    suppressed:
-      base.suppressed +
-      sumBy(
-        trend.filter((x) => !keptTrend.includes(x)),
-        (x) => cycleSize(x.cycleId),
-      ),
-    bySide: { self, manager },
-  };
-};
-
-// ---------------------------------------------------------------- people
+export const collectQualitative: Collector<"qualitative"> = (db, ctx) =>
+  readQualitative(db, ctx, actorOf(ctx));
 
 // ------------------------------------------------------ engagement monthly
 

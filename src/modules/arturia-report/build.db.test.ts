@@ -23,6 +23,20 @@ import {
 import { seedFromFixtures } from "@/modules/ingest/seed";
 import { importReportFile } from "@/modules/lake/upload";
 import { MockProvider } from "@/modules/qualitative-analysis/mock-provider";
+import { qualitativeUniverse } from "@/modules/qualitative-analysis";
+import {
+  agreementBySide,
+  bestWorkOptions,
+  managerFeedbackByGroup,
+  readingProvenance,
+  signalSummary,
+  signalsByGroup,
+  substanceByQuestion,
+  themesBySide,
+  toneByQuestion,
+  valuedDistribution,
+  yesNoRates,
+} from "@/modules/qualitative-analysis/reading";
 import { runAnalysis } from "@/modules/qualitative-analysis/service";
 import { ArturiaError, buildReport, resolveCycle } from "./build";
 import { runExportCli } from "./cli";
@@ -111,7 +125,7 @@ describe("buildReport over the seed small company", () => {
     expect(r.sections.goals).not.toBeNull();
     expect(r.sections.indicators?.distribution).toHaveLength(2);
     expect(r.sections.indicators?.riskMatrix?.cells).toHaveLength(9);
-    expect(r.sections.qualitative?.topThemes.length).toBeGreaterThan(0);
+    expect(r.sections.qualitative?.themes.length).toBeGreaterThan(0);
     expect(r.sections.people?.length).toBe(r.sections.executive.participants);
     // Retention and engagement are labelled by value in the report's
     // language, never with Bamboo's text (which can name the person, #130).
@@ -173,28 +187,6 @@ describe("buildReport over the seed small company", () => {
     }
   });
 
-  it("the qualitative section has five sentiments and the cut by side", async () => {
-    const r = await buildReport(db, { cycle: cycleId, anonymized: false });
-    const q = r.sections.qualitative!;
-    expect(r.schemaMinor).toBe(SCHEMA_MINOR);
-    const t = q.totals!;
-    expect(t.positive + t.constructive + t.neutral + t.mixed + t.negative).toBe(
-      t.total,
-    );
-    expect(t.total).toBe(
-      q.sentimentByDimension.reduce((n, d) => n + d.total, 0),
-    );
-    // Every comment of the seed is from a self or a manager review.
-    const { self, manager } = q.bySide!;
-    expect((self?.totals?.total ?? 0) + (manager?.totals?.total ?? 0)).toBe(
-      t.total,
-    );
-    for (const side of [self, manager]) {
-      expect(side?.totals?.total ?? 0).toBeGreaterThan(0);
-    }
-    expect(q.topThemes[0].sentiment?.total).toBe(q.topThemes[0].count);
-  });
-
   it("the anonymized report has no emails, no seed names and no group under the minimum", async () => {
     const r = await buildReport(db, {
       cycle: cycleId,
@@ -203,11 +195,6 @@ describe("buildReport over the seed small company", () => {
     });
     expect(arturiaReportV1.safeParse(r).success).toBe(true);
     expect(r.sections.people).toBeNull();
-    // No verbatim quote in the anonymized report (#129).
-    const q = r.sections.qualitative;
-    for (const slice of [q, q?.bySide?.self, q?.bySide?.manager]) {
-      for (const th of slice?.topThemes ?? []) expect(th.quotes).toEqual([]);
-    }
     for (const text of [renderJson(r), renderHtml(r)]) {
       expect(text).not.toMatch(EMAIL);
       const folded = text.normalize("NFC");
@@ -281,22 +268,6 @@ describe("buildReport over the seed small company", () => {
           expect(solvable(masked, table(named) as number[][])).toEqual([]);
         }
       }
-      const q = s.qualitative;
-      if (q) {
-        for (const slice of [q, q.bySide?.self, q.bySide?.manager]) {
-          if (!slice) continue;
-          if (slice.suppressed > 0) expect(slice.totals ?? null).toBeNull();
-          for (const row of slice.sentimentByDimension) {
-            expect(
-              row.positive +
-                row.constructive +
-                row.neutral +
-                row.mixed +
-                row.negative,
-            ).toBe(row.total);
-          }
-        }
-      }
       const g = s.goals!;
       const hiddenGoals = g.suppressed.byDepartment + g.suppressed.byManager;
       if (hiddenGoals > 0) {
@@ -340,6 +311,693 @@ describe("buildReport over the seed small company", () => {
       }
     },
   );
+
+  describe("qualitative section: the open-text reading (#129)", () => {
+    const f = () => ({ cycleId });
+    const direction = { personId: null, role: "direction" } as const;
+
+    /**
+     * The four Santex yes/no questions as an import stores them (a text
+     * question with a slug + hash dimension, flagged yes/no), answered by
+     * every submitted request of the side that gets them. Deterministic: a
+     * quarter say No to security, a third to the environment, and exactly two
+     * managers say No to frequent conversations (a figure under the minimum).
+     */
+    beforeAll(async () => {
+      const q = (prompt: string, dimension: string) =>
+        db
+          .execute<{ id: string }>(
+            sql`insert into question_revision (cycle_id, section_title, prompt, kind, applies_to, visible_to_reviewee, required, sort, dimension, yes_no)
+              values (${cycleId}::uuid, ${JSON.stringify({ es: "S", en: "S" })}::jsonb,
+                ${JSON.stringify({ es: prompt, en: prompt })}::jsonb, 'text',
+                array['self','manager'], true, false, 900, ${dimension}, true)
+              returning id`,
+          )
+          .then(([row]) => row.id);
+      const answer = (
+        questionId: string,
+        side: "self" | "manager",
+        no: string,
+        yes: string,
+      ) =>
+        db.execute(sql`
+          insert into answer (request_id, question_revision_id, text_value)
+          select r.id, ${questionId}::uuid, ${sql.raw(`case when ${no} then 'No' else ${yes} end`)}
+          from review_request r
+          where r.cycle_id = ${cycleId}::uuid and r.relationship = ${side}
+            and r.status = 'submitted' and r.deleted_at is null`);
+      const security = await q(
+        "Am I following all Information Security Policies and Procedures of the Company?",
+        "custom_am_i_following_all_information_security_02c50291",
+      );
+      await answer(
+        security,
+        "self",
+        "abs(hashtext(r.id::text)) % 4 = 0",
+        "'Yes'",
+      );
+      const social = await q(
+        'Do I contribute with initiatives related to "Social impact"? How?',
+        "custom_do_i_contribute_with_initiatives_related_097f5c06",
+      );
+      await answer(
+        social,
+        "self",
+        "abs(hashtext(r.id::text)) % 5 = 0",
+        "'Sí, con voluntariado en una escuela y donaciones'",
+      );
+      const environmental = await q(
+        'Do I contribute with initiatives related to "Environmental impact"? How?',
+        "custom_do_i_contribute_with_initiatives_related_80969923",
+      );
+      await answer(
+        environmental,
+        "self",
+        "abs(hashtext(r.id::text)) % 3 = 0",
+        "'Sí, reciclando y moviéndome en bici'",
+      );
+      const conversations = await q(
+        "Do I speak with this employee frequently enough that I consider myself to be aware of his/her needs and current situation?",
+        "custom_do_i_speak_with_this_employee_frequently_d2f1a686",
+      );
+      await answer(
+        conversations,
+        "manager",
+        "r.id in (select id from review_request where cycle_id = '" +
+          cycleId +
+          "' and relationship = 'manager' and status = 'submitted' and deleted_at is null order by id limit 2)",
+        "'Yes'",
+      );
+      // The closed questions: "valued" (1-4, letter choices) and "best work" (one option).
+      const closed = (
+        prompt: string,
+        dimension: string,
+        role: string | null,
+        choices: unknown,
+      ) =>
+        db
+          .execute<{ id: string }>(
+            sql`insert into question_revision (cycle_id, section_title, prompt, kind, applies_to, visible_to_reviewee, required, sort, role, dimension, choices)
+              values (${cycleId}::uuid, ${JSON.stringify({ es: "S", en: "S" })}::jsonb,
+                ${JSON.stringify({ es: prompt, en: prompt })}::jsonb, 'single_choice',
+                array['self'], true, false, 901, ${role}, ${dimension}, ${JSON.stringify(choices)}::jsonb)
+              returning id`,
+          )
+          .then(([row]) => row.id);
+      const valued = await closed(
+        "How well does Meridian recognize my value?",
+        "valued",
+        "valued",
+        [
+          {
+            value: "A",
+            label: { es: "Me siento muy valorado", en: "Highly valued" },
+          },
+          {
+            value: "B",
+            label: { es: "A veces me siento valorado", en: "Sometimes valued" },
+          },
+          { value: "C", label: { es: "No estoy seguro", en: "Not sure" } },
+          {
+            value: "D",
+            label: { es: "No me siento valorado", en: "Not valued" },
+          },
+        ],
+      );
+      await db.execute(sql`
+        insert into answer (request_id, question_revision_id, option_label, option_value)
+        select r.id, ${valued}::uuid, 'x', 1 + abs(hashtext(r.id::text)) % 4
+        from review_request r
+        where r.cycle_id = ${cycleId}::uuid and r.relationship = 'self'
+          and r.status = 'submitted' and r.deleted_at is null`);
+      const best = await closed(
+        "What would help me do my best work?",
+        "best_work",
+        null,
+        [
+          { value: "nothing", label: { es: "Nada", en: "Nothing" } },
+          {
+            value: "direction",
+            label: { es: "Más rumbo", en: "Better direction" },
+          },
+          { value: "other", label: { es: "Otro", en: "Other" } },
+        ],
+      );
+      await db.execute(sql`
+        insert into answer (request_id, question_revision_id, option_label)
+        select r.id, ${best}::uuid, (array['nothing', 'direction', 'other'])[1 + abs(hashtext(r.id::text)) % 3]
+        from review_request r
+        where r.cycle_id = ${cycleId}::uuid and r.relationship = 'self'
+          and r.status = 'submitted' and r.deleted_at is null`);
+      await runAnalysis(db, { provider: new MockProvider() });
+    }, 120_000);
+
+    it("the named report says what /insights/qualitative says for that cycle: the readers' own numbers, in people", async () => {
+      const r = await buildReport(db, { cycle: cycleId, anonymized: false });
+      expect(r.schemaMinor).toBe(SCHEMA_MINOR);
+      expect(SCHEMA_MINOR).toBe(6);
+      const q = r.sections.qualitative!;
+      expect(arturiaReportV1.safeParse(r).success).toBe(true);
+      // The old sentiment-by-answer shape is gone.
+      for (const old of [
+        "totals",
+        "sentimentByDimension",
+        "trend",
+        "topThemes",
+        "bySide",
+      ]) {
+        expect(q).not.toHaveProperty(old);
+      }
+      // The unit is the person: distinct reviewees, never answers.
+      const universe = await qualitativeUniverse(db, DEFAULT_ACTOR, f());
+      expect(q.people).toBe(universe.people);
+      const [{ n }] = await db.execute<{ n: number }>(sql`
+        select count(distinct cp.reviewee_person_id)::int as n
+        from answer a
+        join review_request r on r.id = a.request_id
+        join cycle_participant cp on cp.id = r.participant_id
+        where r.cycle_id = ${cycleId}::uuid and r.status = 'submitted'
+          and r.deleted_at is null and cp.removed_at is null`);
+      expect(q.people).toBe(n);
+      expect(q.provenance.labels).toBeGreaterThan(q.people);
+
+      // Provenance: the seed read the answers with the mock, and the report says so.
+      const prov = (await readingProvenance(db, DEFAULT_ACTOR, f()))!;
+      expect(q.provenance).toMatchObject({
+        labels: prov.labels,
+        human: prov.human,
+        imported: prov.imported,
+        machine: prov.machine,
+        demo: true,
+        providers: prov.providers,
+      });
+      expect(q.provenance.demo).toBe(prov.demo);
+      expect(q.provenance.correctedShare).toBeCloseTo(prov.human / prov.labels);
+      expect(q.provenance.lastRun?.provider).toBe("mock");
+      expect(q.provenance.lastRun?.finishedAt).toMatch(
+        /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/,
+      );
+      expect(renderHtml(r)).toContain("Lectura de demostración");
+
+      // Substance, themes, agreement, tone: the readers' rows.
+      expect(q.substance).toEqual(
+        (await substanceByQuestion(db, DEFAULT_ACTOR, f())).map((x) => ({
+          dimension: x.dimension,
+          side: x.side,
+          people: x.people,
+          none: x.none,
+          generic: x.generic,
+          specific: x.specific,
+        })),
+      );
+      expect(q.substance.length).toBeGreaterThan(0);
+      for (const t of q.themes) {
+        const read = await themesBySide(db, DEFAULT_ACTOR, {
+          ...f(),
+          dimension: t.dimension,
+        });
+        expect(t.people).toEqual(read.people);
+        expect(t.rows).toEqual(
+          read.rows.map((x) => ({
+            theme: x.theme,
+            self: x.self,
+            manager: x.manager,
+            quotes: x.quotes,
+          })),
+        );
+        expect(t.rows.length).toBeGreaterThan(0);
+      }
+      expect(q.themes.map((t) => t.dimension)).toEqual([
+        "strengths",
+        "improvement",
+      ]);
+      const agreement = await agreementBySide(db, DEFAULT_ACTOR, f());
+      expect(q.agreement).toEqual(agreement);
+      expect(
+        (await toneByQuestion(db, DEFAULT_ACTOR, f())).map((x) => [
+          x.dimension,
+          x.side,
+          x.people,
+        ]),
+      ).toEqual(q.tone.map((x) => [x.dimension, x.side, x.people]));
+      for (const x of q.tone) {
+        expect(
+          (x.positive ?? 0) +
+            (x.constructive ?? 0) +
+            (x.neutral ?? 0) +
+            (x.mixed ?? 0) +
+            (x.negative ?? 0),
+        ).toBe(x.people);
+      }
+      // Self and manager are never added in one row.
+      for (const x of [...q.substance, ...q.tone, ...q.yesNo.rows]) {
+        expect(["self", "manager"]).toContain(x.side);
+      }
+    });
+
+    it("signals, yes/no and closed questions are the readers' numbers; the named report has no hidden cell", async () => {
+      const r = await buildReport(db, { cycle: cycleId, anonymized: false });
+      const q = r.sections.qualitative!;
+      const sig = (await signalSummary(db, DEFAULT_ACTOR, f()))!;
+      expect(q.signals).toMatchObject({
+        people: sig.people,
+        withAny: sig.withAny,
+        rows: sig.rows,
+      });
+      expect(sig.rows.length).toBeGreaterThan(0);
+      // The cuts by group: the readers' groups, the people add up to the base.
+      for (const [cut, groupBy] of [
+        [q.signals!.byDepartment, "department"],
+        [q.signals!.byAccount, "account"],
+        [q.signals!.byDm, "dm"],
+      ] as const) {
+        const read = await signalsByGroup(db, DEFAULT_ACTOR, f(), groupBy);
+        expect(cut.suppressed).toBe(0);
+        expect(cut.groups.reduce((n, g) => n + g.people, 0)).toBe(sig.people);
+        const byLabel = new Map(read.map((g) => [g.label ?? "Otros", g]));
+        for (const g of cut.groups) {
+          const row = byLabel.get(g.label)!;
+          expect(row, g.label).toBeDefined();
+          expect(g.people).toBe(row.people);
+          expect(g.withAny).toBe(row.withAny);
+          expect(g.counts).toEqual(row.counts);
+        }
+      }
+      // Yes/no: the rates per question, the alerts where a No is one.
+      const yn = await yesNoRates(db, DEFAULT_ACTOR, f());
+      expect(q.yesNo.rows).toEqual(
+        yn.map((x) => ({
+          dimension: x.dimension,
+          side: x.side,
+          kind: x.kind,
+          people: x.people,
+          yes: x.yes,
+          no: x.no,
+          alert: ["security", "conversations"].includes(x.kind) && x.no > 0,
+        })),
+      );
+      expect(q.yesNo.rows.map((x) => x.kind).sort()).toEqual([
+        "conversations",
+        "impact",
+        "impact",
+        "security",
+      ]);
+      for (const x of q.yesNo.rows) expect(x.yes! + x.no!).toBe(x.people);
+      // Information security = No and frequent conversations = No are called out.
+      expect(
+        q.yesNo.rows
+          .filter((x) => x.alert)
+          .map((x) => x.kind)
+          .sort(),
+      ).toEqual(["conversations", "security"]);
+      expect(
+        q.yesNo.rows.find((x) => x.kind === "conversations"),
+      ).toMatchObject({ side: "manager", no: 2, alert: true });
+      expect(q.yesNo.initiatives.length).toBeGreaterThan(0);
+      const html = renderHtml(r);
+      expect(html).toContain("Seguridad de la información: ");
+      expect(html).toContain("Conversaciones frecuentes: en 2 de ");
+      // Closed questions: valued as a scale (never a sentiment), best work as options.
+      const valued = (await valuedDistribution(db, DEFAULT_ACTOR, f())).total!;
+      expect(q.closed.valued).toMatchObject({
+        people: valued.people,
+        counts: valued.counts,
+        notValued: valued.notValued,
+      });
+      expect(q.closed.valued!.labels.every((l) => typeof l === "string")).toBe(
+        true,
+      );
+      const best = (await bestWorkOptions(db, DEFAULT_ACTOR, f()))!;
+      expect(q.closed.bestWork).toMatchObject({ people: best.people });
+      expect(
+        q.closed.bestWork!.options.map((o) => [o.option, o.people]),
+      ).toEqual(best.options.map((o) => [o.option, o.people]));
+      // The manager's feedback per group.
+      const fb = await managerFeedbackByGroup(
+        db,
+        DEFAULT_ACTOR,
+        f(),
+        "department",
+      );
+      expect(
+        q.managerFeedback.byDepartment.groups.map((g) => [g.label, g.people]),
+      ).toEqual(fb.map((g) => [g.label ?? "Otros", g.people]));
+    });
+
+    it("the named report keeps the representative quotes; no seed name survives in them", async () => {
+      const r = await buildReport(db, { cycle: cycleId, anonymized: false });
+      const quotes = r.sections
+        .qualitative!.themes.flatMap((t) => t.rows)
+        .flatMap((x) => [...x.quotes.self, ...x.quotes.manager]);
+      expect(quotes.length).toBeGreaterThan(0);
+      for (const text of quotes) {
+        for (const n of names) expect(text).not.toContain(n);
+      }
+    });
+
+    it.each(["es", "en"] as const)(
+      "no raw key reaches the HTML (%s), the questions are named, the two impact questions told apart",
+      async (locale) => {
+        for (const anonymized of [false, true]) {
+          const r = await buildReport(db, {
+            cycle: cycleId,
+            anonymized,
+            minGroupSize: 2,
+            locale,
+          });
+          const html = renderHtml(r);
+          const section = html.match(
+            /<section id="qualitative"[\s\S]*?<\/section>/,
+          )![0];
+          expect(
+            // (the named report's quotes are the people's own words: leave them out)
+            section
+              .replace(/<ul class="quotes">[\s\S]*?<\/ul>/g, "")
+              .match(
+                /custom_|best_work|company_request|role_fit|\b(comunicacion|planificacion|proactividad|voluntariado|donaciones|reciclaje|aprendizaje|tecnica|negocio)\b/,
+              )?.[0] ?? null,
+          ).toBeNull();
+          const labels = new Map(
+            r.sections.qualitative!.questions.map((x) => [
+              x.dimension,
+              x.label,
+            ]),
+          );
+          const names4 =
+            locale === "es"
+              ? [
+                  "Seguridad de la información",
+                  "Impacto social",
+                  "Impacto ambiental",
+                  "Conversaciones frecuentes",
+                ]
+              : [
+                  "Information security",
+                  "Social impact",
+                  "Environmental impact",
+                  "Frequent conversations",
+                ];
+          for (const name of names4) {
+            expect([...labels.values()]).toContain(name);
+            expect(section).toContain(name);
+          }
+          // every question key of the rows has a name, and no two share it
+          for (const row of r.sections.qualitative!.yesNo.rows) {
+            expect(labels.get(row.dimension)).toBeDefined();
+          }
+          expect(new Set(labels.values()).size).toBe(labels.size);
+        }
+      },
+    );
+
+    /** Every count of people of the section, with where it is and what it must hold. */
+    function counts(q: NonNullable<ArturiaReport["sections"]["qualitative"]>) {
+      const base: [string, number | null][] = [["people", q.people]];
+      const cell: [string, number | null][] = [];
+      const row = (where: string, x: Record<string, unknown>, keys: string[]) =>
+        keys.forEach((k) =>
+          cell.push([`${where}.${k}`, x[k] as number | null]),
+        );
+      q.substance.forEach((x, i) => {
+        base.push([`substance[${i}]`, x.people]);
+        row(`substance[${i}]`, x, ["none", "generic", "specific"]);
+      });
+      for (const [name, cut] of Object.entries(q.managerFeedback)) {
+        cut.groups.forEach((g, i) => {
+          base.push([`feedback.${name}[${i}]`, g.people]);
+          row(`feedback.${name}[${i}]`, g, ["none", "generic", "specific"]);
+        });
+      }
+      q.themes.forEach((t, i) => {
+        for (const s of ["self", "manager"] as const) {
+          if (t.people[s] !== null)
+            base.push([`themes[${i}].${s}`, t.people[s]]);
+        }
+        t.rows.forEach((x, j) =>
+          row(`themes[${i}][${j}]`, x, ["self", "manager"]),
+        );
+      });
+      q.agreement.rows.forEach((x, i) => {
+        base.push([`agreement[${i}]`, x.both]);
+        row(`agreement[${i}]`, x, ["shared"]);
+      });
+      q.agreement.blindSpots.forEach((x, i) =>
+        base.push([`blind[${i}]`, x.people]),
+      );
+      cell.push(["agreement.blindPeople", q.agreement.blindPeople]);
+      if (q.agreement.improvementBoth !== null) {
+        base.push(["agreement.improvementBoth", q.agreement.improvementBoth]);
+      }
+      if (q.signals) {
+        base.push(["signals.people", q.signals.people]);
+        cell.push(["signals.withAny", q.signals.withAny]);
+        q.signals.rows.forEach((x, i) => {
+          base.push([`signals.rows[${i}]`, x.people]);
+          row(`signals.rows[${i}]`, x, ["self", "manager"]);
+        });
+        for (const [name, cut] of Object.entries({
+          department: q.signals.byDepartment,
+          account: q.signals.byAccount,
+          dm: q.signals.byDm,
+        })) {
+          cut.groups.forEach((g, i) => {
+            base.push([`signals.${name}[${i}]`, g.people]);
+            cell.push([`signals.${name}[${i}].withAny`, g.withAny]);
+            for (const [s, v] of Object.entries(g.counts)) {
+              cell.push([`signals.${name}[${i}].${s}`, v]);
+            }
+          });
+        }
+      }
+      q.yesNo.rows.forEach((x, i) => {
+        base.push([`yesNo[${i}]`, x.people]);
+        row(`yesNo[${i}]`, x, ["yes", "no"]);
+      });
+      q.yesNo.initiatives.forEach((x, i) => {
+        base.push([`initiatives[${i}]`, x.people]);
+        x.rows.forEach((y, j) =>
+          base.push([`initiatives[${i}][${j}]`, y.people]),
+        );
+      });
+      if (q.closed.valued) {
+        base.push(["valued", q.closed.valued.people]);
+        q.closed.valued.counts.forEach((c, i) =>
+          cell.push([`valued[${i}]`, c]),
+        );
+        cell.push(["notValued", q.closed.valued.notValued]);
+      }
+      if (q.closed.bestWork) {
+        base.push(["bestWork", q.closed.bestWork.people]);
+        q.closed.bestWork.options.forEach((o, i) =>
+          cell.push([`bestWork[${i}]`, o.people]),
+        );
+      }
+      q.tone.forEach((x, i) => {
+        base.push([`tone[${i}]`, x.people]);
+        row(`tone[${i}]`, x, [
+          "positive",
+          "constructive",
+          "neutral",
+          "mixed",
+          "negative",
+        ]);
+      });
+      return { base, cell };
+    }
+
+    /** A list whose sum is public: no hidden cell can be solved for. */
+    const unsolvable = (cells: (number | null)[], sum: number) => {
+      const hidden = cells.filter((c) => c === null).length;
+      if (!hidden) return true;
+      const room = sum - cells.reduce<number>((a, c) => a + (c ?? 0), 0);
+      return hidden >= 2 && room > hidden;
+    };
+
+    it.each([2, MIN, 8, 20])(
+      "anonymized with minimum %i: aggregates only, no quote, no figure of fewer people than the minimum, no hidden cell solvable",
+      async (min) => {
+        const r = await buildReport(db, {
+          cycle: cycleId,
+          anonymized: true,
+          minGroupSize: min,
+        });
+        const q = r.sections.qualitative;
+        if (!q) return; // everyone is under the minimum: nothing to publish
+        expect(arturiaReportV1.safeParse(r).success).toBe(true);
+        expect(q.people).toBeGreaterThanOrEqual(min);
+        // no verbatim quote
+        for (const t of q.themes) {
+          for (const x of t.rows) {
+            expect(x.quotes).toEqual({ self: [], manager: [] });
+          }
+        }
+        const { base, cell } = counts(q);
+        for (const [where, v] of base) {
+          expect(v === null || v >= min, `${where} = ${v}`).toBe(true);
+        }
+        for (const [where, v] of cell) {
+          expect(v === null || v === 0 || v >= min, `${where} = ${v}`).toBe(
+            true,
+          );
+        }
+        // lists that add up to a public base
+        for (const x of q.substance) {
+          expect(unsolvable([x.none, x.generic, x.specific], x.people)).toBe(
+            true,
+          );
+        }
+        for (const x of q.tone) {
+          expect(
+            unsolvable(
+              [x.positive, x.constructive, x.neutral, x.mixed, x.negative],
+              x.people,
+            ),
+          ).toBe(true);
+        }
+        for (const x of q.yesNo.rows) {
+          expect(unsolvable([x.yes, x.no], x.people)).toBe(true);
+          // an alert needs its figure
+          if (x.alert) expect(x.no).not.toBeNull();
+        }
+        if (q.closed.valued) {
+          expect(
+            unsolvable(q.closed.valued.counts, q.closed.valued.people),
+          ).toBe(true);
+        }
+        if (q.closed.bestWork) {
+          expect(
+            unsolvable(
+              q.closed.bestWork.options.map((o) => o.people),
+              q.closed.bestWork.people,
+            ),
+          ).toBe(true);
+        }
+        for (const cut of Object.values(q.managerFeedback)) {
+          for (const g of cut.groups) {
+            expect(unsolvable([g.none, g.generic, g.specific], g.people)).toBe(
+              true,
+            );
+          }
+        }
+        // a pair "n of base": neither the count nor its complement under the minimum
+        for (const x of q.agreement.rows) {
+          if (x.shared !== null) {
+            expect(x.both - x.shared === 0 || x.both - x.shared >= min).toBe(
+              true,
+            );
+          }
+        }
+        // the cuts by group: nobody hidden next to the public total, every column unsolvable
+        const s = q.signals;
+        if (s) {
+          for (const cut of [s.byDepartment, s.byAccount, s.byDm]) {
+            expect(
+              cut.groups.reduce((n, g) => n + g.people, 0) + cut.suppressed,
+            ).toBe(s.people);
+            const column = (
+              pick: (g: (typeof cut.groups)[number]) => number | null,
+            ) => cut.groups.map(pick);
+            const withAny = s.withAny;
+            if (withAny !== null && cut.suppressed === 0) {
+              expect(
+                unsolvable(
+                  column((g) => g.withAny),
+                  withAny,
+                ),
+              ).toBe(true);
+            }
+            for (const row of s.rows) {
+              if (cut.suppressed > 0) continue;
+              expect(
+                unsolvable(
+                  column((g) => g.counts[row.signal] ?? 0),
+                  row.people,
+                ),
+                `${row.signal} column`,
+              ).toBe(true);
+            }
+          }
+        }
+        // the groups are folded, not dropped: DMs are numbered, accounts keep their name
+        for (const g of s?.byDm.groups ?? []) {
+          expect(g.label).toMatch(/^(DM \d+|Otros)$/);
+        }
+      },
+    );
+
+    it("anonymized: not a word of any free-text answer, no name, no email, in the JSON or the HTML", async () => {
+      const answers = await db.execute<{ t: string }>(sql`
+        select distinct a.text_value as t
+        from answer a join question_revision q on q.id = a.question_revision_id
+        where q.kind = 'text' and length(btrim(a.text_value)) >= 25`);
+      expect(answers.length).toBeGreaterThan(50);
+      for (const locale of ["es", "en"] as const) {
+        const r = await buildReport(db, {
+          cycle: cycleId,
+          anonymized: true,
+          minGroupSize: MIN,
+          locale,
+        });
+        const out = (renderJson(r) + renderHtml(r)).normalize("NFC");
+        for (const { t } of answers) {
+          expect(out, t).not.toContain(t.trim());
+        }
+        expect(out).not.toMatch(EMAIL);
+        for (const n of names) expect(out).not.toContain(n);
+      }
+    });
+
+    it("anonymized: a No under the minimum is not published (nor called out), and neither is the Yes that would give it away", async () => {
+      const r = await buildReport(db, {
+        cycle: cycleId,
+        anonymized: true,
+        minGroupSize: MIN,
+      });
+      const conv = r.sections.qualitative!.yesNo.rows.find(
+        (x) => x.kind === "conversations",
+      )!;
+      expect(conv.people).toBeGreaterThanOrEqual(MIN);
+      expect([conv.yes, conv.no, conv.alert]).toEqual([null, null, false]);
+      expect(renderHtml(r)).not.toContain("Conversaciones frecuentes: en");
+    });
+
+    it("anonymized: the non-group blocks are the direction view's rows (the screens' rule), less what the cells hide", async () => {
+      const r = await buildReport(db, {
+        cycle: cycleId,
+        anonymized: true,
+        minGroupSize: MIN,
+      });
+      const q = r.sections.qualitative!;
+      const input = { cycleId, minGroupSize: MIN };
+      const sub = await substanceByQuestion(db, direction, input);
+      const key = (x: { dimension: string; side: string }) =>
+        `${x.dimension}/${x.side}`;
+      for (const x of q.substance) {
+        const row = sub.find((y) => key(y) === key(x))!;
+        expect(row, key(x)).toBeDefined();
+        expect(x.people).toBe(row.people);
+      }
+      const strengths = await themesBySide(db, direction, {
+        ...input,
+        dimension: "strengths",
+      });
+      expect(q.themes[0].rows.map((x) => x.theme)).toEqual(
+        strengths.rows.map((x) => x.theme),
+      );
+      const universe = await qualitativeUniverse(db, direction, input);
+      expect(q.people).toBe(universe.people);
+      const tone = await toneByQuestion(db, direction, input);
+      expect(q.tone.map(key)).toEqual(tone.map(key));
+      // Direction filters cannot go under the minimum: a minimum above everybody says nothing.
+      const none = await buildReport(db, {
+        cycle: cycleId,
+        anonymized: true,
+        minGroupSize: 100_000,
+      });
+      expect(none.sections.qualitative).toBeNull();
+      expect(arturiaReportV1.safeParse(none).success).toBe(true);
+    });
+  });
 
   it("completion: the named report is the completion module run as People", async () => {
     const r = await buildReport(db, { cycle: cycleId, anonymized: false });
