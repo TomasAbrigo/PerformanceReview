@@ -158,6 +158,15 @@ describe("native data in the insights", () => {
     for (const row of s.qualitative!.yesNo.rows) {
       expect(row.dimension).toMatch(/^q_[0-9a-f]{10}$/);
     }
+    // With a key, they also reach the by-group and by-cycle blocks.
+    const keys = s.qualitative!.yesNo.rows.map((r) => r.dimension);
+    expect(keys.length).toBeGreaterThan(0);
+    expect(s.qualitative!.yesNo.byCycle.map((b) => b.dimension)).toEqual(
+      expect.arrayContaining(keys),
+    );
+    expect(s.qualitative!.yesNo.byGroup.map((b) => b.dimension)).toEqual(
+      expect.arrayContaining(keys),
+    );
     expect(s.goals).toMatchObject({ participantsWithGoals: 1, goals: 1 });
   });
 });
