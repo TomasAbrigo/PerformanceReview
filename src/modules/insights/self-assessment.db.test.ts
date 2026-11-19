@@ -130,23 +130,33 @@ describe("selfAssessmentReport", () => {
       value: "3",
     });
     expect(rows).toContainEqual({
-      section: "sentiment",
-      group: "strengths",
-      metric: "negative",
-      value: "1",
-    });
-    expect(rows).toContainEqual({
       section: "completion",
       group: "Total",
       metric: "n",
       value: "9",
     });
-    expect(rows).toContainEqual({
-      section: "sentiment_gap",
-      group: "strengths:manager",
-      metric: "constructive",
-      value: "1",
+    // The open-text reading, in people, from the same report as the screen;
+    // the old sentiment-by-answer sections are gone.
+    const report = await selfAssessmentReport(db, hr, {
+      cycleId: s.c2.cycleId,
+      groupBy: "department",
     });
+    const strengths = report.substance.find((x) => x.dimension === "strengths");
+    expect(strengths?.people).toBe(3);
+    for (const metric of ["none", "generic", "specific", "people"] as const) {
+      expect(rows).toContainEqual({
+        section: "substance",
+        group: "strengths",
+        metric,
+        value: String(strengths?.[metric]),
+      });
+    }
+    expect(rows.filter((r) => r.section === "agreement").length).toBe(
+      report.agreement.rows.length * 2,
+    );
+    expect(
+      rows.some((r) => ["sentiment", "sentiment_gap"].includes(r.section)),
+    ).toBe(false);
     expect(rows).toContainEqual({
       section: "theme",
       group: "equipo",
