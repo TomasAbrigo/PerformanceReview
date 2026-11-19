@@ -20,7 +20,7 @@ export type AnalysisCliDeps = {
 
 export const RUN_USAGE = [
   "Usage: pnpm analysis:run [--cycle <id>] [--provider mock|anthropic]",
-  "  Labels open-text answers (sentiment + themes). Default provider: ANALYSIS_PROVIDER or mock.",
+  "  Reads free-text answers (substance, themes, signals, sentiment). Default provider: ANALYSIS_PROVIDER or mock.",
   "  anthropic needs ANTHROPIC_API_KEY (ANALYSIS_MODEL overrides the model).",
   "Exit code: 0 ok, 1 the run failed, 2 bad arguments or configuration.",
 ].join("\n");

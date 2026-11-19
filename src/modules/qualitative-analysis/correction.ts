@@ -6,14 +6,19 @@ import { analysisCorrection } from "@/db/schema/qualitative";
 import { parse } from "@/lib/domain-error";
 import { isUuid } from "@/lib/uuid";
 import type { ActorContext } from "@/modules/actor/types";
-import { sentiments } from "./constants";
+import { sentiments, signals, substances } from "./constants";
 import { effectiveCte } from "./effective";
 import { AnalysisError } from "./errors";
 import { normalizeTheme, upsertThemes } from "./service";
+import { canonicalTheme } from "./themes";
 
 export const correctionSchema = z.object({
   sentiment: z.enum(sentiments),
   themes: z.array(z.string().trim().min(1).max(60)).max(5),
+  /** Absent: the label's substance stays. */
+  substance: z.enum(substances).optional(),
+  /** Absent: the label's signals stay. */
+  signals: z.array(z.enum(signals)).max(signals.length).optional(),
   reason: z.string().trim().max(500).optional(),
 });
 export type CorrectionInput = z.input<typeof correctionSchema>;
@@ -37,19 +42,27 @@ export async function correctLabel(
     dimension: string | null;
     sentiment: (typeof sentiments)[number] | null;
     themes: string[] | null;
+    substance: (typeof substances)[number] | null;
+    signals: string[] | null;
   }>(sql`
     with ${effectiveCte()}
-    select r.cycle_id, eff.dimension, eff.sentiment, eff.themes
+    select r.cycle_id, eff.dimension, eff.sentiment, eff.themes,
+           eff.substance, eff.signals
     from answer a
     join review_request r on r.id = a.request_id
     join question_revision q on q.id = a.question_revision_id
     left join eff on eff.answer_id = a.id
     where a.id = ${answerId}::uuid`);
   if (!target) throw new AnalysisError("not_found");
-  // Only a labeled answer (open comment or closed option) can be corrected:
+  // Only a labeled answer (free text) can be corrected:
   // it is what the readers show.
   if (!target.sentiment) throw new AnalysisError("not_labeled");
-  const themes = [...new Set(data.themes.map(normalizeTheme).filter(Boolean))];
+  const themes = [
+    ...new Set(
+      data.themes.map((t) => canonicalTheme(normalizeTheme(t))).filter(Boolean),
+    ),
+  ];
+  const newSignals = data.signals ? [...new Set(data.signals)] : null;
   const [row] = await db
     .insert(analysisCorrection)
     .values({
@@ -58,6 +71,10 @@ export async function correctLabel(
       newSentiment: data.sentiment,
       previousThemes: target.themes,
       newThemes: themes,
+      previousSubstance: target.substance,
+      newSubstance: data.substance ?? null,
+      previousSignals: target.signals,
+      newSignals,
       actorPersonId: actor.personId,
       reason: data.reason || null,
     })
@@ -68,8 +85,18 @@ export async function correctLabel(
     targetType: "answer",
     targetId: answerId,
     cycleId: target.cycle_id,
-    before: { sentiment: target.sentiment, themes: target.themes },
-    after: { sentiment: data.sentiment, themes },
+    before: {
+      sentiment: target.sentiment,
+      themes: target.themes,
+      substance: target.substance,
+      signals: target.signals,
+    },
+    after: {
+      sentiment: data.sentiment,
+      themes,
+      substance: data.substance ?? target.substance,
+      signals: newSignals ?? target.signals,
+    },
     note: data.reason || null,
   });
   if (target.dimension) await upsertThemes(db, target.dimension, themes);

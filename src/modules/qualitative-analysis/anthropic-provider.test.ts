@@ -8,11 +8,37 @@ import {
   type MessagesClient,
 } from "./anthropic-provider";
 import { MockProvider } from "./mock-provider";
-import { INITIAL_THEMES } from "./themes";
+import type { AnalysisInput } from "./provider";
+import { COMPETENCY_THEMES, IMPACT_THEMES, INITIAL_THEMES } from "./themes";
 
 const reply = (results: unknown) => ({
   stop_reason: "end_turn",
   content: [{ type: "text", text: JSON.stringify({ results }) }],
+});
+
+const item = (
+  token: string,
+  text: string,
+  extra: Partial<AnalysisInput> = {},
+): AnalysisInput => ({
+  token,
+  dimension: "strengths",
+  rubric: "strengths",
+  question: { es: "¿Qué hago bien?", en: "What do I do well?" },
+  relationship: "self",
+  yesNo: null,
+  text,
+  ...extra,
+});
+
+const label = (token: string, extra: Record<string, unknown> = {}) => ({
+  token,
+  substance: "generic",
+  themes: [],
+  signals: [],
+  sentiment: "neutral",
+  confidence: 0.5,
+  ...extra,
 });
 
 describe("createProvider", () => {
@@ -49,40 +75,44 @@ describe("createProvider", () => {
 });
 
 describe("AnthropicProvider", () => {
-  it("sends one structured-output request per batch and maps results by token", async () => {
+  it("sends one structured-output request per batch and maps the reading by token", async () => {
     const create = vi.fn<MessagesClient["create"]>().mockResolvedValue(
       reply([
-        {
-          token: "t2",
+        label("t2", {
+          substance: "specific",
           sentiment: "negative",
           confidence: 1.4,
           themes: ["a", "b", "c", "d"],
-        },
-        {
-          token: "t1",
+          signals: ["workload", "workload", "attrition"],
+        }),
+        label("t1", {
           sentiment: "positive",
           confidence: 0.9,
           themes: ["calidad"],
-        },
+        }),
       ]),
     );
     const p = new AnthropicProvider({ create });
     const out = await p.analyze([
-      { token: "t1", dimension: "strengths", text: "[P1] es genial" },
-      { token: "t2", dimension: "improvement", text: "llega tarde" },
+      item("t1", "[P1] es genial"),
+      item("t2", "llego tarde, hago horas extra", { rubric: "improvement" }),
     ]);
     expect(out).toEqual([
       {
         token: "t1",
+        substance: "generic",
+        themes: ["calidad"],
+        signals: [],
         sentiment: "positive",
         confidence: 0.9,
-        themes: ["calidad"],
       },
       {
         token: "t2",
+        substance: "specific",
+        themes: ["a", "b", "c"],
+        signals: ["workload", "attrition"],
         sentiment: "negative",
         confidence: 1,
-        themes: ["a", "b", "c"],
       },
     ]);
     expect(create).toHaveBeenCalledTimes(1);
@@ -90,61 +120,117 @@ describe("AnthropicProvider", () => {
     expect(params.model).toBe(DEFAULT_ANALYSIS_MODEL);
     expect(params.output_config?.format).toMatchObject({ type: "json_schema" });
   });
-  it("asks for the five sentiments, the initial themes and flags closed answers", async () => {
-    const create = vi.fn<MessagesClient["create"]>().mockResolvedValue(
-      reply([
-        { token: "t1", sentiment: "mixed", confidence: 0.7, themes: [] },
-        { token: "t2", sentiment: "neutral", confidence: 0.6, themes: [] },
-      ]),
-    );
+
+  it("sends the question, who writes about whom and the resolved yes/no; asks for the new fields", async () => {
+    const create = vi
+      .fn<MessagesClient["create"]>()
+      .mockResolvedValue(reply([label("t1"), label("t2")]));
     const p = new AnthropicProvider({ create });
     expect(p.promptVersion).toBe(ANTHROPIC_PROMPT_VERSION);
-    expect(ANTHROPIC_PROMPT_VERSION).toBe("anthropic-v2");
-    const out = await p.analyze([
-      { token: "t1", dimension: "strengths", text: "bien pero tarde" },
-      { token: "t2", dimension: "valued", text: "Somewhat", closed: true },
+    expect(ANTHROPIC_PROMPT_VERSION).toBe("anthropic-v3");
+    const impact = {
+      es: '¿Contribuyo con iniciativas de "Impacto social"? ¿Cómo?',
+      en: 'Do I contribute with initiatives related to "Social impact"? How?',
+    };
+    await p.analyze([
+      item("t1", "Comunica bien", { relationship: "manager" }),
+      item("t2", "con el voluntariado", {
+        rubric: "yes_no_detail",
+        dimension: "custom_x",
+        question: impact,
+        yesNo: "yes",
+      }),
     ]);
-    expect(out.map((r) => r.sentiment)).toEqual(["mixed", "neutral"]);
     const params = create.mock.calls[0][0];
+    const sent = JSON.parse(String(params.messages[0].content)) as {
+      items: Record<string, unknown>[];
+    };
+    expect(sent.items).toEqual([
+      {
+        token: "t1",
+        question: { es: "¿Qué hago bien?", en: "What do I do well?" },
+        relationship: "manager",
+        rubric: "strengths",
+        text: "Comunica bien",
+      },
+      {
+        token: "t2",
+        question: impact,
+        relationship: "self",
+        rubric: "yes_no_detail",
+        yes_no: "yes",
+        text: "con el voluntariado",
+      },
+    ]);
     const format = params.output_config?.format as unknown as {
       schema: {
         properties: {
           results: {
-            items: { properties: { sentiment: { enum: string[] } } };
+            items: {
+              required: string[];
+              properties: {
+                sentiment: { enum: string[] };
+                substance: { enum: string[] };
+                signals: { items: { enum: string[] } };
+              };
+            };
           };
         };
       };
     };
-    expect(
-      format.schema.properties.results.items.properties.sentiment.enum,
-    ).toEqual(["positive", "constructive", "neutral", "mixed", "negative"]);
+    const items = format.schema.properties.results.items;
+    expect(items.required).toEqual(
+      expect.arrayContaining(["substance", "themes", "signals", "sentiment"]),
+    );
+    expect(items.properties.substance.enum).toEqual([
+      "none",
+      "generic",
+      "specific",
+    ]);
+    expect(items.properties.signals.items.enum).toEqual([
+      "workload",
+      "attrition",
+      "conflict",
+      "recognition",
+      "stagnation",
+      "company_request",
+      "role_fit",
+    ]);
+    expect(items.properties.sentiment.enum).toEqual([
+      "positive",
+      "constructive",
+      "neutral",
+      "mixed",
+      "negative",
+    ]);
     const system = String(params.system);
-    for (const word of ["neutral", "mixed", ...INITIAL_THEMES]) {
+    for (const word of [
+      ...INITIAL_THEMES,
+      ...COMPETENCY_THEMES,
+      ...IMPACT_THEMES,
+      "strengths",
+      "improvement",
+      "yes_no_detail",
+    ]) {
       expect(system).toContain(word);
     }
-    const sent = JSON.parse(String(params.messages[0].content)) as {
-      items: { token: string; closed?: boolean }[];
-    };
-    expect(sent.items).toEqual([
-      expect.objectContaining({ token: "t1" }),
-      expect.objectContaining({ token: "t2", closed: true }),
-    ]);
-    expect(sent.items[0]).not.toHaveProperty("closed");
   });
-  it("fails on a missing token, garbage or a refusal, without content in the error", async () => {
+
+  it("fails on a missing token, garbage, an unknown signal or a refusal, without content in the error", async () => {
     const bad = [
       reply([]),
+      reply([label("t", { signals: ["gossip"] })]),
       { stop_reason: "end_turn", content: [{ type: "text", text: "nope" }] },
       { stop_reason: "refusal", content: [] },
     ];
     for (const r of bad) {
       const p = new AnthropicProvider({ create: vi.fn().mockResolvedValue(r) });
-      await expect(
-        p.analyze([{ token: "t", dimension: "x", text: "SECRET TEXT" }]),
-      ).rejects.toThrow(/provider_failed/);
-      await expect(
-        p.analyze([{ token: "t", dimension: "x", text: "SECRET TEXT" }]),
-      ).rejects.not.toThrow(/SECRET/);
+      await expect(p.analyze([item("t", "SECRET TEXT")])).rejects.toThrow(
+        /provider_failed/,
+      );
+      await expect(p.analyze([item("t", "SECRET TEXT")])).rejects.not.toThrow(
+        /SECRET/,
+      );
     }
   });
 });

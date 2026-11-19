@@ -445,9 +445,8 @@ function feedbackHref(scope: CommentScope): string {
 async function scopedComments(
   ctx: Ctx,
   scope: CommentScope,
-  extra: Pick<QualitativeFilters, "includeClosed"> = {},
 ): Promise<DrillResult> {
-  const f = { ...scopeFilters(ctx, scope), ...extra };
+  const f = scopeFilters(ctx, scope);
   const totals = await sentimentTotals(ctx.db, ctx.actor, {
     ...f,
     aggregateOnly: true,
@@ -517,11 +516,7 @@ async function dmRecords(
         state: "pending",
       });
     case "comments":
-      return scopedComments(
-        inDm,
-        { cycle: ctx.cycleId, dm: drill.dm },
-        { includeClosed: false },
-      );
+      return scopedComments(inDm, { cycle: ctx.cycleId, dm: drill.dm });
   }
 }
 

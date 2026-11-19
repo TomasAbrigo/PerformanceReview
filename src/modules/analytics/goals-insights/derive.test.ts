@@ -142,10 +142,11 @@ describe("kpisOf", () => {
       3,
     );
     expect(minGroupSize).toBe(3);
-    // Ingeniería has 3 people; Producto (1) and unnamed (1) are 2 < 3: hidden.
-    expect(groups.map((g) => g.label)).toEqual(["Ingeniería"]);
-    expect(suppressed).toBe(2);
-    expect(total).toBeNull();
+    // Ingeniería has 3 people; Producto (1) and unnamed (1) are 2 < 3, and
+    // hiding them next to the total would give them away (#130): all in Otros.
+    expect(groups.map((g) => [g.label, g.others])).toEqual([[null, true]]);
+    expect(suppressed).toBe(0);
+    expect(total).not.toBeNull();
   });
 });
 
@@ -182,12 +183,29 @@ describe("bucketRows", () => {
       meanEngagement: null,
       meanPositiveShare: null,
     });
-    // Bucket 1 (Bruno, Carla) has both of them from 2 people.
+    // Bucket 1 (Bruno, Carla) has retention from 2 people: shown. Its
+    // engagement is the other base of a public total (the engagement n of the
+    // cycle is 3) whose only other part is hidden, so it goes with it: a lone
+    // hidden n must not be solved by difference (#130).
     expect(buckets[1]).toMatchObject({
       retentionPeople: 2,
-      engagementPeople: 2,
-      meanEngagement: 4,
+      meanRetention: 4,
+      engagementPeople: null,
+      meanEngagement: null,
     });
+  });
+
+  it("a lone small bucket is not left to be solved from the public total (#130)", () => {
+    const many = [
+      ...Array.from({ length: 6 }, (_, i) => row(`a${i}`, 4, 4)),
+      ...Array.from({ length: 7 }, (_, i) => row(`b${i}`, 4, 0)),
+      row("lone", 4, 3),
+    ];
+    const { buckets, suppressed } = bucketRows(many, 5);
+    const hidden = buckets.filter((b) => b.hidden);
+    // People with goals (14) minus the shown buckets must not give one bucket.
+    expect(hidden.length).toBeGreaterThanOrEqual(2);
+    expect(suppressed).toBeGreaterThan(hidden.length);
   });
 
   it("hides the small buckets for direction and leaves the empty ones alone", () => {
@@ -319,12 +337,14 @@ describe("org attributes", () => {
 
     expect(k.groups.map((g) => g.label)).toEqual([null, null]);
     expect(JSON.stringify(k)).not.toMatch(/Diego|Dora/);
-    expect(k.groups.map((g) => g.people)).toEqual([2, 2]);
-    expect(k.suppressed).toBe(1);
-    // An account is not a person.
+    // The unassigned one takes the smallest team with it (#130).
+    expect(k.groups.map((g) => g.people)).toEqual([2, 3]);
+    expect(k.suppressed).toBe(0);
+    // An account is not a person. Cuenta A has 2 people but only one with
+    // goals: the minimum counts who has the data (#130), so it folds.
     expect(kpisOf(org, "account", 2).groups.map((g) => g.label)).toEqual([
-      "Cuenta A",
       "Cuenta B",
+      null,
     ]);
   });
 });

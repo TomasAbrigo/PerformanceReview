@@ -30,6 +30,13 @@ export function foldGroups<T>(
     size: (item: T) => number;
     merge: (rest: T[]) => T;
     named?: (item: T) => boolean;
+    /**
+     * Complementary suppression (#130): when "Otros" is still under the
+     * minimum, the smallest shown items join it until it reaches it, so no
+     * group is hidden while the total is public (it would be the total minus
+     * what is shown). Only the whole under the minimum is left out.
+     */
+    absorb?: boolean;
   },
 ): { shown: T[]; others: T | null; suppressed: number } {
   const named = opts.named ?? (() => true);
@@ -39,18 +46,30 @@ export function foldGroups<T>(
     (named(it) && opts.size(it) >= minGroupSize ? shown : rest).push(it);
   }
   if (!rest.length) return { shown, others: null, suppressed: 0 };
-  const merged = opts.merge(rest);
-  const n = opts.size(merged);
+  let merged = opts.merge(rest);
+  let n = opts.size(merged);
   if (n === 0) return { shown, others: null, suppressed: 0 };
+  if (opts.absorb) {
+    while (n < minGroupSize && shown.length) {
+      const smallest = shown.reduce((a, b) =>
+        opts.size(b) < opts.size(a) ? b : a,
+      );
+      shown.splice(shown.indexOf(smallest), 1);
+      rest.push(smallest);
+      merged = opts.merge(rest);
+      n = opts.size(merged);
+    }
+  }
   if (n < minGroupSize) return { shown, others: null, suppressed: n };
   return { shown, others: merged, suppressed: 0 };
 }
 
 /**
  * Groups of fewer than `minGroupSize` people (and the unnamed one) are folded
- * into one "Otros" cell; if that is still under the minimum it is hidden and
- * its people are only counted, so no cell with fewer people than the minimum
- * is ever shown. With a minimum of 1 only the unnamed group is folded.
+ * into one "Otros" cell; if that is still under the minimum the smallest
+ * shown groups join it (`absorb`), so no cell with fewer people than the
+ * minimum is shown and none is hidden behind a public total. With a minimum
+ * of 1 only the unnamed group is folded.
  */
 export function foldSmallGroups<G extends GroupCell>(
   groups: readonly G[],
@@ -63,6 +82,7 @@ export function foldSmallGroups<G extends GroupCell>(
     {
       size: (c) => c.n,
       named: (c) => c.group?.key != null,
+      absorb: true,
       merge: (rest) => {
         const counts = rest[0].counts.map((_, bin) =>
           rest.reduce((sum, g) => sum + g.counts[bin], 0),

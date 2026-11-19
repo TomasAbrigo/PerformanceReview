@@ -313,7 +313,16 @@ describe("Bamboo raw report questions (#83)", () => {
         byKey("manager:retention"),
         "I would try to convince them to stay. Ana would be difficult to replace",
       ),
-    ).toMatchObject({ optionValue: 4, normalized: 0.75 });
+    ).toEqual({
+      optionValue: 4,
+      normalized: 0.75,
+      // The reviewee's name is never stored (#130): the canonical label.
+      optionLabel: "I would try to convince them to stay.",
+      textValue: null,
+    });
+    expect(
+      answerColumns(byKey("manager:engagement"), "Engaged and a good attitude"),
+    ).toMatchObject({ optionLabel: "Engaged and a good attitude." });
     expect(answerColumns(byKey("manager:engagement"), "Hard to say.")).toEqual({
       unmapped: true,
       raw: "Hard to say.",

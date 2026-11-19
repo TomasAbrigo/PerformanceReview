@@ -59,34 +59,22 @@ describe("Arturia totals, per cut", () => {
     const c = r.sections.completion!;
     const retention = r.sections.indicators!.distribution[0];
 
-    // Fabio alone in Cuenta B is under the minimum, and so is Otros: left out.
-    expect(c.suppressed).toMatchObject({
-      byDepartment: 0,
-      byManager: 0,
-      byAccount: 1,
-      byDm: 0,
-    });
-    expect(c.byAccountTotal).toBeNull();
-    expect(retention.suppressedBy).toEqual({ account: 1, dm: 0 });
-    expect(retention.byAccountTotal).toBeNull();
-    // The totals above and the other cut's are still there.
+    // Fabio alone in Cuenta B is under the minimum: the smallest account
+    // joins him in Otros instead of leaving him out next to a public total
+    // (9 - 8 would be him, #130).
+    expect(c.suppressed).toMatchObject({ byAccount: 0, byDm: 0 });
+    expect(retention.suppressedBy).toEqual({ account: 0, dm: 0 });
+    for (const g of retention.byAccount!) expect(g.n).toBeGreaterThanOrEqual(3);
+    expect(retention.byAccountTotal).toMatchObject({ n: 9 });
+    expect(retention.byAccount!.reduce((n, g) => n + g.n, 0)).toBe(9);
+    expect(c.byAccountTotal).not.toBeNull();
     expect(c.byRelationship).not.toBeNull();
-    expect(c.byDmTotal).toEqual([
-      { relationship: "self", total: 4, submitted: 3, applicable: true },
-      { relationship: "manager", total: 9, submitted: 9, applicable: true },
-    ]);
     expect(retention.total).toMatchObject({ n: 9 });
-    expect(retention.byDmTotal).toMatchObject({ n: 9 });
-    expect(r.sections.goals!.suppressed).toMatchObject({
-      byAccount: 1,
-      byDm: 0,
-    });
-    expect(r.sections.goals!.byAccountTotal).toBeNull();
-    expect(r.sections.goals!.byDmTotal).not.toBeNull();
+    expect(r.sections.goals!.suppressed).toMatchObject({ byAccount: 0 });
     expect(r.sections.goals!.goals).not.toBeNull();
   });
 
-  it("a suppressed area hides the overall totals, but an account cut without suppression keeps its own", async () => {
+  it("a small area is folded, not hidden: the overall totals stay (#130)", async () => {
     await fabioIn("Cuenta C");
 
     const r = await buildReport(db, {
@@ -97,10 +85,11 @@ describe("Arturia totals, per cut", () => {
     const c = r.sections.completion!;
     const retention = r.sections.indicators!.distribution[0];
 
-    // Producto (3) is under the minimum: the area cut suppresses people.
-    expect(c.suppressed.byDepartment).toBeGreaterThan(0);
-    expect(c.byRelationship).toBeNull();
-    expect(retention.total).toBeNull();
+    // Producto (3) is under the minimum: folded with another area.
+    expect(c.suppressed.byDepartment).toBe(0);
+    expect(retention.suppressed).toBe(0);
+    expect(retention.total).toMatchObject({ n: 9 });
+    expect(retention.groups.reduce((n, g) => n + g.n, 0)).toBe(9);
     // Cuenta A (5) and Cuenta C (4) both reach it: nothing suppressed there.
     expect(c.suppressed.byAccount).toBe(0);
     expect(c.byAccountTotal).toEqual([

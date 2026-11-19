@@ -157,11 +157,12 @@ describe("completion", () => {
       minGroupSize: 4,
     });
     expect(byAccount.groups.map((g) => [g.label, g.participants])).toEqual([
-      ["Cuenta A", 4],
       ["Cuenta B", 4],
     ]);
-    // Iris (no account) is alone: under the minimum, hidden.
-    expect(byAccount.suppressed).toBe(1);
+    // Iris (no account) is alone: never hidden next to the total (#130),
+    // Cuenta A joins her in Otros.
+    expect(byAccount.others?.participants).toBe(5);
+    expect(byAccount.suppressed).toBe(0);
 
     const byDm = await completionSummary(db, direction, {
       cycleId,
@@ -281,10 +282,11 @@ describe("indicators", () => {
       { groupBy: "dm", config: { minGroupSize: 5 } },
       direction,
     );
-    // Dora's 3 and Iris' 1 are under 5 even together: hidden, and so is the total.
-    expect(strict.series.map((x) => x.n)).toEqual([5]);
-    expect(strict.suppressed).toBe(4);
-    expect(strict.total).toBeNull();
+    // Dora's 3 and Iris' 1 are under 5 even together: Diego's team joins
+    // them, so nobody is hidden next to the total (#130).
+    expect(strict.series.map((x) => [x.others, x.n])).toEqual([[true, 9]]);
+    expect(strict.suppressed).toBe(0);
+    expect(strict.total?.n).toBe(9);
   });
 });
 

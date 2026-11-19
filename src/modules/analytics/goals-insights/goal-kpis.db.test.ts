@@ -460,28 +460,27 @@ describe("goalKpis (who reads)", () => {
     await expect(
       goalKpis(db, direction, { cycleId: h1(), groupBy: "person" }),
     ).rejects.toMatchObject({ code: "forbidden" });
-    // Minimum 5 (the default): Ingeniería has 6 people, Producto 3 -> folded
-    // into "Otros", which is under 5 as well, so hidden and only counted.
+    // Minimum 5 (the default): Ingeniería has 6 people, Producto 3. Hiding
+    // Producto next to the total would give it away (#130): both in Otros.
     const byDept = await goalKpis(db, direction, {
       cycleId: h1(),
       groupBy: "department",
     });
     expect(byDept.minGroupSize).toBe(5);
     expect(byDept.groups.map((g) => [g.label, g.others, g.people])).toEqual([
-      ["Ingeniería", false, 6],
+      [null, true, 9],
     ]);
-    expect(byDept.suppressed).toBe(3);
-    // The total would give the hidden group away by subtraction.
-    expect(byDept.total).toBeNull();
+    expect(byDept.suppressed).toBe(0);
+    expect(byDept.total).not.toBeNull();
     const byManager = await goalKpis(db, direction, {
       cycleId: h1(),
       groupBy: "manager",
     });
     // A manager is a person: the team keeps its key, not the name.
     expect(byManager.groups.map((g) => [g.key, g.label])).toEqual([
-      [s.id.marta, null],
+      [null, null],
     ]);
-    expect(byManager.suppressed).toBe(3);
+    expect(byManager.suppressed).toBe(0);
   });
 
   it("direction sees every group, and the total, once the minimum allows it", async () => {
@@ -535,14 +534,14 @@ describe("goalKpis (who reads)", () => {
       ["Ingeniería", 5],
       ["Producto", 4],
     ]);
-    // At the snapshot Nora has 3 people: under 4, hidden (and only counted).
+    // At the snapshot Nora has 3 people: under 4, and not hidden next to the
+    // total (#130): Marta's team joins hers in Otros.
     const hidden = await goalKpis(db, direction, {
       cycleId: h1(),
       groupBy: "manager",
     });
-    expect(hidden.groups.map((g) => g.key)).toEqual([s.id.marta]);
-    expect(hidden.groups.map((g) => g.label)).toEqual([null]);
-    expect(hidden.suppressed).toBe(3);
+    expect(hidden.groups.map((g) => [g.key, g.others])).toEqual([[null, true]]);
+    expect(hidden.suppressed).toBe(0);
   });
 });
 

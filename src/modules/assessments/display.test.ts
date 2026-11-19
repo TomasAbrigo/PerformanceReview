@@ -101,26 +101,29 @@ describe("answerDisplay", () => {
       value: 5,
       max: 5,
       code: "A",
-      label: "Me convencería de quedarme",
+      label: "Haría todo para retenerlo",
     });
     expect(answerDisplay(question, answer, "en")).toMatchObject({
-      label: "I would convince them to stay",
+      label: "Do everything to keep them",
     });
   });
 
-  it("uses a text answer of a Likert question as its own label (Bamboo's raw report)", () => {
+  it("labels a Likert answer by its value, never by the stored text (#130)", () => {
     expect(
       answerDisplay(
         q({ kind: "single_choice", role: "engagement", choices: letters }),
-        a({ optionValue: 4, optionLabel: "I would try hard" }),
-        "en",
+        a({
+          optionValue: 4,
+          optionLabel: "I would try hard. Ana would be difficult to replace",
+        }),
+        "es",
       ),
     ).toEqual({
       kind: "closed",
       value: 4,
       max: 5,
       code: null,
-      label: "I would try hard",
+      label: "Comprometido",
     });
   });
 

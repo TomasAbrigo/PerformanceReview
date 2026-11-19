@@ -5,7 +5,9 @@ import {
   insertParticipant,
   insertPerson,
 } from "@/modules/analytics/test-support";
+import { solvable } from "@/modules/insights/suppression-attack";
 import { ReviewError } from "@/modules/review-core/review-errors";
+import { bands } from "./types";
 import { setSetting } from "@/modules/settings";
 import {
   indicatorAlerts,
@@ -361,10 +363,13 @@ describe("indicatorDistribution", () => {
         indicator: "retention",
         groupBy: "department",
       });
-      // Producto (3) is hidden, and so is the total (it would give it away).
-      expect(d.series.map((s) => [s.key, s.n])).toEqual([["Ingeniería", 6]]);
-      expect(d.suppressed).toBe(3);
-      expect(d.total).toBeNull();
+      // Producto (3) cannot be hidden next to a public total (9 - 6 = 3, #130):
+      // Ingeniería joins it in Otros, so no group is under the minimum.
+      expect(d.series.map((s) => [s.key, s.n, s.others])).toEqual([
+        [null, 9, true],
+      ]);
+      expect(d.suppressed).toBe(0);
+      expect(d.total).toMatchObject({ n: 9 });
       expect(d.minGroupSize).toBe(5);
       const whole = await indicatorDistribution(db, direction, {
         cycleId: c2.cycleId,
@@ -745,19 +750,37 @@ describe("riskMatrix", () => {
       );
     });
 
-    it("direction sees cells of at least the minimum only; the total goes with them", async () => {
+    it("direction sees cells of at least the minimum only, and none can be solved for", async () => {
       const m = await riskMatrix(db, direction, { cycleId: c2.cycleId });
       expect(m.atRisk).toBeNull();
       expect(m.suppressed).toBe(true);
-      expect(m.total).toBeNull();
       expect(m.riskCount).toBeNull();
-      expect(cell(m, "low", "low").count).toBeNull();
-      // An empty cell is not a small one.
-      expect(cell(m, "low", "mid").count).toBe(0);
+      // Every non-empty cell is under 5 and they cannot cover each other: the
+      // whole matrix goes, total included.
+      expect(m.cells.every((c) => c.count === null)).toBe(true);
+      expect(m.total).toBeNull();
       const open = await riskMatrix(db, direction, {
         cycleId: c2.cycleId,
         config: { minGroupSize: 1 },
       });
+      // [[3,0,1],[0,1,0],[1,0,2]]: with a minimum of 3 only the 3 is big
+      // enough, and showing it alone would let the 1s around it be solved for
+      // from the bands' totals (#130), so it goes too.
+      const three = await riskMatrix(db, direction, {
+        cycleId: c2.cycleId,
+        config: { minGroupSize: 3 },
+      });
+      const table = (x: typeof m) =>
+        bands.map((r) => bands.map((e) => cell(x, r, e).count));
+      expect(table(open)).toEqual([
+        [3, 0, 1],
+        [0, 1, 0],
+        [1, 0, 2],
+      ]);
+      const shown = table(three);
+      if (shown.flat().some((c) => c !== null)) {
+        expect(solvable(shown, table(open) as number[][])).toEqual([]);
+      }
       expect(open.suppressed).toBe(false);
       expect(open.total).toBe(8);
       expect(open.riskCount).toBe(3);
@@ -1008,7 +1031,7 @@ describe("indicatorConfig and the settings", () => {
       (await indicatorDistribution(db, direction, input)).series.map(
         (s) => s.key,
       ),
-    ).toEqual(["Ingeniería"]);
+    ).toEqual([null]); // Producto (3) cannot hide alone: all in Otros (#130)
     await setSetting(db, hr, "aggregation.minGroupSize", 3);
     const d = await indicatorDistribution(db, direction, input);
     expect(d.series.map((s) => s.key)).toEqual(["Ingeniería", "Producto"]);

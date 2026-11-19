@@ -56,7 +56,6 @@ describe("executiveReport", () => {
     ]);
     expect(r.themes?.map((t) => [t.theme, t.count])).toEqual([
       ["calidad", 2],
-      ["colaboracion", 2],
       ["equipo", 2],
     ]);
   });

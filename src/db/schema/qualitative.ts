@@ -14,12 +14,14 @@ import { sql } from "drizzle-orm";
 import {
   analysisRunStatuses,
   sentiments,
+  substances,
 } from "../../modules/qualitative-analysis/constants";
 import { person } from "./people";
 import { answer } from "./review-requests";
 import { reviewCycle } from "./review-cycles";
 
 export const sentiment = pgEnum("sentiment", sentiments);
+export const substance = pgEnum("analysis_substance", substances);
 export const analysisRunStatus = pgEnum(
   "analysis_run_status",
   analysisRunStatuses,
@@ -65,6 +67,13 @@ export const qualitativeAnalysis = pgTable(
       .array()
       .notNull()
       .default(sql`'{}'::text[]`),
+    /** Null on an imported label (a CSV does not carry it) and on old labels. */
+    substance: substance("substance"),
+    /** Keys of `signals` (constants.ts); a provider may only use those. */
+    signals: text("signals")
+      .array()
+      .notNull()
+      .default(sql`'{}'::text[]`),
     textHash: text("text_hash").notNull(),
     /** md5 of answer.text_value when labeled: a different value means stale. */
     sourceMd5: text("source_md5").notNull(),
@@ -100,6 +109,12 @@ export const analysisCorrection = pgTable(
     newSentiment: sentiment("new_sentiment").notNull(),
     previousThemes: text("previous_themes").array(),
     newThemes: text("new_themes").array().notNull(),
+    previousSubstance: substance("previous_substance"),
+    /** Null: the correction leaves the label's substance as it was. */
+    newSubstance: substance("new_substance"),
+    previousSignals: text("previous_signals").array(),
+    /** Null: the correction leaves the label's signals as they were. */
+    newSignals: text("new_signals").array(),
     actorPersonId: uuid("actor_person_id").references(() => person.id),
     reason: text("reason"),
     createdAt: timestamp("created_at", { withTimezone: true })

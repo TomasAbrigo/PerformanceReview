@@ -235,13 +235,11 @@ describe("completionSummary", () => {
         minGroupSize: 3,
       });
       expect(three.minGroupSize).toBe(3);
-      expect(three.groups.map((g) => g.label).sort()).toEqual([
-        "Tecnología",
-        "Ventas",
-      ]);
-      // Gaby (no department) is alone: under the minimum, and hidden.
-      expect(three.others).toBeNull();
-      expect(three.suppressed).toBe(1);
+      expect(three.groups.map((g) => g.label)).toEqual(["Ventas"]);
+      // Gaby (no department) is alone: never hidden next to the total
+      // (#130), the smallest department joins her in Otros.
+      expect(three.others?.participants).toBe(4);
+      expect(three.suppressed).toBe(0);
       expect(counts(three.total!)).toEqual([7, 4, 6, 2, 5]);
 
       const four = await completionSummary(db, direction, {
@@ -261,9 +259,11 @@ describe("completionSummary", () => {
         hierarchy: "asOf",
         minGroupSize: 2,
       });
-      expect(two.groups).toHaveLength(2);
-      expect(two.others).toBeNull();
-      expect(two.suppressed).toBe(1);
+      // The lone one is not hidden next to the total (#130): a group of 3
+      // joins it in Otros.
+      expect(two.groups).toHaveLength(1);
+      expect(two.others?.participants).toBe(4);
+      expect(two.suppressed).toBe(0);
     });
 
     it("direction gets only the head count when the cycle is under the minimum", async () => {
@@ -308,10 +308,11 @@ describe("completionSummary", () => {
         groupBy: "manager",
         hierarchy: "asOf",
       });
-      expect(s.groups.map((g) => [g.key, g.label])).toEqual([[nico, null]]);
-      // Marta's 3 are the only ones left for "Otros": under 4, so hidden.
-      expect(s.others).toBeNull();
-      expect(s.suppressed).toBe(3);
+      // Marta's 3 are under 4: Nico's team joins them in Otros, so nobody is
+      // hidden next to the total (#130).
+      expect(s.groups).toEqual([]);
+      expect(s.others?.participants).toBe(7);
+      expect(s.suppressed).toBe(0);
     });
   });
 });
@@ -534,15 +535,11 @@ describe("completionDelta", () => {
       groupBy: "department",
       minGroupSize: 3,
     });
-    // Ventas had 1 person before (hidden); Tecnología had 3 and has 3.
-    expect(d.current.groups.map((g) => g.label).sort()).toEqual([
-      "Tecnología",
-      "Ventas",
-    ]);
-    expect(d.previous!.groups.map((g) => g.label)).toEqual(["Tecnología"]);
-    const t = d.groups.find((g) => g.label === "Tecnología")!;
+    // Gaby (no department) folds with Tecnología now; Ventas had 1 person
+    // before, folded with Tecnología then (#130): no group in both cycles.
+    expect(d.current.groups.map((g) => g.label)).toEqual(["Ventas"]);
+    expect(d.previous!.groups).toEqual([]);
     const v = d.groups.find((g) => g.label === "Ventas")!;
-    expect(t).toMatchObject({ selfDelta: -33.3, managerDelta: -33.3 });
     expect(v).toMatchObject({ selfDelta: null, managerDelta: null });
     expect(d.total).toEqual({ selfDelta: -8.3, managerDelta: -26.7 });
   });

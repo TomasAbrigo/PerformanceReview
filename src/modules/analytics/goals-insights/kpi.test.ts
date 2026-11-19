@@ -95,12 +95,43 @@ describe("foldKpiGroups", () => {
     expect(suppressed).toBe(0);
   });
 
-  it("hides Otros when it is still under the minimum and only counts its people", () => {
+  it("never hides Otros behind a public total: the smallest shown group joins it (#130)", () => {
     const { shown, others, suppressed } = foldKpiGroups(
-      [raw("big", 6, 6, 6), raw("s1", 2, 2, 2), raw("s2", 1, 1, 1)],
+      [
+        raw("big", 6, 6, 6),
+        raw("bigger", 8, 8, 0),
+        raw("s1", 2, 2, 2),
+        raw("s2", 1, 1, 1),
+      ],
       5,
     );
-    expect(shown.map((g) => g.key)).toEqual(["big"]);
+    expect(shown.map((g) => g.key)).toEqual(["bigger"]);
+    expect(others).toMatchObject({ people: 9, goals: 9, completed: 9 });
+    expect(suppressed).toBe(0);
+  });
+
+  it("the minimum counts the people with goals, not the headcount (#130)", () => {
+    // Equipo 7 of the audit: 5 people, 2 with goals.
+    const team7 = raw("team7", 5, 4, 0, { peopleWithGoals: 2 });
+    const { shown, others } = foldKpiGroups(
+      [raw("big", 9, 9, 3), team7, raw("other", 7, 7, 1)],
+      5,
+    );
+    expect(shown.map((g) => g.key)).not.toContain("team7");
+    expect(others!.peopleWithGoals).toBeGreaterThanOrEqual(5);
+    // A team where nobody has goals says nothing about anyone's goals.
+    const none = raw("none", 6, 0, 0, { peopleWithGoals: 0 });
+    expect(
+      foldKpiGroups([raw("big", 9, 9, 3), none], 5).shown.map((g) => g.key),
+    ).toEqual(["big", "none"]);
+  });
+
+  it("leaves out only a whole under the minimum", () => {
+    const { shown, others, suppressed } = foldKpiGroups(
+      [raw("s1", 2, 2, 2), raw("s2", 1, 1, 1)],
+      5,
+    );
+    expect(shown).toEqual([]);
     expect(others).toBeNull();
     expect(suppressed).toBe(3);
   });

@@ -390,7 +390,7 @@ describe("AssessmentView", () => {
     expect(within(retention).getByLabelText("4 de 5")).toHaveTextContent("4/5");
     expect(within(retention).getByText("A")).toBeVisible();
     expect(
-      within(retention).getByText("Me convencería de quedarme"),
+      within(retention).getByText("Intentaría convencerlo de quedarse"),
     ).toBeVisible();
     const rating = within(manager).getAllByTestId("question")[1];
     expect(within(rating).getByLabelText("4 de 4")).toBeVisible();
@@ -584,7 +584,7 @@ describe("AssessmentView", () => {
     expect(
       screen.getByRole("heading", { name: "Manager review" }),
     ).toBeVisible();
-    expect(screen.getByText("I would convince them")).toBeVisible();
+    expect(screen.getByText("Try to convince them to stay")).toBeVisible();
     expect(screen.getByRole("link", { name: "Employee view" })).toBeVisible();
   });
 });

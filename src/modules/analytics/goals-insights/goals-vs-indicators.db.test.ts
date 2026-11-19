@@ -335,18 +335,17 @@ describe("goalsVsIndicators (who reads)", () => {
     expect(rows).toEqual([]);
     expect(buckets.map((b) => [b.people, b.hidden])).toEqual([
       [0, false], // nobody: nothing to hide
-      [3, false],
+      [null, true], // the smallest shown one goes with Iris (#130)
       [null, true], // Iris alone: under 3
       [0, false],
       [4, false],
     ]);
-    expect(buckets[1]).toMatchObject({ meanRetention: 4, meanEngagement: 4 });
     expect(buckets[2]).toMatchObject({
       meanRetention: null,
       meanEngagement: null,
       meanPositiveShare: null,
     });
-    expect(suppressed).toBe(1);
+    expect(suppressed).toBe(4);
   });
 });
 
@@ -369,15 +368,24 @@ describe("goalsVsIndicators (direction: the minimum is measured on the people wh
         meanRetention: null,
         meanEngagement: null,
       });
-      // The buckets that do have 3 or more with the indicator stay.
-      expect(buckets[1]).toMatchObject({
-        retentionPeople: 3,
-        engagementPeople: 3,
-        meanRetention: 4,
-        meanEngagement: 4,
+      // Iris alone (40-60 %) is under the minimum, and the people with goals
+      // are a public total: the smallest shown bucket (20-40 %, 3 people)
+      // goes with her, so hers cannot be solved by difference (#130).
+      expect(buckets.map((b) => b.hidden)).toEqual([
+        false,
+        true,
+        true,
+        false,
+        false,
+      ]);
+      expect(suppressed).toBe(4);
+      // The bucket with enough people on both indicators keeps its means.
+      expect(buckets[4]).toMatchObject({
+        retentionPeople: 4,
+        engagementPeople: 4,
+        meanRetention: 3.5,
+        meanEngagement: 3.5,
       });
-      // Iris alone (40-60 %) is the one bucket under the minimum.
-      expect(suppressed).toBe(1);
     } finally {
       s = await buildScenario();
     }
@@ -387,12 +395,12 @@ describe("goalsVsIndicators (direction: the minimum is measured on the people wh
     const fresh = await buildScenario();
     try {
       await setSetting(db, hr, "aggregation.minGroupSize", 3);
-      await addPeopleWithGoalsInProgress(fresh, { withReview: 0, without: 3 });
+      await addPeopleWithGoalsInProgress(fresh, { withReview: 0, without: 4 });
       const { buckets } = await goalsVsIndicators(db, direction, {
         cycleId: fresh.h1.cycleId,
       });
       expect(buckets[0]).toMatchObject({
-        people: 3,
+        people: 4,
         hidden: false,
         retentionPeople: 0,
         engagementPeople: 0,

@@ -88,6 +88,7 @@ export async function buildReport(
     period: { start: cycle.periodStart, end: cycle.periodEnd },
     anonymized: opts.anonymized,
     min: opts.anonymized ? minGroupSize : 1,
+    locale,
     labels,
     teams: await cycleTeams(db, cycle.id, labels.team),
     dms: await cycleDms(db, cycle.id, labels.dm, await groupKeyer(db)),

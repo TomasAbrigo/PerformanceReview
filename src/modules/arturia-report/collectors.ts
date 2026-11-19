@@ -8,6 +8,7 @@
 // reconstruction by difference), re-pseudonymized quotes, no people section.
 import { sql } from "drizzle-orm";
 import type { DbOrTx } from "@/db/client";
+import { likertLabel } from "@/modules/likert";
 import { type ActorContext, DEFAULT_ACTOR } from "@/modules/actor/types";
 import {
   type CompletionGroup,
@@ -40,9 +41,8 @@ import {
   topThemes,
 } from "@/modules/qualitative-analysis/queries";
 import { pseudonymSources } from "@/modules/qualitative-analysis/service";
-import { getSetting } from "@/modules/settings/service";
 import { sumBy, teamLabels } from "./anonymize";
-import type { Labels } from "./labels";
+import type { Labels, ReportLocale } from "./labels";
 import type {
   ArturiaSections,
   CompletionSection,
@@ -58,6 +58,8 @@ export type CollectContext = {
   anonymized: boolean;
   /** Smallest group shown: the report's minGroupSize when anonymized, else 1. */
   min: number;
+  /** The report's language (labels of Likert values; default es). */
+  locale?: ReportLocale;
   labels: Labels;
   /**
    * "Equipo N" of each manager of the cycle (see `cycleTeams`): the one label
@@ -511,7 +513,9 @@ export const collectGoals: Collector<"goals"> = async (db, ctx) => {
   // DM have their own (`byAccountTotal`, `byDmTotal`).
   const hidden =
     ctx.anonymized &&
-    (suppressed.byDepartment + suppressed.byManager + suppressed.buckets > 0 ||
+    // Buckets are suppressed complementarily (#130): never one alone, so the
+    // total can stay next to them.
+    (suppressed.byDepartment + suppressed.byManager > 0 ||
       kpis.total === null ||
       byManager.total === null);
   const cutTotal = (k: GoalKpis) =>
@@ -576,16 +580,10 @@ type Side = "self" | "manager";
 
 /**
  * Distinct participants per dimension, theme and cycle (the group sizes),
- * counting only the comments of `side` when given, and closed-question
- * answers only when they are in the analysis (`analysis.includeClosed`), as
- * the queries that produce the counts do.
+ * counting only the comments of `side` when given, as the queries that
+ * produce the counts do (free text only, #128).
  */
-async function qualitativeSizes(
-  db: DbOrTx,
-  cycleId: string,
-  includeClosed: boolean,
-  side?: Side,
-) {
+async function qualitativeSizes(db: DbOrTx, cycleId: string, side?: Side) {
   const rows = await db.execute<{ kind: string; key: string; n: number }>(sql`
     with ${effectiveCte()},
     l as (
@@ -595,7 +593,6 @@ async function qualitativeSizes(
       join review_request r on r.id = a.request_id
       join cycle_participant cp on cp.id = r.participant_id
       where r.deleted_at is null and r.status = 'submitted' and cp.removed_at is null
-        ${includeClosed ? sql`` : sql`and eff.kind = 'text'`}
         ${side ? sql`and r.relationship = ${side}` : sql``}
     )
     select 'dimension' as kind, dimension as key, count(distinct participant_id)::int as n
@@ -641,15 +638,14 @@ const sumCounts = (rows: Counts[]): Counts => ({
 async function qualitativeSlice(
   db: DbOrTx,
   ctx: CollectContext,
-  includeClosed: boolean,
   side: Side | undefined,
   sources: Awaited<ReturnType<typeof pseudonymSources>>,
 ): Promise<QualitativeSideSection | null> {
-  const f = { cycleId: ctx.cycleId, relationship: side, includeClosed };
+  const f = { cycleId: ctx.cycleId, relationship: side };
   const [dims, themes, sizes] = await Promise.all([
     sentimentByDimension(db, DEFAULT_ACTOR, f),
     topThemes(db, DEFAULT_ACTOR, f),
-    qualitativeSizes(db, ctx.cycleId, includeClosed, side),
+    qualitativeSizes(db, ctx.cycleId, side),
   ]);
   if (!dims.length) return null;
   const others = ctx.labels.others;
@@ -722,14 +718,13 @@ async function qualitativeSlice(
  * of people; the people of the ones left out count in `suppressed`.
  */
 export const collectQualitative: Collector<"qualitative"> = async (db, ctx) => {
-  const includeClosed = await getSetting(db, "analysis.includeClosed");
   const sources = await pseudonymSources(db);
   const [all, self, manager, trend, sizes] = await Promise.all([
-    qualitativeSlice(db, ctx, includeClosed, undefined, sources),
-    qualitativeSlice(db, ctx, includeClosed, "self", sources),
-    qualitativeSlice(db, ctx, includeClosed, "manager", sources),
-    sentimentTrend(db, DEFAULT_ACTOR, { includeClosed }),
-    qualitativeSizes(db, ctx.cycleId, includeClosed),
+    qualitativeSlice(db, ctx, undefined, sources),
+    qualitativeSlice(db, ctx, "self", sources),
+    qualitativeSlice(db, ctx, "manager", sources),
+    sentimentTrend(db, DEFAULT_ACTOR, {}),
+    qualitativeSizes(db, ctx.cycleId),
   ]);
   if (!all && !trend.length) return null;
   const cycleSize = (id: string) => sizes.cycle.get(id) ?? 0;
@@ -814,21 +809,20 @@ export const collectPeople: Collector<"people"> = async (db, ctx) => {
     email: string | null;
     department: string | null;
     manager: string | null;
-    retention: string | null;
-    engagement: string | null;
+    retention: number | null;
+    engagement: number | null;
     positive: number;
     comments: number;
   }>(sql`
     with ${effectiveCte()},
     ind as (
       select distinct on (r.participant_id, q.role) r.participant_id, q.role::text as role,
-             coalesce((select c->'label'->>'es' from jsonb_array_elements(q.choices) c
-                       where c->>'value' = a.option_label limit 1), a.option_label) as label
+             a.option_value as value -- labelled by value below, never by option_label (#130)
       from answer a
       join review_request r on r.id = a.request_id
       join question_revision q on q.id = a.question_revision_id
       where r.cycle_id = ${ctx.cycleId}::uuid and q.role::text in ('retention', 'engagement')
-        and a.option_label is not null and r.relationship = 'manager'
+        and a.option_value is not null and r.relationship = 'manager'
         and r.status = 'submitted' and r.deleted_at is null
       order by r.participant_id, q.role, r.submitted_at desc nulls last, r.id
     ),
@@ -845,8 +839,8 @@ export const collectPeople: Collector<"people"> = async (db, ctx) => {
     )
     select p.id as person_id, p.display_name, p.work_email as email,
            cp.snap_department as department, mp.display_name as manager,
-           (select label from ind where ind.participant_id = cp.id and role = 'retention') as retention,
-           (select label from ind where ind.participant_id = cp.id and role = 'engagement') as engagement,
+           (select value from ind where ind.participant_id = cp.id and role = 'retention') as retention,
+           (select value from ind where ind.participant_id = cp.id and role = 'engagement') as engagement,
            coalesce(sen.positive, 0) as positive, coalesce(sen.comments, 0) as comments
     from cycle_participant cp
     join person p on p.id = cp.reviewee_person_id
@@ -862,8 +856,8 @@ export const collectPeople: Collector<"people"> = async (db, ctx) => {
     manager: r.manager,
     selfStatus: sides.get(r.person_id)?.selfStatus ?? null,
     managerStatus: sides.get(r.person_id)?.managerStatus ?? null,
-    retention: r.retention,
-    engagement: r.engagement,
+    retention: likertLabel("retention", r.retention, ctx.locale ?? "es"),
+    engagement: likertLabel("engagement", r.engagement, ctx.locale ?? "es"),
     positiveShare: r.comments ? r.positive / r.comments : null,
     comments: r.comments,
   }));

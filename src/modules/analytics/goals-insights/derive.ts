@@ -9,6 +9,7 @@ import {
   orgDimOf,
   orgOptionsOf,
 } from "@/modules/org-attributes/kinds";
+import { suppressList } from "@/modules/insights/suppression";
 import { foldKpiGroups, kpiGroup, type KpiCounts, sumGroups } from "./kpi";
 import {
   bucketOf,
@@ -201,7 +202,10 @@ const mean = (values: (number | null)[]): number | null => {
  * base the minimum is measured on: a bucket of 5 people with goals whose
  * retention was answered by 3 shows no retention (the mean of 3 people would
  * be below the minimum). The same for the positive share, whose base is the
- * people with labeled comments.
+ * people with labeled comments. Each of those bases is a list whose sum is
+ * public (the indicator's total n), so it gets the same complementary
+ * suppression as the people of the buckets: a lone hidden n takes the
+ * smallest shown one with it.
  */
 export function bucketRows(
   rows: readonly GoalIndicatorRow[],
@@ -212,13 +216,27 @@ export function bucketRows(
     if (r.goals > 0) slices[bucketOf(r.completed, r.goals)].push(r);
   }
   let suppressed = 0;
+  // Complementary suppression (#130): the people with goals are a public
+  // total, so a lone small bucket takes the smallest shown one with it.
+  const sizes = slices.map((s) => s.length);
+  const hide =
+    minGroupSize === null
+      ? sizes.map(() => false)
+      : (suppressList(sizes, minGroupSize) ?? sizes.map((n) => n > 0));
+  // The people of each bucket who have a measure, and which of those bases
+  // direction may not read (under the minimum, or the complement of one).
+  const maskedBase = (value: (r: GoalIndicatorRow) => number | null) => {
+    const ns = slices.map((s) => s.filter((r) => value(r) !== null).length);
+    return minGroupSize === null
+      ? ns.map(() => false)
+      : (suppressList(ns, minGroupSize) ?? ns.map((n) => n > 0));
+  };
+  const retentionMasked = maskedBase((r) => r.retention);
+  const engagementMasked = maskedBase((r) => r.engagement);
+  const positiveMasked = maskedBase((r) => r.positiveShare);
   const result = buckets.map((range, i): GoalBucket => {
     const people = slices[i];
-    if (
-      minGroupSize !== null &&
-      people.length > 0 &&
-      people.length < minGroupSize
-    ) {
+    if (hide[i]) {
       suppressed += people.length;
       return {
         ...range,
@@ -232,17 +250,16 @@ export function bucketRows(
       };
     }
     // The mean of a measure, and the people it is of; nothing when direction
-    // would be reading fewer people than the minimum.
-    const measure = (value: (r: GoalIndicatorRow) => number | null) => {
-      const n = people.filter((r) => value(r) !== null).length;
-      const masked = minGroupSize !== null && n > 0 && n < minGroupSize;
-      return {
-        n: masked ? null : n,
-        mean: masked ? null : mean(people.map(value)),
-      };
-    };
-    const retention = measure((r) => r.retention);
-    const engagement = measure((r) => r.engagement);
+    // may not read that base (see `maskedBase`).
+    const measure = (
+      value: (r: GoalIndicatorRow) => number | null,
+      masked: readonly boolean[],
+    ) => ({
+      n: masked[i] ? null : people.filter((r) => value(r) !== null).length,
+      mean: masked[i] ? null : mean(people.map(value)),
+    });
+    const retention = measure((r) => r.retention, retentionMasked);
+    const engagement = measure((r) => r.engagement, engagementMasked);
     return {
       ...range,
       people: people.length,
@@ -250,7 +267,7 @@ export function bucketRows(
       engagementPeople: engagement.n,
       meanRetention: retention.mean,
       meanEngagement: engagement.mean,
-      meanPositiveShare: measure((r) => r.positiveShare).mean,
+      meanPositiveShare: measure((r) => r.positiveShare, positiveMasked).mean,
       hidden: false,
     };
   });

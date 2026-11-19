@@ -115,6 +115,15 @@ export interface AssessmentAnswers {
   /** 1-5 ratings on the two custom questions. */
   custom1: number;
   custom2: number;
+  /**
+   * The employee's side only (the text bank, `text-bank.ts`): what they typed
+   * next to "Other" in Q2 (only when Q2 is "Other"), and the whole answer to
+   * the two "yes/no and how" custom questions, as typed ("Sí", "No por
+   * ahora.", "Sí, con el voluntariado de la escuela del barrio.").
+   */
+  bestWorkOther?: string;
+  socialImpact?: string;
+  environmentalImpact?: string;
 }
 
 /** A self + manager assessment of one person in one cycle. */

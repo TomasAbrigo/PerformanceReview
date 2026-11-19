@@ -122,6 +122,7 @@ async function copyQuestions(cycleId: string, templateId: string) {
       required: q.required,
       choices: q.choices,
       role: q.role,
+      yesNo: q.yesNo,
       scale: q.scaleId
         ? {
             options: options

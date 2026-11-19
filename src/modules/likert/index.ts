@@ -246,6 +246,47 @@ const resultFor =
       : { unmapped: true };
   };
 
+const optionOf = (role: LikertRole, value: number) =>
+  Number.isInteger(value) &&
+  value >= LIKERT_MIN &&
+  value <= LIKERT_ROLE_MAX[role]
+    ? LIKERT_OPTIONS[role][LIKERT_ROLE_MAX[role] - value]
+    : undefined;
+
+/**
+ * The label of a value of the role in `locale` (Bamboo's wording, as the
+ * importer's choices), or null off the scale. Screens and exports label a
+ * Likert answer by its value with this, never with the stored option label.
+ */
+export function likertLabel(
+  role: LikertRole,
+  value: number | null,
+  locale: string,
+): string | null {
+  const option = value === null ? undefined : optionOf(role, value);
+  if (!option) return null;
+  return locale === "en" ? option.bamboo.en : option.bamboo.es;
+}
+
+/**
+ * What the importer stores as the option label of a Likert answer (#130): a
+ * letter or a number as it came (the equivalence table maps them), and for
+ * any other text the canonical label of the value it maps to, so the label
+ * Bamboo's report wrote (which can carry the reviewee's name, "… Ana would be
+ * difficult to replace") is never stored. The canonical label maps back to
+ * the same value, so re-applying the mappings keeps working.
+ */
+export function storedLikertLabel(
+  role: LikertRole,
+  raw: string,
+  value: number,
+): string {
+  const text = raw.trim();
+  if (/^[a-z]$/i.test(text)) return text.toUpperCase();
+  if (/^\d+$/.test(text)) return text;
+  return optionOf(role, value)?.labels?.[0] ?? String(value);
+}
+
 /** The value (1..max of the role) of one raw answer, or `unmapped`. */
 export function mapLikert(
   input: LikertInput,

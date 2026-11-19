@@ -50,7 +50,6 @@ type Resolved = {
   scope: InsightsScope;
   f: QualitativeFilters;
   min: number;
-  includeClosed: boolean;
 };
 
 async function resolve(
@@ -65,18 +64,15 @@ async function resolve(
       : undefined,
   );
   if (scope.kind === "none") return null;
-  const includeClosed =
-    f.includeClosed ?? (await getSetting(db, "analysis.includeClosed"));
   if (scope.kind === "aggregatesOnly") {
     return {
       scope,
       // Direction does not filter by the people who lead a team (DM, Santex Lead).
       f: { ...withoutPersonFilters(f, true), aggregateOnly: true },
       min: scope.minGroupSize,
-      includeClosed,
     };
   }
-  return { scope, f, min: 0, includeClosed };
+  return { scope, f, min: 0 };
 }
 
 /** Groups with fewer distinct participants than `min` are left out. */
@@ -84,13 +80,12 @@ const minGroup = (min: number, col = sql`participant_id`) =>
   min > 1 ? sql`having count(distinct ${col}) >= ${min}` : sql``;
 
 /** CTEs eff + labeled: effective labels of submitted answers in scope. */
-function labeledCtes({ scope, f, includeClosed }: Resolved): SQL {
+function labeledCtes({ scope, f }: Resolved): SQL {
   const where: SQL[] = [
     sql`r.deleted_at is null`,
     sql`r.status = 'submitted'`,
     sql`cp.removed_at is null`,
   ];
-  if (!includeClosed) where.push(sql`eff.kind = 'text'`);
   if (f.cycleId) {
     if (!isUuid(f.cycleId)) throw new AnalysisError("not_found");
     where.push(sql`r.cycle_id = ${f.cycleId}::uuid`);
@@ -177,8 +172,8 @@ export async function sentimentByDimension(
 }
 
 /**
- * The sentiment of the comments (open text only, whatever the
- * `analysis.includeClosed` setting says) of each participant in scope, in
+ * The sentiment of the comments (free text only, as everywhere since #128)
+ * of each participant in scope, in
  * every cycle, for views that build their own groups out of people (the DM
  * cards, `dm360`). The rows are people: whoever reads them aggregates and
  * masks. Direction is authorized like everywhere (it reads aggregates), so
@@ -190,7 +185,7 @@ export async function sentimentByParticipant(
   actor: ActorContext,
   f: Pick<QualitativeFilters, "cycleId" | "cycleIds" | "relationship"> = {},
 ): Promise<ParticipantSentiment[]> {
-  const r = await resolve(db, actor, { ...f, includeClosed: false });
+  const r = await resolve(db, actor, f);
   if (!r) return [];
   const rows = await db.execute<SentimentCounts & { participant_id: string }>(
     sql`

@@ -3,6 +3,7 @@ import { buildGoals } from "./goals";
 import { IdentityPool } from "./identity";
 import { buildReviews } from "./reviews";
 import { createRng } from "./rng";
+import { applyBankTexts } from "./texts";
 import type {
   FixtureAssessment,
   FixtureCycle,
@@ -63,6 +64,12 @@ export function generateCompany(
     asOf: AS_OF,
     ...workforce,
     ...reviews,
+    // The open texts come from the text bank, with a stream of their own.
+    assessments: applyBankTexts(
+      reviews.assessments,
+      workforce.employees,
+      options.seed,
+    ),
     identity: { ...workforce.identity, ...reportNoise },
     goals,
   };

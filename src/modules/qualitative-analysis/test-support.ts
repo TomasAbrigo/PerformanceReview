@@ -45,10 +45,12 @@ export async function insertQuestion(
     /** question_revision.dimension (the import mapping sets it). */
     dimension?: string;
     choices?: { value: string; label: { es: string; en: string } }[];
+    /** question_revision.yes_no: a yes/no question (#128). */
+    yesNo?: boolean;
   } = {},
 ): Promise<string> {
   const [q] = await db.execute<{ id: string }>(sql`
-    insert into question_revision (cycle_id, section_title, prompt, kind, applies_to, visible_to_reviewee, required, sort, role, choices, dimension)
+    insert into question_revision (cycle_id, section_title, prompt, kind, applies_to, visible_to_reviewee, required, sort, role, choices, dimension, yes_no)
     values (${cycleId}::uuid, ${JSON.stringify({ es: "S", en: "S" })}::jsonb,
       ${JSON.stringify({ es: prompt, en: prompt })}::jsonb, ${opts.kind ?? "text"},
       array['self','manager'], true, false, 0, ${opts.role ?? null},
@@ -61,7 +63,7 @@ export async function insertQuestion(
               ],
             )
           : null
-      }::jsonb, ${opts.dimension ?? null})
+      }::jsonb, ${opts.dimension ?? null}, ${opts.yesNo ?? false})
     returning id`);
   return q.id;
 }

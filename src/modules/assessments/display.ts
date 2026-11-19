@@ -1,6 +1,6 @@
 // Drizzle- and server-free: how an answer is shown, shared by the queries' tests and the screens.
 import type { LocalizedText } from "@/db/schema/rating-scales";
-import { LIKERT_ROLE_MAX, isLikertRole } from "@/modules/likert";
+import { LIKERT_ROLE_MAX, isLikertRole, likertLabel } from "@/modules/likert";
 import type { QuestionKind, QuestionRole } from "@/modules/templates/constants";
 
 /** What the display needs of a frozen question. */
@@ -75,12 +75,18 @@ export function answerDisplay(
       : isLikertRole(question.role)
         ? LIKERT_ROLE_MAX[question.role]
         : null;
+  // A Likert answer is labelled by its value in the reader's language, never
+  // by the stored label (Bamboo's English text; #130).
+  const likert = isLikertRole(question.role)
+    ? likertLabel(question.role, optionValue, locale)
+    : null;
   return {
     kind: "closed",
     value: optionValue,
     max,
     // A letter (A, B...) is worth showing; a slug of the label is not.
     code: choice && choice.value.length <= 2 ? choice.value : null,
-    label: choice ? pickLocalized(choice.label, locale) : optionLabel,
+    label:
+      likert ?? (choice ? pickLocalized(choice.label, locale) : optionLabel),
   };
 }

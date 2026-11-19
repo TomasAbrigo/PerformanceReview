@@ -1,119 +1,113 @@
-import type { Sentiment } from "./constants";
+import type { Sentiment, Signal, Substance } from "./constants";
 import { fold } from "./dimension";
 import type {
   AnalysisInput,
   AnalysisOutput,
   AnalysisProvider,
 } from "./provider";
+import { isImpactQuestion } from "./themes";
 
-/** es/en keyword stems per sentiment (matched on folded text, as prefixes). */
-type Lexical = "positive" | "constructive" | "negative";
-const LEXICON: Record<Lexical, string[]> = {
+/**
+ * Keyword lists, matched on the folded text (lowercase, no accents) at the
+ * start of a word: "proactiv" hits "proactivo" but never "improactivo", and
+ * "no " phrases need the whole word. A negative cue right after "sin",
+ * "no" or "without" ("sin retrabajo") does not count.
+ */
+type Cue = "positive" | "constructive" | "negative";
+const CUES: Record<Cue, string[]> = {
   positive: [
     "excelente",
     "muy bien",
-    "gran",
+    "gran ",
     "destac",
     "referente",
-    "calidad",
     "confiable",
-    "proactiv",
-    "ayuda",
-    "colabor",
-    "lidera",
     "a tiempo",
-    "aport",
+    "aporta",
+    "ayuda",
+    "con calidad",
     "excellent",
-    "great",
-    "strong",
+    "great ",
     "reliable",
     "helpful",
     "outstanding",
-    "well",
-    "best",
-    "mejor trabajo",
     "reconocid",
-    "valorad",
-    "totalmente de acuerdo",
-    "strongly agree",
+    "me siento valorad",
+    "feel valued",
+    "feel highly valued",
   ],
   constructive: [
     "mejorar",
     "podria",
-    "puede",
+    "puedo ser",
+    "puede ser",
     "seria bueno",
+    "me gustaria",
     "necesito",
-    "quiero",
     "profundizar",
-    "trabajar",
     "anticipar",
     "desarrollar",
-    "aprender",
     "could",
     "should",
     "improve",
     "work on",
-    "develop",
-    "learn",
-    "more",
-    "mas ",
+    "i would like",
   ],
   negative: [
     "no cumple",
-    "tarde",
-    "error",
-    "problema",
-    "falta",
+    "llega tarde",
+    "llego tarde",
+    "es un problema",
+    "fue un problema",
+    "entrega tarde",
+    "retrabajo",
     "conflict",
     "queja",
     "desorganiz",
-    "retrabajo",
-    "nunca",
-    "poor",
-    "late",
-    "missed",
-    "lack",
-    "problem",
-    "never",
-    "complain",
-    "not at all",
-    "nada",
+    "frustr",
+    "desmotiv",
     "estres",
     "burnout",
-    "burocr",
-    "totalmente en desacuerdo",
-    "strongly disagree",
+    "agotad",
+    "maltrato",
+    "no me siento",
+    "falta de",
+    "poor",
+    "missed",
+    "lack of",
+    "complain",
+    "don't feel",
+    "do not feel",
+    "not valued",
   ],
 };
 
-/**
- * Theme -> keyword stems. Names are the normalized theme keys: the initial
- * vocabulary first (it wins ties), then the legacy themes of the first runs.
- */
-const THEMES: Record<string, string[]> = {
-  proyecto: [
-    "proyecto",
-    "project",
-    "alcance",
-    "entregable",
-    "scope",
-    "roadmap",
+/** Theme key -> cues. Order breaks ties (People's eight first). */
+const THEME_CUES: Record<string, string[]> = {
+  proyecto: ["proyecto", "project", "alcance", "entregable", "scope"],
+  equipo: [
+    "equipo",
+    "team",
+    "companer",
+    "colega",
+    "colabor",
+    "teammate",
+    "collaborat",
   ],
-  equipo: ["equipo", "team", "compañer", "colega", "teammate"],
   comunicacion: [
     "comunic",
-    "avis",
     "escuch",
     "feedback",
     "communicat",
     "dialogo",
     "transparen",
+    "reunion",
+    "meeting",
   ],
   crecimiento: [
     "crecer",
     "crecim",
     "growth",
-    "grow",
     "carrera",
     "career",
     "ascenso",
@@ -133,11 +127,9 @@ const THEMES: Record<string, string[]> = {
   bienestar: [
     "bienestar",
     "wellbeing",
-    "well-being",
     "estres",
     "stress",
     "burnout",
-    "balance",
     "carga de trabajo",
     "workload",
     "salud",
@@ -147,95 +139,218 @@ const THEMES: Record<string, string[]> = {
     "reconoc",
     "recogni",
     "valorad",
-    "valorar",
     "valued",
-    "valoro",
     "aprecia",
     "agradec",
   ],
+  tecnica: ["tecnic", "codigo", "arquitect", "technical", "code", "testing"],
   planificacion: [
     "planific",
-    "tiempo",
     "prioriz",
     "organiz",
-    "plan",
+    "plan ",
+    "planning",
     "deadline",
+    "estimac",
   ],
-  calidad: ["calidad", "retrabajo", "prolij", "quality", "detail"],
-  liderazgo: ["lider", "referente", "deleg", "mentor", "lead", "guia"],
-  colaboracion: ["equipo", "colabor", "ayuda", "compañer", "team", "help"],
-  tecnica: ["tecnic", "codigo", "arquitect", "technical", "code"],
-  documentacion: ["document", "continuar"],
-  proactividad: ["proactiv", "anticip", "iniciativa", "riesgo", "initiative"],
+  calidad: ["calidad", "retrabajo", "prolij", "quality", "detalle", "detail"],
+  liderazgo: ["lider", "lidera", "deleg", "mentor", "lead", "guia"],
+  proactividad: ["proactiv", "anticip", "iniciativa", "initiative"],
   negocio: ["negocio", "cliente", "business", "customer"],
   aprendizaje: ["aprend", "profundiz", "capacit", "learn", "curso"],
-};
-const THEME_ORDER = new Map(Object.keys(THEMES).map((t, i) => [t, i]));
-
-const count = (text: string, stems: string[]) =>
-  stems.reduce((n, s) => n + (text.includes(s) ? 1 : 0), 0);
-
-/** Fallback sentiment of a dimension when no keyword hits. */
-const DEFAULTS: Record<string, Sentiment> = {
-  strengths: "positive",
-  improvement: "constructive",
+  documentacion: ["document"],
 };
 
-/** A text of up to this many words, without lexicon hits, is neutral. */
-const SHORT_WORDS = 3;
+/** Initiative type -> cues, for the social / environmental "how". */
+const IMPACT_CUES: Record<string, string[]> = {
+  voluntariado: ["voluntari", "volunteer"],
+  donaciones: ["donacion", "dono", "donamos", "donat", "colecta", "campana"],
+  reciclaje: ["recicl", "residuo", "recycl", "waste", "compost"],
+  consumo: [
+    "consumo",
+    "impresion",
+    "imprimir",
+    "papel",
+    "energia",
+    "plastico",
+    "reduc",
+    "print",
+    "energy",
+  ],
+  educacion: ["escuela", "educa", "ensen", "taller", "school", "teach"],
+  movilidad: ["bici", "transporte publico", "caminando", "carpool", "bike"],
+};
+
+/** What People has to attend to -> cues. */
+const SIGNAL_CUES: Record<Signal, string[]> = {
+  workload: [
+    "carga de trabajo",
+    "sobrecarg",
+    "horas extra",
+    "agotad",
+    "burnout",
+    "estres",
+    "workload",
+    "overload",
+    "overtime",
+  ],
+  attrition: [
+    "renunci",
+    "irme de",
+    "otro trabajo",
+    "otra empresa",
+    "dejar la empresa",
+    "propuesta laboral",
+    "quit",
+    "leave the company",
+    "another job",
+  ],
+  conflict: ["conflict", "discusion", "maltrato", "tension", "roce"],
+  recognition: [
+    "falta de reconocimiento",
+    "sin reconocimiento",
+    "no me siento valorad",
+    "no valoran",
+    "poco reconoc",
+    "not valued",
+    "don't feel valued",
+    "do not feel valued",
+    "lack of recognition",
+  ],
+  stagnation: [
+    "estancad",
+    "no crezco",
+    "sin crecimiento",
+    "mismas tareas",
+    "no aprendo",
+    "stagnat",
+    "stuck",
+    "no growth",
+  ],
+  company_request: [
+    "la empresa deberia",
+    "la empresa podria",
+    "me gustaria que la empresa",
+    "santex deberia",
+    "deberian ofrecer",
+    "the company should",
+    "the company could",
+  ],
+  role_fit: [
+    "fuera de mi rol",
+    "no es mi rol",
+    "cambiar de rol",
+    "otro rol",
+    "cambio de proyecto",
+    "not my role",
+    "change roles",
+    "different role",
+  ],
+};
+
+/** An answer that says nothing ("n/a", "nada", "-"). */
+const NOTHING =
+  /^(n\/?a|na|-+|\.+|nada|ninguna?|ningun|no se|nothing|none|no aplica|sin comentarios|no comments?)[.!]?$/;
+/** Something concrete: a number, a quote, an example, a when. */
+const CONCRETE =
+  /\d|["“]|\b(por ejemplo|cuando|como en|en el proyecto|for example|for instance|when|during|durante)\b/;
+
+const NEGATORS = ["sin ", "no ", "without ", "nunca "];
+
+/** How many of `cues` hit `text` (folded, padded with spaces). */
+function hits(text: string, cues: string[], negatable = false): number {
+  let n = 0;
+  for (const cue of cues) {
+    let from = 0;
+    for (;;) {
+      const at = text.indexOf(cue, from);
+      if (at < 0) break;
+      from = at + 1;
+      // Start of a word only.
+      if (/[a-z0-9]/.test(text[at - 1] ?? " ")) continue;
+      if (negatable && NEGATORS.some((w) => text.endsWith(w, at))) continue;
+      n++;
+      break;
+    }
+  }
+  return n;
+}
+
+const top = (counts: [string, number][], max: number): string[] =>
+  counts
+    .map((c, i) => [c[0], c[1], i] as const)
+    .filter(([, n]) => n > 0)
+    .sort((a, b) => b[1] - a[1] || a[2] - b[2])
+    .slice(0, max)
+    .map(([name]) => name);
 
 /**
- * Deterministic keyword heuristic: same input, same output. For demos, tests
- * and as the default when no real provider is configured. Rules, in order:
- * positive and negative hits together = mixed; else the sentiment with most
- * hits; without hits, a closed-question label or a short text is neutral;
- * else the dimension's default (constructive when it has none).
+ * A demo heuristic, not an analysis (provider "mock", a DEMO_PROVIDERS
+ * entry): deterministic keyword cues, for demos, tests and as the default
+ * when no real provider is configured. It never fabricates a tone from the
+ * question: without cues a text is neutral. Its confidence is null (it does
+ * not estimate one).
  */
 export class MockProvider implements AnalysisProvider {
   readonly name = "mock";
-  readonly promptVersion = "mock-v2";
+  readonly promptVersion = "mock-v3";
 
   async analyze(batch: AnalysisInput[]): Promise<AnalysisOutput[]> {
     return batch.map((input) => analyzeOne(input));
   }
 }
 
-const round2 = (n: number) => Math.round(n * 100) / 100;
-
 export function analyzeOne(input: AnalysisInput): AnalysisOutput {
-  const text = ` ${fold(input.text)} `;
-  const hits = (Object.keys(LEXICON) as Lexical[]).map(
-    (s) => [s, count(text, LEXICON[s])] as const,
+  const bare = fold(input.text).replace(/\s+/g, " ").trim();
+  const text = ` ${bare} `;
+  const n = {
+    positive: hits(text, CUES.positive),
+    constructive: hits(text, CUES.constructive),
+    negative: hits(text, CUES.negative, true),
+  };
+  let sentiment: Sentiment = "neutral";
+  if (n.positive > 0 && n.negative > 0) sentiment = "mixed";
+  else if (n.negative > 0) sentiment = "negative";
+  else if (n.constructive > 0) sentiment = "constructive";
+  else if (n.positive > 0) sentiment = "positive";
+
+  const vocabulary =
+    input.rubric === "yes_no_detail" && isImpactQuestion(input.question)
+      ? IMPACT_CUES
+      : THEME_CUES;
+  const themes = top(
+    Object.entries(vocabulary).map(([k, cues]) => [k, hits(text, cues)]),
+    3,
   );
-  const total = hits.reduce((n, [, h]) => n + h, 0);
-  const n = Object.fromEntries(hits) as Record<Lexical, number>;
-  let sentiment: Sentiment = DEFAULTS[input.dimension] ?? "constructive";
-  let confidence = 0.3;
-  if (n.positive > 0 && n.negative > 0) {
-    sentiment = "mixed";
-    const both = n.positive + n.negative;
-    confidence = round2(
-      0.4 + 0.6 * ((2 * Math.min(n.positive, n.negative)) / both),
-    );
-  } else if (total > 0) {
-    const [best, hit] = [...hits].sort((a, b) => b[1] - a[1])[0];
-    sentiment = best;
-    confidence = round2(0.4 + 0.6 * (hit / total));
-  } else if (input.closed) {
-    sentiment = "neutral";
-    confidence = 0.5;
-  } else if (input.text.trim().split(/\s+/).length <= SHORT_WORDS) {
-    sentiment = "neutral";
+  const signals = top(
+    Object.entries(SIGNAL_CUES).map(([k, cues]) => [k, hits(text, cues)]),
+    7,
+  ) as Signal[];
+
+  const words = bare.split(" ").filter(Boolean).length;
+  let substance: Substance;
+  if (
+    words <= 1 ||
+    NOTHING.test(bare) ||
+    // Only praise where an improvement was asked answers nothing.
+    (input.rubric === "improvement" && sentiment === "positive")
+  ) {
+    substance = "none";
+  } else if (
+    words >= 6 &&
+    (themes.length > 0 || signals.length > 0) &&
+    (CONCRETE.test(bare) || words >= 12)
+  ) {
+    substance = "specific";
+  } else {
+    substance = "generic";
   }
-  const themes = Object.entries(THEMES)
-    .map(([name, stems]) => [name, count(text, stems)] as const)
-    .filter(([, hit]) => hit > 0)
-    .sort(
-      (a, b) =>
-        b[1] - a[1] ||
-        (THEME_ORDER.get(a[0]) ?? 0) - (THEME_ORDER.get(b[0]) ?? 0),
-    )
-    .slice(0, 3)
-    .map(([name]) => name);
-  return { token: input.token, sentiment, confidence, themes };
+  return {
+    token: input.token,
+    substance,
+    themes,
+    signals,
+    sentiment,
+    confidence: null,
+  };
 }

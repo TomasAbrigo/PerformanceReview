@@ -39,11 +39,15 @@ Cualquier otro texto deja la fila sin cruzar (`invalid_sentiment`).
 
 ## Cómo cruza
 
-1. Se buscan los comentarios sobre esa persona (como evaluada) en ese ciclo: los abiertos y las respuestas a preguntas cerradas con dimensión (su texto es la etiqueta de la opción elegida), salvo que el setting `analysis.includeClosed` esté apagado.
+1. Se buscan los comentarios sobre esa persona (como evaluada) en ese ciclo: solo texto libre (#128). Una opción elegida en una pregunta cerrada nunca es un comentario (el texto tipeado junto a una opción, «Otro: …», sí). En una pregunta Sí/No el texto que cuenta es el «cómo» después del Sí/No («Sí, con el voluntariado…» → «con el voluntariado…»); un Sí o No pelado no se etiqueta.
 2. Entre ellos, el que tiene el mismo hash de texto normalizado.
 3. Si ninguno coincide, el único comentario de esa dimensión; si hay más de uno, la fila queda **sin cruzar** (`ambiguous`): nunca se adivina.
 
-Las filas que no cruzan (`missing_fields`, `invalid_sentiment`, `unknown_person`, `unknown_cycle`, `no_match`, `ambiguous`) se devuelven con su número de fila y se muestran en pantalla o en la consola. Cada importación deja una corrida en `analysis_run` (proveedor `import`, filas totales y cruzadas). Reimportar el mismo archivo actualiza las mismas etiquetas. Una corrección humana posterior siempre gana sobre lo importado.
+Las filas que no cruzan (`missing_fields`, `invalid_sentiment`, `unknown_person`, `unknown_cycle`, `no_match`, `ambiguous`) se devuelven con su número de fila y se muestran en pantalla o en la consola. Cada importación deja una corrida en `analysis_run` (proveedor `import`, filas totales y cruzadas). Reimportar el mismo archivo actualiza las mismas etiquetas.
+
+## Precedencia
+
+La lectura efectiva de cada respuesta (CTE `eff`) es, de la última de cada clase: **corrección humana > etiqueta importada > etiqueta de máquina**. Una corrida posterior de un proveedor (mock o Anthropic) no pisa lo importado; una corrección humana siempre gana. Una etiqueta importada no trae `substance` (queda vacía) ni señales: el CSV no tiene esas columnas.
 
 ## Ejemplo
 
@@ -51,5 +55,5 @@ Las filas que no cruzan (`missing_fields`, `invalid_sentiment`, `unknown_person`
 
 ```csv
 employee_name,review_cycle,dimension,text,sentiment,confidence,themes
-Adrián Bustos,Evaluación semestral 2024-H1,improvement,Necesito mejorar la planificación de mis tiempos.,constructive,0.85,planificacion
+Adrián Bustos,Evaluación semestral 2024-H1,improvement,Quiero delegar más y no cargar con todo.,constructive,0.85,liderazgo;planificacion
 ```

@@ -6,6 +6,7 @@ import {
   type LikertOverrides,
   type LikertRole,
   mapLikert,
+  storedLikertLabel,
 } from "@/modules/likert";
 import type {
   CustomQuestionMapping,
@@ -369,7 +370,8 @@ export function answerColumns(
     if ("unmapped" in mapped) return { unmapped: true, raw: text };
     return {
       ...none,
-      optionLabel: text.length === 1 ? text.toUpperCase() : text,
+      // Never Bamboo's text as it came: it can name the reviewee (#130).
+      optionLabel: storedLikertLabel(column.role, text, mapped.value),
       optionValue: mapped.value,
       normalized: mapped.normalized,
     };
