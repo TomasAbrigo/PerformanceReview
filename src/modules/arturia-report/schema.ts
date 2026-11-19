@@ -320,6 +320,33 @@ const signalsBlock = z.object({
   byDepartment: cut(signalGroup),
   byAccount: cut(signalGroup),
   byDm: cut(signalGroup),
+  /**
+   * Signals crossed with the manager's retention / engagement answer: one row
+   * per person (the latest manager review of the participant) and answer value
+   * (1-5), with how many of those people carry some signal.
+   */
+  byIndicator: z.array(
+    z.object({
+      indicator: z.enum(["retention", "engagement"]),
+      value: z.number().int().min(1).max(5),
+      /** The question's choice for the value, in the report's language (never the raw answer text). */
+      label: z.string().nullable(),
+      /** People with that answer (at least the minimum). */
+      people: int,
+      /** Of them, people with at least one signal. */
+      withSignal: shown,
+    }),
+  ),
+});
+
+/** The Yes / No of one group (a cut by area, account or DM). */
+const yesNoGroup = z.object({
+  label: z.string(),
+  other: z.boolean(),
+  /** People of the group who answered Yes or No. */
+  people: int,
+  yes: shown,
+  no: shown,
 });
 
 const yesNoRow = z.object({
@@ -335,6 +362,17 @@ const yesNoRow = z.object({
   alert: z.boolean(),
 });
 
+/** The "valued" scale of one group (a cut by area, account or DM). */
+const valuedGroup = z.object({
+  label: z.string(),
+  other: z.boolean(),
+  people: int,
+  /** People per value 1..4 (index 0 = value 1). */
+  counts: z.array(shown),
+  /** People at 1-2; null when it would give a hidden cell away. */
+  notValued: shown,
+});
+
 const closed = z.object({
   /** "How well does the company recognize my value?" (1-4), people per value. */
   valued: z
@@ -346,6 +384,21 @@ const closed = z.object({
       labels: z.array(z.string().nullable()),
       /** People at 1-2: they do not feel valued (or are not sure). */
       notValued: shown,
+      /** The same scale by group: small groups folded into "Otros". */
+      byDepartment: cut(valuedGroup),
+      byAccount: cut(valuedGroup),
+      byDm: cut(valuedGroup),
+      /** The same scale in every cycle (oldest first); a cycle under the minimum is left out. */
+      byCycle: z.array(
+        z.object({
+          cycleId: z.string(),
+          cycleName: z.string(),
+          periodEnd: z.string(),
+          people: int,
+          counts: z.array(shown),
+          notValued: shown,
+        }),
+      ),
     })
     .nullable(),
   /** "What would help me do my best work?": people per chosen option. */
@@ -394,6 +447,31 @@ const qualitative = z.object({
   signals: signalsBlock.nullable(),
   yesNo: z.object({
     rows: z.array(yesNoRow),
+    /** Yes / No per question and group (area, account, DM): small groups folded into "Otros". */
+    byGroup: z.array(
+      z.object({
+        dimension: z.string(),
+        byDepartment: cut(yesNoGroup),
+        byAccount: cut(yesNoGroup),
+        byDm: cut(yesNoGroup),
+      }),
+    ),
+    /** Yes / No per question in every cycle (oldest first); a cycle under the minimum is left out. */
+    byCycle: z.array(
+      z.object({
+        dimension: z.string(),
+        cycles: z.array(
+          z.object({
+            cycleId: z.string(),
+            cycleName: z.string(),
+            periodEnd: z.string(),
+            people: int,
+            yes: shown,
+            no: shown,
+          }),
+        ),
+      }),
+    ),
     /** Types of initiative (themes of the "how") per yes/no question. */
     initiatives: z.array(
       z.object({

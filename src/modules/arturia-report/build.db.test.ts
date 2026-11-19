@@ -31,11 +31,14 @@ import {
   readingProvenance,
   signalSummary,
   signalsByGroup,
+  signalsVsIndicators,
   substanceByQuestion,
   themesBySide,
   toneByQuestion,
   valuedDistribution,
+  yesNoByGroup,
   yesNoRates,
+  yesNoTrend,
 } from "@/modules/qualitative-analysis/reading";
 import { runAnalysis } from "@/modules/qualitative-analysis/service";
 import { ArturiaError, buildReport, resolveCycle } from "./build";
@@ -324,131 +327,144 @@ describe("buildReport over the seed small company", () => {
      * managers say No to frequent conversations (a figure under the minimum).
      */
     beforeAll(async () => {
-      const q = (prompt: string, dimension: string) =>
-        db
-          .execute<{ id: string }>(
-            sql`insert into question_revision (cycle_id, section_title, prompt, kind, applies_to, visible_to_reviewee, required, sort, dimension, yes_no)
-              values (${cycleId}::uuid, ${JSON.stringify({ es: "S", en: "S" })}::jsonb,
+      const world = async (cycle: string) => {
+        const q = (prompt: string, dimension: string) =>
+          db
+            .execute<{ id: string }>(
+              sql`insert into question_revision (cycle_id, section_title, prompt, kind, applies_to, visible_to_reviewee, required, sort, dimension, yes_no)
+              values (${cycle}::uuid, ${JSON.stringify({ es: "S", en: "S" })}::jsonb,
                 ${JSON.stringify({ es: prompt, en: prompt })}::jsonb, 'text',
                 array['self','manager'], true, false, 900, ${dimension}, true)
               returning id`,
-          )
-          .then(([row]) => row.id);
-      const answer = (
-        questionId: string,
-        side: "self" | "manager",
-        no: string,
-        yes: string,
-      ) =>
-        db.execute(sql`
+            )
+            .then(([row]) => row.id);
+        const answer = (
+          questionId: string,
+          side: "self" | "manager",
+          no: string,
+          yes: string,
+        ) =>
+          db.execute(sql`
           insert into answer (request_id, question_revision_id, text_value)
           select r.id, ${questionId}::uuid, ${sql.raw(`case when ${no} then 'No' else ${yes} end`)}
           from review_request r
-          where r.cycle_id = ${cycleId}::uuid and r.relationship = ${side}
+          where r.cycle_id = ${cycle}::uuid and r.relationship = ${side}
             and r.status = 'submitted' and r.deleted_at is null`);
-      const security = await q(
-        "Am I following all Information Security Policies and Procedures of the Company?",
-        "custom_am_i_following_all_information_security_02c50291",
-      );
-      await answer(
-        security,
-        "self",
-        "abs(hashtext(r.id::text)) % 4 = 0",
-        "'Yes'",
-      );
-      const social = await q(
-        'Do I contribute with initiatives related to "Social impact"? How?',
-        "custom_do_i_contribute_with_initiatives_related_097f5c06",
-      );
-      await answer(
-        social,
-        "self",
-        "abs(hashtext(r.id::text)) % 5 = 0",
-        "'Sí, con voluntariado en una escuela y donaciones'",
-      );
-      const environmental = await q(
-        'Do I contribute with initiatives related to "Environmental impact"? How?',
-        "custom_do_i_contribute_with_initiatives_related_80969923",
-      );
-      await answer(
-        environmental,
-        "self",
-        "abs(hashtext(r.id::text)) % 3 = 0",
-        "'Sí, reciclando y moviéndome en bici'",
-      );
-      const conversations = await q(
-        "Do I speak with this employee frequently enough that I consider myself to be aware of his/her needs and current situation?",
-        "custom_do_i_speak_with_this_employee_frequently_d2f1a686",
-      );
-      await answer(
-        conversations,
-        "manager",
-        "r.id in (select id from review_request where cycle_id = '" +
-          cycleId +
-          "' and relationship = 'manager' and status = 'submitted' and deleted_at is null order by id limit 2)",
-        "'Yes'",
-      );
-      // The closed questions: "valued" (1-4, letter choices) and "best work" (one option).
-      const closed = (
-        prompt: string,
-        dimension: string,
-        role: string | null,
-        choices: unknown,
-      ) =>
-        db
-          .execute<{ id: string }>(
-            sql`insert into question_revision (cycle_id, section_title, prompt, kind, applies_to, visible_to_reviewee, required, sort, role, dimension, choices)
-              values (${cycleId}::uuid, ${JSON.stringify({ es: "S", en: "S" })}::jsonb,
+        const security = await q(
+          "Am I following all Information Security Policies and Procedures of the Company?",
+          "custom_am_i_following_all_information_security_02c50291",
+        );
+        await answer(
+          security,
+          "self",
+          "abs(hashtext(r.id::text)) % 4 = 0",
+          "'Yes'",
+        );
+        const social = await q(
+          'Do I contribute with initiatives related to "Social impact"? How?',
+          "custom_do_i_contribute_with_initiatives_related_097f5c06",
+        );
+        await answer(
+          social,
+          "self",
+          "abs(hashtext(r.id::text)) % 5 = 0",
+          "'Sí, con voluntariado en una escuela y donaciones'",
+        );
+        const environmental = await q(
+          'Do I contribute with initiatives related to "Environmental impact"? How?',
+          "custom_do_i_contribute_with_initiatives_related_80969923",
+        );
+        await answer(
+          environmental,
+          "self",
+          "abs(hashtext(r.id::text)) % 3 = 0",
+          "'Sí, reciclando y moviéndome en bici'",
+        );
+        const conversations = await q(
+          "Do I speak with this employee frequently enough that I consider myself to be aware of his/her needs and current situation?",
+          "custom_do_i_speak_with_this_employee_frequently_d2f1a686",
+        );
+        await answer(
+          conversations,
+          "manager",
+          "r.id in (select id from review_request where cycle_id = '" +
+            cycle +
+            "' and relationship = 'manager' and status = 'submitted' and deleted_at is null order by id limit 2)",
+          "'Yes'",
+        );
+        // The closed questions: "valued" (1-4, letter choices) and "best work" (one option).
+        const closed = (
+          prompt: string,
+          dimension: string,
+          role: string | null,
+          choices: unknown,
+        ) =>
+          db
+            .execute<{ id: string }>(
+              sql`insert into question_revision (cycle_id, section_title, prompt, kind, applies_to, visible_to_reviewee, required, sort, role, dimension, choices)
+              values (${cycle}::uuid, ${JSON.stringify({ es: "S", en: "S" })}::jsonb,
                 ${JSON.stringify({ es: prompt, en: prompt })}::jsonb, 'single_choice',
                 array['self'], true, false, 901, ${role}, ${dimension}, ${JSON.stringify(choices)}::jsonb)
               returning id`,
-          )
-          .then(([row]) => row.id);
-      const valued = await closed(
-        "How well does Meridian recognize my value?",
-        "valued",
-        "valued",
-        [
-          {
-            value: "A",
-            label: { es: "Me siento muy valorado", en: "Highly valued" },
-          },
-          {
-            value: "B",
-            label: { es: "A veces me siento valorado", en: "Sometimes valued" },
-          },
-          { value: "C", label: { es: "No estoy seguro", en: "Not sure" } },
-          {
-            value: "D",
-            label: { es: "No me siento valorado", en: "Not valued" },
-          },
-        ],
-      );
-      await db.execute(sql`
+            )
+            .then(([row]) => row.id);
+        const valued = await closed(
+          "How well does Meridian recognize my value?",
+          "valued",
+          "valued",
+          [
+            {
+              value: "A",
+              label: { es: "Me siento muy valorado", en: "Highly valued" },
+            },
+            {
+              value: "B",
+              label: {
+                es: "A veces me siento valorado",
+                en: "Sometimes valued",
+              },
+            },
+            { value: "C", label: { es: "No estoy seguro", en: "Not sure" } },
+            {
+              value: "D",
+              label: { es: "No me siento valorado", en: "Not valued" },
+            },
+          ],
+        );
+        await db.execute(sql`
         insert into answer (request_id, question_revision_id, option_label, option_value)
         select r.id, ${valued}::uuid, 'x', 1 + abs(hashtext(r.id::text)) % 4
         from review_request r
-        where r.cycle_id = ${cycleId}::uuid and r.relationship = 'self'
+        where r.cycle_id = ${cycle}::uuid and r.relationship = 'self'
           and r.status = 'submitted' and r.deleted_at is null`);
-      const best = await closed(
-        "What would help me do my best work?",
-        "best_work",
-        null,
-        [
-          { value: "nothing", label: { es: "Nada", en: "Nothing" } },
-          {
-            value: "direction",
-            label: { es: "Más rumbo", en: "Better direction" },
-          },
-          { value: "other", label: { es: "Otro", en: "Other" } },
-        ],
-      );
-      await db.execute(sql`
+        const best = await closed(
+          "What would help me do my best work?",
+          "best_work",
+          null,
+          [
+            { value: "nothing", label: { es: "Nada", en: "Nothing" } },
+            {
+              value: "direction",
+              label: { es: "Más rumbo", en: "Better direction" },
+            },
+            { value: "other", label: { es: "Otro", en: "Other" } },
+          ],
+        );
+        await db.execute(sql`
         insert into answer (request_id, question_revision_id, option_label)
         select r.id, ${best}::uuid, (array['nothing', 'direction', 'other'])[1 + abs(hashtext(r.id::text)) % 3]
         from review_request r
-        where r.cycle_id = ${cycleId}::uuid and r.relationship = 'self'
+        where r.cycle_id = ${cycle}::uuid and r.relationship = 'self'
           and r.status = 'submitted' and r.deleted_at is null`);
+      };
+      // The same questions in the cycle before, so there are series by cycle.
+      const [previous] = await db.execute<{ id: string }>(sql`
+        select id from review_cycle
+        where status <> 'draft' and deleted_at is null and id <> ${cycleId}::uuid
+          and period_end < (select period_end from review_cycle where id = ${cycleId}::uuid)
+        order by period_end desc limit 1`);
+      if (previous) await world(previous.id);
+      await world(cycleId);
       await runAnalysis(db, { provider: new MockProvider() });
     }, 120_000);
 
@@ -644,6 +660,118 @@ describe("buildReport over the seed small company", () => {
       ).toEqual(fb.map((g) => [g.label ?? "Otros", g.people]));
     });
 
+    it("signals by the manager's answer, Yes / No by group and by cycle, valued by group and by cycle: the readers' numbers, named", async () => {
+      const r = await buildReport(db, { cycle: cycleId, anonymized: false });
+      const q = r.sections.qualitative!;
+      const input = f();
+      // Signals crossed with retention / engagement: a row per person and answer value.
+      const vs = await signalsVsIndicators(db, DEFAULT_ACTOR, input);
+      expect(vs.length).toBeGreaterThan(0);
+      expect(
+        q.signals!.byIndicator.map((x) => [
+          x.indicator,
+          x.value,
+          x.people,
+          x.withSignal,
+        ]),
+      ).toEqual(vs.map((x) => [x.role, x.value, x.people, x.withSignal]));
+      for (const x of q.signals!.byIndicator) {
+        // labelled by value, in the report's language, never with a name
+        expect(x.label, `${x.indicator} ${x.value}`).toBe(
+          likertLabel(x.indicator, x.value, "es"),
+        );
+        for (const n of names) expect(x.label ?? "").not.toContain(n);
+        expect(x.withSignal!).toBeLessThanOrEqual(x.people);
+      }
+
+      // Yes / No by group: the readers' groups, the people add up to the question's.
+      const dims = q.yesNo.rows.map((x) => x.dimension);
+      expect(q.yesNo.byGroup.map((x) => x.dimension)).toEqual(dims);
+      for (const [cut, groupBy] of [
+        ["byDepartment", "department"],
+        ["byAccount", "account"],
+        ["byDm", "dm"],
+      ] as const) {
+        const read = await yesNoByGroup(db, DEFAULT_ACTOR, input, groupBy);
+        for (const d of q.yesNo.byGroup) {
+          const row = q.yesNo.rows.find((x) => x.dimension === d.dimension)!;
+          const groups = d[cut].groups;
+          expect(d[cut].suppressed).toBe(0);
+          expect(groups.reduce((n, g) => n + g.people, 0)).toBe(row.people);
+          expect(groups.reduce((n, g) => n + (g.yes ?? 0), 0)).toBe(row.yes);
+          expect(groups.reduce((n, g) => n + (g.no ?? 0), 0)).toBe(row.no);
+          const byLabel = new Map(
+            read
+              .filter((x) => x.dimension === d.dimension)
+              .map((x) => [x.label ?? "Otros", x]),
+          );
+          for (const g of groups) {
+            expect(g.people).toBe(byLabel.get(g.label)!.people);
+            expect(g.yes).toBe(byLabel.get(g.label)!.yes);
+            expect(g.no).toBe(byLabel.get(g.label)!.no);
+          }
+        }
+      }
+      // By cycle: the readers' trend, oldest first; this cycle's point is the question's row.
+      const trend = await yesNoTrend(db, DEFAULT_ACTOR, {});
+      for (const d of q.yesNo.byCycle) {
+        expect(d.cycles.map((c) => [c.cycleId, c.people, c.yes, c.no])).toEqual(
+          trend
+            .filter((x) => x.dimension === d.dimension)
+            .map((x) => [x.cycleId, x.people, x.yes, x.no]),
+        );
+        const ends = d.cycles.map((c) => c.periodEnd);
+        expect([...ends].sort()).toEqual(ends);
+        const now = d.cycles.find((c) => c.cycleId === cycleId)!;
+        const row = q.yesNo.rows.find((x) => x.dimension === d.dimension)!;
+        expect([now.people, now.yes, now.no]).toEqual([
+          row.people,
+          row.yes,
+          row.no,
+        ]);
+      }
+      expect(
+        q.yesNo.byCycle.find((d) => d.dimension === dims[0])!.cycles.length,
+      ).toBeGreaterThanOrEqual(2);
+
+      // Valued: by group and by cycle.
+      const v = q.closed.valued!;
+      for (const [cut, groupBy] of [
+        ["byDepartment", "department"],
+        ["byAccount", "account"],
+        ["byDm", "dm"],
+      ] as const) {
+        const read = (
+          await valuedDistribution(db, DEFAULT_ACTOR, input, groupBy)
+        ).byGroup;
+        expect(v[cut].suppressed).toBe(0);
+        expect(v[cut].groups.map((g) => [g.label, g.people, g.counts])).toEqual(
+          read.map((g) => [g.label ?? "Otros", g.people, g.counts]),
+        );
+        expect(v[cut].groups.reduce((n, g) => n + g.people, 0)).toBe(v.people);
+        for (const g of v[cut].groups) {
+          expect(g.notValued).toBe(g.counts[0]! + g.counts[1]!);
+        }
+      }
+      const vt = (await valuedDistribution(db, DEFAULT_ACTOR, input)).trend;
+      expect(
+        v.byCycle.map((c) => [c.cycleId, c.people, c.counts, c.notValued]),
+      ).toEqual(vt.map((c) => [c.cycleId, c.people, c.counts, c.notValued]));
+      expect(v.byCycle.length).toBeGreaterThanOrEqual(2);
+      expect(v.byCycle.at(-1)!.cycleId).toBe(cycleId);
+      // the HTML draws them
+      const html = renderHtml(r);
+      for (const t of [
+        "Señales según la respuesta del manager",
+        "Sí y No por grupo",
+        "Sí y No por ciclo",
+        "Valoración por grupo",
+        "Valoración por ciclo",
+      ]) {
+        expect(html).toContain(t);
+      }
+    });
+
     it("the named report keeps the representative quotes; no seed name survives in them", async () => {
       const r = await buildReport(db, { cycle: cycleId, anonymized: false });
       const quotes = r.sections
@@ -802,6 +930,52 @@ describe("buildReport over the seed small company", () => {
           "negative",
         ]);
       });
+      // signals by the manager's answer, Yes / No by group and cycle, valued by group and cycle
+      q.signals?.byIndicator.forEach((x, i) => {
+        base.push([`byIndicator[${i}]`, x.people]);
+        row(`byIndicator[${i}]`, x, ["withSignal"]);
+      });
+      q.yesNo.byGroup.forEach((d, i) => {
+        for (const [name, cut] of Object.entries({
+          department: d.byDepartment,
+          account: d.byAccount,
+          dm: d.byDm,
+        })) {
+          cut.groups.forEach((g, j) => {
+            base.push([`yesNo.byGroup[${i}].${name}[${j}]`, g.people]);
+            row(`yesNo.byGroup[${i}].${name}[${j}]`, g, ["yes", "no"]);
+          });
+        }
+      });
+      q.yesNo.byCycle.forEach((d, i) =>
+        d.cycles.forEach((c, j) => {
+          base.push([`yesNo.byCycle[${i}][${j}]`, c.people]);
+          row(`yesNo.byCycle[${i}][${j}]`, c, ["yes", "no"]);
+        }),
+      );
+      const val = q.closed.valued;
+      if (val) {
+        for (const [name, cut] of Object.entries({
+          department: val.byDepartment,
+          account: val.byAccount,
+          dm: val.byDm,
+        })) {
+          cut.groups.forEach((g, j) => {
+            base.push([`valued.${name}[${j}]`, g.people]);
+            g.counts.forEach((c, k) =>
+              cell.push([`valued.${name}[${j}][${k}]`, c]),
+            );
+            cell.push([`valued.${name}[${j}].notValued`, g.notValued]);
+          });
+        }
+        val.byCycle.forEach((c, j) => {
+          base.push([`valued.byCycle[${j}]`, c.people]);
+          c.counts.forEach((n, k) =>
+            cell.push([`valued.byCycle[${j}][${k}]`, n]),
+          );
+          cell.push([`valued.byCycle[${j}].notValued`, c.notValued]);
+        });
+      }
       return { base, cell };
     }
 
@@ -921,6 +1095,74 @@ describe("buildReport over the seed small company", () => {
         // the groups are folded, not dropped: DMs are numbered, accounts keep their name
         for (const g of s?.byDm.groups ?? []) {
           expect(g.label).toMatch(/^(DM \d+|Otros)$/);
+        }
+
+        // --- signals by the manager's answer: "n of people" pairs
+        for (const x of s?.byIndicator ?? []) {
+          if (x.withSignal !== null) {
+            expect(
+              x.people - x.withSignal === 0 || x.people - x.withSignal >= min,
+            ).toBe(true);
+          }
+        }
+        // --- Yes / No and valued by group (a table: rows are the groups, whose
+        // people are public; columns are the answers, whose totals are public
+        // when the question's own row publishes them). A hidden cell next to
+        // none other in its row, or in a column with a public total, could be
+        // solved for. (The unit test of maskTable attacks small tables fully.)
+        const hiddenIn = (cells: (number | null)[]) =>
+          cells.filter((c) => c === null).length;
+        for (const d of q.yesNo.byGroup) {
+          const total = q.yesNo.rows.find((x) => x.dimension === d.dimension);
+          for (const cut of [d.byDepartment, d.byAccount, d.byDm]) {
+            for (const g of cut.groups) {
+              expect(hiddenIn([g.yes, g.no]), JSON.stringify(g)).not.toBe(1);
+            }
+            if (cut.suppressed > 0 || !total) continue;
+            expect(cut.groups.reduce((n, g) => n + g.people, 0)).toBe(
+              total.people,
+            );
+            for (const k of ["yes", "no"] as const) {
+              if (total[k] === null) continue;
+              expect(
+                hiddenIn(cut.groups.map((g) => g[k])),
+                `${d.dimension} ${k} column`,
+              ).not.toBe(1);
+            }
+          }
+        }
+        // by cycle: each row adds up to its people
+        for (const d of q.yesNo.byCycle) {
+          for (const c of d.cycles) {
+            expect(unsolvable([c.yes, c.no], c.people)).toBe(true);
+          }
+        }
+        const v = q.closed.valued;
+        if (v) {
+          for (const cut of [v.byDepartment, v.byAccount, v.byDm]) {
+            for (const g of cut.groups) {
+              expect(hiddenIn(g.counts), JSON.stringify(g)).not.toBe(1);
+              // the share at 1-2 is there only when it solves nothing
+              if (g.notValued !== null) {
+                const hid = (i: number) => g.counts[i] === null;
+                const h12 = [0, 1].filter(hid).length;
+                const h34 = [2, 3].filter(hid).length;
+                expect(h12 === 0 || (h12 === 2 && h34 === 0)).toBe(true);
+              }
+            }
+            if (cut.suppressed > 0) continue;
+            expect(cut.groups.reduce((n, g) => n + g.people, 0)).toBe(v.people);
+            for (const k of [0, 1, 2, 3]) {
+              if (v.counts[k] === null) continue;
+              expect(
+                hiddenIn(cut.groups.map((g) => g.counts[k])),
+                `value ${k + 1} column ${JSON.stringify([v.counts, v.people, cut.groups.map((g) => [g.people, g.counts])])}`,
+              ).not.toBe(1);
+            }
+          }
+          for (const c of v.byCycle) {
+            expect(unsolvable(c.counts, c.people)).toBe(true);
+          }
         }
       },
     );

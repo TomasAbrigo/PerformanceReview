@@ -1,10 +1,13 @@
 import { describe, expect, it } from "vitest";
+import { solvable } from "@/modules/insights/suppression-attack";
 import {
   foldCut,
   hideSmall,
   maskCells,
   maskColumns,
   maskPair,
+  maskTable,
+  notValuedOf,
   type CutGroup,
 } from "./qualitative-privacy";
 
@@ -129,6 +132,92 @@ describe("foldCut (a cut by group)", () => {
   });
 });
 
+describe("maskTable (groups by answer, row and column totals public)", () => {
+  it("hides nothing for the named report (minimum 1)", () => {
+    expect(
+      maskTable(
+        [
+          [1, 2],
+          [0, 9],
+        ],
+        1,
+      ),
+    ).toEqual([
+      [1, 2],
+      [0, 9],
+    ]);
+  });
+
+  it("hides the small cells and the ones that would give them away: nobody can solve for a hidden cell", () => {
+    const cases = [
+      [
+        [30, 3],
+        [40, 2],
+        [20, 60],
+      ],
+      [
+        [10, 4],
+        [12, 9],
+        [8, 7],
+      ],
+      [
+        [2, 3, 50, 40],
+        [1, 5, 30, 59],
+        [30, 30, 30, 30],
+      ],
+    ];
+    for (const truth of cases) {
+      const masked = maskTable(truth, 5);
+      expect(masked, JSON.stringify(truth)).not.toBeNull();
+      expect(solvable(masked!, truth), JSON.stringify(truth)).toEqual([]);
+      masked!.forEach((row, r) =>
+        row.forEach((v, c) => {
+          if (v === null) return;
+          // what is shown is the truth, and is not under the minimum
+          expect(v).toBe(truth[r][c]);
+          expect(v === 0 || v >= 5).toBe(true);
+        }),
+      );
+      // something is hidden when something was under the minimum
+      if (truth.flat().some((v) => v > 0 && v < 5)) {
+        expect(masked!.flat().some((v) => v === null)).toBe(true);
+      }
+    }
+  });
+
+  it("a table that cannot be protected is null: the caller leaves it out (a shown 0 would be the row total)", () => {
+    expect(maskTable([[1, 1, 0]], 5)).toBeNull();
+    expect(
+      maskTable(
+        [
+          [25, 1],
+          [30, 1],
+          [28, 0],
+        ],
+        5,
+      ),
+    ).toBeNull();
+    // a single group: its cells are the column totals
+    expect(maskTable([[2, 3, 9, 7]], 8)).toBeNull();
+  });
+});
+
+describe("notValuedOf (the share at values 1-2 next to hidden cells)", () => {
+  it("is published when nothing is hidden, when only 1 and 2 are, or when neither is", () => {
+    expect(notValuedOf([10, 20, 30, 40], 30)).toBe(30);
+    expect(notValuedOf([null, null, 30, 40], 25)).toBe(25);
+    expect(notValuedOf([10, 20, null, 40], 30)).toBe(30);
+    expect(notValuedOf([10, 20, null, null], 30)).toBe(30);
+  });
+
+  it("is not when it would give a hidden cell away", () => {
+    // 1 hidden, 2 shown: the sum solves for 1
+    expect(notValuedOf([null, 20, 30, 40], 25)).toBeNull();
+    // 1 and 2 hidden, 3 hidden too: the sum solves for 3 from the hidden total
+    expect(notValuedOf([null, null, null, 40], 25)).toBeNull();
+  });
+});
+
 describe("maskColumns (a table of groups whose column totals are public)", () => {
   it("hides, per column, the small cells and the complement", () => {
     const table = [
@@ -136,25 +225,28 @@ describe("maskColumns (a table of groups whose column totals are public)", () =>
       [40, 60, 0],
       [20, 50, 7],
     ];
-    const masked = maskColumns(table, 5);
+    const { cells: masked, unprotected } = maskColumns(table, 5);
     // the column with the 3 (and the smallest shown, 50) hides two cells
     expect(masked.map((r) => r[1])).toEqual([null, 60, null]);
     // the other columns: nothing under the minimum
     expect(masked.map((r) => r[0])).toEqual([30, 40, 20]);
+    expect(unprotected).toEqual([false, false, false]);
     // a hidden count is never a number
     for (const row of masked)
       for (const v of row) expect(v === null || v >= 0).toBe(true);
   });
 
-  it("a column that cannot be protected has its non-empty cells hidden", () => {
-    const masked = maskColumns(
+  it("a column that cannot be protected is hidden entirely", () => {
+    const { cells, unprotected } = maskColumns(
       [
         [1, 9],
         [1, 9],
       ],
       5,
     );
-    expect(masked.map((r) => r[0])).toEqual([null, null]);
-    expect(masked.map((r) => r[1])).toEqual([9, 9]);
+    expect(cells.map((r) => r[0])).toEqual([null, null]);
+    expect(cells.map((r) => r[1])).toEqual([9, 9]);
+    // its total must go too: the caller leaves that row out
+    expect(unprotected).toEqual([true, false]);
   });
 });
