@@ -4,6 +4,7 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 import { expect, type Page, test } from "@playwright/test";
 import { countValue, showAllCards } from "./cards";
+import { SCHEMA_MINOR } from "../src/modules/arturia-report/schema";
 import { actAs, actAsRole } from "./act-as";
 import { chooseCycle } from "./filters";
 import { importFile } from "./upload";
@@ -206,14 +207,14 @@ test("People walk the whole insights module and export for Arturía", async ({
         expect(text.includes(fullName(r)), `${file}: a seed name`).toBe(false);
       }
     }
-    // The engagement section is there (schema minor 4) and says no person.
+    // The engagement section is there (schema minor 4 and later) and says no person.
     const json = JSON.parse(
       readFileSync(
         files.find((f) => f.endsWith(".json"))!,
         "utf8",
       ),
     );
-    expect(json.schemaMinor).toBe(4);
+    expect(json.schemaMinor).toBe(SCHEMA_MINOR);
     expect(json.sections.engagementMonthly).toBeTruthy();
     expect(json.sections.people).toBeNull();
   } finally {
