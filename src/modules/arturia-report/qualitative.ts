@@ -39,13 +39,7 @@ import {
 } from "@/modules/qualitative-analysis/reading";
 import { ALERT_KINDS } from "@/modules/qualitative-analysis/yes-no-kind";
 import { sumBy } from "./anonymize";
-import type { LocalizedText } from "@/db/schema/rating-scales";
-import {
-  type Labels,
-  questionLabel,
-  type ReportLocale,
-  santexQuestionName,
-} from "./labels";
+import { type Labels, questionLabel, type ReportLocale } from "./labels";
 import {
   type CutGroup,
   foldCut,
@@ -74,28 +68,6 @@ const CUTS = [
   "account",
   "dm",
 ] as const satisfies readonly QualitativeGroupBy[];
-
-/**
- * The key of a yes/no question's row: its dimension, which the cycles an
- * import creates carry (`custom_<slug>_<hash>`) but the questions of the
- * app's own template do not (the reader gives null): then a stable key made
- * of what the question asks.
- */
-export function yesNoKey(r: {
-  dimension: string | null;
-  prompt: LocalizedText;
-}): string {
-  if (r.dimension) return r.dimension;
-  const asked = santexQuestionName(r.prompt, "en") ?? r.prompt.en;
-  const slug = asked
-    .normalize("NFD")
-    .replace(/\p{M}/gu, "")
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "_")
-    .replace(/^_+|_+$/g, "")
-    .slice(0, 40);
-  return `yes_no_${slug}`;
-}
 
 /** An ISO 8601 instant from Postgres' timestamptz text; the text itself when it does not parse. */
 export function isoOf(text: string): string {
@@ -328,7 +300,7 @@ export async function readQualitative(
       const [yes, no] = cells;
       return [
         {
-          dimension: yesNoKey(r),
+          dimension: r.dimension,
           side: r.side,
           kind: r.kind,
           people: r.people,
@@ -410,7 +382,7 @@ export async function readQualitative(
   // --- the name of every question mentioned, in the report's language
   const promptOf: Record<string, (typeof yesNoRows)[number]["prompt"]> = {
     ...prompts,
-    ...Object.fromEntries(yesNoRows.map((r) => [yesNoKey(r), r.prompt])),
+    ...Object.fromEntries(yesNoRows.map((r) => [r.dimension, r.prompt])),
   };
   const dimensions = new Set<string>([
     "strengths",

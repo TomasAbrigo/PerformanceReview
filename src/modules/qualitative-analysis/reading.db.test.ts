@@ -253,6 +253,37 @@ describe("the open-text reading per person", () => {
     expect(no.rows.map((r) => r.personName)).toEqual(["Beto Lectura"]);
   });
 
+  it("gives a yes/no question of the app's template (no dimension, no role) a stable key", async () => {
+    const native = await insertCycle("Ciclo nativo", "2025-06-30");
+    const nativeNext = await insertCycle("Ciclo nativo 2", "2025-12-31");
+    for (const cycle of [native, nativeNext]) {
+      const q = await insertQuestion(
+        cycle,
+        "Am I following all Information Security Policies and Procedures?",
+        { yesNo: true },
+      );
+      const p = await insertParticipant(cycle, ana, boss, "Ingeniería");
+      await insertAnswer(cycle, p, ana, "self", [
+        { questionId: q, option: "no" },
+      ]);
+    }
+    const [a, b] = await Promise.all([
+      yesNoRates(db, hr, { cycleId: native }),
+      yesNoRates(db, hr, { cycleId: nativeNext }),
+    ]);
+    expect(a).toHaveLength(1);
+    expect(a[0].dimension).toMatch(/^q_[0-9a-f]{10}$/);
+    expect(a[0]).toMatchObject({ kind: "security", no: 1, people: 1 });
+    // The same question of every cycle shares its key: the drill finds it.
+    expect(b[0].dimension).toBe(a[0].dimension);
+    const no = await yesNoAnswers(db, hr, {
+      cycleId: native,
+      dimension: a[0].dimension,
+      yesNo: "no",
+    });
+    expect(no.people).toBe(1);
+  });
+
   it("shows 'valued' as a 1-4 scale and best work as options, never as sentiment", async () => {
     const v = await valuedDistribution(db, hr, { cycleId: c2 }, "department");
     expect(v.total?.counts).toEqual([1, 0, 0, 1]);

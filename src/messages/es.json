@@ -1667,14 +1667,6 @@
     },
     "qualitative": {
       "title": "Análisis cualitativo",
-      "byDimension": "Sentimiento por dimensión",
-      "trend": "Evolución del sentimiento",
-      "themes": "Temas principales",
-      "quotes": "Citas (seudonimizadas)",
-      "totals": "Comentarios analizados",
-      "bySide": "Por quién escribe",
-      "own": "Comentarios propios",
-      "manager": "Comentarios del manager",
       "sentiments": {
         "positive": "Positivo",
         "constructive": "Constructivo",

@@ -73,11 +73,22 @@ function personLabels(r: Resolved): SQL {
     )`;
 }
 
+/**
+ * The key of a question across cycles (aliases `q`): its dimension, else its
+ * role, else (a template question with neither, like the app's yes/no ones)
+ * `q_` + a short hash of its English prompt, so the same question of every
+ * cycle shares one key and a row never has a null one.
+ */
+export function questionKeySql(q = "q"): SQL {
+  const Q = sql.raw(q);
+  return sql`coalesce(${Q}.dimension, ${Q}.role::text, 'q_' || left(md5(coalesce(${Q}.prompt->>'en', ${Q}.prompt->>'es', '')), 10))`;
+}
+
 /** CTE `A`: one submitted answer per person, question and side (the latest), with its yes/no. */
 function personAnswers(r: Resolved, where: SQL): SQL {
   return sql`ans as (
       select a.id as answer_id, a.option_value, a.option_label, a.text_value,
-             coalesce(q.dimension, q.role::text) as dimension,
+             ${questionKeySql("q")} as dimension,
              q.role::text as role, q.prompt, q.choices,
              ${yesNoAnswerSql("a", "q")} as yes_no,
              r.relationship::text as relationship, r.cycle_id,
@@ -855,7 +866,7 @@ export async function yesNoAnswers(
 ): Promise<{ people: number | null; rows: YesNoAnswerRow[] }> {
   const r = await resolve(db, actor, { ...f, dimension: undefined });
   if (!r) return { people: null, rows: [] };
-  const where = sql`q.yes_no and coalesce(q.dimension, q.role::text) = ${f.dimension}`;
+  const where = sql`q.yes_no and ${questionKeySql("q")} = ${f.dimension}`;
   const [count] = await db.execute<{ people: number }>(sql`
     with ${personAnswers(r, where)}
     select count(distinct person_id)::int as people from A

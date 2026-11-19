@@ -1667,14 +1667,6 @@
     },
     "qualitative": {
       "title": "Qualitative analysis",
-      "byDimension": "Sentiment by dimension",
-      "trend": "Sentiment trend",
-      "themes": "Top themes",
-      "quotes": "Quotes (pseudonymized)",
-      "totals": "Comments analyzed",
-      "bySide": "By who wrote them",
-      "own": "Own comments",
-      "manager": "Manager comments",
       "sentiments": {
         "positive": "Positive",
         "constructive": "Constructive",

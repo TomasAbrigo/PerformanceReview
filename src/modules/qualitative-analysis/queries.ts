@@ -14,6 +14,7 @@ import { groupIdentity, needsKeyer } from "@/modules/org-attributes/kinds";
 import { AnalysisError } from "./errors";
 import { choiceOfValue } from "./choices";
 import { labeledCtes, minGroup, resolve } from "./scope";
+import { questionKeySql } from "./reading";
 
 export { qualitativeUniverse, type Universe } from "./scope";
 import { pseudonymize } from "./pseudonymize";
@@ -346,10 +347,10 @@ export async function dimensionPrompts(
   db: DbOrTx,
 ): Promise<Record<string, LocalizedText>> {
   const rows = await db.execute<{ d: string; prompt: LocalizedText }>(sql`
-    select distinct on (q.dimension) q.dimension as d, q.prompt
+    select distinct on (d) ${questionKeySql("q")} as d, q.prompt
     from question_revision q
     join review_cycle c on c.id = q.cycle_id
-    where q.dimension is not null
-    order by q.dimension, c.period_end desc, q.sort, q.id`);
+    where q.dimension is not null or q.yes_no
+    order by d, c.period_end desc, q.sort, q.id`);
   return Object.fromEntries(rows.map((r) => [r.d, r.prompt]));
 }
