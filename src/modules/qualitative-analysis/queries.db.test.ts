@@ -196,18 +196,13 @@ describe("qualitative queries", () => {
       "insights-sentiment.csv",
       `?cycle=${c2024}&locale=en`,
     );
-    expect(header).toEqual([
-      "dimension",
-      "positive",
-      "constructive",
-      "neutral",
-      "mixed",
-      "negative",
-      "total",
-    ]);
-    expect(rows.map((r) => [r.dimension, r.total])).toEqual([
-      ["improvement", "2"],
-      ["strengths", "2"],
+    // In people (#129): Adrián and Carla, each once per question; the manager
+    // side only. The numbers of the rest are in reading-exports.db.test.ts.
+    expect(header.slice(0, 3)).toEqual(["dimension", "side", "people"]);
+    expect(header).not.toContain("total");
+    expect(rows.map((r) => [r.dimension, r.side, r.people])).toEqual([
+      ["improvement", "manager", "2"],
+      ["strengths", "manager", "2"],
     ]);
   });
 
