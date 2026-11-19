@@ -259,8 +259,8 @@ describe("RiskMatrixView", () => {
     expect(
       screen.getByText(
         locale === "es"
-          ? "Las celdas con menos de 5 personas no se muestran, y tampoco el total."
-          : "Cells with fewer than 5 people are not shown, nor is the total.",
+          ? "Las celdas con menos de 5 personas no se muestran, ni las que permitirían calcularlas restando del total."
+          : "Cells with fewer than 5 people are not shown, nor the ones that would let them be worked out from the total.",
       ),
     ).toBeInTheDocument();
     expect(

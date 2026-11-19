@@ -1,5 +1,6 @@
+import { readFile } from "node:fs/promises";
 import path from "node:path";
-import { and, eq, inArray, isNull } from "drizzle-orm";
+import { and, eq, inArray, isNull, sql } from "drizzle-orm";
 import { afterAll, describe, expect, it } from "vitest";
 import { closeDb, db } from "@/db/client";
 import {
@@ -83,6 +84,76 @@ const HEADER = [
   '"Manager Q1: If [Employee] got a job offer elsewhere, I would..."',
   "Manager Q2: How engaged is [Employee] at work?",
 ].join(",");
+
+describe("a label that names the reviewee (#130)", () => {
+  const NAMED =
+    "I would try to convince them to stay. Bruno Pérez would be difficult to replace";
+
+  it("is stored as the canonical label, the migration rewrites old rows, and re-applying still maps them", async () => {
+    await resetDb();
+    await seedLikertMappings(db);
+    const [ana] = await db
+      .insert(person)
+      .values({ displayName: "Ana García" })
+      .returning();
+    const [bruno] = await db
+      .insert(person)
+      .values({ displayName: "Bruno Pérez" })
+      .returning();
+    await db.insert(employeeJobHistory).values({
+      personId: bruno.id,
+      validFrom: "2020-01-01",
+      managerPersonId: ana.id,
+    });
+    const file = await writeCsv([
+      HEADER,
+      `Bruno Pérez,Ana García,Ingeniería,Ciclo 2023,2023-12-01,"${NAMED}",Engaged and a good attitude.`,
+    ]);
+    await importReport(file);
+    const stored = await likertAnswers();
+    expect(stored).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          role: "retention",
+          optionLabel: "I would try to convince them to stay.",
+          optionValue: 4,
+        }),
+        expect.objectContaining({
+          role: "engagement",
+          optionLabel: "Engaged and a good attitude.",
+          optionValue: 4,
+        }),
+      ]),
+    );
+
+    // A row imported before the fix: the migration rewrites it.
+    await db
+      .update(answer)
+      .set({ optionLabel: NAMED })
+      .where(
+        inArray(
+          answer.questionRevisionId,
+          db
+            .select({ id: questionRevision.id })
+            .from(questionRevision)
+            .where(eq(questionRevision.role, "retention")),
+        ),
+      );
+    const migration = await readFile(
+      path.join(process.cwd(), "drizzle/0028_likert_canonical_labels.sql"),
+      "utf8",
+    );
+    await db.execute(sql.raw(migration));
+    const after = await likertAnswers();
+    expect(after.some((a) => a.optionLabel?.includes("Bruno"))).toBe(false);
+    expect(after.find((a) => a.role === "retention")).toMatchObject({
+      optionLabel: "I would try to convince them to stay.",
+      optionValue: 4,
+    });
+    const reapplied = await reapplyLikertMappings(db);
+    expect(reapplied).toMatchObject({ remapped: 0, unmapped: 0 });
+  });
+});
 
 describe("a letter outside the equivalence table", () => {
   it("keeps the answer with the raw label, records an issue and lists it in data quality", async () => {

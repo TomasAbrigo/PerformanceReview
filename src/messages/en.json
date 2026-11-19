@@ -1096,7 +1096,7 @@
       "total": "{n, plural, one {# person with both indicators} other {# people with both indicators}}",
       "totalHidden": "Total not available",
       "riskCount": "At risk: {n}",
-      "suppressed": "Cells with fewer than {min} people are not shown, nor is the total.",
+      "suppressed": "Cells with fewer than {min} people are not shown, nor the ones that would let them be worked out from the total.",
       "risk": {
         "label": "Risk",
         "title": "People in the risk quadrant",

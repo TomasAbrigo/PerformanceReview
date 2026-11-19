@@ -1096,7 +1096,7 @@
       "total": "{n, plural, one {# persona con ambos indicadores} other {# personas con ambos indicadores}}",
       "totalHidden": "Total no disponible",
       "riskCount": "En riesgo: {n}",
-      "suppressed": "Las celdas con menos de {min} personas no se muestran, y tampoco el total.",
+      "suppressed": "Las celdas con menos de {min} personas no se muestran, ni las que permitirían calcularlas restando del total.",
       "risk": {
         "label": "Riesgo",
         "title": "Personas en el cuadrante de riesgo",

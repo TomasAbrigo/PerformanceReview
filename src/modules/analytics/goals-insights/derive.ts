@@ -9,6 +9,7 @@ import {
   orgDimOf,
   orgOptionsOf,
 } from "@/modules/org-attributes/kinds";
+import { suppressList } from "@/modules/insights/suppression";
 import { foldKpiGroups, kpiGroup, type KpiCounts, sumGroups } from "./kpi";
 import {
   bucketOf,
@@ -201,13 +202,16 @@ export function bucketRows(
     if (r.goals > 0) slices[bucketOf(r.completed, r.goals)].push(r);
   }
   let suppressed = 0;
+  // Complementary suppression (#130): the people with goals are a public
+  // total, so a lone small bucket takes the smallest shown one with it.
+  const sizes = slices.map((s) => s.length);
+  const hide =
+    minGroupSize === null
+      ? sizes.map(() => false)
+      : (suppressList(sizes, minGroupSize) ?? sizes.map((n) => n > 0));
   const result = buckets.map((range, i): GoalBucket => {
     const people = slices[i];
-    if (
-      minGroupSize !== null &&
-      people.length > 0 &&
-      people.length < minGroupSize
-    ) {
+    if (hide[i]) {
       suppressed += people.length;
       return {
         ...range,

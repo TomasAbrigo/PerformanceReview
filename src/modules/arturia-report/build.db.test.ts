@@ -24,6 +24,8 @@ import { MockProvider } from "@/modules/qualitative-analysis/mock-provider";
 import { runAnalysis } from "@/modules/qualitative-analysis/service";
 import { ArturiaError, buildReport, resolveCycle } from "./build";
 import { runExportCli } from "./cli";
+import { solvable } from "@/modules/insights/suppression-attack";
+import { likertLabel } from "@/modules/likert";
 import { cycleTeams } from "./collectors";
 import { renderHtml, renderJson } from "./render";
 import { arturiaReportV1, type ArturiaReport, SCHEMA_MINOR } from "./schema";
@@ -109,6 +111,17 @@ describe("buildReport over the seed small company", () => {
     expect(r.sections.indicators?.riskMatrix?.cells).toHaveLength(9);
     expect(r.sections.qualitative?.topThemes.length).toBeGreaterThan(0);
     expect(r.sections.people?.length).toBe(r.sections.executive.participants);
+    // Retention and engagement are labelled by value in the report's
+    // language, never with Bamboo's text (which can name the person, #130).
+    const scale = (role: "retention" | "engagement") =>
+      [1, 2, 3, 4, 5].map((v) => likertLabel(role, v, "es"));
+    for (const p of r.sections.people!) {
+      if (p.retention !== null)
+        expect(scale("retention")).toContain(p.retention);
+      if (p.engagement !== null) {
+        expect(scale("engagement")).toContain(p.engagement);
+      }
+    }
     // The named report carries personal data: emails and names.
     expect(renderJson(r)).toMatch(EMAIL);
     expect(names.some((n) => renderJson(r).includes(n))).toBe(true);
@@ -232,12 +245,34 @@ describe("buildReport over the seed small company", () => {
       for (const d of s.indicators?.distribution ?? []) {
         if (d.suppressed > 0) expect(d.total).toBeNull();
         for (const g of d.groups) expect(g.n).toBeGreaterThanOrEqual(min);
+        // No group is hidden next to a public total (#130): what is shown
+        // adds up to it.
+        if (d.total) {
+          expect(d.groups.reduce((n, g) => n + g.n, 0)).toBe(d.total.n);
+        }
       }
       const m = s.indicators?.riskMatrix;
-      if (m?.cells.some((x) => x.count === null)) {
-        expect(m.total).toBeNull();
+      if (m) {
         // riskCount is the risk cell itself, masked like any other cell
         expect(m.riskCount).toBe(m.cells.find((x) => x.risk)!.count);
+        // Given the cells, the total and the bands' totals (public anyway),
+        // try to solve for each masked cell (#130).
+        const named = (
+          await buildReport(db, { cycle: cycleId, anonymized: false })
+        ).sections.indicators!.riskMatrix!;
+        const table = (x: typeof m) =>
+          ["low", "mid", "high"].map((rb) =>
+            ["low", "mid", "high"].map(
+              (eb) =>
+                x.cells.find((c) => c.retention === rb && c.engagement === eb)!
+                  .count,
+            ),
+          );
+        const masked = table(m);
+        if (masked.flat().some((c) => c !== null)) {
+          expect(m.total).toBe(named.total);
+          expect(solvable(masked, table(named) as number[][])).toEqual([]);
+        }
       }
       const q = s.qualitative;
       if (q) {
@@ -256,10 +291,7 @@ describe("buildReport over the seed small company", () => {
         }
       }
       const g = s.goals!;
-      const hiddenGoals =
-        g.suppressed.byDepartment +
-        g.suppressed.byManager +
-        g.suppressed.buckets;
+      const hiddenGoals = g.suppressed.byDepartment + g.suppressed.byManager;
       if (hiddenGoals > 0) {
         expect([
           g.participantsWithGoals,
@@ -270,7 +302,14 @@ describe("buildReport over the seed small company", () => {
       }
       for (const row of [...g.byDepartment, ...g.byManager]) {
         expect(row.n).toBeGreaterThanOrEqual(min);
+        // The minimum is measured on who has the data (#130).
+        expect(row.peopleWithGoals === 0 || row.peopleWithGoals >= min).toBe(
+          true,
+        );
       }
+      // Buckets: never a single one hidden next to the public total (#130).
+      const hiddenBuckets = g.buckets.filter((b) => b.hidden).length;
+      expect(hiddenBuckets).not.toBe(1);
       for (const b of g.buckets) {
         expect(b.people === null || b.people === 0 || b.people >= min).toBe(
           true,
@@ -540,8 +579,9 @@ describe("buildReport over the seed small company", () => {
         .completion!.byManager.filter((x) => x.relationship === "self")
         .map((x) => [x.label, x.n]),
     );
-    const shared = r.sections.goals!.byManager.filter((x) =>
-      people.has(x.label),
+    // "Otros" differs: goals fold on the people with goals (#130).
+    const shared = r.sections.goals!.byManager.filter(
+      (x) => people.has(x.label) && !x.other,
     );
     expect(shared.some((x) => x.label.startsWith("Equipo"))).toBe(true);
     for (const x of shared) expect(x.n).toBe(people.get(x.label));

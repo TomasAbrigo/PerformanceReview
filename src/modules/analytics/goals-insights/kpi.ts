@@ -100,11 +100,19 @@ export type FoldedKpiGroups = {
   suppressed: number;
 };
 
+/** Whether a group is big enough to stand on its own (#130). */
+const bigEnough = (g: GoalKpiGroup, min: number) =>
+  g.people >= min &&
+  // Its goal figures are those of the people who have goals: they need the
+  // minimum too, unless nobody has any (then they say nothing about anyone).
+  (g.peopleWithGoals === 0 || g.peopleWithGoals >= min);
+
 /**
- * Groups of fewer than `minGroupSize` people (and the unnamed one) are folded
- * into one "Otros" cell; if that is still under the minimum it is hidden and
- * its people are only counted, so no cell with fewer people than the minimum
- * is ever shown. With a minimum of 1 only the unnamed group is folded.
+ * Groups under `minGroupSize` (people, and people with goals) and the unnamed
+ * one are folded into one "Otros" cell; while that is still under the minimum
+ * the smallest shown groups join it, so no group is hidden behind a public
+ * total. Only a whole under the minimum is left out (its people counted).
+ * With a minimum of 1 only the unnamed group is folded.
  */
 export function foldKpiGroups(
   groups: readonly GoalKpiGroup[],
@@ -113,11 +121,24 @@ export function foldKpiGroups(
   const shown: GoalKpiGroup[] = [];
   const rest: GoalKpiGroup[] = [];
   for (const g of groups) {
-    (g.key !== null && g.people >= minGroupSize ? shown : rest).push(g);
+    (g.key !== null && bigEnough(g, minGroupSize) ? shown : rest).push(g);
+  }
+  const small = (list: GoalKpiGroup[]) =>
+    list.length > 0 &&
+    !bigEnough(sumGroups(list, { key: null, label: null }), minGroupSize);
+  while (small(rest) && shown.length) {
+    const smallest = shown.reduce((a, b) =>
+      b.peopleWithGoals < a.peopleWithGoals ||
+      (b.peopleWithGoals === a.peopleWithGoals && b.people < a.people)
+        ? b
+        : a,
+    );
+    shown.splice(shown.indexOf(smallest), 1);
+    rest.push(smallest);
   }
   const people = rest.reduce((n, g) => n + g.people, 0);
   if (people === 0) return { shown, others: null, suppressed: 0 };
-  if (people < minGroupSize) return { shown, others: null, suppressed: people };
+  if (small(rest)) return { shown, others: null, suppressed: people };
   return {
     shown,
     others: sumGroups(rest, { key: null, label: null, others: true }),
