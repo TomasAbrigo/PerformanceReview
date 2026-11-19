@@ -67,7 +67,7 @@ function world(specs: Spec[]) {
     retention: new Map<string, number>(),
     engagement: new Map<string, number>(),
     sides: new Map<string, { self: never; manager: never }>(),
-    sentiment: new Map<string, SentimentCounts>(),
+    signals: new Map<string, boolean>(),
   };
   for (const s of specs) {
     const participantId = `${s.who}@${s.cycle}`;
@@ -85,10 +85,12 @@ function world(specs: Spec[]) {
       self: (s.self ?? "submitted") as never,
       manager: (s.manager ?? "submitted") as never,
     });
+    // A read answer; a "negative" one stands for an answer with a signal.
     if (s.comments) {
-      const c = sentiment(s.comments);
-      c.total = c.positive + c.constructive + c.neutral + c.mixed + c.negative;
-      facts.sentiment.set(participantId, c);
+      facts.signals.set(
+        participantId,
+        (sentiment(s.comments).negative ?? 0) > 0,
+      );
     }
   }
   return { participants, facts: facts as unknown as Dm360Facts };
@@ -149,12 +151,8 @@ describe("buildDm360", () => {
     expect(diego.engagement?.mean).toBeCloseTo(2.5);
     // Two of four have both at 1.
     expect(diego.risk).toEqual({ people: 2, of: 4, share: 0.5 });
-    expect(diego.sentiment).toMatchObject({
-      comments: 6,
-      people: 4,
-      counts: { positive: 4, negative: 2 },
-    });
-    expect(diego.sentiment?.share.negative).toBeCloseTo(2 / 6);
+    // Two of the four people with read answers carry a signal.
+    expect(diego.signals).toEqual({ people: 2, of: 4, share: 0.5 });
     expect(diego.selfRate).toBe(1);
     expect(diego.managerRate).toBe(0.75);
   });
@@ -183,23 +181,23 @@ describe("buildDm360", () => {
     ]);
   });
 
-  it("says what the rules find: falls, negative share, risk, pending assessments", () => {
+  it("says what the rules find: falls, signals, risk, pending assessments", () => {
     const diego = run(specs).cards[0];
 
     // Engagement fell by half a point: under the threshold. 3 of 4 manager
     // assessments are in: not under half.
     expect(diego.insights.map((i) => i.code)).toEqual([
       "retentionDrop",
-      "negativeSentiment",
+      "signals",
       "riskHigh",
     ]);
     expect(diego.insights[0]).toEqual({
       code: "retentionDrop",
       params: { previous: 4, current: 2, delta: 2, cycle: "H2 2024" },
     });
-    expect(diego.insights.find((i) => i.code === "negativeSentiment")).toEqual({
-      code: "negativeSentiment",
-      params: { percent: 33, comments: 6 },
+    expect(diego.insights.find((i) => i.code === "signals")).toEqual({
+      code: "signals",
+      params: { percent: 50, people: 2, of: 4 },
     });
     expect(diego.insights.find((i) => i.code === "riskHigh")).toEqual({
       code: "riskHigh",
@@ -353,7 +351,7 @@ describe("buildDm360, masked (direction)", () => {
     expect(card.retention).toBeNull();
     expect(card.engagement).toBeNull();
     expect(card.risk).toBeNull();
-    expect(card.sentiment).toBeNull();
+    expect(card.signals).toBeNull();
     expect(card.selfRate).toBeNull();
     expect(card.managerRate).toBe(1);
     expect(card.insights).toEqual([{ code: "noData" }]);
@@ -393,45 +391,29 @@ describe("buildDm360, masked (direction)", () => {
 describe("insightsOf", () => {
   const base: Pick<
     Dm360Card,
-    "retention" | "engagement" | "risk" | "sentiment" | "managerRate" | "trend"
+    "retention" | "engagement" | "risk" | "signals" | "managerRate" | "trend"
   > = {
     retention: null,
     engagement: null,
     risk: null,
-    sentiment: null,
+    signals: null,
     managerRate: null,
     trend: [],
   };
 
   it("needs a minimum of comments and people before a share is said", () => {
-    const share = (
-      negative: number,
-      comments: number,
-    ): Dm360Card["sentiment"] => ({
-      comments,
-      people: comments,
-      counts: {
-        positive: comments - negative,
-        constructive: 0,
-        neutral: 0,
-        mixed: 0,
-        negative,
-      },
-      share: {
-        positive: 1 - negative / comments,
-        constructive: 0,
-        neutral: 0,
-        mixed: 0,
-        negative: negative / comments,
-      },
+    const share = (people: number, of: number): Dm360Card["signals"] => ({
+      people,
+      of,
+      share: people / of,
     });
 
-    expect(insightsOf({ ...base, sentiment: share(2, 2) }, thresholds)).toEqual(
-      [{ code: "stable" }],
-    );
+    expect(insightsOf({ ...base, signals: share(2, 2) }, thresholds)).toEqual([
+      { code: "stable" },
+    ]);
     expect(
-      insightsOf({ ...base, sentiment: share(1, 3) }, thresholds)[0].code,
-    ).toBe("negativeSentiment");
+      insightsOf({ ...base, signals: share(1, 3) }, thresholds)[0].code,
+    ).toBe("signals");
     expect(
       insightsOf({ ...base, risk: { people: 2, of: 2, share: 1 } }, thresholds),
     ).toEqual([{ code: "stable" }]);

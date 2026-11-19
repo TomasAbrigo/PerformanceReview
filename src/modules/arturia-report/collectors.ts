@@ -705,7 +705,11 @@ async function qualitativeSlice(
     topThemes: [...t.shown, ...(t.others ? [t.others] : [])].map((x) => ({
       ...withoutN(x),
       theme: x.other ? x.theme : pseudonymize([x.theme], sources).texts[0],
-      quotes: [...new Set(pseudonymize(x.quotes, sources).texts)],
+      // The anonymized report carries no verbatim quote (#129): a text can
+      // tell who wrote it even with names replaced.
+      quotes: ctx.anonymized
+        ? []
+        : [...new Set(pseudonymize(x.quotes, sources).texts)],
     })),
     suppressed,
   };

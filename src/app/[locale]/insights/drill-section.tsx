@@ -120,6 +120,8 @@ async function drillTitle(drill: Drill): Promise<string> {
               value: sc.value,
             })
           : null,
+        sc.substance ? tq(`reading.substance.${sc.substance}`) : null,
+        sc.signal ? tq(`reading.signal.${sc.signal}`) : null,
       ].filter((x): x is string => !!x);
       return parts.length
         ? t("comments", { detail: parts.join(" · ") })
@@ -127,6 +129,15 @@ async function drillTitle(drill: Drill): Promise<string> {
     }
     case "dm":
       return t(`dm.${drill.metric}`, { dm: drill.dm });
+    // ---- open-text reading (#129) ----
+    case "yesno": {
+      const tq = await getTranslations("Qualitative");
+      const labels = await dimensionLabels([drill.dimension]);
+      return t("yesNo", {
+        question: labels[drill.dimension] ?? drill.dimension,
+        answer: tq(`reading.yesNo.${drill.answer}`),
+      });
+    }
   }
 }
 

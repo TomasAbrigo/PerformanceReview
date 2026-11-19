@@ -1,4 +1,4 @@
-import { PageSkeleton } from "@/components/experience";
+import { MetricCard, PageSkeleton } from "@/components/experience";
 import { hasLocale } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
@@ -21,16 +21,19 @@ import {
 import { SideToggle } from "@/components/qualitative/side-toggle";
 import { RunButton } from "@/components/qualitative/run-button";
 import {
-  ByDimension,
-  ByGroup,
-  Indicators,
-  Kpis,
-  Themes,
-  Trend,
-} from "@/components/qualitative/views";
+  AgreementPanel,
+  ClosedQuestionsPanel,
+  ManagerFeedbackPanel,
+  MaskedReading,
+  ProvenanceNote,
+  SignalsPanel,
+  SubstancePanel,
+  ThemesSidePanel,
+  TonePanel,
+  YesNoPanel,
+} from "@/components/qualitative/reading";
 import { db } from "@/db/client";
 import { routing } from "@/i18n/routing";
-import { isUuid } from "@/lib/uuid";
 import { getActor } from "@/modules/actor/server";
 import { canSeeIndividuals, insightsScope } from "@/modules/insights/authz";
 import { orgFilterOptions } from "@/modules/org-attributes";
@@ -39,21 +42,35 @@ import {
   listComments,
   qualitativeFilterOptions,
   qualitativeGroupBys,
+  qualitativeUniverse,
   type QualitativeGroupBy,
-  sentimentByDimension,
-  sentimentByGroup,
-  sentimentTotals,
-  sentimentTrend,
-  sentimentVsIndicators,
-  topThemes,
   type QualitativeFilters as Filters,
 } from "@/modules/qualitative-analysis";
+import {
+  agreementBySide,
+  bestWorkOptions,
+  managerFeedbackByGroup,
+  readingProvenance,
+  signalSummary,
+  signalsByGroup,
+  signalsVsIndicators,
+  substanceByQuestion,
+  themesBySide,
+  toneByQuestion,
+  valuedDistribution,
+  yesNoByGroup,
+  yesNoRates,
+  yesNoThemes,
+  yesNoTrend,
+} from "@/modules/qualitative-analysis/reading";
 import { listCycles } from "@/modules/review-core";
+import { latestFirst, pickCycle } from "@/modules/review-core/current-cycle";
+import { localizeCycles } from "@/modules/review-core/cycle-name";
+import { rememberedCycle } from "@/modules/review-core/remembered-cycle";
 import { getSettings } from "@/modules/settings";
 import { drillBase } from "@/components/drill/drill-link";
 import type { CommentDrills } from "@/components/qualitative/views";
 import { type CommentScope, parseDrill } from "@/modules/insights/drill-spec";
-import { kpiThresholds } from "@/modules/insights/tone";
 import { DrillSection } from "../drill-section";
 import { dimensionLabels } from "../dimension-labels";
 import {
@@ -75,19 +92,25 @@ async function Qualitative({
   const kicker = await groupKicker("insights");
   const scope = insightsScope(actor);
   if (scope.kind === "none") return <p>{t("forbidden")}</p>;
+  const masked = scope.kind === "aggregatesOnly";
   const individuals = canSeeIndividuals(actor);
   const hr = actor.role === "hr";
   // Direction does not filter by the people who lead a team (a DM, a Santex Lead).
   const sp = await searchParams;
-  const p = withoutPersonFilters(
-    parseQualitativeParams(sp),
-    scope.kind === "aggregatesOnly",
-  );
+  const p = withoutPersonFilters(parseQualitativeParams(sp), masked);
   const settings = await getSettings(db);
-  const cycles = (await listCycles(db))
-    .filter((c) => c.status !== "draft")
-    .map((c) => ({ id: c.id, name: c.name }));
-  const cycleId = p.cycle && isUuid(p.cycle) ? p.cycle : undefined;
+  const minGroupSize = settings["aggregation.minGroupSize"];
+  // One cycle across the app (#119); "all" is an explicit choice.
+  const cycles = latestFirst(
+    localizeCycles(await listCycles(db), locale).filter(
+      (c) => c.status !== "draft",
+    ),
+  );
+  const all = p.cycle === "all";
+  const cycle = all
+    ? undefined
+    : pickCycle(cycles, p.cycle, await rememberedCycle());
+  const cycleId = cycle?.id;
   const f: Filters = {
     cycleId,
     department: p.department,
@@ -97,38 +120,61 @@ async function Qualitative({
     theme: p.theme,
     relationship: p.side,
     aggregateOnly: p.aggregate,
+    minGroupSize,
   };
   // Direction reads teams, not the people who lead them (a DM, a Santex Lead).
-  const groupBys: readonly QualitativeGroupBy[] =
-    scope.kind === "aggregatesOnly"
-      ? qualitativeGroupBys.filter((g) => g !== "dm" && g !== "santex_lead")
-      : qualitativeGroupBys;
+  const groupBys: readonly QualitativeGroupBy[] = masked
+    ? qualitativeGroupBys.filter((g) => g !== "dm" && g !== "santex_lead")
+    : qualitativeGroupBys;
   const groupBy =
-    p.groupBy && groupBys.includes(p.groupBy) ? p.groupBy : "account";
-  const [
-    options,
-    org,
-    totals,
-    byDimension,
-    trend,
-    themes,
-    indicators,
-    comments,
-    byGroup,
-  ] = await Promise.all([
+    p.groupBy && groupBys.includes(p.groupBy) ? p.groupBy : "department";
+  const [options, org, universe] = await Promise.all([
     qualitativeFilterOptions(db),
     orgFilterOptions(db, actor, { cycleId }),
-    sentimentTotals(db, actor, f),
-    sentimentByDimension(db, actor, f),
-    sentimentTrend(db, actor, f),
-    topThemes(db, actor, f),
-    sentimentVsIndicators(db, actor, f),
-    listComments(db, actor, f),
-    sentimentByGroup(db, actor, f, groupBy),
+    qualitativeUniverse(db, actor, f),
   ]);
-  // Drill-down (drill-section.tsx): every mark opens its comments, narrowed
-  // by the page's filters plus what the mark stands for. Not in the
-  // aggregate view, which never lists comments.
+  const [
+    provenance,
+    substance,
+    managerFeedback,
+    strengths,
+    improvement,
+    agreement,
+    signals,
+    signalGroups,
+    signalIndicators,
+    yesNo,
+    yesNoCycles,
+    yesNoGroups,
+    initiatives,
+    valued,
+    bestWork,
+    tone,
+    comments,
+  ] = universe.masked
+    ? []
+    : await Promise.all([
+        readingProvenance(db, actor, f),
+        substanceByQuestion(db, actor, f),
+        managerFeedbackByGroup(db, actor, f, groupBy),
+        themesBySide(db, actor, { ...f, dimension: "strengths" }),
+        themesBySide(db, actor, { ...f, dimension: "improvement" }),
+        agreementBySide(db, actor, f),
+        signalSummary(db, actor, f),
+        signalsByGroup(db, actor, f, groupBy),
+        signalsVsIndicators(db, actor, f),
+        yesNoRates(db, actor, f),
+        yesNoTrend(db, actor, f),
+        yesNoByGroup(db, actor, f, groupBy),
+        yesNoThemes(db, actor, f),
+        valuedDistribution(db, actor, f, groupBy),
+        bestWorkOptions(db, actor, f),
+        toneByQuestion(db, actor, f),
+        listComments(db, actor, f),
+      ]);
+  // Drill-down (drill-section.tsx): every mark opens its records, narrowed by
+  // the page's filters plus what the mark stands for. Not in the aggregate
+  // view, which never lists comments.
   const base = drillBase("/insights/qualitative", sp, actor);
   const pageScope: CommentScope = {
     cycle: cycleId,
@@ -142,14 +188,13 @@ async function Qualitative({
   for (const k of Object.keys(pageScope) as (keyof CommentScope)[]) {
     if (pageScope[k] === undefined) delete pageScope[k];
   }
-  const drills: CommentDrills | undefined = p.aggregate
-    ? undefined
-    : { base, scope: pageScope };
-  // Only comment drills here: they carry their own cycle (or all of them).
+  const drills: CommentDrills | undefined =
+    p.aggregate || masked ? undefined : { base, scope: pageScope };
   const parsed = p.aggregate ? null : parseDrill(sp.drill);
-  const drill = parsed?.kind === "comments" ? parsed : null;
+  const drill =
+    parsed?.kind === "comments" || parsed?.kind === "yesno" ? parsed : null;
   const groupScope = (key: string): CommentScope | null => {
-    if (key === "unassigned") return null;
+    if (key.startsWith("unassigned")) return null;
     switch (groupBy) {
       case "department":
         return { department: key };
@@ -159,21 +204,30 @@ async function Qualitative({
         return { [groupBy]: key };
     }
   };
-  // The cycle before the selected one, for the deltas of the KPIs.
-  const at = cycleId ? trend.findIndex((c) => c.cycleId === cycleId) : -1;
-  const previous =
-    at > 0 ? { name: trend[at - 1].cycleName, counts: trend[at - 1] } : null;
-  // The panel only appears when People have loaded org attributes.
-  const hasOrg = Object.values(org).some((values) => values.length > 0);
+  const dimensions = [
+    ...new Set([
+      ...options.dimensions,
+      ...(substance ?? []).map((r) => r.dimension),
+      ...(yesNo ?? []).map((r) => r.dimension),
+      "strengths",
+      "improvement",
+    ]),
+  ];
   const dimensionLabel = await dimensionLabels(
-    options.dimensions,
+    dimensions,
     options.dimensionPrompts,
   );
+  const share = (n: number, of: number) =>
+    of ? `${Math.round((n / of) * 100)} %` : "–";
   return (
     <div className="flex flex-col gap-8">
       <PageHeader
         kicker={kicker}
-        title={t("title")}
+        title={
+          <>
+            {t("title")} · {cycle ? cycle.name : t("filters.allCycles")}
+          </>
+        }
         actions={
           hr ? (
             <>
@@ -194,7 +248,8 @@ async function Qualitative({
         <SideToggle current={p.side} hrefFor={(side) => withSide(p, side)} />
         <QualitativeFilters
           params={p}
-          cycles={cycles}
+          cycles={cycles.map((c) => ({ id: c.id, name: c.name }))}
+          cycle={cycleId ?? "all"}
           departments={options.departments}
           dimensions={options.dimensions}
           themes={options.themes}
@@ -202,75 +257,151 @@ async function Qualitative({
           showAggregate={hr}
           org={org}
         />
+        <Toggle
+          label={t("byGroup.groupBy")}
+          options={groupBys}
+          current={groupBy}
+          hrefFor={(g) => withGroupBy(p, g)}
+          text={(g) => t(`byGroup.groups.${g}`)}
+        />
       </PageHeader>
-      <Kpis
-        counts={totals}
-        previous={previous}
-        drills={drills}
-        thresholds={kpiThresholds(settings)}
-      />
-      <ByDimension
-        rows={byDimension}
-        dimensionLabel={dimensionLabel}
-        drills={drills}
-      />
-      <Trend points={trend} drills={drills} />
-      {hasOrg ? (
-        <ByGroup
-          rows={byGroup}
-          drills={scope.kind === "aggregatesOnly" ? undefined : drills}
-          drillScopeOf={groupScope}
-        >
-          <div className="flex flex-wrap items-center gap-3">
-            <Toggle
-              label={t("byGroup.groupBy")}
-              options={groupBys}
-              current={groupBy}
-              hrefFor={(g) => withGroupBy(p, g)}
-              text={(g) => t(`byGroup.groups.${g}`)}
+      {universe.masked ? (
+        <MaskedReading min={universe.minGroupSize} />
+      ) : (
+        <>
+          <ProvenanceNote p={provenance ?? null} />
+          <section
+            aria-label={t("reading.kpis")}
+            className="grid grid-cols-1 gap-3 sm:grid-cols-3"
+            data-testid="qualitative-kpis"
+          >
+            <MetricCard
+              featured
+              label={t("reading.people")}
+              value={universe.people ?? 0}
+              note={t("reading.peopleKpiNote")}
             />
-            {hr ? (
-              <ExportCsvLink
-                file="insights-sentiment-by"
-                label={t("byGroup.export")}
-                params={{
-                  cycle: cycleId,
-                  groupBy,
-                  department: p.department,
-                  relationship: p.side,
-                  ...orgFiltersOf(p),
-                }}
+            <MetricCard
+              label={t("reading.withAny")}
+              value={share(signals?.withAny ?? 0, signals?.people ?? 0)}
+              note={t("reading.signalsMeta", {
+                n: signals?.withAny ?? 0,
+                of: signals?.people ?? 0,
+              })}
+            />
+            <MetricCard
+              label={t("reading.notValued")}
+              value={share(
+                valued?.total?.notValued ?? 0,
+                valued?.total?.people ?? 0,
+              )}
+              note={t("reading.notValuedNote", {
+                n: valued?.total?.notValued ?? 0,
+                of: valued?.total?.people ?? 0,
+              })}
+            />
+          </section>
+          <SubstancePanel
+            rows={substance ?? []}
+            dimensionLabel={dimensionLabel}
+            drills={drills}
+          />
+          <ManagerFeedbackPanel
+            rows={managerFeedback ?? []}
+            drills={drills}
+            drillScopeOf={groupScope}
+          />
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+            {strengths ? (
+              <ThemesSidePanel
+                id="themes-strengths"
+                title={t("reading.themesOf", {
+                  question: dimensionLabel.strengths,
+                })}
+                data={strengths}
+                drills={drills}
+              />
+            ) : null}
+            {improvement ? (
+              <ThemesSidePanel
+                id="themes-improvement"
+                title={t("reading.themesOf", {
+                  question: dimensionLabel.improvement,
+                })}
+                data={improvement}
+                drills={drills}
               />
             ) : null}
           </div>
-        </ByGroup>
-      ) : null}
-      <Themes themes={themes} total={totals?.total} drills={drills} />
-      <Indicators rows={indicators} drills={drills} />
-      {individuals && !p.aggregate ? (
-        <Panel
-          id="comments"
-          kind="comments"
-          title={t("comments.title")}
-          meta={t("comments.count", { n: comments.length })}
-        >
-          <CommentsTable
-            rows={comments}
-            dimensionLabel={dimensionLabel}
-            correct={hr ? correctLabelAction : undefined}
+          {agreement ? (
+            <AgreementPanel
+              a={agreement}
+              dimensionLabel={dimensionLabel}
+              drills={drills}
+            />
+          ) : null}
+          <SignalsPanel
+            s={signals ?? null}
+            byGroup={signalGroups ?? []}
+            vsIndicators={signalIndicators ?? []}
+            drills={drills}
+            groupScope={groupScope}
           />
-        </Panel>
-      ) : null}
+          <YesNoPanel
+            rows={yesNo ?? []}
+            trend={yesNoCycles ?? []}
+            byGroup={yesNoGroups ?? []}
+            themes={initiatives ?? []}
+            dimensionLabel={dimensionLabel}
+            drillOf={
+              masked || p.aggregate
+                ? undefined
+                : (dimension, side, answer) => ({
+                    base,
+                    drill: {
+                      kind: "yesno",
+                      dimension,
+                      answer,
+                      side,
+                      cycle: cycleId ?? null,
+                    },
+                  })
+            }
+          />
+          {valued ? (
+            <ClosedQuestionsPanel valued={valued} bestWork={bestWork ?? null} />
+          ) : null}
+          <TonePanel
+            rows={tone ?? []}
+            dimensionLabel={dimensionLabel}
+            drills={drills}
+          />
+          {individuals && !p.aggregate ? (
+            <Panel
+              id="comments"
+              kind="comments"
+              title={t("comments.title")}
+              meta={t("comments.count", { n: comments?.length ?? 0 })}
+            >
+              <CommentsTable
+                rows={comments ?? []}
+                dimensionLabel={dimensionLabel}
+                correct={hr ? correctLabelAction : undefined}
+              />
+            </Panel>
+          ) : null}
+        </>
+      )}
       {hr ? <ImportLabelsForm importLabels={importLabelsAction} /> : null}
       {drill ? (
         <Suspense fallback={null}>
-          {/* A comments drill carries its own cycle; the rest need one. */}
+          {/* A comments / yes-no drill carries its own cycle (or all of them). */}
           <DrillSection
             actor={actor}
             cycleId={cycleId ?? ""}
             drill={drill}
             base={base}
-            minGroupSize={settings["aggregation.minGroupSize"]}
+            minGroupSize={minGroupSize}
           />
         </Suspense>
       ) : null}

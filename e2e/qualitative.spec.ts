@@ -6,7 +6,7 @@ import { company } from "./seed-data";
 // Performance report): its open-text answers are what the Mock labels.
 const cycleName = company.cycles[0].name;
 
-test("People runs the Mock analysis on an imported cycle and sees sentiment and themes", async ({
+test("People runs the Mock analysis on an imported cycle and reads it per person", async ({
   page,
 }) => {
   test.setTimeout(120_000);
@@ -21,39 +21,31 @@ test("People runs the Mock analysis on an imported cycle and sees sentiment and 
     page.getByRole("status").filter({ hasText: "Proveedor" }),
   ).toContainText("Proveedor: mock", { timeout: 60_000 });
 
-  const bars = page.getByRole("group", {
-    name: "Barras apiladas de sentimiento por dimensión",
-  });
-  await expect(bars).toBeVisible();
-  await expect(bars.getByTestId("sentiment-bar").first()).toBeVisible();
-  await expect(bars).toContainText("Fortalezas");
-
-  // Every segment opens the comments behind it in the drill sheet.
-  await bars.getByRole("link").first().click();
+  // Who read it: the mock says it is a demo heuristic.
+  await expect(page.getByTestId("reading-provenance")).toContainText(
+    "Lectura de demostración (heurística de palabras clave)",
+  );
+  // Substance per question and side, in people; every segment opens its answers.
+  const substance = page.getByTestId("substance-bar");
+  await expect(substance.first()).toBeVisible();
+  await expect(page.getByTestId("substance")).toContainText("Fortalezas");
+  await substance.first().getByRole("link").first().click();
   await expect(page).toHaveURL(/drill=comments/);
-  const sheet = page.getByRole("dialog");
-  await expect(sheet).toContainText("Comentarios");
+  await expect(page.getByRole("dialog")).toBeVisible();
   await page.goto(page.url().replace(/[?&]drill=[^&]*/, ""));
 
-  const themes = page.getByRole("list", { name: "Temas más frecuentes" });
-  await expect(themes.getByRole("listitem").first()).toBeVisible();
-
+  // Themes of each question, self and manager side by side; signals; yes/no.
+  await expect(
+    page.getByTestId("themes-strengths-list").getByRole("listitem").first(),
+  ).toBeVisible();
+  await expect(page.getByTestId("signals")).toBeVisible();
+  await expect(page.getByTestId("yes-no-bar").first()).toBeVisible();
+  await expect(page.getByTestId("tone")).toBeVisible();
   const comments = page.getByRole("group", { name: "Comentarios etiquetados" });
   await expect(comments).toBeVisible();
-
-  // Five sentiments: the legend, the KPIs and the sentiment filter.
-  await expect(
-    page
-      .getByRole("list", { name: "Leyenda de sentimientos" })
-      .first()
-      .getByRole("listitem"),
-  ).toHaveText(["Positivo", "Constructivo", "Neutral", "Mixto", "Negativo"]);
   await expect(
     page.getByTestId("qualitative-kpis").getByRole("region"),
-  ).toHaveCount(6);
-  await expect(
-    page.getByRole("form", { name: "Filtros" }).getByLabel("Sentimiento"),
-  ).toContainText("Mixto");
+  ).toHaveCount(3);
 
   // Todos / Propios / Manager applies to every block and to the CSV.
   const side = page.getByRole("navigation", { name: "Quién escribe" });

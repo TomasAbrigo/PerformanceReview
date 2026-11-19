@@ -21,6 +21,7 @@ import {
   topThemes,
 } from "@/modules/qualitative-analysis/queries";
 import type { QualitativeFilters } from "@/modules/qualitative-analysis/types";
+import { yesNoAnswers } from "@/modules/qualitative-analysis/reading";
 import {
   type Sentiment,
   sentiments,
@@ -71,7 +72,8 @@ export type DrillComment = {
   answerId: string;
   personName: string;
   dimension: string;
-  sentiment: Sentiment;
+  /** The tone of the free text; null for a yes/no answer (not read as text). */
+  sentiment: Sentiment | null;
   text: string;
 };
 
@@ -414,6 +416,8 @@ function scopeFilters(ctx: Ctx, scope: CommentScope): QualitativeFilters {
     ...(scope.role && scope.value
       ? { indicator: { role: scope.role, value: scope.value } }
       : {}),
+    ...(scope.substance ? { substance: scope.substance } : {}),
+    ...(scope.signal ? { signal: scope.signal } : {}),
   };
 }
 
@@ -431,6 +435,8 @@ function feedbackHref(scope: CommentScope): string {
     ["project", scope.project],
     ["dm", scope.dm],
     ["santexLead", scope.santexLead],
+    ["substance", scope.substance],
+    ["signal", scope.signal],
   ];
   for (const [k, v] of pairs) if (v) q.set(k, v);
   const qs = q.toString();
@@ -520,6 +526,54 @@ async function dmRecords(
   }
 }
 
+/**
+ * The answers of the people who said yes / no to a yes/no question (#129):
+ * the people (direction: a masked count, never a name) and their answers as
+ * typed, with the page's cuts.
+ */
+async function yesNoRecords(
+  ctx: Ctx,
+  drill: Extract<Drill, { kind: "yesno" }>,
+): Promise<DrillResult> {
+  const { people, rows } = await yesNoAnswers(
+    ctx.db,
+    ctx.actor,
+    {
+      ...ctx.filters,
+      cycleId: drill.cycle ?? undefined,
+      relationship: drill.side ?? undefined,
+      dimension: drill.dimension,
+      yesNo: drill.answer,
+      ...(ctx.min !== null ? { minGroupSize: ctx.min } : {}),
+    },
+    COMMENT_LIMIT,
+  );
+  const q = new URLSearchParams();
+  if (drill.cycle) q.set("cycle", drill.cycle);
+  const qs = q.toString();
+  return {
+    drill,
+    unit: "comments",
+    total: people,
+    people: null,
+    comments:
+      ctx.min !== null
+        ? null
+        : rows.map((r) => ({
+            answerId: r.answerId,
+            personName: r.personName,
+            dimension: r.dimension,
+            sentiment: null,
+            text: r.text,
+          })),
+    breakdownBy: "sentiment",
+    breakdown: [],
+    minGroupSize: ctx.min,
+    moreHref: `/insights/qualitative${qs ? `?${qs}` : ""}`,
+    truncated: (people ?? 0) > rows.length,
+  };
+}
+
 /** The most comments a drill lists (the full view has them all). */
 export const COMMENT_LIMIT = 200;
 
@@ -581,5 +635,8 @@ export async function drillRecords(
       return scopedComments(ctx, drill.scope);
     case "dm":
       return dmRecords(ctx, drill);
+    // ---- open-text reading (#129) ----
+    case "yesno":
+      return yesNoRecords(ctx, drill);
   }
 }

@@ -93,7 +93,7 @@ async function Executive({
   const base = drillBase("/insights/executive", sp, actor);
   const drill = parseDrill(sp.drill);
   const dimensionLabel = await dimensionLabels(
-    report.sentiment?.map((r) => r.dimension) ?? [],
+    report.substance?.map((r) => r.dimension) ?? [],
   );
   return (
     <div className="flex flex-col gap-8">

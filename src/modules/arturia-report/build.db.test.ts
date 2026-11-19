@@ -203,6 +203,11 @@ describe("buildReport over the seed small company", () => {
     });
     expect(arturiaReportV1.safeParse(r).success).toBe(true);
     expect(r.sections.people).toBeNull();
+    // No verbatim quote in the anonymized report (#129).
+    const q = r.sections.qualitative;
+    for (const slice of [q, q?.bySide?.self, q?.bySide?.manager]) {
+      for (const th of slice?.topThemes ?? []) expect(th.quotes).toEqual([]);
+    }
     for (const text of [renderJson(r), renderHtml(r)]) {
       expect(text).not.toMatch(EMAIL);
       const folded = text.normalize("NFC");

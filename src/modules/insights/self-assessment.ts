@@ -13,6 +13,18 @@ import {
   type SentimentCounts,
   type ThemeRank,
 } from "@/modules/qualitative-analysis/types";
+import {
+  agreementBySide,
+  bestWorkOptions,
+  substanceByQuestion,
+  valuedDistribution,
+} from "@/modules/qualitative-analysis/reading";
+import type {
+  Agreement,
+  BestWork,
+  SubstanceRow,
+  ValuedDistribution,
+} from "@/modules/qualitative-analysis/reading-types";
 import { ReviewError } from "@/modules/review-core/review-errors";
 import { getSetting } from "@/modules/settings/service";
 import { insightsScope } from "./authz";
@@ -40,6 +52,15 @@ export type SelfAssessmentReport = {
   gap: GapByQuestion[];
   /** For text-only cycles: sentiment of self vs manager comments per dimension. */
   sentimentGap: SentimentGap[];
+  /**
+   * The open-text reading of the self reviews (#129), the same readers as
+   * /insights/qualitative: people per substance of their answer (self
+   * side), "valued" 1-4 and best work, and the agreement with the manager.
+   */
+  substance: SubstanceRow[];
+  valued: ValuedDistribution | null;
+  bestWork: BestWork | null;
+  agreement: Agreement;
 };
 
 /**
@@ -61,6 +82,12 @@ export async function selfAssessmentReport(
   if (scope.kind === "none") throw new ReviewError("forbidden");
   const min = scope.kind === "aggregatesOnly" ? scope.minGroupSize : null;
   const q = { cycleId: f.cycleId, minGroupSize };
+  const [substance, valued, bestWork, agreement] = await Promise.all([
+    substanceByQuestion(db, actor, { ...q, relationship: "self" }),
+    valuedDistribution(db, actor, q),
+    bestWorkOptions(db, actor, q),
+    agreementBySide(db, actor, q),
+  ]);
   const [done, self, manager, themes, gap] = await Promise.all([
     completionSummary(db, actor, { ...f, minGroupSize }),
     sentimentByDimension(db, actor, { ...q, relationship: "self" }),
@@ -89,6 +116,10 @@ export async function selfAssessmentReport(
     sentiment: self,
     themes,
     gap,
+    substance,
+    valued: valued.total,
+    bestWork,
+    agreement,
     sentimentGap: dimensions.map((dimension) => {
       const s = self.find((r) => r.dimension === dimension);
       const m = manager.find((r) => r.dimension === dimension);

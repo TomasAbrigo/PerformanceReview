@@ -12,6 +12,9 @@ export type Dm360Scope = (typeof dm360Scopes)[number];
 /** The mean of a 1-5 indicator and how many people it is over. */
 export type Mean = { mean: number; n: number };
 
+/** People with a signal (#129) over the people with a read answer. */
+export type SignalShare = { people: number; of: number; share: number };
+
 export type SentimentShare = {
   /** Comments counted (open text, effective labels). */
   comments: number;
@@ -48,7 +51,7 @@ export type Insight360 =
         cycle: string;
       };
     }
-  | { code: "negativeSentiment"; params: { percent: number; comments: number } }
+  | { code: "signals"; params: { percent: number; people: number; of: number } }
   | { code: "riskHigh"; params: { percent: number; people: number } }
   | { code: "completionLow"; params: { percent: number } }
   | { code: "stable" }
@@ -67,7 +70,11 @@ export type Dm360Card = {
   engagement: Mean | null;
   /** People with both indicators at or under the risk threshold, over those with both. */
   risk: { people: number; of: number; share: number } | null;
-  sentiment: SentimentShare | null;
+  /**
+   * People with a signal to attend to in their read answers (#129), over the
+   * people with a read answer; null when nobody has one (or under the minimum).
+   */
+  signals: SignalShare | null;
   /** Submitted / applicable, 0-1; null when it applies to nobody (or direction cannot see it). */
   selfRate: number | null;
   managerRate: number | null;
@@ -98,9 +105,9 @@ export type Dm360 = {
   suppressed: number;
 };
 
-/** A negative share at or above this is worth saying (with at least `MIN_COMMENTS`). */
-export const NEGATIVE_SHARE_ALERT = 0.3;
-/** Comments needed before a sentiment share is an insight. */
+/** A share of people with a signal at or above this is worth saying (with at least `MIN_COMMENTS` people). */
+export const SIGNAL_SHARE_ALERT = 0.3;
+/** People with a read answer needed before a signal share is an insight. */
 export const MIN_COMMENTS = 3;
 /** A share of people at risk at or above this, over at least `MIN_RISK_PEOPLE`, is an insight. */
 export const RISK_SHARE_ALERT = 0.25;

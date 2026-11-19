@@ -59,8 +59,11 @@ const comment: CommentRow = {
   text: "Muy buena comunicación",
   sentiment: "positive",
   themes: ["comunicacion"],
+  substance: "specific",
+  signals: [],
   confidence: 0.8,
-  source: "mock",
+  source: "anthropic",
+  demo: false,
 };
 
 describe.each(locales)("qualitative views (%s)", (locale) => {
@@ -268,6 +271,7 @@ describe("QualitativeFilters", () => {
       <QualitativeFilters
         params={{ aggregate: false, side: "manager" }}
         cycles={[]}
+        cycle="all"
         departments={[]}
         dimensions={["strengths"]}
         themes={[]}
@@ -275,7 +279,7 @@ describe("QualitativeFilters", () => {
         showAggregate={false}
       />,
     );
-    const sentiment = screen.getByLabelText("Sentimiento");
+    const sentiment = screen.getByLabelText("Tono");
     expect(
       within(sentiment)
         .getAllByRole("option")
@@ -497,6 +501,7 @@ describe("org cuts in the qualitative view", () => {
       <QualitativeFilters
         params={parseQualitativeParams({ account: "Cuenta A", groupBy: "dm" })}
         cycles={[]}
+        cycle="all"
         departments={[]}
         dimensions={[]}
         themes={[]}

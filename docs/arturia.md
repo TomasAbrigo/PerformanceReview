@@ -25,6 +25,8 @@ De dónde sale cada sección (el informe reusa los módulos de analytics: la ver
 
 **Fecha de corte de los vencidos:** "vencido" es un objetivo en curso con fecha límite anterior a `goals.asOf`: hoy mientras el período del ciclo corre, el último día del período una vez que el ciclo está cerrado (la foto de objetivos queda congelada ahí; la regla única está en `src/modules/goals/state.ts`, `goalAsOf`). El informe lleva esa fecha y el HTML la muestra.
 
+Anonimizado, los temas cualitativos no llevan citas textuales (`quotes` vacío, #129): un texto puede delatar a quien lo escribió aunque se reemplacen los nombres.
+
 Anonimizado, los casos atípicos de objetivos solo se cuentan (y solo desde el mínimo); con nombres se listan con sus valores en `goals.outliers`.
 
 El CLI imprime solo rutas y cantidades, nunca nombres. Código de salida: 0 ok, 1 falló, 2 argumentos inválidos.

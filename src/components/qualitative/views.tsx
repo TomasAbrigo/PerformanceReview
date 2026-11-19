@@ -476,7 +476,7 @@ export function Indicators({
                   key: String(r.value),
                   label: t("row", {
                     value: r.value,
-                    answer: r.label?.[locale] ?? r.option,
+                    answer: r.label?.[locale] ?? "",
                   }),
                 }))}
                 drillOf={

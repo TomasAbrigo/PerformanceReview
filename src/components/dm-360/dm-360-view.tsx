@@ -2,7 +2,6 @@ import { useFormatter, useTranslations } from "next-intl";
 import type { ReactNode } from "react";
 import { type DrillBase, DrillLink } from "@/components/drill/drill-link";
 import { ScaleBar } from "@/components/experience";
-import { MiniBar } from "@/components/qualitative/sentiment-bars";
 import type { Dm360, Dm360Card } from "@/modules/analytics/dm-360/types";
 import type { DmMetric, Drill } from "@/modules/insights/drill-spec";
 import {
@@ -11,7 +10,6 @@ import {
   percentTone,
   type Tone,
 } from "@/modules/insights/tone";
-import { sentiments } from "@/modules/qualitative-analysis/constants";
 import { Sparkline } from "./sparkline";
 
 /**
@@ -91,7 +89,6 @@ function CardView({
   riskThreshold,
   thresholds,
   base,
-  cycleId,
 }: {
   card: Dm360Card;
   team: number;
@@ -102,7 +99,6 @@ function CardView({
   cycleId: string;
 }) {
   const t = useTranslations("Insights360");
-  const ts = useTranslations("Qualitative.sentiment");
   const format = useFormatter();
   const one = (n: number) =>
     format.number(n, { minimumFractionDigits: 1, maximumFractionDigits: 1 });
@@ -111,7 +107,7 @@ function CardView({
   const name = card.others
     ? t("card.others")
     : (card.label ?? t("card.team", { n: team }));
-  const s = card.sentiment;
+  const s = card.signals;
   const canDrill = base && card.label !== null && !card.others;
   const drillOf = (metric: DmMetric, n: number | null) =>
     canDrill && n !== 0
@@ -278,52 +274,17 @@ function CardView({
         {rate("self", card.selfRate)}
         {rate("manager", card.managerRate)}
         <Figure
-          label={t("card.commentsLabel")}
-          testId="dm-comments"
-          value={s ? String(s.comments) : none}
+          label={t("card.signals")}
+          testId="dm-signals"
+          value={s ? `${percent(s.share)} %` : none}
           note={
             s
-              ? t("card.commentsOf", { people: s.people })
+              ? t("card.signalsOf", { people: s.people, of: s.of })
               : t("card.noComments")
           }
-          drill={s ? drillOf("comments", s.comments) : undefined}
+          drill={s ? drillOf("comments", s.of) : undefined}
         />
       </dl>
-      {s ? (
-        <div className="flex flex-col gap-1.5" data-testid="dm-sentiment">
-          <p className="text-xs text-muted-foreground">{t("card.sentiment")}</p>
-          <MiniBar
-            counts={{ ...s.counts, total: s.comments }}
-            label={sentiments
-              .map((k) => `${ts(k)} ${percent(s.share[k])} %`)
-              .join(", ")}
-            drillOf={
-              canDrill
-                ? (sentiment) => ({
-                    base: base!,
-                    drill: {
-                      kind: "comments",
-                      scope: {
-                        cycle: cycleId,
-                        dm: card.key,
-                        sentiment: sentiment as "positive",
-                      },
-                    },
-                  })
-                : undefined
-            }
-          />
-          <p className="flex flex-wrap gap-x-3 text-xs text-muted-foreground">
-            {sentiments
-              .filter((k) => s.counts[k] > 0)
-              .map((k) => (
-                <span key={k}>
-                  {ts(k)} {percent(s.share[k])} %
-                </span>
-              ))}
-          </p>
-        </div>
-      ) : null}
       <div className="flex flex-col gap-1.5">
         <p className="text-xs text-muted-foreground">{t("card.trend")}</p>
         <Sparkline points={card.trend} />

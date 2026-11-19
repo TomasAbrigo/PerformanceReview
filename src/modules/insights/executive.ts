@@ -9,14 +9,16 @@ import type {
   IndicatorDistribution,
   RiskMatrix,
 } from "@/modules/analytics/indicators/types";
+import { topThemes } from "@/modules/qualitative-analysis/queries";
 import {
-  sentimentByDimension,
-  topThemes,
-} from "@/modules/qualitative-analysis/queries";
+  signalSummary,
+  substanceByQuestion,
+} from "@/modules/qualitative-analysis/reading";
 import type {
-  DimensionSentiment,
-  ThemeRank,
-} from "@/modules/qualitative-analysis/types";
+  SignalSummary,
+  SubstanceRow,
+} from "@/modules/qualitative-analysis/reading-types";
+import type { ThemeRank } from "@/modules/qualitative-analysis/types";
 import type { OrgFilters } from "@/modules/org-attributes/kinds";
 import { ReviewError } from "@/modules/review-core/review-errors";
 import { getSetting } from "@/modules/settings/service";
@@ -49,7 +51,13 @@ export type ExecutiveSections = {
    * Never the names (`atRisk` is always null here).
    */
   risk?: RiskMatrix;
-  sentiment?: DimensionSentiment[];
+  /**
+   * The open-text reading (#129), the same readers as /insights/qualitative:
+   * people per substance of their answer, per question and side, and people
+   * with each signal (null: masked).
+   */
+  substance?: SubstanceRow[];
+  signals?: SignalSummary | null;
   /**
    * Goal KPIs of everybody in reach (#62); null when direction cannot see
    * them. `asOf` is the reference date (YYYY-MM-DD) "overdue" and "due" were
@@ -155,10 +163,21 @@ export const COLLECTORS: readonly Collector[] = [
       engagementTile(db, actor, { ...filters, minGroupSize }),
   },
   {
-    key: "sentiment",
+    key: "substance",
     modes: QUAL,
     collect: ({ db, actor, cycleId, minGroupSize, filters }) =>
-      sentimentByDimension(db, actor, {
+      substanceByQuestion(db, actor, {
+        cycleId,
+        aggregateOnly: true,
+        minGroupSize,
+        ...filters,
+      }),
+  },
+  {
+    key: "signals",
+    modes: QUAL,
+    collect: ({ db, actor, cycleId, minGroupSize, filters }) =>
+      signalSummary(db, actor, {
         cycleId,
         aggregateOnly: true,
         minGroupSize,

@@ -5,6 +5,11 @@ import type { DrillBase } from "@/components/drill/drill-link";
 import { MetricCard, ScaleBar } from "@/components/experience";
 import { SentimentBars } from "@/components/qualitative/sentiment-bars";
 import {
+  AgreementPanel,
+  ClosedQuestionsPanel,
+  SubstancePanel,
+} from "@/components/qualitative/reading";
+import {
   type CommentDrills,
   commentDrill,
   Themes,
@@ -45,6 +50,7 @@ export function SelfAssessmentView({
   const t = useTranslations("Insights.SelfAssessment");
   const ti = useTranslations("Insights");
   const tc = useTranslations("Insights.completion");
+  const tq = useTranslations("Qualitative.reading");
   const f = useChartFormat();
   const locale = useLocale() as "es" | "en";
   const dim = (d: string) => dimensionLabel[d] ?? d;
@@ -53,8 +59,8 @@ export function SelfAssessmentView({
   const selfDrills = drills("self");
   const total = report.completion.total;
   const selfComments = report.sentiment.reduce((n, r) => n + r.total, 0);
-  const selfNegative = report.sentiment.reduce((n, r) => n + r.negative, 0);
-  const negShare = selfComments ? selfNegative / selfComments : 0;
+  const valued = report.valued;
+  const notValued = valued?.people ? valued.notValued / valued.people : 0;
   const completionCard = (side: Side) => {
     if (!total) return null;
     const v = sideOf(total, side);
@@ -128,31 +134,21 @@ export function SelfAssessmentView({
         {completionCard("self")}
         {completionCard("manager")}
         <MetricCard
-          label={t("kpi.negative")}
-          value={f.share(negShare)}
+          label={tq("notValued")}
+          value={valued ? f.share(notValued) : "–"}
           icon={<MessageSquareWarning className="size-5" />}
-          status={
-            thresholds && selfComments
-              ? percentTone(negShare * 100, thresholds, "down")
-              : undefined
-          }
-          note={t("kpi.negativeNote", { n: selfNegative, total: selfComments })}
+          note={tq("notValuedNote", {
+            n: valued?.notValued ?? 0,
+            of: valued?.people ?? 0,
+          })}
           scale={{
-            value: negShare * 100,
+            value: notValued * 100,
             min: 0,
             max: 100,
-            label: t("kpi.negativeScale", { share: f.share(negShare) }),
+            label: tq("notValued"),
             minLabel: "0 %",
             maxLabel: "100 %",
           }}
-          drill={
-            selfDrills && selfNegative > 0
-              ? {
-                  ...commentDrill(selfDrills, { sentiment: "negative" }),
-                  label: t("kpi.openNegative", { n: selfNegative }),
-                }
-              : undefined
-          }
         />
       </section>
       <CompletionBars
@@ -165,34 +161,20 @@ export function SelfAssessmentView({
             : 0
         }
       />
-      <ChartFrame
-        id="self-sentiment"
-        title={t("sentimentTitle")}
-        howToRead={t("sentimentHow")}
-        kind="sentiment"
-        empty={report.sentiment.length === 0 ? ti("empty") : null}
-      >
-        <SentimentBars
-          sorted
-          label={t("sentimentChart")}
-          rows={report.sentiment.map((r) => ({
-            ...r,
-            key: r.dimension,
-            label: dim(r.dimension),
-          }))}
-          drillOf={
-            selfDrills
-              ? (dimension, sentiment) =>
-                  isSentiment(sentiment)
-                    ? commentDrill(selfDrills, {
-                        dimension,
-                        sentiment: sentiment as "positive",
-                      })
-                    : undefined
-              : undefined
-          }
-        />
-      </ChartFrame>
+      <SubstancePanel
+        rows={report.substance}
+        dimensionLabel={dimensionLabel}
+        drills={selfDrills}
+      />
+      <ClosedQuestionsPanel
+        valued={{ total: report.valued, byGroup: [], trend: [] }}
+        bestWork={report.bestWork}
+      />
+      <AgreementPanel
+        a={report.agreement}
+        dimensionLabel={dimensionLabel}
+        drills={drills("manager")}
+      />
       <Themes themes={report.themes} total={selfComments} drills={selfDrills} />
       {report.gap.length > 0 ? (
         <ChartFrame

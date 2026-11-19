@@ -9,7 +9,7 @@ import {
   requireUuid,
 } from "@/modules/analytics/indicators/rows";
 import type { IndicatorConfig } from "@/modules/analytics/indicators/types";
-import { sentimentByParticipant } from "@/modules/qualitative-analysis/queries";
+import { signalsByParticipant } from "@/modules/qualitative-analysis/reading";
 import { groupKeyer } from "@/modules/org-attributes/group-key";
 import { ReviewError } from "@/modules/review-core/review-errors";
 import {
@@ -174,10 +174,10 @@ export async function dm360(
         )
       : null;
 
-  const [indicatorRows, sides, sentiments, below, keyOf] = await Promise.all([
+  const [indicatorRows, sides, signals, below, keyOf] = await Promise.all([
     loadRows(db, ctx, { hierarchy: "asOf", cycleIds }),
     loadSides(db, runAs, { hierarchy: "asOf", cycleIds }, { email: false }),
-    sentimentByParticipant(db, actor, { cycleIds }),
+    signalsByParticipant(db, actor, { cycleIds }),
     scope === "tree" ? participantsBelow(db, runAs, cycleIds) : undefined,
     masked ? groupKeyer(db) : undefined,
   ]);
@@ -206,7 +206,7 @@ export async function dm360(
           { self: s.selfStatus, manager: s.managerStatus },
         ]),
       ),
-      sentiment: new Map(sentiments.map((s) => [s.participantId, s])),
+      signals: new Map(signals.map((s) => [s.participantId, s.hasSignal])),
     },
     thresholds: {
       dropThreshold: ctx.config.dropThreshold,

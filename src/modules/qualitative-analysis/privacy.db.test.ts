@@ -37,7 +37,10 @@ let open: string;
 const cycles: string[] = [];
 
 const RETENTION_CHOICES = [
-  { value: "A", label: { es: "Haría todo para retenerlo", en: "Do everything" } },
+  {
+    value: "A",
+    label: { es: "Haría todo para retenerlo", en: "Do everything" },
+  },
   { value: "B", label: { es: "Intentaría convencerlo", en: "Convince" } },
   { value: "C", label: { es: "Tendría que pensarlo", en: "Think" } },
   { value: "D", label: { es: "Le desearía lo mejor", en: "Wish well" } },
@@ -80,7 +83,8 @@ beforeAll(async () => {
       {
         questionId: retention,
         // The report's own text, with a name in it: never a label.
-        option: "I would try to convince them to stay. Única Persona would be difficult to replace",
+        option:
+          "I would try to convince them to stay. Única Persona would be difficult to replace",
         value: 4,
       },
     ]);

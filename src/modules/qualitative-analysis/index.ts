@@ -55,4 +55,9 @@ export {
   sentimentTrend,
   sentimentVsIndicators,
   topThemes,
+  qualitativeUniverse,
+  type Universe,
 } from "./queries";
+export * from "./reading-types";
+export { choiceOfValue } from "./choices";
+export { yesNoKindOf } from "./yes-no-kind";

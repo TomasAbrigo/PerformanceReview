@@ -171,7 +171,11 @@ export async function readingProvenance(
       labels: x.n,
     })),
     lastRun: run
-      ? { provider: run.provider, model: run.model, finishedAt: run.finished_at }
+      ? {
+          provider: run.provider,
+          model: run.model,
+          finishedAt: run.finished_at,
+        }
       : null,
   };
 }
@@ -524,6 +528,30 @@ export async function signalsVsIndicators(
   }));
 }
 
+/**
+ * Each participant in scope with a read answer, and whether any of their
+ * answers (either side) carries a signal: for views that build their own
+ * groups out of people (the DM cards of the 360). The rows are people:
+ * whoever reads them aggregates and masks (direction never sees a row).
+ */
+export async function signalsByParticipant(
+  db: DbOrTx,
+  actor: ActorContext,
+  f: Pick<QualitativeFilters, "cycleId" | "cycleIds">,
+): Promise<{ participantId: string; hasSignal: boolean }[]> {
+  const r = await resolve(db, actor, f);
+  if (!r) return [];
+  const rows = await db.execute<{ participant_id: string; has: boolean }>(sql`
+    with ${labeledCtes(r)}
+    select participant_id, bool_or(cardinality(signals) > 0) as has
+    from labeled where relationship in ('self', 'manager')
+    group by 1`);
+  return rows.map((x) => ({
+    participantId: x.participant_id,
+    hasSignal: x.has,
+  }));
+}
+
 // ---- yes/no ------------------------------------------------------------------
 
 const YES_NO_QUESTION = sql`q.yes_no`;
@@ -792,7 +820,11 @@ export async function toneByQuestion(
       .join(", "),
   );
   const rows = await db.execute<
-    Record<Sentiment, number> & { dimension: string; side: Side; people: number }
+    Record<Sentiment, number> & {
+      dimension: string;
+      side: Side;
+      people: number;
+    }
   >(sql`
     with ${personLabels(r)}
     select dimension, relationship as side, ${cols},

@@ -1209,7 +1209,8 @@
       "theme": "Tema",
       "any": "Todos",
       "aggregate": "Solo agregados (vista dirección)",
-      "apply": "Aplicar"
+      "apply": "Aplicar",
+      "tone": "Tono"
     },
     "sentiment": {
       "positive": "Positivo",
@@ -1365,6 +1366,98 @@
     },
     "takeaway": {
       "worst": "Más crítico: {label} ({share} negativos o mixtos)."
+    },
+    "reading": {
+      "substance": {
+        "none": "Sin contenido",
+        "generic": "Genérico",
+        "specific": "Concreto"
+      },
+      "signal": {
+        "workload": "Carga de trabajo",
+        "attrition": "Intención de irse",
+        "conflict": "Conflicto",
+        "recognition": "Falta de reconocimiento",
+        "stagnation": "Estancamiento",
+        "company_request": "Pedido a la empresa",
+        "role_fit": "Encaje con el rol"
+      },
+      "yesNo": {
+        "yes": "Sí",
+        "no": "No",
+        "openNo": "Ver las {n} respuestas No",
+        "alert": {
+          "security": "Seguridad de la información: {n} de {of} personas ({share}) responden que No cumplen con las políticas.",
+          "conversations": "Conversaciones frecuentes: en {n} de {of} personas ({share}) el manager responde que No habla con la frecuencia suficiente."
+        }
+      },
+      "provenance": {
+        "label": "Procedencia de la lectura",
+        "demo": "Lectura de demostración (heurística de palabras clave): no es un análisis; no se muestra confianza.",
+        "providers": "Leído por {list}",
+        "noMachine": "Sin lectura automática: solo etiquetas importadas o corregidas",
+        "lastRun": "última corrida {date}",
+        "counts": "{labels} respuestas leídas · {corrected} corregidas por personas ({human}) · {imported} importadas"
+      },
+      "kpis": "Indicadores de la lectura",
+      "people": "Personas",
+      "peopleKpiNote": "Personas distintas con alguna respuesta en la selección",
+      "empty": "Sin datos con los filtros actuales.",
+      "question": "Pregunta",
+      "cycle": "Ciclo",
+      "group": "Grupo",
+      "team": "Equipo",
+      "unassigned": "Sin valor",
+      "peopleNote": "Cada barra cuenta personas (una respuesta por persona, pregunta y lado); n = personas.",
+      "substanceTitle": "Sustancia del feedback",
+      "substanceHint": "¿La respuesta dice algo? Concreto: un hecho, ejemplo o acción; genérico: un rasgo sin ancla; sin contenido: no responde lo que se pregunta. Por pregunta y lado, nunca mezclados.",
+      "managerFeedbackTitle": "Calidad del feedback de los managers por grupo",
+      "managerFeedbackHint": "Cada persona según la más débil de las dos respuestas de su manager (fortalezas y mejora): concreto = las dos con ancla. % de personas del grupo.",
+      "themesOf": "Temas: {question}",
+      "themesHint": "Personas que citan cada tema, autoevaluación y manager lado a lado; % sobre las personas de cada lado con respuesta. Citas elegidas por representatividad.",
+      "themesMeta": "Autoevaluación: {self} personas · Manager: {manager} personas",
+      "sideOf": "{side} (n = {n})",
+      "themeShare": "{theme} · {side}: {n} de {of} personas",
+      "openTheme": "Ver las respuestas sobre {theme} · {side}",
+      "agreementTitle": "Coincidencia persona–manager",
+      "agreementHint": "De las personas con las dos respuestas (propia y del manager) leídas con temas, cuántas nombran al menos un mismo tema. Puntos ciegos: temas de mejora que el manager nombra y la persona no.",
+      "agreementOf": "Coinciden en {question}",
+      "agreementNote": "{shared} de {both} personas",
+      "blindTitle": "Con algún punto ciego",
+      "blindNote": "{n} de {of} personas (mejora)",
+      "blindSpots": "Puntos ciegos más frecuentes",
+      "blindSpot": "{theme} · {n} personas",
+      "signalsTitle": "Señales a atender",
+      "signalsHint": "Personas cuyas respuestas (propias o de su manager) dicen algo a atender. % sobre las personas con alguna respuesta leída.",
+      "signalsMeta": "{n} de {of} personas con alguna señal",
+      "noSignals": "Ninguna señal con los filtros actuales.",
+      "signalShare": "{signal}: {n} de {of} personas",
+      "signalSides": "En su autoevaluación: {self} · en la del manager: {manager}",
+      "openSignal": "Ver las respuestas con la señal {signal}",
+      "signalsByGroup": "Personas con alguna señal por grupo",
+      "withAny": "Con alguna señal",
+      "withoutSignal": "Sin señales",
+      "signalsVsIndicator": "Señales según la respuesta del manager",
+      "signalsVsIndicatorHint": "Una fila por persona: % de las personas con cada respuesta de retención / compromiso que tienen alguna señal.",
+      "signalIndicatorShare": "{n} de {of} personas con alguna señal",
+      "yesNoTitle": "Preguntas Sí / No",
+      "yesNoHint": "% de Sí y de No sobre las personas que respondieron, por pregunta y lado. Seguridad = No y conversaciones frecuentes = No son alertas.",
+      "yesNoTrend": "No por ciclo",
+      "yesNoByGroup": "No por grupo",
+      "initiatives": "Tipos de iniciativa (el «cómo»)",
+      "initiativesOf": "{question} · {n} personas con un «cómo»",
+      "closedTitle": "Preguntas cerradas",
+      "closedHint": "Valoración (1–4) como escala y «mejor trabajo» como distribución de opciones: nunca como sentimiento. % de personas.",
+      "notValued": "No se sienten valoradas (1–2)",
+      "notValuedNote": "{n} de {of} personas",
+      "valuedTitle": "¿Qué tan bien reconoce la empresa mi valor? (1–4)",
+      "valuedTotal": "Total",
+      "valuedTrend": "Por ciclo",
+      "bestWorkTitle": "¿Qué me ayudaría a hacer mi mejor trabajo? · {n} personas",
+      "optionShare": "{option}: {n} de {of} personas",
+      "toneTitle": "Tono (secundario)",
+      "toneHint": "Solo texto libre, por pregunta y lado. La pregunta condiciona el tono: «¿qué podría mejorar?» invita a lo constructivo; no compare preguntas entre sí.",
+      "masked": "Con estos filtros hay menos de {min} personas: la lectura no se muestra para proteger su anonimato."
     }
   },
   "Insights": {
@@ -1933,8 +2026,6 @@
       "engagement": "Compromiso medio",
       "risk": "En riesgo",
       "riskValue": "{percent} %",
-      "sentiment": "Sentimiento de los comentarios",
-      "comments": "{n, plural, one {# comentario} other {# comentarios}} de {people, plural, one {# persona} other {# personas}}",
       "noComments": "Sin comentarios",
       "self": "Autoevaluación completa",
       "manager": "Evaluación del manager completa",
@@ -1944,8 +2035,8 @@
       "none": "–",
       "meanOf": "sobre {n}",
       "riskOf": "({people} de {of})",
-      "commentsLabel": "Comentarios",
-      "commentsOf": "de {people, plural, one {# persona} other {# personas}}"
+      "signals": "Con alguna señal",
+      "signalsOf": "{people} de {of} personas con comentarios leídos"
     },
     "spark": {
       "label": "Retención y compromiso por ciclo",
@@ -1958,11 +2049,11 @@
     "insight": {
       "retentionDrop": "La retención media cayó {delta} puntos desde {cycle} (de {previous} a {current}).",
       "engagementDrop": "El compromiso medio cayó {delta} puntos desde {cycle} (de {previous} a {current}).",
-      "negativeSentiment": "El {percent} % de los {comments} comentarios es negativo.",
       "riskHigh": "El {percent} % de las personas con ambos indicadores ({people}) está en riesgo: retención y compromiso bajos.",
       "completionLow": "Solo el {percent} % de las evaluaciones del manager está completo.",
       "stable": "Sin alertas en este ciclo.",
-      "noData": "Todavía no hay datos suficientes para leer este equipo."
+      "noData": "Todavía no hay datos suficientes para leer este equipo.",
+      "signals": "El {percent} % de las personas con comentarios leídos ({people} de {of}) tiene alguna señal a atender."
     },
     "empty": "Ningún DM tiene personas en este ciclo. Cargá el archivo de atributos organizacionales en Importar.",
     "withoutDm": "{n, plural, one {# persona} other {# personas}} sin DM en el archivo.",
@@ -2475,7 +2566,8 @@
         "self": "{dm} · autoevaluaciones pendientes",
         "manager": "{dm} · evaluaciones del manager pendientes",
         "comments": "{dm} · comentarios de su equipo"
-      }
+      },
+      "yesNo": "{question}: respondieron {answer}"
     },
     "truncated": "Se muestran los primeros {n}; la vista completa tiene todos."
   },

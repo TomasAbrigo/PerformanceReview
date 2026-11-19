@@ -84,7 +84,30 @@ describe("SelfAssessmentView", () => {
   const report: SelfAssessmentReport = {
     minGroupSize: null,
     completion: { ...completion, minGroupSize: null, suppressed: 0 },
+    substance: [
+      {
+        dimension: "strengths",
+        side: "self",
+        none: 1,
+        generic: 2,
+        specific: 3,
+        people: 6,
+      },
+    ],
     sentiment: [{ dimension: "strengths", ...counts }],
+    valued: {
+      counts: [1, 2, 3, 4],
+      people: 10,
+      notValued: 3,
+      labels: [null, null, null, null],
+    },
+    bestWork: null,
+    agreement: {
+      rows: [{ dimension: "strengths", both: 4, shared: 3 }],
+      blindSpots: [{ theme: "comunicacion", people: 2 }],
+      blindPeople: 2,
+      improvementBoth: 4,
+    },
     themes: [{ theme: "calidad", count: 2, sentiment: counts, quotes: [] }],
     gap: [
       {
@@ -128,8 +151,8 @@ describe("SelfAssessmentView", () => {
         screen.getByRole("group", {
           name:
             locale === "es"
-              ? "Sentimiento de las autoevaluaciones por dimensión"
-              : "Sentiment of the self assessments by dimension",
+              ? "Sustancia del feedback"
+              : "Substance of the feedback",
         }),
       ).toBeVisible();
       expect(screen.getByText(/^(calidad|quality)$/i)).toBeVisible();
@@ -158,6 +181,7 @@ describe("SelfAssessmentView", () => {
           minGroupSize: 5,
           completion,
           sentiment: [],
+          substance: [],
           themes: [],
           gap: [],
           sentimentGap: [],
@@ -170,7 +194,7 @@ describe("SelfAssessmentView", () => {
       screen.getByText("3 personas en grupos chicos (no se desglosan)"),
     ).toBeVisible();
     expect(
-      screen.getAllByText("Sin datos para mostrar.").length,
+      screen.getAllByText("Sin datos con los filtros actuales.").length,
     ).toBeGreaterThan(0);
   });
 });
@@ -224,20 +248,42 @@ describe("ExecutiveReportView", () => {
       avgProgress: 60,
       asOf: "2026-09-28",
     },
-    sentiment: [{ dimension: "strengths", ...counts }],
+    substance: [
+      {
+        dimension: "strengths",
+        side: "self",
+        none: 1,
+        generic: 2,
+        specific: 3,
+        people: 6,
+      },
+    ],
+    signals: {
+      people: 6,
+      withAny: 2,
+      rows: [{ signal: "workload", people: 2, self: 2, manager: 0 }],
+    },
     themes: [
       { theme: "calidad", count: 2, sentiment: counts, quotes: [] },
       { theme: "colaboracion", count: 2, sentiment: counts, quotes: [] },
     ],
   };
   const forMode = (mode: ExecutiveMode): ExecutiveReport => {
-    const { retention, engagement, risk, goals, sentiment, themes, ...rest } =
-      full;
+    const {
+      retention,
+      engagement,
+      risk,
+      goals,
+      substance,
+      signals,
+      themes,
+      ...rest
+    } = full;
     return {
       ...rest,
       mode,
       ...(mode !== "qualitative" ? { retention, engagement, risk, goals } : {}),
-      ...(mode !== "quantitative" ? { sentiment, themes } : {}),
+      ...(mode !== "quantitative" ? { substance, signals, themes } : {}),
     };
   };
 
@@ -264,7 +310,11 @@ describe("ExecutiveReportView", () => {
         expect(screen.queryByTestId("exec-engagement") !== null).toBe(quant);
         expect(screen.queryByTestId("exec-risk") !== null).toBe(quant);
         expect(screen.queryByTestId("exec-goals") !== null).toBe(quant);
-        expect(screen.queryByTestId("exec-sentiment") !== null).toBe(qual);
+        expect(
+          screen.queryAllByText(
+            /^(Sustancia del feedback|Substance of the feedback)$/,
+          ).length > 0,
+        ).toBe(qual);
         expect(screen.queryByTestId("exec-themes") !== null).toBe(qual);
         if (quant) {
           expect(screen.getByTestId("exec-retention")).toHaveTextContent(
@@ -410,7 +460,8 @@ describe("ExecutiveReportView", () => {
           minGroupSize: 5,
           retention: null,
           risk: riskOf(null, null),
-          sentiment: [],
+          substance: [],
+          signals: null,
           themes: [],
         }}
         dimensionLabel={dims("es")}

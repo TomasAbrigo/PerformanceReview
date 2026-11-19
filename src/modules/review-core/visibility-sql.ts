@@ -9,11 +9,7 @@ import { type SQL, sql } from "drizzle-orm";
  * participant's manager review is not submitted yet — what /assessments
  * shows as "Reservada". A db test keeps it in agreement with `canRead`.
  */
-export function managerMayReadSql(
-  r = "r",
-  cp = "cp",
-  c = "c",
-): SQL {
+export function managerMayReadSql(r = "r", cp = "cp", c = "c"): SQL {
   const R = sql.raw(r);
   const CP = sql.raw(cp);
   const C = sql.raw(c);

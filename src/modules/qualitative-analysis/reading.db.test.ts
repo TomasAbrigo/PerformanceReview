@@ -165,7 +165,12 @@ describe("the open-text reading per person", () => {
   });
 
   it("rates the manager's feedback per group by the weaker answer", async () => {
-    const rows = await managerFeedbackByGroup(db, hr, { cycleId: c2 }, "department");
+    const rows = await managerFeedbackByGroup(
+      db,
+      hr,
+      { cycleId: c2 },
+      "department",
+    );
     const eng = rows.find((r) => r.key === "Ingeniería");
     expect(eng?.people).toBe(1);
     const sales = rows.find((r) => r.key === "Ventas");
@@ -173,7 +178,10 @@ describe("the open-text reading per person", () => {
   });
 
   it("puts the themes of each side next to each other with their bases", async () => {
-    const t = await themesBySide(db, hr, { cycleId: c2, dimension: "strengths" });
+    const t = await themesBySide(db, hr, {
+      cycleId: c2,
+      dimension: "strengths",
+    });
     // Beto's "n/a" has no substance: not in the self base.
     expect(t.people).toEqual({ self: 1, manager: 2 });
     const doc = t.rows.find((r) => r.theme === "documentacion");
@@ -181,11 +189,13 @@ describe("the open-text reading per person", () => {
     expect(doc?.quotes.self.length).toBe(1);
     // Direction: no quotes, and nothing under the minimum.
     expect(
-      (await themesBySide(db, direction, {
-        cycleId: c2,
-        dimension: "strengths",
-        minGroupSize: 5,
-      })).rows,
+      (
+        await themesBySide(db, direction, {
+          cycleId: c2,
+          dimension: "strengths",
+          minGroupSize: 5,
+        })
+      ).rows,
     ).toEqual([]);
   });
 
@@ -225,7 +235,11 @@ describe("the open-text reading per person", () => {
       people: 2,
     });
     const talk = rows.find((r) => r.dimension === "custom_talk");
-    expect(talk).toMatchObject({ side: "manager", kind: "conversations", no: 1 });
+    expect(talk).toMatchObject({
+      side: "manager",
+      kind: "conversations",
+      no: 1,
+    });
     const trend = await yesNoTrend(db, hr, {});
     expect(
       trend.filter((t) => t.dimension === "custom_talk").map((t) => t.no),
