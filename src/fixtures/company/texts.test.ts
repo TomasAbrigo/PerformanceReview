@@ -63,6 +63,55 @@ function drawn(company: typeof demo) {
 const demoDrawn = drawn(demo);
 const smallDrawn = drawn(small);
 
+/**
+ * A participant is a person in a cycle: what the signals say about the
+ * answers of both sides (the unit the Signals screen counts), with the
+ * "other" text of the best work counted as the person's own.
+ */
+interface Participant {
+  cycle: number;
+  low: number;
+  own: Set<string>;
+  manager: Set<string>;
+}
+
+function participants(company: typeof demo): Participant[] {
+  const signalsOf = (
+    question: string,
+    side: string,
+    text: string | undefined,
+  ): string[] =>
+    text === undefined
+      ? []
+      : (byText.get(`${question}|${side}|${text}`)?.expected.signals ?? []);
+  const people: Participant[] = [];
+  for (const a of company.assessments) {
+    const { selfAnswers: s, managerAnswers: m } = a;
+    if (a.employeeId === null || (!s && !m)) continue;
+    people.push({
+      cycle: a.cycle,
+      low: lowness(s, m),
+      own: new Set([
+        ...signalsOf("strengths", "self", s?.q3),
+        ...signalsOf("improvement", "self", s?.q4),
+        ...(s?.q2 === "E"
+          ? signalsOf("best_work_other", "self", s.bestWorkOther)
+          : []),
+      ]),
+      manager: new Set([
+        ...signalsOf("strengths", "manager", m?.q3),
+        ...signalsOf("improvement", "manager", m?.q4),
+      ]),
+    });
+  }
+  return people;
+}
+
+const carries = (p: Participant, signal: string) =>
+  p.own.has(signal) || p.manager.has(signal);
+const anySignal = (p: Participant) => p.own.size + p.manager.size > 0;
+const demoPeople = participants(demo);
+
 describe("texts drawn from the bank", () => {
   it.each([
     ["small", smallDrawn],
@@ -133,14 +182,110 @@ describe("texts drawn from the bank", () => {
     expect(english).toBeLessThan(0.2);
   });
 
-  it("carries each signal in a few answers (2-6 %)", () => {
-    for (const signal of SIGNALS) {
-      const share =
-        demoDrawn.all.filter((x) => x.entry.expected.signals.includes(signal))
-          .length / demoDrawn.all.length;
-      expect(share, signal).toBeGreaterThanOrEqual(0.015);
-      expect(share, signal).toBeLessThanOrEqual(0.06);
-    }
+  describe("signals are the short list of people, not the majority", () => {
+    const cycleShare = (
+      cycle: number,
+      keep: (p: Participant) => boolean,
+      of: (p: Participant) => boolean = () => true,
+    ) => {
+      const some = demoPeople.filter((p) => p.cycle === cycle && of(p));
+      return some.filter(keep).length / some.length;
+    };
+    const cycles = [...new Set(demoPeople.map((p) => p.cycle))];
+
+    it("has a few people with a signal in every cycle (15-22 %)", () => {
+      expect(cycles.length).toBeGreaterThanOrEqual(5);
+      for (const cycle of cycles) {
+        const share = cycleShare(cycle, anySignal);
+        expect(share, `cycle ${cycle}`).toBeGreaterThanOrEqual(0.15);
+        expect(share, `cycle ${cycle}`).toBeLessThanOrEqual(0.22);
+      }
+    });
+
+    it("carries each signal in 2-6 % of the people of a cycle", () => {
+      for (const cycle of cycles) {
+        for (const signal of SIGNALS) {
+          const share = cycleShare(cycle, (p) => carries(p, signal));
+          expect(share, `cycle ${cycle} ${signal}`).toBeGreaterThanOrEqual(
+            0.02,
+          );
+          expect(share, `cycle ${cycle} ${signal}`).toBeLessThanOrEqual(0.06);
+        }
+      }
+    });
+
+    it("makes company requests the most frequent signal and attrition and conflict the rarest", () => {
+      const overall = Object.fromEntries(
+        SIGNALS.map((signal) => [
+          signal,
+          demoPeople.filter((p) => carries(p, signal)).length /
+            demoPeople.length,
+        ]),
+      );
+      const others = SIGNALS.filter((s) => s !== "company_request");
+      for (const signal of others) {
+        expect(overall.company_request, signal).toBeGreaterThan(
+          overall[signal],
+        );
+      }
+      const rarest = Object.values(overall).sort((a, b) => a - b);
+      expect(overall.attrition).toBeLessThanOrEqual(rarest[2]);
+      expect(overall.conflict).toBeLessThanOrEqual(rarest[2]);
+      expect(overall.attrition).toBeLessThanOrEqual(0.035);
+      expect(overall.conflict).toBeLessThanOrEqual(0.035);
+    });
+
+    it("follows the closed answers without being deterministic: ~45-60 % of the lowest band, at most 8 % of the highest", () => {
+      for (const cycle of cycles) {
+        const bands = {
+          lowest: demoPeople.filter((p) => p.cycle === cycle && p.low >= 0.5),
+          middle: demoPeople.filter(
+            (p) => p.cycle === cycle && p.low > 0.2 && p.low < 0.5,
+          ),
+          highest: demoPeople.filter((p) => p.cycle === cycle && p.low <= 0.2),
+        };
+        const rate = (band: Participant[]) =>
+          band.filter(anySignal).length / band.length;
+        for (const [name, band] of Object.entries(bands)) {
+          if (band.length < 10) continue;
+          expect(rate(band), `cycle ${cycle} ${name}`).toBeGreaterThan(0);
+          expect(rate(band), `cycle ${cycle} ${name}`).toBeLessThan(1);
+        }
+        expect(bands.lowest.length, `cycle ${cycle}`).toBeGreaterThanOrEqual(
+          10,
+        );
+        expect(rate(bands.lowest), `cycle ${cycle} lowest`).toBeGreaterThan(
+          0.45,
+        );
+        expect(rate(bands.lowest), `cycle ${cycle} lowest`).toBeLessThan(0.6);
+        expect(rate(bands.highest), `cycle ${cycle} highest`).toBeLessThan(
+          0.08,
+        );
+        expect(rate(bands.middle), `cycle ${cycle} middle`).toBeLessThan(
+          rate(bands.lowest),
+        );
+      }
+    });
+
+    it("sees stagnation, role fit and recognition more in the person's own answers, conflict and attrition slightly more in the manager's", () => {
+      const sides = (signal: (typeof SIGNALS)[number]) => ({
+        own: demoPeople.filter((p) => p.own.has(signal)).length,
+        manager: demoPeople.filter((p) => p.manager.has(signal)).length,
+      });
+      for (const signal of ["stagnation", "role_fit", "recognition"] as const) {
+        const { own, manager } = sides(signal);
+        expect(own, signal).toBeGreaterThan(manager);
+      }
+      for (const signal of ["conflict", "attrition"] as const) {
+        const { own, manager } = sides(signal);
+        expect(manager, signal).toBeGreaterThan(own);
+        expect(own / (own + manager), signal).toBeGreaterThan(0.3);
+      }
+      const workload = sides("workload");
+      const own = workload.own / (workload.own + workload.manager);
+      expect(own).toBeGreaterThan(0.35);
+      expect(own).toBeLessThan(0.65);
+    });
   });
 
   it("makes signals likelier when the closed answers are low", () => {
