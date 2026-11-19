@@ -174,6 +174,14 @@ export const questionRevision = pgTable(
     role: text("role").$type<QuestionRole>(),
     /** Dimension copied from the template question or the import mapping. */
     dimension: text("dimension").$type<RevisionDimension>(),
+    /**
+     * A yes/no question (#128): its answer is a yes or a no, optionally with
+     * a "how" after it ("Sí, con el voluntariado…"). Copied from the template
+     * question, or set by the import from the data (markYesNoQuestions).
+     * The yes/no is counted apart (yesNoAnswerSql); only the "how" is read
+     * as text.
+     */
+    yesNo: boolean("yes_no").notNull().default(false),
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
       .defaultNow(),

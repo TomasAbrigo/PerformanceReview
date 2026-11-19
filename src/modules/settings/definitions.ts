@@ -71,14 +71,6 @@ export const settingDefinitions = {
     default: "mock",
   },
   /**
-   * Also label the answers to closed questions that belong to a dimension
-   * (their chosen option's label), not only the open-text comments.
-   */
-  "analysis.includeClosed": {
-    schema: z.boolean({ error: "invalid_choice" }),
-    default: true,
-  },
-  /**
    * Monthly engagement (docs/engagement-monthly.md): where a 0-1 score becomes
    * a segment when the file has none, in percent: from `Alto` up is alto, from
    * `Medio` up medio, from `Regular` up regular, below it bajo.

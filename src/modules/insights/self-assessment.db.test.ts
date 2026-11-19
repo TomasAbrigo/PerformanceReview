@@ -52,7 +52,6 @@ describe("selfAssessmentReport", () => {
       { dimension: "strengths", ...counts(2, 0, 1) },
     ]);
     expect(r.themes.map((t) => [t.theme, t.count])).toEqual([
-      ["colaboracion", 2],
       ["equipo", 2],
       ["calidad", 1],
     ]);
@@ -148,7 +147,7 @@ describe("selfAssessmentReport", () => {
     });
     expect(rows).toContainEqual({
       section: "theme",
-      group: "colaboracion",
+      group: "equipo",
       metric: "count",
       value: "2",
     });

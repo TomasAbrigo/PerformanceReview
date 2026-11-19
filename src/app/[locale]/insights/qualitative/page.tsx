@@ -96,7 +96,6 @@ async function Qualitative({
     sentiment: p.sentiment,
     theme: p.theme,
     relationship: p.side,
-    includeClosed: settings["analysis.includeClosed"],
     aggregateOnly: p.aggregate,
   };
   // Direction reads teams, not the people who lead them (a DM, a Santex Lead).

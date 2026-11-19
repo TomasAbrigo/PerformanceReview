@@ -1,26 +1,44 @@
 import { describe, expect, it } from "vitest";
+import { signals, substances } from "./constants";
 import { MockProvider } from "./mock-provider";
-import { INITIAL_THEMES } from "./themes";
+import type { AnalysisInput, Rubric } from "./provider";
+import { IMPACT_THEMES, THEMES } from "./themes";
 
-describe("MockProvider", () => {
+const input = (
+  token: string,
+  rubric: Rubric,
+  text: string,
+  question = "¿Qué hago bien?",
+): AnalysisInput => ({
+  token,
+  dimension: rubric === "yes_no_detail" ? "custom_x" : rubric,
+  rubric,
+  question: { es: question, en: question },
+  relationship: "self",
+  yesNo: rubric === "yes_no_detail" ? "yes" : null,
+  text,
+});
+
+describe("MockProvider (demo heuristic)", () => {
   const p = new MockProvider();
-  it("labels by keywords and is deterministic", async () => {
+
+  it("names itself as the mock and estimates no confidence", async () => {
+    expect(p.name).toBe("mock");
+    const [out] = await p.analyze([
+      input("a", "strengths", "Es referente técnico del equipo."),
+    ]);
+    expect(out.confidence).toBeNull();
+  });
+
+  it("is deterministic and keeps to the vocabulary", async () => {
     const batch = [
-      {
-        token: "a",
-        dimension: "strengths",
-        text: "Es referente, entrega con mucha calidad.",
-      },
-      {
-        token: "b",
-        dimension: "improvement",
-        text: "Podría mejorar la planificación de sus tiempos.",
-      },
-      {
-        token: "c",
-        dimension: "other",
-        text: "Siempre llega tarde y hay retrabajo, un problema.",
-      },
+      input("a", "strengths", "Es referente, entrega con mucha calidad."),
+      input(
+        "b",
+        "improvement",
+        "Podría mejorar la planificación de sus tiempos.",
+      ),
+      input("c", "open", "Llega tarde y hay retrabajo; me frustra."),
     ];
     const first = await p.analyze(batch);
     expect(first.map((r) => r.sentiment)).toEqual([
@@ -29,102 +47,103 @@ describe("MockProvider", () => {
       "negative",
     ]);
     expect(first[1].themes).toContain("planificacion");
-    expect(first[0].themes.length).toBeGreaterThan(0);
     for (const r of first) {
-      expect(r.confidence).toBeGreaterThanOrEqual(0);
-      expect(r.confidence).toBeLessThanOrEqual(1);
+      expect(substances).toContain(r.substance);
       expect(r.themes.length).toBeLessThanOrEqual(3);
+      for (const t of r.themes)
+        expect(THEMES as readonly string[]).toContain(t);
+      for (const s of r.signals) expect(signals).toContain(s);
     }
     expect(await p.analyze(batch)).toEqual(first);
   });
-  it("falls back to the dimension's default without hits on a long text", async () => {
-    const batch = [
-      {
-        token: "x",
-        dimension: "strengths",
-        text: "zzz yyy xxx www vvv uuu ttt",
-      },
-      {
-        token: "y",
-        dimension: "improvement",
-        text: "zzz yyy xxx www vvv uuu ttt",
-      },
-    ];
-    expect((await p.analyze(batch)).map((r) => r.sentiment)).toEqual([
-      "positive",
-      "constructive",
-    ]);
-  });
-  it("is neutral without lexicon hits when the text is short or a closed-question label", async () => {
+
+  it("never takes its tone from the question", async () => {
     const out = await p.analyze([
-      { token: "s", dimension: "strengths", text: "zzz" },
-      { token: "c", dimension: "valued", text: "Somewhat", closed: true },
-      {
-        token: "l",
-        dimension: "valued",
-        text: "zzz yyy xxx www vvv uuu ttt",
-        closed: true,
-      },
+      input("x", "strengths", "zzz yyy xxx www vvv uuu ttt"),
+      input("y", "improvement", "zzz yyy xxx www vvv uuu ttt"),
     ]);
-    expect(out.map((r) => r.sentiment)).toEqual([
-      "neutral",
-      "neutral",
-      "neutral",
-    ]);
-    expect(out[0].confidence).toBe(0.3);
-    expect(out[0].themes).toEqual([]);
+    expect(out.map((r) => r.sentiment)).toEqual(["neutral", "neutral"]);
   });
-  it("is mixed when the text has both positive and negative hits", async () => {
-    const [r, en] = await p.analyze([
-      {
-        token: "m",
-        dimension: "other",
-        text: "Gran calidad y muy confiable, pero siempre llega tarde y hay retrabajo.",
-      },
-      {
-        token: "e",
-        dimension: "other",
-        text: "Excellent and reliable work but there is a problem, always late.",
-      },
+
+  it("matches whole-word cues and reads negation (the audit's mislabels)", async () => {
+    const [cargo, proactivo, liderar, norte] = await p.analyze([
+      input(
+        "1",
+        "strengths",
+        "Me hago cargo de los problemas hasta resolverlos.",
+      ),
+      input("2", "improvement", "Puedo ser más proactivo pidiendo feedback."),
+      input("3", "improvement", "Me gustaría animarme a liderar reuniones."),
+      input(
+        "4",
+        "open",
+        'Mi mejor trabajo fue el proyecto "Norte": entregamos a tiempo, sin retrabajo.',
+      ),
     ]);
-    expect(r.sentiment).toBe("mixed");
-    expect(en.sentiment).toBe("mixed");
-    expect(r.confidence).toBeGreaterThan(0.4);
+    expect(cargo.sentiment).not.toBe("negative");
+    expect(proactivo.sentiment).toBe("constructive");
+    expect(proactivo.themes).toContain("proactividad");
+    expect(liderar.sentiment).toBe("constructive");
+    expect(liderar.themes).toContain("liderazgo");
+    expect(norte.sentiment).toBe("positive");
   });
-  it("positive wins over neutral: closed labels with lexicon hits keep their sentiment", async () => {
-    const [r, n] = await p.analyze([
-      { token: "a", dimension: "valued", text: "Very well", closed: true },
-      { token: "b", dimension: "valued", text: "Not at all", closed: true },
+
+  it("reads substance: nothing, only praise in improvement, generic, specific", async () => {
+    const out = await p.analyze([
+      input("n", "improvement", "N/A"),
+      input("p", "improvement", "Es excelente, un referente."),
+      input("g", "strengths", "Trabaja bien en equipo."),
+      input(
+        "s",
+        "strengths",
+        "Cuando el cliente cambió el alcance del proyecto, replanificó el sprint con el equipo en dos días.",
+      ),
     ]);
-    expect(r.sentiment).toBe("positive");
-    expect(n.sentiment).toBe("negative");
+    expect(out.map((r) => r.substance)).toEqual([
+      "none",
+      "none",
+      "generic",
+      "specific",
+    ]);
   });
-  it("tags the eight initial themes (es and en)", async () => {
-    const texts: [string, string][] = [
-      ["proyecto", "El proyecto tiene un alcance claro."],
-      ["equipo", "Buen trabajo en equipo con mis compañeros."],
-      ["comunicacion", "Falta comunicación y feedback."],
-      ["crecimiento", "Quiero crecer en mi carrera."],
-      ["cultura", "La cultura y los valores de la empresa."],
-      ["procesos", "Los procesos son lentos y burocráticos."],
-      ["bienestar", "Mucho estrés y carga de trabajo."],
-      ["reconocimiento", "Me siento reconocido y valorado."],
-      ["bienestar", "The workload causes burnout."],
-      ["crecimiento", "I want career growth."],
-    ];
-    const out = await p.analyze(
-      texts.map(([, text], i) => ({
-        token: `t${i}`,
-        dimension: "other",
-        text,
-      })),
+
+  it("raises the signals People has to attend to", async () => {
+    const [load, leave, ask] = await p.analyze([
+      input("w", "open", "La carga de trabajo es muy alta y hago horas extra."),
+      input(
+        "a",
+        "open",
+        "Estoy pensando en irme de la empresa a otra empresa.",
+      ),
+      input("c", "open", "La empresa debería ofrecer más capacitaciones."),
+    ]);
+    expect(load.signals).toContain("workload");
+    expect(leave.signals).toContain("attrition");
+    expect(ask.signals).toContain("company_request");
+  });
+
+  it("reads the impact 'how' as initiative types", async () => {
+    const q = '¿Contribuyo con iniciativas de "Impacto social"? ¿Cómo?';
+    const [vol, rec] = await p.analyze([
+      input(
+        "v",
+        "yes_no_detail",
+        "con el voluntariado de la escuela del barrio.",
+        q,
+      ),
+      input(
+        "r",
+        "yes_no_detail",
+        "separando residuos y reduciendo impresiones.",
+        q,
+      ),
+    ]);
+    expect(vol.themes).toContain("voluntariado");
+    expect(rec.themes).toEqual(
+      expect.arrayContaining(["reciclaje", "consumo"]),
     );
-    texts.forEach(([theme], i) => expect(out[i].themes).toContain(theme));
-    for (const theme of INITIAL_THEMES) {
-      expect(texts.map(([t]) => t)).toContain(theme);
+    for (const t of [...vol.themes, ...rec.themes]) {
+      expect(IMPACT_THEMES as readonly string[]).toContain(t);
     }
-  });
-  it("has its own prompt version", () => {
-    expect(p.promptVersion).toBe("mock-v2");
   });
 });

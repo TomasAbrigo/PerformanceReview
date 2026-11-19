@@ -80,6 +80,8 @@ export const question = pgTable("question", {
   role: text("role").$type<QuestionRole>(),
   /** What an open question is about (strengths, improvement, custom_n). */
   dimension: text("dimension").$type<QuestionDimension>(),
+  /** A yes/no question (#128): copied to question_revision.yes_no at launch. */
+  yesNo: boolean("yes_no").notNull().default(false),
 });
 
 export type ReviewTemplate = typeof reviewTemplate.$inferSelect;

@@ -1,9 +1,9 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { z } from "zod";
-import { sentiments } from "./constants";
+import { sentiments, signals, substances } from "./constants";
 import { AnalysisError } from "./errors";
 import { MockProvider } from "./mock-provider";
-import { INITIAL_THEMES } from "./themes";
+import { IMPACT_THEMES, THEMES } from "./themes";
 import type {
   AnalysisInput,
   AnalysisOutput,
@@ -11,22 +11,36 @@ import type {
 } from "./provider";
 
 /** Bump when the prompt or the output schema changes: it keys the cache. */
-export const ANTHROPIC_PROMPT_VERSION = "anthropic-v2";
+export const ANTHROPIC_PROMPT_VERSION = "anthropic-v3";
 export const DEFAULT_ANALYSIS_MODEL = "claude-opus-5-5";
 export const DEFAULT_BATCH_SIZE = 20;
 
-const SYSTEM = `You label open-text comments, and the chosen options of closed questions, from employee performance reviews (Spanish or English).
+const SYSTEM = `You read the free-text answers of employee performance reviews (Spanish or English) so that People (HR) learns what is useful from them.
+Each item has: the question as asked ("question", es/en), who writes about whom ("relationship": "self" = the employee about themself, "manager" = the manager about their report), the rubric of the question, for a yes/no question the yes/no already given ("yes_no": "yes" or "no"; the text is then only the "how" after it), and the text.
+
 For each item return:
-- sentiment, exactly one of:
-  "positive" (praise, strengths, satisfaction),
+- substance: does the text answer what was asked?
+  "none" (nothing: "n/a", "-", a non-answer, or only praise where an improvement was asked),
+  "generic" (an answer, but vague: no behaviour, situation, result or action you could point at),
+  "specific" (a concrete behaviour, situation, result or action).
+- themes: 0 to 3 keys saying what it is about. Use this vocabulary: ${THEMES.join(", ")}. Use another short lowercase Spanish noun without accents only when none fits.
+- signals: 0 or more of ${signals.join(", ")}: what People has to attend to, whatever the question. workload = too much work, overtime, exhaustion; attrition = thinking of leaving; conflict = friction with someone; recognition = feeling unrecognized or undervalued; stagnation = not growing or learning; company_request = asks the company for something; role_fit = the role or project does not fit. Only when the text says it; never infer it from the question.
+- sentiment, the tone, a secondary reading: exactly one of
+  "positive" (praise, satisfaction),
   "constructive" (actionable suggestions to improve, neutral or balanced tone),
-  "neutral" (factual or non-committal, no clear praise, criticism or suggestion; also a closed-question option that expresses neither),
-  "mixed" (clearly contains both praise and criticism),
+  "neutral" (factual or non-committal),
+  "mixed" (clearly both praise and criticism),
   "negative" (criticism, problems, frustration).
-- confidence: 0..1, how sure you are of the sentiment.
-- themes: 0 to 3 short themes, lowercase Spanish nouns without accents. Prefer this vocabulary when a theme fits: ${INITIAL_THEMES.join(", ")}. Use another short noun only when none of them fits, and reuse the same words across items.
+  Judge the text, not the question: an improvement answer is not negative because it was asked for, and a strength is not positive by default.
+- confidence: 0..1, how sure you are of this reading.
+
+Rubrics:
+- "strengths": themes = the strength (a competency or one of People's themes).
+- "improvement": themes = the area to improve; only praise is substance "none".
+- "yes_no_detail": the "how" of a yes/no question. When the question is about social or environmental impact initiatives, themes are initiative types: ${IMPACT_THEMES.join(", ")}.
+- "open": any other free text.
+
 Names, emails and employee numbers were replaced by tokens like [P1], [E1], [N1]; never guess who they are and never put tokens in themes.
-The item's dimension tells which question the comment answers. When an item has "closed": true, its text is the label of the option the person chose in a closed question (for example how well the company recognizes their value), not free text: judge what that answer says about the dimension.
 Return exactly one result per input token.`;
 
 const OUTPUT_SCHEMA = {
@@ -38,11 +52,23 @@ const OUTPUT_SCHEMA = {
         type: "object",
         properties: {
           token: { type: "string" },
+          substance: { type: "string", enum: [...substances] },
+          themes: { type: "array", items: { type: "string" } },
+          signals: {
+            type: "array",
+            items: { type: "string", enum: [...signals] },
+          },
           sentiment: { type: "string", enum: [...sentiments] },
           confidence: { type: "number" },
-          themes: { type: "array", items: { type: "string" } },
         },
-        required: ["token", "sentiment", "confidence", "themes"],
+        required: [
+          "token",
+          "substance",
+          "themes",
+          "signals",
+          "sentiment",
+          "confidence",
+        ],
         additionalProperties: false,
       },
     },
@@ -55,9 +81,11 @@ const outputSchema = z.object({
   results: z.array(
     z.object({
       token: z.string(),
+      substance: z.enum(substances),
+      themes: z.array(z.string()),
+      signals: z.array(z.enum(signals)),
       sentiment: z.enum(sentiments),
       confidence: z.number(),
-      themes: z.array(z.string()),
     }),
   ),
 });
@@ -112,11 +140,13 @@ export class AnthropicProvider implements AnalysisProvider {
           {
             role: "user",
             content: JSON.stringify({
-              items: batch.map(({ token, dimension, text, closed }) => ({
-                token,
-                dimension,
-                text,
-                ...(closed ? { closed: true } : {}),
+              items: batch.map((i) => ({
+                token: i.token,
+                question: i.question,
+                relationship: i.relationship,
+                rubric: i.rubric,
+                ...(i.yesNo ? { yes_no: i.yesNo } : {}),
+                text: i.text,
               })),
             }),
           },
@@ -151,9 +181,11 @@ export class AnthropicProvider implements AnalysisProvider {
       }
       return {
         token,
+        substance: r.substance,
+        themes: r.themes.slice(0, 3),
+        signals: [...new Set(r.signals)],
         sentiment: r.sentiment,
         confidence: Math.min(1, Math.max(0, r.confidence)),
-        themes: r.themes.slice(0, 3),
       };
     });
   }

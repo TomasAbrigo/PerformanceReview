@@ -293,6 +293,7 @@ export async function cloneTemplate(
             choices: q.choices,
             role: q.role,
             dimension: q.dimension,
+            yesNo: q.yesNo,
           })),
         );
       }

@@ -19,11 +19,6 @@ export type QualitativeFilters = OrgFilters & {
   /** Only the answers of reviews of this relationship (self, manager...). */
   relationship?: "self" | "manager" | "peer" | "upward";
   /**
-   * Count the labels of closed-question answers too; the
-   * `analysis.includeClosed` setting when the caller did not read it.
-   */
-  includeClosed?: boolean;
-  /**
    * The `aggregation.minGroupSize` setting when the caller already read it
    * (one read per request); read from the settings otherwise.
    */

@@ -108,6 +108,8 @@ type SeedQuestion = {
   visibleToReviewee?: boolean;
   role?: QuestionRole;
   dimension?: QuestionDimension;
+  /** A yes/no question (#128): its answer is counted apart, only its "how" read. */
+  yesNo?: boolean;
 };
 type SeedTemplate = {
   key: string;
@@ -197,6 +199,7 @@ const yesNoQuestion = (
   kind: "single_choice",
   choices: yesNo,
   required: true,
+  yesNo: true,
 });
 
 /**
@@ -590,6 +593,7 @@ export async function seedSystemTemplates(db: DbOrTx): Promise<void> {
             choices: q.choices ?? null,
             role: q.role ?? null,
             dimension: q.dimension ?? null,
+            yesNo: q.yesNo ?? false,
           })),
         );
       }
@@ -609,6 +613,7 @@ const seedShape = (seed: SeedTemplate): string[] =>
         q.appliesTo.join("+"),
         q.role ?? "",
         q.dimension ?? "",
+        q.yesNo ? "yes_no" : "",
         q.scale ?? "",
         (q.choices ?? []).map((c) => c.value).join("/"),
       ].join("\t"),
@@ -631,6 +636,7 @@ async function matchesSeed(
       appliesTo: question.appliesTo,
       role: question.role,
       dimension: question.dimension,
+      yesNo: question.yesNo,
       scaleId: question.scaleId,
       choices: question.choices,
     })
@@ -654,6 +660,7 @@ async function matchesSeed(
       r.appliesTo.join("+"),
       r.role ?? "",
       r.dimension ?? "",
+      r.yesNo ? "yes_no" : "",
       r.scaleId ? (scaleKeys.get(r.scaleId) ?? "") : "",
       (r.choices ?? []).map((c) => c.value).join("/"),
     ].join("\t"),
