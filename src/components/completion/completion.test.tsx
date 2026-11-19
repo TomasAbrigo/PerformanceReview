@@ -160,7 +160,7 @@ describe.each(locales)("CompletionSummaryView (%s)", (locale) => {
         .map((d) => d.textContent);
     expect(deltas(total)).toEqual([
       expect.stringMatching(/▼.*8[.,]3 pp/),
-      expect.stringMatching(/▲.*\+12 pp/),
+      expect.stringMatching(/▲.*[^+]12 pp/),
     ]);
     expect(deltas(techSelf)).toEqual([
       expect.stringMatching(new RegExp(`▼.*${text.down}.*33[.,]3 pp`)),
@@ -356,7 +356,7 @@ describe("Delta", () => {
 
   it("formats the number in the locale's way", () => {
     renderIn("es", <Delta value={16.7} />);
-    expect(screen.getByTestId("delta")).toHaveTextContent("▲ Subió +16,7 pp");
+    expect(screen.getByTestId("delta")).toHaveTextContent("▲ Subió 16,7 pp");
   });
 });
 

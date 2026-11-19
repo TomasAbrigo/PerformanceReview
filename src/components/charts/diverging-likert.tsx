@@ -32,6 +32,9 @@ export const LIKERT_SWATCH = [
   "bg-chart-div-pos",
 ];
 
+/** Below this share a segment carries no inner label (the tooltip and table do). */
+const LABEL_MIN = 0.18;
+
 const share = (c: number[], from: number, to: number) => {
   const n = c.reduce((a, b) => a + b, 0);
   return n ? c.slice(from, to).reduce((a, b) => a + b, 0) / n : 0;
@@ -138,7 +141,7 @@ export function DivergingLikert({
                     count: c,
                     share: f.share(s),
                   });
-                  const cls = `flex min-w-0 items-center justify-center rounded-[2px] text-xs tabular-nums outline-offset-1 focus-visible:outline-2 focus-visible:outline-ring ${FILL[i]}`;
+                  const cls = `flex min-w-0 items-center justify-center overflow-hidden rounded-[2px] text-xs whitespace-nowrap tabular-nums outline-offset-1 focus-visible:outline-2 focus-visible:outline-ring ${FILL[i]}`;
                   const d = drillOf?.(r.key, i + 1);
                   if (d) {
                     return (
@@ -150,7 +153,7 @@ export function DivergingLikert({
                         className={cls}
                         style={{ width: `${s * 100}%` }}
                       >
-                        {s >= 0.12 ? f.share(s) : null}
+                        {s >= LABEL_MIN ? f.share(s) : null}
                       </DrillLink>
                     );
                   }
@@ -163,9 +166,9 @@ export function DivergingLikert({
                       role="img"
                       tabIndex={0}
                       style={{ width: `${s * 100}%` }}
-                      className={`flex min-w-0 items-center justify-center rounded-[2px] text-xs tabular-nums outline-offset-1 focus-visible:outline-2 focus-visible:outline-ring ${FILL[i]}`}
+                      className={`flex min-w-0 items-center justify-center overflow-hidden rounded-[2px] text-xs whitespace-nowrap tabular-nums outline-offset-1 focus-visible:outline-2 focus-visible:outline-ring ${FILL[i]}`}
                     >
-                      {s >= 0.12 ? f.share(s) : null}
+                      {s >= LABEL_MIN ? f.share(s) : null}
                     </span>
                   );
                 })}

@@ -51,7 +51,7 @@ export function orderRows(
 }
 
 /** Below this share a segment carries no inner label (the tooltip and table do). */
-const LABEL_MIN = 0.12;
+const LABEL_MIN = 0.16;
 
 /**
  * 100% stacked horizontal bars: one row per group, segments in the series
@@ -98,7 +98,7 @@ export function StackedBar100({
             className={
               compact
                 ? ""
-                : "grid grid-cols-[minmax(8rem,18rem)_1fr_4rem] items-center gap-3"
+                : "grid grid-cols-[minmax(7rem,14rem)_1fr_4rem] items-center gap-3"
             }
           >
             {compact ? null : (
@@ -127,7 +127,7 @@ export function StackedBar100({
                     count: v,
                     share: f.share(share),
                   });
-                  const cls = `flex min-w-0 items-center justify-center text-xs font-medium tabular-nums outline-offset-1 focus-visible:outline-2 focus-visible:outline-ring ${s.fill} ${s.ink}`;
+                  const cls = `flex min-w-0 items-center justify-center overflow-hidden text-xs font-medium whitespace-nowrap tabular-nums outline-offset-1 focus-visible:outline-2 focus-visible:outline-ring ${s.fill} ${s.ink}`;
                   const text =
                     !compact && share >= LABEL_MIN ? f.share(share) : null;
                   const d = drillOf?.(r.key, s.key);

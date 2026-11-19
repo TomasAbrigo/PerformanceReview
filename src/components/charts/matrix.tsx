@@ -53,7 +53,7 @@ export function Matrix({
               <span className="tabular-nums">{r.range}</span>
             </div>
             {cells[ri].map((c) => {
-              const cls = `relative flex h-20 flex-col items-center justify-center rounded-md border outline-offset-1 focus-visible:outline-2 focus-visible:outline-ring ${
+              const cls = `relative flex min-h-20 flex-col items-center justify-center gap-0.5 rounded-md border px-2 py-2 text-center outline-offset-1 focus-visible:outline-2 focus-visible:outline-ring ${
                 c.highlight ? "border-2 border-chart-div-neg" : "border-border"
               }`;
               const inner = (
@@ -63,7 +63,7 @@ export function Matrix({
                     className={`absolute inset-0 rounded-md ${c.highlight ? "bg-chart-div-neg" : "bg-chart-seq"}`}
                     style={{ opacity: 0.08 + 0.42 * ((c.count ?? 0) / max) }}
                   />
-                  <span className="relative text-xs text-foreground-secondary">
+                  <span className="relative text-xs leading-tight text-foreground-secondary">
                     {c.name}
                   </span>
                   <span className="relative text-xl font-semibold tabular-nums">
