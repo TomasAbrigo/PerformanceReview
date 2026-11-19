@@ -54,10 +54,8 @@ export function Delta({ value }: { value: number | null | undefined }) {
   }
   const arrow = value > 0 ? "▲" : value < 0 ? "▼" : "▬";
   const word = value > 0 ? t("up") : value < 0 ? t("down") : t("same");
-  const text = format.number(value, {
-    maximumFractionDigits: 1,
-    signDisplay: "exceptZero",
-  });
+  // The arrow already says the direction: the number goes without a sign.
+  const text = format.number(Math.abs(value), { maximumFractionDigits: 1 });
   return (
     <span
       className={`delta-pill ${value < 0 ? "delta-down" : value > 0 ? "delta-up" : ""}`}
@@ -140,7 +138,9 @@ function TotalTile({
             })}
             figure={`${submitted}/${applicable}`}
           />
-          <Delta value={delta} />
+          <span className="flex w-[5.25rem] shrink-0 justify-end">
+            <Delta value={delta} />
+          </span>
         </div>
       )}
     </MetricCard>
@@ -294,7 +294,7 @@ function GroupRow({
               applicable,
             })}
             figure={
-              <span className="text-sm text-foreground">
+              <span className="inline-block min-w-[6.5rem] text-right text-sm text-foreground">
                 {submittedDrill && submitted > 0 ? (
                   <DrillLink
                     base={context!.base}
@@ -315,7 +315,9 @@ function GroupRow({
               </span>
             }
           />
-          <Delta value={delta} />
+          <span className="flex w-[5.25rem] shrink-0 justify-end">
+            <Delta value={delta} />
+          </span>
         </div>
       )}
       {pendingDrill && pending > 0 ? (
@@ -448,11 +450,13 @@ export function CompletionSummaryView({
           {sides.map((side) => (
             <section
               key={side}
-              className="chart-panel gap-4"
+              className="chart-panel"
               aria-label={`${t("summary.byGroup")} · ${t(`summary.${side}`)}`}
             >
-              <h3 className="text-lg">{t(`summary.${side}`)}</h3>
-              <ul className="flex flex-col gap-4">
+              <div className="chart-panel-head">
+                <h3 className="text-lg">{t(`summary.${side}`)}</h3>
+              </div>
+              <ul className="chart-panel-body gap-5">
                 {groups.map((r) => (
                   <GroupRow
                     key={r.key}

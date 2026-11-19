@@ -309,8 +309,13 @@
     @apply flex flex-col gap-1.5 text-xs font-medium text-muted-foreground;
   }
   /* A segmented row of links or buttons; aria-current / data-active marks the chosen one. */
+  /* Never wider than its container: too many options scroll sideways. */
   .segmented {
-    @apply inline-flex items-center overflow-hidden rounded-lg border border-input bg-card p-0.5;
+    @apply inline-flex max-w-full items-center overflow-x-auto rounded-lg border border-input bg-card p-0.5;
+    scrollbar-width: none;
+  }
+  .segmented > * {
+    @apply shrink-0;
   }
   .segmented > * {
     @apply rounded-md px-3 py-1.5 text-sm whitespace-nowrap text-foreground-secondary transition-colors hover:bg-brand-fog hover:text-foreground;

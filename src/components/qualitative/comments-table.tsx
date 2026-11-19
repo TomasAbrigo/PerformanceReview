@@ -93,7 +93,9 @@ function Row({
           {t(`comments.tags.${row.relationship}` as "comments.tags.self")}
         </span>
       </div>
-      <p className="kicker text-primary">{dimension}</p>
+      <p className="text-xs leading-snug font-medium text-primary">
+        {dimension}
+      </p>
       <blockquote className="line-clamp-4 border-l-2 border-brand-600 pl-3 text-sm leading-snug whitespace-pre-line">
         {row.text}
       </blockquote>

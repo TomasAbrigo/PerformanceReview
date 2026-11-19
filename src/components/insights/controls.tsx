@@ -18,7 +18,7 @@ export function Toggle<T extends string>({
     <div
       role="group"
       aria-label={label}
-      className="flex flex-wrap items-center gap-2 text-sm"
+      className="flex max-w-full min-w-0 flex-wrap items-center gap-2 text-sm"
     >
       <span className="text-xs font-medium text-muted-foreground">{label}</span>
       <span className="segmented">

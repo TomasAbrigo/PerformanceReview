@@ -182,6 +182,8 @@
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 0.5rem 1rem;
+  /* Values on one line even when a label wraps to two. */
+  align-items: end;
 }
 .dense-facts > div {
   display: flex;
@@ -191,8 +193,10 @@
 }
 .dense-facts dt {
   font-size: 0.6875rem;
+  line-height: 1.25;
   color: var(--muted-foreground);
-  white-space: nowrap;
+  /* A long label ("Comentarios positivos") wraps instead of leaving its column. */
+  overflow-wrap: break-word;
 }
 .dense-facts dd {
   font-size: 0.9375rem;

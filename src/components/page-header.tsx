@@ -20,8 +20,8 @@ export function PageHeader({
 }) {
   return (
     <header className="page-header">
-      <div className="flex flex-wrap items-end justify-between gap-4">
-        <div className="flex flex-col gap-2">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <div className="flex min-w-0 flex-1 flex-col gap-2">
           {kicker ? <p className="kicker text-primary">{kicker}</p> : null}
           <h1 className="text-3xl lg:text-4xl">{title}</h1>
           {description ? (
@@ -31,7 +31,9 @@ export function PageHeader({
           ) : null}
         </div>
         {actions ? (
-          <div className="flex flex-wrap items-center gap-2">{actions}</div>
+          <div className="flex shrink-0 flex-wrap items-center gap-2">
+            {actions}
+          </div>
         ) : null}
       </div>
       {children ? <div className="filter-toolbar">{children}</div> : null}
