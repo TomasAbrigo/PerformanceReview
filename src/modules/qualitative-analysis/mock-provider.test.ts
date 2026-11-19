@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
+import { TEXT_BANK, type BankEntry } from "@/fixtures/company/text-bank";
 import { signals, substances } from "./constants";
+import { evaluateProvider } from "./eval";
 import { MockProvider } from "./mock-provider";
 import type { AnalysisInput, Rubric } from "./provider";
 import { IMPACT_THEMES, THEMES } from "./themes";
@@ -145,5 +147,142 @@ describe("MockProvider (demo heuristic)", () => {
     for (const t of [...vol.themes, ...rec.themes]) {
       expect(IMPACT_THEMES as readonly string[]).toContain(t);
     }
+  });
+});
+
+describe("MockProvider reads the tone by rubric", () => {
+  const p = new MockProvider();
+  const tone = async (rubric: Rubric, text: string, yesNo?: "yes" | "no") => {
+    const [out] = await p.analyze([
+      {
+        ...input(
+          "t",
+          rubric,
+          text,
+          rubric === "yes_no_detail"
+            ? '¿Contribuyo con iniciativas de "Impacto social"? ¿Cómo?'
+            : undefined,
+        ),
+        yesNo: yesNo ?? null,
+      },
+    ]);
+    return out.sentiment;
+  };
+
+  it("an improvement that proposes a step is constructive, even naming a problem", async () => {
+    expect(
+      await tone(
+        "improvement",
+        "Con Facundo discutieron varias veces; conviene acordar reglas antes de arrancar.",
+      ),
+    ).toBe("constructive");
+    expect(
+      await tone("improvement", "Tengo que priorizar mejor los pedidos."),
+    ).toBe("constructive");
+  });
+
+  it("an improvement that only complains or threatens to leave is negative", async () => {
+    expect(await tone("improvement", "Siento que falta reconocimiento.")).toBe(
+      "negative",
+    );
+    expect(
+      await tone(
+        "improvement",
+        "Estoy evaluando otras ofertas porque no veo un camino de crecimiento claro.",
+      ),
+    ).toBe("negative");
+  });
+
+  it("praise with a caveat in a strengths answer is mixed", async () => {
+    expect(
+      await tone(
+        "strengths",
+        "Tiene muy buen nivel técnico, pero chocó varias veces con el equipo de producto.",
+      ),
+    ).toBe("mixed");
+  });
+
+  it("what someone did, with no adjective, is praise in a strengths answer", async () => {
+    expect(
+      await tone(
+        "strengths",
+        "Armé la guía de onboarding y ya la usaron los últimos tres ingresos.",
+      ),
+    ).toBe("positive");
+  });
+
+  it("a wish under 'what would help me' is a request, constructive", async () => {
+    expect(await tone("open", "Más tiempo para capacitarme.")).toBe(
+      "constructive",
+    );
+    expect(await tone("open", "Fewer meetings.")).toBe("constructive");
+  });
+
+  it("a yes needs evidence of what was done to read as positive", async () => {
+    expect(
+      await tone("yes_no_detail", "con el voluntariado de la escuela.", "yes"),
+    ).toBe("positive");
+    expect(await tone("yes_no_detail", "zzz yyy xxx www", "yes")).toBe(
+      "neutral",
+    );
+    expect(await tone("yes_no_detail", "todavía no.", "no")).toBe("neutral");
+  });
+
+  it("reads 'N/A' and 'no sé' as no answer", async () => {
+    const out = await p.analyze([
+      input("a", "strengths", "N/A"),
+      input("b", "strengths", "No sé, mejor que lo diga mi líder."),
+    ]);
+    expect(out.map((r) => r.substance)).toEqual(["none", "none"]);
+    expect(out[1].sentiment).toBe("neutral");
+  });
+});
+
+/**
+ * The reference bank (`TEXT_BANK`) split by a hash of the text: 70 % "dev"
+ * (what the cues were tuned looking at) and 30 % "test" (never looked at while
+ * tuning). The floors are on the test part, a bit below what the heuristic
+ * reached there, so a later change cannot silently degrade the demo; the dev
+ * part has to stay close, or the cues were fitted to the sentences.
+ */
+function fnv1a(s: string): number {
+  let h = 0x811c9dc5;
+  for (let i = 0; i < s.length; i++) {
+    h ^= s.charCodeAt(i);
+    h = Math.imul(h, 0x01000193) >>> 0;
+  }
+  return h;
+}
+const isHoldOut = (e: BankEntry) => fnv1a(e.text) % 10 >= 7;
+const DEV = TEXT_BANK.filter((e) => !isHoldOut(e));
+const HOLD_OUT = TEXT_BANK.filter(isHoldOut);
+
+describe("MockProvider against the reference bank (dev / test split)", () => {
+  const p = new MockProvider();
+
+  it("splits the bank about 70 / 30", () => {
+    const share = HOLD_OUT.length / TEXT_BANK.length;
+    expect(share).toBeGreaterThan(0.25);
+    expect(share).toBeLessThan(0.4);
+  });
+
+  it("holds its floors on the texts it was not tuned on", async () => {
+    const r = await evaluateProvider(p, HOLD_OUT);
+    expect(r.substance.value).toBeGreaterThanOrEqual(0.88);
+    expect(r.tone.value).toBeGreaterThanOrEqual(0.8);
+    expect(r.yesNo.value).toBe(1);
+    expect(r.signalsPrecision.value).toBeGreaterThanOrEqual(0.85);
+    expect(r.signalsRecall.value).toBeGreaterThanOrEqual(0.85);
+    // Themes are a semantic call among 16 keys; lexical cues reach about
+    // 55 % on unseen texts (the former heuristic: 46 %).
+    expect(r.themes.value).toBeGreaterThanOrEqual(0.5);
+  });
+
+  it("does not read the tuning texts far better than the others", async () => {
+    const dev = await evaluateProvider(p, DEV);
+    const hold = await evaluateProvider(p, HOLD_OUT);
+    expect(dev.substance.value - hold.substance.value).toBeLessThan(0.1);
+    expect(dev.tone.value - hold.tone.value).toBeLessThan(0.15);
+    expect(dev.themes.value - hold.themes.value).toBeLessThan(0.2);
   });
 });
