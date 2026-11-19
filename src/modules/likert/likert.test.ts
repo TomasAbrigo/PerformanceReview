@@ -241,7 +241,7 @@ describe("storedLikertLabel and likertLabel (#130)", () => {
 
   it("the data migration writes the same canonical labels", () => {
     const migration = readFileSync(
-      path.join(process.cwd(), "drizzle/0028_likert_canonical_labels.sql"),
+      path.join(process.cwd(), "drizzle/0029_likert_canonical_labels.sql"),
       "utf8",
     );
     for (const role of likertRoles) {

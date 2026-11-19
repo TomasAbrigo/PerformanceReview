@@ -140,7 +140,7 @@ describe("a label that names the reviewee (#130)", () => {
         ),
       );
     const migration = await readFile(
-      path.join(process.cwd(), "drizzle/0028_likert_canonical_labels.sql"),
+      path.join(process.cwd(), "drizzle/0029_likert_canonical_labels.sql"),
       "utf8",
     );
     await db.execute(sql.raw(migration));
