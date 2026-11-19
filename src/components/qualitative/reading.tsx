@@ -510,8 +510,11 @@ export function SignalsPanel({
   vsIndicators,
   drills,
   groupScope,
+  minGroupSize = 0,
   children,
 }: {
+  /** Groups under it go last, marked as small. */
+  minGroupSize?: number;
   s: SignalSummary | null;
   byGroup: GroupSignals[];
   vsIndicators: SignalIndicatorRow[];
@@ -592,40 +595,62 @@ export function SignalsPanel({
         />
       ) : null}
       {byGroup.length ? (
-        <StackedBar100
-          label={t("signalsByGroup")}
-          sortBy={["with"]}
-          series={[
-            {
-              key: "with",
-              label: t("withAny"),
-              fill: "bg-chart-div-neg",
-              ink: "text-white",
-            },
-            {
-              key: "without",
-              label: t("withoutSignal"),
-              fill: "bg-muted",
-              ink: "text-foreground",
-            },
-          ]}
-          rows={byGroup.map((g, i) => ({
-            key: g.key ?? `unassigned-${i}`,
-            label: g.label ?? (g.key ? t("team") : t("unassigned")),
-            testId: "signals-group-bar",
-            values: { with: g.withAny, without: g.people - g.withAny },
-          }))}
-          drillOf={
-            drills
-              ? (key, series) => {
-                  const scope = groupScope(key);
-                  return scope && series === "with"
-                    ? commentDrill(drills, scope)
-                    : undefined;
-                }
-              : undefined
-          }
-        />
+        <div className="flex flex-col gap-2" data-testid="signals-by-group">
+          <p className="text-sm font-medium">{t("signalsByGroup")}</p>
+          <p className="text-xs text-muted-foreground">
+            {t("signalsByGroupHint", { min: minGroupSize })}
+          </p>
+          <ChartLegend
+            items={[
+              { key: "with", label: t("withAny"), swatch: "bg-chart-div-neg" },
+              { key: "without", label: t("withoutSignal"), swatch: "bg-muted" },
+            ]}
+          />
+          <StackedBar100
+            label={t("signalsByGroup")}
+            series={[
+              {
+                key: "with",
+                label: t("withAny"),
+                fill: "bg-chart-div-neg",
+                ink: "text-white",
+              },
+              {
+                key: "without",
+                label: t("withoutSignal"),
+                fill: "bg-muted",
+                ink: "text-foreground",
+              },
+            ]}
+            rows={[...byGroup]
+              .map((g, i) => ({ g, i, small: g.people < minGroupSize }))
+              .sort(
+                (a, b) =>
+                  Number(a.small) - Number(b.small) ||
+                  b.g.withAny - a.g.withAny ||
+                  a.i - b.i,
+              )
+              .map(({ g, i, small }) => {
+                const name = g.label ?? (g.key ? t("team") : t("unassigned"));
+                return {
+                  key: g.key ?? `unassigned-${i}`,
+                  label: small ? t("smallGroup", { label: name }) : name,
+                  testId: "signals-group-bar",
+                  values: { with: g.withAny, without: g.people - g.withAny },
+                };
+              })}
+            drillOf={
+              drills
+                ? (key, series) => {
+                    const scope = groupScope(key);
+                    return scope && series === "with"
+                      ? commentDrill(drills, scope)
+                      : undefined;
+                  }
+                : undefined
+            }
+          />
+        </div>
       ) : null}
       {vsIndicators.length ? (
         <div
@@ -794,8 +819,8 @@ export function YesNoPanel({
             }
           />
           {trend.length ? (
-            <ChartTableToggle
-              caption={t("yesNoTrend")}
+            <NamedTable
+              title={t("yesNoTrend")}
               table={{
                 head: [t("question"), t("cycle"), t("yesNo.no"), t("people")],
                 rows: trend.map((r) => [
@@ -808,8 +833,8 @@ export function YesNoPanel({
             />
           ) : null}
           {byGroup.length ? (
-            <ChartTableToggle
-              caption={t("yesNoByGroup")}
+            <NamedTable
+              title={t("yesNoByGroup")}
               table={{
                 head: [t("question"), t("group"), t("yesNo.no"), t("people")],
                 rows: byGroup.map((r) => [
@@ -848,6 +873,45 @@ export function YesNoPanel({
         </>
       )}
     </Panel>
+  );
+}
+
+/** A table behind its own title (not a chart's "Ver como tabla"). */
+function NamedTable({
+  title,
+  table,
+}: {
+  title: string;
+  table: { head: string[]; rows: (string | number)[][] };
+}) {
+  return (
+    <details className="group text-sm">
+      <summary className="cursor-pointer text-sm text-primary">{title}</summary>
+      <div className="mt-2 overflow-x-auto">
+        <table className="text-sm" aria-label={title}>
+          <thead>
+            <tr>
+              {table.head.map((h) => (
+                <th key={h} className="pr-4 text-left">
+                  {h}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {table.rows.map((r, i) => (
+              <tr key={i}>
+                {r.map((c, j) => (
+                  <td key={j} className="pr-4 tabular-nums">
+                    {c}
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </details>
   );
 }
 
@@ -926,21 +990,28 @@ export function ClosedQuestionsPanel({
           <StackedBar100
             label={t("valuedTitle")}
             series={series}
-            sortBy={["1", "2"]}
             rows={[
               {
                 key: "total",
                 label: t("valuedTotal"),
+                testId: "valued-total-bar",
                 values: valuedValues(total),
               },
-              ...valued.byGroup.map((g, i) => ({
+            ]}
+          />
+          {valued.byGroup.length ? (
+            <StackedBar100
+              label={t("valuedTitle")}
+              series={series}
+              sortBy={["1", "2"]}
+              rows={valued.byGroup.map((g, i) => ({
                 key: g.key ?? `unassigned-${i}`,
                 label: g.label ?? (g.key ? t("team") : t("unassigned")),
                 testId: "valued-group-bar",
                 values: valuedValues(g),
-              })),
-            ]}
-          />
+              }))}
+            />
+          ) : null}
           {valued.trend.length > 1 ? (
             <>
               <p className="text-xs font-medium">{t("valuedTrend")}</p>

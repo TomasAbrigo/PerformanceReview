@@ -1247,7 +1247,11 @@
       "improvement": "Opportunities to improve",
       "valued": "Recognition of value",
       "best_work": "What would help me do my best work",
-      "other": "Other"
+      "other": "Other",
+      "security": "Information security",
+      "conversations": "Frequent conversations",
+      "socialImpact": "Social impact",
+      "environmentalImpact": "Environmental impact"
     },
     "byDimension": {
       "title": "Which dimensions get the most negative comments?",
@@ -1457,7 +1461,9 @@
       "optionShare": "{option}: {n} of {of} people",
       "toneTitle": "Tone (secondary)",
       "toneHint": "Free text only, per question and side. The question conditions the tone: “how could I improve?” invites constructive answers; do not compare questions.",
-      "masked": "These filters select fewer than {min} people: the reading is not shown to protect their anonymity."
+      "masked": "These filters select fewer than {min} people: the reading is not shown to protect their anonymity.",
+      "signalsByGroupHint": "Red: people of the group with a signal; light: none. Ordered by people with a signal; groups under {min} people go last, marked.",
+      "smallGroup": "{label} (small group)"
     }
   },
   "Insights": {
@@ -2588,6 +2594,12 @@
     "documentacion": "Documentation",
     "proactividad": "Proactivity",
     "negocio": "Business",
-    "aprendizaje": "Learning"
+    "aprendizaje": "Learning",
+    "voluntariado": "Volunteering",
+    "donaciones": "Donations",
+    "reciclaje": "Recycling",
+    "consumo": "Responsible consumption",
+    "educacion": "Education",
+    "movilidad": "Sustainable mobility"
   }
 }

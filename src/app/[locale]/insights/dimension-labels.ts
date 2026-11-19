@@ -2,6 +2,7 @@ import { getLocale, getTranslations } from "next-intl/server";
 import {
   dimensionLabels as labelsOf,
   KNOWN_DIMENSIONS,
+  NAMED_QUESTIONS,
 } from "@/components/qualitative/dimension-labels";
 import { db } from "@/db/client";
 import type { LocalizedText } from "@/db/schema/rating-scales";
@@ -32,5 +33,8 @@ export async function dimensionLabels(
     custom: (n) => t("customDimension", { n }),
     prompts: resolved,
     locale,
+    named: Object.fromEntries(
+      NAMED_QUESTIONS.map((k) => [k, t(`dimensions.${k}`)]),
+    ),
   });
 }

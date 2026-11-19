@@ -346,6 +346,7 @@ async function Qualitative({
             vsIndicators={signalIndicators ?? []}
             drills={drills}
             groupScope={groupScope}
+            minGroupSize={minGroupSize}
           />
           <YesNoPanel
             rows={yesNo ?? []}

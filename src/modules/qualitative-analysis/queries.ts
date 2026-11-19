@@ -346,11 +346,10 @@ export async function dimensionPrompts(
   db: DbOrTx,
 ): Promise<Record<string, LocalizedText>> {
   const rows = await db.execute<{ d: string; prompt: LocalizedText }>(sql`
-    select distinct on (qa.dimension) qa.dimension as d, q.prompt
-    from qualitative_analysis qa
-    join answer a on a.id = qa.answer_id
-    join question_revision q on q.id = a.question_revision_id
+    select distinct on (q.dimension) q.dimension as d, q.prompt
+    from question_revision q
     join review_cycle c on c.id = q.cycle_id
-    order by qa.dimension, c.period_end desc, q.sort, q.id`);
+    where q.dimension is not null
+    order by q.dimension, c.period_end desc, q.sort, q.id`);
   return Object.fromEntries(rows.map((r) => [r.d, r.prompt]));
 }

@@ -1246,7 +1246,11 @@
       "improvement": "Oportunidades de mejora",
       "valued": "Reconocimiento de valor",
       "best_work": "Qué me ayudaría a hacer mi mejor trabajo",
-      "other": "Otros"
+      "other": "Otros",
+      "security": "Seguridad de la información",
+      "conversations": "Conversaciones frecuentes",
+      "socialImpact": "Impacto social",
+      "environmentalImpact": "Impacto ambiental"
     },
     "customDimension": "Pregunta personalizada {n}",
     "byDimension": {
@@ -1457,7 +1461,9 @@
       "optionShare": "{option}: {n} de {of} personas",
       "toneTitle": "Tono (secundario)",
       "toneHint": "Solo texto libre, por pregunta y lado. La pregunta condiciona el tono: «¿qué podría mejorar?» invita a lo constructivo; no compare preguntas entre sí.",
-      "masked": "Con estos filtros hay menos de {min} personas: la lectura no se muestra para proteger su anonimato."
+      "masked": "Con estos filtros hay menos de {min} personas: la lectura no se muestra para proteger su anonimato.",
+      "signalsByGroupHint": "Rojo: personas del grupo con alguna señal; claro: sin señales. Ordenado por personas con señal; los grupos de menos de {min} personas van al final, marcados.",
+      "smallGroup": "{label} (grupo chico)"
     }
   },
   "Insights": {
@@ -2588,6 +2594,12 @@
     "documentacion": "Documentación",
     "proactividad": "Proactividad",
     "negocio": "Negocio",
-    "aprendizaje": "Aprendizaje"
+    "aprendizaje": "Aprendizaje",
+    "voluntariado": "Voluntariado",
+    "donaciones": "Donaciones",
+    "reciclaje": "Reciclaje",
+    "consumo": "Consumo responsable",
+    "educacion": "Educación",
+    "movilidad": "Movilidad sostenible"
   }
 }

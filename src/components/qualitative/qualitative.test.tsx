@@ -326,6 +326,41 @@ describe("dimensionLabels", () => {
       dimensionLabels(["weird_key"], { ...base, locale: "en" }).weird_key,
     ).toBe("Something odd?");
   });
+
+  it("names the Santex yes/no questions in the view's language, never their key (#129)", () => {
+    const named = {
+      security: "Seguridad de la información",
+      conversations: "Conversaciones frecuentes",
+      socialImpact: "Impacto social",
+      environmentalImpact: "Impacto ambiental",
+    };
+    const prompts = {
+      custom_am_i_following: {
+        es: "Am I following all Information Security Policies?",
+        en: "Am I following all Information Security Policies?",
+      },
+      custom_talk: {
+        es: "Do I speak with this employee frequently enough?",
+        en: "Do I speak with this employee frequently enough?",
+      },
+      custom_soc: {
+        es: 'Do I contribute with initiatives related to "Social impact"? How?',
+        en: 'Do I contribute with initiatives related to "Social impact"? How?',
+      },
+      custom_env: {
+        es: 'Do I contribute with initiatives related to "Environmental impact"? How?',
+        en: 'Do I contribute with initiatives related to "Environmental impact"? How?',
+      },
+    };
+    expect(
+      dimensionLabels(Object.keys(prompts), { ...base, prompts, named }),
+    ).toEqual({
+      custom_am_i_following: "Seguridad de la información",
+      custom_talk: "Conversaciones frecuentes",
+      custom_soc: "Impacto social",
+      custom_env: "Impacto ambiental",
+    });
+  });
 });
 
 describe("CommentsTable", () => {
