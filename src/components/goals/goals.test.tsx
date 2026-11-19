@@ -55,6 +55,8 @@ const listPage = (items = [item()], over: Partial<GoalListPage> = {}) => ({
   items,
   total: items.length,
   counts: { in_progress: 1, completed: 2, closed: 0, overdue: 1 },
+  asOf: "2026-11-18",
+  due: { total: 3, completed: 2 },
   page: 1,
   pageSize: 25,
   ...over,

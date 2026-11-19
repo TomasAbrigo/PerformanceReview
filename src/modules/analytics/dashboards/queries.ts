@@ -326,6 +326,7 @@ export async function executiveSummary(
       participants: count.n,
       progress: [],
       distribution: empty,
+      rated,
       byDepartment: [],
       others: null,
       suppressed: rated,
@@ -349,6 +350,7 @@ export async function executiveSummary(
       submitted: t.submitted,
     })),
     distribution: masked && rated < min ? empty : dist.total,
+    rated,
     byDepartment: shown.flatMap((g) =>
       g.key === null
         ? []

@@ -211,13 +211,18 @@ describe("ExecutiveReportView", () => {
       peopleWithGoals: 6,
       goals: 20,
       completed: 10,
-      inProgress: 8,
+      inProgress: 5,
       closed: 2,
       overdue: 3,
+      // 15 of the 20 were due by the cut-off, 10 of them completed.
+      due: 15,
+      completedDue: 10,
       completedPct: 50,
-      inProgressPct: 40,
+      inProgressPct: 25,
       overduePct: 15,
+      completedDuePct: (10 / 15) * 100,
       avgProgress: 60,
+      asOf: "2026-09-28",
     },
     sentiment: [{ dimension: "strengths", ...counts }],
     themes: [
@@ -266,8 +271,17 @@ describe("ExecutiveReportView", () => {
             locale === "es" ? "3,1" : "3.1",
           );
           expect(screen.getByTestId("exec-risk")).toHaveTextContent("3");
-          expect(screen.getByTestId("exec-goals")).toHaveTextContent(
+          // Against the target: the goals that were due, not all of them (a
+          // goal not due yet is not a failure); 10 of 15 = 67 %, not 50 %.
+          const goalsCard = screen.getByTestId("exec-goals");
+          expect(goalsCard).toHaveTextContent(locale === "es" ? "67 %" : "67%");
+          expect(goalsCard).not.toHaveTextContent(
             locale === "es" ? "50 %" : "50%",
+          );
+          expect(goalsCard).toHaveTextContent(
+            locale === "es"
+              ? "10 de 15 con fecha límite al 28 sept 2026"
+              : "10 of 15 due by Sep 28, 2026",
           );
         }
         if (qual) {

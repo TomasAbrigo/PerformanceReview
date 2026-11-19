@@ -75,21 +75,38 @@ export type GoalKpiGroup = {
   peopleWithGoals: number;
   goals: number;
   completed: number;
+  /** In progress and not overdue (a partition: the overdue ones are not counted here). */
   inProgress: number;
   /** Goals closed in Bamboo without being completed. */
   closed: number;
-  /** In progress and due before the cycle's period ended. */
+  /**
+   * In progress and due before the cycle's reference date (`GoalKpis.asOf`:
+   * today while the cycle runs, the end of its period once closed). Together
+   * `completed + inProgress + overdue + closed = goals`.
+   */
   overdue: number;
-  /** Shares of `goals`, 0-100; null without goals. */
+  /** Goals due on or before the reference date, whatever their state. */
+  due: number;
+  /** The completed ones among the `due` goals. */
+  completedDue: number;
+  /** Shares of `goals` (all of them, also the ones not due yet), 0-100; null without goals. */
   completedPct: number | null;
   inProgressPct: number | null;
   overduePct: number | null;
+  /**
+   * Completed share of the goals that were due by the reference date, 0-100:
+   * the rate to put next to a target (a goal not due yet is not a failure);
+   * null without due goals.
+   */
+  completedDuePct: number | null;
   /** Mean progress (percent complete) of the goals, 0-100; null without goals. */
   avgProgress: number | null;
 };
 
 export type GoalKpis = {
   cycleId: string;
+  /** The reference date (YYYY-MM-DD) "overdue" and "due" were measured at. */
+  asOf: string;
   groupBy: GoalGroupBy;
   hierarchy: Hierarchy;
   groups: GoalKpiGroup[];
@@ -116,11 +133,15 @@ export type GoalIndicatorRow = OrgDims & {
   department: string | null;
   goals: number;
   completed: number;
+  /** In progress and not overdue. */
   inProgress: number;
   /** Closed in Bamboo without being completed. */
   closed: number;
-  /** In progress and due before the cycle's period ended. */
+  /** In progress and due before the cycle's reference date. */
   overdue: number;
+  /** Goals due on or before the reference date, and the completed ones among them. */
+  due: number;
+  completedDue: number;
   /** Sum of the goals' percent complete (the mean is `avgProgress`). */
   progressSum: number;
   /** Completed / goals, 0-100; null without goals. */
@@ -140,6 +161,13 @@ export type GoalBucket = {
   to: number;
   /** People with goals in the bucket; null when direction cannot see it (under the minimum). */
   people: number | null;
+  /**
+   * People of the bucket who have the indicator (the base of each mean: a
+   * person without it is not in it). Direction: null when that base is under
+   * the minimum, and then the mean is null as well.
+   */
+  retentionPeople: number | null;
+  engagementPeople: number | null;
   meanRetention: number | null;
   meanEngagement: number | null;
   /** Mean of the people's positive shares (people with labeled comments only). */

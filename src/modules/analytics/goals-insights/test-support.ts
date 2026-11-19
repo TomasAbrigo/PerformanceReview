@@ -20,6 +20,7 @@ import {
   insertParticipant,
   insertPerson,
 } from "@/modules/analytics/test-support";
+import type { CycleStatus } from "@/modules/review-core/status";
 import type { Indicator } from "./types";
 
 export const hr: ActorContext = { personId: null, role: "hr" };
@@ -45,7 +46,7 @@ async function insertCycle(c: {
   name: string;
   periodStart: string;
   periodEnd: string;
-  status?: "draft" | "closed";
+  status?: CycleStatus;
 }): Promise<TestCycle> {
   const [cycle] = await db
     .insert(reviewCycle)
@@ -132,6 +133,36 @@ export async function insertGoals(
       noLongerApplicable: g.noLongerApplicable ?? false,
     })),
   );
+}
+
+/**
+ * A second cycle (period 2024-07-01 .. 2024-12-31, `collecting` unless said)
+ * with Ana alone and three goals: one completed (due 2024-08-31) and two in
+ * progress, due 2024-09-30 and 2024-10-01. Where "today" falls decides which
+ * of the two is overdue.
+ */
+export async function insertOpenCycle(
+  s: Pick<Scenario, "id">,
+  opts: { status?: CycleStatus } = {},
+): Promise<TestCycle> {
+  const cycle = await insertCycle({
+    name: `Open ${opts.status ?? "collecting"}`,
+    periodStart: "2024-07-01",
+    periodEnd: "2024-12-31",
+    status: opts.status ?? "collecting",
+  });
+  const participantId = await insertParticipant({
+    cycleId: cycle.cycleId,
+    personId: s.id.ana,
+    snapManagerPersonId: s.id.marta,
+    snapDepartment: "Ingeniería",
+  });
+  await insertGoals(participantId, [
+    done("2024-08-31"),
+    ip(30, "2024-09-30"),
+    ip(30, "2024-10-01"),
+  ]);
+  return cycle;
 }
 
 /** `n` copies of the same goal. */

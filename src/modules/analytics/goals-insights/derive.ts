@@ -148,6 +148,8 @@ export function kpisOf(
       inProgress: 0,
       closed: 0,
       overdue: 0,
+      due: 0,
+      completedDue: 0,
       progressSum: 0,
     };
     c.people += 1;
@@ -157,6 +159,8 @@ export function kpisOf(
     c.inProgress += r.inProgress;
     c.closed += r.closed;
     c.overdue += r.overdue;
+    c.due += r.due;
+    c.completedDue += r.completedDue;
     c.progressSum += r.progressSum;
     sums.set(id, c);
   }
@@ -191,6 +195,13 @@ const mean = (values: (number | null)[]): number | null => {
  * counted in `withoutGoals`. With a minimum (direction) a bucket under it is
  * hidden and its people counted in `suppressed`; an empty bucket gives
  * nobody away and stays; `withoutGoals` is not shown to direction.
+ *
+ * A mean is of the people who HAVE the indicator (a person without it is not
+ * in it), so that is its n (`retentionPeople`, `engagementPeople`) and the
+ * base the minimum is measured on: a bucket of 5 people with goals whose
+ * retention was answered by 3 shows no retention (the mean of 3 people would
+ * be below the minimum). The same for the positive share, whose base is the
+ * people with labeled comments.
  */
 export function bucketRows(
   rows: readonly GoalIndicatorRow[],
@@ -212,18 +223,34 @@ export function bucketRows(
       return {
         ...range,
         people: null,
+        retentionPeople: null,
+        engagementPeople: null,
         meanRetention: null,
         meanEngagement: null,
         meanPositiveShare: null,
         hidden: true,
       };
     }
+    // The mean of a measure, and the people it is of; nothing when direction
+    // would be reading fewer people than the minimum.
+    const measure = (value: (r: GoalIndicatorRow) => number | null) => {
+      const n = people.filter((r) => value(r) !== null).length;
+      const masked = minGroupSize !== null && n > 0 && n < minGroupSize;
+      return {
+        n: masked ? null : n,
+        mean: masked ? null : mean(people.map(value)),
+      };
+    };
+    const retention = measure((r) => r.retention);
+    const engagement = measure((r) => r.engagement);
     return {
       ...range,
       people: people.length,
-      meanRetention: mean(people.map((p) => p.retention)),
-      meanEngagement: mean(people.map((p) => p.engagement)),
-      meanPositiveShare: mean(people.map((p) => p.positiveShare)),
+      retentionPeople: retention.n,
+      engagementPeople: engagement.n,
+      meanRetention: retention.mean,
+      meanEngagement: engagement.mean,
+      meanPositiveShare: measure((r) => r.positiveShare).mean,
       hidden: false,
     };
   });

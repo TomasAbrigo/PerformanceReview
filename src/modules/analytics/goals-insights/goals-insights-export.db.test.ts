@@ -42,14 +42,15 @@ describe("goals insights CSV exports", () => {
     expect(disposition).toContain(
       `insights-goal-kpis-${s.h1.cycleId}-department.csv`,
     );
-    // Ingeniería: 26 goals, 14 completed (53.8 %), 11 in progress (42.3 %),
-    // 1 closed, 2 overdue (7.7 %), mean progress 1920 / 26 = 73.8.
-    // Producto: 7 goals, 3 completed (42.9 %), 4 in progress (57.1 %),
-    // 2 overdue (28.6 %), mean progress 370 / 7 = 52.9.
+    // Ingeniería: 26 goals, 14 completed (53.8 %), 9 in progress (34.6 %), 1
+    // closed, 2 overdue (7.7 %): the states add up. Mean progress 1920 / 26 =
+    // 73.8; 18 were due by 2024-06-30, 14 of them completed (77.8 %).
+    // Producto: 7 goals, 3 completed (42.9 %), 2 in progress (28.6 %), 2
+    // overdue (28.6 %), mean progress 370 / 7 = 52.9; 5 due, 3 completed (60 %).
     expect(lines).toEqual([
-      "group_id,grupo,personas,objetivos,completados,en curso,cerrados,vencidos,% completados,% en curso,% vencidos,avance promedio",
-      "Ingeniería,Ingeniería,6,26,14,11,1,2,53.8,42.3,7.7,73.8",
-      "Producto,Producto,3,7,3,4,0,2,42.9,57.1,28.6,52.9",
+      "group_id,grupo,personas,objetivos,completados,en curso,cerrados,vencidos,% completados,% en curso,% vencidos,avance promedio,vencían,completados de los que vencían,% completados de los que vencían,as_of",
+      "Ingeniería,Ingeniería,6,26,14,9,1,2,53.8,34.6,7.7,73.8,18,14,77.8,2024-06-30",
+      "Producto,Producto,3,7,3,2,0,2,42.9,28.6,28.6,52.9,5,3,60,2024-06-30",
     ]);
   });
 
@@ -59,12 +60,12 @@ describe("goals insights CSV exports", () => {
       `cycle=${s.h1.cycleId}&groupBy=person&department=Producto&locale=en`,
     );
     expect(person.lines[0]).toBe(
-      "group_id,group,people,goals,completed,in_progress,closed,overdue,completed_pct,in_progress_pct,overdue_pct,avg_progress",
+      "group_id,group,people,goals,completed,in_progress,closed,overdue,completed_pct,in_progress_pct,overdue_pct,avg_progress,due,completed_due,completed_due_pct,as_of",
     );
     expect(person.lines.slice(1)).toEqual([
-      `${s.id.gina},${names.gina},1,4,1,3,0,2,25,75,50,32.5`,
-      `${s.id.hugo},${names.hugo},1,1,1,0,0,0,100,0,0,100`,
-      `${s.id.iris},${names.iris},1,2,1,1,0,0,50,50,0,70`,
+      `${s.id.gina},${names.gina},1,4,1,1,0,2,25,25,50,32.5,3,1,33.3,2024-06-30`,
+      `${s.id.hugo},${names.hugo},1,1,1,0,0,0,100,0,0,100,1,1,100,2024-06-30`,
+      `${s.id.iris},${names.iris},1,2,1,1,0,0,50,50,0,70,1,1,100,2024-06-30`,
     ]);
     const manager = await csv(
       "insights-goal-kpis.csv",

@@ -50,8 +50,12 @@ export type ExecutiveSections = {
    */
   risk?: RiskMatrix;
   sentiment?: DimensionSentiment[];
-  /** Goal KPIs of everybody in reach (#62); null when direction cannot see them. */
-  goals?: GoalKpiGroup | null;
+  /**
+   * Goal KPIs of everybody in reach (#62); null when direction cannot see
+   * them. `asOf` is the reference date (YYYY-MM-DD) "overdue" and "due" were
+   * measured at: today, or the end of the period of a closed cycle.
+   */
+  goals?: (GoalKpiGroup & { asOf: string }) | null;
   /** Top 5 themes, counts only. */
   themes?: ThemeRank[];
   /**
@@ -135,9 +139,14 @@ export const COLLECTORS: readonly Collector[] = [
   {
     key: "goals",
     modes: QUANT,
-    collect: async ({ db, actor, cycleId, filters }) =>
-      (await goalKpis(db, actor, { cycleId, groupBy: "department", filters }))
-        .total,
+    collect: async ({ db, actor, cycleId, filters }) => {
+      const k = await goalKpis(db, actor, {
+        cycleId,
+        groupBy: "department",
+        filters,
+      });
+      return k.total ? { ...k.total, asOf: k.asOf } : null;
+    },
   },
   {
     key: "engagementMonthly",

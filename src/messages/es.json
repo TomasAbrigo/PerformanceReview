@@ -60,12 +60,13 @@
         "all": "Toda la compañía",
         "team": "Tu equipo y vos"
       },
-      "pending": "Sin empezar",
-      "ofParticipants": "{pct} % de los participantes",
-      "goalsCompleted": "Objetivos completados",
-      "goalsNote": "{done} de {total} objetivos del ciclo",
+      "pending": "Pendientes",
+      "ofParticipants": "{pct} % de los participantes, sin ninguna evaluación enviada",
+      "goalsCompleted": "Objetivos completados, de los que vencían",
+      "goalsNote": "{done} de {total} objetivos con fecha límite al {date}",
+      "goalsNoneDue": "Ningún objetivo del ciclo vencía al {date}",
       "goalsOverdue": "Objetivos vencidos",
-      "ofGoals": "{pct} % de los objetivos del ciclo",
+      "ofGoals": "{pct} % de los objetivos del ciclo, al {date}",
       "attention": {
         "title": "Para atender",
         "none": "Nada pendiente por ahora.",
@@ -856,9 +857,10 @@
       "rating_label": "etiqueta del rating",
       "rating_normalized": "rating normalizado",
       "relationship": "tipo",
+      "requests": "solicitudes",
       "total": "total",
       "submitted": "enviadas",
-      "draft": "pendientes",
+      "draft": "borradores",
       "declined": "rechazadas",
       "group": "grupo",
       "bin_from": "desde",
@@ -909,6 +911,9 @@
       "completed_pct": "% completados",
       "in_progress_pct": "% en curso",
       "overdue_pct": "% vencidos",
+      "due": "vencían",
+      "completed_due": "completados de los que vencían",
+      "completed_due_pct": "% completados de los que vencían",
       "outlier_kind": "tipo",
       "period_start": "inicio del período",
       "period_end": "fin del período",
@@ -918,7 +923,8 @@
       "retention_n": "retención (personas)",
       "engagement_mean": "compromiso Bamboo (promedio 1-5)",
       "engagement_n": "compromiso Bamboo (personas)",
-      "goals_completed_pct": "objetivos completados (%)"
+      "goals_completed_pct": "objetivos completados (%, de los que vencían)",
+      "goals_due": "objetivos que vencían"
     }
   },
   "ImportHistory": {
@@ -1449,7 +1455,8 @@
       "themes": "Top 5 temas",
       "themeCount": "{n, plural, one {# mención} other {# menciones}}",
       "goals": "Objetivos",
-      "goalsCompleted": "Objetivos completados",
+      "goalsCompleted": "Objetivos completados, de los que vencían",
+      "goalsDueNote": "{done} de {due} con fecha límite al {date}",
       "goalsCount": "Objetivos del período",
       "goalsOverdue": "Vencidos",
       "distributionTitle": "Retención y compromiso (respuestas 1 a 5)",
@@ -1494,6 +1501,7 @@
       "title": "Resumen ejecutivo",
       "participants": "Participantes",
       "distribution": "Distribución de calificaciones",
+      "noRatings": "Sin datos: el ciclo no tiene calificaciones finales.",
       "byDepartment": "Por área",
       "mean": "Promedio"
     },
@@ -1560,6 +1568,7 @@
       "inProgress": "En curso",
       "closed": "Cerrados",
       "overdue": "Vencidos",
+      "asOf": "Fecha de corte de los vencidos",
       "withoutGoals": "Personas sin objetivos",
       "buckets": "Objetivos completados vs indicadores",
       "bucket": "Objetivos completados",
@@ -1585,7 +1594,13 @@
       "managerReview": "Evaluación del manager",
       "retention": "Retención",
       "engagement": "Compromiso",
-      "positiveShare": "Comentarios positivos"
+      "positiveShare": "Comentarios positivos",
+      "statuses": {
+        "submitted": "Enviada",
+        "in_progress": "En curso",
+        "not_started": "No iniciada",
+        "not_applicable": "No aplica"
+      }
     },
     "relationships": {
       "self": "Autoevaluación",
@@ -1723,13 +1738,13 @@
     },
     "period": {
       "title": "Detalle por período",
-      "hint": "Un renglón por ciclo, del más viejo al más nuevo, con los mismos filtros de cuenta, proyecto, DM, Santex Lead, área y manager de la vista (no con el agrupar por). Las medias de valoración propia (1 a 4), retención y compromiso de Bamboo (1 a 5) llevan las personas detrás. Los objetivos completados son el estado en Bamboo.",
+      "hint": "Un renglón por ciclo, del más viejo al más nuevo, con los mismos filtros de cuenta, proyecto, DM, Santex Lead, área y manager de la vista (no con el agrupar por). Las medias de valoración propia (1 a 4), retención y compromiso de Bamboo (1 a 5) llevan las personas detrás. Los objetivos completados son el estado en Bamboo, de los que ya vencían a la fecha de corte del ciclo (hoy mientras el período corre, el último día del período una vez cerrado): uno que todavía no vencía no cuenta como incumplido.",
       "hintAggregates": "Un renglón por ciclo, del más viejo al más nuevo, solo agregados: la cifra de un ciclo con menos personas que el mínimo no se muestra.",
       "label": "Detalle por período",
       "empty": "Todavía no hay ciclos lanzados.",
       "hidden": "Oculto",
       "people": "({n, plural, one {# persona} other {# personas}})",
-      "goalsOf": "de {n}",
+      "goalsOf": "de {n} que vencían",
       "columns": {
         "cycle": "Ciclo",
         "n": "Personas",
@@ -1738,7 +1753,7 @@
         "valued": "Valoración propia (1-4)",
         "retention": "Retención (1-5)",
         "engagement": "Compromiso Bamboo (1-5)",
-        "goals": "Objetivos completados"
+        "goals": "Objetivos completados, de los que vencían"
       },
       "drill": "{cycle} · {what}: ver las personas"
     }
@@ -1785,12 +1800,13 @@
     },
     "kpis": {
       "title": "Indicadores de objetivos",
-      "hint": "Objetivos del período de cada persona (snapshot del ciclo). Vencido: en curso y con fecha anterior al fin del período; un objetivo cerrado nunca lo es.",
+      "hint": "Objetivos del período de cada persona (snapshot del ciclo). Vencido: en curso y con fecha límite anterior al {date}{live, select, true { (hoy)} other { (el cierre del ciclo)}}; un objetivo cerrado nunca lo es. Completados, en curso, vencidos y cerrados suman todos los objetivos del grupo, y los porcentajes son sobre todos ellos, también los que todavía no vencían.",
       "columns": {
         "group": "Grupo",
         "people": "Personas",
         "goals": "Objetivos",
         "completed": "Completados",
+        "completedDue": "Completados de los que vencían",
         "inProgress": "En curso",
         "overdue": "Vencidos",
         "avgProgress": "Avance promedio"
@@ -1799,13 +1815,14 @@
       "total": "Total",
       "none": "Sin objetivos",
       "share": "{count} ({pct} %)",
-      "meter": "{group}: {pct} % de objetivos completados",
+      "dueShare": "{done} de {due} ({pct} %)",
+      "noDue": "Ninguno vencía",
+      "meter": "{group}: {pct} % de todos los objetivos completados",
       "suppressed": "{n, plural, one {# persona en grupos chicos no se muestra} other {# personas en grupos chicos no se muestran}}",
       "totalHidden": "El total se oculta para no revelar los grupos chicos.",
       "unassigned": "Sin asignar",
       "team": "Equipo {n}",
       "withoutGoals": "Sin objetivos en el período:",
-      "legendOnTime": "En curso, a tiempo",
       "legendClosed": "Cerrados"
     },
     "scatter": {
@@ -1821,18 +1838,21 @@
     },
     "buckets": {
       "title": "¿Cambian retención y compromiso según el cumplimiento de objetivos?",
-      "hint": "Cada par de barras es un tramo de % de objetivos completados; la altura es el promedio (1 a 5) de retención y de compromiso de sus personas, y n cuántas son.",
+      "hint": "Cada par de barras es un tramo de % de objetivos completados; la altura es el promedio (1 a 5) de retención y de compromiso de sus personas, y n cuántas personas tienen cada respuesta (retención / compromiso).",
       "bucket": "{from}–{to} %",
       "people": "{n, plural, one {# persona} other {# personas}}",
       "positive": "Comentarios positivos",
       "hidden": "Oculto: menos de {min} personas",
       "noData": "Sin datos",
-      "bar": "{bucket}, {indicator}: {value}",
+      "bar": "{bucket}, {indicator}: {value} (n = {n})",
+      "n": "n = {retention} / {engagement}",
       "withoutGoals": "{n, plural, one {# persona sin objetivos no entra} other {# personas sin objetivos no entran}} en este gráfico.",
       "suppressed": "{n, plural, one {# persona en tramos chicos no se muestra} other {# personas en tramos chicos no se muestran}}.",
       "columns": {
         "bucket": "Objetivos completados",
         "people": "Personas",
+        "retentionPeople": "Personas con retención",
+        "engagementPeople": "Personas con compromiso",
         "retention": "Retención (promedio)",
         "engagement": "Compromiso (promedio)",
         "positive": "Comentarios positivos"
@@ -1865,11 +1885,11 @@
       "none": "Ninguna persona.",
       "doneButLow": {
         "title": "Objetivos cumplidos, indicadores bajos",
-        "description": "Completaron {goals} % o más de sus objetivos, pero retención o compromiso están en {risk} o menos."
+        "description": "Completaron {goals} % o más de todos sus objetivos del período (hayan vencido o no), pero retención o compromiso están en {risk} o menos."
       },
       "behindButHigh": {
         "title": "Objetivos atrasados, indicadores altos",
-        "description": "Completaron {goals} % o menos de sus objetivos, pero retención y compromiso están en {high} o más."
+        "description": "Completaron {goals} % o menos de todos sus objetivos del período (hayan vencido o no), pero retención y compromiso están en {high} o más."
       },
       "columns": {
         "person": "Persona",
@@ -2149,7 +2169,8 @@
       "review": "Para revisar",
       "reviewNote": "{n, plural, one {Objetivo vencido} other {Objetivos vencidos}}",
       "share": "{pct} % de los objetivos de la lista",
-      "overdueShare": "{pct} % vencidos: en curso con la fecha pasada"
+      "overdueShare": "{pct} % vencidos: en curso con la fecha pasada",
+      "frozenNote": "Los objetivos de este ciclo se miden al {date}, el cierre de su período: vencido es un objetivo en curso con fecha límite anterior a ese día."
     },
     "form": {
       "new": "Nuevo objetivo",

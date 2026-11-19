@@ -27,9 +27,12 @@ export type GoalTotals = {
 /**
  * The goal figures of the cycle worked out straight from the goal snapshot
  * the import leaves (one per participant, when the run finishes): what the
- * KPIs' total row must say. Overdue: in progress and due before today, the
- * app's one rule. Participants removed from the cycle and goals that no
- * longer apply do not count.
+ * KPIs' total row must say. Overdue: in progress and due before the cycle's
+ * reference date, the app's one rule (`goalAsOf`: today, or the end of the
+ * period once the cycle is closed); "in progress" leaves the overdue out, so
+ * completed + in progress + overdue + closed add up to the goals.
+ * Participants removed from the cycle and goals that no longer apply do not
+ * count.
  */
 export async function goalTotals(cycleName: string): Promise<GoalTotals> {
   const [row] = await query<GoalTotals>(
@@ -37,12 +40,19 @@ export async function goalTotals(cycleName: string): Promise<GoalTotals> {
       select count(distinct cp.id)::int as people,
              count(g.id)::int as goals,
              count(g.id) filter (where g.status = 'completed')::int as completed,
-             count(g.id) filter (where g.status = 'in_progress')::int as "inProgress",
              count(g.id) filter (
-               where g.status = 'in_progress' and g.due_date < current_date
+               where g.status = 'in_progress'
+                 and (g.due_date is null or g.due_date >= asof.d)
+             )::int as "inProgress",
+             count(g.id) filter (
+               where g.status = 'in_progress' and g.due_date < asof.d
              )::int as overdue
       from cycle_participant cp
       join review_cycle c on c.id = cp.cycle_id and c.name = ${cycleName}
+      cross join lateral (
+        select case when c.status = 'closed' and c.period_end < current_date
+                    then c.period_end else current_date end as d
+      ) asof
       left join participant_goal_snapshot g
         on g.participant_id = cp.id and not g.no_longer_applicable
       where cp.removed_at is null and c.status <> 'draft'`,

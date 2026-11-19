@@ -23,6 +23,16 @@ export function KpisTable({ kpis }: { kpis: GoalKpis }) {
         : (g.label ?? t("unassigned"));
   const share = (count: number, value: number | null) =>
     value === null ? t("none") : t("share", { count, pct: pct(value) ?? 0 });
+  // Completion of the goals that were due by the cut-off (the rate that goes
+  // next to a target): a goal not due yet is not a failure.
+  const dueShare = (g: GoalKpiGroup) =>
+    g.completedDuePct === null
+      ? t("noDue")
+      : t("dueShare", {
+          done: g.completedDue,
+          due: g.due,
+          pct: pct(g.completedDuePct) ?? 0,
+        });
   const groups = [
     ...(kpis.total
       ? [{ group: kpis.total, name: t("total"), total: true }]
@@ -40,6 +50,7 @@ export function KpisTable({ kpis }: { kpis: GoalKpis }) {
     "completed",
     "inProgress",
     "overdue",
+    "completedDue",
     "avgProgress",
   ] as const;
   const facts = (g: GoalKpiGroup) =>
@@ -48,6 +59,7 @@ export function KpisTable({ kpis }: { kpis: GoalKpis }) {
         ["completed", share(g.completed, g.completedPct)],
         ["inProgress", share(g.inProgress, g.inProgressPct)],
         ["overdue", share(g.overdue, g.overduePct)],
+        ["completedDue", dueShare(g)],
         [
           "avgProgress",
           g.avgProgress === null ? t("none") : `${decimal(g.avgProgress)} %`,
@@ -168,6 +180,7 @@ export function KpisTable({ kpis }: { kpis: GoalKpis }) {
           share(g.completed, g.completedPct),
           share(g.inProgress, g.inProgressPct),
           share(g.overdue, g.overduePct),
+          dueShare(g),
           g.avgProgress === null ? t("none") : `${decimal(g.avgProgress)} %`,
         ])}
       />
@@ -175,11 +188,15 @@ export function KpisTable({ kpis }: { kpis: GoalKpis }) {
   );
 }
 
-/** The goals of a group as one bar: completed, in progress, overdue, closed. */
+/**
+ * The goals of a group as one bar: completed, in progress, overdue, closed.
+ * The four are a partition (in progress leaves out the overdue), so the bar
+ * and the numbers beside it say the same.
+ */
 function GoalMix({ group: g, label }: { group: GoalKpiGroup; label: string }) {
   const parts = [
     ["bg-status-done", g.completed],
-    ["bg-brand-400", g.inProgress - g.overdue],
+    ["bg-brand-400", g.inProgress],
     ["bg-status-pending", g.overdue],
     ["bg-muted-foreground/30", g.closed],
   ] as const;
@@ -216,7 +233,7 @@ function GoalMixLegend() {
       {(
         [
           ["bg-status-done", t("columns.completed")],
-          ["bg-brand-400", t("legendOnTime")],
+          ["bg-brand-400", t("columns.inProgress")],
           ["bg-status-pending", t("columns.overdue")],
           ["bg-muted-foreground/30", t("legendClosed")],
         ] as const

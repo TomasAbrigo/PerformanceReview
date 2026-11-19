@@ -27,8 +27,14 @@ export type PeriodDetailRow = {
   retention: MeanOf | null;
   /** Manager "how engaged is [Employee]?" (Bamboo's engagement), 1-5. */
   engagement: MeanOf | null;
-  /** Goals of the period completed, over all of them (Bamboo's own status). */
+  /**
+   * Goals of the period completed, of the ones that were due by the cycle's
+   * reference date (`goalAsOf`: today while it runs, the end of its period
+   * once closed): a goal not due yet is not a failure, so this is the rate
+   * that can sit next to a target. Null when none was due.
+   */
   goalsCompletedPct: number | null;
+  /** The goals that were due by then: the base of `goalsCompletedPct`. */
   goals: number | null;
 };
 

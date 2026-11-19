@@ -560,6 +560,9 @@ describe("executiveSummary", () => {
       participants: 2,
       progress: [],
       distribution: [0, 0, 0, 0, 0],
+      // The people with a final rating (what `suppressed` hides here): 0
+      // would mean the cycle has none (no data), not "under the minimum".
+      rated: 2,
       byDepartment: [],
       others: null,
       suppressed: 2,
@@ -576,6 +579,7 @@ describe("executiveSummary", () => {
     expect(r.participants).toBe(2);
     expect(r.progress).toHaveLength(2);
     expect(r.distribution).toEqual([0, 0, 0, 1, 1]);
+    expect(r.rated).toBe(2);
     expect(r.byDepartment.map((d) => [d.department, d.n])).toEqual([
       ["Ingeniería", 2],
     ]);
@@ -817,7 +821,7 @@ describe("CSV exports", () => {
   it("exports progress, distribution, goals and gap of a cycle", async () => {
     const { cycle } = await h1();
     expect(await csv("dashboard-progress.csv", `cycle=${cycle.id}`)).toEqual([
-      "tipo,área,manager_id,manager,total,enviadas,pendientes,rechazadas",
+      "tipo,área,manager_id,manager,solicitudes,enviadas,borradores,rechazadas",
       `self,Ingeniería,${ana},Ana García,1,0,1,0`,
       `self,Ingeniería,${carla},Carla Romero,1,1,0,0`,
       `manager,Ingeniería,${ana},Ana García,1,1,0,0`,

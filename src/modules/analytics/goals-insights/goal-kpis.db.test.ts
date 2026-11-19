@@ -16,6 +16,7 @@ import {
   buildScenario,
   direction,
   hr,
+  insertOpenCycle,
   reset,
   type Scenario,
 } from "./test-support";
@@ -40,20 +41,142 @@ const byLabel = <G extends { label: string | null }>(
   label: string,
 ): G => groups.find((g) => g.label === label)!;
 
-describe("goalKpis (People)", () => {
-  it("overdue is measured against today, as the goals list does, not the period end", async () => {
+describe("goalKpis (the date overdue is measured at)", () => {
+  it("a closed cycle is measured at the end of its period, whatever today is: the figure does not grow with the calendar", async () => {
     const was = today;
-    today = "2024-10-01";
     try {
-      const { groups } = await goalKpis(db, hr, {
+      const asOfClose = await goalKpis(db, hr, {
         cycleId: h1(),
         groupBy: "person",
       });
-      // Ana's goal in progress is due 2024-09-30: overdue on 2024-10-01.
-      expect(byLabel(groups, "Ana Prieto").overdue).toBe(1);
+      // Months later: Ana's goal in progress, due 2024-09-30, is overdue
+      // TODAY but was not at the close of the period, and the snapshot is
+      // frozen at it.
+      today = "2024-10-01";
+      const later = await goalKpis(db, hr, {
+        cycleId: h1(),
+        groupBy: "person",
+      });
+      expect(byLabel(later.groups, "Ana Prieto").overdue).toBe(0);
+      expect(later.total!.overdue).toBe(4);
+      expect(later.groups).toEqual(asOfClose.groups);
+      expect(asOfClose.asOf).toBe("2024-06-30");
+      expect(later.asOf).toBe("2024-06-30");
     } finally {
       today = was;
     }
+  });
+
+  it("an open cycle is measured against today, as the goals list does", async () => {
+    const was = today;
+    try {
+      const open = await insertOpenCycle(s);
+      today = "2024-10-01";
+      const { groups, total, asOf } = await goalKpis(db, hr, {
+        cycleId: open.cycleId,
+        groupBy: "person",
+      });
+      expect(asOf).toBe("2024-10-01");
+      // Due 2024-09-30: overdue on 2024-10-01; due the same day is not.
+      expect(byLabel(groups, "Ana Prieto")).toMatchObject({
+        goals: 3,
+        completed: 1,
+        inProgress: 1,
+        overdue: 1,
+        closed: 0,
+      });
+      expect(total).toMatchObject({ goals: 3, overdue: 1 });
+      today = "2024-09-30";
+      const before = await goalKpis(db, hr, {
+        cycleId: open.cycleId,
+        groupBy: "person",
+      });
+      expect(before.total).toMatchObject({ inProgress: 2, overdue: 0 });
+    } finally {
+      today = was;
+    }
+  });
+
+  it("a closed cycle whose period has not ended is measured today too", async () => {
+    const was = today;
+    try {
+      const running = await insertOpenCycle(s, { status: "closed" });
+      today = "2024-10-01"; // the period runs to 2024-12-31
+      const { asOf, total } = await goalKpis(db, hr, {
+        cycleId: running.cycleId,
+        groupBy: "person",
+      });
+      expect(asOf).toBe("2024-10-01");
+      expect(total!.overdue).toBe(1);
+    } finally {
+      today = was;
+    }
+  });
+});
+
+describe("goalKpis (People)", () => {
+  it("the four states are a partition: in progress leaves out the overdue, so the parts add up to the goals", async () => {
+    const { groups, total } = await goalKpis(db, hr, {
+      cycleId: h1(),
+      groupBy: "person",
+    });
+    for (const g of [...groups, total!]) {
+      expect(g.completed + g.inProgress + g.overdue + g.closed).toBe(g.goals);
+      if (g.goals > 0) {
+        expect(
+          g.completedPct! +
+            g.inProgressPct! +
+            g.overduePct! +
+            (100 * g.closed) / g.goals,
+        ).toBeCloseTo(100);
+      }
+    }
+    // Bruno: 2 in progress in the snapshot, one of them overdue.
+    expect(byLabel(groups, "Bruno Soler")).toMatchObject({
+      inProgress: 1,
+      overdue: 1,
+    });
+    expect(total).toMatchObject({ inProgress: 11, overdue: 4 });
+  });
+
+  it("completion against a target counts only the goals due by the reference date", async () => {
+    const { groups, total } = await goalKpis(db, hr, {
+      cycleId: h1(),
+      groupBy: "person",
+    });
+    // Elena: 3 of 10 goals completed, but only those 3 were due at the close
+    // of the period (the 7 in progress are due in 2025): 100 % of what was
+    // due, not 30 %.
+    expect(byLabel(groups, "Elena Ríos")).toMatchObject({
+      goals: 10,
+      completedPct: 30,
+      due: 3,
+      completedDue: 3,
+      completedDuePct: 100,
+    });
+    // Bruno: 4 due (done, overdue, in progress due on the last day, closed),
+    // 1 of them completed.
+    expect(byLabel(groups, "Bruno Soler")).toMatchObject({
+      due: 4,
+      completedDue: 1,
+      completedDuePct: 25,
+    });
+    // A goal without a due date was never due; nobody with goals but none
+    // due (and nobody without goals) has a rate.
+    expect(byLabel(groups, "Gina Paz")).toMatchObject({
+      goals: 4,
+      due: 3,
+      completedDue: 1,
+    });
+    expect(byLabel(groups, "Gina Paz").completedDuePct).toBeCloseTo(100 / 3);
+    expect(byLabel(groups, "Dario Mena")).toMatchObject({
+      due: 0,
+      completedDue: 0,
+      completedDuePct: null,
+    });
+    // Everybody: 23 goals were due by 2024-06-30, 17 completed.
+    expect(total).toMatchObject({ goals: 33, due: 23, completedDue: 17 });
+    expect(total!.completedDuePct).toBeCloseTo((17 / 23) * 100);
   });
 
   it("per person: goals, shares and mean progress, worked out by hand", async () => {
@@ -89,16 +212,16 @@ describe("goalKpis (People)", () => {
       overduePct: 0,
       avgProgress: 92,
     });
-    // Bruno: 4 goals: 1 completed, 2 in progress (one overdue, the one due
-    // on the last day of the period is not), 1 closed (never overdue).
+    // Bruno: 4 goals: 1 completed, 1 in progress (the one due on the last day
+    // of the period: not overdue), 1 overdue, 1 closed (never overdue).
     expect(byLabel(groups, "Bruno Soler")).toMatchObject({
       goals: 4,
       completed: 1,
-      inProgress: 2,
+      inProgress: 1,
       closed: 1,
       overdue: 1,
       completedPct: 25,
-      inProgressPct: 50,
+      inProgressPct: 25,
       overduePct: 25,
       avgProgress: 45,
     });
@@ -123,19 +246,19 @@ describe("goalKpis (People)", () => {
     expect(byLabel(groups, "Gina Paz")).toMatchObject({
       goals: 4,
       completed: 1,
-      inProgress: 3,
+      inProgress: 1,
       overdue: 2,
       overduePct: 50,
       avgProgress: 32.5,
     });
-    // Everybody: 33 goals, 17 completed, 15 in progress, 1 closed, 4 overdue,
+    // Everybody: 33 goals, 17 completed, 11 in progress, 1 closed, 4 overdue,
     // progress 2290 / 33.
     expect(total).toMatchObject({
       people: 9,
       peopleWithGoals: 8,
       goals: 33,
       completed: 17,
-      inProgress: 15,
+      inProgress: 11,
       closed: 1,
       overdue: 4,
     });
@@ -156,12 +279,12 @@ describe("goalKpis (People)", () => {
       peopleWithGoals: 5,
       goals: 26,
       completed: 14,
-      inProgress: 11,
+      inProgress: 9,
       closed: 1,
       overdue: 2,
     });
     expect(marta.completedPct).toBeCloseTo((14 / 26) * 100);
-    expect(marta.inProgressPct).toBeCloseTo((11 / 26) * 100);
+    expect(marta.inProgressPct).toBeCloseTo((9 / 26) * 100);
     expect(marta.overduePct).toBeCloseTo((2 / 26) * 100);
     expect(marta.avgProgress).toBeCloseTo(1920 / 26);
     // Nora's: Gina, Hugo, Iris.
@@ -170,7 +293,7 @@ describe("goalKpis (People)", () => {
       people: 3,
       goals: 7,
       completed: 3,
-      inProgress: 4,
+      inProgress: 2,
       overdue: 2,
     });
     expect(nora.completedPct).toBeCloseTo((3 / 7) * 100);

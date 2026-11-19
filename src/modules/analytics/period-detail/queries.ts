@@ -144,8 +144,10 @@ export async function periodDetail(
             : null,
         retention: fromDistribution(snapshot.retention),
         engagement: fromDistribution(snapshot.engagement),
-        goalsCompletedPct: goals.total?.completedPct ?? null,
-        goals: goals.total ? goals.total.goals : null,
+        // Against the target: the goals that were due by the cycle's reference
+        // date (a goal not due yet is not a failure), and how many were.
+        goalsCompletedPct: goals.total?.completedDuePct ?? null,
+        goals: goals.total ? goals.total.due : null,
       };
     }),
   );

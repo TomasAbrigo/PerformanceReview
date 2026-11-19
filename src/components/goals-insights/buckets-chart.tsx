@@ -7,8 +7,10 @@ import { Empty, TableView, useDecimal, usePct } from "./shared";
  * Mean retention and engagement (Likert 1-5) of the people of each goals
  * completion bucket: two bars per bucket (retention in the sequential hue,
  * engagement in a neutral one, told apart by the legend and the direct
- * labels), the bucket's people under it. Buckets nobody falls in are empty;
- * the ones direction may not see (under the minimum) are labelled hidden.
+ * labels), under it the n of each bar: the people of the bucket WHO HAVE that
+ * answer (not everybody with goals). Buckets nobody falls in are empty; the
+ * ones direction may not see (under the minimum) are labelled hidden, and so
+ * is an indicator whose own n is under it.
  */
 export function BucketsChart({ data }: { data: GoalsVsIndicators }) {
   const t = useTranslations("GoalsInsights");
@@ -30,6 +32,10 @@ export function BucketsChart({ data }: { data: GoalsVsIndicators }) {
       cls: "bg-chart-sent-mixed",
     },
   ] as const;
+  const baseOf = (
+    b: GoalsVsIndicators["buckets"][number],
+    key: (typeof series)[number]["key"],
+  ) => (key === "meanRetention" ? b.retentionPeople : b.engagementPeople);
   const describe = (b: GoalsVsIndicators["buckets"][number]) =>
     b.hidden
       ? t("buckets.hidden", { min: data.minGroupSize ?? 0 })
@@ -42,9 +48,19 @@ export function BucketsChart({ data }: { data: GoalsVsIndicators }) {
                 b[s.key] === null
                   ? t("buckets.noData")
                   : (decimal(b[s.key]) ?? 0),
+              n: baseOf(b, s.key) ?? `< ${data.minGroupSize ?? 0}`,
             }),
           )
           .join("; ");
+  // "n = 107 / 107": the people of the bucket with each answer. An indicator
+  // under the minimum (direction) is "< min".
+  const nOf = (b: GoalsVsIndicators["buckets"][number]) =>
+    b.people === null
+      ? `n < ${data.minGroupSize ?? 0}`
+      : t("buckets.n", {
+          retention: b.retentionPeople ?? `< ${data.minGroupSize ?? 0}`,
+          engagement: b.engagementPeople ?? `< ${data.minGroupSize ?? 0}`,
+        });
   return (
     <div className="flex flex-col gap-3" data-testid="buckets-chart">
       <ChartLegend
@@ -65,10 +81,7 @@ export function BucketsChart({ data }: { data: GoalsVsIndicators }) {
         groups={data.buckets.map((b) => ({
           key: String(b.from),
           label: bucketName(b),
-          sub:
-            b.people === null
-              ? `n < ${data.minGroupSize ?? 0}`
-              : `n = ${b.people}`,
+          sub: nOf(b),
           masked: b.hidden
             ? t("buckets.hidden", { min: data.minGroupSize ?? 0 })
             : undefined,
@@ -90,7 +103,9 @@ export function BucketsChart({ data }: { data: GoalsVsIndicators }) {
         head={[
           t("buckets.columns.bucket"),
           t("buckets.columns.people"),
+          t("buckets.columns.retentionPeople"),
           t("buckets.columns.retention"),
+          t("buckets.columns.engagementPeople"),
           t("buckets.columns.engagement"),
           t("buckets.columns.positive"),
         ]}
@@ -99,7 +114,11 @@ export function BucketsChart({ data }: { data: GoalsVsIndicators }) {
           b.hidden
             ? t("buckets.hidden", { min: data.minGroupSize ?? 0 })
             : (b.people ?? 0),
+          b.hidden ? "–" : (b.retentionPeople ?? `< ${data.minGroupSize ?? 0}`),
           decimal(b.meanRetention) ?? t("buckets.noData"),
+          b.hidden
+            ? "–"
+            : (b.engagementPeople ?? `< ${data.minGroupSize ?? 0}`),
           decimal(b.meanEngagement) ?? t("buckets.noData"),
           b.meanPositiveShare === null
             ? t("buckets.noData")
