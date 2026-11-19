@@ -1,8 +1,20 @@
 import { describe, expect, it } from "vitest";
-import { labelsFor } from "./labels";
+import {
+  labelsFor,
+  readingNames,
+  signalLabel,
+  substanceLabel,
+  themeLabel,
+} from "./labels";
 import { renderHtml, renderJson, svgBars, svgStacked } from "./render";
 import { arturiaReportV1 } from "./schema";
-import { sampleReport } from "./test-support";
+import {
+  CONVERSATIONS,
+  ENVIRONMENTAL,
+  SECURITY,
+  SOCIAL,
+  sampleReport,
+} from "./test-support";
 
 /** Any http(s) URL, and src/href/url() that are not "#..." anchors or data: URIs. */
 const EXTERNAL =
@@ -71,52 +83,129 @@ describe("renderers", () => {
     expect(html).toContain("Executive summary");
   });
 
-  describe("qualitative section", () => {
+  describe("qualitative section (the open-text reading, #129)", () => {
     const qualitative = (html: string) =>
       html.match(/<section id="qualitative"[\s\S]*?<\/section>/)![0];
+    const section = (locale: "es" | "en" = "es") =>
+      qualitative(renderHtml(sampleReport({ locale })));
 
-    it("draws the five sentiments with their legend, and the same cut by side", () => {
-      const html = qualitative(renderHtml(sampleReport()));
+    it("says where the labels come from, and that the mock is a demo", () => {
+      const html = section();
+      expect(html).toContain("Procedencia de la lectura");
+      expect(html).toContain("Lectura de demostración");
+      expect(html).toContain("Leído por mock");
+      expect(html).toContain("2026-11-18");
+      expect(html).toContain("10% corregidas por personas (4)");
+      expect(html).toContain('data-demo="1"');
+      expect(section("en")).toContain("Demo reading");
+      // a real provider is not called a demo
+      const real = sampleReport();
+      real.sections.qualitative!.provenance.demo = false;
+      real.sections.qualitative!.provenance.providers = [
+        { provider: "anthropic", model: "claude-x", labels: 36 },
+      ];
+      const html2 = qualitative(renderHtml(real));
+      expect(html2).not.toContain("Lectura de demostración");
+      expect(html2).toContain("anthropic (claude-x)");
+    });
+
+    it.each(["es", "en"] as const)(
+      "no raw key reaches the HTML (%s): questions, themes, signals and substance are named",
+      (locale) => {
+        const T = readingNames(locale);
+        // the question names come in the report's language, as the build writes them
+        const r = sampleReport({ locale });
+        const q4 = [SECURITY, SOCIAL, ENVIRONMENTAL, CONVERSATIONS];
+        const names = [
+          T.questions.security,
+          T.questions.social,
+          T.questions.environmental,
+          T.questions.conversations,
+        ];
+        r.sections.qualitative!.questions =
+          r.sections.qualitative!.questions.map((x) =>
+            q4.includes(x.dimension)
+              ? { ...x, label: names[q4.indexOf(x.dimension)] }
+              : x,
+          );
+        const html = qualitative(renderHtml(r));
+        // dimension, theme and signal keys, and the imports' question slugs
+        expect(html).not.toMatch(
+          /custom_|best_work|company_request|role_fit|\bcomunicacion\b|\bplanificacion\b|\bproactividad\b|\bvoluntariado\b|\bworkload\b/,
+        );
+        for (const name of Object.values(T.questions)) {
+          expect(html).toContain(name);
+        }
+        expect(html).toContain(themeLabel("comunicacion", locale));
+        expect(html).toContain(signalLabel("workload", locale));
+        expect(html).toContain(substanceLabel("specific", locale));
+      },
+    );
+
+    it("tells the two custom (impact) questions apart, and names the four yes/no ones", () => {
+      const html = section();
       for (const name of [
-        "Positivo",
-        "Constructivo",
-        "Neutral",
-        "Mixto",
-        "Negativo",
+        "Seguridad de la información",
+        "Impacto social",
+        "Impacto ambiental",
+        "Conversaciones frecuentes",
       ]) {
         expect(html).toContain(name);
       }
-      // one stacked chart for everybody and one for each side
-      expect(html).toContain("Comentarios propios");
-      expect(html).toContain("Comentarios del manager");
-      expect(html.match(/<svg/g)?.length).toBeGreaterThanOrEqual(4);
-      // five segments per dimension bar carry their own class
-      for (const k of [0, 1, 2, 3, 4]) expect(html).toContain(`class="s${k}"`);
-      // each theme tells its sentiment
-      expect(html).toMatch(/comunicacion[\s\S]*Mixto 1/);
+      const rows = html.match(/<tr><td>Impacto (social|ambiental)<\/td>/g);
+      expect(rows).toHaveLength(2);
     });
 
-    it("in English too, and an old report (three sentiments, no sides) still renders", () => {
-      const en = qualitative(renderHtml(sampleReport({ locale: "en" })));
-      expect(en).toContain("Mixed");
-      expect(en).toContain("Own comments");
-      const old = sampleReport();
-      delete old.sections.qualitative!.bySide;
-      delete old.sections.qualitative!.totals;
-      expect(qualitative(renderHtml(old))).not.toContain("Comentarios propios");
+    it("an unpublished figure reads –, never 0", () => {
+      const html = section();
+      // Ingeniería: attrition (null) between workload 3 and conflict 0
+      expect(html).toMatch(
+        /<tr><td>Ingeniería<\/td><td>9<\/td><td>4<\/td><td>3<\/td><td>–<\/td><td>0<\/td>/,
+      );
+      // the manager's themes side: not published, in the header and the cells
+      expect(html).toContain("Manager (n = –)");
+      // a yes/no question with its figures hidden does not alert
+      expect(html).toContain("Seguridad de la información: 3 de 12");
+      expect(html).not.toContain("Conversaciones frecuentes: en");
+      // a row with a hidden cell goes to the table, not to a bar of lies
+      expect(html).toMatch(/<td>Otros<\/td><td>6<\/td><td>–<\/td>/);
     });
 
-    it("the schema reads a minor-1 report: missing neutral and mixed are zero", () => {
-      const r = sampleReport();
-      const json = JSON.parse(renderJson(r));
-      for (const row of json.sections.qualitative.sentimentByDimension) {
-        delete row.neutral;
-        delete row.mixed;
+    it("draws the substance, the closed scale and the tone as stacked bars", () => {
+      const html = section();
+      expect(html.match(/<svg/g)?.length).toBeGreaterThanOrEqual(5);
+      for (const name of ["Positivo", "Constructivo", "Mixto", "Negativo"]) {
+        expect(html).toContain(name);
       }
-      const parsed = arturiaReportV1.parse(json);
-      expect(
-        parsed.sections.qualitative?.sentimentByDimension[0],
-      ).toMatchObject({ neutral: 0, mixed: 0 });
+      expect(html).toContain("Tono (secundario)");
+      expect(html).toContain("Preguntas cerradas");
+      expect(html).toContain("No se sienten valoradas (1–2): <b>4 (33%)</b>");
+    });
+
+    it("quotes are text, never markup; a report without quotes has no list of them", () => {
+      const html = section();
+      expect(html).toContain('class="quotes"');
+      expect(html).not.toContain("</script> http://x.example");
+      expect(html).not.toMatch(EXTERNAL);
+      const none = sampleReport();
+      for (const t of none.sections.qualitative!.themes) {
+        for (const r of t.rows) r.quotes = { self: [], manager: [] };
+      }
+      expect(qualitative(renderHtml(none))).not.toContain('class="quotes"');
+    });
+
+    it("the section without signals or valued says so instead of failing", () => {
+      const r = sampleReport();
+      r.sections.qualitative!.signals = null;
+      r.sections.qualitative!.closed = { valued: null, bestWork: null };
+      const html = qualitative(renderHtml(r));
+      expect(html).toContain("Ninguna señal");
+    });
+
+    it("is null-safe: a missing section reads as not available", () => {
+      const r = sampleReport();
+      r.sections.qualitative = null;
+      expect(qualitative(renderHtml(r))).toContain("No disponible");
     });
   });
 
@@ -495,10 +584,13 @@ describe("monthly engagement (schema minor 4)", () => {
 
 describe("org cuts (schema minor 3)", () => {
   it("a report of minor 2, without them, is still valid and renders without their sections", () => {
-    const old = sampleReport();
-    expect(old.schemaMinor).toBe(2);
+    const old = sampleReport({ schemaMinor: 2 });
     expect(arturiaReportV1.safeParse(old).success).toBe(true);
-    const html = renderHtml(old);
+    // (the qualitative section has its own cuts since minor 6: not under test here)
+    const html = renderHtml(old).replace(
+      /<section id="qualitative"[\s\S]*?<\/section>/,
+      "",
+    );
     expect(html).not.toContain("Por cuenta");
     expect(html).not.toContain("Por DM");
   });

@@ -1,10 +1,235 @@
-import type { ArturiaReport } from "./schema";
+import type { ArturiaReport, QualitativeSection } from "./schema";
+
+/** Dimension keys of the four Santex yes/no questions as an import names them (slug + hash). */
+export const SECURITY =
+  "custom_am_i_following_all_information_security_02c50291";
+export const SOCIAL =
+  "custom_do_i_contribute_with_initiatives_related_097f5c06";
+export const ENVIRONMENTAL =
+  "custom_do_i_contribute_with_initiatives_related_80969923";
+export const CONVERSATIONS =
+  "custom_do_i_speak_with_this_employee_frequently_d2f1a686";
+
+/**
+ * A qualitative section as the real one reads: provenance from the mock, a
+ * custom question per key, some cells hidden (null), quotes (one hostile),
+ * and themes and signals of the vocabularies.
+ */
+export function sampleQualitative(): NonNullable<QualitativeSection> {
+  const feedback = (people: number) => ({
+    groups: [
+      {
+        label: "Ingeniería",
+        other: false,
+        people,
+        none: 1,
+        generic: 3,
+        specific: people - 4,
+      },
+      {
+        label: "Otros",
+        other: true,
+        people: 6,
+        none: null,
+        generic: null,
+        specific: null,
+      },
+    ],
+    suppressed: 0,
+  });
+  const signalCut = {
+    groups: [
+      {
+        label: "Ingeniería",
+        other: false,
+        people: 9,
+        withAny: 4,
+        counts: { workload: 3, attrition: null, conflict: 0 },
+      },
+    ],
+    suppressed: 0,
+  };
+  return {
+    people: 12,
+    provenance: {
+      labels: 40,
+      human: 4,
+      imported: 0,
+      machine: 36,
+      correctedShare: 0.1,
+      demo: true,
+      providers: [{ provider: "mock", model: null, labels: 36 }],
+      lastRun: {
+        provider: "mock",
+        model: null,
+        finishedAt: "2026-11-18T10:00:00.000Z",
+      },
+    },
+    questions: [
+      { dimension: "improvement", label: "Oportunidades de mejora" },
+      { dimension: "strengths", label: "Fortalezas" },
+      { dimension: SOCIAL, label: "Impacto social" },
+      { dimension: ENVIRONMENTAL, label: "Impacto ambiental" },
+      { dimension: SECURITY, label: "Seguridad de la información" },
+      { dimension: CONVERSATIONS, label: "Conversaciones frecuentes" },
+    ],
+    substance: [
+      {
+        dimension: "strengths",
+        side: "self",
+        people: 12,
+        none: 1,
+        generic: 4,
+        specific: 7,
+      },
+      {
+        dimension: "strengths",
+        side: "manager",
+        people: 10,
+        none: null,
+        generic: null,
+        specific: null,
+      },
+    ],
+    managerFeedback: {
+      byDepartment: feedback(10),
+      byAccount: feedback(8),
+      byDm: feedback(7),
+    },
+    themes: [
+      {
+        dimension: "strengths",
+        people: { self: 12, manager: 10 },
+        rows: [
+          {
+            theme: "comunicacion",
+            self: 5,
+            manager: null,
+            quotes: {
+              self: ["[P1] comunica bien </script> http://x.example"],
+              manager: [],
+            },
+          },
+          {
+            theme: "planificacion",
+            self: 3,
+            manager: 2,
+            quotes: { self: [], manager: [] },
+          },
+        ],
+      },
+      {
+        dimension: "improvement",
+        people: { self: 12, manager: null },
+        rows: [
+          {
+            theme: "proactividad",
+            self: 4,
+            manager: null,
+            quotes: { self: [], manager: [] },
+          },
+        ],
+      },
+    ],
+    agreement: {
+      rows: [{ dimension: "strengths", both: 9, shared: 6 }],
+      blindSpots: [{ theme: "proactividad", people: 3 }],
+      blindPeople: 3,
+      improvementBoth: 8,
+    },
+    signals: {
+      people: 12,
+      withAny: 5,
+      rows: [
+        { signal: "workload", people: 4, self: 3, manager: 2 },
+        { signal: "attrition", people: 2, self: null, manager: null },
+      ],
+      byDepartment: signalCut,
+      byAccount: signalCut,
+      byDm: signalCut,
+    },
+    yesNo: {
+      rows: [
+        {
+          dimension: SECURITY,
+          side: "self",
+          kind: "security",
+          people: 12,
+          yes: 9,
+          no: 3,
+          alert: true,
+        },
+        {
+          dimension: CONVERSATIONS,
+          side: "manager",
+          kind: "conversations",
+          people: 12,
+          yes: null,
+          no: null,
+          alert: false,
+        },
+        {
+          dimension: SOCIAL,
+          side: "self",
+          kind: "impact",
+          people: 12,
+          yes: 8,
+          no: 4,
+          alert: false,
+        },
+        {
+          dimension: ENVIRONMENTAL,
+          side: "self",
+          kind: "impact",
+          people: 12,
+          yes: 6,
+          no: 6,
+          alert: false,
+        },
+      ],
+      initiatives: [
+        {
+          dimension: SOCIAL,
+          people: 8,
+          rows: [{ theme: "voluntariado", people: 5 }],
+        },
+      ],
+    },
+    closed: {
+      valued: {
+        people: 12,
+        counts: [1, 3, 5, 3],
+        labels: ["No me siento valorado", null, null, "Me siento valorado"],
+        notValued: 4,
+      },
+      bestWork: {
+        people: 12,
+        options: [
+          { option: "nothing_i_have_all_i_need", label: "Nada", people: 7 },
+          { option: "other", label: null, people: null },
+        ],
+      },
+    },
+    tone: [
+      {
+        dimension: "strengths",
+        side: "self",
+        people: 12,
+        positive: 7,
+        constructive: 1,
+        neutral: 2,
+        mixed: 1,
+        negative: 1,
+      },
+    ],
+  };
+}
 
 /** A small valid report (unit tests of the renderers). */
 export function sampleReport(over: Partial<ArturiaReport> = {}): ArturiaReport {
   return {
     schemaVersion: "arturia-report.v1",
-    schemaMinor: 2,
+    schemaMinor: 6,
     generatedAt: "2026-11-17T12:00:00.000Z",
     locale: "es",
     cycle: {
@@ -131,129 +356,7 @@ export function sampleReport(over: Partial<ArturiaReport> = {}): ArturiaReport {
         },
         alerts: [{ kind: "drop", indicator: "retention", count: 1 }],
       },
-      qualitative: {
-        totals: {
-          positive: 7,
-          constructive: 2,
-          neutral: 1,
-          mixed: 1,
-          negative: 0,
-          total: 11,
-        },
-        sentimentByDimension: [
-          {
-            dimension: "strengths",
-            positive: 5,
-            constructive: 1,
-            neutral: 1,
-            mixed: 1,
-            negative: 0,
-            total: 8,
-            other: false,
-          },
-          {
-            dimension: "valued",
-            positive: 2,
-            constructive: 1,
-            neutral: 0,
-            mixed: 0,
-            negative: 0,
-            total: 3,
-            other: false,
-          },
-        ],
-        trend: [
-          {
-            cycleId: "a",
-            cycleName: "2024",
-            periodEnd: "2024-12-31",
-            positive: 2,
-            constructive: 1,
-            neutral: 0,
-            mixed: 0,
-            negative: 1,
-            total: 4,
-          },
-          {
-            cycleId: "b",
-            cycleName: "2025",
-            periodEnd: "2025-12-31",
-            positive: 7,
-            constructive: 2,
-            neutral: 1,
-            mixed: 1,
-            negative: 0,
-            total: 11,
-          },
-        ],
-        topThemes: [
-          {
-            theme: "comunicacion",
-            count: 4,
-            other: false,
-            sentiment: {
-              positive: 2,
-              constructive: 1,
-              neutral: 0,
-              mixed: 1,
-              negative: 0,
-              total: 4,
-            },
-            quotes: ["[P1] comunica bien </script> http://x.example"],
-          },
-        ],
-        suppressed: 0,
-        bySide: {
-          self: {
-            totals: {
-              positive: 3,
-              constructive: 1,
-              neutral: 1,
-              mixed: 1,
-              negative: 0,
-              total: 6,
-            },
-            sentimentByDimension: [
-              {
-                dimension: "strengths",
-                positive: 3,
-                constructive: 1,
-                neutral: 1,
-                mixed: 1,
-                negative: 0,
-                total: 6,
-                other: false,
-              },
-            ],
-            topThemes: [],
-            suppressed: 0,
-          },
-          manager: {
-            totals: {
-              positive: 4,
-              constructive: 1,
-              neutral: 0,
-              mixed: 0,
-              negative: 0,
-              total: 5,
-            },
-            sentimentByDimension: [
-              {
-                dimension: "strengths",
-                positive: 4,
-                constructive: 1,
-                neutral: 0,
-                mixed: 0,
-                negative: 0,
-                total: 5,
-                other: false,
-              },
-            ],
-            topThemes: [],
-            suppressed: 0,
-          },
-        },
-      },
+      qualitative: sampleQualitative(),
       goals: {
         participantsWithGoals: 10,
         goals: 24,
