@@ -6,7 +6,13 @@ import {
   substanceLabel,
   themeLabel,
 } from "./labels";
-import { renderHtml, renderJson, svgBars, svgStacked } from "./render";
+import {
+  renderHtml,
+  renderJson,
+  shortCycleNames,
+  svgBars,
+  svgStacked,
+} from "./render";
 import { arturiaReportV1 } from "./schema";
 import {
   CONVERSATIONS,
@@ -192,6 +198,55 @@ describe("renderers", () => {
         for (const r of t.rows) r.quotes = { self: [], manager: [] };
       }
       expect(qualitative(renderHtml(none))).not.toContain('class="quotes"');
+    });
+
+    it("crosses the signals with the manager's retention and engagement answer, by value", () => {
+      const html = section();
+      expect(html).toContain("Señales según la respuesta del manager");
+      // each indicator in its own table, the value with its label
+      expect(html).toContain("<h4>Retención</h4>");
+      expect(html).toContain("<h4>Compromiso</h4>");
+      expect(html).toContain("5 · Haría todo para retenerlo");
+      expect(html).toMatch(
+        /<td>5 · Haría todo para retenerlo<\/td><td>6<\/td><td>1 \(17%\)<\/td>/,
+      );
+      // an unpublished figure reads –, a value without label is its number
+      expect(html).toMatch(/<td>2<\/td><td>6<\/td><td>–<\/td>/);
+      expect(section("en")).toContain("Signals by the manager&#39;s answer");
+    });
+
+    it("Yes / No by group and by cycle: a group with no figure is counted, the cycles come oldest first", () => {
+      const html = section();
+      expect(html).toContain("Sí y No por grupo");
+      expect(html).toMatch(
+        /<tr><td>Por área<\/td><td>Ingeniería<\/td><td>9<\/td><td>7 \(78%\)<\/td><td>2 \(22%\)<\/td><\/tr>/,
+      );
+      // "Otros" has neither figure: not listed, said once
+      expect(html).not.toMatch(/<td>Por área<\/td><td>Otros<\/td>/);
+      expect(html).toContain("1 grupo sin cifras publicadas");
+      // by cycle: the No out of the people, the hidden one reads "–"
+      expect(html).toContain("Sí y No por ciclo");
+      const order = ["2025-H1", "2025-H2", "2026-H1"].map((c) =>
+        html.indexOf(`<td>${c}</td>`),
+      );
+      expect(order.every((i) => i > 0)).toBe(true);
+      expect([...order].sort((a, b) => a - b)).toEqual(order);
+      expect(html).toContain("No 2 / 10 (20%)");
+      expect(html).toContain("– / 12");
+    });
+
+    it("the valued scale by group and by cycle: bars, and a table for the rows with a hidden cell", () => {
+      const html = section();
+      expect(html).toContain("Valoración por grupo · Por área");
+      expect(html).toContain("Valoración por ciclo");
+      // Ingeniería has all four cells: a bar; Otros has hidden ones: the table
+      expect(html).toContain("Ingeniería · 4 · Me siento valorado: 2 (25%)");
+      expect(html).toMatch(
+        /<td>Otros<\/td><td>4<\/td><td>1<\/td><td>2<\/td><td>–<\/td><td>–<\/td>/,
+      );
+      // both cycles drawn, with the names a clipped label still tells apart
+      expect(html).toContain("2025-H2 · 4 · Me siento valorado");
+      expect(html).toContain("2026-H1 · 4 · Me siento valorado");
     });
 
     it("the section without signals or valued says so instead of failing", () => {
@@ -634,5 +689,23 @@ describe("org cuts (schema minor 3)", () => {
     const en = renderHtml({ ...r, locale: "en" });
     expect(en).toContain("By account");
     expect(en).toContain("By DM");
+  });
+});
+
+describe("shortCycleNames", () => {
+  it("drops what the names share up to a word, and keeps a single name whole", () => {
+    expect(
+      shortCycleNames([
+        "Evaluación semestral 2024-04-15 – 2024-09-28",
+        "Evaluación semestral 2024-09-29 – 2025-03-28",
+      ]),
+    ).toEqual(["2024-04-15 – 2024-09-28", "2024-09-29 – 2025-03-28"]);
+    expect(shortCycleNames(["Evaluación 2025"])).toEqual(["Evaluación 2025"]);
+    // nothing in common: nothing dropped; identical names stay whole
+    expect(shortCycleNames(["2025-H1", "2025-H2"])).toEqual([
+      "2025-H1",
+      "2025-H2",
+    ]);
+    expect(shortCycleNames(["A b", "A b"])).toEqual(["A b", "A b"]);
   });
 });

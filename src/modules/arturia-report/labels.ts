@@ -132,6 +132,22 @@ const ES_NAMES = {
     inOwn: "En su autoevaluación",
     inManager: "En la del manager",
     noSignals: "Ninguna señal con los filtros actuales.",
+    signalsByIndicator: "Señales según la respuesta del manager",
+    signalsByIndicatorHint:
+      "Una fila por persona: de las personas con cada respuesta de retención o compromiso (la más reciente de su manager), cuántas tienen alguna señal.",
+    answer: "Respuesta",
+    cut: "Corte",
+    cycle: "Ciclo",
+    yesNoByGroup: "Sí y No por grupo",
+    yesNoByCycle: "Sí y No por ciclo",
+    yesNoByCycleHint:
+      "No sobre las personas que respondieron, en cada ciclo (el más viejo primero).",
+    valuedByGroup: "Valoración por grupo",
+    valuedByCycle: "Valoración por ciclo",
+    groupHidden:
+      "1 grupo sin cifras publicadas (menos personas que el mínimo, o las que permitirían deducirlas).",
+    groupsHidden:
+      "{n} grupos sin cifras publicadas (menos personas que el mínimo, o las que permitirían deducirlas).",
     yesNoTitle: "Preguntas Sí / No",
     yesNoHint:
       "Personas que respondieron Sí y No, por pregunta y lado. Seguridad de la información = No y conversaciones frecuentes = No son alertas.",
@@ -261,6 +277,22 @@ const EN_NAMES: Names = {
     inOwn: "In their self-assessment",
     inManager: "In the manager's",
     noSignals: "No signal with the current filters.",
+    signalsByIndicator: "Signals by the manager's answer",
+    signalsByIndicatorHint:
+      "One row per person: of the people with each retention or engagement answer (their manager's latest), how many have some signal.",
+    answer: "Answer",
+    cut: "Cut",
+    cycle: "Cycle",
+    yesNoByGroup: "Yes and No by group",
+    yesNoByCycle: "Yes and No by cycle",
+    yesNoByCycleHint:
+      "No out of the people who answered, in each cycle (oldest first).",
+    valuedByGroup: "Valued by group",
+    valuedByCycle: "Valued by cycle",
+    groupHidden:
+      "1 group with no figure published (fewer people than the minimum, or the ones that would give them away).",
+    groupsHidden:
+      "{n} groups with no figure published (fewer people than the minimum, or the ones that would give them away).",
     yesNoTitle: "Yes / No questions",
     yesNoHint:
       "People who answered Yes and No, per question and side. Information security = No and frequent conversations = No are alerts.",

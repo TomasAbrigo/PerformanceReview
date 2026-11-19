@@ -22,6 +22,8 @@ import {
   type QualitativeFilters,
   type QualitativeGroupBy,
   signals as SIGNALS,
+  type ValuedGroupRow,
+  type YesNoGroupRow,
 } from "@/modules/qualitative-analysis";
 import {
   agreementBySide,
@@ -30,14 +32,18 @@ import {
   readingProvenance,
   signalSummary,
   signalsByGroup,
+  signalsVsIndicators,
   substanceByQuestion,
   themesBySide,
   toneByQuestion,
   valuedDistribution,
+  yesNoByGroup,
   yesNoRates,
   yesNoThemes,
+  yesNoTrend,
 } from "@/modules/qualitative-analysis/reading";
 import { ALERT_KINDS } from "@/modules/qualitative-analysis/yes-no-kind";
+import { likertLabel } from "@/modules/likert";
 import { sumBy } from "./anonymize";
 import { type Labels, questionLabel, type ReportLocale } from "./labels";
 import {
@@ -47,6 +53,8 @@ import {
   maskCells,
   maskColumns,
   maskPair,
+  maskTable,
+  notValuedOf,
 } from "./qualitative-privacy";
 import type { QualitativeSection } from "./schema";
 
@@ -133,8 +141,15 @@ function feedbackCut(
   return { groups: out, suppressed: leftOut };
 }
 
-/** People with each signal by group: small groups folded, every column masked (its total is public). */
-function signalsCut(rows: GroupSignals[], ctx: QualitativeContext): SignalCut {
+/**
+ * People with each signal by group: small groups folded, every column masked
+ * (its total is public). `unprotected` are the columns (a signal, or "withAny")
+ * that not even hiding every cell protects: their totals must not be published.
+ */
+function signalsCut(
+  rows: GroupSignals[],
+  ctx: QualitativeContext,
+): { cut: SignalCut; unprotected: string[] } {
   type Cells = { withAny: number; counts: Record<string, number> };
   const groups: CutGroup<Cells>[] = rows.map((r) => ({
     key: r.key,
@@ -154,20 +169,111 @@ function signalsCut(rows: GroupSignals[], ctx: QualitativeContext): SignalCut {
     },
   }));
   const all = [...shown, ...(others ? [others] : [])];
-  const masked = maskColumns(
+  const { cells: masked, unprotected } = maskColumns(
     all.map((g) => [
       g.cells.withAny,
       ...SIGNALS.map((s) => g.cells.counts[s] ?? 0),
     ]),
     ctx.min,
   );
+  const keys = ["withAny", ...SIGNALS];
+  return {
+    cut: {
+      groups: all.map((g, i) => ({
+        label: g.label,
+        other: g.key === null,
+        people: g.people,
+        withAny: masked[i][0],
+        counts: Object.fromEntries(
+          SIGNALS.map((s, j) => [s, masked[i][j + 1]]),
+        ),
+      })),
+      suppressed,
+    },
+    unprotected: keys.filter((_, j) => unprotected[j]),
+  };
+}
+
+type YesNoCut = QualitativeSection["yesNo"]["byGroup"][number]["byDepartment"];
+type ValuedCut = NonNullable<
+  QualitativeSection["closed"]["valued"]
+>["byDepartment"];
+
+/**
+ * The Yes / No of one question by group: small groups folded into "Otros", and
+ * the table of groups by answer masked (the people of each group and of the
+ * whole per answer are public, so the cells that give a hidden one away go too).
+ */
+function yesNoCut(rows: YesNoGroupRow[], ctx: QualitativeContext): YesNoCut {
+  type Cells = { yes: number; no: number };
+  const groups: CutGroup<Cells>[] = rows.map((r) => ({
+    key: r.key,
+    label: groupLabel(r, ctx),
+    people: r.people,
+    cells: { yes: r.yes, no: r.no },
+  }));
+  const { shown, others, suppressed } = foldCut(groups, ctx.min, (rest) => ({
+    key: null,
+    label: ctx.labels.others,
+    people: sumBy(rest, (g) => g.people),
+    cells: {
+      yes: sumBy(rest, (g) => g.cells.yes),
+      no: sumBy(rest, (g) => g.cells.no),
+    },
+  }));
+  const all = [...shown, ...(others ? [others] : [])];
+  const masked = maskTable(
+    all.map((g) => [g.cells.yes, g.cells.no]),
+    ctx.min,
+  );
+  // Not even hiding every cell protects them: the whole cut is left out.
+  if (!masked) {
+    return { groups: [], suppressed: suppressed + sumBy(all, (g) => g.people) };
+  }
   return {
     groups: all.map((g, i) => ({
       label: g.label,
       other: g.key === null,
       people: g.people,
-      withAny: masked[i][0],
-      counts: Object.fromEntries(SIGNALS.map((s, j) => [s, masked[i][j + 1]])),
+      yes: masked[i][0],
+      no: masked[i][1],
+    })),
+    suppressed,
+  };
+}
+
+/** The "valued" scale (1-4) by group, folded and masked as `yesNoCut`. */
+function valuedCut(rows: ValuedGroupRow[], ctx: QualitativeContext): ValuedCut {
+  type Cells = { counts: number[] };
+  const groups: CutGroup<Cells>[] = rows.map((r) => ({
+    key: r.key,
+    label: groupLabel(r, ctx),
+    people: r.people,
+    cells: { counts: r.counts },
+  }));
+  const { shown, others, suppressed } = foldCut(groups, ctx.min, (rest) => ({
+    key: null,
+    label: ctx.labels.others,
+    people: sumBy(rest, (g) => g.people),
+    cells: {
+      counts: [0, 1, 2, 3].map((i) => sumBy(rest, (g) => g.cells.counts[i])),
+    },
+  }));
+  const all = [...shown, ...(others ? [others] : [])];
+  const masked = maskTable(
+    all.map((g) => g.cells.counts),
+    ctx.min,
+  );
+  if (!masked) {
+    return { groups: [], suppressed: suppressed + sumBy(all, (g) => g.people) };
+  }
+  return {
+    groups: all.map((g, i) => ({
+      label: g.label,
+      other: g.key === null,
+      people: g.people,
+      counts: masked[i],
+      notValued: notValuedOf(masked[i], g.cells.counts[0] + g.cells.counts[1]),
     })),
     suppressed,
   };
@@ -209,6 +315,10 @@ export async function readQualitative(
     prompts,
     feedback,
     signalGroups,
+    signalIndicators,
+    yesNoGroups,
+    yesNoCycles,
+    valuedGroups,
   ] = await Promise.all([
     readingProvenance(db, actor, rule),
     substanceByQuestion(db, actor, rule),
@@ -224,6 +334,10 @@ export async function readQualitative(
     dimensionPrompts(db),
     Promise.all(CUTS.map((g) => managerFeedbackByGroup(db, actor, raw, g))),
     Promise.all(CUTS.map((g) => signalsByGroup(db, actor, raw, g))),
+    signalsVsIndicators(db, actor, rule),
+    Promise.all(CUTS.map((g) => yesNoByGroup(db, actor, raw, g))),
+    yesNoTrend(db, actor, { minGroupSize: min }),
+    Promise.all(CUTS.map((g) => valuedDistribution(db, actor, raw, g))),
   ]);
 
   // --- substance
@@ -278,22 +392,73 @@ export async function readQualitative(
   };
 
   // --- signals
+  // A column of a cut that not even hiding every cell protects (its cells
+  // are the column's total, which is public) takes its total with it.
+  const cuts = signalGroups.map((g) => signalsCut(g, ctx));
+  const unprotected = new Set(cuts.flatMap((c) => c.unprotected));
   const signals = signalSum && {
     people: signalSum.people,
-    withAny: maskPair(signalSum.withAny, signalSum.people, min),
-    rows: signalSum.rows.map((r) => ({
-      signal: r.signal,
+    withAny: unprotected.has("withAny")
+      ? null
+      : maskPair(signalSum.withAny, signalSum.people, min),
+    rows: signalSum.rows
+      .filter((r) => !unprotected.has(r.signal))
+      .map((r) => ({
+        signal: r.signal,
+        people: r.people,
+        self: hideSmall(r.self, min),
+        manager: hideSmall(r.manager, min),
+      })),
+    byDepartment: cuts[0].cut,
+    byAccount: cuts[1].cut,
+    byDm: cuts[2].cut,
+    // One row per person and answer value: "n of people" pairs.
+    byIndicator: signalIndicators.map((r) => ({
+      indicator: r.role,
+      value: r.value,
+      label: r.label?.[locale] ?? likertLabel(r.role, r.value, locale),
       people: r.people,
-      self: hideSmall(r.self, min),
-      manager: hideSmall(r.manager, min),
+      withSignal: maskPair(r.withSignal, r.people, min),
     })),
-    byDepartment: signalsCut(signalGroups[0], ctx),
-    byAccount: signalsCut(signalGroups[1], ctx),
-    byDm: signalsCut(signalGroups[2], ctx),
   };
 
   // --- yes / no
+  // By group and by cycle: only the questions of this cycle, by the key the
+  // readers give them (a question without one cannot be told apart there).
+  const yesNoDims = [
+    ...new Set(yesNoRows.flatMap((r) => (r.dimension ? [r.dimension] : []))),
+  ];
   const yesNo = {
+    byGroup: yesNoDims.map((dimension) => {
+      const of = (g: YesNoGroupRow[]) =>
+        g.filter((r) => r.dimension === dimension);
+      return {
+        dimension,
+        byDepartment: yesNoCut(of(yesNoGroups[0]), ctx),
+        byAccount: yesNoCut(of(yesNoGroups[1]), ctx),
+        byDm: yesNoCut(of(yesNoGroups[2]), ctx),
+      };
+    }),
+    byCycle: yesNoDims.flatMap((dimension) => {
+      const cycles = yesNoCycles
+        .filter((r) => r.dimension === dimension)
+        .flatMap((r) => {
+          const cells = maskCells([r.yes, r.no], min);
+          return cells
+            ? [
+                {
+                  cycleId: r.cycleId,
+                  cycleName: r.cycleName,
+                  periodEnd: r.periodEnd,
+                  people: r.people,
+                  yes: cells[0],
+                  no: cells[1],
+                },
+              ]
+            : [];
+        });
+      return cycles.length ? [{ dimension, cycles }] : [];
+    }),
     rows: yesNoRows.flatMap((r) => {
       const cells = maskCells([r.yes, r.no], min);
       if (!cells) return [];
@@ -320,9 +485,6 @@ export async function readQualitative(
   // --- closed questions
   const v = valued.total;
   const valuedCells = v ? maskCells(v.counts, min) : null;
-  const hidden = (i: number) => valuedCells !== null && valuedCells[i] === null;
-  const hidden12 = [0, 1].filter(hidden).length;
-  const hidden34 = [2, 3].filter(hidden).length;
   const bestCells =
     bestWork && bestWork.people >= min
       ? maskCells(
@@ -338,10 +500,25 @@ export async function readQualitative(
             counts: valuedCells,
             labels: v.labels.map((l) => l?.[locale] ?? null),
             // The sum of the first two values gives away a hidden one next to a shown one.
-            notValued:
-              hidden12 === 0 || (hidden12 === 2 && hidden34 === 0)
-                ? v.notValued
-                : null,
+            notValued: notValuedOf(valuedCells, v.notValued),
+            byDepartment: valuedCut(valuedGroups[0].byGroup, ctx),
+            byAccount: valuedCut(valuedGroups[1].byGroup, ctx),
+            byDm: valuedCut(valuedGroups[2].byGroup, ctx),
+            byCycle: valued.trend.flatMap((r) => {
+              const cells = maskCells(r.counts, min);
+              return cells
+                ? [
+                    {
+                      cycleId: r.cycleId,
+                      cycleName: r.cycleName,
+                      periodEnd: r.periodEnd,
+                      people: r.people,
+                      counts: cells,
+                      notValued: notValuedOf(cells, r.notValued),
+                    },
+                  ]
+                : [];
+            }),
           }
         : null,
     bestWork:
@@ -390,6 +567,7 @@ export async function readQualitative(
     ...substance.map((r) => r.dimension),
     ...tone.map((r) => r.dimension),
     ...yesNo.rows.map((r) => r.dimension),
+    ...yesNoDims,
     ...yesNo.initiatives.map((r) => r.dimension),
   ]);
 

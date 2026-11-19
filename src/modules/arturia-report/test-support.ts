@@ -147,8 +147,76 @@ export function sampleQualitative(): NonNullable<QualitativeSection> {
       byDepartment: signalCut,
       byAccount: signalCut,
       byDm: signalCut,
+      byIndicator: [
+        {
+          indicator: "retention",
+          value: 5,
+          label: "Haría todo para retenerlo",
+          people: 6,
+          withSignal: 1,
+        },
+        {
+          indicator: "retention",
+          value: 2,
+          label: null,
+          people: 6,
+          withSignal: null,
+        },
+        {
+          indicator: "engagement",
+          value: 4,
+          label: "Muy comprometido",
+          people: 12,
+          withSignal: 5,
+        },
+      ],
     },
     yesNo: {
+      byGroup: [
+        {
+          dimension: SECURITY,
+          byDepartment: {
+            groups: [
+              { label: "Ingeniería", other: false, people: 9, yes: 7, no: 2 },
+              { label: "Otros", other: true, people: 6, yes: null, no: null },
+            ],
+            suppressed: 0,
+          },
+          byAccount: { groups: [], suppressed: 0 },
+          byDm: { groups: [], suppressed: 0 },
+        },
+      ],
+      byCycle: [
+        {
+          dimension: SECURITY,
+          cycles: [
+            {
+              cycleId: "a",
+              cycleName: "2025-H1",
+              periodEnd: "2025-06-30",
+              people: 10,
+              yes: 8,
+              no: 2,
+            },
+            {
+              cycleId: "b",
+              cycleName: "2025-H2",
+              periodEnd: "2025-12-31",
+              people: 12,
+              yes: 9,
+              no: 3,
+            },
+            {
+              cycleId: "c",
+              cycleName: "2026-H1",
+              periodEnd: "2026-06-30",
+              people: 12,
+              yes: null,
+              no: null,
+            },
+          ],
+        },
+      ],
       rows: [
         {
           dimension: SECURITY,
@@ -201,6 +269,45 @@ export function sampleQualitative(): NonNullable<QualitativeSection> {
         counts: [1, 3, 5, 3],
         labels: ["No me siento valorado", null, null, "Me siento valorado"],
         notValued: 4,
+        byDepartment: {
+          groups: [
+            {
+              label: "Ingeniería",
+              other: false,
+              people: 8,
+              counts: [1, 2, 3, 2],
+              notValued: 3,
+            },
+            {
+              label: "Otros",
+              other: true,
+              people: 4,
+              counts: [null, null, 2, 1],
+              notValued: null,
+            },
+          ],
+          suppressed: 0,
+        },
+        byAccount: { groups: [], suppressed: 0 },
+        byDm: { groups: [], suppressed: 0 },
+        byCycle: [
+          {
+            cycleId: "a",
+            cycleName: "2025-H2",
+            periodEnd: "2025-12-31",
+            people: 10,
+            counts: [2, 2, 3, 3],
+            notValued: 4,
+          },
+          {
+            cycleId: "b",
+            cycleName: "2026-H1",
+            periodEnd: "2026-06-30",
+            people: 12,
+            counts: [1, 3, 5, 3],
+            notValued: 4,
+          },
+        ],
       },
       bestWork: {
         people: 12,

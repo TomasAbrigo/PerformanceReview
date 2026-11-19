@@ -197,6 +197,21 @@ export function svgMatrix(
   return `<svg viewBox="0 0 ${off + 3 * S + 10} ${3 * S + 40}" role="img" class="chart matrix">${body}${rowLabels}${colLabels}<text x="${off + 1.5 * S}" y="${3 * S + 34}" text-anchor="middle" class="axis">${esc(L.indicators.engagement)} →</text><text x="10" y="12" class="axis">↑ ${esc(L.indicators.retention)}</text></svg>`;
 }
 
+/**
+ * The names of cycles without what they all start with ("Evaluación semestral
+ * 2024-04-15 – 2024-09-28" next to its siblings is "2024-04-15 – 2024-09-28"),
+ * so a clipped chart label still tells them apart. One name stays whole.
+ */
+export function shortCycleNames(names: readonly string[]): string[] {
+  if (new Set(names).size < 2) return [...names];
+  let prefix = names[0];
+  for (const n of names) {
+    while (!n.startsWith(prefix)) prefix = prefix.slice(0, -1);
+  }
+  const cut = prefix.lastIndexOf(" ") + 1;
+  return names.map((n) => n.slice(cut) || n);
+}
+
 // ---------------------------------------------------------------- sections
 
 const binLabel = (b: { from: number; to: number }) =>
@@ -529,7 +544,27 @@ function qualitativeHtml(q: QualitativeSection | null): string {
         ]),
       ]
     : [];
-  const signals = `<h3>${esc(X.signalsTitle)}</h3><p class="muted">${esc(X.signalsHint)}</p>${
+  // The signals crossed with the manager's retention / engagement answer.
+  const byIndicator = sig?.byIndicator.length
+    ? `<h4>${esc(X.signalsByIndicator)}</h4><p class="muted">${esc(X.signalsByIndicatorHint)}</p>${(
+        ["retention", "engagement"] as const
+      )
+        .map((role) => {
+          const rows = sig.byIndicator.filter((r) => r.indicator === role);
+          return rows.length
+            ? `<h4>${esc(L.indicators[role])}</h4>${table(
+                [X.answer, X.people, X.withSignal],
+                rows.map((r) => [
+                  esc(r.label ? `${r.value} · ${r.label}` : String(r.value)),
+                  String(r.people),
+                  esc(both(r.withSignal, r.people)),
+                ]),
+              )}`
+            : "";
+        })
+        .join("")}`
+    : "";
+  const signalsBase = `<h3>${esc(X.signalsTitle)}</h3><p class="muted">${esc(X.signalsHint)}</p>${
     sig
       ? `${tile(share(sig.withAny, sig.people), X.withSignal)}${
           sig.rows.length
@@ -573,8 +608,68 @@ function qualitativeHtml(q: QualitativeSection | null): string {
           .join("")}`
       : `<p class="muted">${esc(X.noSignals)}</p>`
   }`;
+  const signals = `${signalsBase}${byIndicator}`;
 
   // --- yes / no
+  // By group: one table per question, a row per group of each cut.
+  const yesNoByGroup = q.yesNo.byGroup
+    .map((d) => {
+      const groups = (
+        [
+          [X.cutDepartment, d.byDepartment],
+          [X.cutAccount, d.byAccount],
+          [X.cutDm, d.byDm],
+        ] as const
+      ).flatMap(([title, c]) => c.groups.map((g) => ({ title, g })));
+      // A group with neither figure published says nothing here: counted, not listed.
+      const shown = groups.filter(({ g }) => g.yes !== null || g.no !== null);
+      const none = groups.length - shown.length;
+      return groups.length
+        ? `<h4>${esc(question(d.dimension))}</h4>${
+            shown.length
+              ? table(
+                  [X.cut, X.group, X.people, T.yes, T.no],
+                  shown.map(({ title, g }) => [
+                    esc(title),
+                    esc(g.label),
+                    String(g.people),
+                    esc(both(g.yes, g.people)),
+                    esc(both(g.no, g.people)),
+                  ]),
+                )
+              : ""
+          }${none ? `<p class="muted">${esc(none === 1 ? X.groupHidden : fill(X.groupsHidden, { n: none }))}</p>` : ""}`
+        : "";
+    })
+    .join("");
+  // By cycle: the No of every question, a row per cycle (oldest first).
+  const cycles = new Map<string, { name: string; end: string }>();
+  for (const d of q.yesNo.byCycle) {
+    for (const c of d.cycles) {
+      cycles.set(c.cycleId, { name: c.cycleName, end: c.periodEnd });
+    }
+  }
+  const cycleOrder = [...cycles].sort(
+    ([, a], [, b]) =>
+      a.end.localeCompare(b.end) || a.name.localeCompare(b.name),
+  );
+  const yesNoByCycle = cycleOrder.length
+    ? `<h4>${esc(X.yesNoByCycle)}</h4><p class="muted">${esc(X.yesNoByCycleHint)}</p>${table(
+        [X.cycle, ...q.yesNo.byCycle.map((d) => question(d.dimension))],
+        cycleOrder.map(([id, c]) => [
+          esc(c.name),
+          ...q.yesNo.byCycle.map((d) => {
+            const x = d.cycles.find((y) => y.cycleId === id);
+            if (!x) return esc(T.hiddenCell);
+            return esc(
+              x.no === null
+                ? `${T.hiddenCell} / ${x.people}`
+                : `${T.no} ${x.no} / ${x.people} (${pct(x.no, x.people)})`,
+            );
+          }),
+        ]),
+      )}`
+    : "";
   const alerts = q.yesNo.rows.filter((r) => r.alert);
   const yesNo = `<h3>${esc(X.yesNoTitle)}</h3><p class="muted">${esc(X.yesNoHint)}</p>${
     alerts.length
@@ -616,12 +711,54 @@ function qualitativeHtml(q: QualitativeSection | null): string {
           )
           .join("")}`
       : ""
-  }`;
+  }${yesNoByGroup ? `<h4>${esc(X.yesNoByGroup)}</h4>${yesNoByGroup}` : ""}${yesNoByCycle}`;
 
   // --- closed questions: a scale and a distribution of options, never a sentiment
   const valuedLegend = v
     ? v.labels.map((l, i) => `${i + 1}${l ? ` · ${l}` : ""}`)
     : [];
+  // The scale by group and by cycle: best (4) first, as the total bar.
+  const valuedColors = [0, 1, 3, 4] as const;
+  const valuedBars = (
+    rows: { label: string; people: number; counts: (number | null)[] }[],
+    head: string,
+  ) =>
+    stackedRows(
+      rows.map((r) => ({
+        label: r.label,
+        people: r.people,
+        parts: [...r.counts].reverse(),
+      })),
+      [...valuedLegend].reverse(),
+      "s",
+      valuedColors,
+      X.hiddenRows,
+      [head, X.people],
+    );
+  const valuedExtra = v
+    ? (
+        [
+          [X.cutDepartment, v.byDepartment],
+          [X.cutAccount, v.byAccount],
+          [X.cutDm, v.byDm],
+        ] as const
+      )
+        .filter(([, c]) => c.groups.length)
+        .map(
+          ([title, c]) =>
+            `<h4>${esc(X.valuedByGroup)} · ${esc(title)}</h4>${valuedBars(c.groups, X.group)}${suppressedNote(c.suppressed)}`,
+        )
+        .join("") +
+      (v.byCycle.length
+        ? `<h4>${esc(X.valuedByCycle)}</h4>${valuedBars(
+            v.byCycle.map((c, i) => ({
+              ...c,
+              label: shortCycleNames(v.byCycle.map((x) => x.cycleName))[i],
+            })),
+            X.cycle,
+          )}`
+        : "")
+    : "";
   const bw = q.closed.bestWork;
   const closed = `<h3>${esc(X.closedTitle)}</h3><p class="muted">${esc(X.closedHint)}</p>${
     v
@@ -640,7 +777,7 @@ function qualitativeHtml(q: QualitativeSection | null): string {
                 [0, 1, 3, 4],
               )
             : table(valuedLegend, [v.counts.map((c) => esc(cell(c)))])
-        }<p class="muted">${esc(X.notValued)}: <b>${esc(both(v.notValued, v.people))}</b></p>`
+        }<p class="muted">${esc(X.notValued)}: <b>${esc(both(v.notValued, v.people))}</b></p>${valuedExtra}`
       : ""
   }${
     bw
