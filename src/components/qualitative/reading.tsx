@@ -46,6 +46,7 @@ import type {
   YesNoTrendRow,
 } from "@/modules/qualitative-analysis/reading-types";
 import { ALERT_KINDS } from "@/modules/qualitative-analysis/yes-no-kind";
+import { likertLabel } from "@/modules/likert";
 import { SentimentBars } from "./sentiment-bars";
 import { useThemeLabel } from "./theme-label";
 import { type CommentDrills, commentDrill } from "./views";
@@ -673,7 +674,10 @@ export function SignalsPanel({
                     className="grid grid-cols-[minmax(8rem,16rem)_1fr] items-center gap-3"
                   >
                     <span className="text-xs">
-                      {r.value} · {pick(r.label, locale) ?? ""}
+                      {r.value} ·{" "}
+                      {likertLabel(role, r.value, locale) ??
+                        pick(r.label, locale) ??
+                        ""}
                     </span>
                     <SideBar
                       n={r.withSignal}
@@ -932,7 +936,7 @@ function useValuedSeries(d: ValuedDistribution): StackSeries[] {
   const locale = useLocale();
   return [1, 2, 3, 4].map((v, i) => ({
     key: String(v),
-    label: `${v} · ${pick(d.labels[i], locale) ?? ""}`,
+    label: `${v} · ${likertLabel("valued", v, locale) ?? pick(d.labels[i], locale) ?? ""}`,
     ...VALUED_FILL[i],
   }));
 }
