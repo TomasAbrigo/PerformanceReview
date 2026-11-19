@@ -1,7 +1,12 @@
 // Drizzle- and server-free: shared by the queries and client components.
 import type { LocalizedText } from "@/db/schema/rating-scales";
 import type { OrgFilters } from "@/modules/org-attributes/kinds";
-import { sentiments, type Sentiment } from "./constants";
+import {
+  sentiments,
+  type Sentiment,
+  type Signal,
+  type Substance,
+} from "./constants";
 
 export type QualitativeFilters = OrgFilters & {
   cycleId?: string;
@@ -11,6 +16,10 @@ export type QualitativeFilters = OrgFilters & {
   dimension?: string;
   sentiment?: Sentiment;
   theme?: string;
+  /** Only answers read with this substance (#129). */
+  substance?: Substance;
+  /** Only answers that carry this signal (#129). */
+  signal?: Signal;
   /**
    * Only the comments of people whose manager gave `value` (1-5) to this
    * indicator in that cycle (the latest submitted manager review).
@@ -83,8 +92,7 @@ export type IndicatorSentiment = SentimentCounts & {
   role: string;
   /** The manager's answer, 1-5. */
   value: number;
-  /** The answer's text (the latest one seen for that value). */
-  option: string;
+  /** The question's choice for that value (choiceOfValue), never the raw answer text. */
   label: LocalizedText | null;
 };
 export type CommentRow = {
@@ -99,8 +107,14 @@ export type CommentRow = {
   text: string;
   sentiment: Sentiment;
   themes: string[];
+  /** Null for an imported label without one. */
+  substance: Substance | null;
+  signals: Signal[];
+  /** Null when not estimated (the mock, an import) or corrected. */
   confidence: number | null;
   source: string;
+  /** The label is the demo heuristic (mock): its confidence means nothing. */
+  demo: boolean;
 };
 
 /** What the filters offer. */

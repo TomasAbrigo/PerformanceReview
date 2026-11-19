@@ -1,26 +1,21 @@
-import { type SQL, sql } from "drizzle-orm";
+import { sql } from "drizzle-orm";
 import type { DbOrTx } from "@/db/client";
 import type { LocalizedText } from "@/db/schema/rating-scales";
-import { isUuid } from "@/lib/uuid";
 import type { ActorContext } from "@/modules/actor/types";
-import { sentiments, type Sentiment } from "./constants";
-import { analysisTextSql } from "./analysis-text";
-import { effectiveCte } from "./effective";
+import {
+  sentiments,
+  type Sentiment,
+  type Signal,
+  type Substance,
+} from "./constants";
 import { INITIAL_THEMES } from "./themes";
-import { insightsScope, type InsightsScope } from "@/modules/insights/authz";
 import { groupKeyer } from "@/modules/org-attributes/group-key";
-import {
-  groupIdentity,
-  needsKeyer,
-  withoutPersonFilters,
-} from "@/modules/org-attributes/kinds";
-import {
-  orgAttributeColumns,
-  orgAttributeFilters,
-  orgAttributeJoins,
-} from "@/modules/org-attributes/sql";
-import { getSetting } from "@/modules/settings/service";
+import { groupIdentity, needsKeyer } from "@/modules/org-attributes/kinds";
 import { AnalysisError } from "./errors";
+import { choiceOfValue } from "./choices";
+import { labeledCtes, minGroup, resolve } from "./scope";
+
+export { qualitativeUniverse, type Universe } from "./scope";
 import { pseudonymize } from "./pseudonymize";
 import { pseudonymSources } from "./service";
 import {
@@ -38,116 +33,6 @@ import {
   type ThemeRank,
   type TrendPoint,
 } from "./types";
-
-/**
- * Who sees what (insightsScope): People every label; a manager the labels
- * about their direct reports at the cycle snapshot; direction aggregates only,
- * groups of fewer than `aggregation.minGroupSize` people left out; an employee
- * nothing (never their own labels). aggregateOnly (also People's toggle)
- * keeps counts and drops comments and quotes.
- */
-type Resolved = {
-  scope: InsightsScope;
-  f: QualitativeFilters;
-  min: number;
-};
-
-async function resolve(
-  db: DbOrTx,
-  actor: ActorContext,
-  f: QualitativeFilters,
-): Promise<Resolved | null> {
-  const scope = insightsScope(
-    actor,
-    actor.role === "direction"
-      ? (f.minGroupSize ?? (await getSetting(db, "aggregation.minGroupSize")))
-      : undefined,
-  );
-  if (scope.kind === "none") return null;
-  if (scope.kind === "aggregatesOnly") {
-    return {
-      scope,
-      // Direction does not filter by the people who lead a team (DM, Santex Lead).
-      f: { ...withoutPersonFilters(f, true), aggregateOnly: true },
-      min: scope.minGroupSize,
-    };
-  }
-  return { scope, f, min: 0 };
-}
-
-/** Groups with fewer distinct participants than `min` are left out. */
-const minGroup = (min: number, col = sql`participant_id`) =>
-  min > 1 ? sql`having count(distinct ${col}) >= ${min}` : sql``;
-
-/** CTEs eff + labeled: effective labels of submitted answers in scope. */
-function labeledCtes({ scope, f }: Resolved): SQL {
-  const where: SQL[] = [
-    sql`r.deleted_at is null`,
-    sql`r.status = 'submitted'`,
-    sql`cp.removed_at is null`,
-  ];
-  if (f.cycleId) {
-    if (!isUuid(f.cycleId)) throw new AnalysisError("not_found");
-    where.push(sql`r.cycle_id = ${f.cycleId}::uuid`);
-  }
-  if (f.cycleIds) {
-    const ids = f.cycleIds.map((id) => {
-      if (!isUuid(id)) throw new AnalysisError("not_found");
-      return sql`${id}::uuid`;
-    });
-    where.push(
-      ids.length ? sql`r.cycle_id in (${sql.join(ids, sql`, `)})` : sql`false`,
-    );
-  }
-  if (f.department) where.push(sql`cp.snap_department = ${f.department}`);
-  where.push(...orgAttributeFilters(f));
-  if (f.dimension) where.push(sql`eff.dimension = ${f.dimension}`);
-  if (f.sentiment) where.push(sql`eff.sentiment = ${f.sentiment}`);
-  if (f.theme) where.push(sql`${f.theme} = any(eff.themes)`);
-  if (f.relationship) where.push(sql`r.relationship = ${f.relationship}`);
-  if (f.indicator) {
-    const value = Number(f.indicator.value);
-    if (!Number.isInteger(value) || value < 1 || value > 5) {
-      throw new AnalysisError("not_found");
-    }
-    where.push(sql`(
-      select ia.option_value::int
-      from answer ia
-      join review_request ir on ir.id = ia.request_id
-      join question_revision iq on iq.id = ia.question_revision_id
-      where ir.participant_id = cp.id and iq.role::text = ${f.indicator.role}
-        and ia.option_value in (1, 2, 3, 4, 5)
-        and ir.relationship = 'manager' and ir.status = 'submitted'
-        and ir.deleted_at is null
-      order by ir.submitted_at desc nulls last, ir.id
-      limit 1
-    ) = ${value}`);
-  }
-  if (scope.kind === "directReports") {
-    where.push(
-      sql`cp.snap_manager_person_id = ${scope.managerPersonId}::uuid`,
-      sql`cp.reviewee_person_id <> ${scope.managerPersonId}::uuid`,
-    );
-  }
-  return sql`${effectiveCte()},
-    labeled as (
-      select eff.*, ${analysisTextSql("a", "q")} as text, r.cycle_id,
-             r.relationship::text as relationship,
-             c.name as cycle_name, c.period_start::text as period_start,
-             c.period_end::text as period_end,
-             cp.id as participant_id, p.display_name as person_name,
-             cp.snap_department as department, ${orgAttributeColumns}
-      from eff
-      join answer a on a.id = eff.answer_id
-      join question_revision q on q.id = a.question_revision_id
-      join review_request r on r.id = a.request_id
-      join cycle_participant cp on cp.id = r.participant_id
-      join review_cycle c on c.id = r.cycle_id
-      join person p on p.id = cp.reviewee_person_id
-      ${orgAttributeJoins("cp", sql`cp.snapshot_as_of`)}
-      where ${sql.join(where, sql` and `)}
-    )`;
-}
 
 const countCols = sql.raw(
   sentiments
@@ -225,7 +110,7 @@ export async function sentimentByGroup(
   >(sql`
     with ${labeledCtes(r)}
     select ${column} as value, ${countCols}, count(*)::int as total,
-           count(distinct participant_id)::int as participants
+           count(distinct person_id)::int as participants
     from labeled group by 1 ${minGroup(r.min)}
     order by (${column} is null), 1`);
   const masked = r.scope.kind === "aggregatesOnly";
@@ -297,7 +182,7 @@ export async function topThemes(
     SentimentCounts & { theme: string; count: number; quotes: string[] }
   >(sql`
     with ${labeledCtes(r)},
-    t as (select unnest(themes) as theme, text, answer_id, participant_id, sentiment from labeled)
+    t as (select unnest(themes) as theme, text, answer_id, person_id, sentiment from labeled)
     select theme, count(*)::int as count, ${countCols}, count(*)::int as total,
            (array_agg(text order by length(text), answer_id))[1:${QUOTE_POOL}] as quotes
     from t group by theme ${minGroup(r.min)}
@@ -345,7 +230,6 @@ export async function sentimentVsIndicators(
     SentimentCounts & {
       role: string;
       value: number;
-      option: string;
       choices: { value: string; label: LocalizedText }[] | null;
     }
   >(sql`
@@ -355,8 +239,7 @@ export async function sentimentVsIndicators(
       -- manager review's answer (so each comment is counted once).
       select distinct on (r.participant_id, q.role)
              r.participant_id, r.cycle_id, q.role::text as role,
-             a.option_value::int as value, a.option_label as option,
-             q.choices, c.period_end
+             a.option_value::int as value, q.choices, c.period_end
       from answer a
       join review_request r on r.id = a.request_id
       join review_cycle c on c.id = r.cycle_id
@@ -367,17 +250,15 @@ export async function sentimentVsIndicators(
       order by r.participant_id, q.role, r.submitted_at desc nulls last, r.id
     )
     select ind.role, ind.value,
-           (array_agg(ind.option order by ind.period_end desc))[1] as option,
            (array_agg(ind.choices order by ind.period_end desc))[1] as choices,
            ${countCols}, count(*)::int as total
     from labeled l
     join ind on ind.participant_id = l.participant_id and ind.cycle_id = l.cycle_id
-    group by 1, 2 ${minGroup(r.min, sql`l.participant_id`)} order by 1, 2 desc`);
+    group by 1, 2 ${minGroup(r.min, sql`l.person_id`)} order by 1, 2 desc`);
   return rows.map((r) => ({
     role: r.role,
     value: r.value,
-    option: r.option,
-    label: r.choices?.find((c) => c.value === r.option)?.label ?? null,
+    label: choiceOfValue(r.choices, r.value)?.label ?? null,
     ...counts(r),
   }));
 }
@@ -402,12 +283,16 @@ export async function listComments(
     text: string;
     sentiment: Sentiment;
     themes: string[];
+    substance: Substance | null;
+    signals: Signal[] | null;
     confidence: number | null;
     source: string;
+    demo: boolean;
   }>(sql`
     with ${labeledCtes(r)}
     select answer_id, cycle_name, period_start, period_end, person_name,
-           relationship, dimension, text, sentiment, themes, confidence, source
+           relationship, dimension, text, sentiment, themes, substance,
+           signals, confidence, source, demo
     from labeled order by period_end desc, person_name, dimension, answer_id
     limit ${limit}`);
   return rows.map((r) => ({
@@ -421,8 +306,11 @@ export async function listComments(
     text: r.text,
     sentiment: r.sentiment,
     themes: r.themes,
-    confidence: r.confidence,
+    substance: r.substance,
+    signals: r.signals ?? [],
+    confidence: r.demo ? null : r.confidence,
     source: r.source,
+    demo: r.demo,
   }));
 }
 
