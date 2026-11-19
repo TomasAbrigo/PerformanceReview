@@ -9,6 +9,8 @@ import { generateCompany } from "@/fixtures/company";
 import { DEFAULT_ACTOR } from "@/modules/actor/types";
 import { completionSummary } from "@/modules/analytics/completion";
 import { goalKpis, goalOutliers } from "@/modules/analytics/goals-insights";
+import { goalAsOf } from "@/modules/goals/state";
+import { todayLocal } from "@/modules/org-history/dates";
 import {
   insertParticipant,
   insertPerson,
@@ -161,7 +163,7 @@ describe("buildReport over the seed small company", () => {
   it("the qualitative section has five sentiments and the cut by side", async () => {
     const r = await buildReport(db, { cycle: cycleId, anonymized: false });
     const q = r.sections.qualitative!;
-    expect(r.schemaMinor).toBe(4);
+    expect(r.schemaMinor).toBe(SCHEMA_MINOR);
     const t = q.totals!;
     expect(t.positive + t.constructive + t.neutral + t.mixed + t.negative).toBe(
       t.total,
@@ -349,6 +351,135 @@ describe("buildReport over the seed small company", () => {
     // compared with the semester before it
     expect(c.delta?.previousCycleName).toMatch(/2025-H2/);
     expect(c.delta?.total).not.toBeNull();
+  });
+
+  it("the executive progress is the completion's, not the requests that exist: pending participants are counted", async () => {
+    const r = await buildReport(db, { cycle: cycleId, anonymized: false });
+    const t = (
+      await completionSummary(db, DEFAULT_ACTOR, {
+        cycleId,
+        groupBy: "none",
+      })
+    ).total!;
+    const byRelationship = (rel: string) =>
+      r.sections.executive.progress.find((p) => p.relationship === rel);
+    expect(byRelationship("self")).toEqual({
+      relationship: "self",
+      total: t.selfApplicable,
+      submitted: t.selfSubmitted,
+    });
+    expect(byRelationship("manager")).toEqual({
+      relationship: "manager",
+      total: t.managerApplicable,
+      submitted: t.managerSubmitted,
+    });
+    // Same figures as the completion section of the same file.
+    const c = r.sections.completion!.byRelationship!;
+    for (const side of c) {
+      expect(byRelationship(side.relationship)).toMatchObject({
+        total: side.total,
+        submitted: side.submitted,
+      });
+    }
+    // Not "everybody who has a request submitted it": some do not.
+    expect(t.selfSubmitted).toBeLessThan(t.selfApplicable);
+    const anonymized = await buildReport(db, {
+      cycle: cycleId,
+      anonymized: true,
+      minGroupSize: MIN,
+    });
+    expect(
+      anonymized.sections.executive.progress.find(
+        (p) => p.relationship === "self",
+      ),
+    ).toMatchObject({ total: t.selfApplicable, submitted: t.selfSubmitted });
+  });
+
+  it("people[] tells a pending assessment from a submitted one: a status for every participant, the completion module's", async () => {
+    const r = await buildReport(db, { cycle: cycleId, anonymized: false });
+    const people = r.sections.people!;
+    const allowed = [
+      "submitted",
+      "in_progress",
+      "not_started",
+      "not_applicable",
+    ];
+    for (const p of people) {
+      expect(allowed).toContain(p.selfStatus);
+      expect(allowed).toContain(p.managerStatus);
+    }
+    const t = (
+      await completionSummary(db, DEFAULT_ACTOR, { cycleId, groupBy: "none" })
+    ).total!;
+    const count = (side: "selfStatus" | "managerStatus", status: string) =>
+      people.filter((p) => p[side] === status).length;
+    // The rows add up to the completion section: submitted and pending (not
+    // started or in progress) of the sides that apply.
+    expect(count("selfStatus", "submitted")).toBe(t.selfSubmitted);
+    expect(
+      count("selfStatus", "not_started") + count("selfStatus", "in_progress"),
+    ).toBe(t.selfApplicable - t.selfSubmitted);
+    expect(count("managerStatus", "submitted")).toBe(t.managerSubmitted);
+    expect(
+      count("managerStatus", "not_started") +
+        count("managerStatus", "in_progress"),
+    ).toBe(t.managerApplicable - t.managerSubmitted);
+    // Somebody has started and not submitted: it is not the same as not started.
+    expect(people.some((p) => p.selfStatus === "in_progress")).toBe(true);
+    expect(people.some((p) => p.selfStatus === "not_started")).toBe(true);
+  });
+
+  it("a cycle without final ratings says no data, not a row of zeros", async () => {
+    const [{ n }] = await db.execute<{ n: number }>(
+      sql`select count(*)::int as n from final_rating`,
+    );
+    expect(n).toBe(0);
+    for (const anonymized of [false, true]) {
+      const r = await buildReport(db, {
+        cycle: cycleId,
+        anonymized,
+        minGroupSize: MIN,
+      });
+      const e = r.sections.executive;
+      expect(e.distributionStatus).toBe("no_data");
+      expect(e.distribution).toBeNull();
+      expect(e.byDepartment).toEqual([]);
+      expect(arturiaReportV1.safeParse(r).success).toBe(true);
+      const html = renderHtml(r);
+      const executive = html.match(
+        /<section id="executive"[\s\S]*?<\/section>/,
+      )![0];
+      expect(executive).toContain(
+        "Sin datos: el ciclo no tiene calificaciones",
+      );
+      // No bars of zeros under "Distribución de calificaciones".
+      expect(executive).not.toContain("<svg");
+    }
+  });
+
+  it("the goals carry the cut-off date overdue is measured at: the end of the period for a closed cycle", async () => {
+    const r = await buildReport(db, { cycle: cycleId, anonymized: false });
+    const [cycle] = await db
+      .select()
+      .from(reviewCycle)
+      .where(eq(reviewCycle.id, cycleId));
+    expect(r.sections.goals!.asOf).toBe(goalAsOf(cycle, todayLocal()));
+    if (cycle.status === "closed" && cycle.periodEnd < todayLocal()) {
+      expect(r.sections.goals!.asOf).toBe(r.cycle.periodEnd);
+    }
+    // The states are a partition: the parts of every group add up to its goals.
+    for (const g of r.sections.goals!.byDepartment) {
+      expect(g.completed + g.inProgress + g.overdue + g.closed).toBe(g.goals);
+    }
+    // The same figures as the goal analytics run as People for that date.
+    const k = await goalKpis(db, DEFAULT_ACTOR, {
+      cycleId,
+      groupBy: "department",
+    });
+    expect(r.sections.goals!.asOf).toBe(k.asOf);
+    expect(
+      r.sections.goals!.byDepartment.reduce((n, g) => n + g.overdue, 0),
+    ).toBe(k.groups.reduce((n, g) => n + g.overdue, 0));
   });
 
   it("completion anonymized: the direction view of areas and teams, teams as Equipo N, totals only when nothing is suppressed", async () => {

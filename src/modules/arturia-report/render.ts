@@ -211,6 +211,12 @@ function executiveHtml(e: ExecutiveSection): string {
         `<div class="tile"><b>${pct(p.submitted, p.total)}</b><span>${esc(rel(p.relationship))} (${p.submitted}/${p.total})</span></div>`,
     ),
   ].join("");
+  // A cycle with no final ratings has no distribution: "no data", never a row
+  // of zeros (which would read as "everybody rated 0").
+  if (e.distributionStatus === "no_data") {
+    return `<div class="tiles">${tiles}</div>
+<h3>${esc(L.executive.distribution)}</h3><p class="muted">${esc(L.executive.noRatings)}</p>`;
+  }
   return `<div class="tiles">${tiles}</div>
 <h3>${esc(L.executive.distribution)}</h3>${e.distribution ? svgBars(e.bins.map((b, i) => ({ label: binLabel(b), value: e.distribution![i] ?? 0 }))) : hiddenTotal()}
 <h3>${esc(L.executive.byDepartment)}</h3>${svgStacked(
@@ -379,13 +385,14 @@ function goalsHtml(g: GoalsSection | null): string {
             ? []
             : [tile(g.withoutGoals, G.withoutGoals)]),
         ].join("")}</div>`;
-  // Goals by status per group: completed, in progress (on time), overdue
-  // (a subset of the in progress ones) and closed: the parts add up to goals.
+  // Goals by status per group: completed, in progress, overdue and closed:
+  // a partition (in progress leaves out the overdue), so the parts add up to
+  // the goals.
   const status = (rows: GoalsSection["byDepartment"]) =>
     svgStacked(
       rows.map((r) => ({
         label: `${r.label} (n=${r.n})`,
-        parts: [r.completed, r.inProgress - r.overdue, r.overdue, r.closed],
+        parts: [r.completed, r.inProgress, r.overdue, r.closed],
       })),
       [G.completed, G.inProgress, G.overdue, G.closed],
     );
@@ -418,7 +425,10 @@ function goalsHtml(g: GoalsSection | null): string {
       "",
     )}</ul>${groups.some(([, o]) => o.count === null) ? `<p class="muted">${esc(G.underMinimum)}</p>` : ""}${groups.map(([title, o]) => named(title, o)).join("")}`;
 
-  return `${tiles}
+  const asOf = g.asOf
+    ? `<p class="muted">${esc(G.asOf)}: ${esc(g.asOf)}</p>`
+    : "";
+  return `${tiles}${asOf}
 <h3>${esc(G.byDepartment)} · ${esc(G.status)}</h3>${status(g.byDepartment)}${suppressedNote(g.suppressed.byDepartment)}
 <h3>${esc(G.byManager)} · ${esc(G.status)}</h3>${status(g.byManager)}${suppressedNote(g.suppressed.byManager)}
 ${g.byAccount ? `<h3>${esc(G.byAccount)} · ${esc(G.status)}</h3>${status(g.byAccount)}${suppressedNote(g.suppressed.byAccount ?? 0)}` : ""}
@@ -485,10 +495,14 @@ function peopleHtml(people: ArturiaReport["sections"]["people"]): string {
     .map((h) => `<th>${esc(h)}</th>`)
     .join("");
   const cell = (v: string | null) => `<td>${v === null ? "–" : esc(v)}</td>`;
+  // The side statuses in words (the JSON keeps the module's keys).
+  const statuses = P.statuses as Record<string, string>;
+  const side = (v: string | null) =>
+    cell(v === null ? null : (statuses[v] ?? v));
   const body = people
     .map(
       (p) =>
-        `<tr>${cell(p.displayName)}${cell(p.email)}${cell(p.department)}${cell(p.manager)}${cell(p.selfStatus)}${cell(p.managerStatus)}${cell(p.retention)}${cell(p.engagement)}${cell(p.positiveShare === null ? null : pct(p.positiveShare, 1))}</tr>`,
+        `<tr>${cell(p.displayName)}${cell(p.email)}${cell(p.department)}${cell(p.manager)}${side(p.selfStatus)}${side(p.managerStatus)}${cell(p.retention)}${cell(p.engagement)}${cell(p.positiveShare === null ? null : pct(p.positiveShare, 1))}</tr>`,
     )
     .join("");
   return section(

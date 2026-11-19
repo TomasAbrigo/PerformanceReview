@@ -20,12 +20,14 @@ Contrato del JSON que genera `pnpm export:arturia` (zod: `arturiaReportV1` en `s
 
 - **4**: engagement mensual (#86), del archivo que People carga (ver [engagement-monthly.md](engagement-monthly.md)). Agrega la sección opcional `sections.engagementMonthly` (ver abajo). No cambia ningún campo existente: un informe de un minor anterior sigue siendo válido (la sección no aparece) y un informe de minor 4 sin datos de engagement en el período trae `null`.
 
+- **5**: definiciones que coinciden con su rótulo (#131). Agrega `goals.asOf` (la fecha de corte contra la que se mide "vencido") y `executive.distributionStatus` (`ok`, `no_data`, `suppressed`). Cambia el significado de cuatro campos, y se asienta porque el contrato todavía no tiene consumidores (Arturía no recibió ningún informe): (a) `goals…inProgress` ya no incluye a los vencidos (en curso, vencidos, completados y cerrados suman `goals`); (b) `executive.progress` de `self` y `manager` sale del módulo de completitud (participantes a los que aplica y que enviaron: los que no tienen solicitud cuentan como pendientes), ya no de las solicitudes que existen, que daba 100 % de enviadas con una completitud de 83 % / 76 %; (c) `people[].selfStatus` / `managerStatus` ya no son `null` para quien no entregó: son el estado del módulo de completitud (`submitted`, `in_progress`, `not_started`, `not_applicable`); (d) `executive.distribution` es `null` (con `distributionStatus: "no_data"`) cuando nadie tiene calificación final, en vez de una fila de ceros.
+
 ## Raíz
 
 | Campo           | Tipo                                 | Descripción                                                                                          |
 | --------------- | ------------------------------------ | ---------------------------------------------------------------------------------------------------- |
 | `schemaVersion` | `"arturia-report.v1"`                | Versión mayor del formato.                                                                           |
-| `schemaMinor`   | entero ≥ 0                           | Versión menor (cambios aditivos). Hoy `4`.                                                           |
+| `schemaMinor`   | entero ≥ 0                           | Versión menor (cambios aditivos). Hoy `5`.                                                           |
 | `generatedAt`   | ISO 8601 (UTC)                       | Momento de generación.                                                                               |
 | `cycle`         | `{id, name, periodStart, periodEnd}` | Ciclo: uuid, nombre, fechas `YYYY-MM-DD`.                                                            |
 | `anonymized`    | boolean                              | `true`: versión anonimizada (sin `people`, sin emails ni nombres, sin personas en `goals.outliers`). |
@@ -42,14 +44,15 @@ Regla de anonimización: en toda serie agrupada, los grupos con `n < minGroupSiz
 
 ## `sections.executive`
 
-| Campo          | Tipo                                 | Descripción                                                  |
-| -------------- | ------------------------------------ | ------------------------------------------------------------ |
-| `participants` | entero                               | Participantes activos del ciclo.                             |
-| `progress`     | `[{relationship, total, submitted}]` | Evaluaciones por tipo (`self`, `manager`, `peer`, `upward`). |
-| `bins`         | `[{from, to}]`                       | Rangos (0-1) de la calificación normalizada.                 |
-| `distribution` | `int[]`                              | Personas por rango (todos ceros si quedan bajo el mínimo).   |
-| `byDepartment` | `[{label, n, mean, counts, other}]`  | Por área: n, media normalizada, conteo por rango.            |
-| `suppressed`   | entero                               | Personas fuera del desglose.                                 |
+| Campo                | Tipo                                                | Descripción                                                                                                                                                                                                                                                                                    |
+| -------------------- | --------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `participants`       | entero                                              | Participantes activos del ciclo.                                                                                                                                                                                                                                                               |
+| `progress`           | `[{relationship, total, submitted}]`                | `self` y `manager` (los que aplican a alguien) como la sección `completion`: `total` = participantes a los que aplica, `submitted` = quienes la enviaron; los participantes sin solicitud cuentan como pendientes. Después `peer` / `upward` si hay solicitudes (esos sí cuentan solicitudes). |
+| `bins`               | `[{from, to}]`                                      | Rangos (0-1) de la calificación normalizada.                                                                                                                                                                                                                                                   |
+| `distribution`       | `int[]` o null                                      | Personas por rango. `null` cuando no se puede publicar: nadie tiene calificación final, o (anonimizado) un grupo o todas quedan bajo el mínimo.                                                                                                                                                |
+| `distributionStatus` | `ok` / `no_data` / `suppressed` (minor 5, opcional) | Por qué `distribution` está o no: `no_data` = el ciclo no tiene calificaciones finales (no hay distribución, no "todo en cero"); `suppressed` = bajo el mínimo.                                                                                                                                |
+| `byDepartment`       | `[{label, n, mean, counts, other}]`                 | Por área: n, media normalizada, conteo por rango. Vacío sin calificaciones.                                                                                                                                                                                                                    |
+| `suppressed`         | entero                                              | Personas fuera del desglose.                                                                                                                                                                                                                                                                   |
 
 ## `sections.completion` (nullable)
 
@@ -92,10 +95,11 @@ Los **cinco sentimientos**, en este orden: `positive`, `constructive`, `neutral`
 
 ## `sections.goals` (nullable)
 
-Los objetivos del período del ciclo (la foto de objetivos del ciclo, sin los "ya no aplica") junto a los indicadores del assessment, según el módulo de insights de objetivos (#62). `null` si el ciclo no tiene participantes. "Atrasado" (`overdue`) = en curso con fecha límite anterior al fin del período; un objetivo cerrado nunca lo es.
+Los objetivos del período del ciclo (la foto de objetivos del ciclo, sin los "ya no aplica") junto a los indicadores del assessment, según el módulo de insights de objetivos (#62). `null` si el ciclo no tiene participantes. "Vencido" (`overdue`) = en curso con fecha límite anterior a `asOf`; un objetivo cerrado nunca lo es. **`asOf` es la fecha de corte**: el día de generación mientras el período del ciclo corre (la foto de objetivos se mantiene al día) y el último día del período una vez que el ciclo está cerrado (la foto queda congelada ahí: medirla contra hoy hace crecer el "vencido" con el calendario y vuelve incomparables a dos ciclos). Los cuatro estados (`completed`, `inProgress`, `overdue`, `closed`) son una partición: `inProgress` no incluye a los vencidos y los cuatro suman `goals`.
 
 | Campo                   | Tipo                                                                             | Descripción                                                                                                                                                                             |
 | ----------------------- | -------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `asOf`                  | `YYYY-MM-DD` (minor 5, opcional)                                                 | La fecha de corte de arriba. Un informe de un minor anterior no la trae (medía contra el día de generación).                                                                            |
 | `participantsWithGoals` | entero o null                                                                    | Personas con al menos un objetivo.                                                                                                                                                      |
 | `goals` / `completed`   | entero o null                                                                    | Objetivos y completados.                                                                                                                                                                |
 | `avgProgress`           | número (0-100) o null                                                            | Avance promedio de los objetivos (un decimal).                                                                                                                                          |
@@ -110,7 +114,7 @@ Los objetivos del período del ciclo (la foto de objetivos del ciclo, sin los "y
 
 Los cuatro totales (`participantsWithGoals`, `goals`, `completed`, `avgProgress`) son `null` cuando la versión es anonimizada y algún desglose (`suppressed.*` > 0) tiene un grupo oculto.
 
-`goalRow`: `{label, n, other, peopleWithGoals, goals, completed, inProgress, closed, overdue, avgProgress}`; `n` = personas (participantes) del grupo, `avgProgress` 0-100 o null sin objetivos. Anonimizado, `n` es al menos el mínimo (los grupos menores van a "Otros" o se omiten).
+`goalRow`: `{label, n, other, peopleWithGoals, goals, completed, inProgress, closed, overdue, avgProgress}` (`inProgress` sin los vencidos, ver arriba); `n` = personas (participantes) del grupo, `avgProgress` 0-100 o null sin objetivos. Anonimizado, `n` es al menos el mínimo (los grupos menores van a "Otros" o se omiten).
 
 `buckets`: `from`-`to` en porcentaje (0-20, 20-40, ...); `people` y los promedios son `null` y `hidden` es `true` cuando anonimizado y el tramo tiene menos personas que el mínimo (un tramo vacío no oculta a nadie y queda en 0).
 
@@ -133,12 +137,12 @@ En la versión **anonimizada** (como "dirección", con `minGroupSize`): un mes c
 
 `null` siempre que `anonymized` es `true` (el schema lo exige). En la versión con nombres, una fila por participante:
 
-| Campo                          | Tipo         | Descripción                                           |
-| ------------------------------ | ------------ | ----------------------------------------------------- |
-| `personId`                     | uuid         | Id interno de la persona.                             |
-| `displayName` / `email`        | texto        | Nombre y email laboral (puede ser null).              |
-| `department` / `manager`       | texto o null | Área y nombre del manager del snapshot del ciclo.     |
-| `selfStatus` / `managerStatus` | texto o null | Estado de la autoevaluación / evaluación del manager. |
-| `retention` / `engagement`     | texto o null | Respuesta del manager a cada indicador (etiqueta).    |
-| `positiveShare`                | 0-1 o null   | Proporción de comentarios positivos de la persona.    |
-| `comments`                     | entero       | Comentarios etiquetados.                              |
+| Campo                          | Tipo         | Descripción                                                                                                                                                                                                                                          |
+| ------------------------------ | ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `personId`                     | uuid         | Id interno de la persona.                                                                                                                                                                                                                            |
+| `displayName` / `email`        | texto        | Nombre y email laboral (puede ser null).                                                                                                                                                                                                             |
+| `department` / `manager`       | texto o null | Área y nombre del manager del snapshot del ciclo.                                                                                                                                                                                                    |
+| `selfStatus` / `managerStatus` | texto        | Estado de la autoevaluación / evaluación del manager, el del módulo de completitud: `submitted`, `in_progress`, `not_started` o `not_applicable`. Nunca `null` para un participante: quien no entregó se distingue de quien no tiene esa evaluación. |
+| `retention` / `engagement`     | texto o null | Respuesta del manager a cada indicador (etiqueta).                                                                                                                                                                                                   |
+| `positiveShare`                | 0-1 o null   | Proporción de comentarios positivos de la persona.                                                                                                                                                                                                   |
+| `comments`                     | entero       | Comentarios etiquetados.                                                                                                                                                                                                                             |

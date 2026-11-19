@@ -15,13 +15,15 @@ Informe de desempeño de un ciclo para publicar como mini app en Arturía. Se ge
 
 De dónde sale cada sección (el informe reusa los módulos de analytics: la versión con nombres corre como People y la anonimizada como dirección con el mínimo del informe, ver [arturia-schema.md](arturia-schema.md)):
 
-| Sección       | Módulo                                                                                                         |
-| ------------- | -------------------------------------------------------------------------------------------------------------- |
-| `executive`   | `analytics/dashboards` (`executiveSummary`)                                                                    |
-| `completion`  | `analytics/completion` (`completionOverview`, `completionSummary`): Assessment Progress, si no las solicitudes |
-| `indicators`  | `analytics/indicators`                                                                                         |
-| `goals`       | `analytics/goals-insights` (`goalInsights`, `goalKpis`): KPIs por área y equipo, tramos, casos atípicos        |
-| `qualitative` | `qualitative-analysis`                                                                                         |
+| Sección       | Módulo                                                                                                                                                 |
+| ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `executive`   | `analytics/dashboards` (`executiveSummary`: participantes y distribución de calificaciones) y `analytics/completion` (el avance de `self` y `manager`) |
+| `completion`  | `analytics/completion` (`completionOverview`, `completionSummary`): Assessment Progress, si no las solicitudes                                         |
+| `indicators`  | `analytics/indicators`                                                                                                                                 |
+| `goals`       | `analytics/goals-insights` (`goalInsights`, `goalKpis`): KPIs por área y equipo, tramos, casos atípicos                                                |
+| `qualitative` | `qualitative-analysis`                                                                                                                                 |
+
+**Fecha de corte de los vencidos:** "vencido" es un objetivo en curso con fecha límite anterior a `goals.asOf`: hoy mientras el período del ciclo corre, el último día del período una vez que el ciclo está cerrado (la foto de objetivos queda congelada ahí; la regla única está en `src/modules/goals/state.ts`, `goalAsOf`). El informe lleva esa fecha y el HTML la muestra.
 
 Anonimizado, los casos atípicos de objetivos solo se cuentan (y solo desde el mínimo); con nombres se listan con sus valores en `goals.outliers`.
 

@@ -4,7 +4,7 @@ import { z } from "zod";
 
 export const SCHEMA_VERSION = "arturia-report.v1";
 /** Bumped on every additive change of v1 (new optional field / section). */
-export const SCHEMA_MINOR = 4;
+export const SCHEMA_MINOR = 5;
 
 const int = z.number().int().nonnegative();
 const counts = z.array(int);
@@ -31,12 +31,30 @@ const sentimentCounts = z.object({
 
 const executive = z.object({
   participants: int,
+  /**
+   * Sides of the assessment that applied to someone: `self` and `manager`
+   * from the completion module (`total` = participants it applies to,
+   * `submitted` = who submitted: the same figures as `completion`, so the
+   * participants without a request count as pending), then any other
+   * relationship that has requests (`peer`, `upward`: requests that exist).
+   */
   progress: z.array(
     z.object({ relationship: z.string(), total: int, submitted: int }),
   ),
   bins: z.array(z.object({ from: z.number(), to: z.number() })),
-  /** null when anonymized and any group is suppressed (no differencing). */
+  /**
+   * People per rating range. null when it cannot be published: the cycle has
+   * no final ratings (`distributionStatus` `no_data`), or it is anonymized and
+   * a group, or all the ratings, are under the minimum (`suppressed`: no
+   * differencing).
+   */
   distribution: counts.nullable(),
+  /**
+   * Why `distribution` is or is not there: `ok`, `no_data` (nobody has a
+   * final rating: not a distribution of zeros) or `suppressed` (under the
+   * minimum). Minor 5; a report of an earlier minor has none.
+   */
+  distributionStatus: z.enum(["ok", "no_data", "suppressed"]).optional(),
   byDepartment: z.array(group.extend({ mean: z.number().nullable(), counts })),
   /** People left out of the breakdown (their groups, Otros included, are under the minimum). */
   suppressed: int,
@@ -231,9 +249,10 @@ const goalRow = group.extend({
   peopleWithGoals: int,
   goals: int,
   completed: int,
+  /** In progress and not overdue: the four counts below add up to `goals`. */
   inProgress: int,
   closed: int,
-  /** In progress and due before the period ended. */
+  /** In progress and due before `goals.asOf`. */
   overdue: int,
   /** Mean progress of the goals, 0-100. */
   avgProgress: z.number().nullable(),
@@ -264,6 +283,15 @@ const goalTotal = z.object({
   avgProgress: z.number().nullable(),
 });
 const goals = z.object({
+  /**
+   * The reference date (YYYY-MM-DD) `overdue` is measured at: the day the
+   * report is generated while the cycle's period runs, the end of the period
+   * once the cycle is closed (the goals' snapshot is frozen there). Minor 5.
+   */
+  asOf: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/)
+    .optional(),
   /**
    * The four totals are null when anonymized and any breakdown (areas,
    * teams, buckets) has a suppressed group (no differencing).
@@ -349,6 +377,11 @@ const engagementMonthly = z.object({
   suppressedMonths: int,
 });
 
+/**
+ * Where a side of the assessment stands, as the completion module says it
+ * (`submitted`, `in_progress`, `not_started`, `not_applicable`): never null
+ * for a participant, so a pending assessment is told from a submitted one.
+ */
 const status = z.string().nullable();
 const person = z.object({
   personId: z.string(),
