@@ -8,6 +8,7 @@
 // reconstruction by difference), re-pseudonymized quotes, no people section.
 import { sql } from "drizzle-orm";
 import type { DbOrTx } from "@/db/client";
+import { likertLabel } from "@/modules/likert";
 import { type ActorContext, DEFAULT_ACTOR } from "@/modules/actor/types";
 import {
   type CompletionGroup,
@@ -40,7 +41,7 @@ import {
 } from "@/modules/qualitative-analysis/queries";
 import { pseudonymSources } from "@/modules/qualitative-analysis/service";
 import { sumBy, teamLabels } from "./anonymize";
-import type { Labels } from "./labels";
+import type { Labels, ReportLocale } from "./labels";
 import type {
   ArturiaSections,
   CompletionSection,
@@ -56,6 +57,8 @@ export type CollectContext = {
   anonymized: boolean;
   /** Smallest group shown: the report's minGroupSize when anonymized, else 1. */
   min: number;
+  /** The report's language (labels of Likert values; default es). */
+  locale?: ReportLocale;
   labels: Labels;
   /**
    * "Equipo N" of each manager of the cycle (see `cycleTeams`): the one label
@@ -470,7 +473,9 @@ export const collectGoals: Collector<"goals"> = async (db, ctx) => {
   // DM have their own (`byAccountTotal`, `byDmTotal`).
   const hidden =
     ctx.anonymized &&
-    (suppressed.byDepartment + suppressed.byManager + suppressed.buckets > 0 ||
+    // Buckets are suppressed complementarily (#130): never one alone, so the
+    // total can stay next to them.
+    (suppressed.byDepartment + suppressed.byManager > 0 ||
       kpis.total === null ||
       byManager.total === null);
   const cutTotal = (k: GoalKpis) =>
@@ -748,8 +753,8 @@ export const collectPeople: Collector<"people"> = async (db, ctx) => {
     manager: string | null;
     self_status: string | null;
     manager_status: string | null;
-    retention: string | null;
-    engagement: string | null;
+    retention: number | null;
+    engagement: number | null;
     positive: number;
     comments: number;
   }>(sql`
@@ -761,13 +766,12 @@ export const collectPeople: Collector<"people"> = async (db, ctx) => {
     ),
     ind as (
       select distinct on (r.participant_id, q.role) r.participant_id, q.role::text as role,
-             coalesce((select c->'label'->>'es' from jsonb_array_elements(q.choices) c
-                       where c->>'value' = a.option_label limit 1), a.option_label) as label
+             a.option_value as value -- labelled by value below, never by option_label (#130)
       from answer a
       join review_request r on r.id = a.request_id
       join question_revision q on q.id = a.question_revision_id
       where r.cycle_id = ${ctx.cycleId}::uuid and q.role::text in ('retention', 'engagement')
-        and a.option_label is not null and r.relationship = 'manager'
+        and a.option_value is not null and r.relationship = 'manager'
         and r.status = 'submitted' and r.deleted_at is null
       order by r.participant_id, q.role, r.submitted_at desc nulls last, r.id
     ),
@@ -786,8 +790,8 @@ export const collectPeople: Collector<"people"> = async (db, ctx) => {
            cp.snap_department as department, mp.display_name as manager,
            (select status from req where req.participant_id = cp.id and relationship = 'self') as self_status,
            (select status from req where req.participant_id = cp.id and relationship = 'manager') as manager_status,
-           (select label from ind where ind.participant_id = cp.id and role = 'retention') as retention,
-           (select label from ind where ind.participant_id = cp.id and role = 'engagement') as engagement,
+           (select value from ind where ind.participant_id = cp.id and role = 'retention') as retention,
+           (select value from ind where ind.participant_id = cp.id and role = 'engagement') as engagement,
            coalesce(sen.positive, 0) as positive, coalesce(sen.comments, 0) as comments
     from cycle_participant cp
     join person p on p.id = cp.reviewee_person_id
@@ -803,8 +807,8 @@ export const collectPeople: Collector<"people"> = async (db, ctx) => {
     manager: r.manager,
     selfStatus: r.self_status,
     managerStatus: r.manager_status,
-    retention: r.retention,
-    engagement: r.engagement,
+    retention: likertLabel("retention", r.retention, ctx.locale ?? "es"),
+    engagement: likertLabel("engagement", r.engagement, ctx.locale ?? "es"),
     positiveShare: r.comments ? r.positive / r.comments : null,
     comments: r.comments,
   }));

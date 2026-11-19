@@ -588,17 +588,16 @@ describe("executiveSummary", () => {
 
   it("direction: groups under the minimum are folded into Otros, or hidden if still under it", async () => {
     const { cycle } = await h1WithDora();
-    // Minimum 2: Ingeniería (2) is listed; Ventas (1) alone is under it.
+    // Minimum 2: Ventas (1) alone is under it, and hiding it next to the
+    // total would give it away (#130): Ingeniería joins it in Otros.
     const two = await executiveSummary(db, direction, {
       cycleId: cycle.id,
       minGroupSize: 2,
     });
     expect(two.participants).toBe(3);
-    expect(two.byDepartment.map((d) => [d.department, d.n])).toEqual([
-      ["Ingeniería", 2],
-    ]);
-    expect(two.others).toBeNull();
-    expect(two.suppressed).toBe(1);
+    expect(two.byDepartment).toEqual([]);
+    expect(two.others).toMatchObject({ n: 3 });
+    expect(two.suppressed).toBe(0);
     // Minimum 3: neither group reaches it, together they do: one "Otros".
     const three = await executiveSummary(db, direction, {
       cycleId: cycle.id,
@@ -625,7 +624,8 @@ describe("executiveSummary", () => {
     await setSetting(db, hr, "aggregation.minGroupSize", 2);
     const r = await executiveSummary(db, direction, { cycleId: cycle.id });
     expect(r.minGroupSize).toBe(2);
-    expect(r.byDepartment.map((d) => d.department)).toEqual(["Ingeniería"]);
+    expect(r.byDepartment).toEqual([]); // Ventas (1) folds with Ingeniería (#130)
+    expect(r.others).toMatchObject({ n: 3 });
   });
 
   it("is forbidden to managers and employees", async () => {

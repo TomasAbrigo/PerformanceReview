@@ -86,8 +86,10 @@ describe("selfAssessmentReport", () => {
       groupBy: "department",
     });
     expect(masked.minGroupSize).toBe(5);
-    expect(masked.completion.groups.map((g) => g.key)).toEqual(["Ingeniería"]);
-    expect(masked.completion.suppressed).toBe(3);
+    // Producto (3) cannot hide next to the total (#130): all in Otros.
+    expect(masked.completion.groups).toEqual([]);
+    expect(masked.completion.others).toMatchObject({ participants: 9 });
+    expect(masked.completion.suppressed).toBe(0);
     // 3 people wrote a self comment: under 5, nothing shows.
     expect(masked.sentiment).toEqual([]);
     expect(masked.themes).toEqual([]);

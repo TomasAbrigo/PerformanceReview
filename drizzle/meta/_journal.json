@@ -204,6 +204,13 @@
       "when": 1795094264805,
       "tag": "0028_open_text_reading",
       "breakpoints": true
+    },
+    {
+      "idx": 29,
+      "version": "7",
+      "when": 1795096637248,
+      "tag": "0029_likert_canonical_labels",
+      "breakpoints": true
     }
   ]
 }

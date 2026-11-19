@@ -267,18 +267,17 @@ describe("goalsVsIndicators (who reads)", () => {
     expect(rows).toEqual([]);
     expect(buckets.map((b) => [b.people, b.hidden])).toEqual([
       [0, false], // nobody: nothing to hide
-      [3, false],
+      [null, true], // the smallest shown one goes with Iris (#130)
       [null, true], // Iris alone: under 3
       [0, false],
       [4, false],
     ]);
-    expect(buckets[1]).toMatchObject({ meanRetention: 4, meanEngagement: 4 });
     expect(buckets[2]).toMatchObject({
       meanRetention: null,
       meanEngagement: null,
       meanPositiveShare: null,
     });
-    expect(suppressed).toBe(1);
+    expect(suppressed).toBe(4);
   });
 });
 

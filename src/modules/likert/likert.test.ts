@@ -1,5 +1,14 @@
+import { readFileSync } from "node:fs";
+import path from "node:path";
 import { describe, expect, it } from "vitest";
-import { defaultLikertMappings, mapLikert } from "./index";
+import {
+  defaultLikertMappings,
+  LIKERT_ROLE_MAX,
+  likertLabel,
+  likertRoles,
+  mapLikert,
+  storedLikertLabel,
+} from "./index";
 
 describe("defaultLikertMappings", () => {
   it("maps A-E to 5..1 and A-D to 5,4,2,1 for both roles", () => {
@@ -187,5 +196,66 @@ describe("mapLikert: Bamboo raw report labels (#83)", () => {
     expect(mapLikert({ role: "engagement", raw: "Who knows" })).toEqual({
       unmapped: true,
     });
+  });
+});
+
+describe("storedLikertLabel and likertLabel (#130)", () => {
+  const named =
+    "I would try to convince them to stay. Ana Pérez would be difficult to replace";
+
+  it("never stores the reviewee's name: the canonical label of the value", () => {
+    const mapped = mapLikert({ role: "retention", raw: named });
+    expect(mapped).toEqual({ value: 4, normalized: 0.75 });
+    const stored = storedLikertLabel("retention", named, 4);
+    expect(stored).toBe("I would try to convince them to stay.");
+    expect(stored).not.toContain("Ana");
+    // It maps back to the same value: re-applying the equivalences works.
+    expect(mapLikert({ role: "retention", raw: stored })).toEqual(mapped);
+  });
+
+  it("keeps letters and numbers as they came (the equivalence table maps them)", () => {
+    expect(storedLikertLabel("engagement", " c ", 3)).toBe("C");
+    expect(storedLikertLabel("engagement", "4", 4)).toBe("4");
+  });
+
+  it("every canonical label maps back to its value, for every role", () => {
+    for (const role of likertRoles) {
+      for (let v = 1; v <= LIKERT_ROLE_MAX[role]; v++) {
+        const stored = storedLikertLabel(role, "free text", v);
+        expect(mapLikert({ role, raw: stored })).toMatchObject({ value: v });
+      }
+    }
+  });
+
+  it("labels a value in the view's language", () => {
+    expect(likertLabel("retention", 4, "es")).toBe(
+      "Intentaría convencerlo de quedarse",
+    );
+    expect(likertLabel("retention", 4, "en")).toBe(
+      "Try to convince them to stay",
+    );
+    expect(likertLabel("engagement", 5, "es")).toBe("Muy comprometido");
+    expect(likertLabel("valued", 5, "es")).toBeNull();
+    expect(likertLabel("retention", null, "es")).toBeNull();
+  });
+
+  it("the data migration writes the same canonical labels", () => {
+    const migration = readFileSync(
+      path.join(process.cwd(), "drizzle/0029_likert_canonical_labels.sql"),
+      "utf8",
+    );
+    for (const role of likertRoles) {
+      const block = migration.match(
+        new RegExp(`WHEN '${role}' THEN \\(ARRAY\\[([\\s\\S]*?)\\]\\)`),
+      )![1];
+      const labels = [...block.matchAll(/'((?:[^']|'')*)'/g)].map((m) =>
+        m[1].replace(/''/g, "'"),
+      );
+      expect(labels).toEqual(
+        Array.from({ length: LIKERT_ROLE_MAX[role] }, (_, i) =>
+          storedLikertLabel(role, "text", i + 1),
+        ),
+      );
+    }
   });
 });

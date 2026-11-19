@@ -98,9 +98,11 @@ describe("summarize", () => {
       [...rows, row("Ventas", "Nico", "submitted", "submitted")],
       { groupBy: "department", minGroupSize: 4 },
     );
-    expect(five.groups.map((g) => g.label)).toEqual(["Ventas"]);
-    expect(five.others).toBeNull();
-    expect(five.suppressed).toBe(3);
+    // The 3 others are under 4: Ventas joins them rather than leaving them
+    // hidden next to the total (#130).
+    expect(five.groups).toEqual([]);
+    expect(five.others?.participants).toBe(7);
+    expect(five.suppressed).toBe(0);
   });
 
   it("a manager is a person: with a minimum the teams keep their key but not their name", () => {
@@ -111,10 +113,11 @@ describe("summarize", () => {
     ]);
     expect(s.others).toMatchObject({ key: null, label: null, participants: 3 });
     const all = summarize(rows, { groupBy: "manager", minGroupSize: 2 });
+    // The unassigned one alone takes Nico's 2 with it into Otros (#130).
     expect(all.groups.map((g) => [g.key, g.label])).toEqual([
       ["id-Marta", null],
-      ["id-Nico", null],
     ]);
+    expect(all.others?.participants).toBe(3);
     // areas keep their names: they are not people
     expect(
       summarize(rows, { groupBy: "department", minGroupSize: 3 }).groups[0]
@@ -186,13 +189,12 @@ describe("summarize by an org attribute", () => {
     ]);
     expect(direction.groups.map((g) => [g.label, g.participants])).toEqual([
       [null, 3],
-      [null, 2],
     ]);
-    const keys = direction.groups.map((g) => g.key);
-    expect(new Set(keys).size).toBe(2);
+    expect(direction.groups[0].key).toMatch(/^g/);
     expect(JSON.stringify(direction)).not.toMatch(/Ana|Bruno/);
-    // Teams under the minimum and the unassigned one are folded or hidden.
-    expect(direction.suppressed).toBe(1);
+    // The unassigned one is folded with the smallest team, never hidden (#130).
+    expect(direction.others?.participants).toBe(3);
+    expect(direction.suppressed).toBe(0);
   });
 
   it("refuses to give direction a DM without a keyer: no name leaks as a key", () => {

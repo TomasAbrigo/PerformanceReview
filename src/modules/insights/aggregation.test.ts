@@ -24,12 +24,26 @@ describe("foldSmallGroups", () => {
     expect(r.suppressed).toBe(0);
   });
 
-  it("hides Otros too when the folded groups together are still under the minimum", () => {
-    const r = foldSmallGroups(
-      [group("Ventas", 6), group("Soporte", 2), group("Legales", 1)],
-      5,
-    );
-    expect(r.shown.map((g) => g.key)).toEqual(["Ventas"]);
+  it("never hides Otros while the total is public: the smallest shown group joins it (#130)", () => {
+    const groups = [
+      group("Ventas", 6, 0.5, [0, 0, 6, 0, 0]),
+      group("Marketing", 9, 0.5, [0, 0, 9, 0, 0]),
+      group("Soporte", 2, 0.5, [0, 0, 0, 2, 0]),
+      group("Legales", 1, 0.5, [0, 0, 0, 1, 0]),
+    ];
+    const r = foldSmallGroups(groups, 5);
+    // Try to solve for a hidden group: total minus what is shown.
+    const total = groups.reduce((s, g) => s + g.n, 0);
+    const shown = r.shown.reduce((s, g) => s + g.n, 0) + (r.others?.n ?? 0);
+    expect(total - shown).toBe(0);
+    expect(r.suppressed).toBe(0);
+    expect(r.shown.map((g) => g.key)).toEqual(["Marketing"]);
+    expect(r.others).toMatchObject({ n: 9, counts: [0, 0, 6, 3, 0] });
+  });
+
+  it("leaves out only a whole under the minimum", () => {
+    const r = foldSmallGroups([group("Soporte", 2), group("Legales", 1)], 5);
+    expect(r.shown).toEqual([]);
     expect(r.others).toBeNull();
     expect(r.suppressed).toBe(3);
   });

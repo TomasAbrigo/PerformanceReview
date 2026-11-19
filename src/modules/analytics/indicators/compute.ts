@@ -1,6 +1,7 @@
 // Pure: the indicator figures out of the rows `loadRows` reads. No database,
 // no actor: the callers decide who reads what (see queries.ts).
 import { foldSmallGroups } from "@/modules/insights";
+import { suppressTable } from "@/modules/insights/suppression";
 import {
   type GroupKeyer,
   groupIdentity,
@@ -267,23 +268,39 @@ export function buildMatrix(
       a.name.localeCompare(b.name, "es"),
   );
   const min = reach === "aggregatesOnly" ? config.minGroupSize : null;
-  const cells: MatrixCell[] = bands.flatMap((retention) =>
-    bands.map((engagement) => {
-      const count = counts.get(`${retention}:${engagement}`) ?? 0;
-      return {
-        retention,
-        engagement,
-        count: min !== null && count > 0 && count < min ? null : count,
-        risk: retention === "low" && engagement === "low",
-      };
-    }),
+  const table = bands.map((retention) =>
+    bands.map((engagement) => counts.get(`${retention}:${engagement}`) ?? 0),
+  );
+  // Direction: complementary suppression (#130). The bands' totals are public
+  // (the distributions of the same view), so hiding the small cells is not
+  // enough: more cells go until none can be solved for; when that is not
+  // possible, or there are fewer people than the minimum, nothing is shown
+  // (undefined).
+  const hidden =
+    min === null
+      ? null
+      : pairs.length < min
+        ? undefined
+        : (suppressTable(table, min) ?? undefined);
+  const cells: MatrixCell[] = bands.flatMap((retention, r) =>
+    bands.map((engagement, e) => ({
+      retention,
+      engagement,
+      count:
+        hidden === undefined ||
+        (hidden !== null && hidden[r][e] && table[r][e] > 0)
+          ? null
+          : table[r][e],
+      risk: retention === "low" && engagement === "low",
+    })),
   );
   const suppressed = cells.some((c) => c.count === null);
   return {
     cycleId,
     riskThreshold: config.riskThreshold,
     cells,
-    total: suppressed ? null : pairs.length,
+    // Shown even with hidden cells: it is public anyway (the distributions).
+    total: hidden === undefined ? null : pairs.length,
     riskCount: cells.find((c) => c.risk)!.count,
     atRisk: reach === "aggregatesOnly" ? null : atRisk,
     suppressed,
