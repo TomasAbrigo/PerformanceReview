@@ -55,5 +55,5 @@ La lectura efectiva de cada respuesta (CTE `eff`) es, de la última de cada clas
 
 ```csv
 employee_name,review_cycle,dimension,text,sentiment,confidence,themes
-Adrián Bustos,Evaluación semestral 2024-H1,improvement,Necesito mejorar la planificación de mis tiempos.,constructive,0.85,planificacion
+Adrián Bustos,Evaluación semestral 2024-H1,improvement,Quiero delegar más y no cargar con todo.,constructive,0.85,liderazgo;planificacion
 ```
