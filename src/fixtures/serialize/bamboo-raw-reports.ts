@@ -1,10 +1,6 @@
 import type { CompanyFixture, FixtureAssessment } from "../company";
 import type { ProgressStatus } from "../company/types";
-import {
-  REAL_CUSTOM_QUESTIONS,
-  YES_NO_ANSWERS,
-  YES_NO_HOW_ANSWERS,
-} from "../company/questions";
+import { REAL_CUSTOM_QUESTIONS, YES_NO_ANSWERS } from "../company/questions";
 import { toCsv } from "./csv";
 import type { FixtureFile } from "./files";
 import { createReportNamer } from "./report-names";
@@ -65,10 +61,8 @@ const BEST_WORK = {
   E: "Other",
 } as const;
 
-const OTHER_TEXTS = [
-  "Other Comentario: Más tiempo para capacitarme.",
-  "Other: Menos reuniones y más foco.",
-] as const;
+/** How Bamboo writes the text typed next to "Other" (two spellings). */
+const OTHER_PREFIXES = ["Other Comentario:", "Other:"] as const;
 
 /** Manager Q1 letter -> retention label; some carry the employee's name. */
 const retention = (letter: string, name: string): string =>
@@ -118,8 +112,8 @@ export const usDate = (iso: string) =>
 
 /**
  * The custom questions of every cycle: Santex's real ones (#123). The two
- * "and how" questions get a yes/no with sometimes a reason; the plain yes/no
- * ones a word.
+ * "and how" questions carry the answer the generator wrote (a yes/no, with
+ * sometimes a reason, from the text bank); the plain yes/no ones a word.
  */
 const CUSTOM = REAL_CUSTOM_QUESTIONS;
 
@@ -169,7 +163,7 @@ export function serializeRawReports(company: CompanyFixture): FixtureFile[] {
     const manager = managerDone ? a.managerAnswers! : null;
     const bestWork = self
       ? self.q2 === "E"
-        ? pick(OTHER_TEXTS, i)
+        ? `${pick(OTHER_PREFIXES, i)} ${self.bestWorkOther ?? ""}`.trim()
         : BEST_WORK[self.q2 as keyof typeof BEST_WORK]
       : "";
     let engagement = manager ? (ENGAGEMENT[manager.q2] ?? manager.q2) : "";
@@ -183,9 +177,11 @@ export function serializeRawReports(company: CompanyFixture): FixtureFile[] {
         const question: string | undefined = CUSTOM[side][n];
         const answered = side === "self" ? self : manager;
         if (!question || !answered) return ["", ""];
-        const pool =
-          side === "self" && n < 2 ? YES_NO_HOW_ANSWERS : YES_NO_ANSWERS;
-        return [question, pick(pool, i + n)];
+        const how = side === "self" && n < 2;
+        const answer = !how
+          ? pick(YES_NO_ANSWERS, i + n)
+          : ((n === 0 ? self?.socialImpact : self?.environmentalImpact) ?? "");
+        return [question, answer];
       });
     reportRows.push([
       outsider ? `9${String(900 + (i % 100)).padStart(4, "0")}` : a.employeeId!,

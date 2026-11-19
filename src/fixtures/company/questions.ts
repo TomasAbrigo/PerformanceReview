@@ -56,7 +56,9 @@ export const MANAGER_QUESTIONS = {
 /**
  * Santex's real custom questions (issue #123), the same in every cycle: the
  * employee answers three (two "yes/no and how", one yes/no), the manager one
- * (yes/no). Their answers are mostly "Sí".
+ * (yes/no). Their answers are mostly "Sí". The open texts of the "how" (and
+ * of strengths, improvement and the "Other" of best work) come from the text
+ * bank (`text-bank.ts`, issue #127).
  */
 export const REAL_CUSTOM_QUESTIONS = {
   self: [
@@ -68,18 +70,6 @@ export const REAL_CUSTOM_QUESTIONS = {
     "Do I speak with this employee frequently enough that I consider myself to be aware of his/her needs and current situation?",
   ],
 } as const;
-
-/** How people answer the "yes/no and how" custom questions. */
-export const YES_NO_HOW_ANSWERS = [
-  "Sí",
-  "Si",
-  "Sí, participé en la campaña de donaciones de fin de año.",
-  "Sí, con el voluntariado de la escuela del barrio.",
-  "Si, separando residuos y reduciendo impresiones.",
-  "No",
-  "No por ahora.",
-  "Sí",
-] as const;
 
 /** How people answer the plain yes/no custom questions. */
 export const YES_NO_ANSWERS = ["Sí", "Si", "Sí", "Yes", "Sí", "No"] as const;
@@ -94,45 +84,6 @@ export const CUSTOM_QUESTIONS = [
     employeeText: "Tengo las herramientas para hacer bien mi trabajo.",
     managerText: "[Employee] entrega resultados con la calidad esperada.",
   },
-] as const;
-
-export const SELF_STRENGTHS = [
-  "Soy constante y cumplo con lo que me comprometo.",
-  "Trabajo bien en equipo y ayudo a quien lo necesita.",
-  "Aprendo rápido herramientas nuevas.",
-  "Comunico con claridad los avances y los bloqueos.",
-  "Me hago cargo de los problemas hasta resolverlos.",
-  'Mi mejor trabajo fue el proyecto "Norte": entregamos a tiempo, sin retrabajo.',
-  "Documento lo que hago, para que otros puedan continuar.",
-  "Tengo buena relación con otras áreas, y eso agiliza los pedidos.",
-] as const;
-
-export const SELF_IMPROVEMENTS = [
-  "Quiero delegar más y no cargar con todo.",
-  "Necesito mejorar la planificación de mis tiempos.",
-  "Me gustaría animarme a liderar reuniones.",
-  "Puedo ser más proactivo pidiendo feedback.",
-  "Tengo que priorizar mejor cuando llegan varios pedidos a la vez.",
-  "Quiero profundizar en el área técnica,\ny a la vez entender mejor el negocio.",
-] as const;
-
-export const MANAGER_STRENGTHS = [
-  "Es confiable: cuando dice que algo está, está.",
-  "Tiene muy buena actitud con el equipo y con clientes internos.",
-  "Resuelve con autonomía y pide ayuda cuando corresponde.",
-  "Aporta ideas concretas en las retros.",
-  "Tiene mucha calidad en lo que entrega.",
-  "Es referente para los que recién ingresan.",
-  'Su análisis del caso "Sur" cambió la decisión del comité.',
-] as const;
-
-export const MANAGER_IMPROVEMENTS = [
-  "Puede anticipar más los riesgos y avisar antes.",
-  "Le sugiero comunicar más hacia arriba lo que logra.",
-  "Debería tomar más ownership de proyectos transversales.",
-  "Tiene que cuidar los tiempos de respuesta en reuniones con otras áreas.",
-  "Puede ganar visibilidad compartiendo sus aprendizajes con el resto del equipo.",
-  "Sería bueno trabajar la delegación, y a la vez el seguimiento.",
 ] as const;
 
 export const FOLLOW_UP_NOTES = [

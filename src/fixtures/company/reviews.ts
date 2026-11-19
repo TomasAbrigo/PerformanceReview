@@ -4,13 +4,7 @@ import { addDays, dateBetween } from "./dates";
 import { fullName, misspell } from "./identity";
 import { groupJobRows, rowOnDate } from "./job-history";
 import { requirePool } from "./pool";
-import {
-  FOLLOW_UP_NOTES,
-  MANAGER_IMPROVEMENTS,
-  MANAGER_STRENGTHS,
-  SELF_IMPROVEMENTS,
-  SELF_STRENGTHS,
-} from "./questions";
+import { FOLLOW_UP_NOTES } from "./questions";
 import type { Rng } from "./rng";
 import type {
   AssessmentAnswers,
@@ -76,6 +70,17 @@ export interface Reviews {
 const clamp = (value: number, min: number, max: number): number =>
   Math.min(max, Math.max(min, value));
 
+/**
+ * The open texts (Q3, Q4 and the custom ones) come from the text bank, drawn
+ * afterwards with a stream of their own (`texts.ts`). The two draws kept here
+ * leave the main stream exactly where it was before the bank, so people,
+ * dates, statuses, names and goals did not move when the texts changed.
+ */
+function textSlot(rng: Rng): string {
+  rng.next();
+  return "";
+}
+
 /** Letter A (best) .. last letter (worst) from a 1-5 score. */
 function letterFor(score: number, letters: string): string {
   const step = 4 / letters.length;
@@ -126,8 +131,8 @@ export function buildReviews(
               ["E", 10],
             ] as const)
           : letterFor(clamp(score + noise(), 1, 5), "ABCDE"),
-      q3: rng.pick(kind === "self" ? SELF_STRENGTHS : MANAGER_STRENGTHS),
-      q4: rng.pick(kind === "self" ? SELF_IMPROVEMENTS : MANAGER_IMPROVEMENTS),
+      q3: textSlot(rng),
+      q4: textSlot(rng),
       custom1: rate(kind === "self" ? 0.3 : 0),
       custom2: rate(kind === "self" ? 0.3 : 0),
     };
