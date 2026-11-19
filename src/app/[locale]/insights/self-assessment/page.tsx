@@ -64,9 +64,13 @@ async function SelfAssessment({
     parsed?.kind === "completion" || parsed?.kind === "comments"
       ? parsed
       : null;
-  const dimensionLabel = await dimensionLabels(
-    report.sentimentGap.map((g) => g.dimension),
-  );
+  const dimensionLabel = await dimensionLabels([
+    ...new Set([
+      ...report.substance.map((r) => r.dimension),
+      "strengths",
+      "improvement",
+    ]),
+  ]);
   return (
     <div className="flex flex-col gap-8">
       <PageHeader

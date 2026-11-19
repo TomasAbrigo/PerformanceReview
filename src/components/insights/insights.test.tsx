@@ -94,7 +94,6 @@ describe("SelfAssessmentView", () => {
         people: 6,
       },
     ],
-    sentiment: [{ dimension: "strengths", ...counts }],
     valued: {
       counts: [1, 2, 3, 4],
       people: 10,
@@ -108,7 +107,20 @@ describe("SelfAssessmentView", () => {
       blindPeople: 2,
       improvementBoth: 4,
     },
-    themes: [{ theme: "calidad", count: 2, sentiment: counts, quotes: [] }],
+    themes: [
+      {
+        dimension: "strengths",
+        people: { self: 4, manager: 3 },
+        rows: [
+          {
+            theme: "calidad",
+            self: 2,
+            manager: 1,
+            quotes: { self: [], manager: [] },
+          },
+        ],
+      },
+    ],
     gap: [
       {
         questionRevisionId: "q",
@@ -117,20 +129,6 @@ describe("SelfAssessmentView", () => {
         meanSelf: 0.625,
         meanManager: 0.25,
         meanGap: -0.375,
-      },
-    ],
-    sentimentGap: [
-      {
-        dimension: "strengths",
-        self: counts,
-        manager: {
-          positive: 1,
-          constructive: 1,
-          neutral: 0,
-          mixed: 0,
-          negative: 0,
-          total: 2,
-        },
       },
     ],
   };
@@ -166,7 +164,7 @@ describe("SelfAssessmentView", () => {
       // The bar's label (and its row in the table twin of the chart).
       expect(
         screen.getAllByText(
-          locale === "es" ? "Fortalezas · autoevaluación" : "Strengths · self",
+          locale === "es" ? /^Fortalezas · / : /^Strengths · /,
         ).length,
       ).toBeGreaterThan(0);
     },
@@ -180,11 +178,9 @@ describe("SelfAssessmentView", () => {
           ...report,
           minGroupSize: 5,
           completion,
-          sentiment: [],
           substance: [],
           themes: [],
           gap: [],
-          sentimentGap: [],
         }}
         dimensionLabel={dims("es")}
       />,

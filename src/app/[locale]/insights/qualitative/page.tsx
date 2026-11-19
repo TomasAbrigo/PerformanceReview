@@ -217,6 +217,21 @@ async function Qualitative({
     dimensions,
     options.dimensionPrompts,
   );
+  // People's CSV of a panel, by the page's grouping and filters.
+  const groupCsv = (file: string) =>
+    hr ? (
+      <ExportCsvLink
+        file={file}
+        label={t("byGroup.export")}
+        params={{
+          cycle: cycleId,
+          groupBy,
+          department: p.department,
+          relationship: p.side,
+          ...orgFiltersOf(p),
+        }}
+      />
+    ) : null;
   const share = (n: number, of: number) =>
     of ? `${Math.round((n / of) * 100)} %` : "–";
   return (
@@ -235,6 +250,9 @@ async function Qualitative({
                 file="insights-sentiment"
                 params={{
                   cycle: cycleId,
+                  dimension: p.dimension,
+                  sentiment: p.sentiment,
+                  theme: p.theme,
                   department: p.department,
                   relationship: p.side,
                   ...orgFiltersOf(p),
@@ -310,7 +328,9 @@ async function Qualitative({
             rows={managerFeedback ?? []}
             drills={drills}
             drillScopeOf={groupScope}
-          />
+          >
+            {groupCsv("insights-sentiment-by")}
+          </ManagerFeedbackPanel>
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
             {strengths ? (
               <ThemesSidePanel
@@ -347,8 +367,11 @@ async function Qualitative({
             drills={drills}
             groupScope={groupScope}
             minGroupSize={minGroupSize}
-          />
+          >
+            {groupCsv("insights-sentiment-by")}
+          </SignalsPanel>
           <YesNoPanel
+            actions={groupCsv("insights-yes-no")}
             rows={yesNo ?? []}
             trend={yesNoCycles ?? []}
             byGroup={yesNoGroups ?? []}
@@ -370,7 +393,11 @@ async function Qualitative({
             }
           />
           {valued ? (
-            <ClosedQuestionsPanel valued={valued} bestWork={bestWork ?? null} />
+            <ClosedQuestionsPanel
+              valued={valued}
+              bestWork={bestWork ?? null}
+              actions={groupCsv("insights-closed-questions")}
+            />
           ) : null}
           <TonePanel
             rows={tone ?? []}

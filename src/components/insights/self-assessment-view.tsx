@@ -3,25 +3,17 @@ import { useLocale, useTranslations } from "next-intl";
 import { ChartFrame, useChartFormat } from "@/components/charts";
 import type { DrillBase } from "@/components/drill/drill-link";
 import { MetricCard, ScaleBar } from "@/components/experience";
-import { SentimentBars } from "@/components/qualitative/sentiment-bars";
 import {
   AgreementPanel,
   ClosedQuestionsPanel,
   SubstancePanel,
+  ThemesSidePanel,
 } from "@/components/qualitative/reading";
-import {
-  type CommentDrills,
-  commentDrill,
-  Themes,
-} from "@/components/qualitative/views";
+import type { CommentDrills } from "@/components/qualitative/views";
 import type { CompletionGroup } from "@/modules/analytics/completion";
-import { sentiments } from "@/modules/qualitative-analysis/constants";
 import type { SelfAssessmentReport } from "@/modules/insights/self-assessment";
 import { type KpiThresholds, percentTone } from "@/modules/insights/tone";
 import { pct, type Side, sideOf } from "./completion-table";
-
-const isSentiment = (v: string) =>
-  (sentiments as readonly string[]).includes(v);
 
 /**
  * The self-assessment report: the KPIs (completion of each side and the
@@ -58,7 +50,6 @@ export function SelfAssessmentView({
     base && cycleId ? { base, scope: { cycle: cycleId, side } } : undefined;
   const selfDrills = drills("self");
   const total = report.completion.total;
-  const selfComments = report.sentiment.reduce((n, r) => n + r.total, 0);
   const valued = report.valued;
   const notValued = valued?.people ? valued.notValued / valued.people : 0;
   const completionCard = (side: Side) => {
@@ -104,22 +95,6 @@ export function SelfAssessmentView({
       />
     );
   };
-  const gapRows = report.sentimentGap.flatMap((g) =>
-    (["self", "manager"] as const).flatMap((side) => {
-      const c = g[side];
-      return c
-        ? [
-            {
-              ...c,
-              key: `${g.dimension}:${side}`,
-              label: t(side === "self" ? "rowSelf" : "rowManager", {
-                dimension: dim(g.dimension),
-              }),
-            },
-          ]
-        : [];
-    }),
-  );
   return (
     <div className="flex flex-col gap-8">
       <p className="text-sm text-muted-foreground">
@@ -175,7 +150,17 @@ export function SelfAssessmentView({
         dimensionLabel={dimensionLabel}
         drills={drills("manager")}
       />
-      <Themes themes={report.themes} total={selfComments} drills={selfDrills} />
+      {report.themes.map((q) => (
+        <ThemesSidePanel
+          key={q.dimension}
+          id={`self-themes-${q.dimension}`}
+          title={tq("themesOf", { question: dim(q.dimension) })}
+          data={q}
+          drills={
+            base && cycleId ? { base, scope: { cycle: cycleId } } : undefined
+          }
+        />
+      ))}
       {report.gap.length > 0 ? (
         <ChartFrame
           id="self-gap"
@@ -229,35 +214,6 @@ export function SelfAssessmentView({
               </li>
             ))}
           </ul>
-        </ChartFrame>
-      ) : null}
-      {gapRows.length > 0 ? (
-        <ChartFrame
-          id="self-vs-manager-sentiment"
-          title={t("sentimentGapTitle")}
-          howToRead={t("sentimentGapHint")}
-          kind="comments"
-          tone={report.gap.length === 0 ? "highlight" : "default"}
-        >
-          <SentimentBars
-            label={t("sentimentGapChart")}
-            rows={gapRows}
-            drillOf={
-              base && cycleId
-                ? (key, sentiment) => {
-                    const at = key.lastIndexOf(":");
-                    const side = key.slice(at + 1) as "self" | "manager";
-                    const d = drills(side);
-                    return d && isSentiment(sentiment)
-                      ? commentDrill(d, {
-                          dimension: key.slice(0, at),
-                          sentiment: sentiment as "positive",
-                        })
-                      : undefined;
-                  }
-                : undefined
-            }
-          />
         </ChartFrame>
       ) : null}
     </div>

@@ -716,7 +716,10 @@ export function YesNoPanel({
   themes,
   dimensionLabel,
   drillOf,
+  actions,
 }: {
+  /** Header actions (People's CSV). */
+  actions?: ReactNode;
   rows: YesNoRow[];
   trend: YesNoTrendRow[];
   byGroup: YesNoGroupRow[];
@@ -748,6 +751,7 @@ export function YesNoPanel({
   return (
     <Panel
       id="yes-no"
+      actions={actions}
       kind="distribution"
       title={t("yesNoTitle")}
       hint={t("yesNoHint")}
@@ -940,7 +944,10 @@ const valuedValues = (d: ValuedDistribution) =>
 export function ClosedQuestionsPanel({
   valued,
   bestWork,
+  actions,
 }: {
+  /** Header actions (People's CSV). */
+  actions?: ReactNode;
   valued: {
     total: ValuedDistribution | null;
     byGroup: ValuedGroupRow[];
@@ -959,6 +966,7 @@ export function ClosedQuestionsPanel({
   return (
     <Panel
       id="closed"
+      actions={actions}
       kind="distribution"
       title={t("closedTitle")}
       hint={t("closedHint")}

@@ -88,7 +88,6 @@ import { requestStatuses } from "@/modules/review-core/request-status";
 import { ReviewError } from "@/modules/review-core/review-errors";
 import { relationships } from "@/modules/templates/constants";
 import { csvResponse, type CsvColumn } from "./csv";
-import { readingHeaderIn } from "./reading-headers";
 import {
   closedExportRows,
   type ClosedExportRow,
@@ -825,7 +824,7 @@ const insightsSentimentExport = defineExport({
   rows: (db, q) =>
     each(readingByQuestion(db, DEFAULT_ACTOR, readingFiltersOf(q))),
   columns: (h, _q, locale) => {
-    const r = readingHeaderIn(locale);
+    const r = headerIn(locale);
     return [
       { header: h("dimension"), value: (x: QuestionSideRow) => x.dimension },
       { header: r("side"), value: (x) => x.side },
@@ -873,7 +872,7 @@ const insightsSentimentGroupsExport = defineExport({
   rows: (db, q) =>
     each(readingByGroup(db, DEFAULT_ACTOR, readingFiltersOf(q), q.groupBy)),
   columns: (h, _q, locale) => {
-    const r = readingHeaderIn(locale);
+    const r = headerIn(locale);
     const feedback = [
       ["none", "manager_feedback_none", "manager_feedback_none_pct"],
       ["generic", "manager_feedback_generic", "manager_feedback_generic_pct"],
@@ -929,7 +928,7 @@ const insightsYesNoExport = defineExport({
       ),
     ),
   columns: (h, q, locale) => {
-    const r = readingHeaderIn(locale);
+    const r = headerIn(locale);
     return [
       ...(q.groupBy === "none"
         ? []
@@ -971,7 +970,7 @@ const insightsClosedExport = defineExport({
       ),
     ),
   columns: (h, _q, locale) => {
-    const r = readingHeaderIn(locale);
+    const r = headerIn(locale);
     return [
       { header: h("section"), value: (x: ClosedExportRow) => x.section },
       { header: h("group"), value: (x) => x.group },
@@ -1127,12 +1126,17 @@ const selfAssessmentExport = defineExport({
           ? completionRows(t("completion.all"), r.completion.total)
           : []),
         ...readingRows(r),
-        ...r.themes.map((th) => ({
-          section: "theme" as const,
-          group: th.theme,
-          metric: "count",
-          value: th.count,
-        })),
+        // People who cite each theme, per question and side (#129).
+        ...r.themes.flatMap((q) =>
+          q.rows.flatMap((th) =>
+            (["self", "manager"] as const).map((side) => ({
+              section: "theme" as const,
+              group: `${q.dimension}:${th.theme}`,
+              metric: side,
+              value: th[side],
+            })),
+          ),
+        ),
         ...r.gap.flatMap((g) =>
           (
             [
