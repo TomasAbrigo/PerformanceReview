@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { isYesNo } from "./analysis-text";
+import { isYesNo, parseYesNo } from "./analysis-text";
+import { YES_NO_CASES } from "./yes-no-cases";
 
 describe("isYesNo", () => {
   it("a bare yes or no, in Spanish or English, is not a comment", () => {
@@ -17,5 +18,16 @@ describe("isYesNo", () => {
     ]) {
       expect(isYesNo(t)).toBe(false);
     }
+  });
+});
+
+describe("parseYesNo", () => {
+  it.each(YES_NO_CASES)("%j", (text, expected) => {
+    expect(parseYesNo(text)).toEqual(expected);
+  });
+
+  it("null and undefined read as nothing", () => {
+    expect(parseYesNo(null)).toEqual({ answer: null, detail: null });
+    expect(parseYesNo(undefined)).toEqual({ answer: null, detail: null });
   });
 });

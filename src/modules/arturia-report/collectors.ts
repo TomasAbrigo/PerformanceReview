@@ -39,7 +39,6 @@ import {
   topThemes,
 } from "@/modules/qualitative-analysis/queries";
 import { pseudonymSources } from "@/modules/qualitative-analysis/service";
-import { getSetting } from "@/modules/settings/service";
 import { sumBy, teamLabels } from "./anonymize";
 import type { Labels } from "./labels";
 import type {
@@ -535,16 +534,10 @@ type Side = "self" | "manager";
 
 /**
  * Distinct participants per dimension, theme and cycle (the group sizes),
- * counting only the comments of `side` when given, and closed-question
- * answers only when they are in the analysis (`analysis.includeClosed`), as
- * the queries that produce the counts do.
+ * counting only the comments of `side` when given, as the queries that
+ * produce the counts do (free text only, #128).
  */
-async function qualitativeSizes(
-  db: DbOrTx,
-  cycleId: string,
-  includeClosed: boolean,
-  side?: Side,
-) {
+async function qualitativeSizes(db: DbOrTx, cycleId: string, side?: Side) {
   const rows = await db.execute<{ kind: string; key: string; n: number }>(sql`
     with ${effectiveCte()},
     l as (
@@ -554,7 +547,6 @@ async function qualitativeSizes(
       join review_request r on r.id = a.request_id
       join cycle_participant cp on cp.id = r.participant_id
       where r.deleted_at is null and r.status = 'submitted' and cp.removed_at is null
-        ${includeClosed ? sql`` : sql`and eff.kind = 'text'`}
         ${side ? sql`and r.relationship = ${side}` : sql``}
     )
     select 'dimension' as kind, dimension as key, count(distinct participant_id)::int as n
@@ -600,15 +592,14 @@ const sumCounts = (rows: Counts[]): Counts => ({
 async function qualitativeSlice(
   db: DbOrTx,
   ctx: CollectContext,
-  includeClosed: boolean,
   side: Side | undefined,
   sources: Awaited<ReturnType<typeof pseudonymSources>>,
 ): Promise<QualitativeSideSection | null> {
-  const f = { cycleId: ctx.cycleId, relationship: side, includeClosed };
+  const f = { cycleId: ctx.cycleId, relationship: side };
   const [dims, themes, sizes] = await Promise.all([
     sentimentByDimension(db, DEFAULT_ACTOR, f),
     topThemes(db, DEFAULT_ACTOR, f),
-    qualitativeSizes(db, ctx.cycleId, includeClosed, side),
+    qualitativeSizes(db, ctx.cycleId, side),
   ]);
   if (!dims.length) return null;
   const others = ctx.labels.others;
@@ -681,14 +672,13 @@ async function qualitativeSlice(
  * of people; the people of the ones left out count in `suppressed`.
  */
 export const collectQualitative: Collector<"qualitative"> = async (db, ctx) => {
-  const includeClosed = await getSetting(db, "analysis.includeClosed");
   const sources = await pseudonymSources(db);
   const [all, self, manager, trend, sizes] = await Promise.all([
-    qualitativeSlice(db, ctx, includeClosed, undefined, sources),
-    qualitativeSlice(db, ctx, includeClosed, "self", sources),
-    qualitativeSlice(db, ctx, includeClosed, "manager", sources),
-    sentimentTrend(db, DEFAULT_ACTOR, { includeClosed }),
-    qualitativeSizes(db, ctx.cycleId, includeClosed),
+    qualitativeSlice(db, ctx, undefined, sources),
+    qualitativeSlice(db, ctx, "self", sources),
+    qualitativeSlice(db, ctx, "manager", sources),
+    sentimentTrend(db, DEFAULT_ACTOR, {}),
+    qualitativeSizes(db, ctx.cycleId),
   ]);
   if (!all && !trend.length) return null;
   const cycleSize = (id: string) => sizes.cycle.get(id) ?? 0;

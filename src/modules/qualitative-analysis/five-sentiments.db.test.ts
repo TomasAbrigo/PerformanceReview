@@ -2,7 +2,6 @@ import { sql } from "drizzle-orm";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { closeDb, db } from "@/db/client";
 import type { ActorContext } from "@/modules/actor/types";
-import { setSetting } from "@/modules/settings/service";
 import { table } from "@/modules/exports/csv-test-support";
 import { correctLabel } from "./correction";
 import { importLabels } from "./import-labels";
@@ -123,13 +122,14 @@ describe("five sentiments", () => {
 
   it("totals (the KPIs) add every sentiment", async () => {
     const totals = await sentimentTotals(db, hr, { cycleId: cycle });
+    // The four free texts; the chosen options are never read (#128).
     expect(totals).toEqual({
-      positive: 2,
-      constructive: 1,
+      positive: 1,
+      constructive: 0,
       neutral: 2,
       mixed: 1,
-      negative: 1,
-      total: 7,
+      negative: 0,
+      total: 4,
     });
   });
 });
@@ -137,8 +137,8 @@ describe("five sentiments", () => {
 describe("authorization is unchanged", () => {
   it("manager: their reports; direction: aggregates over the minimum; employee: nothing", async () => {
     const mgr: ActorContext = { personId: boss, role: "manager" };
-    expect((await sentimentTotals(db, mgr, { cycleId: cycle }))?.total).toBe(7);
-    expect(await listComments(db, mgr, { cycleId: cycle })).toHaveLength(7);
+    expect((await sentimentTotals(db, mgr, { cycleId: cycle }))?.total).toBe(4);
+    expect(await listComments(db, mgr, { cycleId: cycle })).toHaveLength(4);
     const other: ActorContext = { personId: ana, role: "manager" };
     expect((await sentimentTotals(db, other, { cycleId: cycle }))?.total).toBe(
       0,
@@ -155,28 +155,25 @@ describe("authorization is unchanged", () => {
 });
 
 describe("closed questions", () => {
-  it("labels the answers of closed questions with a dimension, by the label of the chosen option", async () => {
-    const comments = await listComments(db, hr, {
-      cycleId: cycle,
-      dimension: "valued",
-    });
+  it("a chosen option is never read: no sentiment, no themes (#128)", async () => {
     expect(
-      Object.fromEntries(comments.map((c) => [c.text, c.sentiment])),
-    ).toEqual({
-      Regular: "neutral",
-      "Muy bien": "positive",
-      "Para nada": "negative",
-    });
-    // A closed question without dimension (retention) is not analyzed.
+      await listComments(db, hr, { cycleId: cycle, dimension: "valued" }),
+    ).toEqual([]);
     const all = await listComments(db, hr, { cycleId: cycle });
-    expect(all).toHaveLength(7);
-    expect(all.map((c) => c.dimension)).not.toContain("other");
+    expect(all).toHaveLength(4);
+    const [{ n }] = await db.execute<{ n: number }>(sql`
+      select count(*)::int as n from qualitative_analysis
+      where answer_id in (${sql.join(
+        valuedAnswers.map((id) => sql`${id}::uuid`),
+        sql`, `,
+      )})`);
+    expect(n).toBe(0);
   });
 
   it("an unknown dimension key shows up as is, with its question prompt for the label", async () => {
     const options = await qualitativeFilterOptions(db);
     expect(options.dimensions).toEqual(
-      expect.arrayContaining(["strengths", "valued", "onboarding_q"]),
+      expect.arrayContaining(["strengths", "onboarding_q"]),
     );
     expect(options.dimensionPrompts.onboarding_q).toEqual({
       es: "¿Qué opinás del onboarding?",
@@ -184,36 +181,20 @@ describe("closed questions", () => {
     });
   });
 
-  it("a changed option makes the label stale (until the next run)", async () => {
-    const before = (await listComments(db, hr, { dimension: "valued" })).length;
-    await db.execute(
-      sql`update answer set option_label = 'none' where id = ${valuedAnswers[0]}::uuid`,
-    );
-    expect(await listComments(db, hr, { dimension: "valued" })).toHaveLength(
-      before - 1,
-    );
+  it("a changed text makes the label stale (until the next run)", async () => {
+    const before = (await listComments(db, hr, { dimension: "onboarding_q" }))
+      .length;
+    await db.execute(sql`
+      update answer set text_value = 'Fue lento, el proyecto cambió de alcance.'
+      where question_revision_id = ${weirdQ}::uuid`);
+    expect(
+      await listComments(db, hr, { dimension: "onboarding_q" }),
+    ).toHaveLength(before - 1);
     const rerun = await runAnalysis(db, { provider: new MockProvider() });
     expect(rerun.analyzed).toBe(1);
-    expect(await listComments(db, hr, { dimension: "valued" })).toHaveLength(
-      before,
-    );
-  });
-
-  it("includeClosed=false leaves them out of the analysis and of the views", async () => {
-    await setSetting(db, hr, "analysis.includeClosed", false);
-    try {
-      const comments = await listComments(db, hr, { cycleId: cycle });
-      expect(comments.map((c) => c.dimension)).not.toContain("valued");
-      expect(comments).toHaveLength(4);
-      expect((await sentimentTotals(db, hr, { cycleId: cycle }))?.total).toBe(
-        4,
-      );
-      const run = await runAnalysis(db, { provider: new MockProvider() });
-      expect(run.total).toBe(4);
-    } finally {
-      await setSetting(db, hr, "analysis.includeClosed", true);
-    }
-    expect((await sentimentTotals(db, hr, { cycleId: cycle }))?.total).toBe(7);
+    expect(
+      await listComments(db, hr, { dimension: "onboarding_q" }),
+    ).toHaveLength(before);
   });
 });
 
@@ -221,10 +202,10 @@ describe("self vs manager", () => {
   it("every block honors the relationship filter", async () => {
     const self = { cycleId: cycle, relationship: "self" as const };
     const manager = { cycleId: cycle, relationship: "manager" as const };
-    expect((await sentimentTotals(db, hr, self))?.total).toBe(3);
-    expect((await sentimentTotals(db, hr, manager))?.total).toBe(4);
+    expect((await sentimentTotals(db, hr, self))?.total).toBe(2);
+    expect((await sentimentTotals(db, hr, manager))?.total).toBe(2);
     const selfDims = await sentimentByDimension(db, hr, self);
-    expect(selfDims.reduce((n, r) => n + r.total, 0)).toBe(3);
+    expect(selfDims.reduce((n, r) => n + r.total, 0)).toBe(2);
     expect(bySentiment(selfDims, "strengths")).toMatchObject({
       mixed: 1,
       total: 1,
@@ -253,7 +234,7 @@ describe("self vs manager", () => {
       "negativo",
       "total",
     ]);
-    expect(rows.reduce((n, r) => n + Number(r.total), 0)).toBe(3);
+    expect(rows.reduce((n, r) => n + Number(r.total), 0)).toBe(2);
   });
 });
 
@@ -279,7 +260,7 @@ describe("themes", () => {
       ]),
     );
     const [{ n }] = await db.execute<{ n: number }>(
-      sql`select count(*)::int as n from theme where dimension = 'valued' and normalized_name = 'bienestar'`,
+      sql`select count(*)::int as n from theme where dimension = 'strengths' and normalized_name = 'bienestar'`,
     );
     expect(n).toBe(1);
   });
@@ -299,15 +280,13 @@ describe("corrections and label import with five sentiments", () => {
     }
   });
 
-  it("a closed answer can be corrected too", async () => {
-    await correctLabel(db, hr, valuedAnswers[2], {
-      sentiment: "mixed",
-      themes: [],
-    });
-    const rows = await listComments(db, hr, { dimension: "valued" });
-    expect(rows.find((r) => r.answerId === valuedAnswers[2])?.sentiment).toBe(
-      "mixed",
-    );
+  it("a chosen option has no label to correct", async () => {
+    await expect(
+      correctLabel(db, hr, valuedAnswers[2], {
+        sentiment: "mixed",
+        themes: [],
+      }),
+    ).rejects.toThrow(/not_labeled/);
   });
 
   it("the label CSV accepts the five values in Spanish and English", async () => {

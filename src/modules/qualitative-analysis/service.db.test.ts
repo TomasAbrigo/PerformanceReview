@@ -2,7 +2,9 @@ import { sql } from "drizzle-orm";
 import { afterAll, beforeEach, describe, expect, it } from "vitest";
 import { closeDb, db } from "@/db/client";
 import type { ActorContext } from "@/modules/actor/types";
+import { yesNoAnswerSql } from "./analysis-text";
 import { correctLabel } from "./correction";
+import { importLabels } from "./import-labels";
 import { effectiveCte } from "./effective";
 import { MockProvider } from "./mock-provider";
 import type { AnalysisInput, AnalysisProvider } from "./provider";
@@ -199,5 +201,153 @@ describe("runAnalysis", () => {
     const [{ m }] = await db.execute<{ m: number }>(sql`
       with ${effectiveCte()} select count(*)::int as m from eff`);
     expect(m).toBe(3);
+  });
+});
+
+describe("open-text reading (#128)", () => {
+  type Eff = {
+    answer_id: string;
+    yes_no_question: boolean;
+    themes: string[];
+    substance: string | null;
+    signals: string[];
+    origin: string;
+    provider: string;
+    model: string | null;
+    demo: boolean;
+    confidence: number | null;
+    sentiment: string;
+  };
+  const effOf = async (answerId: string) => {
+    const [row] = await db.execute<Eff>(sql`
+      with ${effectiveCte()} select * from eff where answer_id = ${answerId}::uuid`);
+    return row;
+  };
+
+  it("sends the question, who writes about whom and the rubric; stores substance and signals", async () => {
+    const spy = new SpyProvider();
+    await runAnalysis(db, { cycleId: cycle, provider: spy });
+    const improve = spy.sent.find((s) => s.dimension === "improvement")!;
+    expect(improve).toMatchObject({
+      rubric: "improvement",
+      relationship: "self",
+      yesNo: null,
+      question: { es: "How could I improve?", en: "How could I improve?" },
+    });
+    expect(spy.sent.filter((s) => s.relationship === "manager")).toHaveLength(
+      1,
+    );
+    const label = await effOf(answers[1]);
+    expect(label.substance).not.toBeNull();
+    expect(Array.isArray(label.signals)).toBe(true);
+    expect(label).toMatchObject({ origin: "machine", provider: "spy" });
+  });
+
+  it("the mock is a demo heuristic: no confidence, flagged in eff", async () => {
+    await runAnalysis(db, { provider: new MockProvider() });
+    expect(await effOf(answers[0])).toMatchObject({
+      provider: "mock",
+      origin: "machine",
+      demo: true,
+      confidence: null,
+      model: null,
+    });
+  });
+
+  it("a chosen option is never read; the text typed next to it is", async () => {
+    await db.execute(
+      sql`update answer set text_value = 'Otro: más feedback del cliente' where id = ${answers[2]}::uuid`,
+    );
+    const spy = new SpyProvider();
+    await runAnalysis(db, { provider: spy });
+    const typed = spy.sent.find((s) => s.text.startsWith("Otro"));
+    expect(typed?.rubric).toBe("open");
+    expect(spy.sent).toHaveLength(4);
+  });
+
+  it("a yes/no question: the yes/no resolved and only the 'how' read; a bare yes/no is not", async () => {
+    const q = await insertQuestion(
+      cycle,
+      'Do I contribute with initiatives related to "Social impact"? How?',
+      { dimension: "custom_social", yesNo: true },
+    );
+    const emp = await insertPerson("Otra Persona");
+    const cp = await insertParticipant(cycle, emp, null);
+    const [how] = await insertAnswer(cycle, cp, emp, "self", [
+      { questionId: q, text: "Sí, con el voluntariado del barrio." },
+    ]);
+    const emp2 = await insertPerson("Tercera Persona");
+    const cp2 = await insertParticipant(cycle, emp2, null);
+    await insertAnswer(cycle, cp2, emp2, "self", [
+      { questionId: q, text: "No" },
+    ]);
+    const spy = new SpyProvider();
+    await runAnalysis(db, { provider: spy });
+    const sent = spy.sent.filter((s) => s.dimension === "custom_social");
+    expect(sent).toEqual([
+      expect.objectContaining({
+        rubric: "yes_no_detail",
+        yesNo: "yes",
+        text: "con el voluntariado del barrio.",
+      }),
+    ]);
+    expect((await effOf(how)).yes_no_question).toBe(true);
+    const counts = await db.execute<{ yes_no: string | null }>(sql`
+      select ${yesNoAnswerSql()} as yes_no from answer a
+      join question_revision q on q.id = a.question_revision_id
+      where q.id = ${q}::uuid order by 1`);
+    expect(counts.map((c) => c.yes_no)).toEqual(["no", "yes"]);
+  });
+
+  it("precedence: a human correction > an imported label > a later machine label", async () => {
+    await runAnalysis(db, { provider: new SpyProvider() });
+    await importLabels(db, {
+      rows: [
+        {
+          employee_name: "Adrián Bustos",
+          review_cycle: "Evaluación 2023",
+          dimension: "improvement",
+          sentiment: "negative",
+          themes: "colaboracion",
+        },
+      ],
+    });
+    // A later run of another provider does not override the import.
+    await runAnalysis(db, { provider: new MockProvider() });
+    expect(await effOf(answers[1])).toMatchObject({
+      origin: "import",
+      provider: "import",
+      sentiment: "negative",
+      substance: null,
+      themes: ["equipo"],
+    });
+    await correctLabel(db, hr, answers[1], {
+      sentiment: "constructive",
+      themes: ["planificacion"],
+      substance: "specific",
+      signals: ["workload"],
+    });
+    expect(await effOf(answers[1])).toMatchObject({
+      origin: "human",
+      provider: "human",
+      sentiment: "constructive",
+      substance: "specific",
+      signals: ["workload"],
+      confidence: null,
+    });
+  });
+
+  it("a correction without substance or signals keeps the label's", async () => {
+    await runAnalysis(db, { provider: new MockProvider() });
+    const before = await effOf(answers[0]);
+    await correctLabel(db, hr, answers[0], {
+      sentiment: "negative",
+      themes: [],
+    });
+    expect(await effOf(answers[0])).toMatchObject({
+      substance: before.substance,
+      signals: before.signals,
+      sentiment: "negative",
+    });
   });
 });

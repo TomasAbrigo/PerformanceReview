@@ -225,8 +225,6 @@
       "title": "Qualitative analysis",
       "provider": "Provider",
       "providerHint": "Anthropic also needs the ANALYSIS_PROVIDER flag and an API key; Mock is the default.",
-      "includeClosed": "Also analyze closed questions",
-      "includeClosedHint": "Also labels the chosen option of closed questions that have a dimension (for example, recognition of value), not only open-text comments.",
       "providers": {
         "mock": "Mock (deterministic, no cost)",
         "anthropic": "Anthropic"

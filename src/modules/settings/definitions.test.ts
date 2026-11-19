@@ -16,7 +16,6 @@ describe("DEFAULT_SETTINGS", () => {
       "semester.h2Start": "09-29",
       "semester.ambiguityDays": 15,
       "analysis.provider": "mock",
-      "analysis.includeClosed": true,
       "engagement.cutoffAlto": 80,
       "engagement.cutoffMedio": 60,
       "engagement.cutoffRegular": 40,
@@ -93,17 +92,6 @@ describe("parseSettingValue", () => {
       true,
     );
     expect(parseSettingValue("analysis.provider", "gpt").success).toBe(false);
-  });
-
-  it("includeClosed is a boolean", () => {
-    expect(parseSettingValue("analysis.includeClosed", false).success).toBe(
-      true,
-    );
-    for (const bad of ["true", 1, null]) {
-      expect(parseSettingValue("analysis.includeClosed", bad).success).toBe(
-        false,
-      );
-    }
   });
 
   it("reports stable issue codes the UI can translate", () => {

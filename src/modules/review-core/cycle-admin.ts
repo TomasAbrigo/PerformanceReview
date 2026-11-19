@@ -245,6 +245,7 @@ async function copyTemplateQuestions(
       choices: q.choices,
       role: q.role,
       dimension: q.dimension,
+      yesNo: q.yesNo,
       scale: q.scaleId
         ? {
             options: options

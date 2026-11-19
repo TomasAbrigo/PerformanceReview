@@ -12,6 +12,7 @@ import {
 import { snapshotGoalsForParticipants } from "@/modules/review-core/goal-snapshot";
 import { snapshots } from "@/modules/review-core/service";
 import { reapplyLikertMappings } from "./likert-reapply";
+import { markYesNoQuestions } from "./yes-no";
 import {
   isSemesterLabel,
   legacySemesterConfig,
@@ -37,7 +38,8 @@ import {
  *
  * Finally the
  * retention/engagement answers are remapped with the option count of their
- * column (reapplyLikertMappings).
+ * column (reapplyLikertMappings), and the custom text questions answered
+ * with a yes/no are marked as yes/no questions (markYesNoQuestions).
  */
 export async function finishHistoryImport(
   db: DbOrTx,
@@ -57,6 +59,8 @@ export async function finishHistoryImport(
   // Rows were mapped one by one assuming 5 options; now that the whole file
   // is in, the option count of each Likert column is known (A-D vs A-E).
   await reapplyLikertMappings(db, { cycleIds });
+  // Same for the custom questions: whether one is yes/no shows in its column.
+  await markYesNoQuestions(db, { cycleIds });
   return { mismatches };
 }
 

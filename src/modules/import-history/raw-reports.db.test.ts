@@ -125,10 +125,19 @@ describe("Bamboo's raw assessments report (#83)", () => {
     );
   });
 
+  it("marks the custom questions answered with a yes/no as yes/no questions", async () => {
+    const custom = await db
+      .select({ yesNo: questionRevision.yesNo })
+      .from(questionRevision)
+      .where(like(questionRevision.dimension, "custom_%"));
+    expect(custom.length).toBeGreaterThan(0);
+    expect(custom.every((c) => c.yesNo)).toBe(true);
+  });
+
   it("a bare yes/no answer to a custom question is not a comment to analyse", async () => {
     const rows = await db.execute<{ total: number; analysable: number }>(sql`
       select count(*)::int as total,
-             count(*) filter (where ${analyzableSql(true)})::int as analysable
+             count(*) filter (where ${analyzableSql()})::int as analysable
       from answer a
       join question_revision q on q.id = a.question_revision_id
       where q.dimension like 'custom_%' and btrim(a.text_value) ~* ${YES_NO}`);
@@ -137,7 +146,7 @@ describe("Bamboo's raw assessments report (#83)", () => {
     const [withHow] = await db.execute<{ n: number }>(sql`
       select count(*)::int as n from answer a
       join question_revision q on q.id = a.question_revision_id
-      where q.dimension like 'custom_%' and ${analyzableSql(true)}`);
+      where q.dimension like 'custom_%' and ${analyzableSql()}`);
     expect(withHow.n).toBeGreaterThan(0);
   });
 

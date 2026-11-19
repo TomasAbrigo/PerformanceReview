@@ -17,7 +17,7 @@ import {
 } from "./service";
 import type { UnmatchedReason, UnmatchedRow } from "./import-labels-types";
 import { textHash } from "./text-hash";
-import { getSetting } from "@/modules/settings/service";
+import { canonicalTheme } from "./themes";
 
 export {
   unmatchedReasons,
@@ -68,18 +68,18 @@ type Candidate = {
 /**
  * Imports labels made elsewhere (spreadsheet, earlier tool) as provider
  * `import`. Each row is matched to an answer about that person in that cycle
- * by normalized text hash, else by dimension when exactly one answer fits
- * (closed-question answers too, by the label of the chosen option). The
+ * by normalized text hash (of the text that is read: for a yes/no question,
+ * the "how"), else by dimension when exactly one answer fits. Only answers
+ * with free text are labels' targets (a chosen option never is). An imported
+ * label has no substance (null) and no signals: a CSV does not carry them. The
  * sentiment may be spelled in Spanish or English (Positivo, Mixto...).
  * Rows that do not match are returned (and counted in the run), never guessed.
  */
 export async function importLabels(
   db: DbOrTx,
   input: { csvPath: string } | { csv: string } | { rows: LabelImportRow[] },
-  opts: { actorPersonId?: string | null; includeClosed?: boolean } = {},
+  opts: { actorPersonId?: string | null } = {},
 ): Promise<ImportLabelsResult> {
-  const includeClosed =
-    opts.includeClosed ?? (await getSetting(db, "analysis.includeClosed"));
   const rows =
     "rows" in input
       ? input.rows
@@ -108,7 +108,7 @@ export async function importLabels(
     join person p on p.id = cp.reviewee_person_id
     join review_cycle c on c.id = r.cycle_id
     join question_revision q on q.id = a.question_revision_id
-    where ${analyzableSql(includeClosed)}`);
+    where ${analyzableSql()}`);
   const enriched = candidates.map((c) => ({
     ...c,
     hash: textHash(c.text),
@@ -180,13 +180,18 @@ export async function importLabels(
         promptVersion: IMPORT_PROMPT_VERSION,
         dimension: hit.dimension,
         sentiment,
+        substance: null,
+        signals: [],
         confidence:
           confidence !== null && Number.isFinite(confidence)
             ? Math.min(1, Math.max(0, confidence))
             : null,
         themes: [
           ...new Set(
-            (row.themes ?? "").split(";").map(normalizeTheme).filter(Boolean),
+            (row.themes ?? "")
+              .split(";")
+              .map((t) => canonicalTheme(normalizeTheme(t)))
+              .filter(Boolean),
           ),
         ],
         textHash: hit.hash,

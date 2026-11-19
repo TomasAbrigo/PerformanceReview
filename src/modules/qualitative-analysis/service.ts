@@ -7,19 +7,28 @@ import {
   theme,
 } from "@/db/schema/qualitative";
 import { isUuid } from "@/lib/uuid";
-import { getSetting } from "@/modules/settings/service";
 import { DomainError } from "@/lib/domain-error";
-import { analysisTextSql, analyzableSql } from "./analysis-text";
+import {
+  analysisTextSql,
+  analyzableSql,
+  yesNoAnswerSql,
+} from "./analysis-text";
+import type { YesNo } from "./constants";
 import { dimensionOf, fold } from "./dimension";
 import { AnalysisError } from "./errors";
-import type { AnalysisInput, AnalysisProvider } from "./provider";
+import type {
+  AnalysisInput,
+  AnalysisProvider,
+  Rubric,
+  Writer,
+} from "./provider";
 import {
   depseudonymize,
   pseudonymize,
   type PseudonymMap,
   type PseudonymSources,
 } from "./pseudonymize";
-import { initialThemeRows } from "./themes";
+import { canonicalTheme, initialThemeRows } from "./themes";
 import { textHash } from "./text-hash";
 
 const DEFAULT_BATCH = 50;
@@ -30,8 +39,11 @@ type TextAnswer = {
   text: string;
   prompt: LocalizedText;
   dimension: string | null;
-  /** Question kind: text, rating or single_choice (closed). */
-  kind: string;
+  /** The question is a yes/no one (question_revision.yes_no). */
+  yes_no_question: boolean;
+  /** Its yes/no answer, when it is a yes/no question. */
+  yes_no: YesNo | null;
+  relationship: Writer;
   cached_hash: string | null;
   /** The cached label was made from exactly this text. */
   fresh: boolean;
@@ -39,20 +51,20 @@ type TextAnswer = {
 };
 
 /**
- * Submitted analyzable answers (optionally of one cycle): the non-empty
- * open-text ones, plus the closed ones of a question with a dimension when
- * `includeClosed` (their text is the chosen option's label).
+ * Submitted answers with free text to read (optionally of one cycle): see
+ * analysisTextSql (a chosen option is never read; of a yes/no question only
+ * the "how").
  */
 async function textAnswers(
   db: DbOrTx,
   cycleId: string | undefined,
   provider: string,
   promptVersion: string,
-  includeClosed: boolean,
 ): Promise<TextAnswer[]> {
   return db.execute<TextAnswer>(sql`
     select a.id as answer_id, ${analysisTextSql()} as text, q.prompt, q.dimension,
-           q.kind::text as kind, qa.text_hash as cached_hash,
+           q.yes_no as yes_no_question, ${yesNoAnswerSql()} as yes_no,
+           r.relationship::text as relationship, qa.text_hash as cached_hash,
            coalesce(qa.source_md5 = md5(${analysisTextSql()}), false) as fresh,
            exists (select 1 from analysis_correction c where c.answer_id = a.id) as corrected
     from answer a
@@ -61,7 +73,7 @@ async function textAnswers(
     join question_revision q on q.id = a.question_revision_id
     left join qualitative_analysis qa on qa.answer_id = a.id
       and qa.provider = ${provider} and qa.prompt_version = ${promptVersion}
-    where ${analyzableSql(includeClosed)}
+    where ${analyzableSql()}
       and r.deleted_at is null and r.status = 'submitted'
       ${cycleId ? sql`and r.cycle_id = ${cycleId}::uuid` : sql``}
     order by a.id`);
@@ -89,6 +101,14 @@ export const normalizeTheme = (name: string) =>
     .replace(/\s+/g, " ")
     .trim();
 
+/** The rubric a text is read with, from its question (provider.ts). */
+export function rubricOf(q: { dimension: string; yesNo: boolean }): Rubric {
+  if (q.yesNo) return "yes_no_detail";
+  if (q.dimension === "strengths") return "strengths";
+  if (q.dimension === "improvement") return "improvement";
+  return "open";
+}
+
 export type RunAnalysisResult = {
   runId: string;
   total: number;
@@ -98,7 +118,9 @@ export type RunAnalysisResult = {
 };
 
 /**
- * Labels the open-text answers with `provider`. Skips answers already labeled
+ * Reads the free-text answers with `provider` (#128: substance, themes,
+ * signals, sentiment, confidence), with the question, who writes about whom
+ * and the resolved yes/no. Skips answers already labeled
  * by the same provider + prompt version with the same text (cache) and those
  * a person corrected (never overwritten). Texts are pseudonymized before they
  * reach the provider. The analysis_run row keeps counts, never content.
@@ -108,8 +130,6 @@ export async function runAnalysis(
   opts: {
     cycleId?: string;
     provider: AnalysisProvider;
-    /** Also label closed-question answers; the `analysis.includeClosed` setting when absent. */
-    includeClosed?: boolean;
     actorPersonId?: string | null;
     signal?: AbortSignal;
   },
@@ -135,7 +155,6 @@ export async function runAnalysis(
       opts.cycleId,
       provider.name,
       provider.promptVersion,
-      opts.includeClosed ?? (await getSetting(db, "analysis.includeClosed")),
     );
     counts.total = rows.length;
     await seedInitialThemes(db, rows.map(dimensionOf));
@@ -158,8 +177,14 @@ export async function runAnalysis(
         const inputs: AnalysisInput[] = slice.map((t, j) => ({
           token: `t${i + j}`,
           dimension: t.dimension,
+          rubric: rubricOf({
+            dimension: t.dimension,
+            yesNo: t.yes_no_question,
+          }),
+          question: t.prompt,
+          relationship: t.relationship,
+          yesNo: t.yes_no,
           text: texts[i + j],
-          ...(t.kind === "text" ? {} : { closed: true }),
         }));
         const outputs = await provider.analyze(inputs, opts.signal);
         const byToken = new Map(outputs.map((o) => [o.token, o]));
@@ -171,6 +196,8 @@ export async function runAnalysis(
             provider: provider.name,
             promptVersion: provider.promptVersion,
             dimension: t.dimension,
+            substance: out.substance,
+            signals: out.signals,
             sentiment: out.sentiment,
             confidence: out.confidence,
             themes: cleanThemes(out.themes, map),
@@ -202,7 +229,7 @@ function cleanThemes(themes: string[], map: PseudonymMap): string[] {
   for (const raw of themes) {
     // A theme that needed a token restored names someone: drop it.
     if (depseudonymize(raw, map) !== raw) continue;
-    const key = normalizeTheme(raw);
+    const key = canonicalTheme(normalizeTheme(raw));
     if (key && !out.has(key)) out.set(key, key);
   }
   return [...out.values()].slice(0, 3);
@@ -240,6 +267,8 @@ export async function storeLabels(db: DbOrTx, labels: LabelRow[]) {
       set: {
         dimension: sql`excluded.dimension`,
         sentiment: sql`excluded.sentiment`,
+        substance: sql`excluded.substance`,
+        signals: sql`excluded.signals`,
         confidence: sql`excluded.confidence`,
         themes: sql`excluded.themes`,
         textHash: sql`excluded.text_hash`,
