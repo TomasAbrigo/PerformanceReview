@@ -600,7 +600,7 @@ export function ExecutiveReportView({
         </div>
       ) : null}
       {report.substance ? (
-        report.substance.length === 0 ? (
+        report.substance.length === 0 && min !== null ? (
           <Unavailable min={min} />
         ) : (
           <SubstancePanel

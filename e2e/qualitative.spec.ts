@@ -39,7 +39,7 @@ test("People runs the Mock analysis on an imported cycle and reads it per person
     page.getByTestId("themes-strengths-list").getByRole("listitem").first(),
   ).toBeVisible();
   await expect(page.getByTestId("signals")).toBeVisible();
-  await expect(page.getByTestId("yes-no-bar").first()).toBeVisible();
+  await expect(page.getByTestId("yes-no")).toBeVisible();
   await expect(page.getByTestId("tone")).toBeVisible();
   const comments = page.getByRole("group", { name: "Comentarios etiquetados" });
   await expect(comments).toBeVisible();
