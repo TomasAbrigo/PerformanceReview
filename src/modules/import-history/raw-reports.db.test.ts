@@ -1,5 +1,5 @@
 import path from "node:path";
-import { and, eq, isNotNull, like } from "drizzle-orm";
+import { and, eq, isNotNull, like, sql } from "drizzle-orm";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { closeDb, db } from "@/db/client";
 import {
@@ -14,6 +14,10 @@ import {
   sourceIdentity,
 } from "@/db/schema";
 import type { RunIngestResult } from "@/modules/ingest/run-ingest";
+import {
+  analyzableSql,
+  YES_NO,
+} from "@/modules/qualitative-analysis/analysis-text";
 import {
   importReport,
   REPORTS,
@@ -93,24 +97,48 @@ describe("Bamboo's raw assessments report (#83)", () => {
     expect(first.counts.issues ?? 0).toBe(outsiders);
   });
 
-  it("creates custom questions per cycle, different between cycles", async () => {
+  it("creates the four real custom questions in every cycle (3 self, 1 manager), each with its own dimension", async () => {
     const custom = await db
       .select({
         cycleId: questionRevision.cycleId,
+        relationship: questionRevision.appliesTo,
         dimension: questionRevision.dimension,
       })
       .from(questionRevision)
       .where(like(questionRevision.dimension, "custom_%"));
-    const perCycle = new Map<string, Set<string>>();
+    const perCycle = new Map<string, string[]>();
     for (const c of custom) {
-      perCycle.set(
-        c.cycleId,
-        (perCycle.get(c.cycleId) ?? new Set()).add(c.dimension!),
-      );
+      perCycle.set(c.cycleId, [
+        ...(perCycle.get(c.cycleId) ?? []),
+        `${c.relationship.join("+")}:${c.dimension}`,
+      ]);
     }
-    const sets = [...perCycle.values()].map((s) => [...s].sort().join("|"));
     expect(perCycle.size).toBe(5);
-    expect(new Set(sets).size).toBeGreaterThan(2);
+    const shapes = new Set(
+      [...perCycle.values()].map((s) => [...s].sort().join("|")),
+    );
+    expect(shapes.size).toBe(1);
+    const [shape] = [...shapes];
+    expect(shape.split("|")).toHaveLength(4);
+    expect(shape).toMatch(
+      /^manager:custom_[^|]+\|self:custom_[^|]+\|self:custom_[^|]+\|self:custom_[^|]+$/,
+    );
+  });
+
+  it("a bare yes/no answer to a custom question is not a comment to analyse", async () => {
+    const rows = await db.execute<{ total: number; analysable: number }>(sql`
+      select count(*)::int as total,
+             count(*) filter (where ${analyzableSql(true)})::int as analysable
+      from answer a
+      join question_revision q on q.id = a.question_revision_id
+      where q.dimension like 'custom_%' and btrim(a.text_value) ~* ${YES_NO}`);
+    expect(rows[0].total).toBeGreaterThan(20);
+    expect(rows[0].analysable).toBe(0);
+    const [withHow] = await db.execute<{ n: number }>(sql`
+      select count(*)::int as n from answer a
+      join question_revision q on q.id = a.question_revision_id
+      where q.dimension like 'custom_%' and ${analyzableSql(true)}`);
+    expect(withHow.n).toBeGreaterThan(0);
   });
 
   it("normalizes retention, engagement and valued; flags an unknown label", async () => {

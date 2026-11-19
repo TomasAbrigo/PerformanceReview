@@ -1,10 +1,9 @@
 import type { CompanyFixture, FixtureAssessment } from "../company";
 import type { ProgressStatus } from "../company/types";
 import {
-  MANAGER_IMPROVEMENTS,
-  MANAGER_STRENGTHS,
-  SELF_IMPROVEMENTS,
-  SELF_STRENGTHS,
+  REAL_CUSTOM_QUESTIONS,
+  YES_NO_ANSWERS,
+  YES_NO_HOW_ANSWERS,
 } from "../company/questions";
 import { toCsv } from "./csv";
 import type { FixtureFile } from "./files";
@@ -117,42 +116,12 @@ export function periodEndOf(start: string): string {
 export const usDate = (iso: string) =>
   `${iso.slice(5, 7)}/${iso.slice(8, 10)}/${iso.slice(0, 4)}`;
 
-/** Custom questions per cycle: their texts change between cycles. */
-const CUSTOM_BY_CYCLE: { self: string[]; manager: string[] }[] = [
-  {
-    self: ["¿Qué logro del período destacarías?"],
-    manager: ["¿Qué logro de [Employee] destacarías?"],
-  },
-  {
-    self: [
-      "¿Qué necesitás de tu líder?",
-      "¿Cómo te sentís en tu proyecto actual?",
-    ],
-    manager: ["¿Qué rol podría asumir [Employee] el próximo semestre?"],
-  },
-  {
-    self: [
-      "¿Qué necesitás de tu líder?",
-      "¿Cómo te sentís en tu proyecto actual?",
-    ],
-    manager: ["¿Qué rol podría asumir [Employee] el próximo semestre?"],
-  },
-  {
-    self: [
-      "¿Qué aprendiste este semestre?",
-      "¿Qué te gustaría aprender?",
-      "¿Cómo es tu relación con el cliente?",
-    ],
-    manager: [
-      "¿Cómo es la relación de [Employee] con el cliente?",
-      "¿Qué capacitación recomendarías para [Employee]?",
-    ],
-  },
-  {
-    self: ["¿Qué aprendiste este semestre?", "¿Qué te gustaría aprender?"],
-    manager: ["¿Cómo es la relación de [Employee] con el cliente?"],
-  },
-];
+/**
+ * The custom questions of every cycle: Santex's real ones (#123). The two
+ * "and how" questions get a yes/no with sometimes a reason; the plain yes/no
+ * ones a word.
+ */
+const CUSTOM = REAL_CUSTOM_QUESTIONS;
 
 const pick = <T>(pool: readonly T[], i: number): T => pool[i % pool.length];
 
@@ -196,7 +165,6 @@ export function serializeRawReports(company: CompanyFixture): FixtureFile[] {
     const name = outsider
       ? a.outsiderName!
       : names.inCycle(a.employeeId!, a.cycle);
-    const custom = CUSTOM_BY_CYCLE[a.cycle % CUSTOM_BY_CYCLE.length];
     const self = selfDone ? a.selfAnswers! : null;
     const manager = managerDone ? a.managerAnswers! : null;
     const bestWork = self
@@ -212,17 +180,11 @@ export function serializeRawReports(company: CompanyFixture): FixtureFile[] {
     }
     const customCells = (side: "self" | "manager") =>
       [0, 1, 2].flatMap((n) => {
-        const question = custom[side][n];
+        const question: string | undefined = CUSTOM[side][n];
         const answered = side === "self" ? self : manager;
         if (!question || !answered) return ["", ""];
         const pool =
-          side === "self"
-            ? n % 2 === 0
-              ? SELF_STRENGTHS
-              : SELF_IMPROVEMENTS
-            : n % 2 === 0
-              ? MANAGER_STRENGTHS
-              : MANAGER_IMPROVEMENTS;
+          side === "self" && n < 2 ? YES_NO_HOW_ANSWERS : YES_NO_ANSWERS;
         return [question, pick(pool, i + n)];
       });
     reportRows.push([
