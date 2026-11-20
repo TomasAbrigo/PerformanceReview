@@ -6,6 +6,8 @@ export type BarGroup = {
   values: Record<string, number | null>;
   /** Why the group has no bars (e.g. under the minimum). */
   masked?: string;
+  /** #133: too few people to compare ("poca base"): muted. */
+  faint?: boolean;
 };
 
 const H = 140;
@@ -76,8 +78,9 @@ export function GroupedBars({
           {groups.map((g) => (
             <div
               key={g.key}
-              className="relative flex min-w-16 flex-1 items-end justify-center gap-1"
+              className={`relative flex min-w-16 flex-1 items-end justify-center gap-1 ${g.faint ? "opacity-55" : ""}`}
               data-testid="bar-group"
+              data-faint={g.faint ? "" : undefined}
             >
               {g.masked ? (
                 <span className="self-center px-1 text-center text-xs text-muted-foreground">

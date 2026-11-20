@@ -197,6 +197,11 @@ export function InsightsSettingsForm({
       <Section title={t("targets.title")}>
         {number("targets.goodPct", t("targets.goodPct"), t("targets.hint"))}
         {number("targets.watchPct", t("targets.watchPct"), t("targets.hint"))}
+        {number(
+          "targets.goalsPct",
+          t("targets.goalsPct"),
+          t("targets.goalsHint"),
+        )}
       </Section>
       <Section title={t("analysis.title")}>
         {field(

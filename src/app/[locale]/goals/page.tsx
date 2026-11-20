@@ -36,7 +36,7 @@ import { localizeCycles } from "@/modules/review-core/cycle-name";
 import { rememberedCycle } from "@/modules/review-core/remembered-cycle";
 import { pickCycle } from "@/modules/review-core/current-cycle";
 import { getSettings } from "@/modules/settings";
-import { kpiThresholds } from "@/modules/insights/tone";
+import { goalThresholds } from "@/modules/insights/tone";
 import { ALL_CYCLES } from "@/components/goals/url-state";
 import { createGoalAction } from "./actions";
 
@@ -114,7 +114,7 @@ async function GoalsList({
       />
       <GoalsOverview
         counts={page.counts}
-        thresholds={kpiThresholds(settings)}
+        thresholds={goalThresholds(settings)}
         hrefFor={(state) => hrefFor({ state })}
       />
       {page.asOf < todayLocal() ? (

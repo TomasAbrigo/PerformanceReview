@@ -257,7 +257,9 @@
       "title": "Metas de los KPIs",
       "goodPct": "En meta desde (%)",
       "watchPct": "Atención desde (%)",
-      "hint": "Colorean los porcentajes (completitud, objetivos completados): desde la meta en verde, desde atención en ámbar, por debajo en rojo."
+      "hint": "Colorean los porcentajes de completitud: desde la meta en verde, desde atención en ámbar, por debajo en rojo.",
+      "goalsPct": "Meta de objetivos completados (%)",
+      "goalsHint": "Meta propia de los objetivos (completados de los que vencían; los vencidos la reflejan). 0: sin meta, los KPIs de objetivos no llevan color ni marca de meta."
     }
   },
   "Common": {
@@ -1886,7 +1888,7 @@
     },
     "period": {
       "title": "Detalle por período",
-      "hint": "Un renglón por ciclo, del más viejo al más nuevo, con los mismos filtros de cuenta, proyecto, DM, Santex Lead, área y manager de la vista (no con el agrupar por). Las medias de valoración propia (1 a 4), retención y compromiso de Bamboo (1 a 5) llevan las personas detrás. Los objetivos completados son el estado en Bamboo, de los que ya vencían a la fecha de corte del ciclo (hoy mientras el período corre, el último día del período una vez cerrado): uno que todavía no vencía no cuenta como incumplido.",
+      "hint": "Un renglón por ciclo, del más viejo al más nuevo, con los mismos filtros de cuenta, proyecto, DM, Santex Lead, área y manager de la vista (no con el agrupar por). Las medias de valoración propia (1 a 4), retención y compromiso según el manager (1 a 5) llevan las personas detrás. Los objetivos completados son el estado en Bamboo, de los que ya vencían a la fecha de corte del ciclo (hoy mientras el período corre, el último día del período una vez cerrado): uno que todavía no vencía no cuenta como incumplido.",
       "hintAggregates": "Un renglón por ciclo, del más viejo al más nuevo, solo agregados: la cifra de un ciclo con menos personas que el mínimo no se muestra.",
       "label": "Detalle por período",
       "empty": "Todavía no hay ciclos lanzados.",
@@ -2006,7 +2008,8 @@
         "positive": "Comentarios positivos (promedio por persona)"
       },
       "yTitle": "Promedio (1–5)",
-      "xTitle": "Objetivos completados (%)"
+      "xTitle": "Objetivos completados (%)",
+      "lowBase": "{count, plural, one {# tramo tiene} other {# tramos tienen}} menos de {n} personas (poca base): atenuados, sus promedios no son comparables."
     },
     "people": {
       "title": "Personas",

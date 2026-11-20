@@ -35,6 +35,28 @@ export const kpiThresholds = (
 });
 
 /**
+ * #133: the thresholds of the goal KPIs, their own target
+ * (`targets.goalsPct`), watch the same distance under it as completion's;
+ * null when People set none (0): no tone, no target mark.
+ */
+export const goalThresholds = (
+  s: Pick<
+    Settings,
+    "targets.goalsPct" | "targets.goodPct" | "targets.watchPct"
+  >,
+): KpiThresholds | null => {
+  const good = s["targets.goalsPct"];
+  if (!good) return null;
+  return {
+    goodPct: good,
+    watchPct: Math.max(
+      0,
+      good - (s["targets.goodPct"] - s["targets.watchPct"]),
+    ),
+  };
+};
+
+/**
  * A 0-100 percent: from `goodPct` up good, from `watchPct` up watch, risk
  * below. `better: "down"` mirrors it for a share where less is better
  * (overdue goals): up to 100 - goodPct good, up to 100 - watchPct watch.

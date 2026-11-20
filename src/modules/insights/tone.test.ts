@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { DEFAULT_SETTINGS } from "@/modules/settings/definitions";
 import {
   atRiskTone,
+  goalThresholds,
   kpiThresholds,
   likertTarget,
   likertTone,
@@ -72,5 +73,18 @@ describe("targets", () => {
     expect(percentTone(percentTarget(t), t)).toBe("good");
     expect(percentTarget(t, "down")).toBe(20);
     expect(percentTone(percentTarget(t, "down"), t, "down")).toBe("good");
+  });
+});
+
+describe("goalThresholds (#133)", () => {
+  const base = { "targets.goodPct": 80, "targets.watchPct": 50 };
+  it("is none until People set a goals target", () => {
+    expect(goalThresholds({ ...base, "targets.goalsPct": 0 })).toBeNull();
+  });
+  it("has its own target, watch as far under it as completion's", () => {
+    expect(goalThresholds({ ...base, "targets.goalsPct": 50 })).toEqual({
+      goodPct: 50,
+      watchPct: 20,
+    });
   });
 });

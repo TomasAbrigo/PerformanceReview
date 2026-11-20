@@ -257,7 +257,9 @@
       "title": "KPI targets",
       "goodPct": "On target from (%)",
       "watchPct": "Watch from (%)",
-      "hint": "They colour the percentages (completion, goals completed): from the target green, from watch amber, below it red."
+      "hint": "They colour the completion percents: from the target green, from watch amber, under it red.",
+      "goalsPct": "Goals completed target (%)",
+      "goalsHint": "The goals' own target (completed of those due; overdue mirrors it). 0: no target, the goal KPIs carry no colour or target mark."
     }
   },
   "Common": {
@@ -2006,7 +2008,8 @@
         "positive": "Positive comments (mean per person)"
       },
       "yTitle": "Mean (1–5)",
-      "xTitle": "Goals completed (%)"
+      "xTitle": "Goals completed (%)",
+      "lowBase": "{count, plural, one {# bucket has} other {# buckets have}} fewer than {n} people (low base): muted, their means are not comparable."
     },
     "people": {
       "title": "People",

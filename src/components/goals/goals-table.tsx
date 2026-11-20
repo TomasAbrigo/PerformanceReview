@@ -158,7 +158,8 @@ export function GoalsOverview({
   hrefFor,
 }: {
   counts: GoalListPage["counts"];
-  thresholds: KpiThresholds;
+  /** The goals' own target (#133); null: People set none, no tone. */
+  thresholds: KpiThresholds | null;
   hrefFor: (state: GoalState) => string;
 }) {
   const t = useTranslations("Goals");
@@ -209,7 +210,11 @@ export function GoalsOverview({
         label={t("overview.review")}
         value={counts.overdue}
         href={hrefFor("overdue")}
-        status={total ? percentTone(overduePct, thresholds, "down") : undefined}
+        status={
+          total && thresholds
+            ? percentTone(overduePct, thresholds, "down")
+            : undefined
+        }
         note={t("overview.overdueShare", { pct: Math.round(overduePct) })}
         scale={{
           value: overduePct,

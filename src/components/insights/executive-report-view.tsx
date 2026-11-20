@@ -29,6 +29,7 @@ import {
   kpiThresholds,
   likertTarget,
   likertTone,
+  goalThresholds,
   percentTarget,
   percentTone,
 } from "@/modules/insights/tone";
@@ -76,6 +77,7 @@ export type ExecutiveSettings = Pick<
   | "alerts.riskThreshold"
   | "targets.goodPct"
   | "targets.watchPct"
+  | "targets.goalsPct"
   | "engagement.cutoffAlto"
   | "engagement.cutoffMedio"
 >;
@@ -277,6 +279,7 @@ export function ExecutiveReportView({
   const total = report.completion.total;
   const prevTotal = previous?.completion.total ?? null;
   const targets = kpiThresholds(settings);
+  const goalTargets = goalThresholds(settings);
   const riskThreshold = settings["alerts.riskThreshold"];
   // #133: on the unrounded percents, to one decimal (as /insights/completion).
   const pointsDelta = (now: number, before: number | null | undefined) => {
@@ -424,9 +427,9 @@ export function ExecutiveReportView({
                 : ti("percent", { value: Math.round(goals.completedDuePct) })
             }
             status={
-              goals?.completedDuePct == null
+              goals?.completedDuePct == null || !goalTargets
                 ? undefined
-                : percentTone(goals.completedDuePct, targets)
+                : percentTone(goals.completedDuePct, goalTargets)
             }
             scale={
               goals?.completedDuePct == null
@@ -438,10 +441,15 @@ export function ExecutiveReportView({
                     label: `${t("goalsCompleted")}: ${ti("percent", { value: Math.round(goals.completedDuePct) })}`,
                     minLabel: "0 %",
                     maxLabel: "100 %",
-                    target: {
-                      value: percentTarget(targets),
-                      text: ti("percent", { value: percentTarget(targets) }),
-                    },
+                    // #133: the goals' own target, none until People set one.
+                    target: goalTargets
+                      ? {
+                          value: percentTarget(goalTargets),
+                          text: ti("percent", {
+                            value: percentTarget(goalTargets),
+                          }),
+                        }
+                      : undefined,
                   }
             }
             note={

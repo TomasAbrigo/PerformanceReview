@@ -21,6 +21,7 @@ describe("DEFAULT_SETTINGS", () => {
       "engagement.cutoffRegular": 40,
       "targets.goodPct": 80,
       "targets.watchPct": 50,
+      "targets.goalsPct": 0,
     });
   });
 

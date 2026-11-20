@@ -1,4 +1,5 @@
 import { useTranslations } from "next-intl";
+import { LOW_BASE_N } from "@/modules/insights/rank";
 import type { GoalsVsIndicators } from "@/modules/analytics/goals-insights/types";
 import { ChartLegend, GroupedBars } from "@/components/charts";
 import { Empty, TableView, useDecimal, usePct } from "./shared";
@@ -29,7 +30,8 @@ export function BucketsChart({ data }: { data: GoalsVsIndicators }) {
     {
       key: "meanEngagement",
       name: t("indicator.engagement"),
-      cls: "bg-chart-sent-mixed",
+      // #133: a lighter teal, not the amber of "mixto" / "atención".
+      cls: "bg-chart-4",
     },
   ] as const;
   const baseOf = (
@@ -61,6 +63,10 @@ export function BucketsChart({ data }: { data: GoalsVsIndicators }) {
           retention: b.retentionPeople ?? `< ${data.minGroupSize ?? 0}`,
           engagement: b.engagementPeople ?? `< ${data.minGroupSize ?? 0}`,
         });
+  const faint = data.buckets.filter(
+    (b) =>
+      !b.hidden && b.people !== null && b.people > 0 && b.people < LOW_BASE_N,
+  ).length;
   return (
     <div className="flex flex-col gap-3" data-testid="buckets-chart">
       <ChartLegend
@@ -74,7 +80,8 @@ export function BucketsChart({ data }: { data: GoalsVsIndicators }) {
         label={`${t("buckets.title")}: ${data.buckets.map(describe).join(". ")}`}
         yTitle={t("buckets.yTitle")}
         xTitle={t("buckets.xTitle")}
-        domain={[0, 5]}
+        // #133: a 1-5 mean starts at 1, as every ScaleBar of the app.
+        domain={[1, 5]}
         ticks={[1, 2, 3, 4, 5]}
         fmt={(v) => decimal(v) ?? ""}
         series={series.map((s) => ({ key: s.key, label: s.name, fill: s.cls }))}
@@ -85,6 +92,8 @@ export function BucketsChart({ data }: { data: GoalsVsIndicators }) {
           masked: b.hidden
             ? t("buckets.hidden", { min: data.minGroupSize ?? 0 })
             : undefined,
+          // #133: a bucket of few people is "poca base", muted.
+          faint: !b.hidden && b.people !== null && b.people < LOW_BASE_N,
           values: {
             meanRetention: b.meanRetention,
             meanEngagement: b.meanEngagement,
@@ -92,6 +101,11 @@ export function BucketsChart({ data }: { data: GoalsVsIndicators }) {
         }))}
       />
       <ul className="flex flex-col gap-1 text-sm text-muted-foreground">
+        {faint > 0 ? (
+          <li data-testid="buckets-low-base">
+            {t("buckets.lowBase", { count: faint, n: LOW_BASE_N })}
+          </li>
+        ) : null}
         {data.withoutGoals ? (
           <li>{t("buckets.withoutGoals", { n: data.withoutGoals })}</li>
         ) : null}

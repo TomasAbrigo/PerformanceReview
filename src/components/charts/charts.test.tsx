@@ -334,6 +334,35 @@ describe("GroupedBars", () => {
   });
 });
 
+describe("Scatter clusters (#133)", () => {
+  it("writes how many people share a position from 5 on", () => {
+    const at = (n: number, x: number) =>
+      Array.from({ length: n }, (_, i) => ({
+        key: `${x}-${i}`,
+        x,
+        y: 3,
+        tip: "t",
+      }));
+    renderIn(
+      "es",
+      <Scatter
+        points={[...at(6, 0), ...at(2, 50)]}
+        xDomain={[0, 100]}
+        yDomain={[1, 5]}
+        xTicks={[0, 100]}
+        yTicks={[1, 5]}
+        xFmt={String}
+        yFmt={String}
+        xTitle="x"
+        yTitle="y"
+        label="L"
+      />,
+    );
+    const labels = screen.getAllByTestId("scatter-cluster");
+    expect(labels.map((l) => l.textContent)).toEqual(["×6"]);
+  });
+});
+
 describe("Scatter", () => {
   it("has titled axes, reference lines and a focusable point per person (duplicates spread)", () => {
     const { container } = renderIn(

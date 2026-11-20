@@ -29,6 +29,7 @@ import { countOpenIssues } from "@/modules/identity";
 import { insightsScope } from "@/modules/insights/authz";
 import {
   kpiThresholds,
+  goalThresholds,
   percentTarget,
   percentTone,
 } from "@/modules/insights/tone";
@@ -78,6 +79,8 @@ export async function HomeSignal({ locale }: { locale: string }) {
     rememberedCycle(),
   ]);
   const thresholds = kpiThresholds(settings);
+  // #133: the goals have their own target (none until People set one).
+  const goalTargets = goalThresholds(settings);
   const scope = individualScope(actor);
   const individual = scope.kind !== "none" && actor.role !== "direction";
   const analysis = insightsScope(actor).kind !== "none";
@@ -354,7 +357,9 @@ export async function HomeSignal({ locale }: { locale: string }) {
                 value={goalsDue.total ? `${goalsPct} %` : "—"}
                 href={`/goals?cycle=${cycle.id}&state=completed`}
                 status={
-                  goalsDue.total ? percentTone(goalsPct, thresholds) : undefined
+                  goalsDue.total && goalTargets
+                    ? percentTone(goalsPct, goalTargets)
+                    : undefined
                 }
                 scale={
                   goalsDue.total
@@ -369,7 +374,12 @@ export async function HomeSignal({ locale }: { locale: string }) {
                         }),
                         minLabel: "0 %",
                         maxLabel: "100 %",
-                        target: { value: target, text: `${target} %` },
+                        target: goalTargets
+                          ? {
+                              value: percentTarget(goalTargets),
+                              text: `${percentTarget(goalTargets)} %`,
+                            }
+                          : undefined,
                       }
                     : undefined
                 }
@@ -389,10 +399,10 @@ export async function HomeSignal({ locale }: { locale: string }) {
                 value={goals.counts.overdue}
                 href={`/goals?cycle=${cycle.id}&state=overdue`}
                 status={
-                  goalsTotal
+                  goalsTotal && goalTargets
                     ? percentTone(
                         pct(goals.counts.overdue, goalsTotal),
-                        thresholds,
+                        goalTargets,
                         "down",
                       )
                     : undefined

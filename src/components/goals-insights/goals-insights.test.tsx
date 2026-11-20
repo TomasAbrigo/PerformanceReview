@@ -354,6 +354,32 @@ describe("BucketsChart", () => {
     },
   );
 
+  it("#133: buckets of few people are muted and said, the scale starts at 1", () => {
+    renderIn("es", <BucketsChart data={vs()} />);
+    const groups = screen.getAllByTestId("bar-group");
+    // Buckets of 3 and 4 people: under the low base of 15.
+    expect(groups[1]).toHaveAttribute("data-faint");
+    expect(groups[4]).toHaveAttribute("data-faint");
+    expect(screen.getByTestId("buckets-low-base")).toHaveTextContent(
+      "2 tramos tienen menos de 15 personas (poca base)",
+    );
+    // A mean of 1 draws (almost) nothing: the baseline is 1, not 0.
+    const one = renderIn(
+      "es",
+      <BucketsChart
+        data={vs({
+          buckets: vs().buckets.map((b, i) =>
+            i === 1 ? { ...b, meanRetention: 1 } : b,
+          ),
+        })}
+      />,
+    );
+    const bar = one.container.querySelector(
+      "[aria-label='20–40 % · Retención: 1']",
+    ) as HTMLElement;
+    expect(bar.style.height).toBe("4px");
+  });
+
   it("labels the buckets direction may not see, without numbers", () => {
     renderIn(
       "es",
