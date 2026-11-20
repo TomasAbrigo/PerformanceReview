@@ -78,18 +78,15 @@ describe("dm360 as People", () => {
     // Only Bruno has both at or under 2.
     expect(m.risk).toEqual({ people: 1, of: 5, share: 0.2 });
     // Ana 2 comments, Bruno 2, Carla 1: three positive... and one constructive, one negative.
-    expect(m.sentiment).toMatchObject({
-      comments: 5,
-      people: 3,
-      counts: { positive: 3, constructive: 1, negative: 1 },
-    });
+    // Signals (#129): over the 3 people with read comments.
+    expect(m.signals).toMatchObject({ of: 3 });
     // Self: Ana, Bruno, Carla submitted, Dario a draft, Elena none; manager: all.
     expect(m.selfRate).toBe(0.75);
     expect(m.managerRate).toBe(1);
     // Fabio 1,1; Gina 2,2; Hugo 4,4.
     expect(n.retention?.mean).toBeCloseTo(7 / 3);
     expect(n.risk).toEqual({ people: 2, of: 3, share: 2 / 3 });
-    expect(n.sentiment).toBeNull();
+    expect(n.signals).toBeNull();
     expect(n.insights).toEqual([
       { code: "riskHigh", params: { percent: 67, people: 2 } },
     ]);
@@ -244,15 +241,15 @@ describe("dm360 as direction", () => {
       [null, false, 3],
     ]);
     // 3 people wrote comments in Marta's card, nobody in Nora's.
-    expect(r.cards[0].sentiment).not.toBeNull();
-    expect(r.cards[1].sentiment).toBeNull();
+    expect(r.cards[0].signals).toMatchObject({ of: 3 });
+    expect(r.cards[1].signals).toBeNull();
     const four = await dm360(db, direction, {
       cycleId,
       config: { minGroupSize: 4 },
     });
-    // Marta's 5 are in; of them 4 reach the retention and sentiment (3 writers) is hidden.
+    // Marta's 5 are in; of them 4 reach the retention and the signals (3 people with comments) are hidden.
     expect(four.cards[0].retention?.n).toBe(5);
-    expect(four.cards[0].sentiment).toBeNull();
+    expect(four.cards[0].signals).toBeNull();
     expect(four.cards[0].selfRate).toBe(0.75);
   });
 

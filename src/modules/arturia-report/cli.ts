@@ -124,7 +124,7 @@ export async function runExportCli(
     await writeFile(htmlPath, renderHtml(report, labelsFor(args.locale)));
     const s = report.sections;
     out(
-      `arturia export (${report.anonymized ? "anonymized" : "named"}): ${s.executive.participants} participants, ${s.people?.length ?? 0} person rows, ${s.qualitative?.topThemes.length ?? 0} themes`,
+      `arturia export (${report.anonymized ? "anonymized" : "named"}): ${s.executive.participants} participants, ${s.people?.length ?? 0} person rows, ${s.qualitative?.people ?? 0} people read`,
     );
     out(`  ${jsonPath}`);
     out(`  ${htmlPath}`);

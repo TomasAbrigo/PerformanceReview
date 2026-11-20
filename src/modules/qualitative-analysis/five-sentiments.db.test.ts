@@ -220,21 +220,21 @@ describe("self vs manager", () => {
     }
   });
 
-  it("the CSV honors it too, with the five sentiments", async () => {
+  it("the CSV honors it too: one side, with the tone in people", async () => {
     const { header, rows } = await table(
       "insights-sentiment.csv",
       `?cycle=${cycle}&relationship=self&locale=es`,
     );
-    expect(header).toEqual([
-      "dimensión",
+    expect(header.slice(0, 3)).toEqual(["dimensión", "lado", "personas"]);
+    expect(header.slice(-5)).toEqual([
       "positivo",
       "constructivo",
       "neutral",
       "mixto",
       "negativo",
-      "total",
     ]);
-    expect(rows.reduce((n, r) => n + Number(r.total), 0)).toBe(2);
+    expect(new Set(rows.map((r) => r.lado))).toEqual(new Set(["self"]));
+    expect(rows.reduce((n, r) => n + Number(r.personas), 0)).toBe(2);
   });
 });
 

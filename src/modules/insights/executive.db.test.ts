@@ -43,17 +43,9 @@ describe("executiveReport", () => {
     // Both at or under 2: Bruno, Fabio, Gina.
     expect(r.risk).toMatchObject({ riskCount: 3, total: 8, atRisk: null });
     expect(r.risk?.cells).toHaveLength(9);
-    expect(r.sentiment).toEqual([
-      {
-        dimension: "strengths",
-        positive: 3,
-        constructive: 1,
-        neutral: 0,
-        mixed: 0,
-        negative: 1,
-        total: 5,
-      },
-    ]);
+    // The open-text reading per person (#129): one row per question and side.
+    expect(r.substance?.length).toBeGreaterThan(0);
+    expect(r.signals?.people).toBeGreaterThan(0);
     expect(r.themes?.map((t) => [t.theme, t.count])).toEqual([
       ["calidad", 2],
       ["equipo", 2],
@@ -65,7 +57,7 @@ describe("executiveReport", () => {
       cycleId: s.c2.cycleId,
       mode: "qualitative",
     });
-    expect(qual.sentiment).toBeDefined();
+    expect(qual.substance).toBeDefined();
     expect(qual.themes).toBeDefined();
     expect(qual.retention).toBeUndefined();
     expect(qual.risk).toBeUndefined();
@@ -75,7 +67,7 @@ describe("executiveReport", () => {
     });
     expect(quant.retention).toBeDefined();
     expect(quant.engagement).toBeDefined();
-    expect(quant.sentiment).toBeUndefined();
+    expect(quant.substance).toBeUndefined();
     // Goal KPIs (#62): the scenario's people have no goals in the period.
     expect(quant.goals).toMatchObject({
       people: 9,
@@ -98,7 +90,8 @@ describe("executiveReport", () => {
     // The risk quadrant holds 3 people: under 5, its count is hidden.
     expect(r.risk?.riskCount).toBeNull();
     // Comments of only 3 people: nothing qualitative shows.
-    expect(r.sentiment).toEqual([]);
+    expect(r.substance).toEqual([]);
+    expect(r.signals).toBeNull();
     expect(r.themes).toEqual([]);
   });
 

@@ -1,6 +1,17 @@
 // Pure: the report as JSON and as one self-contained HTML page (inline CSS,
 // JS, data and server-side SVG; no external request of any kind).
-import { labelsFor, type Labels } from "./labels";
+import {
+  fill,
+  humanize,
+  type Labels,
+  labelsFor,
+  questionLabel,
+  readingNames,
+  type ReportLocale,
+  signalLabel,
+  substanceLabel,
+  themeLabel,
+} from "./labels";
 import type {
   ArturiaReport,
   CompletionSection,
@@ -9,14 +20,14 @@ import type {
   GoalsSection,
   IndicatorsSection,
   QualitativeSection,
-  QualitativeSideSection,
 } from "./schema";
 
 /**
- * Labels of the render in progress: set by renderHtml for its (synchronous)
- * duration, so the helpers below need not thread them through.
+ * Labels (and language) of the render in progress: set by renderHtml for its
+ * (synchronous) duration, so the helpers below need not thread them through.
  */
 let L: Labels = labelsFor("es");
+let LOCALE: ReportLocale = "es";
 
 export function renderJson(report: ArturiaReport): string {
   return `${JSON.stringify(report, null, 2)}\n`;
@@ -90,10 +101,13 @@ export function svgStacked(
   legend: string[],
   /** Class of the segment colors: `c0..` (categorical) or `s0..` (sentiments). */
   prefix: "c" | "s" = "c",
+  /** The color index of each part (default: its own position), e.g. a scale that skips the middle sentiments. */
+  palette?: readonly number[],
 ): string {
   if (!rows.length) return `<p class="muted">${esc(L.noData)}</p>`;
   const labelW = labelWidth(rows.map((r) => r.label));
   const span = W - labelW - 60;
+  const color = (k: number) => `${prefix}${palette?.[k] ?? k}`;
   const body = rows
     .map((r, i) => {
       const y = i * ROW;
@@ -106,7 +120,7 @@ export function svgStacked(
             w >= 34
               ? `<text x="${(x + w / 2).toFixed(1)}" y="${y + 17}" text-anchor="middle" class="in">${pct(p, total)}</text>`
               : "";
-          const rect = `<rect x="${x.toFixed(1)}" y="${y + 5}" width="${w.toFixed(1)}" height="16" class="${prefix}${k} seg"><title>${esc(r.label)} · ${esc(legend[k] ?? "")}: ${p} (${pct(p, total)})</title></rect>${label}`;
+          const rect = `<rect x="${x.toFixed(1)}" y="${y + 5}" width="${w.toFixed(1)}" height="16" class="${color(k)} seg"><title>${esc(r.label)} · ${esc(legend[k] ?? "")}: ${p} (${pct(p, total)})</title></rect>${label}`;
           x += w;
           return rect;
         })
@@ -116,8 +130,7 @@ export function svgStacked(
     .join("");
   const keys = legend
     .map(
-      (l, k) =>
-        `<span class="key"><i class="${prefix}${k}"></i>${esc(l)}</span>`,
+      (l, k) => `<span class="key"><i class="${color(k)}"></i>${esc(l)}</span>`,
     )
     .join("");
   return `<div class="legend">${keys}</div><svg viewBox="0 0 ${W} ${rows.length * ROW}" role="img" class="chart">${body}</svg>`;
@@ -182,6 +195,21 @@ export function svgMatrix(
     )
     .join("");
   return `<svg viewBox="0 0 ${off + 3 * S + 10} ${3 * S + 40}" role="img" class="chart matrix">${body}${rowLabels}${colLabels}<text x="${off + 1.5 * S}" y="${3 * S + 34}" text-anchor="middle" class="axis">${esc(L.indicators.engagement)} →</text><text x="10" y="12" class="axis">↑ ${esc(L.indicators.retention)}</text></svg>`;
+}
+
+/**
+ * The names of cycles without what they all start with ("Evaluación semestral
+ * 2024-04-15 – 2024-09-28" next to its siblings is "2024-04-15 – 2024-09-28"),
+ * so a clipped chart label still tells them apart. One name stays whole.
+ */
+export function shortCycleNames(names: readonly string[]): string[] {
+  if (new Set(names).size < 2) return [...names];
+  let prefix = names[0];
+  for (const n of names) {
+    while (!n.startsWith(prefix)) prefix = prefix.slice(0, -1);
+  }
+  const cut = prefix.lastIndexOf(" ") + 1;
+  return names.map((n) => n.slice(cut) || n);
 }
 
 // ---------------------------------------------------------------- sections
@@ -307,7 +335,7 @@ function indicatorsHtml(s: IndicatorsSection | null): string {
   return dist + matrix + alerts;
 }
 
-/** The five sentiments, in the order of the stacked bars and their colors. */
+/** The tone's five sentiments, in the order of the stacked bars and their colors. */
 const SENTIMENTS = [
   "positive",
   "constructive",
@@ -315,54 +343,490 @@ const SENTIMENTS = [
   "mixed",
   "negative",
 ] as const;
+/** Substance, best first; colored green, gray, red (the sentiment palette). */
+const SUBSTANCES = ["specific", "generic", "none"] as const;
+
+/**
+ * Rows whose parts are all published are drawn as bars; the rest (some cell
+ * is not published) go in a table below, where the cells that are published
+ * stay and the others read "–".
+ */
+function stackedRows(
+  rows: { label: string; people: number; parts: (number | null)[] }[],
+  legend: string[],
+  prefix: "c" | "s",
+  palette: readonly number[] | undefined,
+  hiddenNote: string,
+  head: string[],
+): string {
+  if (!rows.length) return `<p class="muted">${esc(L.noData)}</p>`;
+  const drawn = rows.flatMap((r) =>
+    r.parts.every((p) => p !== null)
+      ? [{ label: r.label, parts: r.parts as number[] }]
+      : [],
+  );
+  const partial = rows.filter((r) => r.parts.some((p) => p === null));
+  const rest = partial.length
+    ? `<p class="muted">${esc(hiddenNote)}</p><div class="scroll"><table><thead><tr>${[...head, ...legend].map((h) => `<th>${esc(h)}</th>`).join("")}</tr></thead><tbody>${partial
+        .map(
+          (r) =>
+            `<tr><td>${esc(r.label)}</td><td>${r.people}</td>${r.parts.map((p) => `<td>${p === null ? "–" : p}</td>`).join("")}</tr>`,
+        )
+        .join("")}</tbody></table></div>`
+    : "";
+  return `${drawn.length ? svgStacked(drawn, legend, prefix, palette) : ""}${rest}`;
+}
 
 function qualitativeHtml(q: QualitativeSection | null): string {
   if (!q) return unavailable();
-  const Q = L.qualitative;
-  const S = Q.sentiments;
-  const legend = SENTIMENTS.map((k) => S[k]);
-  const parts = (c: Record<(typeof SENTIMENTS)[number], number>) =>
-    SENTIMENTS.map((k) => c[k]);
-  const stacked = (rows: QualitativeSideSection["sentimentByDimension"]) =>
-    svgStacked(
-      rows.map((d) => ({ label: d.dimension, parts: parts(d) })),
-      legend,
-      "s",
-    );
-  const themes = (rows: QualitativeSideSection["topThemes"]) =>
-    rows
-      .map((t) => {
-        const split = t.sentiment
-          ? ` <span class="muted">${SENTIMENTS.filter(
-              (k) => t.sentiment![k] > 0,
-            )
-              .map((k) => `${esc(S[k])} ${t.sentiment![k]}`)
-              .join(" · ")}</span>`
-          : "";
-        return `<li><b>${esc(t.theme)}</b> (${t.count})${split}${t.quotes.length ? `<ul class="quotes">${t.quotes.map((x) => `<li>“${esc(x)}”</li>`).join("")}</ul>` : ""}</li>`;
+  const T = readingNames(LOCALE);
+  const X = T.text;
+  const side = (s: string) => (T.sides as Record<string, string>)[s] ?? s;
+  const names = new Map(q.questions.map((x) => [x.dimension, x.label]));
+  const question = (d: string) =>
+    names.get(d) ?? questionLabel(d, undefined, LOCALE);
+  const cell = (v: number | null) => (v === null ? T.hiddenCell : String(v));
+  const share = (part: number | null, total: number | null) =>
+    part === null || total === null ? T.hiddenCell : pct(part, total);
+  const both = (part: number | null, total: number | null) =>
+    part === null ? T.hiddenCell : `${part} (${share(part, total)})`;
+  const tile = (value: string | number, label: string) =>
+    `<div class="tile"><b>${esc(value)}</b><span>${esc(label)}</span></div>`;
+  const table = (head: string[], rows: string[][]) =>
+    `<div class="scroll"><table><thead><tr>${head.map((h) => `<th>${esc(h)}</th>`).join("")}</tr></thead><tbody>${rows
+      .map((r) => `<tr>${r.map((c) => `<td>${c}</td>`).join("")}</tr>`)
+      .join("")}</tbody></table></div>`;
+
+  // --- provenance
+  const p = q.provenance;
+  const readBy = p.providers.length
+    ? fill(X.readBy, {
+        list: p.providers
+          .map((x) => (x.model ? `${x.provider} (${x.model})` : x.provider))
+          .join(", "),
       })
-      .join("");
-  const total = (c: QualitativeSideSection["totals"] | undefined) =>
-    c === undefined
-      ? ""
-      : c === null
-        ? hiddenTotal()
-        : `<p class="muted">${esc(Q.totals)}: <b>${c.total}</b> · ${SENTIMENTS.map((k) => `${esc(S[k])} ${c[k]}`).join(" · ")}</p>`;
-  const side = (title: string, x: QualitativeSideSection | null | undefined) =>
-    x
-      ? `<h4>${esc(title)}</h4>${total(x.totals)}${stacked(x.sentimentByDimension)}<ol>${themes(x.topThemes)}</ol>${suppressedNote(x.suppressed)}`
-      : "";
-  const sides = q.bySide
-    ? `<h3>${esc(Q.bySide)}</h3>${side(Q.own, q.bySide.self)}${side(Q.manager, q.bySide.manager)}`
-    : "";
-  return `${total(q.totals)}<h3>${esc(Q.byDimension)}</h3>${stacked(q.sentimentByDimension)}
-<h3>${esc(Q.trend)} (${esc(S.positive)})</h3>${svgLine(
-    q.trend.map((t) => ({
-      label: t.cycleName,
-      value: t.total ? t.positive / t.total : 0,
+    : X.noMachine;
+  const provenance = `<div class="note${p.demo ? " demo" : ""}" data-demo="${p.demo ? "1" : "0"}"><b>${esc(X.provenanceTitle)}</b>${p.demo ? `<p><b>${esc(X.demo)}</b></p>` : ""}<p>${esc(readBy)}${p.lastRun ? ` · ${esc(fill(X.lastRun, { date: p.lastRun.finishedAt.slice(0, 10) }))}` : ""}</p><p class="muted">${esc(
+    fill(X.counts, {
+      labels: p.labels,
+      corrected:
+        p.correctedShare === null
+          ? T.hiddenCell
+          : `${Math.round(p.correctedShare * 100)}%`,
+      human: p.human,
+      imported: p.imported,
+    }),
+  )}</p></div>`;
+
+  const v = q.closed.valued;
+  const tiles = `<div class="tiles">${[
+    tile(q.people, X.people),
+    tile(
+      share(q.signals?.withAny ?? null, q.signals?.people ?? null),
+      X.withSignal,
+    ),
+    tile(share(v?.notValued ?? null, v?.people ?? null), X.notValued),
+  ].join("")}</div><p class="muted">${esc(X.unit)}</p>`;
+
+  // --- substance
+  const substanceLegend = SUBSTANCES.map((k) => substanceLabel(k, LOCALE));
+  const substance = `<h3>${esc(X.substanceTitle)}</h3><p class="muted">${esc(X.substanceHint)}</p>${stackedRows(
+    q.substance.map((r) => ({
+      label: `${question(r.dimension)} · ${side(r.side)}`,
+      people: r.people,
+      parts: [r.specific, r.generic, r.none],
     })),
-  )}
-<h3>${esc(Q.themes)}</h3><ol>${themes(q.topThemes)}</ol>${suppressedNote(q.suppressed)}${sides}`;
+    substanceLegend,
+    "s",
+    [0, 2, 4],
+    X.hiddenRows,
+    [X.question, X.people],
+  )}`;
+  const cuts = [
+    [X.cutDepartment, q.managerFeedback.byDepartment],
+    [X.cutAccount, q.managerFeedback.byAccount],
+    [X.cutDm, q.managerFeedback.byDm],
+  ] as const;
+  const feedback = `<h3>${esc(X.managerFeedbackTitle)}</h3><p class="muted">${esc(X.managerFeedbackHint)}</p>${cuts
+    .map(
+      ([title, c]) =>
+        `<h4>${esc(title)}</h4>${stackedRows(
+          c.groups.map((g) => ({
+            label: g.label,
+            people: g.people,
+            parts: [g.specific, g.generic, g.none],
+          })),
+          substanceLegend,
+          "s",
+          [0, 2, 4],
+          X.hiddenRows,
+          [X.group, X.people],
+        )}${suppressedNote(c.suppressed)}`,
+    )
+    .join("")}`;
+
+  // --- themes of strengths and of improvement, side by side
+  const themes = q.themes
+    .map((t) => {
+      const quotes = t.rows.filter(
+        (r) => r.quotes.self.length || r.quotes.manager.length,
+      );
+      const head = [
+        X.theme,
+        fill(X.sideOf, { side: side("self"), n: cell(t.people.self) }),
+        fill(X.sideOf, { side: side("manager"), n: cell(t.people.manager) }),
+      ];
+      return `<h3>${esc(fill(X.themesOf, { question: question(t.dimension) }))}</h3><p class="muted">${esc(X.themesHint)}</p>${
+        t.rows.length
+          ? table(
+              head,
+              t.rows.map((r) => [
+                esc(themeLabel(r.theme, LOCALE)),
+                esc(both(r.self, t.people.self)),
+                esc(both(r.manager, t.people.manager)),
+              ]),
+            )
+          : `<p class="muted">${esc(X.empty)}</p>`
+      }${
+        quotes.length
+          ? `<h4>${esc(X.quotes)}</h4><ul class="quotes">${quotes
+              .map(
+                (r) =>
+                  `<li><b>${esc(themeLabel(r.theme, LOCALE))}</b>${(
+                    ["self", "manager"] as const
+                  )
+                    .flatMap((s) =>
+                      r.quotes[s].map(
+                        (x) => `<br>${esc(side(s))}: “${esc(x)}”`,
+                      ),
+                    )
+                    .join("")}</li>`,
+              )
+              .join("")}</ul>`
+          : ""
+      }`;
+    })
+    .join("");
+
+  // --- agreement and blind spots
+  const a = q.agreement;
+  const agreement = `<h3>${esc(X.agreementTitle)}</h3><p class="muted">${esc(X.agreementHint)}</p>${
+    a.rows.length
+      ? table(
+          [X.question, X.both, X.shared],
+          a.rows.map((r) => [
+            esc(fill(X.agreementOf, { question: question(r.dimension) })),
+            String(r.both),
+            esc(both(r.shared, r.both)),
+          ]),
+        )
+      : `<p class="muted">${esc(X.empty)}</p>`
+  }<p>${esc(X.blindPeople)}: <b>${esc(both(a.blindPeople, a.improvementBoth))}</b></p>${
+    a.blindSpots.length
+      ? `<h4>${esc(X.blindSpots)}</h4><ol>${a.blindSpots
+          .map(
+            (b) =>
+              `<li>${esc(themeLabel(b.theme, LOCALE))} · ${esc(fill(X.ofPeople, { n: b.people, of: a.improvementBoth ?? "–" }))}</li>`,
+          )
+          .join("")}</ol>`
+      : ""
+  }`;
+
+  // --- signals
+  const sig = q.signals;
+  const signalKeys = sig
+    ? [
+        ...new Set([
+          ...sig.rows.map((r) => r.signal),
+          ...[sig.byDepartment, sig.byAccount, sig.byDm].flatMap((c) =>
+            c.groups.flatMap((g) => Object.keys(g.counts)),
+          ),
+        ]),
+      ]
+    : [];
+  // The signals crossed with the manager's retention / engagement answer.
+  const byIndicator = sig?.byIndicator.length
+    ? `<h4>${esc(X.signalsByIndicator)}</h4><p class="muted">${esc(X.signalsByIndicatorHint)}</p>${(
+        ["retention", "engagement"] as const
+      )
+        .map((role) => {
+          const rows = sig.byIndicator.filter((r) => r.indicator === role);
+          return rows.length
+            ? `<h4>${esc(L.indicators[role])}</h4>${table(
+                [X.answer, X.people, X.withSignal],
+                rows.map((r) => [
+                  esc(r.label ? `${r.value} · ${r.label}` : String(r.value)),
+                  String(r.people),
+                  esc(both(r.withSignal, r.people)),
+                ]),
+              )}`
+            : "";
+        })
+        .join("")}`
+    : "";
+  const signalsBase = `<h3>${esc(X.signalsTitle)}</h3><p class="muted">${esc(X.signalsHint)}</p>${
+    sig
+      ? `${tile(share(sig.withAny, sig.people), X.withSignal)}${
+          sig.rows.length
+            ? table(
+                [X.signal, X.people, X.inOwn, X.inManager],
+                sig.rows.map((r) => [
+                  esc(signalLabel(r.signal, LOCALE)),
+                  esc(both(r.people, sig.people)),
+                  esc(cell(r.self)),
+                  esc(cell(r.manager)),
+                ]),
+              )
+            : `<p class="muted">${esc(X.noSignals)}</p>`
+        }${(
+          [
+            [X.cutDepartment, sig.byDepartment],
+            [X.cutAccount, sig.byAccount],
+            [X.cutDm, sig.byDm],
+          ] as const
+        )
+          .map(
+            ([title, c]) =>
+              `<h4>${esc(X.signalsTitle)} · ${esc(title)}</h4>${table(
+                [
+                  X.group,
+                  X.people,
+                  X.withSignal,
+                  ...signalKeys.map((s) => signalLabel(s, LOCALE)),
+                ],
+                c.groups.map((g) => [
+                  esc(g.label),
+                  String(g.people),
+                  esc(cell(g.withAny)),
+                  // a hidden count (null) reads "–", never 0
+                  ...signalKeys.map((s) =>
+                    esc(cell(s in g.counts ? g.counts[s] : 0)),
+                  ),
+                ]),
+              )}${suppressedNote(c.suppressed)}`,
+          )
+          .join("")}`
+      : `<p class="muted">${esc(X.noSignals)}</p>`
+  }`;
+  const signals = `${signalsBase}${byIndicator}`;
+
+  // --- yes / no
+  // By group: one table per question, a row per group of each cut.
+  const yesNoByGroup = q.yesNo.byGroup
+    .map((d) => {
+      const groups = (
+        [
+          [X.cutDepartment, d.byDepartment],
+          [X.cutAccount, d.byAccount],
+          [X.cutDm, d.byDm],
+        ] as const
+      ).flatMap(([title, c]) => c.groups.map((g) => ({ title, g })));
+      // A group with neither figure published says nothing here: counted, not listed.
+      const shown = groups.filter(({ g }) => g.yes !== null || g.no !== null);
+      const none = groups.length - shown.length;
+      return groups.length
+        ? `<h4>${esc(question(d.dimension))}</h4>${
+            shown.length
+              ? table(
+                  [X.cut, X.group, X.people, T.yes, T.no],
+                  shown.map(({ title, g }) => [
+                    esc(title),
+                    esc(g.label),
+                    String(g.people),
+                    esc(both(g.yes, g.people)),
+                    esc(both(g.no, g.people)),
+                  ]),
+                )
+              : ""
+          }${none ? `<p class="muted">${esc(none === 1 ? X.groupHidden : fill(X.groupsHidden, { n: none }))}</p>` : ""}`
+        : "";
+    })
+    .join("");
+  // By cycle: the No of every question, a row per cycle (oldest first).
+  const cycles = new Map<string, { name: string; end: string }>();
+  for (const d of q.yesNo.byCycle) {
+    for (const c of d.cycles) {
+      cycles.set(c.cycleId, { name: c.cycleName, end: c.periodEnd });
+    }
+  }
+  const cycleOrder = [...cycles].sort(
+    ([, a], [, b]) =>
+      a.end.localeCompare(b.end) || a.name.localeCompare(b.name),
+  );
+  const yesNoByCycle = cycleOrder.length
+    ? `<h4>${esc(X.yesNoByCycle)}</h4><p class="muted">${esc(X.yesNoByCycleHint)}</p>${table(
+        [X.cycle, ...q.yesNo.byCycle.map((d) => question(d.dimension))],
+        cycleOrder.map(([id, c]) => [
+          esc(c.name),
+          ...q.yesNo.byCycle.map((d) => {
+            const x = d.cycles.find((y) => y.cycleId === id);
+            if (!x) return esc(T.hiddenCell);
+            return esc(
+              x.no === null
+                ? `${T.hiddenCell} / ${x.people}`
+                : `${T.no} ${x.no} / ${x.people} (${pct(x.no, x.people)})`,
+            );
+          }),
+        ]),
+      )}`
+    : "";
+  const alerts = q.yesNo.rows.filter((r) => r.alert);
+  const yesNo = `<h3>${esc(X.yesNoTitle)}</h3><p class="muted">${esc(X.yesNoHint)}</p>${
+    alerts.length
+      ? `<ul class="alerts">${alerts
+          .map((r) =>
+            esc(
+              fill(
+                r.kind === "security" ? X.alertSecurity : X.alertConversations,
+                { n: r.no ?? 0, of: r.people, share: share(r.no, r.people) },
+              ),
+            ),
+          )
+          .map((t) => `<li>${t}</li>`)
+          .join("")}</ul>`
+      : ""
+  }${
+    q.yesNo.rows.length
+      ? table(
+          [X.question, X.side, X.people, T.yes, T.no],
+          q.yesNo.rows.map((r) => [
+            esc(question(r.dimension)),
+            esc(side(r.side)),
+            String(r.people),
+            esc(both(r.yes, r.people)),
+            esc(both(r.no, r.people)),
+          ]),
+        )
+      : `<p class="muted">${esc(X.empty)}</p>`
+  }${
+    q.yesNo.initiatives.length
+      ? `<h4>${esc(X.initiatives)}</h4>${q.yesNo.initiatives
+          .map(
+            (i) =>
+              `<p><b>${esc(fill(X.initiativesOf, { question: question(i.dimension), n: i.people }))}</b></p>${
+                i.rows.length
+                  ? `<ul>${i.rows.map((r) => `<li>${esc(themeLabel(r.theme, LOCALE))} · ${esc(fill(X.ofPeople, { n: r.people, of: i.people }))}</li>`).join("")}</ul>`
+                  : ""
+              }`,
+          )
+          .join("")}`
+      : ""
+  }${yesNoByGroup ? `<h4>${esc(X.yesNoByGroup)}</h4>${yesNoByGroup}` : ""}${yesNoByCycle}`;
+
+  // --- closed questions: a scale and a distribution of options, never a sentiment
+  const valuedLegend = v
+    ? v.labels.map((l, i) => `${i + 1}${l ? ` · ${l}` : ""}`)
+    : [];
+  // The scale by group and by cycle: best (4) first, as the total bar.
+  const valuedColors = [0, 1, 3, 4] as const;
+  const valuedBars = (
+    rows: { label: string; people: number; counts: (number | null)[] }[],
+    head: string,
+  ) =>
+    stackedRows(
+      rows.map((r) => ({
+        label: r.label,
+        people: r.people,
+        parts: [...r.counts].reverse(),
+      })),
+      [...valuedLegend].reverse(),
+      "s",
+      valuedColors,
+      X.hiddenRows,
+      [head, X.people],
+    );
+  const valuedExtra = v
+    ? (
+        [
+          [X.cutDepartment, v.byDepartment],
+          [X.cutAccount, v.byAccount],
+          [X.cutDm, v.byDm],
+        ] as const
+      )
+        .filter(([, c]) => c.groups.length)
+        .map(
+          ([title, c]) =>
+            `<h4>${esc(X.valuedByGroup)} · ${esc(title)}</h4>${valuedBars(c.groups, X.group)}${suppressedNote(c.suppressed)}`,
+        )
+        .join("") +
+      (v.byCycle.length
+        ? `<h4>${esc(X.valuedByCycle)}</h4>${valuedBars(
+            v.byCycle.map((c, i) => ({
+              ...c,
+              label: shortCycleNames(v.byCycle.map((x) => x.cycleName))[i],
+            })),
+            X.cycle,
+          )}`
+        : "")
+    : "";
+  const bw = q.closed.bestWork;
+  const closed = `<h3>${esc(X.closedTitle)}</h3><p class="muted">${esc(X.closedHint)}</p>${
+    v
+      ? `<h4>${esc(X.valuedTitle)}</h4>${
+          v.counts.every((c) => c !== null)
+            ? svgStacked(
+                [
+                  {
+                    label: `${X.valuedTotal}`,
+                    // best (4) first, so the bar reads from valued to not valued
+                    parts: [...(v.counts as number[])].reverse(),
+                  },
+                ],
+                [...valuedLegend].reverse(),
+                "s",
+                [0, 1, 3, 4],
+              )
+            : table(valuedLegend, [v.counts.map((c) => esc(cell(c)))])
+        }<p class="muted">${esc(X.notValued)}: <b>${esc(both(v.notValued, v.people))}</b></p>${valuedExtra}`
+      : ""
+  }${
+    bw
+      ? `<h4>${esc(fill(X.bestWorkTitle, { n: bw.people }))}</h4>${svgBars(
+          bw.options.flatMap((o) =>
+            o.people === null
+              ? []
+              : [{ label: o.label ?? humanize(o.option), value: o.people }],
+          ),
+        )}${
+          bw.options.some((o) => o.people === null)
+            ? `<p class="muted">${esc(X.hiddenRows)}: ${esc(
+                bw.options
+                  .filter((o) => o.people === null)
+                  .map((o) => o.label ?? humanize(o.option))
+                  .join("; "),
+              )}</p>`
+            : ""
+        }`
+      : ""
+  }`;
+
+  // --- tone (secondary)
+  const sentimentLegend = SENTIMENTS.map((k) => L.qualitative.sentiments[k]);
+  const tone = `<h3>${esc(X.toneTitle)}</h3><p class="muted">${esc(X.toneHint)}</p>${stackedRows(
+    q.tone.map((r) => ({
+      label: `${question(r.dimension)} · ${side(r.side)}`,
+      people: r.people,
+      parts: SENTIMENTS.map((k) => r[k]),
+    })),
+    sentimentLegend,
+    "s",
+    undefined,
+    X.hiddenRows,
+    [X.question, X.people],
+  )}`;
+
+  return [
+    provenance,
+    tiles,
+    substance,
+    feedback,
+    themes,
+    agreement,
+    signals,
+    yesNo,
+    closed,
+    tone,
+  ].join("\n");
 }
 
 function goalsHtml(g: GoalsSection | null): string {
@@ -532,6 +996,8 @@ svg.chart{width:100%;height:auto;font-size:12px;fill:var(--fg)}svg.matrix{max-wi
 .legend{display:flex;flex-wrap:wrap;gap:12px;font-size:.85em}.key i{display:inline-block;width:10px;height:10px;margin-right:4px;border-radius:2px}
 table{border-collapse:collapse;width:100%;font-size:.9em}th,td{border-bottom:1px solid var(--line);padding:4px 6px;text-align:left}
 .scroll{overflow-x:auto}.quotes{color:var(--muted);font-style:italic}[hidden]{display:none!important}
+.note{border:1px solid var(--line);border-radius:8px;padding:8px 12px;margin:8px 0}.note p{margin:.3em 0}.note.demo{border-color:var(--c1);border-width:2px}
+.alerts li{color:var(--c2);font-weight:600}h4{font-size:.95rem;margin:1em 0 .3em}
 `;
 
 const JS = `
@@ -553,12 +1019,13 @@ export function renderHtml(
   report: ArturiaReport,
   labels: Labels = labelsFor(report.locale),
 ): string {
-  const previous = L;
+  const previous = [L, LOCALE] as const;
   L = labels;
+  LOCALE = report.locale;
   try {
     return page(report);
   } finally {
-    L = previous;
+    [L, LOCALE] = previous;
   }
 }
 

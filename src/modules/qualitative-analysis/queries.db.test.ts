@@ -80,25 +80,10 @@ afterAll(closeDb);
 describe("qualitative queries", () => {
   it("sentiment by dimension (HR: everyone; filters)", async () => {
     const rows = await sentimentByDimension(db, hr, { cycleId: c2023 });
-    expect(rows).toEqual([
-      {
-        dimension: "improvement",
-        positive: 0,
-        constructive: 1,
-        neutral: 0,
-        mixed: 0,
-        negative: 1,
-        total: 2,
-      },
-      {
-        dimension: "strengths",
-        positive: 2,
-        constructive: 0,
-        neutral: 0,
-        mixed: 0,
-        negative: 0,
-        total: 2,
-      },
+    // The tone itself is the mock's (its cues change); the counts are fixed.
+    expect(rows.map((r) => [r.dimension, r.total])).toEqual([
+      ["improvement", 2],
+      ["strengths", 2],
     ]);
     const ventas = await sentimentByDimension(db, hr, {
       cycleId: c2023,
@@ -180,32 +165,12 @@ describe("qualitative queries", () => {
 
   it("sentiment vs retention / engagement answers", async () => {
     const rows = await sentimentVsIndicators(db, hr, { cycleId: c2024 });
-    expect(rows).toEqual([
-      {
-        role: "retention",
-        value: 4,
-        option: "A",
-        label: { es: "A", en: "A" },
-        positive: 1,
-        constructive: 1,
-        neutral: 0,
-        mixed: 0,
-        negative: 0,
-        total: 2,
-      },
-      {
-        role: "retention",
-        value: 2,
-        option: "B",
-        label: { es: "B", en: "B" },
-        positive: 1,
-        constructive: 0,
-        neutral: 0,
-        mixed: 0,
-        negative: 1,
-        total: 2,
-      },
+    // Labelled by value with the question's choices (choiceOfValue).
+    expect(rows.map((r) => [r.role, r.value, r.total])).toEqual([
+      ["retention", 4, 2],
+      ["retention", 2, 2],
     ]);
+    expect(rows.every((r) => !("option" in r))).toBe(true);
   });
 
   it("narrows the comments to a manager's answer to an indicator", async () => {
@@ -231,34 +196,13 @@ describe("qualitative queries", () => {
       "insights-sentiment.csv",
       `?cycle=${c2024}&locale=en`,
     );
-    expect(header).toEqual([
-      "dimension",
-      "positive",
-      "constructive",
-      "neutral",
-      "mixed",
-      "negative",
-      "total",
-    ]);
-    expect(rows).toEqual([
-      {
-        dimension: "improvement",
-        positive: "0",
-        constructive: "1",
-        neutral: "0",
-        mixed: "0",
-        negative: "1",
-        total: "2",
-      },
-      {
-        dimension: "strengths",
-        positive: "2",
-        constructive: "0",
-        neutral: "0",
-        mixed: "0",
-        negative: "0",
-        total: "2",
-      },
+    // In people (#129): Adrián and Carla, each once per question; the manager
+    // side only. The numbers of the rest are in reading-exports.db.test.ts.
+    expect(header.slice(0, 3)).toEqual(["dimension", "side", "people"]);
+    expect(header).not.toContain("total");
+    expect(rows.map((r) => [r.dimension, r.side, r.people])).toEqual([
+      ["improvement", "manager", "2"],
+      ["strengths", "manager", "2"],
     ]);
   });
 

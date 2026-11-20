@@ -13,7 +13,7 @@ import { type DrillBase, DrillLink } from "@/components/drill/drill-link";
 import { SEGMENT_SWATCH } from "@/components/engagement/segments";
 import { RiskMatrixView } from "@/components/indicators/risk-matrix-view";
 import { engagementSegments } from "@/modules/engagement/kinds";
-import { SentimentBars } from "@/components/qualitative/sentiment-bars";
+import { SignalsPanel, SubstancePanel } from "@/components/qualitative/reading";
 import { useThemeLabel } from "@/components/qualitative/theme-label";
 import { Link } from "@/i18n/navigation";
 import type { Indicator } from "@/modules/analytics/indicators/types";
@@ -599,37 +599,36 @@ export function ExecutiveReportView({
           ) : null}
         </div>
       ) : null}
-      {report.sentiment || report.themes ? (
-        <div className="grid gap-4 xl:grid-cols-[3fr_2fr]">
-          {report.sentiment ? (
-            <Panel
-              id="exec-sentiment"
-              kind="sentiment"
-              title={t("sentiment")}
-              hint={t("sentimentHint")}
-            >
-              {report.sentiment.length === 0 ? (
-                <Unavailable min={min} />
-              ) : (
-                <SentimentBars
-                  label={t("sentimentChart")}
-                  rows={report.sentiment.map((r) => ({
-                    ...r,
-                    key: r.dimension,
-                    label: dimensionLabel[r.dimension] ?? r.dimension,
-                  }))}
-                  drillOf={(dimension, sentiment) => ({
-                    base,
-                    drill: {
-                      kind: "sentiment",
-                      dimension,
-                      sentiment: sentiment as "positive",
-                    },
-                  })}
-                />
-              )}
-            </Panel>
-          ) : null}
+      {report.substance ? (
+        report.substance.length === 0 && min !== null ? (
+          <Unavailable min={min} />
+        ) : (
+          <SubstancePanel
+            rows={report.substance}
+            dimensionLabel={dimensionLabel}
+            drills={
+              min === null
+                ? { base, scope: { cycle: report.cycleId } }
+                : undefined
+            }
+          />
+        )
+      ) : null}
+      {report.signals !== undefined ? (
+        <SignalsPanel
+          s={report.signals}
+          byGroup={[]}
+          vsIndicators={[]}
+          groupScope={() => null}
+          drills={
+            min === null
+              ? { base, scope: { cycle: report.cycleId } }
+              : undefined
+          }
+        />
+      ) : null}
+      {report.themes ? (
+        <div className="grid gap-4">
           {report.themes ? (
             <Panel
               id="exec-themes"

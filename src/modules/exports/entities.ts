@@ -51,13 +51,15 @@ import {
 } from "@/modules/analytics/indicators";
 import {
   qualitativeGroupBys,
-  sentimentByDimension,
-  sentimentByGroup,
-  type DimensionSentiment,
-  type GroupSentiment,
-  type SentimentCounts,
+  readingSides,
+  sentiments,
+  signals,
+  type QualitativeFilters,
 } from "@/modules/qualitative-analysis";
-import { selfAssessmentReport } from "@/modules/insights/self-assessment";
+import {
+  selfAssessmentReport,
+  type SelfAssessmentReport,
+} from "@/modules/insights/self-assessment";
 import {
   type GoalKpiGroup,
   type GoalOutlier,
@@ -86,6 +88,17 @@ import { requestStatuses } from "@/modules/review-core/request-status";
 import { ReviewError } from "@/modules/review-core/review-errors";
 import { relationships } from "@/modules/templates/constants";
 import { csvResponse, type CsvColumn } from "./csv";
+import {
+  closedExportRows,
+  type ClosedExportRow,
+  type GroupRow,
+  type QuestionSideRow,
+  pctOf,
+  readingByGroup,
+  readingByQuestion,
+  yesNoExportRows,
+  type YesNoExportRow,
+} from "./reading-rows";
 
 /**
  * CSV exports (`/api/v1/export/<entity>.csv`). Every row carries the internal
@@ -124,7 +137,8 @@ type Export<Q, R> = {
   file: (query: Q) => string;
   query: ZodType<Q>;
   rows: (db: DbOrTx, query: Q, locale: Locale) => AsyncIterable<R>;
-  columns: (header: Header, query: Q) => CsvColumn<R>[];
+  /** The header texts in the file's language, the query and the language. */
+  columns: (header: Header, query: Q, locale: Locale) => CsvColumn<R>[];
 };
 
 function defineExport<Q, R>(def: Export<Q, R>) {
@@ -135,7 +149,7 @@ function defineExport<Q, R>(def: Export<Q, R>) {
       return await csvResponse(
         `${def.file(query)}.csv`,
         def.rows(db, query, locale),
-        def.columns(headerIn(locale), query),
+        def.columns(headerIn(locale), query, locale),
       );
     } catch (error) {
       // The first row is read before answering: a cycle (or anything else the
@@ -770,83 +784,215 @@ const indicatorAlertsExport = defineExport({
 
 // ---------------------------------------------------------------- insights
 
+// The open-text reading (#129): the CSVs of /insights/qualitative say the
+// numbers of the screen because they call the same readers (reading-rows.ts)
+// with the same filters. The unit is the PERSON, self and manager never share
+// a row, no text, quotes or names; People's visibility (the API has no actor).
+
+/** The filters of the reading screen, as the page's URL params. */
+const readingQuery = z.object({
+  ...orgQuery,
+  cycle: uuid.optional(),
+  department: z.string().optional(),
+  relationship: z.enum(readingSides).optional(),
+  dimension: z.string().optional(),
+  sentiment: z.enum(sentiments).optional(),
+  theme: z.string().optional(),
+});
+type ReadingQuery = z.infer<typeof readingQuery>;
+
+const readingFiltersOf = (q: ReadingQuery): QualitativeFilters => ({
+  cycleId: q.cycle,
+  department: q.department,
+  relationship: q.relationship,
+  dimension: q.dimension,
+  sentiment: q.sentiment,
+  theme: q.theme,
+  ...orgFiltersOf(q),
+  aggregateOnly: true,
+});
+
 /**
- * Sentiment counts (the five sentiments) per dimension, optionally of one
- * side only (`relationship=self|manager`, as the page's toggle). HR
- * visibility, counts only: no text, names or emails.
+ * The reading per question and side, in people: who has a read answer, the
+ * share of specific / generic / empty answers, the people with each signal
+ * and the tone of the free text (secondary: the question conditions it). One
+ * row per question and side; `people` is each row's n.
  */
 const insightsSentimentExport = defineExport({
   file: () => "insights-sentiment",
-  query: z.object({
-    ...orgQuery,
-    cycle: uuid.optional(),
-    department: z.string().optional(),
-    relationship: z.enum(relationships).optional(),
-  }),
+  query: readingQuery,
   rows: (db, q) =>
-    each(
-      sentimentByDimension(db, DEFAULT_ACTOR, {
-        cycleId: q.cycle,
-        department: q.department,
-        relationship: q.relationship,
-        ...orgFiltersOf(q),
-        aggregateOnly: true,
-      }),
-    ),
-  columns: (h) => [
-    { header: h("dimension"), value: (r: DimensionSentiment) => r.dimension },
-    { header: h("positive"), value: (r) => r.positive },
-    { header: h("constructive"), value: (r) => r.constructive },
-    { header: h("neutral"), value: (r) => r.neutral },
-    { header: h("mixed"), value: (r) => r.mixed },
-    { header: h("negative"), value: (r) => r.negative },
-    { header: h("total"), value: (r) => r.total },
-  ],
+    each(readingByQuestion(db, DEFAULT_ACTOR, readingFiltersOf(q))),
+  columns: (h, _q, locale) => {
+    const r = headerIn(locale);
+    return [
+      { header: h("dimension"), value: (x: QuestionSideRow) => x.dimension },
+      { header: r("side"), value: (x) => x.side },
+      { header: h("people"), value: (x) => x.people },
+      { header: r("substance_people"), value: (x) => x.substancePeople },
+      { header: r("substance_none"), value: (x) => x.none },
+      { header: r("substance_generic"), value: (x) => x.generic },
+      { header: r("substance_specific"), value: (x) => x.specific },
+      {
+        header: r("substance_none_pct"),
+        value: (x) => pctOf(x.none, x.substancePeople),
+      },
+      {
+        header: r("substance_generic_pct"),
+        value: (x) => pctOf(x.generic, x.substancePeople),
+      },
+      {
+        header: r("substance_specific_pct"),
+        value: (x) => pctOf(x.specific, x.substancePeople),
+      },
+      { header: r("signal_any"), value: (x) => x.withAny },
+      ...signals.map((s) => ({
+        header: r(`signal_${s}`),
+        value: (x: QuestionSideRow) => x.signals[s],
+      })),
+      ...sentiments.map((s) => ({
+        header: h(s),
+        value: (x: QuestionSideRow) => x.tone[s],
+      })),
+    ];
+  },
 });
 
 /**
- * Sentiment counts (the five sentiments) per group of people: area, account,
- * project, DM or Santex Lead (`groupBy`), with the people behind each. Same
- * filters as the page; counts only.
+ * The reading per group of people: area, account, project, DM or Santex Lead
+ * (`groupBy`): the people with each signal and the quality of the managers'
+ * feedback (each person by the weaker of their manager's two answers). One
+ * row per group; `people` is its n (the manager feedback has its own).
  */
 const insightsSentimentGroupsExport = defineExport({
   file: ({ groupBy }) => `insights-sentiment-by-${groupBy}`,
-  query: z.object({
-    ...orgQuery,
+  query: readingQuery.extend({
     groupBy: z.enum(qualitativeGroupBys).default("account"),
-    cycle: uuid.optional(),
-    department: z.string().optional(),
-    relationship: z.enum(relationships).optional(),
+  }),
+  rows: (db, q) =>
+    each(readingByGroup(db, DEFAULT_ACTOR, readingFiltersOf(q), q.groupBy)),
+  columns: (h, _q, locale) => {
+    const r = headerIn(locale);
+    const feedback = [
+      ["none", "manager_feedback_none", "manager_feedback_none_pct"],
+      ["generic", "manager_feedback_generic", "manager_feedback_generic_pct"],
+      [
+        "specific",
+        "manager_feedback_specific",
+        "manager_feedback_specific_pct",
+      ],
+    ] as const;
+    return [
+      { header: h("group"), value: (x: GroupRow) => x.group },
+      { header: h("people"), value: (x) => x.people },
+      { header: r("signal_any"), value: (x) => x.withAny },
+      ...signals.map((s) => ({
+        header: r(`signal_${s}`),
+        value: (x: GroupRow) => x.signals[s],
+      })),
+      {
+        header: r("manager_feedback_people"),
+        value: (x) => x.managerFeedback.people,
+      },
+      ...feedback.map(([k, count]) => ({
+        header: r(count),
+        value: (x: GroupRow) => x.managerFeedback[k],
+      })),
+      ...feedback.map(([k, , pct]) => ({
+        header: r(pct),
+        value: (x: GroupRow) =>
+          pctOf(x.managerFeedback[k], x.managerFeedback.people),
+      })),
+    ];
+  },
+});
+
+/**
+ * Sí / No per yes/no question and side, in people (`groupBy=none`, the
+ * default), or per question and group (`groupBy` area, account, project, DM
+ * or Santex Lead). A bare Sí / No is never a comment: it is counted here.
+ */
+const insightsYesNoExport = defineExport({
+  file: ({ groupBy }) =>
+    groupBy === "none" ? "insights-yes-no" : `insights-yes-no-by-${groupBy}`,
+  query: readingQuery.extend({
+    groupBy: z.enum(["none", ...qualitativeGroupBys]).default("none"),
   }),
   rows: (db, q) =>
     each(
-      sentimentByGroup(
+      yesNoExportRows(
         db,
         DEFAULT_ACTOR,
-        {
-          cycleId: q.cycle,
-          department: q.department,
-          relationship: q.relationship,
-          ...orgFiltersOf(q),
-          aggregateOnly: true,
-        },
-        q.groupBy,
+        readingFiltersOf(q),
+        q.groupBy === "none" ? null : q.groupBy,
       ),
     ),
-  columns: (h) => [
-    { header: h("group"), value: (r: GroupSentiment) => r.label },
-    { header: h("people"), value: (r) => r.participants },
-    { header: h("positive"), value: (r) => r.positive },
-    { header: h("constructive"), value: (r) => r.constructive },
-    { header: h("neutral"), value: (r) => r.neutral },
-    { header: h("mixed"), value: (r) => r.mixed },
-    { header: h("negative"), value: (r) => r.negative },
-    { header: h("total"), value: (r) => r.total },
-  ],
+  columns: (h, q, locale) => {
+    const r = headerIn(locale);
+    return [
+      ...(q.groupBy === "none"
+        ? []
+        : [{ header: h("group"), value: (x: YesNoExportRow) => x.group }]),
+      { header: h("dimension"), value: (x: YesNoExportRow) => x.dimension },
+      { header: h("question_prompt_es"), value: (x) => x.prompt.es },
+      { header: h("question_prompt_en"), value: (x) => x.prompt.en },
+      ...(q.groupBy === "none"
+        ? [{ header: r("side"), value: (x: YesNoExportRow) => x.side }]
+        : []),
+      { header: r("yes"), value: (x) => x.yes },
+      { header: r("no"), value: (x) => x.no },
+      { header: h("people"), value: (x) => x.people },
+      { header: r("yes_pct"), value: (x) => pctOf(x.yes, x.people) },
+      { header: r("no_pct"), value: (x) => pctOf(x.no, x.people) },
+    ];
+  },
+});
+
+/**
+ * The closed questions, as the screen reads them: "valued" (1-4) as a scale,
+ * people per value and the ones at 1-2 ("not_valued"), for the whole
+ * selection and, with `groupBy`, per group; "best work" as people per option.
+ * Never a tone. `base_people` is each row's n.
+ */
+const insightsClosedExport = defineExport({
+  file: () => "insights-closed-questions",
+  query: readingQuery.extend({
+    groupBy: z.enum(["none", ...qualitativeGroupBys]).default("none"),
+  }),
+  rows: (db, q, locale) =>
+    each(
+      closedExportRows(
+        db,
+        DEFAULT_ACTOR,
+        readingFiltersOf(q),
+        q.groupBy === "none" ? null : q.groupBy,
+        locale,
+      ),
+    ),
+  columns: (h, _q, locale) => {
+    const r = headerIn(locale);
+    return [
+      { header: h("section"), value: (x: ClosedExportRow) => x.section },
+      { header: h("group"), value: (x) => x.group },
+      { header: h("value"), value: (x) => x.value },
+      { header: r("choice_label"), value: (x) => x.label },
+      { header: h("people"), value: (x) => x.people },
+      { header: r("base_people"), value: (x) => x.base },
+      { header: r("people_pct"), value: (x) => pctOf(x.people, x.base) },
+    ];
+  },
 });
 
 type SelfAssessmentRow = {
-  section: "completion" | "sentiment" | "sentiment_gap" | "theme" | "gap";
+  section:
+    | "completion"
+    | "substance"
+    | "valued"
+    | "best_work"
+    | "agreement"
+    | "blind_spot"
+    | "theme"
+    | "gap";
   group: string | null;
   metric: string;
   value: number;
@@ -866,28 +1012,95 @@ const completionRows = (
     ] as const
   ).map(([metric, value]) => ({ section: "completion", group, metric, value }));
 
-const sentimentRows = (
-  section: "sentiment" | "sentiment_gap",
-  group: string,
-  c: SentimentCounts,
-): SelfAssessmentRow[] =>
-  (
-    [
-      "positive",
-      "constructive",
-      "neutral",
-      "mixed",
-      "negative",
-      "total",
-    ] as const
-  ).map((metric) => ({ section, group, metric, value: c[metric] }));
+/**
+ * The open-text reading of the self reviews (#129), in people, the same
+ * fields the screen draws: substance per question (`substance`, self side),
+ * "valued" 1-4 as a scale (`valued`: one metric per value, `not_valued` for
+ * the people at 1-2, `n`), best work per option (`best_work`), and the
+ * person-manager agreement per question (`agreement`: `both`, `shared`) with
+ * the improvement blind spots (`blind_spot`: people per theme).
+ */
+const readingRows = (r: SelfAssessmentReport): SelfAssessmentRow[] => [
+  ...r.substance.flatMap((s) =>
+    (
+      [
+        ["none", s.none],
+        ["generic", s.generic],
+        ["specific", s.specific],
+        ["people", s.people],
+      ] as const
+    ).map(([metric, value]) => ({
+      section: "substance" as const,
+      group: s.dimension,
+      metric,
+      value,
+    })),
+  ),
+  ...(r.valued
+    ? [
+        ...r.valued.counts.map((value, i) => ({
+          section: "valued" as const,
+          group: null,
+          metric: String(i + 1),
+          value,
+        })),
+        {
+          section: "valued" as const,
+          group: null,
+          metric: "not_valued",
+          value: r.valued.notValued,
+        },
+        {
+          section: "valued" as const,
+          group: null,
+          metric: "n",
+          value: r.valued.people,
+        },
+      ]
+    : []),
+  ...(r.bestWork
+    ? [
+        ...r.bestWork.options.map((o) => ({
+          section: "best_work" as const,
+          group: o.option,
+          metric: "people",
+          value: o.people,
+        })),
+        {
+          section: "best_work" as const,
+          group: null,
+          metric: "n",
+          value: r.bestWork.people,
+        },
+      ]
+    : []),
+  ...r.agreement.rows.flatMap((a) =>
+    (
+      [
+        ["both", a.both],
+        ["shared", a.shared],
+      ] as const
+    ).map(([metric, value]) => ({
+      section: "agreement" as const,
+      group: a.dimension,
+      metric,
+      value,
+    })),
+  ),
+  ...r.agreement.blindSpots.map((b) => ({
+    section: "blind_spot" as const,
+    group: b.theme,
+    metric: "people",
+    value: b.people,
+  })),
+];
 
 /**
  * The self-assessment report (People's visibility) in long format: one row
  * per section × group × metric: completion per department (plus "Otros" and
- * the total), sentiment of the self comments per dimension, self vs manager
- * sentiment per dimension (`<dimension>:self|manager`), theme counts and the
- * gap per question. Group labels in the file's language.
+ * the total), the open-text reading of the self reviews in people
+ * (`readingRows`), theme counts and the gap per question. Group labels in the
+ * file's language.
  */
 const selfAssessmentExport = defineExport({
   file: () => "insights-self-assessment",
@@ -912,27 +1125,18 @@ const selfAssessmentExport = defineExport({
         ...(r.completion.total
           ? completionRows(t("completion.all"), r.completion.total)
           : []),
-        ...r.sentiment.flatMap((d) =>
-          sentimentRows("sentiment", d.dimension, d),
+        ...readingRows(r),
+        // People who cite each theme, per question and side (#129).
+        ...r.themes.flatMap((q) =>
+          q.rows.flatMap((th) =>
+            (["self", "manager"] as const).map((side) => ({
+              section: "theme" as const,
+              group: `${q.dimension}:${th.theme}`,
+              metric: side,
+              value: th[side],
+            })),
+          ),
         ),
-        ...r.sentimentGap.flatMap((g) => [
-          ...(g.self
-            ? sentimentRows("sentiment_gap", `${g.dimension}:self`, g.self)
-            : []),
-          ...(g.manager
-            ? sentimentRows(
-                "sentiment_gap",
-                `${g.dimension}:manager`,
-                g.manager,
-              )
-            : []),
-        ]),
-        ...r.themes.map((th) => ({
-          section: "theme" as const,
-          group: th.theme,
-          metric: "count",
-          value: th.count,
-        })),
         ...r.gap.flatMap((g) =>
           (
             [
@@ -1269,6 +1473,8 @@ const EXPORTS = {
   "insights-alerts": indicatorAlertsExport,
   "insights-sentiment": insightsSentimentExport,
   "insights-sentiment-by": insightsSentimentGroupsExport,
+  "insights-yes-no": insightsYesNoExport,
+  "insights-closed-questions": insightsClosedExport,
   "insights-self-assessment": selfAssessmentExport,
   "insights-goal-kpis": goalKpisExport,
   "insights-goal-outliers": goalOutliersExport,

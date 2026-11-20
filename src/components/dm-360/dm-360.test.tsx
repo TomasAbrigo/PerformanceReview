@@ -56,18 +56,7 @@ const card = (over: Partial<Dm360Card> = {}): Dm360Card => ({
   retention: { mean: 2, n: 5 },
   engagement: { mean: 3, n: 5 },
   risk: { people: 2, of: 5, share: 0.4 },
-  sentiment: {
-    comments: 6,
-    people: 4,
-    counts: { positive: 3, constructive: 1, neutral: 0, mixed: 0, negative: 2 },
-    share: {
-      positive: 0.5,
-      constructive: 1 / 6,
-      neutral: 0,
-      mixed: 0,
-      negative: 1 / 3,
-    },
-  },
+  signals: { people: 2, of: 4, share: 0.5 },
   selfRate: 1,
   managerRate: 0.6,
   trend,
@@ -76,7 +65,7 @@ const card = (over: Partial<Dm360Card> = {}): Dm360Card => ({
       code: "retentionDrop",
       params: { previous: 4, current: 2, delta: 2, cycle: "H1 2024" },
     },
-    { code: "negativeSentiment", params: { percent: 33, comments: 6 } },
+    { code: "signals", params: { percent: 50, people: 2, of: 4 } },
   ],
   ...over,
 });
@@ -122,16 +111,13 @@ describe("Dm360View", () => {
     expect(within(c).getByTestId("dm-risk")).toHaveTextContent("40 % (2 de 5)");
     expect(within(c).getByTestId("dm-self")).toHaveTextContent("100 %");
     expect(within(c).getByTestId("dm-manager")).toHaveTextContent("60 %");
-    expect(within(c).getByTestId("dm-comments")).toHaveTextContent(
-      "6 de 4 personas",
-    );
-    expect(within(c).getByTestId("dm-sentiment")).toHaveTextContent(
-      "Positivo 50 %",
+    expect(within(c).getByTestId("dm-signals")).toHaveTextContent(
+      "2 de 4 personas con comentarios leídos",
     );
     const lines = within(c).getByTestId("dm-insights").querySelectorAll("li");
     expect([...lines].map((l) => l.textContent)).toEqual([
       "La retención media cayó 2 puntos desde H1 2024 (de 4 a 2).",
-      "El 33 % de los 6 comentarios es negativo.",
+      "El 50 % de las personas con comentarios leídos (2 de 4) tiene alguna señal a atender.",
     ]);
   });
 
@@ -187,7 +173,7 @@ describe("Dm360View", () => {
               retention: null,
               engagement: null,
               risk: null,
-              sentiment: null,
+              signals: null,
               selfRate: null,
               managerRate: null,
               insights: [{ code: "noData" }],
@@ -206,7 +192,7 @@ describe("Dm360View", () => {
       ),
     ).toEqual(["Equipo 1", "Equipo 2", "Otros"]);
     expect(within(cards[0]).getByTestId("dm-retention")).toHaveTextContent("–");
-    expect(within(cards[0]).queryByTestId("dm-sentiment")).toBeNull();
+    expect(within(cards[0]).getByTestId("dm-signals")).toHaveTextContent("–");
     expect(within(cards[0]).getByTestId("dm-insights")).toHaveTextContent(
       "Todavía no hay datos suficientes para leer este equipo.",
     );

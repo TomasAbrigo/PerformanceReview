@@ -18,7 +18,6 @@ import { RunButton } from "./run-button";
 import { dimensionLabels } from "./dimension-labels";
 import { QualitativeFilters } from "./filters";
 import { SideToggle } from "./side-toggle";
-import { ByDimension, ByGroup, Indicators, Kpis, Themes, Trend } from "./views";
 
 vi.mock("@/i18n/navigation", () => ({
   Link: ({ href, children, ...rest }: ComponentProps<"a">) => (
@@ -39,15 +38,6 @@ const renderIn = (locale: "es" | "en", ui: ReactNode) =>
       {ui}
     </NextIntlClientProvider>,
   );
-const locales = ["es", "en"] as const;
-const counts = {
-  positive: 3,
-  constructive: 1,
-  neutral: 2,
-  mixed: 1,
-  negative: 1,
-  total: 8,
-};
 const comment: CommentRow = {
   answerId: "a1",
   cycleName: "2023",
@@ -59,135 +49,12 @@ const comment: CommentRow = {
   text: "Muy buena comunicación",
   sentiment: "positive",
   themes: ["comunicacion"],
+  substance: "specific",
+  signals: [],
   confidence: 0.8,
-  source: "mock",
+  source: "anthropic",
+  demo: false,
 };
-
-describe.each(locales)("qualitative views (%s)", (locale) => {
-  it("stacked bars per dimension and per cycle, with the legend", () => {
-    renderIn(
-      locale,
-      <>
-        <ByDimension
-          rows={[{ dimension: "strengths", ...counts }]}
-          dimensionLabel={{
-            strengths: locale === "es" ? "Fortalezas" : "Strengths",
-          }}
-        />
-        <Trend
-          points={[
-            {
-              cycleId: "c",
-              cycleName: "Ciclo 2023",
-              periodEnd: "2023-12-31",
-              ...counts,
-            },
-          ]}
-        />
-      </>,
-    );
-    expect(
-      screen.getAllByRole("group", { name: /Barras apiladas|Stacked bars/ }),
-    ).toHaveLength(2);
-    expect(screen.getAllByTestId("sentiment-bar")).toHaveLength(2);
-    expect(
-      screen.getAllByText(locale === "es" ? "Fortalezas" : "Strengths").length,
-    ).toBeGreaterThan(0);
-    // Legend: the five sentiments, in order, so color is never the only cue.
-    const names =
-      locale === "es"
-        ? ["Positivo", "Constructivo", "Neutral", "Mixto", "Negativo"]
-        : ["Positive", "Constructive", "Neutral", "Mixed", "Negative"];
-    for (const legend of screen.getAllByRole("list", {
-      name: locale === "es" ? "Leyenda de sentimientos" : "Sentiment legend",
-    })) {
-      expect(
-        within(legend)
-          .getAllByRole("listitem")
-          .map((li) => li.textContent),
-      ).toEqual(names);
-    }
-    // The bar's tooltip names the five counts.
-    expect(
-      screen.getAllByTestId("sentiment-bar")[0].getAttribute("title"),
-    ).toMatch(locale === "es" ? /2 neutrales, 1 mixtos/ : /2 neutral, 1 mixed/);
-  });
-
-  it("offers the bars as a table too (counts per sentiment)", () => {
-    renderIn(
-      locale,
-      <ByDimension
-        rows={[{ dimension: "strengths", ...counts }]}
-        dimensionLabel={{ strengths: "S" }}
-      />,
-    );
-    const table = screen.getByRole("table");
-    expect(within(table).getAllByRole("columnheader")).toHaveLength(7);
-    expect(within(table).getByText("8")).toBeInTheDocument();
-  });
-
-  it("shows the total and each sentiment's share, count and scale; values open their comments", () => {
-    renderIn(
-      locale,
-      <Kpis
-        counts={counts}
-        drills={{
-          base: { pathname: "/insights/qualitative", query: {} },
-          scope: {},
-        }}
-        thresholds={{ goodPct: 80, watchPct: 60 }}
-      />,
-    );
-    const kpis = screen.getByTestId("qualitative-kpis");
-    const total = within(kpis).getByRole("region", { name: "Total" });
-    expect(within(total).getByText("8")).toBeInTheDocument();
-    const positive = within(kpis).getByRole("region", {
-      name: locale === "es" ? "Positivos" : "Positive",
-    });
-    expect(positive).toHaveTextContent(locale === "es" ? "38 %" : "38%");
-    expect(positive).toHaveTextContent(
-      locale === "es" ? "3 comentarios" : "3 comments",
-    );
-    expect(within(positive).getByRole("meter")).toBeInTheDocument();
-    expect(within(positive).getByRole("link").getAttribute("data-drill")).toBe(
-      "comments:sentiment=positive",
-    );
-    // Negative and mixed shares carry a tone.
-    const negative = within(kpis).getByRole("region", {
-      name: locale === "es" ? "Negativos" : "Negative",
-    });
-    expect(negative.getAttribute("data-tone")).toBe("good");
-    expect(within(kpis).getAllByRole("region")).toHaveLength(6);
-  });
-
-  it("themes with quotes, indicators and empty states", () => {
-    renderIn(
-      locale,
-      <>
-        <Themes
-          themes={[
-            {
-              theme: "comunicacion",
-              count: 8,
-              sentiment: counts,
-              quotes: ["[P1] avisa antes"],
-            },
-          ]}
-        />
-        <Indicators rows={[]} />
-      </>,
-    );
-    expect(
-      screen.getByText(/^(comunicaci[oó]n|communication)$/i),
-    ).toBeInTheDocument();
-    expect(screen.getByText("[P1] avisa antes")).toBeInTheDocument();
-    // Each theme carries its stacked sentiment.
-    expect(screen.getByTestId("theme-sentiment")).toBeInTheDocument();
-    expect(
-      screen.getByText(locale === "es" ? /No hay respuestas/ : /No retention/),
-    ).toBeInTheDocument();
-  });
-});
 
 describe("CommentsTable list", () => {
   const rows: CommentRow[] = [
@@ -268,6 +135,7 @@ describe("QualitativeFilters", () => {
       <QualitativeFilters
         params={{ aggregate: false, side: "manager" }}
         cycles={[]}
+        cycle="all"
         departments={[]}
         dimensions={["strengths"]}
         themes={[]}
@@ -275,7 +143,7 @@ describe("QualitativeFilters", () => {
         showAggregate={false}
       />,
     );
-    const sentiment = screen.getByLabelText("Sentimiento");
+    const sentiment = screen.getByLabelText("Tono");
     expect(
       within(sentiment)
         .getAllByRole("option")
@@ -321,6 +189,41 @@ describe("dimensionLabels", () => {
     expect(
       dimensionLabels(["weird_key"], { ...base, locale: "en" }).weird_key,
     ).toBe("Something odd?");
+  });
+
+  it("names the Santex yes/no questions in the view's language, never their key (#129)", () => {
+    const named = {
+      security: "Seguridad de la información",
+      conversations: "Conversaciones frecuentes",
+      socialImpact: "Impacto social",
+      environmentalImpact: "Impacto ambiental",
+    };
+    const prompts = {
+      custom_am_i_following: {
+        es: "Am I following all Information Security Policies?",
+        en: "Am I following all Information Security Policies?",
+      },
+      custom_talk: {
+        es: "Do I speak with this employee frequently enough?",
+        en: "Do I speak with this employee frequently enough?",
+      },
+      custom_soc: {
+        es: 'Do I contribute with initiatives related to "Social impact"? How?',
+        en: 'Do I contribute with initiatives related to "Social impact"? How?',
+      },
+      custom_env: {
+        es: 'Do I contribute with initiatives related to "Environmental impact"? How?',
+        en: 'Do I contribute with initiatives related to "Environmental impact"? How?',
+      },
+    };
+    expect(
+      dimensionLabels(Object.keys(prompts), { ...base, prompts, named }),
+    ).toEqual({
+      custom_am_i_following: "Seguridad de la información",
+      custom_talk: "Conversaciones frecuentes",
+      custom_soc: "Impacto social",
+      custom_env: "Impacto ambiental",
+    });
   });
 });
 
@@ -439,64 +342,13 @@ describe("RunButton / ImportLabelsForm / params", () => {
 });
 
 describe("org cuts in the qualitative view", () => {
-  const sentiment = {
-    positive: 2,
-    constructive: 1,
-    neutral: 0,
-    mixed: 0,
-    negative: 1,
-    total: 4,
-  };
-
-  it("the by-group panel names each group with its people, numbering the teams that come without a name", () => {
-    renderIn(
-      "es",
-      <ByGroup
-        rows={[
-          { key: "Cuenta A", label: "Cuenta A", participants: 3, ...sentiment },
-          { key: "g1", label: null, participants: 5, ...sentiment },
-          { key: "g2", label: null, participants: 5, ...sentiment },
-          { key: null, label: null, participants: 1, ...sentiment },
-        ]}
-      />,
-    );
-
-    const panel = screen.getByTestId("sentiment-by-group");
-    expect(
-      within(panel).getByRole("heading", {
-        name: "¿Qué equipos reciben comentarios más negativos?",
-      }),
-    ).toBeInTheDocument();
-    const labels = [
-      ...panel.querySelectorAll(
-        "table tbody th, [data-testid=sentiment-bar] > span",
-      ),
-    ]
-      .map((n) => n.textContent)
-      .filter((t) => t?.includes("·"));
-    expect(labels).toEqual(
-      expect.arrayContaining([
-        "Cuenta A · 3 personas",
-        "Equipo 1 · 5 personas",
-        "Equipo 2 · 5 personas",
-        "Sin asignar · 1 persona",
-      ]),
-    );
-  });
-
-  it("says there is nothing to show without groups", () => {
-    renderIn("en", <ByGroup rows={[]} />);
-
-    expect(screen.getByTestId("sentiment-by-group")).toBeInTheDocument();
-    expect(screen.getByText(/No/)).toBeInTheDocument();
-  });
-
   it("the filters offer the org selects and the links keep them", () => {
     renderIn(
       "es",
       <QualitativeFilters
         params={parseQualitativeParams({ account: "Cuenta A", groupBy: "dm" })}
         cycles={[]}
+        cycle="all"
         departments={[]}
         dimensions={[]}
         themes={[]}

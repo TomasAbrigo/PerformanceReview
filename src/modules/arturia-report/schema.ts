@@ -3,8 +3,12 @@
 import { z } from "zod";
 
 export const SCHEMA_VERSION = "arturia-report.v1";
-/** Bumped on every additive change of v1 (new optional field / section). */
-export const SCHEMA_MINOR = 5;
+/**
+ * Bumped on every change of v1: a new optional field or section, or one of
+ * the few incompatible changes made while nobody consumes the file (settled in
+ * the history of docs/arturia-schema.md).
+ */
+export const SCHEMA_MINOR = 6;
 
 const int = z.number().int().nonnegative();
 const counts = z.array(int);
@@ -14,19 +18,6 @@ const group = z.object({
   label: z.string(),
   n: int,
   other: z.boolean(),
-});
-
-/**
- * Comments per sentiment. `neutral` and `mixed` came with minor 2 (before it
- * a report had three sentiments): a report without them reads as zero.
- */
-const sentimentCounts = z.object({
-  positive: int,
-  constructive: int,
-  neutral: int.default(0),
-  mixed: int.default(0),
-  negative: int,
-  total: int,
 });
 
 const executive = z.object({
@@ -196,52 +187,302 @@ const indicators = z.object({
   ),
 });
 
-const sentimentRow = sentimentCounts.extend({
-  dimension: z.string(),
-  other: z.boolean(),
-});
-const themeRow = z.object({
-  theme: z.string(),
-  count: int,
-  other: z.boolean(),
-  /** Sentiment of the theme's comments (minor 2; `total` = `count`). */
-  sentiment: sentimentCounts.optional(),
-  quotes: z.array(z.string()),
+// ---------------------------------------------------------- qualitative
+//
+// The open-text reading (#128, #129), rebuilt on the readers of the
+// qualitative module so the report says what /insights/qualitative says. The
+// unit of every figure is the PERSON (a distinct reviewee of the cycle): `n` /
+// `people` count people, never answers, and the self and the manager side are
+// never added together. In the anonymized report a figure is `null` when it
+// covers fewer people than the minimum or when it could be worked out from
+// the ones shown (complementary suppression, #130).
+
+const side = z.enum(["self", "manager"]);
+/** People; null when the anonymized report does not publish the figure. */
+const shown = int.nullable();
+
+/** Where the labels come from: provider, model, last run, share corrected by people. */
+const provenance = z.object({
+  /** Answers read (effective labels) in the cycle. */
+  labels: int,
+  /** Of them: corrected by a person, imported, read by a machine. */
+  human: int,
+  imported: int,
+  machine: int,
+  /** `human / labels` (0-1); null without labels. */
+  correctedShare: z.number().min(0).max(1).nullable(),
+  /** The machine labels are the keyword heuristic of the mock: a demo, not an analysis. */
+  demo: z.boolean(),
+  providers: z.array(
+    z.object({
+      provider: z.string(),
+      model: z.string().nullable(),
+      labels: int,
+    }),
+  ),
+  /** The latest succeeded run of a provider (not an import), ISO 8601. */
+  lastRun: z
+    .object({
+      provider: z.string(),
+      model: z.string().nullable(),
+      finishedAt: z.string(),
+    })
+    .nullable(),
 });
 
-/** Sentiment and themes of the comments one side wrote (minor 2). */
-const qualitativeSide = z.object({
-  /** null when anonymized and some group was suppressed (no differencing). */
-  totals: sentimentCounts.nullable(),
-  sentimentByDimension: z.array(sentimentRow),
-  topThemes: z.array(themeRow),
-  suppressed: int,
+/** The name of each question the section mentions, in the report's language. */
+const questionName = z.object({ dimension: z.string(), label: z.string() });
+
+const substanceCells = { none: shown, generic: shown, specific: shown };
+/** People per substance of their answer to one question, one side. */
+const substanceRow = z.object({
+  dimension: z.string(),
+  side,
+  /** People whose answer has a substance (the row's base, at least the minimum). */
+  people: int,
+  ...substanceCells,
+});
+/** The manager's feedback of the people of a group (the weaker of strengths and improvement). */
+const feedbackGroup = z.object({
+  label: z.string(),
+  other: z.boolean(),
+  people: int,
+  ...substanceCells,
+});
+/** A cut by org attribute: its groups (small ones folded into "Otros") and the people left out. */
+const cut = <T extends z.ZodType>(row: T) =>
+  z.object({ groups: z.array(row), suppressed: int });
+
+const themesOfQuestion = z.object({
+  dimension: z.string(),
+  /**
+   * People with a read answer to the question, per side (the denominators);
+   * null for a side with fewer people than the minimum (anonymized).
+   */
+  people: z.object({ self: shown, manager: shown }),
+  rows: z.array(
+    z.object({
+      theme: z.string(),
+      /** People who cite the theme on each side. */
+      self: shown,
+      manager: shown,
+      /** Up to 2 representative, pseudonymized quotes per side; always empty when anonymized. */
+      quotes: z.object({
+        self: z.array(z.string()),
+        manager: z.array(z.string()),
+      }),
+    }),
+  ),
+});
+
+const agreement = z.object({
+  rows: z.array(
+    z.object({
+      dimension: z.enum(["strengths", "improvement"]),
+      /** People whose two answers (self and manager) have themes. */
+      both: int,
+      /** Of them, people where both name at least one same theme. */
+      shared: shown,
+    }),
+  ),
+  /** Improvement themes the manager names and the person does not. */
+  blindSpots: z.array(z.object({ theme: z.string(), people: int })),
+  /** People with both improvement answers themed and at least one blind spot. */
+  blindPeople: shown,
+  /** People with both improvement answers themed (the base of `blindPeople`); null under the minimum. */
+  improvementBoth: shown,
+});
+
+const signalGroup = z.object({
+  label: z.string(),
+  other: z.boolean(),
+  /** People with a read answer in the group (at least the minimum). */
+  people: int,
+  withAny: shown,
+  /** People with each signal (by signal key). */
+  counts: z.record(z.string(), shown),
+});
+const signalsBlock = z.object({
+  /** People with at least one read answer (the base). */
+  people: int,
+  /** People with at least one signal. */
+  withAny: shown,
+  rows: z.array(
+    z.object({
+      signal: z.string(),
+      /** People with the signal in any answer (either side). */
+      people: int,
+      /** People with it in their own answers / in their manager's. */
+      self: shown,
+      manager: shown,
+    }),
+  ),
+  byDepartment: cut(signalGroup),
+  byAccount: cut(signalGroup),
+  byDm: cut(signalGroup),
+  /**
+   * Signals crossed with the manager's retention / engagement answer: one row
+   * per person (the latest manager review of the participant) and answer value
+   * (1-5), with how many of those people carry some signal.
+   */
+  byIndicator: z.array(
+    z.object({
+      indicator: z.enum(["retention", "engagement"]),
+      value: z.number().int().min(1).max(5),
+      /** The question's choice for the value, in the report's language (never the raw answer text). */
+      label: z.string().nullable(),
+      /** People with that answer (at least the minimum). */
+      people: int,
+      /** Of them, people with at least one signal. */
+      withSignal: shown,
+    }),
+  ),
+});
+
+/** The Yes / No of one group (a cut by area, account or DM). */
+const yesNoGroup = z.object({
+  label: z.string(),
+  other: z.boolean(),
+  /** People of the group who answered Yes or No. */
+  people: int,
+  yes: shown,
+  no: shown,
+});
+
+const yesNoRow = z.object({
+  dimension: z.string(),
+  side,
+  /** What the question asks: `security` and `conversations` alert on a No. */
+  kind: z.enum(["security", "conversations", "impact", "other"]),
+  /** People who answered Yes or No. */
+  people: int,
+  yes: shown,
+  no: shown,
+  /** A question whose No is an alert, with at least one No (and the figures published). */
+  alert: z.boolean(),
+});
+
+/** The "valued" scale of one group (a cut by area, account or DM). */
+const valuedGroup = z.object({
+  label: z.string(),
+  other: z.boolean(),
+  people: int,
+  /** People per value 1..4 (index 0 = value 1). */
+  counts: z.array(shown),
+  /** People at 1-2; null when it would give a hidden cell away. */
+  notValued: shown,
+});
+
+const closed = z.object({
+  /** "How well does the company recognize my value?" (1-4), people per value. */
+  valued: z
+    .object({
+      people: int,
+      /** People per value 1..4 (index 0 = value 1). */
+      counts: z.array(shown),
+      /** The question's choice per value 1..4, in the report's language. */
+      labels: z.array(z.string().nullable()),
+      /** People at 1-2: they do not feel valued (or are not sure). */
+      notValued: shown,
+      /** The same scale by group: small groups folded into "Otros". */
+      byDepartment: cut(valuedGroup),
+      byAccount: cut(valuedGroup),
+      byDm: cut(valuedGroup),
+      /** The same scale in every cycle (oldest first); a cycle under the minimum is left out. */
+      byCycle: z.array(
+        z.object({
+          cycleId: z.string(),
+          cycleName: z.string(),
+          periodEnd: z.string(),
+          people: int,
+          counts: z.array(shown),
+          notValued: shown,
+        }),
+      ),
+    })
+    .nullable(),
+  /** "What would help me do my best work?": people per chosen option. */
+  bestWork: z
+    .object({
+      people: int,
+      options: z.array(
+        z.object({
+          option: z.string(),
+          label: z.string().nullable(),
+          people: shown,
+        }),
+      ),
+    })
+    .nullable(),
+});
+
+/** The tone of the free text of one question and side (secondary). */
+const toneRow = z.object({
+  dimension: z.string(),
+  side,
+  people: int,
+  positive: shown,
+  constructive: shown,
+  neutral: shown,
+  mixed: shown,
+  negative: shown,
 });
 
 const qualitative = z.object({
-  /** Everything in the cycle, all sides (minor 2); null as `qualitativeSide.totals`. */
-  totals: sentimentCounts.nullable().optional(),
-  sentimentByDimension: z.array(sentimentRow),
-  trend: z.array(
-    sentimentCounts.extend({
-      cycleId: z.string(),
-      cycleName: z.string(),
-      periodEnd: z.string(),
-    }),
-  ),
-  topThemes: z.array(themeRow),
-  suppressed: int,
-  /**
-   * The same cut by who wrote the comments (review relationship `self` or
-   * `manager`, as People's Propios / Manager toggle); null: that side has no
-   * labeled comments. Minor 2.
-   */
-  bySide: z
-    .object({
-      self: qualitativeSide.nullable(),
-      manager: qualitativeSide.nullable(),
-    })
-    .optional(),
+  /** Distinct people with a read answer in the cycle (the base of the section). */
+  people: int,
+  provenance,
+  /** The name of every question key used below, in the report's language. */
+  questions: z.array(questionName),
+  substance: z.array(substanceRow),
+  managerFeedback: z.object({
+    byDepartment: cut(feedbackGroup),
+    byAccount: cut(feedbackGroup),
+    byDm: cut(feedbackGroup),
+  }),
+  /** The themes of strengths and of improvement, self and manager side by side. */
+  themes: z.array(themesOfQuestion),
+  agreement,
+  /** null when nobody has a read answer in the group the minimum allows. */
+  signals: signalsBlock.nullable(),
+  yesNo: z.object({
+    rows: z.array(yesNoRow),
+    /** Yes / No per question and group (area, account, DM): small groups folded into "Otros". */
+    byGroup: z.array(
+      z.object({
+        dimension: z.string(),
+        byDepartment: cut(yesNoGroup),
+        byAccount: cut(yesNoGroup),
+        byDm: cut(yesNoGroup),
+      }),
+    ),
+    /** Yes / No per question in every cycle (oldest first); a cycle under the minimum is left out. */
+    byCycle: z.array(
+      z.object({
+        dimension: z.string(),
+        cycles: z.array(
+          z.object({
+            cycleId: z.string(),
+            cycleName: z.string(),
+            periodEnd: z.string(),
+            people: int,
+            yes: shown,
+            no: shown,
+          }),
+        ),
+      }),
+    ),
+    /** Types of initiative (themes of the "how") per yes/no question. */
+    initiatives: z.array(
+      z.object({
+        dimension: z.string(),
+        people: int,
+        rows: z.array(z.object({ theme: z.string(), people: int })),
+      }),
+    ),
+  }),
+  closed,
+  tone: z.array(toneRow),
 });
 
 /** The goal figures of a group; `n` is its people (cycle participants). */
@@ -452,7 +693,6 @@ export type ExecutiveSection = z.infer<typeof executive>;
 export type CompletionSection = z.infer<typeof completion>;
 export type IndicatorsSection = z.infer<typeof indicators>;
 export type QualitativeSection = z.infer<typeof qualitative>;
-export type QualitativeSideSection = z.infer<typeof qualitativeSide>;
 export type GoalsSection = z.infer<typeof goals>;
 export type EngagementMonthlySection = z.infer<typeof engagementMonthly>;
 export type PersonRow = z.infer<typeof person>;

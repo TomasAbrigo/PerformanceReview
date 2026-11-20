@@ -21,15 +21,6 @@ afterAll(async () => {
   await closeDb();
 });
 
-const counts = (positive: number, constructive: number, negative: number) => ({
-  neutral: 0,
-  mixed: 0,
-  positive,
-  constructive,
-  negative,
-  total: positive + constructive + negative,
-});
-
 describe("selfAssessmentReport", () => {
   it("People: completion, self sentiment and themes, the gap", async () => {
     const r = await selfAssessmentReport(db, hr, {
@@ -48,26 +39,18 @@ describe("selfAssessmentReport", () => {
       ["Ingeniería", 3, 4],
       ["Producto", 0, 0],
     ]);
-    expect(r.sentiment).toEqual([
-      { dimension: "strengths", ...counts(2, 0, 1) },
-    ]);
-    expect(r.themes.map((t) => [t.theme, t.count])).toEqual([
-      ["equipo", 2],
-      ["calidad", 1],
-    ]);
+    // The open-text reading per person (#129): self strengths of 3 people.
+    expect(r.substance.find((x) => x.dimension === "strengths")?.people).toBe(
+      3,
+    );
+    const strengths = r.themes.find((t) => t.dimension === "strengths");
+    expect(strengths?.people.self).toBeGreaterThan(0);
     // Retention: self 5 and 2 (normalized 1 and .25), manager 2 and 2 (.25).
     expect(r.gap).toHaveLength(1);
     expect(r.gap[0].n).toBe(2);
     expect(r.gap[0].meanSelf).toBeCloseTo(0.625);
     expect(r.gap[0].meanManager).toBeCloseTo(0.25);
     expect(r.gap[0].meanGap).toBeCloseTo(-0.375);
-    expect(r.sentimentGap).toEqual([
-      {
-        dimension: "strengths",
-        self: counts(2, 0, 1),
-        manager: counts(1, 1, 0),
-      },
-    ]);
   });
 
   it("a manager: only their direct reports", async () => {
@@ -76,7 +59,7 @@ describe("selfAssessmentReport", () => {
       groupBy: "department",
     });
     expect(r.completion.groups.map((g) => g.key)).toEqual(["Producto"]);
-    expect(r.sentiment).toEqual([]);
+    expect(r.substance).toEqual([]);
     expect(r.gap).toEqual([]);
   });
 
@@ -91,8 +74,8 @@ describe("selfAssessmentReport", () => {
     expect(masked.completion.others).toMatchObject({ participants: 9 });
     expect(masked.completion.suppressed).toBe(0);
     // 3 people wrote a self comment: under 5, nothing shows.
-    expect(masked.sentiment).toEqual([]);
-    expect(masked.themes).toEqual([]);
+    expect(masked.substance).toEqual([]);
+    expect(masked.themes.every((t) => t.rows.length === 0)).toBe(true);
     expect(masked.gap).toEqual([]);
 
     await setSetting(db, hr, "aggregation.minGroupSize", 2);
@@ -101,10 +84,14 @@ describe("selfAssessmentReport", () => {
       groupBy: "department",
     });
     await setSetting(db, hr, "aggregation.minGroupSize", 5);
-    expect(open.sentiment).toEqual([
-      { dimension: "strengths", ...counts(2, 0, 1) },
-    ]);
-    expect(open.themes.every((t) => t.quotes.length === 0)).toBe(true);
+    expect(
+      open.substance.find((x) => x.dimension === "strengths")?.people,
+    ).toBe(3);
+    expect(
+      open.themes.every((t) =>
+        t.rows.every((x) => !x.quotes.self.length && !x.quotes.manager.length),
+      ),
+    ).toBe(true);
     expect(open.gap.map((g) => g.n)).toEqual([2]);
   });
 
@@ -130,28 +117,42 @@ describe("selfAssessmentReport", () => {
       value: "3",
     });
     expect(rows).toContainEqual({
-      section: "sentiment",
-      group: "strengths",
-      metric: "negative",
-      value: "1",
-    });
-    expect(rows).toContainEqual({
       section: "completion",
       group: "Total",
       metric: "n",
       value: "9",
     });
-    expect(rows).toContainEqual({
-      section: "sentiment_gap",
-      group: "strengths:manager",
-      metric: "constructive",
-      value: "1",
+    // The open-text reading, in people, from the same report as the screen;
+    // the old sentiment-by-answer sections are gone.
+    const report = await selfAssessmentReport(db, hr, {
+      cycleId: s.c2.cycleId,
+      groupBy: "department",
     });
-    expect(rows).toContainEqual({
-      section: "theme",
-      group: "equipo",
-      metric: "count",
-      value: "2",
-    });
+    const strengths = report.substance.find((x) => x.dimension === "strengths");
+    expect(strengths?.people).toBe(3);
+    for (const metric of ["none", "generic", "specific", "people"] as const) {
+      expect(rows).toContainEqual({
+        section: "substance",
+        group: "strengths",
+        metric,
+        value: String(strengths?.[metric]),
+      });
+    }
+    expect(rows.filter((r) => r.section === "agreement").length).toBe(
+      report.agreement.rows.length * 2,
+    );
+    expect(
+      rows.some((r) => ["sentiment", "sentiment_gap"].includes(r.section)),
+    ).toBe(false);
+    // Themes in people, per question and side (#129), like the screen.
+    const themes = rows.filter((r) => r.section === "theme");
+    expect(themes.length).toBeGreaterThan(0);
+    expect(
+      themes.every(
+        (r) =>
+          /^(strengths|improvement):/.test(String(r.group)) &&
+          ["self", "manager"].includes(String(r.metric)),
+      ),
+    ).toBe(true);
   });
 });

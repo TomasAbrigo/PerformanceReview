@@ -66,7 +66,7 @@ export function DrillView({ result }: { result: DrillResult }) {
           ...result.comments.map((c) => [
             c.personName,
             c.dimension,
-            ts(c.sentiment),
+            c.sentiment ? ts(c.sentiment) : "",
             c.text,
           ]),
         ])
@@ -173,7 +173,8 @@ export function DrillView({ result }: { result: DrillResult }) {
                   “{c.text}”
                 </blockquote>
                 <p className="mt-2 text-xs text-muted-foreground">
-                  {c.personName} · {ts(c.sentiment)}
+                  {c.personName}
+                  {c.sentiment ? ` · ${ts(c.sentiment)}` : null}
                 </p>
               </li>
             ))}

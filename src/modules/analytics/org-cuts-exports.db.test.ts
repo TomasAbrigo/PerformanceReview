@@ -135,9 +135,10 @@ describe("the CSV exports take the org cuts", () => {
     ).resolves.toBeDefined();
   });
 
-  it("insights-sentiment filters by account; insights-sentiment-by groups the comments", async () => {
+  it("insights-sentiment filters by account; insights-sentiment-by groups the people", async () => {
+    // One row per question and side, in people: 3 self and 2 manager readers.
     const total = (rows: Record<string, string>[]) =>
-      rows.reduce((n, r) => n + Number(r.total), 0);
+      rows.reduce((n, r) => n + Number(r.people), 0);
     const all = await table(
       "insights-sentiment.csv",
       `?cycle=${cycle}&locale=en`,
@@ -158,18 +159,13 @@ describe("the CSV exports take the org cuts", () => {
       "insights-sentiment-by.csv",
       `?cycle=${cycle}&groupBy=dm&locale=en`,
     );
-    expect(groups.header).toEqual([
+    expect(groups.header.slice(0, 3)).toEqual([
       "group",
       "people",
-      "positive",
-      "constructive",
-      "neutral",
-      "mixed",
-      "negative",
-      "total",
+      "signal_any",
     ]);
-    expect(groups.rows.map((r) => [r.group, r.people, r.total])).toEqual([
-      ["Diego", "3", "5"],
+    expect(groups.rows.map((r) => [r.group, r.people])).toEqual([
+      ["Diego", "3"],
     ]);
   });
 });

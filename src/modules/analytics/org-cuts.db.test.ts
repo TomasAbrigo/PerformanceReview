@@ -451,11 +451,11 @@ describe("executive report", () => {
     expect(all.completion.participants).toBe(9);
     expect(a.completion.participants).toBe(4);
     expect(a.retention).toMatchObject({ n: 4, counts: [0, 2, 1, 0, 1] });
-    expect(a.sentiment?.[0].total).toBe(5);
+    expect(a.substance?.length).toBeGreaterThan(0);
     expect(a.themes?.length).toBeGreaterThan(0);
     expect(b.completion.participants).toBe(3);
     expect(b.retention?.n).toBe(3);
-    expect(b.sentiment).toEqual([]);
+    expect(b.substance).toEqual([]);
   });
 
   it("direction reads the whole cycle: the filters are People's", async () => {

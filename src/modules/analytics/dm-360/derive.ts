@@ -2,8 +2,6 @@
 // queries.ts). No database, no actor: who reads what is decided before, and
 // the minimum group size (`null`: nothing is masked) is the only masking here.
 import type { GroupKeyer } from "@/modules/org-attributes/kinds";
-import { sentiments } from "@/modules/qualitative-analysis/constants";
-import type { SentimentCounts } from "@/modules/qualitative-analysis/types";
 import type { SideStatus } from "@/modules/analytics/completion/types";
 import {
   COMPLETION_ALERT,
@@ -16,9 +14,8 @@ import {
   MIN_COMMENTS,
   MIN_RISK_PEOPLE,
   type Mean,
-  NEGATIVE_SHARE_ALERT,
+  SIGNAL_SHARE_ALERT,
   RISK_SHARE_ALERT,
-  type SentimentShare,
   SPARK_CYCLES,
 } from "./types";
 
@@ -44,7 +41,8 @@ export type Dm360Facts = {
   retention: ReadonlyMap<string, number>;
   engagement: ReadonlyMap<string, number>;
   sides: ReadonlyMap<string, { self: SideStatus; manager: SideStatus }>;
-  sentiment: ReadonlyMap<string, SentimentCounts>;
+  /** Participants with a read answer: whether any carries a signal (#129). */
+  signals: ReadonlyMap<string, boolean>;
 };
 
 export type Dm360Input = {
@@ -92,14 +90,6 @@ const mean = (values: readonly number[]): Mean | null =>
 const visible = <T>(value: T, n: number, min: number | null): T | null =>
   min !== null && n < min ? null : value;
 
-const emptyCounts = (): Record<(typeof sentiments)[number], number> => ({
-  positive: 0,
-  constructive: 0,
-  neutral: 0,
-  mixed: 0,
-  negative: 0,
-});
-
 type Metrics = Omit<
   Dm360Card,
   "key" | "label" | "others" | "trend" | "insights"
@@ -117,9 +107,8 @@ function metricsOf(
   let withBoth = 0;
   let atRisk = 0;
   const side = { self: [0, 0], manager: [0, 0] };
-  const counts = emptyCounts();
-  let comments = 0;
-  let writers = 0;
+  let readers = 0;
+  let flagged = 0;
   for (const m of members) {
     const r = facts.retention.get(m.participantId);
     const e = facts.engagement.get(m.participantId);
@@ -138,25 +127,21 @@ function metricsOf(
       side[who][1] += 1;
       if (status === "submitted") side[who][0] += 1;
     }
-    const c = facts.sentiment.get(m.participantId);
-    if (c && c.total > 0) {
-      writers += 1;
-      comments += c.total;
-      for (const sentiment of sentiments) counts[sentiment] += c[sentiment];
+    const has = facts.signals.get(m.participantId);
+    if (has !== undefined) {
+      readers += 1;
+      if (has) flagged += 1;
     }
   }
   const rate = ([done, of]: number[]) =>
     of > 0 ? visible(done / of, of, min) : null;
-  const sentiment: SentimentShare | null =
-    comments > 0 && visible(true, writers, min)
-      ? {
-          comments,
-          people: writers,
-          counts,
-          share: Object.fromEntries(
-            sentiments.map((s) => [s, counts[s] / comments]),
-          ) as SentimentShare["share"],
-        }
+  const signals =
+    readers > 0
+      ? visible(
+          { people: flagged, of: readers, share: flagged / readers },
+          readers,
+          min,
+        )
       : null;
   return {
     people: members.length,
@@ -170,7 +155,7 @@ function metricsOf(
             min,
           )
         : null,
-    sentiment,
+    signals,
     selfRate: rate(side.self),
     managerRate: rate(side.manager),
   };
@@ -190,7 +175,7 @@ const percent = (share: number) => Math.round(share * 100);
 export function insightsOf(
   card: Pick<
     Dm360Card,
-    "retention" | "engagement" | "risk" | "sentiment" | "managerRate" | "trend"
+    "retention" | "engagement" | "risk" | "signals" | "managerRate" | "trend"
   >,
   thresholds: Dm360Thresholds,
 ): Insight360[] {
@@ -220,15 +205,11 @@ export function insightsOf(
       });
     }
   }
-  const s = card.sentiment;
-  if (
-    s &&
-    s.comments >= MIN_COMMENTS &&
-    s.share.negative >= NEGATIVE_SHARE_ALERT
-  ) {
+  const s = card.signals;
+  if (s && s.of >= MIN_COMMENTS && s.share >= SIGNAL_SHARE_ALERT) {
     out.push({
-      code: "negativeSentiment",
-      params: { percent: percent(s.share.negative), comments: s.comments },
+      code: "signals",
+      params: { percent: percent(s.share), people: s.people, of: s.of },
     });
   }
   const r = card.risk;
@@ -245,8 +226,7 @@ export function insightsOf(
     });
   }
   if (out.length > 0) return out;
-  const judged =
-    card.retention || card.engagement || card.risk || card.sentiment;
+  const judged = card.retention || card.engagement || card.risk || card.signals;
   return [judged ? { code: "stable" } : { code: "noData" }];
 }
 

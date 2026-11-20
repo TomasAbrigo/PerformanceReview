@@ -1,7 +1,7 @@
 employee_name,review_cycle,dimension,text,sentiment,confidence,themes
-Adrián Bustos,Evaluación semestral 2024-H1,strengths,Se me da bien traducir los pedidos del cliente en tareas claras para el equipo.,positive,0.9,comunicacion;negocio
-Adrián Bustos,Evaluación semestral 2024-H1,improvement,Quiero delegar más y no cargar con todo.,constructive,0.85,liderazgo;planificacion
-Federico Rivas,Evaluación semestral 2024-H1,improvement,Puedo ser más proactivo pidiendo feedback.,constructive,0.8,proactividad;comunicacion
-Carolina Núñez,Evaluación semestral 2024-H1,improvement,Me gustaría que dé el salto a liderar una squad chica el próximo semestre; tiene las condiciones.,constructive,,liderazgo;crecimiento
-Cecilia Pereyra,Evaluación semestral 2024-H1,,Necesita una capacitación formal en seguridad cloud; hay que conseguirle presupuesto antes del próximo ciclo.,constructive,0.6,aprendizaje;tecnica
+Adrián Bustos,Evaluación semestral 2024-H1,strengths,Trabajo bien en equipo y ayudo a quien lo necesita.,positive,0.9,equipo
+Adrián Bustos,Evaluación semestral 2024-H1,improvement,"Necesito dejar de resolver todo yo y delegar tareas puntuales, empezando por la revisión de la documentación.",constructive,0.85,liderazgo;documentacion
+Federico Rivas,Evaluación semestral 2024-H1,improvement,Mejorar la comunicación.,constructive,0.8,comunicacion
+Carolina Núñez,Evaluación semestral 2024-H1,improvement,Escribe poca documentación: cuando estuvo de vacaciones nadie sabía cómo correr el proceso de cierre.,constructive,,documentacion;procesos
+Cecilia Pereyra,Evaluación semestral 2024-H1,,Espera a que le asignen los temas; me gustaría que proponga y lidere al menos una iniciativa transversal por semestre.,constructive,0.6,proactividad;liderazgo
 Persona Inexistente,Evaluación semestral 2024-H1,strengths,Un texto que no existe en ningún ciclo.,positive,0.7,calidad

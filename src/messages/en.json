@@ -922,7 +922,37 @@
       "engagement_mean": "Bamboo engagement (mean 1-5)",
       "engagement_n": "Bamboo engagement (people)",
       "goals_completed_pct": "goals completed (%, of those due)",
-      "goals_due": "goals due"
+      "goals_due": "goals due",
+      "side": "side",
+      "substance_people": "substance_people",
+      "substance_none": "substance_none",
+      "substance_generic": "substance_generic",
+      "substance_specific": "substance_specific",
+      "substance_none_pct": "substance_none_pct",
+      "substance_generic_pct": "substance_generic_pct",
+      "substance_specific_pct": "substance_specific_pct",
+      "signal_workload": "signal_workload",
+      "signal_attrition": "signal_attrition",
+      "signal_conflict": "signal_conflict",
+      "signal_recognition": "signal_recognition",
+      "signal_stagnation": "signal_stagnation",
+      "signal_company_request": "signal_company_request",
+      "signal_role_fit": "signal_role_fit",
+      "signal_any": "signal_any",
+      "manager_feedback_people": "manager_feedback_people",
+      "manager_feedback_none": "manager_feedback_none",
+      "manager_feedback_generic": "manager_feedback_generic",
+      "manager_feedback_specific": "manager_feedback_specific",
+      "manager_feedback_none_pct": "manager_feedback_none_pct",
+      "manager_feedback_generic_pct": "manager_feedback_generic_pct",
+      "manager_feedback_specific_pct": "manager_feedback_specific_pct",
+      "yes": "yes",
+      "no": "no",
+      "yes_pct": "yes_pct",
+      "no_pct": "no_pct",
+      "choice_label": "choice_label",
+      "base_people": "base_people",
+      "people_pct": "people_pct"
     }
   },
   "ImportHistory": {
@@ -1209,7 +1239,8 @@
       "theme": "Theme",
       "any": "Any",
       "aggregate": "Aggregates only (leadership view)",
-      "apply": "Apply"
+      "apply": "Apply",
+      "tone": "Tone"
     },
     "sentiment": {
       "positive": "Positive",
@@ -1246,7 +1277,11 @@
       "improvement": "Opportunities to improve",
       "valued": "Recognition of value",
       "best_work": "What would help me do my best work",
-      "other": "Other"
+      "other": "Other",
+      "security": "Information security",
+      "conversations": "Frequent conversations",
+      "socialImpact": "Social impact",
+      "environmentalImpact": "Environmental impact"
     },
     "byDimension": {
       "title": "Which dimensions get the most negative comments?",
@@ -1365,6 +1400,100 @@
     },
     "takeaway": {
       "worst": "Most critical: {label} ({share} negative or mixed)."
+    },
+    "reading": {
+      "substance": {
+        "none": "No content",
+        "generic": "Generic",
+        "specific": "Specific"
+      },
+      "signal": {
+        "workload": "Workload",
+        "attrition": "Intent to leave",
+        "conflict": "Conflict",
+        "recognition": "Lack of recognition",
+        "stagnation": "Stagnation",
+        "company_request": "Request to the company",
+        "role_fit": "Role fit"
+      },
+      "yesNo": {
+        "yes": "Yes",
+        "no": "No",
+        "openNo": "See the {n} No answers",
+        "alert": {
+          "security": "Information security: {n} of {of} people ({share}) answer that they do not follow the policies.",
+          "conversations": "Frequent conversations: for {n} of {of} people ({share}) the manager answers No."
+        }
+      },
+      "provenance": {
+        "label": "Where the reading comes from",
+        "demo": "Demo reading (keyword heuristic): not an analysis; no confidence is shown.",
+        "providers": "Read by {list}",
+        "noMachine": "No machine reading: only imported or corrected labels",
+        "lastRun": "last run {date}",
+        "counts": "{labels} answers read · {corrected} corrected by people ({human}) · {imported} imported"
+      },
+      "kpis": "Reading indicators",
+      "people": "People",
+      "peopleKpiNote": "Distinct people with an answer in the selection",
+      "empty": "No data with the current filters.",
+      "question": "Question",
+      "cycle": "Cycle",
+      "group": "Group",
+      "team": "Team",
+      "unassigned": "No value",
+      "peopleNote": "Each bar counts people (one answer per person, question and side); n = people.",
+      "substanceTitle": "Substance of the feedback",
+      "substanceHint": "Does the answer say something? Specific: a fact, example or action; generic: a trait with no anchor; no content: it does not answer the question. Per question and side, never mixed.",
+      "managerFeedbackTitle": "Quality of the managers' feedback by group",
+      "managerFeedbackHint": "Each person by the weaker of their manager's two answers (strengths and improvement): specific = both anchored. % of the group's people.",
+      "themesOf": "Themes: {question}",
+      "themesHint": "People who cite each theme, self and manager side by side; % of the people of each side with an answer. Quotes chosen for representativeness.",
+      "themesMeta": "Self: {self} people · Manager: {manager} people",
+      "sideOf": "{side} (n = {n})",
+      "themeShare": "{theme} · {side}: {n} of {of} people",
+      "openTheme": "See the answers about {theme} · {side}",
+      "agreementTitle": "Person–manager agreement",
+      "agreementHint": "Of the people whose two answers (own and manager's) have themes, how many name at least one same theme. Blind spots: improvement themes the manager names and the person does not.",
+      "agreementOf": "Agree on {question}",
+      "agreementNote": "{shared} of {both} people",
+      "blindTitle": "With a blind spot",
+      "blindNote": "{n} of {of} people (improvement)",
+      "blindSpots": "Most frequent blind spots",
+      "blindSpot": "{theme} · {n} people",
+      "signalsTitle": "Signals to attend to",
+      "signalsHint": "People whose answers (own or their manager's) say something to attend to. % of the people with a read answer.",
+      "signalsMeta": "{n} of {of} people with a signal",
+      "noSignals": "No signal with the current filters.",
+      "signalShare": "{signal}: {n} of {of} people",
+      "signalSides": "In their self review: {self} · in the manager's: {manager}",
+      "openSignal": "See the answers with the signal {signal}",
+      "signalsByGroup": "People with a signal by group",
+      "withAny": "With a signal",
+      "withoutSignal": "No signals",
+      "signalsVsIndicator": "Signals by the manager's answer",
+      "signalsVsIndicatorHint": "One row per person: % of the people with each retention / engagement answer who carry a signal.",
+      "signalIndicatorShare": "{n} of {of} people with a signal",
+      "yesNoTitle": "Yes / No questions",
+      "yesNoHint": "% Yes and No of the people who answered, per question and side. Security = No and frequent conversations = No are alerts.",
+      "yesNoTrend": "No by cycle",
+      "yesNoByGroup": "No by group",
+      "initiatives": "Initiative types (the “how”)",
+      "initiativesOf": "{question} · {n} people with a “how”",
+      "closedTitle": "Closed questions",
+      "closedHint": "Valued (1–4) as a scale and “best work” as a distribution of options: never as sentiment. % of people.",
+      "notValued": "Do not feel valued (1–2)",
+      "notValuedNote": "{n} of {of} people",
+      "valuedTitle": "How well does the company recognize my value? (1–4)",
+      "valuedTotal": "Total",
+      "valuedTrend": "By cycle",
+      "bestWorkTitle": "What would help me do my best work? · {n} people",
+      "optionShare": "{option}: {n} of {of} people",
+      "toneTitle": "Tone (secondary)",
+      "toneHint": "Free text only, per question and side. The question conditions the tone: “how could I improve?” invites constructive answers; do not compare questions.",
+      "masked": "These filters select fewer than {min} people: the reading is not shown to protect their anonymity.",
+      "signalsByGroupHint": "Red: people of the group with a signal; light: none. Ordered by people with a signal; groups under {min} people go last, marked.",
+      "smallGroup": "{label} (small group)"
     }
   },
   "Insights": {
@@ -1538,14 +1667,6 @@
     },
     "qualitative": {
       "title": "Qualitative analysis",
-      "byDimension": "Sentiment by dimension",
-      "trend": "Sentiment trend",
-      "themes": "Top themes",
-      "quotes": "Quotes (pseudonymized)",
-      "totals": "Comments analyzed",
-      "bySide": "By who wrote them",
-      "own": "Own comments",
-      "manager": "Manager comments",
       "sentiments": {
         "positive": "Positive",
         "constructive": "Constructive",
@@ -1933,8 +2054,6 @@
       "engagement": "Mean engagement",
       "risk": "At risk",
       "riskValue": "{percent}%",
-      "sentiment": "Sentiment of the comments",
-      "comments": "{n, plural, one {# comment} other {# comments}} from {people, plural, one {# person} other {# people}}",
       "noComments": "No comments",
       "self": "Self assessment complete",
       "manager": "Manager assessment complete",
@@ -1944,8 +2063,8 @@
       "none": "–",
       "meanOf": "over {n}",
       "riskOf": "({people} of {of})",
-      "commentsLabel": "Comments",
-      "commentsOf": "from {people, plural, one {# person} other {# people}}"
+      "signals": "With a signal",
+      "signalsOf": "{people} of {of} people with read comments"
     },
     "spark": {
       "label": "Retention and engagement by cycle",
@@ -1958,11 +2077,11 @@
     "insight": {
       "retentionDrop": "Mean retention fell {delta} points since {cycle} (from {previous} to {current}).",
       "engagementDrop": "Mean engagement fell {delta} points since {cycle} (from {previous} to {current}).",
-      "negativeSentiment": "{percent}% of the {comments} comments are negative.",
       "riskHigh": "{percent}% of the people with both indicators ({people}) are at risk: low retention and engagement.",
       "completionLow": "Only {percent}% of the manager assessments are complete.",
       "stable": "No alerts in this cycle.",
-      "noData": "There is not enough data yet to read this team."
+      "noData": "There is not enough data yet to read this team.",
+      "signals": "{percent}% of the people with read comments ({people} of {of}) carry a signal to attend to."
     },
     "empty": "No DM has people in this cycle. Upload the org attributes file in Import.",
     "withoutDm": "{n, plural, one {# person} other {# people}} without a DM in the file.",
@@ -2475,7 +2594,8 @@
         "self": "{dm} · pending self-assessments",
         "manager": "{dm} · pending manager assessments",
         "comments": "{dm} · their team's comments"
-      }
+      },
+      "yesNo": "{question}: answered {answer}"
     },
     "truncated": "Showing the first {n}; the full view has them all."
   },
@@ -2496,6 +2616,12 @@
     "documentacion": "Documentation",
     "proactividad": "Proactivity",
     "negocio": "Business",
-    "aprendizaje": "Learning"
+    "aprendizaje": "Learning",
+    "voluntariado": "Volunteering",
+    "donaciones": "Donations",
+    "reciclaje": "Recycling",
+    "consumo": "Responsible consumption",
+    "educacion": "Education",
+    "movilidad": "Sustainable mobility"
   }
 }

@@ -124,26 +124,16 @@ test("People walk the whole insights module and export for Arturía", async ({
       .getByTestId("matrix-summary"),
   ).toBeVisible();
 
-  // Qualitative: five sentiments, own and manager comments.
+  // Qualitative: the reading per person, own and manager answers apart.
   await chooseCycle(page, "/es/insights/qualitative", cycleName);
   await page.getByRole("button", { name: "Correr análisis" }).click();
   await expect(page.getByRole("status")).toContainText("Proveedor: mock", {
     timeout: 60_000,
   });
-  await expect(
-    page
-      .getByRole("group", {
-        name: "Barras apiladas de sentimiento por dimensión",
-      })
-      .getByTestId("sentiment-bar")
-      .first(),
-  ).toBeVisible();
-  await expect(
-    page
-      .getByRole("list", { name: "Leyenda de sentimientos" })
-      .first()
-      .getByRole("listitem"),
-  ).toHaveText(["Positivo", "Constructivo", "Neutral", "Mixto", "Negativo"]);
+  await expect(page.getByTestId("substance-bar").first()).toBeVisible();
+  await expect(page.getByTestId("reading-provenance")).toContainText(
+    "Lectura de demostración",
+  );
   const side = page.getByRole("navigation", { name: "Quién escribe" });
   await side.getByRole("link", { name: "Propios" }).click();
   await expect(page).toHaveURL(/side=self/);
@@ -179,7 +169,7 @@ test("People walk the whole insights module and export for Arturía", async ({
   const mode = page.getByRole("navigation", { name: "Modo" });
   await mode.getByRole("link", { name: "Cualitativo" }).click();
   await expect(page).toHaveURL(/mode=qualitative/);
-  await expect(page.getByTestId("exec-sentiment")).toBeVisible();
+  await expect(page.getByTestId("substance")).toBeVisible();
   await mode.getByRole("link", { name: "Cuantitativo" }).click();
   await expect(page).toHaveURL(/mode=quantitative/);
   await expect(page.getByTestId("exec-retention")).toBeVisible();

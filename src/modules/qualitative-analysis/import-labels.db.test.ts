@@ -48,7 +48,7 @@ describe("importLabels (synthetic fixture CSV)", () => {
     expect(labels.length).toBeGreaterThanOrEqual(5);
     expect(labels).toContainEqual({
       sentiment: "constructive",
-      themes: ["proactividad", "comunicacion"],
+      themes: ["comunicacion"],
       dimension: "improvement",
     });
     const [run] = await db.execute<Record<string, unknown>>(

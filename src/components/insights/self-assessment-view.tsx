@@ -3,20 +3,17 @@ import { useLocale, useTranslations } from "next-intl";
 import { ChartFrame, useChartFormat } from "@/components/charts";
 import type { DrillBase } from "@/components/drill/drill-link";
 import { MetricCard, ScaleBar } from "@/components/experience";
-import { SentimentBars } from "@/components/qualitative/sentiment-bars";
 import {
-  type CommentDrills,
-  commentDrill,
-  Themes,
-} from "@/components/qualitative/views";
+  AgreementPanel,
+  ClosedQuestionsPanel,
+  SubstancePanel,
+  ThemesSidePanel,
+} from "@/components/qualitative/reading";
+import type { CommentDrills } from "@/components/qualitative/views";
 import type { CompletionGroup } from "@/modules/analytics/completion";
-import { sentiments } from "@/modules/qualitative-analysis/constants";
 import type { SelfAssessmentReport } from "@/modules/insights/self-assessment";
 import { type KpiThresholds, percentTone } from "@/modules/insights/tone";
 import { pct, type Side, sideOf } from "./completion-table";
-
-const isSentiment = (v: string) =>
-  (sentiments as readonly string[]).includes(v);
 
 /**
  * The self-assessment report: the KPIs (completion of each side and the
@@ -45,6 +42,7 @@ export function SelfAssessmentView({
   const t = useTranslations("Insights.SelfAssessment");
   const ti = useTranslations("Insights");
   const tc = useTranslations("Insights.completion");
+  const tq = useTranslations("Qualitative.reading");
   const f = useChartFormat();
   const locale = useLocale() as "es" | "en";
   const dim = (d: string) => dimensionLabel[d] ?? d;
@@ -52,9 +50,8 @@ export function SelfAssessmentView({
     base && cycleId ? { base, scope: { cycle: cycleId, side } } : undefined;
   const selfDrills = drills("self");
   const total = report.completion.total;
-  const selfComments = report.sentiment.reduce((n, r) => n + r.total, 0);
-  const selfNegative = report.sentiment.reduce((n, r) => n + r.negative, 0);
-  const negShare = selfComments ? selfNegative / selfComments : 0;
+  const valued = report.valued;
+  const notValued = valued?.people ? valued.notValued / valued.people : 0;
   const completionCard = (side: Side) => {
     if (!total) return null;
     const v = sideOf(total, side);
@@ -98,22 +95,6 @@ export function SelfAssessmentView({
       />
     );
   };
-  const gapRows = report.sentimentGap.flatMap((g) =>
-    (["self", "manager"] as const).flatMap((side) => {
-      const c = g[side];
-      return c
-        ? [
-            {
-              ...c,
-              key: `${g.dimension}:${side}`,
-              label: t(side === "self" ? "rowSelf" : "rowManager", {
-                dimension: dim(g.dimension),
-              }),
-            },
-          ]
-        : [];
-    }),
-  );
   return (
     <div className="flex flex-col gap-8">
       <p className="text-sm text-muted-foreground">
@@ -128,31 +109,21 @@ export function SelfAssessmentView({
         {completionCard("self")}
         {completionCard("manager")}
         <MetricCard
-          label={t("kpi.negative")}
-          value={f.share(negShare)}
+          label={tq("notValued")}
+          value={valued ? f.share(notValued) : "–"}
           icon={<MessageSquareWarning className="size-5" />}
-          status={
-            thresholds && selfComments
-              ? percentTone(negShare * 100, thresholds, "down")
-              : undefined
-          }
-          note={t("kpi.negativeNote", { n: selfNegative, total: selfComments })}
+          note={tq("notValuedNote", {
+            n: valued?.notValued ?? 0,
+            of: valued?.people ?? 0,
+          })}
           scale={{
-            value: negShare * 100,
+            value: notValued * 100,
             min: 0,
             max: 100,
-            label: t("kpi.negativeScale", { share: f.share(negShare) }),
+            label: tq("notValued"),
             minLabel: "0 %",
             maxLabel: "100 %",
           }}
-          drill={
-            selfDrills && selfNegative > 0
-              ? {
-                  ...commentDrill(selfDrills, { sentiment: "negative" }),
-                  label: t("kpi.openNegative", { n: selfNegative }),
-                }
-              : undefined
-          }
         />
       </section>
       <CompletionBars
@@ -165,35 +136,31 @@ export function SelfAssessmentView({
             : 0
         }
       />
-      <ChartFrame
-        id="self-sentiment"
-        title={t("sentimentTitle")}
-        howToRead={t("sentimentHow")}
-        kind="sentiment"
-        empty={report.sentiment.length === 0 ? ti("empty") : null}
-      >
-        <SentimentBars
-          sorted
-          label={t("sentimentChart")}
-          rows={report.sentiment.map((r) => ({
-            ...r,
-            key: r.dimension,
-            label: dim(r.dimension),
-          }))}
-          drillOf={
-            selfDrills
-              ? (dimension, sentiment) =>
-                  isSentiment(sentiment)
-                    ? commentDrill(selfDrills, {
-                        dimension,
-                        sentiment: sentiment as "positive",
-                      })
-                    : undefined
-              : undefined
+      <SubstancePanel
+        rows={report.substance}
+        dimensionLabel={dimensionLabel}
+        drills={selfDrills}
+      />
+      <ClosedQuestionsPanel
+        valued={{ total: report.valued, byGroup: [], trend: [] }}
+        bestWork={report.bestWork}
+      />
+      <AgreementPanel
+        a={report.agreement}
+        dimensionLabel={dimensionLabel}
+        drills={drills("manager")}
+      />
+      {report.themes.map((q) => (
+        <ThemesSidePanel
+          key={q.dimension}
+          id={`self-themes-${q.dimension}`}
+          title={tq("themesOf", { question: dim(q.dimension) })}
+          data={q}
+          drills={
+            base && cycleId ? { base, scope: { cycle: cycleId } } : undefined
           }
         />
-      </ChartFrame>
-      <Themes themes={report.themes} total={selfComments} drills={selfDrills} />
+      ))}
       {report.gap.length > 0 ? (
         <ChartFrame
           id="self-gap"
@@ -247,35 +214,6 @@ export function SelfAssessmentView({
               </li>
             ))}
           </ul>
-        </ChartFrame>
-      ) : null}
-      {gapRows.length > 0 ? (
-        <ChartFrame
-          id="self-vs-manager-sentiment"
-          title={t("sentimentGapTitle")}
-          howToRead={t("sentimentGapHint")}
-          kind="comments"
-          tone={report.gap.length === 0 ? "highlight" : "default"}
-        >
-          <SentimentBars
-            label={t("sentimentGapChart")}
-            rows={gapRows}
-            drillOf={
-              base && cycleId
-                ? (key, sentiment) => {
-                    const at = key.lastIndexOf(":");
-                    const side = key.slice(at + 1) as "self" | "manager";
-                    const d = drills(side);
-                    return d && isSentiment(sentiment)
-                      ? commentDrill(d, {
-                          dimension: key.slice(0, at),
-                          sentiment: sentiment as "positive",
-                        })
-                      : undefined;
-                  }
-                : undefined
-            }
-          />
         </ChartFrame>
       ) : null}
     </div>

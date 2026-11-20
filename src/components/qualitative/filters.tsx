@@ -8,6 +8,7 @@ import type { QualitativeParams } from "./params";
 export function QualitativeFilters({
   params,
   cycles,
+  cycle,
   departments,
   dimensions,
   themes,
@@ -17,6 +18,8 @@ export function QualitativeFilters({
 }: {
   params: QualitativeParams;
   cycles: { id: string; name: string }[];
+  /** The cycle shown (an id) or "all" (every cycle, an explicit choice). */
+  cycle: string;
   departments: string[];
   dimensions: string[];
   themes: string[];
@@ -58,12 +61,17 @@ export function QualitativeFilters({
       {params.side ? (
         <input type="hidden" name="side" value={params.side} />
       ) : null}
-      {select(
-        "cycle",
-        t("cycle"),
-        cycles.map((c) => ({ value: c.id, label: c.name })),
-        t("allCycles"),
-      )}
+      <label className="control-label">
+        {t("cycle")}
+        <select name="cycle" defaultValue={cycle} className="control">
+          {cycles.map((c) => (
+            <option key={c.id} value={c.id}>
+              {c.name}
+            </option>
+          ))}
+          <option value="all">{t("allCycles")}</option>
+        </select>
+      </label>
       {select(
         "department",
         t("department"),
@@ -77,7 +85,7 @@ export function QualitativeFilters({
       )}
       {select(
         "sentiment",
-        t("sentiment"),
+        t("tone"),
         sentiments.map((s) => ({ value: s, label: ts(s) })),
       )}
       {select(

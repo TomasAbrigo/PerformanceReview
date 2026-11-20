@@ -16,6 +16,10 @@ import type { Indicator } from "@/modules/analytics/indicators/types";
 import {
   type Sentiment,
   sentiments,
+  type Signal,
+  signals,
+  type Substance,
+  substances,
 } from "@/modules/qualitative-analysis/constants";
 import {
   type EngagementSegment,
@@ -74,7 +78,16 @@ export type Drill =
   /** Comments narrowed by any of the Feedback filters (a bar segment, a band...). */
   | { kind: "comments"; scope: CommentScope }
   /** One figure of a DM card of the 360 (direct scope): its people or comments. */
-  | { kind: "dm"; dm: string; metric: DmMetric };
+  | { kind: "dm"; dm: string; metric: DmMetric }
+  // ---- open-text reading (#129) ----
+  /** The answers of the people who said yes / no to a yes/no question (in a cycle, or all). */
+  | {
+      kind: "yesno";
+      dimension: string;
+      answer: "yes" | "no";
+      side: "self" | "manager" | null;
+      cycle: string | null;
+    };
 
 // ---- quant (#117): group- and month-scoped drills ----
 /** What a group drill groups by (a breakdown of completion or indicators). */
@@ -169,6 +182,10 @@ export type CommentScope = {
   /** The manager's answer to an indicator (both or neither). */
   role?: Indicator;
   value?: number;
+  /** Answers read with this substance (#129). */
+  substance?: Substance;
+  /** Answers that carry this signal (#129). */
+  signal?: Signal;
 };
 
 const SCOPE_KEYS = [
@@ -184,6 +201,8 @@ const SCOPE_KEYS = [
   "santexLead",
   "role",
   "value",
+  "substance",
+  "signal",
 ] as const;
 /** Free text of the org attributes and areas: any short non-empty string. */
 const TEXT = (v: string) => v.length > 0 && v.length <= 120;
@@ -215,7 +234,11 @@ function parseScope(raw: string): CommentScope | null {
                   ? isOneOf(indicators, v)
                   : k === "value"
                     ? /^[1-5]$/.test(v)
-                    : TEXT(v);
+                    : k === "substance"
+                      ? isOneOf(substances, v)
+                      : k === "signal"
+                        ? isOneOf(signals, v)
+                        : TEXT(v);
       if (!ok) return null;
       scope[k] = k === "value" ? Number(v) : v;
     }
@@ -292,6 +315,21 @@ export function parseDrill(raw: unknown): Drill | null {
       }
       return TEXT(dm) ? { kind, dm, metric: a } : null;
     }
+    // ---- open-text reading (#129): yesno:<dimension>:<yes|no>[:<side>[:<cycle>]] ----
+    case "yesno": {
+      const [, , side = "", cycle = ""] = args;
+      if (args.length < 2 || args.length > 4 || !KEY.test(a)) return null;
+      if (b !== "yes" && b !== "no") return null;
+      if (side !== "" && side !== "self" && side !== "manager") return null;
+      if (cycle !== "" && !isUuid(cycle)) return null;
+      return {
+        kind,
+        dimension: a,
+        answer: b,
+        side: side === "" ? null : side,
+        cycle: cycle === "" ? null : cycle,
+      };
+    }
     default:
       return parseQuantDrill(kind, args);
   }
@@ -326,6 +364,11 @@ export function formatDrill(d: Drill): string {
       return `comments:${formatScope(d.scope)}`;
     case "dm":
       return `dm:${d.metric}:${encodeURIComponent(d.dm)}`;
+    case "yesno":
+      return `yesno:${d.dimension}:${d.answer}:${d.side ?? ""}:${d.cycle ?? ""}`.replace(
+        /:+$/,
+        "",
+      );
   }
 }
 
