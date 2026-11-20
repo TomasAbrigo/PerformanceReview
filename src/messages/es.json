@@ -1343,7 +1343,7 @@
       "answer": "Respuesta",
       "retention": "Retención",
       "engagement": "Compromiso",
-      "how": "Sentimiento de los comentarios de cada persona según la respuesta que le dio su manager (5, la más alta, arriba). Cada segmento abre esos comentarios.",
+      "how": "Sentimiento de los comentarios de texto libre de cada persona según la respuesta que le dio su manager (5, la más alta, arriba). La base son los comentarios de las personas con evaluación del manager enviada, por eso puede sumar menos que el total; las respuestas cerradas no cuentan. Cada segmento abre esos comentarios.",
       "chart": "{indicator}: sentimiento por respuesta del manager",
       "row": "{value} · {answer}"
     },

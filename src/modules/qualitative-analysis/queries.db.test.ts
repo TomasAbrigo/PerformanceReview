@@ -173,6 +173,35 @@ describe("qualitative queries", () => {
     expect(rows.every((r) => !("option" in r))).toBe(true);
   });
 
+  it("counts only open text against the indicators, never a closed answer (#133)", async () => {
+    const cycle = await insertCycle("Ciclo 2025", "2025-12-31");
+    const well = await insertQuestion(cycle, "What are some things I do well?");
+    const bestWork = await insertQuestion(cycle, "Best work", {
+      kind: "single_choice",
+    });
+    const retention = await insertQuestion(cycle, "If X got an offer", {
+      kind: "single_choice",
+      role: "retention",
+    });
+    const a = await insertParticipant(cycle, emp, boss);
+    await insertAnswer(cycle, a, boss, "manager", [
+      { questionId: well, text: "Adrián es referente, ayuda con calidad." },
+      {
+        questionId: bestWork,
+        option: "B",
+        text: "Lideró la migración del proyecto con calidad.",
+      },
+      { questionId: retention, option: "A", value: 4 },
+    ]);
+    await runAnalysis(db, { provider: new MockProvider() });
+    const all = await sentimentTotals(db, hr, { cycleId: cycle });
+    expect(all?.total).toBe(2);
+    const rows = await sentimentVsIndicators(db, hr, { cycleId: cycle });
+    expect(rows.map((r) => [r.role, r.value, r.total])).toEqual([
+      ["retention", 4, 1],
+    ]);
+  });
+
   it("narrows the comments to a manager's answer to an indicator", async () => {
     const four = await listComments(db, hr, {
       cycleId: c2024,

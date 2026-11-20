@@ -198,6 +198,7 @@ export function labeledCtes(r: Resolved): SQL {
   return sql`${effectiveCte()},
     labeled as (
       select eff.*, ${analysisTextSql("a", "q")} as text, r.cycle_id,
+             q.kind::text as question_kind,
              r.relationship::text as relationship,
              c.name as cycle_name, c.period_start::text as period_start,
              c.period_end::text as period_end,

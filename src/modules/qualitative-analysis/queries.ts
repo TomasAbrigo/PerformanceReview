@@ -218,7 +218,9 @@ export function distinctQuotes(texts: readonly string[], n = 3): string[] {
 
 /**
  * Sentiment of a person's comments in a cycle against their answers to the
- * retention / engagement questions (question_revision.role).
+ * retention / engagement questions (question_revision.role). Only open text
+ * (#133): a closed answer (valued, best work) carries a sentiment of its
+ * option, not a comment.
  */
 export async function sentimentVsIndicators(
   db: DbOrTx,
@@ -255,6 +257,7 @@ export async function sentimentVsIndicators(
            ${countCols}, count(*)::int as total
     from labeled l
     join ind on ind.participant_id = l.participant_id and ind.cycle_id = l.cycle_id
+    where l.question_kind = 'text'
     group by 1, 2 ${minGroup(r.min, sql`l.person_id`)} order by 1, 2 desc`);
   return rows.map((r) => ({
     role: r.role,

@@ -1343,7 +1343,7 @@
       "answer": "Answer",
       "retention": "Retention",
       "engagement": "Engagement",
-      "how": "Sentiment of each person's comments by the answer their manager gave (5, the highest, on top). Each segment opens those comments.",
+      "how": "Sentiment of each person's free-text comments by the answer their manager gave (5, the highest, on top). The base is the comments of the people with a submitted manager review, so it can add up to less than the total; closed answers do not count. Each segment opens those comments.",
       "chart": "{indicator}: sentiment by the manager's answer",
       "row": "{value} · {answer}"
     },
