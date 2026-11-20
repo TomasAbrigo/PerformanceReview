@@ -64,6 +64,42 @@ afterAll(async () => {
 });
 
 describe("listAssessmentParticipants with imported progress", () => {
+  it("shows an imported submitted side as submitted and counts it in the progress", async () => {
+    await db
+      .update(assessmentProgress)
+      .set({ selfStatus: "submitted", managerStatus: "submitted" });
+    const page = await listAssessmentParticipants(db, hr, cycle);
+    expect(page.items[0]).toMatchObject({
+      self: { state: "submitted" },
+      managerReview: { state: "submitted" },
+      progress: "complete",
+    });
+    expect(page.counts).toEqual({ complete: 1, partial: 0, pending: 0 });
+    // the reviewee reads their own side only; the manager's is not theirs
+    const own = await listAssessmentParticipants(
+      db,
+      { role: "employee", personId: dora },
+      cycle,
+    );
+    expect(own.items[0]).toMatchObject({
+      self: { state: "submitted" },
+      managerReview: { state: "locked" },
+      progress: "partial",
+    });
+    const manager = await listAssessmentParticipants(
+      db,
+      { role: "manager", personId: bruno },
+      cycle,
+    );
+    expect(manager.items.find((r) => r.person.id === dora)).toMatchObject({
+      self: { state: "locked" },
+      progress: "pending",
+    });
+    await db
+      .update(assessmentProgress)
+      .set({ selfStatus: "in_progress", managerStatus: "not_started" });
+  });
+
   it("shows an in-progress imported side as a draft to People", async () => {
     const page = await listAssessmentParticipants(db, hr, cycle);
     expect(page.items[0]).toMatchObject({

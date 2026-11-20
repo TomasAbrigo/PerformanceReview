@@ -130,7 +130,9 @@ test("the goals of the period link to the goal, and the goal back to the assessm
   const goals = page.getByTestId("assessment-goals");
   const [first] = new Set(subject.goalTitles);
   await goals.getByRole("link", { name: first }).first().click();
-  await expect(page).toHaveURL(/\/es\/goals\/[0-9a-f-]{36}$/);
+  await expect(page).toHaveURL(
+    /\/es\/goals\/[0-9a-f-]{36}(\?cycle=[0-9a-f-]{36})?$/,
+  );
   await expect(
     page.getByRole("heading", { level: 1, name: first }),
   ).toBeVisible();

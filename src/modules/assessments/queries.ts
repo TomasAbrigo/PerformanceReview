@@ -235,10 +235,28 @@ function sideSubmitted(
         where m.participant_id = cp.id and m.relationship = 'manager'
           and m.status = 'submitted' and m.deleted_at is null))))`;
   };
-  return sql`exists (
+  // An imported cycle has no request, only Bamboo's progress report: People
+  // read it, the reviewee their own self side, nobody else.
+  const importedVisible =
+    scope.kind === "all"
+      ? sql`true`
+      : side === "self" && scope.kind !== "none"
+        ? sql`cp.reviewee_person_id = ${scope.personId}::uuid`
+        : sql`false`;
+  const importedColumn =
+    side === "self" ? sql`ap.self_status` : sql`ap.manager_status`;
+  return sql`(exists (
     select 1 from review_request r
     where r.participant_id = cp.id and r.relationship = ${side}::review_relationship
-      and r.status = 'submitted' and r.deleted_at is null and ${visible()})`;
+      and r.status = 'submitted' and r.deleted_at is null and ${visible()})
+    or (${importedVisible} and exists (
+      select 1 from assessment_progress ap
+      where ap.participant_id = cp.id and ${importedColumn} = 'submitted'
+        and not exists (
+          select 1 from review_request q
+          where q.participant_id = cp.id
+            and q.relationship = ${side}::review_relationship
+            and q.deleted_at is null and q.status <> 'superseded'))))`;
 }
 
 /** Complete (both sides submitted), partial (one) or pending, as far as the actor may know. */
@@ -377,14 +395,22 @@ export async function listAssessmentParticipants(
     : new Map<string, { self: string; manager: string }>();
   const summary = (participantId: string, side: Side): SideSummary => {
     const request = chosen.get(`${participantId}:${side}`) ?? null;
-    if (!request && imported.get(participantId)?.[side] === "in_progress") {
+    const importedStatus = request
+      ? undefined
+      : imported.get(participantId)?.[side];
+    if (importedStatus === "in_progress" || importedStatus === "submitted") {
       const own =
         side === "self" &&
         scope.kind !== "all" &&
         scope.kind !== "none" &&
         byParticipant.get(participantId)?.personId === scope.personId;
       return {
-        state: scope.kind === "all" || own ? "draft" : "locked",
+        state:
+          scope.kind === "all" || own
+            ? importedStatus === "submitted"
+              ? "submitted"
+              : "draft"
+            : "locked",
         submittedAt: null,
       };
     }
