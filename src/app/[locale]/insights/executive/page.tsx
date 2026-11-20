@@ -34,6 +34,8 @@ import { parseDrill } from "@/modules/insights/drill-spec";
 import { drillBase } from "@/components/drill/drill-link";
 import { dimensionLabels } from "../dimension-labels";
 import { DrillSection } from "../drill-section";
+import { identityRetainedRows } from "@/modules/analytics/data-quality";
+import { RetainedNotice } from "@/components/data-quality/retained-notice";
 
 async function Executive({
   params,
@@ -72,7 +74,7 @@ async function Executive({
   const previousCycle = cycles
     .filter((c) => c.periodStart < cycle.periodStart)
     .sort((a, b) => (a.periodStart < b.periodStart ? 1 : -1))[0];
-  const [report, previous, org] = await Promise.all([
+  const [report, previous, org, retained] = await Promise.all([
     executiveReport(db, actor, {
       cycleId: cycle.id,
       mode,
@@ -88,6 +90,8 @@ async function Executive({
         })
       : null,
     hr ? orgFilterOptions(db, actor, { cycleId: cycle.id }) : null,
+    // Report rows held back by identity (#132): People only.
+    hr ? identityRetainedRows(db) : null,
   ]);
   // Drill-down: `?drill=` opens the records behind a mark (drill-section.tsx).
   const base = drillBase("/insights/executive", sp, actor);
@@ -116,6 +120,11 @@ async function Executive({
           <ModeToggle mode={mode} cycleId={cycle.id} filters={filters} />
         </div>
       </PageHeader>
+      <RetainedNotice
+        count={
+          retained?.items.filter((r) => r.cycleId === cycle.id).length ?? 0
+        }
+      />
       <ExecutiveReportView
         report={report}
         previous={previous}

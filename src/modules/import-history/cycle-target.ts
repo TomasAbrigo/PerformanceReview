@@ -1,4 +1,4 @@
-import { and, eq, gte, ilike, isNull, lte, ne } from "drizzle-orm";
+import { and, eq, gte, ilike, isNull, like, lte, ne } from "drizzle-orm";
 import type { DbOrTx } from "@/db/client";
 import { reviewCycle, type ReviewCycle } from "@/db/schema";
 import type { Deferral, HandlerContext } from "@/modules/ingest/handlers";
@@ -208,7 +208,9 @@ export async function cycleForProgress(
  * date. Created closed on first sight with the end inferred from the
  * semester settings (periodEndFor) and its snapshot as of the period start,
  * so the participant's manager is the one in force when the period opened
- * (reviewer mismatches are against it). Never widened by later rows.
+ * (reviewer mismatches are against it). A start within the ambiguity margin
+ * of another start of the same semester joins that cycle; a real end (the
+ * status file) replaces an inferred one (#132).
  */
 export async function cycleForPeriod(
   tx: DbOrTx,
@@ -227,7 +229,7 @@ export async function cycleForPeriod(
     ctx.cache.set(key, native);
     return native;
   }
-  let [cycle] = await tx
+  let [cycle]: (ReviewCycle | undefined)[] = await tx
     .select()
     .from(reviewCycle)
     .where(
@@ -236,11 +238,26 @@ export async function cycleForPeriod(
         eq(reviewCycle.sourceId, sourceId),
       ),
     );
+  const cfg = await cachedPeriodConfig(tx, ctx.cache);
+  // An irregular start a few days off another start of the same semester
+  // (within semester.ambiguityDays) is that cycle, not one of its own (#132).
+  cycle ??= await sameSemesterCycle(tx, periodStart, cfg);
+  const realEnd = givenEnd && givenEnd >= periodStart ? givenEnd : null;
+  if (cycle && realEnd && cycle.periodEnd !== realEnd) {
+    // The status file brings the real end: it wins over the inferred one,
+    // whichever file came first (#132).
+    [cycle] = await tx
+      .update(reviewCycle)
+      .set({
+        periodEnd: realEnd,
+        name: periodCycleName(cycle.periodStart, realEnd),
+        localizedName: periodCycleNames(cycle.periodStart, realEnd),
+      })
+      .where(eq(reviewCycle.id, cycle.id))
+      .returning();
+  }
   if (!cycle) {
-    const periodEnd =
-      givenEnd && givenEnd >= periodStart
-        ? givenEnd
-        : periodEndFor(periodStart, await cachedPeriodConfig(tx, ctx.cache));
+    const periodEnd = realEnd ?? periodEndFor(periodStart, cfg);
     [cycle] = await tx
       .insert(reviewCycle)
       .values({
@@ -267,6 +284,37 @@ export async function cycleForPeriod(
   }
   ctx.cache.set(key, cycle);
   return cycle;
+}
+
+/**
+ * The imported period cycle of the same semester whose start is within
+ * `ambiguityDays` of `start` (the closest one), if any.
+ */
+async function sameSemesterCycle(
+  tx: DbOrTx,
+  start: string,
+  cfg: SemesterConfig,
+): Promise<ReviewCycle | undefined> {
+  const DAY = 86_400_000;
+  const at = (d: string) => Date.parse(`${d}T00:00:00Z`);
+  const end = periodEndFor(start, cfg);
+  const candidates = await tx
+    .select()
+    .from(reviewCycle)
+    .where(
+      and(
+        eq(reviewCycle.sourceSystem, SOURCE),
+        like(reviewCycle.sourceId, "period:%"),
+        isNull(reviewCycle.deletedAt),
+      ),
+    );
+  return candidates
+    .map((c) => ({ c, gap: Math.abs(at(c.periodStart) - at(start)) / DAY }))
+    .filter(
+      ({ c, gap }) =>
+        gap <= cfg.ambiguityDays && periodEndFor(c.periodStart, cfg) === end,
+    )
+    .sort((a, b) => a.gap - b.gap)[0]?.c;
 }
 
 /**

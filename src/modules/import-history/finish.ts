@@ -1,4 +1,4 @@
-import { aliasedTable, and, eq } from "drizzle-orm";
+import { aliasedTable, and, eq, inArray, sql } from "drizzle-orm";
 import type { DbOrTx } from "@/db/client";
 import {
   cycleParticipant,
@@ -11,6 +11,8 @@ import {
 } from "@/db/schema";
 import { snapshotGoalsForParticipants } from "@/modules/review-core/goal-snapshot";
 import { snapshots } from "@/modules/review-core/service";
+import { emptyTally, recordRow } from "./assessment";
+import { SOURCE } from "./cycles";
 import { reapplyLikertMappings } from "./likert-reapply";
 import { markYesNoQuestions } from "./yes-no";
 import {
@@ -43,13 +45,30 @@ import {
  */
 export async function finishHistoryImport(
   db: DbOrTx,
-  { runId, reject }: { runId: string; reject: (r: IngestReject) => void },
-): Promise<{ mismatches: number }> {
+  {
+    runId,
+    reject,
+    seen,
+  }: {
+    runId: string;
+    reject: (r: IngestReject) => void;
+    /**
+     * Every row key of a whole raw assessments report (#132): the rows of
+     * its cycles that an earlier import wrote and this file no longer has
+     * are dropped. Absent (other formats, a resumed run): nothing dropped.
+     */
+    seen?: Set<string>;
+  },
+): Promise<{ mismatches: number; deleted: number }> {
   const touched = await db
     .selectDistinct({ cycleId: historyImportRow.cycleId })
     .from(historyImportRow)
     .where(eq(historyImportRow.runId, runId));
   const cycleIds = touched.flatMap((t) => (t.cycleId ? [t.cycleId] : []));
+  const deleted =
+    seen && seen.size > 0
+      ? await dropAbsentReportRows(db, { runId, seen, cycleIds })
+      : 0;
   let mismatches = 0;
   for (const cycleId of cycleIds) {
     mismatches += await db.transaction((tx) =>
@@ -61,7 +80,68 @@ export async function finishHistoryImport(
   await reapplyLikertMappings(db, { cycleIds });
   // Same for the custom questions: whether one is yes/no shows in its column.
   await markYesNoQuestions(db, { cycleIds });
-  return { mismatches };
+  return { mismatches, deleted };
+}
+
+/**
+ * The raw assessments report is the whole list of its cycles (#132): an
+ * imported request of one of the run's cycles whose row came from that
+ * report (raw_record, format assessments_report) and is not in this file
+ * any more is dropped, with its answers, and counted on the result screen
+ * as a `removed` row. Requests of other formats are never touched.
+ */
+async function dropAbsentReportRows(
+  db: DbOrTx,
+  {
+    runId,
+    seen,
+    cycleIds,
+  }: { runId: string; seen: Set<string>; cycleIds: string[] },
+): Promise<number> {
+  if (cycleIds.length === 0) return 0;
+  const candidates = await db
+    .select({
+      id: reviewRequest.id,
+      sourceId: reviewRequest.sourceId,
+      cycleId: reviewRequest.cycleId,
+    })
+    .from(reviewRequest)
+    .where(
+      and(
+        eq(reviewRequest.sourceSystem, SOURCE),
+        inArray(reviewRequest.cycleId, cycleIds),
+        sql`exists (
+          select 1 from raw_record rr
+          where rr.entity = 'assessment'
+            and rr.source_id = regexp_replace(${reviewRequest.sourceId}, '#[a-z_]+$', '')
+            and rr.payload->>'format' = 'assessments_report'
+        )`,
+      ),
+    );
+  const absent = new Map<string, { cycleId: string; ids: string[] }>();
+  for (const c of candidates) {
+    const key = c.sourceId!.replace(/#[a-z_]+$/, "");
+    if (seen.has(key)) continue;
+    const entry = absent.get(key) ?? { cycleId: c.cycleId, ids: [] };
+    entry.ids.push(c.id);
+    absent.set(key, entry);
+  }
+  let deleted = 0;
+  for (const [sourceId, { cycleId, ids }] of absent) {
+    await db.transaction(async (tx) => {
+      await tx.delete(reviewRequest).where(inArray(reviewRequest.id, ids));
+      await recordRow(tx, {
+        runId,
+        entity: "assessment",
+        sourceId,
+        cycleId,
+        result: "removed",
+        tally: { ...emptyTally(), requestsRemoved: ids.length },
+      });
+    });
+    deleted += ids.length;
+  }
+  return deleted;
 }
 
 async function refreshCycle(
@@ -113,6 +193,7 @@ async function refreshCycle(
       reviewerPersonId: reviewRequest.reviewerPersonId,
       snapManagerPersonId: cycleParticipant.snapManagerPersonId,
       flagged: importedRequest.reviewerMismatch,
+      unmatched: importedRequest.reviewerUnmatched,
       csvName: importedRequest.csvReviewerName,
       asOfName: asOfManager.displayName,
       writtenNow: reviewRequest.ingestRunId,
@@ -135,7 +216,10 @@ async function refreshCycle(
     );
   let mismatches = 0;
   for (const r of managerReviews) {
-    const mismatch = r.reviewerPersonId !== r.snapManagerPersonId;
+    // A name that matched nobody fell back to the snapshot manager: still a
+    // mismatch, so the attribution is never silent (#132).
+    const mismatch =
+      r.unmatched || r.reviewerPersonId !== r.snapManagerPersonId;
     if (mismatch !== r.flagged) {
       await tx
         .update(importedRequest)
@@ -156,9 +240,11 @@ async function refreshCycle(
     reject({
       sourceId: r.sourceId?.replace(/#manager$/, "") ?? null,
       code: "reviewer_mismatch",
-      reason:
-        `Manager review of "${cycle.name}": the report names ${r.csvName ?? "?"} ` +
-        `but the manager at ${asOf} was ${r.asOfName ?? "nobody"}`,
+      reason: r.unmatched
+        ? `Manager review of "${cycle.name}": the report names ${r.csvName ?? "?"}, ` +
+          `who matches nobody; it was attributed to the manager at ${asOf}, ${r.asOfName ?? "nobody"}`
+        : `Manager review of "${cycle.name}": the report names ${r.csvName ?? "?"} ` +
+          `but the manager at ${asOf} was ${r.asOfName ?? "nobody"}`,
       column: "Manager",
       values: { Manager: r.csvName, asOfManager: r.asOfName },
     });

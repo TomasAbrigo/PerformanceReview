@@ -10,6 +10,8 @@ export async function insertEngagement(e: {
   score?: number | null;
   segment: EngagementSegment;
   deleted?: boolean;
+  /** The file gave the segment (kept whatever the cutoffs); default true. */
+  fromFile?: boolean;
 }): Promise<void> {
   await db.insert(engagementMonthly).values({
     personId: e.personId,
@@ -17,6 +19,7 @@ export async function insertEngagement(e: {
     score:
       e.score === null || e.score === undefined ? null : e.score.toFixed(4),
     segment: e.segment,
+    segmentFromFile: e.fromFile ?? true,
     deletedAt: e.deleted ? new Date() : null,
   });
 }

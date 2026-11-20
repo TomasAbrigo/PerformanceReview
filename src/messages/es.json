@@ -249,7 +249,8 @@
       "cutoffAlto": "Segmento Alto desde (% del score)",
       "cutoffMedio": "Segmento Medio desde (% del score)",
       "cutoffRegular": "Segmento Regular desde (% del score)",
-      "hint": "Solo se usan cuando el archivo no trae la columna Segmento: por debajo de Regular el segmento es Bajo."
+      "hint": "Solo se usan cuando el archivo no trae la columna Segmento: por debajo de Regular el segmento es Bajo.",
+      "appliesToAll": "Cambiar los cortes recalcula el segmento de todos los meses ya importados, salvo los que trajeron su propia columna Segmento."
     },
     "nav": "Configuración",
     "targets": {
@@ -707,12 +708,19 @@
       "cycle": "Ciclo",
       "column": "Columna",
       "rawValue": "Valor original",
-      "answerReason": "Motivo"
+      "answerReason": "Motivo",
+      "sides": "Pedidos retenidos",
+      "answers": "Respuestas retenidas (estimadas)",
+      "entityKind": "Tipo"
     },
     "indicators": {
       "identity_open": {
         "title": "Identidades sin resolver",
-        "description": "Registros de Bamboo que la importación no pudo asignar a una persona."
+        "description": "Registros de Bamboo que la importación no pudo asignar a una persona: empleados del directorio y filas de informes, separados por tipo."
+      },
+      "identity_retained_rows": {
+        "title": "Evaluaciones retenidas por identidad",
+        "description": "Filas del informe de evaluaciones cuya persona no se pudo identificar: no se escribió nada de ellas y no cuentan en ningún análisis hasta resolver el caso."
       },
       "no_manager": {
         "title": "Personas sin manager",
@@ -771,7 +779,19 @@
     "needsReview": "Requiere revisión",
     "ok": "✓ Todo en orden",
     "showAll": "{n, plural, one {Ver el indicador sin casos} other {Ver los # indicadores sin casos}}",
-    "noCases": "Sin casos"
+    "noCases": "Sin casos",
+    "identityEntities": {
+      "employee": "Empleados",
+      "assessment": "Filas del informe de evaluaciones",
+      "assessment_progress": "Filas del informe de estado",
+      "feedback": "Filas de feedback",
+      "org_attribute": "Atributos de People",
+      "engagement": "Engagement mensual",
+      "other": "Otros"
+    },
+    "retainedCycle": "{rows, plural, one {# fila retenida} other {# filas retenidas}} de {fileRows} del archivo ({pct} %) · {sides, plural, one {# pedido} other {# pedidos}} · {answers, plural, one {# respuesta} other {# respuestas}} sin importar",
+    "retainedInsights": "{n, plural, one {# evaluación retenida} other {# evaluaciones retenidas}} por identidad en este ciclo: no cuentan en este análisis.",
+    "retainedInsightsLink": "Ver en Calidad de datos"
   },
   "Exports": {
     "columns": {
@@ -968,10 +988,11 @@
       "requests": "Solicitudes",
       "answers": "Respuestas",
       "issues": "Casos de identidad",
-      "mismatches": "Evaluador distinto"
+      "mismatches": "Evaluador distinto",
+      "superseded": "Reemplazadas",
+      "pendingLabels": "Comentarios sin etiquetar"
     },
     "period": "{start} – {end}",
-    "createdUnchanged": "{created} nuevas · {unchanged} sin cambios",
     "mismatchHint": "Evaluador distinto: el manager del archivo no es el vigente al cierre del período (el participante conserva el vigente).",
     "viewRun": "Ver la corrida",
     "viewQueue": "Ver la cola de identidad",
@@ -1002,14 +1023,19 @@
     "periodCycleName": "Evaluación semestral {start} – {end}",
     "totals": {
       "label": "Totales de la corrida",
-      "rows": "Filas importadas",
+      "rows": "Filas escritas",
       "cycles": "{count, plural, one {en # ciclo} other {en # ciclos}}",
       "requests": "Solicitudes nuevas",
       "answers": "Respuestas nuevas",
-      "unchanged": "{n} sin cambios",
       "issues": "Casos de identidad",
-      "mismatches": "{n, plural, =0 {Sin evaluador distinto} one {# con evaluador distinto} other {# con evaluador distinto}}"
-    }
+      "mismatches": "{n, plural, =0 {Sin evaluador distinto} one {# con evaluador distinto} other {# con evaluador distinto}}",
+      "rowsNote": "{rows} leídas · {retained} retenidas por identidad · {superseded} reemplazadas",
+      "changes": "{updated} actualizadas · {unchanged} sin cambios · {removed} quitadas"
+    },
+    "rowsOf": "{written} escritas de {rows}",
+    "changes": "{created} nuevas · {updated} actualizadas · {unchanged} sin cambios · {removed} quitadas",
+    "pendingLabels": "{count, plural, one {# comentario pendiente de etiquetar} other {# comentarios pendientes de etiquetar}}: corré el análisis cualitativo para que los lean las pantallas.",
+    "supersededHint": "Reemplazadas: filas de una persona y período que ya tenía otra con fecha de entrega posterior (o la misma fila repetida en el archivo); gana la más reciente. Quitadas: lo que una importación anterior escribió y el archivo corregido ya no trae (celda, lado o fila)."
   },
   "Charts": {
     "empty": "No hay datos para estos filtros.",

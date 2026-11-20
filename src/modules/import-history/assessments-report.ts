@@ -5,12 +5,15 @@ import {
   ASSESSMENTS_REPORT_QUESTIONS,
   customQuestionSchema,
 } from "@/modules/lake/profiles";
+import { createHash } from "node:crypto";
 import {
   atNoon,
   columnsOf,
   emptyTally,
   recordRow,
   resolveRow,
+  rowOutcome,
+  tallySaved,
 } from "./assessment";
 import { cycleForPeriod } from "./cycle-target";
 import {
@@ -18,6 +21,7 @@ import {
   ensureParticipant,
   ensureQuestions,
   likertOverridesOf,
+  removeImportedRequest,
   saveAnswers,
   upsertRequest,
 } from "./cycles";
@@ -109,7 +113,13 @@ export type StagedReport = z.infer<typeof stagedReportSchema>;
  * EEID, then work email (the name only proposes candidates in the queue).
  * The manager side is written by the person named in "Manager At Time Of
  * Assessment" or, when that name matches nobody, by the snapshot manager;
- * a reviewer other than the snapshot manager is a reviewer mismatch.
+ * a reviewer other than the snapshot manager, or a name that matches nobody,
+ * is a reviewer mismatch (#132).
+ *
+ * The file is the truth for the rows it has (#132): a side it leaves empty
+ * drops the request an earlier import wrote, and so does a cell (its
+ * answer). Each side has its own hash (its cells, date and who), so a change
+ * on one side leaves the other unchanged.
  */
 export async function upsertReportAssessment(
   tx: DbOrTx,
@@ -118,6 +128,8 @@ export async function upsertReportAssessment(
 ): Promise<HandlerOutcome> {
   const { fields, raw } = staged;
   const { sourceId } = ctx;
+  // The run is a whole raw report: finish drops what it no longer has.
+  ctx.cache.set("assessmentsReport", true);
   const cycle = await cycleForPeriod(tx, ctx, fields.period_start);
   const columns: QuestionColumn[] = [
     ...columnsOf(
@@ -133,23 +145,29 @@ export async function upsertReportAssessment(
   const rejects: string[] = [];
   // The manager's name: matched when unique; matching nobody falls back to
   // the snapshot manager; matching several people goes to the queue.
-  const { revieweeId, reviewerId, reviewerFailed, issue } = await resolveRow(
-    tx,
-    ctx,
-    "assessment",
-    sourceId,
-    { reviewee: fields.employee_name, reviewer: fields.manager_name },
-    {
-      ids: {
-        bamboo_id: fields.employee_bamboo_id,
-        work_email: fields.work_email,
+  const { revieweeId, reviewerId, reviewerFailed, reviewerUnmatched, issue } =
+    await resolveRow(
+      tx,
+      ctx,
+      "assessment",
+      sourceId,
+      { reviewee: fields.employee_name, reviewer: fields.manager_name },
+      {
+        ids: {
+          bamboo_id: fields.employee_bamboo_id,
+          work_email: fields.work_email,
+        },
+        reviewerOptional: true,
       },
-      reviewerOptional: true,
-    },
-  );
+    );
 
   const results: ("inserted" | "updated" | "unchanged" | "superseded")[] = [];
   let overwritten = 0;
+  let writtenInRun = ctx.cache.get("writtenInRun") as Set<string> | undefined;
+  if (!writtenInRun) {
+    writtenInRun = new Set();
+    ctx.cache.set("writtenInRun", writtenInRun);
+  }
   if (revieweeId) {
     const participant = await ensureParticipant(tx, cycle, revieweeId);
     if (participant.created) tally.participantsCreated++;
@@ -170,8 +188,17 @@ export async function upsertReportAssessment(
     ];
     for (const { side, reviewer, date } of sides) {
       const sideColumns = columns.filter((c) => c.relationship === side);
-      // An empty side (no date, no answer) is not a review: nothing written.
-      if (!date && answeredCells(sideColumns, raw) === 0) continue;
+      // An empty side (no date, no answer) is not a review: nothing written,
+      // and what an earlier import wrote for it goes (a corrected file).
+      if (!date && answeredCells(sideColumns, raw) === 0) {
+        if (
+          !writtenInRun.has(`${sourceId}#${side}`) &&
+          (await removeImportedRequest(tx, `${sourceId}#${side}`))
+        ) {
+          tally.requestsRemoved++;
+        }
+        continue;
+      }
       if (!reviewer) {
         // In the identity queue already (an ambiguous name): no reject.
         if (reviewerFailed) continue;
@@ -187,20 +214,30 @@ export async function upsertReportAssessment(
         reviewerPersonId: reviewer,
         relationship: side,
         sourceId: `${sourceId}#${side}`,
-        hash: ctx.hash,
+        hash: sideHash(side, sideColumns, raw, {
+          participant: participant.id,
+          reviewer,
+          date,
+        }),
+        writtenInRun,
         runId: ctx.runId,
         submittedAt: date ? atNoon(date) : null,
         draft: !date,
         declinedAt: null,
         csvReviewerName: side === "manager" ? fields.manager_name : null,
         reviewerMismatch:
-          side === "manager" && reviewer !== participant.snapManagerPersonId,
+          side === "manager" &&
+          (reviewerUnmatched || reviewer !== participant.snapManagerPersonId),
+        reviewerUnmatched: side === "manager" && reviewerUnmatched,
       });
       results.push(request.result);
       if (request.overwroteNative) overwritten++;
+      const who = fields.employee_bamboo_id ?? fields.work_email ?? sourceId;
       if (request.result === "superseded") {
         rejects.push(
-          `A later assessment of ${fields.employee_bamboo_id ?? fields.work_email ?? sourceId} in "${cycle.name}" replaces this ${side} review (one per cycle)`,
+          request.duplicate
+            ? `${who} appears twice in the file for "${cycle.name}": the ${side} review completed later is kept (repeated row)`
+            : `A later assessment of ${who} in "${cycle.name}" replaces this ${side} review (one per cycle)`,
         );
         continue;
       }
@@ -209,7 +246,6 @@ export async function upsertReportAssessment(
         tally.answersUnchanged += answeredCells(sideColumns, raw);
         continue;
       }
-      if (request.result === "inserted") tally.requestsCreated++;
       const saved = await saveAnswers(
         tx,
         request.id,
@@ -222,27 +258,22 @@ export async function upsertReportAssessment(
           overrides: await likertOverridesOf(tx, ctx.cache),
         },
       );
-      tally.answersCreated += saved.created;
-      tally.answersUnchanged += saved.updated;
+      tallySaved(tally, request.result, saved);
       rejects.push(...saved.invalid);
     }
   }
 
-  const result: HandlerOutcome["result"] = issue
-    ? "ignoredIssueId" in issue
-      ? "ignored"
-      : "issues"
-    : results.includes("inserted")
-      ? "inserted"
-      : results.includes("updated")
-        ? "updated"
-        : "unchanged";
+  const { result, recorded } = rowOutcome(
+    issue,
+    results,
+    tally.requestsRemoved,
+  );
   await recordRow(tx, {
     runId: ctx.runId,
     entity: "assessment",
     sourceId,
     cycleId: cycle.id,
-    result,
+    result: recorded,
     tally,
     issueId: issue && "issueId" in issue ? issue.issueId : null,
   });
@@ -251,4 +282,17 @@ export async function upsertReportAssessment(
     rejects,
     ...(overwritten ? { counts: { nativeOverwritten: overwritten } } : {}),
   };
+}
+
+/** The hash of one side of a row: its cells, its date and who it is about. */
+function sideHash(
+  side: string,
+  columns: QuestionColumn[],
+  raw: Record<string, unknown>,
+  who: { participant: string; reviewer: string; date: string | null },
+): string {
+  const cells = columns.map((c) => [c.header, raw[c.header] ?? null]);
+  return createHash("md5")
+    .update(JSON.stringify([side, who, cells]))
+    .digest("hex");
 }

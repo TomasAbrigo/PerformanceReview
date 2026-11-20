@@ -135,7 +135,8 @@ export type RequestRow = {
   reviewerVisible: boolean;
   reviewerMissing: boolean;
   reviewerMismatch: boolean;
-  requestedAt: string;
+  /** Null for imported requests: Bamboo does not export when one was asked for. */
+  requestedAt: string | null;
   submittedAt: string | null;
   declinedAt: string | null;
   /** Manager reviews: when it was shared with the reviewee. */
@@ -307,7 +308,7 @@ async function selectRequests(
         rbi.source_system as "reviewerSystem", rbi.value as "reviewerBambooId",
         r.reviewer_missing as "reviewerMissing",
         r.reviewer_mismatch as "reviewerMismatch",
-        ${iso("r.requested_at")} as "requestedAt",
+        case when r.source_system = 'bamboo_export' then null else ${iso("r.requested_at")} end as "requestedAt",
         ${iso("r.submitted_at")} as "submittedAt",
         ${iso("r.declined_at")} as "declinedAt",
         ${iso("r.shared_at")} as "sharedAt",

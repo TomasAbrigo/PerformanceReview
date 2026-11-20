@@ -19,6 +19,7 @@ import { Link } from "@/i18n/navigation";
 import { individualScope } from "@/modules/actor/individual-scope";
 import { getActor } from "@/modules/actor/server";
 import { getDataQuality } from "@/modules/analytics/data-quality";
+import { RetainedNotice } from "@/components/data-quality/retained-notice";
 import {
   listAssessmentCycles,
   listAssessmentParticipants,
@@ -108,6 +109,14 @@ export async function HomeSignal({ locale }: { locale: string }) {
       actor.role === "hr" ? countOpenIssues(db) : 0,
       actor.role === "hr" ? getDataQuality(db) : [],
     ]);
+
+  // Report rows of the cycle in focus held back by identity (#132).
+  const retainedHere = cycle
+    ? (quality
+        .find((q) => q.key === "identity_retained_rows")
+        ?.items.filter((i) => "cycleId" in i && i.cycleId === cycle.id)
+        .length ?? 0)
+    : 0;
 
   const attention: Attention[] = [];
   for (const r of pendingSelf) {
@@ -216,6 +225,7 @@ export async function HomeSignal({ locale }: { locale: string }) {
 
   return (
     <div className="flex flex-col gap-8">
+      <RetainedNotice count={retainedHere} />
       <section
         className="home-focus"
         aria-labelledby="home-cycle"

@@ -28,7 +28,7 @@ EEID,Nombre,Mes,Score,Segmento
 ### Segmento: el del archivo, o calculado
 
 - Si la fila trae `Segmento`, **ese es el segmento** (el archivo manda, aunque no coincida con los cortes).
-- Si no lo trae, se **calcula del score** con los cortes de la configuración de insights (`/settings/insights`, sección "Engagement mensual", solo People): `Alto` desde `engagement.cutoffAlto` (80), `Medio` desde `engagement.cutoffMedio` (60), `Regular` desde `engagement.cutoffRegular` (40), por debajo `Bajo`. Son porcentajes del score (0,80 = 80) y tienen que bajar de Alto a Medio y de Medio a Regular. Cambiar los cortes aplica a lo que se importe después: para recalcular meses ya importados hay que volver a subir el archivo (una fila con un segmento distinto se actualiza).
+- Si no lo trae, se **calcula del score** con los cortes de la configuración de insights (`/settings/insights`, sección "Engagement mensual", solo People): `Alto` desde `engagement.cutoffAlto` (80), `Medio` desde `engagement.cutoffMedio` (60), `Regular` desde `engagement.cutoffRegular` (40), por debajo `Bajo`. Son porcentajes del score (0,80 = 80) y tienen que bajar de Alto a Medio y de Medio a Regular. La fila guarda si el segmento vino del archivo (`engagement_monthly.segment_from_file`); si no, las vistas lo recalculan del score con los cortes vigentes, así que cambiar los cortes alcanza también a los meses ya importados (#132).
 - `Falta` es quien no respondió ese mes: **no tiene score** aunque la celda diga otra cosa (se guarda `null`). Una fila con solo `Segmento` (sin score) se guarda con ese segmento y sin score.
 
 ### Mapeo configurable

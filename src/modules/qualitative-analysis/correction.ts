@@ -7,6 +7,7 @@ import { parse } from "@/lib/domain-error";
 import { isUuid } from "@/lib/uuid";
 import type { ActorContext } from "@/modules/actor/types";
 import { sentiments, signals, substances } from "./constants";
+import { analysisTextSql } from "./analysis-text";
 import { effectiveCte } from "./effective";
 import { AnalysisError } from "./errors";
 import { normalizeTheme, upsertThemes } from "./service";
@@ -44,10 +45,12 @@ export async function correctLabel(
     themes: string[] | null;
     substance: (typeof substances)[number] | null;
     signals: string[] | null;
+    source_md5: string | null;
   }>(sql`
     with ${effectiveCte()}
     select r.cycle_id, eff.dimension, eff.sentiment, eff.themes,
-           eff.substance, eff.signals
+           eff.substance, eff.signals,
+           md5(${analysisTextSql("a", "q")}) as source_md5
     from answer a
     join review_request r on r.id = a.request_id
     join question_revision q on q.id = a.question_revision_id
@@ -77,6 +80,8 @@ export async function correctLabel(
       newSignals,
       actorPersonId: actor.personId,
       reason: data.reason || null,
+      // The text it was made on: a re-import that changes it makes it stale.
+      sourceMd5: target.source_md5,
     })
     .returning({ id: analysisCorrection.id });
   await db.insert(adminAuditLog).values({

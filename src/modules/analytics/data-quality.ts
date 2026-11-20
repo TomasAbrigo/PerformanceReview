@@ -9,7 +9,7 @@ import {
   type SourceSystem,
 } from "@/db/schema";
 import { jobValidOn, rowsOf } from "@/lib/sql";
-import { listIssues } from "@/modules/identity";
+import { listIssues, summarizePayload } from "@/modules/identity";
 import { normalizeName } from "@/modules/identity/normalize";
 import { todayLocal } from "@/modules/org-history/dates";
 import { activeEmploymentCteOn } from "@/modules/people/employment";
@@ -39,6 +39,7 @@ const indicator = <K extends string, I>(
 /** Display order of the panel. */
 export const DATA_QUALITY_KEYS = [
   "identity_open",
+  "identity_retained_rows",
   "no_manager",
   "participants_no_manager",
   "participants_incomplete_snapshot",
@@ -99,6 +100,100 @@ export async function openIdentityIssues(
       displayName: i.summary.displayName,
       createdAt: i.createdAt,
     })),
+  );
+}
+
+export type RetainedRowItem = {
+  /** identity_match_issue id. */
+  id: string;
+  sourceId: string;
+  displayName: string | null;
+  workEmail: string | null;
+  cycleId: string;
+  cycleName: string;
+  /** Sides (self, manager) of the row with a date or an answer: requests not written. */
+  sides: number;
+  /** Non-empty answer cells of the row: answers not written (estimate). */
+  answers: number;
+  /** Rows of the same file (run) in that cycle, retained ones included. */
+  fileRows: number;
+};
+
+type ReportPayload = {
+  fields?: Record<string, unknown>;
+  raw?: Record<string, unknown>;
+};
+
+const filled = (v: unknown) =>
+  v !== null && v !== undefined && String(v).trim() !== "";
+
+/** Answer columns of the raw report: "Employee - …" / "Manager - …", not the custom question texts. */
+const answerCellsOf = (raw: Record<string, unknown>, side: string) =>
+  Object.entries(raw).filter(
+    ([k, v]) =>
+      k.startsWith(`${side} - `) && !/Custom Question \d/.test(k) && filled(v),
+  ).length;
+
+/**
+ * Rows of an assessments report held back because their person could not be
+ * identified (open identity cases of report rows): nothing of them was
+ * written, so they are missing from every analysis. Each one with its cycle,
+ * what it holds back and the file's rows of that cycle (for a %).
+ */
+export async function identityRetainedRows(
+  db: DbOrTx,
+): Promise<Indicator<"identity_retained_rows", RetainedRowItem>> {
+  const rows = rowsOf<{
+    id: string;
+    sourceId: string;
+    payload: unknown;
+    cycleId: string;
+    cycleName: string;
+    fileRows: number;
+  }>(
+    await db.execute(sql`
+      select i.id, i.source_id as "sourceId", i.payload,
+        h.cycle_id as "cycleId", c.name as "cycleName",
+        (select count(*)::int from history_import_row f
+          where f.run_id = h.run_id and f.entity = h.entity
+            and f.cycle_id = h.cycle_id) as "fileRows"
+      from identity_match_issue i
+      join lateral (
+        select r.run_id, r.entity, r.cycle_id from history_import_row r
+        where r.entity = i.entity and r.source_id = i.source_id
+          and r.cycle_id is not null
+        order by r.created_at desc limit 1
+      ) h on true
+      join review_cycle c on c.id = h.cycle_id and c.deleted_at is null
+      where i.status = 'open' and i.entity = 'assessment'
+      order by c.name, c.id, i.source_id, i.id
+    `),
+  );
+  return indicator(
+    "identity_retained_rows",
+    rows.map((r) => {
+      const payload = (r.payload ?? {}) as ReportPayload;
+      const fields = payload.fields ?? {};
+      const raw = payload.raw ?? {};
+      const self = answerCellsOf(raw, "Employee");
+      const manager = answerCellsOf(raw, "Manager");
+      const sides =
+        (filled(fields.self_completed_on) || self > 0 ? 1 : 0) +
+        (filled(fields.manager_completed_on) || manager > 0 ? 1 : 0);
+      const email = fields.work_email;
+      const summary = summarizePayload(r.payload);
+      return {
+        id: r.id,
+        sourceId: r.sourceId,
+        displayName: summary.displayName,
+        workEmail: typeof email === "string" ? email : null,
+        cycleId: r.cycleId,
+        cycleName: r.cycleName,
+        sides,
+        answers: self + manager,
+        fileRows: r.fileRows,
+      };
+    }),
   );
 }
 
@@ -543,6 +638,7 @@ export async function unmappedAnswers(
 
 export type DataQualityIndicator =
   | Indicator<"identity_open", IdentityOpenItem>
+  | Indicator<"identity_retained_rows", RetainedRowItem>
   | Indicator<"no_manager", NoManagerItem>
   | Indicator<"participants_no_manager", ParticipantItem>
   | Indicator<"participants_incomplete_snapshot", IncompleteSnapshotItem>
@@ -560,6 +656,7 @@ const QUERIES: Record<
   (db: DbOrTx, options: Options) => Promise<DataQualityIndicator>
 > = {
   identity_open: (db) => openIdentityIssues(db),
+  identity_retained_rows: (db) => identityRetainedRows(db),
   no_manager: (db, options) => peopleWithoutManager(db, options),
   participants_no_manager: (db) => participantsWithoutSnapshotManager(db),
   participants_incomplete_snapshot: (db) =>

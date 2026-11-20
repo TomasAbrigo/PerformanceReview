@@ -220,8 +220,13 @@ export const entityHandlers: Partial<
     schema: stagedAnyAssessmentSchema,
     counts: { issues: 0, ignored: 0, mismatches: 0 },
     upsert: upsertAnyAssessment,
-    finish: async (db, { runId, reject }) =>
-      finishHistoryImport(db, { runId, reject }),
+    finish: async (db, { runId, reject, seen, cache }) =>
+      finishHistoryImport(db, {
+        runId,
+        reject,
+        // Only a raw assessments report is a whole list (#132).
+        ...(cache.get("assessmentsReport") ? { seen } : {}),
+      }),
     decide: buildCycleDecision,
   }),
   assessment_progress: defineHandler({

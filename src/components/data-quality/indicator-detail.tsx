@@ -10,6 +10,7 @@ import type {
   DataQualityIndicator,
   IncompleteSnapshotItem,
   ParticipantItem,
+  RetainedRowItem,
 } from "@/modules/analytics/data-quality";
 
 type Column = keyof (typeof es)["DataQuality"]["columns"];
@@ -96,6 +97,59 @@ function ByCycle<T extends ParticipantItem>({
   );
 }
 
+/** Held-back report rows per cycle, with what they hold back and their share of the file. */
+function RetainedByCycle({ items }: { items: RetainedRowItem[] }) {
+  const t = useTranslations("DataQuality");
+  const groups = new Map<string, RetainedRowItem[]>();
+  for (const item of items) {
+    groups.set(item.cycleId, [...(groups.get(item.cycleId) ?? []), item]);
+  }
+  return (
+    <div className="flex flex-col gap-6">
+      {[...groups].map(([cycleId, rows]) => {
+        const fileRows = rows[0].fileRows;
+        const sides = rows.reduce((s, r) => s + r.sides, 0);
+        const answers = rows.reduce((s, r) => s + r.answers, 0);
+        const pct =
+          fileRows > 0 ? Math.round((rows.length / fileRows) * 1000) / 10 : 0;
+        return (
+          <section key={cycleId} className="flex flex-col gap-2">
+            <h2 className="text-lg">{rows[0].cycleName}</h2>
+            <p className="text-sm text-muted-foreground">
+              {t("retainedCycle", {
+                rows: rows.length,
+                fileRows,
+                pct,
+                sides,
+                answers,
+              })}
+            </p>
+            <CaseTable
+              columns={["name", "email", "sourceId", "sides", "answers"]}
+              rows={rows.map((r) => ({
+                key: r.id,
+                cells: [
+                  <Link
+                    key="n"
+                    href={`/imports/identity/${r.id}`}
+                    className="hover:underline"
+                  >
+                    {r.displayName ?? t("unnamed")}
+                  </Link>,
+                  r.workEmail,
+                  r.sourceId,
+                  r.sides,
+                  r.answers,
+                ],
+              }))}
+            />
+          </section>
+        );
+      })}
+    </div>
+  );
+}
+
 function Cases({ indicator }: { indicator: DataQualityIndicator }) {
   const t = useTranslations("DataQuality");
   const { dateTime } = useRunFormat();
@@ -122,6 +176,8 @@ function Cases({ indicator }: { indicator: DataQualityIndicator }) {
           }))}
         />
       );
+    case "identity_retained_rows":
+      return <RetainedByCycle items={indicator.items} />;
     case "no_manager":
       return (
         <CaseTable

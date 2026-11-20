@@ -259,8 +259,15 @@ export type RequestInput = {
   declinedAt: Date | null;
   csvReviewerName: string | null;
   reviewerMismatch: boolean;
+  /** The file's reviewer name matched nobody (#132). */
+  reviewerUnmatched?: boolean;
   /** Answered but never completed (no completion date): a draft. */
   draft?: boolean;
+  /**
+   * The source ids this run already wrote (the run's cache): a second row
+   * with the same id in one file competes by date, not by file order (#132).
+   */
+  writtenInRun?: Set<string>;
 };
 
 /**
@@ -272,7 +279,8 @@ export type RequestInput = {
  * (two Assessment Dates), the LATEST one is that request: an older row finds
  * the newer one in place and is `superseded` (nothing written), a newer row
  * takes the request over (its source id and answers). The outcome depends on
- * the dates only, so re-imports are stable whatever the row order.
+ * the dates only, so re-imports are stable whatever the row order. The same
+ * holds for two rows of one file with the same source id (`duplicate`).
  */
 export async function upsertRequest(
   tx: DbOrTx,
@@ -282,9 +290,16 @@ export async function upsertRequest(
   result: "inserted" | "updated" | "unchanged" | "superseded";
   /** It took over a review written in the app (#106: Bamboo wins). */
   overwroteNative?: boolean;
+  /** Another row of this run has the same source id (#132). */
+  duplicate?: boolean;
 }> {
   const [found] = await tx
-    .select({ id: reviewRequest.id, hash: reviewRequest.payloadHash })
+    .select({
+      id: reviewRequest.id,
+      hash: reviewRequest.payloadHash,
+      submittedAt: reviewRequest.submittedAt,
+      declinedAt: reviewRequest.declinedAt,
+    })
     .from(reviewRequest)
     .where(
       and(
@@ -292,8 +307,15 @@ export async function upsertRequest(
         eq(reviewRequest.sourceId, input.sourceId),
       ),
     );
+  const duplicate = input.writtenInRun?.has(input.sourceId) ?? false;
+  input.writtenInRun?.add(input.sourceId);
   if (found && found.hash === input.hash) {
-    return { id: found.id, result: "unchanged" };
+    return duplicate
+      ? { id: found.id, result: "superseded", duplicate }
+      : { id: found.id, result: "unchanged" };
+  }
+  if (found && duplicate && !isLater(input, found)) {
+    return { id: found.id, result: "superseded", duplicate };
   }
   const values = {
     cycleId: input.cycleId,
@@ -347,9 +369,7 @@ export async function upsertRequest(
         ),
       );
     if (same) {
-      const theirs = (same.submittedAt ?? same.declinedAt)?.getTime() ?? 0;
-      const ours = (input.submittedAt ?? input.declinedAt)?.getTime() ?? 0;
-      if (theirs >= ours) return { id: same.id, result: "superseded" };
+      if (!isLater(input, same)) return { id: same.id, result: "superseded" };
       await tx
         .update(reviewRequest)
         .set(values)
@@ -359,7 +379,8 @@ export async function upsertRequest(
     } else {
       const [row] = await tx
         .insert(reviewRequest)
-        .values({ ...values, requestedAt: input.submittedAt ?? undefined })
+        // Bamboo exports no request date: none is made up (#132).
+        .values({ ...values, requestedAt: null })
         .returning({ id: reviewRequest.id });
       id = row.id;
     }
@@ -370,15 +391,52 @@ export async function upsertRequest(
       requestId: id,
       csvReviewerName: input.csvReviewerName,
       reviewerMismatch: input.reviewerMismatch,
+      reviewerUnmatched: input.reviewerUnmatched ?? false,
     })
     .onConflictDoUpdate({
       target: importedRequest.requestId,
       set: {
         csvReviewerName: input.csvReviewerName,
         reviewerMismatch: input.reviewerMismatch,
+        reviewerUnmatched: input.reviewerUnmatched ?? false,
       },
     });
-  return { id, result, ...(native ? { overwroteNative: true } : {}) };
+  return {
+    id,
+    result,
+    ...(native ? { overwroteNative: true } : {}),
+    ...(duplicate ? { duplicate } : {}),
+  };
+}
+
+/** Whether the incoming row was completed after the stored request. */
+function isLater(
+  input: Pick<RequestInput, "submittedAt" | "declinedAt">,
+  stored: { submittedAt: Date | null; declinedAt: Date | null },
+): boolean {
+  const theirs = (stored.submittedAt ?? stored.declinedAt)?.getTime() ?? 0;
+  const ours = (input.submittedAt ?? input.declinedAt)?.getTime() ?? 0;
+  return ours > theirs;
+}
+
+/**
+ * Drops an imported request (and its answers): the corrected file no longer
+ * has that side, or that row (#132). Returns whether one was there.
+ */
+export async function removeImportedRequest(
+  tx: DbOrTx,
+  sourceId: string,
+): Promise<boolean> {
+  const gone = await tx
+    .delete(reviewRequest)
+    .where(
+      and(
+        eq(reviewRequest.sourceSystem, SOURCE),
+        eq(reviewRequest.sourceId, sourceId),
+      ),
+    )
+    .returning({ id: reviewRequest.id });
+  return gone.length > 0;
 }
 
 /**
@@ -423,7 +481,10 @@ export async function likertOverridesOf(
 
 /**
  * Writes the answers of one side of a report row. Returns how many were
- * created (new) or rewritten, and the cells that the question cannot take.
+ * created (new), changed (`updated`), rewritten with the same value
+ * (`unchanged`) or dropped, and the cells that the question cannot take.
+ * The row is the truth for its cells (#132): a cell it leaves empty, or one
+ * it holds an invalid value in, drops the answer an earlier import wrote.
  * A Likert option without equivalence is stored (raw value as label, no
  * value) and recorded in answer_quality_issue; a later import that maps it
  * resolves the issue.
@@ -435,9 +496,21 @@ export async function saveAnswers(
   revisions: Map<string, string>,
   row: Record<string, unknown>,
   context: { cycleId: string; runId: string; overrides?: LikertOverrides },
-): Promise<{ created: number; updated: number; invalid: string[] }> {
+): Promise<{
+  created: number;
+  updated: number;
+  unchanged: number;
+  removed: number;
+  invalid: string[];
+}> {
   const existing = await tx
-    .select({ revisionId: answer.questionRevisionId })
+    .select({
+      revisionId: answer.questionRevisionId,
+      optionValue: answer.optionValue,
+      optionLabel: answer.optionLabel,
+      normalized: answer.normalized,
+      textValue: answer.textValue,
+    })
     .from(answer)
     .where(
       and(
@@ -445,7 +518,7 @@ export async function saveAnswers(
         inArray(answer.questionRevisionId, [...revisions.values()]),
       ),
     );
-  const had = new Set(existing.map((a) => a.revisionId));
+  const had = new Map(existing.map(({ revisionId, ...a }) => [revisionId, a]));
   // Revisions of this request with an open quality issue: only those can be
   // resolved by this write (one lookup per request).
   const open = new Set(
@@ -491,12 +564,18 @@ export async function saveAnswers(
   const resolved: string[] = [];
   let created = 0;
   let updated = 0;
+  let unchanged = 0;
   const invalid: string[] = [];
+  const drop: string[] = [];
   for (const column of columns) {
     const revisionId = revisions.get(column.key)!;
     const cell = answerColumns(column, row[column.header], context.overrides);
-    if (cell === null) continue;
+    if (cell === null) {
+      if (had.has(revisionId)) drop.push(revisionId);
+      continue;
+    }
     if ("invalid" in cell) {
+      if (had.has(revisionId)) drop.push(revisionId);
       // Rejected (the row reports it) and kept as a quality issue too.
       invalid.push(
         `Column "${column.header}": "${String(row[column.header])}" is not a valid answer`,
@@ -532,8 +611,20 @@ export async function saveAnswers(
     } else if (open.has(revisionId)) {
       resolved.push(revisionId);
     }
-    if (had.has(revisionId)) updated++;
-    else created++;
+    const before = had.get(revisionId);
+    if (!before) created++;
+    else if (sameAnswer(before, values)) unchanged++;
+    else updated++;
+  }
+  if (drop.length) {
+    await tx
+      .delete(answer)
+      .where(
+        and(
+          eq(answer.requestId, requestId),
+          inArray(answer.questionRevisionId, drop),
+        ),
+      );
   }
   if (resolved.length) {
     await tx
@@ -547,7 +638,24 @@ export async function saveAnswers(
         ),
       );
   }
-  return { created, updated, invalid };
+  return { created, updated, unchanged, removed: drop.length, invalid };
+}
+
+type AnswerValues = {
+  optionValue: number | null;
+  optionLabel: string | null;
+  normalized: number | null;
+  textValue: string | null;
+};
+
+function sameAnswer(a: AnswerValues, b: AnswerValues): boolean {
+  const num = (v: number | null) => (v === null ? null : Number(v));
+  return (
+    num(a.optionValue) === num(b.optionValue) &&
+    (a.optionLabel ?? null) === (b.optionLabel ?? null) &&
+    num(a.normalized) === num(b.normalized) &&
+    (a.textValue ?? null) === (b.textValue ?? null)
+  );
 }
 
 /** Counts the non-empty answer cells of one side (unchanged requests). */

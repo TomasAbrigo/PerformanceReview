@@ -43,6 +43,8 @@ import {
 } from "@/modules/insights/tone";
 import type { IndicatorDistribution } from "@/modules/analytics/indicators/types";
 import { getSettings } from "@/modules/settings";
+import { identityRetainedRows } from "@/modules/analytics/data-quality";
+import { RetainedNotice } from "@/components/data-quality/retained-notice";
 import { DrillSection } from "../drill-section";
 
 /** The mean of everybody in a distribution (the total row, or the only one). */
@@ -92,14 +94,20 @@ async function Indicators({
   };
   // The cycle before (cycles come newest first), for the delta of the mean.
   const previousCycle = cycles[cycles.findIndex((c) => c.id === cycle.id) + 1];
-  const [{ options, distribution, matrix, alerts }, previous, settings] =
-    await Promise.all([
-      indicatorOverview(db, actor, { cycleId: cycle.id, ...input }),
-      previousCycle
-        ? indicatorOverview(db, actor, { cycleId: previousCycle.id, ...input })
-        : null,
-      getSettings(db),
-    ]);
+  const [
+    { options, distribution, matrix, alerts },
+    previous,
+    settings,
+    retained,
+  ] = await Promise.all([
+    indicatorOverview(db, actor, { cycleId: cycle.id, ...input }),
+    previousCycle
+      ? indicatorOverview(db, actor, { cycleId: previousCycle.id, ...input })
+      : null,
+    getSettings(db),
+    // Report rows held back by identity (#132): People only.
+    actor.role === "hr" ? identityRetainedRows(db) : null,
+  ]);
   const masked = scope.kind === "aggregatesOnly";
   const targets = kpiThresholds(settings);
   const riskThreshold = settings["alerts.riskThreshold"];
@@ -154,6 +162,11 @@ async function Indicators({
           groupBys={groupBys}
         />
       </PageHeader>
+      <RetainedNotice
+        count={
+          retained?.items.filter((r) => r.cycleId === cycle.id).length ?? 0
+        }
+      />
       <section
         className="grid gap-5 sm:grid-cols-2"
         aria-label={t("kpi.mean", { indicator })}

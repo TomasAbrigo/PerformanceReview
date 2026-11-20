@@ -11,18 +11,17 @@ import { likertRoles, mapLikert } from "@/modules/likert";
 import { loadLikertOverrides } from "@/modules/likert/store";
 
 /**
- * How many options a Likert question had, from the letters actually answered:
- * a column whose letters never go past D is the 4-option variant (A-D);
- * otherwise the revision's choices (5 for Bamboo's Q1/Q2).
+ * How many options a Likert question had: the count its revision declares
+ * (5 for Bamboo's Q1/Q2). Never inferred from the letters answered (#132): a
+ * 5-option column where nobody picked E is still A-E, and reading it as A-D
+ * would shift the scale (C 3 -> 2, D 2 -> 1). A 4-option question is one
+ * whose revision declares 4 choices (or a likert_mapping override).
  */
 export function optionCountOf(
-  labels: (string | null)[],
+  _labels: (string | null)[],
   choices: number | undefined,
 ): number {
-  const letters = labels.filter((l): l is string => !!l && /^[A-Z]$/.test(l));
-  if (letters.length === 0) return choices ?? 5;
-  const highest = Math.max(...letters.map((l) => l.charCodeAt(0) - 64));
-  return highest <= 4 ? 4 : (choices ?? 5);
+  return choices ?? 5;
 }
 
 /**

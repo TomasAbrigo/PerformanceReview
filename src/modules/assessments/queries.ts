@@ -188,7 +188,7 @@ function sideRequests(requests: ReviewRequest[]): Map<string, ReviewRequest> {
   const chosen = new Map<string, ReviewRequest>();
   const rank = (r: ReviewRequest) =>
     (r.status === "submitted" ? 1 : 0) * 1e15 +
-    (r.submittedAt ?? r.requestedAt).getTime();
+    ((r.submittedAt ?? r.requestedAt)?.getTime() ?? 0);
   for (const r of requests) {
     const key = `${r.participantId}:${r.relationship}`;
     const current = chosen.get(key);

@@ -30,6 +30,15 @@ function renderIn(
 }
 
 describe("InsightsSettingsForm", () => {
+  it("says a change of the engagement cutoffs reaches the months already imported (#132)", () => {
+    renderIn("es");
+    expect(
+      screen.getByText(
+        /recalcula el segmento de todos los meses ya importados/,
+      ),
+    ).toBeVisible();
+  });
+
   it("shows the current values of every setting in Spanish", () => {
     renderIn("es");
     const form = screen.getByRole("form", {

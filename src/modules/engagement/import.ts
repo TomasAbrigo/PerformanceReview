@@ -240,6 +240,7 @@ export async function upsertEngagement(
   const values = {
     score: scoreText(staged.score),
     segment,
+    segmentFromFile: staged.segment !== null && staged.segment !== undefined,
     sourceSystem: ctx.source,
     sourceId: ctx.sourceId,
     ingestRunId: ctx.runId,

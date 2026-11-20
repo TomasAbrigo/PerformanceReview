@@ -52,6 +52,8 @@ describe("importing the monthly engagement file", () => {
       ["2026-01-01", "0.8500", "alto"],
       ["2026-02-01", "0.5500", "regular"],
     ]);
+    // The file gave the segment: it is kept whatever the cutoffs (#132).
+    expect((await rowsOf(ana)).every((r) => r.segmentFromFile)).toBe(true);
     expect(
       (await rowsOf(bruno)).map((r) => [r.month, r.score, r.segment]),
     ).toEqual([["2026-01-01", null, "falta"]]);
@@ -72,6 +74,8 @@ describe("importing the monthly engagement file", () => {
       "regular",
       "bajo",
     ]);
+    // Derived: the views recompute it with the current cutoffs (#132).
+    expect((await rowsOf(ana)).some((r) => r.segmentFromFile)).toBe(false);
   });
 
   it("uses the cutoffs of the settings", async () => {

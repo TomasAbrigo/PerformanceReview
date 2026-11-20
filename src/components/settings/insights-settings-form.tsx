@@ -175,6 +175,9 @@ export function InsightsSettingsForm({
       </Section>
       <Section title={t("engagement.title")}>
         <p className="text-sm text-muted-foreground">{t("engagement.hint")}</p>
+        <p className="text-sm text-muted-foreground">
+          {t("engagement.appliesToAll")}
+        </p>
         {number(
           "engagement.cutoffAlto",
           t("engagement.cutoffAlto"),

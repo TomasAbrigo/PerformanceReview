@@ -12,6 +12,39 @@ import type {
 export const indicatorHref = (key: DataQualityKey) =>
   key === "identity_open" ? "/imports/identity" : `/data-quality/${key}`;
 
+const IDENTITY_KINDS = [
+  "employee",
+  "assessment",
+  "assessment_progress",
+  "feedback",
+  "org_attribute",
+  "engagement",
+] as const;
+type IdentityKind = (typeof IDENTITY_KINDS)[number] | "other";
+
+/** Open identity cases by kind: missing employees are not held-back report rows (#132). */
+function IdentityKinds({ items }: { items: { entity: string }[] }) {
+  const t = useTranslations("DataQuality");
+  const counts = new Map<IdentityKind, number>();
+  for (const { entity } of items) {
+    const kind: IdentityKind = (IDENTITY_KINDS as readonly string[]).includes(
+      entity,
+    )
+      ? (entity as IdentityKind)
+      : "other";
+    counts.set(kind, (counts.get(kind) ?? 0) + 1);
+  }
+  return (
+    <ul className="text-xs text-muted-foreground">
+      {[...counts]
+        .sort((a, b) => b[1] - a[1])
+        .map(([kind, n]) => (
+          <li key={kind}>{`${t(`identityEntities.${kind}`)}: ${n}`}</li>
+        ))}
+    </ul>
+  );
+}
+
 function IndicatorCard({ indicator }: { indicator: DataQualityIndicator }) {
   const t = useTranslations("DataQuality");
   const title = t(`indicators.${indicator.key}.title`);
@@ -23,6 +56,9 @@ function IndicatorCard({ indicator }: { indicator: DataQualityIndicator }) {
       <p className="text-sm text-muted-foreground">
         {t(`indicators.${indicator.key}.description`)}
       </p>
+      {indicator.key === "identity_open" && indicator.count > 0 ? (
+        <IdentityKinds items={indicator.items} />
+      ) : null}
       <p
         className={`stat-value ${open ? "text-status-pending" : ""}`}
         aria-label={t("count", { count: indicator.count })}

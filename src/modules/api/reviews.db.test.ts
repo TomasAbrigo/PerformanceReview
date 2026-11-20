@@ -421,6 +421,31 @@ describe("current rating", () => {
   });
 });
 
+describe("imported requests (#132)", () => {
+  it("carry no requested_at: Bamboo does not export when a review was asked for", async () => {
+    const cycle = await insertReviewCycle({ name: "Imported" });
+    const participant = await insertParticipant({
+      cycleId: cycle,
+      personId: dora,
+      snapManagerPersonId: bruno,
+    });
+    const id = await insertRequest({
+      cycleId: cycle,
+      participantId: participant,
+      reviewerPersonId: dora,
+      relationship: "self",
+    });
+    await db
+      .update(reviewRequest)
+      .set({ sourceSystem: "bamboo_export", sourceId: "x#self" })
+      .where(eq(reviewRequest.id, id));
+    const res = await requestsOf(cycle);
+    const [row] = res.body.data;
+    expect(row.requested_at).toBeNull();
+    expect(row.submitted_at).toMatch(ISO);
+  });
+});
+
 describe("superseded manager requests (history data)", () => {
   it("are listed with their status and can be filtered", async () => {
     const cycle = await insertReviewCycle({ name: "Assessors" });
