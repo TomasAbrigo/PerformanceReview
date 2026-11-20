@@ -1188,8 +1188,8 @@
     },
     "alerts": {
       "title": "Alerts",
-      "hint": "A fall of {drop} points or more since the previous cycle, or retention and engagement both at {risk} or less.",
-      "summary": "People with a fall: {drop} · People at risk: {risk}",
+      "hint": "A fall of {drop} points or more since the cycle right before, or retention and engagement both at {risk} or below.",
+      "summary": "People with a fall: {drop} · People at risk: {risk} · People with any alert: {people}",
       "under": "fewer than {min}",
       "aggregateOnly": "Direction sees only how many people have alerts, not who.",
       "kind": {
@@ -1203,10 +1203,11 @@
       "detail": "Detail",
       "dropDetail": "{indicator}: {previous} → {value} (−{delta}) since {cycle}",
       "riskDetail": "Retention {retention}, engagement {engagement}",
-      "dropNote": "Fell {drop} points or more since the previous cycle",
+      "dropNote": "Fell {drop} points or more since {cycle}, the previous cycle",
       "riskNote": "Retention and engagement at {risk} or below",
       "riskDrill": "See the {n} people at risk",
-      "list": "See the {n} alerts"
+      "list": "See the {n} alerts ({people, plural, one {# person} other {# people}}; one fall per indicator)",
+      "noPrevious": "No previous cycle to compare with"
     },
     "trend": {
       "title": "Retention and engagement over time",

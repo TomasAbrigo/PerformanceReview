@@ -307,6 +307,9 @@ const alerts: IndicatorAlerts = {
   riskThreshold: 2,
   peopleWithDrop: 1,
   peopleAtRisk: 1,
+  peopleWithAlert: 1,
+  previousCycleId: "c0",
+  previousCycle: { name: "H1 2024", localizedName: null },
   minGroupSize: null,
   alerts: [
     { kind: "risk", person, retention: 1, engagement: 1 },
@@ -352,6 +355,42 @@ describe("AlertsView", () => {
       expect(
         within(rows[0]).getByRole("link", { name: "Fabio Luna" }),
       ).toHaveAttribute("href", "/insights/indicators/trend?person=p1");
+    },
+  );
+
+  it.each(locales)(
+    "names the previous cycle as the screens do and counts people apart from alerts (%s)",
+    (locale) => {
+      renderIn(
+        locale,
+        <AlertsView
+          data={{
+            ...alerts,
+            previousCycle: {
+              name: "Evaluación semestral 2025-03-29 – 2025-09-28",
+              localizedName: null,
+            },
+          }}
+          context={{
+            base: { pathname: "/insights/indicators", query: {} },
+            targets: { goodPct: 80, watchPct: 50 },
+            total: 10,
+          }}
+        />,
+      );
+      const month = locale === "es" ? "mar – sept 2025" : "Mar – Sep 2025";
+      expect(screen.getByTestId("alerts-kpi-drop")).toHaveTextContent(month);
+      expect(screen.getByTestId("alerts-table")).toHaveTextContent(month);
+      expect(screen.getByTestId("alerts-table")).not.toHaveTextContent(
+        "2025-03-29",
+      );
+      expect(
+        screen.getByText(
+          locale === "es"
+            ? /Ver las 2 alertas \(1 persona;/
+            : /See the 2 alerts \(1 person;/,
+        ),
+      ).toBeInTheDocument();
     },
   );
 

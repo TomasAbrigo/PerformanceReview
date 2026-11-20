@@ -1188,8 +1188,8 @@
     },
     "alerts": {
       "title": "Alertas",
-      "hint": "Caída de {drop} puntos o más respecto del ciclo anterior, o retención y compromiso en {risk} o menos a la vez.",
-      "summary": "Personas con caída: {drop} · Personas en riesgo: {risk}",
+      "hint": "Caída de {drop} puntos o más respecto del ciclo inmediatamente anterior, o retención y compromiso en {risk} o menos a la vez.",
+      "summary": "Personas con caída: {drop} · Personas en riesgo: {risk} · Personas con alguna alerta: {people}",
       "under": "menos de {min}",
       "aggregateOnly": "Dirección ve solo cuántas personas tienen alertas, no quiénes.",
       "kind": {
@@ -1203,10 +1203,11 @@
       "detail": "Detalle",
       "dropDetail": "{indicator}: {previous} → {value} (−{delta}) desde {cycle}",
       "riskDetail": "Retención {retention}, compromiso {engagement}",
-      "dropNote": "Bajaron {drop} puntos o más desde el ciclo anterior",
+      "dropNote": "Bajaron {drop} puntos o más desde {cycle}, el ciclo anterior",
       "riskNote": "Retención y compromiso en {risk} o menos",
       "riskDrill": "Ver las {n} personas en riesgo",
-      "list": "Ver las {n} alertas"
+      "list": "Ver las {n} alertas ({people, plural, one {# persona} other {# personas}}; una caída por indicador)",
+      "noPrevious": "Sin ciclo anterior para comparar"
     },
     "trend": {
       "title": "Evolución de retención y compromiso",

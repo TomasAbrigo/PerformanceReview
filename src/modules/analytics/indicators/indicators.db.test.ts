@@ -840,7 +840,7 @@ describe("indicatorAlerts", () => {
     expect(brief(a)).toEqual([["risk", names.gina, 2, 2]]);
   });
 
-  it("compares with the previous cycle the person has a value in, not only the adjacent one", async () => {
+  it("compares only with the immediately previous cycle (#133), never an older one", async () => {
     const h1 = await insertIndicatorCycle({
       name: "H1 2025",
       periodStart: "2025-01-01",
@@ -860,8 +860,57 @@ describe("indicatorAlerts", () => {
       retention: 2,
       engagement: null,
     });
-    const a = await indicatorAlerts(db, hr, { cycleId: h1.cycleId });
+    // Another person answers in H1 2025 too, so H2 2024 is its previous cycle
+    // for everyone: Hugo is compared with H2 2024 (4 → 2).
+    let a = await indicatorAlerts(db, hr, { cycleId: h1.cycleId });
     expect(brief(a)).toEqual([["drop", names.hugo, "retention", 4, 2, 2]]);
+    expect(a.previousCycleId).toBe(c2.cycleId);
+    // A later cycle where Hugo answers again but the cycle right before it
+    // (H2 2025) has no value of his: no drop against H1 2025 or older.
+    const h2 = await insertIndicatorCycle({
+      name: "H2 2025",
+      periodStart: "2025-07-01",
+      periodEnd: "2025-12-31",
+    });
+    const h3 = await insertIndicatorCycle({
+      name: "H1 2026",
+      periodStart: "2026-01-01",
+      periodEnd: "2026-06-30",
+    });
+    const other = await insertParticipant({
+      cycleId: h2.cycleId,
+      personId: id.ana,
+      snapManagerPersonId: id.marta,
+    });
+    await insertIndicatorReview({
+      cycle: h2,
+      participantId: other,
+      reviewerPersonId: id.marta,
+      retention: 4,
+      engagement: 4,
+    });
+    const later = await insertParticipant({
+      cycleId: h3.cycleId,
+      personId: id.hugo,
+      snapManagerPersonId: id.nora,
+    });
+    await insertIndicatorReview({
+      cycle: h3,
+      participantId: later,
+      reviewerPersonId: id.nora,
+      retention: 1,
+      engagement: null,
+    });
+    a = await indicatorAlerts(db, hr, { cycleId: h3.cycleId });
+    expect(a.previousCycleId).toBe(h2.cycleId);
+    expect(a.alerts.filter((x) => x.kind === "drop")).toEqual([]);
+  });
+
+  it("counts the people with any alert apart from the alerts (#133)", async () => {
+    const a = await indicatorAlerts(db, hr, { cycleId: c2.cycleId });
+    const people = new Set(a.alerts.map((x) => x.person.personId));
+    expect(a.peopleWithAlert).toBe(people.size);
+    expect(a.alerts.length).toBeGreaterThan(people.size);
   });
 
   it("the thresholds change the alerts", async () => {

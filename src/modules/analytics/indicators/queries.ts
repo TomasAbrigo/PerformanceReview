@@ -24,6 +24,7 @@ import {
   indicatorContext,
   loadRows,
   personInReach,
+  previousIndicatorCycle,
   requireCycle,
   requireUuid,
 } from "./rows";
@@ -280,8 +281,8 @@ export async function riskMatrix(
 
 /**
  * The alerts of a cycle: `drop`, an indicator that fell by the drop threshold
- * or more since the previous cycle (the latest one before it, in the order of
- * period, end of period, creation, id) in which the person has a value, and
+ * or more since the cycle right before it that asks the indicators (order of
+ * period, end of period, creation, id; never an older one, #133), and
  * `risk`, retention and engagement both at or below the risk threshold.
  * People and the direct manager get them with the person; direction only the
  * number of people (when at least the minimum); an employee is forbidden. The
@@ -299,7 +300,14 @@ export async function indicatorAlerts(
   const rows = await loadRows(db, ctx, {
     hierarchy: input.hierarchy ?? "asOf",
   });
-  return buildAlerts(rows, input.cycleId, filters, ctx.config, reachOf(ctx));
+  return buildAlerts(
+    rows,
+    input.cycleId,
+    await previousIndicatorCycle(db, input.cycleId),
+    filters,
+    ctx.config,
+    reachOf(ctx),
+  );
 }
 
 // ----------------------------------------------------------------- overview
@@ -348,7 +356,14 @@ export async function indicatorOverview(
       await keyerFor(db, ctx, input.groupBy),
     ),
     matrix: buildMatrix(filtered, input.cycleId, ctx.config, reachOf(ctx)),
-    alerts: buildAlerts(rows, input.cycleId, filters, ctx.config, reachOf(ctx)),
+    alerts: buildAlerts(
+      rows,
+      input.cycleId,
+      await previousIndicatorCycle(db, input.cycleId),
+      filters,
+      ctx.config,
+      reachOf(ctx),
+    ),
   };
 }
 

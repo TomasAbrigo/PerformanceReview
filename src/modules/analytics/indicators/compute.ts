@@ -1,5 +1,6 @@
 // Pure: the indicator figures out of the rows `loadRows` reads. No database,
 // no actor: the callers decide who reads what (see queries.ts).
+import type { LocalizedText } from "@/db/schema";
 import { foldSmallGroups } from "@/modules/insights";
 import { suppressTable } from "@/modules/insights/suppression";
 import {
@@ -313,25 +314,28 @@ export function buildMatrix(
 const kindOrder = { risk: 0, drop: 1 } as const;
 
 /**
- * The alerts of `cycleId` out of the rows of all cycles (the previous value
- * of a drop is the latest row of the same person and indicator that comes
- * before in the order of cycles; see `compareCycles`). Only the rows of the
- * cycle that pass `filters` can alert. Direction gets the number of people
- * (hidden under `minGroupSize`) and no alerts.
+ * The alerts of `cycleId` out of the rows of all cycles. The baseline of a
+ * drop is only `previous`, the cycle right before (#133): a person without a
+ * value there has no drop. Only the rows of the cycle that pass `filters` can
+ * alert. Direction gets the number of people (hidden under `minGroupSize`)
+ * and no alerts.
  */
 export function buildAlerts(
   rows: IndicatorRow[],
   cycleId: string,
+  previous: {
+    id: string;
+    name: string;
+    localizedName: LocalizedText | null;
+  } | null,
   filters: IndicatorFilters | undefined,
   config: IndicatorConfig,
   reach: Reach,
 ): IndicatorAlerts {
-  const history = new Map<string, IndicatorRow[]>();
-  for (const r of rows) {
-    const key = `${r.personId}:${r.indicator}`;
-    history.set(key, [...(history.get(key) ?? []), r]);
-  }
-  for (const list of history.values()) list.sort(compareCycles);
+  const before = new Map<string, IndicatorRow>();
+  for (const r of rows)
+    if (previous && r.cycleId === previous.id)
+      before.set(`${r.personId}:${r.indicator}`, r);
   const people = new Map<
     string,
     { person: AlertPerson; rows: IndicatorRow[] }
@@ -354,23 +358,23 @@ export function buildAlerts(
   const alerts: IndicatorAlert[] = [];
   let withDrop = 0;
   let atRisk = 0;
+  let withAlert = 0;
   for (const { person, rows: own } of people.values()) {
     const value = (i: Indicator) => own.find((r) => r.indicator === i)?.value;
     let dropped = false;
     for (const r of own) {
-      const list = history.get(`${r.personId}:${r.indicator}`)!;
-      const previous = list[list.findIndex((x) => x.cycleId === r.cycleId) - 1];
-      if (!previous) continue;
-      const delta = previous.value - r.value;
+      const prior = before.get(`${r.personId}:${r.indicator}`);
+      if (!prior) continue;
+      const delta = prior.value - r.value;
       if (delta < config.dropThreshold) continue;
       dropped = true;
       alerts.push({
         kind: "drop",
         indicator: r.indicator,
         person,
-        previousCycleId: previous.cycleId,
-        previousCycleName: previous.cycleName,
-        previousValue: previous.value,
+        previousCycleId: prior.cycleId,
+        previousCycleName: prior.cycleName,
+        previousValue: prior.value,
         value: r.value,
         delta,
       });
@@ -386,7 +390,8 @@ export function buildAlerts(
     ) {
       atRisk++;
       alerts.push({ kind: "risk", person, retention, engagement });
-    }
+      withAlert++;
+    } else if (dropped) withAlert++;
   }
   alerts.sort(
     (a, b) =>
@@ -405,6 +410,11 @@ export function buildAlerts(
     riskThreshold: config.riskThreshold,
     peopleWithDrop: visible(withDrop),
     peopleAtRisk: visible(atRisk),
+    peopleWithAlert: visible(withAlert),
+    previousCycleId: previous?.id ?? null,
+    previousCycle: previous
+      ? { name: previous.name, localizedName: previous.localizedName }
+      : null,
     alerts: reach === "aggregatesOnly" ? [] : alerts,
     minGroupSize: min,
   };
