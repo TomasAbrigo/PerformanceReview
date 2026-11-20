@@ -2546,7 +2546,9 @@
       "good": "On target",
       "watch": "Watch",
       "risk": "At risk"
-    }
+    },
+    "noChange": "No change vs. the previous one",
+    "deltaBasis": "{now} vs. {before} people"
   },
   "Drill": {
     "kicker": "Data behind the chart",

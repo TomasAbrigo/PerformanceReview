@@ -488,6 +488,7 @@ describe("completionDelta", () => {
     const d = await completionDelta(db, hr, {
       cycleId: c1,
       groupBy: "department",
+      deltaMinGroupSize: 1,
     });
     // The previous one skips the deleted cycle in between and the draft after.
     expect(d.previous?.cycleName).toBe("2024-H2");
@@ -511,6 +512,25 @@ describe("completionDelta", () => {
     expect(d.groups.map((g) => g.key)).toEqual(
       d.current.groups.map((g) => g.key),
     );
+  });
+
+  it("a group's delta needs the minimum of people on that side in both cycles (#133)", async () => {
+    const d = await completionDelta(db, hr, {
+      cycleId: c1,
+      groupBy: "department",
+    });
+    // Groups of 1-3 people: under the default minimum of 5, no delta; the
+    // total keeps its own.
+    expect(d.groups.every((g) => g.selfDelta === null)).toBe(true);
+    expect(d.total).toEqual({ selfDelta: -8.3, managerDelta: -26.7 });
+    const loose = await completionDelta(db, hr, {
+      cycleId: c1,
+      groupBy: "department",
+      deltaMinGroupSize: 3,
+    });
+    const rows = byLabel(loose.groups);
+    expect(rows["Tecnología"]).toMatchObject({ selfDelta: -33.3 });
+    expect(rows["Ventas"]).toMatchObject({ selfDelta: null });
   });
 
   it("a requests-only cycle compares with the one before it", async () => {

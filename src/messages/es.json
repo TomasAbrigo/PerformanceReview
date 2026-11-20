@@ -2546,7 +2546,9 @@
       "good": "En meta",
       "watch": "Atención",
       "risk": "En riesgo"
-    }
+    },
+    "noChange": "Sin cambios vs. el anterior",
+    "deltaBasis": "{now} vs. {before} personas"
   },
   "Drill": {
     "kicker": "Datos detrás del gráfico",

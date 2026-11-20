@@ -44,6 +44,12 @@ export type CompletionFilters = OrgFilters & {
   managerId?: string;
   /** Direction's minimum group size; default: the `aggregation.minGroupSize` setting. */
   minGroupSize?: number;
+  /**
+   * A group's delta needs at least this many people the side applies to in
+   * both cycles (#133: one person is a jump of 100 points); default: the
+   * `aggregation.minGroupSize` setting, for everybody.
+   */
+  deltaMinGroupSize?: number;
 };
 
 /** The launched, not deleted, cycle `cycleId`; not found otherwise. */
@@ -347,16 +353,26 @@ async function previousCycleId(
 const deltaRow = (
   current: CompletionGroup,
   previous: CompletionGroup | null | undefined,
-): CompletionDeltaRow => ({
-  key: current.key,
-  label: current.label,
-  selfDelta: deltaPoints(current.selfRate, previous?.selfRate ?? null),
-  managerDelta: deltaPoints(current.managerRate, previous?.managerRate ?? null),
-});
+  minN: number,
+): CompletionDeltaRow => {
+  const enough = (now: number, before: number | undefined) =>
+    now >= minN && before !== undefined && before >= minN;
+  return {
+    key: current.key,
+    label: current.label,
+    selfDelta: enough(current.selfApplicable, previous?.selfApplicable)
+      ? deltaPoints(current.selfRate, previous?.selfRate ?? null)
+      : null,
+    managerDelta: enough(current.managerApplicable, previous?.managerApplicable)
+      ? deltaPoints(current.managerRate, previous?.managerRate ?? null)
+      : null,
+  };
+};
 
 function deltaOf(
   current: CompletionSummary,
   previous: CompletionSummary | null,
+  minN: number,
 ): CompletionDelta {
   const before = new Map((previous?.groups ?? []).map((g) => [g.key ?? "", g]));
   return {
@@ -375,10 +391,12 @@ function deltaOf(
             ),
           }
         : null,
-    groups: current.groups.map((g) => deltaRow(g, before.get(g.key ?? ""))),
+    groups: current.groups.map((g) =>
+      deltaRow(g, before.get(g.key ?? ""), minN),
+    ),
     others:
       current.others && previous?.others
-        ? deltaRow(current.others, previous.others)
+        ? deltaRow(current.others, previous.others, minN)
         : null,
   };
 }
@@ -401,7 +419,9 @@ async function overview(db: DbOrTx, actor: ActorContext, f: CompletionFilters) {
         minGroupSize,
       })
     : null;
-  return { r, rows, delta: deltaOf(current, previous) };
+  const deltaMin =
+    f.deltaMinGroupSize ?? (await getSetting(db, "aggregation.minGroupSize"));
+  return { r, rows, delta: deltaOf(current, previous, deltaMin) };
 }
 
 /**

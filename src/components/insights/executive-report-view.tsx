@@ -1,3 +1,4 @@
+import { shownDelta } from "@/modules/insights/delta";
 import { useFormatter, useTranslations } from "next-intl";
 import { MetricCard, ScaleBar } from "@/components/experience";
 import { Panel } from "@/components/insights/parts";
@@ -184,11 +185,16 @@ function IndicatorCard({
   const t = useTranslations("Insights.Executive");
   const f = useChartFormat();
   const mean = data?.mean ?? null;
-  // To the decimal shown: a change that rounds to 0,0 is flat.
-  const delta =
-    mean !== null && previous?.mean != null
-      ? Math.round((mean - previous.mean) * 10) / 10
-      : null;
+  // #133: the one rule of a delta (rounded to the decimal shown, flat when it
+  // rounds to 0,0, none over fewer people than the minimum).
+  const delta = shownDelta({
+    now: mean,
+    before: previous?.mean,
+    decimals: 1,
+    n: [data?.n, previous?.n],
+    minN: min,
+  });
+  const tx = useTranslations("Experience");
   return (
     <MetricCard
       testId={`exec-${which}`}
@@ -222,7 +228,11 @@ function IndicatorCard({
           : {
               value: delta,
               text: t("vsPrevious", {
-                delta: `${delta > 0 ? "+" : ""}${f.decimal(delta === 0 ? 0 : delta)}`,
+                delta: `${delta > 0 ? "+" : ""}${f.decimal(delta)}`,
+              }),
+              basis: tx("deltaBasis", {
+                now: data?.n ?? 0,
+                before: previous?.n ?? 0,
               }),
             }
       }
@@ -268,15 +278,23 @@ export function ExecutiveReportView({
   const prevTotal = previous?.completion.total ?? null;
   const targets = kpiThresholds(settings);
   const riskThreshold = settings["alerts.riskThreshold"];
-  const pointsDelta = (now: number, before: number | null | undefined) =>
-    before == null
+  // #133: on the unrounded percents, to one decimal (as /insights/completion).
+  const pointsDelta = (now: number, before: number | null | undefined) => {
+    const value = shownDelta({ now, before, decimals: 1 });
+    return value === null
       ? undefined
       : {
-          value: now - before,
+          value,
           text: t("vsPreviousPoints", {
-            delta: `${now - before > 0 ? "+" : ""}${Math.round(now - before)}`,
+            delta: format.number(value, {
+              maximumFractionDigits: 1,
+              signDisplay: "exceptZero",
+            }),
           }),
         };
+  };
+  const exact = (v: { submitted: number; total: number }) =>
+    v.total ? (v.submitted / v.total) * 100 : 0;
   const goals = report.goals;
   const risk = report.risk;
   const riskShare =
@@ -298,7 +316,7 @@ export function ExecutiveReportView({
             (["self", "manager"] as const).map((side) => {
               const v = sideOf(total, side);
               const p = pct(v);
-              const before = prevTotal ? pct(sideOf(prevTotal, side)) : null;
+              const before = prevTotal ? exact(sideOf(prevTotal, side)) : null;
               const label = t(side === "self" ? "selfPct" : "managerPct");
               const pending = v.total - v.submitted;
               return (
@@ -328,7 +346,7 @@ export function ExecutiveReportView({
                       text: ti("percent", { value: percentTarget(targets) }),
                     },
                   }}
-                  delta={pointsDelta(p, before)}
+                  delta={pointsDelta(exact(v), before)}
                   drill={{
                     base,
                     drill: { kind: "completion", side, state: "submitted" },

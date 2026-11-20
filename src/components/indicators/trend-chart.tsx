@@ -1,4 +1,5 @@
 import { useFormatter, useTranslations } from "next-intl";
+import { shownDelta } from "@/modules/insights/delta";
 import { ChartTooltip, LineTrend } from "@/components/charts";
 import { Empty, TableView } from "@/components/insights/parts";
 import type { IndicatorTrend } from "@/modules/analytics/indicators/types";
@@ -58,6 +59,7 @@ export function TrendChart({
   subject: string;
 }) {
   const t = useTranslations("Indicators");
+  const tx = useTranslations("Experience");
   const format = useFormatter();
   const num = (v: number) =>
     format.number(v, { minimumFractionDigits: 1, maximumFractionDigits: 1 });
@@ -93,14 +95,30 @@ export function TrendChart({
           delta={
             before
               ? {
-                  value: last.mean! - before.mean!,
+                  // #133: rounded as shown; flat reads "no change".
+                  value: shownDelta({
+                    now: last.mean,
+                    before: before.mean,
+                    decimals: 1,
+                  })!,
                   text: t("kpi.vs", {
-                    delta: format.number(last.mean! - before.mean!, {
-                      minimumFractionDigits: 1,
-                      maximumFractionDigits: 1,
-                      signDisplay: "exceptZero",
-                    }),
+                    delta: format.number(
+                      shownDelta({
+                        now: last.mean,
+                        before: before.mean,
+                        decimals: 1,
+                      })!,
+                      {
+                        minimumFractionDigits: 1,
+                        maximumFractionDigits: 1,
+                        signDisplay: "exceptZero",
+                      },
+                    ),
                     cycle: before.cycleName,
+                  }),
+                  basis: tx("deltaBasis", {
+                    now: last.n ?? 0,
+                    before: before.n ?? 0,
                   }),
                 }
               : undefined

@@ -1308,6 +1308,8 @@ const completionExport = defineExport({
         hierarchy: q.hierarchy,
         department: q.department,
         managerId: q.manager,
+        // A file is data: every delta, however few people (#133 hides them on screen).
+        deltaMinGroupSize: 1,
         ...orgFiltersOf(q),
       }).then((d): CompletionRow[] => {
         const t = createTranslator({
