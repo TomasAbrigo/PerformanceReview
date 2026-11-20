@@ -607,7 +607,7 @@ describe("monthly engagement (schema minor 4)", () => {
 
     const html = renderHtml(r);
 
-    expect(html).toContain("Engagement mensual");
+    expect(html).toContain("Encuesta mensual de engagement");
     expect(html).toContain("2026-01");
     expect(html).toContain("0.64");
     expect(html).toContain("80%");

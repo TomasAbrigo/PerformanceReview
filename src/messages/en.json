@@ -939,8 +939,8 @@
       "valued_n": "valued by the company (people)",
       "retention_mean": "retention (mean 1-5)",
       "retention_n": "retention (people)",
-      "engagement_mean": "Bamboo engagement (mean 1-5)",
-      "engagement_n": "Bamboo engagement (people)",
+      "engagement_mean": "engagement per the manager (mean 1-5)",
+      "engagement_n": "engagement per the manager (people)",
       "goals_completed_pct": "goals completed (%, of those due)",
       "goals_due": "goals due",
       "side": "side",
@@ -1134,20 +1134,21 @@
       "others": "Others",
       "group": "Group",
       "people": "People",
-      "average": "Average",
+      "average": "Mean (1–5)",
       "valueCount": "value {value}: {count}",
       "barLabel": "{group}, value {value}: {count}",
       "suppressed": "{n, plural, one {# person is in a group smaller than {min} and is not shown} other {# people are in groups smaller than {min} and are not shown}}",
       "chart": "Diverging bars of answers 1 to 5 per group",
       "value": "value {value}",
-      "takeaway": "Most low answers: {group} ({share} with 1 or 2).",
+      "takeaway": "Most low answers: {group} ({share} with 1 or 2, against {overall} overall).",
       "lowest": "{value} (lowest)",
       "highest": "{value} (highest)",
-      "faint": "{count, plural, one {# group has} other {# groups have}} fewer than {n} people: muted and last, their shares are not comparable."
+      "faint": "{count, plural, one {# group has} other {# groups have}} fewer than {n} people (low base): muted and last, their percentages are not comparable.",
+      "noStandout": "No group stands out from the total ({overall} with 1 or 2) beyond what its number of people explains."
     },
     "matrix": {
       "title": "How many people have both low retention and low engagement?",
-      "hint": "Each cell crosses the retention band (→) with the engagement band (↑) and counts people; bottom left is the risk quadrant.",
+      "hint": "Each cell crosses the retention band (→) with the engagement band (↑) and counts people; bottom left is the risk quadrant. Both are the manager's view: retention is how hard they would fight to keep the person facing another offer, not the person's intent to leave.",
       "band": {
         "low": "Low",
         "mid": "Mid",
@@ -1170,9 +1171,9 @@
       "chart": "Retention and engagement matrix",
       "quadrant": {
         "low": {
-          "low": "At risk",
-          "mid": "Low retention",
-          "high": "Engaged, may leave"
+          "low": "Low value and low engagement",
+          "mid": "Less valued by their manager",
+          "high": "Engaged, less valued by their manager"
         },
         "mid": {
           "low": "Low engagement",
@@ -1180,8 +1181,8 @@
           "high": "Engaged"
         },
         "high": {
-          "low": "Staying, disengaged",
-          "mid": "Retained",
+          "low": "Valued, low engagement",
+          "mid": "Valued by their manager",
           "high": "Role models"
         }
       }
@@ -1426,7 +1427,8 @@
       "how": "Each bar adds up to 100% of the group's comments; the highest negative and mixed share on top."
     },
     "takeaway": {
-      "worst": "Most critical: {label} ({share} negative or mixed)."
+      "worst": "Most critical: {label} ({share} negative or mixed).",
+      "noStandout": "No group stands out from the whole ({share} negative or mixed) beyond what its number of comments explains."
     },
     "reading": {
       "substance": {
@@ -1597,8 +1599,8 @@
       "participants": "Participants",
       "selfPct": "Self assessments submitted",
       "managerPct": "Manager reviews submitted",
-      "retention": "Retention",
-      "engagement": "Engagement",
+      "retention": "Retention per the manager",
+      "engagement": "Engagement per the manager",
       "n": "{n, plural, one {# person} other {# people}}",
       "distribution": "{indicator} distribution (1 to 5)",
       "risk": "Risk quadrant",
@@ -1619,7 +1621,7 @@
       "scaleOf": "{label}: {value} of {max}",
       "vsPrevious": "{delta} vs. previous cycle",
       "vsPreviousPoints": "{delta} pts vs. previous cycle",
-      "ofParticipants": "{submitted} of {total} · {participants} participants",
+      "ofParticipants": "{submitted} of {total} it applies to · {participants} participants",
       "pending": "{n} pending",
       "riskHint": "Each person's retention and engagement in three bands; the outlined cell is the risk. Pick a cell to see who they are.",
       "sentimentHint": "Pick a segment to read those comments.",
@@ -1657,7 +1659,7 @@
       "distribution": "Rating distribution",
       "noRatings": "No data: the cycle has no final ratings.",
       "byDepartment": "By department",
-      "mean": "Mean"
+      "mean": "Mean final rating"
     },
     "completion": {
       "title": "Completion",
@@ -1720,8 +1722,8 @@
       "bucket": "Goals completed",
       "people": "People",
       "meanRetention": "Retention (mean)",
-      "meanEngagement": "Engagement (mean)",
-      "positiveShare": "Positive comments (mean)",
+      "meanEngagement": "Engagement per the manager (mean 1–5)",
+      "positiveShare": "Positive comments (mean per person, constructive excluded)",
       "outliers": "Outliers",
       "doneButLow": "Goals done but retention or engagement low",
       "behindButHigh": "Goals behind but retention and engagement high",
@@ -1756,7 +1758,7 @@
     },
     "dm": "DM",
     "engagement": {
-      "title": "Monthly engagement",
+      "title": "Monthly engagement survey",
       "evolution": "Mean score by month",
       "bySegment": "People by segment and month",
       "month": "Month",
@@ -1884,7 +1886,7 @@
     },
     "period": {
       "title": "Detail by period",
-      "hint": "One row per cycle, oldest first, with the same account, project, DM, Santex Lead, area and manager filters as the view (not the group by). The means of valued by the company (1 to 4), retention and Bamboo engagement (1 to 5) carry the people behind them. Goals completed is the status in Bamboo, of the goals already due at the cycle's cut-off date (today while the period runs, the last day of the period once closed): one not due yet does not count as missed.",
+      "hint": "One row per cycle, oldest first, with the same account, project, DM, Santex Lead, area and manager filters as the view (not the group by). The means of valued by the company (1 to 4), retention and engagement per the manager (1 to 5) carry the people behind them. Goals completed is the status in Bamboo, of the goals already due at the cycle's cut-off date (today while the period runs, the last day of the period once closed): one not due yet does not count as missed.",
       "hintAggregates": "One row per cycle, oldest first, aggregates only: a cycle with fewer people than the minimum shows no figure.",
       "label": "Detail by period",
       "empty": "There are no launched cycles yet.",
@@ -1898,7 +1900,7 @@
         "manager": "Manager assessment",
         "valued": "Valued by the company (1-4)",
         "retention": "Retention (1-5)",
-        "engagement": "Bamboo engagement (1-5)",
+        "engagement": "Engagement per the manager (1-5)",
         "goals": "Goals completed, of those due"
       },
       "drill": "{cycle} · {what}: see the people"
@@ -1987,7 +1989,7 @@
       "hint": "Each pair of bars is a band of % goals completed; the height is the mean (1 to 5) retention and engagement of its people, and n how many people have each answer (retention / engagement).",
       "bucket": "{from}–{to} %",
       "people": "{n, plural, one {# person} other {# people}}",
-      "positive": "Positive comments",
+      "positive": "Positive comments (mean per person)",
       "hidden": "Hidden: fewer than {min} people",
       "noData": "No data",
       "bar": "{bucket}, {indicator}: {value} (n = {n})",
@@ -2000,8 +2002,8 @@
         "retentionPeople": "People with retention",
         "engagementPeople": "People with engagement",
         "retention": "Retention (mean)",
-        "engagement": "Engagement (mean)",
-        "positive": "Positive comments"
+        "engagement": "Engagement per the manager (mean 1–5)",
+        "positive": "Positive comments (mean per person)"
       },
       "yTitle": "Mean (1–5)",
       "xTitle": "Goals completed (%)"
@@ -2189,14 +2191,16 @@
       "hiddenMonths": "{count, plural, one {# month} other {# months}} not shown for having fewer than {min} people."
     },
     "tile": {
-      "title": "Monthly engagement",
+      "title": "Monthly engagement survey (0–100 %)",
       "month": "Latest month with data: {month}",
       "mean": "Mean score",
       "participation": "Participation",
       "vsPrevious": "{delta} points against the previous month",
       "hidden": "Fewer than {min} people: not shown.",
       "segments": "Segments",
-      "link": "See the evolution"
+      "link": "See the evolution",
+      "monthInCycle": "Latest month with data within the cycle's period: {month}",
+      "outsideCycle": "The monthly survey has no data within this cycle's period."
     },
     "kpi": {
       "label": "Latest month",

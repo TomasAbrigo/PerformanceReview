@@ -374,6 +374,7 @@ describe("ExecutiveReportView", () => {
             ...full,
             engagementMonthly: {
               minGroupSize: null,
+              period: null,
               previous: null,
               latest: {
                 month: "2026-02-01",
@@ -426,6 +427,7 @@ describe("ExecutiveReportView", () => {
             latest: hidden,
             previous: null,
             minGroupSize: 5,
+            period: null,
           },
         }}
         dimensionLabel={dims("es")}
@@ -443,7 +445,7 @@ describe("ExecutiveReportView", () => {
       />,
     );
     expect(screen.getByTestId("exec-engagement-monthly")).toHaveTextContent(
-      "Sin datos para mostrar.",
+      "La encuesta mensual no tiene datos dentro del período de este ciclo.",
     );
   });
 

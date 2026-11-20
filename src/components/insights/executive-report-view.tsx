@@ -610,7 +610,9 @@ export function ExecutiveReportView({
                     settings={settings}
                   />
                 ) : (
-                  <Unavailable min={min} />
+                  <p className="text-sm text-muted-foreground">
+                    {tEngagement("outsideCycle")}
+                  </p>
                 )}
               </Panel>
             </div>
@@ -741,7 +743,9 @@ function EngagementMonthlyTile({
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-3">
         <p className="text-xs text-muted-foreground">
-          {t("month", { month: label })}
+          {data.period
+            ? t("monthInCycle", { month: label })
+            : t("month", { month: label })}
         </p>
         {latest.hidden ? (
           <p className="text-sm text-muted-foreground">

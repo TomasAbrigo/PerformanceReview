@@ -939,8 +939,8 @@
       "valued_n": "valoración propia (personas)",
       "retention_mean": "retención (promedio 1-5)",
       "retention_n": "retención (personas)",
-      "engagement_mean": "compromiso Bamboo (promedio 1-5)",
-      "engagement_n": "compromiso Bamboo (personas)",
+      "engagement_mean": "compromiso según el manager (promedio 1-5)",
+      "engagement_n": "compromiso según el manager (personas)",
       "goals_completed_pct": "objetivos completados (%, de los que vencían)",
       "goals_due": "objetivos que vencían",
       "side": "lado",
@@ -1134,20 +1134,21 @@
       "others": "Otros",
       "group": "Grupo",
       "people": "Personas",
-      "average": "Promedio",
+      "average": "Promedio (1–5)",
       "valueCount": "valor {value}: {count}",
       "barLabel": "{group}, valor {value}: {count}",
       "suppressed": "{n, plural, one {# persona está en un grupo de menos de {min} y no se muestra} other {# personas están en grupos de menos de {min} y no se muestran}}",
       "chart": "Barras divergentes de respuestas 1 a 5 por grupo",
       "value": "valor {value}",
-      "takeaway": "Más respuestas bajas: {group} ({share} con 1 o 2).",
+      "takeaway": "Más respuestas bajas: {group} ({share} con 1 o 2, frente a {overall} del total).",
       "lowest": "{value} (más bajo)",
       "highest": "{value} (más alto)",
-      "faint": "{count, plural, one {# grupo tiene} other {# grupos tienen}} menos de {n} personas: atenuados y al final, sus porcentajes no son comparables."
+      "faint": "{count, plural, one {# grupo tiene} other {# grupos tienen}} menos de {n} personas (poca base): atenuados y al final, sus porcentajes no son comparables.",
+      "noStandout": "Ningún grupo se distingue del total ({overall} con 1 o 2) más allá de lo que explica su cantidad de personas."
     },
     "matrix": {
       "title": "¿Cuántas personas tienen retención y compromiso bajos a la vez?",
-      "hint": "Cada celda cruza la banda de retención (→) con la de compromiso (↑) y cuenta personas; abajo a la izquierda, el cuadrante de riesgo.",
+      "hint": "Cada celda cruza la banda de retención (→) con la de compromiso (↑) y cuenta personas; abajo a la izquierda, el cuadrante de riesgo. Ambas son la opinión del manager: retención es cuánto haría por retener a la persona ante otra oferta, no la intención de la persona de irse.",
       "band": {
         "low": "Bajo",
         "mid": "Medio",
@@ -1170,9 +1171,9 @@
       "chart": "Matriz de retención y compromiso",
       "quadrant": {
         "low": {
-          "low": "En riesgo",
-          "mid": "Poco retenidos",
-          "high": "Comprometidos, con riesgo de irse"
+          "low": "Baja valoración y bajo compromiso",
+          "mid": "Poco valorados por su manager",
+          "high": "Comprometidos, poco valorados por su manager"
         },
         "mid": {
           "low": "Poco comprometidos",
@@ -1180,8 +1181,8 @@
           "high": "Comprometidos"
         },
         "high": {
-          "low": "Se quedan, poco comprometidos",
-          "mid": "Retenidos",
+          "low": "Valorados, poco comprometidos",
+          "mid": "Valorados por su manager",
           "high": "Referentes"
         }
       }
@@ -1426,7 +1427,8 @@
       "how": "Cada barra suma el 100 % de los comentarios del grupo; arriba, los de mayor proporción negativa y mixta."
     },
     "takeaway": {
-      "worst": "Más crítico: {label} ({share} negativos o mixtos)."
+      "worst": "Más crítico: {label} ({share} negativos o mixtos).",
+      "noStandout": "Ningún grupo se distingue del conjunto ({share} negativos o mixtos) más allá de lo que explica su cantidad de comentarios."
     },
     "reading": {
       "substance": {
@@ -1597,8 +1599,8 @@
       "participants": "Participantes",
       "selfPct": "Autoevaluaciones enviadas",
       "managerPct": "Evaluaciones del manager enviadas",
-      "retention": "Retención",
-      "engagement": "Compromiso",
+      "retention": "Retención según el manager",
+      "engagement": "Compromiso según el manager",
       "n": "{n, plural, one {# persona} other {# personas}}",
       "distribution": "Distribución de {indicator} (1 a 5)",
       "risk": "Cuadrante de riesgo",
@@ -1619,7 +1621,7 @@
       "scaleOf": "{label}: {value} de {max}",
       "vsPrevious": "{delta} vs. ciclo anterior",
       "vsPreviousPoints": "{delta} pts vs. ciclo anterior",
-      "ofParticipants": "{submitted} de {total} · {participants} participantes",
+      "ofParticipants": "{submitted} de {total} a quienes aplica · {participants} participantes",
       "pending": "{n, plural, one {# pendiente} other {# pendientes}}",
       "riskHint": "Retención y compromiso de cada persona en tres franjas; la celda marcada es el riesgo. Elegí una celda para ver quiénes son.",
       "sentimentHint": "Elegí un segmento para leer esos comentarios.",
@@ -1657,7 +1659,7 @@
       "distribution": "Distribución de calificaciones",
       "noRatings": "Sin datos: el ciclo no tiene calificaciones finales.",
       "byDepartment": "Por área",
-      "mean": "Promedio"
+      "mean": "Promedio de la calificación final"
     },
     "completion": {
       "title": "Completitud",
@@ -1720,8 +1722,8 @@
       "bucket": "Objetivos completados",
       "people": "Personas",
       "meanRetention": "Retención (promedio)",
-      "meanEngagement": "Compromiso (promedio)",
-      "positiveShare": "Comentarios positivos (promedio)",
+      "meanEngagement": "Compromiso según el manager (promedio 1–5)",
+      "positiveShare": "Comentarios positivos (promedio por persona, sin constructivos)",
       "outliers": "Casos atípicos",
       "doneButLow": "Objetivos cumplidos con retención o compromiso bajo",
       "behindButHigh": "Objetivos atrasados con retención y compromiso altos",
@@ -1756,7 +1758,7 @@
     },
     "dm": "DM",
     "engagement": {
-      "title": "Engagement mensual",
+      "title": "Encuesta mensual de engagement",
       "evolution": "Score promedio por mes",
       "bySegment": "Personas por segmento y por mes",
       "month": "Mes",
@@ -1898,7 +1900,7 @@
         "manager": "Evaluación del manager",
         "valued": "Valoración propia (1-4)",
         "retention": "Retención (1-5)",
-        "engagement": "Compromiso Bamboo (1-5)",
+        "engagement": "Compromiso según el manager (1-5)",
         "goals": "Objetivos completados, de los que vencían"
       },
       "drill": "{cycle} · {what}: ver las personas"
@@ -1987,7 +1989,7 @@
       "hint": "Cada par de barras es un tramo de % de objetivos completados; la altura es el promedio (1 a 5) de retención y de compromiso de sus personas, y n cuántas personas tienen cada respuesta (retención / compromiso).",
       "bucket": "{from}–{to} %",
       "people": "{n, plural, one {# persona} other {# personas}}",
-      "positive": "Comentarios positivos",
+      "positive": "Comentarios positivos (promedio por persona)",
       "hidden": "Oculto: menos de {min} personas",
       "noData": "Sin datos",
       "bar": "{bucket}, {indicator}: {value} (n = {n})",
@@ -2000,8 +2002,8 @@
         "retentionPeople": "Personas con retención",
         "engagementPeople": "Personas con compromiso",
         "retention": "Retención (promedio)",
-        "engagement": "Compromiso (promedio)",
-        "positive": "Comentarios positivos"
+        "engagement": "Compromiso según el manager (promedio 1–5)",
+        "positive": "Comentarios positivos (promedio por persona)"
       },
       "yTitle": "Promedio (1–5)",
       "xTitle": "Objetivos completados (%)"
@@ -2189,14 +2191,16 @@
       "hiddenMonths": "{count, plural, one {# mes} other {# meses}} sin mostrar por tener menos de {min} personas."
     },
     "tile": {
-      "title": "Engagement mensual",
+      "title": "Encuesta mensual de engagement (0–100 %)",
       "month": "Último mes con datos: {month}",
       "mean": "Score promedio",
       "participation": "Participación",
       "vsPrevious": "{delta} puntos frente al mes anterior",
       "hidden": "Menos de {min} personas: no se muestra.",
       "segments": "Segmentos",
-      "link": "Ver la evolución"
+      "link": "Ver la evolución",
+      "monthInCycle": "Último mes con datos dentro del período del ciclo: {month}",
+      "outsideCycle": "La encuesta mensual no tiene datos dentro del período de este ciclo."
     },
     "kpi": {
       "label": "Último mes",

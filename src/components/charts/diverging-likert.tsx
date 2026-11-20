@@ -1,5 +1,6 @@
 import { useTranslations } from "next-intl";
 import { DrillLink } from "@/components/drill/drill-link";
+import { standsOut, wilson } from "@/modules/insights/rank";
 import { useChartFormat } from "./format";
 import type { MarkDrill } from "./stacked-bar-100";
 
@@ -41,16 +42,27 @@ const share = (c: number[], from: number, to: number) => {
 };
 export const lowShare = (c: number[]) => share(c, 0, 2);
 export const highShare = (c: number[]) => share(c, 3, 5);
+const lowCount = (c: number[]) => c[0] + c[1];
+const sum = (c: number[]) => c.reduce((a, b) => a + b, 0);
+/** #133: the low share a group is surely above (Wilson's lower bound), what the order uses. */
+export const lowFloor = (c: number[]) => wilson(lowCount(c), sum(c)).low;
+/** Whether a group's low share stands out from `overall` beyond the noise of its n. */
+export const lowStandsOut = (c: number[], overall: number) =>
+  standsOut(lowCount(c), sum(c), overall);
 
-/** Rows with the biggest low (1-2) share first; strong rows stay on top. */
+/**
+ * Rows with the most low (1-2) answers first, by the lower bound of the
+ * share's interval (#133: 4 of 12 does not outrank 8 of 41); strong rows on
+ * top, faint ones last.
+ */
 export function orderLikert(rows: LikertRow[]): LikertRow[] {
   return rows
-    .map((r, i) => ({ r, i }))
+    .map((r, i) => ({ r, i, k: lowFloor(r.counts) }))
     .sort(
       (a, b) =>
         Number(!!b.r.strong) - Number(!!a.r.strong) ||
         Number(!!a.r.faint) - Number(!!b.r.faint) ||
-        lowShare(b.r.counts) - lowShare(a.r.counts) ||
+        b.k - a.k ||
         a.i - b.i,
     )
     .map((x) => x.r);

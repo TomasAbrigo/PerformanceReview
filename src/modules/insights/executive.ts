@@ -1,3 +1,4 @@
+import { sql } from "drizzle-orm";
 import type { DbOrTx } from "@/db/client";
 import type { ActorContext } from "@/modules/actor/types";
 import { engagementTile } from "@/modules/analytics/engagement/queries";
@@ -159,8 +160,18 @@ export const COLLECTORS: readonly Collector[] = [
   {
     key: "engagementMonthly",
     modes: QUANT,
-    collect: ({ db, actor, minGroupSize, filters }) =>
-      engagementTile(db, actor, { ...filters, minGroupSize }),
+    // #133: the months of the cycle's period, not the latest of the file.
+    collect: async ({ db, actor, cycleId, minGroupSize, filters }) => {
+      const [cycle] = await db.execute<{ start: string; end: string }>(sql`
+        select period_start::text as start, period_end::text as "end"
+        from review_cycle where id = ${cycleId}::uuid`);
+      if (!cycle) return null;
+      return engagementTile(db, actor, {
+        ...filters,
+        minGroupSize,
+        within: cycle,
+      });
+    },
   },
   {
     key: "substance",

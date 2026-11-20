@@ -94,6 +94,47 @@ describe("DistributionView", () => {
     },
   );
 
+  it("#133: names a group only when it stands out beyond the noise of its n", () => {
+    const ranked: IndicatorDistribution = {
+      ...distribution,
+      series: [
+        // 4 of 12 low (33 %) and 8 of 41 (20 %): Soporte's interval holds the total.
+        series("Soporte", [2, 2, 4, 2, 2]),
+        series("Marketing", [4, 4, 13, 10, 10]),
+      ],
+      total: series(null, [6, 6, 17, 12, 12]),
+    };
+    const context = {
+      base: { pathname: "/insights/indicators", query: {} },
+      masked: false,
+      smallN: 5,
+    };
+    const { unmount } = renderIn(
+      "es",
+      <DistributionView data={ranked} context={context} />,
+    );
+    expect(screen.getByTestId("chart-takeaway")).toHaveTextContent(
+      "Ningún grupo se distingue del total",
+    );
+    // Soporte is under the low base: muted and after Marketing.
+    const rows = screen.getAllByTestId("indicator-histogram");
+    expect(rows[1]).toHaveTextContent("Marketing");
+    expect(rows[2]).toHaveAttribute("data-faint");
+    unmount();
+    const clear: IndicatorDistribution = {
+      ...distribution,
+      series: [
+        series("Soporte", [10, 10, 5, 3, 2]),
+        series("Marketing", [1, 2, 13, 15, 10]),
+      ],
+      total: series(null, [11, 12, 18, 18, 12]),
+    };
+    renderIn("es", <DistributionView data={clear} context={context} />);
+    expect(screen.getByTestId("chart-takeaway")).toHaveTextContent(
+      "Más respuestas bajas: Soporte",
+    );
+  });
+
   it.each(locales)(
     "empty, and the people hidden by the minimum (%s)",
     (locale) => {
@@ -219,7 +260,9 @@ describe("RiskMatrixView", () => {
       expect(chart).toBeInTheDocument();
       // The risk cell is named, not just coloured; the axes are titled.
       expect(chart).toHaveTextContent(
-        locale === "es" ? "En riesgo" : "At risk",
+        locale === "es"
+          ? "Baja valoración y bajo compromiso"
+          : "Low value and low engagement",
       );
       expect(
         screen.getByText(locale === "es" ? "Retención →" : "Retention →"),

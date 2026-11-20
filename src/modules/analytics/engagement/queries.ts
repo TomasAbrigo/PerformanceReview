@@ -249,17 +249,23 @@ export async function engagementEvolution(
 
 /**
  * The latest month with data next to the one before it (for the executive
- * view); null when there is no engagement data at all. Read as
+ * view); null when there is no engagement data at all. `within` (a cycle's
+ * period, YYYY-MM-DD) keeps it to the months of that period (#133: the tile
+ * follows the cycle chosen); null when none of them has data. Read as
  * `engagementEvolution` (direction: masked).
  */
 export async function engagementTile(
   db: DbOrTx,
   actor: ActorContext,
-  f: Omit<EngagementFilters, "from" | "to"> = {},
+  f: Omit<EngagementFilters, "from" | "to"> & {
+    within?: { start: string; end: string };
+  } = {},
 ): Promise<EngagementTile | null> {
   const a = await authorize(db, actor, f.minGroupSize);
   checkFilters(f);
-  const { last } = await monthBounds(db);
+  const last = f.within
+    ? await lastMonthWithin(db, f.within)
+    : (await monthBounds(db)).last;
   if (!last) return null;
   const from = shiftMonth(last, -1);
   const counts = await loadMonths(db, a, f, { from, to: last });
@@ -270,7 +276,22 @@ export async function engagementTile(
     latest,
     previous: months.find((m) => m.month === from) ?? null,
     minGroupSize: a.min,
+    period: f.within ?? null,
   };
+}
+
+/** The latest month with data whose first day falls in the period's months. */
+async function lastMonthWithin(
+  db: DbOrTx,
+  period: { start: string; end: string },
+): Promise<string | null> {
+  const [row] = await db.execute<{ last: string | null }>(sql`
+    select max(month)::text as last
+    from engagement_monthly
+    where deleted_at is null
+      and month >= date_trunc('month', ${period.start}::date)
+      and month <= ${period.end}::date`);
+  return row?.last ?? null;
 }
 
 /**
