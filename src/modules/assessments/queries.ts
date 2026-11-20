@@ -2,6 +2,7 @@ import { and, asc, eq, inArray, isNull, ne, type SQL, sql } from "drizzle-orm";
 import type { DbOrTx } from "@/db/client";
 import {
   answer,
+  assessmentProgress,
   cycleParticipant,
   participantGoalSnapshot,
   person,
@@ -352,8 +353,41 @@ export async function listAssessmentParticipants(
   const readable = new Map(
     shown.map((r, i) => [r.id, canRead(actor, contexts[i])]),
   );
+  // An imported cycle has no requests, only Bamboo's progress report: a side
+  // "in progress" there is a draft (only People and the reviewee's own side
+  // read it; for anybody else it is as locked as an unreadable request).
+  const imported = participants.length
+    ? new Map(
+        (
+          await db
+            .select({
+              participantId: assessmentProgress.participantId,
+              self: assessmentProgress.selfStatus,
+              manager: assessmentProgress.managerStatus,
+            })
+            .from(assessmentProgress)
+            .where(
+              inArray(
+                assessmentProgress.participantId,
+                participants.map((p) => p.participantId),
+              ),
+            )
+        ).map((r) => [r.participantId, r]),
+      )
+    : new Map<string, { self: string; manager: string }>();
   const summary = (participantId: string, side: Side): SideSummary => {
     const request = chosen.get(`${participantId}:${side}`) ?? null;
+    if (!request && imported.get(participantId)?.[side] === "in_progress") {
+      const own =
+        side === "self" &&
+        scope.kind !== "all" &&
+        scope.kind !== "none" &&
+        byParticipant.get(participantId)?.personId === scope.personId;
+      return {
+        state: scope.kind === "all" || own ? "draft" : "locked",
+        submittedAt: null,
+      };
+    }
     return {
       state: requestState(request, !!request && !!readable.get(request.id)),
       submittedAt: request?.submittedAt?.toISOString() ?? null,

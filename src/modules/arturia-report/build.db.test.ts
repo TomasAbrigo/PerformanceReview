@@ -45,7 +45,6 @@ import { ArturiaError, buildReport, resolveCycle } from "./build";
 import { runExportCli } from "./cli";
 import { solvable } from "@/modules/insights/suppression-attack";
 import { likertLabel } from "@/modules/likert";
-import { cycleTeams } from "./collectors";
 import { renderHtml, renderJson } from "./render";
 import { arturiaReportV1, type ArturiaReport, SCHEMA_MINOR } from "./schema";
 
@@ -1443,7 +1442,6 @@ describe("buildReport over the seed small company", () => {
       ...input,
       groupBy: "manager",
     });
-    const teams = await cycleTeams(db, cycleId, "Equipo");
     const selfRows = (rows: typeof c.byDepartment) =>
       rows.filter((x) => x.relationship === "self").map((x) => [x.label, x.n]);
     const withOthers = (s: typeof dir) => [
@@ -1456,11 +1454,13 @@ describe("buildReport over the seed small company", () => {
     );
     // the module gives direction no manager name: the export only numbers them
     expect(team.groups.every((g) => g.label === null)).toBe(true);
-    expect(selfRows(c.byManager)).toEqual(
-      withOthers(team).map((g) => [
-        g.key === null ? "Otros" : teams.get(g.key),
-        g.participants,
-      ]),
+    // the numbering is per cut and random per report: compare the sizes
+    const sizes = (rows: unknown[][]) => rows.map((x) => x[1]).sort();
+    expect(sizes(selfRows(c.byManager))).toEqual(
+      sizes(withOthers(team).map((g) => [g.label, g.participants])),
+    );
+    expect(new Set(selfRows(c.byManager).map((x) => x[0])).size).toBe(
+      c.byManager.filter((x) => x.relationship === "self").length,
     );
     for (const g of c.byManager)
       expect(g.label).toMatch(/^(Equipo \d+|Otros)$/);
@@ -1604,23 +1604,38 @@ describe("buildReport over the seed small company", () => {
     },
   );
 
-  it("the same team has the same Equipo N in completion and goals", async () => {
-    const r = await buildReport(db, {
-      cycle: cycleId,
-      anonymized: true,
-      minGroupSize: 2,
-    });
-    const people = new Map(
-      r.sections
-        .completion!.byManager.filter((x) => x.relationship === "self")
-        .map((x) => [x.label, x.n]),
-    );
-    // "Otros" differs: goals fold on the people with goals (#130).
-    const shared = r.sections.goals!.byManager.filter(
-      (x) => people.has(x.label) && !x.other,
-    );
-    expect(shared.some((x) => x.label.startsWith("Equipo"))).toBe(true);
-    for (const x of shared) expect(x.n).toBe(people.get(x.label));
+  it("a team does not keep its Equipo N between cuts or between exports, so two cuts cannot be joined by size (#144)", async () => {
+    const build = (aliasSalt: string) =>
+      buildReport(db, {
+        cycle: cycleId,
+        anonymized: true,
+        minGroupSize: 2,
+        aliasSalt,
+      });
+    // label -> n of the teams both cuts show, per report
+    const join = (r: Awaited<ReturnType<typeof build>>) => {
+      const people = new Map(
+        r.sections
+          .completion!.byManager.filter((x) => x.relationship === "self")
+          .map((x) => [x.label, x.n]),
+      );
+      return r.sections
+        .goals!.byManager.filter(
+          (x) => !x.other && x.label.startsWith("Equipo"),
+        )
+        .map((x) => [x.label, x.n, people.get(x.label)] as const);
+    };
+    const one = await build("one");
+    const sections = (r: typeof one) => [
+      r.sections.completion!.byManager.map((x) => x.label),
+      r.sections.goals!.byManager.map((x) => x.label),
+    ];
+    // never stable across exports
+    expect(sections(await build("two"))).not.toEqual(sections(one));
+    // and the alias of goals does not match the same-numbered team of completion
+    const joined = join(one);
+    expect(joined.length).toBeGreaterThan(1);
+    expect(joined.some(([, n, other]) => other !== n)).toBe(true);
   });
 
   it("completion is null when no assessment applies to anybody", async () => {

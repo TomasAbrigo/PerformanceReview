@@ -1,9 +1,11 @@
+import { randomUUID } from "node:crypto";
 import { sql } from "drizzle-orm";
 import type { DbOrTx } from "@/db/client";
 import { DomainError } from "@/lib/domain-error";
 import { isUuid } from "@/lib/uuid";
 import { groupKeyer } from "@/modules/org-attributes/group-key";
 import { getSetting } from "@/modules/settings/service";
+import { AliasBook } from "./anonymize";
 import {
   collectCompletion,
   collectEngagementMonthly,
@@ -68,6 +70,12 @@ export type BuildOptions = {
   /** Default: the `aggregation.minGroupSize` setting. */
   minGroupSize?: number;
   now?: Date;
+  /**
+   * Seed of the "Equipo N" / "DM N" aliases of the anonymized report (default:
+   * random per report, so the aliases are neither the same in two cuts nor in
+   * two exports; see `AliasBook`). Set it only to make a build reproducible.
+   */
+  aliasSalt?: string;
 };
 
 /** Builds (and validates) the report of a cycle. */
@@ -83,6 +91,7 @@ export async function buildReport(
   const minGroupSize =
     opts.minGroupSize ?? (await getSetting(db, "aggregation.minGroupSize"));
   const labels = labelsFor(locale);
+  const salt = opts.anonymized ? (opts.aliasSalt ?? randomUUID()) : null;
   const ctx: CollectContext = {
     cycleId: cycle.id,
     period: { start: cycle.periodStart, end: cycle.periodEnd },
@@ -90,8 +99,11 @@ export async function buildReport(
     min: opts.anonymized ? minGroupSize : 1,
     locale,
     labels,
-    teams: await cycleTeams(db, cycle.id, labels.team),
-    dms: await cycleDms(db, cycle.id, labels.dm, await groupKeyer(db)),
+    teams: new AliasBook(await cycleTeams(db, cycle.id, labels.team), salt),
+    dms: new AliasBook(
+      await cycleDms(db, cycle.id, labels.dm, await groupKeyer(db)),
+      salt,
+    ),
   };
   const [
     executive,

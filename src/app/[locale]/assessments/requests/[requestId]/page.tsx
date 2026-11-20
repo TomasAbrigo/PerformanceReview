@@ -158,6 +158,7 @@ async function RequestPage({ params }: Props) {
               goals={detail.goals}
               name={name}
               asOf={detail.goalsAsOf}
+              cycleId={cycle.id}
             />
           ) : null}
         </div>
