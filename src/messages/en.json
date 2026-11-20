@@ -2088,7 +2088,7 @@
       "trend": "Evolution by cycle",
       "reading": "Reading",
       "none": "–",
-      "meanOf": "over {n}",
+      "meanOf": "average of {n, plural, one {# person} other {# people}} (scale 1–5)",
       "riskOf": "({people} of {of})",
       "signals": "With a signal",
       "signalsOf": "{people} of {of} people with read comments"
@@ -2102,13 +2102,14 @@
       "axis": "Scale 1 to 5"
     },
     "insight": {
-      "retentionDrop": "Mean retention fell {delta} points since {cycle} (from {previous} to {current}).",
-      "engagementDrop": "Mean engagement fell {delta} points since {cycle} (from {previous} to {current}).",
+      "retentionDrop": "Mean retention fell {delta} points since {cycle}, the previous cycle (from {previous} to {current}).",
+      "engagementDrop": "Mean engagement fell {delta} points since {cycle}, the previous cycle (from {previous} to {current}).",
       "riskHigh": "{percent}% of the people with both indicators ({people}) are at risk: low retention and engagement.",
-      "completionLow": "Only {percent}% of the manager assessments are complete.",
-      "stable": "No alerts in this cycle.",
+      "completionLow": "Only {percent} % of the manager assessments are complete (below target).",
+      "stable": "No alerts: every indicator on target.",
       "noData": "There is not enough data yet to read this team.",
-      "signals": "{percent}% of the people with read comments ({people} of {of}) carry a signal to attend to."
+      "signals": "{percent}% of the people with read comments ({people} of {of}) carry a signal to attend to.",
+      "belowTarget": "No alerts; below target: {which}."
     },
     "empty": "No DM has people in this cycle. Upload the org attributes file in Import.",
     "withoutDm": "{n, plural, one {# person} other {# people}} without a DM in the file.",

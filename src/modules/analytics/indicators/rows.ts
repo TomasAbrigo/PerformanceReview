@@ -57,7 +57,11 @@ export async function requireCycle(db: DbOrTx, cycleId: string): Promise<void> {
 export async function previousIndicatorCycle(
   db: DbOrTx,
   cycleId: string,
-): Promise<{ id: string; name: string; localizedName: LocalizedText | null } | null> {
+): Promise<{
+  id: string;
+  name: string;
+  localizedName: LocalizedText | null;
+} | null> {
   const rows = await db.execute<{
     id: string;
     name: string;

@@ -2088,7 +2088,7 @@
       "trend": "Evolución por ciclo",
       "reading": "Lectura",
       "none": "–",
-      "meanOf": "sobre {n}",
+      "meanOf": "promedio de {n, plural, one {# persona} other {# personas}} (escala 1–5)",
       "riskOf": "({people} de {of})",
       "signals": "Con alguna señal",
       "signalsOf": "{people} de {of} personas con comentarios leídos"
@@ -2102,13 +2102,14 @@
       "axis": "Escala 1 a 5"
     },
     "insight": {
-      "retentionDrop": "La retención media cayó {delta} puntos desde {cycle} (de {previous} a {current}).",
-      "engagementDrop": "El compromiso medio cayó {delta} puntos desde {cycle} (de {previous} a {current}).",
+      "retentionDrop": "La retención media cayó {delta} puntos desde {cycle}, el ciclo anterior (de {previous} a {current}).",
+      "engagementDrop": "El compromiso medio cayó {delta} puntos desde {cycle}, el ciclo anterior (de {previous} a {current}).",
       "riskHigh": "El {percent} % de las personas con ambos indicadores ({people}) está en riesgo: retención y compromiso bajos.",
-      "completionLow": "Solo el {percent} % de las evaluaciones del manager está completo.",
-      "stable": "Sin alertas en este ciclo.",
+      "completionLow": "Solo el {percent} % de las evaluaciones del manager está completo (debajo de la meta).",
+      "stable": "Sin alertas: todos los indicadores en meta.",
       "noData": "Todavía no hay datos suficientes para leer este equipo.",
-      "signals": "El {percent} % de las personas con comentarios leídos ({people} de {of}) tiene alguna señal a atender."
+      "signals": "El {percent} % de las personas con comentarios leídos ({people} de {of}) tiene alguna señal a atender.",
+      "belowTarget": "Sin alertas; por debajo de la meta: {which}."
     },
     "empty": "Ningún DM tiene personas en este ciclo. Cargá el archivo de atributos organizacionales en Importar.",
     "withoutDm": "{n, plural, one {# persona} other {# personas}} sin DM en el archivo.",

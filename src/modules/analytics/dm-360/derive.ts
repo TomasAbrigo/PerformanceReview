@@ -3,8 +3,8 @@
 // the minimum group size (`null`: nothing is masked) is the only masking here.
 import type { GroupKeyer } from "@/modules/org-attributes/kinds";
 import type { SideStatus } from "@/modules/analytics/completion/types";
+import { likertTone, percentTone } from "@/modules/insights/tone";
 import {
-  COMPLETION_ALERT,
   type Dm360,
   type Dm360Card,
   type Dm360Point,
@@ -14,8 +14,6 @@ import {
   MIN_COMMENTS,
   MIN_RISK_PEOPLE,
   type Mean,
-  SIGNAL_SHARE_ALERT,
-  RISK_SHARE_ALERT,
   SPARK_CYCLES,
 } from "./types";
 
@@ -182,12 +180,11 @@ export function insightsOf(
   const out: Insight360[] = [];
   const points = card.trend;
   const current = points[points.length - 1];
+  // #133: a fall is measured only against the cycle right before.
+  const before = points[points.length - 2];
   for (const indicator of ["retention", "engagement"] as const) {
     const now = card[indicator]?.mean;
     if (now === undefined || !current) continue;
-    const before = [...points.slice(0, -1)]
-      .reverse()
-      .find((p) => p[indicator] !== null);
     const previous = before?.[indicator];
     if (
       before &&
@@ -205,27 +202,45 @@ export function insightsOf(
       });
     }
   }
+  // #133: one definition of "alert", the tone the card's own KPI shows (the
+  // `targets.*` settings): anything not "good" is said.
+  const attention = (pct: number, better: "up" | "down" = "up") =>
+    percentTone(pct, thresholds, better) !== "good";
   const s = card.signals;
-  if (s && s.of >= MIN_COMMENTS && s.share >= SIGNAL_SHARE_ALERT) {
+  if (s && s.of >= MIN_COMMENTS && attention(percent(s.share), "down")) {
     out.push({
       code: "signals",
       params: { percent: percent(s.share), people: s.people, of: s.of },
     });
   }
   const r = card.risk;
-  if (r && r.of >= MIN_RISK_PEOPLE && r.share >= RISK_SHARE_ALERT) {
+  if (
+    r &&
+    r.of >= MIN_RISK_PEOPLE &&
+    r.people > 0 &&
+    attention(percent(r.share), "down")
+  ) {
     out.push({
       code: "riskHigh",
       params: { percent: percent(r.share), people: r.people },
     });
   }
-  if (card.managerRate !== null && card.managerRate < COMPLETION_ALERT) {
+  if (card.managerRate !== null && attention(percent(card.managerRate))) {
     out.push({
       code: "completionLow",
       params: { percent: percent(card.managerRate) },
     });
   }
   if (out.length > 0) return out;
+  // Not an alert, but never "stable" while a mean is short of its target.
+  const below = (m: Mean | null) =>
+    m !== null && likertTone(m.mean, thresholds.riskThreshold) !== "good"
+      ? 1
+      : 0;
+  const retention = below(card.retention);
+  const engagement = below(card.engagement);
+  if (retention + engagement > 0)
+    return [{ code: "belowTarget", params: { retention, engagement } }];
   const judged = card.retention || card.engagement || card.risk || card.signals;
   return [judged ? { code: "stable" } : { code: "noData" }];
 }
