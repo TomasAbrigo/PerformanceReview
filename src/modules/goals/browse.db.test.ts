@@ -492,6 +492,20 @@ describe("getGoalDetail", () => {
     }
   });
 
+  it("measures overdue at the cycle's cut-off when opened from a closed cycle", async () => {
+    // Due 2026-01-31: overdue today, not yet at a cut-off of 2026-01-15.
+    await db
+      .update(reviewCycle)
+      .set({ periodEnd: "2026-01-15" })
+      .where(eq(reviewCycle.id, ids.cycleId));
+    expect(
+      (await getGoalDetail(db, hr, ids.capacitar, TODAY, ids.cycleId))?.state,
+    ).toBe("in_progress");
+    expect((await getGoalDetail(db, hr, ids.capacitar, TODAY))?.state).toBe(
+      "overdue",
+    );
+  });
+
   it("is null for an unknown, malformed or deleted goal", async () => {
     expect(await getGoalDetail(db, hr, "nope", TODAY)).toBeNull();
     expect(

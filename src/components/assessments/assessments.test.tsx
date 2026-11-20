@@ -432,7 +432,7 @@ describe("AssessmentView", () => {
     ).toBeVisible();
     expect(
       within(goals).getByRole("link", { name: "Migrar la API" }),
-    ).toHaveAttribute("href", "/goals/g1");
+    ).toHaveAttribute("href", "/goals/g1?cycle=c1");
     expect(
       within(goals).queryByRole("link", { name: "Documentar" }),
     ).not.toBeInTheDocument();

@@ -37,12 +37,12 @@ El CLI imprime solo rutas y cantidades, nunca nombres. Código de salida: 0 ok, 
 
 Por defecto en `data/private/arturia/<ciclo-slug>/` (ignorado por git):
 
-| Archivo                  | Contenido                                                                                                                         |
-| ------------------------ | --------------------------------------------------------------------------------------------------------------------------------- |
-| `report.json`            | Informe completo con la sección `people` (nombre, email, área, manager, estados, indicadores). Solo para People.                  |
-| `report.html`            | El mismo informe como página única: CSS, JS, datos (`<script type="application/json" id="report">`) y gráficos SVG inline.        |
-| `report.anonymized.json` | Sin `people`, sin emails, sin nombres; grupos con menos de `aggregation.minGroupSize` personas en "Otros"; equipos "Equipo 1..N". |
-| `report.anonymized.html` | La página de la versión anonimizada.                                                                                              |
+| Archivo                  | Contenido                                                                                                                                                                                                                                                              |
+| ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `report.json`            | Informe completo con la sección `people` (nombre, email, área, manager, estados, indicadores). Solo para People.                                                                                                                                                       |
+| `report.html`            | El mismo informe como página única: CSS, JS, datos (`<script type="application/json" id="report">`) y gráficos SVG inline.                                                                                                                                             |
+| `report.anonymized.json` | Sin `people`, sin emails, sin nombres; grupos con menos de `aggregation.minGroupSize` personas en "Otros"; equipos "Equipo 1..N" y DM "DM 1..N" con un número distinto en cada corte y en cada exportación (no se pueden vincular dos cortes por el tamaño del grupo). |
+| `report.anonymized.html` | La página de la versión anonimizada.                                                                                                                                                                                                                                   |
 
 El HTML no hace ningún request externo (sin `http(s)://`, ni `src`/`href`/`url()` salvo anclas `#` y `data:`; lo verifica un test). Tiene un selector "Todo / Cuantitativo / Cualitativo" que muestra u oculta secciones con JS puro. Los textos salen del namespace `Arturia` de `src/messages/{es,en}.json` y, los de la lectura cualitativa (nombres de preguntas, temas, señales, sustancia y sus títulos), de `src/modules/arturia-report/labels.ts` (es y en, con un test de paridad).
 

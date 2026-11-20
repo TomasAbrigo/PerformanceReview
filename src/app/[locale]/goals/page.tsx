@@ -151,6 +151,7 @@ async function GoalsList({
         <GoalsTable
           page={page}
           showPerson={!ownOnly}
+          cycleId={cycleId}
           hrefForPage={(n) => hrefFor({ page: n })}
         />
       </section>

@@ -390,6 +390,7 @@ export async function getGoalDetail(
   actor: ActorContext,
   id: string,
   today: string = todayLocal(),
+  cycleId?: string,
 ): Promise<GoalDetail | null> {
   const scope = individualScope(actor);
   if (scope.kind === "none") throw new ReviewError("forbidden");
@@ -422,6 +423,9 @@ export async function getGoalDetail(
   );
   if (!row) return null;
   if (!row.readable) throw new ReviewError("forbidden");
+  // Opened from a cycle: "overdue" at that cycle's reference date, like its list.
+  const asOf =
+    (cycleId ? await cycleGoalAsOf(db, cycleId, today) : null) ?? today;
 
   const [milestones, comments, appearances] = await Promise.all([
     db.execute(sql`
@@ -454,7 +458,7 @@ export async function getGoalDetail(
     title: row.title,
     description: row.description,
     status: row.status,
-    state: goalState(row, today),
+    state: goalState(row, asOf),
     percentComplete: row.percentComplete,
     createdAt: row.createdAt,
     dueDate: row.dueDate,

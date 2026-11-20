@@ -34,7 +34,7 @@ import {
 } from "@/modules/analytics/indicators";
 import { engagementEvolution } from "@/modules/analytics/engagement/queries";
 import { effectiveCte } from "@/modules/qualitative-analysis/effective";
-import { teamLabels } from "./anonymize";
+import { type AliasBook, teamLabels } from "./anonymize";
 import type { Labels, ReportLocale } from "./labels";
 import { readQualitative } from "./qualitative";
 import type {
@@ -55,15 +55,15 @@ export type CollectContext = {
   locale?: ReportLocale;
   labels: Labels;
   /**
-   * "Equipo N" of each manager of the cycle (see `cycleTeams`): the one label
-   * every section gives a team the analytics modules leave without a name.
+   * "Equipo N" of each manager of the cycle (see `cycleTeams`), numbered per
+   * scope (a section and its cut), never the same in two cuts (`AliasBook`).
    */
-  teams: ReadonlyMap<string, string>;
+  teams: AliasBook;
   /**
    * "DM N" of each DM of the cycle by their opaque key (see `cycleDms`), for
    * the DMs the analytics modules give direction without a name.
    */
-  dms: ReadonlyMap<string, string>;
+  dms: AliasBook;
 };
 
 export type Collector<K extends keyof ArturiaSections> = (
@@ -200,9 +200,12 @@ export async function cycleDms(
 const groupLabel = (
   g: { key: string | null; label: string | null },
   ctx: CollectContext,
+  scope: string,
 ) =>
   g.label ??
-  (g.key === null ? undefined : (ctx.teams.get(g.key) ?? ctx.dms.get(g.key))) ??
+  (g.key === null
+    ? undefined
+    : (ctx.teams.label(scope, g.key) ?? ctx.dms.label(scope, g.key))) ??
   ctx.labels.others;
 
 const round = (x: number | null, digits: number) =>
@@ -211,7 +214,11 @@ const round = (x: number | null, digits: number) =>
 type CompletionRows = CompletionSection["byDepartment"];
 
 /** The cells of a summary (direction already folded them): groups, then Otros. */
-function completionCells(s: CompletionSummary, ctx: CollectContext) {
+function completionCells(
+  s: CompletionSummary,
+  ctx: CollectContext,
+  scope: string,
+) {
   const cell = (g: CompletionGroup, label: string, other: boolean) => ({
     label,
     other,
@@ -222,7 +229,7 @@ function completionCells(s: CompletionSummary, ctx: CollectContext) {
     managerApplicable: g.managerApplicable,
   });
   return [
-    ...s.groups.map((g) => cell(g, groupLabel(g, ctx), g.key === null)),
+    ...s.groups.map((g) => cell(g, groupLabel(g, ctx, scope), g.key === null)),
     ...(s.others ? [cell(s.others, ctx.labels.others, true)] : []),
   ];
 }
@@ -336,10 +343,16 @@ export const collectCompletion: Collector<"completion"> = async (db, ctx) => {
           side("manager", total.managerApplicable, total.managerSubmitted),
         ]
       : null,
-    byDepartment: completionRows(completionCells(current, ctx)),
-    byManager: completionRows(completionCells(byTeam, ctx)),
-    byAccount: completionRows(completionCells(byAccount, ctx)),
-    byDm: completionRows(completionCells(byDm, ctx)),
+    byDepartment: completionRows(
+      completionCells(current, ctx, "completion.byDepartment"),
+    ),
+    byManager: completionRows(
+      completionCells(byTeam, ctx, "completion.byManager"),
+    ),
+    byAccount: completionRows(
+      completionCells(byAccount, ctx, "completion.byAccount"),
+    ),
+    byDm: completionRows(completionCells(byDm, ctx, "completion.byDm")),
     byAccountTotal: cutTotal(byAccount),
     byDmTotal: cutTotal(byDm),
     suppressed,
@@ -349,7 +362,7 @@ export const collectCompletion: Collector<"completion"> = async (db, ctx) => {
           total: hidden || !delta.total ? null : points(delta.total),
           byDepartment: [
             ...delta.groups.map((d) => ({
-              label: groupLabel(d, ctx),
+              label: groupLabel(d, ctx, "completion.delta"),
               other: d.key === null,
               ...points(d),
             })),
@@ -404,7 +417,7 @@ export const collectIndicators: Collector<"indicators"> = async (db, ctx) => {
       label:
         s.others || s.key === null
           ? ctx.labels.others
-          : (s.label ?? ctx.dms.get(s.key) ?? s.key),
+          : (s.label ?? ctx.dms.label("indicators.byDm", s.key) ?? s.key),
       n: s.n,
       mean: s.mean,
       counts: s.counts,
@@ -481,9 +494,9 @@ export const collectGoals: Collector<"goals"> = async (db, ctx) => {
   const byDm = all.kpisBy.dm!;
   if (kpis.groups.length === 0 && kpis.suppressed === 0) return null;
 
-  const rows = (k: GoalKpis) =>
+  const rows = (k: GoalKpis, scope: string) =>
     k.groups.map((g: GoalKpiGroup) => ({
-      label: groupLabel(g, ctx),
+      label: groupLabel(g, ctx, scope),
       n: g.people,
       other: g.others || g.key === null,
       peopleWithGoals: g.peopleWithGoals,
@@ -542,10 +555,10 @@ export const collectGoals: Collector<"goals"> = async (db, ctx) => {
     goals: total?.goals ?? null,
     completed: total?.completed ?? null,
     avgProgress: round(total?.avgProgress ?? null, 1),
-    byDepartment: rows(kpis),
-    byManager: rows(byManager),
-    byAccount: rows(byAccount),
-    byDm: rows(byDm),
+    byDepartment: rows(kpis, "goals.byDepartment"),
+    byManager: rows(byManager, "goals.byManager"),
+    byAccount: rows(byAccount, "goals.byAccount"),
+    byDm: rows(byDm, "goals.byDm"),
     byAccountTotal: cutTotal(byAccount),
     byDmTotal: cutTotal(byDm),
     buckets: vs.buckets.map((b) => ({

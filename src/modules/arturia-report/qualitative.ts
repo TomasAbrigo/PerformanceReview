@@ -13,6 +13,7 @@
 // groups and cells are folded or hidden here, so nothing hidden can be
 // subtracted from what is shown.
 import type { DbOrTx } from "@/db/client";
+import type { AliasBook } from "./anonymize";
 import type { ActorContext } from "@/modules/actor/types";
 import {
   dimensionPrompts,
@@ -67,7 +68,7 @@ export type QualitativeContext = {
   locale?: ReportLocale;
   labels: Labels;
   /** "DM N" of each DM of the cycle by its opaque key (what direction gets instead of a name). */
-  dms: ReadonlyMap<string, string>;
+  dms: AliasBook;
 };
 
 /** The cuts by group the report already has and the readers know (area, account, DM). */
@@ -88,9 +89,10 @@ export function isoOf(text: string): string {
 const groupLabel = (
   g: { key: string | null; label: string | null },
   ctx: QualitativeContext,
+  scope: string,
 ) =>
   g.label ??
-  (g.key === null ? undefined : ctx.dms.get(g.key)) ??
+  (g.key === null ? undefined : ctx.dms.label(scope, g.key)) ??
   ctx.labels.others;
 
 type FeedbackCut = QualitativeSection["managerFeedback"]["byDepartment"];
@@ -100,11 +102,12 @@ type SignalCut = NonNullable<QualitativeSection["signals"]>["byDepartment"];
 function feedbackCut(
   rows: GroupSubstance[],
   ctx: QualitativeContext,
+  scope: string,
 ): FeedbackCut {
   type Cells = { none: number; generic: number; specific: number };
   const groups: CutGroup<Cells>[] = rows.map((r) => ({
     key: r.key,
-    label: groupLabel(r, ctx),
+    label: groupLabel(r, ctx, scope),
     people: r.people,
     cells: { none: r.none, generic: r.generic, specific: r.specific },
   }));
@@ -149,11 +152,12 @@ function feedbackCut(
 function signalsCut(
   rows: GroupSignals[],
   ctx: QualitativeContext,
+  scope: string,
 ): { cut: SignalCut; unprotected: string[] } {
   type Cells = { withAny: number; counts: Record<string, number> };
   const groups: CutGroup<Cells>[] = rows.map((r) => ({
     key: r.key,
-    label: groupLabel(r, ctx),
+    label: groupLabel(r, ctx, scope),
     people: r.people,
     cells: { withAny: r.withAny, counts: r.counts },
   }));
@@ -204,11 +208,15 @@ type ValuedCut = NonNullable<
  * the table of groups by answer masked (the people of each group and of the
  * whole per answer are public, so the cells that give a hidden one away go too).
  */
-function yesNoCut(rows: YesNoGroupRow[], ctx: QualitativeContext): YesNoCut {
+function yesNoCut(
+  rows: YesNoGroupRow[],
+  ctx: QualitativeContext,
+  scope: string,
+): YesNoCut {
   type Cells = { yes: number; no: number };
   const groups: CutGroup<Cells>[] = rows.map((r) => ({
     key: r.key,
-    label: groupLabel(r, ctx),
+    label: groupLabel(r, ctx, scope),
     people: r.people,
     cells: { yes: r.yes, no: r.no },
   }));
@@ -243,11 +251,15 @@ function yesNoCut(rows: YesNoGroupRow[], ctx: QualitativeContext): YesNoCut {
 }
 
 /** The "valued" scale (1-4) by group, folded and masked as `yesNoCut`. */
-function valuedCut(rows: ValuedGroupRow[], ctx: QualitativeContext): ValuedCut {
+function valuedCut(
+  rows: ValuedGroupRow[],
+  ctx: QualitativeContext,
+  scope: string,
+): ValuedCut {
   type Cells = { counts: number[] };
   const groups: CutGroup<Cells>[] = rows.map((r) => ({
     key: r.key,
-    label: groupLabel(r, ctx),
+    label: groupLabel(r, ctx, scope),
     people: r.people,
     cells: { counts: r.counts },
   }));
@@ -394,7 +406,9 @@ export async function readQualitative(
   // --- signals
   // A column of a cut that not even hiding every cell protects (its cells
   // are the column's total, which is public) takes its total with it.
-  const cuts = signalGroups.map((g) => signalsCut(g, ctx));
+  const cuts = signalGroups.map((g) =>
+    signalsCut(g, ctx, "qualitative.signals"),
+  );
   const unprotected = new Set(cuts.flatMap((c) => c.unprotected));
   const signals = signalSum && {
     people: signalSum.people,
@@ -434,9 +448,9 @@ export async function readQualitative(
         g.filter((r) => r.dimension === dimension);
       return {
         dimension,
-        byDepartment: yesNoCut(of(yesNoGroups[0]), ctx),
-        byAccount: yesNoCut(of(yesNoGroups[1]), ctx),
-        byDm: yesNoCut(of(yesNoGroups[2]), ctx),
+        byDepartment: yesNoCut(of(yesNoGroups[0]), ctx, "qualitative.yesNo"),
+        byAccount: yesNoCut(of(yesNoGroups[1]), ctx, "qualitative.yesNo"),
+        byDm: yesNoCut(of(yesNoGroups[2]), ctx, "qualitative.yesNo"),
       };
     }),
     byCycle: yesNoDims.flatMap((dimension) => {
@@ -501,9 +515,17 @@ export async function readQualitative(
             labels: v.labels.map((l) => l?.[locale] ?? null),
             // The sum of the first two values gives away a hidden one next to a shown one.
             notValued: notValuedOf(valuedCells, v.notValued),
-            byDepartment: valuedCut(valuedGroups[0].byGroup, ctx),
-            byAccount: valuedCut(valuedGroups[1].byGroup, ctx),
-            byDm: valuedCut(valuedGroups[2].byGroup, ctx),
+            byDepartment: valuedCut(
+              valuedGroups[0].byGroup,
+              ctx,
+              "qualitative.valued",
+            ),
+            byAccount: valuedCut(
+              valuedGroups[1].byGroup,
+              ctx,
+              "qualitative.valued",
+            ),
+            byDm: valuedCut(valuedGroups[2].byGroup, ctx, "qualitative.valued"),
             byCycle: valued.trend.flatMap((r) => {
               const cells = maskCells(r.counts, min);
               return cells
@@ -597,9 +619,9 @@ export async function readQualitative(
     })),
     substance,
     managerFeedback: {
-      byDepartment: feedbackCut(feedback[0], ctx),
-      byAccount: feedbackCut(feedback[1], ctx),
-      byDm: feedbackCut(feedback[2], ctx),
+      byDepartment: feedbackCut(feedback[0], ctx, "qualitative.feedback"),
+      byAccount: feedbackCut(feedback[1], ctx, "qualitative.feedback"),
+      byDm: feedbackCut(feedback[2], ctx, "qualitative.feedback"),
     },
     themes,
     agreement: agreementOut,

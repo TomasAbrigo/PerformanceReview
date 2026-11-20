@@ -17,11 +17,14 @@ export function GoalsOfPeriod({
   goals,
   name,
   asOf,
+  cycleId,
 }: {
   goals: SnapshotGoal[];
   name: string;
   /** When the snapshot was taken (ISO), if known. */
   asOf: string | null;
+  /** The cycle of the assessment: a goal opens measured at its cut-off. */
+  cycleId?: string;
 }) {
   const t = useTranslations("Assessments.detail.goals");
   const d = useDates();
@@ -51,7 +54,11 @@ export function GoalsOfPeriod({
               >
                 {g.openable && g.goalId ? (
                   <Link
-                    href={`/goals/${g.goalId}`}
+                    href={
+                      cycleId
+                        ? `/goals/${g.goalId}?cycle=${cycleId}`
+                        : `/goals/${g.goalId}`
+                    }
                     className="underline decoration-brand-200 underline-offset-4 hover:text-primary"
                   >
                     {g.title}

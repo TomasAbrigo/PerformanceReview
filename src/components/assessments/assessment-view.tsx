@@ -72,7 +72,12 @@ export function AssessmentView({
           ) : null}
         </div>
       ) : null}
-      <GoalsOfPeriod goals={detail.goals} name={name} asOf={detail.goalsAsOf} />
+      <GoalsOfPeriod
+        goals={detail.goals}
+        name={name}
+        asOf={detail.goalsAsOf}
+        cycleId={detail.cycle.id}
+      />
       <div className="grid items-start gap-6 lg:grid-cols-2">
         {detail.sides.map((side) => (
           <AssessmentSideView key={side.relationship} side={side} />

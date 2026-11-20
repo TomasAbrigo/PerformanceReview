@@ -54,10 +54,13 @@ export function GoalsTable({
   page,
   showPerson,
   hrefForPage,
+  cycleId,
 }: {
   page: GoalListPage;
   showPerson: boolean;
   hrefForPage: (page: number) => string;
+  /** The cycle the list is of: its goals open measured at the cycle's cut-off. */
+  cycleId?: string;
 }) {
   const t = useTranslations("Goals");
   const d = useDates();
@@ -81,7 +84,12 @@ export function GoalsTable({
               <GoalStateBadge state={g.state} />
             </div>
             <h2 id={`goal-${g.id}`} className="text-xl leading-snug">
-              <Link href={`/goals/${g.id}`} className="card-link">
+              <Link
+                href={
+                  cycleId ? `/goals/${g.id}?cycle=${cycleId}` : `/goals/${g.id}`
+                }
+                className="card-link"
+              >
                 {g.title}
               </Link>
             </h2>

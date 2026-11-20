@@ -23,8 +23,12 @@ import {
   updateGoalAction,
 } from "../actions";
 
-async function GoalPage({ params }: PageProps<"/[locale]/goals/[id]">) {
+async function GoalPage({
+  params,
+  searchParams,
+}: PageProps<"/[locale]/goals/[id]">) {
   const { locale, id } = await params;
+  const { cycle } = await searchParams;
   if (!hasLocale(routing.locales, locale)) notFound();
   setRequestLocale(locale);
   await connection();
@@ -50,7 +54,13 @@ async function GoalPage({ params }: PageProps<"/[locale]/goals/[id]">) {
   }
   let goal;
   try {
-    goal = await getGoalDetail(db, actor, id);
+    goal = await getGoalDetail(
+      db,
+      actor,
+      id,
+      undefined,
+      typeof cycle === "string" ? cycle : undefined,
+    );
   } catch (error) {
     if (error instanceof ReviewError && error.code === "forbidden") {
       return (
