@@ -114,21 +114,28 @@ describe("executiveReport", () => {
     for (const [i, personId] of people.entries()) {
       await insertEngagement({
         personId,
-        month: "2026-01-01",
+        month: "2024-11-01",
         score: 0.5,
         segment: "regular",
       });
       await insertEngagement({
         personId,
-        month: "2026-02-01",
+        month: "2024-12-01",
         score: i < 3 ? 0.9 : 0.7,
         segment: i < 3 ? "alto" : "medio",
       });
     }
 
+    // #133: a month after the cycle's period (H2 2024) is not its month.
+    await insertEngagement({
+      personId: s.id.ana,
+      month: "2026-02-01",
+      score: 0.1,
+      segment: "bajo",
+    });
     const r = await quantSection();
     expect(r.engagementMonthly?.latest).toMatchObject({
-      month: "2026-02-01",
+      month: "2024-12-01",
       people: 6,
       segments: { alto: 3, medio: 3 },
     });

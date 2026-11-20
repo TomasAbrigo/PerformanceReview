@@ -1,3 +1,4 @@
+import { LOW_BASE_N } from "@/modules/insights/rank";
 import { useFormatter, useTranslations } from "next-intl";
 import {
   ChartLegend,
@@ -5,6 +6,7 @@ import {
   DivergingLikert,
   LIKERT_SWATCH,
   lowShare,
+  lowStandsOut,
   orderLikert,
   useChartFormat,
 } from "@/components/charts";
@@ -71,7 +73,8 @@ export function DistributionView({
     counts: s.counts,
     mean: s.mean,
     strong,
-    faint: !strong && !!context && s.n < context.smallN,
+    // #133: "poca base" under the minimum or LOW_BASE_N, whichever is more.
+    faint: !strong && !!context && s.n < Math.max(context.smallN, LOW_BASE_N),
     testId: "indicator-histogram",
   }));
   const groupBy = data.groupBy;
@@ -100,6 +103,23 @@ export function DistributionView({
   };
   const faintCount = likertRows.filter((r) => r.faint).length;
   const worst = orderLikert(likertRows.filter((r) => !r.strong))[0];
+  // #133: a group is named only when it stands out from everyone beyond the
+  // noise of its n; otherwise the headline says none does.
+  const everyone =
+    total ??
+    groups.reduce<IndicatorSeries | null>(
+      (acc, s) =>
+        acc
+          ? {
+              ...acc,
+              n: acc.n + s.n,
+              counts: acc.counts.map((c, i) => c + s.counts[i]),
+            }
+          : s,
+      null,
+    );
+  const overallLow = everyone ? lowShare(everyone.counts) : 0;
+  const named = worst && !worst.faint && lowStandsOut(worst.counts, overallLow);
   const values = INDICATOR_VALUES.map(String);
   return (
     <div className="flex flex-col gap-3">
@@ -108,10 +128,15 @@ export function DistributionView({
         <>
           {worst && groups.length > 1 && lowShare(worst.counts) > 0 ? (
             <p className="text-sm font-medium" data-testid="chart-takeaway">
-              {t("distribution.takeaway", {
-                group: worst.label,
-                share: f.share(lowShare(worst.counts)),
-              })}
+              {named
+                ? t("distribution.takeaway", {
+                    group: worst.label,
+                    share: f.share(lowShare(worst.counts)),
+                    overall: f.share(overallLow),
+                  })
+                : t("distribution.noStandout", {
+                    overall: f.share(overallLow),
+                  })}
             </p>
           ) : null}
           <ChartLegend

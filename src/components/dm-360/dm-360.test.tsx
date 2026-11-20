@@ -75,7 +75,7 @@ const data = (over: Partial<Dm360> = {}): Dm360 => ({
   cycleName: "H1 2025",
   scope: "direct",
   minGroupSize: null,
-  thresholds: { dropThreshold: 2, riskThreshold: 2 },
+  thresholds: { dropThreshold: 2, riskThreshold: 2, goodPct: 80, watchPct: 50 },
   cards: [card()],
   withoutDm: 0,
   suppressed: 0,
@@ -116,9 +116,56 @@ describe("Dm360View", () => {
     );
     const lines = within(c).getByTestId("dm-insights").querySelectorAll("li");
     expect([...lines].map((l) => l.textContent)).toEqual([
-      "La retención media cayó 2 puntos desde H1 2024 (de 4 a 2).",
+      "La retención media cayó 2 puntos desde H1 2024, el ciclo anterior (de 4 a 2).",
       "El 50 % de las personas con comentarios leídos (2 de 4) tiene alguna señal a atender.",
     ]);
+  });
+
+  it("#133: means say over how many people, ISO-day cycles read as months, a mean short of target is not 'no alerts'", () => {
+    renderIn(
+      "es",
+      <Dm360View
+        data={data({
+          cards: [
+            card({
+              insights: [
+                {
+                  code: "retentionDrop",
+                  params: {
+                    previous: 4,
+                    current: 2,
+                    delta: 2,
+                    cycle: "Evaluación semestral 2025-03-29 – 2025-09-28",
+                  },
+                },
+              ],
+            }),
+            card({
+              key: "Dora",
+              label: "Dora",
+              insights: [
+                {
+                  code: "belowTarget",
+                  params: { retention: 1, engagement: 1 },
+                },
+              ],
+            }),
+          ],
+        })}
+      />,
+    );
+    const [diego, dora] = screen.getAllByTestId("dm-card");
+    expect(within(diego).getByTestId("dm-retention")).toHaveTextContent(
+      "promedio de 5 personas",
+    );
+    expect(within(diego).getByTestId("dm-insights")).toHaveTextContent(
+      "desde Evaluación semestral mar – sept 2025",
+    );
+    const pill = within(dora).getByTestId("dm-insights");
+    expect(pill).toHaveTextContent(
+      "Sin alertas; por debajo de la meta: Retención media, Compromiso medio.",
+    );
+    expect(pill.querySelector("li")).toHaveAttribute("data-tone", "watch");
   });
 
   it("with a base (direct scope, names): each figure opens the DM's people or comments", () => {
@@ -154,7 +201,7 @@ describe("Dm360View", () => {
     expect(within(c).getByTestId("dm-retention")).toHaveTextContent("2.0");
     expect(within(c).getByTestId("dm-risk")).toHaveTextContent("40% (2 of 5)");
     expect(within(c).getByTestId("dm-insights")).toHaveTextContent(
-      "Mean retention fell 2 points since H1 2024 (from 4 to 2).",
+      "Mean retention fell 2 points since H1 2024, the previous cycle (from 4 to 2).",
     );
   });
 

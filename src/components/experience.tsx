@@ -111,17 +111,27 @@ export function ScaleBar({
   );
 }
 
-/** A change against the previous cycle, green when it goes the good way. */
+/**
+ * A change against the previous cycle, green when it goes the good way. The
+ * value comes from `shownDelta` (modules/insights/delta): rounded as written,
+ * 0 when flat. Flat reads `flatText` ("no change"), never "0,0" (#133).
+ */
 export function DeltaPill({
   value,
   text,
   better = "up",
+  flatText,
+  basis,
 }: {
   /** Signed change; 0 is flat. */
   value: number;
   /** The change as written ("+0,3 vs. 2025-H1"). */
   text: string;
   better?: "up" | "down";
+  /** What a flat change says instead of `text`. */
+  flatText?: string;
+  /** Over whom each side is ("277 vs. 294 people"): the populations differ. */
+  basis?: string;
 }) {
   const good = value === 0 ? null : value > 0 === (better === "up");
   // Flat is neither up nor down: a dash, not an arrow.
@@ -136,7 +146,12 @@ export function DeltaPill({
       data-testid="delta"
     >
       <Arrow className="size-3.5" aria-hidden="true" />
-      {text}
+      {value === 0 && flatText ? flatText : text}
+      {basis ? (
+        <span className="text-xs opacity-80" data-testid="delta-basis">
+          · {basis}
+        </span>
+      ) : null}
     </span>
   );
 }
@@ -182,7 +197,12 @@ export function MetricCard({
     /** Where good starts on this scale, as written ("80 %", "4"). */
     target?: { value: number; text: string };
   };
-  delta?: { value: number; text: string; better?: "up" | "down" };
+  delta?: {
+    value: number;
+    text: string;
+    better?: "up" | "down";
+    basis?: string;
+  };
   /** The value becomes a DrillLink to these records. */
   drill?: { base: DrillBase; drill: Drill; label: string };
   /** Without `drill`: the value links here (a list filtered by this KPI). */
@@ -230,7 +250,7 @@ export function MetricCard({
             {t(`tone.${status}`)}
           </span>
         ) : null}
-        {delta ? <DeltaPill {...delta} /> : null}
+        {delta ? <DeltaPill flatText={t("noChange")} {...delta} /> : null}
       </div>
       {scale ? (
         <ScaleBar

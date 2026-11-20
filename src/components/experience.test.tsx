@@ -71,6 +71,23 @@ describe("DeltaPill", () => {
     expect(pill.className).not.toMatch(/delta-good|delta-bad/);
   });
 
+  it("a flat change says so instead of a signed zero (#133)", () => {
+    render(
+      <DeltaPill
+        value={0}
+        text="0,0 vs. ciclo anterior"
+        flatText="Sin cambios"
+        basis="277 vs. 294 personas"
+      />,
+    );
+    const pill = screen.getByTestId("delta");
+    expect(pill).toHaveTextContent("Sin cambios");
+    expect(pill).not.toHaveTextContent("0,0");
+    expect(screen.getByTestId("delta-basis")).toHaveTextContent(
+      "277 vs. 294 personas",
+    );
+  });
+
   it("a rise points up and is good when up is better", () => {
     render(<DeltaPill value={2} text="+2 pts" />);
     const pill = screen.getByTestId("delta");

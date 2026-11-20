@@ -78,6 +78,8 @@ export type EngagementTile = {
   latest: EngagementMonth;
   previous: EngagementMonth | null;
   minGroupSize: number | null;
+  /** The cycle period the month was looked for in (#133); null: the latest of all. */
+  period: { start: string; end: string } | null;
 };
 
 /** The values of the filter selects of the engagement view. */

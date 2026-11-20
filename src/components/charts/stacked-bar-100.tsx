@@ -1,6 +1,7 @@
 import { useTranslations } from "next-intl";
 import { type DrillBase, DrillLink } from "@/components/drill/drill-link";
 import type { Drill } from "@/modules/insights/drill-spec";
+import { wilson } from "@/modules/insights/rank";
 import { useChartFormat } from "./format";
 
 /** What a mark opens: the drill and the page it rides on (see DrillLink). */
@@ -31,7 +32,9 @@ const total = (r: StackRow, keys: string[]) =>
 
 /**
  * Rows ordered by the share of `sortBy` series (descending: most at risk
- * first); masked rows last; ties keep their input order.
+ * first), by the lower bound of its Wilson interval (#133: a small group
+ * with a high raw share does not outrank a large one); masked rows last; ties
+ * keep their input order.
  */
 export function orderRows(
   rows: StackRow[],
@@ -42,7 +45,7 @@ export function orderRows(
   const keys = series.map((s) => s.key);
   const share = (r: StackRow) => {
     const all = total(r, keys);
-    return r.masked || !all ? -1 : total(r, sortBy) / all;
+    return r.masked || !all ? -1 : wilson(total(r, sortBy), all).low;
   };
   return rows
     .map((r, i) => ({ r, i, s: share(r) }))

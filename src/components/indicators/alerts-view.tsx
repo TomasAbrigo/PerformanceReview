@@ -3,7 +3,8 @@ import { TrendingDown, ShieldAlert } from "lucide-react";
 import { IconTile, MetricCard } from "@/components/experience";
 import type { DrillBase } from "@/components/drill/drill-link";
 import { atRiskTone, type KpiThresholds } from "@/modules/insights/tone";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
+import { cycleName } from "@/modules/review-core/cycle-name";
 import { Empty } from "@/components/insights/parts";
 import { Link } from "@/i18n/navigation";
 import type { IndicatorAlerts } from "@/modules/analytics/indicators/types";
@@ -21,6 +22,12 @@ export function AlertsView({
   context?: { base: DrillBase; targets: KpiThresholds; total: number | null };
 }) {
   const t = useTranslations("Indicators");
+  const locale = useLocale();
+  // #133: the drops compare only with the cycle right before, named as the
+  // screens name a cycle (months, not ISO days).
+  const previous = data.previousCycle
+    ? cycleName(data.previousCycle, locale)
+    : null;
   const tone = (n: number | null) =>
     n === null || !context
       ? undefined
@@ -37,7 +44,14 @@ export function AlertsView({
             icon={<TrendingDown className="size-5" />}
             value={data.peopleWithDrop ?? "—"}
             status={tone(data.peopleWithDrop)}
-            note={t("alerts.dropNote", { drop: data.dropThreshold })}
+            note={
+              previous
+                ? t("alerts.dropNote", {
+                    drop: data.dropThreshold,
+                    cycle: previous,
+                  })
+                : t("alerts.noPrevious")
+            }
           />
           <MetricCard
             testId="alerts-kpi-risk"
@@ -66,6 +80,7 @@ export function AlertsView({
         {t("alerts.summary", {
           drop: count(data.peopleWithDrop),
           risk: count(data.peopleAtRisk),
+          people: count(data.peopleWithAlert),
         })}
       </p>
       {data.minGroupSize !== null ? (
@@ -77,7 +92,10 @@ export function AlertsView({
       ) : (
         <details>
           <summary className="button-outline w-fit cursor-pointer">
-            {t("alerts.list", { n: data.alerts.length })}
+            {t("alerts.list", {
+              n: data.alerts.length,
+              people: data.peopleWithAlert ?? 0,
+            })}
           </summary>
           <CardCollection
             gridClassName="dense-list"
@@ -121,7 +139,7 @@ export function AlertsView({
                         previous: a.previousValue,
                         value: a.value,
                         delta: a.delta,
-                        cycle: a.previousCycleName,
+                        cycle: previous ?? a.previousCycleName,
                       })
                     : t("alerts.riskDetail", {
                         retention: a.retention,

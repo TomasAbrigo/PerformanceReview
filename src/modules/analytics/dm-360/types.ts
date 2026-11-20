@@ -54,6 +54,8 @@ export type Insight360 =
   | { code: "signals"; params: { percent: number; people: number; of: number } }
   | { code: "riskHigh"; params: { percent: number; people: number } }
   | { code: "completionLow"; params: { percent: number } }
+  /** Not an alert: which means (1 / 0) are short of their target. */
+  | { code: "belowTarget"; params: { retention: number; engagement: number } }
   | { code: "stable" }
   | { code: "noData" };
 
@@ -88,6 +90,9 @@ export type Dm360Thresholds = {
   dropThreshold: number;
   /** At or under it on both indicators is a risk: the `alerts.riskThreshold` setting. */
   riskThreshold: number;
+  /** The KPI targets (`targets.goodPct` / `targets.watchPct`), the same that tone the card (#133). */
+  goodPct: number;
+  watchPct: number;
 };
 
 export type Dm360 = {
@@ -105,14 +110,9 @@ export type Dm360 = {
   suppressed: number;
 };
 
-/** A share of people with a signal at or above this is worth saying (with at least `MIN_COMMENTS` people). */
-export const SIGNAL_SHARE_ALERT = 0.3;
 /** People with a read answer needed before a signal share is an insight. */
 export const MIN_COMMENTS = 3;
-/** A share of people at risk at or above this, over at least `MIN_RISK_PEOPLE`, is an insight. */
-export const RISK_SHARE_ALERT = 0.25;
+/** People with both indicators needed before a share at risk is an insight. */
 export const MIN_RISK_PEOPLE = 3;
-/** A manager-assessment completion under this is worth saying. */
-export const COMPLETION_ALERT = 0.5;
 /** Points of the sparkline: the latest cycles up to the one asked for. */
 export const SPARK_CYCLES = 8;

@@ -1,4 +1,5 @@
 import { useTranslations } from "next-intl";
+import { standsOut } from "@/modules/insights/rank";
 import {
   ChartLegend,
   ChartTableToggle,
@@ -77,14 +78,34 @@ export function SentimentBars({
     const n = sentiments.reduce((a, s) => a + r.values[s], 0);
     return n ? (r.values.negative + r.values.mixed) / n : 0;
   };
+  // #133: name the worst only when it stands out from all the rows together
+  // beyond the noise of its n.
+  const pooled = stackRows.reduce(
+    (acc, r) => {
+      for (const s of sentiments) acc.n += r.values[s];
+      acc.k += r.values.negative + r.values.mixed;
+      return acc;
+    },
+    { k: 0, n: 0 },
+  );
+  const overall = pooled.n ? pooled.k / pooled.n : 0;
+  const named =
+    worst &&
+    standsOut(
+      worst.values.negative + worst.values.mixed,
+      sentiments.reduce((a, s) => a + worst.values[s], 0),
+      overall,
+    );
   return (
     <div className="flex flex-col gap-3">
       {worst && rows.length > 1 ? (
         <p className="text-sm font-medium" data-testid="chart-takeaway">
-          {t("takeaway.worst", {
-            label: worst.label,
-            share: f.share(worstShare(worst)),
-          })}
+          {named
+            ? t("takeaway.worst", {
+                label: worst.label,
+                share: f.share(worstShare(worst)),
+              })
+            : t("takeaway.noStandout", { share: f.share(overall) })}
         </p>
       ) : null}
       <Legend />

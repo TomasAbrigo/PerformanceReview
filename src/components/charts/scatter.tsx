@@ -18,6 +18,8 @@ const H = 320;
 const PAD = { l: 52, r: 16, t: 24, b: 48 };
 /** Inner margin so dots at the domain edge do not cover the tick labels. */
 const INSET = 16;
+/** People at one position from which the cluster carries its count. */
+const CLUSTER_LABEL = 5;
 
 /**
  * A scatter plot: one translucent dot per point (overlaps darken; identical
@@ -67,6 +69,13 @@ export function Scatter({
     const a = i * 2.4;
     const r = 2.2 * Math.sqrt(i);
     return { p, cx: x(p.x) + Math.cos(a) * r, cy: y(p.y) + Math.sin(a) * r };
+  });
+  // #133: answers are integers, so many people share a position; a cluster of
+  // CLUSTER_LABEL or more writes how many it holds, the dots alone cannot.
+  const clusters = [...seen].flatMap(([k, n]) => {
+    if (n < CLUSTER_LABEL) return [];
+    const [px, py] = k.split("|").map(Number);
+    return [{ k, n, cx: x(px) + 2.2 * Math.sqrt(n) + 8, cy: y(py) }];
   });
   return (
     <svg
@@ -200,6 +209,18 @@ export function Scatter({
           </g>
         );
       })}
+      {clusters.map((c) => (
+        <text
+          key={`n${c.k}`}
+          x={c.cx}
+          y={c.cy + 4}
+          className="fill-foreground text-[11px] font-medium tabular-nums"
+          data-testid="scatter-cluster"
+          aria-hidden="true"
+        >
+          ×{c.n}
+        </text>
+      ))}
     </svg>
   );
 }

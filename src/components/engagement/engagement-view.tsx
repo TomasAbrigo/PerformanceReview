@@ -75,7 +75,8 @@ export function EngagementView({
     {
       key: "participation" as const,
       values: participation,
-      className: "stroke-chart-sent-mixed fill-chart-sent-mixed",
+      // #133: not the amber of "mixto" / "atención": a teal of its own.
+      className: "stroke-chart-3 fill-chart-3",
       dash: "6 4",
     },
   ];
@@ -254,7 +255,7 @@ export function EngagementView({
             {
               key: "participation",
               label: t("line.participation"),
-              swatch: "border-chart-sent-mixed",
+              swatch: "border-chart-3",
               line: true,
               dashed: true,
             },

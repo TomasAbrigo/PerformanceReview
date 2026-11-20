@@ -1,8 +1,13 @@
-import { useFormatter, useTranslations } from "next-intl";
+import { useFormatter, useLocale, useTranslations } from "next-intl";
 import type { ReactNode } from "react";
 import { type DrillBase, DrillLink } from "@/components/drill/drill-link";
 import { ScaleBar } from "@/components/experience";
-import type { Dm360, Dm360Card } from "@/modules/analytics/dm-360/types";
+import type {
+  Dm360,
+  Dm360Card,
+  Insight360,
+} from "@/modules/analytics/dm-360/types";
+import { cycleName } from "@/modules/review-core/cycle-name";
 import type { DmMetric, Drill } from "@/modules/insights/drill-spec";
 import {
   type KpiThresholds,
@@ -99,6 +104,7 @@ function CardView({
   cycleId: string;
 }) {
   const t = useTranslations("Insights360");
+  const locale = useLocale();
   const format = useFormatter();
   const one = (n: number) =>
     format.number(n, { minimumFractionDigits: 1, maximumFractionDigits: 1 });
@@ -117,7 +123,31 @@ function CardView({
           label: t(`drill.${metric}`, { dm: name }),
         }
       : undefined;
-  const alerts = card.insights.filter((i) => i.code !== "stable");
+  // #133: the headline follows the tones of the card's KPIs; a mean short of
+  // its target is a "watch" pill, never "no alerts".
+  const alerts = card.insights.filter(
+    (i) => i.code !== "stable" && i.code !== "belowTarget",
+  );
+  const pillText = (i: Insight360) =>
+    i.code === "belowTarget"
+      ? t("insight.belowTarget", {
+          which: [
+            i.params.retention ? t("card.retention") : null,
+            i.params.engagement ? t("card.engagement") : null,
+          ]
+            .filter(Boolean)
+            .join(", "),
+        })
+      : t(`insight.${i.code}`);
+  const sentence = (i: Insight360) =>
+    i.code === "retentionDrop" || i.code === "engagementDrop"
+      ? t(`insight.${i.code}`, {
+          ...i.params,
+          cycle: cycleName({ name: i.params.cycle }, locale),
+        })
+      : "params" in i
+        ? t(`insight.${i.code}`, i.params)
+        : t(`insight.${i.code}`);
   const rate = (key: "self" | "manager", r: number | null) => (
     <Figure
       label={t(`card.${key}`)}
@@ -159,9 +189,15 @@ function CardView({
                   key={i.code}
                   data-insight={i.code}
                   className="tone-pill"
-                  data-tone={i.code === "stable" ? "good" : undefined}
+                  data-tone={
+                    i.code === "stable"
+                      ? "good"
+                      : i.code === "belowTarget"
+                        ? "watch"
+                        : undefined
+                  }
                 >
-                  {t(`insight.${i.code}`)}
+                  {pillText(i)}
                 </li>
               ))}
             </ul>
@@ -181,9 +217,7 @@ function CardView({
         >
           {alerts.map((i) => (
             <li key={i.code} data-insight={i.code}>
-              {"params" in i
-                ? t(`insight.${i.code}`, i.params)
-                : t(`insight.${i.code}`)}
+              {sentence(i)}
             </li>
           ))}
         </ul>
@@ -277,6 +311,11 @@ function CardView({
           label={t("card.signals")}
           testId="dm-signals"
           value={s ? `${percent(s.share)} %` : none}
+          tone={
+            s && thresholds
+              ? percentTone(percent(s.share), thresholds, "down")
+              : undefined
+          }
           note={
             s
               ? t("card.signalsOf", { people: s.people, of: s.of })

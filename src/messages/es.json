@@ -257,7 +257,9 @@
       "title": "Metas de los KPIs",
       "goodPct": "En meta desde (%)",
       "watchPct": "Atención desde (%)",
-      "hint": "Colorean los porcentajes (completitud, objetivos completados): desde la meta en verde, desde atención en ámbar, por debajo en rojo."
+      "hint": "Colorean los porcentajes de completitud: desde la meta en verde, desde atención en ámbar, por debajo en rojo.",
+      "goalsPct": "Meta de objetivos completados (%)",
+      "goalsHint": "Meta propia de los objetivos (completados de los que vencían; los vencidos la reflejan). 0: sin meta, los KPIs de objetivos no llevan color ni marca de meta."
     }
   },
   "Common": {
@@ -939,8 +941,8 @@
       "valued_n": "valoración propia (personas)",
       "retention_mean": "retención (promedio 1-5)",
       "retention_n": "retención (personas)",
-      "engagement_mean": "compromiso Bamboo (promedio 1-5)",
-      "engagement_n": "compromiso Bamboo (personas)",
+      "engagement_mean": "compromiso según el manager (promedio 1-5)",
+      "engagement_n": "compromiso según el manager (personas)",
       "goals_completed_pct": "objetivos completados (%, de los que vencían)",
       "goals_due": "objetivos que vencían",
       "side": "lado",
@@ -1134,20 +1136,21 @@
       "others": "Otros",
       "group": "Grupo",
       "people": "Personas",
-      "average": "Promedio",
+      "average": "Promedio (1–5)",
       "valueCount": "valor {value}: {count}",
       "barLabel": "{group}, valor {value}: {count}",
       "suppressed": "{n, plural, one {# persona está en un grupo de menos de {min} y no se muestra} other {# personas están en grupos de menos de {min} y no se muestran}}",
       "chart": "Barras divergentes de respuestas 1 a 5 por grupo",
       "value": "valor {value}",
-      "takeaway": "Más respuestas bajas: {group} ({share} con 1 o 2).",
+      "takeaway": "Más respuestas bajas: {group} ({share} con 1 o 2, frente a {overall} del total).",
       "lowest": "{value} (más bajo)",
       "highest": "{value} (más alto)",
-      "faint": "{count, plural, one {# grupo tiene} other {# grupos tienen}} menos de {n} personas: atenuados y al final, sus porcentajes no son comparables."
+      "faint": "{count, plural, one {# grupo tiene} other {# grupos tienen}} menos de {n} personas (poca base): atenuados y al final, sus porcentajes no son comparables.",
+      "noStandout": "Ningún grupo se distingue del total ({overall} con 1 o 2) más allá de lo que explica su cantidad de personas."
     },
     "matrix": {
       "title": "¿Cuántas personas tienen retención y compromiso bajos a la vez?",
-      "hint": "Cada celda cruza la banda de retención (→) con la de compromiso (↑) y cuenta personas; abajo a la izquierda, el cuadrante de riesgo.",
+      "hint": "Cada celda cruza la banda de retención (→) con la de compromiso (↑) y cuenta personas; abajo a la izquierda, el cuadrante de riesgo. Ambas son la opinión del manager: retención es cuánto haría por retener a la persona ante otra oferta, no la intención de la persona de irse.",
       "band": {
         "low": "Bajo",
         "mid": "Medio",
@@ -1170,9 +1173,9 @@
       "chart": "Matriz de retención y compromiso",
       "quadrant": {
         "low": {
-          "low": "En riesgo",
-          "mid": "Poco retenidos",
-          "high": "Comprometidos, con riesgo de irse"
+          "low": "Baja valoración y bajo compromiso",
+          "mid": "Poco valorados por su manager",
+          "high": "Comprometidos, poco valorados por su manager"
         },
         "mid": {
           "low": "Poco comprometidos",
@@ -1180,16 +1183,16 @@
           "high": "Comprometidos"
         },
         "high": {
-          "low": "Se quedan, poco comprometidos",
-          "mid": "Retenidos",
+          "low": "Valorados, poco comprometidos",
+          "mid": "Valorados por su manager",
           "high": "Referentes"
         }
       }
     },
     "alerts": {
       "title": "Alertas",
-      "hint": "Caída de {drop} puntos o más respecto del ciclo anterior, o retención y compromiso en {risk} o menos a la vez.",
-      "summary": "Personas con caída: {drop} · Personas en riesgo: {risk}",
+      "hint": "Caída de {drop} puntos o más respecto del ciclo inmediatamente anterior, o retención y compromiso en {risk} o menos a la vez.",
+      "summary": "Personas con caída: {drop} · Personas en riesgo: {risk} · Personas con alguna alerta: {people}",
       "under": "menos de {min}",
       "aggregateOnly": "Dirección ve solo cuántas personas tienen alertas, no quiénes.",
       "kind": {
@@ -1203,10 +1206,11 @@
       "detail": "Detalle",
       "dropDetail": "{indicator}: {previous} → {value} (−{delta}) desde {cycle}",
       "riskDetail": "Retención {retention}, compromiso {engagement}",
-      "dropNote": "Bajaron {drop} puntos o más desde el ciclo anterior",
+      "dropNote": "Bajaron {drop} puntos o más desde {cycle}, el ciclo anterior",
       "riskNote": "Retención y compromiso en {risk} o menos",
       "riskDrill": "Ver las {n} personas en riesgo",
-      "list": "Ver las {n} alertas"
+      "list": "Ver las {n} alertas ({people, plural, one {# persona} other {# personas}}; una caída por indicador)",
+      "noPrevious": "Sin ciclo anterior para comparar"
     },
     "trend": {
       "title": "Evolución de retención y compromiso",
@@ -1339,7 +1343,7 @@
       "answer": "Respuesta",
       "retention": "Retención",
       "engagement": "Compromiso",
-      "how": "Sentimiento de los comentarios de cada persona según la respuesta que le dio su manager (5, la más alta, arriba). Cada segmento abre esos comentarios.",
+      "how": "Sentimiento de los comentarios de texto libre de cada persona según la respuesta que le dio su manager (5, la más alta, arriba). La base son los comentarios de las personas con evaluación del manager enviada, por eso puede sumar menos que el total; las respuestas cerradas no cuentan. Cada segmento abre esos comentarios.",
       "chart": "{indicator}: sentimiento por respuesta del manager",
       "row": "{value} · {answer}"
     },
@@ -1425,7 +1429,8 @@
       "how": "Cada barra suma el 100 % de los comentarios del grupo; arriba, los de mayor proporción negativa y mixta."
     },
     "takeaway": {
-      "worst": "Más crítico: {label} ({share} negativos o mixtos)."
+      "worst": "Más crítico: {label} ({share} negativos o mixtos).",
+      "noStandout": "Ningún grupo se distingue del conjunto ({share} negativos o mixtos) más allá de lo que explica su cantidad de comentarios."
     },
     "reading": {
       "substance": {
@@ -1596,8 +1601,8 @@
       "participants": "Participantes",
       "selfPct": "Autoevaluaciones enviadas",
       "managerPct": "Evaluaciones del manager enviadas",
-      "retention": "Retención",
-      "engagement": "Compromiso",
+      "retention": "Retención según el manager",
+      "engagement": "Compromiso según el manager",
       "n": "{n, plural, one {# persona} other {# personas}}",
       "distribution": "Distribución de {indicator} (1 a 5)",
       "risk": "Cuadrante de riesgo",
@@ -1618,7 +1623,7 @@
       "scaleOf": "{label}: {value} de {max}",
       "vsPrevious": "{delta} vs. ciclo anterior",
       "vsPreviousPoints": "{delta} pts vs. ciclo anterior",
-      "ofParticipants": "{submitted} de {total} · {participants} participantes",
+      "ofParticipants": "{submitted} de {total} a quienes aplica · {participants} participantes",
       "pending": "{n, plural, one {# pendiente} other {# pendientes}}",
       "riskHint": "Retención y compromiso de cada persona en tres franjas; la celda marcada es el riesgo. Elegí una celda para ver quiénes son.",
       "sentimentHint": "Elegí un segmento para leer esos comentarios.",
@@ -1656,7 +1661,7 @@
       "distribution": "Distribución de calificaciones",
       "noRatings": "Sin datos: el ciclo no tiene calificaciones finales.",
       "byDepartment": "Por área",
-      "mean": "Promedio"
+      "mean": "Promedio de la calificación final"
     },
     "completion": {
       "title": "Completitud",
@@ -1719,8 +1724,8 @@
       "bucket": "Objetivos completados",
       "people": "Personas",
       "meanRetention": "Retención (promedio)",
-      "meanEngagement": "Compromiso (promedio)",
-      "positiveShare": "Comentarios positivos (promedio)",
+      "meanEngagement": "Compromiso según el manager (promedio 1–5)",
+      "positiveShare": "Comentarios positivos (promedio por persona, sin constructivos)",
       "outliers": "Casos atípicos",
       "doneButLow": "Objetivos cumplidos con retención o compromiso bajo",
       "behindButHigh": "Objetivos atrasados con retención y compromiso altos",
@@ -1755,7 +1760,7 @@
     },
     "dm": "DM",
     "engagement": {
-      "title": "Engagement mensual",
+      "title": "Encuesta mensual de engagement",
       "evolution": "Score promedio por mes",
       "bySegment": "Personas por segmento y por mes",
       "month": "Mes",
@@ -1883,7 +1888,7 @@
     },
     "period": {
       "title": "Detalle por período",
-      "hint": "Un renglón por ciclo, del más viejo al más nuevo, con los mismos filtros de cuenta, proyecto, DM, Santex Lead, área y manager de la vista (no con el agrupar por). Las medias de valoración propia (1 a 4), retención y compromiso de Bamboo (1 a 5) llevan las personas detrás. Los objetivos completados son el estado en Bamboo, de los que ya vencían a la fecha de corte del ciclo (hoy mientras el período corre, el último día del período una vez cerrado): uno que todavía no vencía no cuenta como incumplido.",
+      "hint": "Un renglón por ciclo, del más viejo al más nuevo, con los mismos filtros de cuenta, proyecto, DM, Santex Lead, área y manager de la vista (no con el agrupar por). Las medias de valoración propia (1 a 4), retención y compromiso según el manager (1 a 5) llevan las personas detrás. Los objetivos completados son el estado en Bamboo, de los que ya vencían a la fecha de corte del ciclo (hoy mientras el período corre, el último día del período una vez cerrado): uno que todavía no vencía no cuenta como incumplido.",
       "hintAggregates": "Un renglón por ciclo, del más viejo al más nuevo, solo agregados: la cifra de un ciclo con menos personas que el mínimo no se muestra.",
       "label": "Detalle por período",
       "empty": "Todavía no hay ciclos lanzados.",
@@ -1897,7 +1902,7 @@
         "manager": "Evaluación del manager",
         "valued": "Valoración propia (1-4)",
         "retention": "Retención (1-5)",
-        "engagement": "Compromiso Bamboo (1-5)",
+        "engagement": "Compromiso según el manager (1-5)",
         "goals": "Objetivos completados, de los que vencían"
       },
       "drill": "{cycle} · {what}: ver las personas"
@@ -1986,7 +1991,7 @@
       "hint": "Cada par de barras es un tramo de % de objetivos completados; la altura es el promedio (1 a 5) de retención y de compromiso de sus personas, y n cuántas personas tienen cada respuesta (retención / compromiso).",
       "bucket": "{from}–{to} %",
       "people": "{n, plural, one {# persona} other {# personas}}",
-      "positive": "Comentarios positivos",
+      "positive": "Comentarios positivos (promedio por persona)",
       "hidden": "Oculto: menos de {min} personas",
       "noData": "Sin datos",
       "bar": "{bucket}, {indicator}: {value} (n = {n})",
@@ -1999,11 +2004,12 @@
         "retentionPeople": "Personas con retención",
         "engagementPeople": "Personas con compromiso",
         "retention": "Retención (promedio)",
-        "engagement": "Compromiso (promedio)",
-        "positive": "Comentarios positivos"
+        "engagement": "Compromiso según el manager (promedio 1–5)",
+        "positive": "Comentarios positivos (promedio por persona)"
       },
       "yTitle": "Promedio (1–5)",
-      "xTitle": "Objetivos completados (%)"
+      "xTitle": "Objetivos completados (%)",
+      "lowBase": "{count, plural, one {# tramo tiene} other {# tramos tienen}} menos de {n} personas (poca base): atenuados, sus promedios no son comparables."
     },
     "people": {
       "title": "Personas",
@@ -2087,7 +2093,7 @@
       "trend": "Evolución por ciclo",
       "reading": "Lectura",
       "none": "–",
-      "meanOf": "sobre {n}",
+      "meanOf": "promedio de {n, plural, one {# persona} other {# personas}} (escala 1–5)",
       "riskOf": "({people} de {of})",
       "signals": "Con alguna señal",
       "signalsOf": "{people} de {of} personas con comentarios leídos"
@@ -2101,13 +2107,14 @@
       "axis": "Escala 1 a 5"
     },
     "insight": {
-      "retentionDrop": "La retención media cayó {delta} puntos desde {cycle} (de {previous} a {current}).",
-      "engagementDrop": "El compromiso medio cayó {delta} puntos desde {cycle} (de {previous} a {current}).",
+      "retentionDrop": "La retención media cayó {delta} puntos desde {cycle}, el ciclo anterior (de {previous} a {current}).",
+      "engagementDrop": "El compromiso medio cayó {delta} puntos desde {cycle}, el ciclo anterior (de {previous} a {current}).",
       "riskHigh": "El {percent} % de las personas con ambos indicadores ({people}) está en riesgo: retención y compromiso bajos.",
-      "completionLow": "Solo el {percent} % de las evaluaciones del manager está completo.",
-      "stable": "Sin alertas en este ciclo.",
+      "completionLow": "Solo el {percent} % de las evaluaciones del manager está completo (debajo de la meta).",
+      "stable": "Sin alertas: todos los indicadores en meta.",
       "noData": "Todavía no hay datos suficientes para leer este equipo.",
-      "signals": "El {percent} % de las personas con comentarios leídos ({people} de {of}) tiene alguna señal a atender."
+      "signals": "El {percent} % de las personas con comentarios leídos ({people} de {of}) tiene alguna señal a atender.",
+      "belowTarget": "Sin alertas; por debajo de la meta: {which}."
     },
     "empty": "Ningún DM tiene personas en este ciclo. Cargá el archivo de atributos organizacionales en Importar.",
     "withoutDm": "{n, plural, one {# persona} other {# personas}} sin DM en el archivo.",
@@ -2187,14 +2194,16 @@
       "hiddenMonths": "{count, plural, one {# mes} other {# meses}} sin mostrar por tener menos de {min} personas."
     },
     "tile": {
-      "title": "Engagement mensual",
+      "title": "Encuesta mensual de engagement (0–100 %)",
       "month": "Último mes con datos: {month}",
       "mean": "Score promedio",
       "participation": "Participación",
       "vsPrevious": "{delta} puntos frente al mes anterior",
       "hidden": "Menos de {min} personas: no se muestra.",
       "segments": "Segmentos",
-      "link": "Ver la evolución"
+      "link": "Ver la evolución",
+      "monthInCycle": "Último mes con datos dentro del período del ciclo: {month}",
+      "outsideCycle": "La encuesta mensual no tiene datos dentro del período de este ciclo."
     },
     "kpi": {
       "label": "Último mes",
@@ -2544,7 +2553,9 @@
       "good": "En meta",
       "watch": "Atención",
       "risk": "En riesgo"
-    }
+    },
+    "noChange": "Sin cambios vs. el anterior",
+    "deltaBasis": "{now} vs. {before} personas"
   },
   "Drill": {
     "kicker": "Datos detrás del gráfico",

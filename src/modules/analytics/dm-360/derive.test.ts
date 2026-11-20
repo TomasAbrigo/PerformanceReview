@@ -34,7 +34,12 @@ const cycles: Dm360Cycle[] = [
     createdAt: 3,
   },
 ];
-const thresholds = { dropThreshold: 2, riskThreshold: 2 };
+const thresholds = {
+  dropThreshold: 2,
+  riskThreshold: 2,
+  goodPct: 80,
+  watchPct: 50,
+};
 /** A stand-in for the install's keyed hash: opaque, stable, distinct per name. */
 const keyOf = (value: string) =>
   `g${[...value].reduce((h, c) => (h * 31 + c.charCodeAt(0)) % 1_000_003, 7)}`;
@@ -185,11 +190,12 @@ describe("buildDm360", () => {
     const diego = run(specs).cards[0];
 
     // Engagement fell by half a point: under the threshold. 3 of 4 manager
-    // assessments are in: not under half.
+    // assessments are in: under the 80 % target the KPI tones (#133).
     expect(diego.insights.map((i) => i.code)).toEqual([
       "retentionDrop",
       "signals",
       "riskHigh",
+      "completionLow",
     ]);
     expect(diego.insights[0]).toEqual({
       code: "retentionDrop",
@@ -220,7 +226,7 @@ describe("buildDm360", () => {
     expect(nothing.cards[0].insights).toEqual([{ code: "noData" }]);
   });
 
-  it("compares with the last cycle that had a mean, not the one right before", () => {
+  it("compares only with the cycle right before (#133): a gap is no fall", () => {
     const gap = run([
       ...["a", "b"].flatMap((who) => [
         { who, cycle: "c1", dm: "Diego", retention: 5 },
@@ -229,10 +235,9 @@ describe("buildDm360", () => {
       ]),
     ]);
 
-    expect(gap.cards[0].insights[0]).toMatchObject({
-      code: "retentionDrop",
-      params: { previous: 5, current: 2, delta: 3, cycle: "H1 2024" },
-    });
+    expect(gap.cards[0].insights.map((i) => i.code)).not.toContain(
+      "retentionDrop",
+    );
   });
 
   it("a DM nobody reports to has no insight on a fall of less than the threshold", () => {
@@ -243,7 +248,10 @@ describe("buildDm360", () => {
       ]),
     );
 
-    expect(flat.cards[0].insights).toEqual([{ code: "stable" }]);
+    // No alert, but a mean of 3 is short of the target: never "stable".
+    expect(flat.cards[0].insights).toEqual([
+      { code: "belowTarget", params: { retention: 1, engagement: 0 } },
+    ]);
   });
 
   it("tree: counts everybody below the DM in the chart as well as the people assigned to them", () => {
@@ -419,12 +427,69 @@ describe("insightsOf", () => {
     ).toEqual([{ code: "stable" }]);
   });
 
-  it("flags manager assessments pending under half", () => {
-    expect(insightsOf({ ...base, managerRate: 0.4 }, thresholds)).toEqual([
-      { code: "completionLow", params: { percent: 40 } },
+  // #133: one definition of "alert", the tones of the card's own KPIs (the
+  // targets.* settings), never fixed shares of its own.
+  it("flags the manager assessments under the completion target the KPI tones", () => {
+    expect(insightsOf({ ...base, managerRate: 0.7 }, thresholds)).toEqual([
+      { code: "completionLow", params: { percent: 70 } },
     ]);
-    expect(insightsOf({ ...base, managerRate: 0.5 }, thresholds)).toEqual([
+    expect(insightsOf({ ...base, managerRate: 0.8 }, thresholds)).toEqual([
       { code: "noData" },
     ]);
+    expect(
+      insightsOf({ ...base, managerRate: 0.7 }, { ...thresholds, goodPct: 70 }),
+    ).toEqual([{ code: "noData" }]);
+  });
+
+  it("flags a share at risk the KPI tones as attention (24 % of 38)", () => {
+    expect(
+      insightsOf(
+        { ...base, risk: { people: 9, of: 38, share: 9 / 38 } },
+        thresholds,
+      ),
+    ).toEqual([{ code: "riskHigh", params: { percent: 24, people: 9 } }]);
+    expect(
+      insightsOf(
+        { ...base, risk: { people: 0, of: 38, share: 0 } },
+        thresholds,
+      ),
+    ).toEqual([{ code: "stable" }]);
+  });
+
+  it("says which means are under their target instead of 'stable'", () => {
+    const mean = (m: number) => ({ mean: m, n: 10 });
+    expect(
+      insightsOf(
+        { ...base, retention: mean(3.5), engagement: mean(4.2) },
+        thresholds,
+      ),
+    ).toEqual([
+      { code: "belowTarget", params: { retention: 1, engagement: 0 } },
+    ]);
+    expect(
+      insightsOf(
+        { ...base, retention: mean(4), engagement: mean(4.2) },
+        thresholds,
+      ),
+    ).toEqual([{ code: "stable" }]);
+  });
+
+  it("measures a fall only against the cycle right before", () => {
+    const point = (cycleId: string, retention: number | null) => ({
+      cycleId,
+      cycleName: cycleId,
+      periodStart: "2025-01-01",
+      people: 10,
+      retention,
+      engagement: null,
+    });
+    const card = {
+      ...base,
+      retention: { mean: 2, n: 10 },
+      trend: [point("a", 4.5), point("b", null), point("c", 2)],
+    };
+    expect(insightsOf(card, thresholds).map((i) => i.code)).not.toContain(
+      "retentionDrop",
+    );
   });
 });

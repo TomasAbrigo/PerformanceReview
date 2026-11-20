@@ -49,6 +49,7 @@
   --color-chart-sent-neutral: var(--chart-sent-neutral);
   --color-chart-sent-mixed: var(--chart-sent-mixed);
   --color-chart-sent-negative: var(--chart-sent-negative);
+  --color-chart-missing: var(--chart-missing);
   --color-ring: var(--ring);
   --color-input: var(--input);
   --color-border: var(--border);
@@ -107,6 +108,8 @@
   --chart-sent-neutral: #d9dcdc;
   --chart-sent-mixed: #c7892a;
   --chart-sent-negative: #a13a3a;
+  /* #133: "no answer", apart from the neutral of a sentiment or a Likert 3. */
+  --chart-missing: #f2f2f2;
   --background: #fafbfb;
   --foreground: #0f2826;
   --foreground-secondary: #2c4644;
@@ -147,6 +150,7 @@
 /* Brand dark mode (decks, heroes): kept in step with the kit, no toggle yet. */
 .dark {
   --chart-div-mid: #1b2a2a;
+  --chart-missing: #2a3333;
   --chart-sent-neutral: #d9dcdc;
   --background: #000d0e;
   --foreground: #f4f9f9;

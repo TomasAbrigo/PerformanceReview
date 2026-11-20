@@ -173,8 +173,22 @@ test("People walk the whole insights module and export for Arturía", async ({
   await mode.getByRole("link", { name: "Cuantitativo" }).click();
   await expect(page).toHaveURL(/mode=quantitative/);
   await expect(page.getByTestId("exec-retention")).toBeVisible();
+  // #133: the tile follows the cycle chosen: this one is older than the
+  // monthly file, so it says so instead of showing the latest month of all.
   await expect(page.getByTestId("exec-engagement-monthly")).toContainText(
-    "Último mes con datos",
+    "no tiene datos dentro del período de este ciclo",
+  );
+  await chooseCycle(
+    page,
+    "/es/insights/executive",
+    "Evaluación semestral 2026-H1",
+  );
+  await page
+    .getByRole("navigation", { name: "Modo" })
+    .getByRole("link", { name: "Cuantitativo" })
+    .click();
+  await expect(page.getByTestId("exec-engagement-monthly")).toContainText(
+    "Último mes con datos dentro del período del ciclo: mayo de 2026",
   );
 
   // The anonymized export: no email, no person's name, no external URL.

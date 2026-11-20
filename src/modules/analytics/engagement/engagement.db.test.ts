@@ -437,6 +437,20 @@ describe("engagementTile", () => {
     expect((await engagementTile(db, hr))?.previous).toBeNull();
   });
 
+  it("within a cycle's period: the latest month inside it, not the latest of all (#133)", async () => {
+    await seedData();
+    const tile = await engagementTile(db, hr, {
+      within: { start: "2025-12-15", end: "2026-01-31" },
+    });
+    expect(tile?.latest).toMatchObject({ month: JAN });
+    expect(tile?.period).toEqual({ start: "2025-12-15", end: "2026-01-31" });
+    expect(
+      await engagementTile(db, hr, {
+        within: { start: "2024-01-01", end: "2024-06-30" },
+      }),
+    ).toBeNull();
+  });
+
   it("masks the month for direction", async () => {
     await seedData();
     const tile = await engagementTile(db, direction, { minGroupSize: 3 });

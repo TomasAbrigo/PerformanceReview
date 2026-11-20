@@ -14,6 +14,7 @@ export const settingRanges = {
   "engagement.cutoffRegular": { min: 1, max: 99 },
   "targets.goodPct": { min: 1, max: 100 },
   "targets.watchPct": { min: 0, max: 99 },
+  "targets.goalsPct": { min: 0, max: 100 },
 } as const;
 
 /** An integer in the key's range; issue codes the UI translates. */
@@ -94,6 +95,12 @@ export const settingDefinitions = {
    */
   "targets.goodPct": { schema: int("targets.goodPct"), default: 80 },
   "targets.watchPct": { schema: int("targets.watchPct"), default: 50 },
+  /**
+   * #133: the goals' own target (completed of those due; overdue mirrors it),
+   * apart from completion's. 0, the default: People set none, so the goal
+   * KPIs carry no tone and no target mark.
+   */
+  "targets.goalsPct": { schema: int("targets.goalsPct"), default: 0 },
 } as const;
 
 export type SettingDefinitions = typeof settingDefinitions;

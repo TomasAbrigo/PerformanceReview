@@ -1,3 +1,4 @@
+import type { LocalizedText } from "@/db/schema";
 import { sql } from "drizzle-orm";
 import type { DbOrTx } from "@/db/client";
 import { isUuid } from "@/lib/uuid";
@@ -46,6 +47,43 @@ export async function requireCycle(db: DbOrTx, cycleId: string): Promise<void> {
     sql`select 1 from review_cycle where id = ${cycleId}::uuid and deleted_at is null`,
   );
   if (found.length === 0) throw new ReviewError("not_found");
+}
+
+/**
+ * The cycle right before `cycleId` (order of period start, period end,
+ * creation, id) that asks retention or engagement: the only baseline of a
+ * drop (#133). Null for the first one.
+ */
+export async function previousIndicatorCycle(
+  db: DbOrTx,
+  cycleId: string,
+): Promise<{
+  id: string;
+  name: string;
+  localizedName: LocalizedText | null;
+} | null> {
+  const rows = await db.execute<{
+    id: string;
+    name: string;
+    localized_name: LocalizedText | null;
+  }>(sql`
+    select p.id, p.name, p.localized_name
+    from review_cycle c
+    join review_cycle p on p.deleted_at is null
+      and (p.period_start, p.period_end, p.created_at, p.id::text)
+        < (c.period_start, c.period_end, c.created_at, c.id::text)
+    where c.id = ${requireUuid(cycleId)}::uuid
+      and exists (
+        select 1 from question_revision q
+        where q.cycle_id = p.id and q.role in ('retention', 'engagement')
+      )
+    order by p.period_start desc, p.period_end desc, p.created_at desc,
+             p.id::text desc
+    limit 1`);
+  const row = rows[0];
+  return row
+    ? { id: row.id, name: row.name, localizedName: row.localized_name }
+    : null;
 }
 
 /**

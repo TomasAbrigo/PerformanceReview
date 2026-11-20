@@ -12,6 +12,7 @@ import type { IndicatorConfig } from "@/modules/analytics/indicators/types";
 import { signalsByParticipant } from "@/modules/qualitative-analysis/reading";
 import { groupKeyer } from "@/modules/org-attributes/group-key";
 import { ReviewError } from "@/modules/review-core/review-errors";
+import { getSettings } from "@/modules/settings";
 import {
   buildDm360,
   byCycleOrder,
@@ -125,6 +126,7 @@ export async function dm360(
 ): Promise<Dm360> {
   const ctx = await indicatorContext(db, actor, input.config);
   requireUuid(input.cycleId);
+  const targets = await getSettings(db);
   const masked = ctx.scope.kind === "aggregatesOnly";
   const runAs = masked ? ALL_PEOPLE : actor;
   const scope: Dm360Scope =
@@ -211,6 +213,8 @@ export async function dm360(
     thresholds: {
       dropThreshold: ctx.config.dropThreshold,
       riskThreshold: ctx.config.riskThreshold,
+      goodPct: targets["targets.goodPct"],
+      watchPct: targets["targets.watchPct"],
     },
     minGroupSize: masked ? ctx.config.minGroupSize : null,
     keyOf,

@@ -1,3 +1,4 @@
+import { shownDelta } from "@/modules/insights/delta";
 import { EmptyState } from "@/components/experience";
 import { PageSkeleton } from "@/components/experience";
 import { localizeCycles } from "@/modules/review-core/cycle-name";
@@ -124,10 +125,16 @@ async function Indicators({
     });
   const overall = overallOf(distribution);
   const before = previous ? overallOf(previous.distribution) : null;
-  const meanDelta =
-    overall?.mean != null && before?.mean != null
-      ? overall.mean - before.mean
-      : null;
+  // #133: one rule for every delta (rounded as shown, flat under 0,1, none
+  // over fewer people than the minimum), with the people on each side.
+  const meanDelta = shownDelta({
+    now: overall?.mean,
+    before: before?.mean,
+    decimals: 1,
+    n: [overall?.n, before?.n],
+    minN: minGroupSize,
+  });
+  const tx = await getTranslations("Experience");
   // CSV exports go through the API (People's visibility): offered to People only.
   const isHr = actor.role === "hr";
   const indicator = t(`indicator.${p.indicator}`);
@@ -207,6 +214,10 @@ async function Indicators({
                   text: t("kpi.vs", {
                     delta: dec(meanDelta, true),
                     cycle: previousCycle.name,
+                  }),
+                  basis: tx("deltaBasis", {
+                    now: overall?.n ?? 0,
+                    before: before?.n ?? 0,
                   }),
                 }
           }

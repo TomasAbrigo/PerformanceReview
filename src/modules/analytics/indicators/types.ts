@@ -1,4 +1,5 @@
 // Drizzle- and server-free: shared by the queries and client components.
+import type { LocalizedText } from "@/db/schema";
 import { type OrgFilters, orgGroupBys } from "@/modules/org-attributes/kinds";
 
 /**
@@ -177,6 +178,11 @@ export type IndicatorAlerts = {
   /** People with a drop / at risk; null when direction cannot see it (under the minimum). */
   peopleWithDrop: number | null;
   peopleAtRisk: number | null;
+  /** People with a drop or at risk (each once; an alert list counts one per indicator). */
+  peopleWithAlert: number | null;
+  /** The baseline of the drops: the cycle right before (#133); null for the first. */
+  previousCycleId: string | null;
+  previousCycle: { name: string; localizedName: LocalizedText | null } | null;
   /** The alerts with their person: People and the direct manager (the same people as the risk list); empty for direction. */
   alerts: IndicatorAlert[];
   minGroupSize: number | null;

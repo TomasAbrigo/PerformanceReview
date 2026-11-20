@@ -113,7 +113,12 @@ describe("dm360 as People", () => {
   it("takes its thresholds from the settings: a lower risk threshold finds fewer people at risk", async () => {
     const r = await dm360(db, hr, { cycleId, config: { riskThreshold: 1 } });
 
-    expect(r.thresholds).toEqual({ dropThreshold: 2, riskThreshold: 1 });
+    expect(r.thresholds).toEqual({
+      dropThreshold: 2,
+      riskThreshold: 1,
+      goodPct: 80,
+      watchPct: 50,
+    });
     // Only Fabio (1,1) is at or under 1.
     expect(r.cards[1].risk).toEqual({ people: 1, of: 3, share: 1 / 3 });
     expect(r.cards[1].insights).toEqual([
