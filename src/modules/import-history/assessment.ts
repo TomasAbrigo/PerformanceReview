@@ -1,6 +1,6 @@
 import { z } from "zod";
 import type { DbOrTx } from "@/db/client";
-import { and, eq } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 import { historyImportRow, identityMatchIssue } from "@/db/schema";
 import {
   closeOpenIssue,
@@ -26,7 +26,29 @@ import {
 } from "./names";
 import { cycleForAssessment } from "./cycle-target";
 import { detectQuestionColumns, type QuestionColumn } from "./questions";
-import { idIndexOf, matchIds, type RowIds } from "./report-identity";
+import { idIndexOf, matchIdsBy, type RowIds } from "./report-identity";
+
+/** EEIDs with an open employee identity case, read once per run. */
+async function pendingEmployees(
+  tx: DbOrTx,
+  cache: Map<string, unknown>,
+): Promise<Set<string>> {
+  let pending = cache.get("pendingEmployees") as Set<string> | undefined;
+  if (!pending) {
+    const rows = await tx
+      .select({ sourceId: identityMatchIssue.sourceId })
+      .from(identityMatchIssue)
+      .where(
+        and(
+          eq(identityMatchIssue.entity, "employee"),
+          eq(identityMatchIssue.status, "open"),
+        ),
+      );
+    pending = new Set(rows.map((r) => r.sourceId));
+    cache.set("pendingEmployees", pending);
+  }
+  return pending;
+}
 import type { QuestionMapping } from "@/modules/lake/profiles";
 
 const cell = z
@@ -72,18 +94,77 @@ export type StagedAssessment = z.infer<typeof stagedAssessmentSchema>;
 export type RowTally = {
   participantsCreated: number;
   requestsCreated: number;
+  /** Existing requests whose content changed (#132). */
+  requestsUpdated: number;
   requestsUnchanged: number;
+  /** Requests dropped: the corrected file emptied that side (#132). */
+  requestsRemoved: number;
   answersCreated: number;
+  /** Existing answers that now hold another value (#132). */
+  answersUpdated: number;
   answersUnchanged: number;
+  /** Answers dropped: the corrected file emptied that cell (#132). */
+  answersRemoved: number;
 };
 
 export const emptyTally = (): RowTally => ({
   participantsCreated: 0,
   requestsCreated: 0,
+  requestsUpdated: 0,
   requestsUnchanged: 0,
+  requestsRemoved: 0,
   answersCreated: 0,
+  answersUpdated: 0,
   answersUnchanged: 0,
+  answersRemoved: 0,
 });
+
+/** Adds what writing one side did to the row's tally. */
+export function tallySaved(
+  tally: RowTally,
+  request: "inserted" | "updated",
+  saved: {
+    created: number;
+    updated: number;
+    unchanged: number;
+    removed: number;
+  },
+) {
+  if (request === "inserted") tally.requestsCreated++;
+  else tally.requestsUpdated++;
+  tally.answersCreated += saved.created;
+  tally.answersUpdated += saved.updated;
+  tally.answersUnchanged += saved.unchanged;
+  tally.answersRemoved += saved.removed;
+}
+
+type SideResult = "inserted" | "updated" | "unchanged" | "superseded";
+
+/**
+ * The outcome of a report row for the run (handler) and for the result
+ * screen (`recorded`: a row whose every side lost to a later one is
+ * `superseded`, not written).
+ */
+export function rowOutcome(
+  issue: { issueId: string } | { ignoredIssueId: string } | null,
+  results: SideResult[],
+  removed = 0,
+): { result: HandlerOutcome["result"]; recorded: string } {
+  const result: HandlerOutcome["result"] = issue
+    ? "ignoredIssueId" in issue
+      ? "ignored"
+      : "issues"
+    : results.includes("inserted")
+      ? "inserted"
+      : results.includes("updated") || removed > 0
+        ? "updated"
+        : "unchanged";
+  const recorded =
+    !issue && results.length > 0 && results.every((r) => r === "superseded")
+      ? "superseded"
+      : result;
+  return { result, recorded };
+}
 
 /** The report entities whose rows import-history maps. */
 export type ReportEntity = "assessment" | "assessment_progress" | "feedback";
@@ -107,7 +188,8 @@ export async function recordRow(
     entity: ReportEntity;
     sourceId: string;
     cycleId: string;
-    result: HandlerOutcome["result"];
+    /** The handler's result, or `superseded` / `removed` (#132). */
+    result: string;
     tally: RowTally;
     issueId?: string | null;
   },
@@ -123,7 +205,23 @@ export async function recordRow(
       issueId: row.issueId ?? null,
       ...row.tally,
     })
-    .onConflictDoNothing();
+    // A second row of the file with the same key (#132): counted, not lost.
+    .onConflictDoUpdate({
+      target: [
+        historyImportRow.runId,
+        historyImportRow.entity,
+        historyImportRow.sourceId,
+      ],
+      set: {
+        duplicates: sql`${historyImportRow.duplicates} + 1`,
+        ...Object.fromEntries(
+          Object.entries(row.tally).map(([key, n]) => {
+            const column = historyImportRow[key as keyof RowTally];
+            return [key, sql`${column} + ${n}`];
+          }),
+        ),
+      },
+    });
 }
 
 /** Which name of a row a person was looked up for. */
@@ -204,13 +302,25 @@ export async function resolveRow(
   const index = await nameIndexOf(tx, ctx.cache);
   const linked = (await resolvedLinks(tx, ctx.cache, entity)).get(sourceId);
   const reviewerRole: RowRole = entity === "feedback" ? "reviewer" : "manager";
-  const byIds = options.ids
-    ? matchIds(await idIndexOf(tx, ctx.cache), options.ids)
+  let byIds = options.ids
+    ? matchIdsBy(await idIndexOf(tx, ctx.cache), options.ids)
     : null;
+  // An EEID waiting in the employee queue (a rehire not yet decided) is not
+  // placed by legajo or email on the person it may not be (#132): the row
+  // waits too, and is placed once that case is resolved.
+  const eeid = options.ids?.bamboo_id;
+  if (
+    byIds &&
+    byIds.kind !== "bamboo_id" &&
+    eeid &&
+    (await pendingEmployees(tx, ctx.cache)).has(eeid.trim())
+  ) {
+    byIds = null;
+  }
   const lookup = (role: RowRole, name: string | null): NameMatch => {
     if (linked?.[role]) return { personId: linked[role] };
     if (role === "employee" && options.ids) {
-      if (byIds) return { personId: byIds };
+      if (byIds) return { personId: byIds.personId };
       const proposal = name ? matchName(index, name) : null;
       return {
         reason: "no_match",
@@ -286,6 +396,8 @@ export async function resolveRow(
     reviewerId: reviewer && "personId" in reviewer ? reviewer.personId : null,
     /** The reviewer's name is in the queue (ambiguous or unmatched). */
     reviewerFailed: reviewer !== null && !("personId" in reviewer),
+    /** An optional reviewer's name that matches nobody (dropped, #132). */
+    reviewerUnmatched: reviewerMatch !== null && reviewer === null,
     issue,
   };
 }
@@ -382,7 +494,6 @@ export async function upsertAssessment(
         tally.answersUnchanged += answeredCells(sideColumns, raw);
         continue;
       }
-      if (request.result === "inserted") tally.requestsCreated++;
       const saved = await saveAnswers(
         tx,
         request.id,
@@ -395,8 +506,7 @@ export async function upsertAssessment(
           overrides: await likertOverridesOf(tx, ctx.cache),
         },
       );
-      tally.answersCreated += saved.created;
-      tally.answersUnchanged += saved.updated;
+      tallySaved(tally, request.result, saved);
       rejects.push(...saved.invalid);
     }
   }
@@ -404,21 +514,13 @@ export async function upsertAssessment(
   // overall-rating column (e.g. `overall_rating`), write it here as the
   // manager-stage final_rating of the participant once #16 adds that table.
 
-  const result: HandlerOutcome["result"] = issue
-    ? "ignoredIssueId" in issue
-      ? "ignored"
-      : "issues"
-    : results.includes("inserted")
-      ? "inserted"
-      : results.includes("updated")
-        ? "updated"
-        : "unchanged";
+  const { result, recorded } = rowOutcome(issue, results);
   await recordRow(tx, {
     runId: ctx.runId,
     entity: "assessment",
     sourceId,
     cycleId: cycle.id,
-    result,
+    result: recorded,
     tally,
     issueId: issue && "issueId" in issue ? issue.issueId : null,
   });

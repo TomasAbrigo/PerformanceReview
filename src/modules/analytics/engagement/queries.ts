@@ -19,7 +19,7 @@ import {
   orgAttributeJoins,
 } from "@/modules/org-attributes/sql";
 import { ReviewError } from "@/modules/review-core/review-errors";
-import { getSetting } from "@/modules/settings/service";
+import { getSettings } from "@/modules/settings/service";
 import { buildMonths, emptySegments } from "./derive";
 import type {
   EngagementEvolution,
@@ -36,6 +36,8 @@ type Authorized = {
   scope: Exclude<InsightsScope, { kind: "none" }>;
   /** Direction's minimum group size, null for whoever reads everything in reach. */
   min: number | null;
+  /** The current engagement cutoffs (%), for segments the file did not give. */
+  cutoffs: { alto: number; medio: number; regular: number };
 };
 
 /**
@@ -50,9 +52,17 @@ async function authorize(
 ): Promise<Authorized> {
   const first = insightsScope(actor);
   if (first.kind === "none") throw new ReviewError("forbidden");
-  if (first.kind !== "aggregatesOnly") return { scope: first, min: null };
-  const min = override ?? (await getSetting(db, "aggregation.minGroupSize"));
-  return { scope: { kind: "aggregatesOnly", minGroupSize: min }, min };
+  const s = await getSettings(db);
+  const cutoffs = {
+    alto: s["engagement.cutoffAlto"],
+    medio: s["engagement.cutoffMedio"],
+    regular: s["engagement.cutoffRegular"],
+  };
+  if (first.kind !== "aggregatesOnly") {
+    return { scope: first, min: null, cutoffs };
+  }
+  const min = override ?? s["aggregation.minGroupSize"];
+  return { scope: { kind: "aggregatesOnly", minGroupSize: min }, min, cutoffs };
 }
 
 /** `not_found` for a manager id that is not an id (before anything is read). */
@@ -66,6 +76,21 @@ function month(value: string | undefined): string | undefined {
   const parsed = parseEngagementMonth(value);
   if (!parsed) throw new ReviewError("not_found");
   return parsed;
+}
+
+/**
+ * The segment of a row: the file's own, `falta` without a score, else the
+ * score's with the current cutoffs (as `segmentOfScore`), so a change of the
+ * cutoffs in settings reaches months already imported (#132).
+ */
+function segmentSql(c: Authorized["cutoffs"]): SQL {
+  const pct = sql`round(e.score * 100, 6)`;
+  return sql`(case
+    when e.segment_from_file or e.score is null then e.segment::text
+    when ${pct} >= ${c.alto} then 'alto'
+    when ${pct} >= ${c.medio} then 'medio'
+    when ${pct} >= ${c.regular} then 'regular'
+    else 'bajo' end)`;
 }
 
 /**
@@ -101,7 +126,7 @@ function rowsCte(
   }
   return sql`
     rows as (
-      select e.person_id, e.month, e.score::float8 as score, e.segment::text as segment,
+      select e.person_id, e.month, e.score::float8 as score, ${segmentSql(a.cutoffs)} as segment,
              jh.department, jh.location, jh.job_title, jh.manager_person_id,
              ${orgAttributeColumns}
       from (

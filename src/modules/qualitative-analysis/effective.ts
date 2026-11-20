@@ -10,7 +10,9 @@ import { DEMO_PROVIDERS, IMPORT_PROVIDER } from "./constants";
  * machine label. Only labels made from the answer's current text compete
  * (source_md5 = md5 of analysisTextSql: a label of an older text, or of a
  * chosen option, which is never read any more, is stale); a human correction
- * counts even when its label went stale.
+ * counts even when its label went stale, but only while the text it was made
+ * on is the answer's (its source_md5, #132: a re-import that changes the
+ * text makes it stale too; one made before #132 has none and always counts).
  *
  * Columns:
  * - answer_id, dimension, kind (of the question: text, rating,
@@ -49,7 +51,8 @@ export const effectiveCte = () => sql`
     from (
       select distinct on (x.answer_id) x.*, q.kind::text as kind,
              q.yes_no as yes_no_question,
-             x.source_md5 = md5(${analysisTextSql("ans", "q")}) as fresh
+             x.source_md5 = md5(${analysisTextSql("ans", "q")}) as fresh,
+             md5(${analysisTextSql("ans", "q")}) as text_md5
       from qualitative_analysis x
       join answer ans on ans.id = x.answer_id
       join question_revision q on q.id = ans.question_revision_id
@@ -62,6 +65,7 @@ export const effectiveCte = () => sql`
     left join analysis_run run on run.id = l.run_id
     left join lateral (
       select * from analysis_correction ac where ac.answer_id = l.answer_id
+        and (ac.source_md5 is null or ac.source_md5 = l.text_md5)
       order by ac.created_at desc, ac.id desc limit 1
     ) c on true
     where c.id is not null or l.fresh

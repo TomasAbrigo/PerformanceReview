@@ -550,6 +550,7 @@ describe("on a crafted dataset", () => {
     }
     expect(report.map((i) => [i.key, i.count])).toEqual([
       ["identity_open", 1],
+      ["identity_retained_rows", 0],
       ["no_manager", 2],
       ["participants_no_manager", 1],
       ["participants_incomplete_snapshot", 1],

@@ -9,6 +9,10 @@ import {
   reviewRequest,
   type IngestRunStatus,
 } from "@/db/schema";
+import {
+  analysisTextSql,
+  analyzableSql,
+} from "@/modules/qualitative-analysis/analysis-text";
 import { decisionOf, type CycleDecision } from "./decision";
 
 export type HistoryCycleResult = {
@@ -16,17 +20,32 @@ export type HistoryCycleResult = {
   name: string;
   periodStart: string;
   periodEnd: string;
-  /** Report rows of this cycle the run read. */
+  /** Report rows of this cycle the run read (repeated rows included). */
   rows: number;
+  /** Rows written or confirmed (inserted, updated, unchanged): #132. */
+  written: number;
+  /** Rows that lost to a later one of the same person and cycle (#132). */
+  superseded: number;
   participantsCreated: number;
   requestsCreated: number;
+  requestsUpdated: number;
   requestsUnchanged: number;
+  /** Requests dropped: their side, or their row, left the file (#132). */
+  requestsRemoved: number;
   answersCreated: number;
+  answersUpdated: number;
   answersUnchanged: number;
-  /** Rows sent to (or kept in) the identity queue. */
+  /** Answers dropped: their cell was emptied in the file (#132). */
+  answersRemoved: number;
+  /** Rows sent to (or kept in) the identity queue: retained, not written. */
   issues: number;
   /** Imported manager reviews of the cycle flagged reviewer_mismatch. */
   mismatches: number;
+  /**
+   * Open texts of the cycle that no label reads yet (new, or changed by the
+   * import): what `pnpm analysis:run` would label next (#132).
+   */
+  pendingLabels: number;
 };
 
 export type HistoryImportResult = {
@@ -67,12 +86,18 @@ export async function getHistoryImportResult(
       localizedName: reviewCycle.localizedName,
       periodStart: reviewCycle.periodStart,
       periodEnd: reviewCycle.periodEnd,
-      rows: sql<number>`count(*)::int`,
+      rows: sql<number>`((count(*) filter (where ${historyImportRow.result} <> 'removed')) + coalesce(sum(${historyImportRow.duplicates}), 0))::int`,
+      written: sql<number>`(count(*) filter (where ${historyImportRow.result} in ('inserted', 'updated', 'unchanged')))::int`,
+      superseded: sql<number>`((count(*) filter (where ${historyImportRow.result} = 'superseded')) + coalesce(sum(${historyImportRow.duplicates}), 0))::int`,
       participantsCreated: sum(historyImportRow.participantsCreated),
       requestsCreated: sum(historyImportRow.requestsCreated),
+      requestsUpdated: sum(historyImportRow.requestsUpdated),
       requestsUnchanged: sum(historyImportRow.requestsUnchanged),
+      requestsRemoved: sum(historyImportRow.requestsRemoved),
       answersCreated: sum(historyImportRow.answersCreated),
+      answersUpdated: sum(historyImportRow.answersUpdated),
       answersUnchanged: sum(historyImportRow.answersUnchanged),
+      answersRemoved: sum(historyImportRow.answersRemoved),
       issues: sql<number>`(count(*) filter (where ${historyImportRow.result} in ('issues', 'ignored')))::int`,
     })
     .from(historyImportRow)
@@ -101,6 +126,32 @@ export async function getHistoryImportResult(
     )
     .groupBy(reviewRequest.cycleId);
   const mismatches = new Map(flagged.map((f) => [f.cycleId, f.count]));
+  const pending =
+    rows.length > 0
+      ? await db.execute<{ cycle_id: string; n: number }>(sql`
+          select r.cycle_id, count(*)::int as n
+          from answer a
+          join review_request r on r.id = a.request_id
+          join cycle_participant cp on cp.id = r.participant_id
+            and cp.removed_at is null
+          join question_revision q on q.id = a.question_revision_id
+          where r.cycle_id in ${rows.map((r) => r.cycleId)}
+            and r.deleted_at is null and r.status = 'submitted'
+            and ${analyzableSql()}
+            and not exists (
+              select 1 from qualitative_analysis x
+              where x.answer_id = a.id
+                and x.source_md5 = md5(${analysisTextSql()})
+            )
+            and not exists (
+              select 1 from analysis_correction c
+              where c.answer_id = a.id
+                and (c.source_md5 is null
+                     or c.source_md5 = md5(${analysisTextSql()}))
+            )
+          group by r.cycle_id`)
+      : [];
+  const pendingOf = new Map(pending.map((p) => [p.cycle_id, p.n]));
   return {
     runId: run.id,
     entity: run.entity,
@@ -109,6 +160,7 @@ export async function getHistoryImportResult(
     cycles: rows.map((r) => ({
       ...r,
       mismatches: mismatches.get(r.cycleId) ?? 0,
+      pendingLabels: pendingOf.get(r.cycleId) ?? 0,
     })),
   };
 }

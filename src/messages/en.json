@@ -249,7 +249,8 @@
       "cutoffAlto": "High segment from (% of the score)",
       "cutoffMedio": "Medium segment from (% of the score)",
       "cutoffRegular": "Regular segment from (% of the score)",
-      "hint": "Only used when the file has no Segmento column: below Regular the segment is Low."
+      "hint": "Only used when the file has no Segmento column: below Regular the segment is Low.",
+      "appliesToAll": "Changing the cutoffs recomputes the segment of every month already imported, except those whose file had its own Segmento column."
     },
     "nav": "Settings",
     "targets": {
@@ -707,12 +708,19 @@
       "cycle": "Cycle",
       "column": "Column",
       "rawValue": "Raw value",
-      "answerReason": "Reason"
+      "answerReason": "Reason",
+      "sides": "Requests held back",
+      "answers": "Answers held back (estimate)",
+      "entityKind": "Kind"
     },
     "indicators": {
       "identity_open": {
         "title": "Unresolved identities",
-        "description": "Bamboo records the import could not assign to a person."
+        "description": "Bamboo records the import could not assign to a person: directory employees and report rows, split by kind."
+      },
+      "identity_retained_rows": {
+        "title": "Assessments held back by identity",
+        "description": "Rows of the assessments report whose person could not be identified: nothing of them was written and they count in no analysis until the case is resolved."
       },
       "no_manager": {
         "title": "People without a manager",
@@ -771,7 +779,19 @@
     "needsReview": "Needs review",
     "ok": "✓ All clear",
     "showAll": "{n, plural, one {Show the indicator without cases} other {Show the # indicators without cases}}",
-    "noCases": "No cases"
+    "noCases": "No cases",
+    "identityEntities": {
+      "employee": "Employees",
+      "assessment": "Assessments report rows",
+      "assessment_progress": "Status report rows",
+      "feedback": "Feedback rows",
+      "org_attribute": "People attributes",
+      "engagement": "Monthly engagement",
+      "other": "Other"
+    },
+    "retainedCycle": "{rows, plural, one {# row held back} other {# rows held back}} of {fileRows} in the file ({pct} %) · {sides, plural, one {# request} other {# requests}} · {answers, plural, one {# answer} other {# answers}} not imported",
+    "retainedInsights": "{n, plural, one {# assessment held back} other {# assessments held back}} by identity in this cycle: they do not count in this analysis.",
+    "retainedInsightsLink": "See in Data quality"
   },
   "Exports": {
     "columns": {
@@ -968,10 +988,11 @@
       "requests": "Requests",
       "answers": "Answers",
       "issues": "Identity cases",
-      "mismatches": "Different reviewer"
+      "mismatches": "Different reviewer",
+      "superseded": "Superseded",
+      "pendingLabels": "Comments not labelled"
     },
     "period": "{start} – {end}",
-    "createdUnchanged": "{created} new · {unchanged} unchanged",
     "mismatchHint": "Different reviewer: the file's manager is not the one in force at the end of the period (the participant keeps the one in force).",
     "viewRun": "View the run",
     "viewQueue": "View the identity queue",
@@ -1002,14 +1023,19 @@
     "periodCycleName": "Semi-annual review {start} – {end}",
     "totals": {
       "label": "Run totals",
-      "rows": "Rows imported",
+      "rows": "Rows written",
       "cycles": "{count, plural, one {in # cycle} other {in # cycles}}",
       "requests": "New requests",
       "answers": "New answers",
-      "unchanged": "{n} unchanged",
       "issues": "Identity cases",
-      "mismatches": "{n, plural, =0 {No reviewer mismatch} one {# with a different reviewer} other {# with a different reviewer}}"
-    }
+      "mismatches": "{n, plural, =0 {No reviewer mismatch} one {# with a different reviewer} other {# with a different reviewer}}",
+      "rowsNote": "{rows} read · {retained} held for identity · {superseded} superseded",
+      "changes": "{updated} updated · {unchanged} unchanged · {removed} removed"
+    },
+    "rowsOf": "{written} written of {rows}",
+    "changes": "{created} new · {updated} updated · {unchanged} unchanged · {removed} removed",
+    "pendingLabels": "{count, plural, one {# comment waiting to be labelled} other {# comments waiting to be labelled}}: run the qualitative analysis so the screens read them.",
+    "supersededHint": "Superseded: rows of a person and period that already had one submitted later (or the same row repeated in the file); the latest wins. Removed: what an earlier import wrote and the corrected file no longer has (a cell, a side or a row)."
   },
   "Charts": {
     "empty": "No data for these filters.",

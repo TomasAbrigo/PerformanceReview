@@ -50,6 +50,11 @@ export const importedRequest = pgTable("imported_request", {
     .references(() => reviewRequest.id, { onDelete: "cascade" }),
   csvReviewerName: text("csv_reviewer_name"),
   reviewerMismatch: boolean("reviewer_mismatch").notNull().default(false),
+  /**
+   * The file's reviewer name matched nobody, so the snapshot manager was
+   * assumed (#132): always a mismatch, never silent.
+   */
+  reviewerUnmatched: boolean("reviewer_unmatched").notNull().default(false),
 });
 
 /** One report row as processed by one run: what the result screen counts. */
@@ -65,13 +70,23 @@ export const historyImportRow = pgTable(
     cycleId: uuid("cycle_id").references(() => reviewCycle.id, {
       onDelete: "cascade",
     }),
-    /** inserted | updated | unchanged | issues */
+    /** inserted | updated | unchanged | issues | ignored | superseded */
     result: text("result").notNull(),
     participantsCreated: integer("participants_created").notNull().default(0),
     requestsCreated: integer("requests_created").notNull().default(0),
     requestsUnchanged: integer("requests_unchanged").notNull().default(0),
     answersCreated: integer("answers_created").notNull().default(0),
     answersUnchanged: integer("answers_unchanged").notNull().default(0),
+    /** Requests that existed and whose content changed (#132). */
+    requestsUpdated: integer("requests_updated").notNull().default(0),
+    /** Requests dropped: the corrected row left that side empty (#132). */
+    requestsRemoved: integer("requests_removed").notNull().default(0),
+    /** Answers that existed and now hold another value (#132). */
+    answersUpdated: integer("answers_updated").notNull().default(0),
+    /** Answers dropped: the corrected row left the cell empty (#132). */
+    answersRemoved: integer("answers_removed").notNull().default(0),
+    /** Other rows of the same file with this key (#132): one wins by date. */
+    duplicates: integer("duplicates").notNull().default(0),
     issueId: uuid("issue_id").references(() => identityMatchIssue.id, {
       onDelete: "set null",
     }),

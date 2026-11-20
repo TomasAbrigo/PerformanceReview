@@ -4,6 +4,7 @@ import type { ActorContext } from "@/modules/actor/types";
 import { insertEngagement } from "@/modules/engagement/test-support";
 import { setOrgAttributes } from "@/modules/org-attributes/test-support";
 import { ReviewError } from "@/modules/review-core/review-errors";
+import { setSetting } from "@/modules/settings/service";
 import { insertJob, insertPerson, resetAll } from "../test-support";
 import {
   engagementEvolution,
@@ -92,6 +93,36 @@ async function seedData() {
 }
 
 describe("engagementEvolution", () => {
+  it("derives a segment the file did not give with the current cutoffs; the file's own is kept (#132)", async () => {
+    await insertEngagement({
+      personId: ana,
+      month: JAN,
+      score: 0.7,
+      segment: "medio",
+      fromFile: false,
+    });
+    await insertEngagement({
+      personId: bruno,
+      month: JAN,
+      score: 0.7,
+      segment: "alto",
+      fromFile: true,
+    });
+    await setSetting(db, hr, "engagement.cutoffMedio", 75);
+    const evo = await engagementEvolution(db, hr);
+    expect(evo.months[0].segments).toMatchObject({
+      alto: 1,
+      medio: 0,
+      regular: 1,
+    });
+    const people = await engagementPeople(db, hr, {
+      month: JAN,
+      segment: "regular",
+    });
+    expect(people.map((p) => p.personId)).toEqual([ana]);
+    await setSetting(db, hr, "engagement.cutoffMedio", 60);
+  });
+
   it("counts people, participation, mean score and segments per month for People", async () => {
     await seedData();
 

@@ -11,6 +11,7 @@ import {
 import { DataQualityPanel } from "./data-quality-panel";
 import { ExportCsvLink } from "./export-csv-link";
 import { IndicatorDetail } from "./indicator-detail";
+import { RetainedNotice } from "./retained-notice";
 
 vi.mock("@/i18n/navigation", () => ({
   Link: ({
@@ -436,5 +437,89 @@ describe("ExportCsvLink", () => {
       "href",
       "/api/v1/export/ingest-runs.csv?status=error&locale=es",
     );
+  });
+});
+
+describe("RetainedNotice (#132)", () => {
+  it("tells the cycle's held-back assessments and links to their list", () => {
+    renderIn("es", <RetainedNotice count={15} />);
+    expect(
+      screen.getByText(/15 evaluaciones retenidas por identidad/),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: "Ver en Calidad de datos" }),
+    ).toHaveAttribute("href", "/data-quality/identity_retained_rows");
+  });
+
+  it("says nothing when no row is held back", () => {
+    renderIn("en", <RetainedNotice count={0} />);
+    expect(screen.queryByRole("status")).not.toBeInTheDocument();
+  });
+});
+
+describe("identity cases split by kind (#132)", () => {
+  const item = (id: string, entity: string) => ({
+    id,
+    reason: "no_match" as const,
+    sourceSystem: "bamboo_export" as const,
+    entity,
+    sourceId: id,
+    displayName: null,
+    createdAt: new Date("2026-11-01T00:00:00Z"),
+  });
+
+  it("the identity card says how many are employees and how many report rows", () => {
+    renderIn(
+      "es",
+      <DataQualityPanel
+        indicators={[
+          {
+            key: "identity_open",
+            count: 3,
+            items: [
+              item("a", "employee"),
+              item("b", "assessment"),
+              item("c", "assessment"),
+            ],
+          },
+        ]}
+      />,
+    );
+    const card = screen
+      .getByRole("heading", { level: 2, name: "Identidades sin resolver" })
+      .closest("article")!;
+    expect(
+      within(card).getByText("Filas del informe de evaluaciones: 2"),
+    ).toBeInTheDocument();
+    expect(within(card).getByText("Empleados: 1")).toBeInTheDocument();
+  });
+
+  it("lists the held-back assessment rows per cycle with what they hold back and the share of the file", () => {
+    renderIn(
+      "es",
+      <IndicatorDetail
+        indicator={{
+          key: "identity_retained_rows",
+          count: 2,
+          items: [1, 2].map((n) => ({
+            id: `i${n}`,
+            sourceId: `s${n}`,
+            displayName: `Persona ${n}`,
+            workEmail: `p${n}@example.invalid`,
+            cycleId: "c1",
+            cycleName: "Ciclo 2024",
+            sides: 2,
+            answers: 6,
+            fileRows: 200,
+          })),
+        }}
+      />,
+    );
+    expect(
+      screen.getByText(
+        "2 filas retenidas de 200 del archivo (1 %) · 4 pedidos · 12 respuestas sin importar",
+      ),
+    ).toBeInTheDocument();
+    expect(screen.getByText("p1@example.invalid")).toBeInTheDocument();
   });
 });

@@ -45,9 +45,11 @@ export const reviewRequest = pgTable(
     reviewerMissing: boolean("reviewer_missing").notNull().default(false),
     /** Submitted by someone who is no longer the snapshot manager. */
     reviewerMismatch: boolean("reviewer_mismatch").notNull().default(false),
-    requestedAt: timestamp("requested_at", { withTimezone: true })
-      .notNull()
-      .defaultNow(),
+    /**
+     * When the review was asked for. Null for a request imported from Bamboo:
+     * its exports carry no request date (#132), never a made-up one.
+     */
+    requestedAt: timestamp("requested_at", { withTimezone: true }).defaultNow(),
     submittedAt: timestamp("submitted_at", { withTimezone: true }),
     declinedAt: timestamp("declined_at", { withTimezone: true }),
     declineReason: text("decline_reason"),

@@ -66,7 +66,8 @@ async function textAnswers(
            q.yes_no as yes_no_question, ${yesNoAnswerSql()} as yes_no,
            r.relationship::text as relationship, qa.text_hash as cached_hash,
            coalesce(qa.source_md5 = md5(${analysisTextSql()}), false) as fresh,
-           exists (select 1 from analysis_correction c where c.answer_id = a.id) as corrected
+           exists (select 1 from analysis_correction c where c.answer_id = a.id
+             and (c.source_md5 is null or c.source_md5 = md5(${analysisTextSql()}))) as corrected
     from answer a
     join review_request r on r.id = a.request_id
     join cycle_participant cp on cp.id = r.participant_id and cp.removed_at is null

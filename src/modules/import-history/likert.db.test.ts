@@ -263,7 +263,7 @@ async function twoPeople() {
 }
 
 describe("a file whose letters only go A-D", () => {
-  it("uses the 4-option table (C = 2, D = 1)", async () => {
+  it("keeps the declared 5-option table: no E answered is not a 4-option question (#132)", async () => {
     await twoPeople();
     await seedLikertMappings(db);
     const file = await writeCsv([
@@ -277,11 +277,11 @@ describe("a file whose letters only go A-D", () => {
     const value = (role: string, label: string) =>
       answers.find((a) => a.role === role && a.optionLabel === label)
         ?.optionValue;
-    expect(value("retention", "C")).toBe(2);
-    expect(value("retention", "D")).toBe(1);
+    expect(value("retention", "C")).toBe(3);
+    expect(value("retention", "D")).toBe(2);
     expect(value("retention", "A")).toBe(5);
     expect(value("engagement", "B")).toBe(4);
-    expect(value("engagement", "C")).toBe(2);
+    expect(value("engagement", "C")).toBe(3);
   });
 });
 

@@ -4,6 +4,7 @@ import {
   employment,
   identityMatchIssue,
   person,
+  sourceIdentity,
   type IdentityCandidate,
   type IdentityIssueReason,
   type IdentityIssueStatus,
@@ -56,11 +57,18 @@ export function summarizePayload(payload: unknown): PayloadSummary {
     (typeof eeid === "string" || typeof eeid === "number"
       ? `EEID ${eeid}`
       : undefined);
+  // The row's own ids describe the employee: shown unless another name failed.
+  const aboutEmployee =
+    row?.failedRole === undefined || row?.failedRole === "employee";
+  const email = row?.fields?.work_email;
   return {
     displayName: typeof name === "string" ? name : null,
     role: typeof row?.failedRole === "string" ? row.failedRole : null,
-    employeeNumber: null,
-    workEmail: null,
+    employeeNumber:
+      aboutEmployee && (typeof eeid === "string" || typeof eeid === "number")
+        ? `EEID ${eeid}`
+        : null,
+    workEmail: aboutEmployee && typeof email === "string" ? email : null,
     hireDate: null,
     terminationDate: null,
     status: null,
@@ -360,6 +368,33 @@ export async function resolveIssue(
     // Report rows (historical import) name people, they never create them.
     const report = await import("@/modules/import-history/reprocess");
     if (report.isReportEntity(issue.entity)) {
+      if (input.action === "create") {
+        // Only a raw assessments report row whose employee is missing carries
+        // enough to make the person (#132): name, work email and EEID.
+        const row = rawReportEmployee(issue);
+        if (!row) throw new IdentityError("invalid_action");
+        const [created] = await tx
+          .insert(person)
+          .values({ displayName: row.name, workEmail: row.email })
+          .returning({ id: person.id });
+        if (row.eeid) {
+          await tx
+            .insert(sourceIdentity)
+            .values({
+              personId: created.id,
+              sourceSystem: issue.sourceSystem,
+              kind: "bamboo_id",
+              value: row.eeid,
+            })
+            .onConflictDoNothing();
+        }
+        const settled = await settle({ ...resolution, personId: created.id });
+        // The row now finds the person by its EEID or email.
+        if (!(await report.reprocessReportRow(tx, settled))) {
+          throw new IdentityError("invalid_payload");
+        }
+        return settled;
+      }
       if (input.action !== "link") throw new IdentityError("invalid_action");
       if (!input.personId) throw new IdentityError("person_required");
       if (!isUuid(input.personId)) throw new IdentityError("not_found");
@@ -422,6 +457,30 @@ export async function resolveIssue(
       ? settle({ ...resolution, personId: outcome.personId })
       : settled;
   });
+}
+
+/** The employee of a raw assessments report row that failed on them, or null. */
+function rawReportEmployee(
+  issue: IdentityMatchIssue,
+): { name: string; email: string | null; eeid: string | null } | null {
+  const payload = issue.payload as {
+    format?: unknown;
+    fields?: Record<string, unknown>;
+    failedRole?: unknown;
+  } | null;
+  if (issue.entity !== "assessment") return null;
+  if (payload?.format !== "assessments_report") return null;
+  if (payload.failedRole !== undefined && payload.failedRole !== "employee")
+    return null;
+  const text = (v: unknown) =>
+    (typeof v === "string" || typeof v === "number") && String(v).trim()
+      ? String(v).trim()
+      : null;
+  const fields = payload.fields ?? {};
+  const eeid = text(fields.employee_bamboo_id);
+  const email = text(fields.work_email);
+  const name = text(fields.employee_name) ?? email ?? (eeid && `EEID ${eeid}`);
+  return name ? { name, email, eeid } : null;
 }
 
 export const ignoreIssue = (db: DbOrTx, issueId: string, actorNote?: string) =>

@@ -27,3 +27,30 @@ describe("summarizePayload of a row of the org attributes file", () => {
     ).toBe("EEID 99");
   });
 });
+
+describe("summarizePayload of a raw assessments report row (#132)", () => {
+  it("shows the row's work email and EEID so the reviewer can tell who it is", () => {
+    const s = summarizePayload({
+      fields: {
+        employee_bamboo_id: "90901",
+        work_email: "zoe.nadie@example.invalid",
+        employee_name: "Zoe Nadie",
+      },
+    });
+    expect(s).toMatchObject({
+      displayName: "Zoe Nadie",
+      workEmail: "zoe.nadie@example.invalid",
+      employeeNumber: "EEID 90901",
+    });
+  });
+
+  it("does not show the employee's email when the failed name is the manager", () => {
+    const s = summarizePayload({
+      fields: { employee_bamboo_id: "1", work_email: "a@example.invalid" },
+      failedRole: "manager",
+      failedName: "Zoe Nadie",
+    });
+    expect(s.workEmail).toBeNull();
+    expect(s.employeeNumber).toBeNull();
+  });
+});

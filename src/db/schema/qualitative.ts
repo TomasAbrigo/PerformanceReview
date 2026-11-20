@@ -117,6 +117,11 @@ export const analysisCorrection = pgTable(
     newSignals: text("new_signals").array(),
     actorPersonId: uuid("actor_person_id").references(() => person.id),
     reason: text("reason"),
+    /**
+     * md5 of the answer's text the correction was made on (#132): a newer
+     * import that changes the text makes it stale. Null: made before #132.
+     */
+    sourceMd5: text("source_md5"),
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
       .defaultNow(),

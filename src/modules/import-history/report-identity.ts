@@ -71,11 +71,19 @@ export type RowIds = Partial<Record<IdentityKind, string | null>>;
 
 /** The person the row's ids point to: EEID, then legajo, then email. */
 export function matchIds(index: IdIndex, ids: RowIds): string | null {
+  return matchIdsBy(index, ids)?.personId ?? null;
+}
+
+/** Same as matchIds, saying which id matched. */
+export function matchIdsBy(
+  index: IdIndex,
+  ids: RowIds,
+): { personId: string; kind: IdentityKind } | null {
   for (const kind of ["bamboo_id", "employee_number", "work_email"] as const) {
     const value = ids[kind];
     if (!value) continue;
     const found = index[kind].get(normalize(kind, value));
-    if (found) return found;
+    if (found) return { personId: found, kind };
   }
   return null;
 }

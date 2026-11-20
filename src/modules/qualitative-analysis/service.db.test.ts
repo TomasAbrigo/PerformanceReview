@@ -133,14 +133,9 @@ describe("runAnalysis", () => {
       themes: ["Puntualidad"],
       reason: "mal etiquetado",
     });
-    await db.execute(
-      sql`update answer set text_value = 'Excelente, gran referente' where id = ${answers[0]}::uuid`,
-    );
     const spy = new SpyProvider();
     const r = await runAnalysis(db, { provider: spy });
-    expect(spy.sent.map((s) => s.text)).not.toContain(
-      "Excelente, gran referente",
-    );
+    expect(spy.sent).toHaveLength(0);
     expect(r.corrected).toBe(1);
     const [eff] = await db.execute<{ sentiment: string; themes: string[] }>(sql`
       select new_sentiment as sentiment, new_themes as themes from analysis_correction`);
@@ -151,6 +146,26 @@ describe("runAnalysis", () => {
     expect(audit).toEqual([
       { action: "qualitative_label_corrected", note: "mal etiquetado" },
     ]);
+  });
+
+  it("a correction made on an older text is stale once a re-import changes it (#132)", async () => {
+    await runAnalysis(db, { provider: new SpyProvider() });
+    await correctLabel(db, hr, answers[0], {
+      sentiment: "negative",
+      themes: ["Puntualidad"],
+    });
+    await db.execute(
+      sql`update answer set text_value = 'Excelente, gran referente' where id = ${answers[0]}::uuid`,
+    );
+    const [{ n }] = await db.execute<{ n: number }>(sql`
+      with ${effectiveCte()}
+      select count(*)::int as n from eff
+      where answer_id = ${answers[0]}::uuid and origin = 'human'`);
+    expect(n).toBe(0);
+    const spy = new SpyProvider();
+    const r = await runAnalysis(db, { provider: spy });
+    expect(spy.sent.map((s) => s.text)).toContain("Excelente, gran referente");
+    expect(r.corrected).toBe(0);
   });
 
   it("only HR corrects; a failing provider marks the run as error", async () => {
